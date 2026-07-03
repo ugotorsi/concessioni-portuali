@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { canManageProcedimenti, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 import {
   PROCEDIMENTO_STATO_VALUES,
   PROCEDIMENTO_TIPOLOGIA_VALUES,
@@ -47,10 +48,28 @@ export async function createProcedimentoAction(formData: FormData) {
   const role = await requireRole();
 
   if (role === "VIEWER_ADSP") {
+    await auditFailure({
+      azione: "AUTHZ_DENIED",
+      entita: "Procedimento",
+      actor: { userRole: role },
+      metadata: {
+        actionType: "PROCEDIMENTO_CREATE",
+        reason: "VIEWER_ADSP_BLOCKED",
+      },
+    });
     redirect("/adsp");
   }
 
   if (!canManageProcedimenti(role)) {
+    await auditFailure({
+      azione: "AUTHZ_DENIED",
+      entita: "Procedimento",
+      actor: { userRole: role },
+      metadata: {
+        actionType: "PROCEDIMENTO_CREATE",
+        reason: "ROLE_NOT_ALLOWED",
+      },
+    });
     throw new Error("Profilo non autorizzato alla gestione dei procedimenti.");
   }
 
@@ -66,6 +85,15 @@ export async function createProcedimentoAction(formData: FormData) {
   });
 
   if (!parsed.success) {
+    await auditFailure({
+      azione: "PROCEDIMENTO_CREATE",
+      entita: "Procedimento",
+      actor: { userRole: role },
+      metadata: {
+        reason: "VALIDATION_ERROR",
+        issue: parsed.error.issues[0]?.message ?? "Dati non validi.",
+      },
+    });
     throw new Error(parsed.error.issues[0]?.message ?? "Dati non validi.");
   }
 
@@ -78,6 +106,16 @@ export async function createProcedimentoAction(formData: FormData) {
     });
 
     if (!linked || linked.concessioneId !== parsed.data.concessioneId) {
+      await auditFailure({
+        azione: "PROCEDIMENTO_CREATE",
+        entita: "Procedimento",
+        concessioneId: parsed.data.concessioneId,
+        actor: { userRole: role },
+        metadata: {
+          reason: "CRITICITA_CONCESSIONE_MISMATCH",
+          criticitaId,
+        },
+      });
       throw new Error("La criticità selezionata non appartiene alla concessione indicata.");
     }
   }
@@ -99,13 +137,17 @@ export async function createProcedimentoAction(formData: FormData) {
     },
   });
 
-  await prisma.activityLog.create({
-    data: {
-      concessioneId: created.concessioneId,
-      azione: "CREAZIONE_PROCEDIMENTO",
-      entita: "Procedimento",
-      entitaId: created.id,
-      descrizione: "Creato nuovo procedimento in workflow demo.",
+  await auditSuccess({
+    azione: "PROCEDIMENTO_CREATE",
+    entita: "Procedimento",
+    entitaId: created.id,
+    concessioneId: created.concessioneId,
+    actor: { userRole: role },
+    metadata: {
+      tipologia: parsed.data.tipologia,
+      stato: parsed.data.stato,
+      criticitaId,
+      hasContraddittorioDate: Boolean(parsed.data.dataScadenzaContraddittorio),
     },
   });
 

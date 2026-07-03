@@ -27,33 +27,52 @@ export type AggregateActivityLog = {
 export type ActivityLogMinAggregateOutputType = {
   id: string | null
   userId: string | null
+  userEmail: string | null
+  userRole: string | null
   concessioneId: string | null
+  ipAddress: string | null
+  userAgent: string | null
   azione: string | null
   entita: string | null
   entitaId: string | null
-  descrizione: string | null
+  esito: $Enums.AuditEsito | null
+  previousHash: string | null
+  currentHash: string | null
   createdAt: Date | null
 }
 
 export type ActivityLogMaxAggregateOutputType = {
   id: string | null
   userId: string | null
+  userEmail: string | null
+  userRole: string | null
   concessioneId: string | null
+  ipAddress: string | null
+  userAgent: string | null
   azione: string | null
   entita: string | null
   entitaId: string | null
-  descrizione: string | null
+  esito: $Enums.AuditEsito | null
+  previousHash: string | null
+  currentHash: string | null
   createdAt: Date | null
 }
 
 export type ActivityLogCountAggregateOutputType = {
   id: number
   userId: number
+  userEmail: number
+  userRole: number
   concessioneId: number
+  ipAddress: number
+  userAgent: number
   azione: number
   entita: number
   entitaId: number
-  descrizione: number
+  esito: number
+  metadata: number
+  previousHash: number
+  currentHash: number
   createdAt: number
   _all: number
 }
@@ -62,33 +81,52 @@ export type ActivityLogCountAggregateOutputType = {
 export type ActivityLogMinAggregateInputType = {
   id?: true
   userId?: true
+  userEmail?: true
+  userRole?: true
   concessioneId?: true
+  ipAddress?: true
+  userAgent?: true
   azione?: true
   entita?: true
   entitaId?: true
-  descrizione?: true
+  esito?: true
+  previousHash?: true
+  currentHash?: true
   createdAt?: true
 }
 
 export type ActivityLogMaxAggregateInputType = {
   id?: true
   userId?: true
+  userEmail?: true
+  userRole?: true
   concessioneId?: true
+  ipAddress?: true
+  userAgent?: true
   azione?: true
   entita?: true
   entitaId?: true
-  descrizione?: true
+  esito?: true
+  previousHash?: true
+  currentHash?: true
   createdAt?: true
 }
 
 export type ActivityLogCountAggregateInputType = {
   id?: true
   userId?: true
+  userEmail?: true
+  userRole?: true
   concessioneId?: true
+  ipAddress?: true
+  userAgent?: true
   azione?: true
   entita?: true
   entitaId?: true
-  descrizione?: true
+  esito?: true
+  metadata?: true
+  previousHash?: true
+  currentHash?: true
   createdAt?: true
   _all?: true
 }
@@ -168,11 +206,18 @@ export type ActivityLogGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inte
 export type ActivityLogGroupByOutputType = {
   id: string
   userId: string | null
+  userEmail: string | null
+  userRole: string | null
   concessioneId: string | null
+  ipAddress: string | null
+  userAgent: string | null
   azione: string
   entita: string
   entitaId: string | null
-  descrizione: string | null
+  esito: $Enums.AuditEsito
+  metadata: runtime.JsonValue | null
+  previousHash: string | null
+  currentHash: string
   createdAt: Date
   _count: ActivityLogCountAggregateOutputType | null
   _min: ActivityLogMinAggregateOutputType | null
@@ -200,11 +245,18 @@ export type ActivityLogWhereInput = {
   NOT?: Prisma.ActivityLogWhereInput | Prisma.ActivityLogWhereInput[]
   id?: Prisma.StringFilter<"ActivityLog"> | string
   userId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  userEmail?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  userRole?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   concessioneId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  ipAddress?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  userAgent?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   azione?: Prisma.StringFilter<"ActivityLog"> | string
   entita?: Prisma.StringFilter<"ActivityLog"> | string
   entitaId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
-  descrizione?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  esito?: Prisma.EnumAuditEsitoFilter<"ActivityLog"> | $Enums.AuditEsito
+  metadata?: Prisma.JsonNullableFilter<"ActivityLog">
+  previousHash?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  currentHash?: Prisma.StringFilter<"ActivityLog"> | string
   createdAt?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   concessione?: Prisma.XOR<Prisma.ConcessioneNullableScalarRelationFilter, Prisma.ConcessioneWhereInput> | null
@@ -213,11 +265,18 @@ export type ActivityLogWhereInput = {
 export type ActivityLogOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrderInput | Prisma.SortOrder
+  userEmail?: Prisma.SortOrderInput | Prisma.SortOrder
+  userRole?: Prisma.SortOrderInput | Prisma.SortOrder
   concessioneId?: Prisma.SortOrderInput | Prisma.SortOrder
+  ipAddress?: Prisma.SortOrderInput | Prisma.SortOrder
+  userAgent?: Prisma.SortOrderInput | Prisma.SortOrder
   azione?: Prisma.SortOrder
   entita?: Prisma.SortOrder
   entitaId?: Prisma.SortOrderInput | Prisma.SortOrder
-  descrizione?: Prisma.SortOrderInput | Prisma.SortOrder
+  esito?: Prisma.SortOrder
+  metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  previousHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  currentHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   concessione?: Prisma.ConcessioneOrderByWithRelationInput
@@ -229,11 +288,18 @@ export type ActivityLogWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.ActivityLogWhereInput[]
   NOT?: Prisma.ActivityLogWhereInput | Prisma.ActivityLogWhereInput[]
   userId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  userEmail?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  userRole?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   concessioneId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  ipAddress?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  userAgent?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   azione?: Prisma.StringFilter<"ActivityLog"> | string
   entita?: Prisma.StringFilter<"ActivityLog"> | string
   entitaId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
-  descrizione?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  esito?: Prisma.EnumAuditEsitoFilter<"ActivityLog"> | $Enums.AuditEsito
+  metadata?: Prisma.JsonNullableFilter<"ActivityLog">
+  previousHash?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  currentHash?: Prisma.StringFilter<"ActivityLog"> | string
   createdAt?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   concessione?: Prisma.XOR<Prisma.ConcessioneNullableScalarRelationFilter, Prisma.ConcessioneWhereInput> | null
@@ -242,11 +308,18 @@ export type ActivityLogWhereUniqueInput = Prisma.AtLeast<{
 export type ActivityLogOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrderInput | Prisma.SortOrder
+  userEmail?: Prisma.SortOrderInput | Prisma.SortOrder
+  userRole?: Prisma.SortOrderInput | Prisma.SortOrder
   concessioneId?: Prisma.SortOrderInput | Prisma.SortOrder
+  ipAddress?: Prisma.SortOrderInput | Prisma.SortOrder
+  userAgent?: Prisma.SortOrderInput | Prisma.SortOrder
   azione?: Prisma.SortOrder
   entita?: Prisma.SortOrder
   entitaId?: Prisma.SortOrderInput | Prisma.SortOrder
-  descrizione?: Prisma.SortOrderInput | Prisma.SortOrder
+  esito?: Prisma.SortOrder
+  metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  previousHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  currentHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.ActivityLogCountOrderByAggregateInput
   _max?: Prisma.ActivityLogMaxOrderByAggregateInput
@@ -259,20 +332,34 @@ export type ActivityLogScalarWhereWithAggregatesInput = {
   NOT?: Prisma.ActivityLogScalarWhereWithAggregatesInput | Prisma.ActivityLogScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"ActivityLog"> | string
   userId?: Prisma.StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
+  userEmail?: Prisma.StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
+  userRole?: Prisma.StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
   concessioneId?: Prisma.StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
+  ipAddress?: Prisma.StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
+  userAgent?: Prisma.StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
   azione?: Prisma.StringWithAggregatesFilter<"ActivityLog"> | string
   entita?: Prisma.StringWithAggregatesFilter<"ActivityLog"> | string
   entitaId?: Prisma.StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
-  descrizione?: Prisma.StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
+  esito?: Prisma.EnumAuditEsitoWithAggregatesFilter<"ActivityLog"> | $Enums.AuditEsito
+  metadata?: Prisma.JsonNullableWithAggregatesFilter<"ActivityLog">
+  previousHash?: Prisma.StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
+  currentHash?: Prisma.StringWithAggregatesFilter<"ActivityLog"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ActivityLog"> | Date | string
 }
 
 export type ActivityLogCreateInput = {
   id?: string
+  userEmail?: string | null
+  userRole?: string | null
+  ipAddress?: string | null
+  userAgent?: string | null
   azione: string
   entita: string
   entitaId?: string | null
-  descrizione?: string | null
+  esito?: $Enums.AuditEsito
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  previousHash?: string | null
+  currentHash: string
   createdAt?: Date | string
   user?: Prisma.UserCreateNestedOneWithoutActivityLogsInput
   concessione?: Prisma.ConcessioneCreateNestedOneWithoutActivityLogsInput
@@ -281,20 +368,34 @@ export type ActivityLogCreateInput = {
 export type ActivityLogUncheckedCreateInput = {
   id?: string
   userId?: string | null
+  userEmail?: string | null
+  userRole?: string | null
   concessioneId?: string | null
+  ipAddress?: string | null
+  userAgent?: string | null
   azione: string
   entita: string
   entitaId?: string | null
-  descrizione?: string | null
+  esito?: $Enums.AuditEsito
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  previousHash?: string | null
+  currentHash: string
   createdAt?: Date | string
 }
 
 export type ActivityLogUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  userEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azione?: Prisma.StringFieldUpdateOperationsInput | string
   entita?: Prisma.StringFieldUpdateOperationsInput | string
   entitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  esito?: Prisma.EnumAuditEsitoFieldUpdateOperationsInput | $Enums.AuditEsito
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  previousHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneWithoutActivityLogsNestedInput
   concessione?: Prisma.ConcessioneUpdateOneWithoutActivityLogsNestedInput
@@ -303,42 +404,70 @@ export type ActivityLogUpdateInput = {
 export type ActivityLogUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azione?: Prisma.StringFieldUpdateOperationsInput | string
   entita?: Prisma.StringFieldUpdateOperationsInput | string
   entitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  esito?: Prisma.EnumAuditEsitoFieldUpdateOperationsInput | $Enums.AuditEsito
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  previousHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ActivityLogCreateManyInput = {
   id?: string
   userId?: string | null
+  userEmail?: string | null
+  userRole?: string | null
   concessioneId?: string | null
+  ipAddress?: string | null
+  userAgent?: string | null
   azione: string
   entita: string
   entitaId?: string | null
-  descrizione?: string | null
+  esito?: $Enums.AuditEsito
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  previousHash?: string | null
+  currentHash: string
   createdAt?: Date | string
 }
 
 export type ActivityLogUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  userEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azione?: Prisma.StringFieldUpdateOperationsInput | string
   entita?: Prisma.StringFieldUpdateOperationsInput | string
   entitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  esito?: Prisma.EnumAuditEsitoFieldUpdateOperationsInput | $Enums.AuditEsito
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  previousHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ActivityLogUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azione?: Prisma.StringFieldUpdateOperationsInput | string
   entita?: Prisma.StringFieldUpdateOperationsInput | string
   entitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  esito?: Prisma.EnumAuditEsitoFieldUpdateOperationsInput | $Enums.AuditEsito
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  previousHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -355,33 +484,52 @@ export type ActivityLogOrderByRelationAggregateInput = {
 export type ActivityLogCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  userEmail?: Prisma.SortOrder
+  userRole?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrder
+  ipAddress?: Prisma.SortOrder
+  userAgent?: Prisma.SortOrder
   azione?: Prisma.SortOrder
   entita?: Prisma.SortOrder
   entitaId?: Prisma.SortOrder
-  descrizione?: Prisma.SortOrder
+  esito?: Prisma.SortOrder
+  metadata?: Prisma.SortOrder
+  previousHash?: Prisma.SortOrder
+  currentHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type ActivityLogMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  userEmail?: Prisma.SortOrder
+  userRole?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrder
+  ipAddress?: Prisma.SortOrder
+  userAgent?: Prisma.SortOrder
   azione?: Prisma.SortOrder
   entita?: Prisma.SortOrder
   entitaId?: Prisma.SortOrder
-  descrizione?: Prisma.SortOrder
+  esito?: Prisma.SortOrder
+  previousHash?: Prisma.SortOrder
+  currentHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type ActivityLogMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  userEmail?: Prisma.SortOrder
+  userRole?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrder
+  ipAddress?: Prisma.SortOrder
+  userAgent?: Prisma.SortOrder
   azione?: Prisma.SortOrder
   entita?: Prisma.SortOrder
   entitaId?: Prisma.SortOrder
-  descrizione?: Prisma.SortOrder
+  esito?: Prisma.SortOrder
+  previousHash?: Prisma.SortOrder
+  currentHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -469,23 +617,41 @@ export type ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput = {
   deleteMany?: Prisma.ActivityLogScalarWhereInput | Prisma.ActivityLogScalarWhereInput[]
 }
 
+export type EnumAuditEsitoFieldUpdateOperationsInput = {
+  set?: $Enums.AuditEsito
+}
+
 export type ActivityLogCreateWithoutUserInput = {
   id?: string
+  userEmail?: string | null
+  userRole?: string | null
+  ipAddress?: string | null
+  userAgent?: string | null
   azione: string
   entita: string
   entitaId?: string | null
-  descrizione?: string | null
+  esito?: $Enums.AuditEsito
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  previousHash?: string | null
+  currentHash: string
   createdAt?: Date | string
   concessione?: Prisma.ConcessioneCreateNestedOneWithoutActivityLogsInput
 }
 
 export type ActivityLogUncheckedCreateWithoutUserInput = {
   id?: string
+  userEmail?: string | null
+  userRole?: string | null
   concessioneId?: string | null
+  ipAddress?: string | null
+  userAgent?: string | null
   azione: string
   entita: string
   entitaId?: string | null
-  descrizione?: string | null
+  esito?: $Enums.AuditEsito
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  previousHash?: string | null
+  currentHash: string
   createdAt?: Date | string
 }
 
@@ -521,20 +687,34 @@ export type ActivityLogScalarWhereInput = {
   NOT?: Prisma.ActivityLogScalarWhereInput | Prisma.ActivityLogScalarWhereInput[]
   id?: Prisma.StringFilter<"ActivityLog"> | string
   userId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  userEmail?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  userRole?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   concessioneId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  ipAddress?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  userAgent?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   azione?: Prisma.StringFilter<"ActivityLog"> | string
   entita?: Prisma.StringFilter<"ActivityLog"> | string
   entitaId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
-  descrizione?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  esito?: Prisma.EnumAuditEsitoFilter<"ActivityLog"> | $Enums.AuditEsito
+  metadata?: Prisma.JsonNullableFilter<"ActivityLog">
+  previousHash?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  currentHash?: Prisma.StringFilter<"ActivityLog"> | string
   createdAt?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
 }
 
 export type ActivityLogCreateWithoutConcessioneInput = {
   id?: string
+  userEmail?: string | null
+  userRole?: string | null
+  ipAddress?: string | null
+  userAgent?: string | null
   azione: string
   entita: string
   entitaId?: string | null
-  descrizione?: string | null
+  esito?: $Enums.AuditEsito
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  previousHash?: string | null
+  currentHash: string
   createdAt?: Date | string
   user?: Prisma.UserCreateNestedOneWithoutActivityLogsInput
 }
@@ -542,10 +722,17 @@ export type ActivityLogCreateWithoutConcessioneInput = {
 export type ActivityLogUncheckedCreateWithoutConcessioneInput = {
   id?: string
   userId?: string | null
+  userEmail?: string | null
+  userRole?: string | null
+  ipAddress?: string | null
+  userAgent?: string | null
   azione: string
   entita: string
   entitaId?: string | null
-  descrizione?: string | null
+  esito?: $Enums.AuditEsito
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  previousHash?: string | null
+  currentHash: string
   createdAt?: Date | string
 }
 
@@ -577,60 +764,102 @@ export type ActivityLogUpdateManyWithWhereWithoutConcessioneInput = {
 
 export type ActivityLogCreateManyUserInput = {
   id?: string
+  userEmail?: string | null
+  userRole?: string | null
   concessioneId?: string | null
+  ipAddress?: string | null
+  userAgent?: string | null
   azione: string
   entita: string
   entitaId?: string | null
-  descrizione?: string | null
+  esito?: $Enums.AuditEsito
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  previousHash?: string | null
+  currentHash: string
   createdAt?: Date | string
 }
 
 export type ActivityLogUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  userEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azione?: Prisma.StringFieldUpdateOperationsInput | string
   entita?: Prisma.StringFieldUpdateOperationsInput | string
   entitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  esito?: Prisma.EnumAuditEsitoFieldUpdateOperationsInput | $Enums.AuditEsito
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  previousHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   concessione?: Prisma.ConcessioneUpdateOneWithoutActivityLogsNestedInput
 }
 
 export type ActivityLogUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  userEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azione?: Prisma.StringFieldUpdateOperationsInput | string
   entita?: Prisma.StringFieldUpdateOperationsInput | string
   entitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  esito?: Prisma.EnumAuditEsitoFieldUpdateOperationsInput | $Enums.AuditEsito
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  previousHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ActivityLogUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  userEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azione?: Prisma.StringFieldUpdateOperationsInput | string
   entita?: Prisma.StringFieldUpdateOperationsInput | string
   entitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  esito?: Prisma.EnumAuditEsitoFieldUpdateOperationsInput | $Enums.AuditEsito
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  previousHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ActivityLogCreateManyConcessioneInput = {
   id?: string
   userId?: string | null
+  userEmail?: string | null
+  userRole?: string | null
+  ipAddress?: string | null
+  userAgent?: string | null
   azione: string
   entita: string
   entitaId?: string | null
-  descrizione?: string | null
+  esito?: $Enums.AuditEsito
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  previousHash?: string | null
+  currentHash: string
   createdAt?: Date | string
 }
 
 export type ActivityLogUpdateWithoutConcessioneInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  userEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azione?: Prisma.StringFieldUpdateOperationsInput | string
   entita?: Prisma.StringFieldUpdateOperationsInput | string
   entitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  esito?: Prisma.EnumAuditEsitoFieldUpdateOperationsInput | $Enums.AuditEsito
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  previousHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneWithoutActivityLogsNestedInput
 }
@@ -638,20 +867,34 @@ export type ActivityLogUpdateWithoutConcessioneInput = {
 export type ActivityLogUncheckedUpdateWithoutConcessioneInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azione?: Prisma.StringFieldUpdateOperationsInput | string
   entita?: Prisma.StringFieldUpdateOperationsInput | string
   entitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  esito?: Prisma.EnumAuditEsitoFieldUpdateOperationsInput | $Enums.AuditEsito
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  previousHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ActivityLogUncheckedUpdateManyWithoutConcessioneInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azione?: Prisma.StringFieldUpdateOperationsInput | string
   entita?: Prisma.StringFieldUpdateOperationsInput | string
   entitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  esito?: Prisma.EnumAuditEsitoFieldUpdateOperationsInput | $Enums.AuditEsito
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  previousHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -660,11 +903,18 @@ export type ActivityLogUncheckedUpdateManyWithoutConcessioneInput = {
 export type ActivityLogSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
+  userEmail?: boolean
+  userRole?: boolean
   concessioneId?: boolean
+  ipAddress?: boolean
+  userAgent?: boolean
   azione?: boolean
   entita?: boolean
   entitaId?: boolean
-  descrizione?: boolean
+  esito?: boolean
+  metadata?: boolean
+  previousHash?: boolean
+  currentHash?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.ActivityLog$userArgs<ExtArgs>
   concessione?: boolean | Prisma.ActivityLog$concessioneArgs<ExtArgs>
@@ -673,11 +923,18 @@ export type ActivityLogSelect<ExtArgs extends runtime.Types.Extensions.InternalA
 export type ActivityLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
+  userEmail?: boolean
+  userRole?: boolean
   concessioneId?: boolean
+  ipAddress?: boolean
+  userAgent?: boolean
   azione?: boolean
   entita?: boolean
   entitaId?: boolean
-  descrizione?: boolean
+  esito?: boolean
+  metadata?: boolean
+  previousHash?: boolean
+  currentHash?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.ActivityLog$userArgs<ExtArgs>
   concessione?: boolean | Prisma.ActivityLog$concessioneArgs<ExtArgs>
@@ -686,11 +943,18 @@ export type ActivityLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
 export type ActivityLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
+  userEmail?: boolean
+  userRole?: boolean
   concessioneId?: boolean
+  ipAddress?: boolean
+  userAgent?: boolean
   azione?: boolean
   entita?: boolean
   entitaId?: boolean
-  descrizione?: boolean
+  esito?: boolean
+  metadata?: boolean
+  previousHash?: boolean
+  currentHash?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.ActivityLog$userArgs<ExtArgs>
   concessione?: boolean | Prisma.ActivityLog$concessioneArgs<ExtArgs>
@@ -699,15 +963,22 @@ export type ActivityLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
 export type ActivityLogSelectScalar = {
   id?: boolean
   userId?: boolean
+  userEmail?: boolean
+  userRole?: boolean
   concessioneId?: boolean
+  ipAddress?: boolean
+  userAgent?: boolean
   azione?: boolean
   entita?: boolean
   entitaId?: boolean
-  descrizione?: boolean
+  esito?: boolean
+  metadata?: boolean
+  previousHash?: boolean
+  currentHash?: boolean
   createdAt?: boolean
 }
 
-export type ActivityLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "concessioneId" | "azione" | "entita" | "entitaId" | "descrizione" | "createdAt", ExtArgs["result"]["activityLog"]>
+export type ActivityLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "userEmail" | "userRole" | "concessioneId" | "ipAddress" | "userAgent" | "azione" | "entita" | "entitaId" | "esito" | "metadata" | "previousHash" | "currentHash" | "createdAt", ExtArgs["result"]["activityLog"]>
 export type ActivityLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.ActivityLog$userArgs<ExtArgs>
   concessione?: boolean | Prisma.ActivityLog$concessioneArgs<ExtArgs>
@@ -730,11 +1001,18 @@ export type $ActivityLogPayload<ExtArgs extends runtime.Types.Extensions.Interna
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     userId: string | null
+    userEmail: string | null
+    userRole: string | null
     concessioneId: string | null
+    ipAddress: string | null
+    userAgent: string | null
     azione: string
     entita: string
     entitaId: string | null
-    descrizione: string | null
+    esito: $Enums.AuditEsito
+    metadata: runtime.JsonValue | null
+    previousHash: string | null
+    currentHash: string
     createdAt: Date
   }, ExtArgs["result"]["activityLog"]>
   composites: {}
@@ -1163,11 +1441,18 @@ export interface Prisma__ActivityLogClient<T, Null = never, ExtArgs extends runt
 export interface ActivityLogFieldRefs {
   readonly id: Prisma.FieldRef<"ActivityLog", 'String'>
   readonly userId: Prisma.FieldRef<"ActivityLog", 'String'>
+  readonly userEmail: Prisma.FieldRef<"ActivityLog", 'String'>
+  readonly userRole: Prisma.FieldRef<"ActivityLog", 'String'>
   readonly concessioneId: Prisma.FieldRef<"ActivityLog", 'String'>
+  readonly ipAddress: Prisma.FieldRef<"ActivityLog", 'String'>
+  readonly userAgent: Prisma.FieldRef<"ActivityLog", 'String'>
   readonly azione: Prisma.FieldRef<"ActivityLog", 'String'>
   readonly entita: Prisma.FieldRef<"ActivityLog", 'String'>
   readonly entitaId: Prisma.FieldRef<"ActivityLog", 'String'>
-  readonly descrizione: Prisma.FieldRef<"ActivityLog", 'String'>
+  readonly esito: Prisma.FieldRef<"ActivityLog", 'AuditEsito'>
+  readonly metadata: Prisma.FieldRef<"ActivityLog", 'Json'>
+  readonly previousHash: Prisma.FieldRef<"ActivityLog", 'String'>
+  readonly currentHash: Prisma.FieldRef<"ActivityLog", 'String'>
   readonly createdAt: Prisma.FieldRef<"ActivityLog", 'DateTime'>
 }
     

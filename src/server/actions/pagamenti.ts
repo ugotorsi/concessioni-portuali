@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { canManagePagamenti, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 import { PAGAMENTO_STATO_VALUES } from "@/server/queries/pagamenti";
 
 const updatePagamentoSchema = z.object({
@@ -53,10 +54,28 @@ export async function updatePagamentoAction(formData: FormData) {
   const role = await requireRole();
 
   if (role === "VIEWER_ADSP") {
+    await auditFailure({
+      azione: "AUTHZ_DENIED",
+      entita: "Pagamento",
+      actor: { userRole: role },
+      metadata: {
+        actionType: "PAGAMENTO_UPDATE",
+        reason: "VIEWER_ADSP_BLOCKED",
+      },
+    });
     redirect("/adsp");
   }
 
   if (!canManagePagamenti(role)) {
+    await auditFailure({
+      azione: "AUTHZ_DENIED",
+      entita: "Pagamento",
+      actor: { userRole: role },
+      metadata: {
+        actionType: "PAGAMENTO_UPDATE",
+        reason: "ROLE_NOT_ALLOWED",
+      },
+    });
     throw new Error("Profilo non autorizzato alla gestione dei pagamenti.");
   }
 
@@ -70,6 +89,15 @@ export async function updatePagamentoAction(formData: FormData) {
   });
 
   if (!parsed.success) {
+    await auditFailure({
+      azione: "PAGAMENTO_UPDATE",
+      entita: "Pagamento",
+      actor: { userRole: role },
+      metadata: {
+        reason: "VALIDATION_ERROR",
+        issue: parsed.error.issues[0]?.message ?? "Dati non validi.",
+      },
+    });
     throw new Error(parsed.error.issues[0]?.message ?? "Dati non validi.");
   }
 
@@ -79,6 +107,15 @@ export async function updatePagamentoAction(formData: FormData) {
   });
 
   if (!existing) {
+    await auditFailure({
+      azione: "PAGAMENTO_UPDATE",
+      entita: "Pagamento",
+      entitaId: parsed.data.id,
+      actor: { userRole: role },
+      metadata: {
+        reason: "NOT_FOUND",
+      },
+    });
     throw new Error("Pagamento non trovato.");
   }
 
@@ -93,13 +130,16 @@ export async function updatePagamentoAction(formData: FormData) {
     },
   });
 
-  await prisma.activityLog.create({
-    data: {
-      concessioneId: existing.concessioneId,
-      azione: "AGGIORNAMENTO_PAGAMENTO",
-      entita: "Pagamento",
-      entitaId: existing.id,
-      descrizione: "Aggiornata posizione pagamento in workflow demo.",
+  await auditSuccess({
+    azione: "PAGAMENTO_UPDATE",
+    entita: "Pagamento",
+    entitaId: existing.id,
+    concessioneId: existing.concessioneId,
+    actor: { userRole: role },
+    metadata: {
+      stato: parsed.data.stato,
+      importoVersato: parsed.data.importoVersato,
+      changedFields: ["importoVersato", "dataVersamento", "stato", "interessiMora", "note"],
     },
   });
 

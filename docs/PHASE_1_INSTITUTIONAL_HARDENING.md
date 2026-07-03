@@ -81,6 +81,16 @@ Portare Concessioni Portuali da stato MVP avanzato a stato "institutional demo-r
   - consultazione audit con filtri minimi;
   - evidenza di verifica integrita su campione eventi.
 
+Stato attuale (Issue #4 baseline implementata):
+- estensione `ActivityLog` con `esito`, `metadata`, `previousHash`, `currentHash`, contesto request e actor snapshot;
+- utility centralizzata per logging append-only logico con hash chaining SHA-256;
+- integrazione nelle principali server actions operative e log eventi `AUTHZ_DENIED` quando praticabile;
+- vista interna `/audit` accessibile solo ad `ADMIN`.
+
+Limiti residui:
+- baseline tamper-evident applicativa, non conservazione a norma/WORM;
+- necessario hardening successivo su policy DB append-only, backup/retention, firma e integrazione SIEM.
+
 ### 3.5 Test automatici Vitest + Playwright
 - Obiettivo: introdurre baseline test unitari/integration e scenari e2e critici.
 - Motivo strategico: aumenta affidabilita release e riduce regressioni su flussi regolatori.

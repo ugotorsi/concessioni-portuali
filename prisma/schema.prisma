@@ -223,6 +223,11 @@ enum ModuloImpattoNorma {
   CONCESSIONI
 }
 
+enum AuditEsito {
+  SUCCESS
+  FAILURE
+}
+
 model User {
   id           String        @id @default(cuid())
   nome         String
@@ -553,19 +558,26 @@ model NormaImpatto {
 model ActivityLog {
   id            String   @id @default(cuid())
   userId        String?
+  userEmail     String?
+  userRole      String?
   concessioneId String?
+  ipAddress     String?
+  userAgent     String?
   azione        String
   entita        String
   entitaId      String?
-  descrizione   String?
+  esito         AuditEsito @default(SUCCESS)
+  metadata      Json?
+  previousHash  String?
+  currentHash   String
   createdAt     DateTime @default(now())
 
   user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
   concessione Concessione? @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
 
+  @@index([currentHash])
   @@index([userId])
+  @@index([entita, entitaId])
   @@index([concessioneId])
-  @@index([entita])
-  @@index([entitaId])
   @@index([createdAt])
 }

@@ -26,6 +26,9 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Middleware centralizzato con route protection e redirect anonimi
 - Security headers baseline applicati
 - Rate limiting demo/base su route sensibili
+- Audit trail baseline con hash chaining su ActivityLog (Issue #4)
+- Logging centralizzato eventi di scrittura e dinieghi autorizzativi principali
+- Pagina interna `/audit` riservata ad ADMIN
 - Export report CSV verificato
 - PDF report verificato su report esistente
 
@@ -33,6 +36,7 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Rate limiting non distribuito (in-memory, non adatto a multi-istanza production)
 - Hardening avanzato (WAF/CSP completa) non ancora implementato
 - Non ancora inclusi SSO/SAML/OIDC enterprise e MFA (fuori scope Phase 1 Issue #1)
+- Audit tamper-evident baseline ma non conservazione forense/immutabile a norma
 - Stato Git da consolidare in base alla policy del team
 
 ## Prossimi step

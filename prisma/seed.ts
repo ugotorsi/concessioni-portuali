@@ -1,5 +1,6 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
+import { createHash } from "node:crypto";
 import { PrismaClient } from "../src/generated/prisma/client";
 import type { RuoloUser } from "../src/generated/prisma/enums";
 import { Pool } from "pg";
@@ -19,6 +20,38 @@ const prisma = new PrismaClient({
 const dayMs = 24 * 60 * 60 * 1000;
 const daysFromNow = (days: number) => new Date(Date.now() + days * dayMs);
 const daysAgo = (days: number) => new Date(Date.now() - days * dayMs);
+
+function buildAuditHash(payload: {
+  previousHash: string | null;
+  userId: string | null;
+  userEmail: string | null;
+  userRole: string | null;
+  azione: string;
+  entita: string;
+  entitaId: string | null;
+  concessioneId: string | null;
+  esito: "SUCCESS" | "FAILURE";
+  metadata: Record<string, string | null>;
+  createdAt: Date;
+}): string {
+  return createHash("sha256")
+    .update(
+      JSON.stringify({
+        previousHash: payload.previousHash,
+        userId: payload.userId,
+        userEmail: payload.userEmail,
+        userRole: payload.userRole,
+        azione: payload.azione,
+        entita: payload.entita,
+        entitaId: payload.entitaId,
+        concessioneId: payload.concessioneId,
+        esito: payload.esito,
+        metadata: payload.metadata,
+        createdAt: payload.createdAt.toISOString(),
+      }),
+    )
+    .digest("hex");
+}
 
 async function clearDemoData() {
   await prisma.normaImpatto.deleteMany();
@@ -126,6 +159,9 @@ async function main() {
 
   const users = await prisma.user.findMany();
   const userByEmail = Object.fromEntries(users.map((item) => [item.email, item.id]));
+  const userSnapshotById = Object.fromEntries(
+    users.map((item) => [item.id, { email: item.email, ruolo: item.ruolo }]),
+  );
 
   const concessionariData = [
     {
@@ -1308,82 +1344,132 @@ async function main() {
     });
   }
 
-  await prisma.activityLog.createMany({
-    data: [
-      {
-        userId: userByEmail["admin.demo@concessioni.local"],
-        concessioneId: concessioniByKey["con-001"],
-        azione: "CREAZIONE_CONCESSIONE",
-        entita: "Concessione",
-        entitaId: concessioniByKey["con-001"],
-        descrizione: "Inserita nuova concessione CP-001/2021 in anagrafica.",
+  const seedAuditRows = [
+    {
+      userId: userByEmail["admin.demo@concessioni.local"] ?? null,
+      concessioneId: concessioniByKey["con-001"],
+      azione: "CREAZIONE_CONCESSIONE",
+      entita: "Concessione",
+      entitaId: concessioniByKey["con-001"],
+      message: "Inserita nuova concessione CP-001/2021 in anagrafica.",
+    },
+    {
+      userId: userByEmail["pm.demo@concessioni.local"] ?? null,
+      concessioneId: concessioniByKey["con-002"],
+      azione: "AGGIORNAMENTO_CRITICITA",
+      entita: "Criticita",
+      entitaId: criticitaByKey["crit-001"] ?? null,
+      message: "Aggiornato stato criticita morosita a IN_GESTIONE.",
+    },
+    {
+      userId: userByEmail["tecnico.demo@concessioni.local"] ?? null,
+      concessioneId: concessioniByKey["con-006"],
+      azione: "CARICAMENTO_DOCUMENTO",
+      entita: "Documento",
+      entitaId: null,
+      message: "Caricato verbale sopralluogo capannone.",
+    },
+    {
+      userId: userByEmail["giuridico.demo@concessioni.local"] ?? null,
+      concessioneId: concessioniByKey["con-006"],
+      azione: "APERTURA_PROCEDIMENTO",
+      entita: "Procedimento",
+      entitaId: null,
+      message: "Aperto procedimento AVVIO_DECADENZA.",
+    },
+    {
+      userId: userByEmail["economico.demo@concessioni.local"] ?? null,
+      concessioneId: concessioniByKey["con-003"],
+      azione: "REGISTRAZIONE_PAGAMENTO",
+      entita: "Pagamento",
+      entitaId: null,
+      message: "Registrato pagamento parziale annualita 2026.",
+    },
+    {
+      userId: userByEmail["pm.demo@concessioni.local"] ?? null,
+      concessioneId: null,
+      azione: "GENERAZIONE_REPORT",
+      entita: "Report",
+      entitaId: null,
+      message: "Generato report scadenze prossimi 90 giorni.",
+    },
+    {
+      userId: userByEmail["admin.demo@concessioni.local"] ?? null,
+      concessioneId: concessioniByKey["con-007"],
+      azione: "ASSEGNAZIONE_ATTIVITA",
+      entita: "Concessione",
+      entitaId: concessioniByKey["con-007"],
+      message: "Assegnata priorita alta per verifica polizza.",
+    },
+    {
+      userId: userByEmail["viewer.adsp.demo@concessioni.local"] ?? null,
+      concessioneId: concessioniByKey["con-002"],
+      azione: "CONSULTAZIONE_DOSSIER",
+      entita: "Report",
+      entitaId: null,
+      message: "Consultato dossier procedimentale concessione CP-014/2020.",
+    },
+    {
+      userId: userByEmail["giuridico.demo@concessioni.local"] ?? null,
+      concessioneId: concessioniByKey["con-005"],
+      azione: "AGGIORNAMENTO_PROCEDIMENTO",
+      entita: "Procedimento",
+      entitaId: null,
+      message: "Aggiornata nota istruttoria su richiesta chiarimenti.",
+    },
+    {
+      userId: userByEmail["tecnico.demo@concessioni.local"] ?? null,
+      concessioneId: concessioniByKey["con-001"],
+      azione: "CHIUSURA_SOPRALLUOGO",
+      entita: "Sopralluogo",
+      entitaId: null,
+      message: "Chiuso sopralluogo con esito positivo.",
+    },
+  ];
+
+  let previousHash: string | null = null;
+  for (const row of seedAuditRows) {
+    const snapshot = row.userId ? userSnapshotById[row.userId] : null;
+    const createdAt = new Date();
+    const currentHash = buildAuditHash({
+      previousHash,
+      userId: row.userId,
+      userEmail: snapshot?.email ?? null,
+      userRole: snapshot?.ruolo ?? null,
+      azione: row.azione,
+      entita: row.entita,
+      entitaId: row.entitaId,
+      concessioneId: row.concessioneId,
+      esito: "SUCCESS",
+      metadata: {
+        seed: "true",
+        message: row.message,
       },
-      {
-        userId: userByEmail["pm.demo@concessioni.local"],
-        concessioneId: concessioniByKey["con-002"],
-        azione: "AGGIORNAMENTO_CRITICITA",
-        entita: "Criticita",
-        entitaId: criticitaByKey["crit-001"],
-        descrizione: "Aggiornato stato criticita morosita a IN_GESTIONE.",
+      createdAt,
+    });
+
+    await prisma.activityLog.create({
+      data: {
+        userId: row.userId,
+        userEmail: snapshot?.email,
+        userRole: snapshot?.ruolo,
+        concessioneId: row.concessioneId,
+        azione: row.azione,
+        entita: row.entita,
+        entitaId: row.entitaId,
+        esito: "SUCCESS",
+        metadata: {
+          seed: true,
+          message: row.message,
+        },
+        previousHash,
+        currentHash,
+        createdAt,
       },
-      {
-        userId: userByEmail["tecnico.demo@concessioni.local"],
-        concessioneId: concessioniByKey["con-006"],
-        azione: "CARICAMENTO_DOCUMENTO",
-        entita: "Documento",
-        descrizione: "Caricato verbale sopralluogo capannone.",
-      },
-      {
-        userId: userByEmail["giuridico.demo@concessioni.local"],
-        concessioneId: concessioniByKey["con-006"],
-        azione: "APERTURA_PROCEDIMENTO",
-        entita: "Procedimento",
-        descrizione: "Aperto procedimento AVVIO_DECADENZA.",
-      },
-      {
-        userId: userByEmail["economico.demo@concessioni.local"],
-        concessioneId: concessioniByKey["con-003"],
-        azione: "REGISTRAZIONE_PAGAMENTO",
-        entita: "Pagamento",
-        descrizione: "Registrato pagamento parziale annualita 2026.",
-      },
-      {
-        userId: userByEmail["pm.demo@concessioni.local"],
-        azione: "GENERAZIONE_REPORT",
-        entita: "Report",
-        descrizione: "Generato report scadenze prossimi 90 giorni.",
-      },
-      {
-        userId: userByEmail["admin.demo@concessioni.local"],
-        concessioneId: concessioniByKey["con-007"],
-        azione: "ASSEGNAZIONE_ATTIVITA",
-        entita: "Concessione",
-        entitaId: concessioniByKey["con-007"],
-        descrizione: "Assegnata priorita alta per verifica polizza.",
-      },
-      {
-        userId: userByEmail["viewer.adsp.demo@concessioni.local"],
-        concessioneId: concessioniByKey["con-002"],
-        azione: "CONSULTAZIONE_DOSSIER",
-        entita: "Report",
-        descrizione: "Consultato dossier procedimentale concessione CP-014/2020.",
-      },
-      {
-        userId: userByEmail["giuridico.demo@concessioni.local"],
-        concessioneId: concessioniByKey["con-005"],
-        azione: "AGGIORNAMENTO_PROCEDIMENTO",
-        entita: "Procedimento",
-        descrizione: "Aggiornata nota istruttoria su richiesta chiarimenti.",
-      },
-      {
-        userId: userByEmail["tecnico.demo@concessioni.local"],
-        concessioneId: concessioniByKey["con-001"],
-        azione: "CHIUSURA_SOPRALLUOGO",
-        entita: "Sopralluogo",
-        descrizione: "Chiuso sopralluogo con esito positivo.",
-      },
-    ],
-  });
+    });
+
+    previousHash = currentHash;
+  }
 
   const counts = {
     users: await prisma.user.count(),

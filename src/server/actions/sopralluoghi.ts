@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { canManageSopralluoghi, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 import { SOPRALLUOGO_ESITO_VALUES } from "@/server/queries/sopralluoghi";
 
 const createSopralluogoSchema = z.object({
@@ -41,10 +42,28 @@ export async function createSopralluogoAction(formData: FormData) {
   const role = await requireRole();
 
   if (role === "VIEWER_ADSP") {
+    await auditFailure({
+      azione: "AUTHZ_DENIED",
+      entita: "Sopralluogo",
+      actor: { userRole: role },
+      metadata: {
+        actionType: "SOPRALLUOGO_CREATE",
+        reason: "VIEWER_ADSP_BLOCKED",
+      },
+    });
     redirect("/adsp");
   }
 
   if (!canManageSopralluoghi(role)) {
+    await auditFailure({
+      azione: "AUTHZ_DENIED",
+      entita: "Sopralluogo",
+      actor: { userRole: role },
+      metadata: {
+        actionType: "SOPRALLUOGO_CREATE",
+        reason: "ROLE_NOT_ALLOWED",
+      },
+    });
     throw new Error("Profilo non autorizzato alla gestione dei sopralluoghi.");
   }
 
@@ -62,6 +81,15 @@ export async function createSopralluogoAction(formData: FormData) {
   });
 
   if (!parsed.success) {
+    await auditFailure({
+      azione: "SOPRALLUOGO_CREATE",
+      entita: "Sopralluogo",
+      actor: { userRole: role },
+      metadata: {
+        reason: "VALIDATION_ERROR",
+        issue: parsed.error.issues[0]?.message ?? "Dati non validi.",
+      },
+    });
     throw new Error(parsed.error.issues[0]?.message ?? "Dati non validi.");
   }
 
@@ -84,13 +112,25 @@ export async function createSopralluogoAction(formData: FormData) {
     },
   });
 
-  await prisma.activityLog.create({
-    data: {
-      concessioneId: created.concessioneId,
-      azione: "CREAZIONE_SOPRALLUOGO",
-      entita: "Sopralluogo",
-      entitaId: created.id,
-      descrizione: "Registrato nuovo sopralluogo in workflow demo.",
+  await auditSuccess({
+    azione: "SOPRALLUOGO_CREATE",
+    entita: "Sopralluogo",
+    entitaId: created.id,
+    concessioneId: created.concessioneId,
+    actor: { userRole: role },
+    metadata: {
+      esito: parsed.data.esito,
+      conformitaPlanimetrica: parsed.data.conformitaPlanimetrica,
+      changedFields: [
+        "data",
+        "operatori",
+        "esito",
+        "conformitaPlanimetrica",
+        "statoManutentivo",
+        "sicurezza",
+        "occupazione",
+        "interferenze",
+      ],
     },
   });
 

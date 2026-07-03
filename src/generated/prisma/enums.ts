@@ -289,3 +289,11 @@ export const ModuloImpattoNorma = {
 } as const
 
 export type ModuloImpattoNorma = (typeof ModuloImpattoNorma)[keyof typeof ModuloImpattoNorma]
+
+
+export const AuditEsito = {
+  SUCCESS: 'SUCCESS',
+  FAILURE: 'FAILURE'
+} as const
+
+export type AuditEsito = (typeof AuditEsito)[keyof typeof AuditEsito]

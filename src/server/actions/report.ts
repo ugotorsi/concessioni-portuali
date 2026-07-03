@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { canValidateReport, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 
 const toggleReportValidationSchema = z.object({
   id: z.string().min(1),
@@ -16,10 +17,28 @@ export async function toggleReportValidationAction(formData: FormData) {
   const role = await requireRole();
 
   if (role === "VIEWER_ADSP") {
+    await auditFailure({
+      azione: "AUTHZ_DENIED",
+      entita: "Report",
+      actor: { userRole: role },
+      metadata: {
+        actionType: "REPORT_TOGGLE_VALIDATION",
+        reason: "VIEWER_ADSP_BLOCKED",
+      },
+    });
     redirect("/adsp");
   }
 
   if (!canValidateReport(role)) {
+    await auditFailure({
+      azione: "AUTHZ_DENIED",
+      entita: "Report",
+      actor: { userRole: role },
+      metadata: {
+        actionType: "REPORT_TOGGLE_VALIDATION",
+        reason: "ROLE_NOT_ALLOWED",
+      },
+    });
     throw new Error("Profilo non autorizzato alla validazione dei report.");
   }
 
@@ -29,6 +48,15 @@ export async function toggleReportValidationAction(formData: FormData) {
   });
 
   if (!parsed.success) {
+    await auditFailure({
+      azione: "REPORT_TOGGLE_VALIDATION",
+      entita: "Report",
+      actor: { userRole: role },
+      metadata: {
+        reason: "VALIDATION_ERROR",
+        issue: parsed.error.issues[0]?.message ?? "Dati non validi.",
+      },
+    });
     throw new Error(parsed.error.issues[0]?.message ?? "Dati non validi.");
   }
 
@@ -38,6 +66,15 @@ export async function toggleReportValidationAction(formData: FormData) {
   });
 
   if (!existing) {
+    await auditFailure({
+      azione: "REPORT_TOGGLE_VALIDATION",
+      entita: "Report",
+      entitaId: parsed.data.id,
+      actor: { userRole: role },
+      metadata: {
+        reason: "NOT_FOUND",
+      },
+    });
     throw new Error("Report non trovato.");
   }
 
@@ -48,16 +85,15 @@ export async function toggleReportValidationAction(formData: FormData) {
     },
   });
 
-  await prisma.activityLog.create({
-    data: {
-      concessioneId: existing.concessioneId,
-      azione: parsed.data.validato === "SI" ? "VALIDAZIONE_REPORT" : "RIMOZIONE_VALIDAZIONE_REPORT",
-      entita: "Report",
-      entitaId: existing.id,
-      descrizione:
-        parsed.data.validato === "SI"
-          ? "Report validato in workflow demo."
-          : "Validazione report rimossa in workflow demo.",
+  await auditSuccess({
+    azione: parsed.data.validato === "SI" ? "REPORT_VALIDATE" : "REPORT_UNVALIDATE",
+    entita: "Report",
+    entitaId: existing.id,
+    concessioneId: existing.concessioneId,
+    actor: { userRole: role },
+    metadata: {
+      validato: parsed.data.validato === "SI",
+      changedFields: ["validato"],
     },
   });
 

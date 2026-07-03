@@ -18,6 +18,7 @@ import {
   Users,
   Wallet,
   Wrench,
+  ScrollText,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -40,6 +41,7 @@ const backofficeNavItems: NavItem[] = [
   { href: "/procedimenti", label: "Procedimenti", icon: Wrench },
   { href: "/report", label: "Report", icon: FileText },
   { href: "/normativa", label: "Normativa", icon: Library },
+  { href: "/audit", label: "Audit", icon: ScrollText },
   { href: "/ai", label: "Assistente AI", icon: Lightbulb },
   { href: "/demo", label: "Demo", icon: Presentation },
 ];

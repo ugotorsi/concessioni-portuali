@@ -75,6 +75,22 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
 - Security headers baseline configurati in `next.config.ts`.
 - Rate limiting demo/base in-memory su route sensibili (`/api/auth/callback/credentials`, `/export/*`).
 
+## Audit trail baseline (Issue #4)
+- Baseline audit centralizzata con utility server in `src/server/audit/auditLog.ts`.
+- Eventi principali tracciati con contesto utente reale (id, email, ruolo), entita, azione, esito e timestamp.
+- Hash chaining tamper-evident: ogni `ActivityLog` salva `previousHash` e `currentHash` SHA-256.
+- Raccolta context request (`ipAddress`, `userAgent`) tramite helper `src/server/audit/requestContext.ts`.
+- Eventi coperti nelle server actions operative:
+   - `CRITICITA_CREATE`
+   - `CRITICITA_UPDATE`
+   - `PAGAMENTO_UPDATE`
+   - `SOPRALLUOGO_CREATE`
+   - `PROCEDIMENTO_CREATE`
+   - `REPORT_VALIDATE`
+   - `REPORT_UNVALIDATE`
+   - `AUTHZ_DENIED` (quando praticabile)
+- Vista interna audit (`/audit`) disponibile solo per ruolo `ADMIN`.
+
 ## Limiti noti
 - Senza Docker/PostgreSQL attivi, le pagine dati dinamiche possono rispondere con errore.
 - I guard server-side restano necessari anche con middleware, come difesa ulteriore.
@@ -82,3 +98,5 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
 - CSP completa e tuning avanzato (WAF, policy enterprise) restano step successivi.
 - Questa fase non include ancora SSO/SAML/OIDC enterprise ne MFA (previsti nelle fasi successive).
 - `.env.example` puo essere ignorato da `.gitignore` se e presente la regola `.env*`.
+- L'audit trail attuale non e una conservazione legale/fisicamente immutabile (non sostituisce SIEM/WORM).
+- Per produzione sono necessari: policy DB append-only, retention/backup, firma e conservazione a norma.

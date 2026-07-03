@@ -10,6 +10,7 @@ import {
   type DemoRole,
 } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 import {
   CRITICITA_FONTE_VALUES,
   CRITICITA_GRAVITA_VALUES,
@@ -52,12 +53,30 @@ function toOptional(value: string | undefined): string | undefined {
   return trimmed === "" ? undefined : trimmed;
 }
 
-function ensureCanWriteCriticita(role: DemoRole) {
+async function ensureCanWriteCriticita(role: DemoRole, actionType: string) {
   if (role === "VIEWER_ADSP") {
+    await auditFailure({
+      azione: "AUTHZ_DENIED",
+      entita: "Criticita",
+      actor: { userRole: role },
+      metadata: {
+        actionType,
+        reason: "VIEWER_ADSP_BLOCKED",
+      },
+    });
     redirect("/adsp");
   }
 
   if (!canManageCriticita(role)) {
+    await auditFailure({
+      azione: "AUTHZ_DENIED",
+      entita: "Criticita",
+      actor: { userRole: role },
+      metadata: {
+        actionType,
+        reason: "ROLE_NOT_ALLOWED",
+      },
+    });
     throw new Error("Profilo non autorizzato alla gestione delle criticità.");
   }
 }
@@ -74,7 +93,7 @@ function ensureTipologiaByRole(role: DemoRole, tipologia: string) {
 
 export async function createCriticitaAction(formData: FormData) {
   const role = await requireRole();
-  ensureCanWriteCriticita(role);
+  await ensureCanWriteCriticita(role, "CRITICITA_CREATE");
 
   const parsed = createCriticitaSchema.safeParse({
     concessioneId: formData.get("concessioneId"),
@@ -86,10 +105,34 @@ export async function createCriticitaAction(formData: FormData) {
   });
 
   if (!parsed.success) {
+    await auditFailure({
+      azione: "CRITICITA_CREATE",
+      entita: "Criticita",
+      actor: { userRole: role },
+      metadata: {
+        reason: "VALIDATION_ERROR",
+        issue: parsed.error.issues[0]?.message ?? "Dati non validi.",
+      },
+    });
     throw new Error(parsed.error.issues[0]?.message ?? "Dati non validi.");
   }
 
-  ensureTipologiaByRole(role, parsed.data.tipologia);
+  try {
+    ensureTipologiaByRole(role, parsed.data.tipologia);
+  } catch (error) {
+    await auditFailure({
+      azione: "AUTHZ_DENIED",
+      entita: "Criticita",
+      concessioneId: parsed.data.concessioneId,
+      actor: { userRole: role },
+      metadata: {
+        actionType: "CRITICITA_CREATE",
+        reason: error instanceof Error ? error.message : "TIPOLOGIA_NOT_ALLOWED",
+        tipologia: parsed.data.tipologia,
+      },
+    });
+    throw error;
+  }
 
   const created = await prisma.criticita.create({
     data: {
@@ -108,13 +151,17 @@ export async function createCriticitaAction(formData: FormData) {
     },
   });
 
-  await prisma.activityLog.create({
-    data: {
-      concessioneId: created.concessioneId,
-      azione: "CREAZIONE_CRITICITA",
-      entita: "Criticita",
-      entitaId: created.id,
-      descrizione: "Creata nuova criticità in workflow demo.",
+  await auditSuccess({
+    azione: "CRITICITA_CREATE",
+    entita: "Criticita",
+    entitaId: created.id,
+    concessioneId: created.concessioneId,
+    actor: { userRole: role },
+    metadata: {
+      tipologia: parsed.data.tipologia,
+      gravita: parsed.data.gravita,
+      fonte: parsed.data.fonte,
+      stato: "APERTA",
     },
   });
 
@@ -127,7 +174,7 @@ export async function createCriticitaAction(formData: FormData) {
 
 export async function updateCriticitaAction(formData: FormData) {
   const role = await requireRole();
-  ensureCanWriteCriticita(role);
+  await ensureCanWriteCriticita(role, "CRITICITA_UPDATE");
 
   const parsed = updateCriticitaSchema.safeParse({
     id: formData.get("id"),
@@ -138,6 +185,15 @@ export async function updateCriticitaAction(formData: FormData) {
   });
 
   if (!parsed.success) {
+    await auditFailure({
+      azione: "CRITICITA_UPDATE",
+      entita: "Criticita",
+      actor: { userRole: role },
+      metadata: {
+        reason: "VALIDATION_ERROR",
+        issue: parsed.error.issues[0]?.message ?? "Dati non validi.",
+      },
+    });
     throw new Error(parsed.error.issues[0]?.message ?? "Dati non validi.");
   }
 
@@ -147,10 +203,35 @@ export async function updateCriticitaAction(formData: FormData) {
   });
 
   if (!existing) {
+    await auditFailure({
+      azione: "CRITICITA_UPDATE",
+      entita: "Criticita",
+      entitaId: parsed.data.id,
+      actor: { userRole: role },
+      metadata: {
+        reason: "NOT_FOUND",
+      },
+    });
     throw new Error("Criticità non trovata.");
   }
 
-  ensureTipologiaByRole(role, existing.tipologia);
+  try {
+    ensureTipologiaByRole(role, existing.tipologia);
+  } catch (error) {
+    await auditFailure({
+      azione: "AUTHZ_DENIED",
+      entita: "Criticita",
+      entitaId: existing.id,
+      concessioneId: existing.concessioneId,
+      actor: { userRole: role },
+      metadata: {
+        actionType: "CRITICITA_UPDATE",
+        reason: error instanceof Error ? error.message : "TIPOLOGIA_NOT_ALLOWED",
+        tipologia: existing.tipologia,
+      },
+    });
+    throw error;
+  }
 
   await prisma.criticita.update({
     where: { id: parsed.data.id },
@@ -163,13 +244,16 @@ export async function updateCriticitaAction(formData: FormData) {
     },
   });
 
-  await prisma.activityLog.create({
-    data: {
-      concessioneId: existing.concessioneId,
-      azione: "AGGIORNAMENTO_CRITICITA",
-      entita: "Criticita",
-      entitaId: existing.id,
-      descrizione: "Aggiornata criticità in workflow demo.",
+  await auditSuccess({
+    azione: "CRITICITA_UPDATE",
+    entita: "Criticita",
+    entitaId: existing.id,
+    concessioneId: existing.concessioneId,
+    actor: { userRole: role },
+    metadata: {
+      gravita: parsed.data.gravita,
+      stato: parsed.data.stato,
+      changedFields: ["gravita", "stato", "descrizione", "azioneConsigliata"],
     },
   });
 

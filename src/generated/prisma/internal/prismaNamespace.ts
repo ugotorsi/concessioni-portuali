@@ -1811,11 +1811,18 @@ export type NormaImpattoScalarFieldEnum = (typeof NormaImpattoScalarFieldEnum)[k
 export const ActivityLogScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
+  userEmail: 'userEmail',
+  userRole: 'userRole',
   concessioneId: 'concessioneId',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
   azione: 'azione',
   entita: 'entita',
   entitaId: 'entitaId',
-  descrizione: 'descrizione',
+  esito: 'esito',
+  metadata: 'metadata',
+  previousHash: 'previousHash',
+  currentHash: 'currentHash',
   createdAt: 'createdAt'
 } as const
 
@@ -1828,6 +1835,14 @@ export const SortOrder = {
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
@@ -1844,6 +1859,15 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
 
@@ -2220,6 +2244,34 @@ export type EnumModuloImpattoNormaFieldRefInput<$PrismaModel> = FieldRefInputTyp
  * Reference to a field of type 'ModuloImpattoNorma[]'
  */
 export type ListEnumModuloImpattoNormaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ModuloImpattoNorma[]'>
+    
+
+
+/**
+ * Reference to a field of type 'AuditEsito'
+ */
+export type EnumAuditEsitoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AuditEsito'>
+    
+
+
+/**
+ * Reference to a field of type 'AuditEsito[]'
+ */
+export type ListEnumAuditEsitoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AuditEsito[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
