@@ -28,10 +28,18 @@ test("audit page access and report validation audit events", async ({ page }) =>
     await expect(validateButton).toBeVisible();
   }
 
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("link", { name: "Scarica PDF istituzionale" }).click(),
+  ]);
+
+  expect(download.suggestedFilename()).toMatch(/^report-istituzionale-.*\.pdf$/);
+
   await page.goto("/audit");
   await expect(page).toHaveURL(/\/audit$/);
   await expect(page.getByRole("heading", { name: "Ultimi eventi audit" })).toBeVisible();
   await expect(page.getByText(/REPORT_VALIDATE|REPORT_UNVALIDATE/).first()).toBeVisible();
+  await expect(page.getByText("REPORT_PDF_DOWNLOAD").first()).toBeVisible();
 
   await page.goto("/logout");
   await expect(page).toHaveURL(/\/login$/);

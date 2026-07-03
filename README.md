@@ -108,7 +108,7 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
 - Modulo AI assistivo (non sostituisce validazione umana)
 - Modulo normativa con impatti sui flussi
 - Export CSV sui moduli operativi
-- PDF report disponibile su route dedicate
+- PDF report istituzionale server-side (PDFKit) su route dedicate con layout professionale, sezioni standard e metadata documento
 
 ## Security hardening (Phase 1)
 - Middleware centralizzato in `middleware.ts` per primo filtro accessi/redirect.
@@ -131,6 +131,7 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
    - `PROCEDIMENTO_CREATE`
    - `REPORT_VALIDATE`
    - `REPORT_UNVALIDATE`
+   - `REPORT_PDF_DOWNLOAD`
    - `AUTHZ_DENIED` (quando praticabile)
 - Vista interna audit (`/audit`) disponibile solo per ruolo `ADMIN`.
 

@@ -36,7 +36,9 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Checklist contraddittorio su Procedimento con update auditabile (Issue #7)
 - Lista/dettaglio/export procedimenti estesi con stato checklist e warning istruttori
 - Export report CSV verificato
-- PDF report verificato su report esistente
+- PDF report istituzionale server-side (PDFKit) con template stabile, sezioni istruttorie e footer/disclaimer
+- Audit su download PDF (`REPORT_PDF_DOWNLOAD`) e dinieghi autorizzativi su route PDF
+- Test unit su PDF service e test E2E policy download PDF per ruolo/validazione
 
 ## Anomalie residue
 - Rate limiting non distribuito (in-memory, non adatto a multi-istanza production)
