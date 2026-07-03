@@ -47,6 +47,11 @@ export async function GET(request: Request): Promise<Response> {
       descrizione: true,
       riferimentoNormativo: true,
       azioneConsigliata: true,
+      rilevanzaArt47: true,
+      letteraArt47: true,
+      rischioDecadenza: true,
+      motivazioneArt47: true,
+      azioneIstruttoriaArt47: true,
       dataRilevazione: true,
       concessione: {
         select: {
@@ -70,6 +75,11 @@ export async function GET(request: Request): Promise<Response> {
     { header: "riferimento_normativo", value: (row) => row.riferimentoNormativo },
     { header: "descrizione", value: (row) => row.descrizione },
     { header: "azione_consigliata", value: (row) => row.azioneConsigliata },
+    { header: "rilevanza_art47", value: (row) => (row.rilevanzaArt47 ? "SI" : "NO") },
+    { header: "lettera_art47", value: (row) => row.letteraArt47 },
+    { header: "rischio_decadenza", value: (row) => row.rischioDecadenza },
+    { header: "motivazione_art47", value: (row) => row.motivazioneArt47 },
+    { header: "azione_istruttoria_art47", value: (row) => row.azioneIstruttoriaArt47 },
   ]);
 
   return csvResponse(csv, buildCsvFilename("criticita"));

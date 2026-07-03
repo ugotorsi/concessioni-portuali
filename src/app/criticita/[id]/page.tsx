@@ -19,6 +19,12 @@ import {
   canManageProcedimenti,
   requireRole,
 } from "@/lib/auth";
+import {
+  getArt47Description,
+  getArt47Label,
+  getRischioDecadenzaBadgeVariant,
+  getRischioDecadenzaLabel,
+} from "@/lib/art47";
 import { formatCurrencyEUR, formatDateIT, formatEnumLabel } from "@/lib/utils";
 import { getCriticitaDetail, getCriticitaIstruttoria } from "@/server/queries/criticita";
 import { getNormeForCriticita } from "@/server/queries/normativa";
@@ -233,6 +239,49 @@ export default async function CriticitaDetailPage({ params }: CriticitaDetailPag
             </CardContent>
           </Card>
         </section>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Mapping art. 47 Cod. Nav.</CardTitle>
+            <CardDescription>
+              Sezione di supporto istruttorio interno: non sostituisce la valutazione provvedimentale dell Autorita.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-slate-500">Rilevanza art. 47</p>
+              <div className="mt-1">
+                <Badge variant={criticita.rilevanzaArt47 ? "danger" : "default"}>
+                  {criticita.rilevanzaArt47 ? "Rilevante" : "Non rilevante"}
+                </Badge>
+              </div>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wide text-slate-500">Lettera</p>
+              <p className="mt-1 text-slate-900">{getArt47Label(criticita.letteraArt47)}</p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wide text-slate-500">Rischio decadenza</p>
+              <div className="mt-1">
+                <Badge variant={getRischioDecadenzaBadgeVariant(criticita.rischioDecadenza)}>
+                  {getRischioDecadenzaLabel(criticita.rischioDecadenza)}
+                </Badge>
+              </div>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wide text-slate-500">Descrizione fattispecie</p>
+              <p className="mt-1 text-slate-900">{getArt47Description(criticita.letteraArt47)}</p>
+            </div>
+            <div className="md:col-span-2 xl:col-span-4">
+              <p className="text-xs uppercase tracking-wide text-slate-500">Motivazione istruttoria art. 47</p>
+              <p className="mt-1 text-slate-900">{criticita.motivazioneArt47 ?? "-"}</p>
+            </div>
+            <div className="md:col-span-2 xl:col-span-4">
+              <p className="text-xs uppercase tracking-wide text-slate-500">Azione istruttoria art. 47</p>
+              <p className="mt-1 text-slate-900">{criticita.azioneIstruttoriaArt47 ?? "-"}</p>
+            </div>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>

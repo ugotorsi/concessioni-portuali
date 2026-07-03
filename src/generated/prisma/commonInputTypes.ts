@@ -376,6 +376,20 @@ export type EnumFonteCriticitaFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumFonteCriticitaFilter<$PrismaModel> | $Enums.FonteCriticita
 }
 
+export type EnumArt47CodNavLetteraNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.Art47CodNavLettera | Prisma.EnumArt47CodNavLetteraFieldRefInput<$PrismaModel> | null
+  in?: $Enums.Art47CodNavLettera[] | Prisma.ListEnumArt47CodNavLetteraFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.Art47CodNavLettera[] | Prisma.ListEnumArt47CodNavLetteraFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumArt47CodNavLetteraNullableFilter<$PrismaModel> | $Enums.Art47CodNavLettera | null
+}
+
+export type EnumLivelloRischioDecadenzaNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.LivelloRischioDecadenza | Prisma.EnumLivelloRischioDecadenzaFieldRefInput<$PrismaModel> | null
+  in?: $Enums.LivelloRischioDecadenza[] | Prisma.ListEnumLivelloRischioDecadenzaFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.LivelloRischioDecadenza[] | Prisma.ListEnumLivelloRischioDecadenzaFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumLivelloRischioDecadenzaNullableFilter<$PrismaModel> | $Enums.LivelloRischioDecadenza | null
+}
+
 export type EnumStatoCriticitaFilter<$PrismaModel = never> = {
   equals?: $Enums.StatoCriticita | Prisma.EnumStatoCriticitaFieldRefInput<$PrismaModel>
   in?: $Enums.StatoCriticita[] | Prisma.ListEnumStatoCriticitaFieldRefInput<$PrismaModel>
@@ -411,6 +425,26 @@ export type EnumFonteCriticitaWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumFonteCriticitaFilter<$PrismaModel>
   _max?: Prisma.NestedEnumFonteCriticitaFilter<$PrismaModel>
+}
+
+export type EnumArt47CodNavLetteraNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.Art47CodNavLettera | Prisma.EnumArt47CodNavLetteraFieldRefInput<$PrismaModel> | null
+  in?: $Enums.Art47CodNavLettera[] | Prisma.ListEnumArt47CodNavLetteraFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.Art47CodNavLettera[] | Prisma.ListEnumArt47CodNavLetteraFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumArt47CodNavLetteraNullableWithAggregatesFilter<$PrismaModel> | $Enums.Art47CodNavLettera | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumArt47CodNavLetteraNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumArt47CodNavLetteraNullableFilter<$PrismaModel>
+}
+
+export type EnumLivelloRischioDecadenzaNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LivelloRischioDecadenza | Prisma.EnumLivelloRischioDecadenzaFieldRefInput<$PrismaModel> | null
+  in?: $Enums.LivelloRischioDecadenza[] | Prisma.ListEnumLivelloRischioDecadenzaFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.LivelloRischioDecadenza[] | Prisma.ListEnumLivelloRischioDecadenzaFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumLivelloRischioDecadenzaNullableWithAggregatesFilter<$PrismaModel> | $Enums.LivelloRischioDecadenza | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLivelloRischioDecadenzaNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLivelloRischioDecadenzaNullableFilter<$PrismaModel>
 }
 
 export type EnumStatoCriticitaWithAggregatesFilter<$PrismaModel = never> = {
@@ -1046,6 +1080,20 @@ export type NestedEnumFonteCriticitaFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumFonteCriticitaFilter<$PrismaModel> | $Enums.FonteCriticita
 }
 
+export type NestedEnumArt47CodNavLetteraNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.Art47CodNavLettera | Prisma.EnumArt47CodNavLetteraFieldRefInput<$PrismaModel> | null
+  in?: $Enums.Art47CodNavLettera[] | Prisma.ListEnumArt47CodNavLetteraFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.Art47CodNavLettera[] | Prisma.ListEnumArt47CodNavLetteraFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumArt47CodNavLetteraNullableFilter<$PrismaModel> | $Enums.Art47CodNavLettera | null
+}
+
+export type NestedEnumLivelloRischioDecadenzaNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.LivelloRischioDecadenza | Prisma.EnumLivelloRischioDecadenzaFieldRefInput<$PrismaModel> | null
+  in?: $Enums.LivelloRischioDecadenza[] | Prisma.ListEnumLivelloRischioDecadenzaFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.LivelloRischioDecadenza[] | Prisma.ListEnumLivelloRischioDecadenzaFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumLivelloRischioDecadenzaNullableFilter<$PrismaModel> | $Enums.LivelloRischioDecadenza | null
+}
+
 export type NestedEnumStatoCriticitaFilter<$PrismaModel = never> = {
   equals?: $Enums.StatoCriticita | Prisma.EnumStatoCriticitaFieldRefInput<$PrismaModel>
   in?: $Enums.StatoCriticita[] | Prisma.ListEnumStatoCriticitaFieldRefInput<$PrismaModel>
@@ -1081,6 +1129,26 @@ export type NestedEnumFonteCriticitaWithAggregatesFilter<$PrismaModel = never> =
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumFonteCriticitaFilter<$PrismaModel>
   _max?: Prisma.NestedEnumFonteCriticitaFilter<$PrismaModel>
+}
+
+export type NestedEnumArt47CodNavLetteraNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.Art47CodNavLettera | Prisma.EnumArt47CodNavLetteraFieldRefInput<$PrismaModel> | null
+  in?: $Enums.Art47CodNavLettera[] | Prisma.ListEnumArt47CodNavLetteraFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.Art47CodNavLettera[] | Prisma.ListEnumArt47CodNavLetteraFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumArt47CodNavLetteraNullableWithAggregatesFilter<$PrismaModel> | $Enums.Art47CodNavLettera | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumArt47CodNavLetteraNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumArt47CodNavLetteraNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumLivelloRischioDecadenzaNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LivelloRischioDecadenza | Prisma.EnumLivelloRischioDecadenzaFieldRefInput<$PrismaModel> | null
+  in?: $Enums.LivelloRischioDecadenza[] | Prisma.ListEnumLivelloRischioDecadenzaFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.LivelloRischioDecadenza[] | Prisma.ListEnumLivelloRischioDecadenzaFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumLivelloRischioDecadenzaNullableWithAggregatesFilter<$PrismaModel> | $Enums.LivelloRischioDecadenza | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLivelloRischioDecadenzaNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLivelloRischioDecadenzaNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumStatoCriticitaWithAggregatesFilter<$PrismaModel = never> = {

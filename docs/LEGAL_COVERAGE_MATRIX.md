@@ -47,7 +47,7 @@ Nota: utile per MVP, ma manca piena identita legale/organizzativa (profilazione 
 
 ### Criticita
 - Funzione giuridico-amministrativa: registrazione anomalie tecnico-giuridico-economiche e rischio.
-- Dati rilevanti: tipologia, gravita, fonte, descrizione, riferimentoNormativo, stato, dataRilevazione.
+- Dati rilevanti: tipologia, gravita, fonte, descrizione, riferimentoNormativo, stato, dataRilevazione, rilevanzaArt47, letteraArt47, rischioDecadenza, motivazioneArt47.
 - Collegamenti: N:1 verso Concessione, 1:N verso Procedimento, 1:N verso NormaImpatto.
 - Livello maturita attuale: Alto (MVP).
 
@@ -158,7 +158,7 @@ Perche la struttura e corretta per vista 360 gradi:
 | Fonte / articolo | Requisito giuridico-amministrativo | Entita/funzionalita che lo copre oggi | Livello copertura | Gap | Priorita intervento |
 |---|---|---|---|---|---|
 | art. 36 Codice della Navigazione | Titolo concessorio, oggetto, durata, presupposti | Concessione (numeroAtto, date, tipologia, stato), Concessionario | Alta | Versionamento del titolo e atti modificativi | Alta |
-| art. 47 Codice della Navigazione | Decadenza/inadempimento e presidio fattispecie | Criticita (MOROSITA/RISCHIO_DECADENZA), Procedimento (AVVIO_DECADENZA), Pagamento | Media | Workflow formale con prove/notifiche e motivazione | Alta |
+| art. 47 Codice della Navigazione | Decadenza/inadempimento e presidio fattispecie | Criticita con mapping strutturato (`rilevanzaArt47`, `letteraArt47`, `rischioDecadenza`, motivazione), Procedimento (AVVIO_DECADENZA), Pagamento | Medio-Alta | Workflow formale con prove/notifiche e step obbligati | Alta |
 | art. 54 Codice della Navigazione | Repressione occupazioni abusive/difformi | Criticita (OCCUPAZIONE_DIFFORME), Sopralluogo, Procedimento (ORDINE_RIPRISTINO) | Media | Evidenza probatoria allegati e catena decisionale | Alta |
 | legge 241/1990 | Procedimento, motivazione, partecipazione, termini | Procedimento (date/stato), Scadenza (termini), Report | Media | Responsabile procedimento, protocollazione, comunicazioni formali | Altissima |
 | Obblighi concessori | Monitoraggio adempimenti periodici | ObbligoConcessorio + Scadenza | Alta | Automatismi reminder/escalation | Media |

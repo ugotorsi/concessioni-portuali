@@ -59,6 +59,13 @@ Baseline coperta:
 - Unit: rate limiting, capability ruoli, hashing/sanitizzazione audit.
 - E2E: login/redirect per ruoli, security headers baseline, accesso audit admin/viewer.
 
+## Mapping art. 47 su Criticita (Issue #2)
+- Estensione `Criticita` con campi strutturati: `rilevanzaArt47`, `letteraArt47`, `rischioDecadenza`, `motivazioneArt47`, `azioneIstruttoriaArt47`.
+- Form nuova/modifica criticita con sezione dedicata e disclaimer di supporto istruttorio non vincolante.
+- Filtri lista criticita per rilevanza, lettera art.47 e rischio decadenza.
+- Dettaglio criticita con sezione esplicita di mapping art.47.
+- Export CSV criticita esteso con colonne art.47.
+
 ## Auth demo e ruoli
 L'accesso demo avviene da `/login` con autenticazione reale via email/password e sessione applicativa.
 Ruoli principali:

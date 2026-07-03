@@ -174,6 +174,29 @@ export const StatoCriticita = {
 export type StatoCriticita = (typeof StatoCriticita)[keyof typeof StatoCriticita]
 
 
+export const Art47CodNavLettera = {
+  A_MANCATA_ESECUZIONE_OPERE: 'A_MANCATA_ESECUZIONE_OPERE',
+  B_NON_USO_O_CATTIVO_USO: 'B_NON_USO_O_CATTIVO_USO',
+  C_MUTAMENTO_SCOPO_NON_AUTORIZZATO: 'C_MUTAMENTO_SCOPO_NON_AUTORIZZATO',
+  D_OMESSO_PAGAMENTO_CANONE: 'D_OMESSO_PAGAMENTO_CANONE',
+  E_SUBINGRESSO_ABUSIVO: 'E_SUBINGRESSO_ABUSIVO',
+  F_INADEMPIMENTO_OBBLIGHI: 'F_INADEMPIMENTO_OBBLIGHI',
+  ALTRO_PROFILO_ISTRUTTORIO: 'ALTRO_PROFILO_ISTRUTTORIO'
+} as const
+
+export type Art47CodNavLettera = (typeof Art47CodNavLettera)[keyof typeof Art47CodNavLettera]
+
+
+export const LivelloRischioDecadenza = {
+  BASSO: 'BASSO',
+  MEDIO: 'MEDIO',
+  ALTO: 'ALTO',
+  CRITICO: 'CRITICO'
+} as const
+
+export type LivelloRischioDecadenza = (typeof LivelloRischioDecadenza)[keyof typeof LivelloRischioDecadenza]
+
+
 export const TipologiaProcedimento = {
   CHIARIMENTI: 'CHIARIMENTI',
   DIFFIDA: 'DIFFIDA',

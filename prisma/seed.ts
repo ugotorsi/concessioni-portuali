@@ -2,7 +2,15 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import { createHash } from "node:crypto";
 import { PrismaClient } from "../src/generated/prisma/client";
-import type { RuoloUser } from "../src/generated/prisma/enums";
+import type {
+  Art47CodNavLettera,
+  FonteCriticita,
+  GravitaCriticita,
+  LivelloRischioDecadenza,
+  RuoloUser,
+  StatoCriticita,
+  TipologiaCriticita,
+} from "../src/generated/prisma/enums";
 import { Pool } from "pg";
 
 const databaseUrl = process.env.DATABASE_URL;
@@ -717,7 +725,24 @@ async function main() {
     ],
   });
 
-  const criticitaRows = [
+  const criticitaRows: Array<{
+    key: string;
+    concessioneKey: string;
+    tipologia: TipologiaCriticita;
+    gravita: GravitaCriticita;
+    fonte: FonteCriticita;
+    descrizione: string;
+    riferimentoNormativo: string;
+    azioneConsigliata: string;
+    rilevanzaArt47?: boolean;
+    letteraArt47?: Art47CodNavLettera;
+    rischioDecadenza?: LivelloRischioDecadenza;
+    motivazioneArt47?: string;
+    azioneIstruttoriaArt47?: string;
+    stato: StatoCriticita;
+    dataRilevazione: Date;
+    dataUltimoAggiornamento: Date;
+  }> = [
     {
       key: "crit-001",
       concessioneKey: "con-002",
@@ -727,6 +752,11 @@ async function main() {
       descrizione: "Morosita canone annuale con rate insolute.",
       riferimentoNormativo: "art. 18 l. 84/1994",
       azioneConsigliata: "Attivare recupero canoni e piano rientro formalizzato.",
+      rilevanzaArt47: true,
+      letteraArt47: "D_OMESSO_PAGAMENTO_CANONE",
+      rischioDecadenza: "ALTO",
+      motivazioneArt47: "Morosita reiterata su annualita correnti con residuo significativo non sanato.",
+      azioneIstruttoriaArt47: "Avviare contraddittorio e diffida con termine per regolarizzazione.",
       stato: "IN_GESTIONE",
       dataRilevazione: daysAgo(15),
       dataUltimoAggiornamento: daysAgo(2),
@@ -753,6 +783,11 @@ async function main() {
       descrizione: "Occupazione difforme rispetto alla planimetria assentita.",
       riferimentoNormativo: "art. 54 cod. nav.",
       azioneConsigliata: "Rilievo planimetrico aggiornato e ordine di ripristino.",
+      rilevanzaArt47: true,
+      letteraArt47: "B_NON_USO_O_CATTIVO_USO",
+      rischioDecadenza: "MEDIO",
+      motivazioneArt47: "Difformita planimetrica persistente da verificare rispetto al titolo assentito.",
+      azioneIstruttoriaArt47: "Disporre sopralluogo con riscontro metrico e verbalizzazione.",
       stato: "IN_GESTIONE",
       dataRilevazione: daysAgo(22),
       dataUltimoAggiornamento: daysAgo(6),
@@ -779,6 +814,11 @@ async function main() {
       descrizione: "Possibile decadenza ex art. 47 cod. nav. per reiterate inadempienze.",
       riferimentoNormativo: "art. 47 cod. nav.",
       azioneConsigliata: "Valutare avvio procedimento di decadenza.",
+      rilevanzaArt47: true,
+      letteraArt47: "F_INADEMPIMENTO_OBBLIGHI",
+      rischioDecadenza: "CRITICO",
+      motivazioneArt47: "Pluralita di inadempimenti gravi e reiterati con impatto sul rapporto concessorio.",
+      azioneIstruttoriaArt47: "Predisporre relazione istruttoria rafforzata per valutazione decadenza.",
       stato: "IN_GESTIONE",
       dataRilevazione: daysAgo(40),
       dataUltimoAggiornamento: daysAgo(3),
@@ -818,6 +858,11 @@ async function main() {
       descrizione: "Documentazione periodica mancante per due semestri.",
       riferimentoNormativo: "art. 18 l. 84/1994",
       azioneConsigliata: "Richiedere deposito relazione tecnica aggiornata.",
+      rilevanzaArt47: true,
+      letteraArt47: "F_INADEMPIMENTO_OBBLIGHI",
+      rischioDecadenza: "MEDIO",
+      motivazioneArt47: "Inadempimento documentale protratto oltre i termini assegnati dall ufficio.",
+      azioneIstruttoriaArt47: "Inviare diffida formale con termine perentorio e verifica adempimento.",
       stato: "IN_GESTIONE",
       dataRilevazione: daysAgo(55),
       dataUltimoAggiornamento: daysAgo(9),
@@ -848,7 +893,7 @@ async function main() {
       dataRilevazione: daysAgo(11),
       dataUltimoAggiornamento: daysAgo(2),
     },
-  ] as const;
+  ];
 
   const criticitaByKey: Record<string, string> = {};
   for (const item of criticitaRows) {
@@ -861,6 +906,11 @@ async function main() {
         descrizione: item.descrizione,
         riferimentoNormativo: item.riferimentoNormativo,
         azioneConsigliata: item.azioneConsigliata,
+        rilevanzaArt47: item.rilevanzaArt47 ?? false,
+        letteraArt47: item.letteraArt47 ?? null,
+        rischioDecadenza: item.rischioDecadenza ?? null,
+        motivazioneArt47: item.motivazioneArt47 ?? null,
+        azioneIstruttoriaArt47: item.azioneIstruttoriaArt47 ?? null,
         stato: item.stato,
         dataRilevazione: item.dataRilevazione,
         dataUltimoAggiornamento: item.dataUltimoAggiornamento,

@@ -28,11 +28,25 @@ export const CRITICITA_FONTE_VALUES = [
   "ALERT_AUTOMATICO",
   "ALTRO",
 ] as const;
+export const CRITICITA_ART47_LETTERA_VALUES = [
+  "A_MANCATA_ESECUZIONE_OPERE",
+  "B_NON_USO_O_CATTIVO_USO",
+  "C_MUTAMENTO_SCOPO_NON_AUTORIZZATO",
+  "D_OMESSO_PAGAMENTO_CANONE",
+  "E_SUBINGRESSO_ABUSIVO",
+  "F_INADEMPIMENTO_OBBLIGHI",
+  "ALTRO_PROFILO_ISTRUTTORIO",
+] as const;
+export const CRITICITA_RISCHIO_DECADENZA_VALUES = ["BASSO", "MEDIO", "ALTO", "CRITICO"] as const;
+export const CRITICITA_RILEVANZA_ART47_VALUES = ["TUTTE", "SI", "NO"] as const;
 
 type CriticitaTipologiaValue = (typeof CRITICITA_TIPOLOGIA_VALUES)[number];
 type CriticitaGravitaValue = (typeof CRITICITA_GRAVITA_VALUES)[number];
 type CriticitaStatoValue = (typeof CRITICITA_STATO_VALUES)[number];
 type CriticitaFonteValue = (typeof CRITICITA_FONTE_VALUES)[number];
+type CriticitaArt47LetteraValue = (typeof CRITICITA_ART47_LETTERA_VALUES)[number];
+type CriticitaRischioDecadenzaValue = (typeof CRITICITA_RISCHIO_DECADENZA_VALUES)[number];
+type CriticitaRilevanzaArt47Value = (typeof CRITICITA_RILEVANZA_ART47_VALUES)[number];
 
 export interface GetCriticitaListParams {
   search?: string;
@@ -40,6 +54,9 @@ export interface GetCriticitaListParams {
   gravita?: CriticitaGravitaValue;
   stato?: CriticitaStatoValue;
   fonte?: CriticitaFonteValue;
+  rilevanzaArt47?: CriticitaRilevanzaArt47Value;
+  letteraArt47?: CriticitaArt47LetteraValue;
+  rischioDecadenza?: CriticitaRischioDecadenzaValue;
   concessioneId?: string;
 }
 
@@ -51,6 +68,11 @@ export interface CriticitaListItem {
   descrizione: string;
   riferimentoNormativo: string | null;
   azioneConsigliata: string | null;
+  rilevanzaArt47: boolean;
+  letteraArt47: string | null;
+  rischioDecadenza: string | null;
+  motivazioneArt47: string | null;
+  azioneIstruttoriaArt47: string | null;
   stato: string;
   dataRilevazione: Date;
   concessione: {
@@ -87,6 +109,11 @@ export interface CriticitaDetail {
   descrizione: string;
   riferimentoNormativo: string | null;
   azioneConsigliata: string | null;
+  rilevanzaArt47: boolean;
+  letteraArt47: string | null;
+  rischioDecadenza: string | null;
+  motivazioneArt47: string | null;
+  azioneIstruttoriaArt47: string | null;
   stato: string;
   dataRilevazione: Date;
   concessione: {
@@ -156,6 +183,9 @@ export interface CriticitaFiltersData {
   gravita: Array<{ value: CriticitaGravitaValue; label: string }>;
   stati: Array<{ value: CriticitaStatoValue; label: string }>;
   fonti: Array<{ value: CriticitaFonteValue; label: string }>;
+  rilevanzaArt47: Array<{ value: CriticitaRilevanzaArt47Value; label: string }>;
+  lettereArt47: Array<{ value: CriticitaArt47LetteraValue; label: string }>;
+  rischioDecadenza: Array<{ value: CriticitaRischioDecadenzaValue; label: string }>;
 }
 
 export interface CriticitaIstruttoria {
@@ -219,6 +249,13 @@ export async function getCriticitaList(
     ...(params.gravita ? { gravita: params.gravita } : {}),
     ...(params.stato ? { stato: params.stato } : {}),
     ...(params.fonte ? { fonte: params.fonte } : {}),
+    ...(params.rilevanzaArt47 === "SI"
+      ? { rilevanzaArt47: true }
+      : params.rilevanzaArt47 === "NO"
+        ? { rilevanzaArt47: false }
+        : {}),
+    ...(params.letteraArt47 ? { letteraArt47: params.letteraArt47 } : {}),
+    ...(params.rischioDecadenza ? { rischioDecadenza: params.rischioDecadenza } : {}),
     ...(params.concessioneId ? { concessioneId: params.concessioneId } : {}),
   };
 
@@ -233,6 +270,11 @@ export async function getCriticitaList(
         descrizione: true,
         riferimentoNormativo: true,
         azioneConsigliata: true,
+        rilevanzaArt47: true,
+        letteraArt47: true,
+        rischioDecadenza: true,
+        motivazioneArt47: true,
+        azioneIstruttoriaArt47: true,
         stato: true,
         dataRilevazione: true,
         concessione: {
@@ -276,6 +318,11 @@ export async function getCriticitaList(
       descrizione: item.descrizione,
       riferimentoNormativo: item.riferimentoNormativo,
       azioneConsigliata: item.azioneConsigliata,
+      rilevanzaArt47: item.rilevanzaArt47,
+      letteraArt47: item.letteraArt47,
+      rischioDecadenza: item.rischioDecadenza,
+      motivazioneArt47: item.motivazioneArt47,
+      azioneIstruttoriaArt47: item.azioneIstruttoriaArt47,
       stato: item.stato,
       dataRilevazione: item.dataRilevazione,
       concessione: {
@@ -365,6 +412,11 @@ export async function getCriticitaDetail(id: string): Promise<CriticitaDetail | 
     descrizione: criticita.descrizione,
     riferimentoNormativo: criticita.riferimentoNormativo,
     azioneConsigliata: criticita.azioneConsigliata,
+    rilevanzaArt47: criticita.rilevanzaArt47,
+    letteraArt47: criticita.letteraArt47,
+    rischioDecadenza: criticita.rischioDecadenza,
+    motivazioneArt47: criticita.motivazioneArt47,
+    azioneIstruttoriaArt47: criticita.azioneIstruttoriaArt47,
     stato: criticita.stato,
     dataRilevazione: criticita.dataRilevazione,
     concessione: {
@@ -454,6 +506,15 @@ export async function getCriticitaFilters(): Promise<CriticitaFiltersData> {
     gravita: CRITICITA_GRAVITA_VALUES.map((value) => ({ value, label: formatEnumLabel(value) })),
     stati: CRITICITA_STATO_VALUES.map((value) => ({ value, label: formatEnumLabel(value) })),
     fonti: CRITICITA_FONTE_VALUES.map((value) => ({ value, label: formatEnumLabel(value) })),
+    rilevanzaArt47: CRITICITA_RILEVANZA_ART47_VALUES.map((value) => ({
+      value,
+      label: value === "SI" ? "Solo Art. 47" : value === "NO" ? "Solo non Art. 47" : "Tutte",
+    })),
+    lettereArt47: CRITICITA_ART47_LETTERA_VALUES.map((value) => ({ value, label: formatEnumLabel(value) })),
+    rischioDecadenza: CRITICITA_RISCHIO_DECADENZA_VALUES.map((value) => ({
+      value,
+      label: formatEnumLabel(value),
+    })),
   };
 }
 

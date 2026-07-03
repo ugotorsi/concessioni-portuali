@@ -33,6 +33,11 @@ export type CriticitaMinAggregateOutputType = {
   descrizione: string | null
   riferimentoNormativo: string | null
   azioneConsigliata: string | null
+  rilevanzaArt47: boolean | null
+  letteraArt47: $Enums.Art47CodNavLettera | null
+  rischioDecadenza: $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47: string | null
+  azioneIstruttoriaArt47: string | null
   stato: $Enums.StatoCriticita | null
   dataRilevazione: Date | null
   dataUltimoAggiornamento: Date | null
@@ -49,6 +54,11 @@ export type CriticitaMaxAggregateOutputType = {
   descrizione: string | null
   riferimentoNormativo: string | null
   azioneConsigliata: string | null
+  rilevanzaArt47: boolean | null
+  letteraArt47: $Enums.Art47CodNavLettera | null
+  rischioDecadenza: $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47: string | null
+  azioneIstruttoriaArt47: string | null
   stato: $Enums.StatoCriticita | null
   dataRilevazione: Date | null
   dataUltimoAggiornamento: Date | null
@@ -65,6 +75,11 @@ export type CriticitaCountAggregateOutputType = {
   descrizione: number
   riferimentoNormativo: number
   azioneConsigliata: number
+  rilevanzaArt47: number
+  letteraArt47: number
+  rischioDecadenza: number
+  motivazioneArt47: number
+  azioneIstruttoriaArt47: number
   stato: number
   dataRilevazione: number
   dataUltimoAggiornamento: number
@@ -83,6 +98,11 @@ export type CriticitaMinAggregateInputType = {
   descrizione?: true
   riferimentoNormativo?: true
   azioneConsigliata?: true
+  rilevanzaArt47?: true
+  letteraArt47?: true
+  rischioDecadenza?: true
+  motivazioneArt47?: true
+  azioneIstruttoriaArt47?: true
   stato?: true
   dataRilevazione?: true
   dataUltimoAggiornamento?: true
@@ -99,6 +119,11 @@ export type CriticitaMaxAggregateInputType = {
   descrizione?: true
   riferimentoNormativo?: true
   azioneConsigliata?: true
+  rilevanzaArt47?: true
+  letteraArt47?: true
+  rischioDecadenza?: true
+  motivazioneArt47?: true
+  azioneIstruttoriaArt47?: true
   stato?: true
   dataRilevazione?: true
   dataUltimoAggiornamento?: true
@@ -115,6 +140,11 @@ export type CriticitaCountAggregateInputType = {
   descrizione?: true
   riferimentoNormativo?: true
   azioneConsigliata?: true
+  rilevanzaArt47?: true
+  letteraArt47?: true
+  rischioDecadenza?: true
+  motivazioneArt47?: true
+  azioneIstruttoriaArt47?: true
   stato?: true
   dataRilevazione?: true
   dataUltimoAggiornamento?: true
@@ -204,6 +234,11 @@ export type CriticitaGroupByOutputType = {
   descrizione: string
   riferimentoNormativo: string | null
   azioneConsigliata: string | null
+  rilevanzaArt47: boolean
+  letteraArt47: $Enums.Art47CodNavLettera | null
+  rischioDecadenza: $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47: string | null
+  azioneIstruttoriaArt47: string | null
   stato: $Enums.StatoCriticita
   dataRilevazione: Date
   dataUltimoAggiornamento: Date | null
@@ -241,6 +276,11 @@ export type CriticitaWhereInput = {
   descrizione?: Prisma.StringFilter<"Criticita"> | string
   riferimentoNormativo?: Prisma.StringNullableFilter<"Criticita"> | string | null
   azioneConsigliata?: Prisma.StringNullableFilter<"Criticita"> | string | null
+  rilevanzaArt47?: Prisma.BoolFilter<"Criticita"> | boolean
+  letteraArt47?: Prisma.EnumArt47CodNavLetteraNullableFilter<"Criticita"> | $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: Prisma.EnumLivelloRischioDecadenzaNullableFilter<"Criticita"> | $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: Prisma.StringNullableFilter<"Criticita"> | string | null
+  azioneIstruttoriaArt47?: Prisma.StringNullableFilter<"Criticita"> | string | null
   stato?: Prisma.EnumStatoCriticitaFilter<"Criticita"> | $Enums.StatoCriticita
   dataRilevazione?: Prisma.DateTimeFilter<"Criticita"> | Date | string
   dataUltimoAggiornamento?: Prisma.DateTimeNullableFilter<"Criticita"> | Date | string | null
@@ -260,6 +300,11 @@ export type CriticitaOrderByWithRelationInput = {
   descrizione?: Prisma.SortOrder
   riferimentoNormativo?: Prisma.SortOrderInput | Prisma.SortOrder
   azioneConsigliata?: Prisma.SortOrderInput | Prisma.SortOrder
+  rilevanzaArt47?: Prisma.SortOrder
+  letteraArt47?: Prisma.SortOrderInput | Prisma.SortOrder
+  rischioDecadenza?: Prisma.SortOrderInput | Prisma.SortOrder
+  motivazioneArt47?: Prisma.SortOrderInput | Prisma.SortOrder
+  azioneIstruttoriaArt47?: Prisma.SortOrderInput | Prisma.SortOrder
   stato?: Prisma.SortOrder
   dataRilevazione?: Prisma.SortOrder
   dataUltimoAggiornamento?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -282,6 +327,11 @@ export type CriticitaWhereUniqueInput = Prisma.AtLeast<{
   descrizione?: Prisma.StringFilter<"Criticita"> | string
   riferimentoNormativo?: Prisma.StringNullableFilter<"Criticita"> | string | null
   azioneConsigliata?: Prisma.StringNullableFilter<"Criticita"> | string | null
+  rilevanzaArt47?: Prisma.BoolFilter<"Criticita"> | boolean
+  letteraArt47?: Prisma.EnumArt47CodNavLetteraNullableFilter<"Criticita"> | $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: Prisma.EnumLivelloRischioDecadenzaNullableFilter<"Criticita"> | $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: Prisma.StringNullableFilter<"Criticita"> | string | null
+  azioneIstruttoriaArt47?: Prisma.StringNullableFilter<"Criticita"> | string | null
   stato?: Prisma.EnumStatoCriticitaFilter<"Criticita"> | $Enums.StatoCriticita
   dataRilevazione?: Prisma.DateTimeFilter<"Criticita"> | Date | string
   dataUltimoAggiornamento?: Prisma.DateTimeNullableFilter<"Criticita"> | Date | string | null
@@ -301,6 +351,11 @@ export type CriticitaOrderByWithAggregationInput = {
   descrizione?: Prisma.SortOrder
   riferimentoNormativo?: Prisma.SortOrderInput | Prisma.SortOrder
   azioneConsigliata?: Prisma.SortOrderInput | Prisma.SortOrder
+  rilevanzaArt47?: Prisma.SortOrder
+  letteraArt47?: Prisma.SortOrderInput | Prisma.SortOrder
+  rischioDecadenza?: Prisma.SortOrderInput | Prisma.SortOrder
+  motivazioneArt47?: Prisma.SortOrderInput | Prisma.SortOrder
+  azioneIstruttoriaArt47?: Prisma.SortOrderInput | Prisma.SortOrder
   stato?: Prisma.SortOrder
   dataRilevazione?: Prisma.SortOrder
   dataUltimoAggiornamento?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -323,6 +378,11 @@ export type CriticitaScalarWhereWithAggregatesInput = {
   descrizione?: Prisma.StringWithAggregatesFilter<"Criticita"> | string
   riferimentoNormativo?: Prisma.StringNullableWithAggregatesFilter<"Criticita"> | string | null
   azioneConsigliata?: Prisma.StringNullableWithAggregatesFilter<"Criticita"> | string | null
+  rilevanzaArt47?: Prisma.BoolWithAggregatesFilter<"Criticita"> | boolean
+  letteraArt47?: Prisma.EnumArt47CodNavLetteraNullableWithAggregatesFilter<"Criticita"> | $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: Prisma.EnumLivelloRischioDecadenzaNullableWithAggregatesFilter<"Criticita"> | $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: Prisma.StringNullableWithAggregatesFilter<"Criticita"> | string | null
+  azioneIstruttoriaArt47?: Prisma.StringNullableWithAggregatesFilter<"Criticita"> | string | null
   stato?: Prisma.EnumStatoCriticitaWithAggregatesFilter<"Criticita"> | $Enums.StatoCriticita
   dataRilevazione?: Prisma.DateTimeWithAggregatesFilter<"Criticita"> | Date | string
   dataUltimoAggiornamento?: Prisma.DateTimeNullableWithAggregatesFilter<"Criticita"> | Date | string | null
@@ -338,6 +398,11 @@ export type CriticitaCreateInput = {
   descrizione: string
   riferimentoNormativo?: string | null
   azioneConsigliata?: string | null
+  rilevanzaArt47?: boolean
+  letteraArt47?: $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: string | null
+  azioneIstruttoriaArt47?: string | null
   stato: $Enums.StatoCriticita
   dataRilevazione?: Date | string
   dataUltimoAggiornamento?: Date | string | null
@@ -357,6 +422,11 @@ export type CriticitaUncheckedCreateInput = {
   descrizione: string
   riferimentoNormativo?: string | null
   azioneConsigliata?: string | null
+  rilevanzaArt47?: boolean
+  letteraArt47?: $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: string | null
+  azioneIstruttoriaArt47?: string | null
   stato: $Enums.StatoCriticita
   dataRilevazione?: Date | string
   dataUltimoAggiornamento?: Date | string | null
@@ -374,6 +444,11 @@ export type CriticitaUpdateInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  azioneIstruttoriaArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoCriticitaFieldUpdateOperationsInput | $Enums.StatoCriticita
   dataRilevazione?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataUltimoAggiornamento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -393,6 +468,11 @@ export type CriticitaUncheckedUpdateInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  azioneIstruttoriaArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoCriticitaFieldUpdateOperationsInput | $Enums.StatoCriticita
   dataRilevazione?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataUltimoAggiornamento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -411,6 +491,11 @@ export type CriticitaCreateManyInput = {
   descrizione: string
   riferimentoNormativo?: string | null
   azioneConsigliata?: string | null
+  rilevanzaArt47?: boolean
+  letteraArt47?: $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: string | null
+  azioneIstruttoriaArt47?: string | null
   stato: $Enums.StatoCriticita
   dataRilevazione?: Date | string
   dataUltimoAggiornamento?: Date | string | null
@@ -426,6 +511,11 @@ export type CriticitaUpdateManyMutationInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  azioneIstruttoriaArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoCriticitaFieldUpdateOperationsInput | $Enums.StatoCriticita
   dataRilevazione?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataUltimoAggiornamento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -442,6 +532,11 @@ export type CriticitaUncheckedUpdateManyInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  azioneIstruttoriaArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoCriticitaFieldUpdateOperationsInput | $Enums.StatoCriticita
   dataRilevazione?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataUltimoAggiornamento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -468,6 +563,11 @@ export type CriticitaCountOrderByAggregateInput = {
   descrizione?: Prisma.SortOrder
   riferimentoNormativo?: Prisma.SortOrder
   azioneConsigliata?: Prisma.SortOrder
+  rilevanzaArt47?: Prisma.SortOrder
+  letteraArt47?: Prisma.SortOrder
+  rischioDecadenza?: Prisma.SortOrder
+  motivazioneArt47?: Prisma.SortOrder
+  azioneIstruttoriaArt47?: Prisma.SortOrder
   stato?: Prisma.SortOrder
   dataRilevazione?: Prisma.SortOrder
   dataUltimoAggiornamento?: Prisma.SortOrder
@@ -484,6 +584,11 @@ export type CriticitaMaxOrderByAggregateInput = {
   descrizione?: Prisma.SortOrder
   riferimentoNormativo?: Prisma.SortOrder
   azioneConsigliata?: Prisma.SortOrder
+  rilevanzaArt47?: Prisma.SortOrder
+  letteraArt47?: Prisma.SortOrder
+  rischioDecadenza?: Prisma.SortOrder
+  motivazioneArt47?: Prisma.SortOrder
+  azioneIstruttoriaArt47?: Prisma.SortOrder
   stato?: Prisma.SortOrder
   dataRilevazione?: Prisma.SortOrder
   dataUltimoAggiornamento?: Prisma.SortOrder
@@ -500,6 +605,11 @@ export type CriticitaMinOrderByAggregateInput = {
   descrizione?: Prisma.SortOrder
   riferimentoNormativo?: Prisma.SortOrder
   azioneConsigliata?: Prisma.SortOrder
+  rilevanzaArt47?: Prisma.SortOrder
+  letteraArt47?: Prisma.SortOrder
+  rischioDecadenza?: Prisma.SortOrder
+  motivazioneArt47?: Prisma.SortOrder
+  azioneIstruttoriaArt47?: Prisma.SortOrder
   stato?: Prisma.SortOrder
   dataRilevazione?: Prisma.SortOrder
   dataUltimoAggiornamento?: Prisma.SortOrder
@@ -566,6 +676,14 @@ export type EnumFonteCriticitaFieldUpdateOperationsInput = {
   set?: $Enums.FonteCriticita
 }
 
+export type NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput = {
+  set?: $Enums.Art47CodNavLettera | null
+}
+
+export type NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput = {
+  set?: $Enums.LivelloRischioDecadenza | null
+}
+
 export type EnumStatoCriticitaFieldUpdateOperationsInput = {
   set?: $Enums.StatoCriticita
 }
@@ -610,6 +728,11 @@ export type CriticitaCreateWithoutConcessioneInput = {
   descrizione: string
   riferimentoNormativo?: string | null
   azioneConsigliata?: string | null
+  rilevanzaArt47?: boolean
+  letteraArt47?: $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: string | null
+  azioneIstruttoriaArt47?: string | null
   stato: $Enums.StatoCriticita
   dataRilevazione?: Date | string
   dataUltimoAggiornamento?: Date | string | null
@@ -627,6 +750,11 @@ export type CriticitaUncheckedCreateWithoutConcessioneInput = {
   descrizione: string
   riferimentoNormativo?: string | null
   azioneConsigliata?: string | null
+  rilevanzaArt47?: boolean
+  letteraArt47?: $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: string | null
+  azioneIstruttoriaArt47?: string | null
   stato: $Enums.StatoCriticita
   dataRilevazione?: Date | string
   dataUltimoAggiornamento?: Date | string | null
@@ -674,6 +802,11 @@ export type CriticitaScalarWhereInput = {
   descrizione?: Prisma.StringFilter<"Criticita"> | string
   riferimentoNormativo?: Prisma.StringNullableFilter<"Criticita"> | string | null
   azioneConsigliata?: Prisma.StringNullableFilter<"Criticita"> | string | null
+  rilevanzaArt47?: Prisma.BoolFilter<"Criticita"> | boolean
+  letteraArt47?: Prisma.EnumArt47CodNavLetteraNullableFilter<"Criticita"> | $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: Prisma.EnumLivelloRischioDecadenzaNullableFilter<"Criticita"> | $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: Prisma.StringNullableFilter<"Criticita"> | string | null
+  azioneIstruttoriaArt47?: Prisma.StringNullableFilter<"Criticita"> | string | null
   stato?: Prisma.EnumStatoCriticitaFilter<"Criticita"> | $Enums.StatoCriticita
   dataRilevazione?: Prisma.DateTimeFilter<"Criticita"> | Date | string
   dataUltimoAggiornamento?: Prisma.DateTimeNullableFilter<"Criticita"> | Date | string | null
@@ -689,6 +822,11 @@ export type CriticitaCreateWithoutProcedimentiInput = {
   descrizione: string
   riferimentoNormativo?: string | null
   azioneConsigliata?: string | null
+  rilevanzaArt47?: boolean
+  letteraArt47?: $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: string | null
+  azioneIstruttoriaArt47?: string | null
   stato: $Enums.StatoCriticita
   dataRilevazione?: Date | string
   dataUltimoAggiornamento?: Date | string | null
@@ -707,6 +845,11 @@ export type CriticitaUncheckedCreateWithoutProcedimentiInput = {
   descrizione: string
   riferimentoNormativo?: string | null
   azioneConsigliata?: string | null
+  rilevanzaArt47?: boolean
+  letteraArt47?: $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: string | null
+  azioneIstruttoriaArt47?: string | null
   stato: $Enums.StatoCriticita
   dataRilevazione?: Date | string
   dataUltimoAggiornamento?: Date | string | null
@@ -739,6 +882,11 @@ export type CriticitaUpdateWithoutProcedimentiInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  azioneIstruttoriaArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoCriticitaFieldUpdateOperationsInput | $Enums.StatoCriticita
   dataRilevazione?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataUltimoAggiornamento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -757,6 +905,11 @@ export type CriticitaUncheckedUpdateWithoutProcedimentiInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  azioneIstruttoriaArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoCriticitaFieldUpdateOperationsInput | $Enums.StatoCriticita
   dataRilevazione?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataUltimoAggiornamento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -773,6 +926,11 @@ export type CriticitaCreateWithoutNormaImpattiInput = {
   descrizione: string
   riferimentoNormativo?: string | null
   azioneConsigliata?: string | null
+  rilevanzaArt47?: boolean
+  letteraArt47?: $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: string | null
+  azioneIstruttoriaArt47?: string | null
   stato: $Enums.StatoCriticita
   dataRilevazione?: Date | string
   dataUltimoAggiornamento?: Date | string | null
@@ -791,6 +949,11 @@ export type CriticitaUncheckedCreateWithoutNormaImpattiInput = {
   descrizione: string
   riferimentoNormativo?: string | null
   azioneConsigliata?: string | null
+  rilevanzaArt47?: boolean
+  letteraArt47?: $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: string | null
+  azioneIstruttoriaArt47?: string | null
   stato: $Enums.StatoCriticita
   dataRilevazione?: Date | string
   dataUltimoAggiornamento?: Date | string | null
@@ -823,6 +986,11 @@ export type CriticitaUpdateWithoutNormaImpattiInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  azioneIstruttoriaArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoCriticitaFieldUpdateOperationsInput | $Enums.StatoCriticita
   dataRilevazione?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataUltimoAggiornamento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -841,6 +1009,11 @@ export type CriticitaUncheckedUpdateWithoutNormaImpattiInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  azioneIstruttoriaArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoCriticitaFieldUpdateOperationsInput | $Enums.StatoCriticita
   dataRilevazione?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataUltimoAggiornamento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -857,6 +1030,11 @@ export type CriticitaCreateManyConcessioneInput = {
   descrizione: string
   riferimentoNormativo?: string | null
   azioneConsigliata?: string | null
+  rilevanzaArt47?: boolean
+  letteraArt47?: $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: string | null
+  azioneIstruttoriaArt47?: string | null
   stato: $Enums.StatoCriticita
   dataRilevazione?: Date | string
   dataUltimoAggiornamento?: Date | string | null
@@ -872,6 +1050,11 @@ export type CriticitaUpdateWithoutConcessioneInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  azioneIstruttoriaArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoCriticitaFieldUpdateOperationsInput | $Enums.StatoCriticita
   dataRilevazione?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataUltimoAggiornamento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -889,6 +1072,11 @@ export type CriticitaUncheckedUpdateWithoutConcessioneInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  azioneIstruttoriaArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoCriticitaFieldUpdateOperationsInput | $Enums.StatoCriticita
   dataRilevazione?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataUltimoAggiornamento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -906,6 +1094,11 @@ export type CriticitaUncheckedUpdateManyWithoutConcessioneInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  azioneIstruttoriaArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoCriticitaFieldUpdateOperationsInput | $Enums.StatoCriticita
   dataRilevazione?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataUltimoAggiornamento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -962,6 +1155,11 @@ export type CriticitaSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   descrizione?: boolean
   riferimentoNormativo?: boolean
   azioneConsigliata?: boolean
+  rilevanzaArt47?: boolean
+  letteraArt47?: boolean
+  rischioDecadenza?: boolean
+  motivazioneArt47?: boolean
+  azioneIstruttoriaArt47?: boolean
   stato?: boolean
   dataRilevazione?: boolean
   dataUltimoAggiornamento?: boolean
@@ -982,6 +1180,11 @@ export type CriticitaSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   descrizione?: boolean
   riferimentoNormativo?: boolean
   azioneConsigliata?: boolean
+  rilevanzaArt47?: boolean
+  letteraArt47?: boolean
+  rischioDecadenza?: boolean
+  motivazioneArt47?: boolean
+  azioneIstruttoriaArt47?: boolean
   stato?: boolean
   dataRilevazione?: boolean
   dataUltimoAggiornamento?: boolean
@@ -999,6 +1202,11 @@ export type CriticitaSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   descrizione?: boolean
   riferimentoNormativo?: boolean
   azioneConsigliata?: boolean
+  rilevanzaArt47?: boolean
+  letteraArt47?: boolean
+  rischioDecadenza?: boolean
+  motivazioneArt47?: boolean
+  azioneIstruttoriaArt47?: boolean
   stato?: boolean
   dataRilevazione?: boolean
   dataUltimoAggiornamento?: boolean
@@ -1016,6 +1224,11 @@ export type CriticitaSelectScalar = {
   descrizione?: boolean
   riferimentoNormativo?: boolean
   azioneConsigliata?: boolean
+  rilevanzaArt47?: boolean
+  letteraArt47?: boolean
+  rischioDecadenza?: boolean
+  motivazioneArt47?: boolean
+  azioneIstruttoriaArt47?: boolean
   stato?: boolean
   dataRilevazione?: boolean
   dataUltimoAggiornamento?: boolean
@@ -1023,7 +1236,7 @@ export type CriticitaSelectScalar = {
   updatedAt?: boolean
 }
 
-export type CriticitaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "concessioneId" | "tipologia" | "gravita" | "fonte" | "descrizione" | "riferimentoNormativo" | "azioneConsigliata" | "stato" | "dataRilevazione" | "dataUltimoAggiornamento" | "createdAt" | "updatedAt", ExtArgs["result"]["criticita"]>
+export type CriticitaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "concessioneId" | "tipologia" | "gravita" | "fonte" | "descrizione" | "riferimentoNormativo" | "azioneConsigliata" | "rilevanzaArt47" | "letteraArt47" | "rischioDecadenza" | "motivazioneArt47" | "azioneIstruttoriaArt47" | "stato" | "dataRilevazione" | "dataUltimoAggiornamento" | "createdAt" | "updatedAt", ExtArgs["result"]["criticita"]>
 export type CriticitaInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   concessione?: boolean | Prisma.ConcessioneDefaultArgs<ExtArgs>
   procedimenti?: boolean | Prisma.Criticita$procedimentiArgs<ExtArgs>
@@ -1053,6 +1266,11 @@ export type $CriticitaPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     descrizione: string
     riferimentoNormativo: string | null
     azioneConsigliata: string | null
+    rilevanzaArt47: boolean
+    letteraArt47: $Enums.Art47CodNavLettera | null
+    rischioDecadenza: $Enums.LivelloRischioDecadenza | null
+    motivazioneArt47: string | null
+    azioneIstruttoriaArt47: string | null
     stato: $Enums.StatoCriticita
     dataRilevazione: Date
     dataUltimoAggiornamento: Date | null
@@ -1492,6 +1710,11 @@ export interface CriticitaFieldRefs {
   readonly descrizione: Prisma.FieldRef<"Criticita", 'String'>
   readonly riferimentoNormativo: Prisma.FieldRef<"Criticita", 'String'>
   readonly azioneConsigliata: Prisma.FieldRef<"Criticita", 'String'>
+  readonly rilevanzaArt47: Prisma.FieldRef<"Criticita", 'Boolean'>
+  readonly letteraArt47: Prisma.FieldRef<"Criticita", 'Art47CodNavLettera'>
+  readonly rischioDecadenza: Prisma.FieldRef<"Criticita", 'LivelloRischioDecadenza'>
+  readonly motivazioneArt47: Prisma.FieldRef<"Criticita", 'String'>
+  readonly azioneIstruttoriaArt47: Prisma.FieldRef<"Criticita", 'String'>
   readonly stato: Prisma.FieldRef<"Criticita", 'StatoCriticita'>
   readonly dataRilevazione: Prisma.FieldRef<"Criticita", 'DateTime'>
   readonly dataUltimoAggiornamento: Prisma.FieldRef<"Criticita", 'DateTime'>

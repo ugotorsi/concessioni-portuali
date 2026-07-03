@@ -126,6 +126,77 @@ export default async function NuovaCriticitaPage({ searchParams }: NuovaCriticit
                 <Input id="noteIstruttorie" name="noteIstruttorie" placeholder="Indicazioni operative" />
               </div>
 
+              <div className="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Rilevanza ex art. 47 Cod. Nav.</p>
+                  <p className="text-xs text-slate-600">
+                    Supporto istruttorio interno: la qualificazione finale resta in capo all Autorita competente.
+                  </p>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-1">
+                    <label htmlFor="rilevanzaArt47" className="text-sm font-medium text-slate-700">
+                      Rilevanza art. 47
+                    </label>
+                    <Select id="rilevanzaArt47" name="rilevanzaArt47" defaultValue="false" required>
+                      <option value="false">Non rilevante</option>
+                      <option value="true">Rilevante</option>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label htmlFor="rischioDecadenza" className="text-sm font-medium text-slate-700">
+                      Livello rischio decadenza
+                    </label>
+                    <Select id="rischioDecadenza" name="rischioDecadenza" defaultValue="">
+                      <option value="">Seleziona rischio</option>
+                      {filtersData.rischioDecadenza.map((item) => (
+                        <option key={item.value} value={item.value}>
+                          {item.label}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1 md:col-span-2">
+                    <label htmlFor="letteraArt47" className="text-sm font-medium text-slate-700">
+                      Lettera art. 47
+                    </label>
+                    <Select id="letteraArt47" name="letteraArt47" defaultValue="">
+                      <option value="">Seleziona lettera</option>
+                      {filtersData.lettereArt47.map((item) => (
+                        <option key={item.value} value={item.value}>
+                          {item.label}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1 md:col-span-2">
+                    <label htmlFor="motivazioneArt47" className="text-sm font-medium text-slate-700">
+                      Motivazione art. 47
+                    </label>
+                    <Textarea
+                      id="motivazioneArt47"
+                      name="motivazioneArt47"
+                      placeholder="Motivazione istruttoria della rilevanza art. 47..."
+                    />
+                  </div>
+
+                  <div className="space-y-1 md:col-span-2">
+                    <label htmlFor="azioneIstruttoriaArt47" className="text-sm font-medium text-slate-700">
+                      Azione istruttoria art. 47
+                    </label>
+                    <Input
+                      id="azioneIstruttoriaArt47"
+                      name="azioneIstruttoriaArt47"
+                      placeholder="Indicare la prossima azione istruttoria"
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="flex flex-wrap gap-2">
                 <Button type="submit">Salva criticita</Button>
                 <Link

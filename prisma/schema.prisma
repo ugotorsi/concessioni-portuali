@@ -133,6 +133,23 @@ enum StatoCriticita {
   ARCHIVIATA
 }
 
+enum Art47CodNavLettera {
+  A_MANCATA_ESECUZIONE_OPERE
+  B_NON_USO_O_CATTIVO_USO
+  C_MUTAMENTO_SCOPO_NON_AUTORIZZATO
+  D_OMESSO_PAGAMENTO_CANONE
+  E_SUBINGRESSO_ABUSIVO
+  F_INADEMPIMENTO_OBBLIGHI
+  ALTRO_PROFILO_ISTRUTTORIO
+}
+
+enum LivelloRischioDecadenza {
+  BASSO
+  MEDIO
+  ALTO
+  CRITICO
+}
+
 enum TipologiaProcedimento {
   CHIARIMENTI
   DIFFIDA
@@ -352,6 +369,11 @@ model Criticita {
   descrizione             String
   riferimentoNormativo    String?
   azioneConsigliata       String?
+  rilevanzaArt47          Boolean            @default(false)
+  letteraArt47            Art47CodNavLettera?
+  rischioDecadenza        LivelloRischioDecadenza?
+  motivazioneArt47        String?
+  azioneIstruttoriaArt47  String?
   stato                   StatoCriticita
   dataRilevazione         DateTime           @default(now())
   dataUltimoAggiornamento DateTime?
@@ -366,6 +388,9 @@ model Criticita {
   @@index([stato])
   @@index([gravita])
   @@index([tipologia])
+  @@index([rilevanzaArt47])
+  @@index([letteraArt47])
+  @@index([rischioDecadenza])
   @@index([dataRilevazione])
   @@index([createdAt])
 }

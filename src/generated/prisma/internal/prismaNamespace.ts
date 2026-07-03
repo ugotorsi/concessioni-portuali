@@ -1663,6 +1663,11 @@ export const CriticitaScalarFieldEnum = {
   descrizione: 'descrizione',
   riferimentoNormativo: 'riferimentoNormativo',
   azioneConsigliata: 'azioneConsigliata',
+  rilevanzaArt47: 'rilevanzaArt47',
+  letteraArt47: 'letteraArt47',
+  rischioDecadenza: 'rischioDecadenza',
+  motivazioneArt47: 'motivazioneArt47',
+  azioneIstruttoriaArt47: 'azioneIstruttoriaArt47',
   stato: 'stato',
   dataRilevazione: 'dataRilevazione',
   dataUltimoAggiornamento: 'dataUltimoAggiornamento',
@@ -2104,6 +2109,34 @@ export type EnumFonteCriticitaFieldRefInput<$PrismaModel> = FieldRefInputType<$P
  * Reference to a field of type 'FonteCriticita[]'
  */
 export type ListEnumFonteCriticitaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FonteCriticita[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Art47CodNavLettera'
+ */
+export type EnumArt47CodNavLetteraFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Art47CodNavLettera'>
+    
+
+
+/**
+ * Reference to a field of type 'Art47CodNavLettera[]'
+ */
+export type ListEnumArt47CodNavLetteraFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Art47CodNavLettera[]'>
+    
+
+
+/**
+ * Reference to a field of type 'LivelloRischioDecadenza'
+ */
+export type EnumLivelloRischioDecadenzaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LivelloRischioDecadenza'>
+    
+
+
+/**
+ * Reference to a field of type 'LivelloRischioDecadenza[]'
+ */
+export type ListEnumLivelloRischioDecadenzaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LivelloRischioDecadenza[]'>
     
 
 

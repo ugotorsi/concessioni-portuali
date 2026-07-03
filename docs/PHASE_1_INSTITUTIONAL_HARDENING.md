@@ -48,6 +48,13 @@ Portare Concessioni Portuali da stato MVP avanzato a stato "institutional demo-r
   - filtro UI disponibile per lettera art.47;
   - presenza in export/report relativi alle criticita.
 
+Stato attuale (Issue #2 baseline implementata):
+- estensione modello `Criticita` con campi strutturati: `rilevanzaArt47`, `letteraArt47`, `rischioDecadenza`, `motivazioneArt47`, `azioneIstruttoriaArt47`;
+- validazione server-side in create/update criticita con regole condizionali quando `rilevanzaArt47=true`;
+- sezione UI dedicata in nuova/modifica/dettaglio criticita con disclaimer non-vincolante;
+- filtri lista criticita su rilevanza, lettera e rischio decadenza;
+- export CSV criticita esteso con colonne art.47.
+
 ### 3.3 PDF report lato server professionale
 - Obiettivo: elevare i PDF a formato istituzionale con sezioni standard, metadati e impaginazione robusta.
 - Motivo strategico: output formale difendibile in tavoli tecnici, contraddittorio e condivisione inter-ente.

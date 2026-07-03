@@ -15,9 +15,13 @@ import {
   TableRow,
 } from "@/components/ui/Table";
 import { formatDateIT } from "@/lib/utils";
+import { getArt47Label, getRischioDecadenzaBadgeVariant, getRischioDecadenzaLabel } from "@/lib/art47";
 import {
+  CRITICITA_ART47_LETTERA_VALUES,
   CRITICITA_FONTE_VALUES,
   CRITICITA_GRAVITA_VALUES,
+  CRITICITA_RILEVANZA_ART47_VALUES,
+  CRITICITA_RISCHIO_DECADENZA_VALUES,
   CRITICITA_STATO_VALUES,
   CRITICITA_TIPOLOGIA_VALUES,
   getCriticitaFilters,
@@ -73,6 +77,24 @@ export default async function CriticitaPage({ searchParams }: CriticitaPageProps
       const value = pickString(resolvedSearch.fonte);
       return value && CRITICITA_FONTE_VALUES.includes(value as (typeof CRITICITA_FONTE_VALUES)[number])
         ? (value as (typeof CRITICITA_FONTE_VALUES)[number])
+        : undefined;
+    })(),
+    rilevanzaArt47: (() => {
+      const value = pickString(resolvedSearch.rilevanzaArt47);
+      return value && CRITICITA_RILEVANZA_ART47_VALUES.includes(value as (typeof CRITICITA_RILEVANZA_ART47_VALUES)[number])
+        ? (value as (typeof CRITICITA_RILEVANZA_ART47_VALUES)[number])
+        : undefined;
+    })(),
+    letteraArt47: (() => {
+      const value = pickString(resolvedSearch.letteraArt47);
+      return value && CRITICITA_ART47_LETTERA_VALUES.includes(value as (typeof CRITICITA_ART47_LETTERA_VALUES)[number])
+        ? (value as (typeof CRITICITA_ART47_LETTERA_VALUES)[number])
+        : undefined;
+    })(),
+    rischioDecadenza: (() => {
+      const value = pickString(resolvedSearch.rischioDecadenza);
+      return value && CRITICITA_RISCHIO_DECADENZA_VALUES.includes(value as (typeof CRITICITA_RISCHIO_DECADENZA_VALUES)[number])
+        ? (value as (typeof CRITICITA_RISCHIO_DECADENZA_VALUES)[number])
         : undefined;
     })(),
     concessioneId: pickString(resolvedSearch.concessioneId),
@@ -194,6 +216,7 @@ export default async function CriticitaPage({ searchParams }: CriticitaPageProps
                   <TableHead>Concessionario</TableHead>
                   <TableHead>Descrizione</TableHead>
                   <TableHead>Riferimento normativo</TableHead>
+                  <TableHead>Art. 47</TableHead>
                   <TableHead>Stato</TableHead>
                   <TableHead>Procedimenti</TableHead>
                   <TableHead>Azioni</TableHead>
@@ -230,6 +253,19 @@ export default async function CriticitaPage({ searchParams }: CriticitaPageProps
                       <TableCell className="max-w-72 truncate">{item.descrizione}</TableCell>
                       <TableCell>{item.riferimentoNormativo ?? "-"}</TableCell>
                       <TableCell>
+                        {item.rilevanzaArt47 ? (
+                          <div className="space-y-1">
+                            <Badge variant="danger">Art. 47</Badge>
+                            <p className="text-xs text-slate-600">{getArt47Label(item.letteraArt47)}</p>
+                            <Badge variant={getRischioDecadenzaBadgeVariant(item.rischioDecadenza)}>
+                              {getRischioDecadenzaLabel(item.rischioDecadenza)}
+                            </Badge>
+                          </div>
+                        ) : (
+                          <Badge variant="default">Non rilevante</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
                         <StatoBadge value={item.stato} />
                       </TableCell>
                       <TableCell>
@@ -250,7 +286,7 @@ export default async function CriticitaPage({ searchParams }: CriticitaPageProps
                 })}
                 {listData.items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center text-slate-500">
+                    <TableCell colSpan={10} className="text-center text-slate-500">
                       Nessuna criticita trovata con i filtri correnti.
                     </TableCell>
                   </TableRow>

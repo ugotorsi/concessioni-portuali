@@ -9,7 +9,7 @@ interface CriticitaFiltersBarProps {
 
 export function CriticitaFiltersBar({ filtersData, current }: CriticitaFiltersBarProps) {
   return (
-    <form method="get" className="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 md:grid-cols-2 xl:grid-cols-6">
+    <form method="get" className="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 md:grid-cols-2 xl:grid-cols-8">
       <Input
         name="search"
         placeholder="Ricerca descrizione, norma, concessione"
@@ -62,7 +62,34 @@ export function CriticitaFiltersBar({ filtersData, current }: CriticitaFiltersBa
         ))}
       </Select>
 
-      <div className="flex items-center gap-2 md:col-span-2 xl:col-span-6">
+      <Select name="rilevanzaArt47" defaultValue={current.rilevanzaArt47 ?? ""}>
+        <option value="">Rilevanza art. 47 (tutte)</option>
+        {filtersData.rilevanzaArt47.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </Select>
+
+      <Select name="letteraArt47" defaultValue={current.letteraArt47 ?? ""}>
+        <option value="">Lettera art. 47 (tutte)</option>
+        {filtersData.lettereArt47.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </Select>
+
+      <Select name="rischioDecadenza" defaultValue={current.rischioDecadenza ?? ""}>
+        <option value="">Rischio decadenza (tutti)</option>
+        {filtersData.rischioDecadenza.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </Select>
+
+      <div className="flex items-center gap-2 md:col-span-2 xl:col-span-8">
         <button
           type="submit"
           className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white transition-colors hover:bg-slate-800"

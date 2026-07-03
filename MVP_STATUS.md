@@ -31,6 +31,8 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Pagina interna `/audit` riservata ad ADMIN
 - Baseline test automatizzati Vitest + Playwright (Issue #5)
 - Smoke E2E su auth/ruoli, security headers e accesso audit
+- Mapping strutturato art. 47 su Criticita (Issue #2)
+- Filtri/UI/export Criticita allineati al profilo art.47 e rischio decadenza
 - Export report CSV verificato
 - PDF report verificato su report esistente
 
