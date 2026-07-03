@@ -105,6 +105,7 @@ export function Sidebar({ role, roleLabel }: SidebarProps) {
           </Link>
           <Link
             href="/logout"
+            data-testid="logout-link"
             className="inline-flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-800 hover:text-white"
           >
             <DoorOpen className="h-4 w-4" aria-hidden="true" />

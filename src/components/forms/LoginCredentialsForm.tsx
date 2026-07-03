@@ -62,6 +62,7 @@ export function LoginCredentialsForm({ initialErrorMessage }: LoginCredentialsFo
         <input
           type="email"
           name="email"
+          data-testid="login-email"
           required
           autoComplete="username"
           className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900"
@@ -73,6 +74,7 @@ export function LoginCredentialsForm({ initialErrorMessage }: LoginCredentialsFo
         <input
           type="password"
           name="password"
+          data-testid="login-password"
           required
           autoComplete="current-password"
           className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900"
@@ -86,6 +88,7 @@ export function LoginCredentialsForm({ initialErrorMessage }: LoginCredentialsFo
       ) : null}
       <button
         type="submit"
+        data-testid="login-submit"
         disabled={isSubmitting}
         className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white transition-colors hover:bg-slate-800 disabled:opacity-60"
       >

@@ -29,6 +29,8 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Audit trail baseline con hash chaining su ActivityLog (Issue #4)
 - Logging centralizzato eventi di scrittura e dinieghi autorizzativi principali
 - Pagina interna `/audit` riservata ad ADMIN
+- Baseline test automatizzati Vitest + Playwright (Issue #5)
+- Smoke E2E su auth/ruoli, security headers e accesso audit
 - Export report CSV verificato
 - PDF report verificato su report esistente
 
@@ -37,9 +39,10 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Hardening avanzato (WAF/CSP completa) non ancora implementato
 - Non ancora inclusi SSO/SAML/OIDC enterprise e MFA (fuori scope Phase 1 Issue #1)
 - Audit tamper-evident baseline ma non conservazione forense/immutabile a norma
+- Coverage test iniziale focalizzata su flussi core, non ancora esaustiva su tutte le route/actions
 - Stato Git da consolidare in base alla policy del team
 
 ## Prossimi step
-1. Consolidare baseline Git del ripristino
-2. Definire eventuale introduzione middleware centralizzato solo se richiesto
+1. Estendere progressivamente i test su export/report PDF e procedure critiche
+2. Introdurre test integration DB dedicati per server actions a maggiore impatto
 3. Mantenere audit periodico su DB/container e dipendenze

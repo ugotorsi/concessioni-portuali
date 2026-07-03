@@ -44,6 +44,10 @@ export function checkRateLimit({ key, limit, windowMs }: RateLimitOptions): Rate
   };
 }
 
+export function clearRateLimitStore(): void {
+  store.clear();
+}
+
 export function getClientIp(headers: Headers): string {
   const forwardedFor = headers.get("x-forwarded-for");
 

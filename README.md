@@ -40,6 +40,25 @@ Comandi principali:
 - `npm run build`
 - `npm run check`
 
+## Baseline test automatici (Issue #5)
+Prerequisiti E2E:
+- `docker compose up -d`
+- `npm run db:push`
+- `npm run db:seed`
+
+Script test disponibili:
+- `npm run test` esegue i test unit/integration Vitest in modalita run.
+- `npm run test:watch` avvia Vitest in watch mode.
+- `npm run test:coverage` esegue Vitest con coverage V8.
+- `npm run test:e2e` esegue gli smoke test Playwright (Chromium).
+- `npm run test:e2e:ui` avvia Playwright in UI mode.
+- `npm run test:e2e:prepare` prepara DB demo (`db:push` + `db:seed`) senza reset forzati.
+- `npm run test:all` esegue unit test + E2E in sequenza.
+
+Baseline coperta:
+- Unit: rate limiting, capability ruoli, hashing/sanitizzazione audit.
+- E2E: login/redirect per ruoli, security headers baseline, accesso audit admin/viewer.
+
 ## Auth demo e ruoli
 L'accesso demo avviene da `/login` con autenticazione reale via email/password e sessione applicativa.
 Ruoli principali:
@@ -100,3 +119,4 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
 - `.env.example` puo essere ignorato da `.gitignore` se e presente la regola `.env*`.
 - L'audit trail attuale non e una conservazione legale/fisicamente immutabile (non sostituisce SIEM/WORM).
 - Per produzione sono necessari: policy DB append-only, retention/backup, firma e conservazione a norma.
+- La baseline test attuale e orientata a smoke/regressioni principali, non sostituisce una suite completa di integrazione e carico.

@@ -108,6 +108,12 @@ Limiti residui:
   - almeno 2 scenari e2e end-to-end passanti;
   - report test leggibile e riproducibile.
 
+Stato attuale (Issue #5 baseline implementata):
+- configurati `vitest.config.ts` e `playwright.config.ts` con script npm dedicati;
+- introdotti test unitari su rate limiting, capability ruoli e hash audit;
+- introdotti smoke test E2E su auth/ruoli, security headers e accesso audit;
+- documentati prerequisiti DB e flusso di esecuzione test locali.
+
 ### 3.6 Middleware centralizzato, security headers, rate limiting
 - Obiettivo: centralizzare controlli trasversali in middleware con politiche di sicurezza uniformi.
 - Motivo strategico: diminuisce superfici di errore e standardizza la postura security.
