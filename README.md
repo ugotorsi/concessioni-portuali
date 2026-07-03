@@ -67,8 +67,18 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
 - Export CSV sui moduli operativi
 - PDF report disponibile su route dedicate
 
+## Security hardening (Phase 1)
+- Middleware centralizzato in `middleware.ts` per primo filtro accessi/redirect.
+- Redirect utenti non autenticati verso `/login` su rotte protette.
+- Policy ruolo `VIEWER_ADSP` con blocco rotte operative (nuove/modifica) e redirect a `/adsp`.
+- Redirect ruoli back-office da `/adsp` verso `/dashboard`.
+- Security headers baseline configurati in `next.config.ts`.
+- Rate limiting demo/base in-memory su route sensibili (`/api/auth/callback/credentials`, `/export/*`).
+
 ## Limiti noti
 - Senza Docker/PostgreSQL attivi, le pagine dati dinamiche possono rispondere con errore.
-- Il file `middleware.ts` non e presente: la protezione accessi e gestita server-side nelle pagine/route.
+- I guard server-side restano necessari anche con middleware, come difesa ulteriore.
+- Rate limiting in-memory adatto a demo/singola istanza; per produzione serve soluzione distribuita (es. Redis/Upstash).
+- CSP completa e tuning avanzato (WAF, policy enterprise) restano step successivi.
 - Questa fase non include ancora SSO/SAML/OIDC enterprise ne MFA (previsti nelle fasi successive).
 - `.env.example` puo essere ignorato da `.gitignore` se e presente la regola `.env*`.

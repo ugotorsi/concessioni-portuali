@@ -1,10 +1,31 @@
 import { buildCsv, buildCsvFilename, csvResponse } from "@/lib/csv";
 import { canExportOperationalData, getCurrentRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
-export async function GET(): Promise<Response> {
+export async function GET(request: Request): Promise<Response> {
+  const rateLimitResult = checkRateLimit({
+    key: `export:scadenze:${getClientIp(request.headers)}`,
+    limit: 25,
+    windowMs: 60_000,
+  });
+
+  if (!rateLimitResult.allowed) {
+    const retryAfter = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000);
+
+    return Response.json(
+      { error: "Too many requests. Please retry later." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.max(retryAfter, 1)),
+        },
+      },
+    );
+  }
+
   const role = await getCurrentRole();
 
   if (!role) {

@@ -23,11 +23,15 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Seed demo eseguibile e completato
 - Accesso demo reale email/password con utenti persistenti e ruoli applicati
 - Accessi ruolo-based verificati (ADMIN e VIEWER_ADSP)
+- Middleware centralizzato con route protection e redirect anonimi
+- Security headers baseline applicati
+- Rate limiting demo/base su route sensibili
 - Export report CSV verificato
 - PDF report verificato su report esistente
 
 ## Anomalie residue
-- `middleware.ts` assente (attualmente non bloccante: guard server-side operative)
+- Rate limiting non distribuito (in-memory, non adatto a multi-istanza production)
+- Hardening avanzato (WAF/CSP completa) non ancora implementato
 - Non ancora inclusi SSO/SAML/OIDC enterprise e MFA (fuori scope Phase 1 Issue #1)
 - Stato Git da consolidare in base alla policy del team
 
