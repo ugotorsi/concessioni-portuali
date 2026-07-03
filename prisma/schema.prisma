@@ -9,6 +9,7 @@ datasource db {
 
 enum RuoloUser {
   ADMIN
+  OPERATORE_SOCIETA
   PROJECT_MANAGER
   GIURIDICO
   TECNICO
@@ -226,6 +227,7 @@ model User {
   id           String        @id @default(cuid())
   nome         String
   email        String        @unique
+  passwordHash String?
   ruolo        RuoloUser
   attivo       Boolean       @default(true)
   createdAt    DateTime      @default(now())

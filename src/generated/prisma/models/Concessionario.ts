@@ -471,10 +471,6 @@ export type ConcessionarioScalarRelationFilter = {
   isNot?: Prisma.ConcessionarioWhereInput
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type ConcessionarioCreateNestedOneWithoutConcessioniInput = {
   create?: Prisma.XOR<Prisma.ConcessionarioCreateWithoutConcessioniInput, Prisma.ConcessionarioUncheckedCreateWithoutConcessioniInput>
   connectOrCreate?: Prisma.ConcessionarioCreateOrConnectWithoutConcessioniInput

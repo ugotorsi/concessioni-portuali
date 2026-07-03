@@ -41,7 +41,7 @@ Comandi principali:
 - `npm run check`
 
 ## Auth demo e ruoli
-L'accesso demo avviene da `/login` tramite cookie `cp_demo_role`.
+L'accesso demo avviene da `/login` con autenticazione reale via email/password e sessione applicativa.
 Ruoli principali:
 - `ADMIN`
 - `OPERATORE_SOCIETA`
@@ -49,6 +49,15 @@ Ruoli principali:
 - `TECNICO`
 - `ECONOMICO`
 - `VIEWER_ADSP`
+
+Credenziali demo principali:
+- `admin@demo.local` / `admin123`
+- `giuridico@demo.local` / `giuridico123`
+- `tecnico@demo.local` / `tecnico123`
+- `economico@demo.local` / `economico123`
+- `adsp@demo.local` / `adsp123`
+
+Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie per compatibilita demo locale.
 
 `VIEWER_ADSP` e consultivo: accesso a viste read-only e restrizioni su aree operative (AI e creazione nuove pratiche).
 
@@ -61,4 +70,5 @@ Ruoli principali:
 ## Limiti noti
 - Senza Docker/PostgreSQL attivi, le pagine dati dinamiche possono rispondere con errore.
 - Il file `middleware.ts` non e presente: la protezione accessi e gestita server-side nelle pagine/route.
+- Questa fase non include ancora SSO/SAML/OIDC enterprise ne MFA (previsti nelle fasi successive).
 - `.env.example` puo essere ignorato da `.gitignore` se e presente la regola `.env*`.

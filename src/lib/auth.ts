@@ -1,6 +1,8 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { getAuthSession } from "@/lib/next-auth";
+
 export const DEMO_ROLES = [
   "ADMIN",
   "OPERATORE_SOCIETA",
@@ -22,6 +24,13 @@ export const BACKOFFICE_ROLES: DemoRole[] = [
 
 export const DEMO_ROLE_COOKIE = "cp_demo_role";
 
+export interface CurrentUser {
+  id: string;
+  email: string;
+  name?: string | null;
+  role: DemoRole;
+}
+
 function isDemoRole(value: string | undefined): value is DemoRole {
   if (!value) {
     return false;
@@ -31,10 +40,40 @@ function isDemoRole(value: string | undefined): value is DemoRole {
 }
 
 export async function getCurrentRole(): Promise<DemoRole | null> {
-  const cookieStore = await cookies();
-  const role = cookieStore.get(DEMO_ROLE_COOKIE)?.value;
+  const session = await getAuthSession();
+  const sessionRole = session?.user?.role;
 
-  return isDemoRole(role) ? role : null;
+  if (isDemoRole(sessionRole)) {
+    return sessionRole;
+  }
+
+  // Temporary fallback for local demo continuity while transitioning from cookie auth.
+  if (process.env.NODE_ENV !== "production") {
+    const cookieStore = await cookies();
+    const role = cookieStore.get(DEMO_ROLE_COOKIE)?.value;
+
+    if (isDemoRole(role)) {
+      return role;
+    }
+  }
+
+  return null;
+}
+
+export async function getCurrentUser(): Promise<CurrentUser | null> {
+  const session = await getAuthSession();
+  const role = session?.user?.role;
+
+  if (session?.user?.email && session.user.id && isDemoRole(role)) {
+    return {
+      id: session.user.id,
+      email: session.user.email,
+      name: session.user.name,
+      role,
+    };
+  }
+
+  return null;
 }
 
 export async function requireRole(allowedRoles?: DemoRole[]): Promise<DemoRole> {

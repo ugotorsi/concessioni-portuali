@@ -17,14 +17,17 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.11.2",
     "@hookform/resolvers": "latest",
     "@prisma/adapter-pg": "latest",
     "@prisma/client": "latest",
+    "bcryptjs": "^3.0.3",
     "class-variance-authority": "latest",
     "clsx": "latest",
     "date-fns": "latest",
     "lucide-react": "latest",
     "next": "latest",
+    "next-auth": "^4.24.14",
     "pdf-lib": "latest",
     "pg": "latest",
     "prisma": "latest",
@@ -35,6 +38,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "latest",
+    "@types/bcryptjs": "^2.4.6",
     "@types/node": "latest",
     "@types/pg": "latest",
     "@types/react": "latest",

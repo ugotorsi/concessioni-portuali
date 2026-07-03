@@ -21,12 +21,14 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Check progetto (`npm run check`) verde
 - Prisma validate/generate/push verdi con DB attivo
 - Seed demo eseguibile e completato
+- Accesso demo reale email/password con utenti persistenti e ruoli applicati
 - Accessi ruolo-based verificati (ADMIN e VIEWER_ADSP)
 - Export report CSV verificato
 - PDF report verificato su report esistente
 
 ## Anomalie residue
 - `middleware.ts` assente (attualmente non bloccante: guard server-side operative)
+- Non ancora inclusi SSO/SAML/OIDC enterprise e MFA (fuori scope Phase 1 Issue #1)
 - Stato Git da consolidare in base alla policy del team
 
 ## Prossimi step

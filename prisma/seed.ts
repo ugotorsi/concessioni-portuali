@@ -1,5 +1,7 @@
 import { PrismaPg } from "@prisma/adapter-pg";
+import bcrypt from "bcryptjs";
 import { PrismaClient } from "../src/generated/prisma/client";
+import type { RuoloUser } from "../src/generated/prisma/enums";
 import { Pool } from "pg";
 
 const databaseUrl = process.env.DATABASE_URL;
@@ -39,39 +41,87 @@ async function clearDemoData() {
 async function main() {
   await clearDemoData();
 
+  const demoCredentials: Array<{
+    nome: string;
+    email: string;
+    role: RuoloUser;
+    password: string;
+  }> = [
+    { nome: "Admin Demo", email: "admin@demo.local", role: "ADMIN", password: "admin123" },
+    {
+      nome: "Operatore Demo",
+      email: "operatore@demo.local",
+      role: "OPERATORE_SOCIETA",
+      password: "operatore123",
+    },
+    {
+      nome: "Giuridico Demo",
+      email: "giuridico@demo.local",
+      role: "GIURIDICO",
+      password: "giuridico123",
+    },
+    { nome: "Tecnico Demo", email: "tecnico@demo.local", role: "TECNICO", password: "tecnico123" },
+    {
+      nome: "Economico Demo",
+      email: "economico@demo.local",
+      role: "ECONOMICO",
+      password: "economico123",
+    },
+    {
+      nome: "Viewer AdSP Demo",
+      email: "adsp@demo.local",
+      role: "VIEWER_ADSP",
+      password: "adsp123",
+    },
+    {
+      nome: "Admin Legacy Demo",
+      email: "admin.demo@concessioni.local",
+      role: "ADMIN",
+      password: "admin123",
+    },
+    {
+      nome: "Project Manager Demo",
+      email: "pm.demo@concessioni.local",
+      role: "PROJECT_MANAGER",
+      password: "pm123",
+    },
+    {
+      nome: "Giuridico Legacy Demo",
+      email: "giuridico.demo@concessioni.local",
+      role: "GIURIDICO",
+      password: "giuridico123",
+    },
+    {
+      nome: "Tecnico Legacy Demo",
+      email: "tecnico.demo@concessioni.local",
+      role: "TECNICO",
+      password: "tecnico123",
+    },
+    {
+      nome: "Economico Legacy Demo",
+      email: "economico.demo@concessioni.local",
+      role: "ECONOMICO",
+      password: "economico123",
+    },
+    {
+      nome: "Viewer AdSP Legacy Demo",
+      email: "viewer.adsp.demo@concessioni.local",
+      role: "VIEWER_ADSP",
+      password: "adsp123",
+    },
+  ];
+
+  const hashedCredentials = await Promise.all(
+    demoCredentials.map(async (item) => ({
+      nome: item.nome,
+      email: item.email,
+      ruolo: item.role,
+      passwordHash: await bcrypt.hash(item.password, 10),
+    })),
+  );
+
   await prisma.user.createMany({
-    data: [
-      {
-        nome: "Admin Demo",
-        email: "admin.demo@concessioni.local",
-        ruolo: "ADMIN",
-      },
-      {
-        nome: "Project Manager Demo",
-        email: "pm.demo@concessioni.local",
-        ruolo: "PROJECT_MANAGER",
-      },
-      {
-        nome: "Giuridico Demo",
-        email: "giuridico.demo@concessioni.local",
-        ruolo: "GIURIDICO",
-      },
-      {
-        nome: "Tecnico Demo",
-        email: "tecnico.demo@concessioni.local",
-        ruolo: "TECNICO",
-      },
-      {
-        nome: "Economico Demo",
-        email: "economico.demo@concessioni.local",
-        ruolo: "ECONOMICO",
-      },
-      {
-        nome: "Viewer AdSP Demo",
-        email: "viewer.adsp.demo@concessioni.local",
-        ruolo: "VIEWER_ADSP",
-      },
-    ],
+    data: hashedCredentials,
   });
 
   const users = await prisma.user.findMany();
