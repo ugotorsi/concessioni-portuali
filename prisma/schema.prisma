@@ -1,0 +1,569 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum RuoloUser {
+  ADMIN
+  PROJECT_MANAGER
+  GIURIDICO
+  TECNICO
+  ECONOMICO
+  OPERATORE_DOCUMENTALE
+  VIEWER_ADSP
+}
+
+enum NormaRiferimento {
+  ART_36_COD_NAV
+  ART_18_L_84_1994
+  ALTRO
+}
+
+enum TipologiaBene {
+  AREA_SCOPERTA
+  BANCHINA
+  MOLO
+  SPECCHIO_ACQUEO
+  BOX
+  LOCALE
+  MANUFATTO
+  ALTRO
+}
+
+enum AttivitaConcessione {
+  DIPORTO
+  COMMERCIALE
+  TURISTICO_RICREATIVA
+  LOGISTICA
+  CANTIERISTICA
+  SERVIZI_PORTUALI
+  PASSEGGERI
+  ALTRO
+}
+
+enum StatoConcessione {
+  ATTIVA
+  SCADUTA
+  IN_PROROGA
+  SOSPESA
+  REVOCATA
+  DECADUTA
+  ARCHIVIATA
+}
+
+enum TipologiaObbligo {
+  PAGAMENTO_CANONE
+  MANUTENZIONE
+  USO_DIRETTO
+  DIVIETO_SUBCONCESSIONE_NON_AUTORIZZATA
+  PRESCRIZIONI_TECNICHE
+  POLIZZA
+  GARANZIA
+  DOCUMENTAZIONE_PERIODICA
+  SICUREZZA
+  ALTRO
+}
+
+enum StatoObbligo {
+  ADEMPIUTO
+  PARZIALMENTE_ADEMPIUTO
+  INADEMPIUTO
+  DA_VERIFICARE
+}
+
+enum TipologiaScadenza {
+  CONCESSIONE
+  PAGAMENTO_CANONE
+  POLIZZA
+  CAUZIONE
+  FIDEIUSSIONE
+  VERIFICA_PERIODICA
+  SOPRALLUOGO
+  TERMINE_ADEMPIMENTO
+  TERMINE_PROCEDIMENTALE
+  ALTRO
+}
+
+enum StatoScadenza {
+  APERTA
+  GESTITA
+  SCADUTA
+  ARCHIVIATA
+}
+
+enum TipologiaCriticita {
+  GIURIDICA
+  TECNICA
+  ECONOMICA
+  DOCUMENTALE
+  MANUTENTIVA
+  SICUREZZA
+  OCCUPAZIONE_DIFFORME
+  USO_NON_CONFORME
+  MOROSITA
+  RISCHIO_DECADENZA
+  RISCHIO_REVOCA
+  ALTRO
+}
+
+enum GravitaCriticita {
+  BASSA
+  MEDIA
+  ALTA
+  URGENTE
+}
+
+enum FonteCriticita {
+  SOPRALLUOGO
+  VERIFICA_DOCUMENTALE
+  SEGNALAZIONE
+  ALERT_AUTOMATICO
+  ALTRO
+}
+
+enum StatoCriticita {
+  APERTA
+  IN_GESTIONE
+  RISOLTA
+  ARCHIVIATA
+}
+
+enum TipologiaProcedimento {
+  CHIARIMENTI
+  DIFFIDA
+  CONTESTAZIONE
+  ORDINE_RIPRISTINO
+  RECUPERO_CANONI
+  ESCUSSIONE_GARANZIA
+  AVVIO_DECADENZA
+  AVVIO_REVOCA
+  NUOVA_PROCEDURA
+  ALTRO
+}
+
+enum StatoProcedimento {
+  DA_AVVIARE
+  IN_CORSO
+  CONCLUSO
+  ARCHIVIATO
+}
+
+enum EsitoSopralluogo {
+  POSITIVO
+  CON_RILIEVI
+  NEGATIVO
+}
+
+enum StatoPagamento {
+  PAGATO
+  PARZIALE
+  NON_PAGATO
+  SCADUTO
+}
+
+enum TipologiaDocumento {
+  TITOLO_CONCESSORIO
+  PROROGA
+  RINNOVO
+  SUBINGRESSO
+  PLANIMETRIA
+  POLIZZA
+  FIDEIUSSIONE
+  CAUZIONE
+  PAGAMENTO
+  VERBALE
+  DIFFIDA
+  CONTESTAZIONE
+  DETERMINA
+  NOTA
+  ALTRO
+}
+
+enum TipologiaReport {
+  REPORT_MENSILE
+  REPORT_CRITICITA
+  REPORT_MOROSITA
+  REPORT_SCADENZE
+  SCHEDA_CONCESSIONE
+  SCHEDA_CRITICITA
+  DOSSIER_ISTRUTTORIO
+  RELAZIONE_TECNICA
+  RELAZIONE_ECONOMICA
+  PROPOSTA_BANDO
+  ALTRO
+}
+
+enum NormaAmbito {
+  CONCESSIONI
+  PROCEDIMENTI
+  CANONI
+  SICUREZZA
+  AMBIENTE
+  DOCUMENTAZIONE
+  ALTRO
+}
+
+enum StatoNormaVersione {
+  VIGENTE
+  SUPERATA
+  IN_CONSULTAZIONE
+}
+
+enum ModuloImpattoNorma {
+  CRITICITA
+  PROCEDIMENTI
+  SCADENZE
+  PAGAMENTI
+  REPORT
+  CONCESSIONI
+}
+
+model User {
+  id           String        @id @default(cuid())
+  nome         String
+  email        String        @unique
+  ruolo        RuoloUser
+  attivo       Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  activityLogs ActivityLog[]
+
+  @@index([ruolo])
+  @@index([attivo])
+  @@index([createdAt])
+}
+
+model Concessionario {
+  id                   String        @id @default(cuid())
+  denominazione        String
+  codiceFiscale        String?
+  partitaIva           String?
+  sedeLegale           String?
+  pec                  String?
+  legaleRappresentante String?
+  telefono             String?
+  email                String?
+  note                 String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  concessioni          Concessione[]
+
+  @@index([denominazione])
+  @@index([createdAt])
+}
+
+model Concessione {
+  id               String              @id @default(cuid())
+  numeroAtto       String
+  dataRilascio     DateTime
+  dataScadenza     DateTime
+  normaRiferimento NormaRiferimento
+  tipologiaBene    TipologiaBene
+  attivita         AttivitaConcessione
+  superficieMq     Decimal?
+  coordinateGis    String?
+  canoneAnnuo      Decimal?
+  categoriaCanone  String?
+  stato            StatoConcessione
+  descrizioneBene  String?
+  ubicazione       String?
+  note             String?
+  concessionarioId String
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  concessionario Concessionario       @relation(fields: [concessionarioId], references: [id], onDelete: Restrict)
+  obblighi       ObbligoConcessorio[]
+  scadenze       Scadenza[]
+  criticita      Criticita[]
+  procedimenti   Procedimento[]
+  sopralluoghi   Sopralluogo[]
+  pagamenti      Pagamento[]
+  documenti      Documento[]
+  report         Report[]
+  normaImpatti   NormaImpatto[]
+  activityLogs   ActivityLog[]
+
+  @@index([stato])
+  @@index([dataScadenza])
+  @@index([concessionarioId])
+  @@index([tipologiaBene])
+  @@index([createdAt])
+}
+
+model ObbligoConcessorio {
+  id                   String           @id @default(cuid())
+  concessioneId        String
+  tipologia            TipologiaObbligo
+  fonte                String?
+  descrizione          String
+  frequenza            String?
+  dataProssimaVerifica DateTime?
+  stato                StatoObbligo
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+
+  concessione Concessione @relation(fields: [concessioneId], references: [id], onDelete: Cascade)
+
+  @@index([concessioneId])
+  @@index([stato])
+  @@index([tipologia])
+  @@index([dataProssimaVerifica])
+  @@index([createdAt])
+}
+
+model Scadenza {
+  id              String            @id @default(cuid())
+  concessioneId   String
+  tipologia       TipologiaScadenza
+  dataScadenza    DateTime
+  preavvisoGiorni Int               @default(30)
+  stato           StatoScadenza
+  descrizione     String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  concessione Concessione @relation(fields: [concessioneId], references: [id], onDelete: Cascade)
+
+  @@index([concessioneId])
+  @@index([stato])
+  @@index([tipologia])
+  @@index([dataScadenza])
+  @@index([createdAt])
+}
+
+model Criticita {
+  id                      String             @id @default(cuid())
+  concessioneId           String
+  tipologia               TipologiaCriticita
+  gravita                 GravitaCriticita
+  fonte                   FonteCriticita
+  descrizione             String
+  riferimentoNormativo    String?
+  azioneConsigliata       String?
+  stato                   StatoCriticita
+  dataRilevazione         DateTime           @default(now())
+  dataUltimoAggiornamento DateTime?
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+
+  concessione  Concessione    @relation(fields: [concessioneId], references: [id], onDelete: Cascade)
+  procedimenti Procedimento[]
+  normaImpatti NormaImpatto[]
+
+  @@index([concessioneId])
+  @@index([stato])
+  @@index([gravita])
+  @@index([tipologia])
+  @@index([dataRilevazione])
+  @@index([createdAt])
+}
+
+model Procedimento {
+  id                          String                @id @default(cuid())
+  concessioneId               String
+  criticitaId                 String?
+  tipologia                   TipologiaProcedimento
+  riferimentoNormativo        String?
+  dataAvvio                   DateTime?
+  dataScadenzaContraddittorio DateTime?
+  dataProvvedimentoFinale     DateTime?
+  stato                       StatoProcedimento
+  noteIstruttorie             String?
+  createdAt                   DateTime              @default(now())
+  updatedAt                   DateTime              @updatedAt
+
+  concessione Concessione @relation(fields: [concessioneId], references: [id], onDelete: Cascade)
+  criticita   Criticita?  @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
+  normaImpatti NormaImpatto[]
+
+  @@index([concessioneId])
+  @@index([criticitaId])
+  @@index([stato])
+  @@index([tipologia])
+  @@index([dataScadenzaContraddittorio])
+  @@index([createdAt])
+}
+
+model Sopralluogo {
+  id                     String           @id @default(cuid())
+  concessioneId          String
+  data                   DateTime
+  operatori              String
+  esito                  EsitoSopralluogo
+  conformitaPlanimetrica Boolean          @default(false)
+  statoManutentivo       String?
+  sicurezza              String?
+  occupazione            String?
+  interferenze           String?
+  descrizione            String?
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+
+  concessione Concessione @relation(fields: [concessioneId], references: [id], onDelete: Cascade)
+
+  @@index([concessioneId])
+  @@index([data])
+  @@index([esito])
+  @@index([createdAt])
+}
+
+model Pagamento {
+  id              String         @id @default(cuid())
+  concessioneId   String
+  annoRiferimento Int
+  importoDovuto   Decimal
+  importoVersato  Decimal        @default(0)
+  dataScadenza    DateTime
+  dataVersamento  DateTime?
+  stato           StatoPagamento
+  interessiMora   Decimal?
+  note            String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  concessione Concessione @relation(fields: [concessioneId], references: [id], onDelete: Cascade)
+
+  @@index([concessioneId])
+  @@index([stato])
+  @@index([dataScadenza])
+  @@index([annoRiferimento])
+  @@index([createdAt])
+}
+
+model Documento {
+  id            String             @id @default(cuid())
+  concessioneId String
+  nome          String
+  tipologia     TipologiaDocumento
+  url           String
+  dataDocumento DateTime?
+  descrizione   String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  concessione Concessione @relation(fields: [concessioneId], references: [id], onDelete: Cascade)
+
+  @@index([concessioneId])
+  @@index([tipologia])
+  @@index([dataDocumento])
+  @@index([createdAt])
+}
+
+model Report {
+  id            String          @id @default(cuid())
+  concessioneId String?
+  tipologia     TipologiaReport
+  titolo        String
+  contenuto     String
+  formato       String          @default("PDF")
+  validato      Boolean         @default(false)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  concessione Concessione? @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
+  normaImpatti NormaImpatto[]
+
+  @@index([concessioneId])
+  @@index([tipologia])
+  @@index([validato])
+  @@index([createdAt])
+}
+
+model NormaFonte {
+  id            String         @id @default(cuid())
+  codice        String         @unique
+  titolo        String
+  enteEmittente String?
+  ambito        NormaAmbito
+  descrizione   String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  versioni NormaVersione[]
+  impatti  NormaImpatto[]
+
+  @@index([ambito])
+  @@index([titolo])
+  @@index([createdAt])
+}
+
+model NormaVersione {
+  id               String             @id @default(cuid())
+  normaFonteId     String
+  versione         String
+  stato            StatoNormaVersione
+  dataEntrataVigore DateTime
+  dataFineVigore   DateTime?
+  urlTesto         String?
+  sintesi          String
+  note             String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  normaFonte NormaFonte     @relation(fields: [normaFonteId], references: [id], onDelete: Cascade)
+  impatti    NormaImpatto[]
+
+  @@unique([normaFonteId, versione])
+  @@index([normaFonteId])
+  @@index([stato])
+  @@index([dataEntrataVigore])
+  @@index([createdAt])
+}
+
+model NormaImpatto {
+  id              String             @id @default(cuid())
+  normaFonteId    String
+  normaVersioneId String?
+  modulo          ModuloImpattoNorma
+  severita        GravitaCriticita   @default(MEDIA)
+  descrizione     String
+  azioneRichiesta String?
+  concessioneId   String?
+  criticitaId     String?
+  procedimentoId  String?
+  reportId        String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  normaFonte    NormaFonte      @relation(fields: [normaFonteId], references: [id], onDelete: Cascade)
+  normaVersione NormaVersione?  @relation(fields: [normaVersioneId], references: [id], onDelete: SetNull)
+  concessione   Concessione?    @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
+  criticita     Criticita?      @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
+  procedimento  Procedimento?   @relation(fields: [procedimentoId], references: [id], onDelete: SetNull)
+  report        Report?         @relation(fields: [reportId], references: [id], onDelete: SetNull)
+
+  @@index([normaFonteId])
+  @@index([normaVersioneId])
+  @@index([modulo])
+  @@index([severita])
+  @@index([criticitaId])
+  @@index([procedimentoId])
+  @@index([reportId])
+  @@index([concessioneId])
+  @@index([createdAt])
+}
+
+model ActivityLog {
+  id            String   @id @default(cuid())
+  userId        String?
+  concessioneId String?
+  azione        String
+  entita        String
+  entitaId      String?
+  descrizione   String?
+  createdAt     DateTime @default(now())
+
+  user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  concessione Concessione? @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([concessioneId])
+  @@index([entita])
+  @@index([entitaId])
+  @@index([createdAt])
+}

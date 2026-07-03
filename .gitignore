@@ -1,0 +1,15 @@
+node_modules/
+.next/
+.env
+*.log
+.DS_Store
+dist/
+coverage/
+
+# Common caches/temp
+.cache/
+tmp/
+temp/
+
+# Allow sharing example env file
+!.env.example

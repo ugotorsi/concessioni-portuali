@@ -1,0 +1,48 @@
+{
+  "name": "concessioni-portuali",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "check": "npm run build",
+    "db:push": "prisma db push",
+    "db:seed": "prisma db seed",
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio",
+    "db:reset:demo": "prisma db push --force-reset && prisma db seed"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "latest",
+    "@prisma/adapter-pg": "latest",
+    "@prisma/client": "latest",
+    "class-variance-authority": "latest",
+    "clsx": "latest",
+    "date-fns": "latest",
+    "lucide-react": "latest",
+    "next": "latest",
+    "pdf-lib": "latest",
+    "pg": "latest",
+    "prisma": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-hook-form": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "latest",
+    "@types/node": "latest",
+    "@types/pg": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "eslint": "latest",
+    "eslint-config-next": "latest",
+    "tailwindcss": "latest",
+    "tsx": "latest",
+    "typescript": "latest"
+  }
+}

@@ -1,0 +1,20 @@
+﻿services:
+  postgres:
+    image: postgres:16
+    container_name: concessioni_portuali_db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: concessioni
+      POSTGRES_PASSWORD: concessioni
+      POSTGRES_DB: concessioni_portuali
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U concessioni -d concessioni_portuali"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
