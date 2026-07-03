@@ -20,8 +20,18 @@ export type ProcedimentoModel = runtime.Types.Result.DefaultSelection<Prisma.$Pr
 
 export type AggregateProcedimento = {
   _count: ProcedimentoCountAggregateOutputType | null
+  _avg: ProcedimentoAvgAggregateOutputType | null
+  _sum: ProcedimentoSumAggregateOutputType | null
   _min: ProcedimentoMinAggregateOutputType | null
   _max: ProcedimentoMaxAggregateOutputType | null
+}
+
+export type ProcedimentoAvgAggregateOutputType = {
+  termineMemorieGiorni: number | null
+}
+
+export type ProcedimentoSumAggregateOutputType = {
+  termineMemorieGiorni: number | null
 }
 
 export type ProcedimentoMinAggregateOutputType = {
@@ -33,6 +43,23 @@ export type ProcedimentoMinAggregateOutputType = {
   dataAvvio: Date | null
   dataScadenzaContraddittorio: Date | null
   dataProvvedimentoFinale: Date | null
+  comunicazioneAvvioInviata: boolean | null
+  dataComunicazioneAvvio: Date | null
+  termineMemorieGiorni: number | null
+  termineMemorieScadenza: Date | null
+  memorieRicevute: boolean | null
+  dataRicezioneMemorie: Date | null
+  audizioneRichiesta: boolean | null
+  audizioneSvolta: boolean | null
+  dataAudizione: Date | null
+  sopralluogoIstruttorioSvolto: boolean | null
+  contestazioneFormaleInviata: boolean | null
+  dataContestazioneFormale: Date | null
+  controdeduzioniValutate: boolean | null
+  motivazioneValutazione: string | null
+  propostaEsitoIstruttorio: $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta: boolean | null
+  noteChecklistContraddittorio: string | null
   stato: $Enums.StatoProcedimento | null
   noteIstruttorie: string | null
   createdAt: Date | null
@@ -48,6 +75,23 @@ export type ProcedimentoMaxAggregateOutputType = {
   dataAvvio: Date | null
   dataScadenzaContraddittorio: Date | null
   dataProvvedimentoFinale: Date | null
+  comunicazioneAvvioInviata: boolean | null
+  dataComunicazioneAvvio: Date | null
+  termineMemorieGiorni: number | null
+  termineMemorieScadenza: Date | null
+  memorieRicevute: boolean | null
+  dataRicezioneMemorie: Date | null
+  audizioneRichiesta: boolean | null
+  audizioneSvolta: boolean | null
+  dataAudizione: Date | null
+  sopralluogoIstruttorioSvolto: boolean | null
+  contestazioneFormaleInviata: boolean | null
+  dataContestazioneFormale: Date | null
+  controdeduzioniValutate: boolean | null
+  motivazioneValutazione: string | null
+  propostaEsitoIstruttorio: $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta: boolean | null
+  noteChecklistContraddittorio: string | null
   stato: $Enums.StatoProcedimento | null
   noteIstruttorie: string | null
   createdAt: Date | null
@@ -63,6 +107,23 @@ export type ProcedimentoCountAggregateOutputType = {
   dataAvvio: number
   dataScadenzaContraddittorio: number
   dataProvvedimentoFinale: number
+  comunicazioneAvvioInviata: number
+  dataComunicazioneAvvio: number
+  termineMemorieGiorni: number
+  termineMemorieScadenza: number
+  memorieRicevute: number
+  dataRicezioneMemorie: number
+  audizioneRichiesta: number
+  audizioneSvolta: number
+  dataAudizione: number
+  sopralluogoIstruttorioSvolto: number
+  contestazioneFormaleInviata: number
+  dataContestazioneFormale: number
+  controdeduzioniValutate: number
+  motivazioneValutazione: number
+  propostaEsitoIstruttorio: number
+  checklistContraddittorioCompleta: number
+  noteChecklistContraddittorio: number
   stato: number
   noteIstruttorie: number
   createdAt: number
@@ -70,6 +131,14 @@ export type ProcedimentoCountAggregateOutputType = {
   _all: number
 }
 
+
+export type ProcedimentoAvgAggregateInputType = {
+  termineMemorieGiorni?: true
+}
+
+export type ProcedimentoSumAggregateInputType = {
+  termineMemorieGiorni?: true
+}
 
 export type ProcedimentoMinAggregateInputType = {
   id?: true
@@ -80,6 +149,23 @@ export type ProcedimentoMinAggregateInputType = {
   dataAvvio?: true
   dataScadenzaContraddittorio?: true
   dataProvvedimentoFinale?: true
+  comunicazioneAvvioInviata?: true
+  dataComunicazioneAvvio?: true
+  termineMemorieGiorni?: true
+  termineMemorieScadenza?: true
+  memorieRicevute?: true
+  dataRicezioneMemorie?: true
+  audizioneRichiesta?: true
+  audizioneSvolta?: true
+  dataAudizione?: true
+  sopralluogoIstruttorioSvolto?: true
+  contestazioneFormaleInviata?: true
+  dataContestazioneFormale?: true
+  controdeduzioniValutate?: true
+  motivazioneValutazione?: true
+  propostaEsitoIstruttorio?: true
+  checklistContraddittorioCompleta?: true
+  noteChecklistContraddittorio?: true
   stato?: true
   noteIstruttorie?: true
   createdAt?: true
@@ -95,6 +181,23 @@ export type ProcedimentoMaxAggregateInputType = {
   dataAvvio?: true
   dataScadenzaContraddittorio?: true
   dataProvvedimentoFinale?: true
+  comunicazioneAvvioInviata?: true
+  dataComunicazioneAvvio?: true
+  termineMemorieGiorni?: true
+  termineMemorieScadenza?: true
+  memorieRicevute?: true
+  dataRicezioneMemorie?: true
+  audizioneRichiesta?: true
+  audizioneSvolta?: true
+  dataAudizione?: true
+  sopralluogoIstruttorioSvolto?: true
+  contestazioneFormaleInviata?: true
+  dataContestazioneFormale?: true
+  controdeduzioniValutate?: true
+  motivazioneValutazione?: true
+  propostaEsitoIstruttorio?: true
+  checklistContraddittorioCompleta?: true
+  noteChecklistContraddittorio?: true
   stato?: true
   noteIstruttorie?: true
   createdAt?: true
@@ -110,6 +213,23 @@ export type ProcedimentoCountAggregateInputType = {
   dataAvvio?: true
   dataScadenzaContraddittorio?: true
   dataProvvedimentoFinale?: true
+  comunicazioneAvvioInviata?: true
+  dataComunicazioneAvvio?: true
+  termineMemorieGiorni?: true
+  termineMemorieScadenza?: true
+  memorieRicevute?: true
+  dataRicezioneMemorie?: true
+  audizioneRichiesta?: true
+  audizioneSvolta?: true
+  dataAudizione?: true
+  sopralluogoIstruttorioSvolto?: true
+  contestazioneFormaleInviata?: true
+  dataContestazioneFormale?: true
+  controdeduzioniValutate?: true
+  motivazioneValutazione?: true
+  propostaEsitoIstruttorio?: true
+  checklistContraddittorioCompleta?: true
+  noteChecklistContraddittorio?: true
   stato?: true
   noteIstruttorie?: true
   createdAt?: true
@@ -155,6 +275,18 @@ export type ProcedimentoAggregateArgs<ExtArgs extends runtime.Types.Extensions.I
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: ProcedimentoAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: ProcedimentoSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: ProcedimentoMinAggregateInputType
@@ -185,6 +317,8 @@ export type ProcedimentoGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   _count?: ProcedimentoCountAggregateInputType | true
+  _avg?: ProcedimentoAvgAggregateInputType
+  _sum?: ProcedimentoSumAggregateInputType
   _min?: ProcedimentoMinAggregateInputType
   _max?: ProcedimentoMaxAggregateInputType
 }
@@ -198,11 +332,30 @@ export type ProcedimentoGroupByOutputType = {
   dataAvvio: Date | null
   dataScadenzaContraddittorio: Date | null
   dataProvvedimentoFinale: Date | null
+  comunicazioneAvvioInviata: boolean
+  dataComunicazioneAvvio: Date | null
+  termineMemorieGiorni: number | null
+  termineMemorieScadenza: Date | null
+  memorieRicevute: boolean
+  dataRicezioneMemorie: Date | null
+  audizioneRichiesta: boolean
+  audizioneSvolta: boolean
+  dataAudizione: Date | null
+  sopralluogoIstruttorioSvolto: boolean
+  contestazioneFormaleInviata: boolean
+  dataContestazioneFormale: Date | null
+  controdeduzioniValutate: boolean
+  motivazioneValutazione: string | null
+  propostaEsitoIstruttorio: $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta: boolean
+  noteChecklistContraddittorio: string | null
   stato: $Enums.StatoProcedimento
   noteIstruttorie: string | null
   createdAt: Date
   updatedAt: Date
   _count: ProcedimentoCountAggregateOutputType | null
+  _avg: ProcedimentoAvgAggregateOutputType | null
+  _sum: ProcedimentoSumAggregateOutputType | null
   _min: ProcedimentoMinAggregateOutputType | null
   _max: ProcedimentoMaxAggregateOutputType | null
 }
@@ -234,6 +387,23 @@ export type ProcedimentoWhereInput = {
   dataAvvio?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
   dataScadenzaContraddittorio?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
   dataProvvedimentoFinale?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFilter<"Procedimento"> | boolean
+  dataComunicazioneAvvio?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  termineMemorieGiorni?: Prisma.IntNullableFilter<"Procedimento"> | number | null
+  termineMemorieScadenza?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  memorieRicevute?: Prisma.BoolFilter<"Procedimento"> | boolean
+  dataRicezioneMemorie?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFilter<"Procedimento"> | boolean
+  audizioneSvolta?: Prisma.BoolFilter<"Procedimento"> | boolean
+  dataAudizione?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFilter<"Procedimento"> | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFilter<"Procedimento"> | boolean
+  dataContestazioneFormale?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFilter<"Procedimento"> | boolean
+  motivazioneValutazione?: Prisma.StringNullableFilter<"Procedimento"> | string | null
+  propostaEsitoIstruttorio?: Prisma.EnumEsitoIstruttorioProcedimentoNullableFilter<"Procedimento"> | $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: Prisma.BoolFilter<"Procedimento"> | boolean
+  noteChecklistContraddittorio?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   stato?: Prisma.EnumStatoProcedimentoFilter<"Procedimento"> | $Enums.StatoProcedimento
   noteIstruttorie?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Procedimento"> | Date | string
@@ -252,6 +422,23 @@ export type ProcedimentoOrderByWithRelationInput = {
   dataAvvio?: Prisma.SortOrderInput | Prisma.SortOrder
   dataScadenzaContraddittorio?: Prisma.SortOrderInput | Prisma.SortOrder
   dataProvvedimentoFinale?: Prisma.SortOrderInput | Prisma.SortOrder
+  comunicazioneAvvioInviata?: Prisma.SortOrder
+  dataComunicazioneAvvio?: Prisma.SortOrderInput | Prisma.SortOrder
+  termineMemorieGiorni?: Prisma.SortOrderInput | Prisma.SortOrder
+  termineMemorieScadenza?: Prisma.SortOrderInput | Prisma.SortOrder
+  memorieRicevute?: Prisma.SortOrder
+  dataRicezioneMemorie?: Prisma.SortOrderInput | Prisma.SortOrder
+  audizioneRichiesta?: Prisma.SortOrder
+  audizioneSvolta?: Prisma.SortOrder
+  dataAudizione?: Prisma.SortOrderInput | Prisma.SortOrder
+  sopralluogoIstruttorioSvolto?: Prisma.SortOrder
+  contestazioneFormaleInviata?: Prisma.SortOrder
+  dataContestazioneFormale?: Prisma.SortOrderInput | Prisma.SortOrder
+  controdeduzioniValutate?: Prisma.SortOrder
+  motivazioneValutazione?: Prisma.SortOrderInput | Prisma.SortOrder
+  propostaEsitoIstruttorio?: Prisma.SortOrderInput | Prisma.SortOrder
+  checklistContraddittorioCompleta?: Prisma.SortOrder
+  noteChecklistContraddittorio?: Prisma.SortOrderInput | Prisma.SortOrder
   stato?: Prisma.SortOrder
   noteIstruttorie?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -273,6 +460,23 @@ export type ProcedimentoWhereUniqueInput = Prisma.AtLeast<{
   dataAvvio?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
   dataScadenzaContraddittorio?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
   dataProvvedimentoFinale?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFilter<"Procedimento"> | boolean
+  dataComunicazioneAvvio?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  termineMemorieGiorni?: Prisma.IntNullableFilter<"Procedimento"> | number | null
+  termineMemorieScadenza?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  memorieRicevute?: Prisma.BoolFilter<"Procedimento"> | boolean
+  dataRicezioneMemorie?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFilter<"Procedimento"> | boolean
+  audizioneSvolta?: Prisma.BoolFilter<"Procedimento"> | boolean
+  dataAudizione?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFilter<"Procedimento"> | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFilter<"Procedimento"> | boolean
+  dataContestazioneFormale?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFilter<"Procedimento"> | boolean
+  motivazioneValutazione?: Prisma.StringNullableFilter<"Procedimento"> | string | null
+  propostaEsitoIstruttorio?: Prisma.EnumEsitoIstruttorioProcedimentoNullableFilter<"Procedimento"> | $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: Prisma.BoolFilter<"Procedimento"> | boolean
+  noteChecklistContraddittorio?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   stato?: Prisma.EnumStatoProcedimentoFilter<"Procedimento"> | $Enums.StatoProcedimento
   noteIstruttorie?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Procedimento"> | Date | string
@@ -291,13 +495,32 @@ export type ProcedimentoOrderByWithAggregationInput = {
   dataAvvio?: Prisma.SortOrderInput | Prisma.SortOrder
   dataScadenzaContraddittorio?: Prisma.SortOrderInput | Prisma.SortOrder
   dataProvvedimentoFinale?: Prisma.SortOrderInput | Prisma.SortOrder
+  comunicazioneAvvioInviata?: Prisma.SortOrder
+  dataComunicazioneAvvio?: Prisma.SortOrderInput | Prisma.SortOrder
+  termineMemorieGiorni?: Prisma.SortOrderInput | Prisma.SortOrder
+  termineMemorieScadenza?: Prisma.SortOrderInput | Prisma.SortOrder
+  memorieRicevute?: Prisma.SortOrder
+  dataRicezioneMemorie?: Prisma.SortOrderInput | Prisma.SortOrder
+  audizioneRichiesta?: Prisma.SortOrder
+  audizioneSvolta?: Prisma.SortOrder
+  dataAudizione?: Prisma.SortOrderInput | Prisma.SortOrder
+  sopralluogoIstruttorioSvolto?: Prisma.SortOrder
+  contestazioneFormaleInviata?: Prisma.SortOrder
+  dataContestazioneFormale?: Prisma.SortOrderInput | Prisma.SortOrder
+  controdeduzioniValutate?: Prisma.SortOrder
+  motivazioneValutazione?: Prisma.SortOrderInput | Prisma.SortOrder
+  propostaEsitoIstruttorio?: Prisma.SortOrderInput | Prisma.SortOrder
+  checklistContraddittorioCompleta?: Prisma.SortOrder
+  noteChecklistContraddittorio?: Prisma.SortOrderInput | Prisma.SortOrder
   stato?: Prisma.SortOrder
   noteIstruttorie?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ProcedimentoCountOrderByAggregateInput
+  _avg?: Prisma.ProcedimentoAvgOrderByAggregateInput
   _max?: Prisma.ProcedimentoMaxOrderByAggregateInput
   _min?: Prisma.ProcedimentoMinOrderByAggregateInput
+  _sum?: Prisma.ProcedimentoSumOrderByAggregateInput
 }
 
 export type ProcedimentoScalarWhereWithAggregatesInput = {
@@ -312,6 +535,23 @@ export type ProcedimentoScalarWhereWithAggregatesInput = {
   dataAvvio?: Prisma.DateTimeNullableWithAggregatesFilter<"Procedimento"> | Date | string | null
   dataScadenzaContraddittorio?: Prisma.DateTimeNullableWithAggregatesFilter<"Procedimento"> | Date | string | null
   dataProvvedimentoFinale?: Prisma.DateTimeNullableWithAggregatesFilter<"Procedimento"> | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolWithAggregatesFilter<"Procedimento"> | boolean
+  dataComunicazioneAvvio?: Prisma.DateTimeNullableWithAggregatesFilter<"Procedimento"> | Date | string | null
+  termineMemorieGiorni?: Prisma.IntNullableWithAggregatesFilter<"Procedimento"> | number | null
+  termineMemorieScadenza?: Prisma.DateTimeNullableWithAggregatesFilter<"Procedimento"> | Date | string | null
+  memorieRicevute?: Prisma.BoolWithAggregatesFilter<"Procedimento"> | boolean
+  dataRicezioneMemorie?: Prisma.DateTimeNullableWithAggregatesFilter<"Procedimento"> | Date | string | null
+  audizioneRichiesta?: Prisma.BoolWithAggregatesFilter<"Procedimento"> | boolean
+  audizioneSvolta?: Prisma.BoolWithAggregatesFilter<"Procedimento"> | boolean
+  dataAudizione?: Prisma.DateTimeNullableWithAggregatesFilter<"Procedimento"> | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolWithAggregatesFilter<"Procedimento"> | boolean
+  contestazioneFormaleInviata?: Prisma.BoolWithAggregatesFilter<"Procedimento"> | boolean
+  dataContestazioneFormale?: Prisma.DateTimeNullableWithAggregatesFilter<"Procedimento"> | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolWithAggregatesFilter<"Procedimento"> | boolean
+  motivazioneValutazione?: Prisma.StringNullableWithAggregatesFilter<"Procedimento"> | string | null
+  propostaEsitoIstruttorio?: Prisma.EnumEsitoIstruttorioProcedimentoNullableWithAggregatesFilter<"Procedimento"> | $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: Prisma.BoolWithAggregatesFilter<"Procedimento"> | boolean
+  noteChecklistContraddittorio?: Prisma.StringNullableWithAggregatesFilter<"Procedimento"> | string | null
   stato?: Prisma.EnumStatoProcedimentoWithAggregatesFilter<"Procedimento"> | $Enums.StatoProcedimento
   noteIstruttorie?: Prisma.StringNullableWithAggregatesFilter<"Procedimento"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Procedimento"> | Date | string
@@ -325,6 +565,23 @@ export type ProcedimentoCreateInput = {
   dataAvvio?: Date | string | null
   dataScadenzaContraddittorio?: Date | string | null
   dataProvvedimentoFinale?: Date | string | null
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: Date | string | null
+  termineMemorieGiorni?: number | null
+  termineMemorieScadenza?: Date | string | null
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: Date | string | null
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: Date | string | null
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: Date | string | null
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: string | null
+  propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: string | null
   stato: $Enums.StatoProcedimento
   noteIstruttorie?: string | null
   createdAt?: Date | string
@@ -343,6 +600,23 @@ export type ProcedimentoUncheckedCreateInput = {
   dataAvvio?: Date | string | null
   dataScadenzaContraddittorio?: Date | string | null
   dataProvvedimentoFinale?: Date | string | null
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: Date | string | null
+  termineMemorieGiorni?: number | null
+  termineMemorieScadenza?: Date | string | null
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: Date | string | null
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: Date | string | null
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: Date | string | null
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: string | null
+  propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: string | null
   stato: $Enums.StatoProcedimento
   noteIstruttorie?: string | null
   createdAt?: Date | string
@@ -357,6 +631,23 @@ export type ProcedimentoUpdateInput = {
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
   noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -375,6 +666,23 @@ export type ProcedimentoUncheckedUpdateInput = {
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
   noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -391,6 +699,23 @@ export type ProcedimentoCreateManyInput = {
   dataAvvio?: Date | string | null
   dataScadenzaContraddittorio?: Date | string | null
   dataProvvedimentoFinale?: Date | string | null
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: Date | string | null
+  termineMemorieGiorni?: number | null
+  termineMemorieScadenza?: Date | string | null
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: Date | string | null
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: Date | string | null
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: Date | string | null
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: string | null
+  propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: string | null
   stato: $Enums.StatoProcedimento
   noteIstruttorie?: string | null
   createdAt?: Date | string
@@ -404,6 +729,23 @@ export type ProcedimentoUpdateManyMutationInput = {
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
   noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -419,6 +761,23 @@ export type ProcedimentoUncheckedUpdateManyInput = {
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
   noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -444,10 +803,31 @@ export type ProcedimentoCountOrderByAggregateInput = {
   dataAvvio?: Prisma.SortOrder
   dataScadenzaContraddittorio?: Prisma.SortOrder
   dataProvvedimentoFinale?: Prisma.SortOrder
+  comunicazioneAvvioInviata?: Prisma.SortOrder
+  dataComunicazioneAvvio?: Prisma.SortOrder
+  termineMemorieGiorni?: Prisma.SortOrder
+  termineMemorieScadenza?: Prisma.SortOrder
+  memorieRicevute?: Prisma.SortOrder
+  dataRicezioneMemorie?: Prisma.SortOrder
+  audizioneRichiesta?: Prisma.SortOrder
+  audizioneSvolta?: Prisma.SortOrder
+  dataAudizione?: Prisma.SortOrder
+  sopralluogoIstruttorioSvolto?: Prisma.SortOrder
+  contestazioneFormaleInviata?: Prisma.SortOrder
+  dataContestazioneFormale?: Prisma.SortOrder
+  controdeduzioniValutate?: Prisma.SortOrder
+  motivazioneValutazione?: Prisma.SortOrder
+  propostaEsitoIstruttorio?: Prisma.SortOrder
+  checklistContraddittorioCompleta?: Prisma.SortOrder
+  noteChecklistContraddittorio?: Prisma.SortOrder
   stato?: Prisma.SortOrder
   noteIstruttorie?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type ProcedimentoAvgOrderByAggregateInput = {
+  termineMemorieGiorni?: Prisma.SortOrder
 }
 
 export type ProcedimentoMaxOrderByAggregateInput = {
@@ -459,6 +839,23 @@ export type ProcedimentoMaxOrderByAggregateInput = {
   dataAvvio?: Prisma.SortOrder
   dataScadenzaContraddittorio?: Prisma.SortOrder
   dataProvvedimentoFinale?: Prisma.SortOrder
+  comunicazioneAvvioInviata?: Prisma.SortOrder
+  dataComunicazioneAvvio?: Prisma.SortOrder
+  termineMemorieGiorni?: Prisma.SortOrder
+  termineMemorieScadenza?: Prisma.SortOrder
+  memorieRicevute?: Prisma.SortOrder
+  dataRicezioneMemorie?: Prisma.SortOrder
+  audizioneRichiesta?: Prisma.SortOrder
+  audizioneSvolta?: Prisma.SortOrder
+  dataAudizione?: Prisma.SortOrder
+  sopralluogoIstruttorioSvolto?: Prisma.SortOrder
+  contestazioneFormaleInviata?: Prisma.SortOrder
+  dataContestazioneFormale?: Prisma.SortOrder
+  controdeduzioniValutate?: Prisma.SortOrder
+  motivazioneValutazione?: Prisma.SortOrder
+  propostaEsitoIstruttorio?: Prisma.SortOrder
+  checklistContraddittorioCompleta?: Prisma.SortOrder
+  noteChecklistContraddittorio?: Prisma.SortOrder
   stato?: Prisma.SortOrder
   noteIstruttorie?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -474,10 +871,31 @@ export type ProcedimentoMinOrderByAggregateInput = {
   dataAvvio?: Prisma.SortOrder
   dataScadenzaContraddittorio?: Prisma.SortOrder
   dataProvvedimentoFinale?: Prisma.SortOrder
+  comunicazioneAvvioInviata?: Prisma.SortOrder
+  dataComunicazioneAvvio?: Prisma.SortOrder
+  termineMemorieGiorni?: Prisma.SortOrder
+  termineMemorieScadenza?: Prisma.SortOrder
+  memorieRicevute?: Prisma.SortOrder
+  dataRicezioneMemorie?: Prisma.SortOrder
+  audizioneRichiesta?: Prisma.SortOrder
+  audizioneSvolta?: Prisma.SortOrder
+  dataAudizione?: Prisma.SortOrder
+  sopralluogoIstruttorioSvolto?: Prisma.SortOrder
+  contestazioneFormaleInviata?: Prisma.SortOrder
+  dataContestazioneFormale?: Prisma.SortOrder
+  controdeduzioniValutate?: Prisma.SortOrder
+  motivazioneValutazione?: Prisma.SortOrder
+  propostaEsitoIstruttorio?: Prisma.SortOrder
+  checklistContraddittorioCompleta?: Prisma.SortOrder
+  noteChecklistContraddittorio?: Prisma.SortOrder
   stato?: Prisma.SortOrder
   noteIstruttorie?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type ProcedimentoSumOrderByAggregateInput = {
+  termineMemorieGiorni?: Prisma.SortOrder
 }
 
 export type ProcedimentoNullableScalarRelationFilter = {
@@ -573,6 +991,18 @@ export type EnumTipologiaProcedimentoFieldUpdateOperationsInput = {
   set?: $Enums.TipologiaProcedimento
 }
 
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput = {
+  set?: $Enums.EsitoIstruttorioProcedimento | null
+}
+
 export type EnumStatoProcedimentoFieldUpdateOperationsInput = {
   set?: $Enums.StatoProcedimento
 }
@@ -600,6 +1030,23 @@ export type ProcedimentoCreateWithoutConcessioneInput = {
   dataAvvio?: Date | string | null
   dataScadenzaContraddittorio?: Date | string | null
   dataProvvedimentoFinale?: Date | string | null
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: Date | string | null
+  termineMemorieGiorni?: number | null
+  termineMemorieScadenza?: Date | string | null
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: Date | string | null
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: Date | string | null
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: Date | string | null
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: string | null
+  propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: string | null
   stato: $Enums.StatoProcedimento
   noteIstruttorie?: string | null
   createdAt?: Date | string
@@ -616,6 +1063,23 @@ export type ProcedimentoUncheckedCreateWithoutConcessioneInput = {
   dataAvvio?: Date | string | null
   dataScadenzaContraddittorio?: Date | string | null
   dataProvvedimentoFinale?: Date | string | null
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: Date | string | null
+  termineMemorieGiorni?: number | null
+  termineMemorieScadenza?: Date | string | null
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: Date | string | null
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: Date | string | null
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: Date | string | null
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: string | null
+  propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: string | null
   stato: $Enums.StatoProcedimento
   noteIstruttorie?: string | null
   createdAt?: Date | string
@@ -661,6 +1125,23 @@ export type ProcedimentoScalarWhereInput = {
   dataAvvio?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
   dataScadenzaContraddittorio?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
   dataProvvedimentoFinale?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFilter<"Procedimento"> | boolean
+  dataComunicazioneAvvio?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  termineMemorieGiorni?: Prisma.IntNullableFilter<"Procedimento"> | number | null
+  termineMemorieScadenza?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  memorieRicevute?: Prisma.BoolFilter<"Procedimento"> | boolean
+  dataRicezioneMemorie?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFilter<"Procedimento"> | boolean
+  audizioneSvolta?: Prisma.BoolFilter<"Procedimento"> | boolean
+  dataAudizione?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFilter<"Procedimento"> | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFilter<"Procedimento"> | boolean
+  dataContestazioneFormale?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFilter<"Procedimento"> | boolean
+  motivazioneValutazione?: Prisma.StringNullableFilter<"Procedimento"> | string | null
+  propostaEsitoIstruttorio?: Prisma.EnumEsitoIstruttorioProcedimentoNullableFilter<"Procedimento"> | $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: Prisma.BoolFilter<"Procedimento"> | boolean
+  noteChecklistContraddittorio?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   stato?: Prisma.EnumStatoProcedimentoFilter<"Procedimento"> | $Enums.StatoProcedimento
   noteIstruttorie?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Procedimento"> | Date | string
@@ -674,6 +1155,23 @@ export type ProcedimentoCreateWithoutCriticitaInput = {
   dataAvvio?: Date | string | null
   dataScadenzaContraddittorio?: Date | string | null
   dataProvvedimentoFinale?: Date | string | null
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: Date | string | null
+  termineMemorieGiorni?: number | null
+  termineMemorieScadenza?: Date | string | null
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: Date | string | null
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: Date | string | null
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: Date | string | null
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: string | null
+  propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: string | null
   stato: $Enums.StatoProcedimento
   noteIstruttorie?: string | null
   createdAt?: Date | string
@@ -690,6 +1188,23 @@ export type ProcedimentoUncheckedCreateWithoutCriticitaInput = {
   dataAvvio?: Date | string | null
   dataScadenzaContraddittorio?: Date | string | null
   dataProvvedimentoFinale?: Date | string | null
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: Date | string | null
+  termineMemorieGiorni?: number | null
+  termineMemorieScadenza?: Date | string | null
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: Date | string | null
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: Date | string | null
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: Date | string | null
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: string | null
+  propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: string | null
   stato: $Enums.StatoProcedimento
   noteIstruttorie?: string | null
   createdAt?: Date | string
@@ -730,6 +1245,23 @@ export type ProcedimentoCreateWithoutNormaImpattiInput = {
   dataAvvio?: Date | string | null
   dataScadenzaContraddittorio?: Date | string | null
   dataProvvedimentoFinale?: Date | string | null
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: Date | string | null
+  termineMemorieGiorni?: number | null
+  termineMemorieScadenza?: Date | string | null
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: Date | string | null
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: Date | string | null
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: Date | string | null
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: string | null
+  propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: string | null
   stato: $Enums.StatoProcedimento
   noteIstruttorie?: string | null
   createdAt?: Date | string
@@ -747,6 +1279,23 @@ export type ProcedimentoUncheckedCreateWithoutNormaImpattiInput = {
   dataAvvio?: Date | string | null
   dataScadenzaContraddittorio?: Date | string | null
   dataProvvedimentoFinale?: Date | string | null
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: Date | string | null
+  termineMemorieGiorni?: number | null
+  termineMemorieScadenza?: Date | string | null
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: Date | string | null
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: Date | string | null
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: Date | string | null
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: string | null
+  propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: string | null
   stato: $Enums.StatoProcedimento
   noteIstruttorie?: string | null
   createdAt?: Date | string
@@ -776,6 +1325,23 @@ export type ProcedimentoUpdateWithoutNormaImpattiInput = {
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
   noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -793,6 +1359,23 @@ export type ProcedimentoUncheckedUpdateWithoutNormaImpattiInput = {
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
   noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -807,6 +1390,23 @@ export type ProcedimentoCreateManyConcessioneInput = {
   dataAvvio?: Date | string | null
   dataScadenzaContraddittorio?: Date | string | null
   dataProvvedimentoFinale?: Date | string | null
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: Date | string | null
+  termineMemorieGiorni?: number | null
+  termineMemorieScadenza?: Date | string | null
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: Date | string | null
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: Date | string | null
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: Date | string | null
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: string | null
+  propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: string | null
   stato: $Enums.StatoProcedimento
   noteIstruttorie?: string | null
   createdAt?: Date | string
@@ -820,6 +1420,23 @@ export type ProcedimentoUpdateWithoutConcessioneInput = {
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
   noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -836,6 +1453,23 @@ export type ProcedimentoUncheckedUpdateWithoutConcessioneInput = {
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
   noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -851,6 +1485,23 @@ export type ProcedimentoUncheckedUpdateManyWithoutConcessioneInput = {
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
   noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -865,6 +1516,23 @@ export type ProcedimentoCreateManyCriticitaInput = {
   dataAvvio?: Date | string | null
   dataScadenzaContraddittorio?: Date | string | null
   dataProvvedimentoFinale?: Date | string | null
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: Date | string | null
+  termineMemorieGiorni?: number | null
+  termineMemorieScadenza?: Date | string | null
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: Date | string | null
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: Date | string | null
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: Date | string | null
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: string | null
+  propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: string | null
   stato: $Enums.StatoProcedimento
   noteIstruttorie?: string | null
   createdAt?: Date | string
@@ -878,6 +1546,23 @@ export type ProcedimentoUpdateWithoutCriticitaInput = {
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
   noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -894,6 +1579,23 @@ export type ProcedimentoUncheckedUpdateWithoutCriticitaInput = {
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
   noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -909,6 +1611,23 @@ export type ProcedimentoUncheckedUpdateManyWithoutCriticitaInput = {
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
   noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -955,6 +1674,23 @@ export type ProcedimentoSelect<ExtArgs extends runtime.Types.Extensions.Internal
   dataAvvio?: boolean
   dataScadenzaContraddittorio?: boolean
   dataProvvedimentoFinale?: boolean
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: boolean
+  termineMemorieGiorni?: boolean
+  termineMemorieScadenza?: boolean
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: boolean
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: boolean
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: boolean
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: boolean
+  propostaEsitoIstruttorio?: boolean
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: boolean
   stato?: boolean
   noteIstruttorie?: boolean
   createdAt?: boolean
@@ -974,6 +1710,23 @@ export type ProcedimentoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   dataAvvio?: boolean
   dataScadenzaContraddittorio?: boolean
   dataProvvedimentoFinale?: boolean
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: boolean
+  termineMemorieGiorni?: boolean
+  termineMemorieScadenza?: boolean
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: boolean
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: boolean
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: boolean
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: boolean
+  propostaEsitoIstruttorio?: boolean
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: boolean
   stato?: boolean
   noteIstruttorie?: boolean
   createdAt?: boolean
@@ -991,6 +1744,23 @@ export type ProcedimentoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   dataAvvio?: boolean
   dataScadenzaContraddittorio?: boolean
   dataProvvedimentoFinale?: boolean
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: boolean
+  termineMemorieGiorni?: boolean
+  termineMemorieScadenza?: boolean
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: boolean
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: boolean
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: boolean
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: boolean
+  propostaEsitoIstruttorio?: boolean
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: boolean
   stato?: boolean
   noteIstruttorie?: boolean
   createdAt?: boolean
@@ -1008,13 +1778,30 @@ export type ProcedimentoSelectScalar = {
   dataAvvio?: boolean
   dataScadenzaContraddittorio?: boolean
   dataProvvedimentoFinale?: boolean
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: boolean
+  termineMemorieGiorni?: boolean
+  termineMemorieScadenza?: boolean
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: boolean
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: boolean
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: boolean
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: boolean
+  propostaEsitoIstruttorio?: boolean
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: boolean
   stato?: boolean
   noteIstruttorie?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ProcedimentoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "concessioneId" | "criticitaId" | "tipologia" | "riferimentoNormativo" | "dataAvvio" | "dataScadenzaContraddittorio" | "dataProvvedimentoFinale" | "stato" | "noteIstruttorie" | "createdAt" | "updatedAt", ExtArgs["result"]["procedimento"]>
+export type ProcedimentoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "concessioneId" | "criticitaId" | "tipologia" | "riferimentoNormativo" | "dataAvvio" | "dataScadenzaContraddittorio" | "dataProvvedimentoFinale" | "comunicazioneAvvioInviata" | "dataComunicazioneAvvio" | "termineMemorieGiorni" | "termineMemorieScadenza" | "memorieRicevute" | "dataRicezioneMemorie" | "audizioneRichiesta" | "audizioneSvolta" | "dataAudizione" | "sopralluogoIstruttorioSvolto" | "contestazioneFormaleInviata" | "dataContestazioneFormale" | "controdeduzioniValutate" | "motivazioneValutazione" | "propostaEsitoIstruttorio" | "checklistContraddittorioCompleta" | "noteChecklistContraddittorio" | "stato" | "noteIstruttorie" | "createdAt" | "updatedAt", ExtArgs["result"]["procedimento"]>
 export type ProcedimentoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   concessione?: boolean | Prisma.ConcessioneDefaultArgs<ExtArgs>
   criticita?: boolean | Prisma.Procedimento$criticitaArgs<ExtArgs>
@@ -1046,6 +1833,23 @@ export type $ProcedimentoPayload<ExtArgs extends runtime.Types.Extensions.Intern
     dataAvvio: Date | null
     dataScadenzaContraddittorio: Date | null
     dataProvvedimentoFinale: Date | null
+    comunicazioneAvvioInviata: boolean
+    dataComunicazioneAvvio: Date | null
+    termineMemorieGiorni: number | null
+    termineMemorieScadenza: Date | null
+    memorieRicevute: boolean
+    dataRicezioneMemorie: Date | null
+    audizioneRichiesta: boolean
+    audizioneSvolta: boolean
+    dataAudizione: Date | null
+    sopralluogoIstruttorioSvolto: boolean
+    contestazioneFormaleInviata: boolean
+    dataContestazioneFormale: Date | null
+    controdeduzioniValutate: boolean
+    motivazioneValutazione: string | null
+    propostaEsitoIstruttorio: $Enums.EsitoIstruttorioProcedimento | null
+    checklistContraddittorioCompleta: boolean
+    noteChecklistContraddittorio: string | null
     stato: $Enums.StatoProcedimento
     noteIstruttorie: string | null
     createdAt: Date
@@ -1484,6 +2288,23 @@ export interface ProcedimentoFieldRefs {
   readonly dataAvvio: Prisma.FieldRef<"Procedimento", 'DateTime'>
   readonly dataScadenzaContraddittorio: Prisma.FieldRef<"Procedimento", 'DateTime'>
   readonly dataProvvedimentoFinale: Prisma.FieldRef<"Procedimento", 'DateTime'>
+  readonly comunicazioneAvvioInviata: Prisma.FieldRef<"Procedimento", 'Boolean'>
+  readonly dataComunicazioneAvvio: Prisma.FieldRef<"Procedimento", 'DateTime'>
+  readonly termineMemorieGiorni: Prisma.FieldRef<"Procedimento", 'Int'>
+  readonly termineMemorieScadenza: Prisma.FieldRef<"Procedimento", 'DateTime'>
+  readonly memorieRicevute: Prisma.FieldRef<"Procedimento", 'Boolean'>
+  readonly dataRicezioneMemorie: Prisma.FieldRef<"Procedimento", 'DateTime'>
+  readonly audizioneRichiesta: Prisma.FieldRef<"Procedimento", 'Boolean'>
+  readonly audizioneSvolta: Prisma.FieldRef<"Procedimento", 'Boolean'>
+  readonly dataAudizione: Prisma.FieldRef<"Procedimento", 'DateTime'>
+  readonly sopralluogoIstruttorioSvolto: Prisma.FieldRef<"Procedimento", 'Boolean'>
+  readonly contestazioneFormaleInviata: Prisma.FieldRef<"Procedimento", 'Boolean'>
+  readonly dataContestazioneFormale: Prisma.FieldRef<"Procedimento", 'DateTime'>
+  readonly controdeduzioniValutate: Prisma.FieldRef<"Procedimento", 'Boolean'>
+  readonly motivazioneValutazione: Prisma.FieldRef<"Procedimento", 'String'>
+  readonly propostaEsitoIstruttorio: Prisma.FieldRef<"Procedimento", 'EsitoIstruttorioProcedimento'>
+  readonly checklistContraddittorioCompleta: Prisma.FieldRef<"Procedimento", 'Boolean'>
+  readonly noteChecklistContraddittorio: Prisma.FieldRef<"Procedimento", 'String'>
   readonly stato: Prisma.FieldRef<"Procedimento", 'StatoProcedimento'>
   readonly noteIstruttorie: Prisma.FieldRef<"Procedimento", 'String'>
   readonly createdAt: Prisma.FieldRef<"Procedimento", 'DateTime'>

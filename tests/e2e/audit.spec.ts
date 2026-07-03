@@ -31,7 +31,7 @@ test("audit page access and report validation audit events", async ({ page }) =>
   await page.goto("/audit");
   await expect(page).toHaveURL(/\/audit$/);
   await expect(page.getByRole("heading", { name: "Ultimi eventi audit" })).toBeVisible();
-  await expect(page.getByText(/REPORT_VALIDATE|REPORT_UNVALIDATE/)).toBeVisible();
+  await expect(page.getByText(/REPORT_VALIDATE|REPORT_UNVALIDATE/).first()).toBeVisible();
 
   await page.goto("/logout");
   await expect(page).toHaveURL(/\/login$/);

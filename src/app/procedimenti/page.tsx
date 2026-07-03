@@ -4,8 +4,10 @@ import { AppShell } from "@/components/layout/AppShell";
 import { BACKOFFICE_ROLES, canExportOperationalData, canManageProcedimenti, requireRole } from "@/lib/auth";
 import {
   ProcedimentoGiorniBadge,
+  ProcedimentoChecklistBadge,
   ProcedimentoStatoBadge,
   ProcedimentoTipologiaBadge,
+  ProcedimentoWarningBadge,
 } from "@/components/procedimenti/ProcedimentiBadges";
 import { ProcedimentiFiltersBar } from "@/components/procedimenti/ProcedimentiFiltersBar";
 import { Badge } from "@/components/ui/Badge";
@@ -20,6 +22,8 @@ import {
 } from "@/components/ui/Table";
 import { formatDateIT, formatEnumLabel } from "@/lib/utils";
 import {
+  PROCEDIMENTI_CHECKLIST_VALUES,
+  PROCEDIMENTI_MEMORIE_VALUES,
   PROCEDIMENTI_PERIODO_VALUES,
   PROCEDIMENTO_STATO_VALUES,
   PROCEDIMENTO_TIPOLOGIA_VALUES,
@@ -27,6 +31,8 @@ import {
   getProcedimentiList,
   type GetProcedimentiListParams,
   type ProcedimentiPeriodoValue,
+  type ProcedimentiChecklistValue,
+  type ProcedimentiMemorieValue,
   type ProcedimentoStatoValue,
   type ProcedimentoTipologiaValue,
 } from "@/server/queries/procedimenti";
@@ -77,6 +83,18 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
         ? (value as ProcedimentiPeriodoValue)
         : "TUTTI";
     })(),
+    checklist: (() => {
+      const value = pickString(resolvedSearch.checklist);
+      return value && PROCEDIMENTI_CHECKLIST_VALUES.includes(value as ProcedimentiChecklistValue)
+        ? (value as ProcedimentiChecklistValue)
+        : "TUTTE";
+    })(),
+    memorie: (() => {
+      const value = pickString(resolvedSearch.memorie);
+      return value && PROCEDIMENTI_MEMORIE_VALUES.includes(value as ProcedimentiMemorieValue)
+        ? (value as ProcedimentiMemorieValue)
+        : "TUTTE";
+    })(),
   };
 
   const [filtersData, listData] = await Promise.all([
@@ -91,6 +109,7 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
   const terminiScaduti = listData.items.filter((item) => item.giorniRitardoContraddittorio !== null).length;
   const avviiDecRev = listData.items.filter((item) => ["AVVIO_DECADENZA", "AVVIO_REVOCA"].includes(item.tipologia)).length;
   const recuperiGaranzie = listData.items.filter((item) => ["RECUPERO_CANONI", "ESCUSSIONE_GARANZIA"].includes(item.tipologia)).length;
+  const checklistIncompleta = listData.items.filter((item) => !item.checklistContraddittorioCompleta).length;
 
   const letturaIstruttoria: string[] = [];
   if (daAvviare > 0) {
@@ -101,6 +120,9 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
   }
   if (avviiDecRev > 0) {
     letturaIstruttoria.push("Per i procedimenti di decadenza/revoca verificare presupposti, contraddittorio e proporzionalità prima della proposta conclusiva.");
+  }
+  if (checklistIncompleta > 0) {
+    letturaIstruttoria.push("Sono presenti checklist contraddittorio incomplete: verificare i passaggi essenziali mancanti prima della fase conclusiva.");
   }
   if (recuperiGaranzie > 0) {
     letturaIstruttoria.push("Sono presenti procedimenti economici: rafforzare verifica contabile su canoni, residui, interessi e garanzie.");
@@ -216,10 +238,13 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
                 <TableRow>
                   <TableHead>Tipologia</TableHead>
                   <TableHead>Stato</TableHead>
+                  <TableHead>Checklist</TableHead>
+                  <TableHead>Warning</TableHead>
                   <TableHead>Concessione</TableHead>
                   <TableHead>Concessionario</TableHead>
                   <TableHead>Criticità collegata</TableHead>
                   <TableHead>Riferimento normativo</TableHead>
+                  <TableHead>Termine memorie</TableHead>
                   <TableHead>Termine contraddittorio</TableHead>
                   <TableHead>Giorni</TableHead>
                   <TableHead>Azioni</TableHead>
@@ -248,6 +273,12 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
                       <TableCell>
                         <ProcedimentoStatoBadge value={item.stato} />
                       </TableCell>
+                      <TableCell>
+                        <ProcedimentoChecklistBadge complete={item.checklistContraddittorioCompleta} />
+                      </TableCell>
+                      <TableCell>
+                        <ProcedimentoWarningBadge level={item.checklistWarningLevel} />
+                      </TableCell>
                       <TableCell>{item.concessione.numeroAtto}</TableCell>
                       <TableCell>{item.concessione.concessionario.denominazione}</TableCell>
                       <TableCell>
@@ -263,6 +294,9 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
                         )}
                       </TableCell>
                       <TableCell>{item.riferimentoNormativo ?? "-"}</TableCell>
+                      <TableCell>
+                        {item.termineMemorieScadenza ? formatDateIT(item.termineMemorieScadenza) : "-"}
+                      </TableCell>
                       <TableCell>
                         {item.dataScadenzaContraddittorio ? formatDateIT(item.dataScadenzaContraddittorio) : "-"}
                       </TableCell>
@@ -301,7 +335,7 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
                 })}
                 {listData.items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center text-slate-500">
+                    <TableCell colSpan={12} className="text-center text-slate-500">
                       Nessun procedimento trovato con i filtri correnti.
                     </TableCell>
                   </TableRow>

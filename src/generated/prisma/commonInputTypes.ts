@@ -464,6 +464,24 @@ export type EnumTipologiaProcedimentoFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumTipologiaProcedimentoFilter<$PrismaModel> | $Enums.TipologiaProcedimento
 }
 
+export type IntNullableFilter<$PrismaModel = never> = {
+  equals?: number | Prisma.IntFieldRefInput<$PrismaModel> | null
+  in?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel> | null
+  notIn?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel> | null
+  lt?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  lte?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  gt?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  gte?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedIntNullableFilter<$PrismaModel> | number | null
+}
+
+export type EnumEsitoIstruttorioProcedimentoNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.EsitoIstruttorioProcedimento | Prisma.EnumEsitoIstruttorioProcedimentoFieldRefInput<$PrismaModel> | null
+  in?: $Enums.EsitoIstruttorioProcedimento[] | Prisma.ListEnumEsitoIstruttorioProcedimentoFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.EsitoIstruttorioProcedimento[] | Prisma.ListEnumEsitoIstruttorioProcedimentoFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumEsitoIstruttorioProcedimentoNullableFilter<$PrismaModel> | $Enums.EsitoIstruttorioProcedimento | null
+}
+
 export type EnumStatoProcedimentoFilter<$PrismaModel = never> = {
   equals?: $Enums.StatoProcedimento | Prisma.EnumStatoProcedimentoFieldRefInput<$PrismaModel>
   in?: $Enums.StatoProcedimento[] | Prisma.ListEnumStatoProcedimentoFieldRefInput<$PrismaModel>
@@ -479,6 +497,32 @@ export type EnumTipologiaProcedimentoWithAggregatesFilter<$PrismaModel = never> 
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumTipologiaProcedimentoFilter<$PrismaModel>
   _max?: Prisma.NestedEnumTipologiaProcedimentoFilter<$PrismaModel>
+}
+
+export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: number | Prisma.IntFieldRefInput<$PrismaModel> | null
+  in?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel> | null
+  notIn?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel> | null
+  lt?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  lte?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  gt?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  gte?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _avg?: Prisma.NestedFloatNullableFilter<$PrismaModel>
+  _sum?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedIntNullableFilter<$PrismaModel>
+}
+
+export type EnumEsitoIstruttorioProcedimentoNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EsitoIstruttorioProcedimento | Prisma.EnumEsitoIstruttorioProcedimentoFieldRefInput<$PrismaModel> | null
+  in?: $Enums.EsitoIstruttorioProcedimento[] | Prisma.ListEnumEsitoIstruttorioProcedimentoFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.EsitoIstruttorioProcedimento[] | Prisma.ListEnumEsitoIstruttorioProcedimentoFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumEsitoIstruttorioProcedimentoNullableWithAggregatesFilter<$PrismaModel> | $Enums.EsitoIstruttorioProcedimento | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEsitoIstruttorioProcedimentoNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEsitoIstruttorioProcedimentoNullableFilter<$PrismaModel>
 }
 
 export type EnumStatoProcedimentoWithAggregatesFilter<$PrismaModel = never> = {
@@ -1168,6 +1212,13 @@ export type NestedEnumTipologiaProcedimentoFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumTipologiaProcedimentoFilter<$PrismaModel> | $Enums.TipologiaProcedimento
 }
 
+export type NestedEnumEsitoIstruttorioProcedimentoNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.EsitoIstruttorioProcedimento | Prisma.EnumEsitoIstruttorioProcedimentoFieldRefInput<$PrismaModel> | null
+  in?: $Enums.EsitoIstruttorioProcedimento[] | Prisma.ListEnumEsitoIstruttorioProcedimentoFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.EsitoIstruttorioProcedimento[] | Prisma.ListEnumEsitoIstruttorioProcedimentoFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumEsitoIstruttorioProcedimentoNullableFilter<$PrismaModel> | $Enums.EsitoIstruttorioProcedimento | null
+}
+
 export type NestedEnumStatoProcedimentoFilter<$PrismaModel = never> = {
   equals?: $Enums.StatoProcedimento | Prisma.EnumStatoProcedimentoFieldRefInput<$PrismaModel>
   in?: $Enums.StatoProcedimento[] | Prisma.ListEnumStatoProcedimentoFieldRefInput<$PrismaModel>
@@ -1183,6 +1234,43 @@ export type NestedEnumTipologiaProcedimentoWithAggregatesFilter<$PrismaModel = n
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumTipologiaProcedimentoFilter<$PrismaModel>
   _max?: Prisma.NestedEnumTipologiaProcedimentoFilter<$PrismaModel>
+}
+
+export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: number | Prisma.IntFieldRefInput<$PrismaModel> | null
+  in?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel> | null
+  notIn?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel> | null
+  lt?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  lte?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  gt?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  gte?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _avg?: Prisma.NestedFloatNullableFilter<$PrismaModel>
+  _sum?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedIntNullableFilter<$PrismaModel>
+}
+
+export type NestedFloatNullableFilter<$PrismaModel = never> = {
+  equals?: number | Prisma.FloatFieldRefInput<$PrismaModel> | null
+  in?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel> | null
+  notIn?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel> | null
+  lt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  lte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedFloatNullableFilter<$PrismaModel> | number | null
+}
+
+export type NestedEnumEsitoIstruttorioProcedimentoNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EsitoIstruttorioProcedimento | Prisma.EnumEsitoIstruttorioProcedimentoFieldRefInput<$PrismaModel> | null
+  in?: $Enums.EsitoIstruttorioProcedimento[] | Prisma.ListEnumEsitoIstruttorioProcedimentoFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.EsitoIstruttorioProcedimento[] | Prisma.ListEnumEsitoIstruttorioProcedimentoFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumEsitoIstruttorioProcedimentoNullableWithAggregatesFilter<$PrismaModel> | $Enums.EsitoIstruttorioProcedimento | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEsitoIstruttorioProcedimentoNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEsitoIstruttorioProcedimentoNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumStatoProcedimentoWithAggregatesFilter<$PrismaModel = never> = {

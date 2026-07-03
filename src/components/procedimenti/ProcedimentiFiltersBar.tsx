@@ -9,7 +9,7 @@ interface ProcedimentiFiltersBarProps {
 
 export function ProcedimentiFiltersBar({ filtersData, current }: ProcedimentiFiltersBarProps) {
   return (
-    <form method="get" className="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 md:grid-cols-2 xl:grid-cols-6">
+    <form method="get" className="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 md:grid-cols-2 xl:grid-cols-8">
       <Input
         name="search"
         placeholder="Ricerca norma, note, concessione, criticità"
@@ -43,6 +43,22 @@ export function ProcedimentiFiltersBar({ filtersData, current }: ProcedimentiFil
         ))}
       </Select>
 
+      <Select name="checklist" defaultValue={current.checklist ?? "TUTTE"}>
+        {filtersData.checklist.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </Select>
+
+      <Select name="memorie" defaultValue={current.memorie ?? "TUTTE"}>
+        {filtersData.memorie.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </Select>
+
       <Select name="concessioneId" defaultValue={current.concessioneId ?? ""} className="xl:col-span-2">
         <option value="">Concessione (tutte)</option>
         {filtersData.concessioni.map((option) => (
@@ -61,7 +77,7 @@ export function ProcedimentiFiltersBar({ filtersData, current }: ProcedimentiFil
         ))}
       </Select>
 
-      <div className="flex items-center gap-2 md:col-span-2 xl:col-span-2">
+      <div className="flex items-center gap-2 md:col-span-2 xl:col-span-8">
         <button
           type="submit"
           className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white transition-colors hover:bg-slate-800"

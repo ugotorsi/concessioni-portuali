@@ -66,6 +66,23 @@ Baseline coperta:
 - Dettaglio criticita con sezione esplicita di mapping art.47.
 - Export CSV criticita esteso con colonne art.47.
 
+## Checklist contraddittorio su Procedimento (Issue #7)
+- Estensione `Procedimento` con campi checklist procedimentale: avvio, memorie, audizione, contestazione, controdeduzioni, motivazione e proposta esito istruttorio.
+- Utility dominio in `src/lib/procedimento-checklist.ts` per stato item, completezza, missing item e livello warning.
+- Form creazione procedimento con sezione “Contraddittorio e garanzie procedimentali”.
+- Scheda dettaglio procedimento con:
+   - badge checklist completa/incompleta;
+   - warning su passaggi essenziali mancanti;
+   - blocco aggiornamento checklist riservato a ruoli operativi.
+- Lista procedimenti con colonna checklist/warning e filtri opzionali su checklist incompleta e memorie in scadenza.
+- Export CSV procedimenti esteso con campi checklist.
+
+Limiti e perimetro giuridico:
+- La checklist ha funzione di supporto istruttorio e non costituisce provvedimento.
+- Non sostituisce la valutazione del responsabile del procedimento.
+- Non garantisce da sola la legittimita dell atto finale.
+- Serve valutazione giuridica caso per caso.
+
 ## Auth demo e ruoli
 L'accesso demo avviene da `/login` con autenticazione reale via email/password e sessione applicativa.
 Ruoli principali:

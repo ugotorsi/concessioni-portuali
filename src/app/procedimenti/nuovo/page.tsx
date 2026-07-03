@@ -130,6 +130,116 @@ export default async function NuovoProcedimentoPage({ searchParams }: NuovoProce
                 <Textarea id="noteIstruttorie" name="noteIstruttorie" />
               </div>
 
+              <div className="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Contraddittorio e garanzie procedimentali</p>
+                  <p className="text-xs text-slate-600">
+                    La checklist ha funzione istruttoria e non sostituisce la valutazione del responsabile del procedimento.
+                  </p>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <label className="flex items-center gap-2 text-sm text-slate-700">
+                    <input type="checkbox" name="comunicazioneAvvioInviata" className="h-4 w-4" />
+                    Comunicazione avvio inviata
+                  </label>
+                  <div className="space-y-1">
+                    <label htmlFor="dataComunicazioneAvvio" className="text-sm font-medium text-slate-700">
+                      Data comunicazione avvio
+                    </label>
+                    <Input id="dataComunicazioneAvvio" name="dataComunicazioneAvvio" type="date" />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label htmlFor="termineMemorieGiorni" className="text-sm font-medium text-slate-700">
+                      Termine memorie (giorni)
+                    </label>
+                    <Input id="termineMemorieGiorni" name="termineMemorieGiorni" type="number" min={1} />
+                  </div>
+                  <div className="space-y-1">
+                    <label htmlFor="termineMemorieScadenza" className="text-sm font-medium text-slate-700">
+                      Scadenza termine memorie
+                    </label>
+                    <Input id="termineMemorieScadenza" name="termineMemorieScadenza" type="date" />
+                  </div>
+
+                  <label className="flex items-center gap-2 text-sm text-slate-700">
+                    <input type="checkbox" name="contestazioneFormaleInviata" className="h-4 w-4" />
+                    Contestazione formale inviata
+                  </label>
+                  <div className="space-y-1">
+                    <label htmlFor="dataContestazioneFormale" className="text-sm font-medium text-slate-700">
+                      Data contestazione formale
+                    </label>
+                    <Input id="dataContestazioneFormale" name="dataContestazioneFormale" type="date" />
+                  </div>
+
+                  <label className="flex items-center gap-2 text-sm text-slate-700">
+                    <input type="checkbox" name="memorieRicevute" className="h-4 w-4" />
+                    Memorie ricevute
+                  </label>
+                  <div className="space-y-1">
+                    <label htmlFor="dataRicezioneMemorie" className="text-sm font-medium text-slate-700">
+                      Data ricezione memorie
+                    </label>
+                    <Input id="dataRicezioneMemorie" name="dataRicezioneMemorie" type="date" />
+                  </div>
+
+                  <label className="flex items-center gap-2 text-sm text-slate-700">
+                    <input type="checkbox" name="audizioneRichiesta" className="h-4 w-4" />
+                    Audizione richiesta
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-slate-700">
+                    <input type="checkbox" name="audizioneSvolta" className="h-4 w-4" />
+                    Audizione svolta
+                  </label>
+
+                  <div className="space-y-1">
+                    <label htmlFor="dataAudizione" className="text-sm font-medium text-slate-700">
+                      Data audizione
+                    </label>
+                    <Input id="dataAudizione" name="dataAudizione" type="date" />
+                  </div>
+                  <label className="flex items-center gap-2 text-sm text-slate-700">
+                    <input type="checkbox" name="sopralluogoIstruttorioSvolto" className="h-4 w-4" />
+                    Sopralluogo istruttorio svolto
+                  </label>
+
+                  <label className="flex items-center gap-2 text-sm text-slate-700">
+                    <input type="checkbox" name="controdeduzioniValutate" className="h-4 w-4" />
+                    Controdeduzioni valutate
+                  </label>
+
+                  <div className="space-y-1 md:col-span-2">
+                    <label htmlFor="propostaEsitoIstruttorio" className="text-sm font-medium text-slate-700">
+                      Proposta esito istruttorio
+                    </label>
+                    <Select id="propostaEsitoIstruttorio" name="propostaEsitoIstruttorio" defaultValue="">
+                      <option value="">Non indicata</option>
+                      {filtersData.esitiIstruttori.map((item) => (
+                        <option key={item.value} value={item.value}>
+                          {item.label}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1 md:col-span-2">
+                    <label htmlFor="motivazioneValutazione" className="text-sm font-medium text-slate-700">
+                      Motivazione valutazione
+                    </label>
+                    <Textarea id="motivazioneValutazione" name="motivazioneValutazione" />
+                  </div>
+
+                  <div className="space-y-1 md:col-span-2">
+                    <label htmlFor="noteChecklistContraddittorio" className="text-sm font-medium text-slate-700">
+                      Note checklist contraddittorio
+                    </label>
+                    <Textarea id="noteChecklistContraddittorio" name="noteChecklistContraddittorio" />
+                  </div>
+                </div>
+              </div>
+
               <div className="flex flex-wrap gap-2">
                 <Button type="submit">Salva procedimento</Button>
                 <Link

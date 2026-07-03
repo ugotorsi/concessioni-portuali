@@ -53,9 +53,9 @@ Nota: utile per MVP, ma manca piena identita legale/organizzativa (profilazione 
 
 ### Procedimento
 - Funzione giuridico-amministrativa: rappresentazione dell iter istruttorio-amministrativo (diffida, contestazione, recupero canoni, avvio decadenza/revoca).
-- Dati rilevanti: tipologia, stato, dataAvvio, dataScadenzaContraddittorio, dataProvvedimentoFinale, riferimentoNormativo.
+- Dati rilevanti: tipologia, stato, dataAvvio, dataScadenzaContraddittorio, dataProvvedimentoFinale, riferimentoNormativo, checklist contraddittorio (avvio/memorie/audizione/contestazione/valutazione/proposta esito).
 - Collegamenti: N:1 verso Concessione, opzionale N:1 verso Criticita, 1:N verso NormaImpatto.
-- Livello maturita attuale: Alto (MVP) ma workflow ancora non formalizzato.
+- Livello maturita attuale: Alto (MVP) con checklist istruttoria; workflow formale completo ancora in evoluzione.
 
 ### Sopralluogo
 - Funzione giuridico-amministrativa: evidenza tecnica sullo stato dei luoghi e conformita.
@@ -160,7 +160,7 @@ Perche la struttura e corretta per vista 360 gradi:
 | art. 36 Codice della Navigazione | Titolo concessorio, oggetto, durata, presupposti | Concessione (numeroAtto, date, tipologia, stato), Concessionario | Alta | Versionamento del titolo e atti modificativi | Alta |
 | art. 47 Codice della Navigazione | Decadenza/inadempimento e presidio fattispecie | Criticita con mapping strutturato (`rilevanzaArt47`, `letteraArt47`, `rischioDecadenza`, motivazione), Procedimento (AVVIO_DECADENZA), Pagamento | Medio-Alta | Workflow formale con prove/notifiche e step obbligati | Alta |
 | art. 54 Codice della Navigazione | Repressione occupazioni abusive/difformi | Criticita (OCCUPAZIONE_DIFFORME), Sopralluogo, Procedimento (ORDINE_RIPRISTINO) | Media | Evidenza probatoria allegati e catena decisionale | Alta |
-| legge 241/1990 | Procedimento, motivazione, partecipazione, termini | Procedimento (date/stato), Scadenza (termini), Report | Media | Responsabile procedimento, protocollazione, comunicazioni formali | Altissima |
+| legge 241/1990 | Procedimento, motivazione, partecipazione, termini | Procedimento con checklist contraddittorio (avvio, memorie, audizione, contestazione, controdeduzioni, motivazione), Scadenza, Report | Medio-Alta | Responsabile procedimento, protocollazione, comunicazioni formali e catena atti | Altissima |
 | Obblighi concessori | Monitoraggio adempimenti periodici | ObbligoConcessorio + Scadenza | Alta | Automatismi reminder/escalation | Media |
 | Canoni e morosita | Presidio economico e recupero | Pagamento, Criticita economiche, Procedimento recupero | Alta | Riconciliazione contabile esterna e interessi avanzati | Alta |
 | Sopralluoghi/verifiche tecniche | Evidenza tecnica su stato luoghi | Sopralluogo + collegamenti a Criticita/Procedimenti | Alta | Allegati tecnici strutturati e georeferenziazione | Alta |

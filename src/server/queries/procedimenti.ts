@@ -1,5 +1,10 @@
 import { addDays, differenceInCalendarDays, startOfDay } from "date-fns";
 
+import {
+  calculateChecklistCompleteness,
+  getMissingChecklistItems,
+  getProcedimentoWarningLevel,
+} from "@/lib/procedimento-checklist";
 import { prisma } from "@/lib/prisma";
 import { formatEnumLabel } from "@/lib/utils";
 import type { Prisma } from "@/generated/prisma/client";
@@ -27,9 +32,25 @@ export const PROCEDIMENTI_PERIODO_VALUES = [
   "TUTTI",
 ] as const;
 
+export const PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES = [
+  "DA_VALUTARE",
+  "ARCHIVIAZIONE",
+  "DIFFIDA",
+  "REGOLARIZZAZIONE",
+  "DECADENZA_DA_VALUTARE",
+  "REVOCA_DA_VALUTARE",
+  "ALTRO",
+] as const;
+
+export const PROCEDIMENTI_CHECKLIST_VALUES = ["TUTTE", "COMPLETA", "INCOMPLETA"] as const;
+export const PROCEDIMENTI_MEMORIE_VALUES = ["TUTTE", "IN_SCADENZA"] as const;
+
 export type ProcedimentoTipologiaValue = (typeof PROCEDIMENTO_TIPOLOGIA_VALUES)[number];
 export type ProcedimentoStatoValue = (typeof PROCEDIMENTO_STATO_VALUES)[number];
 export type ProcedimentiPeriodoValue = (typeof PROCEDIMENTI_PERIODO_VALUES)[number];
+export type ProcedimentoEsitoIstruttorioValue = (typeof PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES)[number];
+export type ProcedimentiChecklistValue = (typeof PROCEDIMENTI_CHECKLIST_VALUES)[number];
+export type ProcedimentiMemorieValue = (typeof PROCEDIMENTI_MEMORIE_VALUES)[number];
 
 export interface GetProcedimentiListParams {
   search?: string;
@@ -38,6 +59,8 @@ export interface GetProcedimentiListParams {
   concessioneId?: string;
   criticitaId?: string;
   periodo?: ProcedimentiPeriodoValue;
+  checklist?: ProcedimentiChecklistValue;
+  memorie?: ProcedimentiMemorieValue;
 }
 
 export interface ProcedimentoListItem {
@@ -49,6 +72,10 @@ export interface ProcedimentoListItem {
   dataProvvedimentoFinale: Date | null;
   stato: string;
   noteIstruttorie: string | null;
+  termineMemorieScadenza: Date | null;
+  propostaEsitoIstruttorio: string | null;
+  checklistContraddittorioCompleta: boolean;
+  checklistWarningLevel: "default" | "warning" | "danger";
   concessione: {
     id: string;
     numeroAtto: string;
@@ -80,6 +107,9 @@ export interface ProcedimentiFiltersData {
   tipologie: Array<{ value: ProcedimentoTipologiaValue; label: string }>;
   stati: Array<{ value: ProcedimentoStatoValue; label: string }>;
   periodi: Array<{ value: ProcedimentiPeriodoValue; label: string }>;
+  checklist: Array<{ value: ProcedimentiChecklistValue; label: string }>;
+  memorie: Array<{ value: ProcedimentiMemorieValue; label: string }>;
+  esitiIstruttori: Array<{ value: ProcedimentoEsitoIstruttorioValue; label: string }>;
 }
 
 export interface ProcedimentoDetail {
@@ -90,6 +120,28 @@ export interface ProcedimentoDetail {
     dataAvvio: Date | null;
     dataScadenzaContraddittorio: Date | null;
     dataProvvedimentoFinale: Date | null;
+    comunicazioneAvvioInviata: boolean;
+    dataComunicazioneAvvio: Date | null;
+    termineMemorieGiorni: number | null;
+    termineMemorieScadenza: Date | null;
+    memorieRicevute: boolean;
+    dataRicezioneMemorie: Date | null;
+    audizioneRichiesta: boolean;
+    audizioneSvolta: boolean;
+    dataAudizione: Date | null;
+    sopralluogoIstruttorioSvolto: boolean;
+    contestazioneFormaleInviata: boolean;
+    dataContestazioneFormale: Date | null;
+    controdeduzioniValutate: boolean;
+    motivazioneValutazione: string | null;
+    propostaEsitoIstruttorio: string | null;
+    checklistContraddittorioCompleta: boolean;
+    noteChecklistContraddittorio: string | null;
+    checklistMissingItems: string[];
+    checklistPercentage: number;
+    checklistCompletedItems: number;
+    checklistTotalItems: number;
+    checklistWarningLevel: "default" | "warning" | "danger";
     stato: string;
     noteIstruttorie: string | null;
     giorniResiduiContraddittorio: number | null;
@@ -125,6 +177,9 @@ export interface ProcedimentoDetail {
     descrizione: string;
     riferimentoNormativo: string | null;
     dataRilevazione: Date;
+    rilevanzaArt47: boolean;
+    letteraArt47: string | null;
+    rischioDecadenza: string | null;
   } | null;
   altreCriticitaAperte: Array<{
     id: string;
@@ -211,6 +266,8 @@ function getPeriodoWhere(periodo?: ProcedimentiPeriodoValue): Prisma.Procediment
 
 function buildWhere(params: GetProcedimentiListParams): Prisma.ProcedimentoWhereInput {
   const search = params.search?.trim();
+  const today = startOfDay(new Date());
+  const in7 = addDays(today, 7);
 
   return {
     ...(search
@@ -229,6 +286,17 @@ function buildWhere(params: GetProcedimentiListParams): Prisma.ProcedimentoWhere
     ...(params.stato ? { stato: params.stato } : {}),
     ...(params.concessioneId ? { concessioneId: params.concessioneId } : {}),
     ...(params.criticitaId ? { criticitaId: params.criticitaId } : {}),
+    ...(params.checklist === "COMPLETA"
+      ? { checklistContraddittorioCompleta: true }
+      : params.checklist === "INCOMPLETA"
+        ? { checklistContraddittorioCompleta: false }
+        : {}),
+    ...(params.memorie === "IN_SCADENZA"
+      ? {
+          termineMemorieScadenza: { gte: today, lte: in7 },
+          stato: { in: ["DA_AVVIARE", "IN_CORSO"] },
+        }
+      : {}),
     ...getPeriodoWhere(params.periodo),
   };
 }
@@ -251,6 +319,17 @@ function toListItem(
     dataAvvio: Date | null;
     dataScadenzaContraddittorio: Date | null;
     dataProvvedimentoFinale: Date | null;
+    comunicazioneAvvioInviata: boolean;
+    termineMemorieGiorni: number | null;
+    termineMemorieScadenza: Date | null;
+    memorieRicevute: boolean;
+    audizioneRichiesta: boolean;
+    audizioneSvolta: boolean;
+    contestazioneFormaleInviata: boolean;
+    controdeduzioniValutate: boolean;
+    motivazioneValutazione: string | null;
+    propostaEsitoIstruttorio: string | null;
+    checklistContraddittorioCompleta: boolean;
     stato: string;
     noteIstruttorie: string | null;
     createdAt: Date;
@@ -287,6 +366,20 @@ function toListItem(
       ? Math.abs(differenceInCalendarDays(row.dataScadenzaContraddittorio, today))
       : null;
 
+  const checklistWarningLevel = getProcedimentoWarningLevel({
+    tipologia: row.tipologia,
+    comunicazioneAvvioInviata: row.comunicazioneAvvioInviata,
+    termineMemorieGiorni: row.termineMemorieGiorni,
+    termineMemorieScadenza: row.termineMemorieScadenza,
+    memorieRicevute: row.memorieRicevute,
+    audizioneRichiesta: row.audizioneRichiesta,
+    audizioneSvolta: row.audizioneSvolta,
+    contestazioneFormaleInviata: row.contestazioneFormaleInviata,
+    controdeduzioniValutate: row.controdeduzioniValutate,
+    motivazioneValutazione: row.motivazioneValutazione,
+    propostaEsitoIstruttorio: row.propostaEsitoIstruttorio,
+  });
+
   return {
     id: row.id,
     tipologia: row.tipologia,
@@ -296,6 +389,10 @@ function toListItem(
     dataProvvedimentoFinale: row.dataProvvedimentoFinale,
     stato: row.stato,
     noteIstruttorie: row.noteIstruttorie,
+    termineMemorieScadenza: row.termineMemorieScadenza,
+    propostaEsitoIstruttorio: row.propostaEsitoIstruttorio,
+    checklistContraddittorioCompleta: row.checklistContraddittorioCompleta,
+    checklistWarningLevel,
     concessione: row.concessione,
     criticita: row.criticita,
     giorniResiduiContraddittorio,
@@ -319,6 +416,17 @@ export async function getProcedimentiList(
       dataAvvio: true,
       dataScadenzaContraddittorio: true,
       dataProvvedimentoFinale: true,
+      comunicazioneAvvioInviata: true,
+      termineMemorieGiorni: true,
+      termineMemorieScadenza: true,
+      memorieRicevute: true,
+      audizioneRichiesta: true,
+      audizioneSvolta: true,
+      contestazioneFormaleInviata: true,
+      controdeduzioniValutate: true,
+      motivazioneValutazione: true,
+      propostaEsitoIstruttorio: true,
+      checklistContraddittorioCompleta: true,
       stato: true,
       noteIstruttorie: true,
       createdAt: true,
@@ -385,6 +493,9 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
           descrizione: true,
           riferimentoNormativo: true,
           dataRilevazione: true,
+          rilevanzaArt47: true,
+          letteraArt47: true,
+          rischioDecadenza: true,
         },
       },
       concessione: {
@@ -462,6 +573,57 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
       dataRilevazione: item.dataRilevazione,
     }));
 
+  const checklistSummary = calculateChecklistCompleteness({
+    tipologia: procedimento.tipologia,
+    comunicazioneAvvioInviata: procedimento.comunicazioneAvvioInviata,
+    termineMemorieGiorni: procedimento.termineMemorieGiorni,
+    termineMemorieScadenza: procedimento.termineMemorieScadenza,
+    memorieRicevute: procedimento.memorieRicevute,
+    dataRicezioneMemorie: procedimento.dataRicezioneMemorie,
+    audizioneRichiesta: procedimento.audizioneRichiesta,
+    audizioneSvolta: procedimento.audizioneSvolta,
+    dataAudizione: procedimento.dataAudizione,
+    contestazioneFormaleInviata: procedimento.contestazioneFormaleInviata,
+    dataContestazioneFormale: procedimento.dataContestazioneFormale,
+    controdeduzioniValutate: procedimento.controdeduzioniValutate,
+    motivazioneValutazione: procedimento.motivazioneValutazione,
+    propostaEsitoIstruttorio: procedimento.propostaEsitoIstruttorio,
+  });
+
+  const checklistMissingItems = getMissingChecklistItems({
+    tipologia: procedimento.tipologia,
+    comunicazioneAvvioInviata: procedimento.comunicazioneAvvioInviata,
+    termineMemorieGiorni: procedimento.termineMemorieGiorni,
+    termineMemorieScadenza: procedimento.termineMemorieScadenza,
+    memorieRicevute: procedimento.memorieRicevute,
+    dataRicezioneMemorie: procedimento.dataRicezioneMemorie,
+    audizioneRichiesta: procedimento.audizioneRichiesta,
+    audizioneSvolta: procedimento.audizioneSvolta,
+    dataAudizione: procedimento.dataAudizione,
+    contestazioneFormaleInviata: procedimento.contestazioneFormaleInviata,
+    dataContestazioneFormale: procedimento.dataContestazioneFormale,
+    controdeduzioniValutate: procedimento.controdeduzioniValutate,
+    motivazioneValutazione: procedimento.motivazioneValutazione,
+    propostaEsitoIstruttorio: procedimento.propostaEsitoIstruttorio,
+  });
+
+  const checklistWarningLevel = getProcedimentoWarningLevel({
+    tipologia: procedimento.tipologia,
+    comunicazioneAvvioInviata: procedimento.comunicazioneAvvioInviata,
+    termineMemorieGiorni: procedimento.termineMemorieGiorni,
+    termineMemorieScadenza: procedimento.termineMemorieScadenza,
+    memorieRicevute: procedimento.memorieRicevute,
+    dataRicezioneMemorie: procedimento.dataRicezioneMemorie,
+    audizioneRichiesta: procedimento.audizioneRichiesta,
+    audizioneSvolta: procedimento.audizioneSvolta,
+    dataAudizione: procedimento.dataAudizione,
+    contestazioneFormaleInviata: procedimento.contestazioneFormaleInviata,
+    dataContestazioneFormale: procedimento.dataContestazioneFormale,
+    controdeduzioniValutate: procedimento.controdeduzioniValutate,
+    motivazioneValutazione: procedimento.motivazioneValutazione,
+    propostaEsitoIstruttorio: procedimento.propostaEsitoIstruttorio,
+  });
+
   return {
     procedimento: {
       id: procedimento.id,
@@ -470,6 +632,28 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
       dataAvvio: procedimento.dataAvvio,
       dataScadenzaContraddittorio: procedimento.dataScadenzaContraddittorio,
       dataProvvedimentoFinale: procedimento.dataProvvedimentoFinale,
+      comunicazioneAvvioInviata: procedimento.comunicazioneAvvioInviata,
+      dataComunicazioneAvvio: procedimento.dataComunicazioneAvvio,
+      termineMemorieGiorni: procedimento.termineMemorieGiorni,
+      termineMemorieScadenza: procedimento.termineMemorieScadenza,
+      memorieRicevute: procedimento.memorieRicevute,
+      dataRicezioneMemorie: procedimento.dataRicezioneMemorie,
+      audizioneRichiesta: procedimento.audizioneRichiesta,
+      audizioneSvolta: procedimento.audizioneSvolta,
+      dataAudizione: procedimento.dataAudizione,
+      sopralluogoIstruttorioSvolto: procedimento.sopralluogoIstruttorioSvolto,
+      contestazioneFormaleInviata: procedimento.contestazioneFormaleInviata,
+      dataContestazioneFormale: procedimento.dataContestazioneFormale,
+      controdeduzioniValutate: procedimento.controdeduzioniValutate,
+      motivazioneValutazione: procedimento.motivazioneValutazione,
+      propostaEsitoIstruttorio: procedimento.propostaEsitoIstruttorio,
+      checklistContraddittorioCompleta: procedimento.checklistContraddittorioCompleta,
+      noteChecklistContraddittorio: procedimento.noteChecklistContraddittorio,
+      checklistMissingItems,
+      checklistPercentage: checklistSummary.percentage,
+      checklistCompletedItems: checklistSummary.completed,
+      checklistTotalItems: checklistSummary.total,
+      checklistWarningLevel,
       stato: procedimento.stato,
       noteIstruttorie: procedimento.noteIstruttorie,
       giorniResiduiContraddittorio,
@@ -585,6 +769,19 @@ export async function getProcedimentiFilters(): Promise<ProcedimentiFiltersData>
       { value: "SCADUTI", label: "Scaduti" },
       { value: "CONCLUSI", label: "Conclusi" },
     ],
+    checklist: [
+      { value: "TUTTE", label: "Checklist (tutte)" },
+      { value: "INCOMPLETA", label: "Checklist incompleta" },
+      { value: "COMPLETA", label: "Checklist completa" },
+    ],
+    memorie: [
+      { value: "TUTTE", label: "Memorie (tutte)" },
+      { value: "IN_SCADENZA", label: "Memorie in scadenza (7gg)" },
+    ],
+    esitiIstruttori: PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES.map((value) => ({
+      value,
+      label: formatEnumLabel(value),
+    })),
   };
 }
 

@@ -223,6 +223,19 @@ export const StatoProcedimento = {
 export type StatoProcedimento = (typeof StatoProcedimento)[keyof typeof StatoProcedimento]
 
 
+export const EsitoIstruttorioProcedimento = {
+  DA_VALUTARE: 'DA_VALUTARE',
+  ARCHIVIAZIONE: 'ARCHIVIAZIONE',
+  DIFFIDA: 'DIFFIDA',
+  REGOLARIZZAZIONE: 'REGOLARIZZAZIONE',
+  DECADENZA_DA_VALUTARE: 'DECADENZA_DA_VALUTARE',
+  REVOCA_DA_VALUTARE: 'REVOCA_DA_VALUTARE',
+  ALTRO: 'ALTRO'
+} as const
+
+export type EsitoIstruttorioProcedimento = (typeof EsitoIstruttorioProcedimento)[keyof typeof EsitoIstruttorioProcedimento]
+
+
 export const EsitoSopralluogo = {
   POSITIVO: 'POSITIVO',
   CON_RILIEVI: 'CON_RILIEVI',

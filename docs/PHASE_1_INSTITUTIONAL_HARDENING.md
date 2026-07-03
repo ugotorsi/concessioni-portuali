@@ -154,6 +154,17 @@ Stato attuale (Issue #5 baseline implementata):
   - visibilita checklist nel dettaglio procedimento;
   - tracciamento modifiche checklist in audit trail.
 
+Stato attuale (Issue #7 baseline implementata):
+- estensione modello `Procedimento` con campi checklist contraddittorio e `propostaEsitoIstruttorio` strutturata;
+- utility assistiva `src/lib/procedimento-checklist.ts` per completezza/missing/warning senza automatismi decisori;
+- creazione e aggiornamento checklist in server actions con audit `PROCEDIMENTO_CREATE` e `PROCEDIMENTO_CHECKLIST_UPDATE`;
+- UI nuova/dettaglio/lista procedimenti allineata con badge completa/incompleta, warning e filtri opzionali;
+- export CSV procedimenti esteso con colonne checklist e seed con casi completo/incompleto/art.47 decadenziale.
+
+Limiti espliciti:
+- la checklist non costituisce provvedimento e non sostituisce il responsabile del procedimento;
+- la completezza tecnica della checklist non equivale a legittimita automatica dell atto finale.
+
 ### 3.8 DPIA/GDPR documentation draft
 - Obiettivo: redigere bozza operativa DPIA/GDPR orientata al sistema e ai trattamenti principali.
 - Motivo strategico: prerequisito frequente per valutazioni istituzionali e procurement.

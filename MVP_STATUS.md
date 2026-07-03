@@ -33,6 +33,8 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Smoke E2E su auth/ruoli, security headers e accesso audit
 - Mapping strutturato art. 47 su Criticita (Issue #2)
 - Filtri/UI/export Criticita allineati al profilo art.47 e rischio decadenza
+- Checklist contraddittorio su Procedimento con update auditabile (Issue #7)
+- Lista/dettaglio/export procedimenti estesi con stato checklist e warning istruttori
 - Export report CSV verificato
 - PDF report verificato su report esistente
 
@@ -43,6 +45,7 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Audit tamper-evident baseline ma non conservazione forense/immutabile a norma
 - Coverage test iniziale focalizzata su flussi core, non ancora esaustiva su tutte le route/actions
 - Stato Git da consolidare in base alla policy del team
+- La checklist procedimentale non e decisore automatico e richiede valutazione giuridica caso per caso
 
 ## Prossimi step
 1. Estendere progressivamente i test su export/report PDF e procedure critiche

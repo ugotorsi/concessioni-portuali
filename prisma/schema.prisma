@@ -170,6 +170,16 @@ enum StatoProcedimento {
   ARCHIVIATO
 }
 
+enum EsitoIstruttorioProcedimento {
+  DA_VALUTARE
+  ARCHIVIAZIONE
+  DIFFIDA
+  REGOLARIZZAZIONE
+  DECADENZA_DA_VALUTARE
+  REVOCA_DA_VALUTARE
+  ALTRO
+}
+
 enum EsitoSopralluogo {
   POSITIVO
   CON_RILIEVI
@@ -404,6 +414,23 @@ model Procedimento {
   dataAvvio                   DateTime?
   dataScadenzaContraddittorio DateTime?
   dataProvvedimentoFinale     DateTime?
+  comunicazioneAvvioInviata   Boolean               @default(false)
+  dataComunicazioneAvvio      DateTime?
+  termineMemorieGiorni        Int?
+  termineMemorieScadenza      DateTime?
+  memorieRicevute             Boolean               @default(false)
+  dataRicezioneMemorie        DateTime?
+  audizioneRichiesta          Boolean               @default(false)
+  audizioneSvolta             Boolean               @default(false)
+  dataAudizione               DateTime?
+  sopralluogoIstruttorioSvolto Boolean              @default(false)
+  contestazioneFormaleInviata Boolean               @default(false)
+  dataContestazioneFormale    DateTime?
+  controdeduzioniValutate     Boolean               @default(false)
+  motivazioneValutazione      String?
+  propostaEsitoIstruttorio    EsitoIstruttorioProcedimento?
+  checklistContraddittorioCompleta Boolean          @default(false)
+  noteChecklistContraddittorio String?
   stato                       StatoProcedimento
   noteIstruttorie             String?
   createdAt                   DateTime              @default(now())
@@ -418,6 +445,9 @@ model Procedimento {
   @@index([stato])
   @@index([tipologia])
   @@index([dataScadenzaContraddittorio])
+  @@index([checklistContraddittorioCompleta])
+  @@index([termineMemorieScadenza])
+  @@index([contestazioneFormaleInviata])
   @@index([createdAt])
 }
 

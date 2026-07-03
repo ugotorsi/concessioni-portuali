@@ -52,3 +52,19 @@ export function ProcedimentoGiorniBadge(args: {
 
   return <Badge>N/D</Badge>;
 }
+
+export function ProcedimentoChecklistBadge({ complete }: { complete: boolean }) {
+  return <Badge variant={complete ? "success" : "warning"}>{complete ? "Checklist completa" : "Checklist incompleta"}</Badge>;
+}
+
+export function ProcedimentoWarningBadge({ level }: { level: "default" | "warning" | "danger" }) {
+  if (level === "danger") {
+    return <Badge variant="danger">Attenzione alta</Badge>;
+  }
+
+  if (level === "warning") {
+    return <Badge variant="warning">Attenzione media</Badge>;
+  }
+
+  return <Badge variant="default">Nessun alert</Badge>;
+}

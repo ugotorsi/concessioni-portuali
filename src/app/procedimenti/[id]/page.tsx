@@ -5,12 +5,17 @@ import { GravitaBadge, StatoBadge as CriticitaStatoBadge } from "@/components/cr
 import { AppShell } from "@/components/layout/AppShell";
 import {
   ProcedimentoGiorniBadge,
+  ProcedimentoChecklistBadge,
   ProcedimentoStatoBadge,
   ProcedimentoTipologiaBadge,
+  ProcedimentoWarningBadge,
 } from "@/components/procedimenti/ProcedimentiBadges";
 import { ScadenzaStatoBadge } from "@/components/scadenze/ScadenzeBadges";
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import {
   Table,
   TableBody,
@@ -19,89 +24,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/Table";
+import { Textarea } from "@/components/ui/Textarea";
+import { canManageProcedimenti, requireRole } from "@/lib/auth";
+import { getChecklistContraddittorioItems } from "@/lib/procedimento-checklist";
 import { formatCurrencyEUR, formatDateIT, formatEnumLabel } from "@/lib/utils";
+import { updateProcedimentoChecklistAction } from "@/server/actions/procedimenti";
 import { getLetturaProcedimentale, getProcedimentoDetail } from "@/server/queries/procedimenti";
 import { getNormeForProcedimento } from "@/server/queries/normativa";
+
+import { PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES } from "@/server/queries/procedimenti";
 
 interface ProcedimentoDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
-function getChecklistItems(tipologia: string): string[] {
-  if (tipologia === "AVVIO_DECADENZA") {
-    return [
-      "Individuazione obbligo violato",
-      "Qualificazione fattispecie art. 47 cod. nav.",
-      "Raccolta evidenze documentali",
-      "Eventuale sopralluogo",
-      "Comunicazione avvio procedimento",
-      "Termine per controdeduzioni",
-      "Valutazione memorie",
-      "Verifica proporzionalita",
-      "Eventuale parere Comitato Portuale ove necessario",
-      "Proposta conclusiva agli uffici competenti",
-    ];
-  }
-
-  if (tipologia === "AVVIO_REVOCA") {
-    return [
-      "Individuazione interesse pubblico",
-      "Verifica durata concessione",
-      "Verifica opere e possibile indennizzo",
-      "Raccolta documentazione",
-      "Comunicazione avvio procedimento",
-      "Valutazione osservazioni",
-      "Proposta conclusiva",
-    ];
-  }
-
-  if (tipologia === "RECUPERO_CANONI") {
-    return [
-      "Verifica titolo",
-      "Ricostruzione importi dovuti",
-      "Verifica pagamenti ricevuti",
-      "Calcolo residuo",
-      "Sollecito/diffida",
-      "Eventuale procedimento successivo",
-    ];
-  }
-
-  if (tipologia === "ORDINE_RIPRISTINO") {
-    return [
-      "Verifica difformita",
-      "Confronto planimetrie",
-      "Sopralluogo/foto",
-      "Riferimento art. 54 cod. nav.",
-      "Termine per ripristino",
-      "Verifica adempimento",
-    ];
-  }
-
-  if (tipologia === "NUOVA_PROCEDURA") {
-    return [
-      "Verifica stato bene",
-      "Storico criticità",
-      "Valore economico",
-      "Clausole tecniche",
-      "Clausole manutentive",
-      "Criteri di valutazione",
-      "Schema avviso/bando",
-    ];
-  }
-
-  return [
-    "Raccolta documenti",
-    "Verifica titolo",
-    "Comunicazione o richiesta chiarimenti",
-    "Termine riscontro",
-    "Valutazione esiti",
-    "Proposta conclusiva",
-  ];
-}
-
 export const dynamic = "force-dynamic";
 
 export default async function ProcedimentoDetailPage({ params }: ProcedimentoDetailPageProps) {
+  const role = await requireRole();
+  const canWriteChecklist = canManageProcedimenti(role);
   const { id } = await params;
   const detail = await getProcedimentoDetail(id);
 
@@ -109,7 +50,7 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
     notFound();
   }
 
-  const checklist = getChecklistItems(detail.procedimento.tipologia);
+  const checklist = getChecklistContraddittorioItems(detail.procedimento);
 
   const lettura = getLetturaProcedimentale({
     tipologia: detail.procedimento.tipologia,
@@ -223,16 +164,136 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
 
           <Card>
             <CardHeader>
-              <CardTitle>2. Checklist istruttoria</CardTitle>
+              <CardTitle>2. Checklist contraddittorio</CardTitle>
+              <CardDescription>
+                Supporto istruttorio non vincolante: non sostituisce la valutazione del responsabile del procedimento.
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 text-sm text-slate-700">
-                {checklist.map((item, index) => (
-                  <li key={`${index}-${item}`} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
-                    {item}
-                  </li>
+            <CardContent className="space-y-4">
+              <div className="grid gap-3 md:grid-cols-2">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Stato checklist</p>
+                  <div className="mt-1">
+                    <ProcedimentoChecklistBadge complete={detail.procedimento.checklistContraddittorioCompleta} />
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Warning</p>
+                  <div className="mt-1">
+                    <ProcedimentoWarningBadge level={detail.procedimento.checklistWarningLevel} />
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Completamento</p>
+                  <p className="mt-1 text-slate-900">
+                    {detail.procedimento.checklistCompletedItems}/{detail.procedimento.checklistTotalItems} ({detail.procedimento.checklistPercentage}%)
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Termine memorie</p>
+                  <p className="mt-1 text-slate-900">
+                    {detail.procedimento.termineMemorieScadenza ? formatDateIT(detail.procedimento.termineMemorieScadenza) : "-"}
+                  </p>
+                </div>
+              </div>
+
+              {detail.criticitaCollegata?.rilevanzaArt47 ? (
+                <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                  Per profili decadenziali ex art. 47, la checklist aiuta a verificare il rispetto del contraddittorio prima di ogni valutazione finale.
+                </p>
+              ) : null}
+
+              <div className="space-y-2">
+                {checklist.map((item) => (
+                  <div key={item.key} className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+                    <div>
+                      <p className="text-slate-900">{item.label}</p>
+                      <p className="text-xs text-slate-500">{item.required ? "Passaggio essenziale" : "Passaggio consigliato"}</p>
+                    </div>
+                    <Badge variant={item.completed ? "success" : item.required ? "danger" : "default"}>
+                      {item.completed ? "Presente" : item.required ? "Mancante" : "Non compilato"}
+                    </Badge>
+                  </div>
                 ))}
-              </ul>
+              </div>
+
+              {detail.procedimento.checklistMissingItems.length > 0 ? (
+                <div className="rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
+                  <p className="font-medium">Passaggi essenziali mancanti</p>
+                  <ul className="mt-2 list-disc pl-5">
+                    {detail.procedimento.checklistMissingItems.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              <div className="grid gap-3 md:grid-cols-2 text-sm text-slate-700">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Motivazione valutazione</p>
+                  <p className="mt-1">{detail.procedimento.motivazioneValutazione ?? "-"}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Proposta esito istruttorio</p>
+                  <p className="mt-1">{detail.procedimento.propostaEsitoIstruttorio ? formatEnumLabel(detail.procedimento.propostaEsitoIstruttorio) : "-"}</p>
+                </div>
+                <div className="md:col-span-2">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Nota checklist contraddittorio</p>
+                  <p className="mt-1">{detail.procedimento.noteChecklistContraddittorio ?? "-"}</p>
+                </div>
+              </div>
+
+              {canWriteChecklist ? (
+                <form action={updateProcedimentoChecklistAction} className="space-y-3 rounded-md border border-slate-200 bg-white p-3">
+                  <input type="hidden" name="procedimentoId" value={detail.procedimento.id} />
+                  <p className="text-sm font-medium text-slate-900">Aggiorna checklist</p>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <label className="flex items-center gap-2 text-sm text-slate-700">
+                      <input type="checkbox" name="comunicazioneAvvioInviata" defaultChecked={detail.procedimento.comunicazioneAvvioInviata} className="h-4 w-4" />
+                      Comunicazione avvio inviata
+                    </label>
+                    <Input name="dataComunicazioneAvvio" type="date" defaultValue={detail.procedimento.dataComunicazioneAvvio ? detail.procedimento.dataComunicazioneAvvio.toISOString().slice(0, 10) : ""} />
+                    <Input name="termineMemorieGiorni" type="number" min={1} defaultValue={detail.procedimento.termineMemorieGiorni ?? ""} />
+                    <Input name="termineMemorieScadenza" type="date" defaultValue={detail.procedimento.termineMemorieScadenza ? detail.procedimento.termineMemorieScadenza.toISOString().slice(0, 10) : ""} />
+                    <label className="flex items-center gap-2 text-sm text-slate-700">
+                      <input type="checkbox" name="contestazioneFormaleInviata" defaultChecked={detail.procedimento.contestazioneFormaleInviata} className="h-4 w-4" />
+                      Contestazione formale inviata
+                    </label>
+                    <Input name="dataContestazioneFormale" type="date" defaultValue={detail.procedimento.dataContestazioneFormale ? detail.procedimento.dataContestazioneFormale.toISOString().slice(0, 10) : ""} />
+                    <label className="flex items-center gap-2 text-sm text-slate-700">
+                      <input type="checkbox" name="memorieRicevute" defaultChecked={detail.procedimento.memorieRicevute} className="h-4 w-4" />
+                      Memorie ricevute
+                    </label>
+                    <Input name="dataRicezioneMemorie" type="date" defaultValue={detail.procedimento.dataRicezioneMemorie ? detail.procedimento.dataRicezioneMemorie.toISOString().slice(0, 10) : ""} />
+                    <label className="flex items-center gap-2 text-sm text-slate-700">
+                      <input type="checkbox" name="audizioneRichiesta" defaultChecked={detail.procedimento.audizioneRichiesta} className="h-4 w-4" />
+                      Audizione richiesta
+                    </label>
+                    <label className="flex items-center gap-2 text-sm text-slate-700">
+                      <input type="checkbox" name="audizioneSvolta" defaultChecked={detail.procedimento.audizioneSvolta} className="h-4 w-4" />
+                      Audizione svolta
+                    </label>
+                    <Input name="dataAudizione" type="date" defaultValue={detail.procedimento.dataAudizione ? detail.procedimento.dataAudizione.toISOString().slice(0, 10) : ""} />
+                    <label className="flex items-center gap-2 text-sm text-slate-700">
+                      <input type="checkbox" name="sopralluogoIstruttorioSvolto" defaultChecked={detail.procedimento.sopralluogoIstruttorioSvolto} className="h-4 w-4" />
+                      Sopralluogo istruttorio svolto
+                    </label>
+                    <label className="flex items-center gap-2 text-sm text-slate-700">
+                      <input type="checkbox" name="controdeduzioniValutate" defaultChecked={detail.procedimento.controdeduzioniValutate} className="h-4 w-4" />
+                      Controdeduzioni valutate
+                    </label>
+                    <Select name="propostaEsitoIstruttorio" defaultValue={detail.procedimento.propostaEsitoIstruttorio ?? ""}>
+                      <option value="">Nessuna proposta</option>
+                      {PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES.map((item) => (
+                        <option key={item} value={item}>{formatEnumLabel(item)}</option>
+                      ))}
+                    </Select>
+                    <Textarea name="motivazioneValutazione" defaultValue={detail.procedimento.motivazioneValutazione ?? ""} className="md:col-span-2" />
+                    <Textarea name="noteChecklistContraddittorio" defaultValue={detail.procedimento.noteChecklistContraddittorio ?? ""} className="md:col-span-2" />
+                  </div>
+                  <Button type="submit">Aggiorna checklist</Button>
+                </form>
+              ) : null}
             </CardContent>
           </Card>
         </section>

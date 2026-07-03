@@ -1687,6 +1687,23 @@ export const ProcedimentoScalarFieldEnum = {
   dataAvvio: 'dataAvvio',
   dataScadenzaContraddittorio: 'dataScadenzaContraddittorio',
   dataProvvedimentoFinale: 'dataProvvedimentoFinale',
+  comunicazioneAvvioInviata: 'comunicazioneAvvioInviata',
+  dataComunicazioneAvvio: 'dataComunicazioneAvvio',
+  termineMemorieGiorni: 'termineMemorieGiorni',
+  termineMemorieScadenza: 'termineMemorieScadenza',
+  memorieRicevute: 'memorieRicevute',
+  dataRicezioneMemorie: 'dataRicezioneMemorie',
+  audizioneRichiesta: 'audizioneRichiesta',
+  audizioneSvolta: 'audizioneSvolta',
+  dataAudizione: 'dataAudizione',
+  sopralluogoIstruttorioSvolto: 'sopralluogoIstruttorioSvolto',
+  contestazioneFormaleInviata: 'contestazioneFormaleInviata',
+  dataContestazioneFormale: 'dataContestazioneFormale',
+  controdeduzioniValutate: 'controdeduzioniValutate',
+  motivazioneValutazione: 'motivazioneValutazione',
+  propostaEsitoIstruttorio: 'propostaEsitoIstruttorio',
+  checklistContraddittorioCompleta: 'checklistContraddittorioCompleta',
+  noteChecklistContraddittorio: 'noteChecklistContraddittorio',
   stato: 'stato',
   noteIstruttorie: 'noteIstruttorie',
   createdAt: 'createdAt',
@@ -2165,6 +2182,20 @@ export type EnumTipologiaProcedimentoFieldRefInput<$PrismaModel> = FieldRefInput
  * Reference to a field of type 'TipologiaProcedimento[]'
  */
 export type ListEnumTipologiaProcedimentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipologiaProcedimento[]'>
+    
+
+
+/**
+ * Reference to a field of type 'EsitoIstruttorioProcedimento'
+ */
+export type EnumEsitoIstruttorioProcedimentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EsitoIstruttorioProcedimento'>
+    
+
+
+/**
+ * Reference to a field of type 'EsitoIstruttorioProcedimento[]'
+ */
+export type ListEnumEsitoIstruttorioProcedimentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EsitoIstruttorioProcedimento[]'>
     
 
 
