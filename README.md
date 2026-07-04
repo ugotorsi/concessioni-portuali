@@ -163,6 +163,19 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
 - Ogni scenario espone collegamenti reali a concessione, criticita, procedimento e report/PDF.
 - Presidio comunicativo: "elemento da valutare", "profilo istruttorio", "supporto al responsabile del procedimento".
 
+## Demo guidata AI-led (Issue #20)
+- Nuova pagina dedicata: `/demo-guidata`.
+- Presentazione interattiva a slide con storytelling istituzionale e speaker notes AI.
+- Posizionamento esplicito: non è un gestionale, è una piattaforma intelligente di governo istruttorio.
+- Link diretti a scenari demo, fascicolo documentale, procedimenti, mappa e report.
+- Focus su automazione del procedimento, non della decisione.
+- Sezione business plan con modello di adozione graduale e roadmap 30/60/90 giorni.
+
+Perimetro e limiti:
+- l AI agisce come copilota istruttorio e non adotta provvedimenti;
+- nessun automatismo decisionale su decadenza/revoca o altri esiti amministrativi;
+- la demo guidata ha finalità illustrativa istituzionale e di supporto al pilot.
+
 ## Mappa demo territoriale baseline (Issue #10)
 - Nuova pagina dedicata: `/mappa`.
 - Vista geografica placeholder GIS-ready senza provider esterni/API key obbligatorie.

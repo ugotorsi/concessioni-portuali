@@ -48,6 +48,7 @@ const backofficeNavItems: NavItem[] = [
   { href: "/ai", label: "Assistente AI", icon: Lightbulb },
   { href: "/demo", label: "Demo", icon: Presentation },
   { href: "/demo-scenari", label: "Scenari demo", icon: Presentation },
+  { href: "/demo-guidata", label: "Demo guidata", icon: Presentation },
 ];
 
 const adspNavItems: NavItem[] = [
@@ -59,6 +60,7 @@ const adspNavItems: NavItem[] = [
   { href: "/normativa", label: "Normativa", icon: Library },
   { href: "/demo", label: "Demo", icon: Presentation },
   { href: "/demo-scenari", label: "Scenari demo", icon: Presentation },
+  { href: "/demo-guidata", label: "Demo guidata", icon: Presentation },
 ];
 
 interface SidebarProps {

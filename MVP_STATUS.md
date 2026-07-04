@@ -52,6 +52,7 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Test unit su PDF service e test E2E policy download PDF per ruolo/validazione
 - Baseline fascicolo documentale (Issue #18): upload/download protetto, metadati estesi, collegamento multi-entita, stato `ATTIVO/ARCHIVIATO`, audit dedicato, pagina `/documenti` e integrazione su dettagli entita
 - Baseline protocollo/PEC metadata (Issue #19): metadati istruttori su documenti (direzione, canale, protocollo, Message-ID/ricevute PEC), warning ricevute incomplete e sintesi in report/PDF
+- Demo guidata AI-led (Issue #20): sezione `/demo-guidata` con slide navigabili, speaker notes AI, link rapidi a scenari/fascicolo/mappa/report e narrativa istituzionale su automazione del procedimento (non della decisione)
 - Seed documentale locale attivo con file su storage configurabile (`DOCUMENT_STORAGE_ROOT`) e limiti upload (`DOCUMENT_MAX_FILE_MB`)
 - Warning Turbopack su filesystem tracing document storage risolto con isolamento runtime server-side del modulo storage (build pulita, senza warning NFT)
 - Baseline mappa demo territoriale (Issue #10): route `/mappa` GIS-ready con lista marker, placeholder map UI e link rapidi a concessioni/criticita/sopralluoghi
@@ -101,6 +102,7 @@ Copertura baseline CI:
 - Nessun coverage gate obbligatorio in pipeline
 - Baseline GIS senza PostGIS, senza cartografia ufficiale e senza integrazione SIT/geoportale in questa fase
 - Metadati protocollo/PEC tracciati solo a fini istruttori: nessuna integrazione PEC/protocollo a valore legale in questa fase
+- Demo guidata AI-led orientata a storytelling istituzionale/pilot: non costituisce automazione decisionale o supporto decisorio vincolante
 
 ## Prossimi step
 1. Estendere progressivamente i test su export/report PDF e procedure critiche

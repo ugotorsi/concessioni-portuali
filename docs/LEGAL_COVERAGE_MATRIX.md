@@ -139,6 +139,16 @@ Perche la struttura e corretta per vista 360 gradi:
   - DEMO-05 - Istanza di parte e art. 10-bis (preavviso e osservazioni tracciate caso per caso).
 - Presidio giuridico-comunicativo: supporto al responsabile del procedimento, senza automatismi decisori su decadenza/revoca.
 
+## Demo guidata AI-led collegata (Issue #20)
+- Pagina dedicata: `/demo-guidata`.
+- Obiettivo: presentazione istituzionale guidata del progetto come piattaforma intelligente di governo istruttorio, non come gestionale tradizionale.
+- Copertura narrativa:
+  - AI come copilota istruttorio;
+  - automazione del procedimento, non della decisione;
+  - collegamento tra concessioni, criticità, procedimenti, documenti, protocollo/PEC, mappa e report;
+  - roadmap pilot 30/60/90 giorni e modello di adozione graduale.
+- Presidio giuridico-comunicativo: la demo non attribuisce all AI poteri decisionali e non configura provvedimenti automatici.
+
 ## 4. Campi giuridicamente sensibili
 | Entita | Campo | Rilevanza giuridica | Rischio se mancante/errato | Miglioramento consigliato |
 |---|---|---|---|---|
