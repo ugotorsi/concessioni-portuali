@@ -15,6 +15,9 @@ jobs:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/concessioni_test?schema=public
       NEXTAUTH_SECRET: test-secret
       NEXTAUTH_URL: http://localhost:3000
+      AUTH_MAX_FAILED_ATTEMPTS: 5
+      AUTH_LOCKOUT_MINUTES: 15
+      AUTH_PASSWORD_MIN_LENGTH: 10
       RATE_LIMIT_BACKEND: memory
     steps:
       - name: Checkout
@@ -63,6 +66,9 @@ jobs:
       NEXTAUTH_SECRET: test-secret
       NEXTAUTH_URL: http://localhost:3000
       CI: true
+      AUTH_MAX_FAILED_ATTEMPTS: 5
+      AUTH_LOCKOUT_MINUTES: 15
+      AUTH_PASSWORD_MIN_LENGTH: 10
       RATE_LIMIT_BACKEND: memory
     steps:
       - name: Checkout

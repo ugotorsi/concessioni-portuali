@@ -34,11 +34,12 @@ function getErrorMessage(error: string | undefined): string | null {
 
   switch (error) {
     case "invalid":
-      return "Credenziali non valide. Verifica email e password.";
+    case "CredentialsSignin":
+      return "Credenziali non valide o account temporaneamente bloccato.";
     case "missing":
       return "Inserisci email e password per accedere.";
     default:
-      return "Accesso non riuscito. Riprova.";
+      return "Credenziali non valide o account temporaneamente bloccato.";
   }
 }
 

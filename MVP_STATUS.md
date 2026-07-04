@@ -22,6 +22,8 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Prisma validate/generate/push verdi con DB attivo
 - Seed demo eseguibile e completato
 - Accesso demo reale email/password con utenti persistenti e ruoli applicati
+- Baseline auth hardening: lockout tentativi falliti, reset contatori su login valido e messaggistica errore generica (Issue #15)
+- Campi MFA-ready sul modello utente introdotti (Issue #15)
 - Accessi ruolo-based verificati (ADMIN e VIEWER_ADSP)
 - Middleware centralizzato con route protection e redirect anonimi
 - Security headers baseline applicati
@@ -74,7 +76,7 @@ Copertura baseline CI:
 ## Anomalie residue
 - Backend memory mantenuto solo come fallback demo/dev; per produzione multi-istanza necessario backend distribuito (Upstash/Redis) correttamente configurato
 - Hardening avanzato (WAF/CSP completa) non ancora implementato
-- Non ancora inclusi SSO/SAML/OIDC enterprise e MFA (fuori scope Phase 1 Issue #1)
+- Non ancora inclusi SSO/SAML/OIDC enterprise e MFA end-to-end (fuori scope current baseline)
 - Audit tamper-evident baseline ma non conservazione forense/immutabile a norma
 - Coverage test iniziale focalizzata su flussi core, non ancora esaustiva su tutte le route/actions
 - Stato Git da consolidare in base alla policy del team

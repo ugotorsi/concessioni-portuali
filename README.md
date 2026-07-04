@@ -133,6 +133,16 @@ Credenziali demo principali:
 
 Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie per compatibilita demo locale.
 
+## Auth hardening baseline (Issue #15)
+- Baseline account lockout su tentativi falliti (soglia e finestra configurabili via env).
+- Messaggistica di login uniformata e generica per ridurre leakage informativo.
+- Campi utente predisposti per MFA (flag/secret/recovery codes), senza enforcement MFA end-to-end in questa fase.
+- Password policy utility disponibile per flussi di cambio/impostazione password successivi, senza bloccare retroattivamente le credenziali demo seed esistenti.
+- Variabili env introdotte:
+   - `AUTH_MAX_FAILED_ATTEMPTS`
+   - `AUTH_LOCKOUT_MINUTES`
+   - `AUTH_PASSWORD_MIN_LENGTH`
+
 `VIEWER_ADSP` e consultivo: accesso a viste read-only e restrizioni su aree operative (AI e creazione nuove pratiche).
 
 ## AI, normativa, export
@@ -200,7 +210,7 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
 - Rate limiting in-memory adatto a demo/singola istanza; per produzione serve soluzione distribuita (es. Redis/Upstash).
 - Il backend `memory` resta solo fallback dev/demo e non sostituisce controlli edge (WAF/API gateway) in produzione.
 - CSP completa e tuning avanzato (WAF, policy enterprise) restano step successivi.
-- Questa fase non include ancora SSO/SAML/OIDC enterprise ne MFA (previsti nelle fasi successive).
+- Questa fase non include ancora SSO/SAML/OIDC enterprise ne MFA end-to-end (previsti nelle fasi successive).
 - `.env.example` può essere ignorato da `.gitignore` se e presente la regola `.env*`.
 - L'audit trail attuale non e una conservazione legale/fisicamente immutabile (non sostituisce SIEM/WORM).
 - Per produzione sono necessari: policy DB append-only, retention/backup, firma e conservazione a norma.

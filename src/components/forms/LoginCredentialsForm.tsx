@@ -34,7 +34,7 @@ export function LoginCredentialsForm({ initialErrorMessage }: LoginCredentialsFo
     });
 
     if (!result || result.error) {
-      setErrorMessage("Credenziali non valide. Verifica email e password.");
+      setErrorMessage("Credenziali non valide o account temporaneamente bloccato.");
       setIsSubmitting(false);
       return;
     }

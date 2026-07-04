@@ -38,3 +38,27 @@ test("auth + role redirects baseline", async ({ page, context }) => {
   await page.goto("/dashboard");
   await expect(page).toHaveURL(/\/login/);
 });
+
+test("generic auth error and lockout baseline", async ({ page }) => {
+  await page.goto("/login");
+
+  await page.getByTestId("login-email").fill("lockout@demo.local");
+  await page.getByTestId("login-password").fill("bad-password");
+  await page.getByTestId("login-submit").click();
+
+  await expect(page.getByText("Credenziali non valide o account temporaneamente bloccato.")).toBeVisible();
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    await page.getByTestId("login-email").fill("lockout@demo.local");
+    await page.getByTestId("login-password").fill("wrong-password");
+    await page.getByTestId("login-submit").click();
+    await expect(page).toHaveURL(/\/login$/);
+  }
+
+  await page.getByTestId("login-email").fill("lockout@demo.local");
+  await page.getByTestId("login-password").fill("lockout123");
+  await page.getByTestId("login-submit").click();
+
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(page.getByText("Credenziali non valide o account temporaneamente bloccato.")).toBeVisible();
+});

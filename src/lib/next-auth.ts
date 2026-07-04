@@ -5,10 +5,32 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/prisma";
 
+const DUMMY_PASSWORD_HASH = "$2a$10$7x44xI7qxyfGeQ8YV6f8wum8Iat3A80efjhbj4AtNQ35n4NQH6aQW";
+
 const credentialsSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
 });
+
+function getAuthMaxFailedAttempts(): number {
+  const parsed = Number.parseInt(process.env.AUTH_MAX_FAILED_ATTEMPTS ?? "5", 10);
+
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return 5;
+  }
+
+  return parsed;
+}
+
+function getAuthLockoutMinutes(): number {
+  const parsed = Number.parseInt(process.env.AUTH_LOCKOUT_MINUTES ?? "15", 10);
+
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return 15;
+  }
+
+  return parsed;
+}
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET ?? "phase1-demo-auth-secret-change-me",
@@ -32,18 +54,69 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        const now = new Date();
+        const maxFailedAttempts = getAuthMaxFailedAttempts();
+        const lockoutMinutes = getAuthLockoutMinutes();
         const email = parsed.data.email.toLowerCase();
-        const user = await prisma.user.findUnique({ where: { email } });
+        const user = await prisma.user.findUnique({
+          where: { email },
+          select: {
+            id: true,
+            email: true,
+            nome: true,
+            ruolo: true,
+            attivo: true,
+            passwordHash: true,
+            failedLoginAttempts: true,
+            lockedUntil: true,
+            mfaEnabled: true,
+          },
+        });
 
-        if (!user || !user.attivo || !user.passwordHash) {
+        if (!user) {
+          await bcrypt.compare(parsed.data.password, DUMMY_PASSWORD_HASH);
+          return null;
+        }
+
+        if (!user.attivo || !user.passwordHash) {
+          return null;
+        }
+
+        if (user.lockedUntil && user.lockedUntil > now) {
           return null;
         }
 
         const isPasswordValid = await bcrypt.compare(parsed.data.password, user.passwordHash);
 
         if (!isPasswordValid) {
+          const updatedAttempts = user.failedLoginAttempts + 1;
+          const shouldLock = updatedAttempts >= maxFailedAttempts;
+
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              failedLoginAttempts: updatedAttempts,
+              lastFailedLoginAt: now,
+              lockedUntil: shouldLock ? new Date(now.getTime() + lockoutMinutes * 60 * 1000) : null,
+            },
+          });
+
           return null;
         }
+
+        if (user.mfaEnabled) {
+          return null;
+        }
+
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            failedLoginAttempts: 0,
+            lockedUntil: null,
+            lastFailedLoginAt: null,
+            lastLoginAt: now,
+          },
+        });
 
         return {
           id: user.id,

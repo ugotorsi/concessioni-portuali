@@ -151,6 +151,12 @@ async function main() {
       role: "VIEWER_ADSP",
       password: "adsp123",
     },
+    {
+      nome: "Lockout Test Demo",
+      email: "lockout@demo.local",
+      role: "OPERATORE_SOCIETA",
+      password: "lockout123",
+    },
   ];
 
   const hashedCredentials = await Promise.all(
@@ -159,6 +165,15 @@ async function main() {
       email: item.email,
       ruolo: item.role,
       passwordHash: await bcrypt.hash(item.password, 10),
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      lastFailedLoginAt: null,
+      lastLoginAt: null,
+      passwordChangedAt: new Date(),
+      mustChangePassword: false,
+      mfaEnabled: false,
+      mfaSecret: null,
+      mfaVerifiedAt: null,
     })),
   );
 

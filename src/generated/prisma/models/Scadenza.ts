@@ -495,14 +495,6 @@ export type EnumTipologiaScadenzaFieldUpdateOperationsInput = {
   set?: $Enums.TipologiaScadenza
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type EnumStatoScadenzaFieldUpdateOperationsInput = {
   set?: $Enums.StatoScadenza
 }

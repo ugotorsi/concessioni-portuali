@@ -11,6 +11,9 @@ Non rappresenta una certificazione security/compliance definitiva.
 - Middleware centralizzato per route protection e redirect accessi non autorizzati.
 - Security headers baseline (X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy).
 - Rate limiting centralizzato su endpoint sensibili con adapter configurabile (memory/upstash) e risposta 429 standardizzata.
+- Baseline auth hardening con lockout temporaneo account su tentativi falliti e reset stato su login valido.
+- Messaggi di errore login uniformati per riduzione leakage su validita credenziali/account.
+- Campi MFA-ready introdotti nel modello utente (abilitazione futura senza enforcement in questa fase).
 - Audit trail con hash chain tamper-evident applicativa.
 - Audit evento download PDF e dinieghi autorizzativi.
 - Generazione PDF server-side.
@@ -18,8 +21,8 @@ Non rappresenta una certificazione security/compliance definitiva.
 - Test automatici unit/e2e su auth, ruoli, headers, audit e policy PDF.
 
 ## 2. Misure da rafforzare prima della produzione
-- Password policy più rigorosa e rotazione credenziali.
-- MFA per profili privilegiati.
+- Applicazione end-to-end password policy su workflow cambio/reset password e rotazione credenziali.
+- MFA end-to-end per profili privilegiati.
 - Session hardening (timeout, revoke, policy cookie avanzate).
 - Completare rollout produzione backend distribuito (Upstash/Redis) con monitoraggio e tuning soglie.
 - CSP più restrittiva e tuning policy browser security.

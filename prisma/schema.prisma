@@ -279,18 +279,31 @@ enum AuditEsito {
 }
 
 model User {
-  id           String        @id @default(cuid())
-  nome         String
-  email        String        @unique
-  passwordHash String?
-  ruolo        RuoloUser
-  attivo       Boolean       @default(true)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  activityLogs ActivityLog[]
+  id                  String        @id @default(cuid())
+  nome                String
+  email               String        @unique
+  passwordHash        String?
+  ruolo               RuoloUser
+  attivo              Boolean       @default(true)
+  failedLoginAttempts Int           @default(0)
+  lockedUntil         DateTime?
+  lastFailedLoginAt   DateTime?
+  lastLoginAt         DateTime?
+  passwordChangedAt   DateTime?
+  mustChangePassword  Boolean       @default(false)
+  mfaEnabled          Boolean       @default(false)
+  mfaSecret           String?
+  mfaRecoveryCodes    Json?
+  mfaVerifiedAt       DateTime?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  activityLogs        ActivityLog[]
 
   @@index([ruolo])
   @@index([attivo])
+  @@index([lockedUntil])
+  @@index([mfaEnabled])
+  @@index([mustChangePassword])
   @@index([createdAt])
 }
 
