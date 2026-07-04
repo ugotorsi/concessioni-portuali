@@ -157,6 +157,13 @@ Perche la struttura e corretta per vista 360 gradi:
 - Nota obbligatoria associata: "Dati di contesto da verificare e aggiornare prima della presentazione commerciale o istituzionale.".
 - Limite giuridico ribadito: supporto assistivo e precompilazione; nessuna generazione automatica di provvedimenti finali e nessuna sostituzione del responsabile del procedimento.
 
+## Estensione investment breakdown demo (Issue #25)
+- Sezione economica della demo estesa con slide dedicate a investimento richiesto, voci di costo, modello ricavi, trasformazione costo->investimento e sostenibilità/break-even.
+- Range indicativi esplicitati per fasi: pilot 35.000/70.000 €, produzione ente 120.000/250.000 €, scalabilità multi-ente 300.000/700.000 €.
+- Modello ricavi articolato in ricavi iniziali (setup/configurazione/formazione), ricavi ricorrenti (canoni base/moduli/supporto) e servizi professionali.
+- Scenari prudente/intermedio/esteso presentati come ipotesi di lavoro non vincolanti, da validare dopo pilot, analisi costi industriali e pricing effettivo.
+- Presidio comunicativo invariato: il valore istituzionale è legato a tracciabilità, qualità degli atti e riduzione vulnerabilità procedimentali, senza claim di eliminazione del contenzioso.
+
 ## 4. Campi giuridicamente sensibili
 | Entita | Campo | Rilevanza giuridica | Rischio se mancante/errato | Miglioramento consigliato |
 |---|---|---|---|---|

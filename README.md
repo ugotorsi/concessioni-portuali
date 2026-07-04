@@ -174,6 +174,9 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
 - Legal assistant narrativo (Issue #24): nuovo blocco slide su supporto legale-amministrativo per predisposizione assistita di atti, diffide, richieste documentali, comunicazioni di avvio, preavvisi ex art. 10-bis, contestazioni, note istruttorie, schemi di motivazione, bozze di determine, bandi e risposte a istanze/accessi agli atti.
 - Controllo di coerenza dell atto: verifica guidata di evidenze, allegati, contraddittorio, memorie e riferimenti normativi prima della firma.
 - Business plan strutturato (Issue #24): perimetro nazionale prudenziale, costi/tempi/ricavi per breve-medio-lungo periodo, scenari prudente/intermedio/esteso e leve ricavo modulari.
+- Investment breakdown (Issue #25): nuova sezione "Investimento richiesto" con fasi pilot/produzione/scalabilità e range indicativi 35.000/70.000 €, 120.000/250.000 €, 300.000/700.000 €.
+- Voci dell investimento esplicitate: sviluppo software, sicurezza/compliance, infrastruttura, supporto legale-amministrativo, integrazioni, migrazione dati, formazione, manutenzione evolutiva, AI/automazione e commercializzazione.
+- Modello ricavi esteso: ricavi iniziali, ricavi ricorrenti e servizi professionali con logica break-even prudente/intermedia/estesa.
 - Posizionamento esplicito: non è un gestionale, è una piattaforma intelligente di governo istruttorio.
 - Link diretti a scenari demo, fascicolo documentale, procedimenti, mappa e report.
 - Focus su automazione del procedimento, non della decisione.
@@ -190,6 +193,8 @@ Perimetro e limiti:
 - perimetro mercato demo comunicato in forma prudenziale: "Il perimetro nazionale può essere stimato, in via prudenziale e da aggiornare prima di ogni presentazione ufficiale, in 16 Autorità di Sistema Portuale e 62 porti di rilievo nazionale.".
 - nota obbligatoria nei contenuti business: "Dati di contesto da verificare e aggiornare prima della presentazione commerciale o istituzionale.".
 - nessuna generazione automatica di provvedimenti finali: il sistema propone bozze/schemi e supporto di coerenza, con responsabilità decisionale sempre umana.
+- i numeri economici della demo sono ipotesi di lavoro non vincolanti, da validare in sede di pilot e confronto budgetario con l ente.
+- il break-even puntuale va calcolato dopo definizione costi industriali e pricing effettivo di setup/canoni/moduli.
 
 Evoluzione possibile:
 - integrazione futura di voice AI server-side o TTS professionale, mantenendo il perimetro istruttorio e i presidi di legalità.

@@ -83,9 +83,29 @@ test("admin consulta la demo guidata AI e naviga le slide", async ({ page }) => 
   await expect(page.getByTestId("guided-demo-slide-card")).toContainText("62 porti di rilievo nazionale");
 
   await goToSlideWithTitle(page, "Costi, tempi e ricavi");
-  await expect(page.getByTestId("guided-demo-financial-rows")).toContainText("Breve periodo");
-  await expect(page.getByTestId("guided-demo-financial-rows")).toContainText("Medio periodo");
-  await expect(page.getByTestId("guided-demo-financial-rows")).toContainText("Lungo periodo");
+  await expect(page.getByTestId("guided-demo-current-body")).toContainText("quadro economico completo");
+
+  await goToSlideWithTitle(page, "Investimento richiesto");
+  await expect(page.getByTestId("guided-demo-investment-rows")).toContainText("35.000 / 70.000 €");
+  await expect(page.getByTestId("guided-demo-investment-rows")).toContainText("120.000 / 250.000 €");
+  await expect(page.getByTestId("guided-demo-investment-rows")).toContainText("300.000 / 700.000 €");
+
+  await goToSlideWithTitle(page, "Voci dell’investimento");
+  await expect(page.getByTestId("guided-demo-cost-items")).toContainText("Sviluppo software");
+  await expect(page.getByTestId("guided-demo-cost-items")).toContainText("Sicurezza e compliance");
+  await expect(page.getByTestId("guided-demo-cost-items")).toContainText("Supporto legale-amministrativo");
+
+  await goToSlideWithTitle(page, "Ricavi e modello economico");
+  await expect(page.getByTestId("guided-demo-revenue-items")).toContainText("Setup pilot");
+  await expect(page.getByTestId("guided-demo-revenue-items")).toContainText("Canone annuo base per ente");
+
+  await goToSlideWithTitle(page, "Da costo a investimento");
+  await expect(page.getByTestId("guided-demo-slide-card")).toContainText("La piattaforma non è un costo informatico isolato");
+
+  await goToSlideWithTitle(page, "Rientro e sostenibilità");
+  await expect(page.getByTestId("guided-demo-breakeven-items")).toContainText("Scenario prudente");
+  await expect(page.getByTestId("guided-demo-breakeven-items")).toContainText("Scenario intermedio");
+  await expect(page.getByTestId("guided-demo-breakeven-items")).toContainText("Scenario esteso");
 
   await goToSlideWithTitle(page, "Scenario ricavi");
   await expect(page.getByTestId("guided-demo-slide-card")).toContainText("Scenario prudente");

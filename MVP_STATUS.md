@@ -58,6 +58,7 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Demo guidata con pausa/ripresa contestuale (Issue #23): apertura moduli (fascicolo, scenari, mappa, report) con sospensione demo, stato locale in `sessionStorage`, rientro su slide corrente e box "Riprendi demo"
 - Banner di rientro "Torna alla demo guidata" sui moduli visitati durante il tour con accesso rapido a `/demo-guidata?resume=1`
 - Demo guidata legal assistant + business plan (Issue #24): nuove slide su supporto legale-amministrativo alla predisposizione atti e controllo coerenza, più sezione economica strutturata per perimetro nazionale, costi/tempi/ricavi e scenari prudente/intermedio/esteso
+- Investment cost breakdown in demo guidata (Issue #25): dettaglio investimento per fasi (pilot, produzione ente, scalabilità multi-ente), voci costo, ricavi iniziali/ricorrenti/professionali e scenari break-even prudente/intermedio/esteso
 - Seed documentale locale attivo con file su storage configurabile (`DOCUMENT_STORAGE_ROOT`) e limiti upload (`DOCUMENT_MAX_FILE_MB`)
 - Warning Turbopack su filesystem tracing document storage risolto con isolamento runtime server-side del modulo storage (build pulita, senza warning NFT)
 - Baseline mappa demo territoriale (Issue #10): route `/mappa` GIS-ready con lista marker, placeholder map UI e link rapidi a concessioni/criticita/sopralluoghi
@@ -113,6 +114,7 @@ Copertura baseline CI:
 - Persistenza stato demo limitata a `sessionStorage` lato browser per UX (nessun salvataggio server/database e nessun dato sensibile)
 - Supporto legale solo assistivo: bozze/schemi/precompilazione e controlli di coerenza, senza generazione automatica di provvedimenti finali e senza sostituzione del responsabile del procedimento
 - Dati business plan demo su AdSP/porti esposti come stima prudenziale e da aggiornare prima di presentazioni ufficiali
+- Range economici demo non vincolanti: ipotesi di lavoro da validare in sede di pilot e definizione industriale dei costi/prezzi
 
 ## Prossimi step
 1. Estendere progressivamente i test su export/report PDF e procedure critiche

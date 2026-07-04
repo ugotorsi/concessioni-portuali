@@ -17,6 +17,27 @@ export type GuidedDemoSlide = {
     revenues: string;
     notes: string;
   }[];
+  investmentRows?: {
+    phase: string;
+    timeframe: string;
+    investment: string;
+    includes: string[];
+    objective: string;
+  }[];
+  costItems?: {
+    category: string;
+    description: string;
+  }[];
+  revenueItems?: {
+    category: string;
+    rangeOrModel: string;
+    note: string;
+  }[];
+  breakEvenItems?: {
+    scenario: string;
+    assumption: string;
+    expectedOutcome: string;
+  }[];
   speakerNotes: string;
   narrationScript: string;
   visitIntro?: string;
@@ -431,61 +452,253 @@ export const GUIDED_DEMO_SLIDES: GuidedDemoSlide[] = [
     id: 23,
     title: "Costi, tempi e ricavi",
     body:
-      "Pianificazione economica su tre orizzonti: validazione iniziale, consolidamento e scala nazionale.",
-    financialRows: [
-      {
-        horizon: "Breve periodo",
-        timeframe: "0/12 mesi",
-        costs:
-          "sviluppo demo e pilot; hosting/staging; consulenza legale e tecnica; presentazioni istituzionali; prime integrazioni leggere",
-        revenues:
-          "1/2 pilot; setup iniziale; canone pilota; servizi di configurazione",
-        notes: "Obiettivo: validazione prodotto e primo caso d’uso reale.",
-      },
-      {
-        horizon: "Medio periodo",
-        timeframe: "12/36 mesi",
-        costs:
-          "hardening produzione; sicurezza; object storage; integrazione protocollo/PEC; GIS evoluto; supporto clienti; aggiornamento normativo",
-        revenues:
-          "3/6 enti; canoni annuali; moduli opzionali; formazione; manutenzione evolutiva",
-        notes: "Obiettivo: consolidamento commerciale e referenze.",
-      },
-      {
-        horizon: "Lungo periodo",
-        timeframe: "36/60 mesi",
-        costs:
-          "team dedicato; compliance avanzata; TTS/AI premium; marketplace modelli atti; assistenza enterprise; certificazioni e audit",
-        revenues:
-          "diffusione su quota significativa delle AdSP; canoni ricorrenti; moduli AI/legal assistant; integrazioni; servizi professionali",
-        notes: "Obiettivo: piattaforma nazionale verticale.",
-      },
+      "Questa sezione introduce il quadro economico completo: investimento richiesto, voci di costo, modello ricavi e sostenibilità per fasi.",
+    bullets: [
+      "pilot controllato come fase iniziale",
+      "produzione ente con dati e integrazioni reali",
+      "scalabilità multi-ente nel medio-lungo periodo",
+      "range indicativi da validare in sede di pilot",
+      "ricavi da setup, canoni, moduli e servizi professionali",
     ],
     speakerNotes:
-      "Questa slide deve far capire che il progetto non è solo tecnologico. Ha un percorso industriale: costi iniziali controllati, ricavi da pilot, poi canoni ricorrenti, moduli opzionali e servizi professionali.",
+      "Questa slide introduce la logica economica senza sovraccaricare con numeri. Prima si chiariscono le fasi dell investimento, poi si entra nelle voci di costo e nei modelli di ricavo.",
     narrationScript:
-      "Il business plan deve essere letto per fasi. Nel breve periodo l’obiettivo non è massimizzare i ricavi, ma validare il prodotto con uno o due pilot. Nel medio periodo si punta a trasformare quei pilot in referenze, consolidando sicurezza, integrazioni e assistenza. Nel lungo periodo il valore nasce dalla ricorrenza: canoni annuali, moduli legali, moduli AI, integrazioni e servizi professionali.",
+      "Il business plan non va letto come una cifra unica. Va letto per fasi: avvio pilot, produzione ente e poi eventuale scalabilità multi-ente. Ogni fase ha obiettivi diversi, costi diversi e ritorni diversi. Con questa impostazione la demo resta credibile, prudente e difendibile.",
     badges: ["Business plan", "Audit"],
   },
   {
     id: 24,
-    title: "Scenario ricavi",
+    title: "Investimento richiesto",
     body:
-      "Tre scenari economici indicativi guidano la lettura commerciale: prudente, intermedio, esteso.",
-    bullets: [
-      "Scenario prudente: 1 pilot anno 1; 3 enti entro anno 3; ricavi da setup, formazione e canone base",
-      "Scenario intermedio: 2 pilot anno 1; 5/8 enti entro anno 3; moduli protocollo, PEC, GIS e legal assistant",
-      "Scenario esteso: quota significativa delle 16 AdSP nel medio-lungo periodo con moduli premium e assistenza enterprise",
-      "Le cifre economiche puntuali vanno definite dopo validazione del pilot, analisi dei costi di produzione e confronto con il budget degli enti",
+      "Il progetto può essere sviluppato per fasi: pilot, produzione ente e scalabilità multi-ente. Ogni fase ha costi, tempi, obiettivi e ritorni diversi.",
+    investmentRows: [
+      {
+        phase: "Pilot istituzionale",
+        timeframe: "3/4 mesi",
+        investment: "35.000 / 70.000 €",
+        includes: [
+          "baseline funzionale completa",
+          "dataset e configurazione demo",
+          "validazione caso d uso su ente pilota",
+        ],
+        objective: "Validare il caso d’uso reale con una AdSP o ente concedente.",
+      },
+      {
+        phase: "Produzione ente",
+        timeframe: "6/9 mesi",
+        investment: "120.000 / 250.000 €",
+        includes: [
+          "hardening sicurezza e ruoli",
+          "integrazioni sistemi ente",
+          "formazione uffici e supporto avvio",
+        ],
+        objective: "Rendere la piattaforma utilizzabile stabilmente da un ente.",
+      },
+      {
+        phase: "Scalabilità multi-ente",
+        timeframe: "12/24 mesi",
+        investment: "300.000 / 700.000 €",
+        includes: [
+          "multi-tenant e governance avanzata",
+          "moduli premium e assistenza enterprise",
+          "processi di compliance e certificazioni",
+        ],
+        objective: "Trasformare il progetto in piattaforma verticale per più Autorità o enti concedenti.",
+      },
+    ],
+    businessMetrics: [
+      {
+        label: "Nota",
+        value: "Range indicativi da validare in sede di analisi tecnica, pilot e confronto con il budget dell’ente.",
+      },
     ],
     speakerNotes:
-      "Non inserire numeri inventati se non sono ancora validati. La demo deve mostrare metodo: scenari, leve di ricavo e rapporto con il mercato potenziale.",
+      "Questa slide serve a rispondere alla domanda più prevedibile: quanto costa. Il messaggio deve essere chiaro: non serve partire subito con un investimento massimo. Si può iniziare con un pilot, misurare il valore e poi decidere se passare alla produzione e alla scalabilità.",
     narrationScript:
-      "Non ha senso inventare numeri precisi prima del pilot. Ha senso però mostrare gli scenari. Uno scenario prudente parte da un singolo pilot e da pochi enti. Uno scenario intermedio considera più adozioni e moduli opzionali. Uno scenario esteso guarda alla quota significativa delle Autorità esistenti, con canoni ricorrenti e servizi specialistici. La logica economica è chiara: partire leggeri, validare, consolidare e scalare.",
-    badges: ["Business plan", "GIS"],
+      "Quando l’interlocutore chiede il costo, la risposta migliore non è un numero secco. Il progetto va letto per fasi. Un pilot istituzionale può essere contenuto e serve a validare il caso d’uso. La produzione per un ente richiede un investimento superiore perché entrano sicurezza, dati reali, integrazioni e formazione. La scalabilità multi-ente è una fase successiva, più industriale, che ha senso solo dopo aver dimostrato il valore sul campo.",
+    badges: ["Business plan", "Audit"],
   },
   {
     id: 25,
+    title: "Voci dell’investimento",
+    body:
+      "L’investimento non riguarda solo lo sviluppo software. Comprende tecnologia, sicurezza, infrastruttura, contenuti legali, integrazioni, formazione e manutenzione evolutiva.",
+    costItems: [
+      {
+        category: "Sviluppo software",
+        description: "Frontend, backend, database, API, dashboard, ruoli, workflow, report.",
+      },
+      {
+        category: "Sicurezza e compliance",
+        description: "Autenticazione, ruoli, audit trail, rate limit, backup, logging, GDPR, DPIA, hardening.",
+      },
+      {
+        category: "Infrastruttura",
+        description: "Cloud, database, storage documentale, ambienti demo, staging e produzione, monitoraggio.",
+      },
+      {
+        category: "Supporto legale-amministrativo",
+        description: "Modelli di atti, diffide, comunicazioni di avvio, preavvisi, determine, bandi, checklist procedimentali.",
+      },
+      {
+        category: "Integrazioni",
+        description: "PEC, protocollo, documentale, pagamenti, GIS, eventuali PCS o sistemi interni dell’ente.",
+      },
+      {
+        category: "Migrazione dati",
+        description: "Import concessioni, documenti, fascicoli, pagamenti, procedimenti pregressi.",
+      },
+      {
+        category: "Formazione",
+        description: "Sessioni per ufficio demanio, legale, tecnico, ragioneria e direzione.",
+      },
+      {
+        category: "Manutenzione evolutiva",
+        description: "Aggiornamenti normativi, correzioni, nuove funzioni e assistenza.",
+      },
+      {
+        category: "AI e automazione",
+        description: "Copilota istruttorio, generazione bozze, controllo coerenza atti, alert e riepiloghi fascicolo.",
+      },
+      {
+        category: "Commercializzazione",
+        description: "Demo, pilot, presentazioni, documentazione e supporto pre-vendita.",
+      },
+    ],
+    speakerNotes:
+      "Questa slide evita che il costo venga percepito come semplice costo informatico. L’investimento copre sviluppo, sicurezza, contenuti legali, migrazione, formazione e integrazioni.",
+    narrationScript:
+      "È importante spiegare bene le voci dell’investimento. Qui non si compra solo una dashboard. Si finanzia un sistema che unisce software, sicurezza, infrastruttura, fascicolo documentale, supporto legale-amministrativo, integrazioni con sistemi esistenti, migrazione dati e formazione degli uffici. Questo consente di distinguere il costo reale del progetto da una semplice spesa informatica.",
+    badges: ["Business plan", "Audit"],
+  },
+  {
+    id: 26,
+    title: "Ricavi e modello economico",
+    body:
+      "Il modello economico combina ricavi iniziali, canoni ricorrenti, moduli opzionali e servizi professionali.",
+    revenueItems: [
+      {
+        category: "Ricavi iniziali - Setup pilot",
+        rangeOrModel: "25.000 / 50.000 €",
+        note: "Range indicativo da validare dopo il pilot.",
+      },
+      {
+        category: "Ricavi iniziali - Configurazione dati",
+        rangeOrModel: "10.000 / 30.000 €",
+        note: "Dipende da qualità e volume dei fascicoli in ingresso.",
+      },
+      {
+        category: "Ricavi iniziali - Formazione",
+        rangeOrModel: "5.000 / 15.000 €",
+        note: "Percorso formativo su ruoli e moduli ente.",
+      },
+      {
+        category: "Ricavi ricorrenti - Canone annuo base per ente",
+        rangeOrModel: "30.000 / 80.000 €",
+        note: "Comprende nucleo piattaforma e supporto standard.",
+      },
+      {
+        category: "Ricavi ricorrenti - Canone moduli avanzati",
+        rangeOrModel: "15.000 / 60.000 € annui",
+        note: "Protocollo/PEC, GIS, legal assistant, funzioni premium.",
+      },
+      {
+        category: "Ricavi ricorrenti - Supporto e manutenzione",
+        rangeOrModel: "15% / 25% del valore annuo",
+        note: "Adeguamenti normativi, assistenza e miglioramenti continui.",
+      },
+      {
+        category: "Ricavi professionali",
+        rangeOrModel: "Servizi su richiesta",
+        note: "Migrazione fascicoli, workflow, consulenza legale-amministrativa, personalizzazione modelli e integrazioni.",
+      },
+    ],
+    businessMetrics: [
+      {
+        label: "Nota",
+        value: "Valori indicativi da validare dopo pilot, analisi costi e confronto con il mercato.",
+      },
+    ],
+    speakerNotes:
+      "La sostenibilità economica nasce dalla combinazione tra setup iniziale e ricorrenza. Il pilot apre la relazione, ma il valore vero arriva da canoni, moduli opzionali, integrazioni e servizi professionali.",
+    narrationScript:
+      "Dal lato ricavi, il modello non deve dipendere da una singola vendita. La logica più solida è combinare setup iniziale, configurazione dati, formazione, canone annuale, moduli opzionali e servizi professionali. In questo modo il progetto può partire leggero, ma costruire nel tempo ricavi ricorrenti e attività ad alto valore.",
+    badges: ["Business plan", "AI"],
+  },
+  {
+    id: 27,
+    title: "Da costo a investimento",
+    body:
+      "La piattaforma non è un costo informatico isolato. È un investimento in controllo, tracciabilità, qualità degli atti, riduzione del rischio e capacità di governo delle concessioni.",
+    bullets: [
+      "meno tempo per ricostruire fascicoli",
+      "meno omissioni procedimentali",
+      "atti più coerenti",
+      "controllo morosità e criticità",
+      "migliore gestione del contenzioso",
+      "canoni e moduli ricorrenti",
+      "scalabilità su più enti",
+      "supporto a audit e controlli",
+    ],
+    speakerNotes:
+      "Questa slide chiude la parte economica collegando costo e valore. Il ritorno non è solo finanziario, ma anche amministrativo, organizzativo e difensivo.",
+    narrationScript:
+      "Il punto decisivo è trasformare la domanda sul costo in una riflessione sull’investimento. Se la piattaforma riduce il tempo necessario per ricostruire un fascicolo, migliora la qualità degli atti, riduce omissioni e rende più ordinato il procedimento, allora non è una semplice spesa informatica. È un investimento nella capacità dell’ente di governare concessioni, rischi e decisioni.",
+    badges: ["Business plan", "Audit"],
+  },
+  {
+    id: 28,
+    title: "Rientro e sostenibilità",
+    body:
+      "Il rientro dell’investimento dipende dal numero di enti aderenti, dal canone annuale, dai moduli attivati e dai servizi professionali collegati.",
+    breakEvenItems: [
+      {
+        scenario: "Scenario prudente",
+        assumption: "1 pilot nel primo anno e 3 enti entro il terzo anno.",
+        expectedOutcome: "Copertura progressiva dei costi di sviluppo e prime entrate ricorrenti.",
+      },
+      {
+        scenario: "Scenario intermedio",
+        assumption: "2 pilot nel primo anno e 5/8 enti entro il terzo anno.",
+        expectedOutcome: "Consolidamento del prodotto, crescita dei canoni e sviluppo moduli premium.",
+      },
+      {
+        scenario: "Scenario esteso",
+        assumption: "Quota significativa delle Autorità di Sistema Portuale nel medio-lungo periodo.",
+        expectedOutcome: "Piattaforma verticale nazionale con ricavi ricorrenti, integrazioni e servizi specialistici.",
+      },
+    ],
+    businessMetrics: [
+      {
+        label: "Nota",
+        value: "Il break-even puntuale va calcolato dopo la definizione dei costi industriali e dei prezzi effettivi di canone, setup e moduli.",
+      },
+    ],
+    speakerNotes:
+      "La demo non deve promettere un rientro automatico. Deve mostrare che esiste una logica di sostenibilità: pilot, primi enti, canoni, moduli e progressiva scalabilità.",
+    narrationScript:
+      "Il rientro economico dipende da quanta parte del mercato viene effettivamente raggiunta e da quali moduli vengono attivati. In uno scenario prudente si costruiscono le prime referenze. In uno scenario intermedio i canoni e i moduli cominciano a sostenere il prodotto. In uno scenario esteso la piattaforma può diventare una verticale nazionale, con ricavi ricorrenti e servizi specialistici.",
+    badges: ["Business plan", "Audit"],
+  },
+  {
+    id: 29,
+    title: "Scenario ricavi",
+    body:
+      "Gli scenari ricavi combinano entrate iniziali, ricorrenza annua e servizi professionali, con crescita progressiva della base enti.",
+    bullets: [
+      "Scenario prudente: setup pilot + canone base + primi servizi professionali su 3 enti entro anno 3",
+      "Scenario intermedio: 2 pilot iniziali, 5/8 enti entro anno 3 e aumento ricavi da moduli avanzati",
+      "Scenario esteso: quota significativa delle 16 AdSP nel medio-lungo periodo con ricavi ricorrenti e servizi specialistici",
+      "Le cifre economiche puntuali restano ipotesi di lavoro da validare dopo pilot e analisi costi industriali",
+    ],
+    speakerNotes:
+      "La slide scenario ricavi deve essere coerente con le voci presentate: setup iniziale, canoni ricorrenti, moduli e servizi professionali.",
+    narrationScript:
+      "Gli scenari ricavi servono a leggere la traiettoria economica in modo realistico. Nello scenario prudente prevalgono setup e primi canoni. Nello scenario intermedio crescono la base enti e i moduli avanzati. Nello scenario esteso la componente ricorrente diventa centrale e si affianca a servizi specialistici. È una logica progressiva, non una promessa di ritorno automatico.",
+    badges: ["Business plan", "GIS"],
+  },
+  {
+    id: 30,
     title: "Leve di ricavo",
     body:
       "La sostenibilità economica nasce dalla combinazione di ricavi ricorrenti e servizi professionali ad alto valore.",
@@ -510,14 +723,14 @@ export const GUIDED_DEMO_SLIDES: GuidedDemoSlide[] = [
     badges: ["Business plan", "AI"],
   },
   {
-    id: 26,
+    id: 31,
     title: "Chiusura",
     body:
-      "La piattaforma non decide al posto dell’ente: organizza il fascicolo, supporta la predisposizione degli atti, rafforza il procedimento e rende più solida la decisione amministrativa.",
+      "La piattaforma non decide al posto dell’ente: organizza il fascicolo, supporta la predisposizione degli atti, rafforza il procedimento e rende più solida la decisione amministrativa. Il progetto può partire come pilot controllato e crescere come piattaforma verticale, generando valore istituzionale e sostenibilità economica.",
     speakerNotes:
-      "Questa è la sintesi del progetto. Una piattaforma intelligente non sostituisce il potere amministrativo, ma rafforza il procedimento, collega le evidenze, supporta la predisposizione degli atti e migliora la qualità della decisione.",
+      "Questa è la sintesi del progetto. Una piattaforma intelligente non sostituisce il potere amministrativo, ma rafforza il procedimento, collega le evidenze, supporta la predisposizione degli atti e migliora la qualità della decisione con un percorso economico sostenibile per fasi.",
     narrationScript:
-      "Chiudiamo tornando al punto essenziale: la piattaforma non decide al posto dell’ente. Organizza il fascicolo, supporta la predisposizione degli atti, rafforza il procedimento e rende più solida la decisione amministrativa. L’AI agisce come relatore e copilota istruttorio, non come sostituto della responsabilità amministrativa. Se desideri, da qui puoi riaprire i moduli principali e gli scenari per una seconda lettura guidata focalizzata sul tuo caso d’uso.",
+      "Chiudiamo tornando al punto essenziale: la piattaforma non decide al posto dell’ente. Organizza il fascicolo, supporta la predisposizione degli atti, rafforza il procedimento e rende più solida la decisione amministrativa. Il progetto può partire come pilot controllato e crescere come piattaforma verticale, generando valore istituzionale e sostenibilità economica. L’AI agisce come relatore e copilota istruttorio, non come sostituto della responsabilità amministrativa.",
     badges: ["AI", "Audit", "Fascicolo"],
   },
 ];

@@ -516,6 +516,76 @@ export function GuidedDemoSlides({ slides }: GuidedDemoSlidesProps) {
               </div>
             ) : null}
 
+            {currentSlide.investmentRows && currentSlide.investmentRows.length > 0 ? (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4" data-testid="guided-demo-investment-rows">
+                <p className="text-xs font-semibold uppercase tracking-wide text-amber-900">Fasi investimento</p>
+                <div className="mt-3 grid gap-3">
+                  {currentSlide.investmentRows.map((row) => (
+                    <div key={`${currentSlide.id}-${row.phase}`} className="rounded-lg border border-amber-200 bg-white p-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-sm font-semibold text-slate-900">{row.phase}</p>
+                        <p className="text-xs text-slate-600">Durata: {row.timeframe}</p>
+                      </div>
+                      <p className="mt-1 text-sm font-medium text-amber-900">Investimento indicativo: {row.investment}</p>
+                      <ul className="mt-2 grid gap-1 text-sm text-slate-700">
+                        {row.includes.map((item) => (
+                          <li key={`${row.phase}-${item}`} className="flex items-start gap-2">
+                            <span className="mt-1 h-2 w-2 rounded-full bg-amber-600" aria-hidden="true" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="mt-2 text-xs text-slate-600">Obiettivo: {row.objective}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {currentSlide.costItems && currentSlide.costItems.length > 0 ? (
+              <div className="rounded-xl border border-slate-200 bg-white p-4" data-testid="guided-demo-cost-items">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Voci di costo</p>
+                <ol className="mt-2 grid gap-2 text-sm text-slate-700">
+                  {currentSlide.costItems.map((item, index) => (
+                    <li key={`${currentSlide.id}-${item.category}`} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+                      <span className="font-semibold text-slate-900">{index + 1}. {item.category}</span>
+                      <p className="mt-1 text-sm text-slate-700">{item.description}</p>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ) : null}
+
+            {currentSlide.revenueItems && currentSlide.revenueItems.length > 0 ? (
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4" data-testid="guided-demo-revenue-items">
+                <p className="text-xs font-semibold uppercase tracking-wide text-emerald-900">Modello ricavi</p>
+                <div className="mt-3 grid gap-2">
+                  {currentSlide.revenueItems.map((item) => (
+                    <div key={`${currentSlide.id}-${item.category}`} className="rounded-md border border-emerald-200 bg-white px-3 py-2">
+                      <p className="text-sm font-semibold text-slate-900">{item.category}</p>
+                      <p className="text-sm text-emerald-900">{item.rangeOrModel}</p>
+                      <p className="text-xs text-slate-600">{item.note}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {currentSlide.breakEvenItems && currentSlide.breakEvenItems.length > 0 ? (
+              <div className="rounded-xl border border-sky-200 bg-sky-50 p-4" data-testid="guided-demo-breakeven-items">
+                <p className="text-xs font-semibold uppercase tracking-wide text-sky-900">Break-even e sostenibilità</p>
+                <div className="mt-3 grid gap-2">
+                  {currentSlide.breakEvenItems.map((item) => (
+                    <div key={`${currentSlide.id}-${item.scenario}`} className="rounded-md border border-sky-200 bg-white px-3 py-2">
+                      <p className="text-sm font-semibold text-slate-900">{item.scenario}</p>
+                      <p className="text-sm text-slate-700">Ipotesi: {item.assumption}</p>
+                      <p className="text-xs text-slate-600">Risultato atteso: {item.expectedOutcome}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
             {currentSlide.badges && currentSlide.badges.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {currentSlide.badges.map((item) => (
