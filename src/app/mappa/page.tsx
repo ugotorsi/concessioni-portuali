@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { ResumeDemoBanner } from "@/components/demo-guidata/ResumeDemoBanner";
 import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -93,6 +94,8 @@ export default async function MappaPage() {
       subtitle="Vista territoriale dimostrativa delle concessioni, criticita e sopralluoghi registrati nella piattaforma."
     >
       <div className="mx-auto flex w-full max-w-[1460px] flex-col gap-4">
+        <ResumeDemoBanner />
+
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <Card>
             <CardHeader>

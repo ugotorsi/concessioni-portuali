@@ -168,6 +168,9 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
 - Presentazione interattiva a slide con storytelling istituzionale e speaker notes AI.
 - Narrazione vocale browser-based con Web Speech API (Issue #21), controlli play/pausa/riprendi/ferma e toggle narrazione automatica slide-by-slide.
 - Narrazione migliorata in modalità relatore AI (Issue #22): la voce usa copioni discorsivi dedicati (`narrationScript`) e non una lettura meccanica di titolo, bullet e note.
+- Visita contestuale con pausa/ripresa (Issue #23): da slide con azione è disponibile "Apri e sospendi demo" per aprire fascicolo, scenari, mappa o report senza perdere contesto.
+- Ripresa intelligente su `/demo-guidata`: box "Demo sospesa" con azioni "Riprendi spiegazione", "Continua senza voce" e "Ricomincia demo".
+- Banner "Torna alla demo guidata" nei moduli visitati durante il tour, con link a `/demo-guidata?resume=1`.
 - Posizionamento esplicito: non è un gestionale, è una piattaforma intelligente di governo istruttorio.
 - Link diretti a scenari demo, fascicolo documentale, procedimenti, mappa e report.
 - Focus su automazione del procedimento, non della decisione.
@@ -179,11 +182,14 @@ Perimetro e limiti:
 - la demo guidata ha finalità illustrativa istituzionale e di supporto al pilot.
 - nessuna API key audio e nessun servizio esterno TTS richiesto;
 - fallback testuale garantito quando il browser non supporta `speechSynthesis`.
+- stato demo salvato solo lato browser in `sessionStorage` per finalità di esperienza utente (slide corrente, stato auto-narrazione, ultimo modulo visitato, timestamp);
+- nessun dato sensibile o decisionale salvato in persistenza server/database per il meccanismo di ripresa demo.
 
 Evoluzione possibile:
 - integrazione futura di voice AI server-side o TTS professionale, mantenendo il perimetro istruttorio e i presidi di legalità.
 - generazione dinamica dello speech su profilo interlocutore (tecnico, giuridico, economico) mantenendo responsabilità umana e tracciabilità.
 - estensione verso relatore virtuale/avatar istituzionale per demo guidate avanzate.
+- introduzione di un tour engine con overlay guidati contestuali e coach vocale professionale.
 
 ## Mappa demo territoriale baseline (Issue #10)
 - Nuova pagina dedicata: `/mappa`.

@@ -20,6 +20,7 @@ test("admin consulta la demo guidata AI e naviga le slide", async ({ page }) => 
   await expect(page.getByTestId("guided-demo-voice-read")).toBeVisible();
   await expect(page.getByTestId("guided-demo-narrator-mode")).toContainText("Modalità relatore AI");
   await expect(page.getByTestId("guided-demo-voice-section")).toContainText("non una semplice lettura della slide");
+  await expect(page.getByTestId("guided-demo-pause-info")).toContainText("la demo viene sospesa");
 
   await page.getByTestId("guided-demo-voice-read").click();
   await expect(page.getByTestId("guided-demo-voice-stop")).toBeVisible();
@@ -41,8 +42,50 @@ test("admin consulta la demo guidata AI e naviga le slide", async ({ page }) => 
 
   const actionLink = page.getByTestId("guided-demo-action-link");
   await expect(actionLink).toBeVisible();
-  await actionLink.click();
-  await expect(page).toHaveURL(/\/(documenti|demo-scenari)/);
+  await expect(page.getByTestId("guided-demo-action-pause-open")).toContainText("sospendi demo");
+});
+
+test("admin sospende su modulo e riprende la demo dalla stessa slide", async ({ page }) => {
+  await login(page, "admin@demo.local", "admin123");
+  await expect(page).toHaveURL(/\/dashboard$/);
+
+  await page.goto("/demo-guidata");
+  await expect(page).toHaveURL(/\/demo-guidata$/);
+
+  await page.getByTestId("guided-demo-next").click();
+  await page.getByTestId("guided-demo-next").click();
+  await page.getByTestId("guided-demo-next").click();
+  await page.getByTestId("guided-demo-next").click();
+  await page.getByTestId("guided-demo-next").click();
+  await page.getByTestId("guided-demo-next").click();
+  await page.getByTestId("guided-demo-next").click();
+  await page.getByTestId("guided-demo-next").click();
+  await page.getByTestId("guided-demo-next").click();
+
+  await expect(page.getByTestId("guided-demo-current-title")).toContainText("Il fascicolo intelligente");
+  await expect(page.getByTestId("guided-demo-slide-indicator")).toContainText("10/");
+
+  await page.getByTestId("guided-demo-action-pause-open").click();
+  await expect(page).toHaveURL(/\/documenti$/);
+  await expect(page.getByTestId("resume-demo-banner")).toBeVisible();
+
+  await page.getByRole("link", { name: "Torna alla demo guidata" }).click();
+  await expect(page).toHaveURL(/\/demo-guidata\?resume=1/);
+  await expect(page.getByTestId("guided-demo-resume-box")).toBeVisible();
+  await expect(page.getByTestId("guided-demo-resume-badge")).toContainText("Ripresa disponibile");
+
+  await page.getByTestId("guided-demo-resume-silent").click();
+  await expect(page.getByTestId("guided-demo-current-title")).toContainText("Il fascicolo intelligente");
+  await expect(page.getByTestId("guided-demo-slide-indicator")).toContainText("10/");
+
+  await page.getByTestId("guided-demo-action-pause-open").click();
+  await expect(page).toHaveURL(/\/documenti$/);
+  await page.getByRole("link", { name: "Torna alla demo guidata" }).click();
+  await expect(page).toHaveURL(/\/demo-guidata\?resume=1/);
+  await expect(page.getByTestId("guided-demo-resume-box")).toBeVisible();
+
+  await page.getByTestId("guided-demo-restart").click();
+  await expect(page.getByTestId("guided-demo-slide-indicator")).toContainText("1/");
 });
 
 test("viewer AdSP può consultare la demo guidata in sola lettura", async ({ page }) => {
@@ -53,4 +96,26 @@ test("viewer AdSP può consultare la demo guidata in sola lettura", async ({ pag
   await expect(page).toHaveURL(/\/demo-guidata$/);
   await expect(page.getByRole("heading", { name: "Demo guidata AI" }).first()).toBeVisible();
   await expect(page.getByTestId("guided-demo-slide-card")).toBeVisible();
+
+  await page.getByTestId("guided-demo-next").click();
+  await page.getByTestId("guided-demo-next").click();
+  await page.getByTestId("guided-demo-next").click();
+  await page.getByTestId("guided-demo-next").click();
+  await page.getByTestId("guided-demo-next").click();
+  await page.getByTestId("guided-demo-next").click();
+  await page.getByTestId("guided-demo-next").click();
+  await page.getByTestId("guided-demo-next").click();
+  await page.getByTestId("guided-demo-next").click();
+
+  await expect(page.getByTestId("guided-demo-current-title")).toContainText("Il fascicolo intelligente");
+  await page.getByTestId("guided-demo-action-pause-open").click();
+  await expect(page).toHaveURL(/\/documenti$/);
+  await expect(page.getByTestId("resume-demo-banner")).toBeVisible();
+
+  await page.getByRole("link", { name: "Torna alla demo guidata" }).click();
+  await expect(page).toHaveURL(/\/demo-guidata\?resume=1/);
+  await expect(page.getByTestId("guided-demo-resume-box")).toBeVisible();
+
+  await page.getByTestId("guided-demo-resume-silent").click();
+  await expect(page.getByTestId("guided-demo-slide-indicator")).toContainText("10/");
 });

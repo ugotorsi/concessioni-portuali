@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { ResumeDemoBanner } from "@/components/demo-guidata/ResumeDemoBanner";
 import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -30,6 +31,8 @@ export default async function DemoScenariPage() {
       subtitle="Casi guidati per presentazione operativa a PA, AdSP ed ente concedente"
     >
       <div className="mx-auto flex w-full max-w-[1300px] flex-col gap-4">
+        <ResumeDemoBanner />
+
         <Card>
           <CardHeader>
             <CardTitle>Scenari demo istituzionali</CardTitle>

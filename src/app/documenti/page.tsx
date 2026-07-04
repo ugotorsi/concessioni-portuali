@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/layout/AppShell";
+import { ResumeDemoBanner } from "@/components/demo-guidata/ResumeDemoBanner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
 import { Input } from "@/components/ui/Input";
@@ -61,6 +62,8 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
       subtitle="Upload, consultazione e download documenti istruttori"
     >
       <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-4">
+        <ResumeDemoBanner />
+
         <div>
           <h1 className="text-2xl font-semibold text-slate-900">Fascicolo documentale</h1>
           <p className="mt-1 text-sm text-slate-600">

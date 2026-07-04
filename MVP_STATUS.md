@@ -55,6 +55,8 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Demo guidata AI-led (Issue #20): sezione `/demo-guidata` con slide navigabili, speaker notes AI, link rapidi a scenari/fascicolo/mappa/report e narrativa istituzionale su automazione del procedimento (non della decisione)
 - Voce narrante demo guidata (Issue #21): Web Speech API browser-based su `/demo-guidata` con controlli leggi/pausa/riprendi/ferma, narrazione automatica opzionale e fallback senza servizi esterni/API key
 - Relatore AI evoluto (Issue #22): narrazione discorsiva basata su `narrationScript` per ciascuna slide, con tono istituzionale, transizioni più naturali e superamento della lettura meccanica dei contenuti
+- Demo guidata con pausa/ripresa contestuale (Issue #23): apertura moduli (fascicolo, scenari, mappa, report) con sospensione demo, stato locale in `sessionStorage`, rientro su slide corrente e box "Riprendi demo"
+- Banner di rientro "Torna alla demo guidata" sui moduli visitati durante il tour con accesso rapido a `/demo-guidata?resume=1`
 - Seed documentale locale attivo con file su storage configurabile (`DOCUMENT_STORAGE_ROOT`) e limiti upload (`DOCUMENT_MAX_FILE_MB`)
 - Warning Turbopack su filesystem tracing document storage risolto con isolamento runtime server-side del modulo storage (build pulita, senza warning NFT)
 - Baseline mappa demo territoriale (Issue #10): route `/mappa` GIS-ready con lista marker, placeholder map UI e link rapidi a concessioni/criticita/sopralluoghi
@@ -107,6 +109,7 @@ Copertura baseline CI:
 - Demo guidata AI-led orientata a storytelling istituzionale/pilot: non costituisce automazione decisionale o supporto decisorio vincolante
 - Narrazione vocale dipendente dalle capacità del browser client: in assenza di `speechSynthesis` resta disponibile la fruizione testuale completa
 - La voce browser resta un motore TTS locale: qualità e timbro dipendono dalle voci installate sul client
+- Persistenza stato demo limitata a `sessionStorage` lato browser per UX (nessun salvataggio server/database e nessun dato sensibile)
 
 ## Prossimi step
 1. Estendere progressivamente i test su export/report PDF e procedure critiche

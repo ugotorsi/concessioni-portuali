@@ -1,12 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
-import type { GuidedDemoSlide } from "@/lib/demo-guidata";
+import {
+  GUIDED_DEMO_STATE_STORAGE_KEY,
+  type GuidedDemoSessionState,
+  type GuidedDemoSlide,
+} from "@/lib/demo-guidata";
 
 interface GuidedDemoSlidesProps {
   slides: GuidedDemoSlide[];
@@ -29,12 +34,17 @@ function badgeVariant(label: string): "default" | "success" | "warning" | "dange
 }
 
 export function GuidedDemoSlides({ slides }: GuidedDemoSlidesProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isAutoNarrationEnabled, setIsAutoNarrationEnabled] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState<SpeechSynthesisVoice | null>(null);
+  const [resumeState, setResumeState] = useState<GuidedDemoSessionState | null>(null);
+  const [hasLoadedState, setHasLoadedState] = useState(false);
 
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const nextSlideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -43,6 +53,66 @@ export function GuidedDemoSlides({ slides }: GuidedDemoSlidesProps) {
 
   const currentSlide = slides[currentIndex];
   const totalSlides = slides.length;
+  const resumeRequested = searchParams.get("resume") === "1";
+
+  const saveDemoState = useCallback(
+    (reason: string, overrides?: Partial<GuidedDemoSessionState>) => {
+      if (typeof window === "undefined") {
+        return;
+      }
+
+      const baseState: GuidedDemoSessionState = {
+        slideId: currentSlide.id,
+        slideIndex: currentIndex,
+        autoNarration: isAutoNarrationEnabled,
+        wasSpeaking: isSpeaking || isPaused,
+        updatedAt: new Date().toISOString(),
+      };
+
+      const state: GuidedDemoSessionState = {
+        ...baseState,
+        ...overrides,
+      };
+
+      window.sessionStorage.setItem(GUIDED_DEMO_STATE_STORAGE_KEY, JSON.stringify(state));
+
+      if (reason === "pause-for-visit" || state.pausedForVisit) {
+        setResumeState(state);
+      }
+    },
+    [currentIndex, currentSlide.id, isAutoNarrationEnabled, isPaused, isSpeaking],
+  );
+
+  const loadDemoState = useCallback((): GuidedDemoSessionState | null => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    const raw = window.sessionStorage.getItem(GUIDED_DEMO_STATE_STORAGE_KEY);
+    if (!raw) {
+      return null;
+    }
+
+    try {
+      const parsed = JSON.parse(raw) as GuidedDemoSessionState;
+      if (typeof parsed.slideIndex !== "number" || parsed.slideIndex < 0) {
+        return null;
+      }
+
+      return parsed;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const clearDemoState = useCallback(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.sessionStorage.removeItem(GUIDED_DEMO_STATE_STORAGE_KEY);
+    setResumeState(null);
+  }, []);
 
   const progress = useMemo(() => {
     if (totalSlides <= 1) {
@@ -138,6 +208,65 @@ export function GuidedDemoSlides({ slides }: GuidedDemoSlidesProps) {
     speech.speak(utterance);
   }, [buildNarrationText, currentIndex, currentSlide, selectedVoice, speechSupported, totalSlides]);
 
+  const resumeDemoFromSavedState = useCallback(
+    (startNarration: boolean) => {
+      if (!resumeState) {
+        return;
+      }
+
+      const normalizedIndex = Math.max(0, Math.min(totalSlides - 1, resumeState.slideIndex));
+      setCurrentIndex(normalizedIndex);
+
+      const nextState: GuidedDemoSessionState = {
+        ...resumeState,
+        slideId: slides[normalizedIndex]?.id ?? resumeState.slideId,
+        slideIndex: normalizedIndex,
+        pausedForVisit: false,
+        wasSpeaking: startNarration,
+        updatedAt: new Date().toISOString(),
+      };
+
+      setIsAutoNarrationEnabled(resumeState.autoNarration);
+      setResumeState(null);
+
+      if (typeof window !== "undefined") {
+        window.sessionStorage.setItem(GUIDED_DEMO_STATE_STORAGE_KEY, JSON.stringify(nextState));
+      }
+
+      if (startNarration) {
+        setTimeout(() => {
+          speakCurrentSlide();
+        }, 120);
+      } else {
+        stopNarration();
+      }
+    },
+    [resumeState, slides, speakCurrentSlide, stopNarration, totalSlides],
+  );
+
+  const restartDemo = useCallback(() => {
+    stopNarration();
+    clearDemoState();
+    setCurrentIndex(0);
+    setIsAutoNarrationEnabled(false);
+  }, [clearDemoState, stopNarration]);
+
+  const pauseForModuleVisit = useCallback(
+    (actionHref: string, actionLabel: string) => {
+      stopNarration();
+
+      saveDemoState("pause-for-visit", {
+        lastVisitedHref: actionHref,
+        lastVisitedLabel: actionLabel,
+        pausedForVisit: true,
+        wasSpeaking: false,
+      });
+
+      router.push(actionHref);
+    },
+    [router, saveDemoState, stopNarration],
+  );
+
   const pauseNarration = useCallback(() => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) {
       return;
@@ -169,6 +298,48 @@ export function GuidedDemoSlides({ slides }: GuidedDemoSlidesProps) {
   useEffect(() => {
     autoNarrationRef.current = isAutoNarrationEnabled;
   }, [isAutoNarrationEnabled]);
+
+  useEffect(() => {
+    if (hasLoadedState) {
+      return;
+    }
+
+    const state = loadDemoState();
+    if (!state) {
+      setHasLoadedState(true);
+      return;
+    }
+
+    const normalizedIndex = Math.max(0, Math.min(totalSlides - 1, state.slideIndex));
+
+    if (state.pausedForVisit || resumeRequested) {
+      setCurrentIndex(normalizedIndex);
+      setIsAutoNarrationEnabled(state.autoNarration);
+      setResumeState({
+        ...state,
+        slideId: slides[normalizedIndex]?.id ?? state.slideId,
+        slideIndex: normalizedIndex,
+      });
+    }
+
+    setHasLoadedState(true);
+  }, [hasLoadedState, loadDemoState, resumeRequested, slides, totalSlides]);
+
+  useEffect(() => {
+    if (!hasLoadedState) {
+      return;
+    }
+
+    if (resumeState?.pausedForVisit) {
+      return;
+    }
+
+    saveDemoState("state-sync", {
+      pausedForVisit: false,
+      lastVisitedHref: resumeState?.lastVisitedHref,
+      lastVisitedLabel: resumeState?.lastVisitedLabel,
+    });
+  }, [currentIndex, hasLoadedState, isAutoNarrationEnabled, isPaused, isSpeaking, resumeState, saveDemoState]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -309,14 +480,41 @@ export function GuidedDemoSlides({ slides }: GuidedDemoSlidesProps) {
             ) : null}
 
             {currentSlide.actionHref && currentSlide.actionLabel ? (
-              <div>
-                <Link
-                  href={currentSlide.actionHref}
-                  className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-900 hover:bg-slate-100"
-                  data-testid="guided-demo-action-link"
-                >
-                  {currentSlide.actionLabel}
-                </Link>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-sm text-slate-700">
+                  {currentSlide.visitIntro ?? "La demo sarà sospesa e potrai riprenderla da questa slide."}
+                </p>
+                <p className="mt-1 text-xs text-slate-600">
+                  Se desideri, premi Spiega slide prima di aprire il modulo: il narratore AI introduce il contesto della visita.
+                </p>
+                <p className="mt-2 text-xs text-slate-600" data-testid="guided-demo-return-hint">
+                  Dopo aver visitato il modulo, torna a /demo-guidata per riprendere dal punto in cui eri rimasto.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Link
+                    href={currentSlide.actionHref}
+                    className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-900 hover:bg-slate-100"
+                    data-testid="guided-demo-action-link"
+                  >
+                    {currentSlide.actionLabel}
+                  </Link>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => pauseForModuleVisit(currentSlide.actionHref!, currentSlide.actionLabel!)}
+                    data-testid="guided-demo-action-pause-open"
+                  >
+                    {currentSlide.actionLabel.toLowerCase().includes("fascicolo")
+                      ? "Apri fascicolo e sospendi demo"
+                      : currentSlide.actionLabel.toLowerCase().includes("scenari")
+                        ? "Apri scenari e sospendi demo"
+                        : currentSlide.actionLabel.toLowerCase().includes("mappa")
+                          ? "Apri mappa e sospendi demo"
+                          : currentSlide.actionLabel.toLowerCase().includes("report")
+                            ? "Apri report e sospendi demo"
+                            : "Apri modulo e sospendi demo"}
+                  </Button>
+                </div>
               </div>
             ) : null}
           </div>
@@ -339,6 +537,51 @@ export function GuidedDemoSlides({ slides }: GuidedDemoSlidesProps) {
           <Badge variant="success" className="w-fit" data-testid="guided-demo-narrator-mode">
             Modalità relatore AI
           </Badge>
+
+          {resumeState?.pausedForVisit ? (
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4" data-testid="guided-demo-resume-box">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-sm font-semibold text-emerald-900">
+                  Demo sospesa durante la visita a: {resumeState.lastVisitedLabel ?? "modulo contestuale"}. Puoi riprendere dal punto in cui eri rimasto.
+                </p>
+                <Badge variant="success" data-testid="guided-demo-resume-badge">
+                  Ripresa disponibile
+                </Badge>
+              </div>
+              <p className="mt-1 text-xs text-emerald-900">
+                Stato demo: slide {resumeState.slideId}, aggiornato alle {new Date(resumeState.updatedAt).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  onClick={() => resumeDemoFromSavedState(true)}
+                  data-testid="guided-demo-resume-speaking"
+                >
+                  Riprendi spiegazione
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => resumeDemoFromSavedState(false)}
+                  data-testid="guided-demo-resume-silent"
+                >
+                  Continua senza voce
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={restartDemo}
+                  data-testid="guided-demo-restart"
+                >
+                  Ricomincia demo
+                </Button>
+              </div>
+            </div>
+          ) : null}
+
+          <p className="text-xs text-slate-600" data-testid="guided-demo-pause-info">
+            Quando apri un modulo, la demo viene sospesa e potrai riprenderla da questa slide.
+          </p>
 
           <div className="flex flex-wrap items-center gap-2">
             <Button

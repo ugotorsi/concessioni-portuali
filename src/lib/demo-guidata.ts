@@ -6,9 +6,23 @@ export type GuidedDemoSlide = {
   bullets?: string[];
   speakerNotes: string;
   narrationScript: string;
+  visitIntro?: string;
   badges?: string[];
   actionLabel?: string;
   actionHref?: string;
+};
+
+export const GUIDED_DEMO_STATE_STORAGE_KEY = "concessioni-demo-guidata-state";
+
+export type GuidedDemoSessionState = {
+  slideId: number;
+  slideIndex: number;
+  autoNarration: boolean;
+  wasSpeaking: boolean;
+  lastVisitedHref?: string;
+  lastVisitedLabel?: string;
+  pausedForVisit?: boolean;
+  updatedAt: string;
 };
 
 export const GUIDED_DEMO_SLIDES: GuidedDemoSlide[] = [
@@ -177,6 +191,8 @@ export const GUIDED_DEMO_SLIDES: GuidedDemoSlide[] = [
       "Il fascicolo non è un semplice archivio file. È un insieme di evidenze collegate, verificabili e consultabili nel punto in cui servono: sulla criticità, sul procedimento, sul pagamento, sul sopralluogo o nel report.",
     narrationScript:
       "Ora vediamo il fascicolo intelligente in pratica. Ogni documento non è solo archiviato, ma contestualizzato nel punto giusto: concessione, criticità, procedimento, pagamento, sopralluogo o report. Questo consente una consultazione più rapida e una maggiore coerenza istruttoria, perché le evidenze sono disponibili dove servono davvero. Se vuoi, da questa slide puoi aprire direttamente il fascicolo documentale per vedere come metadati, protocollo, PEC e audit dialogano nella stessa esperienza.",
+    visitIntro:
+      "Adesso sospendo la demo e apro il fascicolo documentale. Quando hai finito, torna alla demo guidata: riprenderemo da questa slide.",
     actionLabel: "Apri fascicolo documentale",
     actionHref: "/documenti",
     badges: ["Fascicolo", "PEC", "Audit"],
@@ -190,6 +206,8 @@ export const GUIDED_DEMO_SLIDES: GuidedDemoSlide[] = [
       "Questo scenario mostra come una morosità possa essere letta non solo come dato contabile, ma come profilo istruttorio collegato a documenti, solleciti, PEC, procedimento e possibile rilevanza ex art. 47 Cod. Nav.",
     narrationScript:
       "Entriamo negli scenari: il primo riguarda la morosità con possibile rilevanza ex art. 47. Il punto non è solo il numero economico, ma la lettura istruttoria complessiva: pagamenti, comunicazioni, documenti, criticità e procedimento devono convergere in un quadro unico. In questo modo l’ente può valutare con maggiore precisione tempi, rischi e passaggi necessari. Dalla slide puoi aprire subito gli scenari demo e seguire il caso nel suo sviluppo operativo.",
+    visitIntro:
+      "Adesso sospendo la demo e apro gli scenari. Dopo la visita, torna alla demo guidata per proseguire dalla slide corrente.",
     actionLabel: "Apri scenari demo",
     actionHref: "/demo-scenari",
     badges: ["Art. 47", "Business plan"],
@@ -203,6 +221,8 @@ export const GUIDED_DEMO_SLIDES: GuidedDemoSlide[] = [
       "Nel caso dell’occupazione difforme, il valore è collegare verbale, foto, sopralluogo, localizzazione, criticità e contraddittorio, evitando che le informazioni restino disperse tra uffici e fascicoli.",
     narrationScript:
       "Il secondo scenario affronta l’occupazione difforme, dove la dimensione tecnica e quella amministrativa devono restare allineate. La piattaforma collega sopralluogo, localizzazione, evidenze documentali e percorso procedimentale nello stesso fascicolo, riducendo il rischio di frammentazione tra uffici. Questo rende più semplice ricostruire i fatti e preparare valutazioni coerenti. Anche qui puoi aprire direttamente la sezione scenari per vedere il percorso completo dalla rilevazione alle attività istruttorie successive.",
+    visitIntro:
+      "Sospendo la demo e apro gli scenari contestuali. Al termine, torna alla demo guidata per riprendere il filo.",
     actionLabel: "Apri scenari demo",
     actionHref: "/demo-scenari",
     badges: ["GIS", "Fascicolo"],
@@ -227,6 +247,8 @@ export const GUIDED_DEMO_SLIDES: GuidedDemoSlide[] = [
       "Il procedimento amministrativo è fatto di passaggi. La piattaforma aiuta a verificare che quei passaggi siano presenti, coerenti e documentati, senza sostituire la valutazione del responsabile.",
     narrationScript:
       "Qui vediamo il presidio sul procedimento e sul tracciamento dell’art. 10-bis. La piattaforma distingue i percorsi d’ufficio da quelli su istanza di parte e rende visibili i passaggi fondamentali: avvio, contraddittorio, preavviso, osservazioni e valutazione. Questo approccio riduce il rischio di passaggi incompleti e aiuta a costruire un fascicolo più leggibile anche in sede di verifica successiva. Se vuoi approfondire, puoi entrare direttamente nel modulo procedimenti dalla call to action della slide.",
+    visitIntro:
+      "Sospendo la demo e apro il modulo procedimenti. Quando rientri, ripartiamo da questa stessa slide.",
     actionLabel: "Apri procedimenti",
     actionHref: "/procedimenti",
     badges: ["Audit", "Art. 47"],
@@ -240,6 +262,8 @@ export const GUIDED_DEMO_SLIDES: GuidedDemoSlide[] = [
       "La mappa è una baseline GIS-ready. Non sostituisce cartografie ufficiali o rilievi tecnici, ma permette alla demo di mostrare il territorio come parte del fascicolo.",
     narrationScript:
       "La vista territoriale aggiunge una prospettiva decisiva: collega il dato amministrativo alla dimensione fisica delle aree portuali. In demo la mappa è GIS-ready, quindi orientata all’integrazione progressiva senza sostituire cartografie ufficiali o rilievi tecnici. Il valore immediato è contestualizzare concessioni, criticità e sopralluoghi nello stesso percorso istruttorio. Dalla slide puoi aprire la mappa e verificare come la lettura geografica rafforza la comprensione del caso.",
+    visitIntro:
+      "Sospendo la demo e apro la mappa territoriale. Dopo la visita, torna alla demo guidata e riprendiamo dal punto corrente.",
     actionLabel: "Apri mappa",
     actionHref: "/mappa",
     badges: ["GIS"],
@@ -253,6 +277,8 @@ export const GUIDED_DEMO_SLIDES: GuidedDemoSlide[] = [
       "Il PDF non è un provvedimento automatico. È un documento istruttorio, pensato per ricostruire il quadro e supportare la valutazione amministrativa.",
     narrationScript:
       "Quando serve consolidare il lavoro istruttorio, il report PDF istituzionale riassume il quadro in modo ordinato: fascicolo, criticità, procedimenti, documenti e disclaimer. È uno strumento di supporto, non un atto decisorio automatico. Il suo valore è rendere più agevole la ricostruzione del caso per chi deve valutare o riesaminare il percorso amministrativo. Puoi usare il link della slide per aprire i report demo e vedere come questa sintesi si integra nella narrativa complessiva della piattaforma.",
+    visitIntro:
+      "Sospendo la demo e apro i report istituzionali. Quando torni, la demo riparte da questa slide.",
     actionLabel: "Apri report",
     actionHref: "/report",
     badges: ["Fascicolo", "PEC"],

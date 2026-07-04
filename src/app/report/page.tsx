@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { ResumeDemoBanner } from "@/components/demo-guidata/ResumeDemoBanner";
 import { AppShell } from "@/components/layout/AppShell";
 import { ReportTipologiaBadge, ReportValidatoBadge } from "@/components/report/ReportBadges";
 import { ReportFiltersBar } from "@/components/report/ReportFiltersBar";
@@ -107,6 +108,8 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
       title="Report"
       subtitle="Output istruttori, dossier e reportistica del servizio di monitoraggio"
     >
+      <ResumeDemoBanner />
+
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-8">
         <Card>
           <CardHeader>
