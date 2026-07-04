@@ -10,7 +10,7 @@ Non rappresenta una certificazione security/compliance definitiva.
 - Segregazione VIEWER_ADSP su perimetro consultivo.
 - Middleware centralizzato per route protection e redirect accessi non autorizzati.
 - Security headers baseline (X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy).
-- Rate limiting baseline su endpoint sensibili.
+- Rate limiting centralizzato su endpoint sensibili con adapter configurabile (memory/upstash) e risposta 429 standardizzata.
 - Audit trail con hash chain tamper-evident applicativa.
 - Audit evento download PDF e dinieghi autorizzativi.
 - Generazione PDF server-side.
@@ -21,7 +21,7 @@ Non rappresenta una certificazione security/compliance definitiva.
 - Password policy più rigorosa e rotazione credenziali.
 - MFA per profili privilegiati.
 - Session hardening (timeout, revoke, policy cookie avanzate).
-- Rate limiting distribuito (Redis/Upstash o equivalente).
+- Completare rollout produzione backend distribuito (Upstash/Redis) con monitoraggio e tuning soglie.
 - CSP più restrittiva e tuning policy browser security.
 - HSTS in produzione con configurazione TLS robusta.
 - Logging infrastrutturale centralizzato e correlabile.
@@ -34,7 +34,7 @@ Non rappresenta una certificazione security/compliance definitiva.
 - Penetration test periodico e remediation tracking.
 
 ## 3. Limiti noti della baseline
-- Rate limiting in-memory adeguato a demo/singola istanza, non a cluster produzione.
+- Fallback in-memory mantenuto solo per dev/demo/CI; per produzione multi-istanza usare backend distribuito configurato via env.
 - Audit hash chain applicativo non equivale a conservazione forense WORM.
 - Hardening avanzato e posture enterprise ancora in roadmap.
 

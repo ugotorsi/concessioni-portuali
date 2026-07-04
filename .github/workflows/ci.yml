@@ -15,6 +15,7 @@ jobs:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/concessioni_test?schema=public
       NEXTAUTH_SECRET: test-secret
       NEXTAUTH_URL: http://localhost:3000
+      RATE_LIMIT_BACKEND: memory
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -62,6 +63,7 @@ jobs:
       NEXTAUTH_SECRET: test-secret
       NEXTAUTH_URL: http://localhost:3000
       CI: true
+      RATE_LIMIT_BACKEND: memory
     steps:
       - name: Checkout
         uses: actions/checkout@v4

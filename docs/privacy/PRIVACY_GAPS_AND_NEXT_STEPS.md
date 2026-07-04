@@ -11,6 +11,7 @@ Matrice preliminare gap privacy/compliance per roadmap pre-produzione.
 | Data retention | Bozza policy presente, non attuata | Alto | Alta | Definire tempi ufficiali, job purge, tracciamento esecuzione |
 | Data subject rights | Processo non documentato end-to-end | Alto | Alta | Definire workflow richieste accesso/rettifica/cancellazione/opposizione |
 | Access log review | Audit presente ma review periodica non formalizzata | Medio | Media | Introdurre review periodica con ownership e KPI |
+| Rate limiting distribuito | Adapter Redis-ready presente con fallback memory dev/CI | Medio | Alta | Impostare backend Upstash/Redis in produzione con monitoring, alert e tuning soglie |
 | Backup | Strategia non formalizzata nel repo | Alto | Alta | Policy backup cifrati, restore test, RPO/RTO |
 | Encryption | Cifratura at rest da confermare | Alto | Alta | Definire standard cifratura at rest/in transit e key management |
 | Production hosting | Baseline demo, hardening non completo | Alto | Alta | Definire hosting compliant, segmentazione e controlli runtime |

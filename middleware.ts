@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { buildRateLimitKey, checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 
 const PUBLIC_PATHS = new Set(["/", "/login", "/logout", "/demo"]);
 const PROTECTED_PREFIXES = [
@@ -66,22 +66,18 @@ export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
   if (shouldRateLimit(pathname)) {
-    const ip = getClientIp(request.headers);
-    const result = checkRateLimit({
-      key: `${pathname}:${ip}`,
+    const result = await checkRateLimit({
+      key: buildRateLimitKey(`middleware:${pathname}`, request.headers),
       limit: pathname === "/api/auth/callback/credentials" ? 10 : 25,
       windowMs: 60_000,
     });
 
     if (!result.allowed) {
-      const retryAfter = Math.ceil((result.resetAt - Date.now()) / 1000);
       const response = NextResponse.json(
         { error: "Too many requests. Please retry later." },
         {
           status: 429,
-          headers: {
-            "Retry-After": String(Math.max(retryAfter, 1)),
-          },
+          headers: getRateLimitHeaders(result),
         },
       );
 

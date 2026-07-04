@@ -147,7 +147,18 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
 - Policy ruolo `VIEWER_ADSP` con blocco rotte operative (nuove/modifica) e redirect a `/adsp`.
 - Redirect ruoli back-office da `/adsp` verso `/dashboard`.
 - Security headers baseline configurati in `next.config.ts`.
-- Rate limiting demo/base in-memory su route sensibili (`/api/auth/callback/credentials`, `/export/*`).
+- Rate limiting centralizzato con adapter configurabile (`memory` / `upstash`) su route sensibili (`/api/auth/callback/credentials`, `/export/*`).
+
+### Rate limit backend (Issue #14)
+- Configurazione via env:
+   - `RATE_LIMIT_BACKEND=memory|upstash`
+   - `UPSTASH_REDIS_REST_URL`
+   - `UPSTASH_REDIS_REST_TOKEN`
+- Default locale/CI: `memory` (nessun Redis richiesto).
+- Se `RATE_LIMIT_BACKEND=upstash` senza credenziali:
+   - in `development`/`test` fallback automatico a memory;
+   - in `production` errore esplicito di configurazione.
+- Risposta 429 centralizzata con header `Retry-After` e metadati rate-limit.
 
 ## Audit trail baseline (Issue #4)
 - Baseline audit centralizzata con utility server in `src/server/audit/auditLog.ts`.
@@ -187,6 +198,7 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
 - Senza Docker/PostgreSQL attivi, le pagine dati dinamiche possono rispondere con errore.
 - I guard server-side restano necessari anche con middleware, come difesa ulteriore.
 - Rate limiting in-memory adatto a demo/singola istanza; per produzione serve soluzione distribuita (es. Redis/Upstash).
+- Il backend `memory` resta solo fallback dev/demo e non sostituisce controlli edge (WAF/API gateway) in produzione.
 - CSP completa e tuning avanzato (WAF, policy enterprise) restano step successivi.
 - Questa fase non include ancora SSO/SAML/OIDC enterprise ne MFA (previsti nelle fasi successive).
 - `.env.example` può essere ignorato da `.gitignore` se e presente la regola `.env*`.
