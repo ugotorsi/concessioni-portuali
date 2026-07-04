@@ -134,6 +134,7 @@ export interface PagamentoDetail {
     id: string;
     nome: string;
     tipologia: string;
+    statoDocumento: string;
     url: string;
     dataDocumento: Date | null;
     createdAt: Date;
@@ -431,10 +432,6 @@ export async function getPagamentoDetail(id: string): Promise<PagamentoDetail | 
             orderBy: [{ dataScadenzaContraddittorio: "asc" }, { createdAt: "desc" }],
             take: 12,
           },
-          documenti: {
-            orderBy: [{ dataDocumento: "desc" }, { createdAt: "desc" }],
-            take: 12,
-          },
         },
       },
     },
@@ -445,6 +442,15 @@ export async function getPagamentoDetail(id: string): Promise<PagamentoDetail | 
   }
 
   const today = startOfDay(new Date());
+  const documentiCollegati = await prisma.documento.findMany({
+    where: {
+      OR: [{ pagamentoId: pagamento.id }, { concessioneId: pagamento.concessioneId }],
+    },
+    orderBy: [{ dataDocumento: "desc" }, { createdAt: "desc" }],
+    take: 20,
+    distinct: ["id"],
+  });
+
   const importoDovuto = Number(pagamento.importoDovuto);
   const importoVersato = Number(pagamento.importoVersato);
   const residuo = Math.max(importoDovuto - importoVersato, 0);
@@ -505,11 +511,12 @@ export async function getPagamentoDetail(id: string): Promise<PagamentoDetail | 
       dataScadenzaContraddittorio: item.dataScadenzaContraddittorio,
       dataProvvedimentoFinale: item.dataProvvedimentoFinale,
     })),
-    documentiPrincipali: pagamento.concessione.documenti.map((item) => ({
+    documentiPrincipali: documentiCollegati.map((item) => ({
       id: item.id,
       nome: item.nome,
       tipologia: item.tipologia,
-      url: item.url,
+      statoDocumento: item.statoDocumento,
+      url: item.url ?? `/documenti/${item.id}/download`,
       dataDocumento: item.dataDocumento,
       createdAt: item.createdAt,
     })),

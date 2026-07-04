@@ -163,6 +163,23 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
 - Ogni scenario espone collegamenti reali a concessione, criticita, procedimento e report/PDF.
 - Presidio comunicativo: "elemento da valutare", "profilo istruttorio", "supporto al responsabile del procedimento".
 
+## Fascicolo documentale baseline (Issue #18)
+- Nuovo registro documentale centrale: `/documenti`.
+- Upload file locale con metadati e collegamento a una o piu entita tra concessione, criticita, procedimento, sopralluogo, pagamento, report.
+- Download protetto server-side da route dedicata: `/documenti/[id]/download`.
+- Archivazione documento con stato esplicito (`ATTIVO`/`ARCHIVIATO`) e restrizione consultiva per `VIEWER_ADSP` su documenti archiviati.
+- Audit eventi documentali: upload, download, update metadati, archiviazione e dinieghi autorizzativi.
+- Storage demo locale file-system configurabile via env:
+   - `DOCUMENT_STORAGE_ROOT`
+   - `DOCUMENT_MAX_FILE_MB`
+- Seed demo aggiornato: file reali locali in `.local-storage/documents` e metadati documentali estesi in DB.
+- Integrazione UI documenti nei dettagli entita principali e sezione "Documenti collegati" nel PDF istituzionale.
+
+Perimetro e limiti:
+- baseline documentale orientata a demo e fascicolo operativo interno;
+- nessun blob binario su database;
+- nessuna conservazione sostitutiva/firma/protocollazione a norma in questa fase.
+
 ### Institutional PDF polish (Issue #16)
 - Template PDF istituzionale raffinato con frontespizio, sommario sezioni e layout piu formale.
 - Header ricorrente con riferimenti applicativi/data generazione.

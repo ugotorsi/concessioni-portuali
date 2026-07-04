@@ -1779,12 +1779,27 @@ export type PagamentoScalarFieldEnum = (typeof PagamentoScalarFieldEnum)[keyof t
 
 export const DocumentoScalarFieldEnum = {
   id: 'id',
-  concessioneId: 'concessioneId',
   nome: 'nome',
   tipologia: 'tipologia',
+  statoDocumento: 'statoDocumento',
+  mimeType: 'mimeType',
+  dimensioneBytes: 'dimensioneBytes',
+  checksumSha256: 'checksumSha256',
   url: 'url',
+  storagePath: 'storagePath',
+  nomeStorage: 'nomeStorage',
   dataDocumento: 'dataDocumento',
   descrizione: 'descrizione',
+  uploadedByUserId: 'uploadedByUserId',
+  uploadedByUserEmail: 'uploadedByUserEmail',
+  uploadedByUserRole: 'uploadedByUserRole',
+  archivedAt: 'archivedAt',
+  concessioneId: 'concessioneId',
+  criticitaId: 'criticitaId',
+  procedimentoId: 'procedimentoId',
+  sopralluogoId: 'sopralluogoId',
+  pagamentoId: 'pagamentoId',
+  reportId: 'reportId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2335,6 +2350,20 @@ export type EnumTipologiaDocumentoFieldRefInput<$PrismaModel> = FieldRefInputTyp
  * Reference to a field of type 'TipologiaDocumento[]'
  */
 export type ListEnumTipologiaDocumentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipologiaDocumento[]'>
+    
+
+
+/**
+ * Reference to a field of type 'StatoDocumento'
+ */
+export type EnumStatoDocumentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatoDocumento'>
+    
+
+
+/**
+ * Reference to a field of type 'StatoDocumento[]'
+ */
+export type ListEnumStatoDocumentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatoDocumento[]'>
     
 
 

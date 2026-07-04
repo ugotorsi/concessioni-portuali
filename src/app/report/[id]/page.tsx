@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { GravitaBadge, StatoBadge as CriticitaStatoBadge } from "@/components/criticita/CriticitaBadges";
+import { EntityDocumentsPanel } from "@/components/documents/EntityDocumentsPanel";
 import { AppShell } from "@/components/layout/AppShell";
 import { PrintButton } from "@/components/report/PrintButton";
 import { ReportTipologiaBadge, ReportValidatoBadge } from "@/components/report/ReportBadges";
@@ -16,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/Table";
-import { canDownloadReportPdf, canValidateReport, requireRole } from "@/lib/auth";
+import { BACKOFFICE_ROLES, canDownloadReportPdf, canValidateReport, requireRole } from "@/lib/auth";
 import { formatCurrencyEUR, formatDateIT, formatEnumLabel } from "@/lib/utils";
 import { toggleReportValidationAction } from "@/server/actions/report";
 import { getNormeForReport } from "@/server/queries/normativa";
@@ -44,6 +45,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
 
   const canToggleValidation = canValidateReport(role);
   const canDownloadPdf = canDownloadReportPdf(role, detail.report.validato);
+  const canUploadDocumenti = BACKOFFICE_ROLES.includes(role);
   const normeCollegate = await getNormeForReport(detail.report.id);
 
   return (
@@ -459,51 +461,13 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>9. Documenti principali</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Nome</TableHead>
-                        <TableHead>Tipologia</TableHead>
-                        <TableHead>Data</TableHead>
-                        <TableHead>Link</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {detail.documentiPrincipali.map((item) => (
-                        <TableRow key={item.id}>
-                          <TableCell className="max-w-80 truncate">{item.nome}</TableCell>
-                          <TableCell>{formatEnumLabel(item.tipologia)}</TableCell>
-                          <TableCell>
-                            {item.dataDocumento ? formatDateIT(item.dataDocumento) : formatDateIT(item.createdAt)}
-                          </TableCell>
-                          <TableCell>
-                            <a
-                              href={item.url}
-                              className="text-sm underline underline-offset-4"
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              Apri
-                            </a>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      {detail.documentiPrincipali.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={4} className="text-center text-slate-500">
-                            Nessun documento principale disponibile.
-                          </TableCell>
-                        </TableRow>
-                      ) : null}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
+              <EntityDocumentsPanel
+                title="9. Documenti principali"
+                entityType="report"
+                entityId={detail.report.id}
+                documents={detail.documentiPrincipali}
+                canUpload={canUploadDocumenti}
+              />
             </section>
           </>
         ) : (

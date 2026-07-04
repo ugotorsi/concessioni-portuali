@@ -138,12 +138,20 @@ export default async function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link
-              href="/demo-scenari"
-              className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
-            >
-              Apri scenari demo
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/demo-scenari"
+                className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
+              >
+                Apri scenari demo
+              </Link>
+              <Link
+                href="/documenti"
+                className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              >
+                Apri fascicolo documentale
+              </Link>
+            </div>
           </CardContent>
         </Card>
 

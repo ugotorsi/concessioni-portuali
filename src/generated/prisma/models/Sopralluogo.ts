@@ -247,6 +247,7 @@ export type SopralluogoWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Sopralluogo"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Sopralluogo"> | Date | string
   concessione?: Prisma.XOR<Prisma.ConcessioneScalarRelationFilter, Prisma.ConcessioneWhereInput>
+  documenti?: Prisma.DocumentoListRelationFilter
 }
 
 export type SopralluogoOrderByWithRelationInput = {
@@ -264,6 +265,7 @@ export type SopralluogoOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   concessione?: Prisma.ConcessioneOrderByWithRelationInput
+  documenti?: Prisma.DocumentoOrderByRelationAggregateInput
 }
 
 export type SopralluogoWhereUniqueInput = Prisma.AtLeast<{
@@ -284,6 +286,7 @@ export type SopralluogoWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Sopralluogo"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Sopralluogo"> | Date | string
   concessione?: Prisma.XOR<Prisma.ConcessioneScalarRelationFilter, Prisma.ConcessioneWhereInput>
+  documenti?: Prisma.DocumentoListRelationFilter
 }, "id">
 
 export type SopralluogoOrderByWithAggregationInput = {
@@ -338,6 +341,7 @@ export type SopralluogoCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   concessione: Prisma.ConcessioneCreateNestedOneWithoutSopralluoghiInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutSopralluogoInput
 }
 
 export type SopralluogoUncheckedCreateInput = {
@@ -354,6 +358,7 @@ export type SopralluogoUncheckedCreateInput = {
   descrizione?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutSopralluogoInput
 }
 
 export type SopralluogoUpdateInput = {
@@ -370,6 +375,7 @@ export type SopralluogoUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   concessione?: Prisma.ConcessioneUpdateOneRequiredWithoutSopralluoghiNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutSopralluogoNestedInput
 }
 
 export type SopralluogoUncheckedUpdateInput = {
@@ -386,6 +392,7 @@ export type SopralluogoUncheckedUpdateInput = {
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutSopralluogoNestedInput
 }
 
 export type SopralluogoCreateManyInput = {
@@ -493,6 +500,11 @@ export type SopralluogoMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
+export type SopralluogoNullableScalarRelationFilter = {
+  is?: Prisma.SopralluogoWhereInput | null
+  isNot?: Prisma.SopralluogoWhereInput | null
+}
+
 export type SopralluogoCreateNestedManyWithoutConcessioneInput = {
   create?: Prisma.XOR<Prisma.SopralluogoCreateWithoutConcessioneInput, Prisma.SopralluogoUncheckedCreateWithoutConcessioneInput> | Prisma.SopralluogoCreateWithoutConcessioneInput[] | Prisma.SopralluogoUncheckedCreateWithoutConcessioneInput[]
   connectOrCreate?: Prisma.SopralluogoCreateOrConnectWithoutConcessioneInput | Prisma.SopralluogoCreateOrConnectWithoutConcessioneInput[]
@@ -539,6 +551,22 @@ export type EnumEsitoSopralluogoFieldUpdateOperationsInput = {
   set?: $Enums.EsitoSopralluogo
 }
 
+export type SopralluogoCreateNestedOneWithoutDocumentiInput = {
+  create?: Prisma.XOR<Prisma.SopralluogoCreateWithoutDocumentiInput, Prisma.SopralluogoUncheckedCreateWithoutDocumentiInput>
+  connectOrCreate?: Prisma.SopralluogoCreateOrConnectWithoutDocumentiInput
+  connect?: Prisma.SopralluogoWhereUniqueInput
+}
+
+export type SopralluogoUpdateOneWithoutDocumentiNestedInput = {
+  create?: Prisma.XOR<Prisma.SopralluogoCreateWithoutDocumentiInput, Prisma.SopralluogoUncheckedCreateWithoutDocumentiInput>
+  connectOrCreate?: Prisma.SopralluogoCreateOrConnectWithoutDocumentiInput
+  upsert?: Prisma.SopralluogoUpsertWithoutDocumentiInput
+  disconnect?: Prisma.SopralluogoWhereInput | boolean
+  delete?: Prisma.SopralluogoWhereInput | boolean
+  connect?: Prisma.SopralluogoWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SopralluogoUpdateToOneWithWhereWithoutDocumentiInput, Prisma.SopralluogoUpdateWithoutDocumentiInput>, Prisma.SopralluogoUncheckedUpdateWithoutDocumentiInput>
+}
+
 export type SopralluogoCreateWithoutConcessioneInput = {
   id?: string
   data: Date | string
@@ -552,6 +580,7 @@ export type SopralluogoCreateWithoutConcessioneInput = {
   descrizione?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutSopralluogoInput
 }
 
 export type SopralluogoUncheckedCreateWithoutConcessioneInput = {
@@ -567,6 +596,7 @@ export type SopralluogoUncheckedCreateWithoutConcessioneInput = {
   descrizione?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutSopralluogoInput
 }
 
 export type SopralluogoCreateOrConnectWithoutConcessioneInput = {
@@ -614,6 +644,86 @@ export type SopralluogoScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Sopralluogo"> | Date | string
 }
 
+export type SopralluogoCreateWithoutDocumentiInput = {
+  id?: string
+  data: Date | string
+  operatori: string
+  esito: $Enums.EsitoSopralluogo
+  conformitaPlanimetrica?: boolean
+  statoManutentivo?: string | null
+  sicurezza?: string | null
+  occupazione?: string | null
+  interferenze?: string | null
+  descrizione?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessione: Prisma.ConcessioneCreateNestedOneWithoutSopralluoghiInput
+}
+
+export type SopralluogoUncheckedCreateWithoutDocumentiInput = {
+  id?: string
+  concessioneId: string
+  data: Date | string
+  operatori: string
+  esito: $Enums.EsitoSopralluogo
+  conformitaPlanimetrica?: boolean
+  statoManutentivo?: string | null
+  sicurezza?: string | null
+  occupazione?: string | null
+  interferenze?: string | null
+  descrizione?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type SopralluogoCreateOrConnectWithoutDocumentiInput = {
+  where: Prisma.SopralluogoWhereUniqueInput
+  create: Prisma.XOR<Prisma.SopralluogoCreateWithoutDocumentiInput, Prisma.SopralluogoUncheckedCreateWithoutDocumentiInput>
+}
+
+export type SopralluogoUpsertWithoutDocumentiInput = {
+  update: Prisma.XOR<Prisma.SopralluogoUpdateWithoutDocumentiInput, Prisma.SopralluogoUncheckedUpdateWithoutDocumentiInput>
+  create: Prisma.XOR<Prisma.SopralluogoCreateWithoutDocumentiInput, Prisma.SopralluogoUncheckedCreateWithoutDocumentiInput>
+  where?: Prisma.SopralluogoWhereInput
+}
+
+export type SopralluogoUpdateToOneWithWhereWithoutDocumentiInput = {
+  where?: Prisma.SopralluogoWhereInput
+  data: Prisma.XOR<Prisma.SopralluogoUpdateWithoutDocumentiInput, Prisma.SopralluogoUncheckedUpdateWithoutDocumentiInput>
+}
+
+export type SopralluogoUpdateWithoutDocumentiInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  data?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  operatori?: Prisma.StringFieldUpdateOperationsInput | string
+  esito?: Prisma.EnumEsitoSopralluogoFieldUpdateOperationsInput | $Enums.EsitoSopralluogo
+  conformitaPlanimetrica?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoManutentivo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sicurezza?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interferenze?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessione?: Prisma.ConcessioneUpdateOneRequiredWithoutSopralluoghiNestedInput
+}
+
+export type SopralluogoUncheckedUpdateWithoutDocumentiInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  concessioneId?: Prisma.StringFieldUpdateOperationsInput | string
+  data?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  operatori?: Prisma.StringFieldUpdateOperationsInput | string
+  esito?: Prisma.EnumEsitoSopralluogoFieldUpdateOperationsInput | $Enums.EsitoSopralluogo
+  conformitaPlanimetrica?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoManutentivo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sicurezza?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interferenze?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type SopralluogoCreateManyConcessioneInput = {
   id?: string
   data: Date | string
@@ -642,6 +752,7 @@ export type SopralluogoUpdateWithoutConcessioneInput = {
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documenti?: Prisma.DocumentoUpdateManyWithoutSopralluogoNestedInput
 }
 
 export type SopralluogoUncheckedUpdateWithoutConcessioneInput = {
@@ -657,6 +768,7 @@ export type SopralluogoUncheckedUpdateWithoutConcessioneInput = {
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutSopralluogoNestedInput
 }
 
 export type SopralluogoUncheckedUpdateManyWithoutConcessioneInput = {
@@ -675,6 +787,35 @@ export type SopralluogoUncheckedUpdateManyWithoutConcessioneInput = {
 }
 
 
+/**
+ * Count Type SopralluogoCountOutputType
+ */
+
+export type SopralluogoCountOutputType = {
+  documenti: number
+}
+
+export type SopralluogoCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  documenti?: boolean | SopralluogoCountOutputTypeCountDocumentiArgs
+}
+
+/**
+ * SopralluogoCountOutputType without action
+ */
+export type SopralluogoCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SopralluogoCountOutputType
+   */
+  select?: Prisma.SopralluogoCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * SopralluogoCountOutputType without action
+ */
+export type SopralluogoCountOutputTypeCountDocumentiArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentoWhereInput
+}
+
 
 export type SopralluogoSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -691,6 +832,8 @@ export type SopralluogoSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   createdAt?: boolean
   updatedAt?: boolean
   concessione?: boolean | Prisma.ConcessioneDefaultArgs<ExtArgs>
+  documenti?: boolean | Prisma.Sopralluogo$documentiArgs<ExtArgs>
+  _count?: boolean | Prisma.SopralluogoCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sopralluogo"]>
 
 export type SopralluogoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -746,6 +889,8 @@ export type SopralluogoSelectScalar = {
 export type SopralluogoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "concessioneId" | "data" | "operatori" | "esito" | "conformitaPlanimetrica" | "statoManutentivo" | "sicurezza" | "occupazione" | "interferenze" | "descrizione" | "createdAt" | "updatedAt", ExtArgs["result"]["sopralluogo"]>
 export type SopralluogoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   concessione?: boolean | Prisma.ConcessioneDefaultArgs<ExtArgs>
+  documenti?: boolean | Prisma.Sopralluogo$documentiArgs<ExtArgs>
+  _count?: boolean | Prisma.SopralluogoCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type SopralluogoIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   concessione?: boolean | Prisma.ConcessioneDefaultArgs<ExtArgs>
@@ -758,6 +903,7 @@ export type $SopralluogoPayload<ExtArgs extends runtime.Types.Extensions.Interna
   name: "Sopralluogo"
   objects: {
     concessione: Prisma.$ConcessionePayload<ExtArgs>
+    documenti: Prisma.$DocumentoPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1168,6 +1314,7 @@ readonly fields: SopralluogoFieldRefs;
 export interface Prisma__SopralluogoClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   concessione<T extends Prisma.ConcessioneDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ConcessioneDefaultArgs<ExtArgs>>): Prisma.Prisma__ConcessioneClient<runtime.Types.Result.GetResult<Prisma.$ConcessionePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  documenti<T extends Prisma.Sopralluogo$documentiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Sopralluogo$documentiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1608,6 +1755,30 @@ export type SopralluogoDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Limit how many Sopralluogos to delete.
    */
   limit?: number
+}
+
+/**
+ * Sopralluogo.documenti
+ */
+export type Sopralluogo$documentiArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Documento
+   */
+  select?: Prisma.DocumentoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Documento
+   */
+  omit?: Prisma.DocumentoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentoInclude<ExtArgs> | null
+  where?: Prisma.DocumentoWhereInput
+  orderBy?: Prisma.DocumentoOrderByWithRelationInput | Prisma.DocumentoOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentoWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentoScalarFieldEnum | Prisma.DocumentoScalarFieldEnum[]
 }
 
 /**

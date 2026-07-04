@@ -255,6 +255,7 @@ export interface ProcedimentoDetail {
     id: string;
     nome: string;
     tipologia: string;
+    statoDocumento: string;
     url: string;
     dataDocumento: Date | null;
     createdAt: Date;
@@ -636,10 +637,6 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
             orderBy: [{ data: "desc" }],
             take: 8,
           },
-          documenti: {
-            orderBy: [{ dataDocumento: "desc" }, { createdAt: "desc" }],
-            take: 12,
-          },
           report: {
             orderBy: [{ createdAt: "desc" }],
             take: 10,
@@ -652,6 +649,15 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
   if (!procedimento) {
     return null;
   }
+
+  const documentiCollegati = await prisma.documento.findMany({
+    where: {
+      OR: [{ procedimentoId: procedimento.id }, { concessioneId: procedimento.concessioneId }],
+    },
+    orderBy: [{ dataDocumento: "desc" }, { createdAt: "desc" }],
+    take: 20,
+    distinct: ["id"],
+  });
 
   const termineScaduto =
     procedimento.dataScadenzaContraddittorio !== null &&
@@ -850,11 +856,12 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
       conformitaPlanimetrica: item.conformitaPlanimetrica,
       descrizione: item.descrizione,
     })),
-    documentiPrincipali: procedimento.concessione.documenti.map((item) => ({
+    documentiPrincipali: documentiCollegati.map((item) => ({
       id: item.id,
       nome: item.nome,
       tipologia: item.tipologia,
-      url: item.url,
+      statoDocumento: item.statoDocumento,
+      url: item.url ?? `/documenti/${item.id}/download`,
       dataDocumento: item.dataDocumento,
       createdAt: item.createdAt,
     })),

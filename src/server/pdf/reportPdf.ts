@@ -270,6 +270,7 @@ function addSummarySection(ctx: PdfContext, detail: ReportDetail) {
     "Pagamenti",
     "Scadenze",
     "Sopralluoghi",
+    "Documenti collegati",
     "Evidenze istruttorie",
     "Disclaimer finale",
   ];
@@ -285,6 +286,7 @@ function addSummarySection(ctx: PdfContext, detail: ReportDetail) {
     `Pagamenti critici: ${detail.pagamentiCritici.length}`,
     `Scadenze rilevanti: ${detail.scadenzeRilevanti.length}`,
     `Sopralluoghi recenti: ${detail.sopralluoghiRecenti.length}`,
+    `Documenti collegati: ${detail.documentiPrincipali.length}`,
   ]);
 }
 
@@ -468,6 +470,22 @@ function addSopralluoghiSection(ctx: PdfContext, detail: ReportDetail) {
   }
 }
 
+function addDocumentiSection(ctx: PdfContext, detail: ReportDetail) {
+  addSectionTitle(ctx, "Documenti collegati");
+
+  if (detail.documentiPrincipali.length === 0) {
+    addParagraph(ctx, "Non risultano dati nel perimetro del report.");
+    return;
+  }
+
+  for (const item of detail.documentiPrincipali) {
+    addBullet(
+      ctx,
+      `${textOrNA(item.nome)} | Tipologia: ${enumLabel(item.tipologia)} | Data: ${dateIT(item.dataDocumento ?? item.createdAt)}`,
+    );
+  }
+}
+
 function addNormativaSection(ctx: PdfContext, norme: NormaReportItem[]) {
   addSectionTitle(ctx, "Evidenze istruttorie");
 
@@ -565,6 +583,7 @@ export async function renderInstitutionalReportPdf(params: {
     addPagamentiSection(ctx, params.detail);
     addScadenzeSection(ctx, params.detail);
     addSopralluoghiSection(ctx, params.detail);
+    addDocumentiSection(ctx, params.detail);
     addNormativaSection(ctx, params.norme);
     addDisclaimerSection(ctx);
 

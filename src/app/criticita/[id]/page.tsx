@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { EntityDocumentsPanel } from "@/components/documents/EntityDocumentsPanel";
 import { GravitaBadge, StatoBadge, TipologiaBadge } from "@/components/criticita/CriticitaBadges";
 import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
@@ -577,44 +578,13 @@ export default async function CriticitaDetailPage({ params }: CriticitaDetailPag
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Documenti principali</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Tipologia</TableHead>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Link</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {criticita.documenti.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="max-w-72 truncate">{item.nome}</TableCell>
-                      <TableCell>{formatEnumLabel(item.tipologia)}</TableCell>
-                      <TableCell>{item.dataDocumento ? formatDateIT(item.dataDocumento) : formatDateIT(item.createdAt)}</TableCell>
-                      <TableCell>
-                        <a href={item.url} className="text-sm underline underline-offset-4" target="_blank" rel="noreferrer">
-                          Apri
-                        </a>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {criticita.documenti.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center text-slate-500">
-                        Nessun documento disponibile.
-                      </TableCell>
-                    </TableRow>
-                  ) : null}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <EntityDocumentsPanel
+            title="Documenti principali"
+            entityType="criticita"
+            entityId={criticita.id}
+            documents={criticita.documenti}
+            canUpload={canEdit}
+          />
         </section>
 
         <Card>

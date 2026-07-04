@@ -1,6 +1,8 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import { createHash } from "node:crypto";
+import { promises as fs } from "node:fs";
+import path from "node:path";
 import { PrismaClient } from "../src/generated/prisma/client";
 import type {
   Art47CodNavLettera,
@@ -29,6 +31,27 @@ const prisma = new PrismaClient({
 const dayMs = 24 * 60 * 60 * 1000;
 const daysFromNow = (days: number) => new Date(Date.now() + days * dayMs);
 const daysAgo = (days: number) => new Date(Date.now() - days * dayMs);
+
+function getSeedDocumentStorageRoot(): string {
+  const configured = process.env.DOCUMENT_STORAGE_ROOT?.trim();
+  if (!configured) {
+    return path.join(process.cwd(), ".local-storage", "documents");
+  }
+
+  if (path.isAbsolute(configured)) {
+    return configured;
+  }
+
+  return path.join(process.cwd(), configured);
+}
+
+function sanitizeSeedFileName(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
 
 function buildAuditHash(payload: {
   previousHash: string | null;
@@ -720,26 +743,60 @@ async function main() {
     });
   }
 
-  await prisma.documento.createMany({
-    data: [
-      { concessioneId: concessioniByKey["con-001"], nome: "Titolo concessorio CP-001/2021", tipologia: "TITOLO_CONCESSORIO", url: "/demo/documenti/titolo-concessorio-001.pdf", dataDocumento: daysAgo(1800), descrizione: "Atto principale concessione area scoperta." },
-      { concessioneId: concessioniByKey["con-001"], nome: "Planimetria lotto A", tipologia: "PLANIMETRIA", url: "/demo/documenti/planimetria-lotto-a.pdf", dataDocumento: daysAgo(800), descrizione: "Perimetrazione area in concessione." },
-      { concessioneId: concessioniByKey["con-001"], nome: "Ricevuta canone 2024", tipologia: "PAGAMENTO", url: "/demo/documenti/pagamento-canone-2024-con001.pdf", dataDocumento: daysAgo(420), descrizione: "Quietanza annualita 2024." },
-      { concessioneId: concessioniByKey["con-002"], nome: "Titolo concessorio CP-014/2020", tipologia: "TITOLO_CONCESSORIO", url: "/demo/documenti/titolo-concessorio-014.pdf", dataDocumento: daysAgo(2100), descrizione: "Atto rilascio tratto banchina." },
-      { concessioneId: concessioniByKey["con-002"], nome: "Polizza RCT 2026", tipologia: "POLIZZA", url: "/demo/documenti/polizza-rct-2026-con002.pdf", dataDocumento: daysAgo(30), descrizione: "In corso verifica validita." },
-      { concessioneId: concessioniByKey["con-002"], nome: "Verbale tecnico parabordi", tipologia: "VERBALE", url: "/demo/documenti/verbale-tecnico-parabordi.pdf", dataDocumento: daysAgo(20), descrizione: "Rilievi manutentivi su banchina." },
-      { concessioneId: concessioniByKey["con-003"], nome: "Fideiussione bancaria", tipologia: "FIDEIUSSIONE", url: "/demo/documenti/fideiussione-con003.pdf", dataDocumento: daysAgo(390), descrizione: "Garanzia in scadenza." },
-      { concessioneId: concessioniByKey["con-003"], nome: "Nota ufficio concessioni", tipologia: "NOTA", url: "/demo/documenti/nota-ufficio-con003.pdf", dataDocumento: daysAgo(18), descrizione: "Richiesta integrazione documentale." },
-      { concessioneId: concessioniByKey["con-004"], nome: "Determina di aggiornamento canone", tipologia: "DETERMINA", url: "/demo/documenti/determina-aggiornamento-canone-con004.pdf", dataDocumento: daysAgo(200), descrizione: "Revisione annuale canone." },
-      { concessioneId: concessioniByKey["con-004"], nome: "Planimetria box tecnico", tipologia: "PLANIMETRIA", url: "/demo/documenti/planimetria-box-tecnico-con004.pdf", dataDocumento: daysAgo(310), descrizione: "Distribuzione interna locali." },
-      { concessioneId: concessioniByKey["con-005"], nome: "Diffida ad adempiere prescrizioni", tipologia: "DIFFIDA", url: "/demo/documenti/diffida-adempimenti-con005.pdf", dataDocumento: daysAgo(12), descrizione: "Diffida su aggiornamento sicurezza." },
-      { concessioneId: concessioniByKey["con-006"], nome: "Contestazione irregolarita documentale", tipologia: "CONTESTAZIONE", url: "/demo/documenti/contestazione-documentale-con006.pdf", dataDocumento: daysAgo(40), descrizione: "Mancata trasmissione relazione semestrale." },
-      { concessioneId: concessioniByKey["con-006"], nome: "Verbale sopralluogo capannone", tipologia: "VERBALE", url: "/demo/documenti/verbale-sopralluogo-capannone-con006.pdf", dataDocumento: daysAgo(35), descrizione: "Rilievi su stato manutentivo." },
-      { concessioneId: concessioniByKey["con-007"], nome: "Cauzione a garanzia obblighi", tipologia: "CAUZIONE", url: "/demo/documenti/cauzione-garanzia-con007.pdf", dataDocumento: daysAgo(300), descrizione: "Deposito cauzionale in rinnovo." },
-      { concessioneId: concessioniByKey["con-007"], nome: "Ricevuta pagamento parziale", tipologia: "PAGAMENTO", url: "/demo/documenti/pagamento-parziale-con007.pdf", dataDocumento: daysAgo(22), descrizione: "Versamento parziale canone anno corrente." },
-      { concessioneId: concessioniByKey["con-008"], nome: "Nota tecnica area multifunzione", tipologia: "NOTA", url: "/demo/documenti/nota-tecnica-area-multifunzione-con008.pdf", dataDocumento: daysAgo(9), descrizione: "Linee guida per uso area." },
-    ],
-  });
+  const documentiSeed = [
+    { concessioneId: concessioniByKey["con-001"], nome: "Titolo concessorio CP-001/2021", tipologia: "TITOLO_CONCESSORIO", dataDocumento: daysAgo(1800), descrizione: "Atto principale concessione area scoperta." },
+    { concessioneId: concessioniByKey["con-001"], nome: "Planimetria lotto A", tipologia: "PLANIMETRIA", dataDocumento: daysAgo(800), descrizione: "Perimetrazione area in concessione." },
+    { concessioneId: concessioniByKey["con-001"], nome: "Ricevuta canone 2024", tipologia: "PAGAMENTO", dataDocumento: daysAgo(420), descrizione: "Quietanza annualita 2024." },
+    { concessioneId: concessioniByKey["con-002"], nome: "Titolo concessorio CP-014/2020", tipologia: "TITOLO_CONCESSORIO", dataDocumento: daysAgo(2100), descrizione: "Atto rilascio tratto banchina." },
+    { concessioneId: concessioniByKey["con-002"], nome: "Polizza RCT 2026", tipologia: "POLIZZA", dataDocumento: daysAgo(30), descrizione: "In corso verifica validita." },
+    { concessioneId: concessioniByKey["con-002"], nome: "Verbale tecnico parabordi", tipologia: "VERBALE", dataDocumento: daysAgo(20), descrizione: "Rilievi manutentivi su banchina." },
+    { concessioneId: concessioniByKey["con-003"], nome: "Fideiussione bancaria", tipologia: "FIDEIUSSIONE", dataDocumento: daysAgo(390), descrizione: "Garanzia in scadenza." },
+    { concessioneId: concessioniByKey["con-003"], nome: "Nota ufficio concessioni", tipologia: "NOTA", dataDocumento: daysAgo(18), descrizione: "Richiesta integrazione documentale." },
+    { concessioneId: concessioniByKey["con-004"], nome: "Determina di aggiornamento canone", tipologia: "DETERMINA", dataDocumento: daysAgo(200), descrizione: "Revisione annuale canone." },
+    { concessioneId: concessioniByKey["con-004"], nome: "Planimetria box tecnico", tipologia: "PLANIMETRIA", dataDocumento: daysAgo(310), descrizione: "Distribuzione interna locali." },
+    { concessioneId: concessioniByKey["con-005"], nome: "Diffida ad adempiere prescrizioni", tipologia: "DIFFIDA", dataDocumento: daysAgo(12), descrizione: "Diffida su aggiornamento sicurezza." },
+    { concessioneId: concessioniByKey["con-006"], nome: "Contestazione irregolarita documentale", tipologia: "CONTESTAZIONE", dataDocumento: daysAgo(40), descrizione: "Mancata trasmissione relazione semestrale." },
+    { concessioneId: concessioniByKey["con-006"], nome: "Verbale sopralluogo capannone", tipologia: "VERBALE", dataDocumento: daysAgo(35), descrizione: "Rilievi su stato manutentivo." },
+    { concessioneId: concessioniByKey["con-007"], nome: "Cauzione a garanzia obblighi", tipologia: "CAUZIONE", dataDocumento: daysAgo(300), descrizione: "Deposito cauzionale in rinnovo." },
+    { concessioneId: concessioniByKey["con-007"], nome: "Ricevuta pagamento parziale", tipologia: "PAGAMENTO", dataDocumento: daysAgo(22), descrizione: "Versamento parziale canone anno corrente." },
+    { concessioneId: concessioniByKey["con-008"], nome: "Nota tecnica area multifunzione", tipologia: "NOTA", dataDocumento: daysAgo(9), descrizione: "Linee guida per uso area." },
+  ] as const;
+
+  const storageRoot = getSeedDocumentStorageRoot();
+  await fs.mkdir(storageRoot, { recursive: true });
+
+  for (const [index, item] of documentiSeed.entries()) {
+    const fileName = `seed-${String(index + 1).padStart(2, "0")}-${sanitizeSeedFileName(item.nome)}.txt`;
+    const storagePath = fileName;
+    const absolutePath = path.join(storageRoot, storagePath);
+    const content = [
+      "Concessioni Portuali - Documento seed baseline",
+      `Nome: ${item.nome}`,
+      `Tipologia: ${item.tipologia}`,
+      `Concessione: ${item.concessioneId}`,
+      `Descrizione: ${item.descrizione}`,
+      `Data documento: ${item.dataDocumento.toISOString()}`,
+    ].join("\n");
+
+    const buffer = Buffer.from(content, "utf8");
+    await fs.writeFile(absolutePath, buffer);
+
+    await prisma.documento.create({
+      data: {
+        concessioneId: item.concessioneId,
+        nome: item.nome,
+        tipologia: item.tipologia,
+        statoDocumento: "ATTIVO",
+        mimeType: "text/plain",
+        dimensioneBytes: buffer.byteLength,
+        checksumSha256: createHash("sha256").update(buffer).digest("hex"),
+        storagePath,
+        nomeStorage: fileName,
+        dataDocumento: item.dataDocumento,
+        descrizione: item.descrizione,
+      },
+    });
+  }
 
   const criticitaRows: Array<{
     key: string;

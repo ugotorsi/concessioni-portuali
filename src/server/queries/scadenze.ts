@@ -120,6 +120,7 @@ export interface ScadenzaDetail {
     id: string;
     nome: string;
     tipologia: string;
+    statoDocumento: string;
     url: string;
     dataDocumento: Date | null;
     createdAt: Date;
@@ -388,7 +389,8 @@ export async function getScadenzaDetail(id: string): Promise<ScadenzaDetail | nu
       id: item.id,
       nome: item.nome,
       tipologia: item.tipologia,
-      url: item.url,
+      statoDocumento: item.statoDocumento,
+      url: item.url ?? `/documenti/${item.id}/download`,
       dataDocumento: item.dataDocumento,
       createdAt: item.createdAt,
     })),

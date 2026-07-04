@@ -71,9 +71,9 @@ Nota: utile per MVP, ma manca piena identita legale/organizzativa (profilazione 
 
 ### Documento
 - Funzione giuridico-amministrativa: tracciamento documenti collegati alla concessione/fascicolo.
-- Dati rilevanti: nome, tipologia, url, dataDocumento, descrizione.
-- Collegamenti: N:1 verso Concessione.
-- Livello maturità attuale: Medio (struttura presente, gestione documentale legale non completa).
+- Dati rilevanti: nome, tipologia, statoDocumento, mimeType, dimensioneBytes, checksumSha256, storagePath/url, dataDocumento, descrizione, uploadedByUser.
+- Collegamenti: opzionale verso Concessione, Criticita, Procedimento, Sopralluogo, Pagamento, Report.
+- Livello maturità attuale: Medio-Alto per fascicolo operativo demo; gestione documentale legale completa non ancora presente.
 
 ### Report
 - Funzione giuridico-amministrativa: output istruttorio e reportistica operativa/direzionale.
@@ -182,7 +182,7 @@ Perche la struttura e corretta per vista 360 gradi:
 | Trasparenza verso AdSP | Consultazione controllata | Vista AdSP + Report validati | Alta | Canale formale scambio documentale | Media |
 | Supporto istruttorio | Sintesi e priorità operative | Dashboard, Report, Normativa, AI assistiva | Alta | Workflow di approvazione strutturato | Alta |
 | Tracciabilita | Audit azioni | ActivityLog + action server | Media | Audit forense immutabile con identita reale | Altissima |
-| Documentale | Collegamento documenti al caso | Documento per concessione | Media | Protocollazione, versionamento, firma, conservazione | Altissima |
+| Documentale | Collegamento documenti al caso | Registro documenti centralizzato, upload/download protetto, stato archivio e collegamento multi-entita | Medio-Alta | Protocollazione, versionamento legale, firma, conservazione a norma | Altissima |
 | Normativa/aggiornamento fonti | Versioni e impatti su moduli | NormaFonte/NormaVersione/NormaImpatto | Alta | Ingestion e diff normativi semi-automatici | Media |
 | AI assistiva | Supporto non decisorio e warning | Modulo AI, ruoli, disclaimer, prompt templates | Media | Logging prompt/output, validazione e benchmark | Alta |
 

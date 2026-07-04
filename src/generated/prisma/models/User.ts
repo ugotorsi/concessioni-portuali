@@ -317,6 +317,7 @@ export type UserWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   activityLogs?: Prisma.ActivityLogListRelationFilter
+  documentiCaricati?: Prisma.DocumentoListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -339,6 +340,7 @@ export type UserOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   activityLogs?: Prisma.ActivityLogOrderByRelationAggregateInput
+  documentiCaricati?: Prisma.DocumentoOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -364,6 +366,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   activityLogs?: Prisma.ActivityLogListRelationFilter
+  documentiCaricati?: Prisma.DocumentoListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -436,6 +439,7 @@ export type UserCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  documentiCaricati?: Prisma.DocumentoCreateNestedManyWithoutUploadedByUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -458,6 +462,7 @@ export type UserUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  documentiCaricati?: Prisma.DocumentoUncheckedCreateNestedManyWithoutUploadedByUserInput
 }
 
 export type UserUpdateInput = {
@@ -480,6 +485,7 @@ export type UserUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  documentiCaricati?: Prisma.DocumentoUpdateManyWithoutUploadedByUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -502,6 +508,7 @@ export type UserUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  documentiCaricati?: Prisma.DocumentoUncheckedUpdateManyWithoutUploadedByUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -673,6 +680,22 @@ export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
 
+export type UserCreateNestedOneWithoutDocumentiCaricatiInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentiCaricatiInput, Prisma.UserUncheckedCreateWithoutDocumentiCaricatiInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentiCaricatiInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutDocumentiCaricatiNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentiCaricatiInput, Prisma.UserUncheckedCreateWithoutDocumentiCaricatiInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentiCaricatiInput
+  upsert?: Prisma.UserUpsertWithoutDocumentiCaricatiInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDocumentiCaricatiInput, Prisma.UserUpdateWithoutDocumentiCaricatiInput>, Prisma.UserUncheckedUpdateWithoutDocumentiCaricatiInput>
+}
+
 export type UserCreateNestedOneWithoutActivityLogsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutActivityLogsInput, Prisma.UserUncheckedCreateWithoutActivityLogsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutActivityLogsInput
@@ -687,6 +710,110 @@ export type UserUpdateOneWithoutActivityLogsNestedInput = {
   delete?: Prisma.UserWhereInput | boolean
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutActivityLogsInput, Prisma.UserUpdateWithoutActivityLogsInput>, Prisma.UserUncheckedUpdateWithoutActivityLogsInput>
+}
+
+export type UserCreateWithoutDocumentiCaricatiInput = {
+  id?: string
+  nome: string
+  email: string
+  passwordHash?: string | null
+  ruolo: $Enums.RuoloUser
+  attivo?: boolean
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastFailedLoginAt?: Date | string | null
+  lastLoginAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  mustChangePassword?: boolean
+  mfaEnabled?: boolean
+  mfaSecret?: string | null
+  mfaRecoveryCodes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mfaVerifiedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutDocumentiCaricatiInput = {
+  id?: string
+  nome: string
+  email: string
+  passwordHash?: string | null
+  ruolo: $Enums.RuoloUser
+  attivo?: boolean
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastFailedLoginAt?: Date | string | null
+  lastLoginAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  mustChangePassword?: boolean
+  mfaEnabled?: boolean
+  mfaSecret?: string | null
+  mfaRecoveryCodes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mfaVerifiedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutDocumentiCaricatiInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentiCaricatiInput, Prisma.UserUncheckedCreateWithoutDocumentiCaricatiInput>
+}
+
+export type UserUpsertWithoutDocumentiCaricatiInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDocumentiCaricatiInput, Prisma.UserUncheckedUpdateWithoutDocumentiCaricatiInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentiCaricatiInput, Prisma.UserUncheckedCreateWithoutDocumentiCaricatiInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDocumentiCaricatiInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDocumentiCaricatiInput, Prisma.UserUncheckedUpdateWithoutDocumentiCaricatiInput>
+}
+
+export type UserUpdateWithoutDocumentiCaricatiInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ruolo?: Prisma.EnumRuoloUserFieldUpdateOperationsInput | $Enums.RuoloUser
+  attivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastFailedLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mfaEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mfaSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mfaRecoveryCodes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mfaVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDocumentiCaricatiInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ruolo?: Prisma.EnumRuoloUserFieldUpdateOperationsInput | $Enums.RuoloUser
+  attivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastFailedLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mfaEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mfaSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mfaRecoveryCodes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mfaVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutActivityLogsInput = {
@@ -708,6 +835,7 @@ export type UserCreateWithoutActivityLogsInput = {
   mfaVerifiedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  documentiCaricati?: Prisma.DocumentoCreateNestedManyWithoutUploadedByUserInput
 }
 
 export type UserUncheckedCreateWithoutActivityLogsInput = {
@@ -729,6 +857,7 @@ export type UserUncheckedCreateWithoutActivityLogsInput = {
   mfaVerifiedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  documentiCaricati?: Prisma.DocumentoUncheckedCreateNestedManyWithoutUploadedByUserInput
 }
 
 export type UserCreateOrConnectWithoutActivityLogsInput = {
@@ -766,6 +895,7 @@ export type UserUpdateWithoutActivityLogsInput = {
   mfaVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documentiCaricati?: Prisma.DocumentoUpdateManyWithoutUploadedByUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutActivityLogsInput = {
@@ -787,6 +917,7 @@ export type UserUncheckedUpdateWithoutActivityLogsInput = {
   mfaVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documentiCaricati?: Prisma.DocumentoUncheckedUpdateManyWithoutUploadedByUserNestedInput
 }
 
 
@@ -796,10 +927,12 @@ export type UserUncheckedUpdateWithoutActivityLogsInput = {
 
 export type UserCountOutputType = {
   activityLogs: number
+  documentiCaricati: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   activityLogs?: boolean | UserCountOutputTypeCountActivityLogsArgs
+  documentiCaricati?: boolean | UserCountOutputTypeCountDocumentiCaricatiArgs
 }
 
 /**
@@ -817,6 +950,13 @@ export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
  */
 export type UserCountOutputTypeCountActivityLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ActivityLogWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountDocumentiCaricatiArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentoWhereInput
 }
 
 
@@ -840,6 +980,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdAt?: boolean
   updatedAt?: boolean
   activityLogs?: boolean | Prisma.User$activityLogsArgs<ExtArgs>
+  documentiCaricati?: boolean | Prisma.User$documentiCaricatiArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -909,6 +1050,7 @@ export type UserSelectScalar = {
 export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nome" | "email" | "passwordHash" | "ruolo" | "attivo" | "failedLoginAttempts" | "lockedUntil" | "lastFailedLoginAt" | "lastLoginAt" | "passwordChangedAt" | "mustChangePassword" | "mfaEnabled" | "mfaSecret" | "mfaRecoveryCodes" | "mfaVerifiedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   activityLogs?: boolean | Prisma.User$activityLogsArgs<ExtArgs>
+  documentiCaricati?: boolean | Prisma.User$documentiCaricatiArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -918,6 +1060,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "User"
   objects: {
     activityLogs: Prisma.$ActivityLogPayload<ExtArgs>[]
+    documentiCaricati: Prisma.$DocumentoPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1333,6 +1476,7 @@ readonly fields: UserFieldRefs;
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   activityLogs<T extends Prisma.User$activityLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$activityLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documentiCaricati<T extends Prisma.User$documentiCaricatiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentiCaricatiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1794,6 +1938,30 @@ export type User$activityLogsArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.ActivityLogScalarFieldEnum | Prisma.ActivityLogScalarFieldEnum[]
+}
+
+/**
+ * User.documentiCaricati
+ */
+export type User$documentiCaricatiArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Documento
+   */
+  select?: Prisma.DocumentoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Documento
+   */
+  omit?: Prisma.DocumentoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentoInclude<ExtArgs> | null
+  where?: Prisma.DocumentoWhereInput
+  orderBy?: Prisma.DocumentoOrderByWithRelationInput | Prisma.DocumentoOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentoWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentoScalarFieldEnum | Prisma.DocumentoScalarFieldEnum[]
 }
 
 /**

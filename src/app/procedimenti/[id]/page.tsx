@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { GravitaBadge, StatoBadge as CriticitaStatoBadge } from "@/components/criticita/CriticitaBadges";
+import { EntityDocumentsPanel } from "@/components/documents/EntityDocumentsPanel";
 import { AppShell } from "@/components/layout/AppShell";
 import {
   ProcedimentoGiorniBadge,
@@ -734,44 +735,13 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
         </section>
 
         <section className="grid gap-4 xl:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>10. Documenti principali</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Tipologia</TableHead>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Link</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {detail.documentiPrincipali.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="max-w-80 truncate">{item.nome}</TableCell>
-                      <TableCell>{formatEnumLabel(item.tipologia)}</TableCell>
-                      <TableCell>{item.dataDocumento ? formatDateIT(item.dataDocumento) : formatDateIT(item.createdAt)}</TableCell>
-                      <TableCell>
-                        <a href={item.url} className="text-sm underline underline-offset-4" target="_blank" rel="noreferrer">
-                          Apri
-                        </a>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {detail.documentiPrincipali.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center text-slate-500">
-                        Nessun documento principale disponibile.
-                      </TableCell>
-                    </TableRow>
-                  ) : null}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <EntityDocumentsPanel
+            title="10. Documenti principali"
+            entityType="procedimento"
+            entityId={detail.procedimento.id}
+            documents={detail.documentiPrincipali}
+            canUpload={canWriteChecklist}
+          />
 
           <Card>
             <CardHeader>

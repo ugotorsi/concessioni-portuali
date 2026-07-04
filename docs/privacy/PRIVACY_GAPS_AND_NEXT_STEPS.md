@@ -18,6 +18,7 @@ Matrice preliminare gap privacy/compliance per roadmap pre-produzione.
 | Breach response | Procedura data breach non formalizzata | Alto | Alta | Preparare playbook incidenti e registro breach |
 | Minimizzazione dati | Presidi parziali, allegati/documenti da governare | Medio-Alto | Alta | Regole di minimizzazione by design e controlli input/upload |
 | Export PDF | Policy ruolo presente, governance distribuzione da rafforzare | Medio | Media | Watermark, classificazione, policy invio/archiviazione |
+| Upload documenti locali | Baseline storage locale con metadati e controlli MIME/dimensione | Medio-Alto | Alta | Definire antivirus/malware scanning, policy classificazione, retention allegati e cifratura storage |
 | Audit immutabilita | Hash chain applicativa presente, no WORM | Medio-Alto | Alta | Evolvere verso storage immutabile/SIEM e policy append-only |
 | Ruoli/autorizzazioni | RBAC presente con baseline lockout account; da estendere a casi enterprise | Medio | Media | Revisione periodica ruoli, least privilege, MFA end-to-end su ruoli critici |
 | Test/compliance CI | Baseline test presente, compliance automation limitata | Medio | Media | Integrare test security/compliance e scanning in CI/CD |

@@ -285,6 +285,7 @@ export type PagamentoWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Pagamento"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Pagamento"> | Date | string
   concessione?: Prisma.XOR<Prisma.ConcessioneScalarRelationFilter, Prisma.ConcessioneWhereInput>
+  documenti?: Prisma.DocumentoListRelationFilter
 }
 
 export type PagamentoOrderByWithRelationInput = {
@@ -301,6 +302,7 @@ export type PagamentoOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   concessione?: Prisma.ConcessioneOrderByWithRelationInput
+  documenti?: Prisma.DocumentoOrderByRelationAggregateInput
 }
 
 export type PagamentoWhereUniqueInput = Prisma.AtLeast<{
@@ -320,6 +322,7 @@ export type PagamentoWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Pagamento"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Pagamento"> | Date | string
   concessione?: Prisma.XOR<Prisma.ConcessioneScalarRelationFilter, Prisma.ConcessioneWhereInput>
+  documenti?: Prisma.DocumentoListRelationFilter
 }, "id">
 
 export type PagamentoOrderByWithAggregationInput = {
@@ -373,6 +376,7 @@ export type PagamentoCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   concessione: Prisma.ConcessioneCreateNestedOneWithoutPagamentiInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutPagamentoInput
 }
 
 export type PagamentoUncheckedCreateInput = {
@@ -388,6 +392,7 @@ export type PagamentoUncheckedCreateInput = {
   note?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutPagamentoInput
 }
 
 export type PagamentoUpdateInput = {
@@ -403,6 +408,7 @@ export type PagamentoUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   concessione?: Prisma.ConcessioneUpdateOneRequiredWithoutPagamentiNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutPagamentoNestedInput
 }
 
 export type PagamentoUncheckedUpdateInput = {
@@ -418,6 +424,7 @@ export type PagamentoUncheckedUpdateInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutPagamentoNestedInput
 }
 
 export type PagamentoCreateManyInput = {
@@ -533,6 +540,11 @@ export type PagamentoSumOrderByAggregateInput = {
   interessiMora?: Prisma.SortOrder
 }
 
+export type PagamentoNullableScalarRelationFilter = {
+  is?: Prisma.PagamentoWhereInput | null
+  isNot?: Prisma.PagamentoWhereInput | null
+}
+
 export type PagamentoCreateNestedManyWithoutConcessioneInput = {
   create?: Prisma.XOR<Prisma.PagamentoCreateWithoutConcessioneInput, Prisma.PagamentoUncheckedCreateWithoutConcessioneInput> | Prisma.PagamentoCreateWithoutConcessioneInput[] | Prisma.PagamentoUncheckedCreateWithoutConcessioneInput[]
   connectOrCreate?: Prisma.PagamentoCreateOrConnectWithoutConcessioneInput | Prisma.PagamentoCreateOrConnectWithoutConcessioneInput[]
@@ -587,6 +599,22 @@ export type EnumStatoPagamentoFieldUpdateOperationsInput = {
   set?: $Enums.StatoPagamento
 }
 
+export type PagamentoCreateNestedOneWithoutDocumentiInput = {
+  create?: Prisma.XOR<Prisma.PagamentoCreateWithoutDocumentiInput, Prisma.PagamentoUncheckedCreateWithoutDocumentiInput>
+  connectOrCreate?: Prisma.PagamentoCreateOrConnectWithoutDocumentiInput
+  connect?: Prisma.PagamentoWhereUniqueInput
+}
+
+export type PagamentoUpdateOneWithoutDocumentiNestedInput = {
+  create?: Prisma.XOR<Prisma.PagamentoCreateWithoutDocumentiInput, Prisma.PagamentoUncheckedCreateWithoutDocumentiInput>
+  connectOrCreate?: Prisma.PagamentoCreateOrConnectWithoutDocumentiInput
+  upsert?: Prisma.PagamentoUpsertWithoutDocumentiInput
+  disconnect?: Prisma.PagamentoWhereInput | boolean
+  delete?: Prisma.PagamentoWhereInput | boolean
+  connect?: Prisma.PagamentoWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PagamentoUpdateToOneWithWhereWithoutDocumentiInput, Prisma.PagamentoUpdateWithoutDocumentiInput>, Prisma.PagamentoUncheckedUpdateWithoutDocumentiInput>
+}
+
 export type PagamentoCreateWithoutConcessioneInput = {
   id?: string
   annoRiferimento: number
@@ -599,6 +627,7 @@ export type PagamentoCreateWithoutConcessioneInput = {
   note?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutPagamentoInput
 }
 
 export type PagamentoUncheckedCreateWithoutConcessioneInput = {
@@ -613,6 +642,7 @@ export type PagamentoUncheckedCreateWithoutConcessioneInput = {
   note?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutPagamentoInput
 }
 
 export type PagamentoCreateOrConnectWithoutConcessioneInput = {
@@ -659,6 +689,82 @@ export type PagamentoScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Pagamento"> | Date | string
 }
 
+export type PagamentoCreateWithoutDocumentiInput = {
+  id?: string
+  annoRiferimento: number
+  importoDovuto: runtime.Decimal | runtime.DecimalJsLike | number | string
+  importoVersato?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  dataScadenza: Date | string
+  dataVersamento?: Date | string | null
+  stato: $Enums.StatoPagamento
+  interessiMora?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  note?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessione: Prisma.ConcessioneCreateNestedOneWithoutPagamentiInput
+}
+
+export type PagamentoUncheckedCreateWithoutDocumentiInput = {
+  id?: string
+  concessioneId: string
+  annoRiferimento: number
+  importoDovuto: runtime.Decimal | runtime.DecimalJsLike | number | string
+  importoVersato?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  dataScadenza: Date | string
+  dataVersamento?: Date | string | null
+  stato: $Enums.StatoPagamento
+  interessiMora?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  note?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type PagamentoCreateOrConnectWithoutDocumentiInput = {
+  where: Prisma.PagamentoWhereUniqueInput
+  create: Prisma.XOR<Prisma.PagamentoCreateWithoutDocumentiInput, Prisma.PagamentoUncheckedCreateWithoutDocumentiInput>
+}
+
+export type PagamentoUpsertWithoutDocumentiInput = {
+  update: Prisma.XOR<Prisma.PagamentoUpdateWithoutDocumentiInput, Prisma.PagamentoUncheckedUpdateWithoutDocumentiInput>
+  create: Prisma.XOR<Prisma.PagamentoCreateWithoutDocumentiInput, Prisma.PagamentoUncheckedCreateWithoutDocumentiInput>
+  where?: Prisma.PagamentoWhereInput
+}
+
+export type PagamentoUpdateToOneWithWhereWithoutDocumentiInput = {
+  where?: Prisma.PagamentoWhereInput
+  data: Prisma.XOR<Prisma.PagamentoUpdateWithoutDocumentiInput, Prisma.PagamentoUncheckedUpdateWithoutDocumentiInput>
+}
+
+export type PagamentoUpdateWithoutDocumentiInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  annoRiferimento?: Prisma.IntFieldUpdateOperationsInput | number
+  importoDovuto?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  importoVersato?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dataVersamento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  stato?: Prisma.EnumStatoPagamentoFieldUpdateOperationsInput | $Enums.StatoPagamento
+  interessiMora?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessione?: Prisma.ConcessioneUpdateOneRequiredWithoutPagamentiNestedInput
+}
+
+export type PagamentoUncheckedUpdateWithoutDocumentiInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  concessioneId?: Prisma.StringFieldUpdateOperationsInput | string
+  annoRiferimento?: Prisma.IntFieldUpdateOperationsInput | number
+  importoDovuto?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  importoVersato?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dataVersamento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  stato?: Prisma.EnumStatoPagamentoFieldUpdateOperationsInput | $Enums.StatoPagamento
+  interessiMora?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type PagamentoCreateManyConcessioneInput = {
   id?: string
   annoRiferimento: number
@@ -685,6 +791,7 @@ export type PagamentoUpdateWithoutConcessioneInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documenti?: Prisma.DocumentoUpdateManyWithoutPagamentoNestedInput
 }
 
 export type PagamentoUncheckedUpdateWithoutConcessioneInput = {
@@ -699,6 +806,7 @@ export type PagamentoUncheckedUpdateWithoutConcessioneInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutPagamentoNestedInput
 }
 
 export type PagamentoUncheckedUpdateManyWithoutConcessioneInput = {
@@ -716,6 +824,35 @@ export type PagamentoUncheckedUpdateManyWithoutConcessioneInput = {
 }
 
 
+/**
+ * Count Type PagamentoCountOutputType
+ */
+
+export type PagamentoCountOutputType = {
+  documenti: number
+}
+
+export type PagamentoCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  documenti?: boolean | PagamentoCountOutputTypeCountDocumentiArgs
+}
+
+/**
+ * PagamentoCountOutputType without action
+ */
+export type PagamentoCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PagamentoCountOutputType
+   */
+  select?: Prisma.PagamentoCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * PagamentoCountOutputType without action
+ */
+export type PagamentoCountOutputTypeCountDocumentiArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentoWhereInput
+}
+
 
 export type PagamentoSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -731,6 +868,8 @@ export type PagamentoSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   createdAt?: boolean
   updatedAt?: boolean
   concessione?: boolean | Prisma.ConcessioneDefaultArgs<ExtArgs>
+  documenti?: boolean | Prisma.Pagamento$documentiArgs<ExtArgs>
+  _count?: boolean | Prisma.PagamentoCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pagamento"]>
 
 export type PagamentoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -783,6 +922,8 @@ export type PagamentoSelectScalar = {
 export type PagamentoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "concessioneId" | "annoRiferimento" | "importoDovuto" | "importoVersato" | "dataScadenza" | "dataVersamento" | "stato" | "interessiMora" | "note" | "createdAt" | "updatedAt", ExtArgs["result"]["pagamento"]>
 export type PagamentoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   concessione?: boolean | Prisma.ConcessioneDefaultArgs<ExtArgs>
+  documenti?: boolean | Prisma.Pagamento$documentiArgs<ExtArgs>
+  _count?: boolean | Prisma.PagamentoCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type PagamentoIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   concessione?: boolean | Prisma.ConcessioneDefaultArgs<ExtArgs>
@@ -795,6 +936,7 @@ export type $PagamentoPayload<ExtArgs extends runtime.Types.Extensions.InternalA
   name: "Pagamento"
   objects: {
     concessione: Prisma.$ConcessionePayload<ExtArgs>
+    documenti: Prisma.$DocumentoPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1204,6 +1346,7 @@ readonly fields: PagamentoFieldRefs;
 export interface Prisma__PagamentoClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   concessione<T extends Prisma.ConcessioneDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ConcessioneDefaultArgs<ExtArgs>>): Prisma.Prisma__ConcessioneClient<runtime.Types.Result.GetResult<Prisma.$ConcessionePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  documenti<T extends Prisma.Pagamento$documentiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Pagamento$documentiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1643,6 +1786,30 @@ export type PagamentoDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Limit how many Pagamentos to delete.
    */
   limit?: number
+}
+
+/**
+ * Pagamento.documenti
+ */
+export type Pagamento$documentiArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Documento
+   */
+  select?: Prisma.DocumentoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Documento
+   */
+  omit?: Prisma.DocumentoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentoInclude<ExtArgs> | null
+  where?: Prisma.DocumentoWhereInput
+  orderBy?: Prisma.DocumentoOrderByWithRelationInput | Prisma.DocumentoOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentoWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentoScalarFieldEnum | Prisma.DocumentoScalarFieldEnum[]
 }
 
 /**

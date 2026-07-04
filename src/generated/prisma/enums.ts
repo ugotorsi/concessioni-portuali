@@ -308,6 +308,14 @@ export const TipologiaDocumento = {
 export type TipologiaDocumento = (typeof TipologiaDocumento)[keyof typeof TipologiaDocumento]
 
 
+export const StatoDocumento = {
+  ATTIVO: 'ATTIVO',
+  ARCHIVIATO: 'ARCHIVIATO'
+} as const
+
+export type StatoDocumento = (typeof StatoDocumento)[keyof typeof StatoDocumento]
+
+
 export const TipologiaReport = {
   REPORT_MENSILE: 'REPORT_MENSILE',
   REPORT_CRITICITA: 'REPORT_CRITICITA',

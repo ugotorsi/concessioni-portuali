@@ -344,6 +344,7 @@ export type CriticitaWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Criticita"> | Date | string
   concessione?: Prisma.XOR<Prisma.ConcessioneScalarRelationFilter, Prisma.ConcessioneWhereInput>
   procedimenti?: Prisma.ProcedimentoListRelationFilter
+  documenti?: Prisma.DocumentoListRelationFilter
   normaImpatti?: Prisma.NormaImpattoListRelationFilter
 }
 
@@ -375,6 +376,7 @@ export type CriticitaOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   concessione?: Prisma.ConcessioneOrderByWithRelationInput
   procedimenti?: Prisma.ProcedimentoOrderByRelationAggregateInput
+  documenti?: Prisma.DocumentoOrderByRelationAggregateInput
   normaImpatti?: Prisma.NormaImpattoOrderByRelationAggregateInput
 }
 
@@ -409,6 +411,7 @@ export type CriticitaWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Criticita"> | Date | string
   concessione?: Prisma.XOR<Prisma.ConcessioneScalarRelationFilter, Prisma.ConcessioneWhereInput>
   procedimenti?: Prisma.ProcedimentoListRelationFilter
+  documenti?: Prisma.DocumentoListRelationFilter
   normaImpatti?: Prisma.NormaImpattoListRelationFilter
 }, "id">
 
@@ -501,6 +504,7 @@ export type CriticitaCreateInput = {
   updatedAt?: Date | string
   concessione: Prisma.ConcessioneCreateNestedOneWithoutCriticitaInput
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutCriticitaInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutCriticitaInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutCriticitaInput
 }
 
@@ -531,6 +535,7 @@ export type CriticitaUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutCriticitaInput
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutCriticitaInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutCriticitaInput
 }
 
@@ -561,6 +566,7 @@ export type CriticitaUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   concessione?: Prisma.ConcessioneUpdateOneRequiredWithoutCriticitaNestedInput
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutCriticitaNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutCriticitaNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutCriticitaNestedInput
 }
 
@@ -591,6 +597,7 @@ export type CriticitaUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutCriticitaNestedInput
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutCriticitaNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutCriticitaNestedInput
 }
 
@@ -862,6 +869,22 @@ export type CriticitaUpdateOneWithoutProcedimentiNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CriticitaUpdateToOneWithWhereWithoutProcedimentiInput, Prisma.CriticitaUpdateWithoutProcedimentiInput>, Prisma.CriticitaUncheckedUpdateWithoutProcedimentiInput>
 }
 
+export type CriticitaCreateNestedOneWithoutDocumentiInput = {
+  create?: Prisma.XOR<Prisma.CriticitaCreateWithoutDocumentiInput, Prisma.CriticitaUncheckedCreateWithoutDocumentiInput>
+  connectOrCreate?: Prisma.CriticitaCreateOrConnectWithoutDocumentiInput
+  connect?: Prisma.CriticitaWhereUniqueInput
+}
+
+export type CriticitaUpdateOneWithoutDocumentiNestedInput = {
+  create?: Prisma.XOR<Prisma.CriticitaCreateWithoutDocumentiInput, Prisma.CriticitaUncheckedCreateWithoutDocumentiInput>
+  connectOrCreate?: Prisma.CriticitaCreateOrConnectWithoutDocumentiInput
+  upsert?: Prisma.CriticitaUpsertWithoutDocumentiInput
+  disconnect?: Prisma.CriticitaWhereInput | boolean
+  delete?: Prisma.CriticitaWhereInput | boolean
+  connect?: Prisma.CriticitaWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CriticitaUpdateToOneWithWhereWithoutDocumentiInput, Prisma.CriticitaUpdateWithoutDocumentiInput>, Prisma.CriticitaUncheckedUpdateWithoutDocumentiInput>
+}
+
 export type CriticitaCreateNestedOneWithoutNormaImpattiInput = {
   create?: Prisma.XOR<Prisma.CriticitaCreateWithoutNormaImpattiInput, Prisma.CriticitaUncheckedCreateWithoutNormaImpattiInput>
   connectOrCreate?: Prisma.CriticitaCreateOrConnectWithoutNormaImpattiInput
@@ -904,6 +927,7 @@ export type CriticitaCreateWithoutConcessioneInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutCriticitaInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutCriticitaInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutCriticitaInput
 }
 
@@ -933,6 +957,7 @@ export type CriticitaUncheckedCreateWithoutConcessioneInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutCriticitaInput
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutCriticitaInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutCriticitaInput
 }
 
@@ -1019,6 +1044,7 @@ export type CriticitaCreateWithoutProcedimentiInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   concessione: Prisma.ConcessioneCreateNestedOneWithoutCriticitaInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutCriticitaInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutCriticitaInput
 }
 
@@ -1048,6 +1074,7 @@ export type CriticitaUncheckedCreateWithoutProcedimentiInput = {
   dataUltimoAggiornamento?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutCriticitaInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutCriticitaInput
 }
 
@@ -1093,6 +1120,7 @@ export type CriticitaUpdateWithoutProcedimentiInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   concessione?: Prisma.ConcessioneUpdateOneRequiredWithoutCriticitaNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutCriticitaNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutCriticitaNestedInput
 }
 
@@ -1122,6 +1150,143 @@ export type CriticitaUncheckedUpdateWithoutProcedimentiInput = {
   dataUltimoAggiornamento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutCriticitaNestedInput
+  normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutCriticitaNestedInput
+}
+
+export type CriticitaCreateWithoutDocumentiInput = {
+  id?: string
+  tipologia: $Enums.TipologiaCriticita
+  gravita: $Enums.GravitaCriticita
+  fonte: $Enums.FonteCriticita
+  descrizione: string
+  riferimentoNormativo?: string | null
+  azioneConsigliata?: string | null
+  rilevanzaArt47?: boolean
+  letteraArt47?: $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: string | null
+  azioneIstruttoriaArt47?: string | null
+  regolarizzata?: boolean
+  dataRegolarizzazione?: Date | string | null
+  descrizioneRegolarizzazione?: string | null
+  esitoRegolarizzazione?: $Enums.EsitoRegolarizzazione | null
+  verificataRegolarizzazione?: boolean
+  dataVerificaRegolarizzazione?: Date | string | null
+  noteVerificaRegolarizzazione?: string | null
+  stato: $Enums.StatoCriticita
+  dataRilevazione?: Date | string
+  dataUltimoAggiornamento?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessione: Prisma.ConcessioneCreateNestedOneWithoutCriticitaInput
+  procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutCriticitaInput
+  normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutCriticitaInput
+}
+
+export type CriticitaUncheckedCreateWithoutDocumentiInput = {
+  id?: string
+  concessioneId: string
+  tipologia: $Enums.TipologiaCriticita
+  gravita: $Enums.GravitaCriticita
+  fonte: $Enums.FonteCriticita
+  descrizione: string
+  riferimentoNormativo?: string | null
+  azioneConsigliata?: string | null
+  rilevanzaArt47?: boolean
+  letteraArt47?: $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: string | null
+  azioneIstruttoriaArt47?: string | null
+  regolarizzata?: boolean
+  dataRegolarizzazione?: Date | string | null
+  descrizioneRegolarizzazione?: string | null
+  esitoRegolarizzazione?: $Enums.EsitoRegolarizzazione | null
+  verificataRegolarizzazione?: boolean
+  dataVerificaRegolarizzazione?: Date | string | null
+  noteVerificaRegolarizzazione?: string | null
+  stato: $Enums.StatoCriticita
+  dataRilevazione?: Date | string
+  dataUltimoAggiornamento?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutCriticitaInput
+  normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutCriticitaInput
+}
+
+export type CriticitaCreateOrConnectWithoutDocumentiInput = {
+  where: Prisma.CriticitaWhereUniqueInput
+  create: Prisma.XOR<Prisma.CriticitaCreateWithoutDocumentiInput, Prisma.CriticitaUncheckedCreateWithoutDocumentiInput>
+}
+
+export type CriticitaUpsertWithoutDocumentiInput = {
+  update: Prisma.XOR<Prisma.CriticitaUpdateWithoutDocumentiInput, Prisma.CriticitaUncheckedUpdateWithoutDocumentiInput>
+  create: Prisma.XOR<Prisma.CriticitaCreateWithoutDocumentiInput, Prisma.CriticitaUncheckedCreateWithoutDocumentiInput>
+  where?: Prisma.CriticitaWhereInput
+}
+
+export type CriticitaUpdateToOneWithWhereWithoutDocumentiInput = {
+  where?: Prisma.CriticitaWhereInput
+  data: Prisma.XOR<Prisma.CriticitaUpdateWithoutDocumentiInput, Prisma.CriticitaUncheckedUpdateWithoutDocumentiInput>
+}
+
+export type CriticitaUpdateWithoutDocumentiInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tipologia?: Prisma.EnumTipologiaCriticitaFieldUpdateOperationsInput | $Enums.TipologiaCriticita
+  gravita?: Prisma.EnumGravitaCriticitaFieldUpdateOperationsInput | $Enums.GravitaCriticita
+  fonte?: Prisma.EnumFonteCriticitaFieldUpdateOperationsInput | $Enums.FonteCriticita
+  descrizione?: Prisma.StringFieldUpdateOperationsInput | string
+  riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  azioneIstruttoriaArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  regolarizzata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRegolarizzazione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  descrizioneRegolarizzazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  esitoRegolarizzazione?: Prisma.NullableEnumEsitoRegolarizzazioneFieldUpdateOperationsInput | $Enums.EsitoRegolarizzazione | null
+  verificataRegolarizzazione?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataVerificaRegolarizzazione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  noteVerificaRegolarizzazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stato?: Prisma.EnumStatoCriticitaFieldUpdateOperationsInput | $Enums.StatoCriticita
+  dataRilevazione?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dataUltimoAggiornamento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessione?: Prisma.ConcessioneUpdateOneRequiredWithoutCriticitaNestedInput
+  procedimenti?: Prisma.ProcedimentoUpdateManyWithoutCriticitaNestedInput
+  normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutCriticitaNestedInput
+}
+
+export type CriticitaUncheckedUpdateWithoutDocumentiInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  concessioneId?: Prisma.StringFieldUpdateOperationsInput | string
+  tipologia?: Prisma.EnumTipologiaCriticitaFieldUpdateOperationsInput | $Enums.TipologiaCriticita
+  gravita?: Prisma.EnumGravitaCriticitaFieldUpdateOperationsInput | $Enums.GravitaCriticita
+  fonte?: Prisma.EnumFonteCriticitaFieldUpdateOperationsInput | $Enums.FonteCriticita
+  descrizione?: Prisma.StringFieldUpdateOperationsInput | string
+  riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
+  rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
+  motivazioneArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  azioneIstruttoriaArt47?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  regolarizzata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRegolarizzazione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  descrizioneRegolarizzazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  esitoRegolarizzazione?: Prisma.NullableEnumEsitoRegolarizzazioneFieldUpdateOperationsInput | $Enums.EsitoRegolarizzazione | null
+  verificataRegolarizzazione?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataVerificaRegolarizzazione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  noteVerificaRegolarizzazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stato?: Prisma.EnumStatoCriticitaFieldUpdateOperationsInput | $Enums.StatoCriticita
+  dataRilevazione?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dataUltimoAggiornamento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutCriticitaNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutCriticitaNestedInput
 }
 
@@ -1152,6 +1317,7 @@ export type CriticitaCreateWithoutNormaImpattiInput = {
   updatedAt?: Date | string
   concessione: Prisma.ConcessioneCreateNestedOneWithoutCriticitaInput
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutCriticitaInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutCriticitaInput
 }
 
 export type CriticitaUncheckedCreateWithoutNormaImpattiInput = {
@@ -1181,6 +1347,7 @@ export type CriticitaUncheckedCreateWithoutNormaImpattiInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutCriticitaInput
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutCriticitaInput
 }
 
 export type CriticitaCreateOrConnectWithoutNormaImpattiInput = {
@@ -1226,6 +1393,7 @@ export type CriticitaUpdateWithoutNormaImpattiInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   concessione?: Prisma.ConcessioneUpdateOneRequiredWithoutCriticitaNestedInput
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutCriticitaNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutCriticitaNestedInput
 }
 
 export type CriticitaUncheckedUpdateWithoutNormaImpattiInput = {
@@ -1255,6 +1423,7 @@ export type CriticitaUncheckedUpdateWithoutNormaImpattiInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutCriticitaNestedInput
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutCriticitaNestedInput
 }
 
 export type CriticitaCreateManyConcessioneInput = {
@@ -1310,6 +1479,7 @@ export type CriticitaUpdateWithoutConcessioneInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutCriticitaNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutCriticitaNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutCriticitaNestedInput
 }
 
@@ -1339,6 +1509,7 @@ export type CriticitaUncheckedUpdateWithoutConcessioneInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutCriticitaNestedInput
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutCriticitaNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutCriticitaNestedInput
 }
 
@@ -1376,11 +1547,13 @@ export type CriticitaUncheckedUpdateManyWithoutConcessioneInput = {
 
 export type CriticitaCountOutputType = {
   procedimenti: number
+  documenti: number
   normaImpatti: number
 }
 
 export type CriticitaCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   procedimenti?: boolean | CriticitaCountOutputTypeCountProcedimentiArgs
+  documenti?: boolean | CriticitaCountOutputTypeCountDocumentiArgs
   normaImpatti?: boolean | CriticitaCountOutputTypeCountNormaImpattiArgs
 }
 
@@ -1399,6 +1572,13 @@ export type CriticitaCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Ex
  */
 export type CriticitaCountOutputTypeCountProcedimentiArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ProcedimentoWhereInput
+}
+
+/**
+ * CriticitaCountOutputType without action
+ */
+export type CriticitaCountOutputTypeCountDocumentiArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentoWhereInput
 }
 
 /**
@@ -1437,6 +1617,7 @@ export type CriticitaSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   updatedAt?: boolean
   concessione?: boolean | Prisma.ConcessioneDefaultArgs<ExtArgs>
   procedimenti?: boolean | Prisma.Criticita$procedimentiArgs<ExtArgs>
+  documenti?: boolean | Prisma.Criticita$documentiArgs<ExtArgs>
   normaImpatti?: boolean | Prisma.Criticita$normaImpattiArgs<ExtArgs>
   _count?: boolean | Prisma.CriticitaCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["criticita"]>
@@ -1531,6 +1712,7 @@ export type CriticitaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs 
 export type CriticitaInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   concessione?: boolean | Prisma.ConcessioneDefaultArgs<ExtArgs>
   procedimenti?: boolean | Prisma.Criticita$procedimentiArgs<ExtArgs>
+  documenti?: boolean | Prisma.Criticita$documentiArgs<ExtArgs>
   normaImpatti?: boolean | Prisma.Criticita$normaImpattiArgs<ExtArgs>
   _count?: boolean | Prisma.CriticitaCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -1546,6 +1728,7 @@ export type $CriticitaPayload<ExtArgs extends runtime.Types.Extensions.InternalA
   objects: {
     concessione: Prisma.$ConcessionePayload<ExtArgs>
     procedimenti: Prisma.$ProcedimentoPayload<ExtArgs>[]
+    documenti: Prisma.$DocumentoPayload<ExtArgs>[]
     normaImpatti: Prisma.$NormaImpattoPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1970,6 +2153,7 @@ export interface Prisma__CriticitaClient<T, Null = never, ExtArgs extends runtim
   readonly [Symbol.toStringTag]: "PrismaPromise"
   concessione<T extends Prisma.ConcessioneDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ConcessioneDefaultArgs<ExtArgs>>): Prisma.Prisma__ConcessioneClient<runtime.Types.Result.GetResult<Prisma.$ConcessionePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   procedimenti<T extends Prisma.Criticita$procedimentiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Criticita$procedimentiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProcedimentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documenti<T extends Prisma.Criticita$documentiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Criticita$documentiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   normaImpatti<T extends Prisma.Criticita$normaImpattiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Criticita$normaImpattiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NormaImpattoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2447,6 +2631,30 @@ export type Criticita$procedimentiArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.ProcedimentoScalarFieldEnum | Prisma.ProcedimentoScalarFieldEnum[]
+}
+
+/**
+ * Criticita.documenti
+ */
+export type Criticita$documentiArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Documento
+   */
+  select?: Prisma.DocumentoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Documento
+   */
+  omit?: Prisma.DocumentoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentoInclude<ExtArgs> | null
+  where?: Prisma.DocumentoWhereInput
+  orderBy?: Prisma.DocumentoOrderByWithRelationInput | Prisma.DocumentoOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentoWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentoScalarFieldEnum | Prisma.DocumentoScalarFieldEnum[]
 }
 
 /**

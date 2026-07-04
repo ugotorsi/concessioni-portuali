@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { EntityDocumentsPanel } from "@/components/documents/EntityDocumentsPanel";
 import { AppShell } from "@/components/layout/AppShell";
 import { PagamentoStatoBadge, RitardoBadge } from "@/components/pagamenti/PagamentiBadges";
 import { GravitaBadge, StatoBadge as CriticitaStatoBadge } from "@/components/criticita/CriticitaBadges";
@@ -357,44 +358,13 @@ export default async function PagamentoDetailPage({ params }: PagamentoDetailPag
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>6. Documenti principali</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Tipologia</TableHead>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Link</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {detail.documentiPrincipali.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="max-w-80 truncate">{item.nome}</TableCell>
-                      <TableCell>{formatEnumLabel(item.tipologia)}</TableCell>
-                      <TableCell>{item.dataDocumento ? formatDateIT(item.dataDocumento) : formatDateIT(item.createdAt)}</TableCell>
-                      <TableCell>
-                        <a href={item.url} className="text-sm underline underline-offset-4" target="_blank" rel="noreferrer">
-                          Apri
-                        </a>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {detail.documentiPrincipali.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center text-slate-500">
-                        Nessun documento principale disponibile.
-                      </TableCell>
-                    </TableRow>
-                  ) : null}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <EntityDocumentsPanel
+            title="6. Documenti principali"
+            entityType="pagamento"
+            entityId={detail.pagamento.id}
+            documents={detail.documentiPrincipali}
+            canUpload={canEdit}
+          />
         </section>
 
         <Card>

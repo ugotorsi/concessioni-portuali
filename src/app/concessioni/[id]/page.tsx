@@ -2,6 +2,7 @@ import Link from "next/link";
 import { addDays, startOfDay } from "date-fns";
 import { notFound } from "next/navigation";
 
+import { EntityDocumentsPanel } from "@/components/documents/EntityDocumentsPanel";
 import { GravitaBadge, StatoBadge } from "@/components/concessioni/ConcessioniBadges";
 import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
@@ -14,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/Table";
+import { BACKOFFICE_ROLES, requireRole } from "@/lib/auth";
 import { formatCurrencyEUR, formatDateIT, formatEnumLabel } from "@/lib/utils";
 import { getConcessioneDetail } from "@/server/queries/concessioni";
 
@@ -28,6 +30,8 @@ function yesNo(value: boolean): string {
 export const dynamic = "force-dynamic";
 
 export default async function ConcessioneDetailPage({ params }: ConcessioneDetailPageProps) {
+  const role = await requireRole();
+  const canUploadDocumenti = BACKOFFICE_ROLES.includes(role);
   const { id } = await params;
   const concessione = await getConcessioneDetail(id);
 
@@ -383,37 +387,13 @@ export default async function ConcessioneDetailPage({ params }: ConcessioneDetai
         </Card>
 
         <section className="grid gap-4 xl:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Documenti</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Tipologia</TableHead>
-                    <TableHead>Data documento</TableHead>
-                    <TableHead>Link</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {concessione.documenti.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="max-w-64 truncate">{item.nome}</TableCell>
-                      <TableCell>{formatEnumLabel(item.tipologia)}</TableCell>
-                      <TableCell>{item.dataDocumento ? formatDateIT(item.dataDocumento) : "-"}</TableCell>
-                      <TableCell>
-                        <a href={item.url} className="text-sm underline underline-offset-4" target="_blank" rel="noreferrer">
-                          Apri
-                        </a>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <EntityDocumentsPanel
+            title="Documenti"
+            entityType="concessione"
+            entityId={concessione.id}
+            documents={concessione.documenti}
+            canUpload={canUploadDocumenti}
+          />
 
           <Card>
             <CardHeader>

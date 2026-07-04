@@ -186,6 +186,7 @@ export interface CriticitaDetail {
     id: string;
     nome: string;
     tipologia: string;
+    statoDocumento: string;
     url: string;
     dataDocumento: Date | null;
     createdAt: Date;
@@ -436,10 +437,6 @@ export async function getCriticitaDetail(id: string): Promise<CriticitaDetail | 
             where: { stato: { in: ["NON_PAGATO", "PARZIALE", "SCADUTO"] } },
             orderBy: [{ dataScadenza: "asc" }],
           },
-          documenti: {
-            orderBy: [{ dataDocumento: "desc" }, { createdAt: "desc" }],
-            take: 12,
-          },
           sopralluoghi: {
             orderBy: { data: "desc" },
             take: 6,
@@ -455,6 +452,15 @@ export async function getCriticitaDetail(id: string): Promise<CriticitaDetail | 
   if (!criticita) {
     return null;
   }
+
+  const documentiCollegati = await prisma.documento.findMany({
+    where: {
+      OR: [{ criticitaId: criticita.id }, { concessioneId: criticita.concessioneId }],
+    },
+    orderBy: [{ dataDocumento: "desc" }, { createdAt: "desc" }],
+    take: 20,
+    distinct: ["id"],
+  });
 
   return {
     id: criticita.id,
@@ -523,11 +529,12 @@ export async function getCriticitaDetail(id: string): Promise<CriticitaDetail | 
       dataScadenza: item.dataScadenza,
       descrizione: item.descrizione,
     })),
-    documenti: criticita.concessione.documenti.map((item) => ({
+    documenti: documentiCollegati.map((item) => ({
       id: item.id,
       nome: item.nome,
       tipologia: item.tipologia,
-      url: item.url,
+      statoDocumento: item.statoDocumento,
+      url: item.url ?? `/documenti/${item.id}/download`,
       dataDocumento: item.dataDocumento,
       createdAt: item.createdAt,
     })),

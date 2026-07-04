@@ -112,6 +112,7 @@ export interface SopralluogoDetail {
     id: string;
     nome: string;
     tipologia: string;
+    statoDocumento: string;
     url: string;
     dataDocumento: Date | null;
     createdAt: Date;
@@ -315,10 +316,6 @@ export async function getSopralluogoDetail(id: string): Promise<SopralluogoDetai
             orderBy: [{ dataScadenza: "asc" }],
             take: 12,
           },
-          documenti: {
-            orderBy: [{ dataDocumento: "desc" }, { createdAt: "desc" }],
-            take: 12,
-          },
           procedimenti: {
             where: { stato: { in: ["DA_AVVIARE", "IN_CORSO"] } },
             orderBy: [{ dataScadenzaContraddittorio: "asc" }, { createdAt: "desc" }],
@@ -332,6 +329,15 @@ export async function getSopralluogoDetail(id: string): Promise<SopralluogoDetai
   if (!sopralluogo) {
     return null;
   }
+
+  const documentiCollegati = await prisma.documento.findMany({
+    where: {
+      OR: [{ sopralluogoId: sopralluogo.id }, { concessioneId: sopralluogo.concessioneId }],
+    },
+    orderBy: [{ dataDocumento: "desc" }, { createdAt: "desc" }],
+    take: 20,
+    distinct: ["id"],
+  });
 
   return {
     sopralluogo: {
@@ -376,11 +382,12 @@ export async function getSopralluogoDetail(id: string): Promise<SopralluogoDetai
       dataScadenza: item.dataScadenza,
       descrizione: item.descrizione,
     })),
-    documentiPrincipali: sopralluogo.concessione.documenti.map((item) => ({
+    documentiPrincipali: documentiCollegati.map((item) => ({
       id: item.id,
       nome: item.nome,
       tipologia: item.tipologia,
-      url: item.url,
+      statoDocumento: item.statoDocumento,
+      url: item.url ?? `/documenti/${item.id}/download`,
       dataDocumento: item.dataDocumento,
       createdAt: item.createdAt,
     })),

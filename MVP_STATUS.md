@@ -49,6 +49,8 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Collegamenti scenario -> concessione/criticita/procedimento/report/PDF con linguaggio istruttorio non decisorio
 - Audit su download PDF (`REPORT_PDF_DOWNLOAD`) e dinieghi autorizzativi su route PDF
 - Test unit su PDF service e test E2E policy download PDF per ruolo/validazione
+- Baseline fascicolo documentale (Issue #18): upload/download protetto, metadati estesi, collegamento multi-entita, stato `ATTIVO/ARCHIVIATO`, audit dedicato, pagina `/documenti` e integrazione su dettagli entita
+- Seed documentale locale attivo con file su storage configurabile (`DOCUMENT_STORAGE_ROOT`) e limiti upload (`DOCUMENT_MAX_FILE_MB`)
 - Documentazione privacy/GDPR/DPIA draft creata (Issue #8)
 
 ## Compliance/privacy (Issue #8)

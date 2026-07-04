@@ -14,6 +14,7 @@ const PROTECTED_PREFIXES = [
   "/sopralluoghi",
   "/procedimenti",
   "/report",
+  "/documenti",
   "/normativa",
   "/demo-scenari",
   "/ai",

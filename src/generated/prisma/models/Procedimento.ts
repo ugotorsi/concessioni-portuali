@@ -490,6 +490,7 @@ export type ProcedimentoWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Procedimento"> | Date | string
   concessione?: Prisma.XOR<Prisma.ConcessioneScalarRelationFilter, Prisma.ConcessioneWhereInput>
   criticita?: Prisma.XOR<Prisma.CriticitaNullableScalarRelationFilter, Prisma.CriticitaWhereInput> | null
+  documenti?: Prisma.DocumentoListRelationFilter
   normaImpatti?: Prisma.NormaImpattoListRelationFilter
 }
 
@@ -535,6 +536,7 @@ export type ProcedimentoOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   concessione?: Prisma.ConcessioneOrderByWithRelationInput
   criticita?: Prisma.CriticitaOrderByWithRelationInput
+  documenti?: Prisma.DocumentoOrderByRelationAggregateInput
   normaImpatti?: Prisma.NormaImpattoOrderByRelationAggregateInput
 }
 
@@ -583,6 +585,7 @@ export type ProcedimentoWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Procedimento"> | Date | string
   concessione?: Prisma.XOR<Prisma.ConcessioneScalarRelationFilter, Prisma.ConcessioneWhereInput>
   criticita?: Prisma.XOR<Prisma.CriticitaNullableScalarRelationFilter, Prisma.CriticitaWhereInput> | null
+  documenti?: Prisma.DocumentoListRelationFilter
   normaImpatti?: Prisma.NormaImpattoListRelationFilter
 }, "id">
 
@@ -718,6 +721,7 @@ export type ProcedimentoCreateInput = {
   updatedAt?: Date | string
   concessione: Prisma.ConcessioneCreateNestedOneWithoutProcedimentiInput
   criticita?: Prisma.CriticitaCreateNestedOneWithoutProcedimentiInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutProcedimentoInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -761,6 +765,7 @@ export type ProcedimentoUncheckedCreateInput = {
   noteIstruttorie?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutProcedimentoInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -804,6 +809,7 @@ export type ProcedimentoUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   concessione?: Prisma.ConcessioneUpdateOneRequiredWithoutProcedimentiNestedInput
   criticita?: Prisma.CriticitaUpdateOneWithoutProcedimentiNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutProcedimentoNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -847,6 +853,7 @@ export type ProcedimentoUncheckedUpdateInput = {
   noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutProcedimentoNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -1235,6 +1242,22 @@ export type EnumStatoProcedimentoFieldUpdateOperationsInput = {
   set?: $Enums.StatoProcedimento
 }
 
+export type ProcedimentoCreateNestedOneWithoutDocumentiInput = {
+  create?: Prisma.XOR<Prisma.ProcedimentoCreateWithoutDocumentiInput, Prisma.ProcedimentoUncheckedCreateWithoutDocumentiInput>
+  connectOrCreate?: Prisma.ProcedimentoCreateOrConnectWithoutDocumentiInput
+  connect?: Prisma.ProcedimentoWhereUniqueInput
+}
+
+export type ProcedimentoUpdateOneWithoutDocumentiNestedInput = {
+  create?: Prisma.XOR<Prisma.ProcedimentoCreateWithoutDocumentiInput, Prisma.ProcedimentoUncheckedCreateWithoutDocumentiInput>
+  connectOrCreate?: Prisma.ProcedimentoCreateOrConnectWithoutDocumentiInput
+  upsert?: Prisma.ProcedimentoUpsertWithoutDocumentiInput
+  disconnect?: Prisma.ProcedimentoWhereInput | boolean
+  delete?: Prisma.ProcedimentoWhereInput | boolean
+  connect?: Prisma.ProcedimentoWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProcedimentoUpdateToOneWithWhereWithoutDocumentiInput, Prisma.ProcedimentoUpdateWithoutDocumentiInput>, Prisma.ProcedimentoUncheckedUpdateWithoutDocumentiInput>
+}
+
 export type ProcedimentoCreateNestedOneWithoutNormaImpattiInput = {
   create?: Prisma.XOR<Prisma.ProcedimentoCreateWithoutNormaImpattiInput, Prisma.ProcedimentoUncheckedCreateWithoutNormaImpattiInput>
   connectOrCreate?: Prisma.ProcedimentoCreateOrConnectWithoutNormaImpattiInput
@@ -1290,6 +1313,7 @@ export type ProcedimentoCreateWithoutConcessioneInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   criticita?: Prisma.CriticitaCreateNestedOneWithoutProcedimentiInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutProcedimentoInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -1332,6 +1356,7 @@ export type ProcedimentoUncheckedCreateWithoutConcessioneInput = {
   noteIstruttorie?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutProcedimentoInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -1445,6 +1470,7 @@ export type ProcedimentoCreateWithoutCriticitaInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   concessione: Prisma.ConcessioneCreateNestedOneWithoutProcedimentiInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutProcedimentoInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -1487,6 +1513,7 @@ export type ProcedimentoUncheckedCreateWithoutCriticitaInput = {
   noteIstruttorie?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutProcedimentoInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -1514,6 +1541,194 @@ export type ProcedimentoUpdateWithWhereUniqueWithoutCriticitaInput = {
 export type ProcedimentoUpdateManyWithWhereWithoutCriticitaInput = {
   where: Prisma.ProcedimentoScalarWhereInput
   data: Prisma.XOR<Prisma.ProcedimentoUpdateManyMutationInput, Prisma.ProcedimentoUncheckedUpdateManyWithoutCriticitaInput>
+}
+
+export type ProcedimentoCreateWithoutDocumentiInput = {
+  id?: string
+  tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento?: $Enums.OrigineProcedimento
+  procedimentoUfficio?: boolean
+  riferimentoNormativo?: string | null
+  dataAvvio?: Date | string | null
+  dataScadenzaContraddittorio?: Date | string | null
+  dataProvvedimentoFinale?: Date | string | null
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: Date | string | null
+  termineMemorieGiorni?: number | null
+  termineMemorieScadenza?: Date | string | null
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: Date | string | null
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: Date | string | null
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: Date | string | null
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: string | null
+  propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Date | string | null
+  termineOsservazioniPreavviso?: Date | string | null
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: Date | string | null
+  valutazioneOsservazioniPreavviso?: string | null
+  motivazioneMancatoPreavviso?: string | null
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: string | null
+  stato: $Enums.StatoProcedimento
+  noteIstruttorie?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessione: Prisma.ConcessioneCreateNestedOneWithoutProcedimentiInput
+  criticita?: Prisma.CriticitaCreateNestedOneWithoutProcedimentiInput
+  normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutProcedimentoInput
+}
+
+export type ProcedimentoUncheckedCreateWithoutDocumentiInput = {
+  id?: string
+  concessioneId: string
+  criticitaId?: string | null
+  tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento?: $Enums.OrigineProcedimento
+  procedimentoUfficio?: boolean
+  riferimentoNormativo?: string | null
+  dataAvvio?: Date | string | null
+  dataScadenzaContraddittorio?: Date | string | null
+  dataProvvedimentoFinale?: Date | string | null
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: Date | string | null
+  termineMemorieGiorni?: number | null
+  termineMemorieScadenza?: Date | string | null
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: Date | string | null
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: Date | string | null
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: Date | string | null
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: string | null
+  propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Date | string | null
+  termineOsservazioniPreavviso?: Date | string | null
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: Date | string | null
+  valutazioneOsservazioniPreavviso?: string | null
+  motivazioneMancatoPreavviso?: string | null
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: string | null
+  stato: $Enums.StatoProcedimento
+  noteIstruttorie?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutProcedimentoInput
+}
+
+export type ProcedimentoCreateOrConnectWithoutDocumentiInput = {
+  where: Prisma.ProcedimentoWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProcedimentoCreateWithoutDocumentiInput, Prisma.ProcedimentoUncheckedCreateWithoutDocumentiInput>
+}
+
+export type ProcedimentoUpsertWithoutDocumentiInput = {
+  update: Prisma.XOR<Prisma.ProcedimentoUpdateWithoutDocumentiInput, Prisma.ProcedimentoUncheckedUpdateWithoutDocumentiInput>
+  create: Prisma.XOR<Prisma.ProcedimentoCreateWithoutDocumentiInput, Prisma.ProcedimentoUncheckedCreateWithoutDocumentiInput>
+  where?: Prisma.ProcedimentoWhereInput
+}
+
+export type ProcedimentoUpdateToOneWithWhereWithoutDocumentiInput = {
+  where?: Prisma.ProcedimentoWhereInput
+  data: Prisma.XOR<Prisma.ProcedimentoUpdateWithoutDocumentiInput, Prisma.ProcedimentoUncheckedUpdateWithoutDocumentiInput>
+}
+
+export type ProcedimentoUpdateWithoutDocumentiInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
+  noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessione?: Prisma.ConcessioneUpdateOneRequiredWithoutProcedimentiNestedInput
+  criticita?: Prisma.CriticitaUpdateOneWithoutProcedimentiNestedInput
+  normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutProcedimentoNestedInput
+}
+
+export type ProcedimentoUncheckedUpdateWithoutDocumentiInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  concessioneId?: Prisma.StringFieldUpdateOperationsInput | string
+  criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
+  noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutNormaImpattiInput = {
@@ -1556,6 +1771,7 @@ export type ProcedimentoCreateWithoutNormaImpattiInput = {
   updatedAt?: Date | string
   concessione: Prisma.ConcessioneCreateNestedOneWithoutProcedimentiInput
   criticita?: Prisma.CriticitaCreateNestedOneWithoutProcedimentiInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutNormaImpattiInput = {
@@ -1598,6 +1814,7 @@ export type ProcedimentoUncheckedCreateWithoutNormaImpattiInput = {
   noteIstruttorie?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutNormaImpattiInput = {
@@ -1656,6 +1873,7 @@ export type ProcedimentoUpdateWithoutNormaImpattiInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   concessione?: Prisma.ConcessioneUpdateOneRequiredWithoutProcedimentiNestedInput
   criticita?: Prisma.CriticitaUpdateOneWithoutProcedimentiNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutNormaImpattiInput = {
@@ -1698,6 +1916,7 @@ export type ProcedimentoUncheckedUpdateWithoutNormaImpattiInput = {
   noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateManyConcessioneInput = {
@@ -1780,6 +1999,7 @@ export type ProcedimentoUpdateWithoutConcessioneInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   criticita?: Prisma.CriticitaUpdateOneWithoutProcedimentiNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutProcedimentoNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -1822,6 +2042,7 @@ export type ProcedimentoUncheckedUpdateWithoutConcessioneInput = {
   noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutProcedimentoNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -1946,6 +2167,7 @@ export type ProcedimentoUpdateWithoutCriticitaInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   concessione?: Prisma.ConcessioneUpdateOneRequiredWithoutProcedimentiNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutProcedimentoNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -1988,6 +2210,7 @@ export type ProcedimentoUncheckedUpdateWithoutCriticitaInput = {
   noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutProcedimentoNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -2038,10 +2261,12 @@ export type ProcedimentoUncheckedUpdateManyWithoutCriticitaInput = {
  */
 
 export type ProcedimentoCountOutputType = {
+  documenti: number
   normaImpatti: number
 }
 
 export type ProcedimentoCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  documenti?: boolean | ProcedimentoCountOutputTypeCountDocumentiArgs
   normaImpatti?: boolean | ProcedimentoCountOutputTypeCountNormaImpattiArgs
 }
 
@@ -2053,6 +2278,13 @@ export type ProcedimentoCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types
    * Select specific fields to fetch from the ProcedimentoCountOutputType
    */
   select?: Prisma.ProcedimentoCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * ProcedimentoCountOutputType without action
+ */
+export type ProcedimentoCountOutputTypeCountDocumentiArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentoWhereInput
 }
 
 /**
@@ -2105,6 +2337,7 @@ export type ProcedimentoSelect<ExtArgs extends runtime.Types.Extensions.Internal
   updatedAt?: boolean
   concessione?: boolean | Prisma.ConcessioneDefaultArgs<ExtArgs>
   criticita?: boolean | Prisma.Procedimento$criticitaArgs<ExtArgs>
+  documenti?: boolean | Prisma.Procedimento$documentiArgs<ExtArgs>
   normaImpatti?: boolean | Prisma.Procedimento$normaImpattiArgs<ExtArgs>
   _count?: boolean | Prisma.ProcedimentoCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["procedimento"]>
@@ -2243,6 +2476,7 @@ export type ProcedimentoOmit<ExtArgs extends runtime.Types.Extensions.InternalAr
 export type ProcedimentoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   concessione?: boolean | Prisma.ConcessioneDefaultArgs<ExtArgs>
   criticita?: boolean | Prisma.Procedimento$criticitaArgs<ExtArgs>
+  documenti?: boolean | Prisma.Procedimento$documentiArgs<ExtArgs>
   normaImpatti?: boolean | Prisma.Procedimento$normaImpattiArgs<ExtArgs>
   _count?: boolean | Prisma.ProcedimentoCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -2260,6 +2494,7 @@ export type $ProcedimentoPayload<ExtArgs extends runtime.Types.Extensions.Intern
   objects: {
     concessione: Prisma.$ConcessionePayload<ExtArgs>
     criticita: Prisma.$CriticitaPayload<ExtArgs> | null
+    documenti: Prisma.$DocumentoPayload<ExtArgs>[]
     normaImpatti: Prisma.$NormaImpattoPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -2698,6 +2933,7 @@ export interface Prisma__ProcedimentoClient<T, Null = never, ExtArgs extends run
   readonly [Symbol.toStringTag]: "PrismaPromise"
   concessione<T extends Prisma.ConcessioneDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ConcessioneDefaultArgs<ExtArgs>>): Prisma.Prisma__ConcessioneClient<runtime.Types.Result.GetResult<Prisma.$ConcessionePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   criticita<T extends Prisma.Procedimento$criticitaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Procedimento$criticitaArgs<ExtArgs>>): Prisma.Prisma__CriticitaClient<runtime.Types.Result.GetResult<Prisma.$CriticitaPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  documenti<T extends Prisma.Procedimento$documentiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Procedimento$documentiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   normaImpatti<T extends Prisma.Procedimento$normaImpattiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Procedimento$normaImpattiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NormaImpattoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -3184,6 +3420,30 @@ export type Procedimento$criticitaArgs<ExtArgs extends runtime.Types.Extensions.
    */
   include?: Prisma.CriticitaInclude<ExtArgs> | null
   where?: Prisma.CriticitaWhereInput
+}
+
+/**
+ * Procedimento.documenti
+ */
+export type Procedimento$documentiArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Documento
+   */
+  select?: Prisma.DocumentoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Documento
+   */
+  omit?: Prisma.DocumentoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentoInclude<ExtArgs> | null
+  where?: Prisma.DocumentoWhereInput
+  orderBy?: Prisma.DocumentoOrderByWithRelationInput | Prisma.DocumentoOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentoWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentoScalarFieldEnum | Prisma.DocumentoScalarFieldEnum[]
 }
 
 /**
