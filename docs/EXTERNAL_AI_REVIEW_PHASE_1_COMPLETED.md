@@ -118,3 +118,4 @@ Il punto di forza è la catena funzionale integrata tra criticità, art. 47, pro
 - Mitigazione rischio P0/P1 rate limit presa in carico con Issue #14: adapter Redis-ready (Upstash) con fallback memory limitato a dev/demo/CI.
 - Baseline IAM hardening presa in carico con Issue #15: lockout temporaneo su tentativi falliti, messaggistica login generica anti-enumeration e predisposizione campi MFA/password policy.
 - Raffinamento PDF istituzionale preso in carico con Issue #16: frontespizio, struttura sezioni, header/footer ricorrenti, box riepilogativi e disclaimer istruttori rafforzati su art. 47/regolarizzazione/contraddittorio/art. 10-bis.
+- Kit demo istituzionale preso in carico con Issue #17: nuova pagina scenari guidati con seed realistico su morosita art. 47, occupazione difforme, regolarizzazione pre-provvedimentale, contraddittorio incompleto e tracciamento art. 10-bis.

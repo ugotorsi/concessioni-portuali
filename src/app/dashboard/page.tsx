@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { AppShell } from "@/components/layout/AppShell";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { Badge } from "@/components/ui/Badge";
@@ -128,6 +130,23 @@ export default async function DashboardPage() {
       </section>
 
       <section className="mt-4 grid gap-4 xl:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Scenari demo istituzionali</CardTitle>
+            <CardDescription>
+              Percorsi guidati su morosita art. 47, occupazione difforme, regolarizzazione e art. 10-bis.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href="/demo-scenari"
+              className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
+            >
+              Apri scenari demo
+            </Link>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Criticità prioritarie</CardTitle>

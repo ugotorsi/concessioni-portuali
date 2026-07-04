@@ -151,6 +151,18 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
 - Export CSV sui moduli operativi
 - PDF report istituzionale server-side (PDFKit) su route dedicate con layout professionale, sezioni standard e metadata documento
 
+## Scenari demo istituzionali (Issue #17)
+- Nuova pagina dedicata: `/demo-scenari`.
+- Finalita: raccontare casi istruttori realistici in contesto PA/AdSP senza automatismi decisori.
+- Scenari disponibili:
+   - DEMO-01 - Morosita art. 47
+   - DEMO-02 - Occupazione difforme
+   - DEMO-03 - Regolarizzazione pre-provvedimentale
+   - DEMO-04 - Contraddittorio incompleto
+   - DEMO-05 - Istanza di parte e art. 10-bis
+- Ogni scenario espone collegamenti reali a concessione, criticita, procedimento e report/PDF.
+- Presidio comunicativo: "elemento da valutare", "profilo istruttorio", "supporto al responsabile del procedimento".
+
 ### Institutional PDF polish (Issue #16)
 - Template PDF istituzionale raffinato con frontespizio, sommario sezioni e layout piu formale.
 - Header ricorrente con riferimenti applicativi/data generazione.

@@ -44,6 +44,9 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Export report CSV verificato
 - PDF report istituzionale server-side (PDFKit) con template stabile, sezioni istruttorie e footer/disclaimer
 - PDF istituzionale migliorato (Issue #16) con frontespizio, sommario, header/footer ricorrenti, box riepilogativi e disclaimer finali rafforzati
+- Nuova sezione `/demo-scenari` con 5 scenari demo istituzionali guidati (Issue #17)
+- Seed allineato a casi demo su morosita art.47, occupazione difforme, regolarizzazione, contraddittorio incompleto e art.10-bis
+- Collegamenti scenario -> concessione/criticita/procedimento/report/PDF con linguaggio istruttorio non decisorio
 - Audit su download PDF (`REPORT_PDF_DOWNLOAD`) e dinieghi autorizzativi su route PDF
 - Test unit su PDF service e test E2E policy download PDF per ruolo/validazione
 - Documentazione privacy/GDPR/DPIA draft creata (Issue #8)

@@ -57,80 +57,134 @@ function buildStaticCards(): DemoModuleCard[] {
       subtitle: "Output finali, dossier e reportistica di supporto.",
       href: "/report",
     },
+    {
+      title: "Scenari demo",
+      subtitle: "Casi istituzionali guidati su art. 47, contraddittorio e art. 10-bis.",
+      href: "/demo-scenari",
+    },
   ];
 }
 
+const RECOVERABLE_DEMO_QUERY_ERROR_CODES = new Set([
+  "P1001", // Database unavailable or not reachable.
+  "P2021", // Table does not exist.
+  "P2022", // Column does not exist.
+]);
+
+function isRecoverableDemoQueryError(error: unknown): boolean {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const maybePrismaError = error as {
+    code?: unknown;
+    name?: unknown;
+  };
+
+  if (
+    typeof maybePrismaError.code === "string" &&
+    RECOVERABLE_DEMO_QUERY_ERROR_CODES.has(maybePrismaError.code)
+  ) {
+    return true;
+  }
+
+  if (
+    typeof maybePrismaError.name === "string" &&
+    maybePrismaError.name === "PrismaClientInitializationError"
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+async function loadFocusedConcessione() {
+  try {
+    return await prisma.concessione.findFirst({
+      where: {
+        numeroAtto: "CP-067/2018",
+      },
+      include: {
+        concessionario: {
+          select: {
+            denominazione: true,
+          },
+        },
+        sopralluoghi: {
+          orderBy: [{ data: "desc" }],
+          take: 1,
+          select: {
+            id: true,
+            data: true,
+            esito: true,
+          },
+        },
+        criticita: {
+          where: { stato: { in: ["APERTA", "IN_GESTIONE"] } },
+          orderBy: [{ gravita: "desc" }, { dataRilevazione: "desc" }],
+          take: 1,
+          select: {
+            id: true,
+            tipologia: true,
+            gravita: true,
+          },
+        },
+        pagamenti: {
+          where: { stato: { in: ["NON_PAGATO", "PARZIALE", "SCADUTO"] } },
+          orderBy: [{ dataScadenza: "asc" }],
+          take: 1,
+          select: {
+            id: true,
+            annoRiferimento: true,
+            stato: true,
+          },
+        },
+        scadenze: {
+          where: { stato: { in: ["APERTA", "SCADUTA"] } },
+          orderBy: [{ dataScadenza: "asc" }],
+          take: 1,
+          select: {
+            id: true,
+            tipologia: true,
+            stato: true,
+          },
+        },
+        procedimenti: {
+          where: { stato: { in: ["DA_AVVIARE", "IN_CORSO"] } },
+          orderBy: [{ dataScadenzaContraddittorio: "asc" }, { createdAt: "desc" }],
+          take: 1,
+          select: {
+            id: true,
+            tipologia: true,
+            stato: true,
+          },
+        },
+        report: {
+          orderBy: [{ createdAt: "desc" }],
+          take: 1,
+          select: {
+            id: true,
+            tipologia: true,
+            validato: true,
+          },
+        },
+      },
+    });
+  } catch (error) {
+    if (isRecoverableDemoQueryError(error)) {
+      return null;
+    }
+
+    if (process.env.NODE_ENV !== "production") {
+      return null;
+    }
+
+    throw error;
+  }
+}
+
 export async function getDemoPageData(): Promise<DemoPageData> {
-  const focusedConcessione = await prisma.concessione.findFirst({
-    where: {
-      numeroAtto: "CP-067/2018",
-    },
-    include: {
-      concessionario: {
-        select: {
-          denominazione: true,
-        },
-      },
-      sopralluoghi: {
-        orderBy: [{ data: "desc" }],
-        take: 1,
-        select: {
-          id: true,
-          data: true,
-          esito: true,
-        },
-      },
-      criticita: {
-        where: { stato: { in: ["APERTA", "IN_GESTIONE"] } },
-        orderBy: [{ gravita: "desc" }, { dataRilevazione: "desc" }],
-        take: 1,
-        select: {
-          id: true,
-          tipologia: true,
-          gravita: true,
-        },
-      },
-      pagamenti: {
-        where: { stato: { in: ["NON_PAGATO", "PARZIALE", "SCADUTO"] } },
-        orderBy: [{ dataScadenza: "asc" }],
-        take: 1,
-        select: {
-          id: true,
-          annoRiferimento: true,
-          stato: true,
-        },
-      },
-      scadenze: {
-        where: { stato: { in: ["APERTA", "SCADUTA"] } },
-        orderBy: [{ dataScadenza: "asc" }],
-        take: 1,
-        select: {
-          id: true,
-          tipologia: true,
-          stato: true,
-        },
-      },
-      procedimenti: {
-        where: { stato: { in: ["DA_AVVIARE", "IN_CORSO"] } },
-        orderBy: [{ dataScadenzaContraddittorio: "asc" }, { createdAt: "desc" }],
-        take: 1,
-        select: {
-          id: true,
-          tipologia: true,
-          stato: true,
-        },
-      },
-      report: {
-        orderBy: [{ createdAt: "desc" }],
-        take: 1,
-        select: {
-          id: true,
-          tipologia: true,
-          validato: true,
-        },
-      },
-    },
-  });
+  const focusedConcessione = await loadFocusedConcessione();
 
   if (!focusedConcessione) {
     return {

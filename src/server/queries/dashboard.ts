@@ -2,6 +2,39 @@ import { addDays, differenceInCalendarDays, startOfDay } from "date-fns";
 
 import { prisma } from "@/lib/prisma";
 
+const RECOVERABLE_DASHBOARD_QUERY_ERROR_CODES = new Set([
+  "P1001", // Database unavailable or not reachable.
+  "P2021", // Table does not exist.
+  "P2022", // Column does not exist.
+]);
+
+function isRecoverableDashboardQueryError(error: unknown): boolean {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const maybePrismaError = error as {
+    code?: unknown;
+    name?: unknown;
+  };
+
+  if (
+    typeof maybePrismaError.code === "string" &&
+    RECOVERABLE_DASHBOARD_QUERY_ERROR_CODES.has(maybePrismaError.code)
+  ) {
+    return true;
+  }
+
+  if (
+    typeof maybePrismaError.name === "string" &&
+    maybePrismaError.name === "PrismaClientInitializationError"
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
 function hasNormativaDelegates(): boolean {
   const runtimePrisma = prisma as unknown as Record<string, unknown>;
   return Boolean(runtimePrisma.normaFonte && runtimePrisma.normaVersione);
@@ -70,13 +103,225 @@ export interface DashboardData {
   azioniConsigliate: string[];
 }
 
+function buildFallbackDashboardData(): DashboardData {
+  return {
+    summary: {
+      totaleConcessioni: 0,
+      concessioniAttive: 0,
+      concessioniInScadenza90: 0,
+      criticitaAperte: 0,
+      criticitaUrgenti: 0,
+      morositaAperte: 0,
+      pagamentiCritici: 0,
+      procedimentiInCorso: 0,
+      garanziePolizzeCritiche: 0,
+      fontiNormative: 0,
+      versioniNormativeInConsultazione: 0,
+    },
+    criticitaPrioritarie: [],
+    scadenzeImminenti: [],
+    pagamentiCritici: [],
+    procedimentiInCorso: [],
+    azioniConsigliate: [
+      "Dati dashboard temporaneamente non disponibili: verificare connessione database e sincronizzazione schema Prisma.",
+    ],
+  };
+}
+
 export async function getDashboardData(): Promise<DashboardData> {
   const oggi = startOfDay(new Date());
   const in90Giorni = addDays(oggi, 90);
   const in60Giorni = addDays(oggi, 60);
   const normativaEnabled = hasNormativaDelegates();
 
-  const [
+  let dashboardRows: any = null;
+
+  try {
+    const [
+      totaleConcessioni,
+      concessioniAttive,
+      concessioniInScadenza90,
+      criticitaAperte,
+      criticitaUrgenti,
+      morositaAperte,
+      pagamentiCritici,
+      procedimentiInCorsoCount,
+      garanziePolizzeCritiche,
+      fontiNormative,
+      versioniNormativeInConsultazione,
+      criticitaPrioritarieRows,
+      scadenzeImminentiRows,
+      pagamentiCriticiRows,
+      procedimentiRows,
+    ] = await Promise.all([
+      prisma.concessione.count(),
+      prisma.concessione.count({ where: { stato: "ATTIVA" } }),
+      prisma.concessione.count({
+        where: {
+          dataScadenza: {
+            gte: oggi,
+            lte: in90Giorni,
+          },
+        },
+      }),
+      prisma.criticita.count({ where: { stato: { in: ["APERTA", "IN_GESTIONE"] } } }),
+      prisma.criticita.count({
+        where: {
+          gravita: "URGENTE",
+          stato: { in: ["APERTA", "IN_GESTIONE"] },
+        },
+      }),
+      prisma.criticita.count({
+        where: {
+          tipologia: "MOROSITA",
+          stato: { in: ["APERTA", "IN_GESTIONE"] },
+        },
+      }),
+      prisma.pagamento.count({
+        where: {
+          stato: { in: ["NON_PAGATO", "PARZIALE", "SCADUTO"] },
+        },
+      }),
+      prisma.procedimento.count({
+        where: {
+          stato: "IN_CORSO",
+        },
+      }),
+      prisma.scadenza.count({
+        where: {
+          tipologia: {
+            in: ["POLIZZA", "FIDEIUSSIONE", "CAUZIONE"],
+          },
+          OR: [
+            { stato: "SCADUTA" },
+            {
+              stato: "APERTA",
+              dataScadenza: {
+                lte: in60Giorni,
+              },
+            },
+          ],
+        },
+      }),
+      normativaEnabled ? prisma.normaFonte.count() : Promise.resolve(0),
+      normativaEnabled
+        ? prisma.normaVersione.count({ where: { stato: "IN_CONSULTAZIONE" } })
+        : Promise.resolve(0),
+      prisma.criticita.findMany({
+        where: {
+          stato: { in: ["APERTA", "IN_GESTIONE"] },
+        },
+        orderBy: [{ gravita: "desc" }, { dataRilevazione: "desc" }],
+        take: 6,
+        select: {
+          id: true,
+          gravita: true,
+          tipologia: true,
+          descrizione: true,
+          riferimentoNormativo: true,
+          stato: true,
+          dataRilevazione: true,
+          concessione: {
+            select: {
+              numeroAtto: true,
+            },
+          },
+        },
+      }),
+      prisma.scadenza.findMany({
+        where: {
+          stato: {
+            in: ["APERTA", "SCADUTA"],
+          },
+        },
+        orderBy: [{ dataScadenza: "asc" }],
+        take: 8,
+        select: {
+          id: true,
+          dataScadenza: true,
+          tipologia: true,
+          stato: true,
+          concessione: {
+            select: {
+              numeroAtto: true,
+            },
+          },
+        },
+      }),
+      prisma.pagamento.findMany({
+        where: {
+          stato: {
+            in: ["NON_PAGATO", "PARZIALE", "SCADUTO"],
+          },
+        },
+        orderBy: [{ dataScadenza: "asc" }],
+        select: {
+          id: true,
+          annoRiferimento: true,
+          importoDovuto: true,
+          importoVersato: true,
+          stato: true,
+          dataScadenza: true,
+          concessione: {
+            select: {
+              numeroAtto: true,
+            },
+          },
+        },
+      }),
+      prisma.procedimento.findMany({
+        where: {
+          stato: {
+            in: ["DA_AVVIARE", "IN_CORSO"],
+          },
+        },
+        orderBy: [{ dataScadenzaContraddittorio: "asc" }, { createdAt: "desc" }],
+        take: 5,
+        select: {
+          id: true,
+          tipologia: true,
+          stato: true,
+          riferimentoNormativo: true,
+          dataScadenzaContraddittorio: true,
+          concessione: {
+            select: {
+              numeroAtto: true,
+            },
+          },
+        },
+      }),
+    ]);
+
+    dashboardRows = {
+      totaleConcessioni,
+      concessioniAttive,
+      concessioniInScadenza90,
+      criticitaAperte,
+      criticitaUrgenti,
+      morositaAperte,
+      pagamentiCritici,
+      procedimentiInCorsoCount,
+      garanziePolizzeCritiche,
+      fontiNormative,
+      versioniNormativeInConsultazione,
+      criticitaPrioritarieRows,
+      scadenzeImminentiRows,
+      pagamentiCriticiRows,
+      procedimentiRows,
+    };
+  } catch (error) {
+    if (isRecoverableDashboardQueryError(error) || process.env.NODE_ENV !== "production") {
+      return buildFallbackDashboardData();
+    }
+
+    throw error;
+  }
+
+  if (!dashboardRows) {
+    return buildFallbackDashboardData();
+  }
+
+  const {
     totaleConcessioni,
     concessioniAttive,
     concessioniInScadenza90,
@@ -92,144 +337,18 @@ export async function getDashboardData(): Promise<DashboardData> {
     scadenzeImminentiRows,
     pagamentiCriticiRows,
     procedimentiRows,
-  ] = await Promise.all([
-    prisma.concessione.count(),
-    prisma.concessione.count({ where: { stato: "ATTIVA" } }),
-    prisma.concessione.count({
-      where: {
-        dataScadenza: {
-          gte: oggi,
-          lte: in90Giorni,
-        },
-      },
-    }),
-    prisma.criticita.count({ where: { stato: { in: ["APERTA", "IN_GESTIONE"] } } }),
-    prisma.criticita.count({
-      where: {
-        gravita: "URGENTE",
-        stato: { in: ["APERTA", "IN_GESTIONE"] },
-      },
-    }),
-    prisma.criticita.count({
-      where: {
-        tipologia: "MOROSITA",
-        stato: { in: ["APERTA", "IN_GESTIONE"] },
-      },
-    }),
-    prisma.pagamento.count({
-      where: {
-        stato: { in: ["NON_PAGATO", "PARZIALE", "SCADUTO"] },
-      },
-    }),
-    prisma.procedimento.count({
-      where: {
-        stato: "IN_CORSO",
-      },
-    }),
-    prisma.scadenza.count({
-      where: {
-        tipologia: {
-          in: ["POLIZZA", "FIDEIUSSIONE", "CAUZIONE"],
-        },
-        OR: [
-          { stato: "SCADUTA" },
-          {
-            stato: "APERTA",
-            dataScadenza: {
-              lte: in60Giorni,
-            },
-          },
-        ],
-      },
-    }),
-    normativaEnabled ? prisma.normaFonte.count() : Promise.resolve(0),
-    normativaEnabled ? prisma.normaVersione.count({ where: { stato: "IN_CONSULTAZIONE" } }) : Promise.resolve(0),
-    prisma.criticita.findMany({
-      where: {
-        stato: { in: ["APERTA", "IN_GESTIONE"] },
-      },
-      orderBy: [{ gravita: "desc" }, { dataRilevazione: "desc" }],
-      take: 6,
-      select: {
-        id: true,
-        gravita: true,
-        tipologia: true,
-        descrizione: true,
-        riferimentoNormativo: true,
-        stato: true,
-        dataRilevazione: true,
-        concessione: {
-          select: {
-            numeroAtto: true,
-          },
-        },
-      },
-    }),
-    prisma.scadenza.findMany({
-      where: {
-        stato: {
-          in: ["APERTA", "SCADUTA"],
-        },
-      },
-      orderBy: [{ dataScadenza: "asc" }],
-      take: 8,
-      select: {
-        id: true,
-        dataScadenza: true,
-        tipologia: true,
-        stato: true,
-        concessione: {
-          select: {
-            numeroAtto: true,
-          },
-        },
-      },
-    }),
-    prisma.pagamento.findMany({
-      where: {
-        stato: {
-          in: ["NON_PAGATO", "PARZIALE", "SCADUTO"],
-        },
-      },
-      orderBy: [{ dataScadenza: "asc" }],
-      select: {
-        id: true,
-        annoRiferimento: true,
-        importoDovuto: true,
-        importoVersato: true,
-        stato: true,
-        dataScadenza: true,
-        concessione: {
-          select: {
-            numeroAtto: true,
-          },
-        },
-      },
-    }),
-    prisma.procedimento.findMany({
-      where: {
-        stato: {
-          in: ["DA_AVVIARE", "IN_CORSO"],
-        },
-      },
-      orderBy: [{ dataScadenzaContraddittorio: "asc" }, { createdAt: "desc" }],
-      take: 5,
-      select: {
-        id: true,
-        tipologia: true,
-        stato: true,
-        riferimentoNormativo: true,
-        dataScadenzaContraddittorio: true,
-        concessione: {
-          select: {
-            numeroAtto: true,
-          },
-        },
-      },
-    }),
-  ]);
+  } = dashboardRows;
 
-  const criticitaPrioritarie: DashboardCriticitaItem[] = criticitaPrioritarieRows.map((item) => ({
+  const criticitaPrioritarie: DashboardCriticitaItem[] = criticitaPrioritarieRows.map((item: {
+    id: string;
+    gravita: string;
+    tipologia: string;
+    descrizione: string;
+    riferimentoNormativo: string | null;
+    stato: string;
+    dataRilevazione: Date;
+    concessione: { numeroAtto: string };
+  }) => ({
     id: item.id,
     gravita: item.gravita,
     tipologia: item.tipologia,
@@ -240,7 +359,13 @@ export async function getDashboardData(): Promise<DashboardData> {
     dataRilevazione: item.dataRilevazione,
   }));
 
-  const scadenzeImminenti: DashboardScadenzaItem[] = scadenzeImminentiRows.map((item) => ({
+  const scadenzeImminenti: DashboardScadenzaItem[] = scadenzeImminentiRows.map((item: {
+    id: string;
+    dataScadenza: Date;
+    tipologia: string;
+    stato: string;
+    concessione: { numeroAtto: string };
+  }) => ({
     id: item.id,
     data: item.dataScadenza,
     tipologia: item.tipologia,
@@ -249,7 +374,15 @@ export async function getDashboardData(): Promise<DashboardData> {
     giorniDelta: differenceInCalendarDays(item.dataScadenza, oggi),
   }));
 
-  const pagamentiCriticiData: DashboardPagamentoItem[] = pagamentiCriticiRows.map((item) => {
+  const pagamentiCriticiData: DashboardPagamentoItem[] = pagamentiCriticiRows.map((item: {
+    id: string;
+    annoRiferimento: number;
+    importoDovuto: number;
+    importoVersato: number;
+    stato: string;
+    dataScadenza: Date;
+    concessione: { numeroAtto: string };
+  }) => {
     const dovuto = Number(item.importoDovuto);
     const versato = Number(item.importoVersato);
 
@@ -265,7 +398,14 @@ export async function getDashboardData(): Promise<DashboardData> {
     };
   });
 
-  const procedimentiInCorso: DashboardProcedimentoItem[] = procedimentiRows.map((item) => ({
+  const procedimentiInCorso: DashboardProcedimentoItem[] = procedimentiRows.map((item: {
+    id: string;
+    tipologia: string;
+    stato: string;
+    riferimentoNormativo: string | null;
+    dataScadenzaContraddittorio: Date | null;
+    concessione: { numeroAtto: string };
+  }) => ({
     id: item.id,
     tipologia: item.tipologia,
     concessione: item.concessione.numeroAtto,

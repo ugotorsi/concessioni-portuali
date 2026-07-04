@@ -128,6 +128,17 @@ Perche la struttura e corretta per vista 360 gradi:
 - abilita trasparenza consultiva verso AdSP su report validati e indicatori principali;
 - rende possibile una futura evoluzione in fascicolo digitale strutturato.
 
+## Scenari demo istituzionali collegati (Issue #17)
+- Pagina dedicata: `/demo-scenari`.
+- Obiettivo: rappresentare casi istruttori realistici per interlocutori non tecnici in contesto PA/AdSP.
+- Copertura scenari:
+  - DEMO-01 - Morosita art. 47 (profilo art.47 + procedimento d ufficio + report validato).
+  - DEMO-02 - Occupazione difforme / uso non conforme (sopralluogo + warning checklist).
+  - DEMO-03 - Regolarizzazione pre-provvedimentale (regolarizzazione come elemento da valutare, non automatismo).
+  - DEMO-04 - Contraddittorio incompleto (warning alto e guidance istruttoria).
+  - DEMO-05 - Istanza di parte e art. 10-bis (preavviso e osservazioni tracciate caso per caso).
+- Presidio giuridico-comunicativo: supporto al responsabile del procedimento, senza automatismi decisori su decadenza/revoca.
+
 ## 4. Campi giuridicamente sensibili
 | Entita | Campo | Rilevanza giuridica | Rischio se mancante/errato | Miglioramento consigliato |
 |---|---|---|---|---|

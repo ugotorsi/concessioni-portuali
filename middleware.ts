@@ -15,6 +15,7 @@ const PROTECTED_PREFIXES = [
   "/procedimenti",
   "/report",
   "/normativa",
+  "/demo-scenari",
   "/ai",
   "/adsp",
   "/export",
