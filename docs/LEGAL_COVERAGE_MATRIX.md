@@ -79,7 +79,7 @@ Nota: utile per MVP, ma manca piena identita legale/organizzativa (profilazione 
 - Funzione giuridico-amministrativa: output istruttorio e reportistica operativa/direzionale.
 - Dati rilevanti: tipologia, titolo, contenuto, formato, validato.
 - Collegamenti: opzionale N:1 verso Concessione, 1:N verso NormaImpatto.
-- Livello maturità attuale: Alto (MVP), con validazione e PDF.
+- Livello maturità attuale: Alto (MVP), con validazione, PDF istituzionale strutturato (frontespizio/sezioni/footer) e disclaimer anti-automatismo.
 
 ### NormaFonte
 - Funzione giuridico-amministrativa: catalogo fonti normative.

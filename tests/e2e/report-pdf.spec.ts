@@ -55,6 +55,12 @@ test("pdf report access policy by role and validation", async ({ page }) => {
   const pdfPath = await pdfLink.getAttribute("href");
   expect(pdfPath).toBeTruthy();
 
+  const adminPdfResponse = await page.request.get(pdfPath as string);
+  expect(adminPdfResponse.status()).toBe(200);
+  expect(adminPdfResponse.headers()["content-type"]).toContain("application/pdf");
+  const adminPdfBody = await adminPdfResponse.body();
+  expect(adminPdfBody.byteLength).toBeGreaterThan(3500);
+
   await expect(page.getByRole("button", { name: "Valida report" })).toBeVisible();
 
   await page.goto("/logout");

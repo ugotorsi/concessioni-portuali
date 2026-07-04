@@ -151,6 +151,14 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
 - Export CSV sui moduli operativi
 - PDF report istituzionale server-side (PDFKit) su route dedicate con layout professionale, sezioni standard e metadata documento
 
+### Institutional PDF polish (Issue #16)
+- Template PDF istituzionale raffinato con frontespizio, sommario sezioni e layout piu formale.
+- Header ricorrente con riferimenti applicativi/data generazione.
+- Footer ricorrente con numerazione pagina, ID report e dicitura "Uso interno / istruttorio".
+- Sezioni dedicate a criticita, procedimenti, pagamenti, scadenze e sopralluoghi con box riepilogativi.
+- Evidenza esplicita di art. 47, regolarizzazione, checklist contraddittorio e tracciamento art. 10-bis.
+- Disclaimer rafforzati: supporto istruttorio, assenza di automatismi decisori e necessita di valutazione dell autorita competente.
+
 ## Security hardening (Phase 1)
 - Middleware centralizzato in `middleware.ts` per primo filtro accessi/redirect.
 - Redirect utenti non autenticati verso `/login` su rotte protette.

@@ -10,52 +10,42 @@ interface NormaReportItem {
   descrizione: string;
 }
 
-const DISCLAIMER =
-  "Documento istruttorio interno della societa a supporto dell Autorita. Non costituisce provvedimento amministrativo e non sostituisce la valutazione dell autorita competente.";
-
 interface PdfContext {
   doc: any;
   margin: number;
-  lineGap: number;
   writableWidth: number;
+  lineGap: number;
   generatedAt: Date;
+  reportId: string;
 }
 
-function textOrDash(value: string | null | undefined): string {
+const COVER_DISCLAIMER =
+  "Documento istruttorio generato a supporto dell attivita amministrativa. Non costituisce provvedimento finale ne valutazione vincolante.";
+
+const ART47_NOTE =
+  "La rilevanza ex art. 47 e rappresentata come elemento istruttorio e richiede valutazione dell autorita competente.";
+
+const REGOLARIZZAZIONE_NOTE =
+  "La regolarizzazione costituisce elemento istruttorio da valutare prima di eventuali determinazioni finali.";
+
+const PREAVVISO_NOTE =
+  "La gestione del preavviso di rigetto ex art. 10-bis L. 241/1990 e tracciata a fini istruttori e deve essere valutata secondo il caso concreto.";
+
+const CHECKLIST_NOTE =
+  "La checklist non sostituisce la valutazione del responsabile del procedimento.";
+
+function textOrNA(value: string | null | undefined): string {
   if (!value) {
-    return "-";
+    return "Non disponibile";
   }
 
   const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : "-";
-}
-
-function euro(value: number | null | undefined): string {
-  if (value === null || value === undefined) {
-    return "-";
-  }
-
-  return new Intl.NumberFormat("it-IT", {
-    style: "currency",
-    currency: "EUR",
-  }).format(value);
-}
-
-function dateIT(value: Date | null | undefined): string {
-  if (!value) {
-    return "-";
-  }
-
-  return new Intl.DateTimeFormat("it-IT", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(value);
+  return trimmed.length > 0 ? trimmed : "Non disponibile";
 }
 
 function enumLabel(value: string | null | undefined): string {
   if (!value) {
-    return "-";
+    return "Non disponibile";
   }
 
   return value
@@ -65,267 +55,444 @@ function enumLabel(value: string | null | undefined): string {
     .join(" ");
 }
 
-function ensureSpace(ctx: PdfContext, minHeight: number) {
-  const threshold = ctx.doc.page.height - ctx.margin - minHeight;
-  if (ctx.doc.y > threshold) {
-    ctx.doc.addPage();
-    drawPageHeader(ctx);
+function dateIT(value: Date | null | undefined): string {
+  if (!value) {
+    return "Non disponibile";
   }
+
+  return new Intl.DateTimeFormat("it-IT", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(value);
 }
 
-function drawPageHeader(ctx: PdfContext) {
-  const { doc, margin, writableWidth, generatedAt } = ctx;
-  const pageTop = margin - 18;
-
-  doc.save();
-  doc.font("Helvetica-Bold").fontSize(11).fillColor("#0f172a");
-  doc.text("Concessioni Portuali", margin, pageTop, {
-    width: writableWidth,
-    align: "left",
-  });
-
-  doc.font("Helvetica").fontSize(9).fillColor("#334155");
-  doc.text(`Report istituzionale - Generato il ${dateIT(generatedAt)}`, margin, pageTop, {
-    width: writableWidth,
-    align: "right",
-  });
-
-  doc.moveTo(margin, margin - 4).lineTo(margin + writableWidth, margin - 4).lineWidth(0.8).stroke("#cbd5e1");
-  doc.restore();
-
-  if (doc.y < margin + 6) {
-    doc.y = margin + 6;
+function euro(value: number | null | undefined): string {
+  if (value === null || value === undefined) {
+    return "Non disponibile";
   }
+
+  return new Intl.NumberFormat("it-IT", {
+    style: "currency",
+    currency: "EUR",
+  }).format(value);
 }
 
-function drawPageFooter(ctx: PdfContext) {
-  const { doc, margin, writableWidth } = ctx;
-  const footerY = doc.page.height - margin + 8;
+function addRiskBadgeText(detail: ReportDetail): string {
+  const hasCritico = detail.criticitaAperte.some((item) => item.rischioDecadenza === "CRITICO");
+  if (hasCritico) {
+    return "Critico";
+  }
 
-  doc.save();
-  doc.font("Helvetica").fontSize(8).fillColor("#64748b");
-  doc.text(DISCLAIMER, margin, footerY, {
-    width: writableWidth,
+  const hasAlto = detail.criticitaAperte.some(
+    (item) => item.rischioDecadenza === "ALTO" || item.gravita === "URGENTE",
+  );
+  if (hasAlto) {
+    return "Alto";
+  }
+
+  const hasMedio = detail.criticitaAperte.some(
+    (item) => item.rischioDecadenza === "MEDIO" || item.gravita === "ALTA",
+  );
+  if (hasMedio) {
+    return "Medio";
+  }
+
+  if (detail.criticitaAperte.length > 0) {
+    return "Basso";
+  }
+
+  return "Non disponibile";
+}
+
+function drawHeader(ctx: PdfContext) {
+  const pageTop = ctx.margin - 18;
+
+  ctx.doc.save();
+  ctx.doc.font("Helvetica-Bold").fontSize(11).fillColor("#0f172a");
+  ctx.doc.text("Concessioni Portuali", ctx.margin, pageTop, {
+    width: ctx.writableWidth,
     align: "left",
     lineBreak: false,
   });
-  doc.restore();
+
+  ctx.doc.font("Helvetica").fontSize(9).fillColor("#334155");
+  ctx.doc.text(`Report istituzionale | ${dateIT(ctx.generatedAt)}`, ctx.margin, pageTop, {
+    width: ctx.writableWidth,
+    align: "right",
+    lineBreak: false,
+  });
+
+  ctx.doc.moveTo(ctx.margin, ctx.margin - 4).lineTo(ctx.margin + ctx.writableWidth, ctx.margin - 4).lineWidth(0.8).stroke("#cbd5e1");
+  ctx.doc.restore();
+
+  if (ctx.doc.y < ctx.margin + 6) {
+    ctx.doc.y = ctx.margin + 6;
+  }
 }
 
-function title(ctx: PdfContext, value: string) {
+function drawFooter(ctx: PdfContext, pageNumber: number, totalPages: number) {
+  const footerY = ctx.doc.page.height - ctx.margin + 10;
+
+  ctx.doc.save();
+  ctx.doc.moveTo(ctx.margin, footerY - 6).lineTo(ctx.margin + ctx.writableWidth, footerY - 6).lineWidth(0.7).stroke("#cbd5e1");
+
+  ctx.doc.font("Helvetica").fontSize(8).fillColor("#64748b");
+  ctx.doc.text("Uso interno / istruttorio", ctx.margin, footerY, {
+    width: ctx.writableWidth,
+    align: "left",
+    lineBreak: false,
+  });
+
+  ctx.doc.text(`Report ID: ${ctx.reportId}`, ctx.margin, footerY, {
+    width: ctx.writableWidth,
+    align: "center",
+    lineBreak: false,
+  });
+
+  ctx.doc.text(`Pagina ${pageNumber} di ${totalPages}`, ctx.margin, footerY, {
+    width: ctx.writableWidth,
+    align: "right",
+    lineBreak: false,
+  });
+  ctx.doc.restore();
+}
+
+function maybeAddPage(ctx: PdfContext, minHeight = 120) {
+  const threshold = ctx.doc.page.height - ctx.margin - minHeight;
+  if (ctx.doc.y > threshold) {
+    ctx.doc.addPage();
+    drawHeader(ctx);
+  }
+}
+
+function ensureSpace(ctx: PdfContext, minHeight = 120) {
+  maybeAddPage(ctx, minHeight);
+}
+
+function addSectionTitle(ctx: PdfContext, title: string) {
   ensureSpace(ctx, 56);
+  ctx.doc.moveDown(0.35);
+  ctx.doc.font("Helvetica-Bold").fontSize(13).fillColor("#0f172a").text(title, {
+    width: ctx.writableWidth,
+  });
+  ctx.doc.moveTo(ctx.margin, ctx.doc.y + 3).lineTo(ctx.margin + ctx.writableWidth, ctx.doc.y + 3).lineWidth(0.6).stroke("#e2e8f0");
+  ctx.doc.moveDown(0.45);
+}
+
+function addParagraph(ctx: PdfContext, value: string) {
+  ensureSpace(ctx, 34);
+  ctx.doc.font("Helvetica").fontSize(10.5).fillColor("#1e293b").text(value, {
+    width: ctx.writableWidth,
+    lineGap: ctx.lineGap,
+  });
+}
+
+function addBullet(ctx: PdfContext, value: string) {
+  addParagraph(ctx, `- ${value}`);
+}
+
+function addInfoBox(ctx: PdfContext, title: string, lines: string[]) {
+  const lineHeight = 14;
+  const boxHeight = 28 + lines.length * lineHeight;
+  ensureSpace(ctx, boxHeight + 24);
+
+  const x = ctx.margin;
+  const y = ctx.doc.y;
+
+  ctx.doc.save();
+  ctx.doc.roundedRect(x, y, ctx.writableWidth, boxHeight, 6).fillAndStroke("#f8fafc", "#cbd5e1");
+
+  ctx.doc.fillColor("#0f172a").font("Helvetica-Bold").fontSize(10.5).text(title, x + 12, y + 9, {
+    width: ctx.writableWidth - 24,
+  });
+
+  ctx.doc.font("Helvetica").fontSize(10).fillColor("#334155");
+  let currentY = y + 24;
+  for (const line of lines) {
+    ctx.doc.text(line, x + 12, currentY, {
+      width: ctx.writableWidth - 24,
+      lineGap: 1,
+    });
+    currentY += lineHeight;
+  }
+
+  ctx.doc.restore();
+  ctx.doc.y = y + boxHeight + 10;
+}
+
+function addKeyValueTable(ctx: PdfContext, rows: Array<{ key: string; value: string }>) {
+  for (const row of rows) {
+    ensureSpace(ctx, 24);
+    ctx.doc.font("Helvetica-Bold").fontSize(10.2).fillColor("#0f172a").text(`${row.key}: `, {
+      continued: true,
+    });
+    ctx.doc.font("Helvetica").fontSize(10.2).fillColor("#1e293b").text(row.value, {
+      width: ctx.writableWidth,
+      lineGap: 1,
+    });
+  }
+}
+
+function addCoverPage(ctx: PdfContext, detail: ReportDetail) {
+  drawHeader(ctx);
+
+  ctx.doc.moveDown(1.2);
+  ctx.doc.font("Helvetica-Bold").fontSize(22).fillColor("#0f172a").text("Report istituzionale", {
+    width: ctx.writableWidth,
+  });
+
   ctx.doc.moveDown(0.2);
-  ctx.doc.font("Helvetica-Bold").fontSize(16).fillColor("#0f172a").text(value, {
+  ctx.doc.font("Helvetica").fontSize(12).fillColor("#334155").text(textOrNA(detail.report.titolo), {
     width: ctx.writableWidth,
   });
+
+  ctx.doc.moveDown(0.8);
+  addInfoBox(ctx, "Frontespizio", [
+    `Concessione: ${detail.concessione?.numeroAtto ?? "Non disponibile"}`,
+    `Concessionario: ${detail.concessionario?.denominazione ?? "Non disponibile"}`,
+    `Data generazione: ${dateIT(ctx.generatedAt)}`,
+    `Stato report: ${detail.report.validato ? "Validato" : "Bozza"}`,
+    `Livello rischio complessivo: ${addRiskBadgeText(detail)}`,
+  ]);
+
+  addInfoBox(ctx, "Disclaimer istruttorio", [COVER_DISCLAIMER]);
 }
 
-function section(ctx: PdfContext, value: string) {
-  ensureSpace(ctx, 42);
-  ctx.doc.moveDown(0.5);
-  ctx.doc.font("Helvetica-Bold").fontSize(12).fillColor("#0f172a").text(value, {
-    width: ctx.writableWidth,
-  });
-  ctx.doc.moveDown(0.15);
+function addSummarySection(ctx: PdfContext, detail: ReportDetail) {
+  addSectionTitle(ctx, "Sommario sezioni");
+
+  const rows = [
+    "Sintesi",
+    "Concessione",
+    "Criticita",
+    "Procedimenti",
+    "Pagamenti",
+    "Scadenze",
+    "Sopralluoghi",
+    "Evidenze istruttorie",
+    "Disclaimer finale",
+  ];
+
+  for (const row of rows) {
+    addBullet(ctx, row);
+  }
+
+  addSectionTitle(ctx, "Sintesi");
+  addInfoBox(ctx, "Indicatori chiave", [
+    `Criticita aperte: ${detail.criticitaAperte.length}`,
+    `Procedimenti in corso: ${detail.procedimentiInCorso.length}`,
+    `Pagamenti critici: ${detail.pagamentiCritici.length}`,
+    `Scadenze rilevanti: ${detail.scadenzeRilevanti.length}`,
+    `Sopralluoghi recenti: ${detail.sopralluoghiRecenti.length}`,
+  ]);
 }
 
-function body(ctx: PdfContext, value: string) {
-  ensureSpace(ctx, 28);
-  ctx.doc.font("Helvetica").fontSize(10.5).fillColor("#1e293b").text(value, {
-    width: ctx.writableWidth,
-    lineGap: ctx.lineGap,
-  });
-}
-
-function bullet(ctx: PdfContext, value: string) {
-  ensureSpace(ctx, 26);
-  ctx.doc.font("Helvetica").fontSize(10.5).fillColor("#1e293b").text(`- ${value}`, {
-    width: ctx.writableWidth,
-    lineGap: ctx.lineGap,
-  });
-}
-
-function keyValue(ctx: PdfContext, key: string, value: string) {
-  ensureSpace(ctx, 24);
-  ctx.doc.font("Helvetica-Bold").fontSize(10.5).fillColor("#0f172a").text(`${key}: `, {
-    continued: true,
-  });
-  ctx.doc.font("Helvetica").fontSize(10.5).fillColor("#1e293b").text(value, {
-    width: ctx.writableWidth,
-    lineGap: ctx.lineGap,
-  });
-}
-
-function renderHeaderSection(ctx: PdfContext, detail: ReportDetail) {
-  title(ctx, textOrDash(detail.report.titolo));
-
-  body(
-    ctx,
-    `Tipologia: ${enumLabel(detail.report.tipologia)} | Stato validazione: ${detail.report.validato ? "VALIDATO" : "BOZZA"}`,
-  );
-  body(
-    ctx,
-    `Creato il ${dateIT(detail.report.createdAt)} - Aggiornato il ${dateIT(detail.report.updatedAt)} - Formato ${enumLabel(detail.report.formato)}`,
-  );
-}
-
-function renderContextSection(ctx: PdfContext, detail: ReportDetail) {
-  section(ctx, "1. Contesto concessorio");
+function addConcessioneSection(ctx: PdfContext, detail: ReportDetail) {
+  addSectionTitle(ctx, "Concessione");
 
   if (!detail.concessione) {
-    body(ctx, "Report non collegato a una specifica concessione.");
+    addParagraph(ctx, "Non risultano dati nel perimetro del report.");
     return;
   }
 
-  keyValue(ctx, "Numero atto", detail.concessione.numeroAtto);
-  keyValue(ctx, "Concessionario", detail.concessionario?.denominazione ?? "-");
-  keyValue(ctx, "Stato concessione", enumLabel(detail.concessione.stato));
-  keyValue(ctx, "Tipologia bene", enumLabel(detail.concessione.tipologiaBene));
-  keyValue(ctx, "Attivita", enumLabel(detail.concessione.attivita));
-  keyValue(ctx, "Ubicazione", textOrDash(detail.concessione.ubicazione));
-  keyValue(ctx, "Canone annuo", euro(detail.concessione.canoneAnnuo));
-  keyValue(ctx, "Data scadenza", dateIT(detail.concessione.dataScadenza));
+  addKeyValueTable(ctx, [
+    { key: "Numero atto", value: textOrNA(detail.concessione.numeroAtto) },
+    { key: "Concessionario", value: textOrNA(detail.concessionario?.denominazione) },
+    { key: "Stato concessione", value: enumLabel(detail.concessione.stato) },
+    { key: "Data rilascio", value: dateIT(detail.concessione.dataRilascio) },
+    { key: "Data scadenza", value: dateIT(detail.concessione.dataScadenza) },
+    { key: "Tipologia bene", value: enumLabel(detail.concessione.tipologiaBene) },
+    { key: "Attivita", value: enumLabel(detail.concessione.attivita) },
+    { key: "Ubicazione", value: textOrNA(detail.concessione.ubicazione) },
+    { key: "Canone annuo", value: euro(detail.concessione.canoneAnnuo) },
+  ]);
 }
 
-function renderEvidenceSection(ctx: PdfContext, detail: ReportDetail) {
-  section(ctx, "2. Evidenze istruttorie");
+function addCriticitaSection(ctx: PdfContext, detail: ReportDetail) {
+  addSectionTitle(ctx, "Criticita");
 
-  keyValue(ctx, "Criticita aperte", String(detail.criticitaAperte.length));
-  keyValue(
-    ctx,
-    "Criticita con regolarizzazione",
-    String(detail.criticitaAperte.filter((item) => item.regolarizzata).length),
-  );
-  keyValue(ctx, "Scadenze aperte/scadute", String(detail.scadenzeRilevanti.length));
-  keyValue(ctx, "Pagamenti critici", String(detail.pagamentiCritici.length));
-  keyValue(ctx, "Procedimenti in corso", String(detail.procedimentiInCorso.length));
+  if (detail.criticitaAperte.length === 0) {
+    addParagraph(ctx, "Non risultano dati nel perimetro del report.");
+    return;
+  }
 
-  if (detail.criticitaAperte.length > 0) {
-    bullet(
+  for (const item of detail.criticitaAperte) {
+    addInfoBox(ctx, `Titolo: Criticita ${enumLabel(item.tipologia)}`, [
+      `Stato: ${enumLabel(item.stato)}`,
+      `Livello rischio: ${enumLabel(item.rischioDecadenza)}`,
+      `Ipotesi art. 47: ${enumLabel(item.letteraArt47)}`,
+      `Gravita: ${enumLabel(item.gravita)}`,
+      `Regolarizzata: ${item.regolarizzata ? "Si" : "No"}`,
+      `Data regolarizzazione: ${dateIT(item.dataRegolarizzazione)}`,
+      `Esito regolarizzazione: ${enumLabel(item.esitoRegolarizzazione)}`,
+      `Verifica regolarizzazione: ${item.verificataRegolarizzazione ? "Si" : "No"}`,
+      `Nota istruttoria: ${textOrNA(item.noteVerificaRegolarizzazione ?? item.descrizioneRegolarizzazione)}`,
+    ]);
+
+    addParagraph(ctx, `Descrizione: ${textOrNA(item.descrizione)}`);
+
+    addParagraph(
       ctx,
-      `Criticita prioritaria: ${enumLabel(detail.criticitaAperte[0]?.tipologia)} (${enumLabel(detail.criticitaAperte[0]?.gravita)}).`,
-    );
-  }
-
-  if (detail.scadenzeRilevanti.length > 0) {
-    const next = detail.scadenzeRilevanti[0];
-    bullet(ctx, `Prima scadenza rilevante: ${enumLabel(next.tipologia)} - ${dateIT(next.dataScadenza)}.`);
-  }
-
-  if (detail.pagamentiCritici.length > 0) {
-    const totalResidual = detail.pagamentiCritici.reduce((sum, item) => sum + item.residuo, 0);
-    bullet(ctx, `Residuo economico aggregato su posizioni critiche: ${euro(totalResidual)}.`);
-  }
-
-  if (detail.procedimentiInCorso.length > 0) {
-    const firstProcedimento = detail.procedimentiInCorso[0];
-    bullet(
-      ctx,
-      `Procedimento attivo prioritario: ${enumLabel(firstProcedimento.tipologia)} (${enumLabel(firstProcedimento.stato)}), origine ${enumLabel(firstProcedimento.origineProcedimento)}.`,
+      `Art. 47 rilevante: ${item.rilevanzaArt47 ? "Si" : "No"}${item.riferimentoNormativo ? ` | Riferimento: ${item.riferimentoNormativo}` : ""}`,
     );
 
-    if (firstProcedimento.preavvisoRigettoApplicabile) {
-      bullet(
-        ctx,
-        `Preavviso di rigetto: ${enumLabel(firstProcedimento.statoPreavvisoRigetto)}.`,
-      );
+    if (item.rilevanzaArt47) {
+      addParagraph(ctx, ART47_NOTE);
     }
 
-    if (
-      firstProcedimento.osservazioniPreavvisoRicevute &&
-      !firstProcedimento.valutazioneOsservazioniPreavviso
-    ) {
-      bullet(
-        ctx,
-        "Warning istruttorio: osservazioni su preavviso ricevute ma non ancora valutate in modo esplicito.",
-      );
+    if (item.regolarizzata) {
+      addParagraph(ctx, REGOLARIZZAZIONE_NOTE);
     }
   }
+}
 
-  const criticitaRegDaVerificare = detail.criticitaAperte.filter(
-    (item) => item.regolarizzata && !item.verificataRegolarizzazione,
+function addProcedimentiSection(ctx: PdfContext, detail: ReportDetail) {
+  addSectionTitle(ctx, "Procedimenti");
+
+  if (detail.procedimentiInCorso.length === 0) {
+    addParagraph(ctx, "Non risultano dati nel perimetro del report.");
+    addParagraph(ctx, PREAVVISO_NOTE);
+    addParagraph(ctx, CHECKLIST_NOTE);
+    return;
+  }
+
+  for (const item of detail.procedimentiInCorso) {
+    addInfoBox(ctx, `Procedimento ${enumLabel(item.tipologia)}`, [
+      `Stato: ${enumLabel(item.stato)}`,
+      `Origine procedimento: ${enumLabel(item.origineProcedimento)}${item.procedimentoUfficio ? " (ufficio)" : ""}`,
+      `Checklist contraddittorio: ${item.checklistContraddittorioCompleta ? "Completa" : "Incompleta"}`,
+      `Comunicazione avvio: ${item.comunicazioneAvvioInviata ? "Si" : "No"} (${dateIT(item.dataComunicazioneAvvio)})`,
+      `Contestazione formale: ${item.contestazioneFormaleInviata ? "Si" : "No"} (${dateIT(item.dataContestazioneFormale)})`,
+      `Memorie/controdeduzioni: memorie ${item.memorieRicevute ? "ricevute" : "non ricevute"}, valutazione ${item.controdeduzioniValutate ? "presente" : "non presente"}`,
+      `Audizione: richiesta ${item.audizioneRichiesta ? "Si" : "No"}, svolta ${item.audizioneSvolta ? "Si" : "No"} (${dateIT(item.dataAudizione)})`,
+      `Art. 10-bis applicabile: ${item.preavvisoRigettoApplicabile ? "Si" : "No"}`,
+      `Stato preavviso: ${enumLabel(item.statoPreavvisoRigetto)} | Data: ${dateIT(item.dataPreavvisoRigetto)}`,
+      `Osservazioni preavviso: ${item.osservazioniPreavvisoRicevute ? "Ricevute" : "Non ricevute"} | Termine: ${dateIT(item.termineOsservazioniPreavviso)}`,
+      `Valutazione osservazioni: ${textOrNA(item.valutazioneOsservazioniPreavviso)}`,
+      `Proposta esito istruttorio: ${enumLabel(item.propostaEsitoIstruttorio)}`,
+    ]);
+
+    addParagraph(ctx, `Riferimento normativo: ${textOrNA(item.riferimentoNormativo)}`);
+    addParagraph(ctx, `Data avvio: ${dateIT(item.dataAvvio)} | Scadenza contraddittorio: ${dateIT(item.dataScadenzaContraddittorio)}`);
+    addParagraph(ctx, `Note checklist: ${textOrNA(item.noteChecklistContraddittorio)}`);
+  }
+
+  addParagraph(ctx, PREAVVISO_NOTE);
+  addParagraph(ctx, CHECKLIST_NOTE);
+}
+
+function addPagamentiSection(ctx: PdfContext, detail: ReportDetail) {
+  addSectionTitle(ctx, "Pagamenti");
+
+  if (detail.pagamentiCritici.length === 0) {
+    addParagraph(ctx, "Non risultano dati nel perimetro del report.");
+    return;
+  }
+
+  const now = new Date();
+  const morosi = detail.pagamentiCritici.filter(
+    (item) => item.stato === "SCADUTO" || item.stato === "NON_PAGATO" || item.residuo > 0,
   ).length;
 
-  if (criticitaRegDaVerificare > 0) {
-    bullet(
-      ctx,
-      `Criticita con regolarizzazione ancora da verificare: ${criticitaRegDaVerificare}. Integrare il fascicolo con riscontro tecnico-amministrativo.`,
-    );
-  }
+  addInfoBox(ctx, "Quadro economico", [
+    `Posizioni critiche: ${detail.pagamentiCritici.length}`,
+    `Posizioni scadute/morose: ${morosi}`,
+    `Residuo complessivo: ${euro(detail.pagamentiCritici.reduce((sum, item) => sum + item.residuo, 0))}`,
+  ]);
 
-  const primaRegolarizzata = detail.criticitaAperte.find((item) => item.regolarizzata);
-  if (primaRegolarizzata) {
-    bullet(
-      ctx,
-      `Regolarizzazione rilevata su ${enumLabel(primaRegolarizzata.tipologia)} (esito ${enumLabel(primaRegolarizzata.esitoRegolarizzazione)}). Valutazione con natura istruttoria, senza automatismi provvedimentali.`,
-    );
+  for (const item of detail.pagamentiCritici) {
+    const isScaduto = item.dataScadenza < now;
+    addKeyValueTable(ctx, [
+      {
+        key: `Pagamento ${item.annoRiferimento}`,
+        value: `${enumLabel(item.stato)} | Scadenza ${dateIT(item.dataScadenza)}${isScaduto ? " (scaduto)" : ""}`,
+      },
+      { key: "Importo dovuto", value: euro(item.importoDovuto) },
+      { key: "Importo versato", value: euro(item.importoVersato) },
+      { key: "Residuo", value: euro(item.residuo) },
+      { key: "Interessi mora", value: euro(item.interessiMora) },
+      { key: "Data versamento", value: dateIT(item.dataVersamento) },
+      { key: "Note", value: textOrNA(item.note) },
+    ]);
+    ctx.doc.moveDown(0.3);
   }
 }
 
-function renderAnalysisSection(ctx: PdfContext, detail: ReportDetail) {
-  section(ctx, "3. Analisi");
-  body(ctx, textOrDash(detail.report.contenuto));
+function addScadenzeSection(ctx: PdfContext, detail: ReportDetail) {
+  addSectionTitle(ctx, "Scadenze");
 
-  const isValidated = detail.report.validato;
-  const warning = isValidated
-    ? "Il report e validato per consultazione istituzionale."
-    : "Il report e in bozza: completare la revisione interna prima di diffusione esterna.";
-
-  body(ctx, warning);
-}
-
-function renderNormativaSection(ctx: PdfContext, norme: NormaReportItem[]) {
-  section(ctx, "4. Riferimenti normativi");
-
-  if (norme.length === 0) {
-    body(ctx, "Nessun riferimento normativo esplicito collegato al report.");
+  if (detail.scadenzeRilevanti.length === 0) {
+    addParagraph(ctx, "Non risultano dati nel perimetro del report.");
     return;
   }
 
-  for (const norma of norme.slice(0, 12)) {
-    bullet(ctx, `${norma.codice} - ${norma.titolo} (${enumLabel(norma.ambito)}, severita ${enumLabel(norma.severita)}).`);
+  const now = new Date();
+  const threshold = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+  const prossime = detail.scadenzeRilevanti.filter(
+    (item) => item.dataScadenza >= now && item.dataScadenza <= threshold,
+  ).length;
+
+  addInfoBox(ctx, "Agenda scadenze", [
+    `Scadenze nel perimetro: ${detail.scadenzeRilevanti.length}`,
+    `Scadenze prossime (30 giorni): ${prossime}`,
+  ]);
+
+  for (const item of detail.scadenzeRilevanti) {
+    addBullet(
+      ctx,
+      `${enumLabel(item.tipologia)} | ${dateIT(item.dataScadenza)} | ${enumLabel(item.stato)} | ${textOrNA(item.descrizione)}`,
+    );
   }
 }
 
-function renderProposalSection(ctx: PdfContext, detail: ReportDetail) {
-  section(ctx, "5. Proposta operativa");
+function addSopralluoghiSection(ctx: PdfContext, detail: ReportDetail) {
+  addSectionTitle(ctx, "Sopralluoghi");
 
-  const actions: string[] = [];
-
-  if (detail.pagamentiCritici.length > 0) {
-    actions.push("Prioritizzare azioni su morosita e monitoraggio dei piani di rientro.");
+  if (detail.sopralluoghiRecenti.length === 0) {
+    addParagraph(ctx, "Non risultano dati nel perimetro del report.");
+    return;
   }
 
-  if (detail.scadenzeRilevanti.length > 0) {
-    actions.push("Attivare presidio termini su scadenze aperte o gia scadute.");
+  for (const item of detail.sopralluoghiRecenti) {
+    addInfoBox(ctx, `Sopralluogo del ${dateIT(item.data)}`, [
+      `Esito: ${enumLabel(item.esito)}`,
+      `Operatori: ${textOrNA(item.operatori)}`,
+      `Conformita planimetrica: ${item.conformitaPlanimetrica ? "Si" : "No"}`,
+      `Stato manutentivo: ${textOrNA(item.statoManutentivo)}`,
+      `Sicurezza: ${textOrNA(item.sicurezza)}`,
+      `Occupazione: ${textOrNA(item.occupazione)}`,
+      `Interferenze: ${textOrNA(item.interferenze)}`,
+      `Prescrizioni/descrizione: ${textOrNA(item.descrizione)}`,
+    ]);
+  }
+}
+
+function addNormativaSection(ctx: PdfContext, norme: NormaReportItem[]) {
+  addSectionTitle(ctx, "Evidenze istruttorie");
+
+  if (norme.length === 0) {
+    addParagraph(ctx, "Non risultano dati nel perimetro del report.");
+    return;
   }
 
-  if (detail.criticitaAperte.length > 0) {
-    actions.push("Consolidare evidenze tecniche e giuridiche sulle criticita a gravita piu elevata.");
+  for (const item of norme.slice(0, 12)) {
+    addBullet(
+      ctx,
+      `${item.codice} - ${item.titolo} | Ambito: ${enumLabel(item.ambito)} | Severita: ${enumLabel(item.severita)} | ${textOrNA(item.descrizione)}`,
+    );
   }
+}
 
-  if (actions.length === 0) {
-    actions.push("Mantenere monitoraggio ordinario e aggiornare il report al prossimo ciclo.");
-  }
-
-  if (
-    detail.procedimentiInCorso.some(
-      (item) => item.preavvisoRigettoApplicabile && item.statoPreavvisoRigetto === "APPLICABILE_DA_INVIARE",
-    )
-  ) {
-    actions.push("Presidiare il tracciamento del preavviso di rigetto per i procedimenti a istanza di parte in cui risulta applicabile.");
-  }
-
-  for (const item of actions) {
-    bullet(ctx, item);
-  }
-
-  body(
-    ctx,
-    "La gestione del preavviso di rigetto ha valore istruttorio e deve essere valutata secondo il caso concreto.",
-  );
-
-  body(ctx, DISCLAIMER);
+function addDisclaimerSection(ctx: PdfContext) {
+  addSectionTitle(ctx, "Avvertenze e limiti");
+  addBullet(ctx, "Report generato da dati presenti nella piattaforma.");
+  addBullet(ctx, "Documento a uso istruttorio.");
+  addBullet(ctx, "Non sostituisce verifica documentale/protocollare.");
+  addBullet(ctx, "Non costituisce provvedimento.");
+  addBullet(ctx, "Non determina automaticamente decadenza, archiviazione o sanzioni.");
+  addBullet(ctx, "Richiede valutazione dell autorita competente.");
+  addBullet(ctx, "Eventuali dati mancanti o non aggiornati incidono sull affidabilita.");
 }
 
 export function buildReportPdfFileName(reportId: string): string {
@@ -358,7 +525,7 @@ export async function renderInstitutionalReportPdf(params: {
       },
       bufferPages: true,
       autoFirstPage: true,
-      compress: true,
+      compress: false,
     });
 
     const chunks: Buffer[] = [];
@@ -381,29 +548,30 @@ export async function renderInstitutionalReportPdf(params: {
     const ctx: PdfContext = {
       doc,
       margin,
-      lineGap: 2,
       writableWidth,
+      lineGap: 2,
       generatedAt,
+      reportId: params.detail.report.id,
     };
 
-    drawPageHeader(ctx);
-    renderHeaderSection(ctx, params.detail);
-    renderContextSection(ctx, params.detail);
-    renderEvidenceSection(ctx, params.detail);
-    renderAnalysisSection(ctx, params.detail);
-    renderNormativaSection(ctx, params.norme);
-    renderProposalSection(ctx, params.detail);
+    addCoverPage(ctx, params.detail);
+    doc.addPage();
+    drawHeader(ctx);
+
+    addSummarySection(ctx, params.detail);
+    addConcessioneSection(ctx, params.detail);
+    addCriticitaSection(ctx, params.detail);
+    addProcedimentiSection(ctx, params.detail);
+    addPagamentiSection(ctx, params.detail);
+    addScadenzeSection(ctx, params.detail);
+    addSopralluoghiSection(ctx, params.detail);
+    addNormativaSection(ctx, params.norme);
+    addDisclaimerSection(ctx);
 
     const pageRange = doc.bufferedPageRange();
-
-    for (let i = 0; i < pageRange.count; i += 1) {
-      doc.switchToPage(i);
-      drawPageFooter(ctx);
-      doc.font("Helvetica").fontSize(8).fillColor("#64748b").text(`Pagina ${i + 1} di ${pageRange.count}`, margin, doc.page.height - margin + 20, {
-        width: writableWidth,
-        align: "right",
-        lineBreak: false,
-      });
+    for (let index = 0; index < pageRange.count; index += 1) {
+      doc.switchToPage(index);
+      drawFooter(ctx, index + 1, pageRange.count);
     }
 
     doc.end();

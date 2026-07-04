@@ -43,6 +43,7 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Refinement warning checklist su preavviso rigetto e osservazioni
 - Export report CSV verificato
 - PDF report istituzionale server-side (PDFKit) con template stabile, sezioni istruttorie e footer/disclaimer
+- PDF istituzionale migliorato (Issue #16) con frontespizio, sommario, header/footer ricorrenti, box riepilogativi e disclaimer finali rafforzati
 - Audit su download PDF (`REPORT_PDF_DOWNLOAD`) e dinieghi autorizzativi su route PDF
 - Test unit su PDF service e test E2E policy download PDF per ruolo/validazione
 - Documentazione privacy/GDPR/DPIA draft creata (Issue #8)
@@ -79,6 +80,7 @@ Copertura baseline CI:
 - Non ancora inclusi SSO/SAML/OIDC enterprise e MFA end-to-end (fuori scope current baseline)
 - Audit tamper-evident baseline ma non conservazione forense/immutabile a norma
 - Coverage test iniziale focalizzata su flussi core, non ancora esaustiva su tutte le route/actions
+- PDF polished per demo istituzionale ma non sostituisce catena documentale/protocollare a valore legale
 - Stato Git da consolidare in base alla policy del team
 - La checklist procedimentale non e decisore automatico e richiede valutazione giuridica caso per caso
 - Draft privacy non equivalgono ad approvazione formale DPIA/compliance

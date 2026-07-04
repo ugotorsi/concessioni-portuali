@@ -45,7 +45,20 @@ function createReportDetailFixture(overrides?: Partial<ReportDetail>): ReportDet
         gravita: "ALTA",
         stato: "APERTA",
         descrizione: "Canone annuale non integralmente versato.",
+        riferimentoNormativo: "art. 47 cod. nav.",
         dataRilevazione: new Date("2026-01-15T00:00:00.000Z"),
+        rilevanzaArt47: true,
+        letteraArt47: "D_OMESSO_PAGAMENTO_CANONE",
+        rischioDecadenza: "ALTO",
+        motivazioneArt47: "Morosita reiterata",
+        azioneIstruttoriaArt47: "Avvio contraddittorio",
+        regolarizzata: true,
+        dataRegolarizzazione: new Date("2026-01-20T00:00:00.000Z"),
+        descrizioneRegolarizzazione: "Versamento parziale",
+        esitoRegolarizzazione: "PARZIALE",
+        verificataRegolarizzazione: false,
+        dataVerificaRegolarizzazione: null,
+        noteVerificaRegolarizzazione: "In verifica istruttoria",
       },
     ],
     scadenzeRilevanti: [
@@ -66,6 +79,9 @@ function createReportDetailFixture(overrides?: Partial<ReportDetail>): ReportDet
         residuo: 40000,
         stato: "PARZIALE",
         dataScadenza: new Date("2026-02-01T00:00:00.000Z"),
+        dataVersamento: null,
+        interessiMora: 450.5,
+        note: "Sollecito inviato",
       },
     ],
     procedimentiInCorso: [
@@ -76,9 +92,46 @@ function createReportDetailFixture(overrides?: Partial<ReportDetail>): ReportDet
         riferimentoNormativo: "Art. 47 cod. nav.",
         dataAvvio: new Date("2026-01-20T00:00:00.000Z"),
         dataScadenzaContraddittorio: new Date("2026-02-20T00:00:00.000Z"),
+        origineProcedimento: "ISTANZA_PARTE",
+        procedimentoUfficio: false,
+        comunicazioneAvvioInviata: true,
+        dataComunicazioneAvvio: new Date("2026-01-21T00:00:00.000Z"),
+        termineMemorieGiorni: 15,
+        termineMemorieScadenza: new Date("2026-02-05T00:00:00.000Z"),
+        memorieRicevute: true,
+        dataRicezioneMemorie: new Date("2026-02-04T00:00:00.000Z"),
+        audizioneRichiesta: true,
+        audizioneSvolta: true,
+        dataAudizione: new Date("2026-02-06T00:00:00.000Z"),
+        contestazioneFormaleInviata: true,
+        dataContestazioneFormale: new Date("2026-01-22T00:00:00.000Z"),
+        controdeduzioniValutate: true,
+        propostaEsitoIstruttorio: "DIFFIDA",
+        preavvisoRigettoApplicabile: true,
+        statoPreavvisoRigetto: "OSSERVAZIONI_RICEVUTE",
+        dataPreavvisoRigetto: new Date("2026-01-25T00:00:00.000Z"),
+        termineOsservazioniPreavviso: new Date("2026-02-10T00:00:00.000Z"),
+        osservazioniPreavvisoRicevute: true,
+        dataOsservazioniPreavviso: new Date("2026-02-08T00:00:00.000Z"),
+        valutazioneOsservazioniPreavviso: "Osservazioni in valutazione.",
+        checklistContraddittorioCompleta: true,
+        noteChecklistContraddittorio: "Checklist completa",
       },
     ],
-    sopralluoghiRecenti: [],
+    sopralluoghiRecenti: [
+      {
+        id: "sop-1",
+        data: new Date("2026-02-01T00:00:00.000Z"),
+        esito: "CON_RILIEVI",
+        operatori: "Squadra A",
+        conformitaPlanimetrica: false,
+        statoManutentivo: "Da migliorare",
+        sicurezza: "Parzialmente conforme",
+        occupazione: "Regolare",
+        interferenze: "Limitate",
+        descrizione: "Prescrizioni manutentive",
+      },
+    ],
     documentiPrincipali: [],
   };
 
@@ -111,7 +164,7 @@ describe("report pdf service", () => {
       generatedAt: new Date("2026-02-12T09:00:00.000Z"),
     });
 
-    expect(buffer.length).toBeGreaterThan(1500);
+    expect(buffer.length).toBeGreaterThan(3500);
     expect(buffer.subarray(0, 4).toString()).toBe("%PDF");
   });
 
@@ -127,5 +180,53 @@ describe("report pdf service", () => {
     });
 
     expect(buffer.length).toBeGreaterThan(1000);
+  });
+
+  it("non esplode con campi null/undefined", async () => {
+    const detail = createReportDetailFixture({
+      report: {
+        ...createReportDetailFixture().report,
+        contenuto: "",
+      },
+      criticitaAperte: [
+        {
+          ...createReportDetailFixture().criticitaAperte[0],
+          descrizione: "",
+          letteraArt47: null,
+          rischioDecadenza: null,
+          motivazioneArt47: null,
+          azioneIstruttoriaArt47: null,
+          dataRegolarizzazione: null,
+          descrizioneRegolarizzazione: null,
+          esitoRegolarizzazione: null,
+          dataVerificaRegolarizzazione: null,
+          noteVerificaRegolarizzazione: null,
+        },
+      ],
+      procedimentiInCorso: [
+        {
+          ...createReportDetailFixture().procedimentiInCorso[0],
+          riferimentoNormativo: null,
+          dataAvvio: null,
+          dataScadenzaContraddittorio: null,
+          dataComunicazioneAvvio: null,
+          termineMemorieGiorni: null,
+          termineMemorieScadenza: null,
+          dataRicezioneMemorie: null,
+          dataAudizione: null,
+          dataContestazioneFormale: null,
+          propostaEsitoIstruttorio: null,
+          dataPreavvisoRigetto: null,
+          termineOsservazioniPreavviso: null,
+          dataOsservazioniPreavviso: null,
+          valutazioneOsservazioniPreavviso: null,
+          noteChecklistContraddittorio: null,
+        },
+      ],
+    });
+
+    const buffer = await renderInstitutionalReportPdf({ detail, norme: [] });
+    expect(buffer.length).toBeGreaterThan(2500);
+    expect(buffer.subarray(0, 4).toString()).toBe("%PDF");
   });
 });

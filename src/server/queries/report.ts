@@ -116,10 +116,20 @@ export interface ReportDetail {
     gravita: string;
     stato: string;
     descrizione: string;
+    riferimentoNormativo: string | null;
     dataRilevazione: Date;
+    rilevanzaArt47: boolean;
+    letteraArt47: string | null;
+    rischioDecadenza: string | null;
+    motivazioneArt47: string | null;
+    azioneIstruttoriaArt47: string | null;
     regolarizzata: boolean;
+    dataRegolarizzazione: Date | null;
+    descrizioneRegolarizzazione: string | null;
     esitoRegolarizzazione: string | null;
     verificataRegolarizzazione: boolean;
+    dataVerificaRegolarizzazione: Date | null;
+    noteVerificaRegolarizzazione: string | null;
   }>;
   scadenzeRilevanti: Array<{
     id: string;
@@ -136,6 +146,9 @@ export interface ReportDetail {
     residuo: number;
     stato: string;
     dataScadenza: Date;
+    dataVersamento: Date | null;
+    interessiMora: number | null;
+    note: string | null;
   }>;
   procedimentiInCorso: Array<{
     id: string;
@@ -145,10 +158,29 @@ export interface ReportDetail {
     dataAvvio: Date | null;
     dataScadenzaContraddittorio: Date | null;
     origineProcedimento: string;
+    procedimentoUfficio: boolean;
+    comunicazioneAvvioInviata: boolean;
+    dataComunicazioneAvvio: Date | null;
+    termineMemorieGiorni: number | null;
+    termineMemorieScadenza: Date | null;
+    memorieRicevute: boolean;
+    dataRicezioneMemorie: Date | null;
+    audizioneRichiesta: boolean;
+    audizioneSvolta: boolean;
+    dataAudizione: Date | null;
+    contestazioneFormaleInviata: boolean;
+    dataContestazioneFormale: Date | null;
+    controdeduzioniValutate: boolean;
+    propostaEsitoIstruttorio: string | null;
     preavvisoRigettoApplicabile: boolean;
     statoPreavvisoRigetto: string;
+    dataPreavvisoRigetto: Date | null;
+    termineOsservazioniPreavviso: Date | null;
     osservazioniPreavvisoRicevute: boolean;
+    dataOsservazioniPreavviso: Date | null;
     valutazioneOsservazioniPreavviso: string | null;
+    checklistContraddittorioCompleta: boolean;
+    noteChecklistContraddittorio: string | null;
   }>;
   sopralluoghiRecenti: Array<{
     id: string;
@@ -156,6 +188,10 @@ export interface ReportDetail {
     esito: string;
     operatori: string;
     conformitaPlanimetrica: boolean;
+    statoManutentivo: string | null;
+    sicurezza: string | null;
+    occupazione: string | null;
+    interferenze: string | null;
     descrizione: string | null;
   }>;
   documentiPrincipali: Array<{
@@ -307,10 +343,20 @@ export async function getReportDetail(id: string): Promise<ReportDetail | null> 
               gravita: true,
               stato: true,
               descrizione: true,
+              riferimentoNormativo: true,
               dataRilevazione: true,
+              rilevanzaArt47: true,
+              letteraArt47: true,
+              rischioDecadenza: true,
+              motivazioneArt47: true,
+              azioneIstruttoriaArt47: true,
               regolarizzata: true,
+              dataRegolarizzazione: true,
+              descrizioneRegolarizzazione: true,
               esitoRegolarizzazione: true,
               verificataRegolarizzazione: true,
+              dataVerificaRegolarizzazione: true,
+              noteVerificaRegolarizzazione: true,
             },
           },
           scadenze: {
@@ -335,10 +381,29 @@ export async function getReportDetail(id: string): Promise<ReportDetail | null> 
               dataAvvio: true,
               dataScadenzaContraddittorio: true,
               origineProcedimento: true,
+              procedimentoUfficio: true,
+              comunicazioneAvvioInviata: true,
+              dataComunicazioneAvvio: true,
+              termineMemorieGiorni: true,
+              termineMemorieScadenza: true,
+              memorieRicevute: true,
+              dataRicezioneMemorie: true,
+              audizioneRichiesta: true,
+              audizioneSvolta: true,
+              dataAudizione: true,
+              contestazioneFormaleInviata: true,
+              dataContestazioneFormale: true,
+              controdeduzioniValutate: true,
+              propostaEsitoIstruttorio: true,
               preavvisoRigettoApplicabile: true,
               statoPreavvisoRigetto: true,
+              dataPreavvisoRigetto: true,
+              termineOsservazioniPreavviso: true,
               osservazioniPreavvisoRicevute: true,
+              dataOsservazioniPreavviso: true,
               valutazioneOsservazioniPreavviso: true,
+              checklistContraddittorioCompleta: true,
+              noteChecklistContraddittorio: true,
             },
           },
           sopralluoghi: {
@@ -406,10 +471,20 @@ export async function getReportDetail(id: string): Promise<ReportDetail | null> 
         gravita: item.gravita,
         stato: item.stato,
         descrizione: item.descrizione,
+        riferimentoNormativo: item.riferimentoNormativo,
         dataRilevazione: item.dataRilevazione,
+        rilevanzaArt47: item.rilevanzaArt47,
+        letteraArt47: item.letteraArt47,
+        rischioDecadenza: item.rischioDecadenza,
+        motivazioneArt47: item.motivazioneArt47,
+        azioneIstruttoriaArt47: item.azioneIstruttoriaArt47,
         regolarizzata: item.regolarizzata,
+        dataRegolarizzazione: item.dataRegolarizzazione,
+        descrizioneRegolarizzazione: item.descrizioneRegolarizzazione,
         esitoRegolarizzazione: item.esitoRegolarizzazione,
         verificataRegolarizzazione: item.verificataRegolarizzazione,
+        dataVerificaRegolarizzazione: item.dataVerificaRegolarizzazione,
+        noteVerificaRegolarizzazione: item.noteVerificaRegolarizzazione,
       })) ?? [],
     scadenzeRilevanti:
       report.concessione?.scadenze.map((item) => ({
@@ -432,6 +507,9 @@ export async function getReportDetail(id: string): Promise<ReportDetail | null> 
           residuo: Math.max(importoDovuto - importoVersato, 0),
           stato: item.stato,
           dataScadenza: item.dataScadenza,
+          dataVersamento: item.dataVersamento,
+          interessiMora: item.interessiMora !== null ? Number(item.interessiMora) : null,
+          note: item.note,
         };
       }) ?? [],
     procedimentiInCorso:
@@ -443,10 +521,29 @@ export async function getReportDetail(id: string): Promise<ReportDetail | null> 
         dataAvvio: item.dataAvvio,
         dataScadenzaContraddittorio: item.dataScadenzaContraddittorio,
         origineProcedimento: item.origineProcedimento,
+        procedimentoUfficio: item.procedimentoUfficio,
+        comunicazioneAvvioInviata: item.comunicazioneAvvioInviata,
+        dataComunicazioneAvvio: item.dataComunicazioneAvvio,
+        termineMemorieGiorni: item.termineMemorieGiorni,
+        termineMemorieScadenza: item.termineMemorieScadenza,
+        memorieRicevute: item.memorieRicevute,
+        dataRicezioneMemorie: item.dataRicezioneMemorie,
+        audizioneRichiesta: item.audizioneRichiesta,
+        audizioneSvolta: item.audizioneSvolta,
+        dataAudizione: item.dataAudizione,
+        contestazioneFormaleInviata: item.contestazioneFormaleInviata,
+        dataContestazioneFormale: item.dataContestazioneFormale,
+        controdeduzioniValutate: item.controdeduzioniValutate,
+        propostaEsitoIstruttorio: item.propostaEsitoIstruttorio,
         preavvisoRigettoApplicabile: item.preavvisoRigettoApplicabile,
         statoPreavvisoRigetto: item.statoPreavvisoRigetto,
+        dataPreavvisoRigetto: item.dataPreavvisoRigetto,
+        termineOsservazioniPreavviso: item.termineOsservazioniPreavviso,
         osservazioniPreavvisoRicevute: item.osservazioniPreavvisoRicevute,
+        dataOsservazioniPreavviso: item.dataOsservazioniPreavviso,
         valutazioneOsservazioniPreavviso: item.valutazioneOsservazioniPreavviso,
+        checklistContraddittorioCompleta: item.checklistContraddittorioCompleta,
+        noteChecklistContraddittorio: item.noteChecklistContraddittorio,
       })) ?? [],
     sopralluoghiRecenti:
       report.concessione?.sopralluoghi.map((item) => ({
@@ -455,6 +552,10 @@ export async function getReportDetail(id: string): Promise<ReportDetail | null> 
         esito: item.esito,
         operatori: item.operatori,
         conformitaPlanimetrica: item.conformitaPlanimetrica,
+        statoManutentivo: item.statoManutentivo,
+        sicurezza: item.sicurezza,
+        occupazione: item.occupazione,
+        interferenze: item.interferenze,
         descrizione: item.descrizione,
       })) ?? [],
     documentiPrincipali:
