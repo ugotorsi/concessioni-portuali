@@ -39,6 +39,14 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - PDF report istituzionale server-side (PDFKit) con template stabile, sezioni istruttorie e footer/disclaimer
 - Audit su download PDF (`REPORT_PDF_DOWNLOAD`) e dinieghi autorizzativi su route PDF
 - Test unit su PDF service e test E2E policy download PDF per ruolo/validazione
+- Documentazione privacy/GDPR/DPIA draft creata (Issue #8)
+
+## Compliance/privacy (Issue #8)
+- Registro trattamenti draft in `docs/privacy/GDPR_REGISTER_DRAFT.md`
+- DPIA draft in `docs/privacy/DPIA_DRAFT.md`
+- Data retention policy draft in `docs/privacy/DATA_RETENTION_POLICY_DRAFT.md`
+- Security measures draft in `docs/privacy/SECURITY_MEASURES_DRAFT.md`
+- Matrice gap privacy e next steps in `docs/privacy/PRIVACY_GAPS_AND_NEXT_STEPS.md`
 
 ## Anomalie residue
 - Rate limiting non distribuito (in-memory, non adatto a multi-istanza production)
@@ -48,6 +56,8 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Coverage test iniziale focalizzata su flussi core, non ancora esaustiva su tutte le route/actions
 - Stato Git da consolidare in base alla policy del team
 - La checklist procedimentale non e decisore automatico e richiede valutazione giuridica caso per caso
+- Draft privacy non equivalgono ad approvazione formale DPIA/compliance
+- Nomine privacy, retention ufficiale, data breach workflow e gestione diritti interessati da formalizzare con ente
 
 ## Prossimi step
 1. Estendere progressivamente i test su export/report PDF e procedure critiche

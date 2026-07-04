@@ -169,9 +169,13 @@ Limiti espliciti:
 - Obiettivo: redigere bozza operativa DPIA/GDPR orientata al sistema e ai trattamenti principali.
 - Motivo strategico: prerequisito frequente per valutazioni istituzionali e procurement.
 - File presumibilmente coinvolti:
-  - docs/DPIA_GDPR_DRAFT.md (nuovo)
-  - docs/LEGAL_COVERAGE_MATRIX.md
-  - docs/PROJECT_EVALUATION.md
+  - docs/privacy/GDPR_REGISTER_DRAFT.md (nuovo)
+  - docs/privacy/DPIA_DRAFT.md (nuovo)
+  - docs/privacy/DATA_RETENTION_POLICY_DRAFT.md (nuovo)
+  - docs/privacy/SECURITY_MEASURES_DRAFT.md (nuovo)
+  - docs/privacy/PRIVACY_GAPS_AND_NEXT_STEPS.md (nuovo)
+  - README.md
+  - MVP_STATUS.md
 - Complessita: Media
 - Impatto: Medio-Alto
 - Criteri di accettazione:
@@ -179,6 +183,12 @@ Limiti espliciti:
   - rischi privacy e misure mitigative documentate;
   - punti aperti e decisioni richieste esplicitati;
   - versione pronta per revisione legale esterna.
+
+Stato attuale (Issue #8 baseline implementata):
+- creati 5 documenti privacy draft in `docs/privacy/` (registro trattamenti, DPIA, retention, misure sicurezza, gap/next steps);
+- allineato README con sezione privacy/GDPR/DPIA draft e limiti espliciti;
+- aggiornato MVP status con completamento stream privacy e limiti residui;
+- nessuna dichiarazione di conformita GDPR definitiva e nessuna DPIA formalmente approvata.
 
 ### 3.9 Due scenari demo istituzionali: morosita e occupazione difforme
 - Obiettivo: preparare due percorsi demo guidati con dati, script narrativo e KPI di esito.

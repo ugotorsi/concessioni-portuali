@@ -135,6 +135,19 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
    - `AUTHZ_DENIED` (quando praticabile)
 - Vista interna audit (`/audit`) disponibile solo per ruolo `ADMIN`.
 
+   ## Privacy, GDPR and DPIA draft (Issue #8)
+   Documentazione preliminare privacy/compliance disponibile in `docs/privacy/`:
+   - `docs/privacy/GDPR_REGISTER_DRAFT.md`
+   - `docs/privacy/DPIA_DRAFT.md`
+   - `docs/privacy/DATA_RETENTION_POLICY_DRAFT.md`
+   - `docs/privacy/SECURITY_MEASURES_DRAFT.md`
+   - `docs/privacy/PRIVACY_GAPS_AND_NEXT_STEPS.md`
+
+   Perimetro e limiti:
+   - i documenti sono bozze operative e non rappresentano conformita GDPR definitiva;
+   - la DPIA non e formalmente approvata;
+   - prima della produzione e necessaria validazione con DPO/RPD e ente concedente.
+
 ## Limiti noti
 - Senza Docker/PostgreSQL attivi, le pagine dati dinamiche possono rispondere con errore.
 - I guard server-side restano necessari anche con middleware, come difesa ulteriore.
