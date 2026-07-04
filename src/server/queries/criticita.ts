@@ -128,6 +128,9 @@ export interface CriticitaDetail {
   descrizione: string;
   riferimentoNormativo: string | null;
   azioneConsigliata: string | null;
+  latitudineGis: number | null;
+  longitudineGis: number | null;
+  localizzazioneDescrizione: string | null;
   rilevanzaArt47: boolean;
   letteraArt47: string | null;
   rischioDecadenza: string | null;
@@ -149,6 +152,12 @@ export interface CriticitaDetail {
     dataScadenza: Date;
     tipologiaBene: string;
     ubicazione: string | null;
+    latitudineGis: number | null;
+    longitudineGis: number | null;
+    coordinateGis: string | null;
+    areaDescrizione: string | null;
+    zonaPortuale: string | null;
+    riferimentoCatastale: string | null;
     canoneAnnuo: number | null;
     categoriaCanone: string | null;
     concessionario: {
@@ -265,6 +274,7 @@ export async function getCriticitaList(
       ? {
           OR: [
             { descrizione: { contains: search } },
+            { localizzazioneDescrizione: { contains: search } },
             { riferimentoNormativo: { contains: search } },
             { azioneConsigliata: { contains: search } },
             {
@@ -470,6 +480,9 @@ export async function getCriticitaDetail(id: string): Promise<CriticitaDetail | 
     descrizione: criticita.descrizione,
     riferimentoNormativo: criticita.riferimentoNormativo,
     azioneConsigliata: criticita.azioneConsigliata,
+    latitudineGis: criticita.latitudineGis ? Number(criticita.latitudineGis) : null,
+    longitudineGis: criticita.longitudineGis ? Number(criticita.longitudineGis) : null,
+    localizzazioneDescrizione: criticita.localizzazioneDescrizione,
     rilevanzaArt47: criticita.rilevanzaArt47,
     letteraArt47: criticita.letteraArt47,
     rischioDecadenza: criticita.rischioDecadenza,
@@ -491,6 +504,12 @@ export async function getCriticitaDetail(id: string): Promise<CriticitaDetail | 
       dataScadenza: criticita.concessione.dataScadenza,
       tipologiaBene: criticita.concessione.tipologiaBene,
       ubicazione: criticita.concessione.ubicazione,
+      latitudineGis: criticita.concessione.latitudineGis ? Number(criticita.concessione.latitudineGis) : null,
+      longitudineGis: criticita.concessione.longitudineGis ? Number(criticita.concessione.longitudineGis) : null,
+      coordinateGis: criticita.concessione.coordinateGis,
+      areaDescrizione: criticita.concessione.areaDescrizione,
+      zonaPortuale: criticita.concessione.zonaPortuale,
+      riferimentoCatastale: criticita.concessione.riferimentoCatastale,
       canoneAnnuo: criticita.concessione.canoneAnnuo ? Number(criticita.concessione.canoneAnnuo) : null,
       categoriaCanone: criticita.concessione.categoriaCanone,
       concessionario: {

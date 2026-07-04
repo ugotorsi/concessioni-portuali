@@ -96,7 +96,12 @@ export interface ConcessioneDetail {
   tipologiaBene: string;
   attivita: string;
   superficieMq: number | null;
+  latitudineGis: number | null;
+  longitudineGis: number | null;
   coordinateGis: string | null;
+  areaDescrizione: string | null;
+  zonaPortuale: string | null;
+  riferimentoCatastale: string | null;
   canoneAnnuo: number | null;
   categoriaCanone: string | null;
   stato: string;
@@ -242,6 +247,9 @@ export async function getConcessioniList(
             { numeroAtto: { contains: search } },
             { ubicazione: { contains: search } },
             { descrizioneBene: { contains: search } },
+            { areaDescrizione: { contains: search } },
+            { zonaPortuale: { contains: search } },
+            { riferimentoCatastale: { contains: search } },
             {
               concessionario: {
                 denominazione: { contains: search },
@@ -464,7 +472,12 @@ export async function getConcessioneDetail(id: string): Promise<ConcessioneDetai
     tipologiaBene: concessione.tipologiaBene,
     attivita: concessione.attivita,
     superficieMq: concessione.superficieMq ? Number(concessione.superficieMq) : null,
+    latitudineGis: concessione.latitudineGis ? Number(concessione.latitudineGis) : null,
+    longitudineGis: concessione.longitudineGis ? Number(concessione.longitudineGis) : null,
     coordinateGis: concessione.coordinateGis,
+    areaDescrizione: concessione.areaDescrizione,
+    zonaPortuale: concessione.zonaPortuale,
+    riferimentoCatastale: concessione.riferimentoCatastale,
     canoneAnnuo: concessione.canoneAnnuo ? Number(concessione.canoneAnnuo) : null,
     categoriaCanone: concessione.categoriaCanone,
     stato: concessione.stato,

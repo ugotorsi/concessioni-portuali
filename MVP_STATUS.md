@@ -5,6 +5,7 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 
 ## Moduli disponibili
 - Dashboard
+- Mappa demo territoriale
 - Concessioni
 - Criticita
 - Pagamenti
@@ -52,6 +53,9 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Baseline fascicolo documentale (Issue #18): upload/download protetto, metadati estesi, collegamento multi-entita, stato `ATTIVO/ARCHIVIATO`, audit dedicato, pagina `/documenti` e integrazione su dettagli entita
 - Seed documentale locale attivo con file su storage configurabile (`DOCUMENT_STORAGE_ROOT`) e limiti upload (`DOCUMENT_MAX_FILE_MB`)
 - Warning Turbopack su filesystem tracing document storage risolto con isolamento runtime server-side del modulo storage (build pulita, senza warning NFT)
+- Baseline mappa demo territoriale (Issue #10): route `/mappa` GIS-ready con lista marker, placeholder map UI e link rapidi a concessioni/criticita/sopralluoghi
+- Metadati territoriali demo opzionali estesi: area descrizione, zona portuale, riferimento catastale e localizzazione descrittiva su criticita/sopralluoghi
+- Nessuna API key esterna richiesta (no Google Maps/Mapbox obbligatori), coordinate solo demo/approssimative
 - Documentazione privacy/GDPR/DPIA draft creata (Issue #8)
 
 ## Compliance/privacy (Issue #8)
@@ -94,6 +98,7 @@ Copertura baseline CI:
 - Nessun deploy automatico staging/production ancora configurato
 - Nessun security scan avanzato CI (SAST/dependency audit gating)
 - Nessun coverage gate obbligatorio in pipeline
+- Baseline GIS senza PostGIS, senza cartografia ufficiale e senza integrazione SIT/geoportale in questa fase
 
 ## Prossimi step
 1. Estendere progressivamente i test su export/report PDF e procedure critiche

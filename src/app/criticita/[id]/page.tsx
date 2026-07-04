@@ -193,6 +193,25 @@ export default async function CriticitaDetailPage({ params }: CriticitaDetailPag
               <p className="text-xs uppercase tracking-wide text-slate-500">Riferimento normativo</p>
               <p className="mt-1 text-slate-900">{criticita.riferimentoNormativo ?? "-"}</p>
             </div>
+            <div>
+              <p className="text-xs uppercase tracking-wide text-slate-500">Localizzazione GIS</p>
+              <p className="mt-1 text-slate-900">
+                {criticita.latitudineGis !== null && criticita.longitudineGis !== null
+                  ? `${criticita.latitudineGis.toFixed(4)}, ${criticita.longitudineGis.toFixed(4)}`
+                  : criticita.concessione.latitudineGis !== null && criticita.concessione.longitudineGis !== null
+                    ? `${criticita.concessione.latitudineGis.toFixed(4)}, ${criticita.concessione.longitudineGis.toFixed(4)}`
+                    : criticita.concessione.coordinateGis ?? "-"}
+              </p>
+              <p className="mt-1 text-xs text-slate-600">
+                {criticita.localizzazioneDescrizione ?? criticita.concessione.areaDescrizione ?? "Localizzazione descrittiva non disponibile."}
+              </p>
+              <p className="mt-1 text-xs text-slate-600">
+                Zona: {criticita.concessione.zonaPortuale ?? "-"} | Rif. catastale: {criticita.concessione.riferimentoCatastale ?? "-"}
+              </p>
+              <Link href="/mappa" className="mt-1 inline-flex text-xs font-medium text-slate-700 underline underline-offset-4">
+                Apri vista mappa
+              </Link>
+            </div>
           </CardContent>
         </Card>
 

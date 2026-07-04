@@ -64,6 +64,9 @@ export interface SopralluogoDetail {
     operatori: string;
     esito: string;
     conformitaPlanimetrica: boolean;
+    latitudineGis: number | null;
+    longitudineGis: number | null;
+    localizzazioneDescrizione: string | null;
     statoManutentivo: string | null;
     sicurezza: string | null;
     occupazione: string | null;
@@ -81,6 +84,12 @@ export interface SopralluogoDetail {
     tipologiaBene: string;
     attivita: string;
     ubicazione: string | null;
+    latitudineGis: number | null;
+    longitudineGis: number | null;
+    coordinateGis: string | null;
+    areaDescrizione: string | null;
+    zonaPortuale: string | null;
+    riferimentoCatastale: string | null;
     descrizioneBene: string | null;
   };
   concessionario: {
@@ -198,6 +207,7 @@ function buildWhere(params: GetSopralluoghiListParams): Prisma.SopralluogoWhereI
             { operatori: { contains: search } },
             { descrizione: { contains: search } },
             { statoManutentivo: { contains: search } },
+            { localizzazioneDescrizione: { contains: search } },
             { sicurezza: { contains: search } },
             { occupazione: { contains: search } },
             { interferenze: { contains: search } },
@@ -346,6 +356,9 @@ export async function getSopralluogoDetail(id: string): Promise<SopralluogoDetai
       operatori: sopralluogo.operatori,
       esito: sopralluogo.esito,
       conformitaPlanimetrica: sopralluogo.conformitaPlanimetrica,
+      latitudineGis: sopralluogo.latitudineGis ? Number(sopralluogo.latitudineGis) : null,
+      longitudineGis: sopralluogo.longitudineGis ? Number(sopralluogo.longitudineGis) : null,
+      localizzazioneDescrizione: sopralluogo.localizzazioneDescrizione,
       statoManutentivo: sopralluogo.statoManutentivo,
       sicurezza: sopralluogo.sicurezza,
       occupazione: sopralluogo.occupazione,
@@ -363,6 +376,12 @@ export async function getSopralluogoDetail(id: string): Promise<SopralluogoDetai
       tipologiaBene: sopralluogo.concessione.tipologiaBene,
       attivita: sopralluogo.concessione.attivita,
       ubicazione: sopralluogo.concessione.ubicazione,
+      latitudineGis: sopralluogo.concessione.latitudineGis ? Number(sopralluogo.concessione.latitudineGis) : null,
+      longitudineGis: sopralluogo.concessione.longitudineGis ? Number(sopralluogo.concessione.longitudineGis) : null,
+      coordinateGis: sopralluogo.concessione.coordinateGis,
+      areaDescrizione: sopralluogo.concessione.areaDescrizione,
+      zonaPortuale: sopralluogo.concessione.zonaPortuale,
+      riferimentoCatastale: sopralluogo.concessione.riferimentoCatastale,
       descrizioneBene: sopralluogo.concessione.descrizioneBene,
     },
     concessionario: sopralluogo.concessione.concessionario,

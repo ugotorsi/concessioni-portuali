@@ -20,8 +20,20 @@ export type SopralluogoModel = runtime.Types.Result.DefaultSelection<Prisma.$Sop
 
 export type AggregateSopralluogo = {
   _count: SopralluogoCountAggregateOutputType | null
+  _avg: SopralluogoAvgAggregateOutputType | null
+  _sum: SopralluogoSumAggregateOutputType | null
   _min: SopralluogoMinAggregateOutputType | null
   _max: SopralluogoMaxAggregateOutputType | null
+}
+
+export type SopralluogoAvgAggregateOutputType = {
+  latitudineGis: runtime.Decimal | null
+  longitudineGis: runtime.Decimal | null
+}
+
+export type SopralluogoSumAggregateOutputType = {
+  latitudineGis: runtime.Decimal | null
+  longitudineGis: runtime.Decimal | null
 }
 
 export type SopralluogoMinAggregateOutputType = {
@@ -31,6 +43,9 @@ export type SopralluogoMinAggregateOutputType = {
   operatori: string | null
   esito: $Enums.EsitoSopralluogo | null
   conformitaPlanimetrica: boolean | null
+  latitudineGis: runtime.Decimal | null
+  longitudineGis: runtime.Decimal | null
+  localizzazioneDescrizione: string | null
   statoManutentivo: string | null
   sicurezza: string | null
   occupazione: string | null
@@ -47,6 +62,9 @@ export type SopralluogoMaxAggregateOutputType = {
   operatori: string | null
   esito: $Enums.EsitoSopralluogo | null
   conformitaPlanimetrica: boolean | null
+  latitudineGis: runtime.Decimal | null
+  longitudineGis: runtime.Decimal | null
+  localizzazioneDescrizione: string | null
   statoManutentivo: string | null
   sicurezza: string | null
   occupazione: string | null
@@ -63,6 +81,9 @@ export type SopralluogoCountAggregateOutputType = {
   operatori: number
   esito: number
   conformitaPlanimetrica: number
+  latitudineGis: number
+  longitudineGis: number
+  localizzazioneDescrizione: number
   statoManutentivo: number
   sicurezza: number
   occupazione: number
@@ -74,6 +95,16 @@ export type SopralluogoCountAggregateOutputType = {
 }
 
 
+export type SopralluogoAvgAggregateInputType = {
+  latitudineGis?: true
+  longitudineGis?: true
+}
+
+export type SopralluogoSumAggregateInputType = {
+  latitudineGis?: true
+  longitudineGis?: true
+}
+
 export type SopralluogoMinAggregateInputType = {
   id?: true
   concessioneId?: true
@@ -81,6 +112,9 @@ export type SopralluogoMinAggregateInputType = {
   operatori?: true
   esito?: true
   conformitaPlanimetrica?: true
+  latitudineGis?: true
+  longitudineGis?: true
+  localizzazioneDescrizione?: true
   statoManutentivo?: true
   sicurezza?: true
   occupazione?: true
@@ -97,6 +131,9 @@ export type SopralluogoMaxAggregateInputType = {
   operatori?: true
   esito?: true
   conformitaPlanimetrica?: true
+  latitudineGis?: true
+  longitudineGis?: true
+  localizzazioneDescrizione?: true
   statoManutentivo?: true
   sicurezza?: true
   occupazione?: true
@@ -113,6 +150,9 @@ export type SopralluogoCountAggregateInputType = {
   operatori?: true
   esito?: true
   conformitaPlanimetrica?: true
+  latitudineGis?: true
+  longitudineGis?: true
+  localizzazioneDescrizione?: true
   statoManutentivo?: true
   sicurezza?: true
   occupazione?: true
@@ -161,6 +201,18 @@ export type SopralluogoAggregateArgs<ExtArgs extends runtime.Types.Extensions.In
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: SopralluogoAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: SopralluogoSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: SopralluogoMinAggregateInputType
@@ -191,6 +243,8 @@ export type SopralluogoGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   _count?: SopralluogoCountAggregateInputType | true
+  _avg?: SopralluogoAvgAggregateInputType
+  _sum?: SopralluogoSumAggregateInputType
   _min?: SopralluogoMinAggregateInputType
   _max?: SopralluogoMaxAggregateInputType
 }
@@ -202,6 +256,9 @@ export type SopralluogoGroupByOutputType = {
   operatori: string
   esito: $Enums.EsitoSopralluogo
   conformitaPlanimetrica: boolean
+  latitudineGis: runtime.Decimal | null
+  longitudineGis: runtime.Decimal | null
+  localizzazioneDescrizione: string | null
   statoManutentivo: string | null
   sicurezza: string | null
   occupazione: string | null
@@ -210,6 +267,8 @@ export type SopralluogoGroupByOutputType = {
   createdAt: Date
   updatedAt: Date
   _count: SopralluogoCountAggregateOutputType | null
+  _avg: SopralluogoAvgAggregateOutputType | null
+  _sum: SopralluogoSumAggregateOutputType | null
   _min: SopralluogoMinAggregateOutputType | null
   _max: SopralluogoMaxAggregateOutputType | null
 }
@@ -239,6 +298,9 @@ export type SopralluogoWhereInput = {
   operatori?: Prisma.StringFilter<"Sopralluogo"> | string
   esito?: Prisma.EnumEsitoSopralluogoFilter<"Sopralluogo"> | $Enums.EsitoSopralluogo
   conformitaPlanimetrica?: Prisma.BoolFilter<"Sopralluogo"> | boolean
+  latitudineGis?: Prisma.DecimalNullableFilter<"Sopralluogo"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.DecimalNullableFilter<"Sopralluogo"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.StringNullableFilter<"Sopralluogo"> | string | null
   statoManutentivo?: Prisma.StringNullableFilter<"Sopralluogo"> | string | null
   sicurezza?: Prisma.StringNullableFilter<"Sopralluogo"> | string | null
   occupazione?: Prisma.StringNullableFilter<"Sopralluogo"> | string | null
@@ -257,6 +319,9 @@ export type SopralluogoOrderByWithRelationInput = {
   operatori?: Prisma.SortOrder
   esito?: Prisma.SortOrder
   conformitaPlanimetrica?: Prisma.SortOrder
+  latitudineGis?: Prisma.SortOrderInput | Prisma.SortOrder
+  longitudineGis?: Prisma.SortOrderInput | Prisma.SortOrder
+  localizzazioneDescrizione?: Prisma.SortOrderInput | Prisma.SortOrder
   statoManutentivo?: Prisma.SortOrderInput | Prisma.SortOrder
   sicurezza?: Prisma.SortOrderInput | Prisma.SortOrder
   occupazione?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -278,6 +343,9 @@ export type SopralluogoWhereUniqueInput = Prisma.AtLeast<{
   operatori?: Prisma.StringFilter<"Sopralluogo"> | string
   esito?: Prisma.EnumEsitoSopralluogoFilter<"Sopralluogo"> | $Enums.EsitoSopralluogo
   conformitaPlanimetrica?: Prisma.BoolFilter<"Sopralluogo"> | boolean
+  latitudineGis?: Prisma.DecimalNullableFilter<"Sopralluogo"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.DecimalNullableFilter<"Sopralluogo"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.StringNullableFilter<"Sopralluogo"> | string | null
   statoManutentivo?: Prisma.StringNullableFilter<"Sopralluogo"> | string | null
   sicurezza?: Prisma.StringNullableFilter<"Sopralluogo"> | string | null
   occupazione?: Prisma.StringNullableFilter<"Sopralluogo"> | string | null
@@ -296,6 +364,9 @@ export type SopralluogoOrderByWithAggregationInput = {
   operatori?: Prisma.SortOrder
   esito?: Prisma.SortOrder
   conformitaPlanimetrica?: Prisma.SortOrder
+  latitudineGis?: Prisma.SortOrderInput | Prisma.SortOrder
+  longitudineGis?: Prisma.SortOrderInput | Prisma.SortOrder
+  localizzazioneDescrizione?: Prisma.SortOrderInput | Prisma.SortOrder
   statoManutentivo?: Prisma.SortOrderInput | Prisma.SortOrder
   sicurezza?: Prisma.SortOrderInput | Prisma.SortOrder
   occupazione?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -304,8 +375,10 @@ export type SopralluogoOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.SopralluogoCountOrderByAggregateInput
+  _avg?: Prisma.SopralluogoAvgOrderByAggregateInput
   _max?: Prisma.SopralluogoMaxOrderByAggregateInput
   _min?: Prisma.SopralluogoMinOrderByAggregateInput
+  _sum?: Prisma.SopralluogoSumOrderByAggregateInput
 }
 
 export type SopralluogoScalarWhereWithAggregatesInput = {
@@ -318,6 +391,9 @@ export type SopralluogoScalarWhereWithAggregatesInput = {
   operatori?: Prisma.StringWithAggregatesFilter<"Sopralluogo"> | string
   esito?: Prisma.EnumEsitoSopralluogoWithAggregatesFilter<"Sopralluogo"> | $Enums.EsitoSopralluogo
   conformitaPlanimetrica?: Prisma.BoolWithAggregatesFilter<"Sopralluogo"> | boolean
+  latitudineGis?: Prisma.DecimalNullableWithAggregatesFilter<"Sopralluogo"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.DecimalNullableWithAggregatesFilter<"Sopralluogo"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.StringNullableWithAggregatesFilter<"Sopralluogo"> | string | null
   statoManutentivo?: Prisma.StringNullableWithAggregatesFilter<"Sopralluogo"> | string | null
   sicurezza?: Prisma.StringNullableWithAggregatesFilter<"Sopralluogo"> | string | null
   occupazione?: Prisma.StringNullableWithAggregatesFilter<"Sopralluogo"> | string | null
@@ -333,6 +409,9 @@ export type SopralluogoCreateInput = {
   operatori: string
   esito: $Enums.EsitoSopralluogo
   conformitaPlanimetrica?: boolean
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: string | null
   statoManutentivo?: string | null
   sicurezza?: string | null
   occupazione?: string | null
@@ -351,6 +430,9 @@ export type SopralluogoUncheckedCreateInput = {
   operatori: string
   esito: $Enums.EsitoSopralluogo
   conformitaPlanimetrica?: boolean
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: string | null
   statoManutentivo?: string | null
   sicurezza?: string | null
   occupazione?: string | null
@@ -367,6 +449,9 @@ export type SopralluogoUpdateInput = {
   operatori?: Prisma.StringFieldUpdateOperationsInput | string
   esito?: Prisma.EnumEsitoSopralluogoFieldUpdateOperationsInput | $Enums.EsitoSopralluogo
   conformitaPlanimetrica?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   statoManutentivo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sicurezza?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -385,6 +470,9 @@ export type SopralluogoUncheckedUpdateInput = {
   operatori?: Prisma.StringFieldUpdateOperationsInput | string
   esito?: Prisma.EnumEsitoSopralluogoFieldUpdateOperationsInput | $Enums.EsitoSopralluogo
   conformitaPlanimetrica?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   statoManutentivo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sicurezza?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -402,6 +490,9 @@ export type SopralluogoCreateManyInput = {
   operatori: string
   esito: $Enums.EsitoSopralluogo
   conformitaPlanimetrica?: boolean
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: string | null
   statoManutentivo?: string | null
   sicurezza?: string | null
   occupazione?: string | null
@@ -417,6 +508,9 @@ export type SopralluogoUpdateManyMutationInput = {
   operatori?: Prisma.StringFieldUpdateOperationsInput | string
   esito?: Prisma.EnumEsitoSopralluogoFieldUpdateOperationsInput | $Enums.EsitoSopralluogo
   conformitaPlanimetrica?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   statoManutentivo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sicurezza?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -433,6 +527,9 @@ export type SopralluogoUncheckedUpdateManyInput = {
   operatori?: Prisma.StringFieldUpdateOperationsInput | string
   esito?: Prisma.EnumEsitoSopralluogoFieldUpdateOperationsInput | $Enums.EsitoSopralluogo
   conformitaPlanimetrica?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   statoManutentivo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sicurezza?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -459,6 +556,9 @@ export type SopralluogoCountOrderByAggregateInput = {
   operatori?: Prisma.SortOrder
   esito?: Prisma.SortOrder
   conformitaPlanimetrica?: Prisma.SortOrder
+  latitudineGis?: Prisma.SortOrder
+  longitudineGis?: Prisma.SortOrder
+  localizzazioneDescrizione?: Prisma.SortOrder
   statoManutentivo?: Prisma.SortOrder
   sicurezza?: Prisma.SortOrder
   occupazione?: Prisma.SortOrder
@@ -468,6 +568,11 @@ export type SopralluogoCountOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
+export type SopralluogoAvgOrderByAggregateInput = {
+  latitudineGis?: Prisma.SortOrder
+  longitudineGis?: Prisma.SortOrder
+}
+
 export type SopralluogoMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrder
@@ -475,6 +580,9 @@ export type SopralluogoMaxOrderByAggregateInput = {
   operatori?: Prisma.SortOrder
   esito?: Prisma.SortOrder
   conformitaPlanimetrica?: Prisma.SortOrder
+  latitudineGis?: Prisma.SortOrder
+  longitudineGis?: Prisma.SortOrder
+  localizzazioneDescrizione?: Prisma.SortOrder
   statoManutentivo?: Prisma.SortOrder
   sicurezza?: Prisma.SortOrder
   occupazione?: Prisma.SortOrder
@@ -491,6 +599,9 @@ export type SopralluogoMinOrderByAggregateInput = {
   operatori?: Prisma.SortOrder
   esito?: Prisma.SortOrder
   conformitaPlanimetrica?: Prisma.SortOrder
+  latitudineGis?: Prisma.SortOrder
+  longitudineGis?: Prisma.SortOrder
+  localizzazioneDescrizione?: Prisma.SortOrder
   statoManutentivo?: Prisma.SortOrder
   sicurezza?: Prisma.SortOrder
   occupazione?: Prisma.SortOrder
@@ -498,6 +609,11 @@ export type SopralluogoMinOrderByAggregateInput = {
   descrizione?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type SopralluogoSumOrderByAggregateInput = {
+  latitudineGis?: Prisma.SortOrder
+  longitudineGis?: Prisma.SortOrder
 }
 
 export type SopralluogoNullableScalarRelationFilter = {
@@ -573,6 +689,9 @@ export type SopralluogoCreateWithoutConcessioneInput = {
   operatori: string
   esito: $Enums.EsitoSopralluogo
   conformitaPlanimetrica?: boolean
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: string | null
   statoManutentivo?: string | null
   sicurezza?: string | null
   occupazione?: string | null
@@ -589,6 +708,9 @@ export type SopralluogoUncheckedCreateWithoutConcessioneInput = {
   operatori: string
   esito: $Enums.EsitoSopralluogo
   conformitaPlanimetrica?: boolean
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: string | null
   statoManutentivo?: string | null
   sicurezza?: string | null
   occupazione?: string | null
@@ -635,6 +757,9 @@ export type SopralluogoScalarWhereInput = {
   operatori?: Prisma.StringFilter<"Sopralluogo"> | string
   esito?: Prisma.EnumEsitoSopralluogoFilter<"Sopralluogo"> | $Enums.EsitoSopralluogo
   conformitaPlanimetrica?: Prisma.BoolFilter<"Sopralluogo"> | boolean
+  latitudineGis?: Prisma.DecimalNullableFilter<"Sopralluogo"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.DecimalNullableFilter<"Sopralluogo"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.StringNullableFilter<"Sopralluogo"> | string | null
   statoManutentivo?: Prisma.StringNullableFilter<"Sopralluogo"> | string | null
   sicurezza?: Prisma.StringNullableFilter<"Sopralluogo"> | string | null
   occupazione?: Prisma.StringNullableFilter<"Sopralluogo"> | string | null
@@ -650,6 +775,9 @@ export type SopralluogoCreateWithoutDocumentiInput = {
   operatori: string
   esito: $Enums.EsitoSopralluogo
   conformitaPlanimetrica?: boolean
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: string | null
   statoManutentivo?: string | null
   sicurezza?: string | null
   occupazione?: string | null
@@ -667,6 +795,9 @@ export type SopralluogoUncheckedCreateWithoutDocumentiInput = {
   operatori: string
   esito: $Enums.EsitoSopralluogo
   conformitaPlanimetrica?: boolean
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: string | null
   statoManutentivo?: string | null
   sicurezza?: string | null
   occupazione?: string | null
@@ -698,6 +829,9 @@ export type SopralluogoUpdateWithoutDocumentiInput = {
   operatori?: Prisma.StringFieldUpdateOperationsInput | string
   esito?: Prisma.EnumEsitoSopralluogoFieldUpdateOperationsInput | $Enums.EsitoSopralluogo
   conformitaPlanimetrica?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   statoManutentivo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sicurezza?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -715,6 +849,9 @@ export type SopralluogoUncheckedUpdateWithoutDocumentiInput = {
   operatori?: Prisma.StringFieldUpdateOperationsInput | string
   esito?: Prisma.EnumEsitoSopralluogoFieldUpdateOperationsInput | $Enums.EsitoSopralluogo
   conformitaPlanimetrica?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   statoManutentivo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sicurezza?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -730,6 +867,9 @@ export type SopralluogoCreateManyConcessioneInput = {
   operatori: string
   esito: $Enums.EsitoSopralluogo
   conformitaPlanimetrica?: boolean
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: string | null
   statoManutentivo?: string | null
   sicurezza?: string | null
   occupazione?: string | null
@@ -745,6 +885,9 @@ export type SopralluogoUpdateWithoutConcessioneInput = {
   operatori?: Prisma.StringFieldUpdateOperationsInput | string
   esito?: Prisma.EnumEsitoSopralluogoFieldUpdateOperationsInput | $Enums.EsitoSopralluogo
   conformitaPlanimetrica?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   statoManutentivo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sicurezza?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -761,6 +904,9 @@ export type SopralluogoUncheckedUpdateWithoutConcessioneInput = {
   operatori?: Prisma.StringFieldUpdateOperationsInput | string
   esito?: Prisma.EnumEsitoSopralluogoFieldUpdateOperationsInput | $Enums.EsitoSopralluogo
   conformitaPlanimetrica?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   statoManutentivo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sicurezza?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -777,6 +923,9 @@ export type SopralluogoUncheckedUpdateManyWithoutConcessioneInput = {
   operatori?: Prisma.StringFieldUpdateOperationsInput | string
   esito?: Prisma.EnumEsitoSopralluogoFieldUpdateOperationsInput | $Enums.EsitoSopralluogo
   conformitaPlanimetrica?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   statoManutentivo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sicurezza?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -824,6 +973,9 @@ export type SopralluogoSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   operatori?: boolean
   esito?: boolean
   conformitaPlanimetrica?: boolean
+  latitudineGis?: boolean
+  longitudineGis?: boolean
+  localizzazioneDescrizione?: boolean
   statoManutentivo?: boolean
   sicurezza?: boolean
   occupazione?: boolean
@@ -843,6 +995,9 @@ export type SopralluogoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   operatori?: boolean
   esito?: boolean
   conformitaPlanimetrica?: boolean
+  latitudineGis?: boolean
+  longitudineGis?: boolean
+  localizzazioneDescrizione?: boolean
   statoManutentivo?: boolean
   sicurezza?: boolean
   occupazione?: boolean
@@ -860,6 +1015,9 @@ export type SopralluogoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   operatori?: boolean
   esito?: boolean
   conformitaPlanimetrica?: boolean
+  latitudineGis?: boolean
+  longitudineGis?: boolean
+  localizzazioneDescrizione?: boolean
   statoManutentivo?: boolean
   sicurezza?: boolean
   occupazione?: boolean
@@ -877,6 +1035,9 @@ export type SopralluogoSelectScalar = {
   operatori?: boolean
   esito?: boolean
   conformitaPlanimetrica?: boolean
+  latitudineGis?: boolean
+  longitudineGis?: boolean
+  localizzazioneDescrizione?: boolean
   statoManutentivo?: boolean
   sicurezza?: boolean
   occupazione?: boolean
@@ -886,7 +1047,7 @@ export type SopralluogoSelectScalar = {
   updatedAt?: boolean
 }
 
-export type SopralluogoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "concessioneId" | "data" | "operatori" | "esito" | "conformitaPlanimetrica" | "statoManutentivo" | "sicurezza" | "occupazione" | "interferenze" | "descrizione" | "createdAt" | "updatedAt", ExtArgs["result"]["sopralluogo"]>
+export type SopralluogoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "concessioneId" | "data" | "operatori" | "esito" | "conformitaPlanimetrica" | "latitudineGis" | "longitudineGis" | "localizzazioneDescrizione" | "statoManutentivo" | "sicurezza" | "occupazione" | "interferenze" | "descrizione" | "createdAt" | "updatedAt", ExtArgs["result"]["sopralluogo"]>
 export type SopralluogoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   concessione?: boolean | Prisma.ConcessioneDefaultArgs<ExtArgs>
   documenti?: boolean | Prisma.Sopralluogo$documentiArgs<ExtArgs>
@@ -912,6 +1073,9 @@ export type $SopralluogoPayload<ExtArgs extends runtime.Types.Extensions.Interna
     operatori: string
     esito: $Enums.EsitoSopralluogo
     conformitaPlanimetrica: boolean
+    latitudineGis: runtime.Decimal | null
+    longitudineGis: runtime.Decimal | null
+    localizzazioneDescrizione: string | null
     statoManutentivo: string | null
     sicurezza: string | null
     occupazione: string | null
@@ -1350,6 +1514,9 @@ export interface SopralluogoFieldRefs {
   readonly operatori: Prisma.FieldRef<"Sopralluogo", 'String'>
   readonly esito: Prisma.FieldRef<"Sopralluogo", 'EsitoSopralluogo'>
   readonly conformitaPlanimetrica: Prisma.FieldRef<"Sopralluogo", 'Boolean'>
+  readonly latitudineGis: Prisma.FieldRef<"Sopralluogo", 'Decimal'>
+  readonly longitudineGis: Prisma.FieldRef<"Sopralluogo", 'Decimal'>
+  readonly localizzazioneDescrizione: Prisma.FieldRef<"Sopralluogo", 'String'>
   readonly statoManutentivo: Prisma.FieldRef<"Sopralluogo", 'String'>
   readonly sicurezza: Prisma.FieldRef<"Sopralluogo", 'String'>
   readonly occupazione: Prisma.FieldRef<"Sopralluogo", 'String'>

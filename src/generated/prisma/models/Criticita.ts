@@ -20,8 +20,20 @@ export type CriticitaModel = runtime.Types.Result.DefaultSelection<Prisma.$Criti
 
 export type AggregateCriticita = {
   _count: CriticitaCountAggregateOutputType | null
+  _avg: CriticitaAvgAggregateOutputType | null
+  _sum: CriticitaSumAggregateOutputType | null
   _min: CriticitaMinAggregateOutputType | null
   _max: CriticitaMaxAggregateOutputType | null
+}
+
+export type CriticitaAvgAggregateOutputType = {
+  latitudineGis: runtime.Decimal | null
+  longitudineGis: runtime.Decimal | null
+}
+
+export type CriticitaSumAggregateOutputType = {
+  latitudineGis: runtime.Decimal | null
+  longitudineGis: runtime.Decimal | null
 }
 
 export type CriticitaMinAggregateOutputType = {
@@ -33,6 +45,9 @@ export type CriticitaMinAggregateOutputType = {
   descrizione: string | null
   riferimentoNormativo: string | null
   azioneConsigliata: string | null
+  latitudineGis: runtime.Decimal | null
+  longitudineGis: runtime.Decimal | null
+  localizzazioneDescrizione: string | null
   rilevanzaArt47: boolean | null
   letteraArt47: $Enums.Art47CodNavLettera | null
   rischioDecadenza: $Enums.LivelloRischioDecadenza | null
@@ -61,6 +76,9 @@ export type CriticitaMaxAggregateOutputType = {
   descrizione: string | null
   riferimentoNormativo: string | null
   azioneConsigliata: string | null
+  latitudineGis: runtime.Decimal | null
+  longitudineGis: runtime.Decimal | null
+  localizzazioneDescrizione: string | null
   rilevanzaArt47: boolean | null
   letteraArt47: $Enums.Art47CodNavLettera | null
   rischioDecadenza: $Enums.LivelloRischioDecadenza | null
@@ -89,6 +107,9 @@ export type CriticitaCountAggregateOutputType = {
   descrizione: number
   riferimentoNormativo: number
   azioneConsigliata: number
+  latitudineGis: number
+  longitudineGis: number
+  localizzazioneDescrizione: number
   rilevanzaArt47: number
   letteraArt47: number
   rischioDecadenza: number
@@ -110,6 +131,16 @@ export type CriticitaCountAggregateOutputType = {
 }
 
 
+export type CriticitaAvgAggregateInputType = {
+  latitudineGis?: true
+  longitudineGis?: true
+}
+
+export type CriticitaSumAggregateInputType = {
+  latitudineGis?: true
+  longitudineGis?: true
+}
+
 export type CriticitaMinAggregateInputType = {
   id?: true
   concessioneId?: true
@@ -119,6 +150,9 @@ export type CriticitaMinAggregateInputType = {
   descrizione?: true
   riferimentoNormativo?: true
   azioneConsigliata?: true
+  latitudineGis?: true
+  longitudineGis?: true
+  localizzazioneDescrizione?: true
   rilevanzaArt47?: true
   letteraArt47?: true
   rischioDecadenza?: true
@@ -147,6 +181,9 @@ export type CriticitaMaxAggregateInputType = {
   descrizione?: true
   riferimentoNormativo?: true
   azioneConsigliata?: true
+  latitudineGis?: true
+  longitudineGis?: true
+  localizzazioneDescrizione?: true
   rilevanzaArt47?: true
   letteraArt47?: true
   rischioDecadenza?: true
@@ -175,6 +212,9 @@ export type CriticitaCountAggregateInputType = {
   descrizione?: true
   riferimentoNormativo?: true
   azioneConsigliata?: true
+  latitudineGis?: true
+  longitudineGis?: true
+  localizzazioneDescrizione?: true
   rilevanzaArt47?: true
   letteraArt47?: true
   rischioDecadenza?: true
@@ -233,6 +273,18 @@ export type CriticitaAggregateArgs<ExtArgs extends runtime.Types.Extensions.Inte
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: CriticitaAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: CriticitaSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: CriticitaMinAggregateInputType
@@ -263,6 +315,8 @@ export type CriticitaGroupByArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   _count?: CriticitaCountAggregateInputType | true
+  _avg?: CriticitaAvgAggregateInputType
+  _sum?: CriticitaSumAggregateInputType
   _min?: CriticitaMinAggregateInputType
   _max?: CriticitaMaxAggregateInputType
 }
@@ -276,6 +330,9 @@ export type CriticitaGroupByOutputType = {
   descrizione: string
   riferimentoNormativo: string | null
   azioneConsigliata: string | null
+  latitudineGis: runtime.Decimal | null
+  longitudineGis: runtime.Decimal | null
+  localizzazioneDescrizione: string | null
   rilevanzaArt47: boolean
   letteraArt47: $Enums.Art47CodNavLettera | null
   rischioDecadenza: $Enums.LivelloRischioDecadenza | null
@@ -294,6 +351,8 @@ export type CriticitaGroupByOutputType = {
   createdAt: Date
   updatedAt: Date
   _count: CriticitaCountAggregateOutputType | null
+  _avg: CriticitaAvgAggregateOutputType | null
+  _sum: CriticitaSumAggregateOutputType | null
   _min: CriticitaMinAggregateOutputType | null
   _max: CriticitaMaxAggregateOutputType | null
 }
@@ -325,6 +384,9 @@ export type CriticitaWhereInput = {
   descrizione?: Prisma.StringFilter<"Criticita"> | string
   riferimentoNormativo?: Prisma.StringNullableFilter<"Criticita"> | string | null
   azioneConsigliata?: Prisma.StringNullableFilter<"Criticita"> | string | null
+  latitudineGis?: Prisma.DecimalNullableFilter<"Criticita"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.DecimalNullableFilter<"Criticita"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.StringNullableFilter<"Criticita"> | string | null
   rilevanzaArt47?: Prisma.BoolFilter<"Criticita"> | boolean
   letteraArt47?: Prisma.EnumArt47CodNavLetteraNullableFilter<"Criticita"> | $Enums.Art47CodNavLettera | null
   rischioDecadenza?: Prisma.EnumLivelloRischioDecadenzaNullableFilter<"Criticita"> | $Enums.LivelloRischioDecadenza | null
@@ -357,6 +419,9 @@ export type CriticitaOrderByWithRelationInput = {
   descrizione?: Prisma.SortOrder
   riferimentoNormativo?: Prisma.SortOrderInput | Prisma.SortOrder
   azioneConsigliata?: Prisma.SortOrderInput | Prisma.SortOrder
+  latitudineGis?: Prisma.SortOrderInput | Prisma.SortOrder
+  longitudineGis?: Prisma.SortOrderInput | Prisma.SortOrder
+  localizzazioneDescrizione?: Prisma.SortOrderInput | Prisma.SortOrder
   rilevanzaArt47?: Prisma.SortOrder
   letteraArt47?: Prisma.SortOrderInput | Prisma.SortOrder
   rischioDecadenza?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -392,6 +457,9 @@ export type CriticitaWhereUniqueInput = Prisma.AtLeast<{
   descrizione?: Prisma.StringFilter<"Criticita"> | string
   riferimentoNormativo?: Prisma.StringNullableFilter<"Criticita"> | string | null
   azioneConsigliata?: Prisma.StringNullableFilter<"Criticita"> | string | null
+  latitudineGis?: Prisma.DecimalNullableFilter<"Criticita"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.DecimalNullableFilter<"Criticita"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.StringNullableFilter<"Criticita"> | string | null
   rilevanzaArt47?: Prisma.BoolFilter<"Criticita"> | boolean
   letteraArt47?: Prisma.EnumArt47CodNavLetteraNullableFilter<"Criticita"> | $Enums.Art47CodNavLettera | null
   rischioDecadenza?: Prisma.EnumLivelloRischioDecadenzaNullableFilter<"Criticita"> | $Enums.LivelloRischioDecadenza | null
@@ -424,6 +492,9 @@ export type CriticitaOrderByWithAggregationInput = {
   descrizione?: Prisma.SortOrder
   riferimentoNormativo?: Prisma.SortOrderInput | Prisma.SortOrder
   azioneConsigliata?: Prisma.SortOrderInput | Prisma.SortOrder
+  latitudineGis?: Prisma.SortOrderInput | Prisma.SortOrder
+  longitudineGis?: Prisma.SortOrderInput | Prisma.SortOrder
+  localizzazioneDescrizione?: Prisma.SortOrderInput | Prisma.SortOrder
   rilevanzaArt47?: Prisma.SortOrder
   letteraArt47?: Prisma.SortOrderInput | Prisma.SortOrder
   rischioDecadenza?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -442,8 +513,10 @@ export type CriticitaOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.CriticitaCountOrderByAggregateInput
+  _avg?: Prisma.CriticitaAvgOrderByAggregateInput
   _max?: Prisma.CriticitaMaxOrderByAggregateInput
   _min?: Prisma.CriticitaMinOrderByAggregateInput
+  _sum?: Prisma.CriticitaSumOrderByAggregateInput
 }
 
 export type CriticitaScalarWhereWithAggregatesInput = {
@@ -458,6 +531,9 @@ export type CriticitaScalarWhereWithAggregatesInput = {
   descrizione?: Prisma.StringWithAggregatesFilter<"Criticita"> | string
   riferimentoNormativo?: Prisma.StringNullableWithAggregatesFilter<"Criticita"> | string | null
   azioneConsigliata?: Prisma.StringNullableWithAggregatesFilter<"Criticita"> | string | null
+  latitudineGis?: Prisma.DecimalNullableWithAggregatesFilter<"Criticita"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.DecimalNullableWithAggregatesFilter<"Criticita"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.StringNullableWithAggregatesFilter<"Criticita"> | string | null
   rilevanzaArt47?: Prisma.BoolWithAggregatesFilter<"Criticita"> | boolean
   letteraArt47?: Prisma.EnumArt47CodNavLetteraNullableWithAggregatesFilter<"Criticita"> | $Enums.Art47CodNavLettera | null
   rischioDecadenza?: Prisma.EnumLivelloRischioDecadenzaNullableWithAggregatesFilter<"Criticita"> | $Enums.LivelloRischioDecadenza | null
@@ -485,6 +561,9 @@ export type CriticitaCreateInput = {
   descrizione: string
   riferimentoNormativo?: string | null
   azioneConsigliata?: string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: string | null
   rilevanzaArt47?: boolean
   letteraArt47?: $Enums.Art47CodNavLettera | null
   rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
@@ -517,6 +596,9 @@ export type CriticitaUncheckedCreateInput = {
   descrizione: string
   riferimentoNormativo?: string | null
   azioneConsigliata?: string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: string | null
   rilevanzaArt47?: boolean
   letteraArt47?: $Enums.Art47CodNavLettera | null
   rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
@@ -547,6 +629,9 @@ export type CriticitaUpdateInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
   letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
   rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
@@ -579,6 +664,9 @@ export type CriticitaUncheckedUpdateInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
   letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
   rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
@@ -610,6 +698,9 @@ export type CriticitaCreateManyInput = {
   descrizione: string
   riferimentoNormativo?: string | null
   azioneConsigliata?: string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: string | null
   rilevanzaArt47?: boolean
   letteraArt47?: $Enums.Art47CodNavLettera | null
   rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
@@ -637,6 +728,9 @@ export type CriticitaUpdateManyMutationInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
   letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
   rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
@@ -665,6 +759,9 @@ export type CriticitaUncheckedUpdateManyInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
   letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
   rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
@@ -703,6 +800,9 @@ export type CriticitaCountOrderByAggregateInput = {
   descrizione?: Prisma.SortOrder
   riferimentoNormativo?: Prisma.SortOrder
   azioneConsigliata?: Prisma.SortOrder
+  latitudineGis?: Prisma.SortOrder
+  longitudineGis?: Prisma.SortOrder
+  localizzazioneDescrizione?: Prisma.SortOrder
   rilevanzaArt47?: Prisma.SortOrder
   letteraArt47?: Prisma.SortOrder
   rischioDecadenza?: Prisma.SortOrder
@@ -722,6 +822,11 @@ export type CriticitaCountOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
+export type CriticitaAvgOrderByAggregateInput = {
+  latitudineGis?: Prisma.SortOrder
+  longitudineGis?: Prisma.SortOrder
+}
+
 export type CriticitaMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrder
@@ -731,6 +836,9 @@ export type CriticitaMaxOrderByAggregateInput = {
   descrizione?: Prisma.SortOrder
   riferimentoNormativo?: Prisma.SortOrder
   azioneConsigliata?: Prisma.SortOrder
+  latitudineGis?: Prisma.SortOrder
+  longitudineGis?: Prisma.SortOrder
+  localizzazioneDescrizione?: Prisma.SortOrder
   rilevanzaArt47?: Prisma.SortOrder
   letteraArt47?: Prisma.SortOrder
   rischioDecadenza?: Prisma.SortOrder
@@ -759,6 +867,9 @@ export type CriticitaMinOrderByAggregateInput = {
   descrizione?: Prisma.SortOrder
   riferimentoNormativo?: Prisma.SortOrder
   azioneConsigliata?: Prisma.SortOrder
+  latitudineGis?: Prisma.SortOrder
+  longitudineGis?: Prisma.SortOrder
+  localizzazioneDescrizione?: Prisma.SortOrder
   rilevanzaArt47?: Prisma.SortOrder
   letteraArt47?: Prisma.SortOrder
   rischioDecadenza?: Prisma.SortOrder
@@ -776,6 +887,11 @@ export type CriticitaMinOrderByAggregateInput = {
   dataUltimoAggiornamento?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type CriticitaSumOrderByAggregateInput = {
+  latitudineGis?: Prisma.SortOrder
+  longitudineGis?: Prisma.SortOrder
 }
 
 export type CriticitaNullableScalarRelationFilter = {
@@ -909,6 +1025,9 @@ export type CriticitaCreateWithoutConcessioneInput = {
   descrizione: string
   riferimentoNormativo?: string | null
   azioneConsigliata?: string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: string | null
   rilevanzaArt47?: boolean
   letteraArt47?: $Enums.Art47CodNavLettera | null
   rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
@@ -939,6 +1058,9 @@ export type CriticitaUncheckedCreateWithoutConcessioneInput = {
   descrizione: string
   riferimentoNormativo?: string | null
   azioneConsigliata?: string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: string | null
   rilevanzaArt47?: boolean
   letteraArt47?: $Enums.Art47CodNavLettera | null
   rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
@@ -999,6 +1121,9 @@ export type CriticitaScalarWhereInput = {
   descrizione?: Prisma.StringFilter<"Criticita"> | string
   riferimentoNormativo?: Prisma.StringNullableFilter<"Criticita"> | string | null
   azioneConsigliata?: Prisma.StringNullableFilter<"Criticita"> | string | null
+  latitudineGis?: Prisma.DecimalNullableFilter<"Criticita"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.DecimalNullableFilter<"Criticita"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.StringNullableFilter<"Criticita"> | string | null
   rilevanzaArt47?: Prisma.BoolFilter<"Criticita"> | boolean
   letteraArt47?: Prisma.EnumArt47CodNavLetteraNullableFilter<"Criticita"> | $Enums.Art47CodNavLettera | null
   rischioDecadenza?: Prisma.EnumLivelloRischioDecadenzaNullableFilter<"Criticita"> | $Enums.LivelloRischioDecadenza | null
@@ -1026,6 +1151,9 @@ export type CriticitaCreateWithoutProcedimentiInput = {
   descrizione: string
   riferimentoNormativo?: string | null
   azioneConsigliata?: string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: string | null
   rilevanzaArt47?: boolean
   letteraArt47?: $Enums.Art47CodNavLettera | null
   rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
@@ -1057,6 +1185,9 @@ export type CriticitaUncheckedCreateWithoutProcedimentiInput = {
   descrizione: string
   riferimentoNormativo?: string | null
   azioneConsigliata?: string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: string | null
   rilevanzaArt47?: boolean
   letteraArt47?: $Enums.Art47CodNavLettera | null
   rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
@@ -1102,6 +1233,9 @@ export type CriticitaUpdateWithoutProcedimentiInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
   letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
   rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
@@ -1133,6 +1267,9 @@ export type CriticitaUncheckedUpdateWithoutProcedimentiInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
   letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
   rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
@@ -1162,6 +1299,9 @@ export type CriticitaCreateWithoutDocumentiInput = {
   descrizione: string
   riferimentoNormativo?: string | null
   azioneConsigliata?: string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: string | null
   rilevanzaArt47?: boolean
   letteraArt47?: $Enums.Art47CodNavLettera | null
   rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
@@ -1193,6 +1333,9 @@ export type CriticitaUncheckedCreateWithoutDocumentiInput = {
   descrizione: string
   riferimentoNormativo?: string | null
   azioneConsigliata?: string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: string | null
   rilevanzaArt47?: boolean
   letteraArt47?: $Enums.Art47CodNavLettera | null
   rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
@@ -1238,6 +1381,9 @@ export type CriticitaUpdateWithoutDocumentiInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
   letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
   rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
@@ -1269,6 +1415,9 @@ export type CriticitaUncheckedUpdateWithoutDocumentiInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
   letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
   rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
@@ -1298,6 +1447,9 @@ export type CriticitaCreateWithoutNormaImpattiInput = {
   descrizione: string
   riferimentoNormativo?: string | null
   azioneConsigliata?: string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: string | null
   rilevanzaArt47?: boolean
   letteraArt47?: $Enums.Art47CodNavLettera | null
   rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
@@ -1329,6 +1481,9 @@ export type CriticitaUncheckedCreateWithoutNormaImpattiInput = {
   descrizione: string
   riferimentoNormativo?: string | null
   azioneConsigliata?: string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: string | null
   rilevanzaArt47?: boolean
   letteraArt47?: $Enums.Art47CodNavLettera | null
   rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
@@ -1374,6 +1529,9 @@ export type CriticitaUpdateWithoutNormaImpattiInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
   letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
   rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
@@ -1405,6 +1563,9 @@ export type CriticitaUncheckedUpdateWithoutNormaImpattiInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
   letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
   rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
@@ -1434,6 +1595,9 @@ export type CriticitaCreateManyConcessioneInput = {
   descrizione: string
   riferimentoNormativo?: string | null
   azioneConsigliata?: string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: string | null
   rilevanzaArt47?: boolean
   letteraArt47?: $Enums.Art47CodNavLettera | null
   rischioDecadenza?: $Enums.LivelloRischioDecadenza | null
@@ -1461,6 +1625,9 @@ export type CriticitaUpdateWithoutConcessioneInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
   letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
   rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
@@ -1491,6 +1658,9 @@ export type CriticitaUncheckedUpdateWithoutConcessioneInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
   letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
   rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
@@ -1521,6 +1691,9 @@ export type CriticitaUncheckedUpdateManyWithoutConcessioneInput = {
   descrizione?: Prisma.StringFieldUpdateOperationsInput | string
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   azioneConsigliata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  localizzazioneDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rilevanzaArt47?: Prisma.BoolFieldUpdateOperationsInput | boolean
   letteraArt47?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
   rischioDecadenza?: Prisma.NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput | $Enums.LivelloRischioDecadenza | null
@@ -1598,6 +1771,9 @@ export type CriticitaSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   descrizione?: boolean
   riferimentoNormativo?: boolean
   azioneConsigliata?: boolean
+  latitudineGis?: boolean
+  longitudineGis?: boolean
+  localizzazioneDescrizione?: boolean
   rilevanzaArt47?: boolean
   letteraArt47?: boolean
   rischioDecadenza?: boolean
@@ -1631,6 +1807,9 @@ export type CriticitaSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   descrizione?: boolean
   riferimentoNormativo?: boolean
   azioneConsigliata?: boolean
+  latitudineGis?: boolean
+  longitudineGis?: boolean
+  localizzazioneDescrizione?: boolean
   rilevanzaArt47?: boolean
   letteraArt47?: boolean
   rischioDecadenza?: boolean
@@ -1660,6 +1839,9 @@ export type CriticitaSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   descrizione?: boolean
   riferimentoNormativo?: boolean
   azioneConsigliata?: boolean
+  latitudineGis?: boolean
+  longitudineGis?: boolean
+  localizzazioneDescrizione?: boolean
   rilevanzaArt47?: boolean
   letteraArt47?: boolean
   rischioDecadenza?: boolean
@@ -1689,6 +1871,9 @@ export type CriticitaSelectScalar = {
   descrizione?: boolean
   riferimentoNormativo?: boolean
   azioneConsigliata?: boolean
+  latitudineGis?: boolean
+  longitudineGis?: boolean
+  localizzazioneDescrizione?: boolean
   rilevanzaArt47?: boolean
   letteraArt47?: boolean
   rischioDecadenza?: boolean
@@ -1708,7 +1893,7 @@ export type CriticitaSelectScalar = {
   updatedAt?: boolean
 }
 
-export type CriticitaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "concessioneId" | "tipologia" | "gravita" | "fonte" | "descrizione" | "riferimentoNormativo" | "azioneConsigliata" | "rilevanzaArt47" | "letteraArt47" | "rischioDecadenza" | "motivazioneArt47" | "azioneIstruttoriaArt47" | "regolarizzata" | "dataRegolarizzazione" | "descrizioneRegolarizzazione" | "esitoRegolarizzazione" | "verificataRegolarizzazione" | "dataVerificaRegolarizzazione" | "noteVerificaRegolarizzazione" | "stato" | "dataRilevazione" | "dataUltimoAggiornamento" | "createdAt" | "updatedAt", ExtArgs["result"]["criticita"]>
+export type CriticitaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "concessioneId" | "tipologia" | "gravita" | "fonte" | "descrizione" | "riferimentoNormativo" | "azioneConsigliata" | "latitudineGis" | "longitudineGis" | "localizzazioneDescrizione" | "rilevanzaArt47" | "letteraArt47" | "rischioDecadenza" | "motivazioneArt47" | "azioneIstruttoriaArt47" | "regolarizzata" | "dataRegolarizzazione" | "descrizioneRegolarizzazione" | "esitoRegolarizzazione" | "verificataRegolarizzazione" | "dataVerificaRegolarizzazione" | "noteVerificaRegolarizzazione" | "stato" | "dataRilevazione" | "dataUltimoAggiornamento" | "createdAt" | "updatedAt", ExtArgs["result"]["criticita"]>
 export type CriticitaInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   concessione?: boolean | Prisma.ConcessioneDefaultArgs<ExtArgs>
   procedimenti?: boolean | Prisma.Criticita$procedimentiArgs<ExtArgs>
@@ -1740,6 +1925,9 @@ export type $CriticitaPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     descrizione: string
     riferimentoNormativo: string | null
     azioneConsigliata: string | null
+    latitudineGis: runtime.Decimal | null
+    longitudineGis: runtime.Decimal | null
+    localizzazioneDescrizione: string | null
     rilevanzaArt47: boolean
     letteraArt47: $Enums.Art47CodNavLettera | null
     rischioDecadenza: $Enums.LivelloRischioDecadenza | null
@@ -2192,6 +2380,9 @@ export interface CriticitaFieldRefs {
   readonly descrizione: Prisma.FieldRef<"Criticita", 'String'>
   readonly riferimentoNormativo: Prisma.FieldRef<"Criticita", 'String'>
   readonly azioneConsigliata: Prisma.FieldRef<"Criticita", 'String'>
+  readonly latitudineGis: Prisma.FieldRef<"Criticita", 'Decimal'>
+  readonly longitudineGis: Prisma.FieldRef<"Criticita", 'Decimal'>
+  readonly localizzazioneDescrizione: Prisma.FieldRef<"Criticita", 'String'>
   readonly rilevanzaArt47: Prisma.FieldRef<"Criticita", 'Boolean'>
   readonly letteraArt47: Prisma.FieldRef<"Criticita", 'Art47CodNavLettera'>
   readonly rischioDecadenza: Prisma.FieldRef<"Criticita", 'LivelloRischioDecadenza'>

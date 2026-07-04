@@ -341,7 +341,12 @@ model Concessione {
   tipologiaBene    TipologiaBene
   attivita         AttivitaConcessione
   superficieMq     Decimal?
+  latitudineGis    Decimal?
+  longitudineGis   Decimal?
   coordinateGis    String?
+  areaDescrizione  String?
+  zonaPortuale     String?
+  riferimentoCatastale String?
   canoneAnnuo      Decimal?
   categoriaCanone  String?
   stato            StatoConcessione
@@ -368,6 +373,8 @@ model Concessione {
   @@index([dataScadenza])
   @@index([concessionarioId])
   @@index([tipologiaBene])
+  @@index([zonaPortuale])
+  @@index([latitudineGis, longitudineGis])
   @@index([createdAt])
 }
 
@@ -421,6 +428,9 @@ model Criticita {
   descrizione             String
   riferimentoNormativo    String?
   azioneConsigliata       String?
+  latitudineGis           Decimal?
+  longitudineGis          Decimal?
+  localizzazioneDescrizione String?
   rilevanzaArt47          Boolean            @default(false)
   letteraArt47            Art47CodNavLettera?
   rischioDecadenza        LivelloRischioDecadenza?
@@ -448,6 +458,7 @@ model Criticita {
   @@index([stato])
   @@index([gravita])
   @@index([tipologia])
+  @@index([latitudineGis, longitudineGis])
   @@index([rilevanzaArt47])
   @@index([letteraArt47])
   @@index([rischioDecadenza])
@@ -527,6 +538,9 @@ model Sopralluogo {
   operatori              String
   esito                  EsitoSopralluogo
   conformitaPlanimetrica Boolean          @default(false)
+  latitudineGis          Decimal?
+  longitudineGis         Decimal?
+  localizzazioneDescrizione String?
   statoManutentivo       String?
   sicurezza              String?
   occupazione            String?
@@ -541,6 +555,7 @@ model Sopralluogo {
   @@index([concessioneId])
   @@index([data])
   @@index([esito])
+  @@index([latitudineGis, longitudineGis])
   @@index([createdAt])
 }
 

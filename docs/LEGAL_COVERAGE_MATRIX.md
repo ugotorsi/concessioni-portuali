@@ -147,7 +147,7 @@ Perche la struttura e corretta per vista 360 gradi:
 | Concessione | dataScadenza | Termine efficacia titolo | Mancata gestione rinnovi/decadenza | Alert automatici e workflow rinnovo |
 | Concessione | stato | Situazione giuridica concessione | Decisioni operative non coerenti | State machine vincolata |
 | Concessione | canoneAnnuo | Base economica obblighi | Errori su morosita e recuperi | Storicizzazione importi |
-| Concessione | ubicazione | Individuazione bene/area | Contenzioso su perimetro occupato | Integrazione GIS e riferimenti catastali/nautici |
+| Concessione | ubicazione | Individuazione bene/area | Contenzioso su perimetro occupato | Baseline GIS-ready placeholder introdotta (`/mappa`) con coordinate demo + campi area/zona/riferimento catastale; restano necessari riferimenti nautici e cartografia certificata |
 | Concessione/Concessionario | concessionarioId e dati soggetto | Identifica titolare e responsabilità | Contestazioni soggettive | Gestione storico soggetti e subentri |
 | Concessionario | pec | Canale comunicazioni ufficiali | Invalidita comunicazioni digitali | Entita ComunicazionePEC |
 | Concessionario | codiceFiscale/partitaIva | Identita fiscale | Errori imputazione obblighi | Validazioni formali e controlli esterni |

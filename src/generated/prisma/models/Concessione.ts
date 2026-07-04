@@ -28,11 +28,15 @@ export type AggregateConcessione = {
 
 export type ConcessioneAvgAggregateOutputType = {
   superficieMq: runtime.Decimal | null
+  latitudineGis: runtime.Decimal | null
+  longitudineGis: runtime.Decimal | null
   canoneAnnuo: runtime.Decimal | null
 }
 
 export type ConcessioneSumAggregateOutputType = {
   superficieMq: runtime.Decimal | null
+  latitudineGis: runtime.Decimal | null
+  longitudineGis: runtime.Decimal | null
   canoneAnnuo: runtime.Decimal | null
 }
 
@@ -45,7 +49,12 @@ export type ConcessioneMinAggregateOutputType = {
   tipologiaBene: $Enums.TipologiaBene | null
   attivita: $Enums.AttivitaConcessione | null
   superficieMq: runtime.Decimal | null
+  latitudineGis: runtime.Decimal | null
+  longitudineGis: runtime.Decimal | null
   coordinateGis: string | null
+  areaDescrizione: string | null
+  zonaPortuale: string | null
+  riferimentoCatastale: string | null
   canoneAnnuo: runtime.Decimal | null
   categoriaCanone: string | null
   stato: $Enums.StatoConcessione | null
@@ -66,7 +75,12 @@ export type ConcessioneMaxAggregateOutputType = {
   tipologiaBene: $Enums.TipologiaBene | null
   attivita: $Enums.AttivitaConcessione | null
   superficieMq: runtime.Decimal | null
+  latitudineGis: runtime.Decimal | null
+  longitudineGis: runtime.Decimal | null
   coordinateGis: string | null
+  areaDescrizione: string | null
+  zonaPortuale: string | null
+  riferimentoCatastale: string | null
   canoneAnnuo: runtime.Decimal | null
   categoriaCanone: string | null
   stato: $Enums.StatoConcessione | null
@@ -87,7 +101,12 @@ export type ConcessioneCountAggregateOutputType = {
   tipologiaBene: number
   attivita: number
   superficieMq: number
+  latitudineGis: number
+  longitudineGis: number
   coordinateGis: number
+  areaDescrizione: number
+  zonaPortuale: number
+  riferimentoCatastale: number
   canoneAnnuo: number
   categoriaCanone: number
   stato: number
@@ -103,11 +122,15 @@ export type ConcessioneCountAggregateOutputType = {
 
 export type ConcessioneAvgAggregateInputType = {
   superficieMq?: true
+  latitudineGis?: true
+  longitudineGis?: true
   canoneAnnuo?: true
 }
 
 export type ConcessioneSumAggregateInputType = {
   superficieMq?: true
+  latitudineGis?: true
+  longitudineGis?: true
   canoneAnnuo?: true
 }
 
@@ -120,7 +143,12 @@ export type ConcessioneMinAggregateInputType = {
   tipologiaBene?: true
   attivita?: true
   superficieMq?: true
+  latitudineGis?: true
+  longitudineGis?: true
   coordinateGis?: true
+  areaDescrizione?: true
+  zonaPortuale?: true
+  riferimentoCatastale?: true
   canoneAnnuo?: true
   categoriaCanone?: true
   stato?: true
@@ -141,7 +169,12 @@ export type ConcessioneMaxAggregateInputType = {
   tipologiaBene?: true
   attivita?: true
   superficieMq?: true
+  latitudineGis?: true
+  longitudineGis?: true
   coordinateGis?: true
+  areaDescrizione?: true
+  zonaPortuale?: true
+  riferimentoCatastale?: true
   canoneAnnuo?: true
   categoriaCanone?: true
   stato?: true
@@ -162,7 +195,12 @@ export type ConcessioneCountAggregateInputType = {
   tipologiaBene?: true
   attivita?: true
   superficieMq?: true
+  latitudineGis?: true
+  longitudineGis?: true
   coordinateGis?: true
+  areaDescrizione?: true
+  zonaPortuale?: true
+  riferimentoCatastale?: true
   canoneAnnuo?: true
   categoriaCanone?: true
   stato?: true
@@ -270,7 +308,12 @@ export type ConcessioneGroupByOutputType = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq: runtime.Decimal | null
+  latitudineGis: runtime.Decimal | null
+  longitudineGis: runtime.Decimal | null
   coordinateGis: string | null
+  areaDescrizione: string | null
+  zonaPortuale: string | null
+  riferimentoCatastale: string | null
   canoneAnnuo: runtime.Decimal | null
   categoriaCanone: string | null
   stato: $Enums.StatoConcessione
@@ -314,7 +357,12 @@ export type ConcessioneWhereInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFilter<"Concessione"> | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFilter<"Concessione"> | $Enums.AttivitaConcessione
   superficieMq?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.StringNullableFilter<"Concessione"> | string | null
+  areaDescrizione?: Prisma.StringNullableFilter<"Concessione"> | string | null
+  zonaPortuale?: Prisma.StringNullableFilter<"Concessione"> | string | null
+  riferimentoCatastale?: Prisma.StringNullableFilter<"Concessione"> | string | null
   canoneAnnuo?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.StringNullableFilter<"Concessione"> | string | null
   stato?: Prisma.EnumStatoConcessioneFilter<"Concessione"> | $Enums.StatoConcessione
@@ -346,7 +394,12 @@ export type ConcessioneOrderByWithRelationInput = {
   tipologiaBene?: Prisma.SortOrder
   attivita?: Prisma.SortOrder
   superficieMq?: Prisma.SortOrderInput | Prisma.SortOrder
+  latitudineGis?: Prisma.SortOrderInput | Prisma.SortOrder
+  longitudineGis?: Prisma.SortOrderInput | Prisma.SortOrder
   coordinateGis?: Prisma.SortOrderInput | Prisma.SortOrder
+  areaDescrizione?: Prisma.SortOrderInput | Prisma.SortOrder
+  zonaPortuale?: Prisma.SortOrderInput | Prisma.SortOrder
+  riferimentoCatastale?: Prisma.SortOrderInput | Prisma.SortOrder
   canoneAnnuo?: Prisma.SortOrderInput | Prisma.SortOrder
   categoriaCanone?: Prisma.SortOrderInput | Prisma.SortOrder
   stato?: Prisma.SortOrder
@@ -381,7 +434,12 @@ export type ConcessioneWhereUniqueInput = Prisma.AtLeast<{
   tipologiaBene?: Prisma.EnumTipologiaBeneFilter<"Concessione"> | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFilter<"Concessione"> | $Enums.AttivitaConcessione
   superficieMq?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.StringNullableFilter<"Concessione"> | string | null
+  areaDescrizione?: Prisma.StringNullableFilter<"Concessione"> | string | null
+  zonaPortuale?: Prisma.StringNullableFilter<"Concessione"> | string | null
+  riferimentoCatastale?: Prisma.StringNullableFilter<"Concessione"> | string | null
   canoneAnnuo?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.StringNullableFilter<"Concessione"> | string | null
   stato?: Prisma.EnumStatoConcessioneFilter<"Concessione"> | $Enums.StatoConcessione
@@ -413,7 +471,12 @@ export type ConcessioneOrderByWithAggregationInput = {
   tipologiaBene?: Prisma.SortOrder
   attivita?: Prisma.SortOrder
   superficieMq?: Prisma.SortOrderInput | Prisma.SortOrder
+  latitudineGis?: Prisma.SortOrderInput | Prisma.SortOrder
+  longitudineGis?: Prisma.SortOrderInput | Prisma.SortOrder
   coordinateGis?: Prisma.SortOrderInput | Prisma.SortOrder
+  areaDescrizione?: Prisma.SortOrderInput | Prisma.SortOrder
+  zonaPortuale?: Prisma.SortOrderInput | Prisma.SortOrder
+  riferimentoCatastale?: Prisma.SortOrderInput | Prisma.SortOrder
   canoneAnnuo?: Prisma.SortOrderInput | Prisma.SortOrder
   categoriaCanone?: Prisma.SortOrderInput | Prisma.SortOrder
   stato?: Prisma.SortOrder
@@ -442,7 +505,12 @@ export type ConcessioneScalarWhereWithAggregatesInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneWithAggregatesFilter<"Concessione"> | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneWithAggregatesFilter<"Concessione"> | $Enums.AttivitaConcessione
   superficieMq?: Prisma.DecimalNullableWithAggregatesFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.DecimalNullableWithAggregatesFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.DecimalNullableWithAggregatesFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.StringNullableWithAggregatesFilter<"Concessione"> | string | null
+  areaDescrizione?: Prisma.StringNullableWithAggregatesFilter<"Concessione"> | string | null
+  zonaPortuale?: Prisma.StringNullableWithAggregatesFilter<"Concessione"> | string | null
+  riferimentoCatastale?: Prisma.StringNullableWithAggregatesFilter<"Concessione"> | string | null
   canoneAnnuo?: Prisma.DecimalNullableWithAggregatesFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.StringNullableWithAggregatesFilter<"Concessione"> | string | null
   stato?: Prisma.EnumStatoConcessioneWithAggregatesFilter<"Concessione"> | $Enums.StatoConcessione
@@ -463,7 +531,12 @@ export type ConcessioneCreateInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -494,7 +567,12 @@ export type ConcessioneUncheckedCreateInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -525,7 +603,12 @@ export type ConcessioneUpdateInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -556,7 +639,12 @@ export type ConcessioneUncheckedUpdateInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -587,7 +675,12 @@ export type ConcessioneCreateManyInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -608,7 +701,12 @@ export type ConcessioneUpdateManyMutationInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -628,7 +726,12 @@ export type ConcessioneUncheckedUpdateManyInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -659,7 +762,12 @@ export type ConcessioneCountOrderByAggregateInput = {
   tipologiaBene?: Prisma.SortOrder
   attivita?: Prisma.SortOrder
   superficieMq?: Prisma.SortOrder
+  latitudineGis?: Prisma.SortOrder
+  longitudineGis?: Prisma.SortOrder
   coordinateGis?: Prisma.SortOrder
+  areaDescrizione?: Prisma.SortOrder
+  zonaPortuale?: Prisma.SortOrder
+  riferimentoCatastale?: Prisma.SortOrder
   canoneAnnuo?: Prisma.SortOrder
   categoriaCanone?: Prisma.SortOrder
   stato?: Prisma.SortOrder
@@ -673,6 +781,8 @@ export type ConcessioneCountOrderByAggregateInput = {
 
 export type ConcessioneAvgOrderByAggregateInput = {
   superficieMq?: Prisma.SortOrder
+  latitudineGis?: Prisma.SortOrder
+  longitudineGis?: Prisma.SortOrder
   canoneAnnuo?: Prisma.SortOrder
 }
 
@@ -685,7 +795,12 @@ export type ConcessioneMaxOrderByAggregateInput = {
   tipologiaBene?: Prisma.SortOrder
   attivita?: Prisma.SortOrder
   superficieMq?: Prisma.SortOrder
+  latitudineGis?: Prisma.SortOrder
+  longitudineGis?: Prisma.SortOrder
   coordinateGis?: Prisma.SortOrder
+  areaDescrizione?: Prisma.SortOrder
+  zonaPortuale?: Prisma.SortOrder
+  riferimentoCatastale?: Prisma.SortOrder
   canoneAnnuo?: Prisma.SortOrder
   categoriaCanone?: Prisma.SortOrder
   stato?: Prisma.SortOrder
@@ -706,7 +821,12 @@ export type ConcessioneMinOrderByAggregateInput = {
   tipologiaBene?: Prisma.SortOrder
   attivita?: Prisma.SortOrder
   superficieMq?: Prisma.SortOrder
+  latitudineGis?: Prisma.SortOrder
+  longitudineGis?: Prisma.SortOrder
   coordinateGis?: Prisma.SortOrder
+  areaDescrizione?: Prisma.SortOrder
+  zonaPortuale?: Prisma.SortOrder
+  riferimentoCatastale?: Prisma.SortOrder
   canoneAnnuo?: Prisma.SortOrder
   categoriaCanone?: Prisma.SortOrder
   stato?: Prisma.SortOrder
@@ -720,6 +840,8 @@ export type ConcessioneMinOrderByAggregateInput = {
 
 export type ConcessioneSumOrderByAggregateInput = {
   superficieMq?: Prisma.SortOrder
+  latitudineGis?: Prisma.SortOrder
+  longitudineGis?: Prisma.SortOrder
   canoneAnnuo?: Prisma.SortOrder
 }
 
@@ -956,7 +1078,12 @@ export type ConcessioneCreateWithoutConcessionarioInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -986,7 +1113,12 @@ export type ConcessioneUncheckedCreateWithoutConcessionarioInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -1045,7 +1177,12 @@ export type ConcessioneScalarWhereInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFilter<"Concessione"> | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFilter<"Concessione"> | $Enums.AttivitaConcessione
   superficieMq?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.StringNullableFilter<"Concessione"> | string | null
+  areaDescrizione?: Prisma.StringNullableFilter<"Concessione"> | string | null
+  zonaPortuale?: Prisma.StringNullableFilter<"Concessione"> | string | null
+  riferimentoCatastale?: Prisma.StringNullableFilter<"Concessione"> | string | null
   canoneAnnuo?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.StringNullableFilter<"Concessione"> | string | null
   stato?: Prisma.EnumStatoConcessioneFilter<"Concessione"> | $Enums.StatoConcessione
@@ -1066,7 +1203,12 @@ export type ConcessioneCreateWithoutObblighiInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -1096,7 +1238,12 @@ export type ConcessioneUncheckedCreateWithoutObblighiInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -1142,7 +1289,12 @@ export type ConcessioneUpdateWithoutObblighiInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -1172,7 +1324,12 @@ export type ConcessioneUncheckedUpdateWithoutObblighiInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -1202,7 +1359,12 @@ export type ConcessioneCreateWithoutScadenzeInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -1232,7 +1394,12 @@ export type ConcessioneUncheckedCreateWithoutScadenzeInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -1278,7 +1445,12 @@ export type ConcessioneUpdateWithoutScadenzeInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -1308,7 +1480,12 @@ export type ConcessioneUncheckedUpdateWithoutScadenzeInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -1338,7 +1515,12 @@ export type ConcessioneCreateWithoutCriticitaInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -1368,7 +1550,12 @@ export type ConcessioneUncheckedCreateWithoutCriticitaInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -1414,7 +1601,12 @@ export type ConcessioneUpdateWithoutCriticitaInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -1444,7 +1636,12 @@ export type ConcessioneUncheckedUpdateWithoutCriticitaInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -1474,7 +1671,12 @@ export type ConcessioneCreateWithoutProcedimentiInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -1504,7 +1706,12 @@ export type ConcessioneUncheckedCreateWithoutProcedimentiInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -1550,7 +1757,12 @@ export type ConcessioneUpdateWithoutProcedimentiInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -1580,7 +1792,12 @@ export type ConcessioneUncheckedUpdateWithoutProcedimentiInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -1610,7 +1827,12 @@ export type ConcessioneCreateWithoutSopralluoghiInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -1640,7 +1862,12 @@ export type ConcessioneUncheckedCreateWithoutSopralluoghiInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -1686,7 +1913,12 @@ export type ConcessioneUpdateWithoutSopralluoghiInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -1716,7 +1948,12 @@ export type ConcessioneUncheckedUpdateWithoutSopralluoghiInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -1746,7 +1983,12 @@ export type ConcessioneCreateWithoutPagamentiInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -1776,7 +2018,12 @@ export type ConcessioneUncheckedCreateWithoutPagamentiInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -1822,7 +2069,12 @@ export type ConcessioneUpdateWithoutPagamentiInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -1852,7 +2104,12 @@ export type ConcessioneUncheckedUpdateWithoutPagamentiInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -1882,7 +2139,12 @@ export type ConcessioneCreateWithoutDocumentiInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -1912,7 +2174,12 @@ export type ConcessioneUncheckedCreateWithoutDocumentiInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -1958,7 +2225,12 @@ export type ConcessioneUpdateWithoutDocumentiInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -1988,7 +2260,12 @@ export type ConcessioneUncheckedUpdateWithoutDocumentiInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -2018,7 +2295,12 @@ export type ConcessioneCreateWithoutReportInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -2048,7 +2330,12 @@ export type ConcessioneUncheckedCreateWithoutReportInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -2094,7 +2381,12 @@ export type ConcessioneUpdateWithoutReportInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -2124,7 +2416,12 @@ export type ConcessioneUncheckedUpdateWithoutReportInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -2154,7 +2451,12 @@ export type ConcessioneCreateWithoutNormaImpattiInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -2184,7 +2486,12 @@ export type ConcessioneUncheckedCreateWithoutNormaImpattiInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -2230,7 +2537,12 @@ export type ConcessioneUpdateWithoutNormaImpattiInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -2260,7 +2572,12 @@ export type ConcessioneUncheckedUpdateWithoutNormaImpattiInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -2290,7 +2607,12 @@ export type ConcessioneCreateWithoutActivityLogsInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -2320,7 +2642,12 @@ export type ConcessioneUncheckedCreateWithoutActivityLogsInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -2366,7 +2693,12 @@ export type ConcessioneUpdateWithoutActivityLogsInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -2396,7 +2728,12 @@ export type ConcessioneUncheckedUpdateWithoutActivityLogsInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -2426,7 +2763,12 @@ export type ConcessioneCreateManyConcessionarioInput = {
   tipologiaBene: $Enums.TipologiaBene
   attivita: $Enums.AttivitaConcessione
   superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   stato: $Enums.StatoConcessione
@@ -2446,7 +2788,12 @@ export type ConcessioneUpdateWithoutConcessionarioInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -2476,7 +2823,12 @@ export type ConcessioneUncheckedUpdateWithoutConcessionarioInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -2506,7 +2858,12 @@ export type ConcessioneUncheckedUpdateManyWithoutConcessionarioInput = {
   tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
   attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
   superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
@@ -2638,7 +2995,12 @@ export type ConcessioneSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   tipologiaBene?: boolean
   attivita?: boolean
   superficieMq?: boolean
+  latitudineGis?: boolean
+  longitudineGis?: boolean
   coordinateGis?: boolean
+  areaDescrizione?: boolean
+  zonaPortuale?: boolean
+  riferimentoCatastale?: boolean
   canoneAnnuo?: boolean
   categoriaCanone?: boolean
   stato?: boolean
@@ -2671,7 +3033,12 @@ export type ConcessioneSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   tipologiaBene?: boolean
   attivita?: boolean
   superficieMq?: boolean
+  latitudineGis?: boolean
+  longitudineGis?: boolean
   coordinateGis?: boolean
+  areaDescrizione?: boolean
+  zonaPortuale?: boolean
+  riferimentoCatastale?: boolean
   canoneAnnuo?: boolean
   categoriaCanone?: boolean
   stato?: boolean
@@ -2693,7 +3060,12 @@ export type ConcessioneSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   tipologiaBene?: boolean
   attivita?: boolean
   superficieMq?: boolean
+  latitudineGis?: boolean
+  longitudineGis?: boolean
   coordinateGis?: boolean
+  areaDescrizione?: boolean
+  zonaPortuale?: boolean
+  riferimentoCatastale?: boolean
   canoneAnnuo?: boolean
   categoriaCanone?: boolean
   stato?: boolean
@@ -2715,7 +3087,12 @@ export type ConcessioneSelectScalar = {
   tipologiaBene?: boolean
   attivita?: boolean
   superficieMq?: boolean
+  latitudineGis?: boolean
+  longitudineGis?: boolean
   coordinateGis?: boolean
+  areaDescrizione?: boolean
+  zonaPortuale?: boolean
+  riferimentoCatastale?: boolean
   canoneAnnuo?: boolean
   categoriaCanone?: boolean
   stato?: boolean
@@ -2727,7 +3104,7 @@ export type ConcessioneSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ConcessioneOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "numeroAtto" | "dataRilascio" | "dataScadenza" | "normaRiferimento" | "tipologiaBene" | "attivita" | "superficieMq" | "coordinateGis" | "canoneAnnuo" | "categoriaCanone" | "stato" | "descrizioneBene" | "ubicazione" | "note" | "concessionarioId" | "createdAt" | "updatedAt", ExtArgs["result"]["concessione"]>
+export type ConcessioneOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "numeroAtto" | "dataRilascio" | "dataScadenza" | "normaRiferimento" | "tipologiaBene" | "attivita" | "superficieMq" | "latitudineGis" | "longitudineGis" | "coordinateGis" | "areaDescrizione" | "zonaPortuale" | "riferimentoCatastale" | "canoneAnnuo" | "categoriaCanone" | "stato" | "descrizioneBene" | "ubicazione" | "note" | "concessionarioId" | "createdAt" | "updatedAt", ExtArgs["result"]["concessione"]>
 export type ConcessioneInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   concessionario?: boolean | Prisma.ConcessionarioDefaultArgs<ExtArgs>
   obblighi?: boolean | Prisma.Concessione$obblighiArgs<ExtArgs>
@@ -2773,7 +3150,12 @@ export type $ConcessionePayload<ExtArgs extends runtime.Types.Extensions.Interna
     tipologiaBene: $Enums.TipologiaBene
     attivita: $Enums.AttivitaConcessione
     superficieMq: runtime.Decimal | null
+    latitudineGis: runtime.Decimal | null
+    longitudineGis: runtime.Decimal | null
     coordinateGis: string | null
+    areaDescrizione: string | null
+    zonaPortuale: string | null
+    riferimentoCatastale: string | null
     canoneAnnuo: runtime.Decimal | null
     categoriaCanone: string | null
     stato: $Enums.StatoConcessione
@@ -3225,7 +3607,12 @@ export interface ConcessioneFieldRefs {
   readonly tipologiaBene: Prisma.FieldRef<"Concessione", 'TipologiaBene'>
   readonly attivita: Prisma.FieldRef<"Concessione", 'AttivitaConcessione'>
   readonly superficieMq: Prisma.FieldRef<"Concessione", 'Decimal'>
+  readonly latitudineGis: Prisma.FieldRef<"Concessione", 'Decimal'>
+  readonly longitudineGis: Prisma.FieldRef<"Concessione", 'Decimal'>
   readonly coordinateGis: Prisma.FieldRef<"Concessione", 'String'>
+  readonly areaDescrizione: Prisma.FieldRef<"Concessione", 'String'>
+  readonly zonaPortuale: Prisma.FieldRef<"Concessione", 'String'>
+  readonly riferimentoCatastale: Prisma.FieldRef<"Concessione", 'String'>
   readonly canoneAnnuo: Prisma.FieldRef<"Concessione", 'Decimal'>
   readonly categoriaCanone: Prisma.FieldRef<"Concessione", 'String'>
   readonly stato: Prisma.FieldRef<"Concessione", 'StatoConcessione'>

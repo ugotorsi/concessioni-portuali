@@ -132,6 +132,25 @@ export default async function SopralluogoDetailPage({ params }: SopralluogoDetai
                 {formatEnumLabel(detail.concessione.tipologiaBene)} - {detail.concessione.ubicazione ?? "-"}
               </p>
             </div>
+            <div>
+              <p className="text-xs uppercase tracking-wide text-slate-500">Localizzazione GIS</p>
+              <p className="mt-1 text-slate-900">
+                {detail.sopralluogo.latitudineGis !== null && detail.sopralluogo.longitudineGis !== null
+                  ? `${detail.sopralluogo.latitudineGis.toFixed(4)}, ${detail.sopralluogo.longitudineGis.toFixed(4)}`
+                  : detail.concessione.latitudineGis !== null && detail.concessione.longitudineGis !== null
+                    ? `${detail.concessione.latitudineGis.toFixed(4)}, ${detail.concessione.longitudineGis.toFixed(4)}`
+                    : detail.concessione.coordinateGis ?? "-"}
+              </p>
+              <p className="mt-1 text-xs text-slate-600">
+                {detail.sopralluogo.localizzazioneDescrizione ?? detail.concessione.areaDescrizione ?? "Localizzazione descrittiva non disponibile."}
+              </p>
+              <p className="mt-1 text-xs text-slate-600">
+                Zona: {detail.concessione.zonaPortuale ?? "-"} | Rif. catastale: {detail.concessione.riferimentoCatastale ?? "-"}
+              </p>
+              <Link href="/mappa" className="mt-1 inline-flex text-xs font-medium text-slate-700 underline underline-offset-4">
+                Apri vista mappa
+              </Link>
+            </div>
           </CardContent>
         </Card>
 

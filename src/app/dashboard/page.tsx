@@ -129,7 +129,7 @@ export default async function DashboardPage() {
         />
       </section>
 
-      <section className="mt-4 grid gap-4 xl:grid-cols-2">
+      <section className="mt-4 grid gap-4 xl:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle>Scenari demo istituzionali</CardTitle>
@@ -150,6 +150,31 @@ export default async function DashboardPage() {
                 className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"
               >
                 Apri fascicolo documentale
+              </Link>
+              <Link
+                href="/mappa"
+                className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              >
+                Apri mappa demo
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Mappa concessioni e criticita</CardTitle>
+            <CardDescription>
+              Accesso rapido alla vista territoriale dimostrativa con marker geolocalizzati e link alle schede.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/mappa"
+                className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
+              >
+                Apri mappa concessioni e criticita
               </Link>
             </div>
           </CardContent>

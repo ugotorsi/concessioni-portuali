@@ -192,7 +192,26 @@ export default async function ConcessioneDetailPage({ params }: ConcessioneDetai
               </div>
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-500">Coordinate GIS</p>
-                <p className="mt-1 text-slate-900">{concessione.coordinateGis ?? "-"}</p>
+                <p className="mt-1 text-slate-900">
+                  {concessione.latitudineGis !== null && concessione.longitudineGis !== null
+                    ? `${concessione.latitudineGis.toFixed(4)}, ${concessione.longitudineGis.toFixed(4)}`
+                    : concessione.coordinateGis ?? "-"}
+                </p>
+                <Link href="/mappa" className="mt-1 inline-flex text-xs font-medium text-slate-700 underline underline-offset-4">
+                  Apri vista mappa
+                </Link>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-slate-500">Area descrizione</p>
+                <p className="mt-1 text-slate-900">{concessione.areaDescrizione ?? "-"}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-slate-500">Zona portuale</p>
+                <p className="mt-1 text-slate-900">{concessione.zonaPortuale ?? "-"}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-slate-500">Riferimento catastale</p>
+                <p className="mt-1 text-slate-900">{concessione.riferimentoCatastale ?? "-"}</p>
               </div>
             </CardContent>
           </Card>

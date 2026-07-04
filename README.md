@@ -163,6 +163,19 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
 - Ogni scenario espone collegamenti reali a concessione, criticita, procedimento e report/PDF.
 - Presidio comunicativo: "elemento da valutare", "profilo istruttorio", "supporto al responsabile del procedimento".
 
+## Mappa demo territoriale baseline (Issue #10)
+- Nuova pagina dedicata: `/mappa`.
+- Vista geografica placeholder GIS-ready senza provider esterni/API key obbligatorie.
+- Marker territoriali su concessioni, criticita e sopralluoghi con fallback coordinate da concessione.
+- Layout demo con pannello lista marker, canvas territoriale e link rapidi a dettaglio entita.
+- Estensione schema con metadati territoriali opzionali: `areaDescrizione`, `zonaPortuale`, `riferimentoCatastale`, `localizzazioneDescrizione`.
+
+Perimetro e limiti mappa:
+- nessun PostGIS in questa fase;
+- nessuna cartografia ufficiale o rilievo tecnico certificato;
+- nessun layer demaniale reale;
+- nessuna integrazione SIT/geoportale in questa baseline.
+
 ## Fascicolo documentale baseline (Issue #18)
 - Nuovo registro documentale centrale: `/documenti`.
 - Upload file locale con metadati e collegamento a una o piu entita tra concessione, criticita, procedimento, sopralluogo, pagamento, report.
