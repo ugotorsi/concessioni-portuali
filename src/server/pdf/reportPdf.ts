@@ -479,9 +479,17 @@ function addDocumentiSection(ctx: PdfContext, detail: ReportDetail) {
   }
 
   for (const item of detail.documentiPrincipali) {
+    const protocolloText = item.numeroProtocollo
+      ? `Protocollo: ${item.numeroProtocollo}${item.dataProtocollo ? ` (${dateIT(item.dataProtocollo)})` : ""}`
+      : "Protocollo: non indicato";
+    const channelText = `Direzione/Canale: ${enumLabel(item.direzione)}/${enumLabel(item.canale)}`;
+    const pecText = item.pecWarningMancataRicevuta
+      ? "Warning PEC: ricevute non complete (metadato registrato a fini istruttori)"
+      : "Warning PEC: assente";
+
     addBullet(
       ctx,
-      `${textOrNA(item.nome)} | Tipologia: ${enumLabel(item.tipologia)} | Data: ${dateIT(item.dataDocumento ?? item.createdAt)}`,
+      `${textOrNA(item.nome)} | Tipologia: ${enumLabel(item.tipologia)} | Data: ${dateIT(item.dataDocumento ?? item.createdAt)} | ${channelText} | ${protocolloText} | ${pecText}`,
     );
   }
 }

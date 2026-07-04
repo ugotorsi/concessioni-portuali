@@ -39,6 +39,16 @@ export type DocumentoMinAggregateOutputType = {
   nome: string | null
   tipologia: $Enums.TipologiaDocumento | null
   statoDocumento: $Enums.StatoDocumento | null
+  direzione: $Enums.DocumentoDirezione | null
+  canale: $Enums.DocumentoCanale | null
+  numeroProtocollo: string | null
+  dataProtocollo: Date | null
+  mittente: string | null
+  destinatario: string | null
+  pecMessageId: string | null
+  pecRicevutaAccettazioneId: string | null
+  pecRicevutaConsegnaId: string | null
+  pecWarningMancataRicevuta: boolean | null
   mimeType: string | null
   dimensioneBytes: number | null
   checksumSha256: string | null
@@ -66,6 +76,16 @@ export type DocumentoMaxAggregateOutputType = {
   nome: string | null
   tipologia: $Enums.TipologiaDocumento | null
   statoDocumento: $Enums.StatoDocumento | null
+  direzione: $Enums.DocumentoDirezione | null
+  canale: $Enums.DocumentoCanale | null
+  numeroProtocollo: string | null
+  dataProtocollo: Date | null
+  mittente: string | null
+  destinatario: string | null
+  pecMessageId: string | null
+  pecRicevutaAccettazioneId: string | null
+  pecRicevutaConsegnaId: string | null
+  pecWarningMancataRicevuta: boolean | null
   mimeType: string | null
   dimensioneBytes: number | null
   checksumSha256: string | null
@@ -93,6 +113,16 @@ export type DocumentoCountAggregateOutputType = {
   nome: number
   tipologia: number
   statoDocumento: number
+  direzione: number
+  canale: number
+  numeroProtocollo: number
+  dataProtocollo: number
+  mittente: number
+  destinatario: number
+  pecMessageId: number
+  pecRicevutaAccettazioneId: number
+  pecRicevutaConsegnaId: number
+  pecWarningMancataRicevuta: number
   mimeType: number
   dimensioneBytes: number
   checksumSha256: number
@@ -130,6 +160,16 @@ export type DocumentoMinAggregateInputType = {
   nome?: true
   tipologia?: true
   statoDocumento?: true
+  direzione?: true
+  canale?: true
+  numeroProtocollo?: true
+  dataProtocollo?: true
+  mittente?: true
+  destinatario?: true
+  pecMessageId?: true
+  pecRicevutaAccettazioneId?: true
+  pecRicevutaConsegnaId?: true
+  pecWarningMancataRicevuta?: true
   mimeType?: true
   dimensioneBytes?: true
   checksumSha256?: true
@@ -157,6 +197,16 @@ export type DocumentoMaxAggregateInputType = {
   nome?: true
   tipologia?: true
   statoDocumento?: true
+  direzione?: true
+  canale?: true
+  numeroProtocollo?: true
+  dataProtocollo?: true
+  mittente?: true
+  destinatario?: true
+  pecMessageId?: true
+  pecRicevutaAccettazioneId?: true
+  pecRicevutaConsegnaId?: true
+  pecWarningMancataRicevuta?: true
   mimeType?: true
   dimensioneBytes?: true
   checksumSha256?: true
@@ -184,6 +234,16 @@ export type DocumentoCountAggregateInputType = {
   nome?: true
   tipologia?: true
   statoDocumento?: true
+  direzione?: true
+  canale?: true
+  numeroProtocollo?: true
+  dataProtocollo?: true
+  mittente?: true
+  destinatario?: true
+  pecMessageId?: true
+  pecRicevutaAccettazioneId?: true
+  pecRicevutaConsegnaId?: true
+  pecWarningMancataRicevuta?: true
   mimeType?: true
   dimensioneBytes?: true
   checksumSha256?: true
@@ -298,6 +358,16 @@ export type DocumentoGroupByOutputType = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento: $Enums.StatoDocumento
+  direzione: $Enums.DocumentoDirezione | null
+  canale: $Enums.DocumentoCanale | null
+  numeroProtocollo: string | null
+  dataProtocollo: Date | null
+  mittente: string | null
+  destinatario: string | null
+  pecMessageId: string | null
+  pecRicevutaAccettazioneId: string | null
+  pecRicevutaConsegnaId: string | null
+  pecWarningMancataRicevuta: boolean
   mimeType: string | null
   dimensioneBytes: number | null
   checksumSha256: string | null
@@ -348,6 +418,16 @@ export type DocumentoWhereInput = {
   nome?: Prisma.StringFilter<"Documento"> | string
   tipologia?: Prisma.EnumTipologiaDocumentoFilter<"Documento"> | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFilter<"Documento"> | $Enums.StatoDocumento
+  direzione?: Prisma.EnumDocumentoDirezioneNullableFilter<"Documento"> | $Enums.DocumentoDirezione | null
+  canale?: Prisma.EnumDocumentoCanaleNullableFilter<"Documento"> | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.StringNullableFilter<"Documento"> | string | null
+  dataProtocollo?: Prisma.DateTimeNullableFilter<"Documento"> | Date | string | null
+  mittente?: Prisma.StringNullableFilter<"Documento"> | string | null
+  destinatario?: Prisma.StringNullableFilter<"Documento"> | string | null
+  pecMessageId?: Prisma.StringNullableFilter<"Documento"> | string | null
+  pecRicevutaAccettazioneId?: Prisma.StringNullableFilter<"Documento"> | string | null
+  pecRicevutaConsegnaId?: Prisma.StringNullableFilter<"Documento"> | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFilter<"Documento"> | boolean
   mimeType?: Prisma.StringNullableFilter<"Documento"> | string | null
   dimensioneBytes?: Prisma.IntNullableFilter<"Documento"> | number | null
   checksumSha256?: Prisma.StringNullableFilter<"Documento"> | string | null
@@ -382,6 +462,16 @@ export type DocumentoOrderByWithRelationInput = {
   nome?: Prisma.SortOrder
   tipologia?: Prisma.SortOrder
   statoDocumento?: Prisma.SortOrder
+  direzione?: Prisma.SortOrderInput | Prisma.SortOrder
+  canale?: Prisma.SortOrderInput | Prisma.SortOrder
+  numeroProtocollo?: Prisma.SortOrderInput | Prisma.SortOrder
+  dataProtocollo?: Prisma.SortOrderInput | Prisma.SortOrder
+  mittente?: Prisma.SortOrderInput | Prisma.SortOrder
+  destinatario?: Prisma.SortOrderInput | Prisma.SortOrder
+  pecMessageId?: Prisma.SortOrderInput | Prisma.SortOrder
+  pecRicevutaAccettazioneId?: Prisma.SortOrderInput | Prisma.SortOrder
+  pecRicevutaConsegnaId?: Prisma.SortOrderInput | Prisma.SortOrder
+  pecWarningMancataRicevuta?: Prisma.SortOrder
   mimeType?: Prisma.SortOrderInput | Prisma.SortOrder
   dimensioneBytes?: Prisma.SortOrderInput | Prisma.SortOrder
   checksumSha256?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -419,6 +509,16 @@ export type DocumentoWhereUniqueInput = Prisma.AtLeast<{
   nome?: Prisma.StringFilter<"Documento"> | string
   tipologia?: Prisma.EnumTipologiaDocumentoFilter<"Documento"> | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFilter<"Documento"> | $Enums.StatoDocumento
+  direzione?: Prisma.EnumDocumentoDirezioneNullableFilter<"Documento"> | $Enums.DocumentoDirezione | null
+  canale?: Prisma.EnumDocumentoCanaleNullableFilter<"Documento"> | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.StringNullableFilter<"Documento"> | string | null
+  dataProtocollo?: Prisma.DateTimeNullableFilter<"Documento"> | Date | string | null
+  mittente?: Prisma.StringNullableFilter<"Documento"> | string | null
+  destinatario?: Prisma.StringNullableFilter<"Documento"> | string | null
+  pecMessageId?: Prisma.StringNullableFilter<"Documento"> | string | null
+  pecRicevutaAccettazioneId?: Prisma.StringNullableFilter<"Documento"> | string | null
+  pecRicevutaConsegnaId?: Prisma.StringNullableFilter<"Documento"> | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFilter<"Documento"> | boolean
   mimeType?: Prisma.StringNullableFilter<"Documento"> | string | null
   dimensioneBytes?: Prisma.IntNullableFilter<"Documento"> | number | null
   checksumSha256?: Prisma.StringNullableFilter<"Documento"> | string | null
@@ -453,6 +553,16 @@ export type DocumentoOrderByWithAggregationInput = {
   nome?: Prisma.SortOrder
   tipologia?: Prisma.SortOrder
   statoDocumento?: Prisma.SortOrder
+  direzione?: Prisma.SortOrderInput | Prisma.SortOrder
+  canale?: Prisma.SortOrderInput | Prisma.SortOrder
+  numeroProtocollo?: Prisma.SortOrderInput | Prisma.SortOrder
+  dataProtocollo?: Prisma.SortOrderInput | Prisma.SortOrder
+  mittente?: Prisma.SortOrderInput | Prisma.SortOrder
+  destinatario?: Prisma.SortOrderInput | Prisma.SortOrder
+  pecMessageId?: Prisma.SortOrderInput | Prisma.SortOrder
+  pecRicevutaAccettazioneId?: Prisma.SortOrderInput | Prisma.SortOrder
+  pecRicevutaConsegnaId?: Prisma.SortOrderInput | Prisma.SortOrder
+  pecWarningMancataRicevuta?: Prisma.SortOrder
   mimeType?: Prisma.SortOrderInput | Prisma.SortOrder
   dimensioneBytes?: Prisma.SortOrderInput | Prisma.SortOrder
   checksumSha256?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -488,6 +598,16 @@ export type DocumentoScalarWhereWithAggregatesInput = {
   nome?: Prisma.StringWithAggregatesFilter<"Documento"> | string
   tipologia?: Prisma.EnumTipologiaDocumentoWithAggregatesFilter<"Documento"> | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoWithAggregatesFilter<"Documento"> | $Enums.StatoDocumento
+  direzione?: Prisma.EnumDocumentoDirezioneNullableWithAggregatesFilter<"Documento"> | $Enums.DocumentoDirezione | null
+  canale?: Prisma.EnumDocumentoCanaleNullableWithAggregatesFilter<"Documento"> | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
+  dataProtocollo?: Prisma.DateTimeNullableWithAggregatesFilter<"Documento"> | Date | string | null
+  mittente?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
+  destinatario?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
+  pecMessageId?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
+  pecRicevutaAccettazioneId?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
+  pecRicevutaConsegnaId?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolWithAggregatesFilter<"Documento"> | boolean
   mimeType?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
   dimensioneBytes?: Prisma.IntNullableWithAggregatesFilter<"Documento"> | number | null
   checksumSha256?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
@@ -515,6 +635,16 @@ export type DocumentoCreateInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -542,6 +672,16 @@ export type DocumentoUncheckedCreateInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -569,6 +709,16 @@ export type DocumentoUpdateInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -596,6 +746,16 @@ export type DocumentoUncheckedUpdateInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -623,6 +783,16 @@ export type DocumentoCreateManyInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -650,6 +820,16 @@ export type DocumentoUpdateManyMutationInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -670,6 +850,16 @@ export type DocumentoUncheckedUpdateManyInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -707,6 +897,16 @@ export type DocumentoCountOrderByAggregateInput = {
   nome?: Prisma.SortOrder
   tipologia?: Prisma.SortOrder
   statoDocumento?: Prisma.SortOrder
+  direzione?: Prisma.SortOrder
+  canale?: Prisma.SortOrder
+  numeroProtocollo?: Prisma.SortOrder
+  dataProtocollo?: Prisma.SortOrder
+  mittente?: Prisma.SortOrder
+  destinatario?: Prisma.SortOrder
+  pecMessageId?: Prisma.SortOrder
+  pecRicevutaAccettazioneId?: Prisma.SortOrder
+  pecRicevutaConsegnaId?: Prisma.SortOrder
+  pecWarningMancataRicevuta?: Prisma.SortOrder
   mimeType?: Prisma.SortOrder
   dimensioneBytes?: Prisma.SortOrder
   checksumSha256?: Prisma.SortOrder
@@ -738,6 +938,16 @@ export type DocumentoMaxOrderByAggregateInput = {
   nome?: Prisma.SortOrder
   tipologia?: Prisma.SortOrder
   statoDocumento?: Prisma.SortOrder
+  direzione?: Prisma.SortOrder
+  canale?: Prisma.SortOrder
+  numeroProtocollo?: Prisma.SortOrder
+  dataProtocollo?: Prisma.SortOrder
+  mittente?: Prisma.SortOrder
+  destinatario?: Prisma.SortOrder
+  pecMessageId?: Prisma.SortOrder
+  pecRicevutaAccettazioneId?: Prisma.SortOrder
+  pecRicevutaConsegnaId?: Prisma.SortOrder
+  pecWarningMancataRicevuta?: Prisma.SortOrder
   mimeType?: Prisma.SortOrder
   dimensioneBytes?: Prisma.SortOrder
   checksumSha256?: Prisma.SortOrder
@@ -765,6 +975,16 @@ export type DocumentoMinOrderByAggregateInput = {
   nome?: Prisma.SortOrder
   tipologia?: Prisma.SortOrder
   statoDocumento?: Prisma.SortOrder
+  direzione?: Prisma.SortOrder
+  canale?: Prisma.SortOrder
+  numeroProtocollo?: Prisma.SortOrder
+  dataProtocollo?: Prisma.SortOrder
+  mittente?: Prisma.SortOrder
+  destinatario?: Prisma.SortOrder
+  pecMessageId?: Prisma.SortOrder
+  pecRicevutaAccettazioneId?: Prisma.SortOrder
+  pecRicevutaConsegnaId?: Prisma.SortOrder
+  pecWarningMancataRicevuta?: Prisma.SortOrder
   mimeType?: Prisma.SortOrder
   dimensioneBytes?: Prisma.SortOrder
   checksumSha256?: Prisma.SortOrder
@@ -1051,6 +1271,14 @@ export type EnumStatoDocumentoFieldUpdateOperationsInput = {
   set?: $Enums.StatoDocumento
 }
 
+export type NullableEnumDocumentoDirezioneFieldUpdateOperationsInput = {
+  set?: $Enums.DocumentoDirezione | null
+}
+
+export type NullableEnumDocumentoCanaleFieldUpdateOperationsInput = {
+  set?: $Enums.DocumentoCanale | null
+}
+
 export type DocumentoCreateNestedManyWithoutReportInput = {
   create?: Prisma.XOR<Prisma.DocumentoCreateWithoutReportInput, Prisma.DocumentoUncheckedCreateWithoutReportInput> | Prisma.DocumentoCreateWithoutReportInput[] | Prisma.DocumentoUncheckedCreateWithoutReportInput[]
   connectOrCreate?: Prisma.DocumentoCreateOrConnectWithoutReportInput | Prisma.DocumentoCreateOrConnectWithoutReportInput[]
@@ -1098,6 +1326,16 @@ export type DocumentoCreateWithoutUploadedByUserInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -1124,6 +1362,16 @@ export type DocumentoUncheckedCreateWithoutUploadedByUserInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -1179,6 +1427,16 @@ export type DocumentoScalarWhereInput = {
   nome?: Prisma.StringFilter<"Documento"> | string
   tipologia?: Prisma.EnumTipologiaDocumentoFilter<"Documento"> | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFilter<"Documento"> | $Enums.StatoDocumento
+  direzione?: Prisma.EnumDocumentoDirezioneNullableFilter<"Documento"> | $Enums.DocumentoDirezione | null
+  canale?: Prisma.EnumDocumentoCanaleNullableFilter<"Documento"> | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.StringNullableFilter<"Documento"> | string | null
+  dataProtocollo?: Prisma.DateTimeNullableFilter<"Documento"> | Date | string | null
+  mittente?: Prisma.StringNullableFilter<"Documento"> | string | null
+  destinatario?: Prisma.StringNullableFilter<"Documento"> | string | null
+  pecMessageId?: Prisma.StringNullableFilter<"Documento"> | string | null
+  pecRicevutaAccettazioneId?: Prisma.StringNullableFilter<"Documento"> | string | null
+  pecRicevutaConsegnaId?: Prisma.StringNullableFilter<"Documento"> | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFilter<"Documento"> | boolean
   mimeType?: Prisma.StringNullableFilter<"Documento"> | string | null
   dimensioneBytes?: Prisma.IntNullableFilter<"Documento"> | number | null
   checksumSha256?: Prisma.StringNullableFilter<"Documento"> | string | null
@@ -1206,6 +1464,16 @@ export type DocumentoCreateWithoutConcessioneInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -1232,6 +1500,16 @@ export type DocumentoUncheckedCreateWithoutConcessioneInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -1284,6 +1562,16 @@ export type DocumentoCreateWithoutCriticitaInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -1310,6 +1598,16 @@ export type DocumentoUncheckedCreateWithoutCriticitaInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -1362,6 +1660,16 @@ export type DocumentoCreateWithoutProcedimentoInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -1388,6 +1696,16 @@ export type DocumentoUncheckedCreateWithoutProcedimentoInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -1440,6 +1758,16 @@ export type DocumentoCreateWithoutSopralluogoInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -1466,6 +1794,16 @@ export type DocumentoUncheckedCreateWithoutSopralluogoInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -1518,6 +1856,16 @@ export type DocumentoCreateWithoutPagamentoInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -1544,6 +1892,16 @@ export type DocumentoUncheckedCreateWithoutPagamentoInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -1596,6 +1954,16 @@ export type DocumentoCreateWithoutReportInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -1622,6 +1990,16 @@ export type DocumentoUncheckedCreateWithoutReportInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -1674,6 +2052,16 @@ export type DocumentoCreateManyUploadedByUserInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -1700,6 +2088,16 @@ export type DocumentoUpdateWithoutUploadedByUserInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1726,6 +2124,16 @@ export type DocumentoUncheckedUpdateWithoutUploadedByUserInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1752,6 +2160,16 @@ export type DocumentoUncheckedUpdateManyWithoutUploadedByUserInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1778,6 +2196,16 @@ export type DocumentoCreateManyConcessioneInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -1804,6 +2232,16 @@ export type DocumentoUpdateWithoutConcessioneInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1830,6 +2268,16 @@ export type DocumentoUncheckedUpdateWithoutConcessioneInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1856,6 +2304,16 @@ export type DocumentoUncheckedUpdateManyWithoutConcessioneInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1882,6 +2340,16 @@ export type DocumentoCreateManyCriticitaInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -1908,6 +2376,16 @@ export type DocumentoUpdateWithoutCriticitaInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1934,6 +2412,16 @@ export type DocumentoUncheckedUpdateWithoutCriticitaInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1960,6 +2448,16 @@ export type DocumentoUncheckedUpdateManyWithoutCriticitaInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1986,6 +2484,16 @@ export type DocumentoCreateManyProcedimentoInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -2012,6 +2520,16 @@ export type DocumentoUpdateWithoutProcedimentoInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2038,6 +2556,16 @@ export type DocumentoUncheckedUpdateWithoutProcedimentoInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2064,6 +2592,16 @@ export type DocumentoUncheckedUpdateManyWithoutProcedimentoInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2090,6 +2628,16 @@ export type DocumentoCreateManySopralluogoInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -2116,6 +2664,16 @@ export type DocumentoUpdateWithoutSopralluogoInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2142,6 +2700,16 @@ export type DocumentoUncheckedUpdateWithoutSopralluogoInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2168,6 +2736,16 @@ export type DocumentoUncheckedUpdateManyWithoutSopralluogoInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2194,6 +2772,16 @@ export type DocumentoCreateManyPagamentoInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -2220,6 +2808,16 @@ export type DocumentoUpdateWithoutPagamentoInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2246,6 +2844,16 @@ export type DocumentoUncheckedUpdateWithoutPagamentoInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2272,6 +2880,16 @@ export type DocumentoUncheckedUpdateManyWithoutPagamentoInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2298,6 +2916,16 @@ export type DocumentoCreateManyReportInput = {
   nome: string
   tipologia: $Enums.TipologiaDocumento
   statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
@@ -2324,6 +2952,16 @@ export type DocumentoUpdateWithoutReportInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2350,6 +2988,16 @@ export type DocumentoUncheckedUpdateWithoutReportInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2376,6 +3024,16 @@ export type DocumentoUncheckedUpdateManyWithoutReportInput = {
   nome?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
   statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2404,6 +3062,16 @@ export type DocumentoSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   nome?: boolean
   tipologia?: boolean
   statoDocumento?: boolean
+  direzione?: boolean
+  canale?: boolean
+  numeroProtocollo?: boolean
+  dataProtocollo?: boolean
+  mittente?: boolean
+  destinatario?: boolean
+  pecMessageId?: boolean
+  pecRicevutaAccettazioneId?: boolean
+  pecRicevutaConsegnaId?: boolean
+  pecWarningMancataRicevuta?: boolean
   mimeType?: boolean
   dimensioneBytes?: boolean
   checksumSha256?: boolean
@@ -2438,6 +3106,16 @@ export type DocumentoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   nome?: boolean
   tipologia?: boolean
   statoDocumento?: boolean
+  direzione?: boolean
+  canale?: boolean
+  numeroProtocollo?: boolean
+  dataProtocollo?: boolean
+  mittente?: boolean
+  destinatario?: boolean
+  pecMessageId?: boolean
+  pecRicevutaAccettazioneId?: boolean
+  pecRicevutaConsegnaId?: boolean
+  pecWarningMancataRicevuta?: boolean
   mimeType?: boolean
   dimensioneBytes?: boolean
   checksumSha256?: boolean
@@ -2472,6 +3150,16 @@ export type DocumentoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   nome?: boolean
   tipologia?: boolean
   statoDocumento?: boolean
+  direzione?: boolean
+  canale?: boolean
+  numeroProtocollo?: boolean
+  dataProtocollo?: boolean
+  mittente?: boolean
+  destinatario?: boolean
+  pecMessageId?: boolean
+  pecRicevutaAccettazioneId?: boolean
+  pecRicevutaConsegnaId?: boolean
+  pecWarningMancataRicevuta?: boolean
   mimeType?: boolean
   dimensioneBytes?: boolean
   checksumSha256?: boolean
@@ -2506,6 +3194,16 @@ export type DocumentoSelectScalar = {
   nome?: boolean
   tipologia?: boolean
   statoDocumento?: boolean
+  direzione?: boolean
+  canale?: boolean
+  numeroProtocollo?: boolean
+  dataProtocollo?: boolean
+  mittente?: boolean
+  destinatario?: boolean
+  pecMessageId?: boolean
+  pecRicevutaAccettazioneId?: boolean
+  pecRicevutaConsegnaId?: boolean
+  pecWarningMancataRicevuta?: boolean
   mimeType?: boolean
   dimensioneBytes?: boolean
   checksumSha256?: boolean
@@ -2528,7 +3226,7 @@ export type DocumentoSelectScalar = {
   updatedAt?: boolean
 }
 
-export type DocumentoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nome" | "tipologia" | "statoDocumento" | "mimeType" | "dimensioneBytes" | "checksumSha256" | "url" | "storagePath" | "nomeStorage" | "dataDocumento" | "descrizione" | "uploadedByUserId" | "uploadedByUserEmail" | "uploadedByUserRole" | "archivedAt" | "concessioneId" | "criticitaId" | "procedimentoId" | "sopralluogoId" | "pagamentoId" | "reportId" | "createdAt" | "updatedAt", ExtArgs["result"]["documento"]>
+export type DocumentoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nome" | "tipologia" | "statoDocumento" | "direzione" | "canale" | "numeroProtocollo" | "dataProtocollo" | "mittente" | "destinatario" | "pecMessageId" | "pecRicevutaAccettazioneId" | "pecRicevutaConsegnaId" | "pecWarningMancataRicevuta" | "mimeType" | "dimensioneBytes" | "checksumSha256" | "url" | "storagePath" | "nomeStorage" | "dataDocumento" | "descrizione" | "uploadedByUserId" | "uploadedByUserEmail" | "uploadedByUserRole" | "archivedAt" | "concessioneId" | "criticitaId" | "procedimentoId" | "sopralluogoId" | "pagamentoId" | "reportId" | "createdAt" | "updatedAt", ExtArgs["result"]["documento"]>
 export type DocumentoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   uploadedByUser?: boolean | Prisma.Documento$uploadedByUserArgs<ExtArgs>
   concessione?: boolean | Prisma.Documento$concessioneArgs<ExtArgs>
@@ -2573,6 +3271,16 @@ export type $DocumentoPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     nome: string
     tipologia: $Enums.TipologiaDocumento
     statoDocumento: $Enums.StatoDocumento
+    direzione: $Enums.DocumentoDirezione | null
+    canale: $Enums.DocumentoCanale | null
+    numeroProtocollo: string | null
+    dataProtocollo: Date | null
+    mittente: string | null
+    destinatario: string | null
+    pecMessageId: string | null
+    pecRicevutaAccettazioneId: string | null
+    pecRicevutaConsegnaId: string | null
+    pecWarningMancataRicevuta: boolean
     mimeType: string | null
     dimensioneBytes: number | null
     checksumSha256: string | null
@@ -3027,6 +3735,16 @@ export interface DocumentoFieldRefs {
   readonly nome: Prisma.FieldRef<"Documento", 'String'>
   readonly tipologia: Prisma.FieldRef<"Documento", 'TipologiaDocumento'>
   readonly statoDocumento: Prisma.FieldRef<"Documento", 'StatoDocumento'>
+  readonly direzione: Prisma.FieldRef<"Documento", 'DocumentoDirezione'>
+  readonly canale: Prisma.FieldRef<"Documento", 'DocumentoCanale'>
+  readonly numeroProtocollo: Prisma.FieldRef<"Documento", 'String'>
+  readonly dataProtocollo: Prisma.FieldRef<"Documento", 'DateTime'>
+  readonly mittente: Prisma.FieldRef<"Documento", 'String'>
+  readonly destinatario: Prisma.FieldRef<"Documento", 'String'>
+  readonly pecMessageId: Prisma.FieldRef<"Documento", 'String'>
+  readonly pecRicevutaAccettazioneId: Prisma.FieldRef<"Documento", 'String'>
+  readonly pecRicevutaConsegnaId: Prisma.FieldRef<"Documento", 'String'>
+  readonly pecWarningMancataRicevuta: Prisma.FieldRef<"Documento", 'Boolean'>
   readonly mimeType: Prisma.FieldRef<"Documento", 'String'>
   readonly dimensioneBytes: Prisma.FieldRef<"Documento", 'Int'>
   readonly checksumSha256: Prisma.FieldRef<"Documento", 'String'>

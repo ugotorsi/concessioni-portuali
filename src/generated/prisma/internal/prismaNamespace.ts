@@ -1793,6 +1793,16 @@ export const DocumentoScalarFieldEnum = {
   nome: 'nome',
   tipologia: 'tipologia',
   statoDocumento: 'statoDocumento',
+  direzione: 'direzione',
+  canale: 'canale',
+  numeroProtocollo: 'numeroProtocollo',
+  dataProtocollo: 'dataProtocollo',
+  mittente: 'mittente',
+  destinatario: 'destinatario',
+  pecMessageId: 'pecMessageId',
+  pecRicevutaAccettazioneId: 'pecRicevutaAccettazioneId',
+  pecRicevutaConsegnaId: 'pecRicevutaConsegnaId',
+  pecWarningMancataRicevuta: 'pecWarningMancataRicevuta',
   mimeType: 'mimeType',
   dimensioneBytes: 'dimensioneBytes',
   checksumSha256: 'checksumSha256',
@@ -2375,6 +2385,34 @@ export type EnumStatoDocumentoFieldRefInput<$PrismaModel> = FieldRefInputType<$P
  * Reference to a field of type 'StatoDocumento[]'
  */
 export type ListEnumStatoDocumentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatoDocumento[]'>
+    
+
+
+/**
+ * Reference to a field of type 'DocumentoDirezione'
+ */
+export type EnumDocumentoDirezioneFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentoDirezione'>
+    
+
+
+/**
+ * Reference to a field of type 'DocumentoDirezione[]'
+ */
+export type ListEnumDocumentoDirezioneFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentoDirezione[]'>
+    
+
+
+/**
+ * Reference to a field of type 'DocumentoCanale'
+ */
+export type EnumDocumentoCanaleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentoCanale'>
+    
+
+
+/**
+ * Reference to a field of type 'DocumentoCanale[]'
+ */
+export type ListEnumDocumentoCanaleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentoCanale[]'>
     
 
 

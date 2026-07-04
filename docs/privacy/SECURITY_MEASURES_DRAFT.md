@@ -19,6 +19,7 @@ Non rappresenta una certificazione security/compliance definitiva.
 - Generazione PDF server-side.
 - Seed demo controllato per ambiente locale/test.
 - Test automatici unit/e2e su auth, ruoli, headers, audit e policy PDF.
+- Metadati protocollo/PEC baseline su documenti con warning ricevute incomplete (uso istruttorio, senza integrazione provider PEC).
 
 ## 2. Misure da rafforzare prima della produzione
 - Applicazione end-to-end password policy su workflow cambio/reset password e rotazione credenziali.
@@ -40,6 +41,7 @@ Non rappresenta una certificazione security/compliance definitiva.
 - Fallback in-memory mantenuto solo per dev/demo/CI; per produzione multi-istanza usare backend distribuito configurato via env.
 - Audit hash chain applicativo non equivale a conservazione forense WORM.
 - Hardening avanzato e posture enterprise ancora in roadmap.
+- Metadati protocollo/PEC non equivalgono a protocollazione legale o conservazione a norma.
 
 ## 4. Priorita raccomandate
 1. IAM hardening: MFA, policy password, session controls.

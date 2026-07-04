@@ -193,6 +193,17 @@ Perimetro e limiti:
 - nessun blob binario su database;
 - nessuna conservazione sostitutiva/firma/protocollazione a norma in questa fase.
 
+## Protocollo e metadati PEC baseline (Issue #19)
+- Estensione metadata documento con campi istruttori: direzione, canale, numero/data protocollo, mittente/destinatario, Message-ID PEC e riferimenti ricevute.
+- Warning operativo automatico su documenti canale `PEC` con ricevute incomplete.
+- Filtri e colonne dedicate nel registro documentale e pannelli documenti collegati.
+- Sintesi protocollo/PEC inclusa nel PDF report istituzionale come supporto istruttorio.
+
+Perimetro e limiti:
+- metadato registrato a fini istruttori;
+- nessuna integrazione con provider PEC reali;
+- nessuna protocollazione legale automatica o conservazione a norma in questa baseline.
+
 ### Institutional PDF polish (Issue #16)
 - Template PDF istituzionale raffinato con frontespizio, sommario sezioni e layout piu formale.
 - Header ricorrente con riferimenti applicativi/data generazione.

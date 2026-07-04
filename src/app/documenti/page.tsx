@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { BACKOFFICE_ROLES, requireRole } from "@/lib/auth";
 import { formatDateIT, formatEnumLabel } from "@/lib/utils";
 import { archiveDocumentoAction, createDocumentoUploadAction, updateDocumentoMetadataAction } from "@/server/actions/documenti";
+import { DOCUMENT_CANALE_VALUES, DOCUMENT_DIREZIONE_VALUES } from "@/server/documents/protocollo";
 import {
   DOCUMENT_STATO_VALUES,
   getDocumentiFiltersData,
@@ -21,7 +22,18 @@ interface DocumentiPageProps {
     search?: string;
     tipologia?: (typeof DOCUMENT_TIPOLOGIA_VALUES)[number];
     stato?: DocumentoStatoFilter;
+    direzione?: (typeof DOCUMENT_DIREZIONE_VALUES)[number];
+    canale?: (typeof DOCUMENT_CANALE_VALUES)[number];
+    pecWarning?: "SI" | "NO";
   }>;
+}
+
+function toDateInputValue(value: Date | null): string {
+  if (!value) {
+    return "";
+  }
+
+  return value.toISOString().slice(0, 10);
 }
 
 export const dynamic = "force-dynamic";
@@ -37,6 +49,9 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
       search: params.search,
       tipologia: params.tipologia,
       stato: params.stato,
+      direzione: params.direzione,
+      canale: params.canale,
+      pecWarning: params.pecWarning,
     }),
   ]);
 
@@ -51,6 +66,9 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
           <p className="mt-1 text-sm text-slate-600">
             Baseline locale demo: metadati in database e file su storage locale configurabile.
           </p>
+          <p className="mt-1 text-xs text-slate-500">
+            Metadato registrato a fini istruttori: non sostituisce protocollazione o conservazione a norma.
+          </p>
         </div>
 
         <Card>
@@ -58,7 +76,7 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
             <CardTitle>Filtri documenti</CardTitle>
           </CardHeader>
           <CardContent>
-            <form className="grid gap-3 md:grid-cols-4" method="GET">
+            <form className="grid gap-3 md:grid-cols-6" method="GET">
               <Input name="search" placeholder="Ricerca per nome o descrizione" defaultValue={params.search ?? ""} />
               <Select name="tipologia" defaultValue={params.tipologia ?? ""}>
                 <option value="">Tutte le tipologie</option>
@@ -74,6 +92,27 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
                     {formatEnumLabel(value)}
                   </option>
                 ))}
+              </Select>
+              <Select name="direzione" defaultValue={params.direzione ?? ""}>
+                <option value="">Tutte le direzioni</option>
+                {filters.direzioni.map((item) => (
+                  <option key={item.value} value={item.value}>
+                    {item.label}
+                  </option>
+                ))}
+              </Select>
+              <Select name="canale" defaultValue={params.canale ?? ""}>
+                <option value="">Tutti i canali</option>
+                {filters.canali.map((item) => (
+                  <option key={item.value} value={item.value}>
+                    {item.label}
+                  </option>
+                ))}
+              </Select>
+              <Select name="pecWarning" defaultValue={params.pecWarning ?? ""}>
+                <option value="">Warning PEC: tutti</option>
+                <option value="SI">Con warning PEC</option>
+                <option value="NO">Senza warning PEC</option>
               </Select>
               <div className="flex items-center gap-2">
                 <Button type="submit">Applica</Button>
@@ -120,6 +159,56 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
                 <label className="text-sm text-slate-700 md:col-span-3">
                   Descrizione
                   <Textarea name="descrizione" rows={2} />
+                </label>
+                <label className="text-sm text-slate-700">
+                  Direzione
+                  <Select name="direzione" defaultValue="">
+                    <option value="">Non indicata</option>
+                    {filters.direzioni.map((item) => (
+                      <option key={item.value} value={item.value}>
+                        {item.label}
+                      </option>
+                    ))}
+                  </Select>
+                </label>
+                <label className="text-sm text-slate-700">
+                  Canale
+                  <Select name="canale" defaultValue="">
+                    <option value="">Non indicato</option>
+                    {filters.canali.map((item) => (
+                      <option key={item.value} value={item.value}>
+                        {item.label}
+                      </option>
+                    ))}
+                  </Select>
+                </label>
+                <label className="text-sm text-slate-700">
+                  Numero protocollo
+                  <Input name="numeroProtocollo" placeholder="Es. PG/2026/000123" />
+                </label>
+                <label className="text-sm text-slate-700">
+                  Data protocollo
+                  <Input name="dataProtocollo" type="date" />
+                </label>
+                <label className="text-sm text-slate-700">
+                  Mittente
+                  <Input name="mittente" placeholder="Mittente" />
+                </label>
+                <label className="text-sm text-slate-700">
+                  Destinatario
+                  <Input name="destinatario" placeholder="Destinatario" />
+                </label>
+                <label className="text-sm text-slate-700 md:col-span-3">
+                  PEC Message-ID
+                  <Input name="pecMessageId" placeholder="Message-ID PEC (se canale PEC)" />
+                </label>
+                <label className="text-sm text-slate-700">
+                  Ricevuta accettazione PEC
+                  <Input name="pecRicevutaAccettazioneId" placeholder="ID ricevuta" />
+                </label>
+                <label className="text-sm text-slate-700">
+                  Ricevuta consegna PEC
+                  <Input name="pecRicevutaConsegnaId" placeholder="ID ricevuta" />
                 </label>
                 <label className="text-sm text-slate-700">
                   Concessione
@@ -207,6 +296,7 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
                   <TableHead>Tipologia</TableHead>
                   <TableHead>Stato</TableHead>
                   <TableHead>Dimensione</TableHead>
+                  <TableHead>Protocollo/PEC</TableHead>
                   <TableHead>Data</TableHead>
                   <TableHead>Download</TableHead>
                   {canUpload ? <TableHead>Aggiorna</TableHead> : null}
@@ -219,6 +309,12 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
                     <TableCell>{formatEnumLabel(item.tipologia)}</TableCell>
                     <TableCell>{formatEnumLabel(item.statoDocumento)}</TableCell>
                     <TableCell>{item.dimensioneBytes !== null ? `${item.dimensioneBytes} bytes` : "-"}</TableCell>
+                    <TableCell className="text-xs text-slate-700">
+                      <div>{item.direzione ? formatEnumLabel(item.direzione) : "-"} / {item.canale ? formatEnumLabel(item.canale) : "-"}</div>
+                      <div>{item.numeroProtocollo ?? "Nessun protocollo"}</div>
+                      {item.dataProtocollo ? <div>{formatDateIT(item.dataProtocollo)}</div> : null}
+                      {item.pecWarningMancataRicevuta ? <div className="font-semibold text-amber-700">Warning PEC</div> : null}
+                    </TableCell>
                     <TableCell>{item.dataDocumento ? formatDateIT(item.dataDocumento) : formatDateIT(item.createdAt)}</TableCell>
                     <TableCell>
                       <a href={item.downloadUrl} className="text-sm underline underline-offset-4">
@@ -239,6 +335,29 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
                               ))}
                             </Select>
                             <Input name="descrizione" placeholder="Descrizione" />
+                            <Select name="direzione" defaultValue={item.direzione ?? ""}>
+                              <option value="">Direzione non indicata</option>
+                              {filters.direzioni.map((value) => (
+                                <option key={value.value} value={value.value}>
+                                  {value.label}
+                                </option>
+                              ))}
+                            </Select>
+                            <Select name="canale" defaultValue={item.canale ?? ""}>
+                              <option value="">Canale non indicato</option>
+                              {filters.canali.map((value) => (
+                                <option key={value.value} value={value.value}>
+                                  {value.label}
+                                </option>
+                              ))}
+                            </Select>
+                            <Input name="numeroProtocollo" defaultValue={item.numeroProtocollo ?? ""} placeholder="Numero protocollo" />
+                            <Input name="dataProtocollo" type="date" defaultValue={toDateInputValue(item.dataProtocollo)} />
+                            <Input name="mittente" defaultValue={item.mittente ?? ""} placeholder="Mittente" />
+                            <Input name="destinatario" defaultValue={item.destinatario ?? ""} placeholder="Destinatario" />
+                            <Input name="pecMessageId" defaultValue={item.pecMessageId ?? ""} placeholder="Message-ID PEC" />
+                            <Input name="pecRicevutaAccettazioneId" defaultValue={item.pecRicevutaAccettazioneId ?? ""} placeholder="ID ricevuta accettazione" />
+                            <Input name="pecRicevutaConsegnaId" defaultValue={item.pecRicevutaConsegnaId ?? ""} placeholder="ID ricevuta consegna" />
                             <Button type="submit" variant="outline">
                               Salva metadati
                             </Button>
@@ -258,7 +377,7 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
                 ))}
                 {items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={canUpload ? 7 : 6} className="text-center text-slate-500">
+                    <TableCell colSpan={canUpload ? 8 : 7} className="text-center text-slate-500">
                       Nessun documento trovato.
                     </TableCell>
                   </TableRow>

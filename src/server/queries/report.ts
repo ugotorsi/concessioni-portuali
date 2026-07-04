@@ -199,6 +199,11 @@ export interface ReportDetail {
     nome: string;
     tipologia: string;
     statoDocumento: string;
+    direzione: string | null;
+    canale: string | null;
+    numeroProtocollo: string | null;
+    dataProtocollo: Date | null;
+    pecWarningMancataRicevuta: boolean;
     url: string;
     dataDocumento: Date | null;
     createdAt: Date;
@@ -579,6 +584,11 @@ export async function getReportDetail(id: string): Promise<ReportDetail | null> 
         nome: item.nome,
         tipologia: item.tipologia,
         statoDocumento: item.statoDocumento,
+        direzione: item.direzione,
+        canale: item.canale,
+        numeroProtocollo: item.numeroProtocollo,
+        dataProtocollo: item.dataProtocollo,
+        pecWarningMancataRicevuta: item.pecWarningMancataRicevuta,
         url: item.url ?? `/documenti/${item.id}/download`,
         dataDocumento: item.dataDocumento,
         createdAt: item.createdAt,

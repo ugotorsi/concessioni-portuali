@@ -29,6 +29,12 @@ test("admin uploads and downloads a fascicolo document", async ({ page }) => {
   await uploadForm.locator('input[name="file"]').setInputFiles(filePath);
   await uploadForm.locator('input[name="nome"]').fill(uniqueTitle);
   await uploadForm.locator('select[name="tipologia"]').selectOption("VERBALE");
+  await uploadForm.locator('select[name="direzione"]').selectOption("ENTRATA");
+  await uploadForm.locator('select[name="canale"]').selectOption("PEC");
+  await uploadForm.locator('input[name="numeroProtocollo"]').fill(`PG/2026/${Date.now()}`);
+  await uploadForm.locator('input[name="dataProtocollo"]').fill("2026-03-10");
+  await uploadForm.locator('input[name="pecMessageId"]').fill(`<e2e-${Date.now()}@pec.demo>`);
+  await uploadForm.locator('input[name="pecRicevutaAccettazioneId"]').fill("ACC-E2E-001");
   await uploadForm.locator('select[name="concessioneId"]').selectOption({ index: 1 });
   await Promise.all([
     page.waitForResponse((response) => response.request().method() === "POST"),
@@ -40,6 +46,7 @@ test("admin uploads and downloads a fascicolo document", async ({ page }) => {
   await page.getByRole("button", { name: "Applica" }).click();
   const uploadedRow = page.locator("tr", { hasText: uniqueTitle }).first();
   await expect(uploadedRow).toBeVisible({ timeout: 20000 });
+  await expect(uploadedRow).toContainText("Warning PEC");
 
   const [download] = await Promise.all([
     page.waitForEvent("download"),

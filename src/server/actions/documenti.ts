@@ -8,6 +8,7 @@ import { BACKOFFICE_ROLES, getCurrentUser, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 import { buildLinkedEntityMetadata, parseUploadDocumentFormData, DOCUMENT_TIPOLOGIA_VALUES } from "@/server/documents/validation";
+import { DOCUMENT_CANALE_VALUES, DOCUMENT_DIREZIONE_VALUES, normalizeProtocolloMetadata } from "@/server/documents/protocollo";
 import { storeDocumentFile } from "@/server/documents/storage";
 
 async function assertLinkedEntitiesExist(input: {
@@ -119,6 +120,16 @@ export async function createDocumentoUploadAction(formData: FormData) {
       tipologia: payload.tipologia,
       descrizione: payload.descrizione ?? null,
       dataDocumento: payload.dataDocumento ?? null,
+      direzione: payload.direzione ?? null,
+      canale: payload.canale ?? null,
+      numeroProtocollo: payload.numeroProtocollo ?? null,
+      dataProtocollo: payload.dataProtocollo ?? null,
+      mittente: payload.mittente ?? null,
+      destinatario: payload.destinatario ?? null,
+      pecMessageId: payload.pecMessageId ?? null,
+      pecRicevutaAccettazioneId: payload.pecRicevutaAccettazioneId ?? null,
+      pecRicevutaConsegnaId: payload.pecRicevutaConsegnaId ?? null,
+      pecWarningMancataRicevuta: payload.pecWarningMancataRicevuta,
       uploadedByUserId: currentUser?.id ?? null,
       uploadedByUserEmail: currentUser?.email ?? null,
       uploadedByUserRole: role,
@@ -165,6 +176,14 @@ export async function createDocumentoUploadAction(formData: FormData) {
       mimeType: stored.mimeType,
       dimensioneBytes: stored.size,
       storagePath: stored.storagePath,
+      protocollo: {
+        direzione: payload.direzione ?? null,
+        canale: payload.canale ?? null,
+        numeroProtocollo: payload.numeroProtocollo ?? null,
+        dataProtocollo: payload.dataProtocollo?.toISOString() ?? null,
+        pecWarningMancataRicevuta: payload.pecWarningMancataRicevuta,
+      },
+      notaLegale: "Metadato registrato a fini istruttori",
       linkedEntities: linked,
     },
   });
@@ -258,6 +277,57 @@ const updateDocumentoMetadataSchema = z.object({
     .max(1000)
     .optional()
     .transform((value) => (value && value.length > 0 ? value : null)),
+  direzione: z
+    .enum(DOCUMENT_DIREZIONE_VALUES)
+    .optional()
+    .or(z.literal(""))
+    .transform((value) => (value ? value : undefined)),
+  canale: z
+    .enum(DOCUMENT_CANALE_VALUES)
+    .optional()
+    .or(z.literal(""))
+    .transform((value) => (value ? value : undefined)),
+  numeroProtocollo: z
+    .string()
+    .trim()
+    .max(120)
+    .optional()
+    .transform((value) => (value && value.length > 0 ? value : undefined)),
+  dataProtocollo: z
+    .string()
+    .trim()
+    .optional()
+    .transform((value) => (value && value.length > 0 ? value : undefined)),
+  mittente: z
+    .string()
+    .trim()
+    .max(240)
+    .optional()
+    .transform((value) => (value && value.length > 0 ? value : undefined)),
+  destinatario: z
+    .string()
+    .trim()
+    .max(240)
+    .optional()
+    .transform((value) => (value && value.length > 0 ? value : undefined)),
+  pecMessageId: z
+    .string()
+    .trim()
+    .max(240)
+    .optional()
+    .transform((value) => (value && value.length > 0 ? value : undefined)),
+  pecRicevutaAccettazioneId: z
+    .string()
+    .trim()
+    .max(240)
+    .optional()
+    .transform((value) => (value && value.length > 0 ? value : undefined)),
+  pecRicevutaConsegnaId: z
+    .string()
+    .trim()
+    .max(240)
+    .optional()
+    .transform((value) => (value && value.length > 0 ? value : undefined)),
 });
 
 export async function updateDocumentoMetadataAction(formData: FormData) {
@@ -281,11 +351,32 @@ export async function updateDocumentoMetadataAction(formData: FormData) {
     nome: formData.get("nome"),
     tipologia: formData.get("tipologia"),
     descrizione: formData.get("descrizione")?.toString(),
+    direzione: formData.get("direzione")?.toString(),
+    canale: formData.get("canale")?.toString(),
+    numeroProtocollo: formData.get("numeroProtocollo")?.toString(),
+    dataProtocollo: formData.get("dataProtocollo")?.toString(),
+    mittente: formData.get("mittente")?.toString(),
+    destinatario: formData.get("destinatario")?.toString(),
+    pecMessageId: formData.get("pecMessageId")?.toString(),
+    pecRicevutaAccettazioneId: formData.get("pecRicevutaAccettazioneId")?.toString(),
+    pecRicevutaConsegnaId: formData.get("pecRicevutaConsegnaId")?.toString(),
   });
 
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? "Dati documento non validi.");
   }
+
+  const protocolloMetadata = normalizeProtocolloMetadata({
+    direzione: parsed.data.direzione,
+    canale: parsed.data.canale,
+    numeroProtocollo: parsed.data.numeroProtocollo,
+    dataProtocollo: parsed.data.dataProtocollo,
+    mittente: parsed.data.mittente,
+    destinatario: parsed.data.destinatario,
+    pecMessageId: parsed.data.pecMessageId,
+    pecRicevutaAccettazioneId: parsed.data.pecRicevutaAccettazioneId,
+    pecRicevutaConsegnaId: parsed.data.pecRicevutaConsegnaId,
+  });
 
   const currentUser = await getCurrentUser();
 
@@ -295,6 +386,16 @@ export async function updateDocumentoMetadataAction(formData: FormData) {
       nome: parsed.data.nome,
       tipologia: parsed.data.tipologia,
       descrizione: parsed.data.descrizione,
+      direzione: protocolloMetadata.direzione ?? null,
+      canale: protocolloMetadata.canale ?? null,
+      numeroProtocollo: protocolloMetadata.numeroProtocollo ?? null,
+      dataProtocollo: protocolloMetadata.dataProtocollo ?? null,
+      mittente: protocolloMetadata.mittente ?? null,
+      destinatario: protocolloMetadata.destinatario ?? null,
+      pecMessageId: protocolloMetadata.pecMessageId ?? null,
+      pecRicevutaAccettazioneId: protocolloMetadata.pecRicevutaAccettazioneId ?? null,
+      pecRicevutaConsegnaId: protocolloMetadata.pecRicevutaConsegnaId ?? null,
+      pecWarningMancataRicevuta: protocolloMetadata.pecWarningMancataRicevuta,
     },
     select: {
       id: true,
@@ -314,7 +415,22 @@ export async function updateDocumentoMetadataAction(formData: FormData) {
     concessioneId: updated.concessioneId,
     actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
     metadata: {
-      changedFields: ["nome", "tipologia", "descrizione"],
+      changedFields: [
+        "nome",
+        "tipologia",
+        "descrizione",
+        "direzione",
+        "canale",
+        "numeroProtocollo",
+        "dataProtocollo",
+        "mittente",
+        "destinatario",
+        "pecMessageId",
+        "pecRicevutaAccettazioneId",
+        "pecRicevutaConsegnaId",
+        "pecWarningMancataRicevuta",
+      ],
+      notaLegale: "Metadato registrato a fini istruttori",
     },
   });
 

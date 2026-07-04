@@ -239,6 +239,19 @@ enum StatoDocumento {
   ARCHIVIATO
 }
 
+enum DocumentoDirezione {
+  ENTRATA
+  USCITA
+  INTERNO
+}
+
+enum DocumentoCanale {
+  UPLOAD
+  PEC
+  PROTOCOLLO_INTERNO
+  ALTRO
+}
+
 enum TipologiaReport {
   REPORT_MENSILE
   REPORT_CRITICITA
@@ -588,6 +601,16 @@ model Documento {
   nome                 String
   tipologia            TipologiaDocumento
   statoDocumento       StatoDocumento     @default(ATTIVO)
+  direzione            DocumentoDirezione?
+  canale               DocumentoCanale?
+  numeroProtocollo     String?
+  dataProtocollo       DateTime?
+  mittente             String?
+  destinatario         String?
+  pecMessageId         String?
+  pecRicevutaAccettazioneId String?
+  pecRicevutaConsegnaId String?
+  pecWarningMancataRicevuta Boolean       @default(false)
   mimeType             String?
   dimensioneBytes      Int?
   checksumSha256       String?
@@ -626,6 +649,11 @@ model Documento {
   @@index([pagamentoId])
   @@index([reportId])
   @@index([tipologia])
+  @@index([direzione])
+  @@index([canale])
+  @@index([numeroProtocollo])
+  @@index([dataProtocollo])
+  @@index([pecWarningMancataRicevuta])
   @@index([dataDocumento])
   @@index([createdAt])
 }

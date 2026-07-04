@@ -316,6 +316,25 @@ export const StatoDocumento = {
 export type StatoDocumento = (typeof StatoDocumento)[keyof typeof StatoDocumento]
 
 
+export const DocumentoDirezione = {
+  ENTRATA: 'ENTRATA',
+  USCITA: 'USCITA',
+  INTERNO: 'INTERNO'
+} as const
+
+export type DocumentoDirezione = (typeof DocumentoDirezione)[keyof typeof DocumentoDirezione]
+
+
+export const DocumentoCanale = {
+  UPLOAD: 'UPLOAD',
+  PEC: 'PEC',
+  PROTOCOLLO_INTERNO: 'PROTOCOLLO_INTERNO',
+  ALTRO: 'ALTRO'
+} as const
+
+export type DocumentoCanale = (typeof DocumentoCanale)[keyof typeof DocumentoCanale]
+
+
 export const TipologiaReport = {
   REPORT_MENSILE: 'REPORT_MENSILE',
   REPORT_CRITICITA: 'REPORT_CRITICITA',

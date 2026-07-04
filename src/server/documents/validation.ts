@@ -1,4 +1,11 @@
 import { z } from "zod";
+import {
+  DOCUMENT_CANALE_VALUES,
+  DOCUMENT_DIREZIONE_VALUES,
+  normalizeProtocolloMetadata,
+  type DocumentoCanaleValue,
+  type DocumentoDirezioneValue,
+} from "@/server/documents/protocollo";
 
 export const DOCUMENT_TIPOLOGIA_VALUES = [
   "TITOLO_CONCESSORIO",
@@ -69,6 +76,57 @@ const uploadMetadataSchema = z
       .trim()
       .optional()
       .transform((value) => (value && value.length > 0 ? value : undefined)),
+    direzione: z
+      .enum(DOCUMENT_DIREZIONE_VALUES)
+      .optional()
+      .or(z.literal(""))
+      .transform((value) => (value ? value : undefined)),
+    canale: z
+      .enum(DOCUMENT_CANALE_VALUES)
+      .optional()
+      .or(z.literal(""))
+      .transform((value) => (value ? value : undefined)),
+    numeroProtocollo: z
+      .string()
+      .trim()
+      .max(120, "Numero protocollo troppo lungo.")
+      .optional()
+      .transform((value) => (value && value.length > 0 ? value : undefined)),
+    dataProtocollo: z
+      .string()
+      .trim()
+      .optional()
+      .transform((value) => (value && value.length > 0 ? value : undefined)),
+    mittente: z
+      .string()
+      .trim()
+      .max(240, "Mittente troppo lungo.")
+      .optional()
+      .transform((value) => (value && value.length > 0 ? value : undefined)),
+    destinatario: z
+      .string()
+      .trim()
+      .max(240, "Destinatario troppo lungo.")
+      .optional()
+      .transform((value) => (value && value.length > 0 ? value : undefined)),
+    pecMessageId: z
+      .string()
+      .trim()
+      .max(240, "Message-ID PEC troppo lungo.")
+      .optional()
+      .transform((value) => (value && value.length > 0 ? value : undefined)),
+    pecRicevutaAccettazioneId: z
+      .string()
+      .trim()
+      .max(240, "ID ricevuta accettazione troppo lungo.")
+      .optional()
+      .transform((value) => (value && value.length > 0 ? value : undefined)),
+    pecRicevutaConsegnaId: z
+      .string()
+      .trim()
+      .max(240, "ID ricevuta consegna troppo lungo.")
+      .optional()
+      .transform((value) => (value && value.length > 0 ? value : undefined)),
     concessioneId: optionalId,
     criticitaId: optionalId,
     procedimentoId: optionalId,
@@ -104,6 +162,26 @@ const uploadMetadataSchema = z
         });
       }
     }
+
+    try {
+      normalizeProtocolloMetadata({
+        direzione: value.direzione,
+        canale: value.canale,
+        numeroProtocollo: value.numeroProtocollo,
+        dataProtocollo: value.dataProtocollo,
+        mittente: value.mittente,
+        destinatario: value.destinatario,
+        pecMessageId: value.pecMessageId,
+        pecRicevutaAccettazioneId: value.pecRicevutaAccettazioneId,
+        pecRicevutaConsegnaId: value.pecRicevutaConsegnaId,
+      });
+    } catch (error) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: error instanceof Error ? error.message : "Metadati protocollo/PEC non validi.",
+        path: ["numeroProtocollo"],
+      });
+    }
   });
 
 export interface ParsedUploadDocumentInput {
@@ -111,6 +189,16 @@ export interface ParsedUploadDocumentInput {
   tipologia: (typeof DOCUMENT_TIPOLOGIA_VALUES)[number];
   descrizione?: string;
   dataDocumento?: Date;
+  direzione?: DocumentoDirezioneValue;
+  canale?: DocumentoCanaleValue;
+  numeroProtocollo?: string;
+  dataProtocollo?: Date;
+  mittente?: string;
+  destinatario?: string;
+  pecMessageId?: string;
+  pecRicevutaAccettazioneId?: string;
+  pecRicevutaConsegnaId?: string;
+  pecWarningMancataRicevuta: boolean;
   file: File;
   concessioneId?: string;
   criticitaId?: string;
@@ -145,6 +233,15 @@ export function parseUploadDocumentFormData(formData: FormData): ParsedUploadDoc
     tipologia: formData.get("tipologia"),
     descrizione: formData.get("descrizione")?.toString(),
     dataDocumento: formData.get("dataDocumento")?.toString(),
+    direzione: formData.get("direzione")?.toString(),
+    canale: formData.get("canale")?.toString(),
+    numeroProtocollo: formData.get("numeroProtocollo")?.toString(),
+    dataProtocollo: formData.get("dataProtocollo")?.toString(),
+    mittente: formData.get("mittente")?.toString(),
+    destinatario: formData.get("destinatario")?.toString(),
+    pecMessageId: formData.get("pecMessageId")?.toString(),
+    pecRicevutaAccettazioneId: formData.get("pecRicevutaAccettazioneId")?.toString(),
+    pecRicevutaConsegnaId: formData.get("pecRicevutaConsegnaId")?.toString(),
     concessioneId: formData.get("concessioneId")?.toString(),
     criticitaId: formData.get("criticitaId")?.toString(),
     procedimentoId: formData.get("procedimentoId")?.toString(),
@@ -164,11 +261,33 @@ export function parseUploadDocumentFormData(formData: FormData): ParsedUploadDoc
 
   validateUploadFile(file);
 
+  const protocolloMetadata = normalizeProtocolloMetadata({
+    direzione: parsed.data.direzione,
+    canale: parsed.data.canale,
+    numeroProtocollo: parsed.data.numeroProtocollo,
+    dataProtocollo: parsed.data.dataProtocollo,
+    mittente: parsed.data.mittente,
+    destinatario: parsed.data.destinatario,
+    pecMessageId: parsed.data.pecMessageId,
+    pecRicevutaAccettazioneId: parsed.data.pecRicevutaAccettazioneId,
+    pecRicevutaConsegnaId: parsed.data.pecRicevutaConsegnaId,
+  });
+
   return {
     nome: parsed.data.nome ?? file.name,
     tipologia: parsed.data.tipologia,
     descrizione: parsed.data.descrizione,
     dataDocumento: parsed.data.dataDocumento ? new Date(parsed.data.dataDocumento) : undefined,
+    direzione: protocolloMetadata.direzione,
+    canale: protocolloMetadata.canale,
+    numeroProtocollo: protocolloMetadata.numeroProtocollo,
+    dataProtocollo: protocolloMetadata.dataProtocollo,
+    mittente: protocolloMetadata.mittente,
+    destinatario: protocolloMetadata.destinatario,
+    pecMessageId: protocolloMetadata.pecMessageId,
+    pecRicevutaAccettazioneId: protocolloMetadata.pecRicevutaAccettazioneId,
+    pecRicevutaConsegnaId: protocolloMetadata.pecRicevutaConsegnaId,
+    pecWarningMancataRicevuta: protocolloMetadata.pecWarningMancataRicevuta,
     file,
     concessioneId: parsed.data.concessioneId,
     criticitaId: parsed.data.criticitaId,

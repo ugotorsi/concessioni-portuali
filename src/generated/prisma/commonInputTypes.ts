@@ -712,6 +712,20 @@ export type EnumStatoDocumentoFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumStatoDocumentoFilter<$PrismaModel> | $Enums.StatoDocumento
 }
 
+export type EnumDocumentoDirezioneNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentoDirezione | Prisma.EnumDocumentoDirezioneFieldRefInput<$PrismaModel> | null
+  in?: $Enums.DocumentoDirezione[] | Prisma.ListEnumDocumentoDirezioneFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.DocumentoDirezione[] | Prisma.ListEnumDocumentoDirezioneFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumDocumentoDirezioneNullableFilter<$PrismaModel> | $Enums.DocumentoDirezione | null
+}
+
+export type EnumDocumentoCanaleNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentoCanale | Prisma.EnumDocumentoCanaleFieldRefInput<$PrismaModel> | null
+  in?: $Enums.DocumentoCanale[] | Prisma.ListEnumDocumentoCanaleFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.DocumentoCanale[] | Prisma.ListEnumDocumentoCanaleFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumDocumentoCanaleNullableFilter<$PrismaModel> | $Enums.DocumentoCanale | null
+}
+
 export type EnumTipologiaDocumentoWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.TipologiaDocumento | Prisma.EnumTipologiaDocumentoFieldRefInput<$PrismaModel>
   in?: $Enums.TipologiaDocumento[] | Prisma.ListEnumTipologiaDocumentoFieldRefInput<$PrismaModel>
@@ -730,6 +744,26 @@ export type EnumStatoDocumentoWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumStatoDocumentoFilter<$PrismaModel>
   _max?: Prisma.NestedEnumStatoDocumentoFilter<$PrismaModel>
+}
+
+export type EnumDocumentoDirezioneNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentoDirezione | Prisma.EnumDocumentoDirezioneFieldRefInput<$PrismaModel> | null
+  in?: $Enums.DocumentoDirezione[] | Prisma.ListEnumDocumentoDirezioneFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.DocumentoDirezione[] | Prisma.ListEnumDocumentoDirezioneFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumDocumentoDirezioneNullableWithAggregatesFilter<$PrismaModel> | $Enums.DocumentoDirezione | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocumentoDirezioneNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocumentoDirezioneNullableFilter<$PrismaModel>
+}
+
+export type EnumDocumentoCanaleNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentoCanale | Prisma.EnumDocumentoCanaleFieldRefInput<$PrismaModel> | null
+  in?: $Enums.DocumentoCanale[] | Prisma.ListEnumDocumentoCanaleFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.DocumentoCanale[] | Prisma.ListEnumDocumentoCanaleFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumDocumentoCanaleNullableWithAggregatesFilter<$PrismaModel> | $Enums.DocumentoCanale | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocumentoCanaleNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocumentoCanaleNullableFilter<$PrismaModel>
 }
 
 export type EnumTipologiaReportFilter<$PrismaModel = never> = {
@@ -1501,6 +1535,20 @@ export type NestedEnumStatoDocumentoFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumStatoDocumentoFilter<$PrismaModel> | $Enums.StatoDocumento
 }
 
+export type NestedEnumDocumentoDirezioneNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentoDirezione | Prisma.EnumDocumentoDirezioneFieldRefInput<$PrismaModel> | null
+  in?: $Enums.DocumentoDirezione[] | Prisma.ListEnumDocumentoDirezioneFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.DocumentoDirezione[] | Prisma.ListEnumDocumentoDirezioneFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumDocumentoDirezioneNullableFilter<$PrismaModel> | $Enums.DocumentoDirezione | null
+}
+
+export type NestedEnumDocumentoCanaleNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentoCanale | Prisma.EnumDocumentoCanaleFieldRefInput<$PrismaModel> | null
+  in?: $Enums.DocumentoCanale[] | Prisma.ListEnumDocumentoCanaleFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.DocumentoCanale[] | Prisma.ListEnumDocumentoCanaleFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumDocumentoCanaleNullableFilter<$PrismaModel> | $Enums.DocumentoCanale | null
+}
+
 export type NestedEnumTipologiaDocumentoWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.TipologiaDocumento | Prisma.EnumTipologiaDocumentoFieldRefInput<$PrismaModel>
   in?: $Enums.TipologiaDocumento[] | Prisma.ListEnumTipologiaDocumentoFieldRefInput<$PrismaModel>
@@ -1519,6 +1567,26 @@ export type NestedEnumStatoDocumentoWithAggregatesFilter<$PrismaModel = never> =
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumStatoDocumentoFilter<$PrismaModel>
   _max?: Prisma.NestedEnumStatoDocumentoFilter<$PrismaModel>
+}
+
+export type NestedEnumDocumentoDirezioneNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentoDirezione | Prisma.EnumDocumentoDirezioneFieldRefInput<$PrismaModel> | null
+  in?: $Enums.DocumentoDirezione[] | Prisma.ListEnumDocumentoDirezioneFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.DocumentoDirezione[] | Prisma.ListEnumDocumentoDirezioneFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumDocumentoDirezioneNullableWithAggregatesFilter<$PrismaModel> | $Enums.DocumentoDirezione | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocumentoDirezioneNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocumentoDirezioneNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumDocumentoCanaleNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentoCanale | Prisma.EnumDocumentoCanaleFieldRefInput<$PrismaModel> | null
+  in?: $Enums.DocumentoCanale[] | Prisma.ListEnumDocumentoCanaleFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.DocumentoCanale[] | Prisma.ListEnumDocumentoCanaleFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumDocumentoCanaleNullableWithAggregatesFilter<$PrismaModel> | $Enums.DocumentoCanale | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocumentoCanaleNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocumentoCanaleNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumTipologiaReportFilter<$PrismaModel = never> = {

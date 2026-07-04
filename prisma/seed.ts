@@ -826,12 +826,30 @@ async function main() {
     const buffer = Buffer.from(content, "utf8");
     await fs.writeFile(absolutePath, buffer);
 
+    const withProtocollo = index % 2 === 0;
+    const canale = index % 3 === 0 ? "PEC" : "UPLOAD";
+    const pecMessageId = canale === "PEC" ? `<seed-${index + 1}@pec.demo>` : null;
+    const pecRicevutaAccettazioneId = canale === "PEC" ? `ACC-${String(index + 1).padStart(3, "0")}` : null;
+    const pecRicevutaConsegnaId = canale === "PEC" && index % 4 !== 0
+      ? `CONS-${String(index + 1).padStart(3, "0")}`
+      : null;
+
     await prisma.documento.create({
       data: {
         concessioneId: item.concessioneId,
         nome: item.nome,
         tipologia: item.tipologia,
         statoDocumento: "ATTIVO",
+        direzione: index % 3 === 1 ? "USCITA" : "ENTRATA",
+        canale,
+        numeroProtocollo: withProtocollo ? `PG/2026/${String(index + 1001)}` : null,
+        dataProtocollo: withProtocollo ? daysAgo(30 - index) : null,
+        mittente: index % 3 === 1 ? "Ufficio concessioni" : "Concessionario demo",
+        destinatario: index % 3 === 1 ? "Concessionario demo" : "Ufficio concessioni",
+        pecMessageId,
+        pecRicevutaAccettazioneId,
+        pecRicevutaConsegnaId,
+        pecWarningMancataRicevuta: canale === "PEC" && !(pecRicevutaAccettazioneId && pecRicevutaConsegnaId),
         mimeType: "text/plain",
         dimensioneBytes: buffer.byteLength,
         checksumSha256: createHash("sha256").update(buffer).digest("hex"),

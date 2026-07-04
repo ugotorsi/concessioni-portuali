@@ -6,6 +6,7 @@ import { Select } from "@/components/ui/Select";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
+import { DOCUMENT_CANALE_VALUES, DOCUMENT_DIREZIONE_VALUES } from "@/server/documents/protocollo";
 import { DOCUMENT_TIPOLOGIA_VALUES } from "@/server/documents/validation";
 
 interface EntityDocumentItem {
@@ -15,6 +16,11 @@ interface EntityDocumentItem {
   statoDocumento?: string;
   dataDocumento: Date | null;
   createdAt: Date;
+  direzione?: string | null;
+  canale?: string | null;
+  numeroProtocollo?: string | null;
+  dataProtocollo?: Date | null;
+  pecWarningMancataRicevuta?: boolean;
   url?: string | null;
 }
 
@@ -66,6 +72,7 @@ export function EntityDocumentsPanel({
               <TableHead>Tipologia</TableHead>
               <TableHead>Stato</TableHead>
               <TableHead>Data</TableHead>
+              <TableHead>Metadata</TableHead>
               <TableHead>Download</TableHead>
               {canUpload ? <TableHead>Azioni</TableHead> : null}
             </TableRow>
@@ -78,6 +85,12 @@ export function EntityDocumentsPanel({
                 <TableCell>{formatEnumLabel(item.statoDocumento ?? "ATTIVO")}</TableCell>
                 <TableCell>
                   {item.dataDocumento ? formatDateIT(item.dataDocumento) : formatDateIT(item.createdAt)}
+                </TableCell>
+                <TableCell className="text-xs text-slate-700">
+                  <div>{item.direzione ? formatEnumLabel(item.direzione) : "-"} / {item.canale ? formatEnumLabel(item.canale) : "-"}</div>
+                  <div>{item.numeroProtocollo ?? "Nessun protocollo"}</div>
+                  {item.dataProtocollo ? <div>{formatDateIT(item.dataProtocollo)}</div> : null}
+                  {item.pecWarningMancataRicevuta ? <div className="font-semibold text-amber-700">Warning PEC</div> : null}
                 </TableCell>
                 <TableCell>
                   <a href={`/documenti/${item.id}/download`} className="text-sm underline underline-offset-4">
@@ -102,7 +115,7 @@ export function EntityDocumentsPanel({
             ))}
             {documents.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={canUpload ? 6 : 5} className="text-center text-slate-500">
+                <TableCell colSpan={canUpload ? 7 : 6} className="text-center text-slate-500">
                   Nessun documento collegato.
                 </TableCell>
               </TableRow>
@@ -134,6 +147,56 @@ export function EntityDocumentsPanel({
             <label className="text-sm text-slate-700 md:col-span-2">
               Descrizione
               <Textarea name="descrizione" rows={2} placeholder="Descrizione documento" />
+            </label>
+            <label className="text-sm text-slate-700">
+              Direzione
+              <Select name="direzione" defaultValue="">
+                <option value="">Non indicata</option>
+                {DOCUMENT_DIREZIONE_VALUES.map((value) => (
+                  <option key={value} value={value}>
+                    {formatEnumLabel(value)}
+                  </option>
+                ))}
+              </Select>
+            </label>
+            <label className="text-sm text-slate-700">
+              Canale
+              <Select name="canale" defaultValue="">
+                <option value="">Non indicato</option>
+                {DOCUMENT_CANALE_VALUES.map((value) => (
+                  <option key={value} value={value}>
+                    {formatEnumLabel(value)}
+                  </option>
+                ))}
+              </Select>
+            </label>
+            <label className="text-sm text-slate-700">
+              Numero protocollo
+              <Input name="numeroProtocollo" placeholder="Es. PG/2026/000123" />
+            </label>
+            <label className="text-sm text-slate-700">
+              Data protocollo
+              <Input name="dataProtocollo" type="date" />
+            </label>
+            <label className="text-sm text-slate-700">
+              Mittente
+              <Input name="mittente" placeholder="Mittente" />
+            </label>
+            <label className="text-sm text-slate-700">
+              Destinatario
+              <Input name="destinatario" placeholder="Destinatario" />
+            </label>
+            <label className="text-sm text-slate-700 md:col-span-2">
+              PEC Message-ID
+              <Input name="pecMessageId" placeholder="Message-ID PEC" />
+            </label>
+            <label className="text-sm text-slate-700">
+              Ricevuta accettazione PEC
+              <Input name="pecRicevutaAccettazioneId" placeholder="ID ricevuta" />
+            </label>
+            <label className="text-sm text-slate-700">
+              Ricevuta consegna PEC
+              <Input name="pecRicevutaConsegnaId" placeholder="ID ricevuta" />
             </label>
             <label className="text-sm text-slate-700">
               Data documento
