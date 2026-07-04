@@ -1,4 +1,4 @@
-# Security Measures Draft
+﻿# Security Measures Draft
 
 ## Stato documento
 Bozza tecnica delle misure di sicurezza rilevate e dei rafforzamenti richiesti.
@@ -18,11 +18,11 @@ Non rappresenta una certificazione security/compliance definitiva.
 - Test automatici unit/e2e su auth, ruoli, headers, audit e policy PDF.
 
 ## 2. Misure da rafforzare prima della produzione
-- Password policy piu rigorosa e rotazione credenziali.
+- Password policy più rigorosa e rotazione credenziali.
 - MFA per profili privilegiati.
 - Session hardening (timeout, revoke, policy cookie avanzate).
 - Rate limiting distribuito (Redis/Upstash o equivalente).
-- CSP piu restrittiva e tuning policy browser security.
+- CSP più restrittiva e tuning policy browser security.
 - HSTS in produzione con configurazione TLS robusta.
 - Logging infrastrutturale centralizzato e correlabile.
 - Alerting e monitoraggio security events.
@@ -42,4 +42,5 @@ Non rappresenta una certificazione security/compliance definitiva.
 1. IAM hardening: MFA, policy password, session controls.
 2. Logging e monitoring: centralizzazione, alert, incident workflow.
 3. Data protection: cifratura at rest, backup cifrati, restore testato.
-4. Secure delivery: CI/CD security e gestione vulnerabilita continua.
+4. Secure delivery: CI/CD security e gestione vulnerabilità continua.
+

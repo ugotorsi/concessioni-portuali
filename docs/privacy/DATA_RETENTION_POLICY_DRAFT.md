@@ -1,4 +1,4 @@
-# Data Retention Policy Draft
+﻿# Data Retention Policy Draft
 
 ## Stato documento
 Bozza policy conservazione dati per allineamento preliminare privacy/compliance.
@@ -8,7 +8,7 @@ Termini definitivi da validare con ente, massimario, obblighi normativi e regola
 - Minimizzazione: raccogliere e mantenere solo dati necessari.
 - Limitazione conservazione: mantenere i dati per il tempo strettamente necessario.
 - Integrita e riservatezza: proteggere dati durante ciclo di vita.
-- Accountability: responsabilita formale in capo al titolare/ente.
+- Accountability: responsabilità formale in capo al titolare/ente.
 
 ## 2. Distinzione ambienti
 - Demo: usare dataset controllato, no persistenza non necessaria, reset periodico.
@@ -23,7 +23,7 @@ Termini definitivi da validare con ente, massimario, obblighi normativi e regola
 | Procedimenti | fasi, termini, esiti istruttori | da definire in base a normativa procedimentale | allineare a fascicolo e provvedimenti |
 | Pagamenti | importi, scadenze, morosita | da definire in base a obblighi contabili/fiscali | coordinare con sistemi contabili ufficiali |
 | Sopralluoghi | esiti, verifiche, note tecniche | da definire in base a obblighi tecnici e contenzioso | minimizzare allegati non necessari |
-| Report | contenuto, validazione, metadati | da definire in base a finalita istruttoria | controllo versioni e diffusione |
+| Report | contenuto, validazione, metadati | da definire in base a finalità istruttoria | controllo versioni e diffusione |
 | Audit log | attore, azione, timestamp, hash chain | da definire con requisiti sicurezza/compliance | append-only logico, non WORM nativo |
 | PDF generati/scaricati | report PDF e metadata download | da definire con policy ente e rischio divulgazione | policy specifica per download/share |
 
@@ -37,9 +37,9 @@ Termini definitivi da validare con ente, massimario, obblighi normativi e regola
   - massimario di selezione/scarto documentale;
   - obblighi legali e regolamentari applicabili;
   - policy interne dell ente concedente;
-  - eventuali prescrizioni di autorita di controllo.
+  - eventuali prescrizioni di autorità di controllo.
 
-## 6. Ruoli e responsabilita
+## 6. Ruoli e responsabilità
 - Titolare: definisce tempi e basi giuridiche di retention.
 - Responsabile trattamento: implementa controlli tecnici concordati.
 - DPO/RPD: supervisiona coerenza privacy e valutazione rischi.
@@ -50,3 +50,4 @@ Termini definitivi da validare con ente, massimario, obblighi normativi e regola
 - Definizione retention per categoria con approvazione formale.
 - Introduzione job periodici di purge/archiviazione controllata.
 - Evidenza audit su esecuzione policy.
+

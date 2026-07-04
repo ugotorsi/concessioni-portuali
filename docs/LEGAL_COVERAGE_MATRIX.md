@@ -1,10 +1,10 @@
-# Matrice di copertura giuridico-funzionale
+﻿# Matrice di copertura giuridico-funzionale
 
 ## 1. Obiettivo del documento
-Questa matrice collega norme, obblighi, procedimenti, dati e funzionalita applicative della piattaforma Concessioni Portuali, con finalita di valutazione giuridico-amministrativa e di pianificazione evolutiva.
+Questa matrice collega norme, obblighi, procedimenti, dati e funzionalità applicative della piattaforma Concessioni Portuali, con finalità di valutazione giuridico-amministrativa e di pianificazione evolutiva.
 
 Il documento distingue esplicitamente tra:
-- copertura gia implementata;
+- copertura già implementata;
 - copertura parziale;
 - gap;
 - sviluppi consigliati.
@@ -13,97 +13,97 @@ La base di analisi e costituita da:
 - modello dati reale in [prisma/schema.prisma](prisma/schema.prisma);
 - valutazione progettuale in [docs/PROJECT_EVALUATION.md](docs/PROJECT_EVALUATION.md).
 
-## 2. Entità principali del modello dati
+## 2. EntitÃ  principali del modello dati
 ### User
 - Funzione giuridico-amministrativa: rappresenta il soggetto operatore interno/abilitato al sistema, base minima di accountability.
 - Dati rilevanti: nome, email, ruolo, attivo, createdAt/updatedAt.
 - Collegamenti: relazione con ActivityLog.
-- Livello maturita attuale: Medio.
+- Livello maturità attuale: Medio.
 Nota: utile per MVP, ma manca piena identita legale/organizzativa (profilazione ente, deleghe, unita organizzativa, autenticazione reale).
 
 ### Concessionario
 - Funzione giuridico-amministrativa: anagrafica soggetto concessionario (persona giuridica) titolare del rapporto.
 - Dati rilevanti: denominazione, codiceFiscale, partitaIva, sedeLegale, PEC, legaleRappresentante.
 - Collegamenti: 1:N verso Concessione.
-- Livello maturita attuale: Medio-Alto.
+- Livello maturità attuale: Medio-Alto.
 
 ### Concessione
 - Funzione giuridico-amministrativa: nucleo del titolo concessorio e del fascicolo logico operativo.
 - Dati rilevanti: numeroAtto, dataRilascio, dataScadenza, normaRiferimento, stato, canoneAnnuo, ubicazione, descrizioneBene.
 - Collegamenti: verso ObbligoConcessorio, Scadenza, Criticita, Procedimento, Sopralluogo, Pagamento, Documento, Report, NormaImpatto, ActivityLog.
-- Livello maturita attuale: Alto (MVP).
+- Livello maturità attuale: Alto (MVP).
 
 ### ObbligoConcessorio
 - Funzione giuridico-amministrativa: presidio degli obblighi derivanti dal titolo e dalle prescrizioni.
 - Dati rilevanti: tipologia, descrizione, frequenza, dataProssimaVerifica, stato.
 - Collegamenti: N:1 verso Concessione.
-- Livello maturita attuale: Medio-Alto.
+- Livello maturità attuale: Medio-Alto.
 
 ### Scadenza
 - Funzione giuridico-amministrativa: controllo termini (concessione, canoni, garanzie, adempimenti, termini procedimentali).
 - Dati rilevanti: tipologia, dataScadenza, preavvisoGiorni, stato.
 - Collegamenti: N:1 verso Concessione.
-- Livello maturita attuale: Alto (MVP).
+- Livello maturità attuale: Alto (MVP).
 
 ### Criticita
 - Funzione giuridico-amministrativa: registrazione anomalie tecnico-giuridico-economiche e rischio.
 - Dati rilevanti: tipologia, gravita, fonte, descrizione, riferimentoNormativo, stato, dataRilevazione, rilevanzaArt47, letteraArt47, rischioDecadenza, motivazioneArt47.
 - Collegamenti: N:1 verso Concessione, 1:N verso Procedimento, 1:N verso NormaImpatto.
-- Livello maturita attuale: Alto (MVP).
+- Livello maturità attuale: Alto (MVP).
 
 ### Procedimento
 - Funzione giuridico-amministrativa: rappresentazione dell iter istruttorio-amministrativo (diffida, contestazione, recupero canoni, avvio decadenza/revoca).
 - Dati rilevanti: tipologia, stato, dataAvvio, dataScadenzaContraddittorio, dataProvvedimentoFinale, riferimentoNormativo, checklist contraddittorio (avvio/memorie/audizione/contestazione/valutazione/proposta esito).
 - Collegamenti: N:1 verso Concessione, opzionale N:1 verso Criticita, 1:N verso NormaImpatto.
-- Livello maturita attuale: Alto (MVP) con checklist istruttoria; workflow formale completo ancora in evoluzione.
+- Livello maturità attuale: Alto (MVP) con checklist istruttoria; workflow formale completo ancora in evoluzione.
 
 ### Sopralluogo
-- Funzione giuridico-amministrativa: evidenza tecnica sullo stato dei luoghi e conformita.
+- Funzione giuridico-amministrativa: evidenza tecnica sullo stato dei luoghi e conformità.
 - Dati rilevanti: data, operatori, esito, conformitaPlanimetrica, sicurezza, occupazione, interferenze.
 - Collegamenti: N:1 verso Concessione.
-- Livello maturita attuale: Alto (MVP).
+- Livello maturità attuale: Alto (MVP).
 
 ### Pagamento
 - Funzione giuridico-amministrativa: monitoraggio canoni, morosita, residui e stato versamenti.
 - Dati rilevanti: annoRiferimento, importoDovuto, importoVersato, dataScadenza, stato, interessiMora.
 - Collegamenti: N:1 verso Concessione.
-- Livello maturita attuale: Alto (MVP).
+- Livello maturità attuale: Alto (MVP).
 
 ### Documento
 - Funzione giuridico-amministrativa: tracciamento documenti collegati alla concessione/fascicolo.
 - Dati rilevanti: nome, tipologia, url, dataDocumento, descrizione.
 - Collegamenti: N:1 verso Concessione.
-- Livello maturita attuale: Medio (struttura presente, gestione documentale legale non completa).
+- Livello maturità attuale: Medio (struttura presente, gestione documentale legale non completa).
 
 ### Report
 - Funzione giuridico-amministrativa: output istruttorio e reportistica operativa/direzionale.
 - Dati rilevanti: tipologia, titolo, contenuto, formato, validato.
 - Collegamenti: opzionale N:1 verso Concessione, 1:N verso NormaImpatto.
-- Livello maturita attuale: Alto (MVP), con validazione e PDF.
+- Livello maturità attuale: Alto (MVP), con validazione e PDF.
 
 ### NormaFonte
 - Funzione giuridico-amministrativa: catalogo fonti normative.
 - Dati rilevanti: codice, titolo, enteEmittente, ambito.
 - Collegamenti: 1:N verso NormaVersione, 1:N verso NormaImpatto.
-- Livello maturita attuale: Medio-Alto.
+- Livello maturità attuale: Medio-Alto.
 
 ### NormaVersione
 - Funzione giuridico-amministrativa: presidio evolutivo delle versioni normative.
 - Dati rilevanti: versione, stato, dataEntrataVigore, dataFineVigore, urlTesto.
 - Collegamenti: N:1 verso NormaFonte, 1:N verso NormaImpatto.
-- Livello maturita attuale: Medio-Alto.
+- Livello maturità attuale: Medio-Alto.
 
 ### NormaImpatto
-- Funzione giuridico-amministrativa: ponte tra norma e caso operativo (criticita/procedimento/report/concessione).
+- Funzione giuridico-amministrativa: ponte tra norma e caso operativo (criticità/procedimento/report/concessione).
 - Dati rilevanti: modulo, severita, descrizione, azioneRichiesta.
 - Collegamenti: verso NormaFonte, NormaVersione, Concessione, Criticita, Procedimento, Report.
-- Livello maturita attuale: Alto concettualmente, Medio operativamente.
+- Livello maturità attuale: Alto concettualmente, Medio operativamente.
 
 ### ActivityLog
-- Funzione giuridico-amministrativa: tracciabilita minima delle azioni applicative.
+- Funzione giuridico-amministrativa: tracciabilità minima delle azioni applicative.
 - Dati rilevanti: azione, entita, entitaId, descrizione, timestamp.
 - Collegamenti: opzionale verso User e Concessione.
-- Livello maturita attuale: Medio-Basso per uso forense.
+- Livello maturità attuale: Medio-Basso per uso forense.
 
 ## 3. Relazioni principali
 Modello logico centrato sulla concessione:
@@ -124,7 +124,7 @@ Concessionario
 Perche la struttura e corretta per vista 360 gradi:
 - concentra in un unico asse informativo il titolo concessorio e i suoi effetti operativi;
 - consente lettura trasversale tecnica, economica, giuridica e documentale;
-- permette costruzione di percorsi istruttori end-to-end (evento -> criticita -> procedimento -> report);
+- permette costruzione di percorsi istruttori end-to-end (evento -> criticità -> procedimento -> report);
 - abilita trasparenza consultiva verso AdSP su report validati e indicatori principali;
 - rende possibile una futura evoluzione in fascicolo digitale strutturato.
 
@@ -137,7 +137,7 @@ Perche la struttura e corretta per vista 360 gradi:
 | Concessione | stato | Situazione giuridica concessione | Decisioni operative non coerenti | State machine vincolata |
 | Concessione | canoneAnnuo | Base economica obblighi | Errori su morosita e recuperi | Storicizzazione importi |
 | Concessione | ubicazione | Individuazione bene/area | Contenzioso su perimetro occupato | Integrazione GIS e riferimenti catastali/nautici |
-| Concessione/Concessionario | concessionarioId e dati soggetto | Identifica titolare e responsabilita | Contestazioni soggettive | Gestione storico soggetti e subentri |
+| Concessione/Concessionario | concessionarioId e dati soggetto | Identifica titolare e responsabilità | Contestazioni soggettive | Gestione storico soggetti e subentri |
 | Concessionario | pec | Canale comunicazioni ufficiali | Invalidita comunicazioni digitali | Entita ComunicazionePEC |
 | Concessionario | codiceFiscale/partitaIva | Identita fiscale | Errori imputazione obblighi | Validazioni formali e controlli esterni |
 | ObbligoConcessorio | tipologia/stato/dataProssimaVerifica | Presidio adempimenti | Inadempimenti non rilevati | SLA e reminder automatici |
@@ -151,11 +151,11 @@ Perche la struttura e corretta per vista 360 gradi:
 | Procedimento | dataProvvedimentoFinale | Chiusura iter | Fascicolo incompleto | Entita Provvedimento con esiti/motivazione |
 | Sopralluogo | esito | Evidenza tecnica ufficiale | Debolezza probatoria | Allegati firmati e georeferenziati |
 | Documento | nome/tipologia/url/dataDocumento | Base documentale | Inidoneita probatoria | Versionamento e conservazione |
-| Report | validato | Controllo qualita/affidabilita | Uso improprio output non validati | Workflow revisione multipla |
+| Report | validato | Controllo qualità/affidabilita | Uso improprio output non validati | Workflow revisione multipla |
 | ActivityLog | azione/entita/createdAt | Tracciabilita minima | Accountability insufficiente | AuditEvent forense immutabile |
 
 ## 5. Matrice fonte/requisito/copertura/gap
-| Fonte / articolo | Requisito giuridico-amministrativo | Entita/funzionalita che lo copre oggi | Livello copertura | Gap | Priorita intervento |
+| Fonte / articolo | Requisito giuridico-amministrativo | Entita/funzionalità che lo copre oggi | Livello copertura | Gap | Priorita intervento |
 |---|---|---|---|---|---|
 | art. 36 Codice della Navigazione | Titolo concessorio, oggetto, durata, presupposti | Concessione (numeroAtto, date, tipologia, stato), Concessionario | Alta | Versionamento del titolo e atti modificativi | Alta |
 | art. 47 Codice della Navigazione | Decadenza/inadempimento e presidio fattispecie | Criticita con mapping strutturato (`rilevanzaArt47`, `letteraArt47`, `rischioDecadenza`, motivazione), Procedimento (AVVIO_DECADENZA), Pagamento | Medio-Alta | Workflow formale con prove/notifiche e step obbligati | Alta |
@@ -169,7 +169,7 @@ Perche la struttura e corretta per vista 360 gradi:
 | Revoca | Tracciamento iter e motivi pubblici | Procedimento AVVIO_REVOCA + Criticita | Media | Formalizzazione motivi, impatti e provvedimento | Alta |
 | Contraddittorio | Gestione termini e partecipazione | Procedimento.dataScadenzaContraddittorio, dashboard/alert | Media | Comunicazioni ufficiali tracciate e ricevute | Altissima |
 | Trasparenza verso AdSP | Consultazione controllata | Vista AdSP + Report validati | Alta | Canale formale scambio documentale | Media |
-| Supporto istruttorio | Sintesi e priorita operative | Dashboard, Report, Normativa, AI assistiva | Alta | Workflow di approvazione strutturato | Alta |
+| Supporto istruttorio | Sintesi e priorità operative | Dashboard, Report, Normativa, AI assistiva | Alta | Workflow di approvazione strutturato | Alta |
 | Tracciabilita | Audit azioni | ActivityLog + action server | Media | Audit forense immutabile con identita reale | Altissima |
 | Documentale | Collegamento documenti al caso | Documento per concessione | Media | Protocollazione, versionamento, firma, conservazione | Altissima |
 | Normativa/aggiornamento fonti | Versioni e impatti su moduli | NormaFonte/NormaVersione/NormaImpatto | Alta | Ingestion e diff normativi semi-automatici | Media |
@@ -179,64 +179,64 @@ Perche la struttura e corretta per vista 360 gradi:
 1. Fascicolo digitale
 - Perche importante: unifica cronologia probatoria e amministrativa del caso.
 - Rischio se non risolto: dispersione evidenze e debolezza difensiva.
-- Entita/funzionalita da introdurre: Fascicolo, FascicoloEvento, collegamenti a tutte le entita core.
+- Entita/funzionalità da introdurre: Fascicolo, FascicoloEvento, collegamenti a tutte le entita core.
 
 2. Protocollazione
 - Perche importante: garantisce ufficialita e opponibilita degli atti/comunicazioni.
 - Rischio: impossibilita di dimostrare catena formale dei passaggi.
-- Entita/funzionalita: Protocollo, numerazione, registro e stato lavorazione.
+- Entita/funzionalità: Protocollo, numerazione, registro e stato lavorazione.
 
 3. Comunicazioni PEC
 - Perche importante: canale ufficiale verso concessionari/enti.
 - Rischio: invalidita o contestazione notifiche.
-- Entita/funzionalita: ComunicazionePEC con ricevute invio/consegna.
+- Entita/funzionalità: ComunicazionePEC con ricevute invio/consegna.
 
 4. Workflow procedimentale formalizzato
 - Perche importante: garantisce correttezza iter e rispetto termini.
 - Rischio: salti procedurali e contenzioso.
-- Entita/funzionalita: WorkflowStep, regole di transizione, checklist obbligatorie.
+- Entita/funzionalità: WorkflowStep, regole di transizione, checklist obbligatorie.
 
 5. Responsabile del procedimento
 - Perche importante: accountability amministrativa.
-- Rischio: incertezza su responsabilita e competenze.
-- Entita/funzionalita: Assegnazione, UnitaOrganizzativa, ruolo RUP.
+- Rischio: incertezza su responsabilità e competenze.
+- Entita/funzionalità: Assegnazione, UnitaOrganizzativa, ruolo RUP.
 
 6. Versionamento titolo concessorio
 - Perche importante: traccia modifiche, proroghe, rinnovi, subentri.
 - Rischio: ricostruzione incompleta del titolo vigente.
-- Entita/funzionalita: TitoloVersione collegato a Concessione.
+- Entita/funzionalità: TitoloVersione collegato a Concessione.
 
 7. Audit log forense
 - Perche importante: prova robusta di chi ha fatto cosa e quando.
 - Rischio: inidoneita probatoria in audit/contenzioso.
-- Entita/funzionalita: AuditEvent immutabile, hash/catena eventi, actor reale.
+- Entita/funzionalità: AuditEvent immutabile, hash/catena eventi, actor reale.
 
 8. Allegati probatori
 - Perche importante: supportano rilievi, contestazioni e provvedimenti.
 - Rischio: istruttoria debole o contestabile.
-- Entita/funzionalita: Allegato, metadati probatori, link a evento/procedimento.
+- Entita/funzionalità: Allegato, metadati probatori, link a evento/procedimento.
 
 9. Firma/conservazione
-- Perche importante: validita legale nel tempo.
-- Rischio: non conformita conservazione digitale.
-- Entita/funzionalita: AllegatoVersione, esiti firma, conservazione.
+- Perche importante: validità legale nel tempo.
+- Rischio: non conformità conservazione digitale.
+- Entita/funzionalità: AllegatoVersione, esiti firma, conservazione.
 
 10. Notifiche automatiche
 - Perche importante: prevenzione ritardi su termini e adempimenti.
 - Rischio: scadenze perse e aggravamento rischio decadenza.
-- Entita/funzionalita: Notifica con regole, canali e stato recapito.
+- Entita/funzionalità: Notifica con regole, canali e stato recapito.
 
 11. Test automatici
 - Perche importante: affidabilita continua su regole giuridiche applicative.
 - Rischio: regressioni silenziose in moduli critici.
-- Entita/funzionalita: suite test per query/actions/permessi/route.
+- Entita/funzionalità: suite test per query/actions/permessi/route.
 
 12. IAM/autenticazione reale
-- Perche importante: sicurezza e tracciabilita identita.
+- Perche importante: sicurezza e tracciabilità identita.
 - Rischio: accessi impropri e audit insufficiente.
-- Entita/funzionalita: integrazione IdP, session management, RBAC/ABAC.
+- Entita/funzionalità: integrazione IdP, session management, RBAC/ABAC.
 
-## 7. Entità da aggiungere al modello dati
+## 7. EntitÃ  da aggiungere al modello dati
 ### Fascicolo
 - Scopo: contenitore ufficiale del caso concessorio/procedimentale.
 - Relazioni suggerite: Concessione 1:N Fascicolo; Fascicolo 1:N eventi/documenti/provvedimenti.
@@ -286,7 +286,7 @@ Perche la struttura e corretta per vista 360 gradi:
 - Impatto: Alto.
 
 ### Assegnazione
-- Scopo: attribuire responsabilita operative (RUP/istruttore/revisore).
+- Scopo: attribuire responsabilità operative (RUP/istruttore/revisore).
 - Relazioni: User, UnitaOrganizzativa, Fascicolo/Procedimento.
 - Priorita: Altissima.
 - Impatto: Molto alto.
@@ -316,7 +316,7 @@ Perche la struttura e corretta per vista 360 gradi:
 - Impatto: Alto.
 
 ## 8. Roadmap giuridico-funzionale
-### Fase 1 — Consolidamento MVP
+### Fase 1 â€” Consolidamento MVP
 - completamento concessionari;
 - documenti base;
 - notifiche semplici;
@@ -325,7 +325,7 @@ Perche la struttura e corretta per vista 360 gradi:
 
 Obiettivo: consolidare affidabilita operativa e completare i moduli base mancanti.
 
-### Fase 2 — Fascicolo e workflow
+### Fase 2 â€” Fascicolo e workflow
 - fascicolo digitale;
 - workflow procedimentale;
 - protocolli;
@@ -335,7 +335,7 @@ Obiettivo: consolidare affidabilita operativa e completare i moduli base mancant
 
 Obiettivo: passare da monitoraggio operativo a processo amministrativo formalizzato.
 
-### Fase 3 — Compliance e produzione
+### Fase 3 â€” Compliance e produzione
 - IAM reale;
 - audit forense;
 - conservazione documentale;
@@ -345,7 +345,7 @@ Obiettivo: passare da monitoraggio operativo a processo amministrativo formalizz
 
 Obiettivo: readiness concreta per uso reale in contesti sensibili/istituzionali.
 
-### Fase 4 — Legal intelligence e AI
+### Fase 4 â€” Legal intelligence e AI
 - analisi rischio decadenza;
 - bozze atti;
 - confronto normativa;
@@ -353,18 +353,18 @@ Obiettivo: readiness concreta per uso reale in contesti sensibili/istituzionali.
 - logging prompt/output;
 - validazione umana obbligatoria.
 
-Obiettivo: differenziazione ad alto valore mantenendo governance legale e responsabilita umana.
+Obiettivo: differenziazione ad alto valore mantenendo governance legale e responsabilità umana.
 
 ## 9. Valutazione finale
 Cosa copre bene oggi:
 - modello concessione-centrico 360;
-- monitoraggio obblighi/scadenze/pagamenti/criticita/procedimenti;
+- monitoraggio obblighi/scadenze/pagamenti/criticità/procedimenti;
 - reportistica operativa, export CSV e PDF;
 - normativa con impatti cross-modulo;
 - vista consultiva AdSP.
 
 Cosa copre parzialmente:
-- tracciabilita giuridicamente robusta;
+- tracciabilità giuridicamente robusta;
 - gestione documentale a valore legale;
 - workflow amministrativo formalizzato;
 - governance AI con audit strutturato.
@@ -375,19 +375,19 @@ Cosa manca per uso reale:
 - fascicolo digitale e provvedimenti;
 - conservazione/firma e audit forense.
 
-Perche il progetto e gia valido come MVP:
+Perche il progetto e già valido come MVP:
 - copre in modo concreto il cuore operativo del dominio e consente demo istituzionali credibili.
 
 Perche serve hardening per produzione pubblica:
 - i requisiti di sicurezza, compliance, accountability e formalizzazione procedimentale sono superiori a quelli di un MVP demo.
 
-| Area | Copertura attuale | Priorità evolutiva |
+| Area | Copertura attuale | PrioritÃ  evolutiva |
 |---|---|---|
 | titolo concessorio | Alta | Alta |
 | obblighi | Alta | Media |
 | scadenze | Alta | Alta |
 | pagamenti | Alta | Alta |
-| criticità | Alta | Alta |
+| criticitÃ  | Alta | Alta |
 | sopralluoghi | Alta | Alta |
 | procedimenti | Media-Alta | Altissima |
 | report | Alta | Media-Alta |
@@ -398,3 +398,4 @@ Perche serve hardening per produzione pubblica:
 | sicurezza | Bassa-Media | Altissima |
 | workflow | Media | Altissima |
 | vista AdSP | Alta | Media |
+

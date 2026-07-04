@@ -1,8 +1,8 @@
-# GDPR Register Draft
+﻿# GDPR Register Draft
 
 ## Stato documento
 Bozza operativa per demo istituzionale e valutazione preliminare compliance.
-Questo documento non certifica conformita GDPR definitiva.
+Questo documento non certifica conformità GDPR definitiva.
 
 ## 1. Soggetti del trattamento (placeholder)
 - Titolare del trattamento: Ente concedente / Amministrazione utilizzatrice (da nominare formalmente).
@@ -13,7 +13,7 @@ Questo documento non certifica conformita GDPR definitiva.
 ## 2. Finalita del trattamento
 - Gestione concessioni demaniali/portuali.
 - Monitoraggio obblighi concessori e scadenze.
-- Gestione criticita tecnico-giuridiche-economiche.
+- Gestione criticità tecnico-giuridiche-economiche.
 - Gestione procedimenti istruttori e supporto al contraddittorio.
 - Reportistica istruttoria e supporto decisionale interno.
 - Audit, sicurezza, prevenzione abusi e accountability.
@@ -41,7 +41,7 @@ Questo documento non certifica conformita GDPR definitiva.
 
 ## 6. Destinatari categorie
 - Amministrazione/ente concedente.
-- Organi di controllo e autorita competenti.
+- Organi di controllo e autorità competenti.
 - Soggetti autorizzati interni.
 - Fornitori tecnici nominati secondo art. 28 GDPR.
 
@@ -74,3 +74,4 @@ Questo documento non certifica conformita GDPR definitiva.
 ## 11. Nota di perimetro
 Questa bozza e orientata a supportare confronto con PA/AdSP/ente concedente.
 La messa in produzione richiede validazione legale-organizzativa e decisione formale del titolare.
+

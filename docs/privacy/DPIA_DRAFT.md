@@ -1,4 +1,4 @@
-# DPIA Draft
+﻿# DPIA Draft
 
 ## Stato documento
 Bozza DPIA preliminare non approvata.
@@ -7,12 +7,12 @@ Da validare con DPO/RPD, titolare del trattamento e governance ente prima di ogn
 ## 1. Descrizione del trattamento
 Piattaforma per gestione e monitoraggio concessioni portuali/demaniali con funzioni di:
 - anagrafica concessioni e concessionari;
-- monitoraggio obblighi, scadenze, pagamenti, criticita;
+- monitoraggio obblighi, scadenze, pagamenti, criticità;
 - supporto procedimentale e checklist contraddittorio;
 - reportistica istruttoria (inclusi PDF server-side);
 - audit e tracciamento eventi sicurezza.
 
-## 2. Natura, ambito, contesto e finalita
+## 2. Natura, ambito, contesto e finalità
 - Natura: trattamento di dati amministrativi e potenziali dati personali di operatori/referenti.
 - Ambito: ambiente applicativo web per uso interno e consultivo istituzionale.
 - Contesto: demo avanzata verso scenario istituzionale, non ancora deployment compliance-ready completo.
@@ -21,7 +21,7 @@ Piattaforma per gestione e monitoraggio concessioni portuali/demaniali con funzi
 ## 3. Necessita e proporzionalita
 - Il trattamento e necessario per gestire processi concessori e istruttori complessi.
 - Sono presenti controlli iniziali di accesso e segregazione ruoli.
-- Va rafforzata la minimizzazione documentale/allegati in funzione delle finalita specifiche.
+- Va rafforzata la minimizzazione documentale/allegati in funzione delle finalità specifiche.
 - Va formalizzata base giuridica per ciascun flusso operativo con owner organizzativo.
 
 ## 4. Rischi per diritti e liberta degli interessati
@@ -30,11 +30,11 @@ Piattaforma per gestione e monitoraggio concessioni portuali/demaniali con funzi
 - Esposizione indebita di dati procedimentali tramite report/export.
 - Alterazione o manipolazione audit log.
 - Conservazione eccessiva non giustificata.
-- Data breach con impatto su riservatezza/integrita/disponibilita.
+- Data breach con impatto su riservatezza/integrità/disponibilità.
 - Esportazione PDF non controllata o non coerente con ruolo.
 - Errori istruttori se il sistema viene interpretato come decisore.
 
-## 5. Misure gia presenti (baseline rilevata)
+## 5. Misure già presenti (baseline rilevata)
 - NextAuth per autenticazione applicativa.
 - RBAC con segregazione VIEWER_ADSP.
 - Middleware route protection.
@@ -43,7 +43,7 @@ Piattaforma per gestione e monitoraggio concessioni portuali/demaniali con funzi
 - Audit trail con hash chain tamper-evident applicativa.
 - Test automatici unit/e2e su controlli principali.
 - Distinzione esplicita tra supporto istruttorio e decisione amministrativa.
-- Disclaimer in report/PDF su non sostituzione dell autorita competente.
+- Disclaimer in report/PDF su non sostituzione dell autorità competente.
 
 ## 6. Misure da implementare prima della produzione
 - DPIA formale approvata e governance privacy formalizzata.
@@ -67,3 +67,4 @@ Piattaforma per gestione e monitoraggio concessioni portuali/demaniali con funzi
 - Questa DPIA e un draft non approvato.
 - Non costituisce decisione formale del titolare.
 - Necessaria revisione con DPO/RPD, responsabili funzione e consulenza legale specialistica.
+

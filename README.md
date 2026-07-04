@@ -1,6 +1,6 @@
-# Concessioni Portuali
+﻿# Concessioni Portuali
 
-Piattaforma demo per la gestione operativa delle concessioni portuali, con moduli istruttori, monitoraggio scadenze, criticita, reportistica ed export.
+Piattaforma demo per la gestione operativa delle concessioni portuali, con moduli istruttori, monitoraggio scadenze, criticità, reportistica ed export.
 
 ## Stack
 - Next.js (App Router)
@@ -47,7 +47,7 @@ Prerequisiti E2E:
 - `npm run db:seed`
 
 Script test disponibili:
-- `npm run test` esegue i test unit/integration Vitest in modalita run.
+- `npm run test` esegue i test unit/integration Vitest in modalità run.
 - `npm run test:watch` avvia Vitest in watch mode.
 - `npm run test:coverage` esegue Vitest con coverage V8.
 - `npm run test:e2e` esegue gli smoke test Playwright (Chromium).
@@ -61,15 +61,15 @@ Baseline coperta:
 
 ## Mapping art. 47 su Criticita (Issue #2)
 - Estensione `Criticita` con campi strutturati: `rilevanzaArt47`, `letteraArt47`, `rischioDecadenza`, `motivazioneArt47`, `azioneIstruttoriaArt47`.
-- Form nuova/modifica criticita con sezione dedicata e disclaimer di supporto istruttorio non vincolante.
-- Filtri lista criticita per rilevanza, lettera art.47 e rischio decadenza.
-- Dettaglio criticita con sezione esplicita di mapping art.47.
-- Export CSV criticita esteso con colonne art.47.
+- Form nuova/modifica criticità con sezione dedicata e disclaimer di supporto istruttorio non vincolante.
+- Filtri lista criticità per rilevanza, lettera art.47 e rischio decadenza.
+- Dettaglio criticità con sezione esplicita di mapping art.47.
+- Export CSV criticità esteso con colonne art.47.
 
 ## Checklist contraddittorio su Procedimento (Issue #7)
 - Estensione `Procedimento` con campi checklist procedimentale: avvio, memorie, audizione, contestazione, controdeduzioni, motivazione e proposta esito istruttorio.
 - Utility dominio in `src/lib/procedimento-checklist.ts` per stato item, completezza, missing item e livello warning.
-- Form creazione procedimento con sezione “Contraddittorio e garanzie procedimentali”.
+- Form creazione procedimento con sezione â€œContraddittorio e garanzie procedimentaliâ€.
 - Scheda dettaglio procedimento con:
    - badge checklist completa/incompleta;
    - warning su passaggi essenziali mancanti;
@@ -144,9 +144,13 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
    - `docs/privacy/PRIVACY_GAPS_AND_NEXT_STEPS.md`
 
    Perimetro e limiti:
-   - i documenti sono bozze operative e non rappresentano conformita GDPR definitiva;
+   - i documenti sono bozze operative e non rappresentano conformità GDPR definitiva;
    - la DPIA non e formalmente approvata;
    - prima della produzione e necessaria validazione con DPO/RPD e ente concedente.
+
+## Audit esterno post-Phase 1
+- Documento di audit esterno post completamento Phase 1: `docs/EXTERNAL_AI_REVIEW_PHASE_1_COMPLETED.md`
+- Il documento supporta la prioritizzazione roadmap, ma non costituisce certificazione di conformità o readiness produzione.
 
 ## Limiti noti
 - Senza Docker/PostgreSQL attivi, le pagine dati dinamiche possono rispondere con errore.
@@ -154,7 +158,8 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
 - Rate limiting in-memory adatto a demo/singola istanza; per produzione serve soluzione distribuita (es. Redis/Upstash).
 - CSP completa e tuning avanzato (WAF, policy enterprise) restano step successivi.
 - Questa fase non include ancora SSO/SAML/OIDC enterprise ne MFA (previsti nelle fasi successive).
-- `.env.example` puo essere ignorato da `.gitignore` se e presente la regola `.env*`.
+- `.env.example` può essere ignorato da `.gitignore` se e presente la regola `.env*`.
 - L'audit trail attuale non e una conservazione legale/fisicamente immutabile (non sostituisce SIEM/WORM).
 - Per produzione sono necessari: policy DB append-only, retention/backup, firma e conservazione a norma.
 - La baseline test attuale e orientata a smoke/regressioni principali, non sostituisce una suite completa di integrazione e carico.
+

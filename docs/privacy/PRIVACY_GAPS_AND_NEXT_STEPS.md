@@ -1,4 +1,4 @@
-# Privacy Gaps and Next Steps
+﻿# Privacy Gaps and Next Steps
 
 ## Stato documento
 Matrice preliminare gap privacy/compliance per roadmap pre-produzione.
@@ -26,3 +26,4 @@ Matrice preliminare gap privacy/compliance per roadmap pre-produzione.
 2. Data lifecycle: retention applicata, minimizzazione, diritti interessati.
 3. Security enterprise: cifratura, backup, monitoring, incident response.
 4. Assurance continua: test/compliance CI, review periodica controlli.
+

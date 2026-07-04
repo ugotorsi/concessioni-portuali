@@ -1,7 +1,7 @@
-# Phase 1 - Institutional Demo Hardening
+﻿# Phase 1 - Institutional Demo Hardening
 
 ## 1) Obiettivo fase
-Portare Concessioni Portuali da stato MVP avanzato a stato "institutional demo-ready" con evidenze minime di sicurezza, compliance, tracciabilita e affidabilita operativa utili in contesti pubblici e para-pubblici.
+Portare Concessioni Portuali da stato MVP avanzato a stato "institutional demo-ready" con evidenze minime di sicurezza, compliance, tracciabilità e affidabilita operativa utili in contesti pubblici e para-pubblici.
 
 ## 2) Principi di esecuzione
 - Nessuna riscrittura architetturale estesa in questa fase.
@@ -30,30 +30,30 @@ Portare Concessioni Portuali da stato MVP avanzato a stato "institutional demo-r
   - assenza di regressioni sui flussi principali.
 
 ### 3.2 Campo lettera_art47 su Criticita
-- Obiettivo: introdurre un campo strutturato `lettera_art47` per classificare la base normativa nelle criticita.
-- Motivo strategico: migliora tracciabilita giuridica, filtrabilita e coerenza reportistica.
+- Obiettivo: introdurre un campo strutturato `lettera_art47` per classificare la base normativa nelle criticità.
+- Motivo strategico: migliora tracciabilità giuridica, filtrabilita e coerenza reportistica.
 - File presumibilmente coinvolti:
   - prisma/schema.prisma
   - prisma/seed.ts
-  - src/server/actions/criticita.ts
-  - src/server/queries/criticita.ts
-  - src/app/criticita/nuova/page.tsx
-  - src/app/criticita/[id]/modifica/page.tsx
-  - src/components/criticita/CriticitaFiltersBar.tsx
+  - src/server/actions/criticità.ts
+  - src/server/queries/criticità.ts
+  - src/app/criticità/nuova/page.tsx
+  - src/app/criticità/[id]/modifica/page.tsx
+  - src/components/criticità/CriticitaFiltersBar.tsx
 - Complessita: Media
 - Impatto: Alto
 - Criteri di accettazione:
   - campo persistito a DB e validato lato server;
   - valorizzazione obbligatoria o policy esplicita di default;
   - filtro UI disponibile per lettera art.47;
-  - presenza in export/report relativi alle criticita.
+  - presenza in export/report relativi alle criticità.
 
 Stato attuale (Issue #2 baseline implementata):
 - estensione modello `Criticita` con campi strutturati: `rilevanzaArt47`, `letteraArt47`, `rischioDecadenza`, `motivazioneArt47`, `azioneIstruttoriaArt47`;
-- validazione server-side in create/update criticita con regole condizionali quando `rilevanzaArt47=true`;
-- sezione UI dedicata in nuova/modifica/dettaglio criticita con disclaimer non-vincolante;
-- filtri lista criticita su rilevanza, lettera e rischio decadenza;
-- export CSV criticita esteso con colonne art.47.
+- validazione server-side in create/update criticità con regole condizionali quando `rilevanzaArt47=true`;
+- sezione UI dedicata in nuova/modifica/dettaglio criticità con disclaimer non-vincolante;
+- filtri lista criticità su rilevanza, lettera e rischio decadenza;
+- export CSV criticità esteso con colonne art.47.
 
 ### 3.3 PDF report lato server professionale
 - Obiettivo: elevare i PDF a formato istituzionale con sezioni standard, metadati e impaginazione robusta.
@@ -86,7 +86,7 @@ Stato attuale (Issue #2 baseline implementata):
   - eventi principali registrati con attore, timestamp, oggetto, azione;
   - meccanismo tamper-evident verificabile;
   - consultazione audit con filtri minimi;
-  - evidenza di verifica integrita su campione eventi.
+  - evidenza di verifica integrità su campione eventi.
 
 Stato attuale (Issue #4 baseline implementata):
 - estensione `ActivityLog` con `esito`, `metadata`, `previousHash`, `currentHash`, contesto request e actor snapshot;
@@ -111,7 +111,7 @@ Limiti residui:
 - Impatto: Alto
 - Criteri di accettazione:
   - suite test eseguibile in CI locale;
-  - copertura minima su auth, criticita, procedimenti, export/report;
+  - copertura minima su auth, criticità, procedimenti, export/report;
   - almeno 2 scenari e2e end-to-end passanti;
   - report test leggibile e riproducibile.
 
@@ -188,7 +188,8 @@ Stato attuale (Issue #8 baseline implementata):
 - creati 5 documenti privacy draft in `docs/privacy/` (registro trattamenti, DPIA, retention, misure sicurezza, gap/next steps);
 - allineato README con sezione privacy/GDPR/DPIA draft e limiti espliciti;
 - aggiornato MVP status con completamento stream privacy e limiti residui;
-- nessuna dichiarazione di conformita GDPR definitiva e nessuna DPIA formalmente approvata.
+- nessuna dichiarazione di conformità GDPR definitiva e nessuna DPIA formalmente approvata.
+- audit esterno post-Phase 1 disponibile in `docs/EXTERNAL_AI_REVIEW_PHASE_1_COMPLETED.md` per prioritizzazione roadmap successiva.
 
 ### 3.9 Due scenari demo istituzionali: morosita e occupazione difforme
 - Obiettivo: preparare due percorsi demo guidati con dati, script narrativo e KPI di esito.

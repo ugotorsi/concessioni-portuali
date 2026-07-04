@@ -1,4 +1,4 @@
-# MVP Status - Concessioni Portuali
+﻿# MVP Status - Concessioni Portuali
 
 ## Stato attuale
 Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + PostgreSQL Docker.
@@ -48,6 +48,10 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Security measures draft in `docs/privacy/SECURITY_MEASURES_DRAFT.md`
 - Matrice gap privacy e next steps in `docs/privacy/PRIVACY_GAPS_AND_NEXT_STEPS.md`
 
+## Audit esterno post-Phase 1
+- Audit esterno ricevuto dopo completamento stream #1-#8: `docs/EXTERNAL_AI_REVIEW_PHASE_1_COMPLETED.md`
+- Esito sintetico: go demo con perimetro controllato, no-go production fino a chiusura gap bloccanti.
+
 ## Anomalie residue
 - Rate limiting non distribuito (in-memory, non adatto a multi-istanza production)
 - Hardening avanzato (WAF/CSP completa) non ancora implementato
@@ -63,3 +67,4 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 1. Estendere progressivamente i test su export/report PDF e procedure critiche
 2. Introdurre test integration DB dedicati per server actions a maggiore impatto
 3. Mantenere audit periodico su DB/container e dipendenze
+

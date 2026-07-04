@@ -1,22 +1,22 @@
-# External AI Review - Concessioni Portuali
+﻿# External AI Review - Concessioni Portuali
 
 ## 1) Scopo del documento
-Questo documento sintetizza la valutazione indipendente esterna ricevuta sul progetto Concessioni Portuali, mettendola a confronto con la valutazione interna gia documentata e traducendola in priorita operative.
+Questo documento sintetizza la valutazione indipendente esterna ricevuta sul progetto Concessioni Portuali, mettendola a confronto con la valutazione interna già documentata e traducendola in priorità operative.
 
 ## 2) Conferme rispetto alla valutazione interna
 | Area | Conferma esterna | Coerenza con valutazione interna |
 | --- | --- | --- |
 | Aderenza al dominio portuale | Il modello dati e la tassonomia processuale risultano credibili per uso istituzionale | Alta |
 | Qualita architetturale | Base tecnica moderna e manutenibile (Next.js + TypeScript + Prisma + PostgreSQL) | Alta |
-| Copertura funzionale MVP | Workflow principali coperti (concessioni, procedimenti, criticita, scadenze, report) | Alta |
+| Copertura funzionale MVP | Workflow principali coperti (concessioni, procedimenti, criticità, scadenze, report) | Alta |
 | Potenziale AI operativo | Lato AI utile soprattutto come supporto decisionale e classificazione, non come automazione cieca | Alta |
-| Gap compliance enterprise | Necessita di hardening su audit, sicurezza, identita e tracciabilita giuridica | Alta |
+| Gap compliance enterprise | Necessita di hardening su audit, sicurezza, identita e tracciabilità giuridica | Alta |
 
 ## 3) Nuovi rilievi emersi dalla valutazione indipendente
 | Nuovo rilievo | Implicazione pratica | Priorita |
 | --- | --- | --- |
 | Rischio di percezione "demo non istituzionale" per autenticazione semplificata | Possibile blocco in incontri con PA/Autorita senza identita reale e policy centralizzate | Alta |
-| Catena probatoria non pienamente forense | In caso di contenzioso, attuale audit trail puo essere considerato insufficiente | Alta |
+| Catena probatoria non pienamente forense | In caso di contenzioso, attuale audit trail può essere considerato insufficiente | Alta |
 | PDF report non ancora pienamente "protocol-ready" | Output poco difendibile in conferenze di servizi o scambi formali | Alta |
 | Mancanza di checklist contraddittorio esplicita nel procedimento | Vulnerabilita su equita procedimentale e trasparenza del contraddittorio | Alta |
 | Assenza di demo scenario-driven istituzionale preconfezionata | Riduzione efficacia commerciale e istituzionale nelle sessioni live | Media |
@@ -25,7 +25,7 @@ Questo documento sintetizza la valutazione indipendente esterna ricevuta sul pro
 ## 4) Rischi principali (vista esterna)
 | Rischio | Probabilita | Impatto | Livello |
 | --- | --- | --- | --- |
-| Contestazione su tracciabilita legale delle azioni | Media | Molto alto | Critico |
+| Contestazione su tracciabilità legale delle azioni | Media | Molto alto | Critico |
 | Valutazione negativa in procurement per security/compliance incompleta | Media | Alto | Alto |
 | Riduzione fiducia stakeholder per assenza IDP/SSO e policy centrali | Alta | Alto | Alto |
 | Difficolta adozione operativa per assenza di test automatici robusti | Media | Medio-alto | Medio-alto |
@@ -59,12 +59,12 @@ Messaggio chiave:
 Segmenti prioritari:
 - Autorita di Sistema Portuale (core market).
 - Enti concedenti marittimi con backlog procedimentale.
-- Contesti multi-stakeholder con bisogno di tracciabilita e reportistica formale.
+- Contesti multi-stakeholder con bisogno di tracciabilità e reportistica formale.
 
 Go-to-market consigliato:
 1. Entrare con demo istituzionali verticali (morosita/occupazione difforme).
 2. Offrire pacchetto "Institutional Hardening" come acceleratore di adozione.
-3. Legare pricing a riduzione tempi procedimentali, riduzione rischio contenzioso e qualita evidenze.
+3. Legare pricing a riduzione tempi procedimentali, riduzione rischio contenzioso e qualità evidenze.
 
 ## 8) Conclusione
-La review esterna conferma la direzione strategica del progetto e la qualita della base tecnica. Il passaggio critico per aumentare credibilita presso stakeholder istituzionali e procurement pubblico e l'esecuzione rapida della Phase 1 di hardening su identita, audit, sicurezza, testing e output formali.
+La review esterna conferma la direzione strategica del progetto e la qualità della base tecnica. Il passaggio critico per aumentare credibilita presso stakeholder istituzionali e procurement pubblico e l'esecuzione rapida della Phase 1 di hardening su identita, audit, sicurezza, testing e output formali.
