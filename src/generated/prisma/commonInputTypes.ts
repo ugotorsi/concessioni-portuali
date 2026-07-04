@@ -390,6 +390,13 @@ export type EnumLivelloRischioDecadenzaNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumLivelloRischioDecadenzaNullableFilter<$PrismaModel> | $Enums.LivelloRischioDecadenza | null
 }
 
+export type EnumEsitoRegolarizzazioneNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.EsitoRegolarizzazione | Prisma.EnumEsitoRegolarizzazioneFieldRefInput<$PrismaModel> | null
+  in?: $Enums.EsitoRegolarizzazione[] | Prisma.ListEnumEsitoRegolarizzazioneFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.EsitoRegolarizzazione[] | Prisma.ListEnumEsitoRegolarizzazioneFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumEsitoRegolarizzazioneNullableFilter<$PrismaModel> | $Enums.EsitoRegolarizzazione | null
+}
+
 export type EnumStatoCriticitaFilter<$PrismaModel = never> = {
   equals?: $Enums.StatoCriticita | Prisma.EnumStatoCriticitaFieldRefInput<$PrismaModel>
   in?: $Enums.StatoCriticita[] | Prisma.ListEnumStatoCriticitaFieldRefInput<$PrismaModel>
@@ -445,6 +452,16 @@ export type EnumLivelloRischioDecadenzaNullableWithAggregatesFilter<$PrismaModel
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumLivelloRischioDecadenzaNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumLivelloRischioDecadenzaNullableFilter<$PrismaModel>
+}
+
+export type EnumEsitoRegolarizzazioneNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EsitoRegolarizzazione | Prisma.EnumEsitoRegolarizzazioneFieldRefInput<$PrismaModel> | null
+  in?: $Enums.EsitoRegolarizzazione[] | Prisma.ListEnumEsitoRegolarizzazioneFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.EsitoRegolarizzazione[] | Prisma.ListEnumEsitoRegolarizzazioneFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumEsitoRegolarizzazioneNullableWithAggregatesFilter<$PrismaModel> | $Enums.EsitoRegolarizzazione | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEsitoRegolarizzazioneNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEsitoRegolarizzazioneNullableFilter<$PrismaModel>
 }
 
 export type EnumStatoCriticitaWithAggregatesFilter<$PrismaModel = never> = {
@@ -1138,6 +1155,13 @@ export type NestedEnumLivelloRischioDecadenzaNullableFilter<$PrismaModel = never
   not?: Prisma.NestedEnumLivelloRischioDecadenzaNullableFilter<$PrismaModel> | $Enums.LivelloRischioDecadenza | null
 }
 
+export type NestedEnumEsitoRegolarizzazioneNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.EsitoRegolarizzazione | Prisma.EnumEsitoRegolarizzazioneFieldRefInput<$PrismaModel> | null
+  in?: $Enums.EsitoRegolarizzazione[] | Prisma.ListEnumEsitoRegolarizzazioneFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.EsitoRegolarizzazione[] | Prisma.ListEnumEsitoRegolarizzazioneFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumEsitoRegolarizzazioneNullableFilter<$PrismaModel> | $Enums.EsitoRegolarizzazione | null
+}
+
 export type NestedEnumStatoCriticitaFilter<$PrismaModel = never> = {
   equals?: $Enums.StatoCriticita | Prisma.EnumStatoCriticitaFieldRefInput<$PrismaModel>
   in?: $Enums.StatoCriticita[] | Prisma.ListEnumStatoCriticitaFieldRefInput<$PrismaModel>
@@ -1193,6 +1217,16 @@ export type NestedEnumLivelloRischioDecadenzaNullableWithAggregatesFilter<$Prism
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumLivelloRischioDecadenzaNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumLivelloRischioDecadenzaNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumEsitoRegolarizzazioneNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EsitoRegolarizzazione | Prisma.EnumEsitoRegolarizzazioneFieldRefInput<$PrismaModel> | null
+  in?: $Enums.EsitoRegolarizzazione[] | Prisma.ListEnumEsitoRegolarizzazioneFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.EsitoRegolarizzazione[] | Prisma.ListEnumEsitoRegolarizzazioneFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumEsitoRegolarizzazioneNullableWithAggregatesFilter<$PrismaModel> | $Enums.EsitoRegolarizzazione | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEsitoRegolarizzazioneNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEsitoRegolarizzazioneNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumStatoCriticitaWithAggregatesFilter<$PrismaModel = never> = {

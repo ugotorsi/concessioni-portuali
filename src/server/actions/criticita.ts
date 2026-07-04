@@ -13,6 +13,7 @@ import { prisma } from "@/lib/prisma";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 import {
   CRITICITA_ART47_LETTERA_VALUES,
+  CRITICITA_ESITO_REGOLARIZZAZIONE_VALUES,
   CRITICITA_FONTE_VALUES,
   CRITICITA_GRAVITA_VALUES,
   CRITICITA_RISCHIO_DECADENZA_VALUES,
@@ -29,6 +30,13 @@ const baseCriticitaSchema = z
     rischioDecadenza: z.enum(CRITICITA_RISCHIO_DECADENZA_VALUES).optional(),
     motivazioneArt47: z.string().trim().optional(),
     azioneIstruttoriaArt47: z.string().trim().optional(),
+    regolarizzata: z.enum(["true", "false"]).transform((value) => value === "true"),
+    dataRegolarizzazione: z.string().trim().optional(),
+    descrizioneRegolarizzazione: z.string().trim().optional(),
+    esitoRegolarizzazione: z.enum(CRITICITA_ESITO_REGOLARIZZAZIONE_VALUES).optional(),
+    verificataRegolarizzazione: z.enum(["true", "false"]).transform((value) => value === "true"),
+    dataVerificaRegolarizzazione: z.string().trim().optional(),
+    noteVerificaRegolarizzazione: z.string().trim().optional(),
   })
   .superRefine((value, ctx) => {
     if (!value.rilevanzaArt47) {
@@ -58,6 +66,29 @@ const baseCriticitaSchema = z
         path: ["motivazioneArt47"],
       });
     }
+
+    if (value.regolarizzata) {
+      const hasData = Boolean(value.dataRegolarizzazione && value.dataRegolarizzazione.length > 0);
+      const hasDescrizione = Boolean(
+        value.descrizioneRegolarizzazione && value.descrizioneRegolarizzazione.length >= 10,
+      );
+
+      if (!hasData && !hasDescrizione) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Se la criticità è regolarizzata indica data o descrizione (minimo 10 caratteri).",
+          path: ["descrizioneRegolarizzazione"],
+        });
+      }
+    }
+
+    if (value.verificataRegolarizzazione && !value.dataVerificaRegolarizzazione) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Se la regolarizzazione è verificata indica la data verifica.",
+        path: ["dataVerificaRegolarizzazione"],
+      });
+    }
   });
 
 const createCriticitaSchema = baseCriticitaSchema.extend({
@@ -85,6 +116,7 @@ const economicoTipologie = new Set(["ECONOMICA", "MOROSITA"]);
 
 type Art47LetteraValue = (typeof CRITICITA_ART47_LETTERA_VALUES)[number];
 type RischioDecadenzaValue = (typeof CRITICITA_RISCHIO_DECADENZA_VALUES)[number];
+type EsitoRegolarizzazioneValue = (typeof CRITICITA_ESITO_REGOLARIZZAZIONE_VALUES)[number];
 
 function toOptional(value: string | undefined): string | undefined {
   if (!value) {
@@ -117,6 +149,59 @@ function normalizeArt47Fields(input: {
     rischioDecadenza: input.rischioDecadenza ?? null,
     motivazioneArt47: input.motivazioneArt47 ?? null,
     azioneIstruttoriaArt47: input.azioneIstruttoriaArt47 ?? null,
+  };
+}
+
+function parseOptionalDate(value: string | undefined): Date | null {
+  if (!value) {
+    return null;
+  }
+
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function normalizeRegolarizzazioneFields(input: {
+  regolarizzata: boolean;
+  dataRegolarizzazione?: string;
+  descrizioneRegolarizzazione?: string;
+  esitoRegolarizzazione?: EsitoRegolarizzazioneValue;
+  verificataRegolarizzazione: boolean;
+  dataVerificaRegolarizzazione?: string;
+  noteVerificaRegolarizzazione?: string;
+}) {
+  if (!input.regolarizzata) {
+    return {
+      regolarizzata: false,
+      dataRegolarizzazione: null,
+      descrizioneRegolarizzazione: null,
+      esitoRegolarizzazione: null,
+      verificataRegolarizzazione: false,
+      dataVerificaRegolarizzazione: null,
+      noteVerificaRegolarizzazione: null,
+    };
+  }
+
+  if (!input.verificataRegolarizzazione) {
+    return {
+      regolarizzata: true,
+      dataRegolarizzazione: parseOptionalDate(input.dataRegolarizzazione),
+      descrizioneRegolarizzazione: input.descrizioneRegolarizzazione ?? null,
+      esitoRegolarizzazione: input.esitoRegolarizzazione ?? null,
+      verificataRegolarizzazione: false,
+      dataVerificaRegolarizzazione: null,
+      noteVerificaRegolarizzazione: null,
+    };
+  }
+
+  return {
+    regolarizzata: true,
+    dataRegolarizzazione: parseOptionalDate(input.dataRegolarizzazione),
+    descrizioneRegolarizzazione: input.descrizioneRegolarizzazione ?? null,
+    esitoRegolarizzazione: input.esitoRegolarizzazione ?? null,
+    verificataRegolarizzazione: true,
+    dataVerificaRegolarizzazione: parseOptionalDate(input.dataVerificaRegolarizzazione),
+    noteVerificaRegolarizzazione: input.noteVerificaRegolarizzazione ?? null,
   };
 }
 
@@ -174,6 +259,13 @@ export async function createCriticitaAction(formData: FormData) {
     rischioDecadenza: toOptional(formData.get("rischioDecadenza")?.toString()),
     motivazioneArt47: toOptional(formData.get("motivazioneArt47")?.toString()),
     azioneIstruttoriaArt47: toOptional(formData.get("azioneIstruttoriaArt47")?.toString()),
+    regolarizzata: formData.get("regolarizzata") ?? "false",
+    dataRegolarizzazione: toOptional(formData.get("dataRegolarizzazione")?.toString()),
+    descrizioneRegolarizzazione: toOptional(formData.get("descrizioneRegolarizzazione")?.toString()),
+    esitoRegolarizzazione: toOptional(formData.get("esitoRegolarizzazione")?.toString()),
+    verificataRegolarizzazione: formData.get("verificataRegolarizzazione") ?? "false",
+    dataVerificaRegolarizzazione: toOptional(formData.get("dataVerificaRegolarizzazione")?.toString()),
+    noteVerificaRegolarizzazione: toOptional(formData.get("noteVerificaRegolarizzazione")?.toString()),
   });
 
   if (!parsed.success) {
@@ -215,6 +307,7 @@ export async function createCriticitaAction(formData: FormData) {
       descrizione: parsed.data.descrizione,
       azioneConsigliata: parsed.data.noteIstruttorie,
       ...normalizeArt47Fields(parsed.data),
+      ...normalizeRegolarizzazioneFields(parsed.data),
       stato: "APERTA",
       dataUltimoAggiornamento: new Date(),
     },
@@ -238,6 +331,9 @@ export async function createCriticitaAction(formData: FormData) {
       rilevanzaArt47: parsed.data.rilevanzaArt47,
       letteraArt47: parsed.data.letteraArt47 ?? null,
       rischioDecadenza: parsed.data.rischioDecadenza ?? null,
+      regolarizzata: parsed.data.regolarizzata,
+      esitoRegolarizzazione: parsed.data.esitoRegolarizzazione ?? null,
+      verificataRegolarizzazione: parsed.data.verificataRegolarizzazione,
     },
   });
 
@@ -263,6 +359,13 @@ export async function updateCriticitaAction(formData: FormData) {
     rischioDecadenza: toOptional(formData.get("rischioDecadenza")?.toString()),
     motivazioneArt47: toOptional(formData.get("motivazioneArt47")?.toString()),
     azioneIstruttoriaArt47: toOptional(formData.get("azioneIstruttoriaArt47")?.toString()),
+    regolarizzata: formData.get("regolarizzata") ?? "false",
+    dataRegolarizzazione: toOptional(formData.get("dataRegolarizzazione")?.toString()),
+    descrizioneRegolarizzazione: toOptional(formData.get("descrizioneRegolarizzazione")?.toString()),
+    esitoRegolarizzazione: toOptional(formData.get("esitoRegolarizzazione")?.toString()),
+    verificataRegolarizzazione: formData.get("verificataRegolarizzazione") ?? "false",
+    dataVerificaRegolarizzazione: toOptional(formData.get("dataVerificaRegolarizzazione")?.toString()),
+    noteVerificaRegolarizzazione: toOptional(formData.get("noteVerificaRegolarizzazione")?.toString()),
   });
 
   if (!parsed.success) {
@@ -322,6 +425,7 @@ export async function updateCriticitaAction(formData: FormData) {
       descrizione: parsed.data.descrizione,
       azioneConsigliata: parsed.data.noteIstruttorie,
       ...normalizeArt47Fields(parsed.data),
+      ...normalizeRegolarizzazioneFields(parsed.data),
       dataUltimoAggiornamento: new Date(),
     },
   });
@@ -338,6 +442,9 @@ export async function updateCriticitaAction(formData: FormData) {
       rilevanzaArt47: parsed.data.rilevanzaArt47,
       letteraArt47: parsed.data.letteraArt47 ?? null,
       rischioDecadenza: parsed.data.rischioDecadenza ?? null,
+      regolarizzata: parsed.data.regolarizzata,
+      esitoRegolarizzazione: parsed.data.esitoRegolarizzazione ?? null,
+      verificataRegolarizzazione: parsed.data.verificataRegolarizzazione,
       changedFields: [
         "gravita",
         "stato",
@@ -348,6 +455,13 @@ export async function updateCriticitaAction(formData: FormData) {
         "rischioDecadenza",
         "motivazioneArt47",
         "azioneIstruttoriaArt47",
+        "regolarizzata",
+        "dataRegolarizzazione",
+        "descrizioneRegolarizzazione",
+        "esitoRegolarizzazione",
+        "verificataRegolarizzazione",
+        "dataVerificaRegolarizzazione",
+        "noteVerificaRegolarizzazione",
       ],
     },
   });

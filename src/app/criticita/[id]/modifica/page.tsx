@@ -175,6 +175,102 @@ export default async function ModificaCriticitaPage({ params }: ModificaCriticit
                 </div>
               </div>
 
+              <div className="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Regolarizzazione / sanatoria della criticita</p>
+                  <p className="text-xs text-slate-600">
+                    Informazione istruttoria: la regolarizzazione incide sulla valutazione del caso ma non determina automatismi provvedimentali.
+                  </p>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-1">
+                    <label htmlFor="regolarizzata" className="text-sm font-medium text-slate-700">
+                      Criticita regolarizzata
+                    </label>
+                    <Select id="regolarizzata" name="regolarizzata" defaultValue={detail.regolarizzata ? "true" : "false"} required>
+                      <option value="false">No</option>
+                      <option value="true">Si</option>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label htmlFor="dataRegolarizzazione" className="text-sm font-medium text-slate-700">
+                      Data regolarizzazione
+                    </label>
+                    <Input
+                      id="dataRegolarizzazione"
+                      name="dataRegolarizzazione"
+                      type="date"
+                      defaultValue={detail.dataRegolarizzazione ? detail.dataRegolarizzazione.toISOString().slice(0, 10) : ""}
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label htmlFor="esitoRegolarizzazione" className="text-sm font-medium text-slate-700">
+                      Esito regolarizzazione
+                    </label>
+                    <Select id="esitoRegolarizzazione" name="esitoRegolarizzazione" defaultValue={detail.esitoRegolarizzazione ?? ""}>
+                      <option value="">Seleziona esito</option>
+                      {filtersData.esitoRegolarizzazione.map((item) => (
+                        <option key={item.value} value={item.value}>
+                          {item.label}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label htmlFor="verificataRegolarizzazione" className="text-sm font-medium text-slate-700">
+                      Verifica regolarizzazione
+                    </label>
+                    <Select
+                      id="verificataRegolarizzazione"
+                      name="verificataRegolarizzazione"
+                      defaultValue={detail.verificataRegolarizzazione ? "true" : "false"}
+                      required
+                    >
+                      <option value="false">Da verificare</option>
+                      <option value="true">Verificata</option>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1 md:col-span-2">
+                    <label htmlFor="descrizioneRegolarizzazione" className="text-sm font-medium text-slate-700">
+                      Descrizione regolarizzazione
+                    </label>
+                    <Textarea
+                      id="descrizioneRegolarizzazione"
+                      name="descrizioneRegolarizzazione"
+                      defaultValue={detail.descrizioneRegolarizzazione ?? ""}
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label htmlFor="dataVerificaRegolarizzazione" className="text-sm font-medium text-slate-700">
+                      Data verifica regolarizzazione
+                    </label>
+                    <Input
+                      id="dataVerificaRegolarizzazione"
+                      name="dataVerificaRegolarizzazione"
+                      type="date"
+                      defaultValue={detail.dataVerificaRegolarizzazione ? detail.dataVerificaRegolarizzazione.toISOString().slice(0, 10) : ""}
+                    />
+                  </div>
+
+                  <div className="space-y-1 md:col-span-2">
+                    <label htmlFor="noteVerificaRegolarizzazione" className="text-sm font-medium text-slate-700">
+                      Note verifica regolarizzazione
+                    </label>
+                    <Input
+                      id="noteVerificaRegolarizzazione"
+                      name="noteVerificaRegolarizzazione"
+                      defaultValue={detail.noteVerificaRegolarizzazione ?? ""}
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="flex flex-wrap gap-2">
                 <Button type="submit">Salva modifiche</Button>
                 <Link

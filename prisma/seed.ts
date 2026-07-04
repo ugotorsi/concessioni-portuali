@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import { PrismaClient } from "../src/generated/prisma/client";
 import type {
   Art47CodNavLettera,
+  EsitoRegolarizzazione,
   FonteCriticita,
   GravitaCriticita,
   LivelloRischioDecadenza,
@@ -739,6 +740,13 @@ async function main() {
     rischioDecadenza?: LivelloRischioDecadenza;
     motivazioneArt47?: string;
     azioneIstruttoriaArt47?: string;
+    regolarizzata?: boolean;
+    dataRegolarizzazione?: Date;
+    descrizioneRegolarizzazione?: string;
+    esitoRegolarizzazione?: EsitoRegolarizzazione;
+    verificataRegolarizzazione?: boolean;
+    dataVerificaRegolarizzazione?: Date;
+    noteVerificaRegolarizzazione?: string;
     stato: StatoCriticita;
     dataRilevazione: Date;
     dataUltimoAggiornamento: Date;
@@ -757,6 +765,13 @@ async function main() {
       rischioDecadenza: "ALTO",
       motivazioneArt47: "Morosita reiterata su annualita correnti con residuo significativo non sanato.",
       azioneIstruttoriaArt47: "Avviare contraddittorio e diffida con termine per regolarizzazione.",
+      regolarizzata: true,
+      dataRegolarizzazione: daysAgo(6),
+      descrizioneRegolarizzazione: "Residuo sanato con versamento integrale e piano rientro concluso.",
+      esitoRegolarizzazione: "COMPLETA",
+      verificataRegolarizzazione: true,
+      dataVerificaRegolarizzazione: daysAgo(4),
+      noteVerificaRegolarizzazione: "Quietanze verificate e posizione economica riallineata.",
       stato: "IN_GESTIONE",
       dataRilevazione: daysAgo(15),
       dataUltimoAggiornamento: daysAgo(2),
@@ -788,6 +803,11 @@ async function main() {
       rischioDecadenza: "MEDIO",
       motivazioneArt47: "Difformita planimetrica persistente da verificare rispetto al titolo assentito.",
       azioneIstruttoriaArt47: "Disporre sopralluogo con riscontro metrico e verbalizzazione.",
+      regolarizzata: true,
+      dataRegolarizzazione: daysAgo(10),
+      descrizioneRegolarizzazione: "Ripristino parziale dell area con opere non ancora completate.",
+      esitoRegolarizzazione: "PARZIALE",
+      verificataRegolarizzazione: false,
       stato: "IN_GESTIONE",
       dataRilevazione: daysAgo(22),
       dataUltimoAggiornamento: daysAgo(6),
@@ -911,6 +931,13 @@ async function main() {
         rischioDecadenza: item.rischioDecadenza ?? null,
         motivazioneArt47: item.motivazioneArt47 ?? null,
         azioneIstruttoriaArt47: item.azioneIstruttoriaArt47 ?? null,
+        regolarizzata: item.regolarizzata ?? false,
+        dataRegolarizzazione: item.dataRegolarizzazione ?? null,
+        descrizioneRegolarizzazione: item.descrizioneRegolarizzazione ?? null,
+        esitoRegolarizzazione: item.esitoRegolarizzazione ?? null,
+        verificataRegolarizzazione: item.verificataRegolarizzazione ?? false,
+        dataVerificaRegolarizzazione: item.dataVerificaRegolarizzazione ?? null,
+        noteVerificaRegolarizzazione: item.noteVerificaRegolarizzazione ?? null,
         stato: item.stato,
         dataRilevazione: item.dataRilevazione,
         dataUltimoAggiornamento: item.dataUltimoAggiornamento,

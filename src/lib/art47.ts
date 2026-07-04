@@ -32,6 +32,29 @@ const RISCHIO_LABELS: Record<string, string> = {
   CRITICO: "Critico",
 };
 
+const ESITO_REGOLARIZZAZIONE_LABELS: Record<string, string> = {
+  DA_VERIFICARE: "Da verificare",
+  PARZIALE: "Parziale",
+  COMPLETA: "Completa",
+  NON_IDONEA: "Non idonea",
+  SUPERATA_DA_PROVVEDIMENTO: "Superata da provvedimento",
+};
+
+const ESITO_REGOLARIZZAZIONE_DESCRIPTIONS: Record<string, string> = {
+  DA_VERIFICARE: "La regolarizzazione e dichiarata ma richiede ancora verifica istruttoria.",
+  PARZIALE: "Sono stati adottati interventi solo parzialmente risolutivi.",
+  COMPLETA: "Risultano elementi di regolarizzazione completa, da confermare in istruttoria.",
+  NON_IDONEA: "La regolarizzazione non e ritenuta idonea rispetto ai rilievi istruttori.",
+  SUPERATA_DA_PROVVEDIMENTO: "La posizione e stata superata da successivo provvedimento amministrativo.",
+};
+
+export interface CriticitaRegolarizzazioneInput {
+  rilevanzaArt47?: boolean | null;
+  regolarizzata?: boolean | null;
+  esitoRegolarizzazione?: string | null;
+  verificataRegolarizzazione?: boolean | null;
+}
+
 export function getArt47Label(lettera: string | null | undefined): string {
   if (!lettera) {
     return "-";
@@ -76,6 +99,76 @@ export function getRischioDecadenzaBadgeVariant(
   }
 
   return "default";
+}
+
+export function getEsitoRegolarizzazioneLabel(esito: string | null | undefined): string {
+  if (!esito) {
+    return "-";
+  }
+
+  return ESITO_REGOLARIZZAZIONE_LABELS[esito] ?? esito;
+}
+
+export function getEsitoRegolarizzazioneDescription(esito: string | null | undefined): string {
+  if (!esito) {
+    return "Nessun esito di regolarizzazione indicato.";
+  }
+
+  return ESITO_REGOLARIZZAZIONE_DESCRIPTIONS[esito] ?? "Esito da approfondire in istruttoria.";
+}
+
+export function getRegolarizzazioneBadgeVariant(
+  esito: string | null | undefined,
+): "default" | "success" | "warning" | "danger" {
+  if (!esito) {
+    return "default";
+  }
+
+  if (esito === "COMPLETA") {
+    return "success";
+  }
+
+  if (esito === "PARZIALE" || esito === "DA_VERIFICARE") {
+    return "warning";
+  }
+
+  if (esito === "NON_IDONEA") {
+    return "danger";
+  }
+
+  return "default";
+}
+
+export function hasRegolarizzazioneIstruttoriaRilevante(
+  criticita: CriticitaRegolarizzazioneInput,
+): boolean {
+  return Boolean(criticita.regolarizzata);
+}
+
+export function getArt47RiskNoteWithRegolarizzazione(
+  criticita: CriticitaRegolarizzazioneInput,
+): string {
+  if (!criticita.rilevanzaArt47) {
+    return "La regolarizzazione e un elemento informativo utile al fascicolo istruttorio.";
+  }
+
+  if (!criticita.regolarizzata) {
+    return "La criticita art. 47 risulta non regolarizzata allo stato degli atti istruttori.";
+  }
+
+  if (criticita.esitoRegolarizzazione === "NON_IDONEA") {
+    return "La regolarizzazione risulta non idonea e richiede approfondimento istruttorio prima di eventuali determinazioni finali.";
+  }
+
+  if (criticita.esitoRegolarizzazione === "DA_VERIFICARE" || !criticita.verificataRegolarizzazione) {
+    return "La regolarizzazione e un elemento istruttorio rilevante da valutare prima di eventuali determinazioni finali. Verifica tecnica ancora pendente.";
+  }
+
+  if (criticita.esitoRegolarizzazione === "COMPLETA" && criticita.verificataRegolarizzazione) {
+    return "La regolarizzazione completa e verificata costituisce elemento istruttorio favorevole, da valutare senza automatismi rispetto a eventuali determinazioni decadenziali.";
+  }
+
+  return "La regolarizzazione e un elemento istruttorio rilevante da valutare prima di eventuali determinazioni finali.";
 }
 
 export function inferArt47FromCriticitaTipologia(tipologia: string): {

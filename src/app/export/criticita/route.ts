@@ -52,6 +52,13 @@ export async function GET(request: Request): Promise<Response> {
       rischioDecadenza: true,
       motivazioneArt47: true,
       azioneIstruttoriaArt47: true,
+      regolarizzata: true,
+      dataRegolarizzazione: true,
+      descrizioneRegolarizzazione: true,
+      esitoRegolarizzazione: true,
+      verificataRegolarizzazione: true,
+      dataVerificaRegolarizzazione: true,
+      noteVerificaRegolarizzazione: true,
       dataRilevazione: true,
       concessione: {
         select: {
@@ -80,6 +87,13 @@ export async function GET(request: Request): Promise<Response> {
     { header: "rischio_decadenza", value: (row) => row.rischioDecadenza },
     { header: "motivazione_art47", value: (row) => row.motivazioneArt47 },
     { header: "azione_istruttoria_art47", value: (row) => row.azioneIstruttoriaArt47 },
+    { header: "regolarizzata", value: (row) => (row.regolarizzata ? "SI" : "NO") },
+    { header: "data_regolarizzazione", value: (row) => row.dataRegolarizzazione },
+    { header: "descrizione_regolarizzazione", value: (row) => row.descrizioneRegolarizzazione },
+    { header: "esito_regolarizzazione", value: (row) => row.esitoRegolarizzazione },
+    { header: "verificata_regolarizzazione", value: (row) => (row.verificataRegolarizzazione ? "SI" : "NO") },
+    { header: "data_verifica_regolarizzazione", value: (row) => row.dataVerificaRegolarizzazione },
+    { header: "note_verifica_regolarizzazione", value: (row) => row.noteVerificaRegolarizzazione },
   ]);
 
   return csvResponse(csv, buildCsvFilename("criticita"));

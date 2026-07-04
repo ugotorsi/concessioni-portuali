@@ -37,10 +37,20 @@ test("create criticita with Art.47 mapping", async ({ page }) => {
   await page.locator("#motivazioneArt47").fill("Persistenza morosita su canoni dovuti in assenza di piano rispettato.");
   await page.locator("#azioneIstruttoriaArt47").fill("Predisporre contraddittorio e verifica presupposti.");
 
+  await page.locator("#regolarizzata").selectOption("true");
+  await page.locator("#dataRegolarizzazione").fill("2026-06-20");
+  await page.locator("#esitoRegolarizzazione").selectOption("COMPLETA");
+  await page.locator("#verificataRegolarizzazione").selectOption("true");
+  await page.locator("#descrizioneRegolarizzazione").fill("Versato il residuo con quietanza protocollata e piano rientro chiuso.");
+  await page.locator("#dataVerificaRegolarizzazione").fill("2026-06-25");
+  await page.locator("#noteVerificaRegolarizzazione").fill("Verifica amministrativa completata con esito favorevole.");
+
   await page.getByRole("button", { name: "Salva criticita" }).click();
 
   await expect(page).toHaveURL(/\/criticita\/.+/);
   await expect(page.getByRole("heading", { name: "Mapping art. 47 Cod. Nav." })).toBeVisible();
   await expect(page.getByText("Rilevante")).toBeVisible();
   await expect(page.getByText(/Lettera d/i)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Regolarizzazione / sanatoria" })).toBeVisible();
+  await expect(page.getByText("Regolarizzata")).toBeVisible();
 });

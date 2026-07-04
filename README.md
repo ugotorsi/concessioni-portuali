@@ -85,6 +85,12 @@ Baseline coperta:
 - Dettaglio criticità con sezione esplicita di mapping art.47.
 - Export CSV criticità esteso con colonne art.47.
 
+## Regolarizzazione criticita (Issue #12)
+- Estensione `Criticita` con campi: `regolarizzata`, `dataRegolarizzazione`, `descrizioneRegolarizzazione`, `esitoRegolarizzazione`, `verificataRegolarizzazione`, `dataVerificaRegolarizzazione`, `noteVerificaRegolarizzazione`.
+- Filtri lista criticità su stato regolarizzazione ed esito regolarizzazione.
+- Sezioni dedicate in form e dettaglio criticità con nota istruttoria: la regolarizzazione incide sull istruttoria ma non determina automatica esclusione della decadenza.
+- Export CSV criticità esteso con colonne regolarizzazione.
+
 ## Checklist contraddittorio su Procedimento (Issue #7)
 - Estensione `Procedimento` con campi checklist procedimentale: avvio, memorie, audizione, contestazione, controdeduzioni, motivazione e proposta esito istruttorio.
 - Utility dominio in `src/lib/procedimento-checklist.ts` per stato item, completezza, missing item e livello warning.

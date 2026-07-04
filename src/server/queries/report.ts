@@ -117,6 +117,9 @@ export interface ReportDetail {
     stato: string;
     descrizione: string;
     dataRilevazione: Date;
+    regolarizzata: boolean;
+    esitoRegolarizzazione: string | null;
+    verificataRegolarizzazione: boolean;
   }>;
   scadenzeRilevanti: Array<{
     id: string;
@@ -293,6 +296,17 @@ export async function getReportDetail(id: string): Promise<ReportDetail | null> 
             where: { stato: { in: ["APERTA", "IN_GESTIONE"] } },
             orderBy: [{ gravita: "desc" }, { dataRilevazione: "desc" }],
             take: 12,
+            select: {
+              id: true,
+              tipologia: true,
+              gravita: true,
+              stato: true,
+              descrizione: true,
+              dataRilevazione: true,
+              regolarizzata: true,
+              esitoRegolarizzazione: true,
+              verificataRegolarizzazione: true,
+            },
           },
           scadenze: {
             where: { stato: { in: ["APERTA", "SCADUTA"] } },
@@ -375,6 +389,9 @@ export async function getReportDetail(id: string): Promise<ReportDetail | null> 
         stato: item.stato,
         descrizione: item.descrizione,
         dataRilevazione: item.dataRilevazione,
+        regolarizzata: item.regolarizzata,
+        esitoRegolarizzazione: item.esitoRegolarizzazione,
+        verificataRegolarizzazione: item.verificataRegolarizzazione,
       })) ?? [],
     scadenzeRilevanti:
       report.concessione?.scadenze.map((item) => ({

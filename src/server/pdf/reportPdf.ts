@@ -191,6 +191,11 @@ function renderEvidenceSection(ctx: PdfContext, detail: ReportDetail) {
   section(ctx, "2. Evidenze istruttorie");
 
   keyValue(ctx, "Criticita aperte", String(detail.criticitaAperte.length));
+  keyValue(
+    ctx,
+    "Criticita con regolarizzazione",
+    String(detail.criticitaAperte.filter((item) => item.regolarizzata).length),
+  );
   keyValue(ctx, "Scadenze aperte/scadute", String(detail.scadenzeRilevanti.length));
   keyValue(ctx, "Pagamenti critici", String(detail.pagamentiCritici.length));
   keyValue(ctx, "Procedimenti in corso", String(detail.procedimentiInCorso.length));
@@ -217,6 +222,25 @@ function renderEvidenceSection(ctx: PdfContext, detail: ReportDetail) {
     bullet(
       ctx,
       `Procedimento attivo prioritario: ${enumLabel(firstProcedimento.tipologia)} (${enumLabel(firstProcedimento.stato)}).`,
+    );
+  }
+
+  const criticitaRegDaVerificare = detail.criticitaAperte.filter(
+    (item) => item.regolarizzata && !item.verificataRegolarizzazione,
+  ).length;
+
+  if (criticitaRegDaVerificare > 0) {
+    bullet(
+      ctx,
+      `Criticita con regolarizzazione ancora da verificare: ${criticitaRegDaVerificare}. Integrare il fascicolo con riscontro tecnico-amministrativo.`,
+    );
+  }
+
+  const primaRegolarizzata = detail.criticitaAperte.find((item) => item.regolarizzata);
+  if (primaRegolarizzata) {
+    bullet(
+      ctx,
+      `Regolarizzazione rilevata su ${enumLabel(primaRegolarizzata.tipologia)} (esito ${enumLabel(primaRegolarizzata.esitoRegolarizzazione)}). Valutazione con natura istruttoria, senza automatismi provvedimentali.`,
     );
   }
 }

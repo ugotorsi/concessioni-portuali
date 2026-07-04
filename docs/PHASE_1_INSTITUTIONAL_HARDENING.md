@@ -55,6 +55,11 @@ Stato attuale (Issue #2 baseline implementata):
 - filtri lista criticità su rilevanza, lettera e rischio decadenza;
 - export CSV criticità esteso con colonne art.47.
 
+Evoluzione Phase 2 (Issue #12):
+- estensione `Criticita` con campi regolarizzazione (`regolarizzata`, `dataRegolarizzazione`, `descrizioneRegolarizzazione`, `esitoRegolarizzazione`, `verificataRegolarizzazione`, `dataVerificaRegolarizzazione`, `noteVerificaRegolarizzazione`);
+- filtri/lista/dettaglio/export allineati al tracciamento regolarizzazione;
+- nota esplicita di perimetro: la regolarizzazione incide sull istruttoria ma non determina automatica esclusione della decadenza.
+
 ### 3.3 PDF report lato server professionale
 - Obiettivo: elevare i PDF a formato istituzionale con sezioni standard, metadati e impaginazione robusta.
 - Motivo strategico: output formale difendibile in tavoli tecnici, contraddittorio e condivisione inter-ente.

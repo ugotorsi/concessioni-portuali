@@ -89,6 +89,24 @@ export function CriticitaFiltersBar({ filtersData, current }: CriticitaFiltersBa
         ))}
       </Select>
 
+      <Select name="regolarizzazione" defaultValue={current.regolarizzazione ?? ""}>
+        <option value="">Regolarizzazione (tutte)</option>
+        {filtersData.regolarizzazione.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </Select>
+
+      <Select name="esitoRegolarizzazione" defaultValue={current.esitoRegolarizzazione ?? ""}>
+        <option value="">Esito regolarizzazione (tutti)</option>
+        {filtersData.esitoRegolarizzazione.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </Select>
+
       <div className="flex items-center gap-2 md:col-span-2 xl:col-span-8">
         <button
           type="submit"

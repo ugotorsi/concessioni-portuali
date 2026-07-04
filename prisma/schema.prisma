@@ -150,6 +150,14 @@ enum LivelloRischioDecadenza {
   CRITICO
 }
 
+enum EsitoRegolarizzazione {
+  DA_VERIFICARE
+  PARZIALE
+  COMPLETA
+  NON_IDONEA
+  SUPERATA_DA_PROVVEDIMENTO
+}
+
 enum TipologiaProcedimento {
   CHIARIMENTI
   DIFFIDA
@@ -384,6 +392,13 @@ model Criticita {
   rischioDecadenza        LivelloRischioDecadenza?
   motivazioneArt47        String?
   azioneIstruttoriaArt47  String?
+  regolarizzata           Boolean            @default(false)
+  dataRegolarizzazione    DateTime?
+  descrizioneRegolarizzazione String?
+  esitoRegolarizzazione   EsitoRegolarizzazione?
+  verificataRegolarizzazione Boolean         @default(false)
+  dataVerificaRegolarizzazione DateTime?
+  noteVerificaRegolarizzazione String?
   stato                   StatoCriticita
   dataRilevazione         DateTime           @default(now())
   dataUltimoAggiornamento DateTime?
@@ -401,6 +416,10 @@ model Criticita {
   @@index([rilevanzaArt47])
   @@index([letteraArt47])
   @@index([rischioDecadenza])
+  @@index([regolarizzata])
+  @@index([dataRegolarizzazione])
+  @@index([esitoRegolarizzazione])
+  @@index([verificataRegolarizzazione])
   @@index([dataRilevazione])
   @@index([createdAt])
 }

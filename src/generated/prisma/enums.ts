@@ -197,6 +197,17 @@ export const LivelloRischioDecadenza = {
 export type LivelloRischioDecadenza = (typeof LivelloRischioDecadenza)[keyof typeof LivelloRischioDecadenza]
 
 
+export const EsitoRegolarizzazione = {
+  DA_VERIFICARE: 'DA_VERIFICARE',
+  PARZIALE: 'PARZIALE',
+  COMPLETA: 'COMPLETA',
+  NON_IDONEA: 'NON_IDONEA',
+  SUPERATA_DA_PROVVEDIMENTO: 'SUPERATA_DA_PROVVEDIMENTO'
+} as const
+
+export type EsitoRegolarizzazione = (typeof EsitoRegolarizzazione)[keyof typeof EsitoRegolarizzazione]
+
+
 export const TipologiaProcedimento = {
   CHIARIMENTI: 'CHIARIMENTI',
   DIFFIDA: 'DIFFIDA',

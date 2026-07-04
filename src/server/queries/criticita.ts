@@ -39,6 +39,14 @@ export const CRITICITA_ART47_LETTERA_VALUES = [
 ] as const;
 export const CRITICITA_RISCHIO_DECADENZA_VALUES = ["BASSO", "MEDIO", "ALTO", "CRITICO"] as const;
 export const CRITICITA_RILEVANZA_ART47_VALUES = ["TUTTE", "SI", "NO"] as const;
+export const CRITICITA_ESITO_REGOLARIZZAZIONE_VALUES = [
+  "DA_VERIFICARE",
+  "PARZIALE",
+  "COMPLETA",
+  "NON_IDONEA",
+  "SUPERATA_DA_PROVVEDIMENTO",
+] as const;
+export const CRITICITA_REGOLARIZZAZIONE_VALUES = ["TUTTE", "SI", "DA_VERIFICARE"] as const;
 
 type CriticitaTipologiaValue = (typeof CRITICITA_TIPOLOGIA_VALUES)[number];
 type CriticitaGravitaValue = (typeof CRITICITA_GRAVITA_VALUES)[number];
@@ -47,6 +55,8 @@ type CriticitaFonteValue = (typeof CRITICITA_FONTE_VALUES)[number];
 type CriticitaArt47LetteraValue = (typeof CRITICITA_ART47_LETTERA_VALUES)[number];
 type CriticitaRischioDecadenzaValue = (typeof CRITICITA_RISCHIO_DECADENZA_VALUES)[number];
 type CriticitaRilevanzaArt47Value = (typeof CRITICITA_RILEVANZA_ART47_VALUES)[number];
+type CriticitaEsitoRegolarizzazioneValue = (typeof CRITICITA_ESITO_REGOLARIZZAZIONE_VALUES)[number];
+type CriticitaRegolarizzazioneValue = (typeof CRITICITA_REGOLARIZZAZIONE_VALUES)[number];
 
 export interface GetCriticitaListParams {
   search?: string;
@@ -57,6 +67,8 @@ export interface GetCriticitaListParams {
   rilevanzaArt47?: CriticitaRilevanzaArt47Value;
   letteraArt47?: CriticitaArt47LetteraValue;
   rischioDecadenza?: CriticitaRischioDecadenzaValue;
+  regolarizzazione?: CriticitaRegolarizzazioneValue;
+  esitoRegolarizzazione?: CriticitaEsitoRegolarizzazioneValue;
   concessioneId?: string;
 }
 
@@ -73,6 +85,13 @@ export interface CriticitaListItem {
   rischioDecadenza: string | null;
   motivazioneArt47: string | null;
   azioneIstruttoriaArt47: string | null;
+  regolarizzata: boolean;
+  dataRegolarizzazione: Date | null;
+  descrizioneRegolarizzazione: string | null;
+  esitoRegolarizzazione: string | null;
+  verificataRegolarizzazione: boolean;
+  dataVerificaRegolarizzazione: Date | null;
+  noteVerificaRegolarizzazione: string | null;
   stato: string;
   dataRilevazione: Date;
   concessione: {
@@ -114,6 +133,13 @@ export interface CriticitaDetail {
   rischioDecadenza: string | null;
   motivazioneArt47: string | null;
   azioneIstruttoriaArt47: string | null;
+  regolarizzata: boolean;
+  dataRegolarizzazione: Date | null;
+  descrizioneRegolarizzazione: string | null;
+  esitoRegolarizzazione: string | null;
+  verificataRegolarizzazione: boolean;
+  dataVerificaRegolarizzazione: Date | null;
+  noteVerificaRegolarizzazione: string | null;
   stato: string;
   dataRilevazione: Date;
   concessione: {
@@ -186,6 +212,8 @@ export interface CriticitaFiltersData {
   rilevanzaArt47: Array<{ value: CriticitaRilevanzaArt47Value; label: string }>;
   lettereArt47: Array<{ value: CriticitaArt47LetteraValue; label: string }>;
   rischioDecadenza: Array<{ value: CriticitaRischioDecadenzaValue; label: string }>;
+  regolarizzazione: Array<{ value: CriticitaRegolarizzazioneValue; label: string }>;
+  esitoRegolarizzazione: Array<{ value: CriticitaEsitoRegolarizzazioneValue; label: string }>;
 }
 
 export interface CriticitaIstruttoria {
@@ -222,6 +250,14 @@ export async function getCriticitaList(
   params: GetCriticitaListParams,
 ): Promise<GetCriticitaListResult> {
   const search = params.search?.trim();
+  const andFilters: Prisma.CriticitaWhereInput[] = [];
+
+  if (params.regolarizzazione === "SI") {
+    andFilters.push({ regolarizzata: true });
+  } else if (params.regolarizzazione === "DA_VERIFICARE") {
+    andFilters.push({ regolarizzata: true });
+    andFilters.push({ OR: [{ esitoRegolarizzazione: "DA_VERIFICARE" }, { verificataRegolarizzazione: false }] });
+  }
 
   const where: Prisma.CriticitaWhereInput = {
     ...(search
@@ -256,7 +292,9 @@ export async function getCriticitaList(
         : {}),
     ...(params.letteraArt47 ? { letteraArt47: params.letteraArt47 } : {}),
     ...(params.rischioDecadenza ? { rischioDecadenza: params.rischioDecadenza } : {}),
+    ...(params.esitoRegolarizzazione ? { esitoRegolarizzazione: params.esitoRegolarizzazione } : {}),
     ...(params.concessioneId ? { concessioneId: params.concessioneId } : {}),
+    ...(andFilters.length > 0 ? { AND: andFilters } : {}),
   };
 
   const [rows, summary] = await Promise.all([
@@ -275,6 +313,13 @@ export async function getCriticitaList(
         rischioDecadenza: true,
         motivazioneArt47: true,
         azioneIstruttoriaArt47: true,
+        regolarizzata: true,
+        dataRegolarizzazione: true,
+        descrizioneRegolarizzazione: true,
+        esitoRegolarizzazione: true,
+        verificataRegolarizzazione: true,
+        dataVerificaRegolarizzazione: true,
+        noteVerificaRegolarizzazione: true,
         stato: true,
         dataRilevazione: true,
         concessione: {
@@ -323,6 +368,13 @@ export async function getCriticitaList(
       rischioDecadenza: item.rischioDecadenza,
       motivazioneArt47: item.motivazioneArt47,
       azioneIstruttoriaArt47: item.azioneIstruttoriaArt47,
+      regolarizzata: item.regolarizzata,
+      dataRegolarizzazione: item.dataRegolarizzazione,
+      descrizioneRegolarizzazione: item.descrizioneRegolarizzazione,
+      esitoRegolarizzazione: item.esitoRegolarizzazione,
+      verificataRegolarizzazione: item.verificataRegolarizzazione,
+      dataVerificaRegolarizzazione: item.dataVerificaRegolarizzazione,
+      noteVerificaRegolarizzazione: item.noteVerificaRegolarizzazione,
       stato: item.stato,
       dataRilevazione: item.dataRilevazione,
       concessione: {
@@ -417,6 +469,13 @@ export async function getCriticitaDetail(id: string): Promise<CriticitaDetail | 
     rischioDecadenza: criticita.rischioDecadenza,
     motivazioneArt47: criticita.motivazioneArt47,
     azioneIstruttoriaArt47: criticita.azioneIstruttoriaArt47,
+    regolarizzata: criticita.regolarizzata,
+    dataRegolarizzazione: criticita.dataRegolarizzazione,
+    descrizioneRegolarizzazione: criticita.descrizioneRegolarizzazione,
+    esitoRegolarizzazione: criticita.esitoRegolarizzazione,
+    verificataRegolarizzazione: criticita.verificataRegolarizzazione,
+    dataVerificaRegolarizzazione: criticita.dataVerificaRegolarizzazione,
+    noteVerificaRegolarizzazione: criticita.noteVerificaRegolarizzazione,
     stato: criticita.stato,
     dataRilevazione: criticita.dataRilevazione,
     concessione: {
@@ -512,6 +571,19 @@ export async function getCriticitaFilters(): Promise<CriticitaFiltersData> {
     })),
     lettereArt47: CRITICITA_ART47_LETTERA_VALUES.map((value) => ({ value, label: formatEnumLabel(value) })),
     rischioDecadenza: CRITICITA_RISCHIO_DECADENZA_VALUES.map((value) => ({
+      value,
+      label: formatEnumLabel(value),
+    })),
+    regolarizzazione: CRITICITA_REGOLARIZZAZIONE_VALUES.map((value) => ({
+      value,
+      label:
+        value === "SI"
+          ? "Solo regolarizzate"
+          : value === "DA_VERIFICARE"
+            ? "Regolarizzazione da verificare"
+            : "Tutte",
+    })),
+    esitoRegolarizzazione: CRITICITA_ESITO_REGOLARIZZAZIONE_VALUES.map((value) => ({
       value,
       label: formatEnumLabel(value),
     })),

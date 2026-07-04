@@ -1668,6 +1668,13 @@ export const CriticitaScalarFieldEnum = {
   rischioDecadenza: 'rischioDecadenza',
   motivazioneArt47: 'motivazioneArt47',
   azioneIstruttoriaArt47: 'azioneIstruttoriaArt47',
+  regolarizzata: 'regolarizzata',
+  dataRegolarizzazione: 'dataRegolarizzazione',
+  descrizioneRegolarizzazione: 'descrizioneRegolarizzazione',
+  esitoRegolarizzazione: 'esitoRegolarizzazione',
+  verificataRegolarizzazione: 'verificataRegolarizzazione',
+  dataVerificaRegolarizzazione: 'dataVerificaRegolarizzazione',
+  noteVerificaRegolarizzazione: 'noteVerificaRegolarizzazione',
   stato: 'stato',
   dataRilevazione: 'dataRilevazione',
   dataUltimoAggiornamento: 'dataUltimoAggiornamento',
@@ -2154,6 +2161,20 @@ export type EnumLivelloRischioDecadenzaFieldRefInput<$PrismaModel> = FieldRefInp
  * Reference to a field of type 'LivelloRischioDecadenza[]'
  */
 export type ListEnumLivelloRischioDecadenzaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LivelloRischioDecadenza[]'>
+    
+
+
+/**
+ * Reference to a field of type 'EsitoRegolarizzazione'
+ */
+export type EnumEsitoRegolarizzazioneFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EsitoRegolarizzazione'>
+    
+
+
+/**
+ * Reference to a field of type 'EsitoRegolarizzazione[]'
+ */
+export type ListEnumEsitoRegolarizzazioneFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EsitoRegolarizzazione[]'>
     
 
 

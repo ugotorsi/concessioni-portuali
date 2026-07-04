@@ -197,6 +197,87 @@ export default async function NuovaCriticitaPage({ searchParams }: NuovaCriticit
                 </div>
               </div>
 
+              <div className="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Regolarizzazione / sanatoria della criticita</p>
+                  <p className="text-xs text-slate-600">
+                    Informazione utile alla fase istruttoria: la regolarizzazione non comporta automatica esclusione di eventuali misure decadenziali.
+                  </p>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-1">
+                    <label htmlFor="regolarizzata" className="text-sm font-medium text-slate-700">
+                      Criticita regolarizzata
+                    </label>
+                    <Select id="regolarizzata" name="regolarizzata" defaultValue="false" required>
+                      <option value="false">No</option>
+                      <option value="true">Si</option>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label htmlFor="dataRegolarizzazione" className="text-sm font-medium text-slate-700">
+                      Data regolarizzazione
+                    </label>
+                    <Input id="dataRegolarizzazione" name="dataRegolarizzazione" type="date" />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label htmlFor="esitoRegolarizzazione" className="text-sm font-medium text-slate-700">
+                      Esito regolarizzazione
+                    </label>
+                    <Select id="esitoRegolarizzazione" name="esitoRegolarizzazione" defaultValue="">
+                      <option value="">Seleziona esito</option>
+                      {filtersData.esitoRegolarizzazione.map((item) => (
+                        <option key={item.value} value={item.value}>
+                          {item.label}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label htmlFor="verificataRegolarizzazione" className="text-sm font-medium text-slate-700">
+                      Verifica regolarizzazione
+                    </label>
+                    <Select id="verificataRegolarizzazione" name="verificataRegolarizzazione" defaultValue="false" required>
+                      <option value="false">Da verificare</option>
+                      <option value="true">Verificata</option>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1 md:col-span-2">
+                    <label htmlFor="descrizioneRegolarizzazione" className="text-sm font-medium text-slate-700">
+                      Descrizione regolarizzazione
+                    </label>
+                    <Textarea
+                      id="descrizioneRegolarizzazione"
+                      name="descrizioneRegolarizzazione"
+                      placeholder="Descrivere gli elementi di regolarizzazione o sanatoria..."
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label htmlFor="dataVerificaRegolarizzazione" className="text-sm font-medium text-slate-700">
+                      Data verifica regolarizzazione
+                    </label>
+                    <Input id="dataVerificaRegolarizzazione" name="dataVerificaRegolarizzazione" type="date" />
+                  </div>
+
+                  <div className="space-y-1 md:col-span-2">
+                    <label htmlFor="noteVerificaRegolarizzazione" className="text-sm font-medium text-slate-700">
+                      Note verifica regolarizzazione
+                    </label>
+                    <Input
+                      id="noteVerificaRegolarizzazione"
+                      name="noteVerificaRegolarizzazione"
+                      placeholder="Esito del riscontro tecnico-amministrativo"
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="flex flex-wrap gap-2">
                 <Button type="submit">Salva criticita</Button>
                 <Link

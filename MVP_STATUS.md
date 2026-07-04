@@ -33,6 +33,8 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Smoke E2E su auth/ruoli, security headers e accesso audit
 - Mapping strutturato art. 47 su Criticita (Issue #2)
 - Filtri/UI/export Criticita allineati al profilo art.47 e rischio decadenza
+- Regolarizzazione Criticita con impatto istruttorio e verifica dedicata (Issue #12)
+- Estensione lista/dettaglio/export criticita con stato/esito regolarizzazione
 - Checklist contraddittorio su Procedimento con update auditabile (Issue #7)
 - Lista/dettaglio/export procedimenti estesi con stato checklist e warning istruttori
 - Export report CSV verificato

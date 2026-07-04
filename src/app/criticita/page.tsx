@@ -15,11 +15,19 @@ import {
   TableRow,
 } from "@/components/ui/Table";
 import { formatDateIT } from "@/lib/utils";
-import { getArt47Label, getRischioDecadenzaBadgeVariant, getRischioDecadenzaLabel } from "@/lib/art47";
+import {
+  getArt47Label,
+  getEsitoRegolarizzazioneLabel,
+  getRegolarizzazioneBadgeVariant,
+  getRischioDecadenzaBadgeVariant,
+  getRischioDecadenzaLabel,
+} from "@/lib/art47";
 import {
   CRITICITA_ART47_LETTERA_VALUES,
+  CRITICITA_ESITO_REGOLARIZZAZIONE_VALUES,
   CRITICITA_FONTE_VALUES,
   CRITICITA_GRAVITA_VALUES,
+  CRITICITA_REGOLARIZZAZIONE_VALUES,
   CRITICITA_RILEVANZA_ART47_VALUES,
   CRITICITA_RISCHIO_DECADENZA_VALUES,
   CRITICITA_STATO_VALUES,
@@ -95,6 +103,18 @@ export default async function CriticitaPage({ searchParams }: CriticitaPageProps
       const value = pickString(resolvedSearch.rischioDecadenza);
       return value && CRITICITA_RISCHIO_DECADENZA_VALUES.includes(value as (typeof CRITICITA_RISCHIO_DECADENZA_VALUES)[number])
         ? (value as (typeof CRITICITA_RISCHIO_DECADENZA_VALUES)[number])
+        : undefined;
+    })(),
+    regolarizzazione: (() => {
+      const value = pickString(resolvedSearch.regolarizzazione);
+      return value && CRITICITA_REGOLARIZZAZIONE_VALUES.includes(value as (typeof CRITICITA_REGOLARIZZAZIONE_VALUES)[number])
+        ? (value as (typeof CRITICITA_REGOLARIZZAZIONE_VALUES)[number])
+        : undefined;
+    })(),
+    esitoRegolarizzazione: (() => {
+      const value = pickString(resolvedSearch.esitoRegolarizzazione);
+      return value && CRITICITA_ESITO_REGOLARIZZAZIONE_VALUES.includes(value as (typeof CRITICITA_ESITO_REGOLARIZZAZIONE_VALUES)[number])
+        ? (value as (typeof CRITICITA_ESITO_REGOLARIZZAZIONE_VALUES)[number])
         : undefined;
     })(),
     concessioneId: pickString(resolvedSearch.concessioneId),
@@ -217,6 +237,7 @@ export default async function CriticitaPage({ searchParams }: CriticitaPageProps
                   <TableHead>Descrizione</TableHead>
                   <TableHead>Riferimento normativo</TableHead>
                   <TableHead>Art. 47</TableHead>
+                  <TableHead>Regolarizzazione</TableHead>
                   <TableHead>Stato</TableHead>
                   <TableHead>Procedimenti</TableHead>
                   <TableHead>Azioni</TableHead>
@@ -266,6 +287,21 @@ export default async function CriticitaPage({ searchParams }: CriticitaPageProps
                         )}
                       </TableCell>
                       <TableCell>
+                        {item.regolarizzata ? (
+                          <div className="space-y-1">
+                            <Badge variant="success">Regolarizzata</Badge>
+                            <Badge variant={getRegolarizzazioneBadgeVariant(item.esitoRegolarizzazione)}>
+                              {getEsitoRegolarizzazioneLabel(item.esitoRegolarizzazione)}
+                            </Badge>
+                            {!item.verificataRegolarizzazione ? (
+                              <Badge variant="warning">Da verificare</Badge>
+                            ) : null}
+                          </div>
+                        ) : (
+                          <Badge variant="default">Non regolarizzata</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
                         <StatoBadge value={item.stato} />
                       </TableCell>
                       <TableCell>
@@ -286,7 +322,7 @@ export default async function CriticitaPage({ searchParams }: CriticitaPageProps
                 })}
                 {listData.items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={10} className="text-center text-slate-500">
+                    <TableCell colSpan={11} className="text-center text-slate-500">
                       Nessuna criticita trovata con i filtri correnti.
                     </TableCell>
                   </TableRow>

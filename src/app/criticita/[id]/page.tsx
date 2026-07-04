@@ -21,9 +21,14 @@ import {
 } from "@/lib/auth";
 import {
   getArt47Description,
+  getArt47RiskNoteWithRegolarizzazione,
   getArt47Label,
+  getEsitoRegolarizzazioneDescription,
+  getEsitoRegolarizzazioneLabel,
+  getRegolarizzazioneBadgeVariant,
   getRischioDecadenzaBadgeVariant,
   getRischioDecadenzaLabel,
+  hasRegolarizzazioneIstruttoriaRilevante,
 } from "@/lib/art47";
 import { formatCurrencyEUR, formatDateIT, formatEnumLabel } from "@/lib/utils";
 import { getCriticitaDetail, getCriticitaIstruttoria } from "@/server/queries/criticita";
@@ -104,6 +109,8 @@ export default async function CriticitaDetailPage({ params }: CriticitaDetailPag
     stato: criticita.stato,
   });
   const normeCollegate = await getNormeForCriticita(criticita.id);
+  const regolarizzazioneRilevante = hasRegolarizzazioneIstruttoriaRilevante(criticita);
+  const notaArt47Regolarizzazione = getArt47RiskNoteWithRegolarizzazione(criticita);
 
   const canEdit = canManageCriticita(role);
   const canStartProcedimento = canManageProcedimenti(role);
@@ -280,6 +287,70 @@ export default async function CriticitaDetailPage({ params }: CriticitaDetailPag
               <p className="text-xs uppercase tracking-wide text-slate-500">Azione istruttoria art. 47</p>
               <p className="mt-1 text-slate-900">{criticita.azioneIstruttoriaArt47 ?? "-"}</p>
             </div>
+            <div className="md:col-span-2 xl:col-span-4">
+              <p className="text-xs uppercase tracking-wide text-slate-500">Nota istruttoria su regolarizzazione</p>
+              <p className="mt-1 text-slate-900">{notaArt47Regolarizzazione}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Regolarizzazione / sanatoria</CardTitle>
+            <CardDescription>
+              La regolarizzazione incide sulla valutazione istruttoria ma non determina automaticamente l esclusione di misure decadenziali.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-slate-500">Stato regolarizzazione</p>
+              <div className="mt-1">
+                <Badge variant={criticita.regolarizzata ? "success" : "default"}>
+                  {criticita.regolarizzata ? "Regolarizzata" : "Non regolarizzata"}
+                </Badge>
+              </div>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wide text-slate-500">Esito</p>
+              <div className="mt-1">
+                <Badge variant={getRegolarizzazioneBadgeVariant(criticita.esitoRegolarizzazione)}>
+                  {getEsitoRegolarizzazioneLabel(criticita.esitoRegolarizzazione)}
+                </Badge>
+              </div>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wide text-slate-500">Data regolarizzazione</p>
+              <p className="mt-1 text-slate-900">{criticita.dataRegolarizzazione ? formatDateIT(criticita.dataRegolarizzazione) : "-"}</p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wide text-slate-500">Verifica regolarizzazione</p>
+              <div className="mt-1">
+                <Badge variant={criticita.verificataRegolarizzazione ? "success" : "warning"}>
+                  {criticita.verificataRegolarizzazione ? "Verificata" : "Da verificare"}
+                </Badge>
+              </div>
+            </div>
+            <div className="md:col-span-2 xl:col-span-4">
+              <p className="text-xs uppercase tracking-wide text-slate-500">Descrizione regolarizzazione</p>
+              <p className="mt-1 text-slate-900">{criticita.descrizioneRegolarizzazione ?? "-"}</p>
+            </div>
+            <div className="md:col-span-2 xl:col-span-4">
+              <p className="text-xs uppercase tracking-wide text-slate-500">Descrizione esito</p>
+              <p className="mt-1 text-slate-900">{getEsitoRegolarizzazioneDescription(criticita.esitoRegolarizzazione)}</p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wide text-slate-500">Data verifica</p>
+              <p className="mt-1 text-slate-900">{criticita.dataVerificaRegolarizzazione ? formatDateIT(criticita.dataVerificaRegolarizzazione) : "-"}</p>
+            </div>
+            <div className="md:col-span-2 xl:col-span-3">
+              <p className="text-xs uppercase tracking-wide text-slate-500">Note verifica</p>
+              <p className="mt-1 text-slate-900">{criticita.noteVerificaRegolarizzazione ?? "-"}</p>
+            </div>
+            {regolarizzazioneRilevante ? (
+              <div className="md:col-span-2 xl:col-span-4 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                Presenza di elementi di regolarizzazione utili al fascicolo istruttorio. Valutare proporzionalita e tenuta giuridica senza automatismi.
+              </div>
+            ) : null}
           </CardContent>
         </Card>
 
