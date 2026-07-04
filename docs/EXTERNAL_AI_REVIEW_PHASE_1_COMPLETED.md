@@ -120,3 +120,4 @@ Il punto di forza è la catena funzionale integrata tra criticità, art. 47, pro
 - Raffinamento PDF istituzionale preso in carico con Issue #16: frontespizio, struttura sezioni, header/footer ricorrenti, box riepilogativi e disclaimer istruttori rafforzati su art. 47/regolarizzazione/contraddittorio/art. 10-bis.
 - Kit demo istituzionale preso in carico con Issue #17: nuova pagina scenari guidati con seed realistico su morosita art. 47, occupazione difforme, regolarizzazione pre-provvedimentale, contraddittorio incompleto e tracciamento art. 10-bis.
 - Baseline fascicolo documentale preso in carico con Issue #18: upload/download documenti, storage locale configurabile, collegamento multi-entita, audit eventi documentali e integrazione nei report PDF (senza pretesa di conservazione legale in questa fase).
+- Hardening tecnico Issue #18 completato: warning Turbopack filesystem tracing sul modulo document storage rimosso mantenendo storage locale demo server-side.
