@@ -18,6 +18,8 @@ test("admin consulta la demo guidata AI e naviga le slide", async ({ page }) => 
   await expect(page.getByTestId("guided-demo-speaker-notes")).toBeVisible();
   await expect(page.getByTestId("guided-demo-voice-section")).toBeVisible();
   await expect(page.getByTestId("guided-demo-voice-read")).toBeVisible();
+  await expect(page.getByTestId("guided-demo-narrator-mode")).toContainText("Modalità relatore AI");
+  await expect(page.getByTestId("guided-demo-voice-section")).toContainText("non una semplice lettura della slide");
 
   await page.getByTestId("guided-demo-voice-read").click();
   await expect(page.getByTestId("guided-demo-voice-stop")).toBeVisible();

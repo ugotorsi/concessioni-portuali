@@ -167,6 +167,7 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
 - Nuova pagina dedicata: `/demo-guidata`.
 - Presentazione interattiva a slide con storytelling istituzionale e speaker notes AI.
 - Narrazione vocale browser-based con Web Speech API (Issue #21), controlli play/pausa/riprendi/ferma e toggle narrazione automatica slide-by-slide.
+- Narrazione migliorata in modalità relatore AI (Issue #22): la voce usa copioni discorsivi dedicati (`narrationScript`) e non una lettura meccanica di titolo, bullet e note.
 - Posizionamento esplicito: non è un gestionale, è una piattaforma intelligente di governo istruttorio.
 - Link diretti a scenari demo, fascicolo documentale, procedimenti, mappa e report.
 - Focus su automazione del procedimento, non della decisione.
@@ -181,6 +182,8 @@ Perimetro e limiti:
 
 Evoluzione possibile:
 - integrazione futura di voice AI server-side o TTS professionale, mantenendo il perimetro istruttorio e i presidi di legalità.
+- generazione dinamica dello speech su profilo interlocutore (tecnico, giuridico, economico) mantenendo responsabilità umana e tracciabilità.
+- estensione verso relatore virtuale/avatar istituzionale per demo guidate avanzate.
 
 ## Mappa demo territoriale baseline (Issue #10)
 - Nuova pagina dedicata: `/mappa`.

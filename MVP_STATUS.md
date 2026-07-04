@@ -54,6 +54,7 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Baseline protocollo/PEC metadata (Issue #19): metadati istruttori su documenti (direzione, canale, protocollo, Message-ID/ricevute PEC), warning ricevute incomplete e sintesi in report/PDF
 - Demo guidata AI-led (Issue #20): sezione `/demo-guidata` con slide navigabili, speaker notes AI, link rapidi a scenari/fascicolo/mappa/report e narrativa istituzionale su automazione del procedimento (non della decisione)
 - Voce narrante demo guidata (Issue #21): Web Speech API browser-based su `/demo-guidata` con controlli leggi/pausa/riprendi/ferma, narrazione automatica opzionale e fallback senza servizi esterni/API key
+- Relatore AI evoluto (Issue #22): narrazione discorsiva basata su `narrationScript` per ciascuna slide, con tono istituzionale, transizioni più naturali e superamento della lettura meccanica dei contenuti
 - Seed documentale locale attivo con file su storage configurabile (`DOCUMENT_STORAGE_ROOT`) e limiti upload (`DOCUMENT_MAX_FILE_MB`)
 - Warning Turbopack su filesystem tracing document storage risolto con isolamento runtime server-side del modulo storage (build pulita, senza warning NFT)
 - Baseline mappa demo territoriale (Issue #10): route `/mappa` GIS-ready con lista marker, placeholder map UI e link rapidi a concessioni/criticita/sopralluoghi
@@ -105,6 +106,7 @@ Copertura baseline CI:
 - Metadati protocollo/PEC tracciati solo a fini istruttori: nessuna integrazione PEC/protocollo a valore legale in questa fase
 - Demo guidata AI-led orientata a storytelling istituzionale/pilot: non costituisce automazione decisionale o supporto decisorio vincolante
 - Narrazione vocale dipendente dalle capacità del browser client: in assenza di `speechSynthesis` resta disponibile la fruizione testuale completa
+- La voce browser resta un motore TTS locale: qualità e timbro dipendono dalle voci installate sul client
 
 ## Prossimi step
 1. Estendere progressivamente i test su export/report PDF e procedure critiche

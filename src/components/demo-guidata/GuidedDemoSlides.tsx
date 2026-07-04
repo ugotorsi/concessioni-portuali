@@ -37,6 +37,7 @@ export function GuidedDemoSlides({ slides }: GuidedDemoSlidesProps) {
   const [selectedVoice, setSelectedVoice] = useState<SpeechSynthesisVoice | null>(null);
 
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const nextSlideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const autoNarrationRef = useRef(false);
   const hasUserStartedNarrationRef = useRef(false);
 
@@ -52,20 +53,25 @@ export function GuidedDemoSlides({ slides }: GuidedDemoSlidesProps) {
   }, [currentIndex, totalSlides]);
 
   const buildNarrationText = useCallback((slide: GuidedDemoSlide): string => {
-    const bulletText = slide.bullets && slide.bullets.length > 0 ? `Punti essenziali: ${slide.bullets.join(", ")}.` : "";
+    if (slide.narrationScript && slide.narrationScript.trim().length > 0) {
+      return slide.narrationScript;
+    }
 
     return [
-      `Slide ${slide.id}. ${slide.title}.`,
-      slide.subtitle ? `${slide.subtitle}.` : "",
+      slide.title,
       slide.body,
-      bulletText,
-      `Note relatore AI: ${slide.speakerNotes}`,
+      slide.speakerNotes,
     ]
       .filter((value) => value.trim().length > 0)
       .join(" ");
   }, []);
 
   const stopNarration = useCallback(() => {
+    if (nextSlideTimeoutRef.current) {
+      clearTimeout(nextSlideTimeoutRef.current);
+      nextSlideTimeoutRef.current = null;
+    }
+
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
@@ -116,7 +122,9 @@ export function GuidedDemoSlides({ slides }: GuidedDemoSlidesProps) {
       utteranceRef.current = null;
 
       if (autoNarrationRef.current && currentIndex < totalSlides - 1) {
-        setCurrentIndex((value) => Math.min(totalSlides - 1, value + 1));
+        nextSlideTimeoutRef.current = setTimeout(() => {
+          setCurrentIndex((value) => Math.min(totalSlides - 1, value + 1));
+        }, 550);
       }
     };
 
@@ -211,6 +219,10 @@ export function GuidedDemoSlides({ slides }: GuidedDemoSlidesProps) {
       if (typeof window !== "undefined" && "speechSynthesis" in window) {
         window.speechSynthesis.cancel();
       }
+
+      if (nextSlideTimeoutRef.current) {
+        clearTimeout(nextSlideTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -224,7 +236,7 @@ export function GuidedDemoSlides({ slides }: GuidedDemoSlidesProps) {
     }
 
     if (isSpeaking) {
-      return "Voce AI attiva";
+      return "Spiegazione AI in corso";
     }
 
     return "Voce AI pronta";
@@ -320,19 +332,23 @@ export function GuidedDemoSlides({ slides }: GuidedDemoSlidesProps) {
         <CardHeader>
           <CardTitle className="text-lg">Voce AI</CardTitle>
           <CardDescription>
-            La voce usa la sintesi vocale del browser. Nessun audio viene inviato a servizi esterni.
+            La voce usa la sintesi vocale del browser, ma il testo è un copione di spiegazione AI, non una semplice lettura della slide.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
+          <Badge variant="success" className="w-fit" data-testid="guided-demo-narrator-mode">
+            Modalità relatore AI
+          </Badge>
+
           <div className="flex flex-wrap items-center gap-2">
             <Button
               type="button"
               variant="outline"
               onClick={speakCurrentSlide}
-              aria-label="Leggi la slide corrente"
+              aria-label="Spiega la slide corrente"
               data-testid="guided-demo-voice-read"
             >
-              Leggi slide
+              Spiega slide
             </Button>
             <Button
               type="button"
