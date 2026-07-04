@@ -6,6 +6,7 @@ import { buildRateLimitKey, checkRateLimit, getRateLimitHeaders } from "@/lib/ra
 const PUBLIC_PATHS = new Set(["/", "/login", "/logout", "/demo"]);
 const PROTECTED_PREFIXES = [
   "/dashboard",
+  "/mappa",
   "/concessioni",
   "/concessionari",
   "/criticita",
