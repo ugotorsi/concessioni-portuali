@@ -149,6 +149,14 @@ Perche la struttura e corretta per vista 360 gradi:
   - roadmap pilot 30/60/90 giorni e modello di adozione graduale.
 - Presidio giuridico-comunicativo: la demo non attribuisce all AI poteri decisionali e non configura provvedimenti automatici.
 
+## Estensione legal assistant e business plan demo (Issue #24)
+- Rafforzata la narrativa della demo guidata con blocco "Supporto legale-amministrativo" orientato a predisposizione assistita di atti, diffide, richieste documentali, preavvisi ex art. 10-bis, contestazioni, note istruttorie e schemi di motivazione.
+- Inserito presidio "Controllo di coerenza dell atto" per verifica evidenze, allegati, termini, memorie, riferimenti normativi e tracciabilita prima della firma.
+- Inserita sezione business plan con orizzonti breve/medio/lungo periodo, scenari ricavi prudente/intermedio/esteso e leve economiche modulari.
+- Formula prudenziale esplicitata in demo: "Il perimetro nazionale può essere stimato, in via prudenziale e da aggiornare prima di ogni presentazione ufficiale, in 16 Autorità di Sistema Portuale e 62 porti di rilievo nazionale.".
+- Nota obbligatoria associata: "Dati di contesto da verificare e aggiornare prima della presentazione commerciale o istituzionale.".
+- Limite giuridico ribadito: supporto assistivo e precompilazione; nessuna generazione automatica di provvedimenti finali e nessuna sostituzione del responsabile del procedimento.
+
 ## 4. Campi giuridicamente sensibili
 | Entita | Campo | Rilevanza giuridica | Rischio se mancante/errato | Miglioramento consigliato |
 |---|---|---|---|---|

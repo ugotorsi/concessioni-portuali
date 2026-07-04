@@ -4,6 +4,19 @@ export type GuidedDemoSlide = {
   subtitle?: string;
   body: string;
   bullets?: string[];
+  legalOutputs?: string[];
+  businessMetrics?: {
+    label: string;
+    value: string;
+    note?: string;
+  }[];
+  financialRows?: {
+    horizon: "Breve periodo" | "Medio periodo" | "Lungo periodo";
+    timeframe: string;
+    costs: string;
+    revenues: string;
+    notes: string;
+  }[];
   speakerNotes: string;
   narrationScript: string;
   visitIntro?: string;
@@ -184,6 +197,97 @@ export const GUIDED_DEMO_SLIDES: GuidedDemoSlide[] = [
   },
   {
     id: 10,
+    title: "Supporto legale-amministrativo",
+    body:
+      "La piattaforma può adiuvare gli uffici nella predisposizione di atti, comunicazioni, richieste, diffide, bandi, schemi di provvedimento e note istruttorie, partendo dal fascicolo e dalle evidenze già collegate.",
+    bullets: [
+      "bozze di comunicazione di avvio",
+      "diffide e richieste documentali",
+      "contestazioni",
+      "preavvisi ex art. 10-bis",
+      "schemi di motivazione",
+      "bozze di determine",
+      "bandi e avvisi",
+      "note istruttorie",
+      "risposte a istanze",
+      "report per organi interni",
+    ],
+    legalOutputs: [
+      "atti di impulso procedimentale",
+      "bozze e schemi di provvedimento",
+      "supporto a risposte su istanze e accessi agli atti",
+    ],
+    speakerNotes:
+      "Qui la piattaforma compie un salto di valore. Non si limita a dire che esiste una criticità. Aiuta gli uffici a trasformare quella criticità in un percorso amministrativo coerente: quale atto predisporre, quali evidenze richiamare, quali passaggi verificare e quali cautele motivazionali inserire.",
+    narrationScript:
+      "Questo è un passaggio essenziale. Una piattaforma intelligente non deve limitarsi a mostrare dati. Deve aiutare gli uffici a lavorare meglio sugli atti. Partendo dal fascicolo, dai documenti, dalle PEC, dai pagamenti e dalle criticità, il sistema può proporre bozze di comunicazioni, diffide, richieste documentali, preavvisi, contestazioni e schemi di provvedimento. Non sono atti automatici e non sostituiscono la valutazione umana, ma diventano una base strutturata su cui l’ufficio può lavorare con maggiore rapidità e coerenza.",
+    badges: ["AI", "Audit"],
+  },
+  {
+    id: 11,
+    title: "Dalla criticità all’atto",
+    body:
+      "Ogni criticità può diventare un percorso assistito: evidenze, base normativa, contraddittorio, schema di atto, allegati e tracciabilità.",
+    bullets: [
+      "rilevazione criticità",
+      "fonti documentali",
+      "riferimenti normativi",
+      "passaggi procedimentali",
+      "bozza atto",
+      "allegati",
+      "controllo motivazione",
+      "audit",
+    ],
+    speakerNotes:
+      "La forza del sistema è trasformare una criticità isolata in un fascicolo operativo. L’ufficio non parte da una pagina bianca, ma da una sequenza ordinata di evidenze e passaggi.",
+    narrationScript:
+      "Pensiamo a una morosità o a un’occupazione difforme. In un sistema tradizionale l’ufficio deve cercare i pagamenti, recuperare le PEC, verificare i sopralluoghi, ricostruire la concessione e poi scrivere un atto. Qui il percorso è diverso: la piattaforma collega gli elementi già presenti e suggerisce una traccia operativa. Quali evidenze richiamare, quale contraddittorio attivare, quali allegati inserire e quale schema motivazionale utilizzare.",
+    badges: ["Fascicolo", "Art. 47", "Audit"],
+  },
+  {
+    id: 12,
+    title: "Libreria atti e modelli",
+    body:
+      "Il sistema può evolvere in una libreria di modelli amministrativi, personalizzabili per ente, tipologia di concessione, criticità e fase del procedimento.",
+    bullets: [
+      "diffida per morosità",
+      "richiesta integrazione documentale",
+      "comunicazione di avvio",
+      "contestazione uso difforme",
+      "preavviso di rigetto",
+      "proposta di decadenza",
+      "determina conclusiva",
+      "bando o avviso",
+      "schema verbale sopralluogo",
+    ],
+    speakerNotes:
+      "La libreria atti consente di standardizzare senza irrigidire. Ogni modello resta modificabile, ma nasce già collegato al fascicolo e ai riferimenti utili.",
+    narrationScript:
+      "Una possibile evoluzione concreta è la libreria atti. L’ente può avere modelli propri, coerenti con il suo stile amministrativo e con la propria organizzazione. La piattaforma non impone un testo unico, ma propone una base controllata: diffide, comunicazioni di avvio, preavvisi, richieste documentali, determine, bandi e avvisi. Il vantaggio è ridurre tempi di predisposizione e disomogeneità tra uffici.",
+    badges: ["AI", "Audit"],
+  },
+  {
+    id: 13,
+    title: "Controllo di coerenza dell’atto",
+    body:
+      "Prima della firma, la piattaforma può aiutare a verificare se l’atto richiama le evidenze corrette, considera il contraddittorio, valuta le memorie e mantiene coerenza con il fascicolo.",
+    bullets: [
+      "evidenze richiamate",
+      "allegati presenti",
+      "termini rispettati",
+      "memorie valutate",
+      "motivazione coerente",
+      "riferimenti normativi",
+      "audit del percorso",
+    ],
+    speakerNotes:
+      "Il supporto legale più importante non è scrivere al posto dell’ufficio, ma aiutare l’ufficio a non dimenticare ciò che rende l’atto più solido.",
+    narrationScript:
+      "La piattaforma può diventare anche uno strumento di controllo. Prima che un atto venga firmato, il sistema può segnalare se manca un allegato, se una memoria non risulta valutata, se il contraddittorio non è completo o se la motivazione non richiama le evidenze essenziali. Questo non elimina il controllo umano, ma lo rende più ordinato e documentato.",
+    badges: ["Audit", "Art. 47"],
+  },
+  {
+    id: 14,
     title: "Il fascicolo intelligente",
     body:
       "Ogni documento può essere collegato a concessione, criticità, procedimento, pagamento, sopralluogo o report, con metadati, protocollo, PEC, hash e audit.",
@@ -198,7 +302,7 @@ export const GUIDED_DEMO_SLIDES: GuidedDemoSlide[] = [
     badges: ["Fascicolo", "PEC", "Audit"],
   },
   {
-    id: 11,
+    id: 15,
     title: "Scenario: morosità ex art. 47",
     body:
       "Dal pagamento scaduto alla criticità rilevante, fino al procedimento d’ufficio e al report istruttorio.",
@@ -213,7 +317,7 @@ export const GUIDED_DEMO_SLIDES: GuidedDemoSlide[] = [
     badges: ["Art. 47", "Business plan"],
   },
   {
-    id: 12,
+    id: 16,
     title: "Scenario: occupazione difforme",
     body:
       "Sopralluogo, evidenze documentali, localizzazione, criticità e procedimento vengono collegati nello stesso percorso istruttorio.",
@@ -228,7 +332,7 @@ export const GUIDED_DEMO_SLIDES: GuidedDemoSlide[] = [
     badges: ["GIS", "Fascicolo"],
   },
   {
-    id: 13,
+    id: 17,
     title: "Regolarizzazione prima del provvedimento finale",
     body:
       "La regolarizzazione non cancella automaticamente la criticità, ma diventa un elemento istruttorio da valutare prima di eventuali determinazioni finali.",
@@ -239,7 +343,7 @@ export const GUIDED_DEMO_SLIDES: GuidedDemoSlide[] = [
     badges: ["Art. 47"],
   },
   {
-    id: 14,
+    id: 18,
     title: "Procedimento e art. 10-bis",
     body:
       "La piattaforma distingue procedimento d’ufficio e istanza di parte, tracciando comunicazione di avvio, contraddittorio, preavviso di rigetto e valutazione delle osservazioni.",
@@ -254,7 +358,7 @@ export const GUIDED_DEMO_SLIDES: GuidedDemoSlide[] = [
     badges: ["Audit", "Art. 47"],
   },
   {
-    id: 15,
+    id: 19,
     title: "Mappa GIS-ready",
     body:
       "La vista territoriale consente di localizzare concessioni, criticità e sopralluoghi, collegando il dato amministrativo alla dimensione fisica dell’area.",
@@ -269,7 +373,7 @@ export const GUIDED_DEMO_SLIDES: GuidedDemoSlide[] = [
     badges: ["GIS"],
   },
   {
-    id: 16,
+    id: 20,
     title: "PDF istituzionale",
     body:
       "Il report PDF sintetizza fascicolo, criticità, procedimenti, documenti, protocollo, PEC, mappa e disclaimer istruttori.",
@@ -284,7 +388,7 @@ export const GUIDED_DEMO_SLIDES: GuidedDemoSlide[] = [
     badges: ["Fascicolo", "PEC"],
   },
   {
-    id: 17,
+    id: 21,
     title: "Audit e sicurezza",
     body:
       "Ruoli, audit trail, hash chain, rate limit Redis-ready, lockout, CI/CD e test automatizzati rendono la piattaforma più affidabile e verificabile.",
@@ -295,68 +399,125 @@ export const GUIDED_DEMO_SLIDES: GuidedDemoSlide[] = [
     badges: ["Audit", "AI"],
   },
   {
-    id: 18,
-    title: "Modello di adozione",
+    id: 22,
+    title: "Business plan: perimetro nazionale",
     body:
-      "Il percorso commerciale naturale è un pilot istituzionale, seguito da configurazione dati, formazione, canone annuo e moduli opzionali.",
+      "Il mercato iniziale può essere stimato sulle Autorità di Sistema Portuale e sugli enti concedenti collegati, con un modello progressivo da pilot locale a diffusione nazionale.",
     bullets: [
-      "pilot con AdSP o ente concedente",
-      "setup dati",
-      "formazione",
-      "canone annuo",
-      "moduli opzionali",
-      "integrazioni protocollo, PEC, GIS e storage",
+      "16 Autorità di Sistema Portuale",
+      "62 porti di rilievo nazionale",
+      "enti concedenti e società in house",
+      "uffici concessioni, demanio, legale, tecnico, ragioneria",
+      "adozione graduale per moduli",
+    ],
+    businessMetrics: [
+      {
+        label: "Perimetro prudenziale",
+        value: "16 AdSP / 62 porti",
+        note: "Dati di contesto da verificare e aggiornare prima della presentazione ufficiale.",
+      },
+      {
+        label: "Formula di riferimento",
+        value: "Stima prudenziale, da aggiornare prima di ogni presentazione commerciale o istituzionale",
+      },
     ],
     speakerNotes:
-      "La piattaforma si presta a un modello graduale: prima una demo guidata, poi un pilot su un perimetro limitato, infine integrazioni progressive con sistemi reali.",
+      "Il business plan non deve essere costruito su numeri fantasiosi. Il punto è mostrare un perimetro nazionale ragionevole e una strategia di adozione progressiva: prima un pilot, poi alcuni enti, poi moduli e integrazioni.",
     narrationScript:
-      "Il modello di adozione deve essere graduale. Prima una demo guidata, poi un pilot su un perimetro limitato, ad esempio alcune concessioni o una specifica area portuale. Da lì si passa alla configurazione dei dati reali, alla formazione, al canone annuale e ai moduli opzionali: protocollo, PEC, GIS avanzato, storage esterno, aggiornamento normativo e assistente AI.",
-    badges: ["Business plan"],
-  },
-  {
-    id: 19,
-    title: "Valore economico e organizzativo",
-    body:
-      "La piattaforma riduce dispersione documentale, omissioni istruttorie, tempi di ricostruzione del fascicolo e vulnerabilità del procedimento.",
-    bullets: [
-      "meno dispersione",
-      "più tracciabilità",
-      "reportistica rapida",
-      "controllo criticità",
-      "supporto a contenzioso e audit",
-      "migliore qualità istruttoria",
-    ],
-    speakerNotes:
-      "Il beneficio non è solo tecnologico. È organizzativo, amministrativo e difensivo: sapere dove sono gli atti, quali passaggi mancano e quali evidenze supportano la decisione.",
-    narrationScript:
-      "Il valore atteso non è soltanto tecnologico. È soprattutto organizzativo e amministrativo: meno dispersione, più tracciabilità e una migliore capacità di governare criticità e tempi istruttori. Questo impatto si traduce anche in maggiore qualità difensiva, perché un fascicolo ordinato rende più semplice spiegare le scelte adottate e dimostrare la coerenza del percorso seguito. In breve, la piattaforma migliora il lavoro quotidiano degli uffici e rafforza la qualità complessiva delle decisioni.",
+      "Qui passiamo dal valore istituzionale alla sostenibilità economica. Il perimetro nazionale può essere stimato, in via prudenziale e da aggiornare prima di ogni presentazione ufficiale, in 16 Autorità di Sistema Portuale e 62 porti di rilievo nazionale. Non significa vendere subito a tutti, ma disegnare una traiettoria: un primo pilot, poi alcune adozioni mirate, poi una possibile diffusione modulare. Dati di contesto da verificare e aggiornare prima della presentazione commerciale o istituzionale.",
     badges: ["Business plan", "Audit"],
   },
   {
-    id: 20,
-    title: "Roadmap 30 / 60 / 90 giorni",
+    id: 23,
+    title: "Costi, tempi e ricavi",
     body:
-      "Un pilot può partire con dati demo, poi integrare fascicoli reali, protocollo, PEC, storage esterno, GIS evoluto e aggiornamento normativo.",
-    bullets: [
-      "30 giorni: demo e configurazione pilota",
-      "60 giorni: import fascicoli e workflow",
-      "90 giorni: integrazioni e misurazione risultati",
+      "Pianificazione economica su tre orizzonti: validazione iniziale, consolidamento e scala nazionale.",
+    financialRows: [
+      {
+        horizon: "Breve periodo",
+        timeframe: "0/12 mesi",
+        costs:
+          "sviluppo demo e pilot; hosting/staging; consulenza legale e tecnica; presentazioni istituzionali; prime integrazioni leggere",
+        revenues:
+          "1/2 pilot; setup iniziale; canone pilota; servizi di configurazione",
+        notes: "Obiettivo: validazione prodotto e primo caso d’uso reale.",
+      },
+      {
+        horizon: "Medio periodo",
+        timeframe: "12/36 mesi",
+        costs:
+          "hardening produzione; sicurezza; object storage; integrazione protocollo/PEC; GIS evoluto; supporto clienti; aggiornamento normativo",
+        revenues:
+          "3/6 enti; canoni annuali; moduli opzionali; formazione; manutenzione evolutiva",
+        notes: "Obiettivo: consolidamento commerciale e referenze.",
+      },
+      {
+        horizon: "Lungo periodo",
+        timeframe: "36/60 mesi",
+        costs:
+          "team dedicato; compliance avanzata; TTS/AI premium; marketplace modelli atti; assistenza enterprise; certificazioni e audit",
+        revenues:
+          "diffusione su quota significativa delle AdSP; canoni ricorrenti; moduli AI/legal assistant; integrazioni; servizi professionali",
+        notes: "Obiettivo: piattaforma nazionale verticale.",
+      },
     ],
     speakerNotes:
-      "La roadmap deve essere credibile. Non promette tutto subito, ma propone un percorso progressivo: dimostrazione, validazione, integrazione e consolidamento.",
+      "Questa slide deve far capire che il progetto non è solo tecnologico. Ha un percorso industriale: costi iniziali controllati, ricavi da pilot, poi canoni ricorrenti, moduli opzionali e servizi professionali.",
     narrationScript:
-      "La roadmap proposta è progressiva e realistica: prima dimostrazione e setup del pilot, poi import dei fascicoli e allineamento dei workflow, infine integrazioni con ecosistemi esistenti e misurazione dei risultati. Questo consente di governare tempi, rischi e priorità senza interrompere l’operatività ordinaria degli uffici. Il vantaggio di questo approccio è trasformare la demo in un percorso concreto di adozione, con obiettivi verificabili lungo 30, 60 e 90 giorni.",
+      "Il business plan deve essere letto per fasi. Nel breve periodo l’obiettivo non è massimizzare i ricavi, ma validare il prodotto con uno o due pilot. Nel medio periodo si punta a trasformare quei pilot in referenze, consolidando sicurezza, integrazioni e assistenza. Nel lungo periodo il valore nasce dalla ricorrenza: canoni annuali, moduli legali, moduli AI, integrazioni e servizi professionali.",
+    badges: ["Business plan", "Audit"],
+  },
+  {
+    id: 24,
+    title: "Scenario ricavi",
+    body:
+      "Tre scenari economici indicativi guidano la lettura commerciale: prudente, intermedio, esteso.",
+    bullets: [
+      "Scenario prudente: 1 pilot anno 1; 3 enti entro anno 3; ricavi da setup, formazione e canone base",
+      "Scenario intermedio: 2 pilot anno 1; 5/8 enti entro anno 3; moduli protocollo, PEC, GIS e legal assistant",
+      "Scenario esteso: quota significativa delle 16 AdSP nel medio-lungo periodo con moduli premium e assistenza enterprise",
+      "Le cifre economiche puntuali vanno definite dopo validazione del pilot, analisi dei costi di produzione e confronto con il budget degli enti",
+    ],
+    speakerNotes:
+      "Non inserire numeri inventati se non sono ancora validati. La demo deve mostrare metodo: scenari, leve di ricavo e rapporto con il mercato potenziale.",
+    narrationScript:
+      "Non ha senso inventare numeri precisi prima del pilot. Ha senso però mostrare gli scenari. Uno scenario prudente parte da un singolo pilot e da pochi enti. Uno scenario intermedio considera più adozioni e moduli opzionali. Uno scenario esteso guarda alla quota significativa delle Autorità esistenti, con canoni ricorrenti e servizi specialistici. La logica economica è chiara: partire leggeri, validare, consolidare e scalare.",
     badges: ["Business plan", "GIS"],
   },
   {
-    id: 21,
+    id: 25,
+    title: "Leve di ricavo",
+    body:
+      "La sostenibilità economica nasce dalla combinazione di ricavi ricorrenti e servizi professionali ad alto valore.",
+    bullets: [
+      "setup iniziale",
+      "importazione fascicoli",
+      "configurazione workflow",
+      "canone annuale",
+      "modulo legal assistant",
+      "modulo aggiornamento normativo",
+      "modulo protocollo/PEC",
+      "modulo GIS",
+      "object storage",
+      "formazione",
+      "assistenza",
+      "manutenzione evolutiva",
+    ],
+    speakerNotes:
+      "La struttura ricavi deve restare modulare: una base annuale stabile e servizi configurabili in funzione della complessità dell’ente.",
+    narrationScript:
+      "Le entrate non dipendono da un solo canone. La piattaforma può generare ricavi da setup, configurazione, migrazione fascicoli, formazione e moduli opzionali. Questo consente di adattare l’offerta a enti piccoli, medi e grandi, mantenendo una base ricorrente e servizi professionali ad alto valore.",
+    badges: ["Business plan", "AI"],
+  },
+  {
+    id: 26,
     title: "Chiusura",
     body:
-      "La piattaforma non decide al posto dell’ente: rende più ordinato, verificabile e difendibile il percorso che porta alla decisione.",
+      "La piattaforma non decide al posto dell’ente: organizza il fascicolo, supporta la predisposizione degli atti, rafforza il procedimento e rende più solida la decisione amministrativa.",
     speakerNotes:
-      "Questa è la sintesi del progetto. Una piattaforma intelligente non sostituisce il potere amministrativo, ma rafforza il procedimento, collega le evidenze e migliora la qualità della decisione.",
+      "Questa è la sintesi del progetto. Una piattaforma intelligente non sostituisce il potere amministrativo, ma rafforza il procedimento, collega le evidenze, supporta la predisposizione degli atti e migliora la qualità della decisione.",
     narrationScript:
-      "Chiudiamo tornando al punto essenziale: la piattaforma non decide al posto dell’ente. Il suo compito è rendere il procedimento più ordinato, verificabile e difendibile, collegando evidenze che oggi risultano spesso disperse. L’AI agisce come relatore e copilota istruttorio, non come sostituto della responsabilità amministrativa. Se desideri, da qui puoi riaprire i moduli principali e gli scenari per una seconda lettura guidata focalizzata sul tuo caso d’uso.",
+      "Chiudiamo tornando al punto essenziale: la piattaforma non decide al posto dell’ente. Organizza il fascicolo, supporta la predisposizione degli atti, rafforza il procedimento e rende più solida la decisione amministrativa. L’AI agisce come relatore e copilota istruttorio, non come sostituto della responsabilità amministrativa. Se desideri, da qui puoi riaprire i moduli principali e gli scenari per una seconda lettura guidata focalizzata sul tuo caso d’uso.",
     badges: ["AI", "Audit", "Fascicolo"],
   },
 ];

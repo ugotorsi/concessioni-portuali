@@ -171,6 +171,9 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
 - Visita contestuale con pausa/ripresa (Issue #23): da slide con azione è disponibile "Apri e sospendi demo" per aprire fascicolo, scenari, mappa o report senza perdere contesto.
 - Ripresa intelligente su `/demo-guidata`: box "Demo sospesa" con azioni "Riprendi spiegazione", "Continua senza voce" e "Ricomincia demo".
 - Banner "Torna alla demo guidata" nei moduli visitati durante il tour, con link a `/demo-guidata?resume=1`.
+- Legal assistant narrativo (Issue #24): nuovo blocco slide su supporto legale-amministrativo per predisposizione assistita di atti, diffide, richieste documentali, comunicazioni di avvio, preavvisi ex art. 10-bis, contestazioni, note istruttorie, schemi di motivazione, bozze di determine, bandi e risposte a istanze/accessi agli atti.
+- Controllo di coerenza dell atto: verifica guidata di evidenze, allegati, contraddittorio, memorie e riferimenti normativi prima della firma.
+- Business plan strutturato (Issue #24): perimetro nazionale prudenziale, costi/tempi/ricavi per breve-medio-lungo periodo, scenari prudente/intermedio/esteso e leve ricavo modulari.
 - Posizionamento esplicito: non è un gestionale, è una piattaforma intelligente di governo istruttorio.
 - Link diretti a scenari demo, fascicolo documentale, procedimenti, mappa e report.
 - Focus su automazione del procedimento, non della decisione.
@@ -184,6 +187,9 @@ Perimetro e limiti:
 - fallback testuale garantito quando il browser non supporta `speechSynthesis`.
 - stato demo salvato solo lato browser in `sessionStorage` per finalità di esperienza utente (slide corrente, stato auto-narrazione, ultimo modulo visitato, timestamp);
 - nessun dato sensibile o decisionale salvato in persistenza server/database per il meccanismo di ripresa demo.
+- perimetro mercato demo comunicato in forma prudenziale: "Il perimetro nazionale può essere stimato, in via prudenziale e da aggiornare prima di ogni presentazione ufficiale, in 16 Autorità di Sistema Portuale e 62 porti di rilievo nazionale.".
+- nota obbligatoria nei contenuti business: "Dati di contesto da verificare e aggiornare prima della presentazione commerciale o istituzionale.".
+- nessuna generazione automatica di provvedimenti finali: il sistema propone bozze/schemi e supporto di coerenza, con responsabilità decisionale sempre umana.
 
 Evoluzione possibile:
 - integrazione futura di voice AI server-side o TTS professionale, mantenendo il perimetro istruttorio e i presidi di legalità.

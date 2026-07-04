@@ -469,6 +469,53 @@ export function GuidedDemoSlides({ slides }: GuidedDemoSlidesProps) {
               </ul>
             ) : null}
 
+            {currentSlide.legalOutputs && currentSlide.legalOutputs.length > 0 ? (
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4" data-testid="guided-demo-legal-outputs">
+                <p className="text-xs font-semibold uppercase tracking-wide text-emerald-900">Output legali assistiti</p>
+                <ul className="mt-2 grid gap-2 text-sm text-emerald-900">
+                  {currentSlide.legalOutputs.map((item) => (
+                    <li key={`${currentSlide.id}-legal-${item}`} className="flex items-start gap-2">
+                      <span className="mt-1 h-2 w-2 rounded-full bg-emerald-600" aria-hidden="true" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            {currentSlide.businessMetrics && currentSlide.businessMetrics.length > 0 ? (
+              <div className="grid gap-3 md:grid-cols-2" data-testid="guided-demo-business-metrics">
+                {currentSlide.businessMetrics.map((metric) => (
+                  <div key={`${currentSlide.id}-metric-${metric.label}`} className="rounded-xl border border-slate-200 bg-white p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{metric.label}</p>
+                    <p className="mt-1 text-sm font-medium text-slate-900">{metric.value}</p>
+                    {metric.note ? <p className="mt-1 text-xs text-slate-600">{metric.note}</p> : null}
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
+            {currentSlide.financialRows && currentSlide.financialRows.length > 0 ? (
+              <div className="rounded-xl border border-slate-200 bg-white p-4" data-testid="guided-demo-financial-rows">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Piano economico per orizzonti</p>
+                <div className="mt-3 grid gap-3">
+                  {currentSlide.financialRows.map((row) => (
+                    <div key={`${currentSlide.id}-${row.horizon}`} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-sm font-semibold text-slate-900">{row.horizon}</p>
+                        <p className="text-xs text-slate-600">{row.timeframe}</p>
+                      </div>
+                      <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Costi</p>
+                      <p className="text-sm text-slate-700">{row.costs}</p>
+                      <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Ricavi</p>
+                      <p className="text-sm text-slate-700">{row.revenues}</p>
+                      <p className="mt-2 text-xs text-slate-600">{row.notes}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
             {currentSlide.badges && currentSlide.badges.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {currentSlide.badges.map((item) => (
