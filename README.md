@@ -166,6 +166,7 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
 ## Demo guidata AI-led (Issue #20)
 - Nuova pagina dedicata: `/demo-guidata`.
 - Presentazione interattiva a slide con storytelling istituzionale e speaker notes AI.
+- Narrazione vocale browser-based con Web Speech API (Issue #21), controlli play/pausa/riprendi/ferma e toggle narrazione automatica slide-by-slide.
 - Posizionamento esplicito: non è un gestionale, è una piattaforma intelligente di governo istruttorio.
 - Link diretti a scenari demo, fascicolo documentale, procedimenti, mappa e report.
 - Focus su automazione del procedimento, non della decisione.
@@ -175,6 +176,11 @@ Perimetro e limiti:
 - l AI agisce come copilota istruttorio e non adotta provvedimenti;
 - nessun automatismo decisionale su decadenza/revoca o altri esiti amministrativi;
 - la demo guidata ha finalità illustrativa istituzionale e di supporto al pilot.
+- nessuna API key audio e nessun servizio esterno TTS richiesto;
+- fallback testuale garantito quando il browser non supporta `speechSynthesis`.
+
+Evoluzione possibile:
+- integrazione futura di voice AI server-side o TTS professionale, mantenendo il perimetro istruttorio e i presidi di legalità.
 
 ## Mappa demo territoriale baseline (Issue #10)
 - Nuova pagina dedicata: `/mappa`.

@@ -16,6 +16,17 @@ test("admin consulta la demo guidata AI e naviga le slide", async ({ page }) => 
   await expect(page.getByRole("heading", { name: "Demo guidata AI" }).first()).toBeVisible();
   await expect(page.getByText("Non è un gestionale. È una piattaforma intelligente di governo istruttorio delle concessioni portuali.")).toBeVisible();
   await expect(page.getByTestId("guided-demo-speaker-notes")).toBeVisible();
+  await expect(page.getByTestId("guided-demo-voice-section")).toBeVisible();
+  await expect(page.getByTestId("guided-demo-voice-read")).toBeVisible();
+
+  await page.getByTestId("guided-demo-voice-read").click();
+  await expect(page.getByTestId("guided-demo-voice-stop")).toBeVisible();
+
+  const autoToggle = page.getByTestId("guided-demo-voice-auto-toggle");
+  await autoToggle.check();
+  await expect(autoToggle).toBeChecked();
+  await autoToggle.uncheck();
+  await expect(autoToggle).not.toBeChecked();
 
   await page.getByTestId("guided-demo-next").click();
   await expect(page.getByTestId("guided-demo-slide-indicator")).toContainText("2/");

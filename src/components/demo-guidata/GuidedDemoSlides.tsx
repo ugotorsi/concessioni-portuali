@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -30,6 +30,15 @@ function badgeVariant(label: string): "default" | "success" | "warning" | "dange
 
 export function GuidedDemoSlides({ slides }: GuidedDemoSlidesProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isAutoNarrationEnabled, setIsAutoNarrationEnabled] = useState(false);
+  const [speechSupported, setSpeechSupported] = useState(false);
+  const [selectedVoice, setSelectedVoice] = useState<SpeechSynthesisVoice | null>(null);
+
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const autoNarrationRef = useRef(false);
+  const hasUserStartedNarrationRef = useRef(false);
 
   const currentSlide = slides[currentIndex];
   const totalSlides = slides.length;
@@ -41,6 +50,185 @@ export function GuidedDemoSlides({ slides }: GuidedDemoSlidesProps) {
 
     return Math.round(((currentIndex + 1) / totalSlides) * 100);
   }, [currentIndex, totalSlides]);
+
+  const buildNarrationText = useCallback((slide: GuidedDemoSlide): string => {
+    const bulletText = slide.bullets && slide.bullets.length > 0 ? `Punti essenziali: ${slide.bullets.join(", ")}.` : "";
+
+    return [
+      `Slide ${slide.id}. ${slide.title}.`,
+      slide.subtitle ? `${slide.subtitle}.` : "",
+      slide.body,
+      bulletText,
+      `Note relatore AI: ${slide.speakerNotes}`,
+    ]
+      .filter((value) => value.trim().length > 0)
+      .join(" ");
+  }, []);
+
+  const stopNarration = useCallback(() => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+    utteranceRef.current = null;
+    setIsSpeaking(false);
+    setIsPaused(false);
+  }, []);
+
+  const speakCurrentSlide = useCallback(() => {
+    hasUserStartedNarrationRef.current = true;
+
+    if (!speechSupported || typeof window === "undefined" || !("speechSynthesis" in window)) {
+      setIsSpeaking(false);
+      setIsPaused(false);
+      return;
+    }
+
+    const speech = window.speechSynthesis;
+    speech.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(buildNarrationText(currentSlide));
+    utterance.lang = "it-IT";
+    utterance.rate = 0.95;
+    utterance.pitch = 1;
+
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+    }
+
+    utterance.onstart = () => {
+      setIsSpeaking(true);
+      setIsPaused(false);
+    };
+
+    utterance.onpause = () => {
+      setIsPaused(true);
+      setIsSpeaking(false);
+    };
+
+    utterance.onresume = () => {
+      setIsPaused(false);
+      setIsSpeaking(true);
+    };
+
+    utterance.onend = () => {
+      setIsSpeaking(false);
+      setIsPaused(false);
+      utteranceRef.current = null;
+
+      if (autoNarrationRef.current && currentIndex < totalSlides - 1) {
+        setCurrentIndex((value) => Math.min(totalSlides - 1, value + 1));
+      }
+    };
+
+    utterance.onerror = () => {
+      setIsSpeaking(false);
+      setIsPaused(false);
+      utteranceRef.current = null;
+    };
+
+    utteranceRef.current = utterance;
+    speech.speak(utterance);
+  }, [buildNarrationText, currentIndex, currentSlide, selectedVoice, speechSupported, totalSlides]);
+
+  const pauseNarration = useCallback(() => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      return;
+    }
+
+    window.speechSynthesis.pause();
+    setIsPaused(true);
+    setIsSpeaking(false);
+  }, []);
+
+  const resumeNarration = useCallback(() => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      return;
+    }
+
+    const speech = window.speechSynthesis;
+    if (speech.paused) {
+      speech.resume();
+      setIsPaused(false);
+      setIsSpeaking(true);
+      return;
+    }
+
+    if (!isSpeaking) {
+      speakCurrentSlide();
+    }
+  }, [isSpeaking, speakCurrentSlide]);
+
+  useEffect(() => {
+    autoNarrationRef.current = isAutoNarrationEnabled;
+  }, [isAutoNarrationEnabled]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const isSupported = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+    setSpeechSupported(isSupported);
+
+    if (!isSupported) {
+      return;
+    }
+
+    const speech = window.speechSynthesis;
+
+    const chooseVoice = () => {
+      const voices = speech.getVoices();
+      if (!voices || voices.length === 0) {
+        return;
+      }
+
+      const italian = voices.find((voice) => voice.lang.toLowerCase().startsWith("it"));
+      setSelectedVoice(italian ?? voices[0] ?? null);
+    };
+
+    chooseVoice();
+    speech.addEventListener("voiceschanged", chooseVoice);
+
+    return () => {
+      speech.removeEventListener("voiceschanged", chooseVoice);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!speechSupported) {
+      return;
+    }
+
+    stopNarration();
+
+    if (isAutoNarrationEnabled && hasUserStartedNarrationRef.current) {
+      speakCurrentSlide();
+    }
+  }, [currentIndex, isAutoNarrationEnabled, speakCurrentSlide, speechSupported, stopNarration]);
+
+  useEffect(() => {
+    return () => {
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  const voiceStatusLabel = useMemo(() => {
+    if (!speechSupported) {
+      return "Narrazione non supportata da questo browser";
+    }
+
+    if (isPaused) {
+      return "Voce in pausa";
+    }
+
+    if (isSpeaking) {
+      return "Voce AI attiva";
+    }
+
+    return "Voce AI pronta";
+  }, [isPaused, isSpeaking, speechSupported]);
 
   return (
     <div className="mx-auto flex w-full max-w-[1260px] flex-col gap-5" data-testid="guided-demo-root">
@@ -125,6 +313,70 @@ export function GuidedDemoSlides({ slides }: GuidedDemoSlidesProps) {
             <p className="text-xs font-semibold uppercase tracking-wide text-sky-800">Speaker notes AI</p>
             <p className="mt-2 text-sm leading-6 text-slate-700">{currentSlide.speakerNotes}</p>
           </aside>
+        </CardContent>
+      </Card>
+
+      <Card className="border-slate-200 shadow-sm" data-testid="guided-demo-voice-section">
+        <CardHeader>
+          <CardTitle className="text-lg">Voce AI</CardTitle>
+          <CardDescription>
+            La voce usa la sintesi vocale del browser. Nessun audio viene inviato a servizi esterni.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={speakCurrentSlide}
+              aria-label="Leggi la slide corrente"
+              data-testid="guided-demo-voice-read"
+            >
+              Leggi slide
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={pauseNarration}
+              aria-label="Metti in pausa la narrazione"
+              data-testid="guided-demo-voice-pause"
+            >
+              Pausa
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={resumeNarration}
+              aria-label="Riprendi la narrazione"
+              data-testid="guided-demo-voice-resume"
+            >
+              Riprendi
+            </Button>
+            <Button
+              type="button"
+              onClick={stopNarration}
+              aria-label="Ferma la narrazione"
+              data-testid="guided-demo-voice-stop"
+            >
+              Ferma
+            </Button>
+          </div>
+
+          <label className="inline-flex items-center gap-2 text-sm text-slate-700" htmlFor="guided-demo-auto-narration-toggle">
+            <input
+              id="guided-demo-auto-narration-toggle"
+              type="checkbox"
+              checked={isAutoNarrationEnabled}
+              onChange={(event) => setIsAutoNarrationEnabled(event.target.checked)}
+              aria-label="Attiva o disattiva la narrazione automatica"
+              data-testid="guided-demo-voice-auto-toggle"
+            />
+            Narrazione automatica
+          </label>
+
+          <p className="text-sm font-medium text-slate-700" data-testid="guided-demo-voice-status">
+            {voiceStatusLabel}
+          </p>
         </CardContent>
       </Card>
 
