@@ -19,7 +19,12 @@ test("admin consulta il modulo mappa demo", async ({ page }) => {
   await expect(page.getByText(/Morosita|DEMO-01/i).first()).toBeVisible();
   await expect(page.getByTestId("mappa-point").first()).toBeVisible();
 
-  await page.getByRole("link", { name: "Apri scheda" }).first().click();
+  const firstDetailLink = page.getByTestId("mappa-marker-list").getByRole("link", { name: "Apri scheda" }).first();
+  await expect(firstDetailLink).toBeVisible();
+  const detailHref = await firstDetailLink.getAttribute("href");
+  expect(detailHref).toBeTruthy();
+
+  await page.goto(detailHref!);
   await expect(page).toHaveURL(/\/(concessioni|criticita|sopralluoghi)\/.+/);
 });
 

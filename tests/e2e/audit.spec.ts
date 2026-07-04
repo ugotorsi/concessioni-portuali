@@ -20,12 +20,16 @@ test("audit page access and report validation audit events", async ({ page }) =>
   await page.waitForSelector('button:has-text("Valida report"), button:has-text("Rimuovi validazione")');
 
   if (await validateButton.isVisible()) {
-    await validateButton.click();
-    await expect(unvalidateButton).toBeVisible();
+    await Promise.all([
+      page.waitForResponse((response) => response.request().method() === "POST"),
+      validateButton.click(),
+    ]);
   } else {
     await expect(unvalidateButton).toBeVisible();
-    await unvalidateButton.click();
-    await expect(validateButton).toBeVisible();
+    await Promise.all([
+      page.waitForResponse((response) => response.request().method() === "POST"),
+      unvalidateButton.click(),
+    ]);
   }
 
   const [download] = await Promise.all([

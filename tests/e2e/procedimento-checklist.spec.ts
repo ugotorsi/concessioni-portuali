@@ -12,7 +12,12 @@ test("procedimento checklist section and update form visibility by role", async 
   await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto("/procedimenti");
-  await page.getByRole("link", { name: "Apri scheda" }).first().click();
+  const detailLink = page.locator('a[href^="/procedimenti/"]', { hasText: "Apri scheda" }).first();
+  await expect(detailLink).toBeVisible();
+  const detailHref = await detailLink.getAttribute("href");
+  expect(detailHref).toBeTruthy();
+
+  await page.goto(detailHref!);
   await expect(page).toHaveURL(/\/procedimenti\/.+/);
   const procedimentoDetailUrl = page.url();
 

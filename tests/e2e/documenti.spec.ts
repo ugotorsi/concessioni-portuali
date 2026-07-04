@@ -19,20 +19,31 @@ test("admin uploads and downloads a fascicolo document", async ({ page }) => {
 
   const tmpDir = await mkdtemp(path.join(tmpdir(), "cp-doc-e2e-"));
   const filePath = path.join(tmpDir, "verbale-upload-e2e.txt");
+  const uniqueTitle = `Verbale upload E2E ${Date.now()}`;
   await writeFile(filePath, "Documento E2E baseline fascicolo");
 
-  await page.locator('input[name="file"]').first().setInputFiles(filePath);
-  await page.locator('input[name="nome"]').first().fill("Verbale upload E2E");
-  await page.locator('select[name="tipologia"]').first().selectOption("VERBALE");
-  await page.locator('select[name="concessioneId"]').first().selectOption({ index: 1 });
-  await page.getByRole("button", { name: "Carica documento" }).first().click();
+  const uploadForm = page.locator("form", {
+    has: page.getByRole("button", { name: "Carica documento" }),
+  }).first();
+
+  await uploadForm.locator('input[name="file"]').setInputFiles(filePath);
+  await uploadForm.locator('input[name="nome"]').fill(uniqueTitle);
+  await uploadForm.locator('select[name="tipologia"]').selectOption("VERBALE");
+  await uploadForm.locator('select[name="concessioneId"]').selectOption({ index: 1 });
+  await Promise.all([
+    page.waitForResponse((response) => response.request().method() === "POST"),
+    uploadForm.getByRole("button", { name: "Carica documento" }).click(),
+  ]);
 
   await expect(page).toHaveURL(/\/documenti$/);
-  await expect(page.getByText("Verbale upload E2E").first()).toBeVisible();
+  await page.locator('input[name="search"]').fill(uniqueTitle);
+  await page.getByRole("button", { name: "Applica" }).click();
+  const uploadedRow = page.locator("tr", { hasText: uniqueTitle }).first();
+  await expect(uploadedRow).toBeVisible({ timeout: 20000 });
 
   const [download] = await Promise.all([
     page.waitForEvent("download"),
-    page.getByRole("link", { name: "Scarica" }).first().click(),
+    uploadedRow.getByRole("link", { name: "Scarica" }).click(),
   ]);
 
   expect(download.suggestedFilename().toLowerCase()).toContain("verbale");
