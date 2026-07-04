@@ -114,3 +114,4 @@ Il punto di forza è la catena funzionale integrata tra criticità, art. 47, pro
 - Issue di riferimento: #11 Add CI/CD baseline with GitHub Actions.
 - Baseline workflow introdotta in `.github/workflows/ci.yml` (senza deploy automatico in questa fase).
 - Follow-up dominio art. 47 preso in carico con Issue #12: estensione campi regolarizzazione su Criticita (stato/esito/verifica) e nota esplicita di assenza automatismi su decadenza.
+- Raffinamento procedimentale preso in carico con Issue #13: distinzione d ufficio/istanza di parte e tracciamento istruttorio art. 10-bis senza automatismi decisori.

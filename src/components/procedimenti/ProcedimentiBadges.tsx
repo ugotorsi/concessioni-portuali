@@ -57,6 +57,41 @@ export function ProcedimentoChecklistBadge({ complete }: { complete: boolean }) 
   return <Badge variant={complete ? "success" : "warning"}>{complete ? "Checklist completa" : "Checklist incompleta"}</Badge>;
 }
 
+export function ProcedimentoOrigineBadge({ value }: { value: string }) {
+  if (value === "UFFICIO") {
+    return <Badge variant="warning">D ufficio</Badge>;
+  }
+
+  if (value === "ISTANZA_PARTE") {
+    return <Badge variant="default">Istanza di parte</Badge>;
+  }
+
+  return <Badge variant="default">{formatEnumLabel(value)}</Badge>;
+}
+
+export function ProcedimentoPreavvisoBadge(args: {
+  applicabile: boolean;
+  stato: string;
+}) {
+  if (!args.applicabile) {
+    return <Badge variant="default">Preavviso non applicabile/da valutare</Badge>;
+  }
+
+  if (["APPLICABILE_DA_INVIARE"].includes(args.stato)) {
+    return <Badge variant="danger">Preavviso da inviare</Badge>;
+  }
+
+  if (["INVIATO", "OSSERVAZIONI_RICEVUTE"].includes(args.stato)) {
+    return <Badge variant="warning">Preavviso in gestione</Badge>;
+  }
+
+  if (args.stato === "OSSERVAZIONI_VALUTATE") {
+    return <Badge variant="success">Preavviso gestito</Badge>;
+  }
+
+  return <Badge variant="default">Preavviso da verificare</Badge>;
+}
+
 export function ProcedimentoWarningBadge({ level }: { level: "default" | "warning" | "danger" }) {
   if (level === "danger") {
     return <Badge variant="danger">Attenzione alta</Badge>;

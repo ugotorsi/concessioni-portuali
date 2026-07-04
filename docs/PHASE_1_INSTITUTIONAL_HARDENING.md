@@ -126,6 +126,11 @@ Stato attuale (Issue #5 baseline implementata):
 - introdotti smoke test E2E su auth/ruoli, security headers e accesso audit;
 - documentati prerequisiti DB e flusso di esecuzione test locali.
 
+Evoluzione Phase 2 (Issue #13):
+- distinzione esplicita tra procedimenti d ufficio e a istanza di parte su modello Procedimento;
+- tracking istruttorio preavviso di rigetto ex art. 10-bis (stato, date, osservazioni, valutazione), senza automatismi decisori;
+- refinement checklist/warning su dettaglio/lista/export/PDF in ottica supporto istruttorio caso per caso.
+
 ### 3.6 Middleware centralizzato, security headers, rate limiting
 - Obiettivo: centralizzare controlli trasversali in middleware con politiche di sicurezza uniformi.
 - Motivo strategico: diminuisce superfici di errore e standardizza la postura security.

@@ -3,6 +3,7 @@ import { addDays, differenceInCalendarDays, startOfDay } from "date-fns";
 import {
   calculateChecklistCompleteness,
   getMissingChecklistItems,
+  getProcedimentoChecklistGuidance,
   getProcedimentoWarningLevel,
 } from "@/lib/procedimento-checklist";
 import { prisma } from "@/lib/prisma";
@@ -24,13 +25,7 @@ export const PROCEDIMENTO_TIPOLOGIA_VALUES = [
 
 export const PROCEDIMENTO_STATO_VALUES = ["DA_AVVIARE", "IN_CORSO", "CONCLUSO", "ARCHIVIATO"] as const;
 
-export const PROCEDIMENTI_PERIODO_VALUES = [
-  "APERTI",
-  "IN_SCADENZA",
-  "SCADUTI",
-  "CONCLUSI",
-  "TUTTI",
-] as const;
+export const PROCEDIMENTI_PERIODO_VALUES = ["APERTI", "IN_SCADENZA", "SCADUTI", "CONCLUSI", "TUTTI"] as const;
 
 export const PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES = [
   "DA_VALUTARE",
@@ -42,6 +37,17 @@ export const PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES = [
   "ALTRO",
 ] as const;
 
+export const PROCEDIMENTO_ORIGINE_VALUES = ["UFFICIO", "ISTANZA_PARTE", "ALTRO"] as const;
+export const PROCEDIMENTO_STATO_PREAVVISO_RIGETTO_VALUES = [
+  "NON_VALUTATO",
+  "NON_APPLICABILE",
+  "APPLICABILE_DA_INVIARE",
+  "INVIATO",
+  "OSSERVAZIONI_RICEVUTE",
+  "OSSERVAZIONI_VALUTATE",
+] as const;
+export const PROCEDIMENTO_BOOLEAN_FILTER_VALUES = ["TUTTI", "SI", "NO"] as const;
+
 export const PROCEDIMENTI_CHECKLIST_VALUES = ["TUTTE", "COMPLETA", "INCOMPLETA"] as const;
 export const PROCEDIMENTI_MEMORIE_VALUES = ["TUTTE", "IN_SCADENZA"] as const;
 
@@ -49,6 +55,9 @@ export type ProcedimentoTipologiaValue = (typeof PROCEDIMENTO_TIPOLOGIA_VALUES)[
 export type ProcedimentoStatoValue = (typeof PROCEDIMENTO_STATO_VALUES)[number];
 export type ProcedimentiPeriodoValue = (typeof PROCEDIMENTI_PERIODO_VALUES)[number];
 export type ProcedimentoEsitoIstruttorioValue = (typeof PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES)[number];
+export type ProcedimentoOrigineValue = (typeof PROCEDIMENTO_ORIGINE_VALUES)[number];
+export type ProcedimentoStatoPreavvisoRigettoValue = (typeof PROCEDIMENTO_STATO_PREAVVISO_RIGETTO_VALUES)[number];
+export type ProcedimentoBooleanFilterValue = (typeof PROCEDIMENTO_BOOLEAN_FILTER_VALUES)[number];
 export type ProcedimentiChecklistValue = (typeof PROCEDIMENTI_CHECKLIST_VALUES)[number];
 export type ProcedimentiMemorieValue = (typeof PROCEDIMENTI_MEMORIE_VALUES)[number];
 
@@ -61,6 +70,10 @@ export interface GetProcedimentiListParams {
   periodo?: ProcedimentiPeriodoValue;
   checklist?: ProcedimentiChecklistValue;
   memorie?: ProcedimentiMemorieValue;
+  origineProcedimento?: ProcedimentoOrigineValue;
+  procedimentoUfficio?: ProcedimentoBooleanFilterValue;
+  preavvisoRigettoApplicabile?: ProcedimentoBooleanFilterValue;
+  statoPreavvisoRigetto?: ProcedimentoStatoPreavvisoRigettoValue;
 }
 
 export interface ProcedimentoListItem {
@@ -72,10 +85,21 @@ export interface ProcedimentoListItem {
   dataProvvedimentoFinale: Date | null;
   stato: string;
   noteIstruttorie: string | null;
+  origineProcedimento: string;
+  procedimentoUfficio: boolean;
+  preavvisoRigettoApplicabile: boolean;
+  statoPreavvisoRigetto: string;
+  dataPreavvisoRigetto: Date | null;
+  termineOsservazioniPreavviso: Date | null;
+  osservazioniPreavvisoRicevute: boolean;
+  dataOsservazioniPreavviso: Date | null;
+  valutazioneOsservazioniPreavviso: string | null;
+  motivazioneMancatoPreavviso: string | null;
   termineMemorieScadenza: Date | null;
   propostaEsitoIstruttorio: string | null;
   checklistContraddittorioCompleta: boolean;
   checklistWarningLevel: "default" | "warning" | "danger";
+  checklistGuidance: string;
   concessione: {
     id: string;
     numeroAtto: string;
@@ -110,6 +134,10 @@ export interface ProcedimentiFiltersData {
   checklist: Array<{ value: ProcedimentiChecklistValue; label: string }>;
   memorie: Array<{ value: ProcedimentiMemorieValue; label: string }>;
   esitiIstruttori: Array<{ value: ProcedimentoEsitoIstruttorioValue; label: string }>;
+  originiProcedimento: Array<{ value: ProcedimentoOrigineValue; label: string }>;
+  procedimentoUfficio: Array<{ value: ProcedimentoBooleanFilterValue; label: string }>;
+  preavvisoRigettoApplicabile: Array<{ value: ProcedimentoBooleanFilterValue; label: string }>;
+  statiPreavvisoRigetto: Array<{ value: ProcedimentoStatoPreavvisoRigettoValue; label: string }>;
 }
 
 export interface ProcedimentoDetail {
@@ -135,6 +163,16 @@ export interface ProcedimentoDetail {
     controdeduzioniValutate: boolean;
     motivazioneValutazione: string | null;
     propostaEsitoIstruttorio: string | null;
+    origineProcedimento: string;
+    procedimentoUfficio: boolean;
+    preavvisoRigettoApplicabile: boolean;
+    statoPreavvisoRigetto: string;
+    dataPreavvisoRigetto: Date | null;
+    termineOsservazioniPreavviso: Date | null;
+    osservazioniPreavvisoRicevute: boolean;
+    dataOsservazioniPreavviso: Date | null;
+    valutazioneOsservazioniPreavviso: string | null;
+    motivazioneMancatoPreavviso: string | null;
     checklistContraddittorioCompleta: boolean;
     noteChecklistContraddittorio: string | null;
     checklistMissingItems: string[];
@@ -297,6 +335,18 @@ function buildWhere(params: GetProcedimentiListParams): Prisma.ProcedimentoWhere
           stato: { in: ["DA_AVVIARE", "IN_CORSO"] },
         }
       : {}),
+    ...(params.origineProcedimento ? { origineProcedimento: params.origineProcedimento } : {}),
+    ...(params.procedimentoUfficio === "SI"
+      ? { procedimentoUfficio: true }
+      : params.procedimentoUfficio === "NO"
+        ? { procedimentoUfficio: false }
+        : {}),
+    ...(params.preavvisoRigettoApplicabile === "SI"
+      ? { preavvisoRigettoApplicabile: true }
+      : params.preavvisoRigettoApplicabile === "NO"
+        ? { preavvisoRigettoApplicabile: false }
+        : {}),
+    ...(params.statoPreavvisoRigetto ? { statoPreavvisoRigetto: params.statoPreavvisoRigetto } : {}),
     ...getPeriodoWhere(params.periodo),
   };
 }
@@ -323,12 +373,25 @@ function toListItem(
     termineMemorieGiorni: number | null;
     termineMemorieScadenza: Date | null;
     memorieRicevute: boolean;
+    dataRicezioneMemorie: Date | null;
     audizioneRichiesta: boolean;
     audizioneSvolta: boolean;
+    dataAudizione: Date | null;
     contestazioneFormaleInviata: boolean;
+    dataContestazioneFormale: Date | null;
     controdeduzioniValutate: boolean;
     motivazioneValutazione: string | null;
     propostaEsitoIstruttorio: string | null;
+    origineProcedimento: string;
+    procedimentoUfficio: boolean;
+    preavvisoRigettoApplicabile: boolean;
+    statoPreavvisoRigetto: string;
+    dataPreavvisoRigetto: Date | null;
+    termineOsservazioniPreavviso: Date | null;
+    osservazioniPreavvisoRicevute: boolean;
+    dataOsservazioniPreavviso: Date | null;
+    valutazioneOsservazioniPreavviso: string | null;
+    motivazioneMancatoPreavviso: string | null;
     checklistContraddittorioCompleta: boolean;
     stato: string;
     noteIstruttorie: string | null;
@@ -368,16 +431,37 @@ function toListItem(
 
   const checklistWarningLevel = getProcedimentoWarningLevel({
     tipologia: row.tipologia,
+    origineProcedimento: row.origineProcedimento,
+    procedimentoUfficio: row.procedimentoUfficio,
     comunicazioneAvvioInviata: row.comunicazioneAvvioInviata,
     termineMemorieGiorni: row.termineMemorieGiorni,
     termineMemorieScadenza: row.termineMemorieScadenza,
     memorieRicevute: row.memorieRicevute,
+    dataRicezioneMemorie: row.dataRicezioneMemorie,
     audizioneRichiesta: row.audizioneRichiesta,
     audizioneSvolta: row.audizioneSvolta,
+    dataAudizione: row.dataAudizione,
     contestazioneFormaleInviata: row.contestazioneFormaleInviata,
+    dataContestazioneFormale: row.dataContestazioneFormale,
     controdeduzioniValutate: row.controdeduzioniValutate,
     motivazioneValutazione: row.motivazioneValutazione,
     propostaEsitoIstruttorio: row.propostaEsitoIstruttorio,
+    preavvisoRigettoApplicabile: row.preavvisoRigettoApplicabile,
+    statoPreavvisoRigetto: row.statoPreavvisoRigetto,
+    dataPreavvisoRigetto: row.dataPreavvisoRigetto,
+    termineOsservazioniPreavviso: row.termineOsservazioniPreavviso,
+    osservazioniPreavvisoRicevute: row.osservazioniPreavvisoRicevute,
+    dataOsservazioniPreavviso: row.dataOsservazioniPreavviso,
+    valutazioneOsservazioniPreavviso: row.valutazioneOsservazioniPreavviso,
+    motivazioneMancatoPreavviso: row.motivazioneMancatoPreavviso,
+  });
+
+  const checklistGuidance = getProcedimentoChecklistGuidance({
+    tipologia: row.tipologia,
+    origineProcedimento: row.origineProcedimento,
+    procedimentoUfficio: row.procedimentoUfficio,
+    preavvisoRigettoApplicabile: row.preavvisoRigettoApplicabile,
+    statoPreavvisoRigetto: row.statoPreavvisoRigetto,
   });
 
   return {
@@ -389,10 +473,21 @@ function toListItem(
     dataProvvedimentoFinale: row.dataProvvedimentoFinale,
     stato: row.stato,
     noteIstruttorie: row.noteIstruttorie,
+    origineProcedimento: row.origineProcedimento,
+    procedimentoUfficio: row.procedimentoUfficio,
+    preavvisoRigettoApplicabile: row.preavvisoRigettoApplicabile,
+    statoPreavvisoRigetto: row.statoPreavvisoRigetto,
+    dataPreavvisoRigetto: row.dataPreavvisoRigetto,
+    termineOsservazioniPreavviso: row.termineOsservazioniPreavviso,
+    osservazioniPreavvisoRicevute: row.osservazioniPreavvisoRicevute,
+    dataOsservazioniPreavviso: row.dataOsservazioniPreavviso,
+    valutazioneOsservazioniPreavviso: row.valutazioneOsservazioniPreavviso,
+    motivazioneMancatoPreavviso: row.motivazioneMancatoPreavviso,
     termineMemorieScadenza: row.termineMemorieScadenza,
     propostaEsitoIstruttorio: row.propostaEsitoIstruttorio,
     checklistContraddittorioCompleta: row.checklistContraddittorioCompleta,
     checklistWarningLevel,
+    checklistGuidance,
     concessione: row.concessione,
     criticita: row.criticita,
     giorniResiduiContraddittorio,
@@ -402,9 +497,7 @@ function toListItem(
   };
 }
 
-export async function getProcedimentiList(
-  params: GetProcedimentiListParams,
-): Promise<GetProcedimentiListResult> {
+export async function getProcedimentiList(params: GetProcedimentiListParams): Promise<GetProcedimentiListResult> {
   const today = startOfDay(new Date());
 
   const rows = await prisma.procedimento.findMany({
@@ -416,16 +509,29 @@ export async function getProcedimentiList(
       dataAvvio: true,
       dataScadenzaContraddittorio: true,
       dataProvvedimentoFinale: true,
+      origineProcedimento: true,
+      procedimentoUfficio: true,
       comunicazioneAvvioInviata: true,
       termineMemorieGiorni: true,
       termineMemorieScadenza: true,
       memorieRicevute: true,
+      dataRicezioneMemorie: true,
       audizioneRichiesta: true,
       audizioneSvolta: true,
+      dataAudizione: true,
       contestazioneFormaleInviata: true,
+      dataContestazioneFormale: true,
       controdeduzioniValutate: true,
       motivazioneValutazione: true,
       propostaEsitoIstruttorio: true,
+      preavvisoRigettoApplicabile: true,
+      statoPreavvisoRigetto: true,
+      dataPreavvisoRigetto: true,
+      termineOsservazioniPreavviso: true,
+      osservazioniPreavvisoRicevute: true,
+      dataOsservazioniPreavviso: true,
+      valutazioneOsservazioniPreavviso: true,
+      motivazioneMancatoPreavviso: true,
       checklistContraddittorioCompleta: true,
       stato: true,
       noteIstruttorie: true,
@@ -575,6 +681,8 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
 
   const checklistSummary = calculateChecklistCompleteness({
     tipologia: procedimento.tipologia,
+    origineProcedimento: procedimento.origineProcedimento,
+    procedimentoUfficio: procedimento.procedimentoUfficio,
     comunicazioneAvvioInviata: procedimento.comunicazioneAvvioInviata,
     termineMemorieGiorni: procedimento.termineMemorieGiorni,
     termineMemorieScadenza: procedimento.termineMemorieScadenza,
@@ -588,10 +696,20 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
     controdeduzioniValutate: procedimento.controdeduzioniValutate,
     motivazioneValutazione: procedimento.motivazioneValutazione,
     propostaEsitoIstruttorio: procedimento.propostaEsitoIstruttorio,
+    preavvisoRigettoApplicabile: procedimento.preavvisoRigettoApplicabile,
+    statoPreavvisoRigetto: procedimento.statoPreavvisoRigetto,
+    dataPreavvisoRigetto: procedimento.dataPreavvisoRigetto,
+    termineOsservazioniPreavviso: procedimento.termineOsservazioniPreavviso,
+    osservazioniPreavvisoRicevute: procedimento.osservazioniPreavvisoRicevute,
+    dataOsservazioniPreavviso: procedimento.dataOsservazioniPreavviso,
+    valutazioneOsservazioniPreavviso: procedimento.valutazioneOsservazioniPreavviso,
+    motivazioneMancatoPreavviso: procedimento.motivazioneMancatoPreavviso,
   });
 
   const checklistMissingItems = getMissingChecklistItems({
     tipologia: procedimento.tipologia,
+    origineProcedimento: procedimento.origineProcedimento,
+    procedimentoUfficio: procedimento.procedimentoUfficio,
     comunicazioneAvvioInviata: procedimento.comunicazioneAvvioInviata,
     termineMemorieGiorni: procedimento.termineMemorieGiorni,
     termineMemorieScadenza: procedimento.termineMemorieScadenza,
@@ -605,10 +723,20 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
     controdeduzioniValutate: procedimento.controdeduzioniValutate,
     motivazioneValutazione: procedimento.motivazioneValutazione,
     propostaEsitoIstruttorio: procedimento.propostaEsitoIstruttorio,
+    preavvisoRigettoApplicabile: procedimento.preavvisoRigettoApplicabile,
+    statoPreavvisoRigetto: procedimento.statoPreavvisoRigetto,
+    dataPreavvisoRigetto: procedimento.dataPreavvisoRigetto,
+    termineOsservazioniPreavviso: procedimento.termineOsservazioniPreavviso,
+    osservazioniPreavvisoRicevute: procedimento.osservazioniPreavvisoRicevute,
+    dataOsservazioniPreavviso: procedimento.dataOsservazioniPreavviso,
+    valutazioneOsservazioniPreavviso: procedimento.valutazioneOsservazioniPreavviso,
+    motivazioneMancatoPreavviso: procedimento.motivazioneMancatoPreavviso,
   });
 
   const checklistWarningLevel = getProcedimentoWarningLevel({
     tipologia: procedimento.tipologia,
+    origineProcedimento: procedimento.origineProcedimento,
+    procedimentoUfficio: procedimento.procedimentoUfficio,
     comunicazioneAvvioInviata: procedimento.comunicazioneAvvioInviata,
     termineMemorieGiorni: procedimento.termineMemorieGiorni,
     termineMemorieScadenza: procedimento.termineMemorieScadenza,
@@ -622,6 +750,14 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
     controdeduzioniValutate: procedimento.controdeduzioniValutate,
     motivazioneValutazione: procedimento.motivazioneValutazione,
     propostaEsitoIstruttorio: procedimento.propostaEsitoIstruttorio,
+    preavvisoRigettoApplicabile: procedimento.preavvisoRigettoApplicabile,
+    statoPreavvisoRigetto: procedimento.statoPreavvisoRigetto,
+    dataPreavvisoRigetto: procedimento.dataPreavvisoRigetto,
+    termineOsservazioniPreavviso: procedimento.termineOsservazioniPreavviso,
+    osservazioniPreavvisoRicevute: procedimento.osservazioniPreavvisoRicevute,
+    dataOsservazioniPreavviso: procedimento.dataOsservazioniPreavviso,
+    valutazioneOsservazioniPreavviso: procedimento.valutazioneOsservazioniPreavviso,
+    motivazioneMancatoPreavviso: procedimento.motivazioneMancatoPreavviso,
   });
 
   return {
@@ -647,6 +783,16 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
       controdeduzioniValutate: procedimento.controdeduzioniValutate,
       motivazioneValutazione: procedimento.motivazioneValutazione,
       propostaEsitoIstruttorio: procedimento.propostaEsitoIstruttorio,
+      origineProcedimento: procedimento.origineProcedimento,
+      procedimentoUfficio: procedimento.procedimentoUfficio,
+      preavvisoRigettoApplicabile: procedimento.preavvisoRigettoApplicabile,
+      statoPreavvisoRigetto: procedimento.statoPreavvisoRigetto,
+      dataPreavvisoRigetto: procedimento.dataPreavvisoRigetto,
+      termineOsservazioniPreavviso: procedimento.termineOsservazioniPreavviso,
+      osservazioniPreavvisoRicevute: procedimento.osservazioniPreavvisoRicevute,
+      dataOsservazioniPreavviso: procedimento.dataOsservazioniPreavviso,
+      valutazioneOsservazioniPreavviso: procedimento.valutazioneOsservazioniPreavviso,
+      motivazioneMancatoPreavviso: procedimento.motivazioneMancatoPreavviso,
       checklistContraddittorioCompleta: procedimento.checklistContraddittorioCompleta,
       noteChecklistContraddittorio: procedimento.noteChecklistContraddittorio,
       checklistMissingItems,
@@ -779,6 +925,22 @@ export async function getProcedimentiFilters(): Promise<ProcedimentiFiltersData>
       { value: "IN_SCADENZA", label: "Memorie in scadenza (7gg)" },
     ],
     esitiIstruttori: PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES.map((value) => ({
+      value,
+      label: formatEnumLabel(value),
+    })),
+    originiProcedimento: PROCEDIMENTO_ORIGINE_VALUES.map((value) => ({
+      value,
+      label: formatEnumLabel(value),
+    })),
+    procedimentoUfficio: PROCEDIMENTO_BOOLEAN_FILTER_VALUES.map((value) => ({
+      value,
+      label: value === "SI" ? "Solo d ufficio" : value === "NO" ? "Solo non d ufficio" : "Procedimento d ufficio (tutti)",
+    })),
+    preavvisoRigettoApplicabile: PROCEDIMENTO_BOOLEAN_FILTER_VALUES.map((value) => ({
+      value,
+      label: value === "SI" ? "Preavviso applicabile" : value === "NO" ? "Preavviso non applicabile" : "Preavviso (tutti)",
+    })),
+    statiPreavvisoRigetto: PROCEDIMENTO_STATO_PREAVVISO_RIGETTO_VALUES.map((value) => ({
       value,
       label: formatEnumLabel(value),
     })),

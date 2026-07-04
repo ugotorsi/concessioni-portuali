@@ -221,8 +221,25 @@ function renderEvidenceSection(ctx: PdfContext, detail: ReportDetail) {
     const firstProcedimento = detail.procedimentiInCorso[0];
     bullet(
       ctx,
-      `Procedimento attivo prioritario: ${enumLabel(firstProcedimento.tipologia)} (${enumLabel(firstProcedimento.stato)}).`,
+      `Procedimento attivo prioritario: ${enumLabel(firstProcedimento.tipologia)} (${enumLabel(firstProcedimento.stato)}), origine ${enumLabel(firstProcedimento.origineProcedimento)}.`,
     );
+
+    if (firstProcedimento.preavvisoRigettoApplicabile) {
+      bullet(
+        ctx,
+        `Preavviso di rigetto: ${enumLabel(firstProcedimento.statoPreavvisoRigetto)}.`,
+      );
+    }
+
+    if (
+      firstProcedimento.osservazioniPreavvisoRicevute &&
+      !firstProcedimento.valutazioneOsservazioniPreavviso
+    ) {
+      bullet(
+        ctx,
+        "Warning istruttorio: osservazioni su preavviso ricevute ma non ancora valutate in modo esplicito.",
+      );
+    }
   }
 
   const criticitaRegDaVerificare = detail.criticitaAperte.filter(
@@ -291,9 +308,22 @@ function renderProposalSection(ctx: PdfContext, detail: ReportDetail) {
     actions.push("Mantenere monitoraggio ordinario e aggiornare il report al prossimo ciclo.");
   }
 
+  if (
+    detail.procedimentiInCorso.some(
+      (item) => item.preavvisoRigettoApplicabile && item.statoPreavvisoRigetto === "APPLICABILE_DA_INVIARE",
+    )
+  ) {
+    actions.push("Presidiare il tracciamento del preavviso di rigetto per i procedimenti a istanza di parte in cui risulta applicabile.");
+  }
+
   for (const item of actions) {
     bullet(ctx, item);
   }
+
+  body(
+    ctx,
+    "La gestione del preavviso di rigetto ha valore istruttorio e deve essere valutata secondo il caso concreto.",
+  );
 
   body(ctx, DISCLAIMER);
 }

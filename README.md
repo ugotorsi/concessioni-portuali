@@ -102,6 +102,12 @@ Baseline coperta:
 - Lista procedimenti con colonna checklist/warning e filtri opzionali su checklist incompleta e memorie in scadenza.
 - Export CSV procedimenti esteso con campi checklist.
 
+## Procedimento d ufficio vs istanza di parte (Issue #13)
+- Estensione Procedimento con tracciamento origine (`origineProcedimento`, `procedimentoUfficio`) e campi istruttori preavviso rigetto ex art. 10-bis L. 241/1990.
+- Checklist contraddittorio raffinata con percorso differenziato tra procedimenti d ufficio e a istanza di parte.
+- Preavviso di rigetto trattato come tracking istruttorio: applicabilita da valutare caso per caso, senza automatismi decisori.
+- Lista, dettaglio, export CSV e PDF report allineati ai nuovi campi.
+
 Limiti e perimetro giuridico:
 - La checklist ha funzione di supporto istruttorio e non costituisce provvedimento.
 - Non sostituisce la valutazione del responsabile del procedimento.

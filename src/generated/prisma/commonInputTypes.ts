@@ -481,6 +481,13 @@ export type EnumTipologiaProcedimentoFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumTipologiaProcedimentoFilter<$PrismaModel> | $Enums.TipologiaProcedimento
 }
 
+export type EnumOrigineProcedimentoFilter<$PrismaModel = never> = {
+  equals?: $Enums.OrigineProcedimento | Prisma.EnumOrigineProcedimentoFieldRefInput<$PrismaModel>
+  in?: $Enums.OrigineProcedimento[] | Prisma.ListEnumOrigineProcedimentoFieldRefInput<$PrismaModel>
+  notIn?: $Enums.OrigineProcedimento[] | Prisma.ListEnumOrigineProcedimentoFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumOrigineProcedimentoFilter<$PrismaModel> | $Enums.OrigineProcedimento
+}
+
 export type IntNullableFilter<$PrismaModel = never> = {
   equals?: number | Prisma.IntFieldRefInput<$PrismaModel> | null
   in?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel> | null
@@ -499,6 +506,13 @@ export type EnumEsitoIstruttorioProcedimentoNullableFilter<$PrismaModel = never>
   not?: Prisma.NestedEnumEsitoIstruttorioProcedimentoNullableFilter<$PrismaModel> | $Enums.EsitoIstruttorioProcedimento | null
 }
 
+export type EnumStatoPreavvisoRigettoFilter<$PrismaModel = never> = {
+  equals?: $Enums.StatoPreavvisoRigetto | Prisma.EnumStatoPreavvisoRigettoFieldRefInput<$PrismaModel>
+  in?: $Enums.StatoPreavvisoRigetto[] | Prisma.ListEnumStatoPreavvisoRigettoFieldRefInput<$PrismaModel>
+  notIn?: $Enums.StatoPreavvisoRigetto[] | Prisma.ListEnumStatoPreavvisoRigettoFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumStatoPreavvisoRigettoFilter<$PrismaModel> | $Enums.StatoPreavvisoRigetto
+}
+
 export type EnumStatoProcedimentoFilter<$PrismaModel = never> = {
   equals?: $Enums.StatoProcedimento | Prisma.EnumStatoProcedimentoFieldRefInput<$PrismaModel>
   in?: $Enums.StatoProcedimento[] | Prisma.ListEnumStatoProcedimentoFieldRefInput<$PrismaModel>
@@ -514,6 +528,16 @@ export type EnumTipologiaProcedimentoWithAggregatesFilter<$PrismaModel = never> 
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumTipologiaProcedimentoFilter<$PrismaModel>
   _max?: Prisma.NestedEnumTipologiaProcedimentoFilter<$PrismaModel>
+}
+
+export type EnumOrigineProcedimentoWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.OrigineProcedimento | Prisma.EnumOrigineProcedimentoFieldRefInput<$PrismaModel>
+  in?: $Enums.OrigineProcedimento[] | Prisma.ListEnumOrigineProcedimentoFieldRefInput<$PrismaModel>
+  notIn?: $Enums.OrigineProcedimento[] | Prisma.ListEnumOrigineProcedimentoFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumOrigineProcedimentoWithAggregatesFilter<$PrismaModel> | $Enums.OrigineProcedimento
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumOrigineProcedimentoFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumOrigineProcedimentoFilter<$PrismaModel>
 }
 
 export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -540,6 +564,16 @@ export type EnumEsitoIstruttorioProcedimentoNullableWithAggregatesFilter<$Prisma
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumEsitoIstruttorioProcedimentoNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumEsitoIstruttorioProcedimentoNullableFilter<$PrismaModel>
+}
+
+export type EnumStatoPreavvisoRigettoWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.StatoPreavvisoRigetto | Prisma.EnumStatoPreavvisoRigettoFieldRefInput<$PrismaModel>
+  in?: $Enums.StatoPreavvisoRigetto[] | Prisma.ListEnumStatoPreavvisoRigettoFieldRefInput<$PrismaModel>
+  notIn?: $Enums.StatoPreavvisoRigetto[] | Prisma.ListEnumStatoPreavvisoRigettoFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumStatoPreavvisoRigettoWithAggregatesFilter<$PrismaModel> | $Enums.StatoPreavvisoRigetto
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumStatoPreavvisoRigettoFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumStatoPreavvisoRigettoFilter<$PrismaModel>
 }
 
 export type EnumStatoProcedimentoWithAggregatesFilter<$PrismaModel = never> = {
@@ -1246,11 +1280,25 @@ export type NestedEnumTipologiaProcedimentoFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumTipologiaProcedimentoFilter<$PrismaModel> | $Enums.TipologiaProcedimento
 }
 
+export type NestedEnumOrigineProcedimentoFilter<$PrismaModel = never> = {
+  equals?: $Enums.OrigineProcedimento | Prisma.EnumOrigineProcedimentoFieldRefInput<$PrismaModel>
+  in?: $Enums.OrigineProcedimento[] | Prisma.ListEnumOrigineProcedimentoFieldRefInput<$PrismaModel>
+  notIn?: $Enums.OrigineProcedimento[] | Prisma.ListEnumOrigineProcedimentoFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumOrigineProcedimentoFilter<$PrismaModel> | $Enums.OrigineProcedimento
+}
+
 export type NestedEnumEsitoIstruttorioProcedimentoNullableFilter<$PrismaModel = never> = {
   equals?: $Enums.EsitoIstruttorioProcedimento | Prisma.EnumEsitoIstruttorioProcedimentoFieldRefInput<$PrismaModel> | null
   in?: $Enums.EsitoIstruttorioProcedimento[] | Prisma.ListEnumEsitoIstruttorioProcedimentoFieldRefInput<$PrismaModel> | null
   notIn?: $Enums.EsitoIstruttorioProcedimento[] | Prisma.ListEnumEsitoIstruttorioProcedimentoFieldRefInput<$PrismaModel> | null
   not?: Prisma.NestedEnumEsitoIstruttorioProcedimentoNullableFilter<$PrismaModel> | $Enums.EsitoIstruttorioProcedimento | null
+}
+
+export type NestedEnumStatoPreavvisoRigettoFilter<$PrismaModel = never> = {
+  equals?: $Enums.StatoPreavvisoRigetto | Prisma.EnumStatoPreavvisoRigettoFieldRefInput<$PrismaModel>
+  in?: $Enums.StatoPreavvisoRigetto[] | Prisma.ListEnumStatoPreavvisoRigettoFieldRefInput<$PrismaModel>
+  notIn?: $Enums.StatoPreavvisoRigetto[] | Prisma.ListEnumStatoPreavvisoRigettoFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumStatoPreavvisoRigettoFilter<$PrismaModel> | $Enums.StatoPreavvisoRigetto
 }
 
 export type NestedEnumStatoProcedimentoFilter<$PrismaModel = never> = {
@@ -1268,6 +1316,16 @@ export type NestedEnumTipologiaProcedimentoWithAggregatesFilter<$PrismaModel = n
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumTipologiaProcedimentoFilter<$PrismaModel>
   _max?: Prisma.NestedEnumTipologiaProcedimentoFilter<$PrismaModel>
+}
+
+export type NestedEnumOrigineProcedimentoWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.OrigineProcedimento | Prisma.EnumOrigineProcedimentoFieldRefInput<$PrismaModel>
+  in?: $Enums.OrigineProcedimento[] | Prisma.ListEnumOrigineProcedimentoFieldRefInput<$PrismaModel>
+  notIn?: $Enums.OrigineProcedimento[] | Prisma.ListEnumOrigineProcedimentoFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumOrigineProcedimentoWithAggregatesFilter<$PrismaModel> | $Enums.OrigineProcedimento
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumOrigineProcedimentoFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumOrigineProcedimentoFilter<$PrismaModel>
 }
 
 export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -1305,6 +1363,16 @@ export type NestedEnumEsitoIstruttorioProcedimentoNullableWithAggregatesFilter<$
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumEsitoIstruttorioProcedimentoNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumEsitoIstruttorioProcedimentoNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumStatoPreavvisoRigettoWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.StatoPreavvisoRigetto | Prisma.EnumStatoPreavvisoRigettoFieldRefInput<$PrismaModel>
+  in?: $Enums.StatoPreavvisoRigetto[] | Prisma.ListEnumStatoPreavvisoRigettoFieldRefInput<$PrismaModel>
+  notIn?: $Enums.StatoPreavvisoRigetto[] | Prisma.ListEnumStatoPreavvisoRigettoFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumStatoPreavvisoRigettoWithAggregatesFilter<$PrismaModel> | $Enums.StatoPreavvisoRigetto
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumStatoPreavvisoRigettoFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumStatoPreavvisoRigettoFilter<$PrismaModel>
 }
 
 export type NestedEnumStatoProcedimentoWithAggregatesFilter<$PrismaModel = never> = {

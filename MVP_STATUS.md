@@ -37,6 +37,8 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Estensione lista/dettaglio/export criticita con stato/esito regolarizzazione
 - Checklist contraddittorio su Procedimento con update auditabile (Issue #7)
 - Lista/dettaglio/export procedimenti estesi con stato checklist e warning istruttori
+- Distinzione Procedimento d ufficio / istanza di parte con tracking art. 10-bis istruttorio (Issue #13)
+- Refinement warning checklist su preavviso rigetto e osservazioni
 - Export report CSV verificato
 - PDF report istituzionale server-side (PDFKit) con template stabile, sezioni istruttorie e footer/disclaimer
 - Audit su download PDF (`REPORT_PDF_DOWNLOAD`) e dinieghi autorizzativi su route PDF

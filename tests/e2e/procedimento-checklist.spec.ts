@@ -18,7 +18,19 @@ test("procedimento checklist section and update form visibility by role", async 
 
   await expect(page.getByRole("heading", { name: "2. Checklist contraddittorio" })).toBeVisible();
   await expect(page.getByText(/Checklist (completa|incompleta)/i)).toBeVisible();
+  await expect(page.getByText(/Origine procedimento/i)).toBeVisible();
+  await expect(page.getByText(/Stato preavviso rigetto/i)).toBeVisible();
   await expect(page.getByRole("button", { name: "Aggiorna checklist" })).toBeVisible();
+
+  await page.locator('select[name="origineProcedimento"]').selectOption("ISTANZA_PARTE");
+  await page.locator('select[name="procedimentoUfficio"]').selectOption("false");
+  await page.locator('select[name="preavvisoRigettoApplicabile"]').selectOption("true");
+  await page.locator('select[name="statoPreavvisoRigetto"]').selectOption("INVIATO");
+  await page.getByRole("button", { name: "Aggiorna checklist" }).click();
+
+  await expect(page).toHaveURL(/\/procedimenti\/.+/);
+  await expect(page.getByText(/Istanza di parte/i).first()).toBeVisible();
+  await expect(page.getByText(/Preavviso in gestione/i)).toBeVisible();
 
   await page.goto("/logout");
   await expect(page).toHaveURL(/\/login$/);

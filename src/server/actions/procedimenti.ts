@@ -9,6 +9,8 @@ import { isContraddittorioCompleto } from "@/lib/procedimento-checklist";
 import { prisma } from "@/lib/prisma";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 import {
+  PROCEDIMENTO_ORIGINE_VALUES,
+  PROCEDIMENTO_STATO_PREAVVISO_RIGETTO_VALUES,
   PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES,
   PROCEDIMENTO_STATO_VALUES,
   PROCEDIMENTO_TIPOLOGIA_VALUES,
@@ -18,6 +20,8 @@ const createProcedimentoSchema = z.object({
   concessioneId: z.string().min(1, "Seleziona una concessione."),
   criticitaId: z.string().optional(),
   tipologia: z.enum(PROCEDIMENTO_TIPOLOGIA_VALUES, { message: "Tipologia procedimento non valida." }),
+  origineProcedimento: z.enum(PROCEDIMENTO_ORIGINE_VALUES),
+  procedimentoUfficio: z.boolean(),
   stato: z.enum(PROCEDIMENTO_STATO_VALUES, { message: "Stato procedimento non valido." }),
   riferimentoNormativo: z.string().trim().optional(),
   dataAvvio: z.string().optional(),
@@ -37,12 +41,22 @@ const createProcedimentoSchema = z.object({
   controdeduzioniValutate: z.boolean(),
   motivazioneValutazione: z.string().trim().optional(),
   propostaEsitoIstruttorio: z.enum(PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES).optional(),
+  preavvisoRigettoApplicabile: z.boolean(),
+  statoPreavvisoRigetto: z.enum(PROCEDIMENTO_STATO_PREAVVISO_RIGETTO_VALUES),
+  dataPreavvisoRigetto: z.string().optional(),
+  termineOsservazioniPreavviso: z.string().optional(),
+  osservazioniPreavvisoRicevute: z.boolean(),
+  dataOsservazioniPreavviso: z.string().optional(),
+  valutazioneOsservazioniPreavviso: z.string().trim().optional(),
+  motivazioneMancatoPreavviso: z.string().trim().optional(),
   noteChecklistContraddittorio: z.string().trim().optional(),
   noteIstruttorie: z.string().trim().optional(),
 });
 
 const updateProcedimentoChecklistSchema = z.object({
   procedimentoId: z.string().min(1, "Procedimento non valido."),
+  origineProcedimento: z.enum(PROCEDIMENTO_ORIGINE_VALUES),
+  procedimentoUfficio: z.boolean(),
   comunicazioneAvvioInviata: z.boolean(),
   dataComunicazioneAvvio: z.string().optional(),
   termineMemorieGiorni: z.number().int().positive().optional(),
@@ -58,6 +72,14 @@ const updateProcedimentoChecklistSchema = z.object({
   controdeduzioniValutate: z.boolean(),
   motivazioneValutazione: z.string().trim().optional(),
   propostaEsitoIstruttorio: z.enum(PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES).optional(),
+  preavvisoRigettoApplicabile: z.boolean(),
+  statoPreavvisoRigetto: z.enum(PROCEDIMENTO_STATO_PREAVVISO_RIGETTO_VALUES),
+  dataPreavvisoRigetto: z.string().optional(),
+  termineOsservazioniPreavviso: z.string().optional(),
+  osservazioniPreavvisoRicevute: z.boolean(),
+  dataOsservazioniPreavviso: z.string().optional(),
+  valutazioneOsservazioniPreavviso: z.string().trim().optional(),
+  motivazioneMancatoPreavviso: z.string().trim().optional(),
   noteChecklistContraddittorio: z.string().trim().optional(),
 });
 
@@ -108,6 +130,8 @@ function addDays(date: Date, days: number): Date {
 
 function normalizeChecklist(input: {
   tipologia: string;
+  origineProcedimento: (typeof PROCEDIMENTO_ORIGINE_VALUES)[number];
+  procedimentoUfficio: boolean;
   comunicazioneAvvioInviata: boolean;
   dataComunicazioneAvvio?: string;
   termineMemorieGiorni?: number;
@@ -123,6 +147,14 @@ function normalizeChecklist(input: {
   controdeduzioniValutate: boolean;
   motivazioneValutazione?: string;
   propostaEsitoIstruttorio?: (typeof PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES)[number];
+  preavvisoRigettoApplicabile: boolean;
+  statoPreavvisoRigetto: (typeof PROCEDIMENTO_STATO_PREAVVISO_RIGETTO_VALUES)[number];
+  dataPreavvisoRigetto?: string;
+  termineOsservazioniPreavviso?: string;
+  osservazioniPreavvisoRicevute: boolean;
+  dataOsservazioniPreavviso?: string;
+  valutazioneOsservazioniPreavviso?: string;
+  motivazioneMancatoPreavviso?: string;
   noteChecklistContraddittorio?: string;
 }) {
   const dataComunicazioneAvvio = toDate(input.dataComunicazioneAvvio);
@@ -137,9 +169,31 @@ function normalizeChecklist(input: {
   const dataContestazioneFormale = input.contestazioneFormaleInviata
     ? toDate(input.dataContestazioneFormale)
     : null;
+  const origineProcedimento = input.origineProcedimento;
+  const procedimentoUfficio =
+    origineProcedimento === "UFFICIO" ? true : origineProcedimento === "ISTANZA_PARTE" ? false : input.procedimentoUfficio;
+  const preavvisoRigettoApplicabile = input.preavvisoRigettoApplicabile;
+  const statoPreavvisoRigetto =
+    preavvisoRigettoApplicabile && input.statoPreavvisoRigetto === "NON_APPLICABILE"
+      ? "APPLICABILE_DA_INVIARE"
+      : input.statoPreavvisoRigetto;
+  const dataPreavvisoRigetto = preavvisoRigettoApplicabile ? toDate(input.dataPreavvisoRigetto) : null;
+  const termineOsservazioniPreavviso = preavvisoRigettoApplicabile
+    ? toDate(input.termineOsservazioniPreavviso)
+    : null;
+  const osservazioniPreavvisoRicevute = preavvisoRigettoApplicabile && input.osservazioniPreavvisoRicevute;
+  const dataOsservazioniPreavviso = osservazioniPreavvisoRicevute ? toDate(input.dataOsservazioniPreavviso) : null;
+  const valutazioneOsservazioniPreavviso = osservazioniPreavvisoRicevute
+    ? toNullable(input.valutazioneOsservazioniPreavviso)
+    : null;
+  const motivazioneMancatoPreavviso = preavvisoRigettoApplicabile
+    ? null
+    : toNullable(input.motivazioneMancatoPreavviso);
 
   const checklistContraddittorioCompleta = isContraddittorioCompleto({
     tipologia: input.tipologia,
+    origineProcedimento,
+    procedimentoUfficio,
     comunicazioneAvvioInviata: input.comunicazioneAvvioInviata,
     termineMemorieGiorni: input.termineMemorieGiorni ?? null,
     termineMemorieScadenza,
@@ -153,9 +207,19 @@ function normalizeChecklist(input: {
     controdeduzioniValutate: input.controdeduzioniValutate,
     motivazioneValutazione: toNullable(input.motivazioneValutazione),
     propostaEsitoIstruttorio: input.propostaEsitoIstruttorio ?? null,
+    preavvisoRigettoApplicabile,
+    statoPreavvisoRigetto,
+    dataPreavvisoRigetto,
+    termineOsservazioniPreavviso,
+    osservazioniPreavvisoRicevute,
+    dataOsservazioniPreavviso,
+    valutazioneOsservazioniPreavviso,
+    motivazioneMancatoPreavviso,
   });
 
   return {
+    origineProcedimento,
+    procedimentoUfficio,
     comunicazioneAvvioInviata: input.comunicazioneAvvioInviata,
     dataComunicazioneAvvio,
     termineMemorieGiorni: input.termineMemorieGiorni ?? null,
@@ -171,6 +235,14 @@ function normalizeChecklist(input: {
     controdeduzioniValutate: input.controdeduzioniValutate,
     motivazioneValutazione: toNullable(input.motivazioneValutazione),
     propostaEsitoIstruttorio: input.propostaEsitoIstruttorio ?? null,
+    preavvisoRigettoApplicabile,
+    statoPreavvisoRigetto,
+    dataPreavvisoRigetto,
+    termineOsservazioniPreavviso,
+    osservazioniPreavvisoRicevute,
+    dataOsservazioniPreavviso,
+    valutazioneOsservazioniPreavviso,
+    motivazioneMancatoPreavviso,
     checklistContraddittorioCompleta,
     noteChecklistContraddittorio: toNullable(input.noteChecklistContraddittorio),
   };
@@ -209,6 +281,8 @@ export async function createProcedimentoAction(formData: FormData) {
     concessioneId: formData.get("concessioneId"),
     criticitaId: formData.get("criticitaId")?.toString(),
     tipologia: formData.get("tipologia"),
+    origineProcedimento: formData.get("origineProcedimento") ?? "UFFICIO",
+    procedimentoUfficio: toBoolean(formData.get("procedimentoUfficio")),
     stato: formData.get("stato"),
     riferimentoNormativo: formData.get("riferimentoNormativo")?.toString(),
     dataAvvio: formData.get("dataAvvio")?.toString(),
@@ -228,6 +302,14 @@ export async function createProcedimentoAction(formData: FormData) {
     controdeduzioniValutate: toBoolean(formData.get("controdeduzioniValutate")),
     motivazioneValutazione: formData.get("motivazioneValutazione")?.toString(),
     propostaEsitoIstruttorio: toNullable(formData.get("propostaEsitoIstruttorio")?.toString()) ?? undefined,
+    preavvisoRigettoApplicabile: toBoolean(formData.get("preavvisoRigettoApplicabile")),
+    statoPreavvisoRigetto: formData.get("statoPreavvisoRigetto") ?? "NON_VALUTATO",
+    dataPreavvisoRigetto: formData.get("dataPreavvisoRigetto")?.toString(),
+    termineOsservazioniPreavviso: formData.get("termineOsservazioniPreavviso")?.toString(),
+    osservazioniPreavvisoRicevute: toBoolean(formData.get("osservazioniPreavvisoRicevute")),
+    dataOsservazioniPreavviso: formData.get("dataOsservazioniPreavviso")?.toString(),
+    valutazioneOsservazioniPreavviso: formData.get("valutazioneOsservazioniPreavviso")?.toString(),
+    motivazioneMancatoPreavviso: formData.get("motivazioneMancatoPreavviso")?.toString(),
     noteChecklistContraddittorio: formData.get("noteChecklistContraddittorio")?.toString(),
     noteIstruttorie: formData.get("noteIstruttorie")?.toString(),
   });
@@ -270,6 +352,8 @@ export async function createProcedimentoAction(formData: FormData) {
 
   const checklistData = normalizeChecklist({
     tipologia: parsed.data.tipologia,
+    origineProcedimento: parsed.data.origineProcedimento,
+    procedimentoUfficio: parsed.data.procedimentoUfficio,
     comunicazioneAvvioInviata: parsed.data.comunicazioneAvvioInviata,
     dataComunicazioneAvvio: parsed.data.dataComunicazioneAvvio,
     termineMemorieGiorni: parsed.data.termineMemorieGiorni,
@@ -285,6 +369,14 @@ export async function createProcedimentoAction(formData: FormData) {
     controdeduzioniValutate: parsed.data.controdeduzioniValutate,
     motivazioneValutazione: parsed.data.motivazioneValutazione,
     propostaEsitoIstruttorio: parsed.data.propostaEsitoIstruttorio,
+    preavvisoRigettoApplicabile: parsed.data.preavvisoRigettoApplicabile,
+    statoPreavvisoRigetto: parsed.data.statoPreavvisoRigetto,
+    dataPreavvisoRigetto: parsed.data.dataPreavvisoRigetto,
+    termineOsservazioniPreavviso: parsed.data.termineOsservazioniPreavviso,
+    osservazioniPreavvisoRicevute: parsed.data.osservazioniPreavvisoRicevute,
+    dataOsservazioniPreavviso: parsed.data.dataOsservazioniPreavviso,
+    valutazioneOsservazioniPreavviso: parsed.data.valutazioneOsservazioniPreavviso,
+    motivazioneMancatoPreavviso: parsed.data.motivazioneMancatoPreavviso,
     noteChecklistContraddittorio: parsed.data.noteChecklistContraddittorio,
   });
 
@@ -316,9 +408,13 @@ export async function createProcedimentoAction(formData: FormData) {
       tipologia: parsed.data.tipologia,
       stato: parsed.data.stato,
       criticitaId,
+      origineProcedimento: checklistData.origineProcedimento,
+      procedimentoUfficio: checklistData.procedimentoUfficio,
       hasContraddittorioDate: Boolean(parsed.data.dataScadenzaContraddittorio),
       checklistContraddittorioCompleta: checklistData.checklistContraddittorioCompleta,
       propostaEsitoIstruttorio: checklistData.propostaEsitoIstruttorio,
+      preavvisoRigettoApplicabile: checklistData.preavvisoRigettoApplicabile,
+      statoPreavvisoRigetto: checklistData.statoPreavvisoRigetto,
     },
   });
 
@@ -360,6 +456,8 @@ export async function updateProcedimentoChecklistAction(formData: FormData) {
 
   const parsed = updateProcedimentoChecklistSchema.safeParse({
     procedimentoId: formData.get("procedimentoId"),
+    origineProcedimento: formData.get("origineProcedimento") ?? "UFFICIO",
+    procedimentoUfficio: toBoolean(formData.get("procedimentoUfficio")),
     comunicazioneAvvioInviata: toBoolean(formData.get("comunicazioneAvvioInviata")),
     dataComunicazioneAvvio: formData.get("dataComunicazioneAvvio")?.toString(),
     termineMemorieGiorni: toOptionalInteger(formData.get("termineMemorieGiorni")?.toString()),
@@ -375,6 +473,14 @@ export async function updateProcedimentoChecklistAction(formData: FormData) {
     controdeduzioniValutate: toBoolean(formData.get("controdeduzioniValutate")),
     motivazioneValutazione: formData.get("motivazioneValutazione")?.toString(),
     propostaEsitoIstruttorio: toNullable(formData.get("propostaEsitoIstruttorio")?.toString()) ?? undefined,
+    preavvisoRigettoApplicabile: toBoolean(formData.get("preavvisoRigettoApplicabile")),
+    statoPreavvisoRigetto: formData.get("statoPreavvisoRigetto") ?? "NON_VALUTATO",
+    dataPreavvisoRigetto: formData.get("dataPreavvisoRigetto")?.toString(),
+    termineOsservazioniPreavviso: formData.get("termineOsservazioniPreavviso")?.toString(),
+    osservazioniPreavvisoRicevute: toBoolean(formData.get("osservazioniPreavvisoRicevute")),
+    dataOsservazioniPreavviso: formData.get("dataOsservazioniPreavviso")?.toString(),
+    valutazioneOsservazioniPreavviso: formData.get("valutazioneOsservazioniPreavviso")?.toString(),
+    motivazioneMancatoPreavviso: formData.get("motivazioneMancatoPreavviso")?.toString(),
     noteChecklistContraddittorio: formData.get("noteChecklistContraddittorio")?.toString(),
   });
 
@@ -411,6 +517,8 @@ export async function updateProcedimentoChecklistAction(formData: FormData) {
 
   const checklistData = normalizeChecklist({
     tipologia: procedimento.tipologia,
+    origineProcedimento: parsed.data.origineProcedimento,
+    procedimentoUfficio: parsed.data.procedimentoUfficio,
     comunicazioneAvvioInviata: parsed.data.comunicazioneAvvioInviata,
     dataComunicazioneAvvio: parsed.data.dataComunicazioneAvvio,
     termineMemorieGiorni: parsed.data.termineMemorieGiorni,
@@ -426,6 +534,14 @@ export async function updateProcedimentoChecklistAction(formData: FormData) {
     controdeduzioniValutate: parsed.data.controdeduzioniValutate,
     motivazioneValutazione: parsed.data.motivazioneValutazione,
     propostaEsitoIstruttorio: parsed.data.propostaEsitoIstruttorio,
+    preavvisoRigettoApplicabile: parsed.data.preavvisoRigettoApplicabile,
+    statoPreavvisoRigetto: parsed.data.statoPreavvisoRigetto,
+    dataPreavvisoRigetto: parsed.data.dataPreavvisoRigetto,
+    termineOsservazioniPreavviso: parsed.data.termineOsservazioniPreavviso,
+    osservazioniPreavvisoRicevute: parsed.data.osservazioniPreavvisoRicevute,
+    dataOsservazioniPreavviso: parsed.data.dataOsservazioniPreavviso,
+    valutazioneOsservazioniPreavviso: parsed.data.valutazioneOsservazioniPreavviso,
+    motivazioneMancatoPreavviso: parsed.data.motivazioneMancatoPreavviso,
     noteChecklistContraddittorio: parsed.data.noteChecklistContraddittorio,
   });
 
@@ -443,7 +559,13 @@ export async function updateProcedimentoChecklistAction(formData: FormData) {
     metadata: {
       checklistContraddittorioCompleta: checklistData.checklistContraddittorioCompleta,
       propostaEsitoIstruttorio: checklistData.propostaEsitoIstruttorio,
+      origineProcedimento: checklistData.origineProcedimento,
+      procedimentoUfficio: checklistData.procedimentoUfficio,
+      preavvisoRigettoApplicabile: checklistData.preavvisoRigettoApplicabile,
+      statoPreavvisoRigetto: checklistData.statoPreavvisoRigetto,
       changedFields: [
+        "origineProcedimento",
+        "procedimentoUfficio",
         "comunicazioneAvvioInviata",
         "termineMemorieGiorni",
         "termineMemorieScadenza",
@@ -455,6 +577,14 @@ export async function updateProcedimentoChecklistAction(formData: FormData) {
         "controdeduzioniValutate",
         "motivazioneValutazione",
         "propostaEsitoIstruttorio",
+        "preavvisoRigettoApplicabile",
+        "statoPreavvisoRigetto",
+        "dataPreavvisoRigetto",
+        "termineOsservazioniPreavviso",
+        "osservazioniPreavvisoRicevute",
+        "dataOsservazioniPreavviso",
+        "valutazioneOsservazioniPreavviso",
+        "motivazioneMancatoPreavviso",
       ],
     },
   });

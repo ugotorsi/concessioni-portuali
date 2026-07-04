@@ -144,6 +144,11 @@ export interface ReportDetail {
     riferimentoNormativo: string | null;
     dataAvvio: Date | null;
     dataScadenzaContraddittorio: Date | null;
+    origineProcedimento: string;
+    preavvisoRigettoApplicabile: boolean;
+    statoPreavvisoRigetto: string;
+    osservazioniPreavvisoRicevute: boolean;
+    valutazioneOsservazioniPreavviso: string | null;
   }>;
   sopralluoghiRecenti: Array<{
     id: string;
@@ -322,6 +327,19 @@ export async function getReportDetail(id: string): Promise<ReportDetail | null> 
             where: { stato: { in: ["DA_AVVIARE", "IN_CORSO"] } },
             orderBy: [{ dataScadenzaContraddittorio: "asc" }, { createdAt: "desc" }],
             take: 12,
+            select: {
+              id: true,
+              tipologia: true,
+              stato: true,
+              riferimentoNormativo: true,
+              dataAvvio: true,
+              dataScadenzaContraddittorio: true,
+              origineProcedimento: true,
+              preavvisoRigettoApplicabile: true,
+              statoPreavvisoRigetto: true,
+              osservazioniPreavvisoRicevute: true,
+              valutazioneOsservazioniPreavviso: true,
+            },
           },
           sopralluoghi: {
             orderBy: [{ data: "desc" }],
@@ -424,6 +442,11 @@ export async function getReportDetail(id: string): Promise<ReportDetail | null> 
         riferimentoNormativo: item.riferimentoNormativo,
         dataAvvio: item.dataAvvio,
         dataScadenzaContraddittorio: item.dataScadenzaContraddittorio,
+        origineProcedimento: item.origineProcedimento,
+        preavvisoRigettoApplicabile: item.preavvisoRigettoApplicabile,
+        statoPreavvisoRigetto: item.statoPreavvisoRigetto,
+        osservazioniPreavvisoRicevute: item.osservazioniPreavvisoRicevute,
+        valutazioneOsservazioniPreavviso: item.valutazioneOsservazioniPreavviso,
       })) ?? [],
     sopralluoghiRecenti:
       report.concessione?.sopralluoghi.map((item) => ({

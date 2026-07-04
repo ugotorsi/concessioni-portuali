@@ -59,6 +59,40 @@ export function ProcedimentiFiltersBar({ filtersData, current }: ProcedimentiFil
         ))}
       </Select>
 
+      <Select name="origineProcedimento" defaultValue={current.origineProcedimento ?? ""}>
+        <option value="">Origine (tutte)</option>
+        {filtersData.originiProcedimento.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </Select>
+
+      <Select name="procedimentoUfficio" defaultValue={current.procedimentoUfficio ?? "TUTTI"}>
+        {filtersData.procedimentoUfficio.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </Select>
+
+      <Select name="preavvisoRigettoApplicabile" defaultValue={current.preavvisoRigettoApplicabile ?? "TUTTI"}>
+        {filtersData.preavvisoRigettoApplicabile.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </Select>
+
+      <Select name="statoPreavvisoRigetto" defaultValue={current.statoPreavvisoRigetto ?? ""}>
+        <option value="">Stato preavviso (tutti)</option>
+        {filtersData.statiPreavvisoRigetto.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </Select>
+
       <Select name="concessioneId" defaultValue={current.concessioneId ?? ""} className="xl:col-span-2">
         <option value="">Concessione (tutte)</option>
         {filtersData.concessioni.map((option) => (

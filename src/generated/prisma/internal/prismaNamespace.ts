@@ -1690,6 +1690,8 @@ export const ProcedimentoScalarFieldEnum = {
   concessioneId: 'concessioneId',
   criticitaId: 'criticitaId',
   tipologia: 'tipologia',
+  origineProcedimento: 'origineProcedimento',
+  procedimentoUfficio: 'procedimentoUfficio',
   riferimentoNormativo: 'riferimentoNormativo',
   dataAvvio: 'dataAvvio',
   dataScadenzaContraddittorio: 'dataScadenzaContraddittorio',
@@ -1709,6 +1711,14 @@ export const ProcedimentoScalarFieldEnum = {
   controdeduzioniValutate: 'controdeduzioniValutate',
   motivazioneValutazione: 'motivazioneValutazione',
   propostaEsitoIstruttorio: 'propostaEsitoIstruttorio',
+  preavvisoRigettoApplicabile: 'preavvisoRigettoApplicabile',
+  statoPreavvisoRigetto: 'statoPreavvisoRigetto',
+  dataPreavvisoRigetto: 'dataPreavvisoRigetto',
+  termineOsservazioniPreavviso: 'termineOsservazioniPreavviso',
+  osservazioniPreavvisoRicevute: 'osservazioniPreavvisoRicevute',
+  dataOsservazioniPreavviso: 'dataOsservazioniPreavviso',
+  valutazioneOsservazioniPreavviso: 'valutazioneOsservazioniPreavviso',
+  motivazioneMancatoPreavviso: 'motivazioneMancatoPreavviso',
   checklistContraddittorioCompleta: 'checklistContraddittorioCompleta',
   noteChecklistContraddittorio: 'noteChecklistContraddittorio',
   stato: 'stato',
@@ -2207,6 +2217,20 @@ export type ListEnumTipologiaProcedimentoFieldRefInput<$PrismaModel> = FieldRefI
 
 
 /**
+ * Reference to a field of type 'OrigineProcedimento'
+ */
+export type EnumOrigineProcedimentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrigineProcedimento'>
+    
+
+
+/**
+ * Reference to a field of type 'OrigineProcedimento[]'
+ */
+export type ListEnumOrigineProcedimentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrigineProcedimento[]'>
+    
+
+
+/**
  * Reference to a field of type 'EsitoIstruttorioProcedimento'
  */
 export type EnumEsitoIstruttorioProcedimentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EsitoIstruttorioProcedimento'>
@@ -2217,6 +2241,20 @@ export type EnumEsitoIstruttorioProcedimentoFieldRefInput<$PrismaModel> = FieldR
  * Reference to a field of type 'EsitoIstruttorioProcedimento[]'
  */
 export type ListEnumEsitoIstruttorioProcedimentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EsitoIstruttorioProcedimento[]'>
+    
+
+
+/**
+ * Reference to a field of type 'StatoPreavvisoRigetto'
+ */
+export type EnumStatoPreavvisoRigettoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatoPreavvisoRigetto'>
+    
+
+
+/**
+ * Reference to a field of type 'StatoPreavvisoRigetto[]'
+ */
+export type ListEnumStatoPreavvisoRigettoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatoPreavvisoRigetto[]'>
     
 
 

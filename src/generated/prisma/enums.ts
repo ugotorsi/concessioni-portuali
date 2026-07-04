@@ -247,6 +247,27 @@ export const EsitoIstruttorioProcedimento = {
 export type EsitoIstruttorioProcedimento = (typeof EsitoIstruttorioProcedimento)[keyof typeof EsitoIstruttorioProcedimento]
 
 
+export const OrigineProcedimento = {
+  UFFICIO: 'UFFICIO',
+  ISTANZA_PARTE: 'ISTANZA_PARTE',
+  ALTRO: 'ALTRO'
+} as const
+
+export type OrigineProcedimento = (typeof OrigineProcedimento)[keyof typeof OrigineProcedimento]
+
+
+export const StatoPreavvisoRigetto = {
+  NON_VALUTATO: 'NON_VALUTATO',
+  NON_APPLICABILE: 'NON_APPLICABILE',
+  APPLICABILE_DA_INVIARE: 'APPLICABILE_DA_INVIARE',
+  INVIATO: 'INVIATO',
+  OSSERVAZIONI_RICEVUTE: 'OSSERVAZIONI_RICEVUTE',
+  OSSERVAZIONI_VALUTATE: 'OSSERVAZIONI_VALUTATE'
+} as const
+
+export type StatoPreavvisoRigetto = (typeof StatoPreavvisoRigetto)[keyof typeof StatoPreavvisoRigetto]
+
+
 export const EsitoSopralluogo = {
   POSITIVO: 'POSITIVO',
   CON_RILIEVI: 'CON_RILIEVI',

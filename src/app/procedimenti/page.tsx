@@ -5,6 +5,8 @@ import { BACKOFFICE_ROLES, canExportOperationalData, canManageProcedimenti, requ
 import {
   ProcedimentoGiorniBadge,
   ProcedimentoChecklistBadge,
+  ProcedimentoOrigineBadge,
+  ProcedimentoPreavvisoBadge,
   ProcedimentoStatoBadge,
   ProcedimentoTipologiaBadge,
   ProcedimentoWarningBadge,
@@ -25,6 +27,9 @@ import {
   PROCEDIMENTI_CHECKLIST_VALUES,
   PROCEDIMENTI_MEMORIE_VALUES,
   PROCEDIMENTI_PERIODO_VALUES,
+  PROCEDIMENTO_BOOLEAN_FILTER_VALUES,
+  PROCEDIMENTO_ORIGINE_VALUES,
+  PROCEDIMENTO_STATO_PREAVVISO_RIGETTO_VALUES,
   PROCEDIMENTO_STATO_VALUES,
   PROCEDIMENTO_TIPOLOGIA_VALUES,
   getProcedimentiFilters,
@@ -33,6 +38,9 @@ import {
   type ProcedimentiPeriodoValue,
   type ProcedimentiChecklistValue,
   type ProcedimentiMemorieValue,
+  type ProcedimentoBooleanFilterValue,
+  type ProcedimentoOrigineValue,
+  type ProcedimentoStatoPreavvisoRigettoValue,
   type ProcedimentoStatoValue,
   type ProcedimentoTipologiaValue,
 } from "@/server/queries/procedimenti";
@@ -94,6 +102,30 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
       return value && PROCEDIMENTI_MEMORIE_VALUES.includes(value as ProcedimentiMemorieValue)
         ? (value as ProcedimentiMemorieValue)
         : "TUTTE";
+    })(),
+    origineProcedimento: (() => {
+      const value = pickString(resolvedSearch.origineProcedimento);
+      return value && PROCEDIMENTO_ORIGINE_VALUES.includes(value as ProcedimentoOrigineValue)
+        ? (value as ProcedimentoOrigineValue)
+        : undefined;
+    })(),
+    procedimentoUfficio: (() => {
+      const value = pickString(resolvedSearch.procedimentoUfficio);
+      return value && PROCEDIMENTO_BOOLEAN_FILTER_VALUES.includes(value as ProcedimentoBooleanFilterValue)
+        ? (value as ProcedimentoBooleanFilterValue)
+        : "TUTTI";
+    })(),
+    preavvisoRigettoApplicabile: (() => {
+      const value = pickString(resolvedSearch.preavvisoRigettoApplicabile);
+      return value && PROCEDIMENTO_BOOLEAN_FILTER_VALUES.includes(value as ProcedimentoBooleanFilterValue)
+        ? (value as ProcedimentoBooleanFilterValue)
+        : "TUTTI";
+    })(),
+    statoPreavvisoRigetto: (() => {
+      const value = pickString(resolvedSearch.statoPreavvisoRigetto);
+      return value && PROCEDIMENTO_STATO_PREAVVISO_RIGETTO_VALUES.includes(value as ProcedimentoStatoPreavvisoRigettoValue)
+        ? (value as ProcedimentoStatoPreavvisoRigettoValue)
+        : undefined;
     })(),
   };
 
@@ -240,6 +272,8 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
                   <TableHead>Stato</TableHead>
                   <TableHead>Checklist</TableHead>
                   <TableHead>Warning</TableHead>
+                  <TableHead>Origine</TableHead>
+                  <TableHead>Preavviso</TableHead>
                   <TableHead>Concessione</TableHead>
                   <TableHead>Concessionario</TableHead>
                   <TableHead>Criticità collegata</TableHead>
@@ -278,6 +312,18 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
                       </TableCell>
                       <TableCell>
                         <ProcedimentoWarningBadge level={item.checklistWarningLevel} />
+                      </TableCell>
+                      <TableCell>
+                        <ProcedimentoOrigineBadge value={item.origineProcedimento} />
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <ProcedimentoPreavvisoBadge
+                            applicabile={item.preavvisoRigettoApplicabile}
+                            stato={item.statoPreavvisoRigetto}
+                          />
+                          <p className="text-xs text-slate-500">{formatEnumLabel(item.statoPreavvisoRigetto)}</p>
+                        </div>
                       </TableCell>
                       <TableCell>{item.concessione.numeroAtto}</TableCell>
                       <TableCell>{item.concessione.concessionario.denominazione}</TableCell>
@@ -335,7 +381,7 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
                 })}
                 {listData.items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={12} className="text-center text-slate-500">
+                    <TableCell colSpan={14} className="text-center text-slate-500">
                       Nessun procedimento trovato con i filtri correnti.
                     </TableCell>
                   </TableRow>

@@ -6,6 +6,8 @@ import { AppShell } from "@/components/layout/AppShell";
 import {
   ProcedimentoGiorniBadge,
   ProcedimentoChecklistBadge,
+  ProcedimentoOrigineBadge,
+  ProcedimentoPreavvisoBadge,
   ProcedimentoStatoBadge,
   ProcedimentoTipologiaBadge,
   ProcedimentoWarningBadge,
@@ -26,7 +28,13 @@ import {
 } from "@/components/ui/Table";
 import { Textarea } from "@/components/ui/Textarea";
 import { canManageProcedimenti, requireRole } from "@/lib/auth";
-import { getChecklistContraddittorioItems } from "@/lib/procedimento-checklist";
+import {
+  getChecklistContraddittorioItems,
+  getOrigineProcedimentoLabel,
+  getProcedimentoChecklistGuidance,
+  getStatoPreavvisoRigettoDescription,
+  getStatoPreavvisoRigettoLabel,
+} from "@/lib/procedimento-checklist";
 import { formatCurrencyEUR, formatDateIT, formatEnumLabel } from "@/lib/utils";
 import { updateProcedimentoChecklistAction } from "@/server/actions/procedimenti";
 import { getLetturaProcedimentale, getProcedimentoDetail } from "@/server/queries/procedimenti";
@@ -51,6 +59,14 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
   }
 
   const checklist = getChecklistContraddittorioItems(detail.procedimento);
+  const checklistGuidance = getProcedimentoChecklistGuidance(detail.procedimento);
+  const preavvisoWarningApplicabileNonInviato =
+    detail.procedimento.preavvisoRigettoApplicabile &&
+    ["APPLICABILE_DA_INVIARE", "NON_VALUTATO"].includes(detail.procedimento.statoPreavvisoRigetto);
+  const preavvisoWarningOsservazioniNonValutate =
+    detail.procedimento.osservazioniPreavvisoRicevute &&
+    detail.procedimento.statoPreavvisoRigetto !== "OSSERVAZIONI_VALUTATE" &&
+    !(detail.procedimento.valutazioneOsservazioniPreavviso && detail.procedimento.valutazioneOsservazioniPreavviso.trim() !== "");
 
   const lettura = getLetturaProcedimentale({
     tipologia: detail.procedimento.tipologia,
@@ -195,7 +211,51 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
                     {detail.procedimento.termineMemorieScadenza ? formatDateIT(detail.procedimento.termineMemorieScadenza) : "-"}
                   </p>
                 </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Origine procedimento</p>
+                  <div className="mt-1">
+                    <ProcedimentoOrigineBadge value={detail.procedimento.origineProcedimento} />
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Procedimento d ufficio</p>
+                  <p className="mt-1 text-slate-900">{detail.procedimento.procedimentoUfficio ? "Si" : "No"}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Stato preavviso rigetto</p>
+                  <div className="mt-1">
+                    <ProcedimentoPreavvisoBadge
+                      applicabile={detail.procedimento.preavvisoRigettoApplicabile}
+                      stato={detail.procedimento.statoPreavvisoRigetto}
+                    />
+                  </div>
+                  <p className="mt-1 text-xs text-slate-500">{getStatoPreavvisoRigettoLabel(detail.procedimento.statoPreavvisoRigetto)}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Termine osservazioni preavviso</p>
+                  <p className="mt-1 text-slate-900">
+                    {detail.procedimento.termineOsservazioniPreavviso
+                      ? formatDateIT(detail.procedimento.termineOsservazioniPreavviso)
+                      : "-"}
+                  </p>
+                </div>
               </div>
+
+              <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                {getStatoPreavvisoRigettoDescription(detail.procedimento.statoPreavvisoRigetto)}
+              </div>
+
+              {preavvisoWarningApplicabileNonInviato ? (
+                <div className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">
+                  Preavviso di rigetto indicato come applicabile secondo valutazione istruttoria ma non ancora inviato.
+                </div>
+              ) : null}
+
+              {preavvisoWarningOsservazioniNonValutate ? (
+                <div className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">
+                  Osservazioni sul preavviso ricevute ma non ancora valutate in motivazione istruttoria.
+                </div>
+              ) : null}
 
               {detail.criticitaCollegata?.rilevanzaArt47 ? (
                 <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
@@ -241,6 +301,26 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
                   <p className="text-xs uppercase tracking-wide text-slate-500">Nota checklist contraddittorio</p>
                   <p className="mt-1">{detail.procedimento.noteChecklistContraddittorio ?? "-"}</p>
                 </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Data preavviso rigetto</p>
+                  <p className="mt-1">{detail.procedimento.dataPreavvisoRigetto ? formatDateIT(detail.procedimento.dataPreavvisoRigetto) : "-"}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Data osservazioni preavviso</p>
+                  <p className="mt-1">{detail.procedimento.dataOsservazioniPreavviso ? formatDateIT(detail.procedimento.dataOsservazioniPreavviso) : "-"}</p>
+                </div>
+                <div className="md:col-span-2">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Valutazione osservazioni preavviso</p>
+                  <p className="mt-1">{detail.procedimento.valutazioneOsservazioniPreavviso ?? "-"}</p>
+                </div>
+                <div className="md:col-span-2">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Motivazione mancato preavviso</p>
+                  <p className="mt-1">{detail.procedimento.motivazioneMancatoPreavviso ?? "-"}</p>
+                </div>
+              </div>
+
+              <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                {checklistGuidance}
               </div>
 
               {canWriteChecklist ? (
@@ -248,6 +328,34 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
                   <input type="hidden" name="procedimentoId" value={detail.procedimento.id} />
                   <p className="text-sm font-medium text-slate-900">Aggiorna checklist</p>
                   <div className="grid gap-3 md:grid-cols-2">
+                    <Select name="origineProcedimento" defaultValue={detail.procedimento.origineProcedimento}>
+                      <option value="UFFICIO">{getOrigineProcedimentoLabel("UFFICIO")}</option>
+                      <option value="ISTANZA_PARTE">{getOrigineProcedimentoLabel("ISTANZA_PARTE")}</option>
+                      <option value="ALTRO">{getOrigineProcedimentoLabel("ALTRO")}</option>
+                    </Select>
+                    <Select name="procedimentoUfficio" defaultValue={detail.procedimento.procedimentoUfficio ? "true" : "false"}>
+                      <option value="true">Procedimento d ufficio: Si</option>
+                      <option value="false">Procedimento d ufficio: No</option>
+                    </Select>
+                    <Select name="preavvisoRigettoApplicabile" defaultValue={detail.procedimento.preavvisoRigettoApplicabile ? "true" : "false"}>
+                      <option value="false">Preavviso applicabile: No / da verificare</option>
+                      <option value="true">Preavviso applicabile: Si</option>
+                    </Select>
+                    <Select name="statoPreavvisoRigetto" defaultValue={detail.procedimento.statoPreavvisoRigetto}>
+                      <option value="NON_VALUTATO">{getStatoPreavvisoRigettoLabel("NON_VALUTATO")}</option>
+                      <option value="NON_APPLICABILE">{getStatoPreavvisoRigettoLabel("NON_APPLICABILE")}</option>
+                      <option value="APPLICABILE_DA_INVIARE">{getStatoPreavvisoRigettoLabel("APPLICABILE_DA_INVIARE")}</option>
+                      <option value="INVIATO">{getStatoPreavvisoRigettoLabel("INVIATO")}</option>
+                      <option value="OSSERVAZIONI_RICEVUTE">{getStatoPreavvisoRigettoLabel("OSSERVAZIONI_RICEVUTE")}</option>
+                      <option value="OSSERVAZIONI_VALUTATE">{getStatoPreavvisoRigettoLabel("OSSERVAZIONI_VALUTATE")}</option>
+                    </Select>
+                    <Input name="dataPreavvisoRigetto" type="date" defaultValue={detail.procedimento.dataPreavvisoRigetto ? detail.procedimento.dataPreavvisoRigetto.toISOString().slice(0, 10) : ""} />
+                    <Input name="termineOsservazioniPreavviso" type="date" defaultValue={detail.procedimento.termineOsservazioniPreavviso ? detail.procedimento.termineOsservazioniPreavviso.toISOString().slice(0, 10) : ""} />
+                    <Select name="osservazioniPreavvisoRicevute" defaultValue={detail.procedimento.osservazioniPreavvisoRicevute ? "true" : "false"}>
+                      <option value="false">Osservazioni preavviso: No</option>
+                      <option value="true">Osservazioni preavviso: Si</option>
+                    </Select>
+                    <Input name="dataOsservazioniPreavviso" type="date" defaultValue={detail.procedimento.dataOsservazioniPreavviso ? detail.procedimento.dataOsservazioniPreavviso.toISOString().slice(0, 10) : ""} />
                     <label className="flex items-center gap-2 text-sm text-slate-700">
                       <input type="checkbox" name="comunicazioneAvvioInviata" defaultChecked={detail.procedimento.comunicazioneAvvioInviata} className="h-4 w-4" />
                       Comunicazione avvio inviata
@@ -289,6 +397,8 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
                       ))}
                     </Select>
                     <Textarea name="motivazioneValutazione" defaultValue={detail.procedimento.motivazioneValutazione ?? ""} className="md:col-span-2" />
+                    <Textarea name="valutazioneOsservazioniPreavviso" defaultValue={detail.procedimento.valutazioneOsservazioniPreavviso ?? ""} className="md:col-span-2" />
+                    <Textarea name="motivazioneMancatoPreavviso" defaultValue={detail.procedimento.motivazioneMancatoPreavviso ?? ""} className="md:col-span-2" />
                     <Textarea name="noteChecklistContraddittorio" defaultValue={detail.procedimento.noteChecklistContraddittorio ?? ""} className="md:col-span-2" />
                   </div>
                   <Button type="submit">Aggiorna checklist</Button>

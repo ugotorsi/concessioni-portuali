@@ -132,6 +132,108 @@ export default async function NuovoProcedimentoPage({ searchParams }: NuovoProce
 
               <div className="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
                 <div>
+                  <p className="text-sm font-semibold text-slate-900">Origine del procedimento e art. 10-bis</p>
+                  <p className="text-xs text-slate-600">
+                    La sezione ha funzione istruttoria. L applicabilita del preavviso di rigetto ex art. 10-bis L. 241/1990 deve essere valutata dal responsabile del procedimento.
+                  </p>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-1">
+                    <label htmlFor="origineProcedimento" className="text-sm font-medium text-slate-700">
+                      Origine procedimento
+                    </label>
+                    <Select id="origineProcedimento" name="origineProcedimento" defaultValue="UFFICIO" required>
+                      {filtersData.originiProcedimento.map((item) => (
+                        <option key={item.value} value={item.value}>
+                          {item.label}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label htmlFor="procedimentoUfficio" className="text-sm font-medium text-slate-700">
+                      Procedimento d ufficio
+                    </label>
+                    <Select id="procedimentoUfficio" name="procedimentoUfficio" defaultValue="true" required>
+                      <option value="true">Si</option>
+                      <option value="false">No</option>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label htmlFor="preavvisoRigettoApplicabile" className="text-sm font-medium text-slate-700">
+                      Preavviso rigetto applicabile
+                    </label>
+                    <Select id="preavvisoRigettoApplicabile" name="preavvisoRigettoApplicabile" defaultValue="false" required>
+                      <option value="false">No / da verificare</option>
+                      <option value="true">Si (secondo valutazione istruttoria)</option>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label htmlFor="statoPreavvisoRigetto" className="text-sm font-medium text-slate-700">
+                      Stato preavviso rigetto
+                    </label>
+                    <Select id="statoPreavvisoRigetto" name="statoPreavvisoRigetto" defaultValue="NON_VALUTATO" required>
+                      {filtersData.statiPreavvisoRigetto.map((item) => (
+                        <option key={item.value} value={item.value}>
+                          {item.label}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label htmlFor="dataPreavvisoRigetto" className="text-sm font-medium text-slate-700">
+                      Data preavviso rigetto
+                    </label>
+                    <Input id="dataPreavvisoRigetto" name="dataPreavvisoRigetto" type="date" />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label htmlFor="termineOsservazioniPreavviso" className="text-sm font-medium text-slate-700">
+                      Termine osservazioni preavviso
+                    </label>
+                    <Input id="termineOsservazioniPreavviso" name="termineOsservazioniPreavviso" type="date" />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label htmlFor="osservazioniPreavvisoRicevute" className="text-sm font-medium text-slate-700">
+                      Osservazioni preavviso ricevute
+                    </label>
+                    <Select id="osservazioniPreavvisoRicevute" name="osservazioniPreavvisoRicevute" defaultValue="false" required>
+                      <option value="false">No</option>
+                      <option value="true">Si</option>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label htmlFor="dataOsservazioniPreavviso" className="text-sm font-medium text-slate-700">
+                      Data osservazioni
+                    </label>
+                    <Input id="dataOsservazioniPreavviso" name="dataOsservazioniPreavviso" type="date" />
+                  </div>
+
+                  <div className="space-y-1 md:col-span-2">
+                    <label htmlFor="valutazioneOsservazioniPreavviso" className="text-sm font-medium text-slate-700">
+                      Valutazione osservazioni
+                    </label>
+                    <Textarea id="valutazioneOsservazioniPreavviso" name="valutazioneOsservazioniPreavviso" />
+                  </div>
+
+                  <div className="space-y-1 md:col-span-2">
+                    <label htmlFor="motivazioneMancatoPreavviso" className="text-sm font-medium text-slate-700">
+                      Motivazione mancato preavviso
+                    </label>
+                    <Textarea id="motivazioneMancatoPreavviso" name="motivazioneMancatoPreavviso" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div>
                   <p className="text-sm font-semibold text-slate-900">Contraddittorio e garanzie procedimentali</p>
                   <p className="text-xs text-slate-600">
                     La checklist ha funzione istruttoria e non sostituisce la valutazione del responsabile del procedimento.

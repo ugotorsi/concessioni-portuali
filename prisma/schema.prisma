@@ -188,6 +188,21 @@ enum EsitoIstruttorioProcedimento {
   ALTRO
 }
 
+enum OrigineProcedimento {
+  UFFICIO
+  ISTANZA_PARTE
+  ALTRO
+}
+
+enum StatoPreavvisoRigetto {
+  NON_VALUTATO
+  NON_APPLICABILE
+  APPLICABILE_DA_INVIARE
+  INVIATO
+  OSSERVAZIONI_RICEVUTE
+  OSSERVAZIONI_VALUTATE
+}
+
 enum EsitoSopralluogo {
   POSITIVO
   CON_RILIEVI
@@ -429,6 +444,8 @@ model Procedimento {
   concessioneId               String
   criticitaId                 String?
   tipologia                   TipologiaProcedimento
+  origineProcedimento         OrigineProcedimento   @default(UFFICIO)
+  procedimentoUfficio         Boolean               @default(true)
   riferimentoNormativo        String?
   dataAvvio                   DateTime?
   dataScadenzaContraddittorio DateTime?
@@ -448,6 +465,14 @@ model Procedimento {
   controdeduzioniValutate     Boolean               @default(false)
   motivazioneValutazione      String?
   propostaEsitoIstruttorio    EsitoIstruttorioProcedimento?
+  preavvisoRigettoApplicabile Boolean               @default(false)
+  statoPreavvisoRigetto       StatoPreavvisoRigetto @default(NON_VALUTATO)
+  dataPreavvisoRigetto        DateTime?
+  termineOsservazioniPreavviso DateTime?
+  osservazioniPreavvisoRicevute Boolean             @default(false)
+  dataOsservazioniPreavviso   DateTime?
+  valutazioneOsservazioniPreavviso String?
+  motivazioneMancatoPreavviso String?
   checklistContraddittorioCompleta Boolean          @default(false)
   noteChecklistContraddittorio String?
   stato                       StatoProcedimento
@@ -463,6 +488,10 @@ model Procedimento {
   @@index([criticitaId])
   @@index([stato])
   @@index([tipologia])
+  @@index([origineProcedimento])
+  @@index([procedimentoUfficio])
+  @@index([preavvisoRigettoApplicabile])
+  @@index([statoPreavvisoRigetto])
   @@index([dataScadenzaContraddittorio])
   @@index([checklistContraddittorioCompleta])
   @@index([termineMemorieScadenza])

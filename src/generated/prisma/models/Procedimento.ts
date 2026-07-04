@@ -39,6 +39,8 @@ export type ProcedimentoMinAggregateOutputType = {
   concessioneId: string | null
   criticitaId: string | null
   tipologia: $Enums.TipologiaProcedimento | null
+  origineProcedimento: $Enums.OrigineProcedimento | null
+  procedimentoUfficio: boolean | null
   riferimentoNormativo: string | null
   dataAvvio: Date | null
   dataScadenzaContraddittorio: Date | null
@@ -58,6 +60,14 @@ export type ProcedimentoMinAggregateOutputType = {
   controdeduzioniValutate: boolean | null
   motivazioneValutazione: string | null
   propostaEsitoIstruttorio: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile: boolean | null
+  statoPreavvisoRigetto: $Enums.StatoPreavvisoRigetto | null
+  dataPreavvisoRigetto: Date | null
+  termineOsservazioniPreavviso: Date | null
+  osservazioniPreavvisoRicevute: boolean | null
+  dataOsservazioniPreavviso: Date | null
+  valutazioneOsservazioniPreavviso: string | null
+  motivazioneMancatoPreavviso: string | null
   checklistContraddittorioCompleta: boolean | null
   noteChecklistContraddittorio: string | null
   stato: $Enums.StatoProcedimento | null
@@ -71,6 +81,8 @@ export type ProcedimentoMaxAggregateOutputType = {
   concessioneId: string | null
   criticitaId: string | null
   tipologia: $Enums.TipologiaProcedimento | null
+  origineProcedimento: $Enums.OrigineProcedimento | null
+  procedimentoUfficio: boolean | null
   riferimentoNormativo: string | null
   dataAvvio: Date | null
   dataScadenzaContraddittorio: Date | null
@@ -90,6 +102,14 @@ export type ProcedimentoMaxAggregateOutputType = {
   controdeduzioniValutate: boolean | null
   motivazioneValutazione: string | null
   propostaEsitoIstruttorio: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile: boolean | null
+  statoPreavvisoRigetto: $Enums.StatoPreavvisoRigetto | null
+  dataPreavvisoRigetto: Date | null
+  termineOsservazioniPreavviso: Date | null
+  osservazioniPreavvisoRicevute: boolean | null
+  dataOsservazioniPreavviso: Date | null
+  valutazioneOsservazioniPreavviso: string | null
+  motivazioneMancatoPreavviso: string | null
   checklistContraddittorioCompleta: boolean | null
   noteChecklistContraddittorio: string | null
   stato: $Enums.StatoProcedimento | null
@@ -103,6 +123,8 @@ export type ProcedimentoCountAggregateOutputType = {
   concessioneId: number
   criticitaId: number
   tipologia: number
+  origineProcedimento: number
+  procedimentoUfficio: number
   riferimentoNormativo: number
   dataAvvio: number
   dataScadenzaContraddittorio: number
@@ -122,6 +144,14 @@ export type ProcedimentoCountAggregateOutputType = {
   controdeduzioniValutate: number
   motivazioneValutazione: number
   propostaEsitoIstruttorio: number
+  preavvisoRigettoApplicabile: number
+  statoPreavvisoRigetto: number
+  dataPreavvisoRigetto: number
+  termineOsservazioniPreavviso: number
+  osservazioniPreavvisoRicevute: number
+  dataOsservazioniPreavviso: number
+  valutazioneOsservazioniPreavviso: number
+  motivazioneMancatoPreavviso: number
   checklistContraddittorioCompleta: number
   noteChecklistContraddittorio: number
   stato: number
@@ -145,6 +175,8 @@ export type ProcedimentoMinAggregateInputType = {
   concessioneId?: true
   criticitaId?: true
   tipologia?: true
+  origineProcedimento?: true
+  procedimentoUfficio?: true
   riferimentoNormativo?: true
   dataAvvio?: true
   dataScadenzaContraddittorio?: true
@@ -164,6 +196,14 @@ export type ProcedimentoMinAggregateInputType = {
   controdeduzioniValutate?: true
   motivazioneValutazione?: true
   propostaEsitoIstruttorio?: true
+  preavvisoRigettoApplicabile?: true
+  statoPreavvisoRigetto?: true
+  dataPreavvisoRigetto?: true
+  termineOsservazioniPreavviso?: true
+  osservazioniPreavvisoRicevute?: true
+  dataOsservazioniPreavviso?: true
+  valutazioneOsservazioniPreavviso?: true
+  motivazioneMancatoPreavviso?: true
   checklistContraddittorioCompleta?: true
   noteChecklistContraddittorio?: true
   stato?: true
@@ -177,6 +217,8 @@ export type ProcedimentoMaxAggregateInputType = {
   concessioneId?: true
   criticitaId?: true
   tipologia?: true
+  origineProcedimento?: true
+  procedimentoUfficio?: true
   riferimentoNormativo?: true
   dataAvvio?: true
   dataScadenzaContraddittorio?: true
@@ -196,6 +238,14 @@ export type ProcedimentoMaxAggregateInputType = {
   controdeduzioniValutate?: true
   motivazioneValutazione?: true
   propostaEsitoIstruttorio?: true
+  preavvisoRigettoApplicabile?: true
+  statoPreavvisoRigetto?: true
+  dataPreavvisoRigetto?: true
+  termineOsservazioniPreavviso?: true
+  osservazioniPreavvisoRicevute?: true
+  dataOsservazioniPreavviso?: true
+  valutazioneOsservazioniPreavviso?: true
+  motivazioneMancatoPreavviso?: true
   checklistContraddittorioCompleta?: true
   noteChecklistContraddittorio?: true
   stato?: true
@@ -209,6 +259,8 @@ export type ProcedimentoCountAggregateInputType = {
   concessioneId?: true
   criticitaId?: true
   tipologia?: true
+  origineProcedimento?: true
+  procedimentoUfficio?: true
   riferimentoNormativo?: true
   dataAvvio?: true
   dataScadenzaContraddittorio?: true
@@ -228,6 +280,14 @@ export type ProcedimentoCountAggregateInputType = {
   controdeduzioniValutate?: true
   motivazioneValutazione?: true
   propostaEsitoIstruttorio?: true
+  preavvisoRigettoApplicabile?: true
+  statoPreavvisoRigetto?: true
+  dataPreavvisoRigetto?: true
+  termineOsservazioniPreavviso?: true
+  osservazioniPreavvisoRicevute?: true
+  dataOsservazioniPreavviso?: true
+  valutazioneOsservazioniPreavviso?: true
+  motivazioneMancatoPreavviso?: true
   checklistContraddittorioCompleta?: true
   noteChecklistContraddittorio?: true
   stato?: true
@@ -328,6 +388,8 @@ export type ProcedimentoGroupByOutputType = {
   concessioneId: string
   criticitaId: string | null
   tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento: $Enums.OrigineProcedimento
+  procedimentoUfficio: boolean
   riferimentoNormativo: string | null
   dataAvvio: Date | null
   dataScadenzaContraddittorio: Date | null
@@ -347,6 +409,14 @@ export type ProcedimentoGroupByOutputType = {
   controdeduzioniValutate: boolean
   motivazioneValutazione: string | null
   propostaEsitoIstruttorio: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile: boolean
+  statoPreavvisoRigetto: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto: Date | null
+  termineOsservazioniPreavviso: Date | null
+  osservazioniPreavvisoRicevute: boolean
+  dataOsservazioniPreavviso: Date | null
+  valutazioneOsservazioniPreavviso: string | null
+  motivazioneMancatoPreavviso: string | null
   checklistContraddittorioCompleta: boolean
   noteChecklistContraddittorio: string | null
   stato: $Enums.StatoProcedimento
@@ -383,6 +453,8 @@ export type ProcedimentoWhereInput = {
   concessioneId?: Prisma.StringFilter<"Procedimento"> | string
   criticitaId?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFilter<"Procedimento"> | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFilter<"Procedimento"> | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFilter<"Procedimento"> | boolean
   riferimentoNormativo?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   dataAvvio?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
   dataScadenzaContraddittorio?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
@@ -402,6 +474,14 @@ export type ProcedimentoWhereInput = {
   controdeduzioniValutate?: Prisma.BoolFilter<"Procedimento"> | boolean
   motivazioneValutazione?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   propostaEsitoIstruttorio?: Prisma.EnumEsitoIstruttorioProcedimentoNullableFilter<"Procedimento"> | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFilter<"Procedimento"> | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFilter<"Procedimento"> | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFilter<"Procedimento"> | boolean
+  dataOsservazioniPreavviso?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.StringNullableFilter<"Procedimento"> | string | null
+  motivazioneMancatoPreavviso?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   checklistContraddittorioCompleta?: Prisma.BoolFilter<"Procedimento"> | boolean
   noteChecklistContraddittorio?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   stato?: Prisma.EnumStatoProcedimentoFilter<"Procedimento"> | $Enums.StatoProcedimento
@@ -418,6 +498,8 @@ export type ProcedimentoOrderByWithRelationInput = {
   concessioneId?: Prisma.SortOrder
   criticitaId?: Prisma.SortOrderInput | Prisma.SortOrder
   tipologia?: Prisma.SortOrder
+  origineProcedimento?: Prisma.SortOrder
+  procedimentoUfficio?: Prisma.SortOrder
   riferimentoNormativo?: Prisma.SortOrderInput | Prisma.SortOrder
   dataAvvio?: Prisma.SortOrderInput | Prisma.SortOrder
   dataScadenzaContraddittorio?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -437,6 +519,14 @@ export type ProcedimentoOrderByWithRelationInput = {
   controdeduzioniValutate?: Prisma.SortOrder
   motivazioneValutazione?: Prisma.SortOrderInput | Prisma.SortOrder
   propostaEsitoIstruttorio?: Prisma.SortOrderInput | Prisma.SortOrder
+  preavvisoRigettoApplicabile?: Prisma.SortOrder
+  statoPreavvisoRigetto?: Prisma.SortOrder
+  dataPreavvisoRigetto?: Prisma.SortOrderInput | Prisma.SortOrder
+  termineOsservazioniPreavviso?: Prisma.SortOrderInput | Prisma.SortOrder
+  osservazioniPreavvisoRicevute?: Prisma.SortOrder
+  dataOsservazioniPreavviso?: Prisma.SortOrderInput | Prisma.SortOrder
+  valutazioneOsservazioniPreavviso?: Prisma.SortOrderInput | Prisma.SortOrder
+  motivazioneMancatoPreavviso?: Prisma.SortOrderInput | Prisma.SortOrder
   checklistContraddittorioCompleta?: Prisma.SortOrder
   noteChecklistContraddittorio?: Prisma.SortOrderInput | Prisma.SortOrder
   stato?: Prisma.SortOrder
@@ -456,6 +546,8 @@ export type ProcedimentoWhereUniqueInput = Prisma.AtLeast<{
   concessioneId?: Prisma.StringFilter<"Procedimento"> | string
   criticitaId?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFilter<"Procedimento"> | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFilter<"Procedimento"> | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFilter<"Procedimento"> | boolean
   riferimentoNormativo?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   dataAvvio?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
   dataScadenzaContraddittorio?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
@@ -475,6 +567,14 @@ export type ProcedimentoWhereUniqueInput = Prisma.AtLeast<{
   controdeduzioniValutate?: Prisma.BoolFilter<"Procedimento"> | boolean
   motivazioneValutazione?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   propostaEsitoIstruttorio?: Prisma.EnumEsitoIstruttorioProcedimentoNullableFilter<"Procedimento"> | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFilter<"Procedimento"> | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFilter<"Procedimento"> | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFilter<"Procedimento"> | boolean
+  dataOsservazioniPreavviso?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.StringNullableFilter<"Procedimento"> | string | null
+  motivazioneMancatoPreavviso?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   checklistContraddittorioCompleta?: Prisma.BoolFilter<"Procedimento"> | boolean
   noteChecklistContraddittorio?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   stato?: Prisma.EnumStatoProcedimentoFilter<"Procedimento"> | $Enums.StatoProcedimento
@@ -491,6 +591,8 @@ export type ProcedimentoOrderByWithAggregationInput = {
   concessioneId?: Prisma.SortOrder
   criticitaId?: Prisma.SortOrderInput | Prisma.SortOrder
   tipologia?: Prisma.SortOrder
+  origineProcedimento?: Prisma.SortOrder
+  procedimentoUfficio?: Prisma.SortOrder
   riferimentoNormativo?: Prisma.SortOrderInput | Prisma.SortOrder
   dataAvvio?: Prisma.SortOrderInput | Prisma.SortOrder
   dataScadenzaContraddittorio?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -510,6 +612,14 @@ export type ProcedimentoOrderByWithAggregationInput = {
   controdeduzioniValutate?: Prisma.SortOrder
   motivazioneValutazione?: Prisma.SortOrderInput | Prisma.SortOrder
   propostaEsitoIstruttorio?: Prisma.SortOrderInput | Prisma.SortOrder
+  preavvisoRigettoApplicabile?: Prisma.SortOrder
+  statoPreavvisoRigetto?: Prisma.SortOrder
+  dataPreavvisoRigetto?: Prisma.SortOrderInput | Prisma.SortOrder
+  termineOsservazioniPreavviso?: Prisma.SortOrderInput | Prisma.SortOrder
+  osservazioniPreavvisoRicevute?: Prisma.SortOrder
+  dataOsservazioniPreavviso?: Prisma.SortOrderInput | Prisma.SortOrder
+  valutazioneOsservazioniPreavviso?: Prisma.SortOrderInput | Prisma.SortOrder
+  motivazioneMancatoPreavviso?: Prisma.SortOrderInput | Prisma.SortOrder
   checklistContraddittorioCompleta?: Prisma.SortOrder
   noteChecklistContraddittorio?: Prisma.SortOrderInput | Prisma.SortOrder
   stato?: Prisma.SortOrder
@@ -531,6 +641,8 @@ export type ProcedimentoScalarWhereWithAggregatesInput = {
   concessioneId?: Prisma.StringWithAggregatesFilter<"Procedimento"> | string
   criticitaId?: Prisma.StringNullableWithAggregatesFilter<"Procedimento"> | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoWithAggregatesFilter<"Procedimento"> | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoWithAggregatesFilter<"Procedimento"> | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolWithAggregatesFilter<"Procedimento"> | boolean
   riferimentoNormativo?: Prisma.StringNullableWithAggregatesFilter<"Procedimento"> | string | null
   dataAvvio?: Prisma.DateTimeNullableWithAggregatesFilter<"Procedimento"> | Date | string | null
   dataScadenzaContraddittorio?: Prisma.DateTimeNullableWithAggregatesFilter<"Procedimento"> | Date | string | null
@@ -550,6 +662,14 @@ export type ProcedimentoScalarWhereWithAggregatesInput = {
   controdeduzioniValutate?: Prisma.BoolWithAggregatesFilter<"Procedimento"> | boolean
   motivazioneValutazione?: Prisma.StringNullableWithAggregatesFilter<"Procedimento"> | string | null
   propostaEsitoIstruttorio?: Prisma.EnumEsitoIstruttorioProcedimentoNullableWithAggregatesFilter<"Procedimento"> | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolWithAggregatesFilter<"Procedimento"> | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoWithAggregatesFilter<"Procedimento"> | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.DateTimeNullableWithAggregatesFilter<"Procedimento"> | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.DateTimeNullableWithAggregatesFilter<"Procedimento"> | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolWithAggregatesFilter<"Procedimento"> | boolean
+  dataOsservazioniPreavviso?: Prisma.DateTimeNullableWithAggregatesFilter<"Procedimento"> | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.StringNullableWithAggregatesFilter<"Procedimento"> | string | null
+  motivazioneMancatoPreavviso?: Prisma.StringNullableWithAggregatesFilter<"Procedimento"> | string | null
   checklistContraddittorioCompleta?: Prisma.BoolWithAggregatesFilter<"Procedimento"> | boolean
   noteChecklistContraddittorio?: Prisma.StringNullableWithAggregatesFilter<"Procedimento"> | string | null
   stato?: Prisma.EnumStatoProcedimentoWithAggregatesFilter<"Procedimento"> | $Enums.StatoProcedimento
@@ -561,6 +681,8 @@ export type ProcedimentoScalarWhereWithAggregatesInput = {
 export type ProcedimentoCreateInput = {
   id?: string
   tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento?: $Enums.OrigineProcedimento
+  procedimentoUfficio?: boolean
   riferimentoNormativo?: string | null
   dataAvvio?: Date | string | null
   dataScadenzaContraddittorio?: Date | string | null
@@ -580,6 +702,14 @@ export type ProcedimentoCreateInput = {
   controdeduzioniValutate?: boolean
   motivazioneValutazione?: string | null
   propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Date | string | null
+  termineOsservazioniPreavviso?: Date | string | null
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: Date | string | null
+  valutazioneOsservazioniPreavviso?: string | null
+  motivazioneMancatoPreavviso?: string | null
   checklistContraddittorioCompleta?: boolean
   noteChecklistContraddittorio?: string | null
   stato: $Enums.StatoProcedimento
@@ -596,6 +726,8 @@ export type ProcedimentoUncheckedCreateInput = {
   concessioneId: string
   criticitaId?: string | null
   tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento?: $Enums.OrigineProcedimento
+  procedimentoUfficio?: boolean
   riferimentoNormativo?: string | null
   dataAvvio?: Date | string | null
   dataScadenzaContraddittorio?: Date | string | null
@@ -615,6 +747,14 @@ export type ProcedimentoUncheckedCreateInput = {
   controdeduzioniValutate?: boolean
   motivazioneValutazione?: string | null
   propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Date | string | null
+  termineOsservazioniPreavviso?: Date | string | null
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: Date | string | null
+  valutazioneOsservazioniPreavviso?: string | null
+  motivazioneMancatoPreavviso?: string | null
   checklistContraddittorioCompleta?: boolean
   noteChecklistContraddittorio?: string | null
   stato: $Enums.StatoProcedimento
@@ -627,6 +767,8 @@ export type ProcedimentoUncheckedCreateInput = {
 export type ProcedimentoUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -646,6 +788,14 @@ export type ProcedimentoUpdateInput = {
   controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
   motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
@@ -662,6 +812,8 @@ export type ProcedimentoUncheckedUpdateInput = {
   concessioneId?: Prisma.StringFieldUpdateOperationsInput | string
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -681,6 +833,14 @@ export type ProcedimentoUncheckedUpdateInput = {
   controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
   motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
@@ -695,6 +855,8 @@ export type ProcedimentoCreateManyInput = {
   concessioneId: string
   criticitaId?: string | null
   tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento?: $Enums.OrigineProcedimento
+  procedimentoUfficio?: boolean
   riferimentoNormativo?: string | null
   dataAvvio?: Date | string | null
   dataScadenzaContraddittorio?: Date | string | null
@@ -714,6 +876,14 @@ export type ProcedimentoCreateManyInput = {
   controdeduzioniValutate?: boolean
   motivazioneValutazione?: string | null
   propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Date | string | null
+  termineOsservazioniPreavviso?: Date | string | null
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: Date | string | null
+  valutazioneOsservazioniPreavviso?: string | null
+  motivazioneMancatoPreavviso?: string | null
   checklistContraddittorioCompleta?: boolean
   noteChecklistContraddittorio?: string | null
   stato: $Enums.StatoProcedimento
@@ -725,6 +895,8 @@ export type ProcedimentoCreateManyInput = {
 export type ProcedimentoUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -744,6 +916,14 @@ export type ProcedimentoUpdateManyMutationInput = {
   controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
   motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
@@ -757,6 +937,8 @@ export type ProcedimentoUncheckedUpdateManyInput = {
   concessioneId?: Prisma.StringFieldUpdateOperationsInput | string
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -776,6 +958,14 @@ export type ProcedimentoUncheckedUpdateManyInput = {
   controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
   motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
@@ -799,6 +989,8 @@ export type ProcedimentoCountOrderByAggregateInput = {
   concessioneId?: Prisma.SortOrder
   criticitaId?: Prisma.SortOrder
   tipologia?: Prisma.SortOrder
+  origineProcedimento?: Prisma.SortOrder
+  procedimentoUfficio?: Prisma.SortOrder
   riferimentoNormativo?: Prisma.SortOrder
   dataAvvio?: Prisma.SortOrder
   dataScadenzaContraddittorio?: Prisma.SortOrder
@@ -818,6 +1010,14 @@ export type ProcedimentoCountOrderByAggregateInput = {
   controdeduzioniValutate?: Prisma.SortOrder
   motivazioneValutazione?: Prisma.SortOrder
   propostaEsitoIstruttorio?: Prisma.SortOrder
+  preavvisoRigettoApplicabile?: Prisma.SortOrder
+  statoPreavvisoRigetto?: Prisma.SortOrder
+  dataPreavvisoRigetto?: Prisma.SortOrder
+  termineOsservazioniPreavviso?: Prisma.SortOrder
+  osservazioniPreavvisoRicevute?: Prisma.SortOrder
+  dataOsservazioniPreavviso?: Prisma.SortOrder
+  valutazioneOsservazioniPreavviso?: Prisma.SortOrder
+  motivazioneMancatoPreavviso?: Prisma.SortOrder
   checklistContraddittorioCompleta?: Prisma.SortOrder
   noteChecklistContraddittorio?: Prisma.SortOrder
   stato?: Prisma.SortOrder
@@ -835,6 +1035,8 @@ export type ProcedimentoMaxOrderByAggregateInput = {
   concessioneId?: Prisma.SortOrder
   criticitaId?: Prisma.SortOrder
   tipologia?: Prisma.SortOrder
+  origineProcedimento?: Prisma.SortOrder
+  procedimentoUfficio?: Prisma.SortOrder
   riferimentoNormativo?: Prisma.SortOrder
   dataAvvio?: Prisma.SortOrder
   dataScadenzaContraddittorio?: Prisma.SortOrder
@@ -854,6 +1056,14 @@ export type ProcedimentoMaxOrderByAggregateInput = {
   controdeduzioniValutate?: Prisma.SortOrder
   motivazioneValutazione?: Prisma.SortOrder
   propostaEsitoIstruttorio?: Prisma.SortOrder
+  preavvisoRigettoApplicabile?: Prisma.SortOrder
+  statoPreavvisoRigetto?: Prisma.SortOrder
+  dataPreavvisoRigetto?: Prisma.SortOrder
+  termineOsservazioniPreavviso?: Prisma.SortOrder
+  osservazioniPreavvisoRicevute?: Prisma.SortOrder
+  dataOsservazioniPreavviso?: Prisma.SortOrder
+  valutazioneOsservazioniPreavviso?: Prisma.SortOrder
+  motivazioneMancatoPreavviso?: Prisma.SortOrder
   checklistContraddittorioCompleta?: Prisma.SortOrder
   noteChecklistContraddittorio?: Prisma.SortOrder
   stato?: Prisma.SortOrder
@@ -867,6 +1077,8 @@ export type ProcedimentoMinOrderByAggregateInput = {
   concessioneId?: Prisma.SortOrder
   criticitaId?: Prisma.SortOrder
   tipologia?: Prisma.SortOrder
+  origineProcedimento?: Prisma.SortOrder
+  procedimentoUfficio?: Prisma.SortOrder
   riferimentoNormativo?: Prisma.SortOrder
   dataAvvio?: Prisma.SortOrder
   dataScadenzaContraddittorio?: Prisma.SortOrder
@@ -886,6 +1098,14 @@ export type ProcedimentoMinOrderByAggregateInput = {
   controdeduzioniValutate?: Prisma.SortOrder
   motivazioneValutazione?: Prisma.SortOrder
   propostaEsitoIstruttorio?: Prisma.SortOrder
+  preavvisoRigettoApplicabile?: Prisma.SortOrder
+  statoPreavvisoRigetto?: Prisma.SortOrder
+  dataPreavvisoRigetto?: Prisma.SortOrder
+  termineOsservazioniPreavviso?: Prisma.SortOrder
+  osservazioniPreavvisoRicevute?: Prisma.SortOrder
+  dataOsservazioniPreavviso?: Prisma.SortOrder
+  valutazioneOsservazioniPreavviso?: Prisma.SortOrder
+  motivazioneMancatoPreavviso?: Prisma.SortOrder
   checklistContraddittorioCompleta?: Prisma.SortOrder
   noteChecklistContraddittorio?: Prisma.SortOrder
   stato?: Prisma.SortOrder
@@ -991,6 +1211,10 @@ export type EnumTipologiaProcedimentoFieldUpdateOperationsInput = {
   set?: $Enums.TipologiaProcedimento
 }
 
+export type EnumOrigineProcedimentoFieldUpdateOperationsInput = {
+  set?: $Enums.OrigineProcedimento
+}
+
 export type NullableIntFieldUpdateOperationsInput = {
   set?: number | null
   increment?: number
@@ -1001,6 +1225,10 @@ export type NullableIntFieldUpdateOperationsInput = {
 
 export type NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput = {
   set?: $Enums.EsitoIstruttorioProcedimento | null
+}
+
+export type EnumStatoPreavvisoRigettoFieldUpdateOperationsInput = {
+  set?: $Enums.StatoPreavvisoRigetto
 }
 
 export type EnumStatoProcedimentoFieldUpdateOperationsInput = {
@@ -1026,6 +1254,8 @@ export type ProcedimentoUpdateOneWithoutNormaImpattiNestedInput = {
 export type ProcedimentoCreateWithoutConcessioneInput = {
   id?: string
   tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento?: $Enums.OrigineProcedimento
+  procedimentoUfficio?: boolean
   riferimentoNormativo?: string | null
   dataAvvio?: Date | string | null
   dataScadenzaContraddittorio?: Date | string | null
@@ -1045,6 +1275,14 @@ export type ProcedimentoCreateWithoutConcessioneInput = {
   controdeduzioniValutate?: boolean
   motivazioneValutazione?: string | null
   propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Date | string | null
+  termineOsservazioniPreavviso?: Date | string | null
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: Date | string | null
+  valutazioneOsservazioniPreavviso?: string | null
+  motivazioneMancatoPreavviso?: string | null
   checklistContraddittorioCompleta?: boolean
   noteChecklistContraddittorio?: string | null
   stato: $Enums.StatoProcedimento
@@ -1059,6 +1297,8 @@ export type ProcedimentoUncheckedCreateWithoutConcessioneInput = {
   id?: string
   criticitaId?: string | null
   tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento?: $Enums.OrigineProcedimento
+  procedimentoUfficio?: boolean
   riferimentoNormativo?: string | null
   dataAvvio?: Date | string | null
   dataScadenzaContraddittorio?: Date | string | null
@@ -1078,6 +1318,14 @@ export type ProcedimentoUncheckedCreateWithoutConcessioneInput = {
   controdeduzioniValutate?: boolean
   motivazioneValutazione?: string | null
   propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Date | string | null
+  termineOsservazioniPreavviso?: Date | string | null
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: Date | string | null
+  valutazioneOsservazioniPreavviso?: string | null
+  motivazioneMancatoPreavviso?: string | null
   checklistContraddittorioCompleta?: boolean
   noteChecklistContraddittorio?: string | null
   stato: $Enums.StatoProcedimento
@@ -1121,6 +1369,8 @@ export type ProcedimentoScalarWhereInput = {
   concessioneId?: Prisma.StringFilter<"Procedimento"> | string
   criticitaId?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFilter<"Procedimento"> | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFilter<"Procedimento"> | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFilter<"Procedimento"> | boolean
   riferimentoNormativo?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   dataAvvio?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
   dataScadenzaContraddittorio?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
@@ -1140,6 +1390,14 @@ export type ProcedimentoScalarWhereInput = {
   controdeduzioniValutate?: Prisma.BoolFilter<"Procedimento"> | boolean
   motivazioneValutazione?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   propostaEsitoIstruttorio?: Prisma.EnumEsitoIstruttorioProcedimentoNullableFilter<"Procedimento"> | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFilter<"Procedimento"> | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFilter<"Procedimento"> | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFilter<"Procedimento"> | boolean
+  dataOsservazioniPreavviso?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.StringNullableFilter<"Procedimento"> | string | null
+  motivazioneMancatoPreavviso?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   checklistContraddittorioCompleta?: Prisma.BoolFilter<"Procedimento"> | boolean
   noteChecklistContraddittorio?: Prisma.StringNullableFilter<"Procedimento"> | string | null
   stato?: Prisma.EnumStatoProcedimentoFilter<"Procedimento"> | $Enums.StatoProcedimento
@@ -1151,6 +1409,8 @@ export type ProcedimentoScalarWhereInput = {
 export type ProcedimentoCreateWithoutCriticitaInput = {
   id?: string
   tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento?: $Enums.OrigineProcedimento
+  procedimentoUfficio?: boolean
   riferimentoNormativo?: string | null
   dataAvvio?: Date | string | null
   dataScadenzaContraddittorio?: Date | string | null
@@ -1170,6 +1430,14 @@ export type ProcedimentoCreateWithoutCriticitaInput = {
   controdeduzioniValutate?: boolean
   motivazioneValutazione?: string | null
   propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Date | string | null
+  termineOsservazioniPreavviso?: Date | string | null
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: Date | string | null
+  valutazioneOsservazioniPreavviso?: string | null
+  motivazioneMancatoPreavviso?: string | null
   checklistContraddittorioCompleta?: boolean
   noteChecklistContraddittorio?: string | null
   stato: $Enums.StatoProcedimento
@@ -1184,6 +1452,8 @@ export type ProcedimentoUncheckedCreateWithoutCriticitaInput = {
   id?: string
   concessioneId: string
   tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento?: $Enums.OrigineProcedimento
+  procedimentoUfficio?: boolean
   riferimentoNormativo?: string | null
   dataAvvio?: Date | string | null
   dataScadenzaContraddittorio?: Date | string | null
@@ -1203,6 +1473,14 @@ export type ProcedimentoUncheckedCreateWithoutCriticitaInput = {
   controdeduzioniValutate?: boolean
   motivazioneValutazione?: string | null
   propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Date | string | null
+  termineOsservazioniPreavviso?: Date | string | null
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: Date | string | null
+  valutazioneOsservazioniPreavviso?: string | null
+  motivazioneMancatoPreavviso?: string | null
   checklistContraddittorioCompleta?: boolean
   noteChecklistContraddittorio?: string | null
   stato: $Enums.StatoProcedimento
@@ -1241,6 +1519,8 @@ export type ProcedimentoUpdateManyWithWhereWithoutCriticitaInput = {
 export type ProcedimentoCreateWithoutNormaImpattiInput = {
   id?: string
   tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento?: $Enums.OrigineProcedimento
+  procedimentoUfficio?: boolean
   riferimentoNormativo?: string | null
   dataAvvio?: Date | string | null
   dataScadenzaContraddittorio?: Date | string | null
@@ -1260,6 +1540,14 @@ export type ProcedimentoCreateWithoutNormaImpattiInput = {
   controdeduzioniValutate?: boolean
   motivazioneValutazione?: string | null
   propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Date | string | null
+  termineOsservazioniPreavviso?: Date | string | null
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: Date | string | null
+  valutazioneOsservazioniPreavviso?: string | null
+  motivazioneMancatoPreavviso?: string | null
   checklistContraddittorioCompleta?: boolean
   noteChecklistContraddittorio?: string | null
   stato: $Enums.StatoProcedimento
@@ -1275,6 +1563,8 @@ export type ProcedimentoUncheckedCreateWithoutNormaImpattiInput = {
   concessioneId: string
   criticitaId?: string | null
   tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento?: $Enums.OrigineProcedimento
+  procedimentoUfficio?: boolean
   riferimentoNormativo?: string | null
   dataAvvio?: Date | string | null
   dataScadenzaContraddittorio?: Date | string | null
@@ -1294,6 +1584,14 @@ export type ProcedimentoUncheckedCreateWithoutNormaImpattiInput = {
   controdeduzioniValutate?: boolean
   motivazioneValutazione?: string | null
   propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Date | string | null
+  termineOsservazioniPreavviso?: Date | string | null
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: Date | string | null
+  valutazioneOsservazioniPreavviso?: string | null
+  motivazioneMancatoPreavviso?: string | null
   checklistContraddittorioCompleta?: boolean
   noteChecklistContraddittorio?: string | null
   stato: $Enums.StatoProcedimento
@@ -1321,6 +1619,8 @@ export type ProcedimentoUpdateToOneWithWhereWithoutNormaImpattiInput = {
 export type ProcedimentoUpdateWithoutNormaImpattiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1340,6 +1640,14 @@ export type ProcedimentoUpdateWithoutNormaImpattiInput = {
   controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
   motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
@@ -1355,6 +1663,8 @@ export type ProcedimentoUncheckedUpdateWithoutNormaImpattiInput = {
   concessioneId?: Prisma.StringFieldUpdateOperationsInput | string
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1374,6 +1684,14 @@ export type ProcedimentoUncheckedUpdateWithoutNormaImpattiInput = {
   controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
   motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
@@ -1386,6 +1704,8 @@ export type ProcedimentoCreateManyConcessioneInput = {
   id?: string
   criticitaId?: string | null
   tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento?: $Enums.OrigineProcedimento
+  procedimentoUfficio?: boolean
   riferimentoNormativo?: string | null
   dataAvvio?: Date | string | null
   dataScadenzaContraddittorio?: Date | string | null
@@ -1405,6 +1725,14 @@ export type ProcedimentoCreateManyConcessioneInput = {
   controdeduzioniValutate?: boolean
   motivazioneValutazione?: string | null
   propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Date | string | null
+  termineOsservazioniPreavviso?: Date | string | null
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: Date | string | null
+  valutazioneOsservazioniPreavviso?: string | null
+  motivazioneMancatoPreavviso?: string | null
   checklistContraddittorioCompleta?: boolean
   noteChecklistContraddittorio?: string | null
   stato: $Enums.StatoProcedimento
@@ -1416,6 +1744,8 @@ export type ProcedimentoCreateManyConcessioneInput = {
 export type ProcedimentoUpdateWithoutConcessioneInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1435,6 +1765,14 @@ export type ProcedimentoUpdateWithoutConcessioneInput = {
   controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
   motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
@@ -1449,6 +1787,8 @@ export type ProcedimentoUncheckedUpdateWithoutConcessioneInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1468,6 +1808,14 @@ export type ProcedimentoUncheckedUpdateWithoutConcessioneInput = {
   controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
   motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
@@ -1481,6 +1829,8 @@ export type ProcedimentoUncheckedUpdateManyWithoutConcessioneInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1500,6 +1850,14 @@ export type ProcedimentoUncheckedUpdateManyWithoutConcessioneInput = {
   controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
   motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
@@ -1512,6 +1870,8 @@ export type ProcedimentoCreateManyCriticitaInput = {
   id?: string
   concessioneId: string
   tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento?: $Enums.OrigineProcedimento
+  procedimentoUfficio?: boolean
   riferimentoNormativo?: string | null
   dataAvvio?: Date | string | null
   dataScadenzaContraddittorio?: Date | string | null
@@ -1531,6 +1891,14 @@ export type ProcedimentoCreateManyCriticitaInput = {
   controdeduzioniValutate?: boolean
   motivazioneValutazione?: string | null
   propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Date | string | null
+  termineOsservazioniPreavviso?: Date | string | null
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: Date | string | null
+  valutazioneOsservazioniPreavviso?: string | null
+  motivazioneMancatoPreavviso?: string | null
   checklistContraddittorioCompleta?: boolean
   noteChecklistContraddittorio?: string | null
   stato: $Enums.StatoProcedimento
@@ -1542,6 +1910,8 @@ export type ProcedimentoCreateManyCriticitaInput = {
 export type ProcedimentoUpdateWithoutCriticitaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1561,6 +1931,14 @@ export type ProcedimentoUpdateWithoutCriticitaInput = {
   controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
   motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
@@ -1575,6 +1953,8 @@ export type ProcedimentoUncheckedUpdateWithoutCriticitaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1594,6 +1974,14 @@ export type ProcedimentoUncheckedUpdateWithoutCriticitaInput = {
   controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
   motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
@@ -1607,6 +1995,8 @@ export type ProcedimentoUncheckedUpdateManyWithoutCriticitaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.StringFieldUpdateOperationsInput | string
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
   riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1626,6 +2016,14 @@ export type ProcedimentoUncheckedUpdateManyWithoutCriticitaInput = {
   controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
   motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
   noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
@@ -1670,6 +2068,8 @@ export type ProcedimentoSelect<ExtArgs extends runtime.Types.Extensions.Internal
   concessioneId?: boolean
   criticitaId?: boolean
   tipologia?: boolean
+  origineProcedimento?: boolean
+  procedimentoUfficio?: boolean
   riferimentoNormativo?: boolean
   dataAvvio?: boolean
   dataScadenzaContraddittorio?: boolean
@@ -1689,6 +2089,14 @@ export type ProcedimentoSelect<ExtArgs extends runtime.Types.Extensions.Internal
   controdeduzioniValutate?: boolean
   motivazioneValutazione?: boolean
   propostaEsitoIstruttorio?: boolean
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: boolean
+  dataPreavvisoRigetto?: boolean
+  termineOsservazioniPreavviso?: boolean
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: boolean
+  valutazioneOsservazioniPreavviso?: boolean
+  motivazioneMancatoPreavviso?: boolean
   checklistContraddittorioCompleta?: boolean
   noteChecklistContraddittorio?: boolean
   stato?: boolean
@@ -1706,6 +2114,8 @@ export type ProcedimentoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   concessioneId?: boolean
   criticitaId?: boolean
   tipologia?: boolean
+  origineProcedimento?: boolean
+  procedimentoUfficio?: boolean
   riferimentoNormativo?: boolean
   dataAvvio?: boolean
   dataScadenzaContraddittorio?: boolean
@@ -1725,6 +2135,14 @@ export type ProcedimentoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   controdeduzioniValutate?: boolean
   motivazioneValutazione?: boolean
   propostaEsitoIstruttorio?: boolean
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: boolean
+  dataPreavvisoRigetto?: boolean
+  termineOsservazioniPreavviso?: boolean
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: boolean
+  valutazioneOsservazioniPreavviso?: boolean
+  motivazioneMancatoPreavviso?: boolean
   checklistContraddittorioCompleta?: boolean
   noteChecklistContraddittorio?: boolean
   stato?: boolean
@@ -1740,6 +2158,8 @@ export type ProcedimentoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   concessioneId?: boolean
   criticitaId?: boolean
   tipologia?: boolean
+  origineProcedimento?: boolean
+  procedimentoUfficio?: boolean
   riferimentoNormativo?: boolean
   dataAvvio?: boolean
   dataScadenzaContraddittorio?: boolean
@@ -1759,6 +2179,14 @@ export type ProcedimentoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   controdeduzioniValutate?: boolean
   motivazioneValutazione?: boolean
   propostaEsitoIstruttorio?: boolean
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: boolean
+  dataPreavvisoRigetto?: boolean
+  termineOsservazioniPreavviso?: boolean
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: boolean
+  valutazioneOsservazioniPreavviso?: boolean
+  motivazioneMancatoPreavviso?: boolean
   checklistContraddittorioCompleta?: boolean
   noteChecklistContraddittorio?: boolean
   stato?: boolean
@@ -1774,6 +2202,8 @@ export type ProcedimentoSelectScalar = {
   concessioneId?: boolean
   criticitaId?: boolean
   tipologia?: boolean
+  origineProcedimento?: boolean
+  procedimentoUfficio?: boolean
   riferimentoNormativo?: boolean
   dataAvvio?: boolean
   dataScadenzaContraddittorio?: boolean
@@ -1793,6 +2223,14 @@ export type ProcedimentoSelectScalar = {
   controdeduzioniValutate?: boolean
   motivazioneValutazione?: boolean
   propostaEsitoIstruttorio?: boolean
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: boolean
+  dataPreavvisoRigetto?: boolean
+  termineOsservazioniPreavviso?: boolean
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: boolean
+  valutazioneOsservazioniPreavviso?: boolean
+  motivazioneMancatoPreavviso?: boolean
   checklistContraddittorioCompleta?: boolean
   noteChecklistContraddittorio?: boolean
   stato?: boolean
@@ -1801,7 +2239,7 @@ export type ProcedimentoSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ProcedimentoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "concessioneId" | "criticitaId" | "tipologia" | "riferimentoNormativo" | "dataAvvio" | "dataScadenzaContraddittorio" | "dataProvvedimentoFinale" | "comunicazioneAvvioInviata" | "dataComunicazioneAvvio" | "termineMemorieGiorni" | "termineMemorieScadenza" | "memorieRicevute" | "dataRicezioneMemorie" | "audizioneRichiesta" | "audizioneSvolta" | "dataAudizione" | "sopralluogoIstruttorioSvolto" | "contestazioneFormaleInviata" | "dataContestazioneFormale" | "controdeduzioniValutate" | "motivazioneValutazione" | "propostaEsitoIstruttorio" | "checklistContraddittorioCompleta" | "noteChecklistContraddittorio" | "stato" | "noteIstruttorie" | "createdAt" | "updatedAt", ExtArgs["result"]["procedimento"]>
+export type ProcedimentoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "concessioneId" | "criticitaId" | "tipologia" | "origineProcedimento" | "procedimentoUfficio" | "riferimentoNormativo" | "dataAvvio" | "dataScadenzaContraddittorio" | "dataProvvedimentoFinale" | "comunicazioneAvvioInviata" | "dataComunicazioneAvvio" | "termineMemorieGiorni" | "termineMemorieScadenza" | "memorieRicevute" | "dataRicezioneMemorie" | "audizioneRichiesta" | "audizioneSvolta" | "dataAudizione" | "sopralluogoIstruttorioSvolto" | "contestazioneFormaleInviata" | "dataContestazioneFormale" | "controdeduzioniValutate" | "motivazioneValutazione" | "propostaEsitoIstruttorio" | "preavvisoRigettoApplicabile" | "statoPreavvisoRigetto" | "dataPreavvisoRigetto" | "termineOsservazioniPreavviso" | "osservazioniPreavvisoRicevute" | "dataOsservazioniPreavviso" | "valutazioneOsservazioniPreavviso" | "motivazioneMancatoPreavviso" | "checklistContraddittorioCompleta" | "noteChecklistContraddittorio" | "stato" | "noteIstruttorie" | "createdAt" | "updatedAt", ExtArgs["result"]["procedimento"]>
 export type ProcedimentoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   concessione?: boolean | Prisma.ConcessioneDefaultArgs<ExtArgs>
   criticita?: boolean | Prisma.Procedimento$criticitaArgs<ExtArgs>
@@ -1829,6 +2267,8 @@ export type $ProcedimentoPayload<ExtArgs extends runtime.Types.Extensions.Intern
     concessioneId: string
     criticitaId: string | null
     tipologia: $Enums.TipologiaProcedimento
+    origineProcedimento: $Enums.OrigineProcedimento
+    procedimentoUfficio: boolean
     riferimentoNormativo: string | null
     dataAvvio: Date | null
     dataScadenzaContraddittorio: Date | null
@@ -1848,6 +2288,14 @@ export type $ProcedimentoPayload<ExtArgs extends runtime.Types.Extensions.Intern
     controdeduzioniValutate: boolean
     motivazioneValutazione: string | null
     propostaEsitoIstruttorio: $Enums.EsitoIstruttorioProcedimento | null
+    preavvisoRigettoApplicabile: boolean
+    statoPreavvisoRigetto: $Enums.StatoPreavvisoRigetto
+    dataPreavvisoRigetto: Date | null
+    termineOsservazioniPreavviso: Date | null
+    osservazioniPreavvisoRicevute: boolean
+    dataOsservazioniPreavviso: Date | null
+    valutazioneOsservazioniPreavviso: string | null
+    motivazioneMancatoPreavviso: string | null
     checklistContraddittorioCompleta: boolean
     noteChecklistContraddittorio: string | null
     stato: $Enums.StatoProcedimento
@@ -2284,6 +2732,8 @@ export interface ProcedimentoFieldRefs {
   readonly concessioneId: Prisma.FieldRef<"Procedimento", 'String'>
   readonly criticitaId: Prisma.FieldRef<"Procedimento", 'String'>
   readonly tipologia: Prisma.FieldRef<"Procedimento", 'TipologiaProcedimento'>
+  readonly origineProcedimento: Prisma.FieldRef<"Procedimento", 'OrigineProcedimento'>
+  readonly procedimentoUfficio: Prisma.FieldRef<"Procedimento", 'Boolean'>
   readonly riferimentoNormativo: Prisma.FieldRef<"Procedimento", 'String'>
   readonly dataAvvio: Prisma.FieldRef<"Procedimento", 'DateTime'>
   readonly dataScadenzaContraddittorio: Prisma.FieldRef<"Procedimento", 'DateTime'>
@@ -2303,6 +2753,14 @@ export interface ProcedimentoFieldRefs {
   readonly controdeduzioniValutate: Prisma.FieldRef<"Procedimento", 'Boolean'>
   readonly motivazioneValutazione: Prisma.FieldRef<"Procedimento", 'String'>
   readonly propostaEsitoIstruttorio: Prisma.FieldRef<"Procedimento", 'EsitoIstruttorioProcedimento'>
+  readonly preavvisoRigettoApplicabile: Prisma.FieldRef<"Procedimento", 'Boolean'>
+  readonly statoPreavvisoRigetto: Prisma.FieldRef<"Procedimento", 'StatoPreavvisoRigetto'>
+  readonly dataPreavvisoRigetto: Prisma.FieldRef<"Procedimento", 'DateTime'>
+  readonly termineOsservazioniPreavviso: Prisma.FieldRef<"Procedimento", 'DateTime'>
+  readonly osservazioniPreavvisoRicevute: Prisma.FieldRef<"Procedimento", 'Boolean'>
+  readonly dataOsservazioniPreavviso: Prisma.FieldRef<"Procedimento", 'DateTime'>
+  readonly valutazioneOsservazioniPreavviso: Prisma.FieldRef<"Procedimento", 'String'>
+  readonly motivazioneMancatoPreavviso: Prisma.FieldRef<"Procedimento", 'String'>
   readonly checklistContraddittorioCompleta: Prisma.FieldRef<"Procedimento", 'Boolean'>
   readonly noteChecklistContraddittorio: Prisma.FieldRef<"Procedimento", 'String'>
   readonly stato: Prisma.FieldRef<"Procedimento", 'StatoProcedimento'>
