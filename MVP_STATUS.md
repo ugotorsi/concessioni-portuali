@@ -52,6 +52,21 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Audit esterno ricevuto dopo completamento stream #1-#8: `docs/EXTERNAL_AI_REVIEW_PHASE_1_COMPLETED.md`
 - Esito sintetico: go demo con perimetro controllato, no-go production fino a chiusura gap bloccanti.
 
+## Phase 2 avviata
+- Issue #11: Add CI/CD baseline with GitHub Actions.
+- Workflow CI introdotto in `.github/workflows/ci.yml` con job separati:
+	- `unit-build-check`
+	- `e2e` con servizio PostgreSQL.
+
+Copertura baseline CI:
+- install dipendenze;
+- Prisma generate;
+- unit test;
+- build;
+- check;
+- E2E Playwright con seed DB;
+- upload artifact report Playwright in caso di failure.
+
 ## Anomalie residue
 - Rate limiting non distribuito (in-memory, non adatto a multi-istanza production)
 - Hardening avanzato (WAF/CSP completa) non ancora implementato
@@ -62,6 +77,9 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - La checklist procedimentale non e decisore automatico e richiede valutazione giuridica caso per caso
 - Draft privacy non equivalgono ad approvazione formale DPIA/compliance
 - Nomine privacy, retention ufficiale, data breach workflow e gestione diritti interessati da formalizzare con ente
+- Nessun deploy automatico staging/production ancora configurato
+- Nessun security scan avanzato CI (SAST/dependency audit gating)
+- Nessun coverage gate obbligatorio in pipeline
 
 ## Prossimi step
 1. Estendere progressivamente i test su export/report PDF e procedure critiche

@@ -108,3 +108,8 @@ Il punto di forza è la catena funzionale integrata tra criticità, art. 47, pro
 ## 13. Decisione finale
 - Go demo: Sì, con perimetro dichiarato e senza claim di compliance/production readiness.
 - No-go production: Sì, finché non sono chiusi i gap bloccanti su security, compliance e governance documentale.
+
+## 14. Stato presa in carico raccomandazioni
+- Raccomandazione CI/CD presa in carico come prima issue Phase 2.
+- Issue di riferimento: #11 Add CI/CD baseline with GitHub Actions.
+- Baseline workflow introdotta in `.github/workflows/ci.yml` (senza deploy automatico in questa fase).

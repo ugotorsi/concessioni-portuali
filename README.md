@@ -40,6 +40,25 @@ Comandi principali:
 - `npm run build`
 - `npm run check`
 
+## CI/CD baseline (Phase 2)
+Pipeline GitHub Actions disponibile in `.github/workflows/ci.yml`.
+
+Copertura CI su push e pull request verso main:
+- install dipendenze con `npm ci`;
+- generazione Prisma client;
+- test unit (`npm run test`);
+- build (`npm run build`);
+- check (`npm run check`);
+- E2E Playwright (`npm run test:e2e`) con servizio PostgreSQL dedicato in workflow.
+
+In caso di failure E2E, la pipeline carica artifact:
+- `playwright-report/`
+- `test-results/`
+
+Perimetro attuale:
+- baseline CI presente;
+- nessun deploy automatico staging/production in questa fase.
+
 ## Baseline test automatici (Issue #5)
 Prerequisiti E2E:
 - `docker compose up -d`
