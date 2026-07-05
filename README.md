@@ -40,6 +40,22 @@ Comandi principali:
 - `npm run build`
 - `npm run check`
 
+## Cloud demo (pilot preview, non-production)
+Stato: previsto/preparato per deploy demo cloud, senza sostituire l ambiente locale Docker.
+
+Perimetro:
+- ambiente cloud dimostrativo per presentazioni istituzionali;
+- dati demo non reali;
+- no claim di produzione.
+
+Checklist anti-figuraccia e procedura completa:
+- `docs/CLOUD_DEMO_DEPLOYMENT.md`
+
+Note operative:
+- mantenere Docker locale come fallback;
+- non usare `localhost` nelle env cloud;
+- configurare `NEXTAUTH_URL` e `NEXTAUTH_SECRET` in modo esplicito in cloud.
+
 ## CI/CD baseline (Phase 2)
 Pipeline GitHub Actions disponibile in `.github/workflows/ci.yml`.
 

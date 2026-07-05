@@ -16,6 +16,8 @@
     "test:all": "npm run test && npm run test:e2e",
     "ci": "npm run test && npm run build && npm run check",
     "ci:e2e": "npm run db:push && npm run db:seed && npm run test:e2e",
+    "cloud:check": "npm run test && npm run build && npm run check",
+    "cloud:prepare-db": "npm run db:push && npm run db:seed",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
     "db:generate": "prisma generate",

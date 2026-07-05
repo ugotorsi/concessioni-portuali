@@ -83,6 +83,18 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 	- `unit-build-check`
 	- `e2e` con servizio PostgreSQL.
 
+## Cloud demo
+- Stato: previsto/preparato (pilot preview), non production.
+- Architettura target: Next.js su Vercel + PostgreSQL gestito + seed demo.
+- Obiettivo: presentazioni esterne senza dipendenza da avvio locale Docker/terminale.
+- Vincolo: nessun dato reale o riservato nel database demo cloud.
+- Checklist anti-figuraccia, piano B e procedura deploy documentati in `docs/CLOUD_DEMO_DEPLOYMENT.md`.
+
+Presidi comunicativi:
+- non presentare come produzione;
+- non presentare la AI come decisore automatico;
+- mantenere fallback demo locale e materiale statico (PDF/screenshot/video).
+
 Copertura baseline CI:
 - install dipendenze;
 - Prisma generate;
