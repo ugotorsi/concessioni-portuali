@@ -92,6 +92,9 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Dominio demo verificato: `https://concessioni-portuali-demo.vercel.app`.
 - DB cloud inizializzato: `db:push` allineato e `db:seed` completato su PostgreSQL gestito.
 - Rotte cloud verificate (reachability): `/`, `/login`, `/demo-guidata`, `/demo-scenari`, `/documenti`, `/mappa`, `/report`.
+- Diagnostica login cloud completata (2026-07-05): utenti demo presenti nel DB target, hash password valorizzati, account non bloccati.
+- Correzione cloud eseguita: `DATABASE_URL` Vercel riallineata al DB seedato (Production+Preview), `NEXTAUTH_URL` riallineata al dominio demo e redeploy production completato.
+- Verifica funzionale post-fix: login admin OK, login viewer OK, demo guidata OK (voce AI + pausa/riprendi), accesso viewer a `/demo-guidata` OK.
 
 Presidi comunicativi:
 - non presentare come produzione;
