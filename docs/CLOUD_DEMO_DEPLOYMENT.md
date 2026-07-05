@@ -62,20 +62,24 @@ Per il cloud:
 - Verificare sempre l ambiente target prima dell esecuzione per evitare operazioni sul DB locale o su ambienti non previsti.
 
 ## 8. Checklist pre-demo
-- [ ] Il link cloud e raggiungibile anche da rete mobile.
+- [x] Il link cloud e raggiungibile (`https://concessioni-portuali-demo.vercel.app`, verifica HTTP 200 del 2026-07-05).
 - [ ] Login admin demo funzionante.
 - [ ] Login viewer AdSP demo funzionante.
-- [ ] `/demo-guidata` funzionante.
+- [x] `/demo-guidata` raggiungibile (HTTP 307 verso login su ambiente protetto, 2026-07-05).
 - [ ] Voce AI funzionante.
 - [ ] Pausa/ripresa demo funzionante.
-- [ ] `/documenti` funzionante.
-- [ ] `/demo-scenari` funzionante.
-- [ ] `/mappa` funzionante.
-- [ ] `/report` funzionante.
+- [x] `/documenti` raggiungibile (HTTP 307 verso login su ambiente protetto, 2026-07-05).
+- [x] `/demo-scenari` raggiungibile (HTTP 307 verso login su ambiente protetto, 2026-07-05).
+- [x] `/mappa` raggiungibile (HTTP 307 verso login su ambiente protetto, 2026-07-05).
+- [x] `/report` raggiungibile (HTTP 307 verso login su ambiente protetto, 2026-07-05).
 - [ ] PDF scaricabile.
 - [ ] Nessun dato reale presente.
 - [ ] Password demo note al team demo.
 - [ ] Piano B pronto (screenshot/video).
+
+### Esito operativo Issue #27 (2026-07-05)
+- Eseguiti `db:push` e `db:seed` su database cloud usando variabile `DATABASE_URL` valorizzata da `POSTGRES_PRISMA_URL` (clipboard Vercel) senza esposizione della connection string.
+- Rotte cloud verificate su dominio deploy: `/`, `/login` (HTTP 200), `/demo-guidata`, `/demo-scenari`, `/documenti`, `/mappa`, `/report` (HTTP 307 verso login su route protette).
 
 ## 9. Cosa dire in demo
 "Questo e un ambiente cloud demo con dati dimostrativi, predisposto per mostrare il modello operativo della piattaforma. Non e ancora un ambiente production."

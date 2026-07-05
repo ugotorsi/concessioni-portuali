@@ -84,11 +84,14 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 	- `e2e` con servizio PostgreSQL.
 
 ## Cloud demo
-- Stato: previsto/preparato (pilot preview), non production.
+- Stato: primo deploy cloud completato (Issue #27), non production.
 - Architettura target: Next.js su Vercel + PostgreSQL gestito + seed demo.
 - Obiettivo: presentazioni esterne senza dipendenza da avvio locale Docker/terminale.
 - Vincolo: nessun dato reale o riservato nel database demo cloud.
 - Checklist anti-figuraccia, piano B e procedura deploy documentati in `docs/CLOUD_DEMO_DEPLOYMENT.md`.
+- Dominio demo verificato: `https://concessioni-portuali-demo.vercel.app`.
+- DB cloud inizializzato: `db:push` allineato e `db:seed` completato su PostgreSQL gestito.
+- Rotte cloud verificate (reachability): `/`, `/login`, `/demo-guidata`, `/demo-scenari`, `/documenti`, `/mappa`, `/report`.
 
 Presidi comunicativi:
 - non presentare come produzione;

@@ -15,5 +15,8 @@ tmp/
 temp/
 .local-storage/
 
+.vercel
+.env*
+
 # Allow sharing example env file
 !.env.example
