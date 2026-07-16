@@ -614,9 +614,20 @@ model Documento {
   mimeType             String?
   dimensioneBytes      Int?
   checksumSha256       String?
+  sha256               String?
   url                  String?
   storagePath          String?
+  storageKey           String?
+  storageProvider      String?
+  storageBucket        String?
+  publicUrl            String?
   nomeStorage          String?
+  originalName         String?
+  sizeBytes            Int?
+  documentType         String?
+  documentDate         DateTime?
+  source               String?
+  status               String?
   dataDocumento        DateTime?
   descrizione          String?
   uploadedByUserId     String?

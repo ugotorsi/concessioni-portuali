@@ -28,10 +28,12 @@ export type AggregateDocumento = {
 
 export type DocumentoAvgAggregateOutputType = {
   dimensioneBytes: number | null
+  sizeBytes: number | null
 }
 
 export type DocumentoSumAggregateOutputType = {
   dimensioneBytes: number | null
+  sizeBytes: number | null
 }
 
 export type DocumentoMinAggregateOutputType = {
@@ -52,9 +54,20 @@ export type DocumentoMinAggregateOutputType = {
   mimeType: string | null
   dimensioneBytes: number | null
   checksumSha256: string | null
+  sha256: string | null
   url: string | null
   storagePath: string | null
+  storageKey: string | null
+  storageProvider: string | null
+  storageBucket: string | null
+  publicUrl: string | null
   nomeStorage: string | null
+  originalName: string | null
+  sizeBytes: number | null
+  documentType: string | null
+  documentDate: Date | null
+  source: string | null
+  status: string | null
   dataDocumento: Date | null
   descrizione: string | null
   uploadedByUserId: string | null
@@ -89,9 +102,20 @@ export type DocumentoMaxAggregateOutputType = {
   mimeType: string | null
   dimensioneBytes: number | null
   checksumSha256: string | null
+  sha256: string | null
   url: string | null
   storagePath: string | null
+  storageKey: string | null
+  storageProvider: string | null
+  storageBucket: string | null
+  publicUrl: string | null
   nomeStorage: string | null
+  originalName: string | null
+  sizeBytes: number | null
+  documentType: string | null
+  documentDate: Date | null
+  source: string | null
+  status: string | null
   dataDocumento: Date | null
   descrizione: string | null
   uploadedByUserId: string | null
@@ -126,9 +150,20 @@ export type DocumentoCountAggregateOutputType = {
   mimeType: number
   dimensioneBytes: number
   checksumSha256: number
+  sha256: number
   url: number
   storagePath: number
+  storageKey: number
+  storageProvider: number
+  storageBucket: number
+  publicUrl: number
   nomeStorage: number
+  originalName: number
+  sizeBytes: number
+  documentType: number
+  documentDate: number
+  source: number
+  status: number
   dataDocumento: number
   descrizione: number
   uploadedByUserId: number
@@ -149,10 +184,12 @@ export type DocumentoCountAggregateOutputType = {
 
 export type DocumentoAvgAggregateInputType = {
   dimensioneBytes?: true
+  sizeBytes?: true
 }
 
 export type DocumentoSumAggregateInputType = {
   dimensioneBytes?: true
+  sizeBytes?: true
 }
 
 export type DocumentoMinAggregateInputType = {
@@ -173,9 +210,20 @@ export type DocumentoMinAggregateInputType = {
   mimeType?: true
   dimensioneBytes?: true
   checksumSha256?: true
+  sha256?: true
   url?: true
   storagePath?: true
+  storageKey?: true
+  storageProvider?: true
+  storageBucket?: true
+  publicUrl?: true
   nomeStorage?: true
+  originalName?: true
+  sizeBytes?: true
+  documentType?: true
+  documentDate?: true
+  source?: true
+  status?: true
   dataDocumento?: true
   descrizione?: true
   uploadedByUserId?: true
@@ -210,9 +258,20 @@ export type DocumentoMaxAggregateInputType = {
   mimeType?: true
   dimensioneBytes?: true
   checksumSha256?: true
+  sha256?: true
   url?: true
   storagePath?: true
+  storageKey?: true
+  storageProvider?: true
+  storageBucket?: true
+  publicUrl?: true
   nomeStorage?: true
+  originalName?: true
+  sizeBytes?: true
+  documentType?: true
+  documentDate?: true
+  source?: true
+  status?: true
   dataDocumento?: true
   descrizione?: true
   uploadedByUserId?: true
@@ -247,9 +306,20 @@ export type DocumentoCountAggregateInputType = {
   mimeType?: true
   dimensioneBytes?: true
   checksumSha256?: true
+  sha256?: true
   url?: true
   storagePath?: true
+  storageKey?: true
+  storageProvider?: true
+  storageBucket?: true
+  publicUrl?: true
   nomeStorage?: true
+  originalName?: true
+  sizeBytes?: true
+  documentType?: true
+  documentDate?: true
+  source?: true
+  status?: true
   dataDocumento?: true
   descrizione?: true
   uploadedByUserId?: true
@@ -371,9 +441,20 @@ export type DocumentoGroupByOutputType = {
   mimeType: string | null
   dimensioneBytes: number | null
   checksumSha256: string | null
+  sha256: string | null
   url: string | null
   storagePath: string | null
+  storageKey: string | null
+  storageProvider: string | null
+  storageBucket: string | null
+  publicUrl: string | null
   nomeStorage: string | null
+  originalName: string | null
+  sizeBytes: number | null
+  documentType: string | null
+  documentDate: Date | null
+  source: string | null
+  status: string | null
   dataDocumento: Date | null
   descrizione: string | null
   uploadedByUserId: string | null
@@ -431,9 +512,20 @@ export type DocumentoWhereInput = {
   mimeType?: Prisma.StringNullableFilter<"Documento"> | string | null
   dimensioneBytes?: Prisma.IntNullableFilter<"Documento"> | number | null
   checksumSha256?: Prisma.StringNullableFilter<"Documento"> | string | null
+  sha256?: Prisma.StringNullableFilter<"Documento"> | string | null
   url?: Prisma.StringNullableFilter<"Documento"> | string | null
   storagePath?: Prisma.StringNullableFilter<"Documento"> | string | null
+  storageKey?: Prisma.StringNullableFilter<"Documento"> | string | null
+  storageProvider?: Prisma.StringNullableFilter<"Documento"> | string | null
+  storageBucket?: Prisma.StringNullableFilter<"Documento"> | string | null
+  publicUrl?: Prisma.StringNullableFilter<"Documento"> | string | null
   nomeStorage?: Prisma.StringNullableFilter<"Documento"> | string | null
+  originalName?: Prisma.StringNullableFilter<"Documento"> | string | null
+  sizeBytes?: Prisma.IntNullableFilter<"Documento"> | number | null
+  documentType?: Prisma.StringNullableFilter<"Documento"> | string | null
+  documentDate?: Prisma.DateTimeNullableFilter<"Documento"> | Date | string | null
+  source?: Prisma.StringNullableFilter<"Documento"> | string | null
+  status?: Prisma.StringNullableFilter<"Documento"> | string | null
   dataDocumento?: Prisma.DateTimeNullableFilter<"Documento"> | Date | string | null
   descrizione?: Prisma.StringNullableFilter<"Documento"> | string | null
   uploadedByUserId?: Prisma.StringNullableFilter<"Documento"> | string | null
@@ -475,9 +567,20 @@ export type DocumentoOrderByWithRelationInput = {
   mimeType?: Prisma.SortOrderInput | Prisma.SortOrder
   dimensioneBytes?: Prisma.SortOrderInput | Prisma.SortOrder
   checksumSha256?: Prisma.SortOrderInput | Prisma.SortOrder
+  sha256?: Prisma.SortOrderInput | Prisma.SortOrder
   url?: Prisma.SortOrderInput | Prisma.SortOrder
   storagePath?: Prisma.SortOrderInput | Prisma.SortOrder
+  storageKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  storageProvider?: Prisma.SortOrderInput | Prisma.SortOrder
+  storageBucket?: Prisma.SortOrderInput | Prisma.SortOrder
+  publicUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   nomeStorage?: Prisma.SortOrderInput | Prisma.SortOrder
+  originalName?: Prisma.SortOrderInput | Prisma.SortOrder
+  sizeBytes?: Prisma.SortOrderInput | Prisma.SortOrder
+  documentType?: Prisma.SortOrderInput | Prisma.SortOrder
+  documentDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  source?: Prisma.SortOrderInput | Prisma.SortOrder
+  status?: Prisma.SortOrderInput | Prisma.SortOrder
   dataDocumento?: Prisma.SortOrderInput | Prisma.SortOrder
   descrizione?: Prisma.SortOrderInput | Prisma.SortOrder
   uploadedByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -522,9 +625,20 @@ export type DocumentoWhereUniqueInput = Prisma.AtLeast<{
   mimeType?: Prisma.StringNullableFilter<"Documento"> | string | null
   dimensioneBytes?: Prisma.IntNullableFilter<"Documento"> | number | null
   checksumSha256?: Prisma.StringNullableFilter<"Documento"> | string | null
+  sha256?: Prisma.StringNullableFilter<"Documento"> | string | null
   url?: Prisma.StringNullableFilter<"Documento"> | string | null
   storagePath?: Prisma.StringNullableFilter<"Documento"> | string | null
+  storageKey?: Prisma.StringNullableFilter<"Documento"> | string | null
+  storageProvider?: Prisma.StringNullableFilter<"Documento"> | string | null
+  storageBucket?: Prisma.StringNullableFilter<"Documento"> | string | null
+  publicUrl?: Prisma.StringNullableFilter<"Documento"> | string | null
   nomeStorage?: Prisma.StringNullableFilter<"Documento"> | string | null
+  originalName?: Prisma.StringNullableFilter<"Documento"> | string | null
+  sizeBytes?: Prisma.IntNullableFilter<"Documento"> | number | null
+  documentType?: Prisma.StringNullableFilter<"Documento"> | string | null
+  documentDate?: Prisma.DateTimeNullableFilter<"Documento"> | Date | string | null
+  source?: Prisma.StringNullableFilter<"Documento"> | string | null
+  status?: Prisma.StringNullableFilter<"Documento"> | string | null
   dataDocumento?: Prisma.DateTimeNullableFilter<"Documento"> | Date | string | null
   descrizione?: Prisma.StringNullableFilter<"Documento"> | string | null
   uploadedByUserId?: Prisma.StringNullableFilter<"Documento"> | string | null
@@ -566,9 +680,20 @@ export type DocumentoOrderByWithAggregationInput = {
   mimeType?: Prisma.SortOrderInput | Prisma.SortOrder
   dimensioneBytes?: Prisma.SortOrderInput | Prisma.SortOrder
   checksumSha256?: Prisma.SortOrderInput | Prisma.SortOrder
+  sha256?: Prisma.SortOrderInput | Prisma.SortOrder
   url?: Prisma.SortOrderInput | Prisma.SortOrder
   storagePath?: Prisma.SortOrderInput | Prisma.SortOrder
+  storageKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  storageProvider?: Prisma.SortOrderInput | Prisma.SortOrder
+  storageBucket?: Prisma.SortOrderInput | Prisma.SortOrder
+  publicUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   nomeStorage?: Prisma.SortOrderInput | Prisma.SortOrder
+  originalName?: Prisma.SortOrderInput | Prisma.SortOrder
+  sizeBytes?: Prisma.SortOrderInput | Prisma.SortOrder
+  documentType?: Prisma.SortOrderInput | Prisma.SortOrder
+  documentDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  source?: Prisma.SortOrderInput | Prisma.SortOrder
+  status?: Prisma.SortOrderInput | Prisma.SortOrder
   dataDocumento?: Prisma.SortOrderInput | Prisma.SortOrder
   descrizione?: Prisma.SortOrderInput | Prisma.SortOrder
   uploadedByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -611,9 +736,20 @@ export type DocumentoScalarWhereWithAggregatesInput = {
   mimeType?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
   dimensioneBytes?: Prisma.IntNullableWithAggregatesFilter<"Documento"> | number | null
   checksumSha256?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
+  sha256?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
   url?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
   storagePath?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
+  storageKey?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
+  storageProvider?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
+  storageBucket?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
+  publicUrl?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
   nomeStorage?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
+  originalName?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
+  sizeBytes?: Prisma.IntNullableWithAggregatesFilter<"Documento"> | number | null
+  documentType?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
+  documentDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Documento"> | Date | string | null
+  source?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
+  status?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
   dataDocumento?: Prisma.DateTimeNullableWithAggregatesFilter<"Documento"> | Date | string | null
   descrizione?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
   uploadedByUserId?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
@@ -648,9 +784,20 @@ export type DocumentoCreateInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserEmail?: string | null
@@ -685,9 +832,20 @@ export type DocumentoUncheckedCreateInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserId?: string | null
@@ -722,9 +880,20 @@ export type DocumentoUpdateInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -759,9 +928,20 @@ export type DocumentoUncheckedUpdateInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -796,9 +976,20 @@ export type DocumentoCreateManyInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserId?: string | null
@@ -833,9 +1024,20 @@ export type DocumentoUpdateManyMutationInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -863,9 +1065,20 @@ export type DocumentoUncheckedUpdateManyInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -910,9 +1123,20 @@ export type DocumentoCountOrderByAggregateInput = {
   mimeType?: Prisma.SortOrder
   dimensioneBytes?: Prisma.SortOrder
   checksumSha256?: Prisma.SortOrder
+  sha256?: Prisma.SortOrder
   url?: Prisma.SortOrder
   storagePath?: Prisma.SortOrder
+  storageKey?: Prisma.SortOrder
+  storageProvider?: Prisma.SortOrder
+  storageBucket?: Prisma.SortOrder
+  publicUrl?: Prisma.SortOrder
   nomeStorage?: Prisma.SortOrder
+  originalName?: Prisma.SortOrder
+  sizeBytes?: Prisma.SortOrder
+  documentType?: Prisma.SortOrder
+  documentDate?: Prisma.SortOrder
+  source?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   dataDocumento?: Prisma.SortOrder
   descrizione?: Prisma.SortOrder
   uploadedByUserId?: Prisma.SortOrder
@@ -931,6 +1155,7 @@ export type DocumentoCountOrderByAggregateInput = {
 
 export type DocumentoAvgOrderByAggregateInput = {
   dimensioneBytes?: Prisma.SortOrder
+  sizeBytes?: Prisma.SortOrder
 }
 
 export type DocumentoMaxOrderByAggregateInput = {
@@ -951,9 +1176,20 @@ export type DocumentoMaxOrderByAggregateInput = {
   mimeType?: Prisma.SortOrder
   dimensioneBytes?: Prisma.SortOrder
   checksumSha256?: Prisma.SortOrder
+  sha256?: Prisma.SortOrder
   url?: Prisma.SortOrder
   storagePath?: Prisma.SortOrder
+  storageKey?: Prisma.SortOrder
+  storageProvider?: Prisma.SortOrder
+  storageBucket?: Prisma.SortOrder
+  publicUrl?: Prisma.SortOrder
   nomeStorage?: Prisma.SortOrder
+  originalName?: Prisma.SortOrder
+  sizeBytes?: Prisma.SortOrder
+  documentType?: Prisma.SortOrder
+  documentDate?: Prisma.SortOrder
+  source?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   dataDocumento?: Prisma.SortOrder
   descrizione?: Prisma.SortOrder
   uploadedByUserId?: Prisma.SortOrder
@@ -988,9 +1224,20 @@ export type DocumentoMinOrderByAggregateInput = {
   mimeType?: Prisma.SortOrder
   dimensioneBytes?: Prisma.SortOrder
   checksumSha256?: Prisma.SortOrder
+  sha256?: Prisma.SortOrder
   url?: Prisma.SortOrder
   storagePath?: Prisma.SortOrder
+  storageKey?: Prisma.SortOrder
+  storageProvider?: Prisma.SortOrder
+  storageBucket?: Prisma.SortOrder
+  publicUrl?: Prisma.SortOrder
   nomeStorage?: Prisma.SortOrder
+  originalName?: Prisma.SortOrder
+  sizeBytes?: Prisma.SortOrder
+  documentType?: Prisma.SortOrder
+  documentDate?: Prisma.SortOrder
+  source?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   dataDocumento?: Prisma.SortOrder
   descrizione?: Prisma.SortOrder
   uploadedByUserId?: Prisma.SortOrder
@@ -1009,6 +1256,7 @@ export type DocumentoMinOrderByAggregateInput = {
 
 export type DocumentoSumOrderByAggregateInput = {
   dimensioneBytes?: Prisma.SortOrder
+  sizeBytes?: Prisma.SortOrder
 }
 
 export type DocumentoCreateNestedManyWithoutUploadedByUserInput = {
@@ -1339,9 +1587,20 @@ export type DocumentoCreateWithoutUploadedByUserInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserEmail?: string | null
@@ -1375,9 +1634,20 @@ export type DocumentoUncheckedCreateWithoutUploadedByUserInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserEmail?: string | null
@@ -1440,9 +1710,20 @@ export type DocumentoScalarWhereInput = {
   mimeType?: Prisma.StringNullableFilter<"Documento"> | string | null
   dimensioneBytes?: Prisma.IntNullableFilter<"Documento"> | number | null
   checksumSha256?: Prisma.StringNullableFilter<"Documento"> | string | null
+  sha256?: Prisma.StringNullableFilter<"Documento"> | string | null
   url?: Prisma.StringNullableFilter<"Documento"> | string | null
   storagePath?: Prisma.StringNullableFilter<"Documento"> | string | null
+  storageKey?: Prisma.StringNullableFilter<"Documento"> | string | null
+  storageProvider?: Prisma.StringNullableFilter<"Documento"> | string | null
+  storageBucket?: Prisma.StringNullableFilter<"Documento"> | string | null
+  publicUrl?: Prisma.StringNullableFilter<"Documento"> | string | null
   nomeStorage?: Prisma.StringNullableFilter<"Documento"> | string | null
+  originalName?: Prisma.StringNullableFilter<"Documento"> | string | null
+  sizeBytes?: Prisma.IntNullableFilter<"Documento"> | number | null
+  documentType?: Prisma.StringNullableFilter<"Documento"> | string | null
+  documentDate?: Prisma.DateTimeNullableFilter<"Documento"> | Date | string | null
+  source?: Prisma.StringNullableFilter<"Documento"> | string | null
+  status?: Prisma.StringNullableFilter<"Documento"> | string | null
   dataDocumento?: Prisma.DateTimeNullableFilter<"Documento"> | Date | string | null
   descrizione?: Prisma.StringNullableFilter<"Documento"> | string | null
   uploadedByUserId?: Prisma.StringNullableFilter<"Documento"> | string | null
@@ -1477,9 +1758,20 @@ export type DocumentoCreateWithoutConcessioneInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserEmail?: string | null
@@ -1513,9 +1805,20 @@ export type DocumentoUncheckedCreateWithoutConcessioneInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserId?: string | null
@@ -1575,9 +1878,20 @@ export type DocumentoCreateWithoutCriticitaInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserEmail?: string | null
@@ -1611,9 +1925,20 @@ export type DocumentoUncheckedCreateWithoutCriticitaInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserId?: string | null
@@ -1673,9 +1998,20 @@ export type DocumentoCreateWithoutProcedimentoInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserEmail?: string | null
@@ -1709,9 +2045,20 @@ export type DocumentoUncheckedCreateWithoutProcedimentoInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserId?: string | null
@@ -1771,9 +2118,20 @@ export type DocumentoCreateWithoutSopralluogoInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserEmail?: string | null
@@ -1807,9 +2165,20 @@ export type DocumentoUncheckedCreateWithoutSopralluogoInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserId?: string | null
@@ -1869,9 +2238,20 @@ export type DocumentoCreateWithoutPagamentoInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserEmail?: string | null
@@ -1905,9 +2285,20 @@ export type DocumentoUncheckedCreateWithoutPagamentoInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserId?: string | null
@@ -1967,9 +2358,20 @@ export type DocumentoCreateWithoutReportInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserEmail?: string | null
@@ -2003,9 +2405,20 @@ export type DocumentoUncheckedCreateWithoutReportInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserId?: string | null
@@ -2065,9 +2478,20 @@ export type DocumentoCreateManyUploadedByUserInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserEmail?: string | null
@@ -2101,9 +2525,20 @@ export type DocumentoUpdateWithoutUploadedByUserInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2137,9 +2572,20 @@ export type DocumentoUncheckedUpdateWithoutUploadedByUserInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2173,9 +2619,20 @@ export type DocumentoUncheckedUpdateManyWithoutUploadedByUserInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2209,9 +2666,20 @@ export type DocumentoCreateManyConcessioneInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserId?: string | null
@@ -2245,9 +2713,20 @@ export type DocumentoUpdateWithoutConcessioneInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2281,9 +2760,20 @@ export type DocumentoUncheckedUpdateWithoutConcessioneInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2317,9 +2807,20 @@ export type DocumentoUncheckedUpdateManyWithoutConcessioneInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2353,9 +2854,20 @@ export type DocumentoCreateManyCriticitaInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserId?: string | null
@@ -2389,9 +2901,20 @@ export type DocumentoUpdateWithoutCriticitaInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2425,9 +2948,20 @@ export type DocumentoUncheckedUpdateWithoutCriticitaInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2461,9 +2995,20 @@ export type DocumentoUncheckedUpdateManyWithoutCriticitaInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2497,9 +3042,20 @@ export type DocumentoCreateManyProcedimentoInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserId?: string | null
@@ -2533,9 +3089,20 @@ export type DocumentoUpdateWithoutProcedimentoInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2569,9 +3136,20 @@ export type DocumentoUncheckedUpdateWithoutProcedimentoInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2605,9 +3183,20 @@ export type DocumentoUncheckedUpdateManyWithoutProcedimentoInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2641,9 +3230,20 @@ export type DocumentoCreateManySopralluogoInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserId?: string | null
@@ -2677,9 +3277,20 @@ export type DocumentoUpdateWithoutSopralluogoInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2713,9 +3324,20 @@ export type DocumentoUncheckedUpdateWithoutSopralluogoInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2749,9 +3371,20 @@ export type DocumentoUncheckedUpdateManyWithoutSopralluogoInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2785,9 +3418,20 @@ export type DocumentoCreateManyPagamentoInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserId?: string | null
@@ -2821,9 +3465,20 @@ export type DocumentoUpdateWithoutPagamentoInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2857,9 +3512,20 @@ export type DocumentoUncheckedUpdateWithoutPagamentoInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2893,9 +3559,20 @@ export type DocumentoUncheckedUpdateManyWithoutPagamentoInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2929,9 +3606,20 @@ export type DocumentoCreateManyReportInput = {
   mimeType?: string | null
   dimensioneBytes?: number | null
   checksumSha256?: string | null
+  sha256?: string | null
   url?: string | null
   storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
   nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
   dataDocumento?: Date | string | null
   descrizione?: string | null
   uploadedByUserId?: string | null
@@ -2965,9 +3653,20 @@ export type DocumentoUpdateWithoutReportInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3001,9 +3700,20 @@ export type DocumentoUncheckedUpdateWithoutReportInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3037,9 +3747,20 @@ export type DocumentoUncheckedUpdateManyWithoutReportInput = {
   mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3075,9 +3796,20 @@ export type DocumentoSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   mimeType?: boolean
   dimensioneBytes?: boolean
   checksumSha256?: boolean
+  sha256?: boolean
   url?: boolean
   storagePath?: boolean
+  storageKey?: boolean
+  storageProvider?: boolean
+  storageBucket?: boolean
+  publicUrl?: boolean
   nomeStorage?: boolean
+  originalName?: boolean
+  sizeBytes?: boolean
+  documentType?: boolean
+  documentDate?: boolean
+  source?: boolean
+  status?: boolean
   dataDocumento?: boolean
   descrizione?: boolean
   uploadedByUserId?: boolean
@@ -3119,9 +3851,20 @@ export type DocumentoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   mimeType?: boolean
   dimensioneBytes?: boolean
   checksumSha256?: boolean
+  sha256?: boolean
   url?: boolean
   storagePath?: boolean
+  storageKey?: boolean
+  storageProvider?: boolean
+  storageBucket?: boolean
+  publicUrl?: boolean
   nomeStorage?: boolean
+  originalName?: boolean
+  sizeBytes?: boolean
+  documentType?: boolean
+  documentDate?: boolean
+  source?: boolean
+  status?: boolean
   dataDocumento?: boolean
   descrizione?: boolean
   uploadedByUserId?: boolean
@@ -3163,9 +3906,20 @@ export type DocumentoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   mimeType?: boolean
   dimensioneBytes?: boolean
   checksumSha256?: boolean
+  sha256?: boolean
   url?: boolean
   storagePath?: boolean
+  storageKey?: boolean
+  storageProvider?: boolean
+  storageBucket?: boolean
+  publicUrl?: boolean
   nomeStorage?: boolean
+  originalName?: boolean
+  sizeBytes?: boolean
+  documentType?: boolean
+  documentDate?: boolean
+  source?: boolean
+  status?: boolean
   dataDocumento?: boolean
   descrizione?: boolean
   uploadedByUserId?: boolean
@@ -3207,9 +3961,20 @@ export type DocumentoSelectScalar = {
   mimeType?: boolean
   dimensioneBytes?: boolean
   checksumSha256?: boolean
+  sha256?: boolean
   url?: boolean
   storagePath?: boolean
+  storageKey?: boolean
+  storageProvider?: boolean
+  storageBucket?: boolean
+  publicUrl?: boolean
   nomeStorage?: boolean
+  originalName?: boolean
+  sizeBytes?: boolean
+  documentType?: boolean
+  documentDate?: boolean
+  source?: boolean
+  status?: boolean
   dataDocumento?: boolean
   descrizione?: boolean
   uploadedByUserId?: boolean
@@ -3226,7 +3991,7 @@ export type DocumentoSelectScalar = {
   updatedAt?: boolean
 }
 
-export type DocumentoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nome" | "tipologia" | "statoDocumento" | "direzione" | "canale" | "numeroProtocollo" | "dataProtocollo" | "mittente" | "destinatario" | "pecMessageId" | "pecRicevutaAccettazioneId" | "pecRicevutaConsegnaId" | "pecWarningMancataRicevuta" | "mimeType" | "dimensioneBytes" | "checksumSha256" | "url" | "storagePath" | "nomeStorage" | "dataDocumento" | "descrizione" | "uploadedByUserId" | "uploadedByUserEmail" | "uploadedByUserRole" | "archivedAt" | "concessioneId" | "criticitaId" | "procedimentoId" | "sopralluogoId" | "pagamentoId" | "reportId" | "createdAt" | "updatedAt", ExtArgs["result"]["documento"]>
+export type DocumentoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nome" | "tipologia" | "statoDocumento" | "direzione" | "canale" | "numeroProtocollo" | "dataProtocollo" | "mittente" | "destinatario" | "pecMessageId" | "pecRicevutaAccettazioneId" | "pecRicevutaConsegnaId" | "pecWarningMancataRicevuta" | "mimeType" | "dimensioneBytes" | "checksumSha256" | "sha256" | "url" | "storagePath" | "storageKey" | "storageProvider" | "storageBucket" | "publicUrl" | "nomeStorage" | "originalName" | "sizeBytes" | "documentType" | "documentDate" | "source" | "status" | "dataDocumento" | "descrizione" | "uploadedByUserId" | "uploadedByUserEmail" | "uploadedByUserRole" | "archivedAt" | "concessioneId" | "criticitaId" | "procedimentoId" | "sopralluogoId" | "pagamentoId" | "reportId" | "createdAt" | "updatedAt", ExtArgs["result"]["documento"]>
 export type DocumentoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   uploadedByUser?: boolean | Prisma.Documento$uploadedByUserArgs<ExtArgs>
   concessione?: boolean | Prisma.Documento$concessioneArgs<ExtArgs>
@@ -3284,9 +4049,20 @@ export type $DocumentoPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     mimeType: string | null
     dimensioneBytes: number | null
     checksumSha256: string | null
+    sha256: string | null
     url: string | null
     storagePath: string | null
+    storageKey: string | null
+    storageProvider: string | null
+    storageBucket: string | null
+    publicUrl: string | null
     nomeStorage: string | null
+    originalName: string | null
+    sizeBytes: number | null
+    documentType: string | null
+    documentDate: Date | null
+    source: string | null
+    status: string | null
     dataDocumento: Date | null
     descrizione: string | null
     uploadedByUserId: string | null
@@ -3748,9 +4524,20 @@ export interface DocumentoFieldRefs {
   readonly mimeType: Prisma.FieldRef<"Documento", 'String'>
   readonly dimensioneBytes: Prisma.FieldRef<"Documento", 'Int'>
   readonly checksumSha256: Prisma.FieldRef<"Documento", 'String'>
+  readonly sha256: Prisma.FieldRef<"Documento", 'String'>
   readonly url: Prisma.FieldRef<"Documento", 'String'>
   readonly storagePath: Prisma.FieldRef<"Documento", 'String'>
+  readonly storageKey: Prisma.FieldRef<"Documento", 'String'>
+  readonly storageProvider: Prisma.FieldRef<"Documento", 'String'>
+  readonly storageBucket: Prisma.FieldRef<"Documento", 'String'>
+  readonly publicUrl: Prisma.FieldRef<"Documento", 'String'>
   readonly nomeStorage: Prisma.FieldRef<"Documento", 'String'>
+  readonly originalName: Prisma.FieldRef<"Documento", 'String'>
+  readonly sizeBytes: Prisma.FieldRef<"Documento", 'Int'>
+  readonly documentType: Prisma.FieldRef<"Documento", 'String'>
+  readonly documentDate: Prisma.FieldRef<"Documento", 'DateTime'>
+  readonly source: Prisma.FieldRef<"Documento", 'String'>
+  readonly status: Prisma.FieldRef<"Documento", 'String'>
   readonly dataDocumento: Prisma.FieldRef<"Documento", 'DateTime'>
   readonly descrizione: Prisma.FieldRef<"Documento", 'String'>
   readonly uploadedByUserId: Prisma.FieldRef<"Documento", 'String'>

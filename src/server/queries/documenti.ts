@@ -29,6 +29,11 @@ export interface DocumentoListItem {
   statoDocumento: string;
   mimeType: string | null;
   dimensioneBytes: number | null;
+  sizeBytes: number | null;
+  checksumSha256: string | null;
+  storageProvider: string | null;
+  source: string | null;
+  status: string | null;
   dataDocumento: Date | null;
   direzione: string | null;
   canale: string | null;
@@ -100,6 +105,11 @@ export async function getDocumentiList(params: GetDocumentiListParams): Promise<
       statoDocumento: true,
       mimeType: true,
       dimensioneBytes: true,
+      sizeBytes: true,
+      checksumSha256: true,
+      storageProvider: true,
+      source: true,
+      status: true,
       dataDocumento: true,
       direzione: true,
       canale: true,

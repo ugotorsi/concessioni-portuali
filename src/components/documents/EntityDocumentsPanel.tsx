@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
 import { DOCUMENT_CANALE_VALUES, DOCUMENT_DIREZIONE_VALUES } from "@/server/documents/protocollo";
-import { DOCUMENT_TIPOLOGIA_VALUES } from "@/server/documents/validation";
+import { DOCUMENT_SOURCE_VALUES, DOCUMENT_STATUS_VALUES, DOCUMENT_TIPOLOGIA_VALUES } from "@/server/documents/validation";
 
 interface EntityDocumentItem {
   id: string;
@@ -18,6 +18,11 @@ interface EntityDocumentItem {
   createdAt: Date;
   direzione?: string | null;
   canale?: string | null;
+  source?: string | null;
+  status?: string | null;
+  storageProvider?: string | null;
+  checksumSha256?: string | null;
+  sizeBytes?: number | null;
   numeroProtocollo?: string | null;
   dataProtocollo?: Date | null;
   pecWarningMancataRicevuta?: boolean;
@@ -73,6 +78,7 @@ export function EntityDocumentsPanel({
               <TableHead>Stato</TableHead>
               <TableHead>Data</TableHead>
               <TableHead>Metadata</TableHead>
+              <TableHead>Storage</TableHead>
               <TableHead>Download</TableHead>
               {canUpload ? <TableHead>Azioni</TableHead> : null}
             </TableRow>
@@ -92,10 +98,29 @@ export function EntityDocumentsPanel({
                   {item.dataProtocollo ? <div>{formatDateIT(item.dataProtocollo)}</div> : null}
                   {item.pecWarningMancataRicevuta ? <div className="font-semibold text-amber-700">Warning PEC</div> : null}
                 </TableCell>
+                <TableCell className="text-xs text-slate-700">
+                  <div>{item.storageProvider ? formatEnumLabel(item.storageProvider) : "-"}</div>
+                  <div>{item.source ? `Fonte: ${formatEnumLabel(item.source)}` : "Fonte: -"}</div>
+                  <div>{item.status ? `Status: ${formatEnumLabel(item.status)}` : "Status: -"}</div>
+                  <div>{item.checksumSha256 ? `Hash: ${item.checksumSha256.slice(0, 10)}...` : "Hash: -"}</div>
+                  <div>{item.sizeBytes !== null && item.sizeBytes !== undefined ? `${item.sizeBytes} bytes` : "-"}</div>
+                </TableCell>
                 <TableCell>
-                  <a href={`/documenti/${item.id}/download`} className="text-sm underline underline-offset-4">
-                    Scarica
-                  </a>
+                  <div className="flex flex-col gap-1">
+                    <a href={`/documenti/${item.id}/download`} className="text-sm underline underline-offset-4">
+                      Scarica
+                    </a>
+                    {item.url?.includes("/download") ? (
+                      <a
+                        href={`/documenti/${item.id}/download?preview=1`}
+                        className="text-xs underline underline-offset-4"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Preview
+                      </a>
+                    ) : null}
+                  </div>
                 </TableCell>
                 {canUpload ? (
                   <TableCell>
@@ -115,7 +140,7 @@ export function EntityDocumentsPanel({
             ))}
             {documents.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={canUpload ? 7 : 6} className="text-center text-slate-500">
+                <TableCell colSpan={canUpload ? 8 : 7} className="text-center text-slate-500">
                   Nessun documento collegato.
                 </TableCell>
               </TableRow>
@@ -201,6 +226,26 @@ export function EntityDocumentsPanel({
             <label className="text-sm text-slate-700">
               Data documento
               <Input name="dataDocumento" type="date" />
+            </label>
+            <label className="text-sm text-slate-700">
+              Fonte
+              <Select name="source" required defaultValue="UPLOAD_UTENTE">
+                {DOCUMENT_SOURCE_VALUES.map((value) => (
+                  <option key={value} value={value}>
+                    {formatEnumLabel(value)}
+                  </option>
+                ))}
+              </Select>
+            </label>
+            <label className="text-sm text-slate-700">
+              Stato
+              <Select name="status" required defaultValue="ATTIVO">
+                {DOCUMENT_STATUS_VALUES.map((value) => (
+                  <option key={value} value={value}>
+                    {formatEnumLabel(value)}
+                  </option>
+                ))}
+              </Select>
             </label>
             <div className="flex items-end">
               <Button type="submit">Carica documento</Button>

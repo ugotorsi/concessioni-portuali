@@ -6,6 +6,8 @@ describe("documenti validation", () => {
   it("accepts valid upload payload with linked concessione", () => {
     const formData = new FormData();
     formData.set("tipologia", "NOTA");
+    formData.set("source", "UPLOAD_UTENTE");
+    formData.set("status", "ATTIVO");
     formData.set("concessioneId", "concessione-1");
     formData.set("descrizione", "Nota istruttoria");
     formData.set("file", new File(["contenuto"], "nota.txt", { type: "text/plain" }));
@@ -20,6 +22,8 @@ describe("documenti validation", () => {
   it("rejects payload without linked entities", () => {
     const formData = new FormData();
     formData.set("tipologia", "NOTA");
+    formData.set("source", "UPLOAD_UTENTE");
+    formData.set("status", "ATTIVO");
     formData.set("file", new File(["contenuto"], "nota.txt", { type: "text/plain" }));
 
     expect(() => parseUploadDocumentFormData(formData)).toThrow(/almeno una entita/i);
@@ -34,6 +38,8 @@ describe("documenti validation", () => {
   it("accepts protocollo and PEC metadata baseline", () => {
     const formData = new FormData();
     formData.set("tipologia", "NOTA");
+    formData.set("source", "PEC_METADATA");
+    formData.set("status", "ATTIVO");
     formData.set("concessioneId", "concessione-1");
     formData.set("canale", "PEC");
     formData.set("direzione", "ENTRATA");
@@ -53,10 +59,22 @@ describe("documenti validation", () => {
   it("rejects protocol number without protocol date", () => {
     const formData = new FormData();
     formData.set("tipologia", "NOTA");
+    formData.set("source", "UPLOAD_UTENTE");
+    formData.set("status", "ATTIVO");
     formData.set("concessioneId", "concessione-1");
     formData.set("numeroProtocollo", "PG/2026/999");
     formData.set("file", new File(["contenuto"], "nota.txt", { type: "text/plain" }));
 
     expect(() => parseUploadDocumentFormData(formData)).toThrow(/Numero e data protocollo/i);
+  });
+
+  it("rejects payload without mandatory source", () => {
+    const formData = new FormData();
+    formData.set("tipologia", "NOTA");
+    formData.set("status", "ATTIVO");
+    formData.set("concessioneId", "concessione-1");
+    formData.set("file", new File(["contenuto"], "nota.txt", { type: "text/plain" }));
+
+    expect(() => parseUploadDocumentFormData(formData)).toThrow(/Fonte documento obbligatoria/i);
   });
 });
