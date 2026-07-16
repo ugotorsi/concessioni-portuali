@@ -22,8 +22,16 @@ test("admin visualizza i 5 scenari demo istituzionali", async ({ page }) => {
   await expect(page.getByTestId("demo-scenario-card-contraddittorio-incompleto")).toBeVisible();
   await expect(page.getByTestId("demo-scenario-card-istanza-parte-art10bis")).toBeVisible();
 
-  await page.getByTestId("demo-scenario-card-morosita-art47").getByRole("link", { name: "Apri report" }).click();
-  await expect(page).toHaveURL(/\/report\/.+/);
+  const reportLink = page
+    .getByTestId("demo-scenario-card-morosita-art47")
+    .getByRole("link", { name: "Apri report" });
+
+  await expect(reportLink).toBeVisible();
+  await expect(reportLink).toHaveAttribute("href", /\/report\/.+/);
+  await Promise.all([
+    page.waitForURL(/\/report\/.+/),
+    reportLink.click(),
+  ]);
   await expect(page.getByText(/Documento istruttorio|art\. 47/i).first()).toBeVisible();
 });
 
