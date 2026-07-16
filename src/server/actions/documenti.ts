@@ -118,8 +118,13 @@ export async function createDocumentoUploadAction(formData: FormData) {
     data: {
       nome: payload.nome,
       tipologia: payload.tipologia,
+      documentType: payload.tipologia,
+      source: payload.source,
+      status: payload.status,
       descrizione: payload.descrizione ?? null,
       dataDocumento: payload.dataDocumento ?? null,
+      documentDate: payload.dataDocumento ?? new Date(),
+      statoDocumento: payload.status,
       direzione: payload.direzione ?? null,
       canale: payload.canale ?? null,
       numeroProtocollo: payload.numeroProtocollo ?? null,
@@ -151,16 +156,39 @@ export async function createDocumentoUploadAction(formData: FormData) {
     },
   });
 
-  const stored = await storeDocumentFile({ documentId: created.id, file: payload.file });
+  let stored;
+  try {
+    stored = await storeDocumentFile({ documentId: created.id, file: payload.file });
+  } catch (error) {
+    await auditFailure({
+      azione: "DOCUMENT_UPLOAD",
+      entita: "Documento",
+      entitaId: created.id,
+      concessioneId: created.concessioneId,
+      actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+      metadata: {
+        reason: "STORAGE_WRITE_FAILED",
+        issue: error instanceof Error ? error.message : "Errore storage documento.",
+      },
+    });
+    throw new Error("Caricamento documento non riuscito: errore durante la persistenza storage.");
+  }
 
   await prisma.documento.update({
     where: { id: created.id },
     data: {
       nomeStorage: stored.fileName,
-      storagePath: stored.storagePath,
+      storagePath: stored.storageKey,
+      storageKey: stored.storageKey,
+      storageProvider: stored.storageProvider,
+      storageBucket: stored.bucket,
+      publicUrl: stored.publicUrl ?? null,
       mimeType: stored.mimeType,
-      dimensioneBytes: stored.size,
+      originalName: stored.originalName,
+      dimensioneBytes: stored.sizeBytes,
+      sizeBytes: stored.sizeBytes,
       checksumSha256: stored.sha256,
+      sha256: stored.sha256,
       url: `/documenti/${created.id}/download`,
     },
   });
@@ -173,9 +201,12 @@ export async function createDocumentoUploadAction(formData: FormData) {
     actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
     metadata: {
       tipologia: payload.tipologia,
+      source: payload.source,
+      status: payload.status,
       mimeType: stored.mimeType,
-      dimensioneBytes: stored.size,
-      storagePath: stored.storagePath,
+      dimensioneBytes: stored.sizeBytes,
+      storageProvider: stored.storageProvider,
+      storageKey: stored.storageKey,
       protocollo: {
         direzione: payload.direzione ?? null,
         canale: payload.canale ?? null,
@@ -231,6 +262,7 @@ export async function archiveDocumentoAction(formData: FormData) {
     where: { id: parsed.data.id },
     data: {
       statoDocumento: "ARCHIVIATO",
+      status: "ARCHIVIATO",
       archivedAt: new Date(),
     },
     select: {

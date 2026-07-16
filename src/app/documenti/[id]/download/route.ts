@@ -1,12 +1,12 @@
 import { getCurrentRole } from "@/lib/auth";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
-import { readStoredDocument } from "@/server/documents/storage";
+import { readStoredDocument, storedDocumentExists } from "@/server/documents/storage";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ id: string }> },
 ): Promise<Response> {
   const { id } = await context.params;
@@ -32,7 +32,12 @@ export async function GET(
       id: true,
       nome: true,
       mimeType: true,
+      originalName: true,
       storagePath: true,
+      storageKey: true,
+      storageProvider: true,
+      storageBucket: true,
+      publicUrl: true,
       url: true,
       statoDocumento: true,
       concessioneId: true,
@@ -65,8 +70,32 @@ export async function GET(
     return new Response("Forbidden", { status: 403 });
   }
 
-  if (documento.storagePath) {
-    const buffer = await readStoredDocument(documento.storagePath);
+  const requestedPreview = new URL(request.url).searchParams.get("preview") === "1";
+  const canInlinePreview = (documento.mimeType ?? "").startsWith("application/pdf") || (documento.mimeType ?? "").startsWith("image/");
+  const disposition = requestedPreview && canInlinePreview ? "inline" : "attachment";
+
+  const storageKey = documento.storageKey ?? documento.storagePath;
+  if (storageKey) {
+    const exists = await storedDocumentExists(storageKey);
+
+    if (!exists) {
+      await auditFailure({
+        azione: "DOCUMENT_DOWNLOAD",
+        entita: "Documento",
+        entitaId: documento.id,
+        concessioneId: documento.concessioneId,
+        actor: { userRole: role },
+        metadata: {
+          reason: "STORAGE_OBJECT_NOT_FOUND",
+          storageKey,
+          storageProvider: documento.storageProvider ?? "local",
+        },
+      });
+
+      return new Response("File non disponibile", { status: 404 });
+    }
+
+    const buffer = await readStoredDocument(storageKey);
 
     await auditSuccess({
       azione: "DOCUMENT_DOWNLOAD",
@@ -76,6 +105,9 @@ export async function GET(
       actor: { userRole: role },
       metadata: {
         source: "local-storage",
+        storageProvider: documento.storageProvider ?? "local",
+        storageBucket: documento.storageBucket,
+        storageKey,
         mimeType: documento.mimeType,
         statoDocumento: documento.statoDocumento,
       },
@@ -85,13 +117,15 @@ export async function GET(
       status: 200,
       headers: {
         "Content-Type": documento.mimeType ?? "application/octet-stream",
-        "Content-Disposition": `attachment; filename="${documento.nome}"`,
+        "Content-Disposition": `${disposition}; filename="${documento.originalName ?? documento.nome}"`,
         "Cache-Control": "no-store",
       },
     });
   }
 
-  if (documento.url) {
+  if (documento.publicUrl || documento.url) {
+    const redirectUrl = documento.publicUrl ?? documento.url;
+
     await auditSuccess({
       azione: "DOCUMENT_DOWNLOAD",
       entita: "Documento",
@@ -100,12 +134,12 @@ export async function GET(
       actor: { userRole: role },
       metadata: {
         source: "external-url",
-        redirectUrl: documento.url,
+        redirectUrl,
         statoDocumento: documento.statoDocumento,
       },
     });
 
-    return Response.redirect(documento.url, 302);
+    return Response.redirect(redirectUrl as string, 302);
   }
 
   await auditFailure({

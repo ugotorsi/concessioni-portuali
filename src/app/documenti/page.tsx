@@ -16,7 +16,7 @@ import {
   getDocumentiList,
   type DocumentoStatoFilter,
 } from "@/server/queries/documenti";
-import { DOCUMENT_TIPOLOGIA_VALUES } from "@/server/documents/validation";
+import { DOCUMENT_SOURCE_VALUES, DOCUMENT_STATUS_VALUES, DOCUMENT_TIPOLOGIA_VALUES } from "@/server/documents/validation";
 
 interface DocumentiPageProps {
   searchParams?: Promise<{
@@ -159,6 +159,26 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
                   Data documento
                   <Input name="dataDocumento" type="date" />
                 </label>
+                <label className="text-sm text-slate-700">
+                  Fonte
+                  <Select name="source" defaultValue="UPLOAD_UTENTE" required>
+                    {DOCUMENT_SOURCE_VALUES.map((value) => (
+                      <option key={value} value={value}>
+                        {formatEnumLabel(value)}
+                      </option>
+                    ))}
+                  </Select>
+                </label>
+                <label className="text-sm text-slate-700">
+                  Stato
+                  <Select name="status" defaultValue="ATTIVO" required>
+                    {DOCUMENT_STATUS_VALUES.map((value) => (
+                      <option key={value} value={value}>
+                        {formatEnumLabel(value)}
+                      </option>
+                    ))}
+                  </Select>
+                </label>
                 <label className="text-sm text-slate-700 md:col-span-3">
                   Descrizione
                   <Textarea name="descrizione" rows={2} />
@@ -299,6 +319,7 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
                   <TableHead>Tipologia</TableHead>
                   <TableHead>Stato</TableHead>
                   <TableHead>Dimensione</TableHead>
+                  <TableHead>Storage</TableHead>
                   <TableHead>Protocollo/PEC</TableHead>
                   <TableHead>Data</TableHead>
                   <TableHead>Download</TableHead>
@@ -311,7 +332,13 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
                     <TableCell className="max-w-80 truncate">{item.nome}</TableCell>
                     <TableCell>{formatEnumLabel(item.tipologia)}</TableCell>
                     <TableCell>{formatEnumLabel(item.statoDocumento)}</TableCell>
-                    <TableCell>{item.dimensioneBytes !== null ? `${item.dimensioneBytes} bytes` : "-"}</TableCell>
+                    <TableCell>{(item.sizeBytes ?? item.dimensioneBytes) !== null ? `${item.sizeBytes ?? item.dimensioneBytes} bytes` : "-"}</TableCell>
+                    <TableCell className="text-xs text-slate-700">
+                      <div>{item.storageProvider ? formatEnumLabel(item.storageProvider) : "-"}</div>
+                      <div>{item.source ? `Fonte: ${formatEnumLabel(item.source)}` : "Fonte: -"}</div>
+                      <div>{item.status ? `Status: ${formatEnumLabel(item.status)}` : "Status: -"}</div>
+                      <div>{item.checksumSha256 ? `Hash: ${item.checksumSha256.slice(0, 12)}...` : "Hash: -"}</div>
+                    </TableCell>
                     <TableCell className="text-xs text-slate-700">
                       <div>{item.direzione ? formatEnumLabel(item.direzione) : "-"} / {item.canale ? formatEnumLabel(item.canale) : "-"}</div>
                       <div>{item.numeroProtocollo ?? "Nessun protocollo"}</div>
@@ -320,9 +347,21 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
                     </TableCell>
                     <TableCell>{item.dataDocumento ? formatDateIT(item.dataDocumento) : formatDateIT(item.createdAt)}</TableCell>
                     <TableCell>
-                      <a href={item.downloadUrl} className="text-sm underline underline-offset-4">
-                        Scarica
-                      </a>
+                      <div className="flex flex-col gap-1">
+                        <a href={item.downloadUrl} className="text-sm underline underline-offset-4">
+                          Scarica
+                        </a>
+                        {item.mimeType?.startsWith("application/pdf") || item.mimeType?.startsWith("image/") ? (
+                          <a
+                            href={`${item.downloadUrl}?preview=1`}
+                            className="text-xs underline underline-offset-4"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            Preview
+                          </a>
+                        ) : null}
+                      </div>
                     </TableCell>
                     {canUpload ? (
                       <TableCell>
@@ -380,7 +419,7 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
                 ))}
                 {items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={canUpload ? 8 : 7} className="text-center text-slate-500">
+                    <TableCell colSpan={canUpload ? 9 : 8} className="text-center text-slate-500">
                       Nessun documento trovato.
                     </TableCell>
                   </TableRow>

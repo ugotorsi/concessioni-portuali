@@ -70,6 +70,28 @@ Obiettivo fase corrente:
 Prossima decisione strategica:
 - avvio Sprint 1 su fascicolo documentale cloud persistente (object storage + audit + metadati).
 
+## Sprint 1 avviato - Persistent cloud document dossier
+Implementazione avviata su branch dedicato con storage adapter astratto:
+- backend `local` (default dev/test);
+- backend `s3` per provider S3-compatible (Cloudflare R2 consigliato).
+
+Documentazione tecnica Sprint 1:
+- `docs/DOCUMENT_DOSSIER_STORAGE.md`
+
+Variabili env storage:
+- `DOCUMENT_STORAGE_BACKEND`
+- `DOCUMENT_STORAGE_ROOT`
+- `S3_ENDPOINT`
+- `S3_REGION`
+- `S3_BUCKET`
+- `S3_ACCESS_KEY_ID`
+- `S3_SECRET_ACCESS_KEY`
+- `S3_FORCE_PATH_STYLE`
+
+Nota operativa:
+- non committare chiavi/secret reali;
+- se backend `s3` e variabili mancanti, il sistema restituisce errore esplicito di configurazione.
+
 ## CI/CD baseline (Phase 2)
 Pipeline GitHub Actions disponibile in `.github/workflows/ci.yml`.
 

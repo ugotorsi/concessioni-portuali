@@ -90,6 +90,14 @@ Sintesi posizione attuale:
 Prossima decisione richiesta:
 - confermare avvio Sprint 1 su fascicolo documentale cloud persistente.
 
+## Sprint 1 in esecuzione - Fascicolo documentale cloud persistente
+- Storage adapter astratto introdotto con backend `local` e `s3` (S3-compatible).
+- Metadata storage estesi sul modello documento (provider/key/bucket/hash/dimensione/originalName).
+- Upload aggiornato con metadati obbligatori (`source`, `status`), hash SHA-256 e persistenza via adapter.
+- Download aggiornato su `storageKey` con fallback legacy, audit e preview semplice PDF/immagini.
+- Soft delete mantenuto via archiviazione (`ARCHIVIATO` + `archivedAt`) con audit.
+- Nuova documentazione tecnica: `docs/DOCUMENT_DOSSIER_STORAGE.md`.
+
 ## Phase 2 avviata
 - Issue #11: Add CI/CD baseline with GitHub Actions.
 - Workflow CI introdotto in `.github/workflows/ci.yml` con job separati:

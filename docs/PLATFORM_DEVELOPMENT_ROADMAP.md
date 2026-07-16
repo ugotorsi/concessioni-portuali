@@ -31,6 +31,10 @@ Exit criteria:
 - nessuna regressione su modulo documenti;
 - tracciabilita completa del ciclo base documento.
 
+Stato implementazione:
+- avviato con adapter storage astratto (`local`/`s3`), metadati obbligatori e audit upload/download.
+- opzione consigliata S3-compatible: Cloudflare R2.
+
 ## Sprint 2 - Libreria atti e legal assistant operativo
 Obiettivo:
 - passare da storytelling legal a supporto operativo concreto.

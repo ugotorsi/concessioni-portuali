@@ -25,6 +25,9 @@ export const DOCUMENT_TIPOLOGIA_VALUES = [
   "ALTRO",
 ] as const;
 
+export const DOCUMENT_SOURCE_VALUES = ["UPLOAD_UTENTE", "PEC_METADATA", "PROTOCOLLO_INTERNO", "MIGRAZIONE", "ALTRO"] as const;
+export const DOCUMENT_STATUS_VALUES = ["ATTIVO", "ARCHIVIATO"] as const;
+
 const ALLOWED_MIME_TYPES = new Set([
   "application/pdf",
   "image/png",
@@ -76,6 +79,8 @@ const uploadMetadataSchema = z
       .trim()
       .optional()
       .transform((value) => (value && value.length > 0 ? value : undefined)),
+    source: z.enum(DOCUMENT_SOURCE_VALUES, { message: "Fonte documento obbligatoria." }),
+    status: z.enum(DOCUMENT_STATUS_VALUES, { message: "Stato documento obbligatorio." }),
     direzione: z
       .enum(DOCUMENT_DIREZIONE_VALUES)
       .optional()
@@ -189,6 +194,8 @@ export interface ParsedUploadDocumentInput {
   tipologia: (typeof DOCUMENT_TIPOLOGIA_VALUES)[number];
   descrizione?: string;
   dataDocumento?: Date;
+  source: (typeof DOCUMENT_SOURCE_VALUES)[number];
+  status: (typeof DOCUMENT_STATUS_VALUES)[number];
   direzione?: DocumentoDirezioneValue;
   canale?: DocumentoCanaleValue;
   numeroProtocollo?: string;
@@ -233,6 +240,8 @@ export function parseUploadDocumentFormData(formData: FormData): ParsedUploadDoc
     tipologia: formData.get("tipologia"),
     descrizione: formData.get("descrizione")?.toString(),
     dataDocumento: formData.get("dataDocumento")?.toString(),
+    source: formData.get("source"),
+    status: formData.get("status"),
     direzione: formData.get("direzione")?.toString(),
     canale: formData.get("canale")?.toString(),
     numeroProtocollo: formData.get("numeroProtocollo")?.toString(),
@@ -278,6 +287,8 @@ export function parseUploadDocumentFormData(formData: FormData): ParsedUploadDoc
     tipologia: parsed.data.tipologia,
     descrizione: parsed.data.descrizione,
     dataDocumento: parsed.data.dataDocumento ? new Date(parsed.data.dataDocumento) : undefined,
+    source: parsed.data.source,
+    status: parsed.data.status,
     direzione: protocolloMetadata.direzione,
     canale: protocolloMetadata.canale,
     numeroProtocollo: protocolloMetadata.numeroProtocollo,
