@@ -77,6 +77,19 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Audit esterno ricevuto dopo completamento stream #1-#8: `docs/EXTERNAL_AI_REVIEW_PHASE_1_COMPLETED.md`
 - Esito sintetico: go demo con perimetro controllato, no-go production fino a chiusura gap bloccanti.
 
+## Project-wide assessment post cloud demo investitore
+- Assessment complessivo di transizione demo -> piattaforma: `docs/PROJECT_WIDE_ASSESSMENT_PLATFORM_DEVELOPMENT.md`
+- Pacchetto prompt per audit da altra AI: `docs/EXTERNAL_AI_AUDIT_PLATFORM_DEVELOPMENT_REQUEST.md`
+- Roadmap piattaforma (Sprint 1-7): `docs/PLATFORM_DEVELOPMENT_ROADMAP.md`
+
+Sintesi posizione attuale:
+- cloud demo consegnata e valida come ambiente dimostrativo;
+- progetto non classificabile come produzione;
+- gap principali su storage documentale persistente, compliance formalizzata, hardening sicurezza enterprise e integrazioni ente.
+
+Prossima decisione richiesta:
+- confermare avvio Sprint 1 su fascicolo documentale cloud persistente.
+
 ## Phase 2 avviata
 - Issue #11: Add CI/CD baseline with GitHub Actions.
 - Workflow CI introdotto in `.github/workflows/ci.yml` con job separati:

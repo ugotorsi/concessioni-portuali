@@ -56,6 +56,20 @@ Note operative:
 - non usare `localhost` nelle env cloud;
 - configurare `NEXTAUTH_URL` e `NEXTAUTH_SECRET` in modo esplicito in cloud.
 
+## Project-wide assessment e passaggio da demo a piattaforma
+Documenti chiave per la fase successiva alla cloud demo investitore:
+- `docs/PROJECT_WIDE_ASSESSMENT_PLATFORM_DEVELOPMENT.md`
+- `docs/EXTERNAL_AI_AUDIT_PLATFORM_DEVELOPMENT_REQUEST.md`
+- `docs/PLATFORM_DEVELOPMENT_ROADMAP.md`
+
+Obiettivo fase corrente:
+- distinguere chiaramente moduli demo/scaffold da moduli platform-ready;
+- preparare audit esterno severo e non compiacente;
+- definire roadmap concreta per arrivare a pilot reale.
+
+Prossima decisione strategica:
+- avvio Sprint 1 su fascicolo documentale cloud persistente (object storage + audit + metadati).
+
 ## CI/CD baseline (Phase 2)
 Pipeline GitHub Actions disponibile in `.github/workflows/ci.yml`.
 
