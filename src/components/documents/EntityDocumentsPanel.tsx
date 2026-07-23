@@ -67,7 +67,7 @@ export function EntityDocumentsPanel({
     <Card>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
-        <CardDescription>Documenti del fascicolo collegati all entita istruttoria.</CardDescription>
+        <CardDescription>Documenti del fascicolo collegati all'entità istruttoria.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <Table>

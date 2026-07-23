@@ -52,7 +52,7 @@ function createReportDetailFixture(overrides?: Partial<ReportDetail>): ReportDet
         rilevanzaArt47: true,
         letteraArt47: "D_OMESSO_PAGAMENTO_CANONE",
         rischioDecadenza: "ALTO",
-        motivazioneArt47: "Morosita reiterata",
+        motivazioneArt47: "Morosità reiterata",
         azioneIstruttoriaArt47: "Avvio contraddittorio",
         regolarizzata: true,
         dataRegolarizzazione: new Date("2026-01-20T00:00:00.000Z"),
@@ -156,7 +156,7 @@ describe("report pdf service", () => {
         titolo: "Decadenza della concessione",
         ambito: "DEMANIO",
         severita: "ALTA",
-        descrizione: "Rilevanza elevata in caso di morosita reiterata.",
+        descrizione: "Rilevanza elevata in caso di morosità reiterata.",
       },
     ];
 

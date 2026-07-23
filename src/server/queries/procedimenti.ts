@@ -947,7 +947,7 @@ export async function getProcedimentiFilters(): Promise<ProcedimentiFiltersData>
     })),
     procedimentoUfficio: PROCEDIMENTO_BOOLEAN_FILTER_VALUES.map((value) => ({
       value,
-      label: value === "SI" ? "Solo d ufficio" : value === "NO" ? "Solo non d ufficio" : "Procedimento d ufficio (tutti)",
+      label: value === "SI" ? "Solo d'ufficio" : value === "NO" ? "Solo non d'ufficio" : "Procedimento d'ufficio (tutti)",
     })),
     preavvisoRigettoApplicabile: PROCEDIMENTO_BOOLEAN_FILTER_VALUES.map((value) => ({
       value,
@@ -968,18 +968,18 @@ export function getLetturaProcedimentale(procedimento: {
 }): LetturaProcedimentale {
   const base = {
     avvertenza:
-      "La piattaforma supporta l istruttoria e non sostituisce le determinazioni dell Autorita competente.",
+      "La piattaforma supporta l'istruttoria e non sostituisce le determinazioni dell'Autorità competente.",
   };
 
   const ritardoHint = procedimento.giorniRitardoContraddittorio !== null
-    ? "Termine di contraddittorio scaduto: attribuire priorita alta alla chiusura del passaggio istruttorio."
+    ? "Termine di contraddittorio scaduto: attribuire priorità alta alla chiusura del passaggio istruttorio."
     : "";
 
   switch (procedimento.tipologia) {
     case "CHIARIMENTI":
       return {
         ...base,
-        qualificazioneProcedimentale: "Procedimento ricognitivo finalizzato all acquisizione di elementi dal concessionario.",
+        qualificazioneProcedimentale: "Procedimento ricognitivo finalizzato all'acquisizione di elementi dal concessionario.",
         livelloAttenzione: "MEDIO",
         passaggiIstruttoriConsigliati:
           `Acquisire elementi dal concessionario e fissare termine di riscontro. ${ritardoHint}`.trim(),
@@ -1006,7 +1006,7 @@ export function getLetturaProcedimentale(procedimento: {
     case "ORDINE_RIPRISTINO":
       return {
         ...base,
-        qualificazioneProcedimentale: "Procedimento tecnico-ripristinatorio su difformita dello stato dei luoghi.",
+        qualificazioneProcedimentale: "Procedimento tecnico-ripristinatorio su difformità dello stato dei luoghi.",
         livelloAttenzione: "ALTO",
         passaggiIstruttoriConsigliati:
           `Verificare art. 54 cod. nav., stato dei luoghi, planimetrie e sopralluogo. ${ritardoHint}`.trim(),
@@ -1036,7 +1036,7 @@ export function getLetturaProcedimentale(procedimento: {
         qualificazioneProcedimentale: "Procedimento incidente sul rapporto concessorio con possibile decadenza.",
         livelloAttenzione: "MOLTO ALTO",
         passaggiIstruttoriConsigliati:
-          `Verificare art. 47 cod. nav., gravita, proporzionalita, contraddittorio ed eventuale parere Comitato Portuale ove necessario. ${ritardoHint}`.trim(),
+          `Verificare art. 47 cod. nav., gravità, proporzionalità, contraddittorio ed eventuale parere Comitato Portuale ove necessario. ${ritardoHint}`.trim(),
         riferimentiNormativiSuggeriti: procedimento.riferimentoNormativo ?? "Art. 47 cod. nav.",
       };
     case "AVVIO_REVOCA":

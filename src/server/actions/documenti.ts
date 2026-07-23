@@ -43,7 +43,7 @@ async function assertLinkedEntitiesExist(input: {
 
   const result = await Promise.all(checks);
   if (result.some((item) => !item)) {
-    throw new Error("Una o piu entita collegate non esistono.");
+    throw new Error("Una o più entità collegate non esistono.");
   }
 }
 

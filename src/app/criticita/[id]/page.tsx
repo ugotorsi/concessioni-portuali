@@ -40,7 +40,7 @@ interface CriticitaDetailPageProps {
 }
 
 function yesNo(value: boolean): string {
-  return value ? "Si" : "No";
+  return value ? "Sì" : "No";
 }
 
 function buildPrioritaOperativa(args: {
@@ -62,7 +62,7 @@ function buildPrioritaOperativa(args: {
 
   if (args.tipologia === "RISCHIO_DECADENZA") {
     messages.push(
-      "Verificare presupposti, gravita, contraddittorio e proporzionalita prima di eventuali proposte istruttorie.",
+      "Verificare presupposti, gravità, contraddittorio e proporzionalità prima di eventuali proposte istruttorie.",
     );
   }
 
@@ -145,7 +145,7 @@ export default async function CriticitaDetailPage({ params }: CriticitaDetailPag
               </Link>
             ) : null}
             <Link href="/criticita" className="text-sm font-medium text-slate-700 underline underline-offset-4">
-              Torna al registro criticita
+              Torna al registro criticità
             </Link>
           </div>
         </div>
@@ -156,7 +156,7 @@ export default async function CriticitaDetailPage({ params }: CriticitaDetailPag
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             <div>
-              <p className="text-xs uppercase tracking-wide text-slate-500">Gravita</p>
+              <p className="text-xs uppercase tracking-wide text-slate-500">Gravità</p>
               <div className="mt-1">
                 <GravitaBadge value={criticita.gravita} />
               </div>
@@ -240,7 +240,7 @@ export default async function CriticitaDetailPage({ params }: CriticitaDetailPag
             <CardHeader>
               <CardTitle>Lettura istruttoria</CardTitle>
               <CardDescription>
-                Supporto decisionale interno: la valutazione finale resta in capo all Autorita competente.
+                Supporto decisionale interno: la valutazione finale resta in capo all'Autorità competente.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 text-sm text-slate-700">
@@ -271,7 +271,7 @@ export default async function CriticitaDetailPage({ params }: CriticitaDetailPag
           <CardHeader>
             <CardTitle>Mapping art. 47 Cod. Nav.</CardTitle>
             <CardDescription>
-              Sezione di supporto istruttorio interno: non sostituisce la valutazione provvedimentale dell Autorita.
+              Sezione di supporto istruttorio interno: non sostituisce la valutazione provvedimentale dell'Autorità.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -318,7 +318,7 @@ export default async function CriticitaDetailPage({ params }: CriticitaDetailPag
           <CardHeader>
             <CardTitle>Regolarizzazione / sanatoria</CardTitle>
             <CardDescription>
-              La regolarizzazione incide sulla valutazione istruttoria ma non determina automaticamente l esclusione di misure decadenziali.
+              La regolarizzazione incide sulla valutazione istruttoria ma non determina automaticamente l'esclusione di misure decadenziali.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -368,7 +368,7 @@ export default async function CriticitaDetailPage({ params }: CriticitaDetailPag
             </div>
             {regolarizzazioneRilevante ? (
               <div className="md:col-span-2 xl:col-span-4 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
-                Presenza di elementi di regolarizzazione utili al fascicolo istruttorio. Valutare proporzionalita e tenuta giuridica senza automatismi.
+                Presenza di elementi di regolarizzazione utili al fascicolo istruttorio. Valutare proporzionalità e tenuta giuridica senza automatismi.
               </div>
             ) : null}
           </CardContent>
@@ -468,7 +468,7 @@ export default async function CriticitaDetailPage({ params }: CriticitaDetailPag
                 {normeCollegate.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center text-slate-500">
-                      Nessun riferimento normativo collegato alla criticita.
+                      Nessun riferimento normativo collegato alla criticità.
                     </TableCell>
                   </TableRow>
                 ) : null}
@@ -617,7 +617,7 @@ export default async function CriticitaDetailPage({ params }: CriticitaDetailPag
                   <TableHead>Data</TableHead>
                   <TableHead>Esito</TableHead>
                   <TableHead>Operatori</TableHead>
-                  <TableHead>Conformita planimetrica</TableHead>
+                    <TableHead>Conformità planimetrica</TableHead>
                   <TableHead>Descrizione</TableHead>
                 </TableRow>
               </TableHeader>

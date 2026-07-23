@@ -1,16 +1,16 @@
-# External Full Program Audit Request — Concessioni Portuali
+﻿# External Full Program Audit Request â€” Concessioni Portuali
 
 ## 1. Executive summary
 Concessioni Portuali e una piattaforma modulare di supporto istruttorio per rapporti concessori demaniali/pubblici.
 Il sistema e rivolto a concessionari strutturati, AdSP, enti concedenti, comuni costieri e consulenti tecnico-giuridici.
-Il problema che risolve è la frammentazione informativa tra dati concessori, criticità, procedimenti, pagamenti, scadenze e report.
-La soluzione integra in un unico flusso operativo: monitoraggio, supporto istruttorio, tracciabilità delle azioni e output documentali.
-L’architettura è moderna (Next.js + TypeScript + Prisma + PostgreSQL), con autenticazione reale, RBAC, middleware di sicurezza e baseline test automatizzati.
+Il problema che risolve Ã¨ la frammentazione informativa tra dati concessori, criticitÃ , procedimenti, pagamenti, scadenze e report.
+La soluzione integra in un unico flusso operativo: monitoraggio, supporto istruttorio, tracciabilitÃ  delle azioni e output documentali.
+Lâ€™architettura Ã¨ moderna (Next.js + TypeScript + Prisma + PostgreSQL), con autenticazione reale, RBAC, middleware di sicurezza e baseline test automatizzati.
 Sono state completate le issue critiche della Phase 1 (#1-#8), incluse sicurezza, audit trail, checklist contraddittorio, PDF server-side e documentazione GDPR/DPIA draft.
 Lo stato attuale e "institutional demo-ready", ma non production-ready pieno.
 Persistono gap infrastrutturali, documentali e compliance che richiedono hardening prima della produzione.
 Si richiede audit esterno indipendente per:
-- validare la credibilità tecnica e giuridico-funzionale dell’MVP;
+- validare la credibilitÃ  tecnica e giuridico-funzionale dellâ€™MVP;
 - identificare rischi tecnici/compliance residui;
 - definire una roadmap 30/60/90 giorni orientata a demo avanzata PA e produzione;
 - supportare decisioni go/no-go su presentazioni istituzionali e sviluppo commerciale.
@@ -27,14 +27,14 @@ Cornice legale/posizionamento da applicare nell audit:
 Il progetto copre il ciclo principale della gestione concessoria demaniale/pubblica:
 - gestione anagrafiche concessioni e concessionari;
 - monitoraggio obblighi concessori;
-- presidio criticità tecnico-giuridiche-economiche;
+- presidio criticitÃ  tecnico-giuridiche-economiche;
 - gestione procedimenti con checklist contraddittorio;
-- gestione pagamenti e morosità;
+- gestione pagamenti e morositÃ ;
 - monitoraggio scadenze amministrative/tecniche;
 - gestione sopralluoghi;
 - reportistica istruttoria e report direzionali;
 - audit eventi operativi;
-- profili art. 47 Cod. Nav. nelle criticità;
+- profili art. 47 Cod. Nav. nelle criticitÃ ;
 - PDF istituzionali server-side;
 - documentazione privacy/GDPR/DPIA in stato draft.
 
@@ -59,32 +59,32 @@ Struttura di repository rilevante:
 - `src/server/actions` per mutazioni server-side;
 - `src/server/queries` per accesso dati;
 - `src/server/pdf` per composizione report PDF;
-- `src/server/audit` per tracciabilità eventi/hash chain;
-- `src/lib` per auth, utilità, policy applicative;
+- `src/server/audit` per tracciabilitÃ  eventi/hash chain;
+- `src/lib` per auth, utilitÃ , policy applicative;
 - `prisma` per schema/seed;
 - `docs` per governance, roadmap, compliance draft;
 - `tests/unit` e `tests/e2e` per regressioni automatiche.
 
 ## 4. Modello dati principale
-Entità core:
-- User: identità applicativa, ruolo, attivazione, password hash.
+EntitÃ  core:
+- User: identitÃ  applicativa, ruolo, attivazione, password hash.
 - Concessionario: anagrafica soggetto titolare/referente.
 - Concessione: nucleo del rapporto concessorio.
 - ObbligoConcessorio: adempimenti e verifiche periodiche.
 - Scadenza: termini amministrativi/tecnici/economici.
-- Criticità: anomalie con profilo gravità, stato, fonte, art. 47.
+- CriticitÃ : anomalie con profilo gravitÃ , stato, fonte, art. 47.
 - Procedimento: iter istruttorio con checklist contraddittorio e warning.
-- Pagamento: canoni, stato pagamento, morosità.
-- Sopralluogo: evidenze tecniche su stato luoghi/conformità.
+- Pagamento: canoni, stato pagamento, morositÃ .
+- Sopralluogo: evidenze tecniche su stato luoghi/conformitÃ .
 - Report: output istruttorio/direzionale con stato validazione.
 - ActivityLog: audit eventi con hash chain tamper-evident applicativa.
 - Normativa (NormaFonte/NormaVersione/NormaImpatto): collegamento norma-caso operativo.
 
 Elementi normativi/procedurali modellati:
-- enum Art. 47 Cod. Nav. per classificazione criticità rilevanti;
+- enum Art. 47 Cod. Nav. per classificazione criticitÃ  rilevanti;
 - enum/checklist procedimento per passaggi di contraddittorio.
 
-## 5. Funzionalità implementate
+## 5. FunzionalitÃ  implementate
 ### 5.1 Autenticazione e ruoli
 - Login reale con NextAuth credentials.
 - RBAC con ruoli operativi e profilo consultivo VIEWER_ADSP.
@@ -97,20 +97,20 @@ Elementi normativi/procedurali modellati:
 - Logging eventi sensibili con actor/context.
 - Hash chaining su ActivityLog (tamper-evident applicativa).
 
-### 5.4 Criticità e art. 47
-- Mapping strutturato art. 47 su criticità.
-- Filtri e visibilità dedicata in UI/export.
+### 5.4 CriticitÃ  e art. 47
+- Mapping strutturato art. 47 su criticitÃ .
+- Filtri e visibilitÃ  dedicata in UI/export.
 
 ### 5.5 Procedimenti e checklist contraddittorio
 - Checklist procedimentale strutturata con completezza/missing/warning.
-- No automatismo decisorio: supporto istruttorio, non sostituzione dell’autorità.
+- No automatismo decisorio: supporto istruttorio, non sostituzione dellâ€™autoritÃ .
 
 ### 5.6 PDF report server-side
 - Report PDF istituzionali server-side con sezioni standard e disclaimer.
 - Policy download per ruolo/stato validazione + audit download.
 
 ### 5.7 Export CSV
-- Export CSV su aree operative principali (criticità, scadenze, pagamenti, procedimenti, report).
+- Export CSV su aree operative principali (criticitÃ , scadenze, pagamenti, procedimenti, report).
 
 ### 5.8 Test automatici
 - Vitest baseline su auth/ruoli/rate limit/audit hash/PDF helper.
@@ -133,42 +133,42 @@ Elementi normativi/procedurali modellati:
 Issue chiuse con commit noti e impatto:
 
 1. #1 Auth reale
-- Cosa è stato fatto: autenticazione reale con NextAuth e sessione JWT.
+- Cosa Ã¨ stato fatto: autenticazione reale con NextAuth e sessione JWT.
 - Commit: d13baa3 feat: add real demo authentication with NextAuth
-- Impatto: credibilità istituzionale e controllo accessi di base.
+- Impatto: credibilitÃ  istituzionale e controllo accessi di base.
 
 2. #2 Art. 47 mapping
-- Cosa è stato fatto: mapping strutturato art. 47 su criticità + filtri/export.
-- Commit: 156676d feat: add art 47 mapping to criticita
+- Cosa Ã¨ stato fatto: mapping strutturato art. 47 su criticitÃ  + filtri/export.
+- Commit: 156676d feat: add art 47 mapping to criticità
 - Impatto: rafforzamento presidio giuridico-istruttorio su decadenza.
 
 3. #3 Server-side PDF reports
-- Cosa è stato fatto: report PDF server-side con audit download.
+- Cosa Ã¨ stato fatto: report PDF server-side con audit download.
 - Commit: a9ef266 feat(report): implement institutional server-side PDF with audit trail
-- Impatto: output più difendibile in contesti istituzionali.
+- Impatto: output piÃ¹ difendibile in contesti istituzionali.
 
 4. #4 Audit trail
-- Cosa è stato fatto: baseline audit con hash chain tamper-evident.
+- Cosa Ã¨ stato fatto: baseline audit con hash chain tamper-evident.
 - Commit: 8d60107 feat: add immutable audit trail baseline
-- Impatto: migliore tracciabilità e accountability applicativa.
+- Impatto: migliore tracciabilitÃ  e accountability applicativa.
 
 5. #5 Vitest/Playwright
-- Cosa è stato fatto: baseline test unit + E2E.
+- Cosa Ã¨ stato fatto: baseline test unit + E2E.
 - Commit: db28610 test: add Vitest and Playwright baseline
 - Impatto: riduzione regressioni sui flussi core.
 
 6. #6 Security middleware
-- Cosa è stato fatto: middleware centralizzato, headers, rate limiting baseline.
+- Cosa Ã¨ stato fatto: middleware centralizzato, headers, rate limiting baseline.
 - Commit: 53d3b26 feat: add security middleware and headers
-- Impatto: posture security minima più coerente.
+- Impatto: posture security minima piÃ¹ coerente.
 
 7. #7 Checklist contraddittorio
-- Cosa è stato fatto: checklist procedimento con logica completezza/warning.
+- Cosa Ã¨ stato fatto: checklist procedimento con logica completezza/warning.
 - Commit: 48b838a feat: add procedimento contraddittorio checklist
 - Impatto: maggiore trasparenza istruttoria e presidio passaggi essenziali.
 
 8. #8 GDPR/DPIA draft
-- Cosa è stato fatto: set documentale privacy/GDPR/DPIA draft.
+- Cosa Ã¨ stato fatto: set documentale privacy/GDPR/DPIA draft.
 - Commit: 01a2cff docs: add GDPR and DPIA documentation draft
 - Impatto: base preliminare compliance per interlocuzione istituzionale.
 
@@ -190,7 +190,7 @@ Evidenze richieste:
 01a2cff docs: add GDPR and DPIA documentation draft
 a9ef266 feat(report): implement institutional server-side PDF with audit trail
 48b838a feat: add procedimento contraddittorio checklist
-156676d feat: add art 47 mapping to criticita
+156676d feat: add art 47 mapping to criticità
 db28610 test: add Vitest and Playwright baseline
 8d60107 feat: add immutable audit trail baseline
 53d3b26 feat: add security middleware and headers
@@ -228,16 +228,16 @@ ID  TITLE                          LABELS                    UPDATED
 #1  Implement real authenticat...  phase-1, priority-cri...  about 20 hours ago
 ```
 
-Nota stato: working tree non clean al momento della stesura perché sono in corso correzioni linguistiche documentali.
+Nota stato: working tree non clean al momento della stesura perchÃ© sono in corso correzioni linguistiche documentali.
 
 ## 8. Punti forti
-- Verticalità giuridico-dominiale rara rispetto a gestionali generalisti.
-- Flusso operativo coerente: criticità → art.47 → procedimento → contraddittorio → report.
-- Audit trail applicativo già integrato nei flussi sensibili.
+- VerticalitÃ  giuridico-dominiale rara rispetto a gestionali generalisti.
+- Flusso operativo coerente: criticitÃ  â†’ art.47 â†’ procedimento â†’ contraddittorio â†’ report.
+- Audit trail applicativo giÃ  integrato nei flussi sensibili.
 - Presenza di baseline test automatizzati ripetibili.
 - PDF istituzionali server-side con controlli ruolo/validazione.
 - Pacchetto privacy/GDPR draft pronto per revisione legale.
-- Demo istituzionale già presentabile con narrativa tecnico-amministrativa.
+- Demo istituzionale giÃ  presentabile con narrativa tecnico-amministrativa.
 
 ## 9. Limiti e rischi attuali
 - Non production-grade pieno.
@@ -267,7 +267,7 @@ Nota stato: working tree non clean al momento della stesura perché sono in cors
 - Logging infrastrutturale centralizzato, alerting, SIEM.
 
 ### P1 (demo istituzionale avanzata)
-- Workflow procedimentale più vincolato.
+- Workflow procedimentale piÃ¹ vincolato.
 - Gestione documentale e allegati strutturata.
 - Integrazione protocollo/PEC (anche pilota).
 - Reportistica avanzata con scenario pack istituzionale.
@@ -281,13 +281,13 @@ Nota stato: working tree non clean al momento della stesura perché sono in cors
 ## 11. Domande per la AI valutatrice
 - La separazione core comune vs verticali normative e coerente e comunicabile?
 - Il framing legale (art. 18 speciale, art. 36 base, art. 37 comparativa, art. 47 trasversale, d.l. 400/1993, art. 12 dir. 2006/123) e correttamente recepito?
-- Questo è un MVP credibile per contesto pubblico/para-pubblico?
+- Questo Ã¨ un MVP credibile per contesto pubblico/para-pubblico?
 - Cosa manca in modo imprescindibile per una PA?
 - Quali rischi tecnici principali vedi?
 - Quali rischi giuridici/compliance principali vedi?
 - Quali parti sembrano deboli o incoerenti?
 - Quali test mancano per ridurre rischio regressione?
-- Quanto è vendibile oggi e a quali condizioni?
+- Quanto Ã¨ vendibile oggi e a quali condizioni?
 - Quale roadmap prioritaria consiglieresti?
 - Quali feature elimineresti o semplificheresti?
 - Quali feature aggiungeresti prima di demo istituzionale estesa?
@@ -295,15 +295,15 @@ Nota stato: working tree non clean al momento della stesura perché sono in cors
 
 ## 12. Rating richiesto
 Richiesto rating 1-10 su:
-- qualità tecnica;
+- qualitÃ  tecnica;
 - architettura;
 - sicurezza;
 - compliance GDPR;
 - coerenza giuridica;
-- qualità UX;
-- maturità prodotto;
-- vendibilità a PA/AdSP;
-- manutenibilità;
+- qualitÃ  UX;
+- maturitÃ  prodotto;
+- vendibilitÃ  a PA/AdSP;
+- manutenibilitÃ ;
 - readiness demo;
 - readiness production.
 
@@ -339,3 +339,4 @@ Claim da evitare nella valutazione e nel posizionamento:
 - non presentare il prodotto come production-ready generalizzato per tutti i comuni costieri;
 - non presentare compliance automatica totale o decisioni automatiche di decadenza/revoca;
 - non presentare firma/conservazione/PEC/protocollo come pienamente operativi.
+

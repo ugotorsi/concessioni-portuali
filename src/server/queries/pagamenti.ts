@@ -378,7 +378,7 @@ export async function getPagamentiFilters(): Promise<PagamentiFiltersData> {
     stati: PAGAMENTO_STATO_VALUES.map((value) => ({ value, label: formatEnumLabel(value) })),
     criticita: [
       { value: "SOLO_CRITICI", label: "Solo critici" },
-      { value: "MOROSITA", label: "Morosita" },
+      { value: "MOROSITA", label: "Morosità" },
       { value: "PARZIALI", label: "Parziali" },
       { value: "SCADUTI", label: "Scaduti" },
     ],

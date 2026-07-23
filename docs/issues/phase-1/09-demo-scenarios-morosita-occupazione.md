@@ -1,7 +1,7 @@
-# Add institutional demo scenarios for morosita and occupazione difforme
+﻿# Add institutional demo scenarios for morosità and occupazione difforme
 
 ## Obiettivo
-Rafforzare seed e percorso demo con due casi istituzionali completi: morosita rilevante e occupazione difforme.
+Rafforzare seed e percorso demo con due casi istituzionali completi: morosità rilevante e occupazione difforme.
 
 ## Motivazione strategica
 Aumenta qualita commerciale e istituzionale delle demo, mostrando valore concreto su casi ad alto impatto.
@@ -17,10 +17,10 @@ Aumenta qualita commerciale e istituzionale delle demo, mostrando valore concret
 - src/app/report/page.tsx
 - docs/DEMO_SCENARIOS_INSTITUTIONAL.md
 
-## Attivita tecniche
+## Attività tecniche
 - Preparare dati seed realistici per entrambi i casi.
 - Definire percorso demo con passaggi e tempi standard.
-- Collegare evidenze a criticita/procedimenti/report.
+- Collegare evidenze a criticità/procedimenti/report.
 - Formalizzare KPI narrativi (rischio, tempo, decisioni supportate).
 
 ## Criteri di accettazione
@@ -30,7 +30,7 @@ Aumenta qualita commerciale e istituzionale delle demo, mostrando valore concret
 - Documentazione scenario disponibile.
 
 ## Test richiesti
-- Smoke test esecuzione completa scenario morosita.
+- Smoke test esecuzione completa scenario morosità.
 - Smoke test esecuzione completa scenario occupazione difforme.
 - Verifica consistenza output report.
 
@@ -41,7 +41,7 @@ Aumenta qualita commerciale e istituzionale delle demo, mostrando valore concret
 ## Dipendenze
 - Beneficia di Issue 3 e Issue 7 completate.
 
-## Priorita
+## Priorità
 High
 
 ## Complessita
@@ -49,3 +49,4 @@ Media
 
 ## Label suggerite
 demo, seed, legal-domain, phase-1, priority-high
+

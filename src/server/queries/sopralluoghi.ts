@@ -463,10 +463,10 @@ export function getLetturaTecnicaSopralluogo(sopralluogo: {
   let livelloAttenzione = "BASSO";
 
   if (sopralluogo.esito === "NEGATIVO") {
-    qualificazioneTecnica = "Sopralluogo con esito negativo e necessita di presidio tecnico immediato.";
+    qualificazioneTecnica = "Sopralluogo con esito negativo e necessità di presidio tecnico immediato.";
     livelloAttenzione = "ALTO";
     messaggi.push(
-      "Trattare il sopralluogo con priorita: valutare apertura/aggiornamento criticita e supporto istruttorio.",
+      "Trattare il sopralluogo con priorità: valutare apertura/aggiornamento criticità e supporto istruttorio.",
     );
   } else if (sopralluogo.esito === "CON_RILIEVI") {
     qualificazioneTecnica = "Sopralluogo con rilievi che richiede follow-up tecnico.";
@@ -479,7 +479,7 @@ export function getLetturaTecnicaSopralluogo(sopralluogo: {
   if (!sopralluogo.conformitaPlanimetrica) {
     livelloAttenzione = livelloAttenzione === "ALTO" ? "ALTO" : "MEDIO_ALTO";
     messaggi.push(
-      "Conformita planimetrica non positiva: confrontare planimetria e area occupata, con verifica di possibile occupazione difforme.",
+      "Conformità planimetrica non positiva: confrontare planimetria e area occupata, con verifica di possibile occupazione difforme.",
     );
   }
 
@@ -491,14 +491,14 @@ export function getLetturaTecnicaSopralluogo(sopralluogo: {
   if (hasIssueText(sopralluogo.occupazione)) {
     livelloAttenzione = livelloAttenzione === "BASSO" ? "MEDIO" : livelloAttenzione;
     messaggi.push(
-      "Rilievi sull occupazione: verificare art. 54 cod. nav. e possibile attivazione di criticita tecnica/giuridica.",
+      "Rilievi sull'occupazione: verificare art. 54 cod. nav. e possibile attivazione di criticità tecnica/giuridica.",
     );
   }
 
   if (hasIssueText(sopralluogo.interferenze)) {
     livelloAttenzione = livelloAttenzione === "BASSO" ? "MEDIO" : livelloAttenzione;
     messaggi.push(
-      "Interferenze presenti: verificare coordinamento con altri concessionari e viabilita portuale.",
+      "Interferenze presenti: verificare coordinamento con altri concessionari e viabilità portuale.",
     );
   }
 
@@ -512,7 +512,7 @@ export function getLetturaTecnicaSopralluogo(sopralluogo: {
     azioneConsigliata: messaggi.join(" "),
     collegamentoCriticita:
       sopralluogo.esito === "NEGATIVO" || !sopralluogo.conformitaPlanimetrica || hasIssueText(sopralluogo.occupazione)
-        ? "Valutare apertura o aggiornamento criticita collegate alla concessione."
+        ? "Valutare apertura o aggiornamento criticità collegate alla concessione."
         : "Nessun collegamento critico immediato emerso dai dati correnti.",
   };
 }

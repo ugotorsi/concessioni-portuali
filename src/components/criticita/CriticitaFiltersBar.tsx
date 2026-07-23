@@ -27,7 +27,7 @@ export function CriticitaFiltersBar({ filtersData, current }: CriticitaFiltersBa
       </Select>
 
       <Select name="gravita" defaultValue={current.gravita ?? ""}>
-        <option value="">Gravita (tutte)</option>
+        <option value="">Gravità (tutte)</option>
         {filtersData.gravita.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}

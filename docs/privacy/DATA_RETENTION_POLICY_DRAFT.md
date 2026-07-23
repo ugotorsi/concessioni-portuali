@@ -19,9 +19,9 @@ Termini definitivi da validare con ente, massimario, obblighi normativi e regola
 | --- | --- | --- | --- |
 | Utenti e account | email, ruolo, stato attivo, log accesso | da definire in base a obblighi legali e policy ente | disattivazione account e minimizzazione storici |
 | Concessioni | titolo, stato, durata, riferimenti | da definire in base a massimario e obblighi amministrativi | possibile conservazione estesa per fascicolo |
-| Criticita | tipologia, gravita, art.47, note istruttorie | da definire con ente e rischio contenzioso | valutare anonimizzazione post-chiusura |
+| Criticità | tipologia, gravità, art.47, note istruttorie | da definire con ente e rischio contenzioso | valutare anonimizzazione post-chiusura |
 | Procedimenti | fasi, termini, esiti istruttori | da definire in base a normativa procedimentale | allineare a fascicolo e provvedimenti |
-| Pagamenti | importi, scadenze, morosita | da definire in base a obblighi contabili/fiscali | coordinare con sistemi contabili ufficiali |
+| Pagamenti | importi, scadenze, morosità | da definire in base a obblighi contabili/fiscali | coordinare con sistemi contabili ufficiali |
 | Sopralluoghi | esiti, verifiche, note tecniche | da definire in base a obblighi tecnici e contenzioso | minimizzare allegati non necessari |
 | Report | contenuto, validazione, metadati | da definire in base a finalità istruttoria | controllo versioni e diffusione |
 | Audit log | attore, azione, timestamp, hash chain | da definire con requisiti sicurezza/compliance | append-only logico, non WORM nativo |
@@ -50,4 +50,5 @@ Termini definitivi da validare con ente, massimario, obblighi normativi e regola
 - Definizione retention per categoria con approvazione formale.
 - Introduzione job periodici di purge/archiviazione controllata.
 - Evidenza audit su esecuzione policy.
+
 

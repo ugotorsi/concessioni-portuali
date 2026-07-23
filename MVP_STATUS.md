@@ -12,7 +12,7 @@ Riposizionamento dominio (Issue #34 / 32A):
 - Dashboard
 - Mappa demo territoriale
 - Concessioni
-- Criticita
+- Criticità
 - Pagamenti
 - Sopralluoghi
 - Procedimenti
@@ -39,23 +39,23 @@ Riposizionamento dominio (Issue #34 / 32A):
 - Pagina interna `/audit` riservata ad ADMIN
 - Baseline test automatizzati Vitest + Playwright (Issue #5)
 - Smoke E2E su auth/ruoli, security headers e accesso audit
-- Mapping strutturato art. 47 su Criticita (Issue #2)
-- Filtri/UI/export Criticita allineati al profilo art.47 e rischio decadenza
-- Regolarizzazione Criticita con impatto istruttorio e verifica dedicata (Issue #12)
-- Estensione lista/dettaglio/export criticita con stato/esito regolarizzazione
+- Mapping strutturato art. 47 su Criticità (Issue #2)
+- Filtri/UI/export Criticità allineati al profilo art.47 e rischio decadenza
+- Regolarizzazione Criticità con impatto istruttorio e verifica dedicata (Issue #12)
+- Estensione lista/dettaglio/export criticità con stato/esito regolarizzazione
 - Checklist contraddittorio su Procedimento con update auditabile (Issue #7)
 - Lista/dettaglio/export procedimenti estesi con stato checklist e warning istruttori
-- Distinzione Procedimento d ufficio / istanza di parte con tracking art. 10-bis istruttorio (Issue #13)
+- Distinzione Procedimento d'ufficio / istanza di parte con tracking art. 10-bis istruttorio (Issue #13)
 - Refinement warning checklist su preavviso rigetto e osservazioni
 - Export report CSV verificato
 - PDF report istituzionale server-side (PDFKit) con template stabile, sezioni istruttorie e footer/disclaimer
 - PDF istituzionale migliorato (Issue #16) con frontespizio, sommario, header/footer ricorrenti, box riepilogativi e disclaimer finali rafforzati
 - Nuova sezione `/demo-scenari` con 5 scenari demo istituzionali guidati (Issue #17)
-- Seed allineato a casi demo su morosita art.47, occupazione difforme, regolarizzazione, contraddittorio incompleto e art.10-bis
-- Collegamenti scenario -> concessione/criticita/procedimento/report/PDF con linguaggio istruttorio non decisorio
+- Seed allineato a casi demo su morosità art.47, occupazione difforme, regolarizzazione, contraddittorio incompleto e art.10-bis
+- Collegamenti scenario -> concessione/criticità/procedimento/report/PDF con linguaggio istruttorio non decisorio
 - Audit su download PDF (`REPORT_PDF_DOWNLOAD`) e dinieghi autorizzativi su route PDF
 - Test unit su PDF service e test E2E policy download PDF per ruolo/validazione
-- Baseline fascicolo documentale (Issue #18): upload/download protetto, metadati estesi, collegamento multi-entita, stato `ATTIVO/ARCHIVIATO`, audit dedicato, pagina `/documenti` e integrazione su dettagli entita
+- Baseline fascicolo documentale (Issue #18): upload/download protetto, metadati estesi, collegamento multi-entità, stato `ATTIVO/ARCHIVIATO`, audit dedicato, pagina `/documenti` e integrazione su dettagli entità
 - Baseline protocollo/PEC metadata (Issue #19): metadati istruttori su documenti (direzione, canale, protocollo, Message-ID/ricevute PEC), warning ricevute incomplete e sintesi in report/PDF
 - Demo guidata AI-led (Issue #20): sezione `/demo-guidata` con slide navigabili, speaker notes AI, link rapidi a scenari/fascicolo/mappa/report e narrativa istituzionale su automazione del procedimento (non della decisione)
 - Voce narrante demo guidata (Issue #21): Web Speech API browser-based su `/demo-guidata` con controlli leggi/pausa/riprendi/ferma, narrazione automatica opzionale e fallback senza servizi esterni/API key
@@ -66,8 +66,8 @@ Riposizionamento dominio (Issue #34 / 32A):
 - Investment cost breakdown in demo guidata (Issue #25): dettaglio investimento per fasi (pilot, produzione ente, scalabilità multi-ente), voci costo, ricavi iniziali/ricorrenti/professionali e scenari break-even prudente/intermedio/esteso
 - Seed documentale locale attivo con file su storage configurabile (`DOCUMENT_STORAGE_ROOT`) e limiti upload (`DOCUMENT_MAX_FILE_MB`)
 - Warning Turbopack su filesystem tracing document storage risolto con isolamento runtime server-side del modulo storage (build pulita, senza warning NFT)
-- Baseline mappa demo territoriale (Issue #10): route `/mappa` GIS-ready con lista marker, placeholder map UI e link rapidi a concessioni/criticita/sopralluoghi
-- Metadati territoriali demo opzionali estesi: area descrizione, zona portuale, riferimento catastale e localizzazione descrittiva su criticita/sopralluoghi
+- Baseline mappa demo territoriale (Issue #10): route `/mappa` GIS-ready con lista marker, placeholder map UI e link rapidi a concessioni/criticità/sopralluoghi
+- Metadati territoriali demo opzionali estesi: area descrizione, zona portuale, riferimento catastale e localizzazione descrittiva su criticità/sopralluoghi
 - Nessuna API key esterna richiesta (no Google Maps/Mapbox obbligatori), coordinate solo demo/approssimative
 - Documentazione privacy/GDPR/DPIA draft creata (Issue #8)
 
@@ -182,4 +182,5 @@ Copertura baseline CI:
 1. Estendere progressivamente i test su export/report PDF e procedure critiche
 2. Introdurre test integration DB dedicati per server actions a maggiore impatto
 3. Mantenere audit periodico su DB/container e dipendenze
+
 

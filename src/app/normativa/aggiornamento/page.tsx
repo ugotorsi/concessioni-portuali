@@ -28,7 +28,7 @@ export default async function NormativaAggiornamentoPage() {
           <CardContent>
             <ol className="list-decimal space-y-2 pl-5 text-sm text-slate-700">
               <li>Registrare nuova versione della fonte normativa in archivio.</li>
-              <li>Valutare impatti su criticita, procedimenti, report e concessioni.</li>
+              <li>Valutare impatti su criticità, procedimenti, report e concessioni.</li>
               <li>Aggiornare note operative e checklist istruttorie dei moduli coinvolti.</li>
               <li>Condividere outcome interno con i referenti di area.</li>
             </ol>

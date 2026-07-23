@@ -1,4 +1,4 @@
-# Implement professional server-side PDF reports
+﻿# Implement professional server-side PDF reports
 
 ## Obiettivo
 Sostituire/rafforzare output PDF demo con generazione server-side professionale, template istituzionale e dati istruttori.
@@ -17,7 +17,7 @@ Un report PDF formalizzato aumenta credibilita in interlocuzione con AdSP, partn
 - src/lib/utils.ts
 - src/types/
 
-## Attivita tecniche
+## Attività tecniche
 - Definire template istituzionale (header, footer, sezioni).
 - Mappare contenuti istruttori in blocchi coerenti.
 - Gestire fallback per campi mancanti.
@@ -41,7 +41,7 @@ Un report PDF formalizzato aumenta credibilita in interlocuzione con AdSP, partn
 ## Dipendenze
 - Beneficia di completamento Issue 2 e Issue 7.
 
-## Priorita
+## Priorità
 High
 
 ## Complessita
@@ -49,3 +49,4 @@ Media-Alta
 
 ## Label suggerite
 reports, pdf, phase-1, priority-high
+

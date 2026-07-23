@@ -78,7 +78,7 @@ Prossima decisione strategica:
 ## Posizionamento dominio e quadro giuridico (Issue #34 / 32A)
 Core comune:
 - monitoraggio istruttorio di rapporti concessori demaniali/pubblici;
-- fascicolo documentale, scadenze, canoni, obblighi, sopralluoghi, criticita, procedimenti, audit, report.
+- fascicolo documentale, scadenze, canoni, obblighi, sopralluoghi, criticità, procedimenti, audit, report.
 
 Verticale A - Portuale / AdSP:
 - art. 18 L. 84/1994 come verticale speciale;
@@ -162,15 +162,15 @@ Baseline coperta:
 - Unit: rate limiting, capability ruoli, hashing/sanitizzazione audit.
 - E2E: login/redirect per ruoli, security headers baseline, accesso audit admin/viewer.
 
-## Mapping art. 47 su Criticita (Issue #2)
-- Estensione `Criticita` con campi strutturati: `rilevanzaArt47`, `letteraArt47`, `rischioDecadenza`, `motivazioneArt47`, `azioneIstruttoriaArt47`.
+## Mapping art. 47 su Criticità (Issue #2)
+- Estensione `Criticità` con campi strutturati: `rilevanzaArt47`, `letteraArt47`, `rischioDecadenza`, `motivazioneArt47`, `azioneIstruttoriaArt47`.
 - Form nuova/modifica criticità con sezione dedicata e disclaimer di supporto istruttorio non vincolante.
 - Filtri lista criticità per rilevanza, lettera art.47 e rischio decadenza.
 - Dettaglio criticità con sezione esplicita di mapping art.47.
 - Export CSV criticità esteso con colonne art.47.
 
-## Regolarizzazione criticita (Issue #12)
-- Estensione `Criticita` con campi: `regolarizzata`, `dataRegolarizzazione`, `descrizioneRegolarizzazione`, `esitoRegolarizzazione`, `verificataRegolarizzazione`, `dataVerificaRegolarizzazione`, `noteVerificaRegolarizzazione`.
+## Regolarizzazione criticità (Issue #12)
+- Estensione `Criticità` con campi: `regolarizzata`, `dataRegolarizzazione`, `descrizioneRegolarizzazione`, `esitoRegolarizzazione`, `verificataRegolarizzazione`, `dataVerificaRegolarizzazione`, `noteVerificaRegolarizzazione`.
 - Filtri lista criticità su stato regolarizzazione ed esito regolarizzazione.
 - Sezioni dedicate in form e dettaglio criticità con nota istruttoria: la regolarizzazione incide sull istruttoria ma non determina automatica esclusione della decadenza.
 - Export CSV criticità esteso con colonne regolarizzazione.
@@ -186,10 +186,10 @@ Baseline coperta:
 - Lista procedimenti con colonna checklist/warning e filtri opzionali su checklist incompleta e memorie in scadenza.
 - Export CSV procedimenti esteso con campi checklist.
 
-## Procedimento d ufficio vs istanza di parte (Issue #13)
+## Procedimento d'ufficio vs istanza di parte (Issue #13)
 - Estensione Procedimento con tracciamento origine (`origineProcedimento`, `procedimentoUfficio`) e campi istruttori preavviso rigetto ex art. 10-bis L. 241/1990.
-- Checklist contraddittorio raffinata con percorso differenziato tra procedimenti d ufficio e a istanza di parte.
-- Preavviso di rigetto trattato come tracking istruttorio: applicabilita da valutare caso per caso, senza automatismi decisori.
+- Checklist contraddittorio raffinata con percorso differenziato tra procedimenti d'ufficio e a istanza di parte.
+- Preavviso di rigetto trattato come tracking istruttorio: applicabilità da valutare caso per caso, senza automatismi decisori.
 - Lista, dettaglio, export CSV e PDF report allineati ai nuovi campi.
 
 Limiti e perimetro giuridico:
@@ -237,14 +237,14 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
 
 ## Scenari demo istituzionali (Issue #17)
 - Nuova pagina dedicata: `/demo-scenari`.
-- Finalita: raccontare casi istruttori realistici in contesto PA/AdSP senza automatismi decisori.
+- Finalità: raccontare casi istruttori realistici in contesto PA/AdSP senza automatismi decisori.
 - Scenari disponibili:
-   - DEMO-01 - Morosita art. 47
+   - DEMO-01 - Morosità art. 47
    - DEMO-02 - Occupazione difforme
    - DEMO-03 - Regolarizzazione pre-provvedimentale
    - DEMO-04 - Contraddittorio incompleto
    - DEMO-05 - Istanza di parte e art. 10-bis
-- Ogni scenario espone collegamenti reali a concessione, criticita, procedimento e report/PDF.
+- Ogni scenario espone collegamenti reali a concessione, criticità, procedimento e report/PDF.
 - Presidio comunicativo: "elemento da valutare", "profilo istruttorio", "supporto al responsabile del procedimento".
 
 ## Demo guidata AI-led (Issue #20)
@@ -289,8 +289,8 @@ Evoluzione possibile:
 ## Mappa demo territoriale baseline (Issue #10)
 - Nuova pagina dedicata: `/mappa`.
 - Vista geografica placeholder GIS-ready senza provider esterni/API key obbligatorie.
-- Marker territoriali su concessioni, criticita e sopralluoghi con fallback coordinate da concessione.
-- Layout demo con pannello lista marker, canvas territoriale e link rapidi a dettaglio entita.
+- Marker territoriali su concessioni, criticità e sopralluoghi con fallback coordinate da concessione.
+- Layout demo con pannello lista marker, canvas territoriale e link rapidi a dettaglio entità.
 - Estensione schema con metadati territoriali opzionali: `areaDescrizione`, `zonaPortuale`, `riferimentoCatastale`, `localizzazioneDescrizione`.
 
 Perimetro e limiti mappa:
@@ -301,7 +301,7 @@ Perimetro e limiti mappa:
 
 ## Fascicolo documentale baseline (Issue #18)
 - Nuovo registro documentale centrale: `/documenti`.
-- Upload file locale con metadati e collegamento a una o piu entita tra concessione, criticita, procedimento, sopralluogo, pagamento, report.
+- Upload file locale con metadati e collegamento a una o più entità tra concessione, criticità, procedimento, sopralluogo, pagamento, report.
 - Download protetto server-side da route dedicata: `/documenti/[id]/download`.
 - Archivazione documento con stato esplicito (`ATTIVO`/`ARCHIVIATO`) e restrizione consultiva per `VIEWER_ADSP` su documenti archiviati.
 - Audit eventi documentali: upload, download, update metadati, archiviazione e dinieghi autorizzativi.
@@ -309,7 +309,7 @@ Perimetro e limiti mappa:
    - `DOCUMENT_STORAGE_ROOT`
    - `DOCUMENT_MAX_FILE_MB`
 - Seed demo aggiornato: file reali locali in `.local-storage/documents` e metadati documentali estesi in DB.
-- Integrazione UI documenti nei dettagli entita principali e sezione "Documenti collegati" nel PDF istituzionale.
+- Integrazione UI documenti nei dettagli entità principali e sezione "Documenti collegati" nel PDF istituzionale.
 
 Perimetro e limiti:
 - baseline documentale orientata a demo e fascicolo operativo interno;
@@ -328,12 +328,12 @@ Perimetro e limiti:
 - nessuna protocollazione legale automatica o conservazione a norma in questa baseline.
 
 ### Institutional PDF polish (Issue #16)
-- Template PDF istituzionale raffinato con frontespizio, sommario sezioni e layout piu formale.
+- Template PDF istituzionale raffinato con frontespizio, sommario sezioni e layout più formale.
 - Header ricorrente con riferimenti applicativi/data generazione.
 - Footer ricorrente con numerazione pagina, ID report e dicitura "Uso interno / istruttorio".
-- Sezioni dedicate a criticita, procedimenti, pagamenti, scadenze e sopralluoghi con box riepilogativi.
+- Sezioni dedicate a criticità, procedimenti, pagamenti, scadenze e sopralluoghi con box riepilogativi.
 - Evidenza esplicita di art. 47, regolarizzazione, checklist contraddittorio e tracciamento art. 10-bis.
-- Disclaimer rafforzati: supporto istruttorio, assenza di automatismi decisori e necessita di valutazione dell autorita competente.
+- Disclaimer rafforzati: supporto istruttorio, assenza di automatismi decisori e necessita di valutazione dell autorità competente.
 
 ## Security hardening (Phase 1)
 - Middleware centralizzato in `middleware.ts` per primo filtro accessi/redirect.
@@ -356,7 +356,7 @@ Perimetro e limiti:
 
 ## Audit trail baseline (Issue #4)
 - Baseline audit centralizzata con utility server in `src/server/audit/auditLog.ts`.
-- Eventi principali tracciati con contesto utente reale (id, email, ruolo), entita, azione, esito e timestamp.
+- Eventi principali tracciati con contesto utente reale (id, email, ruolo), entità, azione, esito e timestamp.
 - Hash chaining tamper-evident: ogni `ActivityLog` salva `previousHash` e `currentHash` SHA-256.
 - Raccolta context request (`ipAddress`, `userAgent`) tramite helper `src/server/audit/requestContext.ts`.
 - Eventi coperti nelle server actions operative:
@@ -399,4 +399,5 @@ Perimetro e limiti:
 - L'audit trail attuale non e una conservazione legale/fisicamente immutabile (non sostituisce SIEM/WORM).
 - Per produzione sono necessari: policy DB append-only, retention/backup, firma e conservazione a norma.
 - La baseline test attuale e orientata a smoke/regressioni principali, non sostituisce una suite completa di integrazione e carico.
+
 

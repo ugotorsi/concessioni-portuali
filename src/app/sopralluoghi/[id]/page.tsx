@@ -161,7 +161,7 @@ export default async function SopralluogoDetailPage({ params }: SopralluogoDetai
             </CardHeader>
             <CardContent className="grid gap-3 md:grid-cols-2 text-sm text-slate-700">
               <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500">Conformita planimetrica</p>
+                <p className="text-xs uppercase tracking-wide text-slate-500">Conformità planimetrica</p>
                 <div className="mt-1">
                   <ConformitaBadge value={detail.sopralluogo.conformitaPlanimetrica} />
                 </div>
@@ -210,7 +210,7 @@ export default async function SopralluogoDetailPage({ params }: SopralluogoDetai
                 </div>
               </div>
               <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500">Conformita planimetrica</p>
+                <p className="text-xs uppercase tracking-wide text-slate-500">Conformità planimetrica</p>
                 <div className="mt-1">
                   <ConformitaBadge value={detail.sopralluogo.conformitaPlanimetrica} />
                 </div>
@@ -251,7 +251,7 @@ export default async function SopralluogoDetailPage({ params }: SopralluogoDetai
               <p className="mt-1">{formatEnumLabel(detail.concessione.tipologiaBene)}</p>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-wide text-slate-500">Attivita</p>
+              <p className="text-xs uppercase tracking-wide text-slate-500">Attività</p>
               <p className="mt-1">{formatEnumLabel(detail.concessione.attivita)}</p>
             </div>
             <div>
@@ -279,7 +279,7 @@ export default async function SopralluogoDetailPage({ params }: SopralluogoDetai
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Gravita</TableHead>
+                    <TableHead>Gravità</TableHead>
                     <TableHead>Tipologia</TableHead>
                     <TableHead>Descrizione</TableHead>
                     <TableHead>Stato</TableHead>
@@ -301,7 +301,7 @@ export default async function SopralluogoDetailPage({ params }: SopralluogoDetai
                   {detail.criticitaAperte.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={4} className="text-center text-slate-500">
-                        Nessuna criticita aperta collegata.
+                        Nessuna criticità aperta collegata.
                       </TableCell>
                     </TableRow>
                   ) : null}
@@ -401,7 +401,7 @@ export default async function SopralluogoDetailPage({ params }: SopralluogoDetai
           <CardHeader>
             <CardTitle>Lettura tecnica e azione consigliata</CardTitle>
             <CardDescription>
-              La piattaforma supporta la verifica istruttoria e non sostituisce le determinazioni dell Autorita.
+              La piattaforma supporta la verifica istruttoria e non sostituisce le determinazioni dell'Autorità.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-slate-700">
@@ -418,7 +418,7 @@ export default async function SopralluogoDetailPage({ params }: SopralluogoDetai
               <p className="mt-1">{letturaTecnica.azioneConsigliata}</p>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-wide text-slate-500">Collegamento a criticita</p>
+              <p className="text-xs uppercase tracking-wide text-slate-500">Collegamento a criticità</p>
               <p className="mt-1">{letturaTecnica.collegamentoCriticita}</p>
             </div>
           </CardContent>

@@ -209,7 +209,7 @@ export async function getMappaDemoData(): Promise<MappaDemoData> {
       {
         id: row.id,
         type: "CRITICITA",
-        title: `Criticita ${row.tipologia}`,
+        title: `Criticità ${row.tipologia}`,
         subtitle: row.localizzazioneDescrizione ?? `Concessione ${row.concessione.numeroAtto}`,
         lat: coordinates.lat,
         lng: coordinates.lng,

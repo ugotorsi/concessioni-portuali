@@ -16,7 +16,7 @@ Piattaforma per gestione e monitoraggio concessioni portuali/demaniali con funzi
 - Natura: trattamento di dati amministrativi e potenziali dati personali di operatori/referenti.
 - Ambito: ambiente applicativo web per uso interno e consultivo istituzionale.
 - Contesto: demo avanzata verso scenario istituzionale, non ancora deployment compliance-ready completo.
-- Finalita: supporto istruttorio, monitoraggio rischio concessorio, trasparenza operativa e sicurezza.
+- Finalità: supporto istruttorio, monitoraggio rischio concessorio, trasparenza operativa e sicurezza.
 
 ## 3. Necessita e proporzionalita
 - Il trattamento e necessario per gestire processi concessori e istruttori complessi.
@@ -67,4 +67,5 @@ Piattaforma per gestione e monitoraggio concessioni portuali/demaniali con funzi
 - Questa DPIA e un draft non approvato.
 - Non costituisce decisione formale del titolare.
 - Necessaria revisione con DPO/RPD, responsabili funzione e consulenza legale specialistica.
+
 

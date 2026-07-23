@@ -20,16 +20,16 @@ interface PdfContext {
 }
 
 const COVER_DISCLAIMER =
-  "Documento istruttorio generato a supporto dell attivita amministrativa. Non costituisce provvedimento finale ne valutazione vincolante.";
+  "Documento istruttorio generato a supporto dell'attività amministrativa. Non costituisce provvedimento finale né valutazione vincolante.";
 
 const ART47_NOTE =
-  "La rilevanza ex art. 47 e rappresentata come elemento istruttorio e richiede valutazione dell autorita competente.";
+  "La rilevanza ex art. 47 è rappresentata come elemento istruttorio e richiede valutazione dell'autorità competente.";
 
 const REGOLARIZZAZIONE_NOTE =
   "La regolarizzazione costituisce elemento istruttorio da valutare prima di eventuali determinazioni finali.";
 
 const PREAVVISO_NOTE =
-  "La gestione del preavviso di rigetto ex art. 10-bis L. 241/1990 e tracciata a fini istruttori e deve essere valutata secondo il caso concreto.";
+  "La gestione del preavviso di rigetto ex art. 10-bis L. 241/1990 è tracciata a fini istruttori e deve essere valutata secondo il caso concreto.";
 
 const CHECKLIST_NOTE =
   "La checklist non sostituisce la valutazione del responsabile del procedimento.";
@@ -265,7 +265,7 @@ function addSummarySection(ctx: PdfContext, detail: ReportDetail) {
   const rows = [
     "Sintesi",
     "Concessione",
-    "Criticita",
+    "Criticità",
     "Procedimenti",
     "Pagamenti",
     "Scadenze",
@@ -281,7 +281,7 @@ function addSummarySection(ctx: PdfContext, detail: ReportDetail) {
 
   addSectionTitle(ctx, "Sintesi");
   addInfoBox(ctx, "Indicatori chiave", [
-    `Criticita aperte: ${detail.criticitaAperte.length}`,
+    `Criticità aperte: ${detail.criticitaAperte.length}`,
     `Procedimenti in corso: ${detail.procedimentiInCorso.length}`,
     `Pagamenti critici: ${detail.pagamentiCritici.length}`,
     `Scadenze rilevanti: ${detail.scadenzeRilevanti.length}`,
@@ -305,14 +305,14 @@ function addConcessioneSection(ctx: PdfContext, detail: ReportDetail) {
     { key: "Data rilascio", value: dateIT(detail.concessione.dataRilascio) },
     { key: "Data scadenza", value: dateIT(detail.concessione.dataScadenza) },
     { key: "Tipologia bene", value: enumLabel(detail.concessione.tipologiaBene) },
-    { key: "Attivita", value: enumLabel(detail.concessione.attivita) },
+    { key: "Attività", value: enumLabel(detail.concessione.attivita) },
     { key: "Ubicazione", value: textOrNA(detail.concessione.ubicazione) },
     { key: "Canone annuo", value: euro(detail.concessione.canoneAnnuo) },
   ]);
 }
 
 function addCriticitaSection(ctx: PdfContext, detail: ReportDetail) {
-  addSectionTitle(ctx, "Criticita");
+  addSectionTitle(ctx, "Criticità");
 
   if (detail.criticitaAperte.length === 0) {
     addParagraph(ctx, "Non risultano dati nel perimetro del report.");
@@ -320,15 +320,15 @@ function addCriticitaSection(ctx: PdfContext, detail: ReportDetail) {
   }
 
   for (const item of detail.criticitaAperte) {
-    addInfoBox(ctx, `Titolo: Criticita ${enumLabel(item.tipologia)}`, [
+    addInfoBox(ctx, `Titolo: Criticità ${enumLabel(item.tipologia)}`, [
       `Stato: ${enumLabel(item.stato)}`,
       `Livello rischio: ${enumLabel(item.rischioDecadenza)}`,
       `Ipotesi art. 47: ${enumLabel(item.letteraArt47)}`,
-      `Gravita: ${enumLabel(item.gravita)}`,
-      `Regolarizzata: ${item.regolarizzata ? "Si" : "No"}`,
+      `Gravità: ${enumLabel(item.gravita)}`,
+      `Regolarizzata: ${item.regolarizzata ? "Sì" : "No"}`,
       `Data regolarizzazione: ${dateIT(item.dataRegolarizzazione)}`,
       `Esito regolarizzazione: ${enumLabel(item.esitoRegolarizzazione)}`,
-      `Verifica regolarizzazione: ${item.verificataRegolarizzazione ? "Si" : "No"}`,
+      `Verifica regolarizzazione: ${item.verificataRegolarizzazione ? "Sì" : "No"}`,
       `Nota istruttoria: ${textOrNA(item.noteVerificaRegolarizzazione ?? item.descrizioneRegolarizzazione)}`,
     ]);
 
@@ -336,7 +336,7 @@ function addCriticitaSection(ctx: PdfContext, detail: ReportDetail) {
 
     addParagraph(
       ctx,
-      `Art. 47 rilevante: ${item.rilevanzaArt47 ? "Si" : "No"}${item.riferimentoNormativo ? ` | Riferimento: ${item.riferimentoNormativo}` : ""}`,
+      `Art. 47 rilevante: ${item.rilevanzaArt47 ? "Sì" : "No"}${item.riferimentoNormativo ? ` | Riferimento: ${item.riferimentoNormativo}` : ""}`,
     );
 
     if (item.rilevanzaArt47) {
@@ -364,11 +364,11 @@ function addProcedimentiSection(ctx: PdfContext, detail: ReportDetail) {
       `Stato: ${enumLabel(item.stato)}`,
       `Origine procedimento: ${enumLabel(item.origineProcedimento)}${item.procedimentoUfficio ? " (ufficio)" : ""}`,
       `Checklist contraddittorio: ${item.checklistContraddittorioCompleta ? "Completa" : "Incompleta"}`,
-      `Comunicazione avvio: ${item.comunicazioneAvvioInviata ? "Si" : "No"} (${dateIT(item.dataComunicazioneAvvio)})`,
-      `Contestazione formale: ${item.contestazioneFormaleInviata ? "Si" : "No"} (${dateIT(item.dataContestazioneFormale)})`,
+      `Comunicazione avvio: ${item.comunicazioneAvvioInviata ? "Sì" : "No"} (${dateIT(item.dataComunicazioneAvvio)})`,
+      `Contestazione formale: ${item.contestazioneFormaleInviata ? "Sì" : "No"} (${dateIT(item.dataContestazioneFormale)})`,
       `Memorie/controdeduzioni: memorie ${item.memorieRicevute ? "ricevute" : "non ricevute"}, valutazione ${item.controdeduzioniValutate ? "presente" : "non presente"}`,
-      `Audizione: richiesta ${item.audizioneRichiesta ? "Si" : "No"}, svolta ${item.audizioneSvolta ? "Si" : "No"} (${dateIT(item.dataAudizione)})`,
-      `Art. 10-bis applicabile: ${item.preavvisoRigettoApplicabile ? "Si" : "No"}`,
+      `Audizione: richiesta ${item.audizioneRichiesta ? "Sì" : "No"}, svolta ${item.audizioneSvolta ? "Sì" : "No"} (${dateIT(item.dataAudizione)})`,
+      `Art. 10-bis applicabile: ${item.preavvisoRigettoApplicabile ? "Sì" : "No"}`,
       `Stato preavviso: ${enumLabel(item.statoPreavvisoRigetto)} | Data: ${dateIT(item.dataPreavvisoRigetto)}`,
       `Osservazioni preavviso: ${item.osservazioniPreavvisoRicevute ? "Ricevute" : "Non ricevute"} | Termine: ${dateIT(item.termineOsservazioniPreavviso)}`,
       `Valutazione osservazioni: ${textOrNA(item.valutazioneOsservazioniPreavviso)}`,
@@ -460,7 +460,7 @@ function addSopralluoghiSection(ctx: PdfContext, detail: ReportDetail) {
     addInfoBox(ctx, `Sopralluogo del ${dateIT(item.data)}`, [
       `Esito: ${enumLabel(item.esito)}`,
       `Operatori: ${textOrNA(item.operatori)}`,
-      `Conformita planimetrica: ${item.conformitaPlanimetrica ? "Si" : "No"}`,
+      `Conformità planimetrica: ${item.conformitaPlanimetrica ? "Sì" : "No"}`,
       `Stato manutentivo: ${textOrNA(item.statoManutentivo)}`,
       `Sicurezza: ${textOrNA(item.sicurezza)}`,
       `Occupazione: ${textOrNA(item.occupazione)}`,
@@ -505,7 +505,7 @@ function addNormativaSection(ctx: PdfContext, norme: NormaReportItem[]) {
   for (const item of norme.slice(0, 12)) {
     addBullet(
       ctx,
-      `${item.codice} - ${item.titolo} | Ambito: ${enumLabel(item.ambito)} | Severita: ${enumLabel(item.severita)} | ${textOrNA(item.descrizione)}`,
+      `${item.codice} - ${item.titolo} | Ambito: ${enumLabel(item.ambito)} | Severità: ${enumLabel(item.severita)} | ${textOrNA(item.descrizione)}`,
     );
   }
 }
@@ -517,8 +517,8 @@ function addDisclaimerSection(ctx: PdfContext) {
   addBullet(ctx, "Non sostituisce verifica documentale/protocollare.");
   addBullet(ctx, "Non costituisce provvedimento.");
   addBullet(ctx, "Non determina automaticamente decadenza, archiviazione o sanzioni.");
-  addBullet(ctx, "Richiede valutazione dell autorita competente.");
-  addBullet(ctx, "Eventuali dati mancanti o non aggiornati incidono sull affidabilita.");
+  addBullet(ctx, "Richiede valutazione dell'autorità competente.");
+  addBullet(ctx, "Eventuali dati mancanti o non aggiornati incidono sull'affidabilità.");
 }
 
 export function buildReportPdfFileName(reportId: string): string {

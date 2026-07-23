@@ -90,10 +90,10 @@ export default async function NuovoSopralluogoPage({ searchParams }: NuovoSopral
                 </div>
                 <div className="space-y-1">
                   <label htmlFor="conformitaPlanimetrica" className="text-sm font-medium text-slate-700">
-                    Conformita planimetrica
+                    Conformità planimetrica
                   </label>
                   <Select id="conformitaPlanimetrica" name="conformitaPlanimetrica" required>
-                    <option value="SI">Si</option>
+                    <option value="SI">Sì</option>
                     <option value="NO">No</option>
                   </Select>
                 </div>

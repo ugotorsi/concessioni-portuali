@@ -3,7 +3,7 @@
 ## Stato documento
 Matrice preliminare gap privacy/compliance per roadmap pre-produzione.
 
-| Area | Stato attuale | Rischio | Priorita | Intervento consigliato |
+| Area | Stato attuale | Rischio | Priorità | Intervento consigliato |
 | --- | --- | --- | --- | --- |
 | DPIA formale | Presente solo draft preliminare | Alto | Alta | Avviare DPIA formale con DPO/ente e approvazione governance |
 | Privacy notice | Non formalizzata in documentazione completa | Medio-Alto | Alta | Redigere informative per utenti/interessati e processi correlati |
@@ -29,4 +29,5 @@ Matrice preliminare gap privacy/compliance per roadmap pre-produzione.
 2. Data lifecycle: retention applicata, minimizzazione, diritti interessati.
 3. Security enterprise: cifratura, backup, monitoring, incident response.
 4. Assurance continua: test/compliance CI, review periodica controlli.
+
 

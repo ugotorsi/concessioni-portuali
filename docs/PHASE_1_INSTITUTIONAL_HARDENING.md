@@ -1,7 +1,7 @@
 ﻿# Phase 1 - Institutional Demo Hardening
 
 ## 1) Obiettivo fase
-Portare Concessioni Portuali da stato MVP avanzato a stato "institutional demo-ready" con evidenze minime di sicurezza, compliance, tracciabilità e affidabilita operativa utili in contesti pubblici e para-pubblici.
+Portare Concessioni Portuali da stato MVP avanzato a stato "institutional demo-ready" con evidenze minime di sicurezza, compliance, tracciabilità e affidabilità operativa utili in contesti pubblici e para-pubblici.
 
 ## 2) Principi di esecuzione
 - Nessuna riscrittura architetturale estesa in questa fase.
@@ -29,7 +29,7 @@ Portare Concessioni Portuali da stato MVP avanzato a stato "institutional demo-r
   - accessi non autorizzati bloccati con comportamento consistente;
   - assenza di regressioni sui flussi principali.
 
-### 3.2 Campo lettera_art47 su Criticita
+### 3.2 Campo lettera_art47 su Criticità
 - Obiettivo: introdurre un campo strutturato `lettera_art47` per classificare la base normativa nelle criticità.
 - Motivo strategico: migliora tracciabilità giuridica, filtrabilita e coerenza reportistica.
 - File presumibilmente coinvolti:
@@ -49,14 +49,14 @@ Portare Concessioni Portuali da stato MVP avanzato a stato "institutional demo-r
   - presenza in export/report relativi alle criticità.
 
 Stato attuale (Issue #2 baseline implementata):
-- estensione modello `Criticita` con campi strutturati: `rilevanzaArt47`, `letteraArt47`, `rischioDecadenza`, `motivazioneArt47`, `azioneIstruttoriaArt47`;
+- estensione modello `Criticità` con campi strutturati: `rilevanzaArt47`, `letteraArt47`, `rischioDecadenza`, `motivazioneArt47`, `azioneIstruttoriaArt47`;
 - validazione server-side in create/update criticità con regole condizionali quando `rilevanzaArt47=true`;
 - sezione UI dedicata in nuova/modifica/dettaglio criticità con disclaimer non-vincolante;
 - filtri lista criticità su rilevanza, lettera e rischio decadenza;
 - export CSV criticità esteso con colonne art.47.
 
 Evoluzione Phase 2 (Issue #12):
-- estensione `Criticita` con campi regolarizzazione (`regolarizzata`, `dataRegolarizzazione`, `descrizioneRegolarizzazione`, `esitoRegolarizzazione`, `verificataRegolarizzazione`, `dataVerificaRegolarizzazione`, `noteVerificaRegolarizzazione`);
+- estensione `Criticità` con campi regolarizzazione (`regolarizzata`, `dataRegolarizzazione`, `descrizioneRegolarizzazione`, `esitoRegolarizzazione`, `verificataRegolarizzazione`, `dataVerificaRegolarizzazione`, `noteVerificaRegolarizzazione`);
 - filtri/lista/dettaglio/export allineati al tracciamento regolarizzazione;
 - nota esplicita di perimetro: la regolarizzazione incide sull istruttoria ma non determina automatica esclusione della decadenza.
 
@@ -105,7 +105,7 @@ Limiti residui:
 
 ### 3.5 Test automatici Vitest + Playwright
 - Obiettivo: introdurre baseline test unitari/integration e scenari e2e critici.
-- Motivo strategico: aumenta affidabilita release e riduce regressioni su flussi regolatori.
+- Motivo strategico: aumenta affidabilità release e riduce regressioni su flussi regolatori.
 - File presumibilmente coinvolti:
   - package.json
   - vitest.config.ts (nuovo)
@@ -127,7 +127,7 @@ Stato attuale (Issue #5 baseline implementata):
 - documentati prerequisiti DB e flusso di esecuzione test locali.
 
 Evoluzione Phase 2 (Issue #13):
-- distinzione esplicita tra procedimenti d ufficio e a istanza di parte su modello Procedimento;
+- distinzione esplicita tra procedimenti d'ufficio e a istanza di parte su modello Procedimento;
 - tracking istruttorio preavviso di rigetto ex art. 10-bis (stato, date, osservazioni, valutazione), senza automatismi decisori;
 - refinement checklist/warning su dettaglio/lista/export/PDF in ottica supporto istruttorio caso per caso.
 
@@ -201,7 +201,7 @@ Stato attuale (Issue #8 baseline implementata):
 - nessuna dichiarazione di conformità GDPR definitiva e nessuna DPIA formalmente approvata.
 - audit esterno post-Phase 1 disponibile in `docs/EXTERNAL_AI_REVIEW_PHASE_1_COMPLETED.md` per prioritizzazione roadmap successiva.
 
-### 3.9 Due scenari demo istituzionali: morosita e occupazione difforme
+### 3.9 Due scenari demo istituzionali: morosità e occupazione difforme
 - Obiettivo: preparare due percorsi demo guidati con dati, script narrativo e KPI di esito.
 - Motivo strategico: aumenta conversione commerciale e chiarezza del valore in contesti pubblici.
 - File presumibilmente coinvolti:
@@ -253,3 +253,4 @@ La fase e considerata completata quando:
 - i 10 stream prioritari sono implementati almeno a livello "institutional demo-ready";
 - i criteri di accettazione sono verificati e documentati;
 - il sistema e presentabile in contesto istituzionale con rischio operativo/compliance ridotto rispetto allo stato attuale.
+

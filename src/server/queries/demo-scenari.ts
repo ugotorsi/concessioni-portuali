@@ -32,14 +32,14 @@ export interface DemoScenarioItem {
 export const DEMO_SCENARIO_BLUEPRINTS: DemoScenarioBlueprint[] = [
   {
     slug: "morosita-art47",
-    title: "Morosita rilevante ex art. 47",
+    title: "Morosità rilevante ex Art. 47",
     description:
-      "Scenario con canone scaduto e profilo art. 47 da valutare in istruttoria, con procedimento d ufficio e report validato.",
+      "Scenario con canone scaduto e profilo Art. 47 da valutare in istruttoria, con procedimento d'ufficio e report validato.",
     administrativeProblem:
-      "Morosita reiterata su concessione attiva con rischio decadenziale alto come elemento da valutare.",
+      "Morosità reiterata su concessione attiva con rischio decadenziale alto come elemento da valutare.",
     platformFocus:
-      "Allineamento tra pagamenti, criticita art. 47, procedimento e documento istruttorio validato.",
-    modules: ["Concessioni", "Pagamenti", "Criticita", "Procedimenti", "Report"],
+      "Allineamento tra pagamenti, criticità Art. 47, procedimento e documento istruttorio validato.",
+    modules: ["Concessioni", "Pagamenti", "Criticità", "Procedimenti", "Report"],
     riskLevel: "ALTO",
     concessioneNumeroAtto: "CP-014/2020",
     notes:
@@ -49,12 +49,12 @@ export const DEMO_SCENARIO_BLUEPRINTS: DemoScenarioBlueprint[] = [
     slug: "occupazione-difforme",
     title: "Occupazione difforme / uso non conforme",
     description:
-      "Scenario tecnico-giuridico con rilievi da sopralluogo, criticita di occupazione difforme e ordine di ripristino con checklist non completa.",
+      "Scenario tecnico-giuridico con rilievi da sopralluogo, criticità di occupazione difforme e ordine di ripristino con checklist non completa.",
     administrativeProblem:
-      "Uso difforme del bene rispetto al titolo con necessita di verifica tecnica e presidio procedimentale.",
+      "Uso difforme del bene rispetto al titolo con necessità di verifica tecnica e presidio procedimentale.",
     platformFocus:
-      "Collegamento tra sopralluogo, criticita, warning checklist e report istituzionale.",
-    modules: ["Concessioni", "Sopralluoghi", "Criticita", "Procedimenti", "Report"],
+      "Collegamento tra sopralluogo, criticità, warning checklist e report istituzionale.",
+    modules: ["Concessioni", "Sopralluoghi", "Criticità", "Procedimenti", "Report"],
     riskLevel: "ALTO",
     concessioneNumeroAtto: "CP-001/2021",
     notes:
@@ -64,16 +64,16 @@ export const DEMO_SCENARIO_BLUEPRINTS: DemoScenarioBlueprint[] = [
     slug: "regolarizzazione-pre-provvedimento",
     title: "Regolarizzazione prima del provvedimento finale",
     description:
-      "Scenario con criticita art. 47 regolarizzata in corso istruttorio, con evidenza documentale della regolarizzazione e report dedicato.",
+      "Scenario con criticità Art. 47 regolarizzata in corso istruttorio, con evidenza documentale della regolarizzazione e report dedicato.",
     administrativeProblem:
-      "Necessita di valutare gli effetti della regolarizzazione senza automatica archiviazione del procedimento.",
+      "Necessità di valutare gli effetti della regolarizzazione senza automatica archiviazione del procedimento.",
     platformFocus:
       "Tracciamento regolarizzazione, verifica successiva e narrativa PDF istituzionale.",
-    modules: ["Criticita", "Procedimenti", "Report"],
+    modules: ["Criticità", "Procedimenti", "Report"],
     riskLevel: "MEDIO",
     concessioneNumeroAtto: "CP-067/2018",
     notes:
-      "La regolarizzazione e un elemento da valutare e non determina in automatico esito favorevole o archiviazione.",
+      "La regolarizzazione è un elemento da valutare e non determina in automatico esito favorevole o archiviazione.",
   },
   {
     slug: "contraddittorio-incompleto",
@@ -84,11 +84,11 @@ export const DEMO_SCENARIO_BLUEPRINTS: DemoScenarioBlueprint[] = [
       "Passaggi essenziali del contraddittorio non ancora completati prima della proposta conclusiva.",
     platformFocus:
       "Evidenza checklist, warning e punti di attenzione procedimentale.",
-    modules: ["Procedimenti", "Criticita", "Report"],
+    modules: ["Procedimenti", "Criticità", "Report"],
     riskLevel: "CRITICO",
     concessioneNumeroAtto: "CP-067/2018",
     notes:
-      "Supporto al responsabile del procedimento: il sistema segnala criticita istruttorie ma non adotta decisioni.",
+      "Supporto al responsabile del procedimento: il sistema segnala criticità istruttorie ma non adotta decisioni.",
   },
   {
     slug: "istanza-parte-art10bis",
@@ -99,7 +99,7 @@ export const DEMO_SCENARIO_BLUEPRINTS: DemoScenarioBlueprint[] = [
       "Gestione del preavviso ex art. 10-bis e valutazione motivata delle osservazioni.",
     platformFocus:
       "Tracking di preavviso, osservazioni e motivazione istruttoria nel procedimento.",
-    modules: ["Procedimenti", "Criticita", "Report"],
+    modules: ["Procedimenti", "Criticità", "Report"],
     riskLevel: "MEDIO",
     concessioneNumeroAtto: "CP-058/2019",
     notes:
@@ -111,14 +111,14 @@ export const DEMO_SCENARIO_BLUEPRINTS: DemoScenarioBlueprint[] = [
     description:
       "Scenario dimostrativo su concessione stagionale turistico-ricreativa con focus su comparazione ex art. 37 e presidio istruttorio.",
     administrativeProblem:
-      "Gestione di profili combinati: stagionalita, morosita/residui e istanza concorrente in area costiera ad uso turistico.",
+      "Gestione di profili combinati: stagionalità, morosità/residui e istanza concorrente in area costiera ad uso turistico.",
     platformFocus:
-      "Visibilita della verticale turistico-ricreativa/comune costiero nel percorso concessione-criticita-procedimento-report.",
-    modules: ["Concessioni", "Criticita", "Procedimenti", "Report"],
+      "Visibilità della verticale Turistico-ricreativa / Comune costiero nel percorso concessione-criticità-procedimento-report.",
+    modules: ["Concessioni", "Criticità", "Procedimenti", "Report"],
     riskLevel: "MEDIO",
     concessioneNumeroAtto: "CP-031/2017",
     notes:
-      "Supporto istruttorio: art. 47 trattato come profilo di rischio/procedura e non come automatismo di decadenza.",
+      "Supporto istruttorio: Art. 47 trattato come profilo di rischio/procedura e non come automatismo di decadenza.",
   },
 ];
 

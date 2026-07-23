@@ -1,4 +1,4 @@
-# External AI Audit - From Investor Demo to Real Platform Development
+﻿# External AI Audit - From Investor Demo to Real Platform Development
 
 ## 1. Titolo
 External AI Audit - From Investor Demo to Real Platform Development
@@ -13,7 +13,7 @@ Posizionamento dominio richiesto:
 
 Abbiamo appena completato e consegnato una cloud demo all investitore.
 
-Da questo momento, l obiettivo non e piu una demo narrativa, ma una piattaforma reale, pilotabile presso enti, con roadmap tecnica, legale e commerciale credibile.
+Da questo momento, l obiettivo non e più una demo narrativa, ma una piattaforma reale, pilotabile presso enti, con roadmap tecnica, legale e commerciale credibile.
 
 Vincolo fondamentale:
 - non confondere stato demo con stato produzione.
@@ -31,7 +31,7 @@ Moduli presenti nel repository:
 - login/ruoli;
 - dashboard;
 - concessioni;
-- criticita;
+- criticità;
 - procedimenti;
 - documenti;
 - audit trail;
@@ -48,7 +48,7 @@ Baseline tecnica verificata in questa assessment session:
 - Docker locale non attivo nella sessione (quindi E2E/DB locale non rieseguiti qui).
 
 ## 4. Limiti noti
-Punti deboli dichiarati e gia identificati:
+Punti deboli dichiarati e già identificati:
 - storage documentale cloud persistente non ancora definitivo;
 - legal assistant ancora non pienamente operativo;
 - normativa non ancora modulo dinamico completo;
@@ -62,7 +62,7 @@ Punti deboli dichiarati e gia identificati:
 ## 5. Domande principali per l audit
 Rispondi in modo severo e pratico alle seguenti domande:
 - Qual e lo stato reale del progetto?
-- Quali moduli sono demo e quali sono gia base di piattaforma?
+- Quali moduli sono demo e quali sono già base di piattaforma?
 - Quale dovrebbe essere lo Sprint 1?
 - Conviene partire da storage documentale persistente o legal assistant operativo?
 - Quali rischi impediscono un pilot presso un ente?
@@ -73,7 +73,7 @@ Rispondi in modo severo e pratico alle seguenti domande:
 - Quali claim commerciali sono pericolosi?
 - Quale roadmap 30/60/90 giorni suggerisci?
 - Quanto capitale serve per arrivare a un pilot serio?
-- Quale business model appare piu credibile?
+- Quale business model appare più credibile?
 - Quale architettura tecnica suggerisci?
 - Quale strategia dati/documenti suggerisci?
 - Come presenteresti il progetto a una PA?
@@ -108,4 +108,4 @@ Il tono deve essere:
 ## 8. Short prompt version
 Usa questa versione breve se serve una richiesta rapida:
 
-"Esegui un audit severo del progetto Concessioni Portuali, gia consegnato come cloud demo investitore, da riposizionare come piattaforma modulare di supporto istruttorio con core concessorio comune e verticali normative progressive. Distingui con nettezza moduli demo vs moduli realmente pronti, assegna voto demo/pilot/production, verifica coerenza legale (art. 18 come verticale speciale; art. 36 base generale; art. 37 comparativa; art. 47 trasversale; d.l. 400/1993; art. 12 dir. 2006/123/CE), indica rischi bloccanti, roadmap 30/60/90 giorni, costi stimati, quick wins e raccomandazione finale go/no-go. Mantieni tono pragmatico, non compiacente, orientato a PA e investitore."
+"Esegui un audit severo del progetto Concessioni Portuali, già consegnato come cloud demo investitore, da riposizionare come piattaforma modulare di supporto istruttorio con core concessorio comune e verticali normative progressive. Distingui con nettezza moduli demo vs moduli realmente pronti, assegna voto demo/pilot/production, verifica coerenza legale (art. 18 come verticale speciale; art. 36 base generale; art. 37 comparativa; art. 47 trasversale; d.l. 400/1993; art. 12 dir. 2006/123/CE), indica rischi bloccanti, roadmap 30/60/90 giorni, costi stimati, quick wins e raccomandazione finale go/no-go. Mantieni tono pragmatico, non compiacente, orientato a PA e investitore."

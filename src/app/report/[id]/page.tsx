@@ -162,7 +162,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
             </CardHeader>
             <CardContent className="space-y-3 text-sm text-slate-700">
               <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500">Finalita</p>
+                <p className="text-xs uppercase tracking-wide text-slate-500">Finalità</p>
                 <p className="mt-1">{preview.finalita}</p>
               </div>
               <div>
@@ -252,7 +252,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Attivita</p>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Attività</p>
                   <p className="mt-1">{formatEnumLabel(detail.concessione.attivita)}</p>
                 </div>
                 <div>
@@ -285,13 +285,13 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
             <section className="grid gap-4 xl:grid-cols-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>4. Criticita aperte</CardTitle>
+                  <CardTitle>4. Criticità aperte</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Gravita</TableHead>
+                        <TableHead>Gravità</TableHead>
                         <TableHead>Tipologia</TableHead>
                         <TableHead>Descrizione</TableHead>
                         <TableHead>Stato</TableHead>
@@ -313,7 +313,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                       {detail.criticitaAperte.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={4} className="text-center text-slate-500">
-                            Nessuna criticita aperta collegata.
+                            Nessuna criticità aperta collegata.
                           </TableCell>
                         </TableRow>
                       ) : null}
@@ -452,7 +452,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                         <TableHead>Data</TableHead>
                         <TableHead>Esito</TableHead>
                         <TableHead>Operatori</TableHead>
-                        <TableHead>Conformita</TableHead>
+                        <TableHead>Conformità</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>

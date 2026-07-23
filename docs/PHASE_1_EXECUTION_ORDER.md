@@ -1,11 +1,11 @@
-# Phase 1 Execution Order
+﻿# Phase 1 Execution Order
 
 ## Ordine consigliato delle issue
 1. Auth reale (Issue 1)
 2. Security middleware/headers/rate limiting (Issue 6)
 3. Audit trail (Issue 4)
 4. Test baseline Vitest + Playwright (Issue 5)
-5. Art. 47 mapping su Criticita (Issue 2)
+5. Art. 47 mapping su Criticità (Issue 2)
 6. Checklist contraddittorio su Procedimento (Issue 7)
 7. PDF server-side professionale (Issue 3)
 8. Demo scenarios istituzionali (Issue 9)
@@ -20,8 +20,8 @@
 - Issue 7 e facilitata dal mapping legale (Issue 2).
 - Issue 3 produce output finale migliore dopo arricchimento legale/procedimentale (Issue 2/7).
 - Issue 9 dipende da disponibilita output report robusti (Issue 3) e flusso procedimentale (Issue 7).
-- Issue 8 consolida compliance usando evidenze gia implementate (Issue 1/4/6).
-- Issue 10 non blocca altre issue e puo restare in coda.
+- Issue 8 consolida compliance usando evidenze già implementate (Issue 1/4/6).
+- Issue 10 non blocca altre issue e può restare in coda.
 
 ## Cosa fare prima
 - Definire perimetro tecnico minimo della milestone (nessun refactor esteso).
@@ -35,16 +35,17 @@
 - Non aprire stream paralleli non prioritari che aumentano rischio regressione.
 - Non rimandare i test all'ultima settimana.
 
-## Attivita in parallelo
+## Attività in parallelo
 - In parallelo controllato: Issue 2 e Issue 7 (allineamento dominio legale).
-- In parallelo controllato: Issue 8 documentale puo avanzare mentre chiudono Issue 3 e Issue 9.
-- In parallelo tardivo: Issue 10 GIS puo procedere senza bloccare stream core.
+- In parallelo controllato: Issue 8 documentale può avanzare mentre chiudono Issue 3 e Issue 9.
+- In parallelo tardivo: Issue 10 GIS può procedere senza bloccare stream core.
 - Da non parallelizzare troppo: Issue 1, 6, 4 (core security/compliance) per evitare incoerenze.
 
 ## Definition of Done finale della Phase 1
 Phase 1 e completata quando:
 - tutte le 10 issue sono chiuse con criteri di accettazione verificati;
 - build/check/test risultano verdi in modo ripetibile;
-- demo istituzionale morosita e occupazione difforme e ripetibile end-to-end;
+- demo istituzionale morosità e occupazione difforme e ripetibile end-to-end;
 - documentazione compliance minima (GDPR/DPIA draft) e disponibile;
 - repository risulta pulito e milestone GitHub chiusa con evidenze tracciate.
+

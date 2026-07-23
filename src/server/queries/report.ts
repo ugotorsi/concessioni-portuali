@@ -679,21 +679,21 @@ export function getReportPreviewOperativo(report: {
   validato: boolean;
 }): ReportPreviewOperativo {
   const avvertenza =
-    "Output istruttorio interno della societa a supporto dell Autorita, non provvedimento amministrativo.";
+    "Output istruttorio interno della società a supporto dell'Autorità, non provvedimento amministrativo.";
 
   switch (report.tipologia) {
     case "REPORT_MENSILE":
       return {
-        finalita: "Sintesi periodica dello stato concessorio con evidenza di trend, adempimenti e criticita.",
+        finalita: "Sintesi periodica dello stato concessorio con evidenza di trend, adempimenti e criticità.",
         destinatarioOperativo: "Coordinamento servizio monitoraggio e direzione operativa.",
-        utilizzoConsigliato: "Usare per pianificazione mensile priorita, controllo backlog e assegnazione attivita.",
+        utilizzoConsigliato: "Usare per pianificazione mensile priorità, controllo backlog e assegnazione attività.",
         avvertenza,
       };
     case "REPORT_CRITICITA":
       return {
-        finalita: "Quadro delle anomalie tecniche, giuridiche ed economiche con livelli di gravita.",
+        finalita: "Quadro delle anomalie tecniche, giuridiche ed economiche con livelli di gravità.",
         destinatarioOperativo: "Funzioni giuridica, tecnica ed economica.",
-        utilizzoConsigliato: "Usare per priorita di intervento, istruttorie e monitoraggio chiusura criticita.",
+        utilizzoConsigliato: "Usare per priorità di intervento, istruttorie e monitoraggio chiusura criticità.",
         avvertenza,
       };
     case "REPORT_MOROSITA":
@@ -721,7 +721,7 @@ export function getReportPreviewOperativo(report: {
       return {
         finalita: "Scheda istruttoria focalizzata su singola anomalia e relativi impatti.",
         destinatarioOperativo: "Istruttori tecnici e giuridici.",
-        utilizzoConsigliato: "Usare per documentare stato, evidenze e azioni consigliate su criticita specifica.",
+        utilizzoConsigliato: "Usare per documentare stato, evidenze e azioni consigliate su criticità specifica.",
         avvertenza,
       };
     case "DOSSIER_ISTRUTTORIO":
@@ -733,14 +733,14 @@ export function getReportPreviewOperativo(report: {
       };
     case "RELAZIONE_TECNICA":
       return {
-        finalita: "Verifica stato luoghi su sopralluoghi, conformita e difformita riscontrate.",
+        finalita: "Verifica stato luoghi su sopralluoghi, conformità e difformità riscontrate.",
         destinatarioOperativo: "Area tecnica e supporto giuridico.",
         utilizzoConsigliato: "Usare per qualificazione tecnica delle risultanze e prescrizioni operative.",
         avvertenza,
       };
     case "RELAZIONE_ECONOMICA":
       return {
-        finalita: "Analisi canoni, residui e garanzie con focus su sostenibilita e rischi.",
+        finalita: "Analisi canoni, residui e garanzie con focus su sostenibilità e rischi.",
         destinatarioOperativo: "Area economica e direzione operativa.",
         utilizzoConsigliato: "Usare per pianificare recupero economico e verificare impatti finanziari.",
         avvertenza,

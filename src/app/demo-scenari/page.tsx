@@ -111,10 +111,10 @@ export default async function DemoScenariPage() {
 
                     {scenario.criticitaId ? (
                       <Link href={`/criticita/${scenario.criticitaId}`} className="font-medium text-slate-900 underline underline-offset-4">
-                        Apri criticita
+                        Apri criticità
                       </Link>
                     ) : (
-                      <span className="text-slate-500">Criticita non disponibile</span>
+                      <span className="text-slate-500">Criticità non disponibile</span>
                     )}
 
                     {scenario.procedimentoId ? (

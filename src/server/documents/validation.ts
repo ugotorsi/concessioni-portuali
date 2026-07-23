@@ -152,7 +152,7 @@ const uploadMetadataSchema = z
     if (links.length === 0) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Collega il documento ad almeno una entita istruttoria.",
+        message: "Collega il documento ad almeno un'entità istruttoria.",
         path: ["concessioneId"],
       });
     }
@@ -221,7 +221,7 @@ export function validateUploadFile(file: File): void {
   }
 
   if (file.size <= 0) {
-    throw new Error("Il file selezionato e vuoto.");
+    throw new Error("Il file selezionato è vuoto.");
   }
 
   if (file.size > getDocumentMaxBytes()) {

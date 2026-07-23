@@ -17,7 +17,7 @@ export default async function AiPage() {
   const suggestion = getAiSupportSuggestion({
     role,
     taskType: "SUPPORTO_PROCEDIMENTO",
-    input: "Verifica procedimenti con termini in scadenza e criticita economiche ad alta priorita.",
+    input: "Verifica procedimenti con termini in scadenza e criticità economiche ad alta priorità.",
     referenceNorme: ["ART_47_COD_NAV", "ART_42_COD_NAV"],
   });
 

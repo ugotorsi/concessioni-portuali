@@ -66,10 +66,10 @@ export default async function NuovoProcedimentoPage({ searchParams }: NuovoProce
                 </div>
                 <div className="space-y-1 md:col-span-2">
                   <label htmlFor="criticitaId" className="text-sm font-medium text-slate-700">
-                    Criticita collegata (opzionale)
+                    Criticità collegata (opzionale)
                   </label>
                   <Select id="criticitaId" name="criticitaId" defaultValue={criticitaId}>
-                    <option value="">Nessuna criticita collegata</option>
+                    <option value="">Nessuna criticità collegata</option>
                     {filtersData.criticita.map((item) => (
                       <option key={item.id} value={item.id}>
                         {item.label}

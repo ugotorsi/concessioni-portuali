@@ -1,9 +1,9 @@
-# Platform Development Roadmap
+﻿# Platform Development Roadmap
 
 Roadmap per passaggio disciplinato da investor demo a piattaforma reale.
 
 Principio guida:
-- prima affidabilita operativa e compliance minima;
+- prima affidabilità operativa e compliance minima;
 - poi automazione documentale e valore AI;
 - poi scalabilita multi-ente.
 
@@ -31,7 +31,7 @@ Quadro giuridico Simpliciter da recepire in roadmap:
 - valutazione campi aggiuntivi: concessionObjectType, awardingProcedureType, publicUseConstraints, removableWorksProfile, seasonalityProfile, feeRegime, comparativeProcedureStatus, thirdPartyManagementStatus.
 
 32C - UI/demo verticals (dopo 32B):
-- scenario Comune costiero realistico (stabilimento balneare, battigia, comparativa, morosita, rischio art.47);
+- scenario Comune costiero realistico (stabilimento balneare, battigia, comparativa, morosità, rischio art.47);
 - reportistica verticale dedicata;
 - mantenimento presidi anti-overclaim e ruolo umano decisionale.
 
@@ -57,7 +57,7 @@ Deliverable:
 Exit criteria:
 - file persistenti dopo redeploy;
 - nessuna regressione su modulo documenti;
-- tracciabilita completa del ciclo base documento.
+- tracciabilità completa del ciclo base documento.
 
 Stato implementazione:
 - completato nel perimetro demo avanzata con adapter storage astratto (`local`/`s3`), metadati obbligatori e audit upload/download.
@@ -92,7 +92,7 @@ Obiettivo:
 
 Scope:
 - dati precompilati;
-- collegamento concessione/criticita/procedimento;
+- collegamento concessione/criticità/procedimento;
 - checklist;
 - controllo fascicolo;
 - audit generazione.
@@ -105,7 +105,7 @@ Deliverable:
 
 Exit criteria:
 - riduzione errori formali nelle bozze;
-- evidenza di tracciabilita decisionale umana mantenuta.
+- evidenza di tracciabilità decisionale umana mantenuta.
 
 ## Sprint 4 - Normativa e fonti
 Obiettivo:
@@ -154,9 +154,9 @@ Obiettivo:
 - rendere evidente valore economico e operativo.
 
 Scope:
-- morosita;
+- morosità;
 - scadenze;
-- criticita;
+- criticità;
 - recupero potenziale;
 - rischio contenzioso;
 - efficienza uffici.
@@ -205,10 +205,11 @@ Exit criteria:
 Questa roadmap evita di trattare la demo come prodotto finito.
 
 Sequenza consigliata:
-1. affidabilita documentale;
+1. affidabilità documentale;
 2. operativita legale assistita;
 3. coerenza fascicolo;
 4. evoluzione normativa;
 5. onboarding dati;
 6. KPI economici;
 7. readiness pilot.
+

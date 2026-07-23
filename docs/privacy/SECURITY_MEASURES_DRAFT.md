@@ -43,9 +43,10 @@ Non rappresenta una certificazione security/compliance definitiva.
 - Hardening avanzato e posture enterprise ancora in roadmap.
 - Metadati protocollo/PEC non equivalgono a protocollazione legale o conservazione a norma.
 
-## 4. Priorita raccomandate
+## 4. Priorità raccomandate
 1. IAM hardening: MFA, policy password, session controls.
 2. Logging e monitoring: centralizzazione, alert, incident workflow.
 3. Data protection: cifratura at rest, backup cifrati, restore testato.
 4. Secure delivery: CI/CD security e gestione vulnerabilità continua.
+
 

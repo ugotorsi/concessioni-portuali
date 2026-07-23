@@ -141,7 +141,7 @@ export default async function ConcessioniPage({ searchParams }: ConcessioniPageP
           <CardHeader>
             <CardTitle>Elenco concessioni</CardTitle>
             <CardDescription>
-              Vista read-only operativa: scadenze, criticita e pagamenti critici in evidenza.
+              Vista read-only operativa: scadenze, criticità e pagamenti critici in evidenza.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -151,12 +151,12 @@ export default async function ConcessioniPage({ searchParams }: ConcessioniPageP
                   <TableHead>Atto</TableHead>
                   <TableHead>Concessionario</TableHead>
                   <TableHead>Bene/Area</TableHead>
-                  <TableHead>Attivita</TableHead>
+                  <TableHead>Attività</TableHead>
                   <TableHead>Verticale</TableHead>
                   <TableHead>Scadenza</TableHead>
                   <TableHead>Canone</TableHead>
                   <TableHead>Stato</TableHead>
-                  <TableHead>Criticita</TableHead>
+                  <TableHead>Criticità</TableHead>
                   <TableHead>Azioni</TableHead>
                 </TableRow>
               </TableHeader>

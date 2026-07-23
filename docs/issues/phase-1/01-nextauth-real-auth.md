@@ -1,10 +1,10 @@
-# Implement real authentication with NextAuth.js
+﻿# Implement real authentication with NextAuth.js
 
 ## Obiettivo
 Sostituire login demo/cookie ruolo con autenticazione reale, utenti persistenti e sessione sicura.
 
 ## Motivazione strategica
-E un prerequisito per credibilita istituzionale, controllo accessi robusto e tracciabilita affidabile degli attori operativi.
+E un prerequisito per credibilita istituzionale, controllo accessi robusto e tracciabilità affidabile degli attori operativi.
 
 ## Ambito
 - Integrazione NextAuth.js con sessione server-side.
@@ -19,7 +19,7 @@ E un prerequisito per credibilita istituzionale, controllo accessi robusto e tra
 - src/middleware.ts
 - package.json
 
-## Attivita tecniche
+## Attività tecniche
 - Integrare NextAuth.js e configurare provider/strategy per fase demo istituzionale.
 - Definire modello utenti/ruoli/sessioni persistente.
 - Implementare callback/session mapping ruoli.
@@ -44,7 +44,7 @@ E un prerequisito per credibilita istituzionale, controllo accessi robusto e tra
 ## Dipendenze
 - Nessuna dipendenza bloccante; stream fondazionale.
 
-## Priorita
+## Priorità
 Critical
 
 ## Complessita
@@ -52,3 +52,4 @@ Alta
 
 ## Label suggerite
 auth, security, phase-1, priority-critical
+

@@ -132,7 +132,7 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
             <CardHeader>
               <CardTitle>Carica documento</CardTitle>
               <CardDescription>
-                Collega il file ad almeno una entita tra concessione, criticita, procedimento, sopralluogo, pagamento o report.
+                Collega il file ad almeno un'entità tra concessione, criticità, procedimento, sopralluogo, pagamento o report.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -245,7 +245,7 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
                   </Select>
                 </label>
                 <label className="text-sm text-slate-700">
-                  Criticita
+                  Criticità
                   <Select name="criticitaId" defaultValue="">
                     <option value="">Nessuna</option>
                     {filters.criticita.map((item) => (

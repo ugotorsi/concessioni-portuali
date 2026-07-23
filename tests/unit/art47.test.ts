@@ -33,7 +33,7 @@ describe("art47 helpers", () => {
     expect(getRischioDecadenzaBadgeVariant("CRITICO")).toBe("danger");
   });
 
-  it("fornisce inferenza assistiva per morosita", () => {
+  it("fornisce inferenza assistiva per morosità", () => {
     const inferred = inferArt47FromCriticitaTipologia("MOROSITA");
 
     expect(inferred.suggestedLettera).toBe("D_OMESSO_PAGAMENTO_CANONE");

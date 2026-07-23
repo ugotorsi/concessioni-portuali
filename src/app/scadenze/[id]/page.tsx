@@ -203,7 +203,7 @@ export default async function ScadenzaDetailPage({ params }: ScadenzaDetailPageP
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Gravita</TableHead>
+                    <TableHead>Gravità</TableHead>
                     <TableHead>Tipologia</TableHead>
                     <TableHead>Descrizione</TableHead>
                     <TableHead>Stato</TableHead>
@@ -225,7 +225,7 @@ export default async function ScadenzaDetailPage({ params }: ScadenzaDetailPageP
                   {scadenza.criticitaAperte.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={4} className="text-center text-slate-500">
-                        Nessuna criticita aperta collegata.
+                        Nessuna criticità aperta collegata.
                       </TableCell>
                     </TableRow>
                   ) : null}

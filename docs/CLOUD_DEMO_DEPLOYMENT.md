@@ -1,4 +1,4 @@
-# Cloud Demo Deployment
+﻿# Cloud Demo Deployment
 
 ## 1. Scopo
 Ambiente cloud demo, non produzione.
@@ -99,14 +99,14 @@ Per il cloud:
 ## 11. Piano B
 - Hotspot mobile pronto.
 - Browser alternativo pronto.
-- PDF gia scaricato localmente.
+- PDF già scaricato localmente.
 - Screenshot chiave disponibili.
 - Video breve demo disponibile.
 - Repository e commit pronti da mostrare.
 - Demo locale pronta come fallback.
 
 ## Note tecniche su storage documentale (limite cloud demo)
-L attuale storage documentale usa filesystem locale server (`DOCUMENT_STORAGE_ROOT`, default `.local-storage/documents`). In ambiente serverless questo puo non essere persistente tra deploy/istanze.
+L attuale storage documentale usa filesystem locale server (`DOCUMENT_STORAGE_ROOT`, default `.local-storage/documents`). In ambiente serverless questo può non essere persistente tra deploy/istanze.
 
 Impatto demo cloud:
 - i file seed presenti solo su filesystem runtime possono non essere affidabili nel tempo;
@@ -117,3 +117,4 @@ Mitigazione per questa fase:
 - mantenere sempre un fallback (PDF/screenshot/video/local demo).
 
 Evoluzione consigliata (fase successiva): object storage dedicato (S3, Supabase Storage o Vercel Blob) con persistenza stabile.
+

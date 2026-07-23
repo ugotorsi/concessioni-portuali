@@ -12,6 +12,6 @@ export function buildAiPrompt(context: AiTaskContext): string {
     `Task: ${context.taskType}.`,
     norme,
     `Input operativo: ${context.input}`,
-    "Rispondi in italiano con: sintesi, azioni consigliate e avvertenza di non sostituzione della decisione dell Autorita.",
+    "Rispondi in italiano con: sintesi, azioni consigliate e avvertenza di non sostituzione della decisione dell'Autorità.",
   ].join("\n");
 }

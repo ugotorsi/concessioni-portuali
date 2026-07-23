@@ -1,4 +1,4 @@
-# Add security middleware, headers and rate limiting
+﻿# Add security middleware, headers and rate limiting
 
 ## Obiettivo
 Introdurre protezione centralizzata route, security headers e rate limiting base.
@@ -17,7 +17,7 @@ Uniforma la postura di sicurezza e riduce il rischio di esposizioni incoerenti t
 - src/lib/auth.ts
 - src/app/**/route.ts
 
-## Attivita tecniche
+## Attività tecniche
 - Definire matcher middleware per aree protette.
 - Impostare security headers minimi coerenti con app.
 - Implementare rate limiting base per endpoint critici.
@@ -41,7 +41,7 @@ Uniforma la postura di sicurezza e riduce il rischio di esposizioni incoerenti t
 ## Dipendenze
 - Coordinata con Issue 1 per allineamento auth.
 
-## Priorita
+## Priorità
 Critical
 
 ## Complessita
@@ -49,3 +49,4 @@ Media-Alta
 
 ## Label suggerite
 security, middleware, phase-1, priority-critical
+

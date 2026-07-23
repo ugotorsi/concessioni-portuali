@@ -209,7 +209,7 @@ export default async function SopralluoghiPage({ searchParams }: SopralluoghiPag
                   <TableHead>Concessione</TableHead>
                   <TableHead>Concessionario</TableHead>
                   <TableHead>Area/Bene</TableHead>
-                  <TableHead>Conformita</TableHead>
+                  <TableHead>Conformità</TableHead>
                   <TableHead>Sicurezza</TableHead>
                   <TableHead>Occupazione</TableHead>
                   <TableHead>Interferenze</TableHead>

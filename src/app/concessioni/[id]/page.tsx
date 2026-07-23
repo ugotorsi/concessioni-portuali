@@ -164,7 +164,7 @@ export default async function ConcessioneDetailPage({ params }: ConcessioneDetai
                 <p className="mt-1 text-slate-900">{formatEnumLabel(concessione.tipologiaBene)}</p>
               </div>
               <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500">Attivita</p>
+                <p className="text-xs uppercase tracking-wide text-slate-500">Attività</p>
                 <p className="mt-1 text-slate-900">{formatEnumLabel(concessione.attivita)}</p>
               </div>
               <div>
@@ -245,11 +245,11 @@ export default async function ConcessioneDetailPage({ params }: ConcessioneDetai
             </CardHeader>
             <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
-                <p className="text-xs text-slate-500">Criticita aperte</p>
+                <p className="text-xs text-slate-500">Criticità aperte</p>
                 <p className="text-2xl font-semibold text-rose-700">{criticitaAperte}</p>
               </div>
               <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
-                <p className="text-xs text-slate-500">Criticita urgenti/alte</p>
+                <p className="text-xs text-slate-500">Criticità urgenti/alte</p>
                 <p className="text-2xl font-semibold text-rose-700">{criticitaUrgentiAlte}</p>
               </div>
               <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
@@ -358,13 +358,13 @@ export default async function ConcessioneDetailPage({ params }: ConcessioneDetai
 
         <Card>
           <CardHeader>
-            <CardTitle>Criticita</CardTitle>
+            <CardTitle>Criticità</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Gravita</TableHead>
+                  <TableHead>Gravità</TableHead>
                   <TableHead>Tipologia</TableHead>
                   <TableHead>Descrizione</TableHead>
                   <TableHead>Rif. normativo</TableHead>

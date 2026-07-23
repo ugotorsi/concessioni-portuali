@@ -40,7 +40,7 @@ function markerLabel(type: MappaDemoMarker["type"]): string {
   }
 
   if (type === "CRITICITA") {
-    return "Criticita";
+    return "Criticità";
   }
 
   return "Sopralluogo";
@@ -90,8 +90,8 @@ export default async function MappaPage() {
 
   return (
     <AppShell
-      title="Mappa demo concessioni e criticita"
-      subtitle="Vista territoriale dimostrativa delle concessioni, criticita e sopralluoghi registrati nella piattaforma."
+      title="Mappa demo concessioni e criticità"
+      subtitle="Vista territoriale dimostrativa delle concessioni, criticità e sopralluoghi registrati nella piattaforma."
     >
       <div className="mx-auto flex w-full max-w-[1460px] flex-col gap-4">
         <ResumeDemoBanner />
@@ -105,7 +105,7 @@ export default async function MappaPage() {
           </Card>
           <Card>
             <CardHeader>
-              <CardDescription>Criticita geolocalizzate</CardDescription>
+              <CardDescription>Criticità geolocalizzate</CardDescription>
               <CardTitle>{data.summary.criticita}</CardTitle>
             </CardHeader>
           </Card>
@@ -117,13 +117,13 @@ export default async function MappaPage() {
           </Card>
           <Card>
             <CardHeader>
-              <CardDescription>Criticita con profilo art. 47</CardDescription>
+              <CardDescription>Criticità con profilo art. 47</CardDescription>
               <CardTitle>{data.summary.art47}</CardTitle>
             </CardHeader>
           </Card>
           <Card>
             <CardHeader>
-              <CardDescription>Punti ad alta priorita</CardDescription>
+              <CardDescription>Punti ad alta priorità</CardDescription>
               <CardTitle>{data.summary.altaPriorita}</CardTitle>
             </CardHeader>
           </Card>
@@ -174,7 +174,7 @@ export default async function MappaPage() {
                 <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.09)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.09)_1px,transparent_1px)] bg-[size:40px_40px]" />
                 <div className="pointer-events-none absolute right-8 top-8 h-24 w-52 rounded-lg border border-white/70 bg-white/70 p-3 text-xs text-slate-700 shadow-sm backdrop-blur">
                   <p className="font-semibold">Scenario demo territoriale</p>
-                  <p className="mt-1">Distribuzione sintetica concessioni, criticita e sopralluoghi su aree portuali demo.</p>
+                  <p className="mt-1">Distribuzione sintetica concessioni, criticità e sopralluoghi su aree portuali demo.</p>
                 </div>
 
                 {canvasMarkers.map((marker) => (
@@ -202,7 +202,7 @@ export default async function MappaPage() {
 
               <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-700">
                 <Badge variant="success">Concessione</Badge>
-                <Badge variant="danger">Criticita</Badge>
+                <Badge variant="danger">Criticità</Badge>
                 <Badge variant="warning">Sopralluogo</Badge>
                 <Badge variant="danger">Rischio alto/critico</Badge>
               </div>

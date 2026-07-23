@@ -65,16 +65,16 @@ Valutazione sintetica: ottima base MVP verticale, forte valore dimostrativo e bu
 | Dashboard | KPI, priorità, tabelle operative | 8/10 | Implementato |
 | Concessioni | Lista + scheda 360 su concessione | 8/10 | Implementato |
 | Concessionari | Entry in menu e pagina | 3/10 | Predisposto |
-| Criticita | Lista, scheda, creazione/modifica controllata | 8/10 | Implementato |
+| Criticità | Lista, scheda, creazione/modifica controllata | 8/10 | Implementato |
 | Scadenze | Agenda scadenze con lettura operativa | 8/10 | Implementato |
-| Pagamenti | Monitoraggio residui/morosita + update | 8/10 | Implementato |
+| Pagamenti | Monitoraggio residui/morosità + update | 8/10 | Implementato |
 | Sopralluoghi | Registro tecnico + creazione | 8/10 | Implementato |
 | Procedimenti | Registro istruttorio + creazione | 8/10 | Implementato |
 | Report | Lista, scheda, validazione, PDF | 8/10 | Implementato |
 | Normativa | Fonti/versioni/impatti + pagina aggiornamento | 7/10 | Implementato |
 | AI assistiva | Template suggestion con disclaimer | 5/10 | Scaffold funzionale |
 | Vista AdSP | Portale consultivo separato | 7/10 | Implementato |
-| Export CSV | Criticita, scadenze, pagamenti, procedimenti, report | 8/10 | Implementato |
+| Export CSV | Criticità, scadenze, pagamenti, procedimenti, report | 8/10 | Implementato |
 | Login demo/ruoli | Selezione ruolo e cookie httpOnly | 4/10 | Solo demo |
 
 ## 4. Valutazione tecnica
@@ -103,7 +103,7 @@ Valutazione sintetica: ottima base MVP verticale, forte valore dimostrativo e bu
 ### 5.1 Cosa consente oggi la piattaforma
 - Navigare quadro completo concessioni e relativi sotto-domini operativi.
 - Individuare rischi e priorità da dashboard e liste verticali.
-- Aggiornare in modo controllato alcune entita core (criticità, pagamenti, sopralluoghi, procedimenti, validazione report).
+- Aggiornare in modo controllato alcune entità core (criticità, pagamenti, sopralluoghi, procedimenti, validazione report).
 - Produrre export CSV e PDF report.
 - Operare con profili demo differenziati, inclusa vista consultiva AdSP.
 
@@ -124,7 +124,7 @@ Per ogni modulo: funzione, maturità, utilita, limiti, miglioramento.
   - Limiti: assenza editing strutturato concessione.
   - Miglioramenti: workflow variazioni/rinnovi/versioning titolo.
 
-- Criticita
+- Criticità
   - Funzione: gestione anomalie e rischio.
   - Maturita: alta MVP.
   - Utilita: altissima per presidio rischio.
@@ -139,7 +139,7 @@ Per ogni modulo: funzione, maturità, utilita, limiti, miglioramento.
   - Miglioramenti: notifiche PEC/email/in-app, regole configurabili.
 
 - Pagamenti
-  - Funzione: esposizione residua e morosita.
+  - Funzione: esposizione residua e morosità.
   - Maturita: alta MVP.
   - Utilita: alta economico-legale.
   - Limiti: manca integrazione contabile esterna.
@@ -189,7 +189,7 @@ Per ogni modulo: funzione, maturità, utilita, limiti, miglioramento.
 
 ## 6. Valutazione giuridico-amministrativa
 ### 6.1 Punti di forza
-- Dominio ben rappresentato su decadenza/revoca/morosita/scadenze/procedimenti.
+- Dominio ben rappresentato su decadenza/revoca/morosità/scadenze/procedimenti.
 - Esplicita separazione proposta tecnica vs decisione autoritativa.
 - Presenza di disclaimer chiari su AI e natura istruttoria.
 - Tracciabilita minima delle azioni tramite ActivityLog.
@@ -217,8 +217,8 @@ Per ogni modulo: funzione, maturità, utilita, limiti, miglioramento.
 Riduce frammentazione operativa tra dati concessori, rischio tecnico-giuridico-economico e output istruttori, offrendo una vista integrata orientata alla decisione.
 
 ### 7.2 Target primari
-- Societa concessionarie strutturate.
-- Autorita di Sistema Portuale.
+- Società concessionarie strutturate.
+- Autorità di Sistema Portuale.
 - Enti pubblici con demanio marittimo e concessioni complesse.
 - Studi legali/amministrativi specializzati in concessioni.
 
@@ -239,7 +239,7 @@ Riduce frammentazione operativa tra dati concessori, rischio tecnico-giuridico-e
 - Verticalizzazione estendibile a concessioni pubbliche non portuali, autorizzazioni e procedimenti con analoghe esigenze.
 
 ### 7.6 Ipotesi modello business e pricing ragionevole
-- Modello base: canone annuo per ente/societa + moduli add-on.
+- Modello base: canone annuo per ente/società + moduli add-on.
 - Fasce indicative (solo stima strategica, non da codice):
   - SMB concessionario: 8k-25k euro/anno.
   - Mid-large concessionario o multi-sito: 25k-80k euro/anno.
@@ -310,7 +310,7 @@ Riduce frammentazione operativa tra dati concessori, rischio tecnico-giuridico-e
 - Nessun repository audit prompt/output persistente.
 
 ### 10.3 Principio di governance
-Il principio e corretto e allineato al dominio pubblico: AI propone, operatore verifica, responsabile valida, Autorita decide.
+Il principio e corretto e allineato al dominio pubblico: AI propone, operatore verifica, responsabile valida, Autorità decide.
 
 ### 10.4 Opportunita reali AI
 - Analisi pre-istruttoria criticità e rischio decadenza.
@@ -333,7 +333,7 @@ Il principio e corretto e allineato al dominio pubblico: AI propone, operatore v
 
 ## 11. Database e modello dati
 ### 11.1 Cosa e ben modellato
-- Copertura entita core molto ampia.
+- Copertura entità core molto ampia.
 - Relazioni coerenti e indici utili.
 - Enum dominio ben strutturate.
 - Collegamenti trasversali utili (criticità-procedimenti-report-normativa).
@@ -341,13 +341,13 @@ Il principio e corretto e allineato al dominio pubblico: AI propone, operatore v
 
 ### 11.2 Cosa manca o va esteso
 - Versionamento titolo concessorio e sue modifiche nel tempo.
-- Fascicolo procedimentale esplicito come entita autonoma.
+- Fascicolo procedimentale esplicito come entità autonoma.
 - Protocollo, comunicazioni PEC, notifiche e canali ufficiali.
 - Unita organizzative, utenti reali, deleghe e responsabilità formali.
 - Workflow autorizzativo configurabile e policy-based.
 - Storico decisionale con motivazioni e allegati firmati.
 
-### 11.3 Entita strategiche da aggiungere
+### 11.3 Entità strategiche da aggiungere
 - Protocollo
 - ComunicazionePEC
 - Fascicolo
@@ -391,42 +391,42 @@ Il principio e corretto e allineato al dominio pubblico: AI propone, operatore v
 ### 13.1 Stabilizzazione tecnica immediata
 - Obiettivi: hardening base, coerenza documentale, quality baseline.
 - Interventi: test smoke/e2e minimi, lint/check estesi, allineamento docs, observability base.
-- Priorita: Altissima.
+- Priorità: Altissima.
 - Complessita: Media.
 - Impatto: Alto.
 
 ### 13.2 Demo istituzionale
 - Obiettivi: massimizzare credibilita verso enti e investitori.
 - Interventi: storytelling KPI, dataset casi istituzionali, demo script multi-ruolo, export executive.
-- Priorita: Alta.
+- Priorità: Alta.
 - Complessita: Media.
 - Impatto: Alto.
 
 ### 13.3 MVP commerciale
 - Obiettivi: primo prodotto vendibile a clienti privati/consulenza.
 - Interventi: auth reale, onboarding tenant, billing/licensing base, support process.
-- Priorita: Alta.
+- Priorità: Alta.
 - Complessita: Alta.
 - Impatto: Alto.
 
 ### 13.4 Versione production-grade
-- Obiettivi: sicurezza/compliance e affidabilita operative.
+- Obiettivi: sicurezza/compliance e affidabilità operative.
 - Interventi: IAM enterprise, audit forense, backup/DR, policy security, CI/CD completa.
-- Priorita: Altissima.
+- Priorità: Altissima.
 - Complessita: Alta.
 - Impatto: Molto alto.
 
 ### 13.5 Versione enterprise/AdSP
 - Obiettivi: adozione ente pubblico e multi-organizzazione.
 - Interventi: workflow amministrativo formalizzato, protocollazione, integrazioni istituzionali, on-prem.
-- Priorita: Alta.
+- Priorità: Alta.
 - Complessita: Molto alta.
 - Impatto: Molto alto.
 
 ### 13.6 Evoluzione AI/legal intelligence
 - Obiettivi: differenziazione competitiva sostenibile.
 - Interventi: provider LLM, guardrail, benchmark qualitÃ , explainability, audit AI end-to-end.
-- Priorita: Media-Alta.
+- Priorità: Media-Alta.
 - Complessita: Alta.
 - Impatto: Alto.
 
@@ -462,7 +462,7 @@ Con un piano di 2-3 release focalizzate su hardening e processi, Concessioni Por
 4. Implementare audit trail forense completo con user identity reale.
 5. Formalizzare workflow procedimentale con stati vincolati, SLA e responsabilità.
 6. Introdurre gestione documentale strutturata (upload, versioni, metadati, allegati).
-7. Aggiungere notifiche operative (scadenze, morosita, criticità) multicanale.
+7. Aggiungere notifiche operative (scadenze, morosità, criticità) multicanale.
 8. Allineare documentazione strategica e tecnica allo stato PostgreSQL corrente.
 9. Rendere il modulo Concessionari operativo (non placeholder).
 10. Definire baseline DevSecOps (CI/CD, scan dipendenze, policy security).
@@ -490,4 +490,5 @@ In stato attuale: ottimo per demo avanzate e discovery commerciale.
 Non ancora idoneo a uso istituzionale in produzione senza interventi obbligatori.
 Traiettorie AI e normativa sono promettenti ma da governare con rigore.
 Raccomandazione: investire subito su production readiness e validazione pilota con stakeholder reali.
+
 

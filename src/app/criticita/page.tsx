@@ -134,7 +134,7 @@ export default async function CriticitaPage({ searchParams }: CriticitaPageProps
         <Card>
           <CardHeader>
             <CardTitle>Totale</CardTitle>
-            <CardDescription>Criticita censite</CardDescription>
+            <CardDescription>Criticità censite</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-semibold text-slate-900">{listData.summary.totale}</p>
@@ -323,7 +323,7 @@ export default async function CriticitaPage({ searchParams }: CriticitaPageProps
                 {listData.items.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={11} className="text-center text-slate-500">
-                      Nessuna criticita trovata con i filtri correnti.
+                      Nessuna criticità trovata con i filtri correnti.
                     </TableCell>
                   </TableRow>
                 ) : null}

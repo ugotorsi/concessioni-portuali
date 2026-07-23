@@ -499,7 +499,7 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
               <p className="mt-1">{formatEnumLabel(detail.concessione.tipologiaBene)}</p>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-wide text-slate-500">Attivita</p>
+              <p className="text-xs uppercase tracking-wide text-slate-500">Attività</p>
               <p className="mt-1">{formatEnumLabel(detail.concessione.attivita)}</p>
             </div>
             <div>
@@ -540,7 +540,7 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
                   <p className="mt-1">{formatEnumLabel(detail.criticitaCollegata.tipologia)}</p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Gravita</p>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Gravità</p>
                   <div className="mt-1">
                     <GravitaBadge value={detail.criticitaCollegata.gravita} />
                   </div>
@@ -569,7 +569,7 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-slate-500">Nessuna criticita collegata al procedimento.</p>
+              <p className="text-sm text-slate-500">Nessuna criticità collegata al procedimento.</p>
             )}
           </CardContent>
         </Card>
@@ -583,7 +583,7 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Gravita</TableHead>
+                    <TableHead>Gravità</TableHead>
                     <TableHead>Tipologia</TableHead>
                     <TableHead>Descrizione</TableHead>
                     <TableHead>Stato</TableHead>
@@ -605,7 +605,7 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
                   {detail.altreCriticitaAperte.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={4} className="text-center text-slate-500">
-                        Nessuna ulteriore criticita aperta.
+                        Nessuna ulteriore criticità aperta.
                       </TableCell>
                     </TableRow>
                   ) : null}
@@ -703,7 +703,7 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
                     <TableHead>Data</TableHead>
                     <TableHead>Esito</TableHead>
                     <TableHead>Operatori</TableHead>
-                    <TableHead>Conformita</TableHead>
+                    <TableHead>Conformità</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

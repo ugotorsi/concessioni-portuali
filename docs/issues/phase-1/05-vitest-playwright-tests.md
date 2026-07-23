@@ -1,10 +1,10 @@
-# Add Vitest and Playwright test baseline
+﻿# Add Vitest and Playwright test baseline
 
 ## Obiettivo
 Introdurre test automatici minimi su query/actions e flussi demo principali.
 
 ## Motivazione strategica
-Aumenta affidabilita del rilascio demo istituzionale e riduce regressioni su funzionalita critiche.
+Aumenta affidabilità del rilascio demo istituzionale e riduce regressioni su funzionalita critiche.
 
 ## Ambito
 - Setup framework Vitest e Playwright.
@@ -18,10 +18,10 @@ Aumenta affidabilita del rilascio demo istituzionale e riduce regressioni su fun
 - tests/unit/
 - tests/e2e/
 
-## Attivita tecniche
+## Attività tecniche
 - Configurare runner, script e ambiente test.
 - Scrivere test unitari su query/actions prioritarie.
-- Scrivere scenari e2e su login, criticita/procedimento e report.
+- Scrivere scenari e2e su login, criticità/procedimento e report.
 - Integrare comandi test nella routine check.
 
 ## Criteri di accettazione
@@ -41,7 +41,7 @@ Aumenta affidabilita del rilascio demo istituzionale e riduce regressioni su fun
 ## Dipendenze
 - Beneficia della stabilizzazione di Issue 1, 6 e 4.
 
-## Priorita
+## Priorità
 Critical
 
 ## Complessita
@@ -49,3 +49,4 @@ Media
 
 ## Label suggerite
 testing, quality, phase-1, priority-critical
+

@@ -44,7 +44,7 @@ export default async function AuditPage() {
                 <TableHead>Utente</TableHead>
                 <TableHead>Ruolo</TableHead>
                 <TableHead>Azione</TableHead>
-                <TableHead>Entita</TableHead>
+                <TableHead>Entità</TableHead>
                 <TableHead>Esito</TableHead>
                 <TableHead>Concessione</TableHead>
                 <TableHead>Prev hash</TableHead>

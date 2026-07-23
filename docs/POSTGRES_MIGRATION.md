@@ -1,4 +1,4 @@
-# Migrazione a PostgreSQL (Docker)
+﻿# Migrazione a PostgreSQL (Docker)
 
 ## Configurazione raccomandata
 
@@ -69,4 +69,5 @@ Nota Prisma 7:
 ## Politica d'uso ambienti
 
 - Non usare SQLite in ambiente demo istituzionale o produzione.
-- Usare SQLite solo come rollback temporaneo per sviluppo locale quando Docker non è disponibile.
+- Usare SQLite solo come rollback temporaneo per sviluppo locale quando Docker non Ã¨ disponibile.
+

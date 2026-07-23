@@ -1,4 +1,4 @@
-# Add GDPR and DPIA documentation draft
+﻿# Add GDPR and DPIA documentation draft
 
 ## Obiettivo
 Creare documentazione preliminare privacy/compliance per demo istituzionale e primo pilota.
@@ -17,8 +17,8 @@ Supporta interlocuzione con soggetti pubblici e consulenti, riducendo rischio pe
 - docs/PROJECT_EVALUATION.md
 - docs/EXTERNAL_AI_REVIEW.md
 
-## Attivita tecniche
-- Definire finalita, categorie dati, ruoli e basi giuridiche.
+## Attività tecniche
+- Definire finalità, categorie dati, ruoli e basi giuridiche.
 - Identificare rischi privacy e misure mitigative.
 - Mappare data lifecycle e retention preliminare.
 - Evidenziare questioni aperte per revisione legale.
@@ -40,7 +40,7 @@ Supporta interlocuzione con soggetti pubblici e consulenti, riducendo rischio pe
 ## Dipendenze
 - Preferibile avere baseline auth/audit/security definita (Issue 1, 4, 6).
 
-## Priorita
+## Priorità
 High
 
 ## Complessita
@@ -48,3 +48,4 @@ Media
 
 ## Label suggerite
 gdpr, compliance, docs, phase-1, priority-high
+

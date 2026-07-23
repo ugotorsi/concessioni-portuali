@@ -14,7 +14,7 @@ export function getAiSupportSuggestion(context: AiTaskContext): AiSuggestion {
       summary: "Profilo non abilitato al modulo assistente AI.",
       recommendedActions: ["Richiedere supporto a un profilo back-office abilitato."],
       warning:
-        "La funzionalita AI e disabilitata per il profilo corrente; nessuna elaborazione istruttoria automatica disponibile.",
+        "La funzionalità AI è disabilitata per il profilo corrente; nessuna elaborazione istruttoria automatica disponibile.",
     };
   }
 
@@ -30,6 +30,6 @@ export function getAiSupportSuggestion(context: AiTaskContext): AiSuggestion {
       `Prompt operativo usato: ${prompt}`,
     ],
     warning:
-      "Output assistivo: non costituisce provvedimento, non sostituisce valutazione discrezionale e decisione dell Autorita competente.",
+      "Output assistivo: non costituisce provvedimento, non sostituisce valutazione discrezionale e decisione dell'Autorità competente.",
   };
 }

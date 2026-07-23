@@ -40,7 +40,7 @@ test("admin visualizza i 6 scenari demo istituzionali", async ({ page }) => {
   await expect(page.getByText(/Documento istruttorio|art\. 47/i).first()).toBeVisible();
 });
 
-test("viewer adsp puo consultare scenari demo in sola lettura", async ({ page }) => {
+test("viewer adsp può consultare scenari demo in sola lettura", async ({ page }) => {
   await login(page, "adsp@demo.local", "adsp123");
   await expect(page).toHaveURL(/\/adsp$/);
 

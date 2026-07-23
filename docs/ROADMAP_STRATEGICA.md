@@ -1,4 +1,4 @@
-# Roadmap Tecnica e Strategica
+﻿# Roadmap Tecnica e Strategica
 
 ## 0. Repositioning di dominio (Issue #34 / 32A)
 
@@ -15,22 +15,22 @@ Track evolutivo collegato:
 
 ## 1. Stato MVP attuale
 
-- Moduli completati: Dashboard, Concessioni, Concessionari, Criticità, Scadenze, Pagamenti, Sopralluoghi, Procedimenti, Report, Normativa, Assistente AI (scaffold), Demo.
+- Moduli completati: Dashboard, Concessioni, Concessionari, CriticitÃ , Scadenze, Pagamenti, Sopralluoghi, Procedimenti, Report, Normativa, Assistente AI (scaffold), Demo.
 - Natura operativa controllata: ai flussi read-mostly si affiancano write minime autorizzate e tracciate su moduli core.
 - SQLite temporaneo: ambiente locale semplificato per accelerare sviluppo e dimostrazione.
-- Valore demo: percorso end-to-end già presentabile a soci e interlocutori istituzionali con dataset coerente multi-modulo.
+- Valore demo: percorso end-to-end giÃ  presentabile a soci e interlocutori istituzionali con dataset coerente multi-modulo.
 
 ## 2. Debolezze tecniche attuali
 
 - SQLite: soluzione efficace per demo, ma non ideale per carichi concorrenti e scenari produttivi.
 - Assenza autenticazione: mancano login reale, controllo sessione e governance accessi.
-- Assenza CRUD: impossibilità di aggiornare operativamente il dato senza interventi esterni.
+- Assenza CRUD: impossibilitÃ  di aggiornare operativamente il dato senza interventi esterni.
 - Export professionale avviato: presenti export CSV server-side e PDF report server-side con regole ruolo.
-- Assenza viste separate società/AdSP: perimetro utente non ancora differenziato per audience e responsabilità.
+- Assenza viste separate societÃ /AdSP: perimetro utente non ancora differenziato per audience e responsabilitÃ .
 
 ## 3. Debolezze di dominio
 
-- Assenza GIS: non è presente una rappresentazione spaziale evoluta di aree, perimetri e interferenze.
+- Assenza GIS: non Ã¨ presente una rappresentazione spaziale evoluta di aree, perimetri e interferenze.
 - Motore normativo iniziale: introdotto modulo Normativa con fonti, versioni e impatti collegati ai moduli operativi.
 - Assenza tracciamento contraddittorio procedimentale: mancano timeline strutturate e audit trail dedicati.
 - Seed ancora generico: dataset valido per demo, ma non ancora strutturato su casistiche istituzionali profonde.
@@ -42,13 +42,13 @@ Track evolutivo collegato:
   - ripristino datasource PostgreSQL e stack locale containerizzato
   - verifica migrazioni e allineamento query
 - Autenticazione e ruoli:
-  - login, sessione e profili minimi (società, AdSP, amministrazione)
+  - login, sessione e profili minimi (societÃ , AdSP, amministrazione)
 - CRUD minimo:
-  - inserimento/aggiornamento controllato su criticità, pagamenti e sopralluoghi
+  - inserimento/aggiornamento controllato su criticitÃ , pagamenti e sopralluoghi
 - Vista AdSP read-only:
   - separazione navigazione e contenuti per profilo istituzionale
 - Export PDF/CSV professionale:
-  - CSV server-side su criticita/scadenze/pagamenti/procedimenti/report
+  - CSV server-side su criticità/scadenze/pagamenti/procedimenti/report
   - PDF server-side su report con regole ruolo
 - Seed scenari art. 47:
   - casi guidati su decadenza/revoca e contraddittorio
@@ -58,7 +58,7 @@ Track evolutivo collegato:
 - GIS:
   - visualizzazione concessioni su mappa e analisi interferenze
 - Motore alert configurabile:
-  - regole su scadenze, morosità, garanzie e stati procedimentali
+  - regole su scadenze, morositÃ , garanzie e stati procedimentali
 - Generatore bozze atti:
   - template istruttori e compilazione semi-automatica
 - Modulo normativa avanzato:
@@ -69,7 +69,7 @@ Track evolutivo collegato:
   - estrazione metadati, classificazione e collegamento automatico ai moduli
 - Modulo bandi:
   - gestione ciclo preparazione procedura, allegati e stato avanzamento
-- Dashboard duale società/AdSP:
+- Dashboard duale societÃ /AdSP:
   - indicatori e narrative differenziate per ruolo
 
 ## 6. Roadmap strategica 3-6 mesi
@@ -77,15 +77,15 @@ Track evolutivo collegato:
 - Motore giuridico integrato:
   - supporto normativo contestuale su casi e passaggi istruttori
 - Scoring rischio decadenza/revoca:
-  - modelli di priorità basati su segnali tecnico-giuridico-economici
+  - modelli di prioritÃ  basati su segnali tecnico-giuridico-economici
 - Digital twin concessione:
   - fascicolo digitale dinamico con stato operativo e storico eventi
 - Modulo bandi intelligente:
   - suggerimenti su criterio procedura, output e coerenza documentale
-- Interoperabilità SID/BDNCP/PDND:
+- InteroperabilitÃ  SID/BDNCP/PDND:
   - integrazione con ecosistemi pubblici e flussi informativi istituzionali
 - Multi-ente white label:
-  - adozione scalabile su più autorità o società in configurazione dedicata
+  - adozione scalabile su piÃ¹ autoritÃ  o societÃ  in configurazione dedicata
 
 ## 7. Innovazioni differenzianti
 
@@ -94,7 +94,7 @@ Track evolutivo collegato:
 - Scoring rischio decadenza/revoca
 - Digital twin concessione
 - Modulo bandi intelligente
-- Dashboard duale società/AdSP
+- Dashboard duale societÃ /AdSP
 
 ## 8. Prossimo sprint consigliato
 
@@ -109,5 +109,6 @@ Deliverable attesi:
 
 - ambiente locale stabile su PostgreSQL
 - accesso autenticato con primi ruoli attivi
-- operatività base in aggiornamento dato sui moduli core
-- percorsi utente distinti per servizio società e vista istituzionale AdSP
+- operativitÃ  base in aggiornamento dato sui moduli core
+- percorsi utente distinti per servizio societÃ  e vista istituzionale AdSP
+

@@ -36,7 +36,7 @@ export function ConcessioniFiltersBar({ filtersData, current }: ConcessioniFilte
       </Select>
 
       <Select name="attivita" defaultValue={current.attivita ?? ""}>
-        <option value="">Attivita (tutte)</option>
+        <option value="">Attività (tutte)</option>
         {filtersData.attivita.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}

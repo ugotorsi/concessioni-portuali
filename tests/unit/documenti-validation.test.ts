@@ -26,7 +26,7 @@ describe("documenti validation", () => {
     formData.set("status", "ATTIVO");
     formData.set("file", new File(["contenuto"], "nota.txt", { type: "text/plain" }));
 
-    expect(() => parseUploadDocumentFormData(formData)).toThrow(/almeno una entita/i);
+    expect(() => parseUploadDocumentFormData(formData)).toThrow(/almeno un'entità istruttoria/i);
   });
 
   it("rejects unsupported mime types", () => {

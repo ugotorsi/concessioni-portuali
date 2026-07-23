@@ -7,7 +7,7 @@ async function login(page: import("playwright/test").Page, email: string, passwo
   await page.getByTestId("login-submit").click();
 }
 
-test("create criticita with Art.47 mapping", async ({ page }) => {
+test("create criticità with Art.47 mapping", async ({ page }) => {
   await login(page, "admin@demo.local", "admin123");
   await expect(page).toHaveURL(/\/dashboard$/);
 
@@ -19,13 +19,13 @@ test("create criticita with Art.47 mapping", async ({ page }) => {
   await page.locator("#gravita").selectOption("ALTA");
   await page.locator("#fonte").selectOption("VERIFICA_DOCUMENTALE");
 
-  await page.locator("#descrizione").fill(`Morosita persistente con profilo istruttorio ex art. 47. ${Date.now()}`);
+  await page.locator("#descrizione").fill(`Morosità persistente con profilo istruttorio ex art. 47. ${Date.now()}`);
   await page.locator("#noteIstruttorie").fill("Avviare approfondimento con diffida.");
 
   await page.locator("#rilevanzaArt47").selectOption("true");
   await page.locator("#letteraArt47").selectOption("D_OMESSO_PAGAMENTO_CANONE");
   await page.locator("#rischioDecadenza").selectOption("ALTO");
-  await page.locator("#motivazioneArt47").fill("Persistenza morosita su canoni dovuti in assenza di piano rispettato.");
+  await page.locator("#motivazioneArt47").fill("Persistenza morosità su canoni dovuti in assenza di piano rispettato.");
   await page.locator("#azioneIstruttoriaArt47").fill("Predisporre contraddittorio e verifica presupposti.");
 
   await page.locator("#regolarizzata").selectOption("true");
@@ -38,7 +38,7 @@ test("create criticita with Art.47 mapping", async ({ page }) => {
 
   await Promise.all([
     page.waitForResponse((response) => response.request().method() === "POST"),
-    page.getByRole("button", { name: "Salva criticita" }).click(),
+    page.getByRole("button", { name: "Salva criticità" }).click(),
   ]);
 
   await expect(page).toHaveURL(/\/criticita\/(?!nuova$)[^/]+$/, { timeout: 30000 });

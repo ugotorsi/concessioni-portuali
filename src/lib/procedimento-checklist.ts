@@ -86,7 +86,7 @@ export function getOrigineProcedimentoLabel(origine: string | null | undefined):
   }
 
   const labels: Record<string, string> = {
-    UFFICIO: "D ufficio",
+    UFFICIO: "D'ufficio",
     ISTANZA_PARTE: "A istanza di parte",
     ALTRO: "Altro",
   };
@@ -117,7 +117,7 @@ export function getStatoPreavvisoRigettoDescription(stato: string | null | undef
   }
 
   const descriptions: Record<string, string> = {
-    NON_VALUTATO: "Applicabilita del preavviso non ancora valutata in istruttoria.",
+    NON_VALUTATO: "Applicabilità del preavviso non ancora valutata in istruttoria.",
     NON_APPLICABILE: "Preavviso indicato come non applicabile secondo valutazione istruttoria.",
     APPLICABILE_DA_INVIARE: "Preavviso ritenuto applicabile, invio ancora da completare.",
     INVIATO: "Preavviso inviato: monitorare eventuali osservazioni e relativi termini.",
@@ -214,7 +214,7 @@ export function getPreavvisoRigettoChecklistItems(
   return [
     {
       key: "preavvisoValutato",
-      label: "Valutazione applicabilita preavviso art. 10-bis",
+      label: "Valutazione applicabilità preavviso art. 10-bis",
       required: true,
       completed: stato !== null && stato !== undefined && stato !== "NON_VALUTATO",
     },
@@ -247,7 +247,7 @@ export function getPreavvisoRigettoChecklistItems(
     },
     {
       key: "motivazioneMancatoPreavviso",
-      label: "Motivazione mancato preavviso / non applicabilita",
+      label: "Motivazione mancato preavviso / non applicabilità",
       required: !applicabile,
       completed:
         applicabile ||
@@ -260,18 +260,18 @@ export function getPreavvisoRigettoChecklistItems(
 export function getProcedimentoChecklistGuidance(procedimento: ProcedimentoChecklistInput): string {
   if (isProcedimentoUfficio(procedimento)) {
     if (procedimento.tipologia === "AVVIO_DECADENZA") {
-      return "Procedimento d ufficio con profilo art. 47: presidiare comunicazione avvio, contestazione formale, termini memorie e motivazione valutativa. Nessun automatismo decisorio.";
+      return "Procedimento d'ufficio con profilo art. 47: presidiare comunicazione avvio, contestazione formale, termini memorie e motivazione valutativa. Nessun automatismo decisorio.";
     }
 
-    return "Procedimento d ufficio: verificare completezza del contraddittorio (avvio, contestazione, memorie, eventuale audizione, valutazione finale) come supporto istruttorio.";
+    return "Procedimento d'ufficio: verificare completezza del contraddittorio (avvio, contestazione, memorie, eventuale audizione, valutazione finale) come supporto istruttorio.";
   }
 
   if (isProcedimentoIstanzaParte(procedimento)) {
     if (procedimento.preavvisoRigettoApplicabile) {
-      return "Procedimento a istanza di parte: il preavviso di rigetto e tracciato come elemento istruttorio quando applicabile secondo valutazione del responsabile.";
+      return "Procedimento a istanza di parte: il preavviso di rigetto è tracciato come elemento istruttorio quando applicabile secondo valutazione del responsabile.";
     }
 
-    return "Procedimento a istanza di parte: se il preavviso non e applicabile, indicare stato/motivazione istruttoria del mancato preavviso.";
+    return "Procedimento a istanza di parte: se il preavviso non è applicabile, indicare stato/motivazione istruttoria del mancato preavviso.";
   }
 
   return "Distinguere origine del procedimento e completezza checklist per supportare la ricostruzione istruttoria del caso.";

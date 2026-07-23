@@ -14,9 +14,9 @@ const LETTERA_DESCRIPTIONS: Record<string, string> = {
   B_NON_USO_O_CATTIVO_USO:
     "Possibile scostamento tra uso assentito e uso effettivo o mancato utilizzo dell'area.",
   C_MUTAMENTO_SCOPO_NON_AUTORIZZATO:
-    "Possibile utilizzo del bene per finalita diverse rispetto a quelle autorizzate.",
+    "Possibile utilizzo del bene per finalità diverse rispetto a quelle autorizzate.",
   D_OMESSO_PAGAMENTO_CANONE:
-    "Possibile morosita su canoni o somme dovute correlate al titolo concessorio.",
+    "Possibile morosità su canoni o somme dovute correlate al titolo concessorio.",
   E_SUBINGRESSO_ABUSIVO:
     "Possibile subentro o affidamento a terzi senza il necessario titolo autorizzativo.",
   F_INADEMPIMENTO_OBBLIGHI:
@@ -41,11 +41,11 @@ const ESITO_REGOLARIZZAZIONE_LABELS: Record<string, string> = {
 };
 
 const ESITO_REGOLARIZZAZIONE_DESCRIPTIONS: Record<string, string> = {
-  DA_VERIFICARE: "La regolarizzazione e dichiarata ma richiede ancora verifica istruttoria.",
+  DA_VERIFICARE: "La regolarizzazione è dichiarata ma richiede ancora verifica istruttoria.",
   PARZIALE: "Sono stati adottati interventi solo parzialmente risolutivi.",
   COMPLETA: "Risultano elementi di regolarizzazione completa, da confermare in istruttoria.",
-  NON_IDONEA: "La regolarizzazione non e ritenuta idonea rispetto ai rilievi istruttori.",
-  SUPERATA_DA_PROVVEDIMENTO: "La posizione e stata superata da successivo provvedimento amministrativo.",
+  NON_IDONEA: "La regolarizzazione non è ritenuta idonea rispetto ai rilievi istruttori.",
+  SUPERATA_DA_PROVVEDIMENTO: "La posizione è stata superata da successivo provvedimento amministrativo.",
 };
 
 export interface CriticitaRegolarizzazioneInput {
@@ -149,11 +149,11 @@ export function getArt47RiskNoteWithRegolarizzazione(
   criticita: CriticitaRegolarizzazioneInput,
 ): string {
   if (!criticita.rilevanzaArt47) {
-    return "La regolarizzazione e un elemento informativo utile al fascicolo istruttorio.";
+    return "La regolarizzazione è un elemento informativo utile al fascicolo istruttorio.";
   }
 
   if (!criticita.regolarizzata) {
-    return "La criticita art. 47 risulta non regolarizzata allo stato degli atti istruttori.";
+    return "La criticità art. 47 risulta non regolarizzata allo stato degli atti istruttori.";
   }
 
   if (criticita.esitoRegolarizzazione === "NON_IDONEA") {
@@ -161,14 +161,14 @@ export function getArt47RiskNoteWithRegolarizzazione(
   }
 
   if (criticita.esitoRegolarizzazione === "DA_VERIFICARE" || !criticita.verificataRegolarizzazione) {
-    return "La regolarizzazione e un elemento istruttorio rilevante da valutare prima di eventuali determinazioni finali. Verifica tecnica ancora pendente.";
+    return "La regolarizzazione è un elemento istruttorio rilevante da valutare prima di eventuali determinazioni finali. Verifica tecnica ancora pendente.";
   }
 
   if (criticita.esitoRegolarizzazione === "COMPLETA" && criticita.verificataRegolarizzazione) {
     return "La regolarizzazione completa e verificata costituisce elemento istruttorio favorevole, da valutare senza automatismi rispetto a eventuali determinazioni decadenziali.";
   }
 
-  return "La regolarizzazione e un elemento istruttorio rilevante da valutare prima di eventuali determinazioni finali.";
+  return "La regolarizzazione è un elemento istruttorio rilevante da valutare prima di eventuali determinazioni finali.";
 }
 
 export function inferArt47FromCriticitaTipologia(tipologia: string): {
@@ -181,7 +181,7 @@ export function inferArt47FromCriticitaTipologia(tipologia: string): {
       return {
         suggestedLettera: "D_OMESSO_PAGAMENTO_CANONE",
         suggestedRischio: "ALTO",
-        reason: "Suggerimento assistivo basato su profilo morosita: richiede verifica istruttoria umana.",
+        reason: "Suggerimento assistivo basato su profilo morosità: richiede verifica istruttoria umana.",
       };
     case "OCCUPAZIONE_DIFFORME":
     case "USO_NON_CONFORME":

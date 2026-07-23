@@ -1,4 +1,4 @@
-# Add procedural adversarial checklist to Procedimento
+﻿# Add procedural adversarial checklist to Procedimento
 
 ## Obiettivo
 Modellare e visualizzare gli elementi minimi del contraddittorio procedimentale: comunicazione avvio, termine memorie, audizione, pareri, provvedimento finale.
@@ -18,7 +18,7 @@ Rafforza tenuta amministrativa del procedimento e riduce rischio contestazioni s
 - src/app/procedimenti/nuovo/page.tsx
 - src/app/procedimenti/[id]/page.tsx
 
-## Attivita tecniche
+## Attività tecniche
 - Definire campi checklist contraddittorio.
 - Aggiornare action/query e validazioni.
 - Rendere visibile stato checklist nel dettaglio procedimento.
@@ -42,7 +42,7 @@ Rafforza tenuta amministrativa del procedimento e riduce rischio contestazioni s
 ## Dipendenze
 - Sinergia con Issue 2 (mapping legale) e Issue 4 (audit).
 
-## Priorita
+## Priorità
 High
 
 ## Complessita
@@ -50,3 +50,4 @@ Media
 
 ## Label suggerite
 legal-domain, procedimento, phase-1, priority-high
+

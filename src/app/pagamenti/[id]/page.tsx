@@ -208,7 +208,7 @@ export default async function PagamentoDetailPage({ params }: PagamentoDetailPag
                 <p className="mt-1">{formatEnumLabel(detail.concessione.tipologiaBene)}</p>
               </div>
               <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500">Attivita</p>
+                <p className="text-xs uppercase tracking-wide text-slate-500">Attività</p>
                 <p className="mt-1">{formatEnumLabel(detail.concessione.attivita)}</p>
               </div>
               <div>
@@ -249,7 +249,7 @@ export default async function PagamentoDetailPage({ params }: PagamentoDetailPag
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Gravita</TableHead>
+                    <TableHead>Gravità</TableHead>
                     <TableHead>Tipologia</TableHead>
                     <TableHead>Descrizione</TableHead>
                     <TableHead>Stato</TableHead>
@@ -271,7 +271,7 @@ export default async function PagamentoDetailPage({ params }: PagamentoDetailPag
                   {detail.criticitaEconomicheMorosita.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={4} className="text-center text-slate-500">
-                        Nessuna criticita economica/morosita collegata.
+                        Nessuna criticità economica/morosità collegata.
                       </TableCell>
                     </TableRow>
                   ) : null}

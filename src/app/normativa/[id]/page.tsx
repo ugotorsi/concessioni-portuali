@@ -153,7 +153,7 @@ export default async function NormativaDetailPage({ params }: NormativaDetailPag
                         ) : null}
                         {item.criticita ? (
                           <Link href={`/criticita/${item.criticita.id}`} className="text-xs underline underline-offset-4">
-                            Criticita {formatEnumLabel(item.criticita.tipologia)}
+                            Criticità {formatEnumLabel(item.criticita.tipologia)}
                           </Link>
                         ) : null}
                         {item.procedimento ? (

@@ -13,10 +13,10 @@ test("admin consulta il modulo mappa demo", async ({ page }) => {
 
   await page.goto("/mappa");
   await expect(page).toHaveURL(/\/mappa$/);
-  await expect(page.getByRole("heading", { name: "Mappa demo concessioni e criticita" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Mappa demo concessioni e criticità" })).toBeVisible();
   await expect(page.getByTestId("mappa-placeholder")).toBeVisible();
   await expect(page.getByTestId("mappa-marker-list")).toBeVisible();
-  await expect(page.getByText(/Morosita|DEMO-01/i).first()).toBeVisible();
+  await expect(page.getByText(/Morosità|Morosita|DEMO-01/i).first()).toBeVisible();
   await expect(page.getByTestId("mappa-point").first()).toBeVisible();
 
   const firstDetailLink = page.getByTestId("mappa-marker-list").getByRole("link", { name: "Apri scheda" }).first();
@@ -28,12 +28,12 @@ test("admin consulta il modulo mappa demo", async ({ page }) => {
   await expect(page).toHaveURL(/\/(concessioni|criticita|sopralluoghi)\/.+/);
 });
 
-test("viewer adsp puo consultare la mappa in sola lettura", async ({ page }) => {
+test("viewer adsp può consultare la mappa in sola lettura", async ({ page }) => {
   await login(page, "adsp@demo.local", "adsp123");
   await expect(page).toHaveURL(/\/adsp$/);
 
   await page.goto("/mappa");
   await expect(page).toHaveURL(/\/mappa$/);
-  await expect(page.getByRole("heading", { name: "Mappa demo concessioni e criticita" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Mappa demo concessioni e criticità" })).toBeVisible();
   await expect(page.getByTestId("mappa-placeholder")).toBeVisible();
 });

@@ -1,4 +1,4 @@
-# Add GIS map placeholder or base map module
+﻿# Add GIS map placeholder or base map module
 
 ## Obiettivo
 Introdurre una prima rappresentazione geografica o placeholder evolutivo per aree, banchine e occupazioni.
@@ -17,7 +17,7 @@ Rafforza la lettura territoriale dei casi e migliora la comunicazione del rischi
 - src/types/
 - docs/GIS_ROADMAP_NOTE.md
 
-## Attivita tecniche
+## Attività tecniche
 - Scegliere approccio placeholder o mappa base.
 - Definire modello dati minimo per coordinate/area.
 - Integrare rendering in vista concessione.
@@ -41,7 +41,7 @@ Rafforza la lettura territoriale dei casi e migliora la comunicazione del rischi
 ## Dipendenze
 - Nessuna bloccante; consigliata in coda alla fase.
 
-## Priorita
+## Priorità
 Medium
 
 ## Complessita
@@ -49,3 +49,4 @@ Media-Alta
 
 ## Label suggerite
 gis, ux, phase-1, priority-medium
+

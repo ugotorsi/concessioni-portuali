@@ -44,11 +44,11 @@ export default async function NuovaCriticitaPage({ searchParams }: NuovaCriticit
   const tipologia = pickString(resolvedSearch.tipologia);
 
   return (
-    <AppShell title="Nuova criticita" subtitle="Inserimento controllato per workflow demo">
+    <AppShell title="Nuova criticità" subtitle="Inserimento controllato per workflow demo">
       <div className="mx-auto w-full max-w-3xl">
         <Card>
           <CardHeader>
-            <CardTitle>Nuova criticita</CardTitle>
+            <CardTitle>Nuova criticità</CardTitle>
           </CardHeader>
           <CardContent>
             <form action={createCriticitaAction} className="space-y-4">
@@ -81,10 +81,10 @@ export default async function NuovaCriticitaPage({ searchParams }: NuovaCriticit
                 </div>
                 <div className="space-y-1">
                   <label htmlFor="gravita" className="text-sm font-medium text-slate-700">
-                    Gravita
+                    Gravità
                   </label>
                   <Select id="gravita" name="gravita" required>
-                    <option value="">Seleziona gravita</option>
+                    <option value="">Seleziona gravità</option>
                     {filtersData.gravita.map((item) => (
                       <option key={item.value} value={item.value}>
                         {item.label}
@@ -130,7 +130,7 @@ export default async function NuovaCriticitaPage({ searchParams }: NuovaCriticit
                 <div>
                   <p className="text-sm font-semibold text-slate-900">Rilevanza ex art. 47 Cod. Nav.</p>
                   <p className="text-xs text-slate-600">
-                    Supporto istruttorio interno: la qualificazione finale resta in capo all Autorita competente.
+                    Supporto istruttorio interno: la qualificazione finale resta in capo all'Autorità competente.
                   </p>
                 </div>
 
@@ -199,7 +199,7 @@ export default async function NuovaCriticitaPage({ searchParams }: NuovaCriticit
 
               <div className="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">Regolarizzazione / sanatoria della criticita</p>
+                  <p className="text-sm font-semibold text-slate-900">Regolarizzazione / sanatoria della criticità</p>
                   <p className="text-xs text-slate-600">
                     Informazione utile alla fase istruttoria: la regolarizzazione non comporta automatica esclusione di eventuali misure decadenziali.
                   </p>
@@ -208,11 +208,11 @@ export default async function NuovaCriticitaPage({ searchParams }: NuovaCriticit
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-1">
                     <label htmlFor="regolarizzata" className="text-sm font-medium text-slate-700">
-                      Criticita regolarizzata
+                      Criticità regolarizzata
                     </label>
                     <Select id="regolarizzata" name="regolarizzata" defaultValue="false" required>
                       <option value="false">No</option>
-                      <option value="true">Si</option>
+                      <option value="true">Sì</option>
                     </Select>
                   </div>
 
@@ -279,7 +279,7 @@ export default async function NuovaCriticitaPage({ searchParams }: NuovaCriticit
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <Button type="submit">Salva criticita</Button>
+                <Button type="submit">Salva criticità</Button>
                 <Link
                   href="/criticita"
                   className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"

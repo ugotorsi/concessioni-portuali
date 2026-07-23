@@ -1,4 +1,4 @@
-# Add immutable audit trail baseline
+﻿# Add immutable audit trail baseline
 
 ## Obiettivo
 Rafforzare ActivityLog verso audit trail non manipolabile, con dati essenziali per ricostruzione forense.
@@ -18,7 +18,7 @@ Riduce rischio legale/compliance e migliora la difendibilita delle azioni in cas
 - src/lib/auth.ts
 - src/lib/utils.ts
 
-## Attivita tecniche
+## Attività tecniche
 - Definire modello evento audit con actor, azione, target, timestamp, contesto.
 - Implementare hash o chaining semplice per evidenza integrita.
 - Integrare logging in actions critiche.
@@ -42,7 +42,7 @@ Riduce rischio legale/compliance e migliora la difendibilita delle azioni in cas
 ## Dipendenze
 - Consigliata chiusura o stabilita Issue 1 (identity affidabile).
 
-## Priorita
+## Priorità
 Critical
 
 ## Complessita
@@ -50,3 +50,4 @@ Alta
 
 ## Label suggerite
 audit, compliance, security, phase-1, priority-critical
+

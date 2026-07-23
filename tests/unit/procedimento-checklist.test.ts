@@ -68,7 +68,7 @@ describe("procedimento checklist helpers", () => {
     expect(getProcedimentoWarningLevel({ tipologia: "DIFFIDA" })).toBe("warning");
   });
 
-  it("procedimento d ufficio non richiede automaticamente preavviso rigetto", () => {
+  it("procedimento d'ufficio non richiede automaticamente preavviso rigetto", () => {
     const procedimento = {
       tipologia: "AVVIO_DECADENZA",
       origineProcedimento: "UFFICIO",
@@ -116,7 +116,7 @@ describe("procedimento checklist helpers", () => {
     expect(level).toBe("danger");
   });
 
-  it("art.47 d ufficio senza avvio/contestazione evidenzia missing items", () => {
+  it("art.47 d'ufficio senza avvio/contestazione evidenzia missing items", () => {
     const missing = getMissingChecklistItems({
       tipologia: "AVVIO_DECADENZA",
       origineProcedimento: "UFFICIO",

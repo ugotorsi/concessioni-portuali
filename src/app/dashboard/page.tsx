@@ -134,7 +134,7 @@ export default async function DashboardPage() {
           <CardHeader>
             <CardTitle>Scenari demo istituzionali</CardTitle>
             <CardDescription>
-              Percorsi guidati su morosita art. 47, occupazione difforme, regolarizzazione e art. 10-bis.
+              Percorsi guidati su morosità Art. 47, occupazione difforme, regolarizzazione e art. 10-bis.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -169,7 +169,7 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Mappa concessioni e criticita</CardTitle>
+            <CardTitle>Mappa concessioni e criticità</CardTitle>
             <CardDescription>
               Accesso rapido alla vista territoriale dimostrativa con marker geolocalizzati e link alle schede.
             </CardDescription>
@@ -180,7 +180,7 @@ export default async function DashboardPage() {
                 href="/mappa"
                 className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
               >
-                Apri mappa concessioni e criticita
+                Apri mappa concessioni e criticità
               </Link>
             </div>
           </CardContent>
@@ -365,7 +365,7 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Azioni consigliate</CardTitle>
-            <CardDescription>Priorita operative generate automaticamente dal quadro attuale.</CardDescription>
+            <CardDescription>Priorità operative generate automaticamente dal quadro attuale.</CardDescription>
           </CardHeader>
           <CardContent>
             <ul className="space-y-2 text-sm text-slate-700">

@@ -153,7 +153,7 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Report criticita</CardTitle>
+            <CardTitle>Report criticità</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-semibold text-rose-700">{summary.reportCriticita}</p>
@@ -161,7 +161,7 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Report morosita</CardTitle>
+            <CardTitle>Report morosità</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-semibold text-rose-700">{summary.reportMorosita}</p>

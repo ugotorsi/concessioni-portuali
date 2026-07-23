@@ -32,11 +32,11 @@ export default async function ModificaCriticitaPage({ params }: ModificaCriticit
   }
 
   return (
-    <AppShell title="Modifica criticita" subtitle="Aggiornamento controllato per workflow demo">
+    <AppShell title="Modifica criticità" subtitle="Aggiornamento controllato per workflow demo">
       <div className="mx-auto w-full max-w-3xl">
         <Card>
           <CardHeader>
-            <CardTitle>Modifica criticita</CardTitle>
+            <CardTitle>Modifica criticità</CardTitle>
           </CardHeader>
           <CardContent>
             <form action={updateCriticitaAction} className="space-y-4">
@@ -53,7 +53,7 @@ export default async function ModificaCriticitaPage({ params }: ModificaCriticit
                 </div>
                 <div className="space-y-1">
                   <label htmlFor="gravita" className="text-sm font-medium text-slate-700">
-                    Gravita
+                    Gravità
                   </label>
                   <Select id="gravita" name="gravita" defaultValue={detail.gravita} required>
                     {filtersData.gravita.map((item) => (
@@ -99,7 +99,7 @@ export default async function ModificaCriticitaPage({ params }: ModificaCriticit
                 <div>
                   <p className="text-sm font-semibold text-slate-900">Rilevanza ex art. 47 Cod. Nav.</p>
                   <p className="text-xs text-slate-600">
-                    Classificazione istruttoria interna non vincolante: la decisione resta in capo all Autorita competente.
+                    Classificazione istruttoria interna non vincolante: la decisione resta in capo all'Autorità competente.
                   </p>
                 </div>
 
@@ -177,7 +177,7 @@ export default async function ModificaCriticitaPage({ params }: ModificaCriticit
 
               <div className="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">Regolarizzazione / sanatoria della criticita</p>
+                  <p className="text-sm font-semibold text-slate-900">Regolarizzazione / sanatoria della criticità</p>
                   <p className="text-xs text-slate-600">
                     Informazione istruttoria: la regolarizzazione incide sulla valutazione del caso ma non determina automatismi provvedimentali.
                   </p>
@@ -186,11 +186,11 @@ export default async function ModificaCriticitaPage({ params }: ModificaCriticit
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-1">
                     <label htmlFor="regolarizzata" className="text-sm font-medium text-slate-700">
-                      Criticita regolarizzata
+                      Criticità regolarizzata
                     </label>
                     <Select id="regolarizzata" name="regolarizzata" defaultValue={detail.regolarizzata ? "true" : "false"} required>
                       <option value="false">No</option>
-                      <option value="true">Si</option>
+                      <option value="true">Sì</option>
                     </Select>
                   </div>
 

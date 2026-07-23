@@ -10,12 +10,12 @@ Questo documento sintetizza la valutazione indipendente esterna ricevuta sul pro
 | Qualita architetturale | Base tecnica moderna e manutenibile (Next.js + TypeScript + Prisma + PostgreSQL) | Alta |
 | Copertura funzionale MVP | Workflow principali coperti (concessioni, procedimenti, criticità, scadenze, report) | Alta |
 | Potenziale AI operativo | Lato AI utile soprattutto come supporto decisionale e classificazione, non come automazione cieca | Alta |
-| Gap compliance enterprise | Necessita di hardening su audit, sicurezza, identita e tracciabilità giuridica | Alta |
+| Gap compliance enterprise | Necessita di hardening su audit, sicurezza, identità e tracciabilità giuridica | Alta |
 
 ## 3) Nuovi rilievi emersi dalla valutazione indipendente
-| Nuovo rilievo | Implicazione pratica | Priorita |
+| Nuovo rilievo | Implicazione pratica | Priorità |
 | --- | --- | --- |
-| Rischio di percezione "demo non istituzionale" per autenticazione semplificata | Possibile blocco in incontri con PA/Autorita senza identita reale e policy centralizzate | Alta |
+| Rischio di percezione "demo non istituzionale" per autenticazione semplificata | Possibile blocco in incontri con PA/Autorità senza identità reale e policy centralizzate | Alta |
 | Catena probatoria non pienamente forense | In caso di contenzioso, attuale audit trail può essere considerato insufficiente | Alta |
 | PDF report non ancora pienamente "protocol-ready" | Output poco difendibile in conferenze di servizi o scambi formali | Alta |
 | Mancanza di checklist contraddittorio esplicita nel procedimento | Vulnerabilita su equita procedimentale e trasparenza del contraddittorio | Alta |
@@ -38,7 +38,7 @@ Questo documento sintetizza la valutazione indipendente esterna ricevuta sul pro
 4. Formalizzare nel workflow il contraddittorio con checklist obbligatoria e stato verificabile.
 5. Attivare test automatici (Vitest + Playwright) su casi critici regolatori.
 6. Introdurre middleware unico per security headers, rate limiting e policy trasversali.
-7. Preparare due demo istituzionali guidate (morosita e occupazione difforme) con script, dataset e outcome atteso.
+7. Preparare due demo istituzionali guidate (morosità e occupazione difforme) con script, dataset e outcome atteso.
 8. Avviare un modulo GIS base (anche placeholder evolutivo) per georeferenziazione minima e prova valore.
 
 ## 6) Rating esterno
@@ -57,14 +57,15 @@ Messaggio chiave:
 - Non solo gestione pratiche, ma piattaforma di governo del rischio concessorio, trasparenza procedimentale e decision support regolatorio.
 
 Segmenti prioritari:
-- Autorita di Sistema Portuale (core market).
+- Autorità di Sistema Portuale (core market).
 - Enti concedenti marittimi con backlog procedimentale.
 - Contesti multi-stakeholder con bisogno di tracciabilità e reportistica formale.
 
 Go-to-market consigliato:
-1. Entrare con demo istituzionali verticali (morosita/occupazione difforme).
+1. Entrare con demo istituzionali verticali (morosità/occupazione difforme).
 2. Offrire pacchetto "Institutional Hardening" come acceleratore di adozione.
 3. Legare pricing a riduzione tempi procedimentali, riduzione rischio contenzioso e qualità evidenze.
 
 ## 8) Conclusione
-La review esterna conferma la direzione strategica del progetto e la qualità della base tecnica. Il passaggio critico per aumentare credibilita presso stakeholder istituzionali e procurement pubblico e l'esecuzione rapida della Phase 1 di hardening su identita, audit, sicurezza, testing e output formali.
+La review esterna conferma la direzione strategica del progetto e la qualità della base tecnica. Il passaggio critico per aumentare credibilita presso stakeholder istituzionali e procurement pubblico e l'esecuzione rapida della Phase 1 di hardening su identità, audit, sicurezza, testing e output formali.
+

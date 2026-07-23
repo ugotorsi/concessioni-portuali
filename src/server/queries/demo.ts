@@ -29,7 +29,7 @@ function buildStaticCards(): DemoModuleCard[] {
   return [
     {
       title: "Dashboard operativa",
-      subtitle: "Quadro sintetico KPI, priorita e azioni consigliate.",
+      subtitle: "Quadro sintetico KPI, priorità e azioni consigliate.",
       href: "/dashboard",
     },
     {
@@ -38,13 +38,13 @@ function buildStaticCards(): DemoModuleCard[] {
       href: "/concessioni",
     },
     {
-      title: "Criticita",
+      title: "Criticità",
       subtitle: "Anomalie tecniche, giuridiche ed economiche in gestione.",
       href: "/criticita",
     },
     {
       title: "Scadenze e pagamenti",
-      subtitle: "Agenda adempimenti, morosita e stato economico.",
+      subtitle: "Agenda adempimenti, morosità e stato economico.",
       href: "/pagamenti",
     },
     {
@@ -226,10 +226,10 @@ export async function getDemoPageData(): Promise<DemoPageData> {
   const criticita = focusedConcessione.criticita[0];
   if (criticita) {
     steps.push({
-      title: "Criticita",
+      title: "Criticità",
       description: `${formatEnumLabel(criticita.tipologia)} (${formatEnumLabel(criticita.gravita)}).`,
       href: `/criticita/${criticita.id}`,
-      label: "Apri criticita",
+      label: "Apri criticità",
     });
   }
 

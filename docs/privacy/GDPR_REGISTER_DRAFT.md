@@ -10,7 +10,7 @@ Questo documento non certifica conformità GDPR definitiva.
 - Responsabile del trattamento: fornitore piattaforma/servizi ICT (se applicabile, da nomina contrattuale).
 - DPO/RPD: da identificare lato ente e coinvolgere in validazione.
 
-## 2. Finalita del trattamento
+## 2. Finalità del trattamento
 - Gestione concessioni demaniali/portuali.
 - Monitoraggio obblighi concessori e scadenze.
 - Gestione criticità tecnico-giuridiche-economiche.
@@ -29,7 +29,7 @@ Questo documento non certifica conformità GDPR definitiva.
 - Dati di contatto (email, PEC, telefono, sede legale).
 - Dati ruolo/account (ruolo applicativo, stato attivo, credenziali hash).
 - Dati amministrativi concessori e istruttori.
-- Dati economico-contabili (canoni, versamenti, morosita).
+- Dati economico-contabili (canoni, versamenti, morosità).
 - Log tecnici e audit (azione, attore, timestamp, ip, user-agent, hash chain).
 - Documentazione istruttoria collegata a concessioni/procedimenti/report.
 
@@ -74,4 +74,5 @@ Questo documento non certifica conformità GDPR definitiva.
 ## 11. Nota di perimetro
 Questa bozza e orientata a supportare confronto con PA/AdSP/ente concedente.
 La messa in produzione richiede validazione legale-organizzativa e decisione formale del titolare.
+
 

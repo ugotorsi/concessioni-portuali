@@ -1,4 +1,4 @@
-# Document Dossier Storage - Sprint 1
+﻿# Document Dossier Storage - Sprint 1
 
 ## Scopo Sprint 1
 Stabilizzare il fascicolo documentale come fondazione tecnica per un pilot reale:
@@ -8,13 +8,13 @@ Stabilizzare il fascicolo documentale come fondazione tecnica per un pilot reale
 - metadati obbligatori;
 - audit eventi documentali.
 
-## Perche questo sprint e fondazione della piattaforma
+## Perché questo sprint è fondazione della piattaforma
 Senza persistenza affidabile dei documenti il fascicolo resta una demo.
 
 La persistenza oggetti e il punto tecnico minimo per:
 - credibilita verso ente pilot;
 - continuita operativa tra deploy e ambienti;
-- tracciabilita del ciclo documentale.
+- tracciabilità del ciclo documentale.
 
 ## Architettura storage
 Adapter astratto con backend selezionabile da env:
@@ -72,7 +72,7 @@ Preview semplice:
 - supporto `?preview=1` per PDF/immagini con `Content-Disposition: inline`.
 
 ## Metadati obbligatori Sprint 1
-- almeno una entita collegata (concessione o altra entita istruttoria);
+- almeno una entità collegata (concessione o altra entità istruttoria);
 - tipologia documento;
 - fonte (`source`);
 - stato (`status`);
@@ -100,3 +100,4 @@ Cloudflare R2 e opzione consigliata per il backend S3-compatible per:
 - integrazione semplice con adapter introdotto.
 
 La scelta resta intercambiabile con altri provider S3-compatible senza cambiare il modulo applicativo.
+

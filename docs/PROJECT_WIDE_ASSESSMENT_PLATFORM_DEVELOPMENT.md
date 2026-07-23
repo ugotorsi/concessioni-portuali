@@ -1,11 +1,11 @@
-# Project-wide Assessment for Platform Development
+﻿# Project-wide Assessment for Platform Development
 
 ## 1. Executive summary
 Questo assessment conferma che il progetto ha superato la soglia demo tecnica e narrativa, ma non e ancora una piattaforma pronta per pilot formale ente o produzione.
 
 Stato sintetico:
 - Demo istituzionale cloud: pronta e funzionante.
-- Baseline applicativa core: buona su dominio concessorio (concessioni/criticita/procedimenti/documenti/report).
+- Baseline applicativa core: buona su dominio concessorio (concessioni/criticità/procedimenti/documenti/report).
 - Storage documentale cloud persistente: completato nel perimetro demo avanzata (#29, #31).
 - Gap bloccanti per pilot serio: compliance formalizzata, hardening sicurezza enterprise, integrazioni protocollari reali, workflow documentale a valore legale.
 - Gap bloccanti per produzione: multipli e sostanziali.
@@ -17,7 +17,7 @@ Verdetto severo:
 
 Riposizionamento dominio (Issue #34 / 32A):
 - piattaforma di supporto istruttorio su core concessorio comune;
-- verticale A portuale/AdSP gia attiva;
+- verticale A portuale/AdSP già attiva;
 - verticale B marittima turistico-ricreativa in roadmap.
 
 Quadro giuridico Simpliciter:
@@ -43,17 +43,17 @@ Conclusione di stato:
 - Qualita tecnica baseline buona per demo evoluta.
 - Verifica E2E locale non rieseguita in questa sessione per assenza Docker attivo.
 
-## 3. Cosa e gia utilizzabile
+## 3. Cosa e già utilizzabile
 Aree con base concreta e utilizzabile:
 - Autenticazione con ruoli e sessione applicativa.
 - Protezione route, security headers, rate limit baseline.
-- Modulo concessioni e criticita con mappatura Art. 47 strutturata.
+- Modulo concessioni e criticità con mappatura Art. 47 strutturata.
 - Modulo procedimenti con checklist e tracciamento contraddittorio/10-bis.
 - Fascicolo documentale baseline con metadata e audit eventi.
 - Reportistica CSV e PDF istituzionale.
 - Audit trail hash-chain applicativa.
 - Dashboard operativa e scenari demo guidati.
-- Deploy cloud demo Vercel/DB gestito per finalita presentative.
+- Deploy cloud demo Vercel/DB gestito per finalità presentative.
 
 ## 4. Cosa e ancora demo/scaffold
 Elementi non vendibili come produzione:
@@ -74,10 +74,10 @@ Mappa moduli core con classificazione severa.
 | Auth e ruoli | `src/lib/auth.ts`, `src/app/login`, `src/server/actions/auth.ts`, `middleware.ts` | Accesso, sessione, autorizzazioni | MVP | next-auth, prisma, bcrypt | MFA non enforcement, session hardening incompleto | unit + e2e auth | SSO/OIDC assente |
 | Sicurezza/rate limit | `middleware.ts`, `src/lib/rate-limit/*` | Header sicurezza, throttling login/export | MVP | middleware, upstash optional | in produzione serve backend distribuito configurato | unit rate-limit, e2e security-headers | no WAF/CSP avanzata |
 | Audit trail | `src/server/audit/*`, `src/app/audit` | Tracciamento eventi e hash chaining | MVP | prisma ActivityLog | non WORM, non SIEM completo | unit audit-hash, e2e audit | conservazione forense assente |
-| Database dominio | `prisma/schema.prisma`, `prisma/seed.ts` | Modello dati concessioni/criticita/procedimenti/documenti | quasi pilot | postgres, prisma | schema esteso ma senza multi-tenant | test indiretti unit/e2e | migrazioni enterprise e governance dati da rafforzare |
+| Database dominio | `prisma/schema.prisma`, `prisma/seed.ts` | Modello dati concessioni/criticità/procedimenti/documenti | quasi pilot | postgres, prisma | schema esteso ma senza multi-tenant | test indiretti unit/e2e | migrazioni enterprise e governance dati da rafforzare |
 | Concessioni | `src/app/concessioni/*`, `src/server/queries/concessioni.ts` | Fascicolo concessorio base | MVP | auth, prisma | integrazioni esterne assenti | e2e copertura trasversale | import massivo assente |
-| Criticita + Art.47 | `src/app/criticita/*`, `src/lib/art47.ts`, `src/server/actions/criticita.ts` | Rilevazione rischio e supporto istruttorio | quasi pilot | concessioni, normativa, procedimenti | rischio over-claim decisionale | unit art47, e2e art47 | workflow avanzato da consolidare |
-| Procedimenti + 10-bis | `src/app/procedimenti/*`, `src/lib/procedimento-checklist.ts` | Contraddittorio, checklist procedurale | quasi pilot | criticita, documenti, ruoli | non sostituisce valutazione giuridica | unit checklist, e2e procedimenti | generatori atti non operativi completi |
+| Criticità + Art.47 | `src/app/criticità/*`, `src/lib/art47.ts`, `src/server/actions/criticità.ts` | Rilevazione rischio e supporto istruttorio | quasi pilot | concessioni, normativa, procedimenti | rischio over-claim decisionale | unit art47, e2e art47 | workflow avanzato da consolidare |
+| Procedimenti + 10-bis | `src/app/procedimenti/*`, `src/lib/procedimento-checklist.ts` | Contraddittorio, checklist procedurale | quasi pilot | criticità, documenti, ruoli | non sostituisce valutazione giuridica | unit checklist, e2e procedimenti | generatori atti non operativi completi |
 | Documenti/fascicolo | `src/app/documenti/*`, `src/server/documents/*` | Upload/download metadata e collegamenti | MVP | storage locale/runtime, prisma | persistenza cloud e conservazione non definitive | e2e documenti, unit validazione/protocollo | object storage definitivo e firma assenti |
 | Report PDF/CSV | `src/app/report/*`, `src/server/pdf/*`, `src/server/actions/report.ts` | Output reportistica istituzionale | MVP | pdfkit, dati dominio | valore probatorio non garantito | unit report-pdf, e2e report-pdf | firma digitale/conservazione assenti |
 
@@ -128,7 +128,7 @@ Mappa moduli core con classificazione severa.
 - Fascicolo cloud non ancora con storage definitivo enterprise.
 - Tracciamento metadata protocollo/PEC non equivale a integrazione legale.
 - Catena documentale non ancora conservazione sostitutiva.
-- Potenziali contestazioni su affidabilita output PDF se usati oltre perimetro.
+- Potenziali contestazioni su affidabilità output PDF se usati oltre perimetro.
 
 ## 12. Rischi commerciali
 - Sovrapromessa: confondere demo AI narrativa con prodotto AI operativo.
@@ -140,7 +140,7 @@ Mappa moduli core con classificazione severa.
 - Richieste compliance e sicurezza superiori allo stato attuale.
 - Necessita prove formali su governance dati e audit.
 - Necessita chiarezza contrattuale su perimetro funzionale non decisionale.
-- Mancanza integrazioni ente puo rallentare procurement/pilot.
+- Mancanza integrazioni ente può rallentare procurement/pilot.
 
 ## 14. Roadmap consigliata
 Roadmap severa orientata pilot:
@@ -176,20 +176,20 @@ Deliverable minimi:
 Titolo: Bozze assistite e controllo coerenza.
 
 Deliverable minimi:
-- Precompilazione da dati concessione/criticita/procedimento.
+- Precompilazione da dati concessione/criticità/procedimento.
 - Checklist completezza fascicolo.
 - Audit della generazione e del ciclo revisione.
 
 ## 18. Decisioni aperte
-- Priorita investimento: consolidamento domain repositioning (32A) e preparazione modello dati (32B) prima di estensioni UI (32C).
+- Priorità investimento: consolidamento domain repositioning (32A) e preparazione modello dati (32B) prima di estensioni UI (32C).
 - Scelta architettura target: single-tenant per ente o multi-tenant progressivo.
 - Posizionamento commerciale iniziale: pilot operativo vs advisory/demo evoluta.
 - Strategia integrazioni esterne (PEC/protocollo/GIS) in fasi.
 
 ## 19. Domande da sottoporre ad altra AI
-- Quale ordine di priorita massimizza probabilita di pilot entro 90 giorni?
+- Quale ordine di priorità massimizza probabilita di pilot entro 90 giorni?
 - Quale combinazione minima funzionale riduce rischio legale/commerciale?
-- Quale architettura dati/documenti e piu credibile per PA?
+- Quale architettura dati/documenti e più credibile per PA?
 - Quale livello di investimento e realistico per arrivare a pilot serio?
 - Quali claim commerciali devono essere evitati in modo assoluto?
 
@@ -207,14 +207,14 @@ Raccomandazione finale: procedere con piano sprint rigoroso, mantenere claim pru
 
 ## Appendice A - Valutazione funzionale 25 blocchi
 
-| # | Blocco | Demo (1-10) | Pilot reale (1-10) | Produzione (1-10) | Priorita | Prossima azione consigliata |
+| # | Blocco | Demo (1-10) | Pilot reale (1-10) | Produzione (1-10) | Priorità | Prossima azione consigliata |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Autenticazione e ruoli | 8 | 6 | 4 | Alta | Abilitare MFA, session policy e audit accessi avanzati |
 | 2 | Sicurezza e rate limit | 7 | 5 | 3 | Alta | Consolidare backend distribuito e hardening CSP/WAF |
 | 3 | Audit trail | 8 | 6 | 4 | Alta | Portare audit su storage immutabile e retention governata |
 | 4 | Database e modello dati | 8 | 7 | 5 | Media | Definire migrazioni, governance schema, piani backup/restore |
 | 5 | Concessioni | 8 | 7 | 5 | Media | Rafforzare import dati ente e validazioni avanzate |
-| 6 | Criticita | 8 | 7 | 5 | Media | Estendere workflow remediation e metriche di esito |
+| 6 | Criticità | 8 | 7 | 5 | Media | Estendere workflow remediation e metriche di esito |
 | 7 | Art. 47 / decadenza / revoca | 8 | 7 | 5 | Alta | Consolidare presidi giuridici e output istruttori formalizzati |
 | 8 | Regolarizzazione | 7 | 6 | 4 | Media | Migliorare pipeline verifica e collegamento atti |
 | 9 | Procedimenti e contraddittorio | 8 | 7 | 5 | Alta | Completare workflow approvativi e gestione atti formali |
@@ -233,4 +233,5 @@ Raccomandazione finale: procedere con piano sprint rigoroso, mantenere claim pru
 | 22 | Multi-ente/multi-tenant | 3 | 2 | 1 | Alta | Disegnare strategia tenancy e isolamento dati |
 | 23 | Import dati ente | 4 | 3 | 2 | Media | Costruire pipeline CSV/XLSX con mapping e quality checks |
 | 24 | Storage cloud persistente | 4 | 3 | 2 | Alta | Sprint 1 dedicato a object storage persistente |
-| 25 | Integrazioni PEC/protocollo/PCS/GIS | 3 | 2 | 1 | Alta | Piano integrazioni progressive con priorita PEC/protocollo |
+| 25 | Integrazioni PEC/protocollo/PCS/GIS | 3 | 2 | 1 | Alta | Piano integrazioni progressive con priorità PEC/protocollo |
+

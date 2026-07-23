@@ -640,7 +640,7 @@ export function getCriticitaIstruttoria(criticita: {
       livelloAttenzione: "ALTO",
     },
     USO_NON_CONFORME: {
-      qualificazioneOperativa: "Scostamento tra titolo assentito e attivita effettivamente svolta.",
+      qualificazioneOperativa: "Scostamento tra titolo assentito e attività effettivamente svolta.",
       riferimentoNormativoSuggerito: "art. 47 lett. c/f cod. nav.",
       azioneIstruttoriaConsigliata:
         "Confrontare titolo e uso reale, avviare contraddittorio tecnico-giuridico con riscontro documentale.",
@@ -654,10 +654,10 @@ export function getCriticitaIstruttoria(criticita: {
       livelloAttenzione: "ALTO",
     },
     RISCHIO_DECADENZA: {
-      qualificazioneOperativa: "Profilo potenziale di decadenza con necessita di istruttoria rafforzata.",
+      qualificazioneOperativa: "Profilo potenziale di decadenza con necessità di istruttoria rafforzata.",
       riferimentoNormativoSuggerito: "art. 47 cod. nav.",
       azioneIstruttoriaConsigliata:
-        "Verificare gravita, proporzionalita, contraddittorio e acquisire pareri ove necessario.",
+        "Verificare gravità, proporzionalità, contraddittorio e acquisire pareri ove necessario.",
       livelloAttenzione: "MOLTO ALTO",
     },
     RISCHIO_REVOCA: {
@@ -674,7 +674,7 @@ export function getCriticitaIstruttoria(criticita: {
       livelloAttenzione: "MEDIO",
     },
     SICUREZZA: {
-      qualificazioneOperativa: "Possibile rischio su presidio sicurezza e conformita tecnica.",
+      qualificazioneOperativa: "Possibile rischio su presidio sicurezza e conformità tecnica.",
       riferimentoNormativoSuggerito: "prescrizioni tecniche e sicurezza operativa",
       azioneIstruttoriaConsigliata: "Attivare sopralluogo urgente e definire prescrizioni tecniche puntuali.",
       livelloAttenzione: "ALTO",
@@ -692,7 +692,7 @@ export function getCriticitaIstruttoria(criticita: {
       livelloAttenzione: "MEDIO",
     },
     GIURIDICA: {
-      qualificazioneOperativa: "Potenziale criticita di legittimita e tenuta del titolo.",
+      qualificazioneOperativa: "Potenziale criticità di legittimità e tenuta del titolo.",
       riferimentoNormativoSuggerito: "disciplina del titolo concessorio e cod. nav.",
       azioneIstruttoriaConsigliata:
         "Verificare titolo, subingressi, proroghe e affidamenti a terzi non autorizzati.",
@@ -708,7 +708,7 @@ export function getCriticitaIstruttoria(criticita: {
   };
 
   const fallback = {
-    qualificazioneOperativa: "Criticita da approfondire in istruttoria con analisi tecnica e giuridica.",
+    qualificazioneOperativa: "Criticità da approfondire in istruttoria con analisi tecnica e giuridica.",
     riferimentoNormativoSuggerito: "verifica normativa specifica del caso",
     azioneIstruttoriaConsigliata: "Predisporre istruttoria dedicata con raccolta elementi oggettivi.",
     livelloAttenzione: "MEDIO",
@@ -736,6 +736,6 @@ export function getCriticitaIstruttoria(criticita: {
         : template.azioneIstruttoriaConsigliata,
     livelloAttenzione,
     avvertenza:
-      "La piattaforma supporta l istruttoria interna e non sostituisce la valutazione e le decisioni dell Autorita competente.",
+      "La piattaforma supporta l'istruttoria interna e non sostituisce la valutazione e le decisioni dell'Autorità competente.",
   };
 }
