@@ -10,6 +10,7 @@ import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 import { buildLinkedEntityMetadata, parseUploadDocumentFormData, DOCUMENT_TIPOLOGIA_VALUES } from "@/server/documents/validation";
 import { DOCUMENT_CANALE_VALUES, DOCUMENT_DIREZIONE_VALUES, normalizeProtocolloMetadata } from "@/server/documents/protocollo";
 import { storeDocumentFile } from "@/server/documents/storage";
+import { DocumentStorageS3Error } from "@/server/documents/storage/s3StorageAdapter";
 
 async function assertLinkedEntitiesExist(input: {
   concessioneId?: string;
@@ -160,6 +161,21 @@ export async function createDocumentoUploadAction(formData: FormData) {
   try {
     stored = await storeDocumentFile({ documentId: created.id, file: payload.file });
   } catch (error) {
+    const storageDiagnostics =
+      error instanceof DocumentStorageS3Error
+        ? {
+            provider: error.diagnostics.provider,
+            operation: error.diagnostics.operation,
+            code: error.diagnostics.code,
+            statusCode: error.diagnostics.statusCode,
+            retryable: error.diagnostics.retryable,
+            bucketConfigured: error.diagnostics.bucketConfigured,
+            endpointConfigured: error.diagnostics.endpointConfigured,
+            regionConfigured: error.diagnostics.regionConfigured,
+            forcePathStyle: error.diagnostics.forcePathStyle,
+          }
+        : undefined;
+
     await auditFailure({
       azione: "DOCUMENT_UPLOAD",
       entita: "Documento",
@@ -169,6 +185,7 @@ export async function createDocumentoUploadAction(formData: FormData) {
       metadata: {
         reason: "STORAGE_WRITE_FAILED",
         issue: error instanceof Error ? error.message : "Errore storage documento.",
+        storageDiagnostics,
       },
     });
     throw new Error("Caricamento documento non riuscito: errore durante la persistenza storage.");

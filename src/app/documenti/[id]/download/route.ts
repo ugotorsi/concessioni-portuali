@@ -1,6 +1,7 @@
 import { getCurrentRole } from "@/lib/auth";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
-import { readStoredDocument, storedDocumentExists } from "@/server/documents/storage";
+import { readStoredDocumentWithProvider, storedDocumentExists } from "@/server/documents/storage";
+import { DocumentStorageS3Error } from "@/server/documents/storage/s3StorageAdapter";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -76,7 +77,41 @@ export async function GET(
 
   const storageKey = documento.storageKey ?? documento.storagePath;
   if (storageKey) {
-    const exists = await storedDocumentExists(storageKey);
+    let exists = false;
+    try {
+      exists = await storedDocumentExists(storageKey);
+    } catch (error) {
+      const storageDiagnostics =
+        error instanceof DocumentStorageS3Error
+          ? {
+              provider: error.diagnostics.provider,
+              operation: error.diagnostics.operation,
+              code: error.diagnostics.code,
+              statusCode: error.diagnostics.statusCode,
+              retryable: error.diagnostics.retryable,
+              bucketConfigured: error.diagnostics.bucketConfigured,
+              endpointConfigured: error.diagnostics.endpointConfigured,
+              regionConfigured: error.diagnostics.regionConfigured,
+              forcePathStyle: error.diagnostics.forcePathStyle,
+            }
+          : undefined;
+
+      await auditFailure({
+        azione: "DOCUMENT_DOWNLOAD",
+        entita: "Documento",
+        entitaId: documento.id,
+        concessioneId: documento.concessioneId,
+        actor: { userRole: role },
+        metadata: {
+          reason: "STORAGE_CHECK_FAILED",
+          storageKey,
+          storageProvider: documento.storageProvider ?? "local",
+          storageDiagnostics,
+        },
+      });
+
+      return new Response("Errore storage documento", { status: 502 });
+    }
 
     if (!exists) {
       await auditFailure({
@@ -95,7 +130,41 @@ export async function GET(
       return new Response("File non disponibile", { status: 404 });
     }
 
-    const buffer = await readStoredDocument(storageKey);
+    let stored;
+    try {
+      stored = await readStoredDocumentWithProvider(storageKey);
+    } catch (error) {
+      const storageDiagnostics =
+        error instanceof DocumentStorageS3Error
+          ? {
+              provider: error.diagnostics.provider,
+              operation: error.diagnostics.operation,
+              code: error.diagnostics.code,
+              statusCode: error.diagnostics.statusCode,
+              retryable: error.diagnostics.retryable,
+              bucketConfigured: error.diagnostics.bucketConfigured,
+              endpointConfigured: error.diagnostics.endpointConfigured,
+              regionConfigured: error.diagnostics.regionConfigured,
+              forcePathStyle: error.diagnostics.forcePathStyle,
+            }
+          : undefined;
+
+      await auditFailure({
+        azione: "DOCUMENT_DOWNLOAD",
+        entita: "Documento",
+        entitaId: documento.id,
+        concessioneId: documento.concessioneId,
+        actor: { userRole: role },
+        metadata: {
+          reason: "STORAGE_READ_FAILED",
+          storageKey,
+          storageProvider: documento.storageProvider ?? "local",
+          storageDiagnostics,
+        },
+      });
+
+      return new Response("Errore storage documento", { status: 502 });
+    }
 
     await auditSuccess({
       azione: "DOCUMENT_DOWNLOAD",
@@ -104,8 +173,8 @@ export async function GET(
       concessioneId: documento.concessioneId,
       actor: { userRole: role },
       metadata: {
-        source: "local-storage",
-        storageProvider: documento.storageProvider ?? "local",
+        source: stored.storageProvider,
+        storageProvider: stored.storageProvider,
         storageBucket: documento.storageBucket,
         storageKey,
         mimeType: documento.mimeType,
@@ -113,7 +182,7 @@ export async function GET(
       },
     });
 
-    return new Response(new Uint8Array(buffer), {
+    return new Response(new Uint8Array(stored.body), {
       status: 200,
       headers: {
         "Content-Type": documento.mimeType ?? "application/octet-stream",

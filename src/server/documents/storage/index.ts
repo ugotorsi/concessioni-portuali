@@ -61,6 +61,19 @@ export async function readStoredDocument(storageKey: string): Promise<Buffer> {
   return result.body;
 }
 
+export async function readStoredDocumentWithProvider(storageKey: string): Promise<{
+  body: Buffer;
+  storageProvider: DocumentStorageBackend;
+}> {
+  const storage = getDocumentStorageAdapter();
+  const result = await storage.get(storageKey);
+
+  return {
+    body: result.body,
+    storageProvider: getActiveDocumentStorageBackend(),
+  };
+}
+
 export async function storedDocumentExists(storageKey: string): Promise<boolean> {
   const storage = getDocumentStorageAdapter();
   return storage.exists(storageKey);

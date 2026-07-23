@@ -9,6 +9,53 @@ import {
 import { getS3StorageConfig } from "./config";
 import type { DocumentStorageAdapter, DocumentStorageGetOutput, DocumentStoragePutInput, StoredDocumentObject } from "./types";
 
+type StorageOperation = "PUT" | "GET" | "DELETE" | "HEAD";
+
+interface StorageDiagnostics {
+  provider: "s3";
+  operation: StorageOperation;
+  code: string;
+  statusCode?: number;
+  retryable?: boolean;
+  bucketConfigured: boolean;
+  endpointConfigured: boolean;
+  regionConfigured: boolean;
+  forcePathStyle: boolean;
+}
+
+export class DocumentStorageS3Error extends Error {
+  readonly diagnostics: StorageDiagnostics;
+
+  constructor(message: string, diagnostics: StorageDiagnostics, options?: { cause?: unknown }) {
+    super(message, options);
+    this.name = "DocumentStorageS3Error";
+    this.diagnostics = diagnostics;
+  }
+}
+
+interface AwsLikeError {
+  name?: string;
+  code?: string;
+  $metadata?: {
+    httpStatusCode?: number;
+  };
+  retryable?: boolean;
+}
+
+function extractErrorCode(error: unknown): string {
+  const candidate = error as AwsLikeError;
+  return candidate.code ?? candidate.name ?? "UNKNOWN_S3_ERROR";
+}
+
+function extractStatusCode(error: unknown): number | undefined {
+  const candidate = error as AwsLikeError;
+  return candidate.$metadata?.httpStatusCode;
+}
+
+function isNotFoundLike(code: string, statusCode?: number): boolean {
+  return code === "NotFound" || code === "NoSuchKey" || statusCode === 404;
+}
+
 function assertSafeStorageKey(storageKey: string): string {
   const normalized = storageKey.trim();
 
@@ -60,21 +107,42 @@ export class S3StorageAdapter implements DocumentStorageAdapter {
     forcePathStyle: this.config.forcePathStyle,
   });
 
+  private toS3Error(operation: StorageOperation, error: unknown): DocumentStorageS3Error {
+    const code = extractErrorCode(error);
+    const statusCode = extractStatusCode(error);
+
+    return new DocumentStorageS3Error(`Storage S3 ${operation} failed (${code}).`, {
+      provider: "s3",
+      operation,
+      code,
+      statusCode,
+      retryable: (error as AwsLikeError).retryable,
+      bucketConfigured: this.config.bucket.length > 0,
+      endpointConfigured: this.config.endpoint.length > 0,
+      regionConfigured: this.config.region.length > 0,
+      forcePathStyle: this.config.forcePathStyle,
+    }, { cause: error });
+  }
+
   async put(input: DocumentStoragePutInput): Promise<StoredDocumentObject> {
     const storageKey = assertSafeStorageKey(input.storageKey);
 
-    await this.client.send(
-      new PutObjectCommand({
-        Bucket: this.config.bucket,
-        Key: storageKey,
-        Body: input.body,
-        ContentType: input.mimeType,
-        Metadata: {
-          sha256: input.sha256,
-          originalname: input.originalName,
-        },
-      }),
-    );
+    try {
+      await this.client.send(
+        new PutObjectCommand({
+          Bucket: this.config.bucket,
+          Key: storageKey,
+          Body: input.body,
+          ContentType: input.mimeType,
+          Metadata: {
+            sha256: input.sha256,
+            originalname: input.originalName,
+          },
+        }),
+      );
+    } catch (error) {
+      throw this.toS3Error("PUT", error);
+    }
 
     return {
       storageProvider: "s3",
@@ -90,12 +158,17 @@ export class S3StorageAdapter implements DocumentStorageAdapter {
 
   async get(storageKey: string): Promise<DocumentStorageGetOutput> {
     const safeKey = assertSafeStorageKey(storageKey);
-    const response = await this.client.send(
-      new GetObjectCommand({
-        Bucket: this.config.bucket,
-        Key: safeKey,
-      }),
-    );
+    let response;
+    try {
+      response = await this.client.send(
+        new GetObjectCommand({
+          Bucket: this.config.bucket,
+          Key: safeKey,
+        }),
+      );
+    } catch (error) {
+      throw this.toS3Error("GET", error);
+    }
 
     const body = await bodyToBuffer(response.Body);
     return { body };
@@ -104,12 +177,16 @@ export class S3StorageAdapter implements DocumentStorageAdapter {
   async delete(storageKey: string): Promise<void> {
     const safeKey = assertSafeStorageKey(storageKey);
 
-    await this.client.send(
-      new DeleteObjectCommand({
-        Bucket: this.config.bucket,
-        Key: safeKey,
-      }),
-    );
+    try {
+      await this.client.send(
+        new DeleteObjectCommand({
+          Bucket: this.config.bucket,
+          Key: safeKey,
+        }),
+      );
+    } catch (error) {
+      throw this.toS3Error("DELETE", error);
+    }
   }
 
   async exists(storageKey: string): Promise<boolean> {
@@ -123,8 +200,15 @@ export class S3StorageAdapter implements DocumentStorageAdapter {
         }),
       );
       return true;
-    } catch {
-      return false;
+    } catch (error) {
+      const code = extractErrorCode(error);
+      const statusCode = extractStatusCode(error);
+
+      if (isNotFoundLike(code, statusCode)) {
+        return false;
+      }
+
+      throw this.toS3Error("HEAD", error);
     }
   }
 }
