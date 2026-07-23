@@ -3,6 +3,11 @@
 ## Stato attuale
 Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + PostgreSQL Docker.
 
+Riposizionamento dominio (Issue #34 / 32A):
+- piattaforma modulare di supporto istruttorio per rapporti concessori demaniali/pubblici;
+- core comune + verticali normative progressive;
+- verticale portuale/AdSP attiva; verticale marittima turistico-ricreativa in roadmap.
+
 ## Moduli disponibili
 - Dashboard
 - Mappa demo territoriale
@@ -82,21 +87,39 @@ Progetto ripristinato e avviabile in locale con stack Next.js + Prisma + Postgre
 - Pacchetto prompt per audit da altra AI: `docs/EXTERNAL_AI_AUDIT_PLATFORM_DEVELOPMENT_REQUEST.md`
 - Roadmap piattaforma (Sprint 1-7): `docs/PLATFORM_DEVELOPMENT_ROADMAP.md`
 
+Stato issue strategiche:
+- #29 CLOSED (fascicolo documentale cloud persistente completato)
+- #31 CLOSED (storage S3-compatible/R2 attivato e validato)
+- #32 OPEN (issue madre: core concessorio + verticali)
+- #34 OPEN (32A: documentation/domain repositioning)
+
 Sintesi posizione attuale:
 - cloud demo consegnata e valida come ambiente dimostrativo;
 - progetto non classificabile come produzione;
 - gap principali su storage documentale persistente, compliance formalizzata, hardening sicurezza enterprise e integrazioni ente.
 
 Prossima decisione richiesta:
-- confermare avvio Sprint 1 su fascicolo documentale cloud persistente.
+- avviare 32B (data model preparation) dopo validazione documentale 32A.
 
-## Sprint 1 in esecuzione - Fascicolo documentale cloud persistente
+## Sprint 1 completato - Fascicolo documentale cloud persistente
 - Storage adapter astratto introdotto con backend `local` e `s3` (S3-compatible).
 - Metadata storage estesi sul modello documento (provider/key/bucket/hash/dimensione/originalName).
 - Upload aggiornato con metadati obbligatori (`source`, `status`), hash SHA-256 e persistenza via adapter.
 - Download aggiornato su `storageKey` con fallback legacy, audit e preview semplice PDF/immagini.
 - Soft delete mantenuto via archiviazione (`ARCHIVIATO` + `archivedAt`) con audit.
 - Nuova documentazione tecnica: `docs/DOCUMENT_DOSSIER_STORAGE.md`.
+
+Aggiornamento stato:
+- issue #29 e #31 chiuse con validazione end-to-end completata.
+- fascicolo documentale cloud persistente classificato come completato nel perimetro demo avanzata.
+
+## Quadro giuridico Simpliciter recepito (32A)
+- art. 18 L. 84/1994: verticale speciale portuale/AdSP, non base universale.
+- art. 36 cod. nav.: base generale concessioni demaniali marittime.
+- art. 37 cod. nav.: procedura comparativa/istanze concorrenti (rilevanza alta su turistico-ricreative).
+- art. 47 cod. nav.: regola trasversale di decadenza (non solo portuale).
+- d.l. 400/1993: riferimento centrale per verticale marittima turistico-ricreativa.
+- art. 12 direttiva 2006/123/CE: risorse scarse, selezione trasparente/imparziale, no proroghe automatiche generalizzate.
 
 ## Phase 2 avviata
 - Issue #11: Add CI/CD baseline with GitHub Actions.

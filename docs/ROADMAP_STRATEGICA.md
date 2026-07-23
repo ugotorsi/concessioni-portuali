@@ -1,5 +1,18 @@
 # Roadmap Tecnica e Strategica
 
+## 0. Repositioning di dominio (Issue #34 / 32A)
+
+- La piattaforma va descritta come supporto istruttorio per rapporti concessori demaniali/pubblici.
+- Il dominio si articola in core comune + verticali normative progressive.
+- Verticale A (attiva): portuale/AdSP con art. 18 L. 84/1994 come verticale speciale e art. 36 cod. nav. ove rilevante.
+- Verticale B (roadmap): marittima turistico-ricreativa per comuni costieri con art. 36/37/47 cod. nav., d.l. 400/1993 e vincoli art. 12 direttiva 2006/123/CE.
+- Art. 47 cod. nav. va mantenuto come regola trasversale di decadenza, non solo portuale.
+
+Track evolutivo collegato:
+- 32A: documentation/domain repositioning;
+- 32B: data model preparation;
+- 32C: UI/demo verticals.
+
 ## 1. Stato MVP attuale
 
 - Moduli completati: Dashboard, Concessioni, Concessionari, Criticità, Scadenze, Pagamenti, Sopralluoghi, Procedimenti, Report, Normativa, Assistente AI (scaffold), Demo.

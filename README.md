@@ -1,6 +1,11 @@
 ﻿# Concessioni Portuali
 
-Piattaforma demo per la gestione operativa delle concessioni portuali, con moduli istruttori, monitoraggio scadenze, criticità, reportistica ed export.
+Piattaforma demo avanzata di supporto istruttorio per rapporti concessori demaniali/pubblici, con core comune e verticali normative progressive.
+
+Posizionamento attuale:
+- non prodotto solo portuale o solo art. 18;
+- verticale portuale/AdSP attiva come primo perimetro operativo;
+- estensione progressiva verso verticale marittima turistico-ricreativa in roadmap.
 
 ## Stack
 - Next.js (App Router)
@@ -64,14 +69,35 @@ Documenti chiave per la fase successiva alla cloud demo investitore:
 
 Obiettivo fase corrente:
 - distinguere chiaramente moduli demo/scaffold da moduli platform-ready;
-- preparare audit esterno severo e non compiacente;
-- definire roadmap concreta per arrivare a pilot reale.
+- consolidare il posizionamento "core concessorio + verticali";
+- recepire cautele giuridiche Simpliciter e claim prudenti.
 
 Prossima decisione strategica:
-- avvio Sprint 1 su fascicolo documentale cloud persistente (object storage + audit + metadati).
+- avvio issue 32B (data model preparation) dopo completamento documentale 32A.
 
-## Sprint 1 avviato - Persistent cloud document dossier
-Implementazione avviata su branch dedicato con storage adapter astratto:
+## Posizionamento dominio e quadro giuridico (Issue #34 / 32A)
+Core comune:
+- monitoraggio istruttorio di rapporti concessori demaniali/pubblici;
+- fascicolo documentale, scadenze, canoni, obblighi, sopralluoghi, criticita, procedimenti, audit, report.
+
+Verticale A - Portuale / AdSP:
+- art. 18 L. 84/1994 come verticale speciale;
+- art. 36 cod. nav. quando rilevante;
+- art. 47 cod. nav. come regola trasversale di decadenza;
+- aree/banchine, contesto AdSP, operazioni/servizi portuali.
+
+Verticale B - Marittima turistico-ricreativa / Comuni costieri (roadmap):
+- art. 36, 37, 47 cod. nav.;
+- d.l. 400/1993;
+- art. 12 direttiva 2006/123/CE (selezione trasparente/imparziale, no proroghe automatiche generalizzate).
+
+Presidio comunicativo:
+- AI come supporto istruttorio, non decisore;
+- nessuna decisione automatica su decadenza/revoca;
+- nessun claim di compliance piena su firma/conservazione/PEC/protocollo.
+
+## Sprint 1 completato - Persistent cloud document dossier (#29 e #31)
+Implementazione completata con storage adapter astratto:
 - backend `local` (default dev/test);
 - backend `s3` per provider S3-compatible (Cloudflare R2 consigliato).
 
@@ -91,6 +117,12 @@ Variabili env storage:
 Nota operativa:
 - non committare chiavi/secret reali;
 - se backend `s3` e variabili mancanti, il sistema restituisce errore esplicito di configurazione.
+
+Roadmap madre di generalizzazione dominio:
+- #32 issue madre (OPEN);
+- #34 (32A) documentazione e domain repositioning;
+- 32B data model preparation (prossima);
+- 32C UI/demo verticals (dopo 32B).
 
 ## CI/CD baseline (Phase 2)
 Pipeline GitHub Actions disponibile in `.github/workflows/ci.yml`.

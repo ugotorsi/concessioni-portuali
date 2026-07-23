@@ -7,6 +7,34 @@ Principio guida:
 - poi automazione documentale e valore AI;
 - poi scalabilita multi-ente.
 
+Principio dominio (Issue #32 / #34):
+- core comune di monitoraggio concessorio demaniale/pubblico;
+- verticale A portuale/AdSP come perimetro attivo;
+- verticale B marittima turistico-ricreativa come estensione progressiva.
+
+Quadro giuridico Simpliciter da recepire in roadmap:
+- art. 18 L. 84/1994: verticale speciale portuale, non base universale;
+- art. 36 cod. nav.: base generale concessoria demaniale marittima;
+- art. 37 cod. nav.: presidio procedura comparativa/istanze concorrenti;
+- art. 47 cod. nav.: regola trasversale di decadenza;
+- d.l. 400/1993: fonte centrale verticale turistico-ricreativa;
+- art. 12 direttiva 2006/123/CE: selezione trasparente/imparziale e no proroghe automatiche generalizzate.
+
+## Track di generalizzazione dominio (32A / 32B / 32C)
+32A - Documentation/domain repositioning:
+- aggiornamento posizionamento documentale da "port-only" a "core + verticali";
+- integrazione cautele Simpliciter e fonti normative/giurisprudenziali;
+- nessun impatto runtime, schema o UI.
+
+32B - Data model preparation (successiva):
+- definizione concettuale attributi verticali (es. concessionVertical/legalFramework);
+- valutazione campi aggiuntivi: concessionObjectType, awardingProcedureType, publicUseConstraints, removableWorksProfile, seasonalityProfile, feeRegime, comparativeProcedureStatus, thirdPartyManagementStatus.
+
+32C - UI/demo verticals (dopo 32B):
+- scenario Comune costiero realistico (stabilimento balneare, battigia, comparativa, morosita, rischio art.47);
+- reportistica verticale dedicata;
+- mantenimento presidi anti-overclaim e ruolo umano decisionale.
+
 ## Sprint 1 - Fascicolo documentale cloud persistente
 Obiettivo:
 - eliminare il principale gap tecnico per pilot credibile.
@@ -32,7 +60,7 @@ Exit criteria:
 - tracciabilita completa del ciclo base documento.
 
 Stato implementazione:
-- avviato con adapter storage astratto (`local`/`s3`), metadati obbligatori e audit upload/download.
+- completato nel perimetro demo avanzata con adapter storage astratto (`local`/`s3`), metadati obbligatori e audit upload/download.
 - opzione consigliata S3-compatible: Cloudflare R2.
 
 ## Sprint 2 - Libreria atti e legal assistant operativo

@@ -5,14 +5,28 @@ Questo assessment conferma che il progetto ha superato la soglia demo tecnica e 
 
 Stato sintetico:
 - Demo istituzionale cloud: pronta e funzionante.
-- Baseline applicativa core: buona su dominio concessioni/criticita/procedimenti/documenti/report.
-- Gap bloccanti per pilot serio: storage documentale persistente cloud, compliance formalizzata, hardening sicurezza enterprise, integrazioni protocollari reali.
+- Baseline applicativa core: buona su dominio concessorio (concessioni/criticita/procedimenti/documenti/report).
+- Storage documentale cloud persistente: completato nel perimetro demo avanzata (#29, #31).
+- Gap bloccanti per pilot serio: compliance formalizzata, hardening sicurezza enterprise, integrazioni protocollari reali, workflow documentale a valore legale.
 - Gap bloccanti per produzione: multipli e sostanziali.
 
 Verdetto severo:
 - Demo: solida.
 - Pilot reale: possibile solo dopo sprint di hardening mirati.
 - Produzione: no-go in stato attuale.
+
+Riposizionamento dominio (Issue #34 / 32A):
+- piattaforma di supporto istruttorio su core concessorio comune;
+- verticale A portuale/AdSP gia attiva;
+- verticale B marittima turistico-ricreativa in roadmap.
+
+Quadro giuridico Simpliciter:
+- art. 18 L. 84/1994 come verticale speciale portuale (non base universale);
+- art. 36 cod. nav. come base generale delle concessioni demaniali marittime;
+- art. 37 cod. nav. come presidio della procedura comparativa;
+- art. 47 cod. nav. come regola trasversale di decadenza;
+- d.l. 400/1993 come fonte centrale della verticale turistico-ricreativa;
+- art. 12 direttiva 2006/123/CE come vincolo su risorse scarse, selezione trasparente/imparziale e no proroghe automatiche generalizzate.
 
 ## 2. Stato attuale del progetto
 Snapshot operativo eseguito in questa ricognizione:
@@ -46,7 +60,7 @@ Elementi non vendibili come produzione:
 - Demo guidata AI-led: forte su storytelling, non su automazione enterprise.
 - Mappa: GIS-ready placeholder, non GIS operativo certificato.
 - Protocollo/PEC: metadata registrati, non integrazione reale provider/ente.
-- Storage documenti: baseline locale/server runtime, persistenza cloud definitiva non consolidata.
+- Storage documenti: persistenza cloud attiva in perimetro demo avanzata, ma senza piena catena legale (firma/conservazione/protocollo integrato).
 - Normativa: modulo utile ma non ancora knowledge engine dinamico con governance forte.
 - Compliance privacy: documentazione in larga parte draft.
 - Multi-tenant: assente.
@@ -167,7 +181,7 @@ Deliverable minimi:
 - Audit della generazione e del ciclo revisione.
 
 ## 18. Decisioni aperte
-- Priorita investimento: storage persistente prima di legal assistant operativo.
+- Priorita investimento: consolidamento domain repositioning (32A) e preparazione modello dati (32B) prima di estensioni UI (32C).
 - Scelta architettura target: single-tenant per ente o multi-tenant progressivo.
 - Posizionamento commerciale iniziale: pilot operativo vs advisory/demo evoluta.
 - Strategia integrazioni esterne (PEC/protocollo/GIS) in fasi.

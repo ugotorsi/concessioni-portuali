@@ -1,13 +1,13 @@
 # External Full Program Audit Request — Concessioni Portuali
 
 ## 1. Executive summary
-Concessioni Portuali è una piattaforma verticale per la gestione operativa e istruttoria delle concessioni demaniali/portuali.
-Il sistema è rivolto a concessionari strutturati, AdSP, enti concedenti e consulenti tecnico-giuridici.
+Concessioni Portuali e una piattaforma modulare di supporto istruttorio per rapporti concessori demaniali/pubblici.
+Il sistema e rivolto a concessionari strutturati, AdSP, enti concedenti, comuni costieri e consulenti tecnico-giuridici.
 Il problema che risolve è la frammentazione informativa tra dati concessori, criticità, procedimenti, pagamenti, scadenze e report.
 La soluzione integra in un unico flusso operativo: monitoraggio, supporto istruttorio, tracciabilità delle azioni e output documentali.
 L’architettura è moderna (Next.js + TypeScript + Prisma + PostgreSQL), con autenticazione reale, RBAC, middleware di sicurezza e baseline test automatizzati.
 Sono state completate le issue critiche della Phase 1 (#1-#8), incluse sicurezza, audit trail, checklist contraddittorio, PDF server-side e documentazione GDPR/DPIA draft.
-Lo stato attuale è “institutional demo-ready”, ma non production-ready pieno.
+Lo stato attuale e "institutional demo-ready", ma non production-ready pieno.
 Persistono gap infrastrutturali, documentali e compliance che richiedono hardening prima della produzione.
 Si richiede audit esterno indipendente per:
 - validare la credibilità tecnica e giuridico-funzionale dell’MVP;
@@ -15,8 +15,16 @@ Si richiede audit esterno indipendente per:
 - definire una roadmap 30/60/90 giorni orientata a demo avanzata PA e produzione;
 - supportare decisioni go/no-go su presentazioni istituzionali e sviluppo commerciale.
 
+Cornice legale/posizionamento da applicare nell audit:
+- art. 18 L. 84/1994 come verticale speciale portuale (non base universale);
+- art. 36 cod. nav. come base generale concessoria;
+- art. 37 cod. nav. come presidio procedurale comparativo;
+- art. 47 cod. nav. come regola trasversale di decadenza;
+- d.l. 400/1993 come riferimento centrale verticale turistico-ricreativa;
+- art. 12 direttiva 2006/123/CE come vincolo su risorse scarse, selezione trasparente/imparziale e no proroghe automatiche generalizzate.
+
 ## 2. Contesto funzionale
-Il progetto copre il ciclo principale della gestione concessoria portuale/demaniale:
+Il progetto copre il ciclo principale della gestione concessoria demaniale/pubblica:
 - gestione anagrafiche concessioni e concessionari;
 - monitoraggio obblighi concessori;
 - presidio criticità tecnico-giuridiche-economiche;
@@ -29,6 +37,10 @@ Il progetto copre il ciclo principale della gestione concessoria portuale/demani
 - profili art. 47 Cod. Nav. nelle criticità;
 - PDF istituzionali server-side;
 - documentazione privacy/GDPR/DPIA in stato draft.
+
+Verticali di dominio:
+- Verticale A (attiva): portuale/AdSP.
+- Verticale B (roadmap): marittima turistico-ricreativa per comuni costieri.
 
 ## 3. Architettura tecnica
 Stack e componenti principali:
@@ -267,6 +279,8 @@ Nota stato: working tree non clean al momento della stesura perché sono in cors
 - Observability avanzata e benchmark performance.
 
 ## 11. Domande per la AI valutatrice
+- La separazione core comune vs verticali normative e coerente e comunicabile?
+- Il framing legale (art. 18 speciale, art. 36 base, art. 37 comparativa, art. 47 trasversale, d.l. 400/1993, art. 12 dir. 2006/123) e correttamente recepito?
 - Questo è un MVP credibile per contesto pubblico/para-pubblico?
 - Cosa manca in modo imprescindibile per una PA?
 - Quali rischi tecnici principali vedi?
@@ -320,3 +334,8 @@ Il revisore dovrebbe analizzare almeno:
 - `middleware.ts`
 
 Richiesta metodologica: audit severo, completo, non autocelebrativo, con evidenza dei blocchi reali alla produzione.
+
+Claim da evitare nella valutazione e nel posizionamento:
+- non presentare il prodotto come production-ready generalizzato per tutti i comuni costieri;
+- non presentare compliance automatica totale o decisioni automatiche di decadenza/revoca;
+- non presentare firma/conservazione/PEC/protocollo come pienamente operativi.
