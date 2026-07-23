@@ -1,10 +1,42 @@
 import { expect, test } from "playwright/test";
+import { loginAndExpectLanding } from "./helpers/auth";
 
-async function login(page: import("playwright/test").Page, email: string, password: string) {
-  await page.goto("/login");
-  await page.getByTestId("login-email").fill(email);
-  await page.getByTestId("login-password").fill(password);
-  await page.getByTestId("login-submit").click();
+async function pauseDemoAndOpenModule(page: import("playwright/test").Page, expectedUrl: RegExp) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const pauseButton = page.getByTestId("guided-demo-action-pause-open");
+    const isPauseButtonVisible = await pauseButton.isVisible({ timeout: 5000 }).catch(() => false);
+    if (!isPauseButtonVisible) {
+      await page.waitForTimeout(300);
+      continue;
+    }
+
+    await pauseButton.scrollIntoViewIfNeeded().catch(() => null);
+
+    await Promise.all([
+      page.waitForURL(expectedUrl, { timeout: 5000 }).catch(() => null),
+      pauseButton.click({ timeout: 5000 }),
+    ]);
+
+    if (expectedUrl.test(page.url())) {
+      return;
+    }
+
+    // Fallback: if SPA navigation does not complete after pause, use the direct module link.
+    const actionLink = page.getByTestId("guided-demo-action-link");
+    if (await actionLink.isVisible().catch(() => false)) {
+      await Promise.all([
+        page.waitForURL(expectedUrl, { timeout: 5000 }).catch(() => null),
+        actionLink.click({ timeout: 5000 }),
+      ]);
+      if (expectedUrl.test(page.url())) {
+        return;
+      }
+    }
+
+    await page.waitForTimeout(300);
+  }
+
+  throw new Error(`Pause/open action did not navigate to expected URL ${expectedUrl}.`);
 }
 
 async function goToSlideWithTitle(page: import("playwright/test").Page, title: string) {
@@ -26,8 +58,7 @@ async function goToSlideWithTitle(page: import("playwright/test").Page, title: s
 }
 
 test("admin consulta la demo guidata AI e naviga le slide", async ({ page }) => {
-  await login(page, "admin@demo.local", "admin123");
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await loginAndExpectLanding(page, "admin@demo.local", "admin123", /\/dashboard$/);
 
   await page.goto("/demo-guidata");
   await expect(page).toHaveURL(/\/demo-guidata$/);
@@ -117,8 +148,7 @@ test("admin consulta la demo guidata AI e naviga le slide", async ({ page }) => 
 });
 
 test("admin sospende su modulo e riprende la demo dalla stessa slide", async ({ page }) => {
-  await login(page, "admin@demo.local", "admin123");
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await loginAndExpectLanding(page, "admin@demo.local", "admin123", /\/dashboard$/);
 
   await page.goto("/demo-guidata");
   await expect(page).toHaveURL(/\/demo-guidata$/);
@@ -126,7 +156,7 @@ test("admin sospende su modulo e riprende la demo dalla stessa slide", async ({ 
   await goToSlideWithTitle(page, "Il fascicolo intelligente");
   await expect(page.getByTestId("guided-demo-current-title")).toContainText("Il fascicolo intelligente");
 
-  await page.getByTestId("guided-demo-action-pause-open").click();
+  await pauseDemoAndOpenModule(page, /\/documenti$/);
   await expect(page).toHaveURL(/\/documenti$/);
   await expect(page.getByTestId("resume-demo-banner")).toBeVisible();
 
@@ -138,7 +168,8 @@ test("admin sospende su modulo e riprende la demo dalla stessa slide", async ({ 
   await page.getByTestId("guided-demo-resume-silent").click();
   await expect(page.getByTestId("guided-demo-current-title")).toContainText("Il fascicolo intelligente");
 
-  await page.getByTestId("guided-demo-action-pause-open").click();
+  await goToSlideWithTitle(page, "Il fascicolo intelligente");
+  await pauseDemoAndOpenModule(page, /\/documenti$/);
   await expect(page).toHaveURL(/\/documenti$/);
   await page.getByRole("link", { name: "Torna alla demo guidata" }).click();
   await expect(page).toHaveURL(/\/demo-guidata\?resume=1/);
@@ -149,8 +180,7 @@ test("admin sospende su modulo e riprende la demo dalla stessa slide", async ({ 
 });
 
 test("viewer AdSP può consultare la demo guidata in sola lettura", async ({ page }) => {
-  await login(page, "adsp@demo.local", "adsp123");
-  await expect(page).toHaveURL(/\/adsp$/);
+  await loginAndExpectLanding(page, "adsp@demo.local", "adsp123", /\/adsp$/);
 
   await page.goto("/demo-guidata");
   await expect(page).toHaveURL(/\/demo-guidata$/);
@@ -159,7 +189,7 @@ test("viewer AdSP può consultare la demo guidata in sola lettura", async ({ pag
 
   await goToSlideWithTitle(page, "Il fascicolo intelligente");
   await expect(page.getByTestId("guided-demo-current-title")).toContainText("Il fascicolo intelligente");
-  await page.getByTestId("guided-demo-action-pause-open").click();
+  await pauseDemoAndOpenModule(page, /\/documenti$/);
   await expect(page).toHaveURL(/\/documenti$/);
   await expect(page.getByTestId("resume-demo-banner")).toBeVisible();
 

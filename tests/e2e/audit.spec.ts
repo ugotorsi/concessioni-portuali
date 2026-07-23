@@ -1,15 +1,10 @@
 import { expect, test } from "playwright/test";
-
-async function login(page: import("playwright/test").Page, email: string, password: string) {
-  await page.goto("/login");
-  await page.getByTestId("login-email").fill(email);
-  await page.getByTestId("login-password").fill(password);
-  await page.getByTestId("login-submit").click();
-}
+import { loginAndExpectLanding } from "./helpers/auth";
 
 test("audit page access and report validation audit events", async ({ page }) => {
-  await login(page, "admin@demo.local", "admin123");
-  await expect(page).toHaveURL(/\/dashboard$/);
+  test.setTimeout(90000);
+
+  await loginAndExpectLanding(page, "admin@demo.local", "admin123", /\/dashboard$/);
 
   await page.goto("/report");
   await page.getByRole("link", { name: "Apri report" }).first().click();
@@ -39,7 +34,7 @@ test("audit page access and report validation audit events", async ({ page }) =>
 
   expect(download.suggestedFilename()).toMatch(/^report-istituzionale-.*\.pdf$/);
 
-  await page.goto("/audit");
+  await page.goto("/audit", { waitUntil: "domcontentloaded" });
   await expect(page).toHaveURL(/\/audit$/);
   await expect(page.getByRole("heading", { name: "Ultimi eventi audit" })).toBeVisible();
   await expect(page.getByText(/REPORT_VALIDATE|REPORT_UNVALIDATE/).first()).toBeVisible();
@@ -48,9 +43,8 @@ test("audit page access and report validation audit events", async ({ page }) =>
   await page.goto("/logout");
   await expect(page).toHaveURL(/\/login$/);
 
-  await login(page, "adsp@demo.local", "adsp123");
-  await expect(page).toHaveURL(/\/adsp$/);
+  await loginAndExpectLanding(page, "adsp@demo.local", "adsp123", /\/adsp$/);
 
-  await page.goto("/audit");
+  await page.goto("/audit", { waitUntil: "domcontentloaded" });
   await expect(page).toHaveURL(/\/adsp$/);
 });

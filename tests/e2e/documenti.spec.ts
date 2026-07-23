@@ -2,17 +2,10 @@ import { expect, test } from "playwright/test";
 import { mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-
-async function login(page: import("playwright/test").Page, email: string, password: string) {
-  await page.goto("/login");
-  await page.getByTestId("login-email").fill(email);
-  await page.getByTestId("login-password").fill(password);
-  await page.getByTestId("login-submit").click();
-}
+import { loginAndExpectLanding } from "./helpers/auth";
 
 test("admin uploads and downloads a fascicolo document", async ({ page }) => {
-  await login(page, "admin@demo.local", "admin123");
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await loginAndExpectLanding(page, "admin@demo.local", "admin123", /\/dashboard$/);
 
   await page.goto("/documenti");
   await expect(page.getByRole("heading", { name: "Fascicolo documentale" }).first()).toBeVisible();
@@ -59,8 +52,7 @@ test("admin uploads and downloads a fascicolo document", async ({ page }) => {
 });
 
 test("viewer adsp can consult document register without upload controls", async ({ page }) => {
-  await login(page, "adsp@demo.local", "adsp123");
-  await expect(page).toHaveURL(/\/adsp$/);
+  await loginAndExpectLanding(page, "adsp@demo.local", "adsp123", /\/adsp$/);
 
   await page.goto("/documenti");
   await expect(page).toHaveURL(/\/documenti$/);

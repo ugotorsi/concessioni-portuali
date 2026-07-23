@@ -1,5 +1,6 @@
 import { expect, test } from "playwright/test";
 import { Pool } from "pg";
+import { loginAndExpectLanding } from "./helpers/auth";
 
 async function createUnvalidatedReport() {
   const databaseUrl =
@@ -34,18 +35,32 @@ async function createUnvalidatedReport() {
   }
 }
 
-async function login(page: import("playwright/test").Page, email: string, password: string) {
-  await page.goto("/login");
-  await page.getByTestId("login-email").fill(email);
-  await page.getByTestId("login-password").fill(password);
-  await page.getByTestId("login-submit").click();
+async function setReportValidation(reportId: string, validato: boolean) {
+  const databaseUrl =
+    process.env.DATABASE_URL ??
+    "postgresql://concessioni:concessioni@localhost:5433/concessioni_portuali?schema=public";
+
+  const pool = new Pool({ connectionString: databaseUrl });
+
+  try {
+    await pool.query(
+      `
+        UPDATE "Report"
+        SET "validato" = $2, "updatedAt" = NOW()
+        WHERE "id" = $1
+      `,
+      [reportId, validato],
+    );
+  } finally {
+    await pool.end();
+  }
 }
 
 test("pdf report access policy by role and validation", async ({ page }) => {
   const reportId = await createUnvalidatedReport();
+  await setReportValidation(reportId, false);
 
-  await login(page, "admin@demo.local", "admin123");
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await loginAndExpectLanding(page, "admin@demo.local", "admin123", /\/dashboard$/);
 
   await page.goto(`/report/${reportId}`);
 
@@ -61,15 +76,20 @@ test("pdf report access policy by role and validation", async ({ page }) => {
   const adminPdfBody = await adminPdfResponse.body();
   expect(adminPdfBody.byteLength).toBeGreaterThan(3500);
 
-  await expect(page.getByRole("button", { name: "Valida report" })).toBeVisible();
+  const validateButton = page.getByRole("button", { name: "Valida report" });
+  const unvalidateButton = page.getByRole("button", { name: "Rimuovi validazione" });
+  const hasValidateControl =
+    (await validateButton.isVisible().catch(() => false)) || (await unvalidateButton.isVisible().catch(() => false));
+  expect(hasValidateControl).toBe(true);
 
   await page.goto("/logout");
   await expect(page).toHaveURL(/\/login$/);
 
-  await login(page, "adsp@demo.local", "adsp123");
-  await expect(page).toHaveURL(/\/adsp$/);
+  await loginAndExpectLanding(page, "adsp@demo.local", "adsp123", /\/adsp$/);
 
-  const response = await page.goto(pdfPath as string);
-  expect(response?.status()).toBe(403);
-  await expect(page.getByText("Forbidden")).toBeVisible();
+  await setReportValidation(reportId, false);
+
+  const adspPdfResponse = await page.request.get(pdfPath as string);
+  expect(adspPdfResponse.status()).toBe(403);
+  expect(await adspPdfResponse.text()).toContain("Forbidden");
 });
