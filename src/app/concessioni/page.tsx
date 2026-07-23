@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/Table";
+import { getConcessionVerticalLabel } from "@/lib/concession-vertical-labels";
 import { formatCurrencyEUR, formatDateIT, formatEnumLabel } from "@/lib/utils";
 import {
   ATTIVITA_CONCESSIONE_VALUES,
@@ -151,6 +152,7 @@ export default async function ConcessioniPage({ searchParams }: ConcessioniPageP
                   <TableHead>Concessionario</TableHead>
                   <TableHead>Bene/Area</TableHead>
                   <TableHead>Attivita</TableHead>
+                  <TableHead>Verticale</TableHead>
                   <TableHead>Scadenza</TableHead>
                   <TableHead>Canone</TableHead>
                   <TableHead>Stato</TableHead>
@@ -179,6 +181,11 @@ export default async function ConcessioniPage({ searchParams }: ConcessioniPageP
                         </div>
                       </TableCell>
                       <TableCell>{formatEnumLabel(item.attivita)}</TableCell>
+                      <TableCell>
+                        <Badge data-testid={`concessione-vertical-${item.id}`}>
+                          {getConcessionVerticalLabel(item.concessionVertical)}
+                        </Badge>
+                      </TableCell>
                       <TableCell>
                         <div className="space-y-1">
                           <p>{formatDateIT(item.dataScadenza)}</p>

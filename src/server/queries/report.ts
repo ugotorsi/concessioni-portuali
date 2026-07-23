@@ -92,6 +92,8 @@ export interface ReportDetail {
     id: string;
     numeroAtto: string;
     stato: string;
+    concessionVertical: string;
+    legalFrameworks: string[];
     dataRilascio: Date;
     dataScadenza: Date;
     tipologiaBene: string;
@@ -424,6 +426,14 @@ export async function getReportDetail(id: string): Promise<ReportDetail | null> 
             orderBy: [{ dataDocumento: "desc" }, { createdAt: "desc" }],
             take: 12,
           },
+          legalFrameworks: {
+            select: {
+              framework: true,
+            },
+            orderBy: {
+              framework: "asc",
+            },
+          },
         },
       },
     },
@@ -449,6 +459,8 @@ export async function getReportDetail(id: string): Promise<ReportDetail | null> 
         id: report.concessione.id,
         numeroAtto: report.concessione.numeroAtto,
         stato: report.concessione.stato,
+        concessionVertical: report.concessione.concessionVertical,
+        legalFrameworks: report.concessione.legalFrameworks.map((item) => item.framework),
         dataRilascio: report.concessione.dataRilascio,
         dataScadenza: report.concessione.dataScadenza,
         tipologiaBene: report.concessione.tipologiaBene,

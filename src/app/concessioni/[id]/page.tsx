@@ -16,6 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/Table";
 import { BACKOFFICE_ROLES, requireRole } from "@/lib/auth";
+import { getConcessionVerticalLabel, getLegalFrameworkLabel } from "@/lib/concession-vertical-labels";
 import { formatCurrencyEUR, formatDateIT, formatEnumLabel } from "@/lib/utils";
 import { getConcessioneDetail } from "@/server/queries/concessioni";
 
@@ -167,6 +168,14 @@ export default async function ConcessioneDetailPage({ params }: ConcessioneDetai
                 <p className="mt-1 text-slate-900">{formatEnumLabel(concessione.attivita)}</p>
               </div>
               <div>
+                <p className="text-xs uppercase tracking-wide text-slate-500">Verticale</p>
+                <div className="mt-1">
+                  <Badge data-testid="concessione-vertical-detail">
+                    {getConcessionVerticalLabel(concessione.concessionVertical)}
+                  </Badge>
+                </div>
+              </div>
+              <div>
                 <p className="text-xs uppercase tracking-wide text-slate-500">Superficie</p>
                 <p className="mt-1 text-slate-900">
                   {concessione.superficieMq !== null ? `${concessione.superficieMq.toLocaleString("it-IT")} mq` : "-"}
@@ -212,6 +221,20 @@ export default async function ConcessioneDetailPage({ params }: ConcessioneDetai
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-500">Riferimento catastale</p>
                 <p className="mt-1 text-slate-900">{concessione.riferimentoCatastale ?? "-"}</p>
+              </div>
+              <div className="md:col-span-2 xl:col-span-4">
+                <p className="text-xs uppercase tracking-wide text-slate-500">Quadro normativo associato</p>
+                <div className="mt-1 flex flex-wrap gap-2" data-testid="concessione-legal-frameworks-detail">
+                  {concessione.legalFrameworks.length > 0 ? (
+                    concessione.legalFrameworks.map((item) => (
+                      <Badge key={item} variant="default">
+                        {getLegalFrameworkLabel(item)}
+                      </Badge>
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-500">Nessun framework normativo associato.</p>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>

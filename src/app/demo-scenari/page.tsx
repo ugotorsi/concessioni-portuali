@@ -5,6 +5,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { requireRole } from "@/lib/auth";
+import { getConcessionVerticalLabel } from "@/lib/concession-vertical-labels";
 import { getDemoScenarios } from "@/server/queries/demo-scenari";
 
 export const dynamic = "force-dynamic";
@@ -80,6 +81,17 @@ export default async function DemoScenariPage() {
                     ))}
                   </div>
                 </div>
+
+                {scenario.concessionVertical ? (
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-slate-500">Verticale concessione</p>
+                    <div className="mt-1">
+                      <Badge data-testid={`demo-scenario-vertical-${scenario.slug}`}>
+                        {getConcessionVerticalLabel(scenario.concessionVertical)}
+                      </Badge>
+                    </div>
+                  </div>
+                ) : null}
 
                 <div>
                   <p className="text-xs uppercase tracking-wide text-slate-500">Note istruttorie</p>

@@ -20,6 +20,8 @@ function createReportDetailFixture(overrides?: Partial<ReportDetail>): ReportDet
       id: "con-1",
       numeroAtto: "D-45/2024",
       stato: "ATTIVA",
+      concessionVertical: "PORTUALE_ADSP",
+      legalFrameworks: ["ART_18_L_84_1994", "ART_36_COD_NAV"],
       dataRilascio: new Date("2024-01-01T00:00:00.000Z"),
       dataScadenza: new Date("2028-12-31T00:00:00.000Z"),
       tipologiaBene: "AREA_DEMANIALE",

@@ -16,6 +16,7 @@ export interface DemoScenarioItem {
   slug: string;
   title: string;
   description: string;
+  concessionVertical: string | null;
   administrativeProblem: string;
   platformFocus: string;
   modules: string[];
@@ -104,6 +105,21 @@ export const DEMO_SCENARIO_BLUEPRINTS: DemoScenarioBlueprint[] = [
     notes:
       "Art. 10-bis trattato come profilo istruttorio da valutare in concreto, non come automatismo applicativo.",
   },
+  {
+    slug: "comune-costiero-stagionale",
+    title: "Concessione turistico-ricreativa in Comune costiero",
+    description:
+      "Scenario dimostrativo su concessione stagionale turistico-ricreativa con focus su comparazione ex art. 37 e presidio istruttorio.",
+    administrativeProblem:
+      "Gestione di profili combinati: stagionalita, morosita/residui e istanza concorrente in area costiera ad uso turistico.",
+    platformFocus:
+      "Visibilita della verticale turistico-ricreativa/comune costiero nel percorso concessione-criticita-procedimento-report.",
+    modules: ["Concessioni", "Criticita", "Procedimenti", "Report"],
+    riskLevel: "MEDIO",
+    concessioneNumeroAtto: "CP-031/2017",
+    notes:
+      "Supporto istruttorio: art. 47 trattato come profilo di rischio/procedura e non come automatismo di decadenza.",
+  },
 ];
 
 function buildFallbackScenarios(): DemoScenarioItem[] {
@@ -111,6 +127,7 @@ function buildFallbackScenarios(): DemoScenarioItem[] {
     slug: blueprint.slug,
     title: blueprint.title,
     description: blueprint.description,
+    concessionVertical: null,
     administrativeProblem: blueprint.administrativeProblem,
     platformFocus: blueprint.platformFocus,
     modules: blueprint.modules,
@@ -152,10 +169,13 @@ export async function getDemoScenarios(): Promise<DemoScenarioItem[]> {
       select: {
         id: true,
         numeroAtto: true,
+        concessionVertical: true,
       },
     });
 
-    const concessioneByNumeroAtto = new Map(concessioni.map((item) => [item.numeroAtto, item.id]));
+      const concessioneByNumeroAtto = new Map(
+        concessioni.map((item) => [item.numeroAtto, { id: item.id, concessionVertical: item.concessionVertical }]),
+      );
 
     const reports = await prisma.report.findMany({
       where: {
@@ -173,13 +193,15 @@ export async function getDemoScenarios(): Promise<DemoScenarioItem[]> {
 
     const scenarios = await Promise.all(
       DEMO_SCENARIO_BLUEPRINTS.map(async (blueprint) => {
-        const concessioneId = concessioneByNumeroAtto.get(blueprint.concessioneNumeroAtto) ?? null;
+        const concessioneEntry = concessioneByNumeroAtto.get(blueprint.concessioneNumeroAtto) ?? null;
+        const concessioneId = concessioneEntry?.id ?? null;
 
         if (!concessioneId) {
           return {
             slug: blueprint.slug,
             title: blueprint.title,
             description: blueprint.description,
+            concessionVertical: concessioneEntry?.concessionVertical ?? null,
             administrativeProblem: blueprint.administrativeProblem,
             platformFocus: blueprint.platformFocus,
             modules: blueprint.modules,
@@ -321,6 +343,7 @@ export async function getDemoScenarios(): Promise<DemoScenarioItem[]> {
           slug: blueprint.slug,
           title: blueprint.title,
           description: blueprint.description,
+          concessionVertical: concessioneEntry?.concessionVertical ?? null,
           administrativeProblem: blueprint.administrativeProblem,
           platformFocus: blueprint.platformFocus,
           modules: blueprint.modules,

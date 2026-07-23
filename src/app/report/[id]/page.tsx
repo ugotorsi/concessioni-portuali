@@ -18,6 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/Table";
 import { BACKOFFICE_ROLES, canDownloadReportPdf, canValidateReport, requireRole } from "@/lib/auth";
+import { getConcessionVerticalLabel, getLegalFrameworkLabel } from "@/lib/concession-vertical-labels";
 import { formatCurrencyEUR, formatDateIT, formatEnumLabel } from "@/lib/utils";
 import { toggleReportValidationAction } from "@/server/actions/report";
 import { getNormeForReport } from "@/server/queries/normativa";
@@ -243,6 +244,14 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                   <p className="mt-1">{formatEnumLabel(detail.concessione.tipologiaBene)}</p>
                 </div>
                 <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Verticale concessione</p>
+                  <div className="mt-1">
+                    <Badge data-testid="report-concession-vertical">
+                      {getConcessionVerticalLabel(detail.concessione.concessionVertical)}
+                    </Badge>
+                  </div>
+                </div>
+                <div>
                   <p className="text-xs uppercase tracking-wide text-slate-500">Attivita</p>
                   <p className="mt-1">{formatEnumLabel(detail.concessione.attivita)}</p>
                 </div>
@@ -257,6 +266,18 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                       ? formatCurrencyEUR(detail.concessione.canoneAnnuo)
                       : "-"}
                   </p>
+                </div>
+                <div className="md:col-span-2 xl:col-span-4">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Framework normativi associati</p>
+                  <div className="mt-1 flex flex-wrap gap-2" data-testid="report-concession-legal-frameworks">
+                    {detail.concessione.legalFrameworks.length > 0 ? (
+                      detail.concessione.legalFrameworks.map((item) => (
+                        <Badge key={item}>{getLegalFrameworkLabel(item)}</Badge>
+                      ))
+                    ) : (
+                      <span className="text-slate-500">Nessun framework normativo associato.</span>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>

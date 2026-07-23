@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { DEMO_SCENARIO_BLUEPRINTS } from "@/server/queries/demo-scenari";
 
 describe("demo scenari blueprints", () => {
-  it("espone 5 scenari istituzionali", () => {
-    expect(DEMO_SCENARIO_BLUEPRINTS).toHaveLength(5);
+  it("espone 6 scenari istituzionali", () => {
+    expect(DEMO_SCENARIO_BLUEPRINTS).toHaveLength(6);
   });
 
   it("ogni scenario ha titolo e descrizione", () => {
@@ -34,5 +34,14 @@ describe("demo scenari blueprints", () => {
     expect(`${art10bis?.title} ${art10bis?.description} ${art10bis?.administrativeProblem}`.toLowerCase()).toContain(
       "preavviso",
     );
+  });
+
+  it("scenario comune costiero evidenzia verticale turistico-ricreativa", () => {
+    const comuneCostiero = DEMO_SCENARIO_BLUEPRINTS.find((item) => item.slug === "comune-costiero-stagionale");
+    expect(comuneCostiero).toBeDefined();
+    expect(
+      `${comuneCostiero?.title} ${comuneCostiero?.description} ${comuneCostiero?.platformFocus}`.toLowerCase(),
+    ).toContain("costier");
+    expect(comuneCostiero?.notes.toLowerCase()).toContain("non come automatismo");
   });
 });
