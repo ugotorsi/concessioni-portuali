@@ -375,6 +375,56 @@ enum AuditEsito {
   FAILURE
 }
 
+enum EnteTipo {
+  ADSP
+  COMUNE_COSTIERO
+  ALTRO_ENTE_PUBBLICO
+  ALTRO
+}
+
+enum EnteStato {
+  ATTIVO
+  DISATTIVATO
+}
+
+model Ente {
+  id          String             @id @default(cuid())
+  nome        String
+  codice      String             @unique
+  tipo        EnteTipo           @default(ALTRO)
+  stato       EnteStato          @default(ATTIVO)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  concessioni Concessione[]
+  documenti   Documento[]
+  report      Report[]
+  activityLog ActivityLog[]
+  memberships TenantMembership[]
+
+  @@index([tipo])
+  @@index([stato])
+  @@index([createdAt])
+}
+
+model TenantMembership {
+  id        String   @id @default(cuid())
+  userId    String
+  enteId    String
+  role      RuoloUser
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ente Ente @relation(fields: [enteId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, enteId])
+  @@index([userId])
+  @@index([enteId])
+  @@index([isDefault])
+  @@index([role])
+}
+
 model User {
   id                  String        @id @default(cuid())
   nome                String
@@ -396,6 +446,7 @@ model User {
   updatedAt           DateTime      @updatedAt
   activityLogs        ActivityLog[]
   documentiCaricati   Documento[]   @relation("DocumentoUploader")
+  tenantMemberships   TenantMembership[]
 
   @@index([ruolo])
   @@index([attivo])
@@ -454,10 +505,12 @@ model Concessione {
   ubicazione       String?
   note             String?
   concessionarioId String
+  enteId           String?
   createdAt        DateTime            @default(now())
   updatedAt        DateTime            @updatedAt
 
   concessionario Concessionario       @relation(fields: [concessionarioId], references: [id], onDelete: Restrict)
+  ente          Ente?                @relation(fields: [enteId], references: [id], onDelete: SetNull)
   obblighi       ObbligoConcessorio[]
   scadenze       Scadenza[]
   criticita      Criticita[]
@@ -473,6 +526,7 @@ model Concessione {
   @@index([stato])
   @@index([dataScadenza])
   @@index([concessionarioId])
+  @@index([enteId])
   @@index([tipologiaBene])
   @@index([zonaPortuale])
   @@index([concessionVertical])
@@ -745,6 +799,7 @@ model Documento {
   uploadedByUserEmail  String?
   uploadedByUserRole   String?
   archivedAt           DateTime?
+  enteId               String?
   concessioneId        String?
   criticitaId          String?
   procedimentoId       String?
@@ -755,6 +810,7 @@ model Documento {
   updatedAt            DateTime           @updatedAt
 
   uploadedByUser User? @relation("DocumentoUploader", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
+  ente          Ente?  @relation(fields: [enteId], references: [id], onDelete: SetNull)
   concessione    Concessione? @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
   criticita      Criticita?   @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
   procedimento   Procedimento? @relation(fields: [procedimentoId], references: [id], onDelete: SetNull)
@@ -764,6 +820,7 @@ model Documento {
 
   @@index([uploadedByUserId])
   @@index([statoDocumento])
+  @@index([enteId])
   @@index([concessioneId])
   @@index([criticitaId])
   @@index([procedimentoId])
@@ -782,6 +839,7 @@ model Documento {
 
 model Report {
   id            String          @id @default(cuid())
+  enteId        String?
   concessioneId String?
   tipologia     TipologiaReport
   titolo        String
@@ -791,10 +849,12 @@ model Report {
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
+  ente       Ente?        @relation(fields: [enteId], references: [id], onDelete: SetNull)
   concessione Concessione? @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
   documenti   Documento[]
   normaImpatti NormaImpatto[]
 
+  @@index([enteId])
   @@index([concessioneId])
   @@index([tipologia])
   @@index([validato])
@@ -880,6 +940,7 @@ model ActivityLog {
   userId        String?
   userEmail     String?
   userRole      String?
+  enteId        String?
   concessioneId String?
   ipAddress     String?
   userAgent     String?
@@ -892,11 +953,13 @@ model ActivityLog {
   currentHash   String
   createdAt     DateTime @default(now())
 
+  ente       Ente?        @relation(fields: [enteId], references: [id], onDelete: SetNull)
   user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
   concessione Concessione? @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
 
   @@index([currentHash])
   @@index([userId])
+  @@index([enteId])
   @@index([entita, entitaId])
   @@index([concessioneId])
   @@index([createdAt])

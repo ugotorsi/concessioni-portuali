@@ -501,3 +501,21 @@ export const AuditEsito = {
 } as const
 
 export type AuditEsito = (typeof AuditEsito)[keyof typeof AuditEsito]
+
+
+export const EnteTipo = {
+  ADSP: 'ADSP',
+  COMUNE_COSTIERO: 'COMUNE_COSTIERO',
+  ALTRO_ENTE_PUBBLICO: 'ALTRO_ENTE_PUBBLICO',
+  ALTRO: 'ALTRO'
+} as const
+
+export type EnteTipo = (typeof EnteTipo)[keyof typeof EnteTipo]
+
+
+export const EnteStato = {
+  ATTIVO: 'ATTIVO',
+  DISATTIVATO: 'DISATTIVATO'
+} as const
+
+export type EnteStato = (typeof EnteStato)[keyof typeof EnteStato]

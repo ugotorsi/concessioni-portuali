@@ -26,6 +26,7 @@ export type AggregateReport = {
 
 export type ReportMinAggregateOutputType = {
   id: string | null
+  enteId: string | null
   concessioneId: string | null
   tipologia: $Enums.TipologiaReport | null
   titolo: string | null
@@ -38,6 +39,7 @@ export type ReportMinAggregateOutputType = {
 
 export type ReportMaxAggregateOutputType = {
   id: string | null
+  enteId: string | null
   concessioneId: string | null
   tipologia: $Enums.TipologiaReport | null
   titolo: string | null
@@ -50,6 +52,7 @@ export type ReportMaxAggregateOutputType = {
 
 export type ReportCountAggregateOutputType = {
   id: number
+  enteId: number
   concessioneId: number
   tipologia: number
   titolo: number
@@ -64,6 +67,7 @@ export type ReportCountAggregateOutputType = {
 
 export type ReportMinAggregateInputType = {
   id?: true
+  enteId?: true
   concessioneId?: true
   tipologia?: true
   titolo?: true
@@ -76,6 +80,7 @@ export type ReportMinAggregateInputType = {
 
 export type ReportMaxAggregateInputType = {
   id?: true
+  enteId?: true
   concessioneId?: true
   tipologia?: true
   titolo?: true
@@ -88,6 +93,7 @@ export type ReportMaxAggregateInputType = {
 
 export type ReportCountAggregateInputType = {
   id?: true
+  enteId?: true
   concessioneId?: true
   tipologia?: true
   titolo?: true
@@ -173,6 +179,7 @@ export type ReportGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalA
 
 export type ReportGroupByOutputType = {
   id: string
+  enteId: string | null
   concessioneId: string | null
   tipologia: $Enums.TipologiaReport
   titolo: string
@@ -206,6 +213,7 @@ export type ReportWhereInput = {
   OR?: Prisma.ReportWhereInput[]
   NOT?: Prisma.ReportWhereInput | Prisma.ReportWhereInput[]
   id?: Prisma.StringFilter<"Report"> | string
+  enteId?: Prisma.StringNullableFilter<"Report"> | string | null
   concessioneId?: Prisma.StringNullableFilter<"Report"> | string | null
   tipologia?: Prisma.EnumTipologiaReportFilter<"Report"> | $Enums.TipologiaReport
   titolo?: Prisma.StringFilter<"Report"> | string
@@ -214,6 +222,7 @@ export type ReportWhereInput = {
   validato?: Prisma.BoolFilter<"Report"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Report"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Report"> | Date | string
+  ente?: Prisma.XOR<Prisma.EnteNullableScalarRelationFilter, Prisma.EnteWhereInput> | null
   concessione?: Prisma.XOR<Prisma.ConcessioneNullableScalarRelationFilter, Prisma.ConcessioneWhereInput> | null
   documenti?: Prisma.DocumentoListRelationFilter
   normaImpatti?: Prisma.NormaImpattoListRelationFilter
@@ -221,6 +230,7 @@ export type ReportWhereInput = {
 
 export type ReportOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  enteId?: Prisma.SortOrderInput | Prisma.SortOrder
   concessioneId?: Prisma.SortOrderInput | Prisma.SortOrder
   tipologia?: Prisma.SortOrder
   titolo?: Prisma.SortOrder
@@ -229,6 +239,7 @@ export type ReportOrderByWithRelationInput = {
   validato?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  ente?: Prisma.EnteOrderByWithRelationInput
   concessione?: Prisma.ConcessioneOrderByWithRelationInput
   documenti?: Prisma.DocumentoOrderByRelationAggregateInput
   normaImpatti?: Prisma.NormaImpattoOrderByRelationAggregateInput
@@ -239,6 +250,7 @@ export type ReportWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.ReportWhereInput | Prisma.ReportWhereInput[]
   OR?: Prisma.ReportWhereInput[]
   NOT?: Prisma.ReportWhereInput | Prisma.ReportWhereInput[]
+  enteId?: Prisma.StringNullableFilter<"Report"> | string | null
   concessioneId?: Prisma.StringNullableFilter<"Report"> | string | null
   tipologia?: Prisma.EnumTipologiaReportFilter<"Report"> | $Enums.TipologiaReport
   titolo?: Prisma.StringFilter<"Report"> | string
@@ -247,6 +259,7 @@ export type ReportWhereUniqueInput = Prisma.AtLeast<{
   validato?: Prisma.BoolFilter<"Report"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Report"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Report"> | Date | string
+  ente?: Prisma.XOR<Prisma.EnteNullableScalarRelationFilter, Prisma.EnteWhereInput> | null
   concessione?: Prisma.XOR<Prisma.ConcessioneNullableScalarRelationFilter, Prisma.ConcessioneWhereInput> | null
   documenti?: Prisma.DocumentoListRelationFilter
   normaImpatti?: Prisma.NormaImpattoListRelationFilter
@@ -254,6 +267,7 @@ export type ReportWhereUniqueInput = Prisma.AtLeast<{
 
 export type ReportOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  enteId?: Prisma.SortOrderInput | Prisma.SortOrder
   concessioneId?: Prisma.SortOrderInput | Prisma.SortOrder
   tipologia?: Prisma.SortOrder
   titolo?: Prisma.SortOrder
@@ -272,6 +286,7 @@ export type ReportScalarWhereWithAggregatesInput = {
   OR?: Prisma.ReportScalarWhereWithAggregatesInput[]
   NOT?: Prisma.ReportScalarWhereWithAggregatesInput | Prisma.ReportScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Report"> | string
+  enteId?: Prisma.StringNullableWithAggregatesFilter<"Report"> | string | null
   concessioneId?: Prisma.StringNullableWithAggregatesFilter<"Report"> | string | null
   tipologia?: Prisma.EnumTipologiaReportWithAggregatesFilter<"Report"> | $Enums.TipologiaReport
   titolo?: Prisma.StringWithAggregatesFilter<"Report"> | string
@@ -291,6 +306,7 @@ export type ReportCreateInput = {
   validato?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  ente?: Prisma.EnteCreateNestedOneWithoutReportInput
   concessione?: Prisma.ConcessioneCreateNestedOneWithoutReportInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutReportInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutReportInput
@@ -298,6 +314,7 @@ export type ReportCreateInput = {
 
 export type ReportUncheckedCreateInput = {
   id?: string
+  enteId?: string | null
   concessioneId?: string | null
   tipologia: $Enums.TipologiaReport
   titolo: string
@@ -319,6 +336,7 @@ export type ReportUpdateInput = {
   validato?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ente?: Prisma.EnteUpdateOneWithoutReportNestedInput
   concessione?: Prisma.ConcessioneUpdateOneWithoutReportNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutReportNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutReportNestedInput
@@ -326,6 +344,7 @@ export type ReportUpdateInput = {
 
 export type ReportUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tipologia?: Prisma.EnumTipologiaReportFieldUpdateOperationsInput | $Enums.TipologiaReport
   titolo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -340,6 +359,7 @@ export type ReportUncheckedUpdateInput = {
 
 export type ReportCreateManyInput = {
   id?: string
+  enteId?: string | null
   concessioneId?: string | null
   tipologia: $Enums.TipologiaReport
   titolo: string
@@ -363,6 +383,7 @@ export type ReportUpdateManyMutationInput = {
 
 export type ReportUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tipologia?: Prisma.EnumTipologiaReportFieldUpdateOperationsInput | $Enums.TipologiaReport
   titolo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -390,6 +411,7 @@ export type ReportNullableScalarRelationFilter = {
 
 export type ReportCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  enteId?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrder
   tipologia?: Prisma.SortOrder
   titolo?: Prisma.SortOrder
@@ -402,6 +424,7 @@ export type ReportCountOrderByAggregateInput = {
 
 export type ReportMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  enteId?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrder
   tipologia?: Prisma.SortOrder
   titolo?: Prisma.SortOrder
@@ -414,6 +437,7 @@ export type ReportMaxOrderByAggregateInput = {
 
 export type ReportMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  enteId?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrder
   tipologia?: Prisma.SortOrder
   titolo?: Prisma.SortOrder
@@ -422,6 +446,48 @@ export type ReportMinOrderByAggregateInput = {
   validato?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type ReportCreateNestedManyWithoutEnteInput = {
+  create?: Prisma.XOR<Prisma.ReportCreateWithoutEnteInput, Prisma.ReportUncheckedCreateWithoutEnteInput> | Prisma.ReportCreateWithoutEnteInput[] | Prisma.ReportUncheckedCreateWithoutEnteInput[]
+  connectOrCreate?: Prisma.ReportCreateOrConnectWithoutEnteInput | Prisma.ReportCreateOrConnectWithoutEnteInput[]
+  createMany?: Prisma.ReportCreateManyEnteInputEnvelope
+  connect?: Prisma.ReportWhereUniqueInput | Prisma.ReportWhereUniqueInput[]
+}
+
+export type ReportUncheckedCreateNestedManyWithoutEnteInput = {
+  create?: Prisma.XOR<Prisma.ReportCreateWithoutEnteInput, Prisma.ReportUncheckedCreateWithoutEnteInput> | Prisma.ReportCreateWithoutEnteInput[] | Prisma.ReportUncheckedCreateWithoutEnteInput[]
+  connectOrCreate?: Prisma.ReportCreateOrConnectWithoutEnteInput | Prisma.ReportCreateOrConnectWithoutEnteInput[]
+  createMany?: Prisma.ReportCreateManyEnteInputEnvelope
+  connect?: Prisma.ReportWhereUniqueInput | Prisma.ReportWhereUniqueInput[]
+}
+
+export type ReportUpdateManyWithoutEnteNestedInput = {
+  create?: Prisma.XOR<Prisma.ReportCreateWithoutEnteInput, Prisma.ReportUncheckedCreateWithoutEnteInput> | Prisma.ReportCreateWithoutEnteInput[] | Prisma.ReportUncheckedCreateWithoutEnteInput[]
+  connectOrCreate?: Prisma.ReportCreateOrConnectWithoutEnteInput | Prisma.ReportCreateOrConnectWithoutEnteInput[]
+  upsert?: Prisma.ReportUpsertWithWhereUniqueWithoutEnteInput | Prisma.ReportUpsertWithWhereUniqueWithoutEnteInput[]
+  createMany?: Prisma.ReportCreateManyEnteInputEnvelope
+  set?: Prisma.ReportWhereUniqueInput | Prisma.ReportWhereUniqueInput[]
+  disconnect?: Prisma.ReportWhereUniqueInput | Prisma.ReportWhereUniqueInput[]
+  delete?: Prisma.ReportWhereUniqueInput | Prisma.ReportWhereUniqueInput[]
+  connect?: Prisma.ReportWhereUniqueInput | Prisma.ReportWhereUniqueInput[]
+  update?: Prisma.ReportUpdateWithWhereUniqueWithoutEnteInput | Prisma.ReportUpdateWithWhereUniqueWithoutEnteInput[]
+  updateMany?: Prisma.ReportUpdateManyWithWhereWithoutEnteInput | Prisma.ReportUpdateManyWithWhereWithoutEnteInput[]
+  deleteMany?: Prisma.ReportScalarWhereInput | Prisma.ReportScalarWhereInput[]
+}
+
+export type ReportUncheckedUpdateManyWithoutEnteNestedInput = {
+  create?: Prisma.XOR<Prisma.ReportCreateWithoutEnteInput, Prisma.ReportUncheckedCreateWithoutEnteInput> | Prisma.ReportCreateWithoutEnteInput[] | Prisma.ReportUncheckedCreateWithoutEnteInput[]
+  connectOrCreate?: Prisma.ReportCreateOrConnectWithoutEnteInput | Prisma.ReportCreateOrConnectWithoutEnteInput[]
+  upsert?: Prisma.ReportUpsertWithWhereUniqueWithoutEnteInput | Prisma.ReportUpsertWithWhereUniqueWithoutEnteInput[]
+  createMany?: Prisma.ReportCreateManyEnteInputEnvelope
+  set?: Prisma.ReportWhereUniqueInput | Prisma.ReportWhereUniqueInput[]
+  disconnect?: Prisma.ReportWhereUniqueInput | Prisma.ReportWhereUniqueInput[]
+  delete?: Prisma.ReportWhereUniqueInput | Prisma.ReportWhereUniqueInput[]
+  connect?: Prisma.ReportWhereUniqueInput | Prisma.ReportWhereUniqueInput[]
+  update?: Prisma.ReportUpdateWithWhereUniqueWithoutEnteInput | Prisma.ReportUpdateWithWhereUniqueWithoutEnteInput[]
+  updateMany?: Prisma.ReportUpdateManyWithWhereWithoutEnteInput | Prisma.ReportUpdateManyWithWhereWithoutEnteInput[]
+  deleteMany?: Prisma.ReportScalarWhereInput | Prisma.ReportScalarWhereInput[]
 }
 
 export type ReportCreateNestedManyWithoutConcessioneInput = {
@@ -502,6 +568,76 @@ export type ReportUpdateOneWithoutNormaImpattiNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ReportUpdateToOneWithWhereWithoutNormaImpattiInput, Prisma.ReportUpdateWithoutNormaImpattiInput>, Prisma.ReportUncheckedUpdateWithoutNormaImpattiInput>
 }
 
+export type ReportCreateWithoutEnteInput = {
+  id?: string
+  tipologia: $Enums.TipologiaReport
+  titolo: string
+  contenuto: string
+  formato?: string
+  validato?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessione?: Prisma.ConcessioneCreateNestedOneWithoutReportInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutReportInput
+  normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutReportInput
+}
+
+export type ReportUncheckedCreateWithoutEnteInput = {
+  id?: string
+  concessioneId?: string | null
+  tipologia: $Enums.TipologiaReport
+  titolo: string
+  contenuto: string
+  formato?: string
+  validato?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutReportInput
+  normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutReportInput
+}
+
+export type ReportCreateOrConnectWithoutEnteInput = {
+  where: Prisma.ReportWhereUniqueInput
+  create: Prisma.XOR<Prisma.ReportCreateWithoutEnteInput, Prisma.ReportUncheckedCreateWithoutEnteInput>
+}
+
+export type ReportCreateManyEnteInputEnvelope = {
+  data: Prisma.ReportCreateManyEnteInput | Prisma.ReportCreateManyEnteInput[]
+  skipDuplicates?: boolean
+}
+
+export type ReportUpsertWithWhereUniqueWithoutEnteInput = {
+  where: Prisma.ReportWhereUniqueInput
+  update: Prisma.XOR<Prisma.ReportUpdateWithoutEnteInput, Prisma.ReportUncheckedUpdateWithoutEnteInput>
+  create: Prisma.XOR<Prisma.ReportCreateWithoutEnteInput, Prisma.ReportUncheckedCreateWithoutEnteInput>
+}
+
+export type ReportUpdateWithWhereUniqueWithoutEnteInput = {
+  where: Prisma.ReportWhereUniqueInput
+  data: Prisma.XOR<Prisma.ReportUpdateWithoutEnteInput, Prisma.ReportUncheckedUpdateWithoutEnteInput>
+}
+
+export type ReportUpdateManyWithWhereWithoutEnteInput = {
+  where: Prisma.ReportScalarWhereInput
+  data: Prisma.XOR<Prisma.ReportUpdateManyMutationInput, Prisma.ReportUncheckedUpdateManyWithoutEnteInput>
+}
+
+export type ReportScalarWhereInput = {
+  AND?: Prisma.ReportScalarWhereInput | Prisma.ReportScalarWhereInput[]
+  OR?: Prisma.ReportScalarWhereInput[]
+  NOT?: Prisma.ReportScalarWhereInput | Prisma.ReportScalarWhereInput[]
+  id?: Prisma.StringFilter<"Report"> | string
+  enteId?: Prisma.StringNullableFilter<"Report"> | string | null
+  concessioneId?: Prisma.StringNullableFilter<"Report"> | string | null
+  tipologia?: Prisma.EnumTipologiaReportFilter<"Report"> | $Enums.TipologiaReport
+  titolo?: Prisma.StringFilter<"Report"> | string
+  contenuto?: Prisma.StringFilter<"Report"> | string
+  formato?: Prisma.StringFilter<"Report"> | string
+  validato?: Prisma.BoolFilter<"Report"> | boolean
+  createdAt?: Prisma.DateTimeFilter<"Report"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Report"> | Date | string
+}
+
 export type ReportCreateWithoutConcessioneInput = {
   id?: string
   tipologia: $Enums.TipologiaReport
@@ -511,12 +647,14 @@ export type ReportCreateWithoutConcessioneInput = {
   validato?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  ente?: Prisma.EnteCreateNestedOneWithoutReportInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutReportInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutReportInput
 }
 
 export type ReportUncheckedCreateWithoutConcessioneInput = {
   id?: string
+  enteId?: string | null
   tipologia: $Enums.TipologiaReport
   titolo: string
   contenuto: string
@@ -554,21 +692,6 @@ export type ReportUpdateManyWithWhereWithoutConcessioneInput = {
   data: Prisma.XOR<Prisma.ReportUpdateManyMutationInput, Prisma.ReportUncheckedUpdateManyWithoutConcessioneInput>
 }
 
-export type ReportScalarWhereInput = {
-  AND?: Prisma.ReportScalarWhereInput | Prisma.ReportScalarWhereInput[]
-  OR?: Prisma.ReportScalarWhereInput[]
-  NOT?: Prisma.ReportScalarWhereInput | Prisma.ReportScalarWhereInput[]
-  id?: Prisma.StringFilter<"Report"> | string
-  concessioneId?: Prisma.StringNullableFilter<"Report"> | string | null
-  tipologia?: Prisma.EnumTipologiaReportFilter<"Report"> | $Enums.TipologiaReport
-  titolo?: Prisma.StringFilter<"Report"> | string
-  contenuto?: Prisma.StringFilter<"Report"> | string
-  formato?: Prisma.StringFilter<"Report"> | string
-  validato?: Prisma.BoolFilter<"Report"> | boolean
-  createdAt?: Prisma.DateTimeFilter<"Report"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"Report"> | Date | string
-}
-
 export type ReportCreateWithoutDocumentiInput = {
   id?: string
   tipologia: $Enums.TipologiaReport
@@ -578,12 +701,14 @@ export type ReportCreateWithoutDocumentiInput = {
   validato?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  ente?: Prisma.EnteCreateNestedOneWithoutReportInput
   concessione?: Prisma.ConcessioneCreateNestedOneWithoutReportInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutReportInput
 }
 
 export type ReportUncheckedCreateWithoutDocumentiInput = {
   id?: string
+  enteId?: string | null
   concessioneId?: string | null
   tipologia: $Enums.TipologiaReport
   titolo: string
@@ -620,12 +745,14 @@ export type ReportUpdateWithoutDocumentiInput = {
   validato?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ente?: Prisma.EnteUpdateOneWithoutReportNestedInput
   concessione?: Prisma.ConcessioneUpdateOneWithoutReportNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutReportNestedInput
 }
 
 export type ReportUncheckedUpdateWithoutDocumentiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tipologia?: Prisma.EnumTipologiaReportFieldUpdateOperationsInput | $Enums.TipologiaReport
   titolo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -646,12 +773,14 @@ export type ReportCreateWithoutNormaImpattiInput = {
   validato?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  ente?: Prisma.EnteCreateNestedOneWithoutReportInput
   concessione?: Prisma.ConcessioneCreateNestedOneWithoutReportInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutReportInput
 }
 
 export type ReportUncheckedCreateWithoutNormaImpattiInput = {
   id?: string
+  enteId?: string | null
   concessioneId?: string | null
   tipologia: $Enums.TipologiaReport
   titolo: string
@@ -688,12 +817,14 @@ export type ReportUpdateWithoutNormaImpattiInput = {
   validato?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ente?: Prisma.EnteUpdateOneWithoutReportNestedInput
   concessione?: Prisma.ConcessioneUpdateOneWithoutReportNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutReportNestedInput
 }
 
 export type ReportUncheckedUpdateWithoutNormaImpattiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tipologia?: Prisma.EnumTipologiaReportFieldUpdateOperationsInput | $Enums.TipologiaReport
   titolo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -705,8 +836,61 @@ export type ReportUncheckedUpdateWithoutNormaImpattiInput = {
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutReportNestedInput
 }
 
+export type ReportCreateManyEnteInput = {
+  id?: string
+  concessioneId?: string | null
+  tipologia: $Enums.TipologiaReport
+  titolo: string
+  contenuto: string
+  formato?: string
+  validato?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type ReportUpdateWithoutEnteInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tipologia?: Prisma.EnumTipologiaReportFieldUpdateOperationsInput | $Enums.TipologiaReport
+  titolo?: Prisma.StringFieldUpdateOperationsInput | string
+  contenuto?: Prisma.StringFieldUpdateOperationsInput | string
+  formato?: Prisma.StringFieldUpdateOperationsInput | string
+  validato?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessione?: Prisma.ConcessioneUpdateOneWithoutReportNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutReportNestedInput
+  normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutReportNestedInput
+}
+
+export type ReportUncheckedUpdateWithoutEnteInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipologia?: Prisma.EnumTipologiaReportFieldUpdateOperationsInput | $Enums.TipologiaReport
+  titolo?: Prisma.StringFieldUpdateOperationsInput | string
+  contenuto?: Prisma.StringFieldUpdateOperationsInput | string
+  formato?: Prisma.StringFieldUpdateOperationsInput | string
+  validato?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutReportNestedInput
+  normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutReportNestedInput
+}
+
+export type ReportUncheckedUpdateManyWithoutEnteInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipologia?: Prisma.EnumTipologiaReportFieldUpdateOperationsInput | $Enums.TipologiaReport
+  titolo?: Prisma.StringFieldUpdateOperationsInput | string
+  contenuto?: Prisma.StringFieldUpdateOperationsInput | string
+  formato?: Prisma.StringFieldUpdateOperationsInput | string
+  validato?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type ReportCreateManyConcessioneInput = {
   id?: string
+  enteId?: string | null
   tipologia: $Enums.TipologiaReport
   titolo: string
   contenuto: string
@@ -725,12 +909,14 @@ export type ReportUpdateWithoutConcessioneInput = {
   validato?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ente?: Prisma.EnteUpdateOneWithoutReportNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutReportNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutReportNestedInput
 }
 
 export type ReportUncheckedUpdateWithoutConcessioneInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tipologia?: Prisma.EnumTipologiaReportFieldUpdateOperationsInput | $Enums.TipologiaReport
   titolo?: Prisma.StringFieldUpdateOperationsInput | string
   contenuto?: Prisma.StringFieldUpdateOperationsInput | string
@@ -744,6 +930,7 @@ export type ReportUncheckedUpdateWithoutConcessioneInput = {
 
 export type ReportUncheckedUpdateManyWithoutConcessioneInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tipologia?: Prisma.EnumTipologiaReportFieldUpdateOperationsInput | $Enums.TipologiaReport
   titolo?: Prisma.StringFieldUpdateOperationsInput | string
   contenuto?: Prisma.StringFieldUpdateOperationsInput | string
@@ -795,6 +982,7 @@ export type ReportCountOutputTypeCountNormaImpattiArgs<ExtArgs extends runtime.T
 
 export type ReportSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  enteId?: boolean
   concessioneId?: boolean
   tipologia?: boolean
   titolo?: boolean
@@ -803,6 +991,7 @@ export type ReportSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   validato?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  ente?: boolean | Prisma.Report$enteArgs<ExtArgs>
   concessione?: boolean | Prisma.Report$concessioneArgs<ExtArgs>
   documenti?: boolean | Prisma.Report$documentiArgs<ExtArgs>
   normaImpatti?: boolean | Prisma.Report$normaImpattiArgs<ExtArgs>
@@ -811,6 +1000,7 @@ export type ReportSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
 
 export type ReportSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  enteId?: boolean
   concessioneId?: boolean
   tipologia?: boolean
   titolo?: boolean
@@ -819,11 +1009,13 @@ export type ReportSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   validato?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  ente?: boolean | Prisma.Report$enteArgs<ExtArgs>
   concessione?: boolean | Prisma.Report$concessioneArgs<ExtArgs>
 }, ExtArgs["result"]["report"]>
 
 export type ReportSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  enteId?: boolean
   concessioneId?: boolean
   tipologia?: boolean
   titolo?: boolean
@@ -832,11 +1024,13 @@ export type ReportSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   validato?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  ente?: boolean | Prisma.Report$enteArgs<ExtArgs>
   concessione?: boolean | Prisma.Report$concessioneArgs<ExtArgs>
 }, ExtArgs["result"]["report"]>
 
 export type ReportSelectScalar = {
   id?: boolean
+  enteId?: boolean
   concessioneId?: boolean
   tipologia?: boolean
   titolo?: boolean
@@ -847,29 +1041,34 @@ export type ReportSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ReportOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "concessioneId" | "tipologia" | "titolo" | "contenuto" | "formato" | "validato" | "createdAt" | "updatedAt", ExtArgs["result"]["report"]>
+export type ReportOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "enteId" | "concessioneId" | "tipologia" | "titolo" | "contenuto" | "formato" | "validato" | "createdAt" | "updatedAt", ExtArgs["result"]["report"]>
 export type ReportInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  ente?: boolean | Prisma.Report$enteArgs<ExtArgs>
   concessione?: boolean | Prisma.Report$concessioneArgs<ExtArgs>
   documenti?: boolean | Prisma.Report$documentiArgs<ExtArgs>
   normaImpatti?: boolean | Prisma.Report$normaImpattiArgs<ExtArgs>
   _count?: boolean | Prisma.ReportCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ReportIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  ente?: boolean | Prisma.Report$enteArgs<ExtArgs>
   concessione?: boolean | Prisma.Report$concessioneArgs<ExtArgs>
 }
 export type ReportIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  ente?: boolean | Prisma.Report$enteArgs<ExtArgs>
   concessione?: boolean | Prisma.Report$concessioneArgs<ExtArgs>
 }
 
 export type $ReportPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Report"
   objects: {
+    ente: Prisma.$EntePayload<ExtArgs> | null
     concessione: Prisma.$ConcessionePayload<ExtArgs> | null
     documenti: Prisma.$DocumentoPayload<ExtArgs>[]
     normaImpatti: Prisma.$NormaImpattoPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    enteId: string | null
     concessioneId: string | null
     tipologia: $Enums.TipologiaReport
     titolo: string
@@ -1272,6 +1471,7 @@ readonly fields: ReportFieldRefs;
  */
 export interface Prisma__ReportClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  ente<T extends Prisma.Report$enteArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Report$enteArgs<ExtArgs>>): Prisma.Prisma__EnteClient<runtime.Types.Result.GetResult<Prisma.$EntePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   concessione<T extends Prisma.Report$concessioneArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Report$concessioneArgs<ExtArgs>>): Prisma.Prisma__ConcessioneClient<runtime.Types.Result.GetResult<Prisma.$ConcessionePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   documenti<T extends Prisma.Report$documentiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Report$documentiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   normaImpatti<T extends Prisma.Report$normaImpattiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Report$normaImpattiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NormaImpattoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -1305,6 +1505,7 @@ export interface Prisma__ReportClient<T, Null = never, ExtArgs extends runtime.T
  */
 export interface ReportFieldRefs {
   readonly id: Prisma.FieldRef<"Report", 'String'>
+  readonly enteId: Prisma.FieldRef<"Report", 'String'>
   readonly concessioneId: Prisma.FieldRef<"Report", 'String'>
   readonly tipologia: Prisma.FieldRef<"Report", 'TipologiaReport'>
   readonly titolo: Prisma.FieldRef<"Report", 'String'>
@@ -1711,6 +1912,25 @@ export type ReportDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Limit how many Reports to delete.
    */
   limit?: number
+}
+
+/**
+ * Report.ente
+ */
+export type Report$enteArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Ente
+   */
+  select?: Prisma.EnteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Ente
+   */
+  omit?: Prisma.EnteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EnteInclude<ExtArgs> | null
+  where?: Prisma.EnteWhereInput
 }
 
 /**

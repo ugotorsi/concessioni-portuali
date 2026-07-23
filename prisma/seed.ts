@@ -9,6 +9,7 @@ import {
   inferInitialLegalFrameworks,
   mapTipologiaBeneToConcessionObjectType,
 } from "../src/lib/concession-vertical";
+import { resolveDemoEnteCodeForConcessione } from "../src/lib/tenant";
 import { PrismaClient } from "../src/generated/prisma/client";
 import type {
   Art47CodNavLettera,
@@ -18,6 +19,7 @@ import type {
   LivelloRischioDecadenza,
   RuoloUser,
   StatoCriticita,
+  TipologiaReport,
   TipologiaCriticita,
 } from "../src/generated/prisma/enums";
 import { Pool } from "pg";
@@ -106,7 +108,9 @@ async function clearDemoData() {
   await prisma.obbligoConcessorio.deleteMany();
   await prisma.concessione.deleteMany();
   await prisma.concessionario.deleteMany();
+  await prisma.tenantMembership.deleteMany();
   await prisma.user.deleteMany();
+  await prisma.ente.deleteMany();
 }
 
 async function main() {
@@ -215,6 +219,38 @@ async function main() {
   const userSnapshotById = Object.fromEntries(
     users.map((item) => [item.id, { email: item.email, ruolo: item.ruolo }]),
   );
+
+  await prisma.ente.createMany({
+    data: [
+      {
+        codice: "DEMO-ENTE-ADSP",
+        nome: "Autorita demo / Ente dimostrativo",
+        tipo: "ADSP",
+      },
+      {
+        codice: "DEMO-COMUNE-COSTIERO",
+        nome: "Comune costiero demo",
+        tipo: "COMUNE_COSTIERO",
+      },
+    ],
+  });
+
+  const enti = await prisma.ente.findMany();
+  const enteByCode = Object.fromEntries(enti.map((item) => [item.codice, item.id]));
+
+  const defaultDemoEnteId = enteByCode["DEMO-ENTE-ADSP"];
+  if (!defaultDemoEnteId) {
+    throw new Error("Default demo ente DEMO-ENTE-ADSP not found after seed create.");
+  }
+
+  await prisma.tenantMembership.createMany({
+    data: users.map((item) => ({
+      userId: item.id,
+      enteId: defaultDemoEnteId,
+      role: item.ruolo,
+      isDefault: true,
+    })),
+  });
 
   const concessionariData = [
     {
@@ -485,11 +521,21 @@ async function main() {
   ] as const;
 
   const concessioniByKey: Record<string, string> = {};
+  const concessioneEnteById: Record<string, string> = {};
   for (const item of concessioniData) {
     const concessionVertical = inferDefaultConcessionVertical({
       attivita: item.attivita,
       normaRiferimento: item.normaRiferimento,
     });
+    const enteCode = resolveDemoEnteCodeForConcessione({
+      concessionVertical,
+      attivita: item.attivita,
+    });
+    const enteId = enteByCode[enteCode];
+
+    if (!enteId) {
+      throw new Error(`Missing enteId mapping for demo code ${enteCode}.`);
+    }
 
     const created = await prisma.concessione.create({
       data: {
@@ -523,10 +569,12 @@ async function main() {
         descrizioneBene: item.descrizioneBene,
         ubicazione: item.ubicazione,
         note: item.note,
+        enteId,
         concessionarioId: concessionariByKey[item.concessionarioKey],
       },
     });
     concessioniByKey[item.key] = created.id;
+    concessioneEnteById[created.id] = enteId;
   }
 
   await prisma.obbligoConcessorio.createMany({
@@ -858,6 +906,7 @@ async function main() {
 
     await prisma.documento.create({
       data: {
+        enteId: concessioneEnteById[item.concessioneId] ?? null,
         concessioneId: item.concessioneId,
         nome: item.nome,
         tipologia: item.tipologia,
@@ -1444,106 +1493,120 @@ async function main() {
     skipDuplicates: true,
   });
 
-  await prisma.report.createMany({
-    data: [
-      {
-        tipologia: "REPORT_MENSILE",
-        titolo: "Report mensile monitoraggio - giugno 2026",
-        contenuto:
-          "Sintesi mensile delle principali variazioni su concessioni attive, scadenze e criticita in gestione.",
-        formato: "PDF",
-        validato: true,
+  const reportSeed: Array<{
+    concessioneId?: string;
+    tipologia: TipologiaReport;
+    titolo: string;
+    contenuto: string;
+    formato: string;
+    validato: boolean;
+  }> = [
+    {
+      tipologia: "REPORT_MENSILE",
+      titolo: "Report mensile monitoraggio - giugno 2026",
+      contenuto:
+        "Sintesi mensile delle principali variazioni su concessioni attive, scadenze e criticita in gestione.",
+      formato: "PDF",
+      validato: true,
+    },
+    {
+      concessioneId: concessioniByKey["con-006"],
+      tipologia: "REPORT_CRITICITA",
+      titolo: "Report criticita capannone con-006",
+      contenuto:
+        "Focus su criticita manutentive e documentali con proposta di azioni prioritarie entro 30 giorni.",
+      formato: "PDF",
+      validato: false,
+    },
+    {
+      concessioneId: concessioniByKey["con-002"],
+      tipologia: "REPORT_MOROSITA",
+      titolo: "Report morosita canoni Q2 2026",
+      contenuto:
+        "Elenco posizioni con canoni scaduti o parzialmente versati e stato attivita di recupero.",
+      formato: "PDF",
+      validato: true,
+    },
+    {
+      tipologia: "REPORT_SCADENZE",
+      titolo: "Report scadenze prossimi 90 giorni",
+      contenuto:
+        "Scadenze concessorie, polizze e termini procedimentali in agenda operativa.",
+      formato: "PDF",
+      validato: true,
+    },
+    {
+      concessioneId: concessioniByKey["con-005"],
+      tipologia: "DOSSIER_ISTRUTTORIO",
+      titolo: "Dossier istruttorio concessione con-005",
+      contenuto:
+        "Raccolta sintetica degli elementi istruttori su uso non conforme e prescrizioni sicurezza.",
+      formato: "PDF",
+      validato: false,
+    },
+    {
+      tipologia: "PROPOSTA_BANDO",
+      titolo: "Proposta bando area banchina est",
+      contenuto:
+        "Bozza di impostazione tecnico-economica per nuova procedura concessoria su area strategica.",
+      formato: "PDF",
+      validato: false,
+    },
+    {
+      concessioneId: concessioniByKey["con-002"],
+      tipologia: "DOSSIER_ISTRUTTORIO",
+      titolo: "DEMO-01 - Morosita art. 47",
+      contenuto:
+        "Documento istruttorio scenario DEMO-01: morosita rilevante ex art. 47 come profilo istruttorio da valutare con supporto al responsabile del procedimento.",
+      formato: "PDF",
+      validato: true,
+    },
+    {
+      concessioneId: concessioniByKey["con-001"],
+      tipologia: "RELAZIONE_TECNICA",
+      titolo: "DEMO-02 - Occupazione difforme",
+      contenuto:
+        "Documento istruttorio scenario DEMO-02: occupazione difforme e uso non conforme, con warning su checklist parzialmente incompleta.",
+      formato: "PDF",
+      validato: true,
+    },
+    {
+      concessioneId: concessioniByKey["con-006"],
+      tipologia: "DOSSIER_ISTRUTTORIO",
+      titolo: "DEMO-03 - Regolarizzazione pre-provvedimentale",
+      contenuto:
+        "Documento istruttorio scenario DEMO-03: regolarizzazione intervenuta prima del provvedimento finale come elemento da valutare, senza automatica archiviazione.",
+      formato: "PDF",
+      validato: true,
+    },
+    {
+      concessioneId: concessioniByKey["con-006"],
+      tipologia: "REPORT_CRITICITA",
+      titolo: "DEMO-04 - Contraddittorio incompleto",
+      contenuto:
+        "Documento istruttorio scenario DEMO-04: checklist contraddittorio incompleta con warning alto e guidance per completamento passaggi essenziali.",
+      formato: "PDF",
+      validato: false,
+    },
+    {
+      concessioneId: concessioniByKey["con-005"],
+      tipologia: "DOSSIER_ISTRUTTORIO",
+      titolo: "DEMO-05 - Istanza di parte e art. 10-bis",
+      contenuto:
+        "Documento istruttorio scenario DEMO-05: procedimento a istanza di parte con preavviso ex art. 10-bis tracciato caso per caso e osservazioni valutate.",
+      formato: "PDF",
+      validato: true,
+    },
+  ];
+
+  for (const item of reportSeed) {
+    await prisma.report.create({
+      data: {
+        ...item,
+        enteId: item.concessioneId ? concessioneEnteById[item.concessioneId] ?? null : null,
       },
-      {
-        concessioneId: concessioniByKey["con-006"],
-        tipologia: "REPORT_CRITICITA",
-        titolo: "Report criticita capannone con-006",
-        contenuto:
-          "Focus su criticita manutentive e documentali con proposta di azioni prioritarie entro 30 giorni.",
-        formato: "PDF",
-        validato: false,
-      },
-      {
-        concessioneId: concessioniByKey["con-002"],
-        tipologia: "REPORT_MOROSITA",
-        titolo: "Report morosita canoni Q2 2026",
-        contenuto:
-          "Elenco posizioni con canoni scaduti o parzialmente versati e stato attivita di recupero.",
-        formato: "PDF",
-        validato: true,
-      },
-      {
-        tipologia: "REPORT_SCADENZE",
-        titolo: "Report scadenze prossimi 90 giorni",
-        contenuto:
-          "Scadenze concessorie, polizze e termini procedimentali in agenda operativa.",
-        formato: "PDF",
-        validato: true,
-      },
-      {
-        concessioneId: concessioniByKey["con-005"],
-        tipologia: "DOSSIER_ISTRUTTORIO",
-        titolo: "Dossier istruttorio concessione con-005",
-        contenuto:
-          "Raccolta sintetica degli elementi istruttori su uso non conforme e prescrizioni sicurezza.",
-        formato: "PDF",
-        validato: false,
-      },
-      {
-        tipologia: "PROPOSTA_BANDO",
-        titolo: "Proposta bando area banchina est",
-        contenuto:
-          "Bozza di impostazione tecnico-economica per nuova procedura concessoria su area strategica.",
-        formato: "PDF",
-        validato: false,
-      },
-      {
-        concessioneId: concessioniByKey["con-002"],
-        tipologia: "DOSSIER_ISTRUTTORIO",
-        titolo: "DEMO-01 - Morosita art. 47",
-        contenuto:
-          "Documento istruttorio scenario DEMO-01: morosita rilevante ex art. 47 come profilo istruttorio da valutare con supporto al responsabile del procedimento.",
-        formato: "PDF",
-        validato: true,
-      },
-      {
-        concessioneId: concessioniByKey["con-001"],
-        tipologia: "RELAZIONE_TECNICA",
-        titolo: "DEMO-02 - Occupazione difforme",
-        contenuto:
-          "Documento istruttorio scenario DEMO-02: occupazione difforme e uso non conforme, con warning su checklist parzialmente incompleta.",
-        formato: "PDF",
-        validato: true,
-      },
-      {
-        concessioneId: concessioniByKey["con-006"],
-        tipologia: "DOSSIER_ISTRUTTORIO",
-        titolo: "DEMO-03 - Regolarizzazione pre-provvedimentale",
-        contenuto:
-          "Documento istruttorio scenario DEMO-03: regolarizzazione intervenuta prima del provvedimento finale come elemento da valutare, senza automatica archiviazione.",
-        formato: "PDF",
-        validato: true,
-      },
-      {
-        concessioneId: concessioniByKey["con-006"],
-        tipologia: "REPORT_CRITICITA",
-        titolo: "DEMO-04 - Contraddittorio incompleto",
-        contenuto:
-          "Documento istruttorio scenario DEMO-04: checklist contraddittorio incompleta con warning alto e guidance per completamento passaggi essenziali.",
-        formato: "PDF",
-        validato: false,
-      },
-      {
-        concessioneId: concessioniByKey["con-005"],
-        tipologia: "DOSSIER_ISTRUTTORIO",
-        titolo: "DEMO-05 - Istanza di parte e art. 10-bis",
-        contenuto:
-          "Documento istruttorio scenario DEMO-05: procedimento a istanza di parte con preavviso ex art. 10-bis tracciato caso per caso e osservazioni valutate.",
-        formato: "PDF",
-        validato: true,
-      },
-    ],
-  });
+    });
+  }
 
   const normaFontiData = [
     {
@@ -1917,6 +1980,7 @@ async function main() {
         userId: row.userId,
         userEmail: snapshot?.email,
         userRole: snapshot?.ruolo,
+        enteId: row.concessioneId ? concessioneEnteById[row.concessioneId] ?? null : null,
         concessioneId: row.concessioneId,
         azione: row.azione,
         entita: row.entita,
@@ -1937,6 +2001,8 @@ async function main() {
 
   const counts = {
     users: await prisma.user.count(),
+    enti: await prisma.ente.count(),
+    tenantMemberships: await prisma.tenantMembership.count(),
     concessionari: await prisma.concessionario.count(),
     concessioni: await prisma.concessione.count(),
     normeFonte: await prisma.normaFonte.count(),

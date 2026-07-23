@@ -74,6 +74,7 @@ export type DocumentoMinAggregateOutputType = {
   uploadedByUserEmail: string | null
   uploadedByUserRole: string | null
   archivedAt: Date | null
+  enteId: string | null
   concessioneId: string | null
   criticitaId: string | null
   procedimentoId: string | null
@@ -122,6 +123,7 @@ export type DocumentoMaxAggregateOutputType = {
   uploadedByUserEmail: string | null
   uploadedByUserRole: string | null
   archivedAt: Date | null
+  enteId: string | null
   concessioneId: string | null
   criticitaId: string | null
   procedimentoId: string | null
@@ -170,6 +172,7 @@ export type DocumentoCountAggregateOutputType = {
   uploadedByUserEmail: number
   uploadedByUserRole: number
   archivedAt: number
+  enteId: number
   concessioneId: number
   criticitaId: number
   procedimentoId: number
@@ -230,6 +233,7 @@ export type DocumentoMinAggregateInputType = {
   uploadedByUserEmail?: true
   uploadedByUserRole?: true
   archivedAt?: true
+  enteId?: true
   concessioneId?: true
   criticitaId?: true
   procedimentoId?: true
@@ -278,6 +282,7 @@ export type DocumentoMaxAggregateInputType = {
   uploadedByUserEmail?: true
   uploadedByUserRole?: true
   archivedAt?: true
+  enteId?: true
   concessioneId?: true
   criticitaId?: true
   procedimentoId?: true
@@ -326,6 +331,7 @@ export type DocumentoCountAggregateInputType = {
   uploadedByUserEmail?: true
   uploadedByUserRole?: true
   archivedAt?: true
+  enteId?: true
   concessioneId?: true
   criticitaId?: true
   procedimentoId?: true
@@ -461,6 +467,7 @@ export type DocumentoGroupByOutputType = {
   uploadedByUserEmail: string | null
   uploadedByUserRole: string | null
   archivedAt: Date | null
+  enteId: string | null
   concessioneId: string | null
   criticitaId: string | null
   procedimentoId: string | null
@@ -532,6 +539,7 @@ export type DocumentoWhereInput = {
   uploadedByUserEmail?: Prisma.StringNullableFilter<"Documento"> | string | null
   uploadedByUserRole?: Prisma.StringNullableFilter<"Documento"> | string | null
   archivedAt?: Prisma.DateTimeNullableFilter<"Documento"> | Date | string | null
+  enteId?: Prisma.StringNullableFilter<"Documento"> | string | null
   concessioneId?: Prisma.StringNullableFilter<"Documento"> | string | null
   criticitaId?: Prisma.StringNullableFilter<"Documento"> | string | null
   procedimentoId?: Prisma.StringNullableFilter<"Documento"> | string | null
@@ -541,6 +549,7 @@ export type DocumentoWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Documento"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Documento"> | Date | string
   uploadedByUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  ente?: Prisma.XOR<Prisma.EnteNullableScalarRelationFilter, Prisma.EnteWhereInput> | null
   concessione?: Prisma.XOR<Prisma.ConcessioneNullableScalarRelationFilter, Prisma.ConcessioneWhereInput> | null
   criticita?: Prisma.XOR<Prisma.CriticitaNullableScalarRelationFilter, Prisma.CriticitaWhereInput> | null
   procedimento?: Prisma.XOR<Prisma.ProcedimentoNullableScalarRelationFilter, Prisma.ProcedimentoWhereInput> | null
@@ -587,6 +596,7 @@ export type DocumentoOrderByWithRelationInput = {
   uploadedByUserEmail?: Prisma.SortOrderInput | Prisma.SortOrder
   uploadedByUserRole?: Prisma.SortOrderInput | Prisma.SortOrder
   archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  enteId?: Prisma.SortOrderInput | Prisma.SortOrder
   concessioneId?: Prisma.SortOrderInput | Prisma.SortOrder
   criticitaId?: Prisma.SortOrderInput | Prisma.SortOrder
   procedimentoId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -596,6 +606,7 @@ export type DocumentoOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   uploadedByUser?: Prisma.UserOrderByWithRelationInput
+  ente?: Prisma.EnteOrderByWithRelationInput
   concessione?: Prisma.ConcessioneOrderByWithRelationInput
   criticita?: Prisma.CriticitaOrderByWithRelationInput
   procedimento?: Prisma.ProcedimentoOrderByWithRelationInput
@@ -645,6 +656,7 @@ export type DocumentoWhereUniqueInput = Prisma.AtLeast<{
   uploadedByUserEmail?: Prisma.StringNullableFilter<"Documento"> | string | null
   uploadedByUserRole?: Prisma.StringNullableFilter<"Documento"> | string | null
   archivedAt?: Prisma.DateTimeNullableFilter<"Documento"> | Date | string | null
+  enteId?: Prisma.StringNullableFilter<"Documento"> | string | null
   concessioneId?: Prisma.StringNullableFilter<"Documento"> | string | null
   criticitaId?: Prisma.StringNullableFilter<"Documento"> | string | null
   procedimentoId?: Prisma.StringNullableFilter<"Documento"> | string | null
@@ -654,6 +666,7 @@ export type DocumentoWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Documento"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Documento"> | Date | string
   uploadedByUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  ente?: Prisma.XOR<Prisma.EnteNullableScalarRelationFilter, Prisma.EnteWhereInput> | null
   concessione?: Prisma.XOR<Prisma.ConcessioneNullableScalarRelationFilter, Prisma.ConcessioneWhereInput> | null
   criticita?: Prisma.XOR<Prisma.CriticitaNullableScalarRelationFilter, Prisma.CriticitaWhereInput> | null
   procedimento?: Prisma.XOR<Prisma.ProcedimentoNullableScalarRelationFilter, Prisma.ProcedimentoWhereInput> | null
@@ -700,6 +713,7 @@ export type DocumentoOrderByWithAggregationInput = {
   uploadedByUserEmail?: Prisma.SortOrderInput | Prisma.SortOrder
   uploadedByUserRole?: Prisma.SortOrderInput | Prisma.SortOrder
   archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  enteId?: Prisma.SortOrderInput | Prisma.SortOrder
   concessioneId?: Prisma.SortOrderInput | Prisma.SortOrder
   criticitaId?: Prisma.SortOrderInput | Prisma.SortOrder
   procedimentoId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -756,6 +770,7 @@ export type DocumentoScalarWhereWithAggregatesInput = {
   uploadedByUserEmail?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
   uploadedByUserRole?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
   archivedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Documento"> | Date | string | null
+  enteId?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
   concessioneId?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
   criticitaId?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
   procedimentoId?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
@@ -806,6 +821,7 @@ export type DocumentoCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   uploadedByUser?: Prisma.UserCreateNestedOneWithoutDocumentiCaricatiInput
+  ente?: Prisma.EnteCreateNestedOneWithoutDocumentiInput
   concessione?: Prisma.ConcessioneCreateNestedOneWithoutDocumentiInput
   criticita?: Prisma.CriticitaCreateNestedOneWithoutDocumentiInput
   procedimento?: Prisma.ProcedimentoCreateNestedOneWithoutDocumentiInput
@@ -852,6 +868,7 @@ export type DocumentoUncheckedCreateInput = {
   uploadedByUserEmail?: string | null
   uploadedByUserRole?: string | null
   archivedAt?: Date | string | null
+  enteId?: string | null
   concessioneId?: string | null
   criticitaId?: string | null
   procedimentoId?: string | null
@@ -902,6 +919,7 @@ export type DocumentoUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   uploadedByUser?: Prisma.UserUpdateOneWithoutDocumentiCaricatiNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutDocumentiNestedInput
   concessione?: Prisma.ConcessioneUpdateOneWithoutDocumentiNestedInput
   criticita?: Prisma.CriticitaUpdateOneWithoutDocumentiNestedInput
   procedimento?: Prisma.ProcedimentoUpdateOneWithoutDocumentiNestedInput
@@ -948,6 +966,7 @@ export type DocumentoUncheckedUpdateInput = {
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -996,6 +1015,7 @@ export type DocumentoCreateManyInput = {
   uploadedByUserEmail?: string | null
   uploadedByUserRole?: string | null
   archivedAt?: Date | string | null
+  enteId?: string | null
   concessioneId?: string | null
   criticitaId?: string | null
   procedimentoId?: string | null
@@ -1085,6 +1105,7 @@ export type DocumentoUncheckedUpdateManyInput = {
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1143,6 +1164,7 @@ export type DocumentoCountOrderByAggregateInput = {
   uploadedByUserEmail?: Prisma.SortOrder
   uploadedByUserRole?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
+  enteId?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrder
   criticitaId?: Prisma.SortOrder
   procedimentoId?: Prisma.SortOrder
@@ -1196,6 +1218,7 @@ export type DocumentoMaxOrderByAggregateInput = {
   uploadedByUserEmail?: Prisma.SortOrder
   uploadedByUserRole?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
+  enteId?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrder
   criticitaId?: Prisma.SortOrder
   procedimentoId?: Prisma.SortOrder
@@ -1244,6 +1267,7 @@ export type DocumentoMinOrderByAggregateInput = {
   uploadedByUserEmail?: Prisma.SortOrder
   uploadedByUserRole?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
+  enteId?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrder
   criticitaId?: Prisma.SortOrder
   procedimentoId?: Prisma.SortOrder
@@ -1257,6 +1281,48 @@ export type DocumentoMinOrderByAggregateInput = {
 export type DocumentoSumOrderByAggregateInput = {
   dimensioneBytes?: Prisma.SortOrder
   sizeBytes?: Prisma.SortOrder
+}
+
+export type DocumentoCreateNestedManyWithoutEnteInput = {
+  create?: Prisma.XOR<Prisma.DocumentoCreateWithoutEnteInput, Prisma.DocumentoUncheckedCreateWithoutEnteInput> | Prisma.DocumentoCreateWithoutEnteInput[] | Prisma.DocumentoUncheckedCreateWithoutEnteInput[]
+  connectOrCreate?: Prisma.DocumentoCreateOrConnectWithoutEnteInput | Prisma.DocumentoCreateOrConnectWithoutEnteInput[]
+  createMany?: Prisma.DocumentoCreateManyEnteInputEnvelope
+  connect?: Prisma.DocumentoWhereUniqueInput | Prisma.DocumentoWhereUniqueInput[]
+}
+
+export type DocumentoUncheckedCreateNestedManyWithoutEnteInput = {
+  create?: Prisma.XOR<Prisma.DocumentoCreateWithoutEnteInput, Prisma.DocumentoUncheckedCreateWithoutEnteInput> | Prisma.DocumentoCreateWithoutEnteInput[] | Prisma.DocumentoUncheckedCreateWithoutEnteInput[]
+  connectOrCreate?: Prisma.DocumentoCreateOrConnectWithoutEnteInput | Prisma.DocumentoCreateOrConnectWithoutEnteInput[]
+  createMany?: Prisma.DocumentoCreateManyEnteInputEnvelope
+  connect?: Prisma.DocumentoWhereUniqueInput | Prisma.DocumentoWhereUniqueInput[]
+}
+
+export type DocumentoUpdateManyWithoutEnteNestedInput = {
+  create?: Prisma.XOR<Prisma.DocumentoCreateWithoutEnteInput, Prisma.DocumentoUncheckedCreateWithoutEnteInput> | Prisma.DocumentoCreateWithoutEnteInput[] | Prisma.DocumentoUncheckedCreateWithoutEnteInput[]
+  connectOrCreate?: Prisma.DocumentoCreateOrConnectWithoutEnteInput | Prisma.DocumentoCreateOrConnectWithoutEnteInput[]
+  upsert?: Prisma.DocumentoUpsertWithWhereUniqueWithoutEnteInput | Prisma.DocumentoUpsertWithWhereUniqueWithoutEnteInput[]
+  createMany?: Prisma.DocumentoCreateManyEnteInputEnvelope
+  set?: Prisma.DocumentoWhereUniqueInput | Prisma.DocumentoWhereUniqueInput[]
+  disconnect?: Prisma.DocumentoWhereUniqueInput | Prisma.DocumentoWhereUniqueInput[]
+  delete?: Prisma.DocumentoWhereUniqueInput | Prisma.DocumentoWhereUniqueInput[]
+  connect?: Prisma.DocumentoWhereUniqueInput | Prisma.DocumentoWhereUniqueInput[]
+  update?: Prisma.DocumentoUpdateWithWhereUniqueWithoutEnteInput | Prisma.DocumentoUpdateWithWhereUniqueWithoutEnteInput[]
+  updateMany?: Prisma.DocumentoUpdateManyWithWhereWithoutEnteInput | Prisma.DocumentoUpdateManyWithWhereWithoutEnteInput[]
+  deleteMany?: Prisma.DocumentoScalarWhereInput | Prisma.DocumentoScalarWhereInput[]
+}
+
+export type DocumentoUncheckedUpdateManyWithoutEnteNestedInput = {
+  create?: Prisma.XOR<Prisma.DocumentoCreateWithoutEnteInput, Prisma.DocumentoUncheckedCreateWithoutEnteInput> | Prisma.DocumentoCreateWithoutEnteInput[] | Prisma.DocumentoUncheckedCreateWithoutEnteInput[]
+  connectOrCreate?: Prisma.DocumentoCreateOrConnectWithoutEnteInput | Prisma.DocumentoCreateOrConnectWithoutEnteInput[]
+  upsert?: Prisma.DocumentoUpsertWithWhereUniqueWithoutEnteInput | Prisma.DocumentoUpsertWithWhereUniqueWithoutEnteInput[]
+  createMany?: Prisma.DocumentoCreateManyEnteInputEnvelope
+  set?: Prisma.DocumentoWhereUniqueInput | Prisma.DocumentoWhereUniqueInput[]
+  disconnect?: Prisma.DocumentoWhereUniqueInput | Prisma.DocumentoWhereUniqueInput[]
+  delete?: Prisma.DocumentoWhereUniqueInput | Prisma.DocumentoWhereUniqueInput[]
+  connect?: Prisma.DocumentoWhereUniqueInput | Prisma.DocumentoWhereUniqueInput[]
+  update?: Prisma.DocumentoUpdateWithWhereUniqueWithoutEnteInput | Prisma.DocumentoUpdateWithWhereUniqueWithoutEnteInput[]
+  updateMany?: Prisma.DocumentoUpdateManyWithWhereWithoutEnteInput | Prisma.DocumentoUpdateManyWithWhereWithoutEnteInput[]
+  deleteMany?: Prisma.DocumentoScalarWhereInput | Prisma.DocumentoScalarWhereInput[]
 }
 
 export type DocumentoCreateNestedManyWithoutUploadedByUserInput = {
@@ -1569,6 +1635,180 @@ export type DocumentoUncheckedUpdateManyWithoutReportNestedInput = {
   deleteMany?: Prisma.DocumentoScalarWhereInput | Prisma.DocumentoScalarWhereInput[]
 }
 
+export type DocumentoCreateWithoutEnteInput = {
+  id?: string
+  nome: string
+  tipologia: $Enums.TipologiaDocumento
+  statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
+  mimeType?: string | null
+  dimensioneBytes?: number | null
+  checksumSha256?: string | null
+  sha256?: string | null
+  url?: string | null
+  storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
+  nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
+  dataDocumento?: Date | string | null
+  descrizione?: string | null
+  uploadedByUserEmail?: string | null
+  uploadedByUserRole?: string | null
+  archivedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  uploadedByUser?: Prisma.UserCreateNestedOneWithoutDocumentiCaricatiInput
+  concessione?: Prisma.ConcessioneCreateNestedOneWithoutDocumentiInput
+  criticita?: Prisma.CriticitaCreateNestedOneWithoutDocumentiInput
+  procedimento?: Prisma.ProcedimentoCreateNestedOneWithoutDocumentiInput
+  sopralluogo?: Prisma.SopralluogoCreateNestedOneWithoutDocumentiInput
+  pagamento?: Prisma.PagamentoCreateNestedOneWithoutDocumentiInput
+  report?: Prisma.ReportCreateNestedOneWithoutDocumentiInput
+}
+
+export type DocumentoUncheckedCreateWithoutEnteInput = {
+  id?: string
+  nome: string
+  tipologia: $Enums.TipologiaDocumento
+  statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
+  mimeType?: string | null
+  dimensioneBytes?: number | null
+  checksumSha256?: string | null
+  sha256?: string | null
+  url?: string | null
+  storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
+  nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
+  dataDocumento?: Date | string | null
+  descrizione?: string | null
+  uploadedByUserId?: string | null
+  uploadedByUserEmail?: string | null
+  uploadedByUserRole?: string | null
+  archivedAt?: Date | string | null
+  concessioneId?: string | null
+  criticitaId?: string | null
+  procedimentoId?: string | null
+  sopralluogoId?: string | null
+  pagamentoId?: string | null
+  reportId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type DocumentoCreateOrConnectWithoutEnteInput = {
+  where: Prisma.DocumentoWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocumentoCreateWithoutEnteInput, Prisma.DocumentoUncheckedCreateWithoutEnteInput>
+}
+
+export type DocumentoCreateManyEnteInputEnvelope = {
+  data: Prisma.DocumentoCreateManyEnteInput | Prisma.DocumentoCreateManyEnteInput[]
+  skipDuplicates?: boolean
+}
+
+export type DocumentoUpsertWithWhereUniqueWithoutEnteInput = {
+  where: Prisma.DocumentoWhereUniqueInput
+  update: Prisma.XOR<Prisma.DocumentoUpdateWithoutEnteInput, Prisma.DocumentoUncheckedUpdateWithoutEnteInput>
+  create: Prisma.XOR<Prisma.DocumentoCreateWithoutEnteInput, Prisma.DocumentoUncheckedCreateWithoutEnteInput>
+}
+
+export type DocumentoUpdateWithWhereUniqueWithoutEnteInput = {
+  where: Prisma.DocumentoWhereUniqueInput
+  data: Prisma.XOR<Prisma.DocumentoUpdateWithoutEnteInput, Prisma.DocumentoUncheckedUpdateWithoutEnteInput>
+}
+
+export type DocumentoUpdateManyWithWhereWithoutEnteInput = {
+  where: Prisma.DocumentoScalarWhereInput
+  data: Prisma.XOR<Prisma.DocumentoUpdateManyMutationInput, Prisma.DocumentoUncheckedUpdateManyWithoutEnteInput>
+}
+
+export type DocumentoScalarWhereInput = {
+  AND?: Prisma.DocumentoScalarWhereInput | Prisma.DocumentoScalarWhereInput[]
+  OR?: Prisma.DocumentoScalarWhereInput[]
+  NOT?: Prisma.DocumentoScalarWhereInput | Prisma.DocumentoScalarWhereInput[]
+  id?: Prisma.StringFilter<"Documento"> | string
+  nome?: Prisma.StringFilter<"Documento"> | string
+  tipologia?: Prisma.EnumTipologiaDocumentoFilter<"Documento"> | $Enums.TipologiaDocumento
+  statoDocumento?: Prisma.EnumStatoDocumentoFilter<"Documento"> | $Enums.StatoDocumento
+  direzione?: Prisma.EnumDocumentoDirezioneNullableFilter<"Documento"> | $Enums.DocumentoDirezione | null
+  canale?: Prisma.EnumDocumentoCanaleNullableFilter<"Documento"> | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.StringNullableFilter<"Documento"> | string | null
+  dataProtocollo?: Prisma.DateTimeNullableFilter<"Documento"> | Date | string | null
+  mittente?: Prisma.StringNullableFilter<"Documento"> | string | null
+  destinatario?: Prisma.StringNullableFilter<"Documento"> | string | null
+  pecMessageId?: Prisma.StringNullableFilter<"Documento"> | string | null
+  pecRicevutaAccettazioneId?: Prisma.StringNullableFilter<"Documento"> | string | null
+  pecRicevutaConsegnaId?: Prisma.StringNullableFilter<"Documento"> | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFilter<"Documento"> | boolean
+  mimeType?: Prisma.StringNullableFilter<"Documento"> | string | null
+  dimensioneBytes?: Prisma.IntNullableFilter<"Documento"> | number | null
+  checksumSha256?: Prisma.StringNullableFilter<"Documento"> | string | null
+  sha256?: Prisma.StringNullableFilter<"Documento"> | string | null
+  url?: Prisma.StringNullableFilter<"Documento"> | string | null
+  storagePath?: Prisma.StringNullableFilter<"Documento"> | string | null
+  storageKey?: Prisma.StringNullableFilter<"Documento"> | string | null
+  storageProvider?: Prisma.StringNullableFilter<"Documento"> | string | null
+  storageBucket?: Prisma.StringNullableFilter<"Documento"> | string | null
+  publicUrl?: Prisma.StringNullableFilter<"Documento"> | string | null
+  nomeStorage?: Prisma.StringNullableFilter<"Documento"> | string | null
+  originalName?: Prisma.StringNullableFilter<"Documento"> | string | null
+  sizeBytes?: Prisma.IntNullableFilter<"Documento"> | number | null
+  documentType?: Prisma.StringNullableFilter<"Documento"> | string | null
+  documentDate?: Prisma.DateTimeNullableFilter<"Documento"> | Date | string | null
+  source?: Prisma.StringNullableFilter<"Documento"> | string | null
+  status?: Prisma.StringNullableFilter<"Documento"> | string | null
+  dataDocumento?: Prisma.DateTimeNullableFilter<"Documento"> | Date | string | null
+  descrizione?: Prisma.StringNullableFilter<"Documento"> | string | null
+  uploadedByUserId?: Prisma.StringNullableFilter<"Documento"> | string | null
+  uploadedByUserEmail?: Prisma.StringNullableFilter<"Documento"> | string | null
+  uploadedByUserRole?: Prisma.StringNullableFilter<"Documento"> | string | null
+  archivedAt?: Prisma.DateTimeNullableFilter<"Documento"> | Date | string | null
+  enteId?: Prisma.StringNullableFilter<"Documento"> | string | null
+  concessioneId?: Prisma.StringNullableFilter<"Documento"> | string | null
+  criticitaId?: Prisma.StringNullableFilter<"Documento"> | string | null
+  procedimentoId?: Prisma.StringNullableFilter<"Documento"> | string | null
+  sopralluogoId?: Prisma.StringNullableFilter<"Documento"> | string | null
+  pagamentoId?: Prisma.StringNullableFilter<"Documento"> | string | null
+  reportId?: Prisma.StringNullableFilter<"Documento"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"Documento"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Documento"> | Date | string
+}
+
 export type DocumentoCreateWithoutUploadedByUserInput = {
   id?: string
   nome: string
@@ -1608,6 +1848,7 @@ export type DocumentoCreateWithoutUploadedByUserInput = {
   archivedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  ente?: Prisma.EnteCreateNestedOneWithoutDocumentiInput
   concessione?: Prisma.ConcessioneCreateNestedOneWithoutDocumentiInput
   criticita?: Prisma.CriticitaCreateNestedOneWithoutDocumentiInput
   procedimento?: Prisma.ProcedimentoCreateNestedOneWithoutDocumentiInput
@@ -1653,6 +1894,7 @@ export type DocumentoUncheckedCreateWithoutUploadedByUserInput = {
   uploadedByUserEmail?: string | null
   uploadedByUserRole?: string | null
   archivedAt?: Date | string | null
+  enteId?: string | null
   concessioneId?: string | null
   criticitaId?: string | null
   procedimentoId?: string | null
@@ -1687,57 +1929,6 @@ export type DocumentoUpdateWithWhereUniqueWithoutUploadedByUserInput = {
 export type DocumentoUpdateManyWithWhereWithoutUploadedByUserInput = {
   where: Prisma.DocumentoScalarWhereInput
   data: Prisma.XOR<Prisma.DocumentoUpdateManyMutationInput, Prisma.DocumentoUncheckedUpdateManyWithoutUploadedByUserInput>
-}
-
-export type DocumentoScalarWhereInput = {
-  AND?: Prisma.DocumentoScalarWhereInput | Prisma.DocumentoScalarWhereInput[]
-  OR?: Prisma.DocumentoScalarWhereInput[]
-  NOT?: Prisma.DocumentoScalarWhereInput | Prisma.DocumentoScalarWhereInput[]
-  id?: Prisma.StringFilter<"Documento"> | string
-  nome?: Prisma.StringFilter<"Documento"> | string
-  tipologia?: Prisma.EnumTipologiaDocumentoFilter<"Documento"> | $Enums.TipologiaDocumento
-  statoDocumento?: Prisma.EnumStatoDocumentoFilter<"Documento"> | $Enums.StatoDocumento
-  direzione?: Prisma.EnumDocumentoDirezioneNullableFilter<"Documento"> | $Enums.DocumentoDirezione | null
-  canale?: Prisma.EnumDocumentoCanaleNullableFilter<"Documento"> | $Enums.DocumentoCanale | null
-  numeroProtocollo?: Prisma.StringNullableFilter<"Documento"> | string | null
-  dataProtocollo?: Prisma.DateTimeNullableFilter<"Documento"> | Date | string | null
-  mittente?: Prisma.StringNullableFilter<"Documento"> | string | null
-  destinatario?: Prisma.StringNullableFilter<"Documento"> | string | null
-  pecMessageId?: Prisma.StringNullableFilter<"Documento"> | string | null
-  pecRicevutaAccettazioneId?: Prisma.StringNullableFilter<"Documento"> | string | null
-  pecRicevutaConsegnaId?: Prisma.StringNullableFilter<"Documento"> | string | null
-  pecWarningMancataRicevuta?: Prisma.BoolFilter<"Documento"> | boolean
-  mimeType?: Prisma.StringNullableFilter<"Documento"> | string | null
-  dimensioneBytes?: Prisma.IntNullableFilter<"Documento"> | number | null
-  checksumSha256?: Prisma.StringNullableFilter<"Documento"> | string | null
-  sha256?: Prisma.StringNullableFilter<"Documento"> | string | null
-  url?: Prisma.StringNullableFilter<"Documento"> | string | null
-  storagePath?: Prisma.StringNullableFilter<"Documento"> | string | null
-  storageKey?: Prisma.StringNullableFilter<"Documento"> | string | null
-  storageProvider?: Prisma.StringNullableFilter<"Documento"> | string | null
-  storageBucket?: Prisma.StringNullableFilter<"Documento"> | string | null
-  publicUrl?: Prisma.StringNullableFilter<"Documento"> | string | null
-  nomeStorage?: Prisma.StringNullableFilter<"Documento"> | string | null
-  originalName?: Prisma.StringNullableFilter<"Documento"> | string | null
-  sizeBytes?: Prisma.IntNullableFilter<"Documento"> | number | null
-  documentType?: Prisma.StringNullableFilter<"Documento"> | string | null
-  documentDate?: Prisma.DateTimeNullableFilter<"Documento"> | Date | string | null
-  source?: Prisma.StringNullableFilter<"Documento"> | string | null
-  status?: Prisma.StringNullableFilter<"Documento"> | string | null
-  dataDocumento?: Prisma.DateTimeNullableFilter<"Documento"> | Date | string | null
-  descrizione?: Prisma.StringNullableFilter<"Documento"> | string | null
-  uploadedByUserId?: Prisma.StringNullableFilter<"Documento"> | string | null
-  uploadedByUserEmail?: Prisma.StringNullableFilter<"Documento"> | string | null
-  uploadedByUserRole?: Prisma.StringNullableFilter<"Documento"> | string | null
-  archivedAt?: Prisma.DateTimeNullableFilter<"Documento"> | Date | string | null
-  concessioneId?: Prisma.StringNullableFilter<"Documento"> | string | null
-  criticitaId?: Prisma.StringNullableFilter<"Documento"> | string | null
-  procedimentoId?: Prisma.StringNullableFilter<"Documento"> | string | null
-  sopralluogoId?: Prisma.StringNullableFilter<"Documento"> | string | null
-  pagamentoId?: Prisma.StringNullableFilter<"Documento"> | string | null
-  reportId?: Prisma.StringNullableFilter<"Documento"> | string | null
-  createdAt?: Prisma.DateTimeFilter<"Documento"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"Documento"> | Date | string
 }
 
 export type DocumentoCreateWithoutConcessioneInput = {
@@ -1780,6 +1971,7 @@ export type DocumentoCreateWithoutConcessioneInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   uploadedByUser?: Prisma.UserCreateNestedOneWithoutDocumentiCaricatiInput
+  ente?: Prisma.EnteCreateNestedOneWithoutDocumentiInput
   criticita?: Prisma.CriticitaCreateNestedOneWithoutDocumentiInput
   procedimento?: Prisma.ProcedimentoCreateNestedOneWithoutDocumentiInput
   sopralluogo?: Prisma.SopralluogoCreateNestedOneWithoutDocumentiInput
@@ -1825,6 +2017,7 @@ export type DocumentoUncheckedCreateWithoutConcessioneInput = {
   uploadedByUserEmail?: string | null
   uploadedByUserRole?: string | null
   archivedAt?: Date | string | null
+  enteId?: string | null
   criticitaId?: string | null
   procedimentoId?: string | null
   sopralluogoId?: string | null
@@ -1900,6 +2093,7 @@ export type DocumentoCreateWithoutCriticitaInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   uploadedByUser?: Prisma.UserCreateNestedOneWithoutDocumentiCaricatiInput
+  ente?: Prisma.EnteCreateNestedOneWithoutDocumentiInput
   concessione?: Prisma.ConcessioneCreateNestedOneWithoutDocumentiInput
   procedimento?: Prisma.ProcedimentoCreateNestedOneWithoutDocumentiInput
   sopralluogo?: Prisma.SopralluogoCreateNestedOneWithoutDocumentiInput
@@ -1945,6 +2139,7 @@ export type DocumentoUncheckedCreateWithoutCriticitaInput = {
   uploadedByUserEmail?: string | null
   uploadedByUserRole?: string | null
   archivedAt?: Date | string | null
+  enteId?: string | null
   concessioneId?: string | null
   procedimentoId?: string | null
   sopralluogoId?: string | null
@@ -2020,6 +2215,7 @@ export type DocumentoCreateWithoutProcedimentoInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   uploadedByUser?: Prisma.UserCreateNestedOneWithoutDocumentiCaricatiInput
+  ente?: Prisma.EnteCreateNestedOneWithoutDocumentiInput
   concessione?: Prisma.ConcessioneCreateNestedOneWithoutDocumentiInput
   criticita?: Prisma.CriticitaCreateNestedOneWithoutDocumentiInput
   sopralluogo?: Prisma.SopralluogoCreateNestedOneWithoutDocumentiInput
@@ -2065,6 +2261,7 @@ export type DocumentoUncheckedCreateWithoutProcedimentoInput = {
   uploadedByUserEmail?: string | null
   uploadedByUserRole?: string | null
   archivedAt?: Date | string | null
+  enteId?: string | null
   concessioneId?: string | null
   criticitaId?: string | null
   sopralluogoId?: string | null
@@ -2140,6 +2337,7 @@ export type DocumentoCreateWithoutSopralluogoInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   uploadedByUser?: Prisma.UserCreateNestedOneWithoutDocumentiCaricatiInput
+  ente?: Prisma.EnteCreateNestedOneWithoutDocumentiInput
   concessione?: Prisma.ConcessioneCreateNestedOneWithoutDocumentiInput
   criticita?: Prisma.CriticitaCreateNestedOneWithoutDocumentiInput
   procedimento?: Prisma.ProcedimentoCreateNestedOneWithoutDocumentiInput
@@ -2185,6 +2383,7 @@ export type DocumentoUncheckedCreateWithoutSopralluogoInput = {
   uploadedByUserEmail?: string | null
   uploadedByUserRole?: string | null
   archivedAt?: Date | string | null
+  enteId?: string | null
   concessioneId?: string | null
   criticitaId?: string | null
   procedimentoId?: string | null
@@ -2260,6 +2459,7 @@ export type DocumentoCreateWithoutPagamentoInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   uploadedByUser?: Prisma.UserCreateNestedOneWithoutDocumentiCaricatiInput
+  ente?: Prisma.EnteCreateNestedOneWithoutDocumentiInput
   concessione?: Prisma.ConcessioneCreateNestedOneWithoutDocumentiInput
   criticita?: Prisma.CriticitaCreateNestedOneWithoutDocumentiInput
   procedimento?: Prisma.ProcedimentoCreateNestedOneWithoutDocumentiInput
@@ -2305,6 +2505,7 @@ export type DocumentoUncheckedCreateWithoutPagamentoInput = {
   uploadedByUserEmail?: string | null
   uploadedByUserRole?: string | null
   archivedAt?: Date | string | null
+  enteId?: string | null
   concessioneId?: string | null
   criticitaId?: string | null
   procedimentoId?: string | null
@@ -2380,6 +2581,7 @@ export type DocumentoCreateWithoutReportInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   uploadedByUser?: Prisma.UserCreateNestedOneWithoutDocumentiCaricatiInput
+  ente?: Prisma.EnteCreateNestedOneWithoutDocumentiInput
   concessione?: Prisma.ConcessioneCreateNestedOneWithoutDocumentiInput
   criticita?: Prisma.CriticitaCreateNestedOneWithoutDocumentiInput
   procedimento?: Prisma.ProcedimentoCreateNestedOneWithoutDocumentiInput
@@ -2425,6 +2627,7 @@ export type DocumentoUncheckedCreateWithoutReportInput = {
   uploadedByUserEmail?: string | null
   uploadedByUserRole?: string | null
   archivedAt?: Date | string | null
+  enteId?: string | null
   concessioneId?: string | null
   criticitaId?: string | null
   procedimentoId?: string | null
@@ -2458,6 +2661,198 @@ export type DocumentoUpdateWithWhereUniqueWithoutReportInput = {
 export type DocumentoUpdateManyWithWhereWithoutReportInput = {
   where: Prisma.DocumentoScalarWhereInput
   data: Prisma.XOR<Prisma.DocumentoUpdateManyMutationInput, Prisma.DocumentoUncheckedUpdateManyWithoutReportInput>
+}
+
+export type DocumentoCreateManyEnteInput = {
+  id?: string
+  nome: string
+  tipologia: $Enums.TipologiaDocumento
+  statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
+  mimeType?: string | null
+  dimensioneBytes?: number | null
+  checksumSha256?: string | null
+  sha256?: string | null
+  url?: string | null
+  storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
+  nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
+  dataDocumento?: Date | string | null
+  descrizione?: string | null
+  uploadedByUserId?: string | null
+  uploadedByUserEmail?: string | null
+  uploadedByUserRole?: string | null
+  archivedAt?: Date | string | null
+  concessioneId?: string | null
+  criticitaId?: string | null
+  procedimentoId?: string | null
+  sopralluogoId?: string | null
+  pagamentoId?: string | null
+  reportId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type DocumentoUpdateWithoutEnteInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
+  statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedByUserRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  uploadedByUser?: Prisma.UserUpdateOneWithoutDocumentiCaricatiNestedInput
+  concessione?: Prisma.ConcessioneUpdateOneWithoutDocumentiNestedInput
+  criticita?: Prisma.CriticitaUpdateOneWithoutDocumentiNestedInput
+  procedimento?: Prisma.ProcedimentoUpdateOneWithoutDocumentiNestedInput
+  sopralluogo?: Prisma.SopralluogoUpdateOneWithoutDocumentiNestedInput
+  pagamento?: Prisma.PagamentoUpdateOneWithoutDocumentiNestedInput
+  report?: Prisma.ReportUpdateOneWithoutDocumentiNestedInput
+}
+
+export type DocumentoUncheckedUpdateWithoutEnteInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
+  statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedByUserRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sopralluogoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pagamentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reportId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type DocumentoUncheckedUpdateManyWithoutEnteInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
+  statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedByUserRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sopralluogoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pagamentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reportId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type DocumentoCreateManyUploadedByUserInput = {
@@ -2497,6 +2892,7 @@ export type DocumentoCreateManyUploadedByUserInput = {
   uploadedByUserEmail?: string | null
   uploadedByUserRole?: string | null
   archivedAt?: Date | string | null
+  enteId?: string | null
   concessioneId?: string | null
   criticitaId?: string | null
   procedimentoId?: string | null
@@ -2546,6 +2942,7 @@ export type DocumentoUpdateWithoutUploadedByUserInput = {
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ente?: Prisma.EnteUpdateOneWithoutDocumentiNestedInput
   concessione?: Prisma.ConcessioneUpdateOneWithoutDocumentiNestedInput
   criticita?: Prisma.CriticitaUpdateOneWithoutDocumentiNestedInput
   procedimento?: Prisma.ProcedimentoUpdateOneWithoutDocumentiNestedInput
@@ -2591,6 +2988,7 @@ export type DocumentoUncheckedUpdateWithoutUploadedByUserInput = {
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2638,6 +3036,7 @@ export type DocumentoUncheckedUpdateManyWithoutUploadedByUserInput = {
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2686,6 +3085,7 @@ export type DocumentoCreateManyConcessioneInput = {
   uploadedByUserEmail?: string | null
   uploadedByUserRole?: string | null
   archivedAt?: Date | string | null
+  enteId?: string | null
   criticitaId?: string | null
   procedimentoId?: string | null
   sopralluogoId?: string | null
@@ -2735,6 +3135,7 @@ export type DocumentoUpdateWithoutConcessioneInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   uploadedByUser?: Prisma.UserUpdateOneWithoutDocumentiCaricatiNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutDocumentiNestedInput
   criticita?: Prisma.CriticitaUpdateOneWithoutDocumentiNestedInput
   procedimento?: Prisma.ProcedimentoUpdateOneWithoutDocumentiNestedInput
   sopralluogo?: Prisma.SopralluogoUpdateOneWithoutDocumentiNestedInput
@@ -2780,6 +3181,7 @@ export type DocumentoUncheckedUpdateWithoutConcessioneInput = {
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sopralluogoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2827,6 +3229,7 @@ export type DocumentoUncheckedUpdateManyWithoutConcessioneInput = {
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sopralluogoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2874,6 +3277,7 @@ export type DocumentoCreateManyCriticitaInput = {
   uploadedByUserEmail?: string | null
   uploadedByUserRole?: string | null
   archivedAt?: Date | string | null
+  enteId?: string | null
   concessioneId?: string | null
   procedimentoId?: string | null
   sopralluogoId?: string | null
@@ -2923,6 +3327,7 @@ export type DocumentoUpdateWithoutCriticitaInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   uploadedByUser?: Prisma.UserUpdateOneWithoutDocumentiCaricatiNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutDocumentiNestedInput
   concessione?: Prisma.ConcessioneUpdateOneWithoutDocumentiNestedInput
   procedimento?: Prisma.ProcedimentoUpdateOneWithoutDocumentiNestedInput
   sopralluogo?: Prisma.SopralluogoUpdateOneWithoutDocumentiNestedInput
@@ -2968,6 +3373,7 @@ export type DocumentoUncheckedUpdateWithoutCriticitaInput = {
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sopralluogoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3015,6 +3421,7 @@ export type DocumentoUncheckedUpdateManyWithoutCriticitaInput = {
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sopralluogoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3062,6 +3469,7 @@ export type DocumentoCreateManyProcedimentoInput = {
   uploadedByUserEmail?: string | null
   uploadedByUserRole?: string | null
   archivedAt?: Date | string | null
+  enteId?: string | null
   concessioneId?: string | null
   criticitaId?: string | null
   sopralluogoId?: string | null
@@ -3111,6 +3519,7 @@ export type DocumentoUpdateWithoutProcedimentoInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   uploadedByUser?: Prisma.UserUpdateOneWithoutDocumentiCaricatiNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutDocumentiNestedInput
   concessione?: Prisma.ConcessioneUpdateOneWithoutDocumentiNestedInput
   criticita?: Prisma.CriticitaUpdateOneWithoutDocumentiNestedInput
   sopralluogo?: Prisma.SopralluogoUpdateOneWithoutDocumentiNestedInput
@@ -3156,6 +3565,7 @@ export type DocumentoUncheckedUpdateWithoutProcedimentoInput = {
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sopralluogoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3203,6 +3613,7 @@ export type DocumentoUncheckedUpdateManyWithoutProcedimentoInput = {
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sopralluogoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3250,6 +3661,7 @@ export type DocumentoCreateManySopralluogoInput = {
   uploadedByUserEmail?: string | null
   uploadedByUserRole?: string | null
   archivedAt?: Date | string | null
+  enteId?: string | null
   concessioneId?: string | null
   criticitaId?: string | null
   procedimentoId?: string | null
@@ -3299,6 +3711,7 @@ export type DocumentoUpdateWithoutSopralluogoInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   uploadedByUser?: Prisma.UserUpdateOneWithoutDocumentiCaricatiNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutDocumentiNestedInput
   concessione?: Prisma.ConcessioneUpdateOneWithoutDocumentiNestedInput
   criticita?: Prisma.CriticitaUpdateOneWithoutDocumentiNestedInput
   procedimento?: Prisma.ProcedimentoUpdateOneWithoutDocumentiNestedInput
@@ -3344,6 +3757,7 @@ export type DocumentoUncheckedUpdateWithoutSopralluogoInput = {
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3391,6 +3805,7 @@ export type DocumentoUncheckedUpdateManyWithoutSopralluogoInput = {
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3438,6 +3853,7 @@ export type DocumentoCreateManyPagamentoInput = {
   uploadedByUserEmail?: string | null
   uploadedByUserRole?: string | null
   archivedAt?: Date | string | null
+  enteId?: string | null
   concessioneId?: string | null
   criticitaId?: string | null
   procedimentoId?: string | null
@@ -3487,6 +3903,7 @@ export type DocumentoUpdateWithoutPagamentoInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   uploadedByUser?: Prisma.UserUpdateOneWithoutDocumentiCaricatiNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutDocumentiNestedInput
   concessione?: Prisma.ConcessioneUpdateOneWithoutDocumentiNestedInput
   criticita?: Prisma.CriticitaUpdateOneWithoutDocumentiNestedInput
   procedimento?: Prisma.ProcedimentoUpdateOneWithoutDocumentiNestedInput
@@ -3532,6 +3949,7 @@ export type DocumentoUncheckedUpdateWithoutPagamentoInput = {
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3579,6 +3997,7 @@ export type DocumentoUncheckedUpdateManyWithoutPagamentoInput = {
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3626,6 +4045,7 @@ export type DocumentoCreateManyReportInput = {
   uploadedByUserEmail?: string | null
   uploadedByUserRole?: string | null
   archivedAt?: Date | string | null
+  enteId?: string | null
   concessioneId?: string | null
   criticitaId?: string | null
   procedimentoId?: string | null
@@ -3675,6 +4095,7 @@ export type DocumentoUpdateWithoutReportInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   uploadedByUser?: Prisma.UserUpdateOneWithoutDocumentiCaricatiNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutDocumentiNestedInput
   concessione?: Prisma.ConcessioneUpdateOneWithoutDocumentiNestedInput
   criticita?: Prisma.CriticitaUpdateOneWithoutDocumentiNestedInput
   procedimento?: Prisma.ProcedimentoUpdateOneWithoutDocumentiNestedInput
@@ -3720,6 +4141,7 @@ export type DocumentoUncheckedUpdateWithoutReportInput = {
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3767,6 +4189,7 @@ export type DocumentoUncheckedUpdateManyWithoutReportInput = {
   uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedByUserRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3816,6 +4239,7 @@ export type DocumentoSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   uploadedByUserEmail?: boolean
   uploadedByUserRole?: boolean
   archivedAt?: boolean
+  enteId?: boolean
   concessioneId?: boolean
   criticitaId?: boolean
   procedimentoId?: boolean
@@ -3825,6 +4249,7 @@ export type DocumentoSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   createdAt?: boolean
   updatedAt?: boolean
   uploadedByUser?: boolean | Prisma.Documento$uploadedByUserArgs<ExtArgs>
+  ente?: boolean | Prisma.Documento$enteArgs<ExtArgs>
   concessione?: boolean | Prisma.Documento$concessioneArgs<ExtArgs>
   criticita?: boolean | Prisma.Documento$criticitaArgs<ExtArgs>
   procedimento?: boolean | Prisma.Documento$procedimentoArgs<ExtArgs>
@@ -3871,6 +4296,7 @@ export type DocumentoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   uploadedByUserEmail?: boolean
   uploadedByUserRole?: boolean
   archivedAt?: boolean
+  enteId?: boolean
   concessioneId?: boolean
   criticitaId?: boolean
   procedimentoId?: boolean
@@ -3880,6 +4306,7 @@ export type DocumentoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   createdAt?: boolean
   updatedAt?: boolean
   uploadedByUser?: boolean | Prisma.Documento$uploadedByUserArgs<ExtArgs>
+  ente?: boolean | Prisma.Documento$enteArgs<ExtArgs>
   concessione?: boolean | Prisma.Documento$concessioneArgs<ExtArgs>
   criticita?: boolean | Prisma.Documento$criticitaArgs<ExtArgs>
   procedimento?: boolean | Prisma.Documento$procedimentoArgs<ExtArgs>
@@ -3926,6 +4353,7 @@ export type DocumentoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   uploadedByUserEmail?: boolean
   uploadedByUserRole?: boolean
   archivedAt?: boolean
+  enteId?: boolean
   concessioneId?: boolean
   criticitaId?: boolean
   procedimentoId?: boolean
@@ -3935,6 +4363,7 @@ export type DocumentoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   createdAt?: boolean
   updatedAt?: boolean
   uploadedByUser?: boolean | Prisma.Documento$uploadedByUserArgs<ExtArgs>
+  ente?: boolean | Prisma.Documento$enteArgs<ExtArgs>
   concessione?: boolean | Prisma.Documento$concessioneArgs<ExtArgs>
   criticita?: boolean | Prisma.Documento$criticitaArgs<ExtArgs>
   procedimento?: boolean | Prisma.Documento$procedimentoArgs<ExtArgs>
@@ -3981,6 +4410,7 @@ export type DocumentoSelectScalar = {
   uploadedByUserEmail?: boolean
   uploadedByUserRole?: boolean
   archivedAt?: boolean
+  enteId?: boolean
   concessioneId?: boolean
   criticitaId?: boolean
   procedimentoId?: boolean
@@ -3991,9 +4421,10 @@ export type DocumentoSelectScalar = {
   updatedAt?: boolean
 }
 
-export type DocumentoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nome" | "tipologia" | "statoDocumento" | "direzione" | "canale" | "numeroProtocollo" | "dataProtocollo" | "mittente" | "destinatario" | "pecMessageId" | "pecRicevutaAccettazioneId" | "pecRicevutaConsegnaId" | "pecWarningMancataRicevuta" | "mimeType" | "dimensioneBytes" | "checksumSha256" | "sha256" | "url" | "storagePath" | "storageKey" | "storageProvider" | "storageBucket" | "publicUrl" | "nomeStorage" | "originalName" | "sizeBytes" | "documentType" | "documentDate" | "source" | "status" | "dataDocumento" | "descrizione" | "uploadedByUserId" | "uploadedByUserEmail" | "uploadedByUserRole" | "archivedAt" | "concessioneId" | "criticitaId" | "procedimentoId" | "sopralluogoId" | "pagamentoId" | "reportId" | "createdAt" | "updatedAt", ExtArgs["result"]["documento"]>
+export type DocumentoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nome" | "tipologia" | "statoDocumento" | "direzione" | "canale" | "numeroProtocollo" | "dataProtocollo" | "mittente" | "destinatario" | "pecMessageId" | "pecRicevutaAccettazioneId" | "pecRicevutaConsegnaId" | "pecWarningMancataRicevuta" | "mimeType" | "dimensioneBytes" | "checksumSha256" | "sha256" | "url" | "storagePath" | "storageKey" | "storageProvider" | "storageBucket" | "publicUrl" | "nomeStorage" | "originalName" | "sizeBytes" | "documentType" | "documentDate" | "source" | "status" | "dataDocumento" | "descrizione" | "uploadedByUserId" | "uploadedByUserEmail" | "uploadedByUserRole" | "archivedAt" | "enteId" | "concessioneId" | "criticitaId" | "procedimentoId" | "sopralluogoId" | "pagamentoId" | "reportId" | "createdAt" | "updatedAt", ExtArgs["result"]["documento"]>
 export type DocumentoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   uploadedByUser?: boolean | Prisma.Documento$uploadedByUserArgs<ExtArgs>
+  ente?: boolean | Prisma.Documento$enteArgs<ExtArgs>
   concessione?: boolean | Prisma.Documento$concessioneArgs<ExtArgs>
   criticita?: boolean | Prisma.Documento$criticitaArgs<ExtArgs>
   procedimento?: boolean | Prisma.Documento$procedimentoArgs<ExtArgs>
@@ -4003,6 +4434,7 @@ export type DocumentoInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
 }
 export type DocumentoIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   uploadedByUser?: boolean | Prisma.Documento$uploadedByUserArgs<ExtArgs>
+  ente?: boolean | Prisma.Documento$enteArgs<ExtArgs>
   concessione?: boolean | Prisma.Documento$concessioneArgs<ExtArgs>
   criticita?: boolean | Prisma.Documento$criticitaArgs<ExtArgs>
   procedimento?: boolean | Prisma.Documento$procedimentoArgs<ExtArgs>
@@ -4012,6 +4444,7 @@ export type DocumentoIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
 }
 export type DocumentoIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   uploadedByUser?: boolean | Prisma.Documento$uploadedByUserArgs<ExtArgs>
+  ente?: boolean | Prisma.Documento$enteArgs<ExtArgs>
   concessione?: boolean | Prisma.Documento$concessioneArgs<ExtArgs>
   criticita?: boolean | Prisma.Documento$criticitaArgs<ExtArgs>
   procedimento?: boolean | Prisma.Documento$procedimentoArgs<ExtArgs>
@@ -4024,6 +4457,7 @@ export type $DocumentoPayload<ExtArgs extends runtime.Types.Extensions.InternalA
   name: "Documento"
   objects: {
     uploadedByUser: Prisma.$UserPayload<ExtArgs> | null
+    ente: Prisma.$EntePayload<ExtArgs> | null
     concessione: Prisma.$ConcessionePayload<ExtArgs> | null
     criticita: Prisma.$CriticitaPayload<ExtArgs> | null
     procedimento: Prisma.$ProcedimentoPayload<ExtArgs> | null
@@ -4069,6 +4503,7 @@ export type $DocumentoPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     uploadedByUserEmail: string | null
     uploadedByUserRole: string | null
     archivedAt: Date | null
+    enteId: string | null
     concessioneId: string | null
     criticitaId: string | null
     procedimentoId: string | null
@@ -4472,6 +4907,7 @@ readonly fields: DocumentoFieldRefs;
 export interface Prisma__DocumentoClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   uploadedByUser<T extends Prisma.Documento$uploadedByUserArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Documento$uploadedByUserArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  ente<T extends Prisma.Documento$enteArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Documento$enteArgs<ExtArgs>>): Prisma.Prisma__EnteClient<runtime.Types.Result.GetResult<Prisma.$EntePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   concessione<T extends Prisma.Documento$concessioneArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Documento$concessioneArgs<ExtArgs>>): Prisma.Prisma__ConcessioneClient<runtime.Types.Result.GetResult<Prisma.$ConcessionePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   criticita<T extends Prisma.Documento$criticitaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Documento$criticitaArgs<ExtArgs>>): Prisma.Prisma__CriticitaClient<runtime.Types.Result.GetResult<Prisma.$CriticitaPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   procedimento<T extends Prisma.Documento$procedimentoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Documento$procedimentoArgs<ExtArgs>>): Prisma.Prisma__ProcedimentoClient<runtime.Types.Result.GetResult<Prisma.$ProcedimentoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -4544,6 +4980,7 @@ export interface DocumentoFieldRefs {
   readonly uploadedByUserEmail: Prisma.FieldRef<"Documento", 'String'>
   readonly uploadedByUserRole: Prisma.FieldRef<"Documento", 'String'>
   readonly archivedAt: Prisma.FieldRef<"Documento", 'DateTime'>
+  readonly enteId: Prisma.FieldRef<"Documento", 'String'>
   readonly concessioneId: Prisma.FieldRef<"Documento", 'String'>
   readonly criticitaId: Prisma.FieldRef<"Documento", 'String'>
   readonly procedimentoId: Prisma.FieldRef<"Documento", 'String'>
@@ -4969,6 +5406,25 @@ export type Documento$uploadedByUserArgs<ExtArgs extends runtime.Types.Extension
    */
   include?: Prisma.UserInclude<ExtArgs> | null
   where?: Prisma.UserWhereInput
+}
+
+/**
+ * Documento.ente
+ */
+export type Documento$enteArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Ente
+   */
+  select?: Prisma.EnteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Ente
+   */
+  omit?: Prisma.EnteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EnteInclude<ExtArgs> | null
+  where?: Prisma.EnteWhereInput
 }
 
 /**

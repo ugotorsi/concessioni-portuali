@@ -318,6 +318,7 @@ export type UserWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   activityLogs?: Prisma.ActivityLogListRelationFilter
   documentiCaricati?: Prisma.DocumentoListRelationFilter
+  tenantMemberships?: Prisma.TenantMembershipListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -341,6 +342,7 @@ export type UserOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   activityLogs?: Prisma.ActivityLogOrderByRelationAggregateInput
   documentiCaricati?: Prisma.DocumentoOrderByRelationAggregateInput
+  tenantMemberships?: Prisma.TenantMembershipOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -367,6 +369,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   activityLogs?: Prisma.ActivityLogListRelationFilter
   documentiCaricati?: Prisma.DocumentoListRelationFilter
+  tenantMemberships?: Prisma.TenantMembershipListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -440,6 +443,7 @@ export type UserCreateInput = {
   updatedAt?: Date | string
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
   documentiCaricati?: Prisma.DocumentoCreateNestedManyWithoutUploadedByUserInput
+  tenantMemberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -463,6 +467,7 @@ export type UserUncheckedCreateInput = {
   updatedAt?: Date | string
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
   documentiCaricati?: Prisma.DocumentoUncheckedCreateNestedManyWithoutUploadedByUserInput
+  tenantMemberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -486,6 +491,7 @@ export type UserUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
   documentiCaricati?: Prisma.DocumentoUpdateManyWithoutUploadedByUserNestedInput
+  tenantMemberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -509,6 +515,7 @@ export type UserUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
   documentiCaricati?: Prisma.DocumentoUncheckedUpdateManyWithoutUploadedByUserNestedInput
+  tenantMemberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -572,6 +579,11 @@ export type UserUncheckedUpdateManyInput = {
   mfaVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type UserScalarRelationFilter = {
+  is?: Prisma.UserWhereInput
+  isNot?: Prisma.UserWhereInput
 }
 
 export type UserCountOrderByAggregateInput = {
@@ -648,20 +660,22 @@ export type UserNullableScalarRelationFilter = {
   isNot?: Prisma.UserWhereInput | null
 }
 
-export type StringFieldUpdateOperationsInput = {
-  set?: string
+export type UserCreateNestedOneWithoutTenantMembershipsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutTenantMembershipsInput, Prisma.UserUncheckedCreateWithoutTenantMembershipsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTenantMembershipsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutTenantMembershipsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutTenantMembershipsInput, Prisma.UserUncheckedCreateWithoutTenantMembershipsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTenantMembershipsInput
+  upsert?: Prisma.UserUpsertWithoutTenantMembershipsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutTenantMembershipsInput, Prisma.UserUpdateWithoutTenantMembershipsInput>, Prisma.UserUncheckedUpdateWithoutTenantMembershipsInput>
 }
 
 export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
-}
-
-export type EnumRuoloUserFieldUpdateOperationsInput = {
-  set?: $Enums.RuoloUser
-}
-
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
 }
 
 export type IntFieldUpdateOperationsInput = {
@@ -674,10 +688,6 @@ export type IntFieldUpdateOperationsInput = {
 
 export type NullableDateTimeFieldUpdateOperationsInput = {
   set?: Date | string | null
-}
-
-export type DateTimeFieldUpdateOperationsInput = {
-  set?: Date | string
 }
 
 export type UserCreateNestedOneWithoutDocumentiCaricatiInput = {
@@ -712,6 +722,114 @@ export type UserUpdateOneWithoutActivityLogsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutActivityLogsInput, Prisma.UserUpdateWithoutActivityLogsInput>, Prisma.UserUncheckedUpdateWithoutActivityLogsInput>
 }
 
+export type UserCreateWithoutTenantMembershipsInput = {
+  id?: string
+  nome: string
+  email: string
+  passwordHash?: string | null
+  ruolo: $Enums.RuoloUser
+  attivo?: boolean
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastFailedLoginAt?: Date | string | null
+  lastLoginAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  mustChangePassword?: boolean
+  mfaEnabled?: boolean
+  mfaSecret?: string | null
+  mfaRecoveryCodes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mfaVerifiedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  documentiCaricati?: Prisma.DocumentoCreateNestedManyWithoutUploadedByUserInput
+}
+
+export type UserUncheckedCreateWithoutTenantMembershipsInput = {
+  id?: string
+  nome: string
+  email: string
+  passwordHash?: string | null
+  ruolo: $Enums.RuoloUser
+  attivo?: boolean
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastFailedLoginAt?: Date | string | null
+  lastLoginAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  mustChangePassword?: boolean
+  mfaEnabled?: boolean
+  mfaSecret?: string | null
+  mfaRecoveryCodes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mfaVerifiedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  documentiCaricati?: Prisma.DocumentoUncheckedCreateNestedManyWithoutUploadedByUserInput
+}
+
+export type UserCreateOrConnectWithoutTenantMembershipsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutTenantMembershipsInput, Prisma.UserUncheckedCreateWithoutTenantMembershipsInput>
+}
+
+export type UserUpsertWithoutTenantMembershipsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutTenantMembershipsInput, Prisma.UserUncheckedUpdateWithoutTenantMembershipsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutTenantMembershipsInput, Prisma.UserUncheckedCreateWithoutTenantMembershipsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutTenantMembershipsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutTenantMembershipsInput, Prisma.UserUncheckedUpdateWithoutTenantMembershipsInput>
+}
+
+export type UserUpdateWithoutTenantMembershipsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ruolo?: Prisma.EnumRuoloUserFieldUpdateOperationsInput | $Enums.RuoloUser
+  attivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastFailedLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mfaEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mfaSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mfaRecoveryCodes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mfaVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  documentiCaricati?: Prisma.DocumentoUpdateManyWithoutUploadedByUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutTenantMembershipsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ruolo?: Prisma.EnumRuoloUserFieldUpdateOperationsInput | $Enums.RuoloUser
+  attivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastFailedLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mfaEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mfaSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mfaRecoveryCodes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mfaVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  documentiCaricati?: Prisma.DocumentoUncheckedUpdateManyWithoutUploadedByUserNestedInput
+}
+
 export type UserCreateWithoutDocumentiCaricatiInput = {
   id?: string
   nome: string
@@ -732,6 +850,7 @@ export type UserCreateWithoutDocumentiCaricatiInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  tenantMemberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutDocumentiCaricatiInput = {
@@ -754,6 +873,7 @@ export type UserUncheckedCreateWithoutDocumentiCaricatiInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  tenantMemberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutDocumentiCaricatiInput = {
@@ -792,6 +912,7 @@ export type UserUpdateWithoutDocumentiCaricatiInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  tenantMemberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDocumentiCaricatiInput = {
@@ -814,6 +935,7 @@ export type UserUncheckedUpdateWithoutDocumentiCaricatiInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  tenantMemberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutActivityLogsInput = {
@@ -836,6 +958,7 @@ export type UserCreateWithoutActivityLogsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   documentiCaricati?: Prisma.DocumentoCreateNestedManyWithoutUploadedByUserInput
+  tenantMemberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutActivityLogsInput = {
@@ -858,6 +981,7 @@ export type UserUncheckedCreateWithoutActivityLogsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   documentiCaricati?: Prisma.DocumentoUncheckedCreateNestedManyWithoutUploadedByUserInput
+  tenantMemberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutActivityLogsInput = {
@@ -896,6 +1020,7 @@ export type UserUpdateWithoutActivityLogsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   documentiCaricati?: Prisma.DocumentoUpdateManyWithoutUploadedByUserNestedInput
+  tenantMemberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutActivityLogsInput = {
@@ -918,6 +1043,7 @@ export type UserUncheckedUpdateWithoutActivityLogsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   documentiCaricati?: Prisma.DocumentoUncheckedUpdateManyWithoutUploadedByUserNestedInput
+  tenantMemberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -928,11 +1054,13 @@ export type UserUncheckedUpdateWithoutActivityLogsInput = {
 export type UserCountOutputType = {
   activityLogs: number
   documentiCaricati: number
+  tenantMemberships: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   activityLogs?: boolean | UserCountOutputTypeCountActivityLogsArgs
   documentiCaricati?: boolean | UserCountOutputTypeCountDocumentiCaricatiArgs
+  tenantMemberships?: boolean | UserCountOutputTypeCountTenantMembershipsArgs
 }
 
 /**
@@ -959,6 +1087,13 @@ export type UserCountOutputTypeCountDocumentiCaricatiArgs<ExtArgs extends runtim
   where?: Prisma.DocumentoWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountTenantMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TenantMembershipWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -981,6 +1116,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   updatedAt?: boolean
   activityLogs?: boolean | Prisma.User$activityLogsArgs<ExtArgs>
   documentiCaricati?: boolean | Prisma.User$documentiCaricatiArgs<ExtArgs>
+  tenantMemberships?: boolean | Prisma.User$tenantMembershipsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1051,6 +1187,7 @@ export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = run
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   activityLogs?: boolean | Prisma.User$activityLogsArgs<ExtArgs>
   documentiCaricati?: boolean | Prisma.User$documentiCaricatiArgs<ExtArgs>
+  tenantMemberships?: boolean | Prisma.User$tenantMembershipsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1061,6 +1198,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     activityLogs: Prisma.$ActivityLogPayload<ExtArgs>[]
     documentiCaricati: Prisma.$DocumentoPayload<ExtArgs>[]
+    tenantMemberships: Prisma.$TenantMembershipPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1477,6 +1615,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   activityLogs<T extends Prisma.User$activityLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$activityLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documentiCaricati<T extends Prisma.User$documentiCaricatiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentiCaricatiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  tenantMemberships<T extends Prisma.User$tenantMembershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$tenantMembershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TenantMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1962,6 +2101,30 @@ export type User$documentiCaricatiArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.DocumentoScalarFieldEnum | Prisma.DocumentoScalarFieldEnum[]
+}
+
+/**
+ * User.tenantMemberships
+ */
+export type User$tenantMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TenantMembership
+   */
+  select?: Prisma.TenantMembershipSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TenantMembership
+   */
+  omit?: Prisma.TenantMembershipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TenantMembershipInclude<ExtArgs> | null
+  where?: Prisma.TenantMembershipWhereInput
+  orderBy?: Prisma.TenantMembershipOrderByWithRelationInput | Prisma.TenantMembershipOrderByWithRelationInput[]
+  cursor?: Prisma.TenantMembershipWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TenantMembershipScalarFieldEnum | Prisma.TenantMembershipScalarFieldEnum[]
 }
 
 /**

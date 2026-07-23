@@ -51,6 +51,8 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
+  Ente: 'Ente',
+  TenantMembership: 'TenantMembership',
   User: 'User',
   Concessionario: 'Concessionario',
   Concessione: 'Concessione',
@@ -83,6 +85,32 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 } as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
+
+
+export const EnteScalarFieldEnum = {
+  id: 'id',
+  nome: 'nome',
+  codice: 'codice',
+  tipo: 'tipo',
+  stato: 'stato',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EnteScalarFieldEnum = (typeof EnteScalarFieldEnum)[keyof typeof EnteScalarFieldEnum]
+
+
+export const TenantMembershipScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  enteId: 'enteId',
+  role: 'role',
+  isDefault: 'isDefault',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TenantMembershipScalarFieldEnum = (typeof TenantMembershipScalarFieldEnum)[keyof typeof TenantMembershipScalarFieldEnum]
 
 
 export const UserScalarFieldEnum = {
@@ -157,6 +185,7 @@ export const ConcessioneScalarFieldEnum = {
   ubicazione: 'ubicazione',
   note: 'note',
   concessionarioId: 'concessionarioId',
+  enteId: 'enteId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -364,6 +393,7 @@ export const DocumentoScalarFieldEnum = {
   uploadedByUserEmail: 'uploadedByUserEmail',
   uploadedByUserRole: 'uploadedByUserRole',
   archivedAt: 'archivedAt',
+  enteId: 'enteId',
   concessioneId: 'concessioneId',
   criticitaId: 'criticitaId',
   procedimentoId: 'procedimentoId',
@@ -379,6 +409,7 @@ export type DocumentoScalarFieldEnum = (typeof DocumentoScalarFieldEnum)[keyof t
 
 export const ReportScalarFieldEnum = {
   id: 'id',
+  enteId: 'enteId',
   concessioneId: 'concessioneId',
   tipologia: 'tipologia',
   titolo: 'titolo',
@@ -447,6 +478,7 @@ export const ActivityLogScalarFieldEnum = {
   userId: 'userId',
   userEmail: 'userEmail',
   userRole: 'userRole',
+  enteId: 'enteId',
   concessioneId: 'concessioneId',
   ipAddress: 'ipAddress',
   userAgent: 'userAgent',

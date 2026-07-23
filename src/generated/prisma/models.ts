@@ -8,6 +8,8 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/Ente'
+export type * from './models/TenantMembership'
 export type * from './models/User'
 export type * from './models/Concessionario'
 export type * from './models/Concessione'

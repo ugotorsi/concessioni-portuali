@@ -70,6 +70,7 @@ export type ConcessioneMinAggregateOutputType = {
   ubicazione: string | null
   note: string | null
   concessionarioId: string | null
+  enteId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -104,6 +105,7 @@ export type ConcessioneMaxAggregateOutputType = {
   ubicazione: string | null
   note: string | null
   concessionarioId: string | null
+  enteId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -138,6 +140,7 @@ export type ConcessioneCountAggregateOutputType = {
   ubicazione: number
   note: number
   concessionarioId: number
+  enteId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -188,6 +191,7 @@ export type ConcessioneMinAggregateInputType = {
   ubicazione?: true
   note?: true
   concessionarioId?: true
+  enteId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -222,6 +226,7 @@ export type ConcessioneMaxAggregateInputType = {
   ubicazione?: true
   note?: true
   concessionarioId?: true
+  enteId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -256,6 +261,7 @@ export type ConcessioneCountAggregateInputType = {
   ubicazione?: true
   note?: true
   concessionarioId?: true
+  enteId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -377,6 +383,7 @@ export type ConcessioneGroupByOutputType = {
   ubicazione: string | null
   note: string | null
   concessionarioId: string
+  enteId: string | null
   createdAt: Date
   updatedAt: Date
   _count: ConcessioneCountAggregateOutputType | null
@@ -434,9 +441,11 @@ export type ConcessioneWhereInput = {
   ubicazione?: Prisma.StringNullableFilter<"Concessione"> | string | null
   note?: Prisma.StringNullableFilter<"Concessione"> | string | null
   concessionarioId?: Prisma.StringFilter<"Concessione"> | string
+  enteId?: Prisma.StringNullableFilter<"Concessione"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Concessione"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Concessione"> | Date | string
   concessionario?: Prisma.XOR<Prisma.ConcessionarioScalarRelationFilter, Prisma.ConcessionarioWhereInput>
+  ente?: Prisma.XOR<Prisma.EnteNullableScalarRelationFilter, Prisma.EnteWhereInput> | null
   obblighi?: Prisma.ObbligoConcessorioListRelationFilter
   scadenze?: Prisma.ScadenzaListRelationFilter
   criticita?: Prisma.CriticitaListRelationFilter
@@ -480,9 +489,11 @@ export type ConcessioneOrderByWithRelationInput = {
   ubicazione?: Prisma.SortOrderInput | Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
   concessionarioId?: Prisma.SortOrder
+  enteId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   concessionario?: Prisma.ConcessionarioOrderByWithRelationInput
+  ente?: Prisma.EnteOrderByWithRelationInput
   obblighi?: Prisma.ObbligoConcessorioOrderByRelationAggregateInput
   scadenze?: Prisma.ScadenzaOrderByRelationAggregateInput
   criticita?: Prisma.CriticitaOrderByRelationAggregateInput
@@ -529,9 +540,11 @@ export type ConcessioneWhereUniqueInput = Prisma.AtLeast<{
   ubicazione?: Prisma.StringNullableFilter<"Concessione"> | string | null
   note?: Prisma.StringNullableFilter<"Concessione"> | string | null
   concessionarioId?: Prisma.StringFilter<"Concessione"> | string
+  enteId?: Prisma.StringNullableFilter<"Concessione"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Concessione"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Concessione"> | Date | string
   concessionario?: Prisma.XOR<Prisma.ConcessionarioScalarRelationFilter, Prisma.ConcessionarioWhereInput>
+  ente?: Prisma.XOR<Prisma.EnteNullableScalarRelationFilter, Prisma.EnteWhereInput> | null
   obblighi?: Prisma.ObbligoConcessorioListRelationFilter
   scadenze?: Prisma.ScadenzaListRelationFilter
   criticita?: Prisma.CriticitaListRelationFilter
@@ -575,6 +588,7 @@ export type ConcessioneOrderByWithAggregationInput = {
   ubicazione?: Prisma.SortOrderInput | Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
   concessionarioId?: Prisma.SortOrder
+  enteId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ConcessioneCountOrderByAggregateInput
@@ -617,6 +631,7 @@ export type ConcessioneScalarWhereWithAggregatesInput = {
   ubicazione?: Prisma.StringNullableWithAggregatesFilter<"Concessione"> | string | null
   note?: Prisma.StringNullableWithAggregatesFilter<"Concessione"> | string | null
   concessionarioId?: Prisma.StringWithAggregatesFilter<"Concessione"> | string
+  enteId?: Prisma.StringNullableWithAggregatesFilter<"Concessione"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Concessione"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Concessione"> | Date | string
 }
@@ -653,6 +668,7 @@ export type ConcessioneCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   concessionario: Prisma.ConcessionarioCreateNestedOneWithoutConcessioniInput
+  ente?: Prisma.EnteCreateNestedOneWithoutConcessioniInput
   obblighi?: Prisma.ObbligoConcessorioCreateNestedManyWithoutConcessioneInput
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
@@ -696,6 +712,7 @@ export type ConcessioneUncheckedCreateInput = {
   ubicazione?: string | null
   note?: string | null
   concessionarioId: string
+  enteId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedCreateNestedManyWithoutConcessioneInput
@@ -743,6 +760,7 @@ export type ConcessioneUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   concessionario?: Prisma.ConcessionarioUpdateOneRequiredWithoutConcessioniNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutConcessioniNestedInput
   obblighi?: Prisma.ObbligoConcessorioUpdateManyWithoutConcessioneNestedInput
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
@@ -786,6 +804,7 @@ export type ConcessioneUncheckedUpdateInput = {
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionarioId?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -831,6 +850,7 @@ export type ConcessioneCreateManyInput = {
   ubicazione?: string | null
   note?: string | null
   concessionarioId: string
+  enteId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -898,6 +918,7 @@ export type ConcessioneUncheckedUpdateManyInput = {
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionarioId?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -942,6 +963,7 @@ export type ConcessioneCountOrderByAggregateInput = {
   ubicazione?: Prisma.SortOrder
   note?: Prisma.SortOrder
   concessionarioId?: Prisma.SortOrder
+  enteId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -983,6 +1005,7 @@ export type ConcessioneMaxOrderByAggregateInput = {
   ubicazione?: Prisma.SortOrder
   note?: Prisma.SortOrder
   concessionarioId?: Prisma.SortOrder
+  enteId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -1017,6 +1040,7 @@ export type ConcessioneMinOrderByAggregateInput = {
   ubicazione?: Prisma.SortOrder
   note?: Prisma.SortOrder
   concessionarioId?: Prisma.SortOrder
+  enteId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -1036,6 +1060,48 @@ export type ConcessioneScalarRelationFilter = {
 export type ConcessioneNullableScalarRelationFilter = {
   is?: Prisma.ConcessioneWhereInput | null
   isNot?: Prisma.ConcessioneWhereInput | null
+}
+
+export type ConcessioneCreateNestedManyWithoutEnteInput = {
+  create?: Prisma.XOR<Prisma.ConcessioneCreateWithoutEnteInput, Prisma.ConcessioneUncheckedCreateWithoutEnteInput> | Prisma.ConcessioneCreateWithoutEnteInput[] | Prisma.ConcessioneUncheckedCreateWithoutEnteInput[]
+  connectOrCreate?: Prisma.ConcessioneCreateOrConnectWithoutEnteInput | Prisma.ConcessioneCreateOrConnectWithoutEnteInput[]
+  createMany?: Prisma.ConcessioneCreateManyEnteInputEnvelope
+  connect?: Prisma.ConcessioneWhereUniqueInput | Prisma.ConcessioneWhereUniqueInput[]
+}
+
+export type ConcessioneUncheckedCreateNestedManyWithoutEnteInput = {
+  create?: Prisma.XOR<Prisma.ConcessioneCreateWithoutEnteInput, Prisma.ConcessioneUncheckedCreateWithoutEnteInput> | Prisma.ConcessioneCreateWithoutEnteInput[] | Prisma.ConcessioneUncheckedCreateWithoutEnteInput[]
+  connectOrCreate?: Prisma.ConcessioneCreateOrConnectWithoutEnteInput | Prisma.ConcessioneCreateOrConnectWithoutEnteInput[]
+  createMany?: Prisma.ConcessioneCreateManyEnteInputEnvelope
+  connect?: Prisma.ConcessioneWhereUniqueInput | Prisma.ConcessioneWhereUniqueInput[]
+}
+
+export type ConcessioneUpdateManyWithoutEnteNestedInput = {
+  create?: Prisma.XOR<Prisma.ConcessioneCreateWithoutEnteInput, Prisma.ConcessioneUncheckedCreateWithoutEnteInput> | Prisma.ConcessioneCreateWithoutEnteInput[] | Prisma.ConcessioneUncheckedCreateWithoutEnteInput[]
+  connectOrCreate?: Prisma.ConcessioneCreateOrConnectWithoutEnteInput | Prisma.ConcessioneCreateOrConnectWithoutEnteInput[]
+  upsert?: Prisma.ConcessioneUpsertWithWhereUniqueWithoutEnteInput | Prisma.ConcessioneUpsertWithWhereUniqueWithoutEnteInput[]
+  createMany?: Prisma.ConcessioneCreateManyEnteInputEnvelope
+  set?: Prisma.ConcessioneWhereUniqueInput | Prisma.ConcessioneWhereUniqueInput[]
+  disconnect?: Prisma.ConcessioneWhereUniqueInput | Prisma.ConcessioneWhereUniqueInput[]
+  delete?: Prisma.ConcessioneWhereUniqueInput | Prisma.ConcessioneWhereUniqueInput[]
+  connect?: Prisma.ConcessioneWhereUniqueInput | Prisma.ConcessioneWhereUniqueInput[]
+  update?: Prisma.ConcessioneUpdateWithWhereUniqueWithoutEnteInput | Prisma.ConcessioneUpdateWithWhereUniqueWithoutEnteInput[]
+  updateMany?: Prisma.ConcessioneUpdateManyWithWhereWithoutEnteInput | Prisma.ConcessioneUpdateManyWithWhereWithoutEnteInput[]
+  deleteMany?: Prisma.ConcessioneScalarWhereInput | Prisma.ConcessioneScalarWhereInput[]
+}
+
+export type ConcessioneUncheckedUpdateManyWithoutEnteNestedInput = {
+  create?: Prisma.XOR<Prisma.ConcessioneCreateWithoutEnteInput, Prisma.ConcessioneUncheckedCreateWithoutEnteInput> | Prisma.ConcessioneCreateWithoutEnteInput[] | Prisma.ConcessioneUncheckedCreateWithoutEnteInput[]
+  connectOrCreate?: Prisma.ConcessioneCreateOrConnectWithoutEnteInput | Prisma.ConcessioneCreateOrConnectWithoutEnteInput[]
+  upsert?: Prisma.ConcessioneUpsertWithWhereUniqueWithoutEnteInput | Prisma.ConcessioneUpsertWithWhereUniqueWithoutEnteInput[]
+  createMany?: Prisma.ConcessioneCreateManyEnteInputEnvelope
+  set?: Prisma.ConcessioneWhereUniqueInput | Prisma.ConcessioneWhereUniqueInput[]
+  disconnect?: Prisma.ConcessioneWhereUniqueInput | Prisma.ConcessioneWhereUniqueInput[]
+  delete?: Prisma.ConcessioneWhereUniqueInput | Prisma.ConcessioneWhereUniqueInput[]
+  connect?: Prisma.ConcessioneWhereUniqueInput | Prisma.ConcessioneWhereUniqueInput[]
+  update?: Prisma.ConcessioneUpdateWithWhereUniqueWithoutEnteInput | Prisma.ConcessioneUpdateWithWhereUniqueWithoutEnteInput[]
+  updateMany?: Prisma.ConcessioneUpdateManyWithWhereWithoutEnteInput | Prisma.ConcessioneUpdateManyWithWhereWithoutEnteInput[]
+  deleteMany?: Prisma.ConcessioneScalarWhereInput | Prisma.ConcessioneScalarWhereInput[]
 }
 
 export type ConcessioneCreateNestedManyWithoutConcessionarioInput = {
@@ -1298,6 +1364,160 @@ export type ConcessioneUpdateOneWithoutActivityLogsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ConcessioneUpdateToOneWithWhereWithoutActivityLogsInput, Prisma.ConcessioneUpdateWithoutActivityLogsInput>, Prisma.ConcessioneUncheckedUpdateWithoutActivityLogsInput>
 }
 
+export type ConcessioneCreateWithoutEnteInput = {
+  id?: string
+  numeroAtto: string
+  dataRilascio: Date | string
+  dataScadenza: Date | string
+  normaRiferimento: $Enums.NormaRiferimento
+  tipologiaBene: $Enums.TipologiaBene
+  attivita: $Enums.AttivitaConcessione
+  superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
+  canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
+  stato: $Enums.StatoConcessione
+  descrizioneBene?: string | null
+  ubicazione?: string | null
+  note?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessionario: Prisma.ConcessionarioCreateNestedOneWithoutConcessioniInput
+  obblighi?: Prisma.ObbligoConcessorioCreateNestedManyWithoutConcessioneInput
+  scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
+  criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
+  procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutConcessioneInput
+  sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
+  pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
+  report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
+  normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
+}
+
+export type ConcessioneUncheckedCreateWithoutEnteInput = {
+  id?: string
+  numeroAtto: string
+  dataRilascio: Date | string
+  dataScadenza: Date | string
+  normaRiferimento: $Enums.NormaRiferimento
+  tipologiaBene: $Enums.TipologiaBene
+  attivita: $Enums.AttivitaConcessione
+  superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
+  canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
+  stato: $Enums.StatoConcessione
+  descrizioneBene?: string | null
+  ubicazione?: string | null
+  note?: string | null
+  concessionarioId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  obblighi?: Prisma.ObbligoConcessorioUncheckedCreateNestedManyWithoutConcessioneInput
+  scadenze?: Prisma.ScadenzaUncheckedCreateNestedManyWithoutConcessioneInput
+  criticita?: Prisma.CriticitaUncheckedCreateNestedManyWithoutConcessioneInput
+  procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
+  sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
+  pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
+  report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
+  normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
+}
+
+export type ConcessioneCreateOrConnectWithoutEnteInput = {
+  where: Prisma.ConcessioneWhereUniqueInput
+  create: Prisma.XOR<Prisma.ConcessioneCreateWithoutEnteInput, Prisma.ConcessioneUncheckedCreateWithoutEnteInput>
+}
+
+export type ConcessioneCreateManyEnteInputEnvelope = {
+  data: Prisma.ConcessioneCreateManyEnteInput | Prisma.ConcessioneCreateManyEnteInput[]
+  skipDuplicates?: boolean
+}
+
+export type ConcessioneUpsertWithWhereUniqueWithoutEnteInput = {
+  where: Prisma.ConcessioneWhereUniqueInput
+  update: Prisma.XOR<Prisma.ConcessioneUpdateWithoutEnteInput, Prisma.ConcessioneUncheckedUpdateWithoutEnteInput>
+  create: Prisma.XOR<Prisma.ConcessioneCreateWithoutEnteInput, Prisma.ConcessioneUncheckedCreateWithoutEnteInput>
+}
+
+export type ConcessioneUpdateWithWhereUniqueWithoutEnteInput = {
+  where: Prisma.ConcessioneWhereUniqueInput
+  data: Prisma.XOR<Prisma.ConcessioneUpdateWithoutEnteInput, Prisma.ConcessioneUncheckedUpdateWithoutEnteInput>
+}
+
+export type ConcessioneUpdateManyWithWhereWithoutEnteInput = {
+  where: Prisma.ConcessioneScalarWhereInput
+  data: Prisma.XOR<Prisma.ConcessioneUpdateManyMutationInput, Prisma.ConcessioneUncheckedUpdateManyWithoutEnteInput>
+}
+
+export type ConcessioneScalarWhereInput = {
+  AND?: Prisma.ConcessioneScalarWhereInput | Prisma.ConcessioneScalarWhereInput[]
+  OR?: Prisma.ConcessioneScalarWhereInput[]
+  NOT?: Prisma.ConcessioneScalarWhereInput | Prisma.ConcessioneScalarWhereInput[]
+  id?: Prisma.StringFilter<"Concessione"> | string
+  numeroAtto?: Prisma.StringFilter<"Concessione"> | string
+  dataRilascio?: Prisma.DateTimeFilter<"Concessione"> | Date | string
+  dataScadenza?: Prisma.DateTimeFilter<"Concessione"> | Date | string
+  normaRiferimento?: Prisma.EnumNormaRiferimentoFilter<"Concessione"> | $Enums.NormaRiferimento
+  tipologiaBene?: Prisma.EnumTipologiaBeneFilter<"Concessione"> | $Enums.TipologiaBene
+  attivita?: Prisma.EnumAttivitaConcessioneFilter<"Concessione"> | $Enums.AttivitaConcessione
+  superficieMq?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateGis?: Prisma.StringNullableFilter<"Concessione"> | string | null
+  areaDescrizione?: Prisma.StringNullableFilter<"Concessione"> | string | null
+  zonaPortuale?: Prisma.StringNullableFilter<"Concessione"> | string | null
+  riferimentoCatastale?: Prisma.StringNullableFilter<"Concessione"> | string | null
+  canoneAnnuo?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  categoriaCanone?: Prisma.StringNullableFilter<"Concessione"> | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFilter<"Concessione"> | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.EnumConcessionObjectTypeNullableFilter<"Concessione"> | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFilter<"Concessione"> | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFilter<"Concessione"> | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFilter<"Concessione"> | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFilter<"Concessione"> | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFilter<"Concessione"> | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFilter<"Concessione"> | $Enums.ThirdPartyManagementStatus
+  stato?: Prisma.EnumStatoConcessioneFilter<"Concessione"> | $Enums.StatoConcessione
+  descrizioneBene?: Prisma.StringNullableFilter<"Concessione"> | string | null
+  ubicazione?: Prisma.StringNullableFilter<"Concessione"> | string | null
+  note?: Prisma.StringNullableFilter<"Concessione"> | string | null
+  concessionarioId?: Prisma.StringFilter<"Concessione"> | string
+  enteId?: Prisma.StringNullableFilter<"Concessione"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"Concessione"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Concessione"> | Date | string
+}
+
 export type ConcessioneCreateWithoutConcessionarioInput = {
   id?: string
   numeroAtto: string
@@ -1329,6 +1549,7 @@ export type ConcessioneCreateWithoutConcessionarioInput = {
   note?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  ente?: Prisma.EnteCreateNestedOneWithoutConcessioniInput
   obblighi?: Prisma.ObbligoConcessorioCreateNestedManyWithoutConcessioneInput
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
@@ -1371,6 +1592,7 @@ export type ConcessioneUncheckedCreateWithoutConcessionarioInput = {
   descrizioneBene?: string | null
   ubicazione?: string | null
   note?: string | null
+  enteId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedCreateNestedManyWithoutConcessioneInput
@@ -1412,43 +1634,6 @@ export type ConcessioneUpdateManyWithWhereWithoutConcessionarioInput = {
   data: Prisma.XOR<Prisma.ConcessioneUpdateManyMutationInput, Prisma.ConcessioneUncheckedUpdateManyWithoutConcessionarioInput>
 }
 
-export type ConcessioneScalarWhereInput = {
-  AND?: Prisma.ConcessioneScalarWhereInput | Prisma.ConcessioneScalarWhereInput[]
-  OR?: Prisma.ConcessioneScalarWhereInput[]
-  NOT?: Prisma.ConcessioneScalarWhereInput | Prisma.ConcessioneScalarWhereInput[]
-  id?: Prisma.StringFilter<"Concessione"> | string
-  numeroAtto?: Prisma.StringFilter<"Concessione"> | string
-  dataRilascio?: Prisma.DateTimeFilter<"Concessione"> | Date | string
-  dataScadenza?: Prisma.DateTimeFilter<"Concessione"> | Date | string
-  normaRiferimento?: Prisma.EnumNormaRiferimentoFilter<"Concessione"> | $Enums.NormaRiferimento
-  tipologiaBene?: Prisma.EnumTipologiaBeneFilter<"Concessione"> | $Enums.TipologiaBene
-  attivita?: Prisma.EnumAttivitaConcessioneFilter<"Concessione"> | $Enums.AttivitaConcessione
-  superficieMq?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  latitudineGis?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  longitudineGis?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  coordinateGis?: Prisma.StringNullableFilter<"Concessione"> | string | null
-  areaDescrizione?: Prisma.StringNullableFilter<"Concessione"> | string | null
-  zonaPortuale?: Prisma.StringNullableFilter<"Concessione"> | string | null
-  riferimentoCatastale?: Prisma.StringNullableFilter<"Concessione"> | string | null
-  canoneAnnuo?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  categoriaCanone?: Prisma.StringNullableFilter<"Concessione"> | string | null
-  concessionVertical?: Prisma.EnumConcessionVerticalFilter<"Concessione"> | $Enums.ConcessionVertical
-  concessionObjectType?: Prisma.EnumConcessionObjectTypeNullableFilter<"Concessione"> | $Enums.ConcessionObjectType | null
-  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFilter<"Concessione"> | $Enums.AwardingProcedureType
-  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFilter<"Concessione"> | $Enums.RemovableWorksProfile
-  seasonalityProfile?: Prisma.EnumSeasonalityProfileFilter<"Concessione"> | $Enums.SeasonalityProfile
-  feeRegime?: Prisma.EnumFeeRegimeFilter<"Concessione"> | $Enums.FeeRegime
-  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFilter<"Concessione"> | $Enums.ComparativeProcedureStatus
-  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFilter<"Concessione"> | $Enums.ThirdPartyManagementStatus
-  stato?: Prisma.EnumStatoConcessioneFilter<"Concessione"> | $Enums.StatoConcessione
-  descrizioneBene?: Prisma.StringNullableFilter<"Concessione"> | string | null
-  ubicazione?: Prisma.StringNullableFilter<"Concessione"> | string | null
-  note?: Prisma.StringNullableFilter<"Concessione"> | string | null
-  concessionarioId?: Prisma.StringFilter<"Concessione"> | string
-  createdAt?: Prisma.DateTimeFilter<"Concessione"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"Concessione"> | Date | string
-}
-
 export type ConcessioneCreateWithoutLegalFrameworksInput = {
   id?: string
   numeroAtto: string
@@ -1481,6 +1666,7 @@ export type ConcessioneCreateWithoutLegalFrameworksInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   concessionario: Prisma.ConcessionarioCreateNestedOneWithoutConcessioniInput
+  ente?: Prisma.EnteCreateNestedOneWithoutConcessioniInput
   obblighi?: Prisma.ObbligoConcessorioCreateNestedManyWithoutConcessioneInput
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
@@ -1523,6 +1709,7 @@ export type ConcessioneUncheckedCreateWithoutLegalFrameworksInput = {
   ubicazione?: string | null
   note?: string | null
   concessionarioId: string
+  enteId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedCreateNestedManyWithoutConcessioneInput
@@ -1585,6 +1772,7 @@ export type ConcessioneUpdateWithoutLegalFrameworksInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   concessionario?: Prisma.ConcessionarioUpdateOneRequiredWithoutConcessioniNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutConcessioniNestedInput
   obblighi?: Prisma.ObbligoConcessorioUpdateManyWithoutConcessioneNestedInput
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
@@ -1627,6 +1815,7 @@ export type ConcessioneUncheckedUpdateWithoutLegalFrameworksInput = {
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionarioId?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -1673,6 +1862,7 @@ export type ConcessioneCreateWithoutObblighiInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   concessionario: Prisma.ConcessionarioCreateNestedOneWithoutConcessioniInput
+  ente?: Prisma.EnteCreateNestedOneWithoutConcessioniInput
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutConcessioneInput
@@ -1715,6 +1905,7 @@ export type ConcessioneUncheckedCreateWithoutObblighiInput = {
   ubicazione?: string | null
   note?: string | null
   concessionarioId: string
+  enteId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   scadenze?: Prisma.ScadenzaUncheckedCreateNestedManyWithoutConcessioneInput
@@ -1777,6 +1968,7 @@ export type ConcessioneUpdateWithoutObblighiInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   concessionario?: Prisma.ConcessionarioUpdateOneRequiredWithoutConcessioniNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutConcessioniNestedInput
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutConcessioneNestedInput
@@ -1819,6 +2011,7 @@ export type ConcessioneUncheckedUpdateWithoutObblighiInput = {
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionarioId?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   scadenze?: Prisma.ScadenzaUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -1865,6 +2058,7 @@ export type ConcessioneCreateWithoutScadenzeInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   concessionario: Prisma.ConcessionarioCreateNestedOneWithoutConcessioniInput
+  ente?: Prisma.EnteCreateNestedOneWithoutConcessioniInput
   obblighi?: Prisma.ObbligoConcessorioCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutConcessioneInput
@@ -1907,6 +2101,7 @@ export type ConcessioneUncheckedCreateWithoutScadenzeInput = {
   ubicazione?: string | null
   note?: string | null
   concessionarioId: string
+  enteId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedCreateNestedManyWithoutConcessioneInput
@@ -1969,6 +2164,7 @@ export type ConcessioneUpdateWithoutScadenzeInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   concessionario?: Prisma.ConcessionarioUpdateOneRequiredWithoutConcessioniNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutConcessioniNestedInput
   obblighi?: Prisma.ObbligoConcessorioUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutConcessioneNestedInput
@@ -2011,6 +2207,7 @@ export type ConcessioneUncheckedUpdateWithoutScadenzeInput = {
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionarioId?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -2057,6 +2254,7 @@ export type ConcessioneCreateWithoutCriticitaInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   concessionario: Prisma.ConcessionarioCreateNestedOneWithoutConcessioniInput
+  ente?: Prisma.EnteCreateNestedOneWithoutConcessioniInput
   obblighi?: Prisma.ObbligoConcessorioCreateNestedManyWithoutConcessioneInput
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutConcessioneInput
@@ -2099,6 +2297,7 @@ export type ConcessioneUncheckedCreateWithoutCriticitaInput = {
   ubicazione?: string | null
   note?: string | null
   concessionarioId: string
+  enteId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedCreateNestedManyWithoutConcessioneInput
@@ -2161,6 +2360,7 @@ export type ConcessioneUpdateWithoutCriticitaInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   concessionario?: Prisma.ConcessionarioUpdateOneRequiredWithoutConcessioniNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutConcessioniNestedInput
   obblighi?: Prisma.ObbligoConcessorioUpdateManyWithoutConcessioneNestedInput
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutConcessioneNestedInput
@@ -2203,6 +2403,7 @@ export type ConcessioneUncheckedUpdateWithoutCriticitaInput = {
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionarioId?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -2249,6 +2450,7 @@ export type ConcessioneCreateWithoutProcedimentiInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   concessionario: Prisma.ConcessionarioCreateNestedOneWithoutConcessioniInput
+  ente?: Prisma.EnteCreateNestedOneWithoutConcessioniInput
   obblighi?: Prisma.ObbligoConcessorioCreateNestedManyWithoutConcessioneInput
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
@@ -2291,6 +2493,7 @@ export type ConcessioneUncheckedCreateWithoutProcedimentiInput = {
   ubicazione?: string | null
   note?: string | null
   concessionarioId: string
+  enteId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedCreateNestedManyWithoutConcessioneInput
@@ -2353,6 +2556,7 @@ export type ConcessioneUpdateWithoutProcedimentiInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   concessionario?: Prisma.ConcessionarioUpdateOneRequiredWithoutConcessioniNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutConcessioniNestedInput
   obblighi?: Prisma.ObbligoConcessorioUpdateManyWithoutConcessioneNestedInput
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
@@ -2395,6 +2599,7 @@ export type ConcessioneUncheckedUpdateWithoutProcedimentiInput = {
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionarioId?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -2441,6 +2646,7 @@ export type ConcessioneCreateWithoutSopralluoghiInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   concessionario: Prisma.ConcessionarioCreateNestedOneWithoutConcessioniInput
+  ente?: Prisma.EnteCreateNestedOneWithoutConcessioniInput
   obblighi?: Prisma.ObbligoConcessorioCreateNestedManyWithoutConcessioneInput
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
@@ -2483,6 +2689,7 @@ export type ConcessioneUncheckedCreateWithoutSopralluoghiInput = {
   ubicazione?: string | null
   note?: string | null
   concessionarioId: string
+  enteId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedCreateNestedManyWithoutConcessioneInput
@@ -2545,6 +2752,7 @@ export type ConcessioneUpdateWithoutSopralluoghiInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   concessionario?: Prisma.ConcessionarioUpdateOneRequiredWithoutConcessioniNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutConcessioniNestedInput
   obblighi?: Prisma.ObbligoConcessorioUpdateManyWithoutConcessioneNestedInput
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
@@ -2587,6 +2795,7 @@ export type ConcessioneUncheckedUpdateWithoutSopralluoghiInput = {
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionarioId?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -2633,6 +2842,7 @@ export type ConcessioneCreateWithoutPagamentiInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   concessionario: Prisma.ConcessionarioCreateNestedOneWithoutConcessioniInput
+  ente?: Prisma.EnteCreateNestedOneWithoutConcessioniInput
   obblighi?: Prisma.ObbligoConcessorioCreateNestedManyWithoutConcessioneInput
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
@@ -2675,6 +2885,7 @@ export type ConcessioneUncheckedCreateWithoutPagamentiInput = {
   ubicazione?: string | null
   note?: string | null
   concessionarioId: string
+  enteId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedCreateNestedManyWithoutConcessioneInput
@@ -2737,6 +2948,7 @@ export type ConcessioneUpdateWithoutPagamentiInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   concessionario?: Prisma.ConcessionarioUpdateOneRequiredWithoutConcessioniNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutConcessioniNestedInput
   obblighi?: Prisma.ObbligoConcessorioUpdateManyWithoutConcessioneNestedInput
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
@@ -2779,6 +2991,7 @@ export type ConcessioneUncheckedUpdateWithoutPagamentiInput = {
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionarioId?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -2825,6 +3038,7 @@ export type ConcessioneCreateWithoutDocumentiInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   concessionario: Prisma.ConcessionarioCreateNestedOneWithoutConcessioniInput
+  ente?: Prisma.EnteCreateNestedOneWithoutConcessioniInput
   obblighi?: Prisma.ObbligoConcessorioCreateNestedManyWithoutConcessioneInput
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
@@ -2867,6 +3081,7 @@ export type ConcessioneUncheckedCreateWithoutDocumentiInput = {
   ubicazione?: string | null
   note?: string | null
   concessionarioId: string
+  enteId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedCreateNestedManyWithoutConcessioneInput
@@ -2929,6 +3144,7 @@ export type ConcessioneUpdateWithoutDocumentiInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   concessionario?: Prisma.ConcessionarioUpdateOneRequiredWithoutConcessioniNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutConcessioniNestedInput
   obblighi?: Prisma.ObbligoConcessorioUpdateManyWithoutConcessioneNestedInput
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
@@ -2971,6 +3187,7 @@ export type ConcessioneUncheckedUpdateWithoutDocumentiInput = {
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionarioId?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -3017,6 +3234,7 @@ export type ConcessioneCreateWithoutReportInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   concessionario: Prisma.ConcessionarioCreateNestedOneWithoutConcessioniInput
+  ente?: Prisma.EnteCreateNestedOneWithoutConcessioniInput
   obblighi?: Prisma.ObbligoConcessorioCreateNestedManyWithoutConcessioneInput
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
@@ -3059,6 +3277,7 @@ export type ConcessioneUncheckedCreateWithoutReportInput = {
   ubicazione?: string | null
   note?: string | null
   concessionarioId: string
+  enteId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedCreateNestedManyWithoutConcessioneInput
@@ -3121,6 +3340,7 @@ export type ConcessioneUpdateWithoutReportInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   concessionario?: Prisma.ConcessionarioUpdateOneRequiredWithoutConcessioniNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutConcessioniNestedInput
   obblighi?: Prisma.ObbligoConcessorioUpdateManyWithoutConcessioneNestedInput
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
@@ -3163,6 +3383,7 @@ export type ConcessioneUncheckedUpdateWithoutReportInput = {
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionarioId?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -3209,6 +3430,7 @@ export type ConcessioneCreateWithoutNormaImpattiInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   concessionario: Prisma.ConcessionarioCreateNestedOneWithoutConcessioniInput
+  ente?: Prisma.EnteCreateNestedOneWithoutConcessioniInput
   obblighi?: Prisma.ObbligoConcessorioCreateNestedManyWithoutConcessioneInput
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
@@ -3251,6 +3473,7 @@ export type ConcessioneUncheckedCreateWithoutNormaImpattiInput = {
   ubicazione?: string | null
   note?: string | null
   concessionarioId: string
+  enteId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedCreateNestedManyWithoutConcessioneInput
@@ -3313,6 +3536,7 @@ export type ConcessioneUpdateWithoutNormaImpattiInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   concessionario?: Prisma.ConcessionarioUpdateOneRequiredWithoutConcessioniNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutConcessioniNestedInput
   obblighi?: Prisma.ObbligoConcessorioUpdateManyWithoutConcessioneNestedInput
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
@@ -3355,6 +3579,7 @@ export type ConcessioneUncheckedUpdateWithoutNormaImpattiInput = {
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionarioId?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -3401,6 +3626,7 @@ export type ConcessioneCreateWithoutActivityLogsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   concessionario: Prisma.ConcessionarioCreateNestedOneWithoutConcessioniInput
+  ente?: Prisma.EnteCreateNestedOneWithoutConcessioniInput
   obblighi?: Prisma.ObbligoConcessorioCreateNestedManyWithoutConcessioneInput
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
@@ -3443,6 +3669,7 @@ export type ConcessioneUncheckedCreateWithoutActivityLogsInput = {
   ubicazione?: string | null
   note?: string | null
   concessionarioId: string
+  enteId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedCreateNestedManyWithoutConcessioneInput
@@ -3505,6 +3732,7 @@ export type ConcessioneUpdateWithoutActivityLogsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   concessionario?: Prisma.ConcessionarioUpdateOneRequiredWithoutConcessioniNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutConcessioniNestedInput
   obblighi?: Prisma.ObbligoConcessorioUpdateManyWithoutConcessioneNestedInput
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
@@ -3547,6 +3775,7 @@ export type ConcessioneUncheckedUpdateWithoutActivityLogsInput = {
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionarioId?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -3559,6 +3788,164 @@ export type ConcessioneUncheckedUpdateWithoutActivityLogsInput = {
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
+}
+
+export type ConcessioneCreateManyEnteInput = {
+  id?: string
+  numeroAtto: string
+  dataRilascio: Date | string
+  dataScadenza: Date | string
+  normaRiferimento: $Enums.NormaRiferimento
+  tipologiaBene: $Enums.TipologiaBene
+  attivita: $Enums.AttivitaConcessione
+  superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
+  canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
+  stato: $Enums.StatoConcessione
+  descrizioneBene?: string | null
+  ubicazione?: string | null
+  note?: string | null
+  concessionarioId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type ConcessioneUpdateWithoutEnteInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
+  dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  normaRiferimento?: Prisma.EnumNormaRiferimentoFieldUpdateOperationsInput | $Enums.NormaRiferimento
+  tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
+  attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
+  superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
+  stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
+  descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessionario?: Prisma.ConcessionarioUpdateOneRequiredWithoutConcessioniNestedInput
+  obblighi?: Prisma.ObbligoConcessorioUpdateManyWithoutConcessioneNestedInput
+  scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
+  criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
+  procedimenti?: Prisma.ProcedimentoUpdateManyWithoutConcessioneNestedInput
+  sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
+  pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
+  report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
+  normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
+}
+
+export type ConcessioneUncheckedUpdateWithoutEnteInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
+  dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  normaRiferimento?: Prisma.EnumNormaRiferimentoFieldUpdateOperationsInput | $Enums.NormaRiferimento
+  tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
+  attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
+  superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
+  stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
+  descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionarioId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  obblighi?: Prisma.ObbligoConcessorioUncheckedUpdateManyWithoutConcessioneNestedInput
+  scadenze?: Prisma.ScadenzaUncheckedUpdateManyWithoutConcessioneNestedInput
+  criticita?: Prisma.CriticitaUncheckedUpdateManyWithoutConcessioneNestedInput
+  procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
+  pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
+  normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
+}
+
+export type ConcessioneUncheckedUpdateManyWithoutEnteInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
+  dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  normaRiferimento?: Prisma.EnumNormaRiferimentoFieldUpdateOperationsInput | $Enums.NormaRiferimento
+  tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
+  attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
+  superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
+  stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
+  descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionarioId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ConcessioneCreateManyConcessionarioInput = {
@@ -3590,6 +3977,7 @@ export type ConcessioneCreateManyConcessionarioInput = {
   descrizioneBene?: string | null
   ubicazione?: string | null
   note?: string | null
+  enteId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -3625,6 +4013,7 @@ export type ConcessioneUpdateWithoutConcessionarioInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ente?: Prisma.EnteUpdateOneWithoutConcessioniNestedInput
   obblighi?: Prisma.ObbligoConcessorioUpdateManyWithoutConcessioneNestedInput
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
@@ -3667,6 +4056,7 @@ export type ConcessioneUncheckedUpdateWithoutConcessionarioInput = {
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   obblighi?: Prisma.ObbligoConcessorioUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -3711,6 +4101,7 @@ export type ConcessioneUncheckedUpdateManyWithoutConcessionarioInput = {
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -3866,9 +4257,11 @@ export type ConcessioneSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   ubicazione?: boolean
   note?: boolean
   concessionarioId?: boolean
+  enteId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   concessionario?: boolean | Prisma.ConcessionarioDefaultArgs<ExtArgs>
+  ente?: boolean | Prisma.Concessione$enteArgs<ExtArgs>
   obblighi?: boolean | Prisma.Concessione$obblighiArgs<ExtArgs>
   scadenze?: boolean | Prisma.Concessione$scadenzeArgs<ExtArgs>
   criticita?: boolean | Prisma.Concessione$criticitaArgs<ExtArgs>
@@ -3913,9 +4306,11 @@ export type ConcessioneSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   ubicazione?: boolean
   note?: boolean
   concessionarioId?: boolean
+  enteId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   concessionario?: boolean | Prisma.ConcessionarioDefaultArgs<ExtArgs>
+  ente?: boolean | Prisma.Concessione$enteArgs<ExtArgs>
 }, ExtArgs["result"]["concessione"]>
 
 export type ConcessioneSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -3948,9 +4343,11 @@ export type ConcessioneSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   ubicazione?: boolean
   note?: boolean
   concessionarioId?: boolean
+  enteId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   concessionario?: boolean | Prisma.ConcessionarioDefaultArgs<ExtArgs>
+  ente?: boolean | Prisma.Concessione$enteArgs<ExtArgs>
 }, ExtArgs["result"]["concessione"]>
 
 export type ConcessioneSelectScalar = {
@@ -3983,13 +4380,15 @@ export type ConcessioneSelectScalar = {
   ubicazione?: boolean
   note?: boolean
   concessionarioId?: boolean
+  enteId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ConcessioneOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "numeroAtto" | "dataRilascio" | "dataScadenza" | "normaRiferimento" | "tipologiaBene" | "attivita" | "superficieMq" | "latitudineGis" | "longitudineGis" | "coordinateGis" | "areaDescrizione" | "zonaPortuale" | "riferimentoCatastale" | "canoneAnnuo" | "categoriaCanone" | "concessionVertical" | "concessionObjectType" | "awardingProcedureType" | "removableWorksProfile" | "seasonalityProfile" | "feeRegime" | "comparativeProcedureStatus" | "thirdPartyManagementStatus" | "stato" | "descrizioneBene" | "ubicazione" | "note" | "concessionarioId" | "createdAt" | "updatedAt", ExtArgs["result"]["concessione"]>
+export type ConcessioneOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "numeroAtto" | "dataRilascio" | "dataScadenza" | "normaRiferimento" | "tipologiaBene" | "attivita" | "superficieMq" | "latitudineGis" | "longitudineGis" | "coordinateGis" | "areaDescrizione" | "zonaPortuale" | "riferimentoCatastale" | "canoneAnnuo" | "categoriaCanone" | "concessionVertical" | "concessionObjectType" | "awardingProcedureType" | "removableWorksProfile" | "seasonalityProfile" | "feeRegime" | "comparativeProcedureStatus" | "thirdPartyManagementStatus" | "stato" | "descrizioneBene" | "ubicazione" | "note" | "concessionarioId" | "enteId" | "createdAt" | "updatedAt", ExtArgs["result"]["concessione"]>
 export type ConcessioneInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   concessionario?: boolean | Prisma.ConcessionarioDefaultArgs<ExtArgs>
+  ente?: boolean | Prisma.Concessione$enteArgs<ExtArgs>
   obblighi?: boolean | Prisma.Concessione$obblighiArgs<ExtArgs>
   scadenze?: boolean | Prisma.Concessione$scadenzeArgs<ExtArgs>
   criticita?: boolean | Prisma.Concessione$criticitaArgs<ExtArgs>
@@ -4005,15 +4404,18 @@ export type ConcessioneInclude<ExtArgs extends runtime.Types.Extensions.Internal
 }
 export type ConcessioneIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   concessionario?: boolean | Prisma.ConcessionarioDefaultArgs<ExtArgs>
+  ente?: boolean | Prisma.Concessione$enteArgs<ExtArgs>
 }
 export type ConcessioneIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   concessionario?: boolean | Prisma.ConcessionarioDefaultArgs<ExtArgs>
+  ente?: boolean | Prisma.Concessione$enteArgs<ExtArgs>
 }
 
 export type $ConcessionePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Concessione"
   objects: {
     concessionario: Prisma.$ConcessionarioPayload<ExtArgs>
+    ente: Prisma.$EntePayload<ExtArgs> | null
     obblighi: Prisma.$ObbligoConcessorioPayload<ExtArgs>[]
     scadenze: Prisma.$ScadenzaPayload<ExtArgs>[]
     criticita: Prisma.$CriticitaPayload<ExtArgs>[]
@@ -4056,6 +4458,7 @@ export type $ConcessionePayload<ExtArgs extends runtime.Types.Extensions.Interna
     ubicazione: string | null
     note: string | null
     concessionarioId: string
+    enteId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["concessione"]>
@@ -4453,6 +4856,7 @@ readonly fields: ConcessioneFieldRefs;
 export interface Prisma__ConcessioneClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   concessionario<T extends Prisma.ConcessionarioDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ConcessionarioDefaultArgs<ExtArgs>>): Prisma.Prisma__ConcessionarioClient<runtime.Types.Result.GetResult<Prisma.$ConcessionarioPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  ente<T extends Prisma.Concessione$enteArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$enteArgs<ExtArgs>>): Prisma.Prisma__EnteClient<runtime.Types.Result.GetResult<Prisma.$EntePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   obblighi<T extends Prisma.Concessione$obblighiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$obblighiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ObbligoConcessorioPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   scadenze<T extends Prisma.Concessione$scadenzeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$scadenzeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ScadenzaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   criticita<T extends Prisma.Concessione$criticitaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$criticitaArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CriticitaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -4522,6 +4926,7 @@ export interface ConcessioneFieldRefs {
   readonly ubicazione: Prisma.FieldRef<"Concessione", 'String'>
   readonly note: Prisma.FieldRef<"Concessione", 'String'>
   readonly concessionarioId: Prisma.FieldRef<"Concessione", 'String'>
+  readonly enteId: Prisma.FieldRef<"Concessione", 'String'>
   readonly createdAt: Prisma.FieldRef<"Concessione", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Concessione", 'DateTime'>
 }
@@ -4922,6 +5327,25 @@ export type ConcessioneDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Limit how many Concessiones to delete.
    */
   limit?: number
+}
+
+/**
+ * Concessione.ente
+ */
+export type Concessione$enteArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Ente
+   */
+  select?: Prisma.EnteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Ente
+   */
+  omit?: Prisma.EnteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EnteInclude<ExtArgs> | null
+  where?: Prisma.EnteWhereInput
 }
 
 /**
