@@ -1,4 +1,6 @@
 import { canDownloadReportPdf, getCurrentRole } from "@/lib/auth";
+import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
+import { prisma } from "@/lib/prisma";
 import { renderInstitutionalReportPdf, buildReportPdfFileName } from "@/server/pdf/reportPdf";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 import { getReportDetail } from "@/server/queries/report";
@@ -25,6 +27,58 @@ export async function GET(
       },
     });
     return new Response("Unauthorized", { status: 401 });
+  }
+
+  const reportOwnership = await prisma.report.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      enteId: true,
+      concessioneId: true,
+      concessione: {
+        select: {
+          enteId: true,
+        },
+      },
+    },
+  });
+
+  if (!reportOwnership) {
+    await auditFailure({
+      azione: "REPORT_PDF_DOWNLOAD",
+      entita: "Report",
+      entitaId: id,
+      actor: { userRole: role },
+      metadata: {
+        reason: "NOT_FOUND",
+      },
+    });
+    return new Response("Not found", { status: 404 });
+  }
+
+  const resourceEnteId = reportOwnership.enteId ?? reportOwnership.concessione?.enteId ?? null;
+  const tenantContext = await getCurrentTenantContext();
+  if (tenantContext) {
+    try {
+      requireTenantAccess(tenantContext, resourceEnteId, {
+        mode: "read",
+        allowWhenEnteMissing: true,
+      });
+    } catch {
+      await auditFailure({
+        azione: "AUTHZ_DENIED",
+        entita: "Report",
+        entitaId: id,
+        concessioneId: reportOwnership.concessioneId,
+        enteId: resourceEnteId,
+        actor: { userRole: role },
+        metadata: {
+          actionType: "REPORT_PDF_DOWNLOAD",
+          reason: "CROSS_TENANT_BLOCKED",
+        },
+      });
+      return new Response("Forbidden", { status: 403 });
+    }
   }
 
   const detail = await getReportDetail(id);
@@ -73,6 +127,7 @@ export async function GET(
       format: "PDF",
       normeCollegateCount: norme.length,
     },
+    enteId: resourceEnteId,
   });
 
   return new Response(new Uint8Array(pdfBuffer), {

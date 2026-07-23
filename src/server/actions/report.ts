@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { canValidateReport, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 
 const toggleReportValidationSchema = z.object({
@@ -62,7 +63,16 @@ export async function toggleReportValidationAction(formData: FormData) {
 
   const existing = await prisma.report.findUnique({
     where: { id: parsed.data.id },
-    select: { id: true, concessioneId: true },
+    select: {
+      id: true,
+      concessioneId: true,
+      enteId: true,
+      concessione: {
+        select: {
+          enteId: true,
+        },
+      },
+    },
   });
 
   if (!existing) {
@@ -76,6 +86,31 @@ export async function toggleReportValidationAction(formData: FormData) {
       },
     });
     throw new Error("Report non trovato.");
+  }
+
+  const resourceEnteId = existing.enteId ?? existing.concessione?.enteId ?? null;
+  const tenantContext = await getCurrentTenantContext();
+  if (tenantContext) {
+    try {
+      requireTenantAccess(tenantContext, resourceEnteId, {
+        mode: "write",
+        allowWhenEnteMissing: true,
+      });
+    } catch {
+      await auditFailure({
+        azione: "AUTHZ_DENIED",
+        entita: "Report",
+        entitaId: existing.id,
+        concessioneId: existing.concessioneId,
+        enteId: resourceEnteId,
+        actor: { userRole: role },
+        metadata: {
+          actionType: "REPORT_TOGGLE_VALIDATION",
+          reason: "CROSS_TENANT_BLOCKED",
+        },
+      });
+      throw new Error("Accesso tenant non consentito.");
+    }
   }
 
   await prisma.report.update({
@@ -95,6 +130,7 @@ export async function toggleReportValidationAction(formData: FormData) {
       validato: parsed.data.validato === "SI",
       changedFields: ["validato"],
     },
+    enteId: resourceEnteId,
   });
 
   revalidatePath("/report");

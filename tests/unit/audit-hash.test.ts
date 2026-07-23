@@ -36,6 +36,7 @@ describe("audit hash helpers", () => {
       azione: "REPORT_VALIDATE",
       entita: "Report",
       entitaId: "rep-1",
+      enteId: "ente-1",
       concessioneId: "con-1",
       esito: "SUCCESS" as const,
       actor: {
@@ -59,6 +60,7 @@ describe("audit hash helpers", () => {
       azione: "CRITICITA_UPDATE",
       entita: "Criticita",
       entitaId: "crit-1",
+      enteId: "ente-7",
       concessioneId: "con-7",
       esito: "SUCCESS" as const,
       actor: {

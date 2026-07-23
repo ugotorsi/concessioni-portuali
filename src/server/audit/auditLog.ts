@@ -14,6 +14,7 @@ interface CreateAuditLogInput {
   azione: string;
   entita: string;
   entitaId?: string | null;
+  enteId?: string | null;
   concessioneId?: string | null;
   esito: "SUCCESS" | "FAILURE";
   metadata?: Prisma.InputJsonValue | null;
@@ -58,6 +59,7 @@ export async function createAuditLog(input: CreateAuditLogInput) {
       azione: input.azione,
       entita: input.entita,
       entitaId: input.entitaId ?? null,
+      enteId: input.enteId ?? null,
       concessioneId: input.concessioneId ?? null,
       esito: input.esito,
       actor,
@@ -69,6 +71,7 @@ export async function createAuditLog(input: CreateAuditLogInput) {
         userId: actor.userId,
         userEmail: actor.userEmail,
         userRole: actor.userRole,
+        enteId: input.enteId ?? null,
         concessioneId: input.concessioneId ?? null,
         azione: input.azione,
         entita: input.entita,

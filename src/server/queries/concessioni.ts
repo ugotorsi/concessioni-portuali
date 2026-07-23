@@ -2,6 +2,7 @@ import { addDays, startOfDay } from "date-fns";
 
 import { formatEnumLabel } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
+import { getCurrentTenantContext, isTenantContextConstrained } from "@/lib/tenant-auth";
 import type { Prisma } from "@/generated/prisma/client";
 
 export const STATO_CONCESSIONE_VALUES = [
@@ -242,9 +243,29 @@ function getScadenzaPriority(dataScadenza: Date, today: Date): number {
   return 2;
 }
 
+function buildConcessioneTenantWhere(
+  tenantContext: Awaited<ReturnType<typeof getCurrentTenantContext>>,
+): Prisma.ConcessioneWhereInput {
+  if (!tenantContext || !isTenantContextConstrained(tenantContext)) {
+    return {};
+  }
+
+  if (tenantContext.accessibleTenantIds.length === 0) {
+    return { enteId: null };
+  }
+
+  return {
+    OR: [
+      { enteId: { in: tenantContext.accessibleTenantIds } },
+      { enteId: null },
+    ],
+  };
+}
+
 export async function getConcessioniList(
   params: GetConcessioniListParams,
 ): Promise<GetConcessioniListResult> {
+  const tenantContext = await getCurrentTenantContext();
   const today = startOfDay(new Date());
   const in90Days = addDays(today, 90);
 
@@ -252,6 +273,7 @@ export async function getConcessioniList(
   const scadenzaWhere = getScadenzaWhere(params.scadenza);
 
   const where: Prisma.ConcessioneWhereInput = {
+    ...buildConcessioneTenantWhere(tenantContext),
     ...(search
       ? {
           OR: [
@@ -275,6 +297,8 @@ export async function getConcessioniList(
     ...(params.concessionarioId ? { concessionarioId: params.concessionarioId } : {}),
     ...(scadenzaWhere ? { dataScadenza: scadenzaWhere } : {}),
   };
+
+  const summaryWhere = buildConcessioneTenantWhere(tenantContext);
 
   const [concessioniRows, summary] = await Promise.all([
     prisma.concessione.findMany({
@@ -301,11 +325,12 @@ export async function getConcessioniList(
       },
     }),
     Promise.all([
-      prisma.concessione.count(),
-      prisma.concessione.count({ where: { stato: "ATTIVA" } }),
-      prisma.concessione.count({ where: { dataScadenza: { lt: today } } }),
+      prisma.concessione.count({ where: summaryWhere }),
+      prisma.concessione.count({ where: { ...summaryWhere, stato: "ATTIVA" } }),
+      prisma.concessione.count({ where: { ...summaryWhere, dataScadenza: { lt: today } } }),
       prisma.concessione.count({
         where: {
+          ...summaryWhere,
           dataScadenza: {
             gte: today,
             lte: in90Days,
@@ -407,8 +432,12 @@ export async function getConcessioniList(
 }
 
 export async function getConcessioneDetail(id: string): Promise<ConcessioneDetail | null> {
-  const concessione = await prisma.concessione.findUnique({
-    where: { id },
+  const tenantContext = await getCurrentTenantContext();
+  const concessione = await prisma.concessione.findFirst({
+    where: {
+      id,
+      ...buildConcessioneTenantWhere(tenantContext),
+    },
     include: {
       concessionario: true,
       obblighi: {
@@ -595,13 +624,27 @@ export async function getConcessioneDetail(id: string): Promise<ConcessioneDetai
 }
 
 export async function getConcessioniFilters(): Promise<ConcessioniFiltersData> {
-  const concessionari = await prisma.concessionario.findMany({
-    orderBy: { denominazione: "asc" },
+  const tenantContext = await getCurrentTenantContext();
+  const concessioniForFilters = await prisma.concessione.findMany({
+    where: buildConcessioneTenantWhere(tenantContext),
     select: {
-      id: true,
-      denominazione: true,
+      concessionario: {
+        select: {
+          id: true,
+          denominazione: true,
+        },
+      },
     },
   });
+
+  const concessionariMap = new Map<string, { id: string; denominazione: string }>();
+  for (const item of concessioniForFilters) {
+    concessionariMap.set(item.concessionario.id, item.concessionario);
+  }
+
+  const concessionari = Array.from(concessionariMap.values()).sort((a, b) =>
+    a.denominazione.localeCompare(b.denominazione),
+  );
 
   return {
     concessionari,

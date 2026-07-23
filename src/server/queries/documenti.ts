@@ -1,5 +1,6 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import { getCurrentTenantContext, isTenantContextConstrained } from "@/lib/tenant-auth";
 import { formatEnumLabel } from "@/lib/utils";
 import {
   DOCUMENT_CANALE_VALUES,
@@ -94,9 +95,47 @@ function buildWhere(params: GetDocumentiListParams): Prisma.DocumentoWhereInput 
   };
 }
 
+function buildDocumentoTenantWhere(
+  tenantContext: Awaited<ReturnType<typeof getCurrentTenantContext>>,
+): Prisma.DocumentoWhereInput {
+  if (!tenantContext || !isTenantContextConstrained(tenantContext)) {
+    return {};
+  }
+
+  if (tenantContext.accessibleTenantIds.length === 0) {
+    return {
+      OR: [{ enteId: null, concessioneId: null }],
+    };
+  }
+
+  const tenantIds = tenantContext.accessibleTenantIds;
+
+  return {
+    OR: [
+      { enteId: { in: tenantIds } },
+      {
+        enteId: null,
+        concessione: { is: { enteId: { in: tenantIds } } },
+      },
+      {
+        enteId: null,
+        report: { is: { enteId: { in: tenantIds } } },
+      },
+      {
+        enteId: null,
+        concessioneId: null,
+      },
+    ],
+  };
+}
+
 export async function getDocumentiList(params: GetDocumentiListParams): Promise<DocumentoListItem[]> {
+  const tenantContext = await getCurrentTenantContext();
   const rows = await prisma.documento.findMany({
-    where: buildWhere(params),
+    where: {
+      ...buildDocumentoTenantWhere(tenantContext),
+      ...buildWhere(params),
+    },
     orderBy: [{ createdAt: "desc" }],
     select: {
       id: true,
@@ -140,6 +179,16 @@ export async function getDocumentiList(params: GetDocumentiListParams): Promise<
 }
 
 export async function getDocumentiFiltersData(): Promise<DocumentiFiltersData> {
+  const tenantContext = await getCurrentTenantContext();
+  const concessioneTenantWhere =
+    !tenantContext || !isTenantContextConstrained(tenantContext)
+      ? {}
+      : tenantContext.accessibleTenantIds.length === 0
+        ? { enteId: null }
+        : {
+            OR: [{ enteId: { in: tenantContext.accessibleTenantIds } }, { enteId: null }],
+          };
+
   const [
     concessioni,
     criticita,
@@ -149,30 +198,43 @@ export async function getDocumentiFiltersData(): Promise<DocumentiFiltersData> {
     report,
   ] = await Promise.all([
     prisma.concessione.findMany({
+      where: concessioneTenantWhere,
       orderBy: [{ dataScadenza: "asc" }],
       select: { id: true, numeroAtto: true },
     }),
     prisma.criticita.findMany({
+      where: { concessione: concessioneTenantWhere },
       orderBy: [{ dataRilevazione: "desc" }],
       take: 50,
       select: { id: true, tipologia: true, concessione: { select: { numeroAtto: true } } },
     }),
     prisma.procedimento.findMany({
+      where: { concessione: concessioneTenantWhere },
       orderBy: [{ createdAt: "desc" }],
       take: 50,
       select: { id: true, tipologia: true, concessione: { select: { numeroAtto: true } } },
     }),
     prisma.sopralluogo.findMany({
+      where: { concessione: concessioneTenantWhere },
       orderBy: [{ data: "desc" }],
       take: 50,
       select: { id: true, data: true, concessione: { select: { numeroAtto: true } } },
     }),
     prisma.pagamento.findMany({
+      where: { concessione: concessioneTenantWhere },
       orderBy: [{ dataScadenza: "desc" }],
       take: 50,
       select: { id: true, annoRiferimento: true, concessione: { select: { numeroAtto: true } } },
     }),
     prisma.report.findMany({
+      where:
+        !tenantContext || !isTenantContextConstrained(tenantContext)
+          ? {}
+          : tenantContext.accessibleTenantIds.length === 0
+            ? { enteId: null }
+            : {
+                OR: [{ enteId: { in: tenantContext.accessibleTenantIds } }, { enteId: null }],
+              },
       orderBy: [{ createdAt: "desc" }],
       take: 50,
       select: { id: true, titolo: true },

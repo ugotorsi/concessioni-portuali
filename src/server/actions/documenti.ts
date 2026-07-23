@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { BACKOFFICE_ROLES, getCurrentUser, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 import { buildLinkedEntityMetadata, parseUploadDocumentFormData, DOCUMENT_TIPOLOGIA_VALUES } from "@/server/documents/validation";
 import { DOCUMENT_CANALE_VALUES, DOCUMENT_DIREZIONE_VALUES, normalizeProtocolloMetadata } from "@/server/documents/protocollo";
@@ -45,6 +46,114 @@ async function assertLinkedEntitiesExist(input: {
   if (result.some((item) => !item)) {
     throw new Error("Una o più entità collegate non esistono.");
   }
+}
+
+async function resolveLinkedTenantForDocumento(input: {
+  concessioneId?: string;
+  criticitaId?: string;
+  procedimentoId?: string;
+  sopralluogoId?: string;
+  pagamentoId?: string;
+  reportId?: string;
+}): Promise<{ enteId: string | null }> {
+  const candidateTenantIds = new Set<string>();
+
+  if (input.concessioneId) {
+    const concessione = await prisma.concessione.findUnique({
+      where: { id: input.concessioneId },
+      select: { id: true, enteId: true },
+    });
+    if (!concessione) {
+      throw new Error("Concessione collegata non trovata.");
+    }
+    if (concessione.enteId) {
+      candidateTenantIds.add(concessione.enteId);
+    }
+  }
+
+  if (input.criticitaId) {
+    const criticita = await prisma.criticita.findUnique({
+      where: { id: input.criticitaId },
+      select: { id: true, concessione: { select: { enteId: true } } },
+    });
+    if (!criticita) {
+      throw new Error("Criticita collegata non trovata.");
+    }
+    if (criticita.concessione.enteId) {
+      candidateTenantIds.add(criticita.concessione.enteId);
+    }
+  }
+
+  if (input.procedimentoId) {
+    const procedimento = await prisma.procedimento.findUnique({
+      where: { id: input.procedimentoId },
+      select: { id: true, concessione: { select: { enteId: true } } },
+    });
+    if (!procedimento) {
+      throw new Error("Procedimento collegato non trovato.");
+    }
+    if (procedimento.concessione.enteId) {
+      candidateTenantIds.add(procedimento.concessione.enteId);
+    }
+  }
+
+  if (input.sopralluogoId) {
+    const sopralluogo = await prisma.sopralluogo.findUnique({
+      where: { id: input.sopralluogoId },
+      select: { id: true, concessione: { select: { enteId: true } } },
+    });
+    if (!sopralluogo) {
+      throw new Error("Sopralluogo collegato non trovato.");
+    }
+    if (sopralluogo.concessione.enteId) {
+      candidateTenantIds.add(sopralluogo.concessione.enteId);
+    }
+  }
+
+  if (input.pagamentoId) {
+    const pagamento = await prisma.pagamento.findUnique({
+      where: { id: input.pagamentoId },
+      select: { id: true, concessione: { select: { enteId: true } } },
+    });
+    if (!pagamento) {
+      throw new Error("Pagamento collegato non trovato.");
+    }
+    if (pagamento.concessione.enteId) {
+      candidateTenantIds.add(pagamento.concessione.enteId);
+    }
+  }
+
+  if (input.reportId) {
+    const report = await prisma.report.findUnique({
+      where: { id: input.reportId },
+      select: {
+        id: true,
+        enteId: true,
+        concessione: {
+          select: {
+            enteId: true,
+          },
+        },
+      },
+    });
+    if (!report) {
+      throw new Error("Report collegato non trovato.");
+    }
+    if (report.enteId) {
+      candidateTenantIds.add(report.enteId);
+    }
+    if (report.concessione?.enteId) {
+      candidateTenantIds.add(report.concessione.enteId);
+    }
+  }
+
+  if (candidateTenantIds.size > 1) {
+    throw new Error("Entita collegate appartenenti a tenant diversi non consentite.");
+  }
+
+  return {
+    enteId: candidateTenantIds.values().next().value ?? null,
+  };
 }
 
 function revalidateLinkedPaths(input: {
@@ -112,6 +221,30 @@ export async function createDocumentoUploadAction(formData: FormData) {
   }
 
   const currentUser = await getCurrentUser();
+  const tenantContext = await getCurrentTenantContext();
+  const linkedTenant = await resolveLinkedTenantForDocumento(payload);
+
+  if (tenantContext) {
+    try {
+      requireTenantAccess(tenantContext, linkedTenant.enteId, {
+        mode: "write",
+        allowWhenEnteMissing: true,
+      });
+    } catch {
+      await auditFailure({
+        azione: "AUTHZ_DENIED",
+        entita: "Documento",
+        concessioneId: payload.concessioneId ?? null,
+        enteId: linkedTenant.enteId,
+        actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+        metadata: {
+          actionType: "DOCUMENT_UPLOAD",
+          reason: "CROSS_TENANT_BLOCKED",
+        },
+      });
+      throw new Error("Accesso tenant non consentito.");
+    }
+  }
 
   const linked = buildLinkedEntityMetadata(payload);
 
@@ -139,6 +272,7 @@ export async function createDocumentoUploadAction(formData: FormData) {
       uploadedByUserId: currentUser?.id ?? null,
       uploadedByUserEmail: currentUser?.email ?? null,
       uploadedByUserRole: role,
+      enteId: linkedTenant.enteId,
       concessioneId: payload.concessioneId ?? null,
       criticitaId: payload.criticitaId ?? null,
       procedimentoId: payload.procedimentoId ?? null,
@@ -187,6 +321,7 @@ export async function createDocumentoUploadAction(formData: FormData) {
         issue: error instanceof Error ? error.message : "Errore storage documento.",
         storageDiagnostics,
       },
+      enteId: linkedTenant.enteId,
     });
     throw new Error("Caricamento documento non riuscito: errore durante la persistenza storage.");
   }
@@ -234,6 +369,7 @@ export async function createDocumentoUploadAction(formData: FormData) {
       notaLegale: "Metadato registrato a fini istruttori",
       linkedEntities: linked,
     },
+    enteId: linkedTenant.enteId,
   });
 
   revalidateLinkedPaths({
@@ -275,6 +411,47 @@ export async function archiveDocumentoAction(formData: FormData) {
 
   const currentUser = await getCurrentUser();
 
+  const existing = await prisma.documento.findUnique({
+    where: { id: parsed.data.id },
+    select: {
+      id: true,
+      enteId: true,
+      concessione: {
+        select: {
+          enteId: true,
+        },
+      },
+    },
+  });
+
+  if (!existing) {
+    throw new Error("Documento non trovato.");
+  }
+
+  const resourceEnteId = existing.enteId ?? existing.concessione?.enteId ?? null;
+  const tenantContext = await getCurrentTenantContext();
+  if (tenantContext) {
+    try {
+      requireTenantAccess(tenantContext, resourceEnteId, {
+        mode: "write",
+        allowWhenEnteMissing: true,
+      });
+    } catch {
+      await auditFailure({
+        azione: "AUTHZ_DENIED",
+        entita: "Documento",
+        entitaId: parsed.data.id,
+        enteId: resourceEnteId,
+        actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+        metadata: {
+          actionType: "DOCUMENT_ARCHIVE",
+          reason: "CROSS_TENANT_BLOCKED",
+        },
+      });
+      throw new Error("Accesso tenant non consentito.");
+    }
+  }
+
   const updated = await prisma.documento.update({
     where: { id: parsed.data.id },
     data: {
@@ -302,6 +479,7 @@ export async function archiveDocumentoAction(formData: FormData) {
     metadata: {
       changedFields: ["statoDocumento", "archivedAt"],
     },
+    enteId: resourceEnteId,
   });
 
   revalidateLinkedPaths({
@@ -429,6 +607,47 @@ export async function updateDocumentoMetadataAction(formData: FormData) {
 
   const currentUser = await getCurrentUser();
 
+  const existing = await prisma.documento.findUnique({
+    where: { id: parsed.data.id },
+    select: {
+      id: true,
+      enteId: true,
+      concessione: {
+        select: {
+          enteId: true,
+        },
+      },
+    },
+  });
+
+  if (!existing) {
+    throw new Error("Documento non trovato.");
+  }
+
+  const resourceEnteId = existing.enteId ?? existing.concessione?.enteId ?? null;
+  const tenantContext = await getCurrentTenantContext();
+  if (tenantContext) {
+    try {
+      requireTenantAccess(tenantContext, resourceEnteId, {
+        mode: "write",
+        allowWhenEnteMissing: true,
+      });
+    } catch {
+      await auditFailure({
+        azione: "AUTHZ_DENIED",
+        entita: "Documento",
+        entitaId: parsed.data.id,
+        enteId: resourceEnteId,
+        actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+        metadata: {
+          actionType: "DOCUMENT_METADATA_UPDATE",
+          reason: "CROSS_TENANT_BLOCKED",
+        },
+      });
+      throw new Error("Accesso tenant non consentito.");
+    }
+  }
+
   const updated = await prisma.documento.update({
     where: { id: parsed.data.id },
     data: {
@@ -481,6 +700,7 @@ export async function updateDocumentoMetadataAction(formData: FormData) {
       ],
       notaLegale: "Metadato registrato a fini istruttori",
     },
+    enteId: resourceEnteId,
   });
 
   revalidateLinkedPaths({

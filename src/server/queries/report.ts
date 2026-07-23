@@ -2,6 +2,7 @@ import { startOfMonth } from "date-fns";
 
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import { getCurrentTenantContext, isTenantContextConstrained } from "@/lib/tenant-auth";
 import { formatEnumLabel } from "@/lib/utils";
 
 export const REPORT_TIPOLOGIA_VALUES = [
@@ -238,6 +239,55 @@ function buildWhere(params: GetReportListParams): Prisma.ReportWhereInput {
   };
 }
 
+function buildConcessioneTenantWhere(
+  tenantContext: Awaited<ReturnType<typeof getCurrentTenantContext>>,
+): Prisma.ConcessioneWhereInput {
+  if (!tenantContext || !isTenantContextConstrained(tenantContext)) {
+    return {};
+  }
+
+  if (tenantContext.accessibleTenantIds.length === 0) {
+    return { enteId: null };
+  }
+
+  return {
+    OR: [
+      { enteId: { in: tenantContext.accessibleTenantIds } },
+      { enteId: null },
+    ],
+  };
+}
+
+function buildReportTenantWhere(
+  tenantContext: Awaited<ReturnType<typeof getCurrentTenantContext>>,
+): Prisma.ReportWhereInput {
+  if (!tenantContext || !isTenantContextConstrained(tenantContext)) {
+    return {};
+  }
+
+  if (tenantContext.accessibleTenantIds.length === 0) {
+    return {
+      OR: [{ enteId: null, concessioneId: null }],
+    };
+  }
+
+  const tenantIds = tenantContext.accessibleTenantIds;
+
+  return {
+    OR: [
+      { enteId: { in: tenantIds } },
+      {
+        enteId: null,
+        concessione: { is: { enteId: { in: tenantIds } } },
+      },
+      {
+        enteId: null,
+        concessioneId: null,
+      },
+    ],
+  };
+}
+
 function tipologiaPriority(tipologia: string): number {
   if (tipologia === "DOSSIER_ISTRUTTORIO") {
     return 0;
@@ -255,8 +305,12 @@ function tipologiaPriority(tipologia: string): number {
 }
 
 export async function getReportList(params: GetReportListParams): Promise<GetReportListResult> {
+  const tenantContext = await getCurrentTenantContext();
   const rows = await prisma.report.findMany({
-    where: buildWhere(params),
+    where: {
+      ...buildReportTenantWhere(tenantContext),
+      ...buildWhere(params),
+    },
     select: {
       id: true,
       tipologia: true,
@@ -325,8 +379,12 @@ export async function getReportList(params: GetReportListParams): Promise<GetRep
 }
 
 export async function getReportDetail(id: string): Promise<ReportDetail | null> {
-  const report = await prisma.report.findUnique({
-    where: { id },
+  const tenantContext = await getCurrentTenantContext();
+  const report = await prisma.report.findFirst({
+    where: {
+      id,
+      ...buildReportTenantWhere(tenantContext),
+    },
     include: {
       documenti: {
         orderBy: [{ dataDocumento: "desc" }, { createdAt: "desc" }],
@@ -609,7 +667,9 @@ export async function getReportDetail(id: string): Promise<ReportDetail | null> 
 }
 
 export async function getReportFilters(): Promise<ReportFiltersData> {
+  const tenantContext = await getCurrentTenantContext();
   const concessioni = await prisma.concessione.findMany({
+    where: buildConcessioneTenantWhere(tenantContext),
     orderBy: [{ dataScadenza: "asc" }],
     select: {
       id: true,
@@ -640,7 +700,9 @@ export async function getReportFilters(): Promise<ReportFiltersData> {
 }
 
 export async function getReportDashboardSummary(): Promise<ReportDashboardSummary> {
+  const tenantContext = await getCurrentTenantContext();
   const monthStart = startOfMonth(new Date());
+  const reportTenantWhere = buildReportTenantWhere(tenantContext);
 
   const [
     totaleReport,
@@ -652,14 +714,14 @@ export async function getReportDashboardSummary(): Promise<ReportDashboardSummar
     reportMorosita,
     proposteBando,
   ] = await Promise.all([
-    prisma.report.count(),
-    prisma.report.count({ where: { validato: true } }),
-    prisma.report.count({ where: { validato: false } }),
-    prisma.report.count({ where: { tipologia: "REPORT_MENSILE", createdAt: { gte: monthStart } } }),
-    prisma.report.count({ where: { tipologia: "DOSSIER_ISTRUTTORIO" } }),
-    prisma.report.count({ where: { tipologia: "REPORT_CRITICITA" } }),
-    prisma.report.count({ where: { tipologia: "REPORT_MOROSITA" } }),
-    prisma.report.count({ where: { tipologia: "PROPOSTA_BANDO" } }),
+    prisma.report.count({ where: reportTenantWhere }),
+    prisma.report.count({ where: { ...reportTenantWhere, validato: true } }),
+    prisma.report.count({ where: { ...reportTenantWhere, validato: false } }),
+    prisma.report.count({ where: { ...reportTenantWhere, tipologia: "REPORT_MENSILE", createdAt: { gte: monthStart } } }),
+    prisma.report.count({ where: { ...reportTenantWhere, tipologia: "DOSSIER_ISTRUTTORIO" } }),
+    prisma.report.count({ where: { ...reportTenantWhere, tipologia: "REPORT_CRITICITA" } }),
+    prisma.report.count({ where: { ...reportTenantWhere, tipologia: "REPORT_MOROSITA" } }),
+    prisma.report.count({ where: { ...reportTenantWhere, tipologia: "PROPOSTA_BANDO" } }),
   ]);
 
   return {

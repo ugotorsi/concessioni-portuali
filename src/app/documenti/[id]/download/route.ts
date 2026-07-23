@@ -1,4 +1,5 @@
 import { getCurrentRole } from "@/lib/auth";
+import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 import { readStoredDocumentWithProvider, storedDocumentExists } from "@/server/documents/storage";
 import { DocumentStorageS3Error } from "@/server/documents/storage/s3StorageAdapter";
@@ -31,6 +32,7 @@ export async function GET(
     where: { id },
     select: {
       id: true,
+      enteId: true,
       nome: true,
       mimeType: true,
       originalName: true,
@@ -42,6 +44,11 @@ export async function GET(
       url: true,
       statoDocumento: true,
       concessioneId: true,
+      concessione: {
+        select: {
+          enteId: true,
+        },
+      },
     },
   });
 
@@ -69,6 +76,31 @@ export async function GET(
       },
     });
     return new Response("Forbidden", { status: 403 });
+  }
+
+  const tenantContext = await getCurrentTenantContext();
+  const resourceEnteId = documento.enteId ?? documento.concessione?.enteId ?? null;
+  if (tenantContext) {
+    try {
+      requireTenantAccess(tenantContext, resourceEnteId, {
+        mode: "read",
+        allowWhenEnteMissing: true,
+      });
+    } catch {
+      await auditFailure({
+        azione: "AUTHZ_DENIED",
+        entita: "Documento",
+        entitaId: documento.id,
+        concessioneId: documento.concessioneId,
+        enteId: resourceEnteId,
+        actor: { userRole: role },
+        metadata: {
+          actionType: "DOCUMENT_DOWNLOAD",
+          reason: "CROSS_TENANT_BLOCKED",
+        },
+      });
+      return new Response("Forbidden", { status: 403 });
+    }
   }
 
   const requestedPreview = new URL(request.url).searchParams.get("preview") === "1";
@@ -180,6 +212,7 @@ export async function GET(
         mimeType: documento.mimeType,
         statoDocumento: documento.statoDocumento,
       },
+      enteId: resourceEnteId,
     });
 
     return new Response(new Uint8Array(stored.body), {
@@ -206,6 +239,7 @@ export async function GET(
         redirectUrl,
         statoDocumento: documento.statoDocumento,
       },
+      enteId: resourceEnteId,
     });
 
     return Response.redirect(redirectUrl as string, 302);

@@ -10,6 +10,7 @@ export interface ComputeAuditHashInput {
   azione: string;
   entita: string;
   entitaId: string | null;
+  enteId: string | null;
   concessioneId: string | null;
   esito: "SUCCESS" | "FAILURE";
   actor: {
@@ -64,6 +65,7 @@ export function computeAuditHash(input: ComputeAuditHashInput): string {
     azione: input.azione,
     entita: input.entita,
     entitaId: input.entitaId,
+    enteId: input.enteId,
     concessioneId: input.concessioneId,
     esito: input.esito,
     metadata: input.metadata,
