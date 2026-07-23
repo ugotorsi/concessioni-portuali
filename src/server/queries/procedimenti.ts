@@ -79,6 +79,7 @@ export interface GetProcedimentiListParams {
 export interface ProcedimentoListItem {
   id: string;
   tipologia: string;
+  checklistProfile: string;
   riferimentoNormativo: string | null;
   dataAvvio: Date | null;
   dataScadenzaContraddittorio: Date | null;
@@ -144,6 +145,7 @@ export interface ProcedimentoDetail {
   procedimento: {
     id: string;
     tipologia: string;
+    checklistProfile: string;
     riferimentoNormativo: string | null;
     dataAvvio: Date | null;
     dataScadenzaContraddittorio: Date | null;
@@ -366,6 +368,7 @@ function toListItem(
   row: {
     id: string;
     tipologia: string;
+    checklistProfile: string;
     riferimentoNormativo: string | null;
     dataAvvio: Date | null;
     dataScadenzaContraddittorio: Date | null;
@@ -468,6 +471,7 @@ function toListItem(
   return {
     id: row.id,
     tipologia: row.tipologia,
+    checklistProfile: row.checklistProfile,
     riferimentoNormativo: row.riferimentoNormativo,
     dataAvvio: row.dataAvvio,
     dataScadenzaContraddittorio: row.dataScadenzaContraddittorio,
@@ -506,6 +510,7 @@ export async function getProcedimentiList(params: GetProcedimentiListParams): Pr
     select: {
       id: true,
       tipologia: true,
+      checklistProfile: true,
       riferimentoNormativo: true,
       dataAvvio: true,
       dataScadenzaContraddittorio: true,
@@ -770,6 +775,7 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
     procedimento: {
       id: procedimento.id,
       tipologia: procedimento.tipologia,
+      checklistProfile: procedimento.checklistProfile,
       riferimentoNormativo: procedimento.riferimentoNormativo,
       dataAvvio: procedimento.dataAvvio,
       dataScadenzaContraddittorio: procedimento.dataScadenzaContraddittorio,

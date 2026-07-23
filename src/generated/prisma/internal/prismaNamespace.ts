@@ -387,6 +387,7 @@ export const ModelName = {
   User: 'User',
   Concessionario: 'Concessionario',
   Concessione: 'Concessione',
+  ConcessioneLegalFramework: 'ConcessioneLegalFramework',
   ObbligoConcessorio: 'ObbligoConcessorio',
   Scadenza: 'Scadenza',
   Criticita: 'Criticita',
@@ -414,7 +415,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "concessionario" | "concessione" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "sopralluogo" | "pagamento" | "documento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog"
+    modelProps: "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "sopralluogo" | "pagamento" | "documento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -637,6 +638,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ConcessioneCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ConcessioneCountAggregateOutputType> | number
+        }
+      }
+    }
+    ConcessioneLegalFramework: {
+      payload: Prisma.$ConcessioneLegalFrameworkPayload<ExtArgs>
+      fields: Prisma.ConcessioneLegalFrameworkFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ConcessioneLegalFrameworkFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConcessioneLegalFrameworkPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ConcessioneLegalFrameworkFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConcessioneLegalFrameworkPayload>
+        }
+        findFirst: {
+          args: Prisma.ConcessioneLegalFrameworkFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConcessioneLegalFrameworkPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ConcessioneLegalFrameworkFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConcessioneLegalFrameworkPayload>
+        }
+        findMany: {
+          args: Prisma.ConcessioneLegalFrameworkFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConcessioneLegalFrameworkPayload>[]
+        }
+        create: {
+          args: Prisma.ConcessioneLegalFrameworkCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConcessioneLegalFrameworkPayload>
+        }
+        createMany: {
+          args: Prisma.ConcessioneLegalFrameworkCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ConcessioneLegalFrameworkCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConcessioneLegalFrameworkPayload>[]
+        }
+        delete: {
+          args: Prisma.ConcessioneLegalFrameworkDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConcessioneLegalFrameworkPayload>
+        }
+        update: {
+          args: Prisma.ConcessioneLegalFrameworkUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConcessioneLegalFrameworkPayload>
+        }
+        deleteMany: {
+          args: Prisma.ConcessioneLegalFrameworkDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ConcessioneLegalFrameworkUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ConcessioneLegalFrameworkUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConcessioneLegalFrameworkPayload>[]
+        }
+        upsert: {
+          args: Prisma.ConcessioneLegalFrameworkUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConcessioneLegalFrameworkPayload>
+        }
+        aggregate: {
+          args: Prisma.ConcessioneLegalFrameworkAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConcessioneLegalFramework>
+        }
+        groupBy: {
+          args: Prisma.ConcessioneLegalFrameworkGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConcessioneLegalFrameworkGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ConcessioneLegalFrameworkCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConcessioneLegalFrameworkCountAggregateOutputType> | number
         }
       }
     }
@@ -1626,6 +1701,14 @@ export const ConcessioneScalarFieldEnum = {
   riferimentoCatastale: 'riferimentoCatastale',
   canoneAnnuo: 'canoneAnnuo',
   categoriaCanone: 'categoriaCanone',
+  concessionVertical: 'concessionVertical',
+  concessionObjectType: 'concessionObjectType',
+  awardingProcedureType: 'awardingProcedureType',
+  removableWorksProfile: 'removableWorksProfile',
+  seasonalityProfile: 'seasonalityProfile',
+  feeRegime: 'feeRegime',
+  comparativeProcedureStatus: 'comparativeProcedureStatus',
+  thirdPartyManagementStatus: 'thirdPartyManagementStatus',
   stato: 'stato',
   descrizioneBene: 'descrizioneBene',
   ubicazione: 'ubicazione',
@@ -1636,6 +1719,17 @@ export const ConcessioneScalarFieldEnum = {
 } as const
 
 export type ConcessioneScalarFieldEnum = (typeof ConcessioneScalarFieldEnum)[keyof typeof ConcessioneScalarFieldEnum]
+
+
+export const ConcessioneLegalFrameworkScalarFieldEnum = {
+  id: 'id',
+  concessioneId: 'concessioneId',
+  framework: 'framework',
+  note: 'note',
+  createdAt: 'createdAt'
+} as const
+
+export type ConcessioneLegalFrameworkScalarFieldEnum = (typeof ConcessioneLegalFrameworkScalarFieldEnum)[keyof typeof ConcessioneLegalFrameworkScalarFieldEnum]
 
 
 export const ObbligoConcessorioScalarFieldEnum = {
@@ -1737,6 +1831,7 @@ export const ProcedimentoScalarFieldEnum = {
   dataOsservazioniPreavviso: 'dataOsservazioniPreavviso',
   valutazioneOsservazioniPreavviso: 'valutazioneOsservazioniPreavviso',
   motivazioneMancatoPreavviso: 'motivazioneMancatoPreavviso',
+  checklistProfile: 'checklistProfile',
   checklistContraddittorioCompleta: 'checklistContraddittorioCompleta',
   noteChecklistContraddittorio: 'noteChecklistContraddittorio',
   stato: 'stato',
@@ -2106,6 +2201,118 @@ export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMo
 
 
 /**
+ * Reference to a field of type 'ConcessionVertical'
+ */
+export type EnumConcessionVerticalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ConcessionVertical'>
+    
+
+
+/**
+ * Reference to a field of type 'ConcessionVertical[]'
+ */
+export type ListEnumConcessionVerticalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ConcessionVertical[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ConcessionObjectType'
+ */
+export type EnumConcessionObjectTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ConcessionObjectType'>
+    
+
+
+/**
+ * Reference to a field of type 'ConcessionObjectType[]'
+ */
+export type ListEnumConcessionObjectTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ConcessionObjectType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'AwardingProcedureType'
+ */
+export type EnumAwardingProcedureTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AwardingProcedureType'>
+    
+
+
+/**
+ * Reference to a field of type 'AwardingProcedureType[]'
+ */
+export type ListEnumAwardingProcedureTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AwardingProcedureType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'RemovableWorksProfile'
+ */
+export type EnumRemovableWorksProfileFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RemovableWorksProfile'>
+    
+
+
+/**
+ * Reference to a field of type 'RemovableWorksProfile[]'
+ */
+export type ListEnumRemovableWorksProfileFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RemovableWorksProfile[]'>
+    
+
+
+/**
+ * Reference to a field of type 'SeasonalityProfile'
+ */
+export type EnumSeasonalityProfileFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SeasonalityProfile'>
+    
+
+
+/**
+ * Reference to a field of type 'SeasonalityProfile[]'
+ */
+export type ListEnumSeasonalityProfileFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SeasonalityProfile[]'>
+    
+
+
+/**
+ * Reference to a field of type 'FeeRegime'
+ */
+export type EnumFeeRegimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FeeRegime'>
+    
+
+
+/**
+ * Reference to a field of type 'FeeRegime[]'
+ */
+export type ListEnumFeeRegimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FeeRegime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ComparativeProcedureStatus'
+ */
+export type EnumComparativeProcedureStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ComparativeProcedureStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'ComparativeProcedureStatus[]'
+ */
+export type ListEnumComparativeProcedureStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ComparativeProcedureStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ThirdPartyManagementStatus'
+ */
+export type EnumThirdPartyManagementStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ThirdPartyManagementStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'ThirdPartyManagementStatus[]'
+ */
+export type ListEnumThirdPartyManagementStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ThirdPartyManagementStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'StatoConcessione'
  */
 export type EnumStatoConcessioneFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatoConcessione'>
@@ -2116,6 +2323,20 @@ export type EnumStatoConcessioneFieldRefInput<$PrismaModel> = FieldRefInputType<
  * Reference to a field of type 'StatoConcessione[]'
  */
 export type ListEnumStatoConcessioneFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatoConcessione[]'>
+    
+
+
+/**
+ * Reference to a field of type 'LegalFramework'
+ */
+export type EnumLegalFrameworkFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalFramework'>
+    
+
+
+/**
+ * Reference to a field of type 'LegalFramework[]'
+ */
+export type ListEnumLegalFrameworkFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalFramework[]'>
     
 
 
@@ -2326,6 +2547,20 @@ export type EnumStatoPreavvisoRigettoFieldRefInput<$PrismaModel> = FieldRefInput
  * Reference to a field of type 'StatoPreavvisoRigetto[]'
  */
 export type ListEnumStatoPreavvisoRigettoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatoPreavvisoRigetto[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ChecklistProfile'
+ */
+export type EnumChecklistProfileFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ChecklistProfile'>
+    
+
+
+/**
+ * Reference to a field of type 'ChecklistProfile[]'
+ */
+export type ListEnumChecklistProfileFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ChecklistProfile[]'>
     
 
 
@@ -2623,6 +2858,7 @@ export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   concessionario?: Prisma.ConcessionarioOmit
   concessione?: Prisma.ConcessioneOmit
+  concessioneLegalFramework?: Prisma.ConcessioneLegalFrameworkOmit
   obbligoConcessorio?: Prisma.ObbligoConcessorioOmit
   scadenza?: Prisma.ScadenzaOmit
   criticita?: Prisma.CriticitaOmit

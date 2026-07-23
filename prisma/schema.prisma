@@ -46,6 +46,85 @@ enum AttivitaConcessione {
   ALTRO
 }
 
+enum ConcessionVertical {
+  PORTUALE_ADSP
+  MARITTIMA_TURISTICO_RICREATIVA
+  ALTRA_CONCESSIONE_DEMANIALE
+}
+
+enum LegalFramework {
+  ART_36_COD_NAV
+  ART_18_L_84_1994
+  ART_37_COD_NAV
+  ART_47_COD_NAV
+  DL_400_1993
+  DIR_2006_123_ART_12
+  ALTRO
+}
+
+enum ConcessionObjectType {
+  AREA_DEMANIALE
+  BANCHINA
+  MOLO
+  SPECCHIO_ACQUEO
+  PERTINENZA_DEMANIALE
+  MANUFATTO
+  LOCALE
+  ALTRO
+}
+
+enum AwardingProcedureType {
+  DIRETTA
+  COMPARATIVA_ART37
+  EVIDENZA_PUBBLICA
+  RINNOVO
+  PROROGA_TECNICA
+  ALTRO
+}
+
+enum RemovableWorksProfile {
+  NON_RILEVATO
+  PREVALENTE_AMOVIBILE
+  MISTO
+  PREVALENTE_NON_AMOVIBILE
+}
+
+enum SeasonalityProfile {
+  ANNUALE
+  STAGIONALE
+  MISTO
+  NON_RILEVATO
+}
+
+enum FeeRegime {
+  PORTUALE
+  TURISTICO_RICREATIVO_DL400
+  ORDINARIO_DEMANIALE
+  ALTRO
+}
+
+enum ComparativeProcedureStatus {
+  NON_APPLICABILE
+  DA_AVVIARE
+  IN_CORSO
+  CONCLUSA
+  CONTENZIOSO
+}
+
+enum ThirdPartyManagementStatus {
+  DIRETTA
+  AFFIDAMENTO_AUTORIZZATO
+  AFFIDAMENTO_DA_VERIFICARE
+  AFFIDAMENTO_NON_AUTORIZZATO
+}
+
+enum ChecklistProfile {
+  CORE
+  PORTUALE_ADSP
+  TURISTICO_RICREATIVO
+  MISTO
+}
+
 enum StatoConcessione {
   ATTIVA
   SCADUTA
@@ -362,6 +441,14 @@ model Concessione {
   riferimentoCatastale String?
   canoneAnnuo      Decimal?
   categoriaCanone  String?
+  concessionVertical ConcessionVertical @default(PORTUALE_ADSP)
+  concessionObjectType ConcessionObjectType?
+  awardingProcedureType AwardingProcedureType @default(ALTRO)
+  removableWorksProfile RemovableWorksProfile @default(NON_RILEVATO)
+  seasonalityProfile SeasonalityProfile @default(NON_RILEVATO)
+  feeRegime        FeeRegime            @default(ALTRO)
+  comparativeProcedureStatus ComparativeProcedureStatus @default(NON_APPLICABILE)
+  thirdPartyManagementStatus ThirdPartyManagementStatus @default(DIRETTA)
   stato            StatoConcessione
   descrizioneBene  String?
   ubicazione       String?
@@ -379,6 +466,7 @@ model Concessione {
   pagamenti      Pagamento[]
   documenti      Documento[]
   report         Report[]
+  legalFrameworks ConcessioneLegalFramework[]
   normaImpatti   NormaImpatto[]
   activityLogs   ActivityLog[]
 
@@ -387,7 +475,28 @@ model Concessione {
   @@index([concessionarioId])
   @@index([tipologiaBene])
   @@index([zonaPortuale])
+  @@index([concessionVertical])
+  @@index([concessionObjectType])
+  @@index([awardingProcedureType])
+  @@index([feeRegime])
+  @@index([comparativeProcedureStatus])
+  @@index([thirdPartyManagementStatus])
   @@index([latitudineGis, longitudineGis])
+  @@index([createdAt])
+}
+
+model ConcessioneLegalFramework {
+  id           String         @id @default(cuid())
+  concessioneId String
+  framework    LegalFramework
+  note         String?
+  createdAt    DateTime       @default(now())
+
+  concessione Concessione @relation(fields: [concessioneId], references: [id], onDelete: Cascade)
+
+  @@unique([concessioneId, framework])
+  @@index([concessioneId])
+  @@index([framework])
   @@index([createdAt])
 }
 
@@ -517,6 +626,7 @@ model Procedimento {
   dataOsservazioniPreavviso   DateTime?
   valutazioneOsservazioniPreavviso String?
   motivazioneMancatoPreavviso String?
+  checklistProfile            ChecklistProfile      @default(CORE)
   checklistContraddittorioCompleta Boolean          @default(false)
   noteChecklistContraddittorio String?
   stato                       StatoProcedimento
@@ -537,6 +647,7 @@ model Procedimento {
   @@index([procedimentoUfficio])
   @@index([preavvisoRigettoApplicabile])
   @@index([statoPreavvisoRigetto])
+  @@index([checklistProfile])
   @@index([dataScadenzaContraddittorio])
   @@index([checklistContraddittorioCompleta])
   @@index([termineMemorieScadenza])

@@ -57,6 +57,14 @@ export type ConcessioneMinAggregateOutputType = {
   riferimentoCatastale: string | null
   canoneAnnuo: runtime.Decimal | null
   categoriaCanone: string | null
+  concessionVertical: $Enums.ConcessionVertical | null
+  concessionObjectType: $Enums.ConcessionObjectType | null
+  awardingProcedureType: $Enums.AwardingProcedureType | null
+  removableWorksProfile: $Enums.RemovableWorksProfile | null
+  seasonalityProfile: $Enums.SeasonalityProfile | null
+  feeRegime: $Enums.FeeRegime | null
+  comparativeProcedureStatus: $Enums.ComparativeProcedureStatus | null
+  thirdPartyManagementStatus: $Enums.ThirdPartyManagementStatus | null
   stato: $Enums.StatoConcessione | null
   descrizioneBene: string | null
   ubicazione: string | null
@@ -83,6 +91,14 @@ export type ConcessioneMaxAggregateOutputType = {
   riferimentoCatastale: string | null
   canoneAnnuo: runtime.Decimal | null
   categoriaCanone: string | null
+  concessionVertical: $Enums.ConcessionVertical | null
+  concessionObjectType: $Enums.ConcessionObjectType | null
+  awardingProcedureType: $Enums.AwardingProcedureType | null
+  removableWorksProfile: $Enums.RemovableWorksProfile | null
+  seasonalityProfile: $Enums.SeasonalityProfile | null
+  feeRegime: $Enums.FeeRegime | null
+  comparativeProcedureStatus: $Enums.ComparativeProcedureStatus | null
+  thirdPartyManagementStatus: $Enums.ThirdPartyManagementStatus | null
   stato: $Enums.StatoConcessione | null
   descrizioneBene: string | null
   ubicazione: string | null
@@ -109,6 +125,14 @@ export type ConcessioneCountAggregateOutputType = {
   riferimentoCatastale: number
   canoneAnnuo: number
   categoriaCanone: number
+  concessionVertical: number
+  concessionObjectType: number
+  awardingProcedureType: number
+  removableWorksProfile: number
+  seasonalityProfile: number
+  feeRegime: number
+  comparativeProcedureStatus: number
+  thirdPartyManagementStatus: number
   stato: number
   descrizioneBene: number
   ubicazione: number
@@ -151,6 +175,14 @@ export type ConcessioneMinAggregateInputType = {
   riferimentoCatastale?: true
   canoneAnnuo?: true
   categoriaCanone?: true
+  concessionVertical?: true
+  concessionObjectType?: true
+  awardingProcedureType?: true
+  removableWorksProfile?: true
+  seasonalityProfile?: true
+  feeRegime?: true
+  comparativeProcedureStatus?: true
+  thirdPartyManagementStatus?: true
   stato?: true
   descrizioneBene?: true
   ubicazione?: true
@@ -177,6 +209,14 @@ export type ConcessioneMaxAggregateInputType = {
   riferimentoCatastale?: true
   canoneAnnuo?: true
   categoriaCanone?: true
+  concessionVertical?: true
+  concessionObjectType?: true
+  awardingProcedureType?: true
+  removableWorksProfile?: true
+  seasonalityProfile?: true
+  feeRegime?: true
+  comparativeProcedureStatus?: true
+  thirdPartyManagementStatus?: true
   stato?: true
   descrizioneBene?: true
   ubicazione?: true
@@ -203,6 +243,14 @@ export type ConcessioneCountAggregateInputType = {
   riferimentoCatastale?: true
   canoneAnnuo?: true
   categoriaCanone?: true
+  concessionVertical?: true
+  concessionObjectType?: true
+  awardingProcedureType?: true
+  removableWorksProfile?: true
+  seasonalityProfile?: true
+  feeRegime?: true
+  comparativeProcedureStatus?: true
+  thirdPartyManagementStatus?: true
   stato?: true
   descrizioneBene?: true
   ubicazione?: true
@@ -316,6 +364,14 @@ export type ConcessioneGroupByOutputType = {
   riferimentoCatastale: string | null
   canoneAnnuo: runtime.Decimal | null
   categoriaCanone: string | null
+  concessionVertical: $Enums.ConcessionVertical
+  concessionObjectType: $Enums.ConcessionObjectType | null
+  awardingProcedureType: $Enums.AwardingProcedureType
+  removableWorksProfile: $Enums.RemovableWorksProfile
+  seasonalityProfile: $Enums.SeasonalityProfile
+  feeRegime: $Enums.FeeRegime
+  comparativeProcedureStatus: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene: string | null
   ubicazione: string | null
@@ -365,6 +421,14 @@ export type ConcessioneWhereInput = {
   riferimentoCatastale?: Prisma.StringNullableFilter<"Concessione"> | string | null
   canoneAnnuo?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.StringNullableFilter<"Concessione"> | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFilter<"Concessione"> | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.EnumConcessionObjectTypeNullableFilter<"Concessione"> | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFilter<"Concessione"> | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFilter<"Concessione"> | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFilter<"Concessione"> | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFilter<"Concessione"> | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFilter<"Concessione"> | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFilter<"Concessione"> | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFilter<"Concessione"> | $Enums.StatoConcessione
   descrizioneBene?: Prisma.StringNullableFilter<"Concessione"> | string | null
   ubicazione?: Prisma.StringNullableFilter<"Concessione"> | string | null
@@ -381,6 +445,7 @@ export type ConcessioneWhereInput = {
   pagamenti?: Prisma.PagamentoListRelationFilter
   documenti?: Prisma.DocumentoListRelationFilter
   report?: Prisma.ReportListRelationFilter
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkListRelationFilter
   normaImpatti?: Prisma.NormaImpattoListRelationFilter
   activityLogs?: Prisma.ActivityLogListRelationFilter
 }
@@ -402,6 +467,14 @@ export type ConcessioneOrderByWithRelationInput = {
   riferimentoCatastale?: Prisma.SortOrderInput | Prisma.SortOrder
   canoneAnnuo?: Prisma.SortOrderInput | Prisma.SortOrder
   categoriaCanone?: Prisma.SortOrderInput | Prisma.SortOrder
+  concessionVertical?: Prisma.SortOrder
+  concessionObjectType?: Prisma.SortOrderInput | Prisma.SortOrder
+  awardingProcedureType?: Prisma.SortOrder
+  removableWorksProfile?: Prisma.SortOrder
+  seasonalityProfile?: Prisma.SortOrder
+  feeRegime?: Prisma.SortOrder
+  comparativeProcedureStatus?: Prisma.SortOrder
+  thirdPartyManagementStatus?: Prisma.SortOrder
   stato?: Prisma.SortOrder
   descrizioneBene?: Prisma.SortOrderInput | Prisma.SortOrder
   ubicazione?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -418,6 +491,7 @@ export type ConcessioneOrderByWithRelationInput = {
   pagamenti?: Prisma.PagamentoOrderByRelationAggregateInput
   documenti?: Prisma.DocumentoOrderByRelationAggregateInput
   report?: Prisma.ReportOrderByRelationAggregateInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkOrderByRelationAggregateInput
   normaImpatti?: Prisma.NormaImpattoOrderByRelationAggregateInput
   activityLogs?: Prisma.ActivityLogOrderByRelationAggregateInput
 }
@@ -442,6 +516,14 @@ export type ConcessioneWhereUniqueInput = Prisma.AtLeast<{
   riferimentoCatastale?: Prisma.StringNullableFilter<"Concessione"> | string | null
   canoneAnnuo?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.StringNullableFilter<"Concessione"> | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFilter<"Concessione"> | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.EnumConcessionObjectTypeNullableFilter<"Concessione"> | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFilter<"Concessione"> | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFilter<"Concessione"> | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFilter<"Concessione"> | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFilter<"Concessione"> | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFilter<"Concessione"> | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFilter<"Concessione"> | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFilter<"Concessione"> | $Enums.StatoConcessione
   descrizioneBene?: Prisma.StringNullableFilter<"Concessione"> | string | null
   ubicazione?: Prisma.StringNullableFilter<"Concessione"> | string | null
@@ -458,6 +540,7 @@ export type ConcessioneWhereUniqueInput = Prisma.AtLeast<{
   pagamenti?: Prisma.PagamentoListRelationFilter
   documenti?: Prisma.DocumentoListRelationFilter
   report?: Prisma.ReportListRelationFilter
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkListRelationFilter
   normaImpatti?: Prisma.NormaImpattoListRelationFilter
   activityLogs?: Prisma.ActivityLogListRelationFilter
 }, "id">
@@ -479,6 +562,14 @@ export type ConcessioneOrderByWithAggregationInput = {
   riferimentoCatastale?: Prisma.SortOrderInput | Prisma.SortOrder
   canoneAnnuo?: Prisma.SortOrderInput | Prisma.SortOrder
   categoriaCanone?: Prisma.SortOrderInput | Prisma.SortOrder
+  concessionVertical?: Prisma.SortOrder
+  concessionObjectType?: Prisma.SortOrderInput | Prisma.SortOrder
+  awardingProcedureType?: Prisma.SortOrder
+  removableWorksProfile?: Prisma.SortOrder
+  seasonalityProfile?: Prisma.SortOrder
+  feeRegime?: Prisma.SortOrder
+  comparativeProcedureStatus?: Prisma.SortOrder
+  thirdPartyManagementStatus?: Prisma.SortOrder
   stato?: Prisma.SortOrder
   descrizioneBene?: Prisma.SortOrderInput | Prisma.SortOrder
   ubicazione?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -513,6 +604,14 @@ export type ConcessioneScalarWhereWithAggregatesInput = {
   riferimentoCatastale?: Prisma.StringNullableWithAggregatesFilter<"Concessione"> | string | null
   canoneAnnuo?: Prisma.DecimalNullableWithAggregatesFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.StringNullableWithAggregatesFilter<"Concessione"> | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalWithAggregatesFilter<"Concessione"> | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.EnumConcessionObjectTypeNullableWithAggregatesFilter<"Concessione"> | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeWithAggregatesFilter<"Concessione"> | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileWithAggregatesFilter<"Concessione"> | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileWithAggregatesFilter<"Concessione"> | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeWithAggregatesFilter<"Concessione"> | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusWithAggregatesFilter<"Concessione"> | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusWithAggregatesFilter<"Concessione"> | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneWithAggregatesFilter<"Concessione"> | $Enums.StatoConcessione
   descrizioneBene?: Prisma.StringNullableWithAggregatesFilter<"Concessione"> | string | null
   ubicazione?: Prisma.StringNullableWithAggregatesFilter<"Concessione"> | string | null
@@ -539,6 +638,14 @@ export type ConcessioneCreateInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -554,6 +661,7 @@ export type ConcessioneCreateInput = {
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
 }
@@ -575,6 +683,14 @@ export type ConcessioneUncheckedCreateInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -590,6 +706,7 @@ export type ConcessioneUncheckedCreateInput = {
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
 }
@@ -611,6 +728,14 @@ export type ConcessioneUpdateInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -626,6 +751,7 @@ export type ConcessioneUpdateInput = {
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
 }
@@ -647,6 +773,14 @@ export type ConcessioneUncheckedUpdateInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -662,6 +796,7 @@ export type ConcessioneUncheckedUpdateInput = {
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
 }
@@ -683,6 +818,14 @@ export type ConcessioneCreateManyInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -709,6 +852,14 @@ export type ConcessioneUpdateManyMutationInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -734,6 +885,14 @@ export type ConcessioneUncheckedUpdateManyInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -770,6 +929,14 @@ export type ConcessioneCountOrderByAggregateInput = {
   riferimentoCatastale?: Prisma.SortOrder
   canoneAnnuo?: Prisma.SortOrder
   categoriaCanone?: Prisma.SortOrder
+  concessionVertical?: Prisma.SortOrder
+  concessionObjectType?: Prisma.SortOrder
+  awardingProcedureType?: Prisma.SortOrder
+  removableWorksProfile?: Prisma.SortOrder
+  seasonalityProfile?: Prisma.SortOrder
+  feeRegime?: Prisma.SortOrder
+  comparativeProcedureStatus?: Prisma.SortOrder
+  thirdPartyManagementStatus?: Prisma.SortOrder
   stato?: Prisma.SortOrder
   descrizioneBene?: Prisma.SortOrder
   ubicazione?: Prisma.SortOrder
@@ -803,6 +970,14 @@ export type ConcessioneMaxOrderByAggregateInput = {
   riferimentoCatastale?: Prisma.SortOrder
   canoneAnnuo?: Prisma.SortOrder
   categoriaCanone?: Prisma.SortOrder
+  concessionVertical?: Prisma.SortOrder
+  concessionObjectType?: Prisma.SortOrder
+  awardingProcedureType?: Prisma.SortOrder
+  removableWorksProfile?: Prisma.SortOrder
+  seasonalityProfile?: Prisma.SortOrder
+  feeRegime?: Prisma.SortOrder
+  comparativeProcedureStatus?: Prisma.SortOrder
+  thirdPartyManagementStatus?: Prisma.SortOrder
   stato?: Prisma.SortOrder
   descrizioneBene?: Prisma.SortOrder
   ubicazione?: Prisma.SortOrder
@@ -829,6 +1004,14 @@ export type ConcessioneMinOrderByAggregateInput = {
   riferimentoCatastale?: Prisma.SortOrder
   canoneAnnuo?: Prisma.SortOrder
   categoriaCanone?: Prisma.SortOrder
+  concessionVertical?: Prisma.SortOrder
+  concessionObjectType?: Prisma.SortOrder
+  awardingProcedureType?: Prisma.SortOrder
+  removableWorksProfile?: Prisma.SortOrder
+  seasonalityProfile?: Prisma.SortOrder
+  feeRegime?: Prisma.SortOrder
+  comparativeProcedureStatus?: Prisma.SortOrder
+  thirdPartyManagementStatus?: Prisma.SortOrder
   stato?: Prisma.SortOrder
   descrizioneBene?: Prisma.SortOrder
   ubicazione?: Prisma.SortOrder
@@ -917,8 +1100,54 @@ export type NullableDecimalFieldUpdateOperationsInput = {
   divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
+export type EnumConcessionVerticalFieldUpdateOperationsInput = {
+  set?: $Enums.ConcessionVertical
+}
+
+export type NullableEnumConcessionObjectTypeFieldUpdateOperationsInput = {
+  set?: $Enums.ConcessionObjectType | null
+}
+
+export type EnumAwardingProcedureTypeFieldUpdateOperationsInput = {
+  set?: $Enums.AwardingProcedureType
+}
+
+export type EnumRemovableWorksProfileFieldUpdateOperationsInput = {
+  set?: $Enums.RemovableWorksProfile
+}
+
+export type EnumSeasonalityProfileFieldUpdateOperationsInput = {
+  set?: $Enums.SeasonalityProfile
+}
+
+export type EnumFeeRegimeFieldUpdateOperationsInput = {
+  set?: $Enums.FeeRegime
+}
+
+export type EnumComparativeProcedureStatusFieldUpdateOperationsInput = {
+  set?: $Enums.ComparativeProcedureStatus
+}
+
+export type EnumThirdPartyManagementStatusFieldUpdateOperationsInput = {
+  set?: $Enums.ThirdPartyManagementStatus
+}
+
 export type EnumStatoConcessioneFieldUpdateOperationsInput = {
   set?: $Enums.StatoConcessione
+}
+
+export type ConcessioneCreateNestedOneWithoutLegalFrameworksInput = {
+  create?: Prisma.XOR<Prisma.ConcessioneCreateWithoutLegalFrameworksInput, Prisma.ConcessioneUncheckedCreateWithoutLegalFrameworksInput>
+  connectOrCreate?: Prisma.ConcessioneCreateOrConnectWithoutLegalFrameworksInput
+  connect?: Prisma.ConcessioneWhereUniqueInput
+}
+
+export type ConcessioneUpdateOneRequiredWithoutLegalFrameworksNestedInput = {
+  create?: Prisma.XOR<Prisma.ConcessioneCreateWithoutLegalFrameworksInput, Prisma.ConcessioneUncheckedCreateWithoutLegalFrameworksInput>
+  connectOrCreate?: Prisma.ConcessioneCreateOrConnectWithoutLegalFrameworksInput
+  upsert?: Prisma.ConcessioneUpsertWithoutLegalFrameworksInput
+  connect?: Prisma.ConcessioneWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ConcessioneUpdateToOneWithWhereWithoutLegalFrameworksInput, Prisma.ConcessioneUpdateWithoutLegalFrameworksInput>, Prisma.ConcessioneUncheckedUpdateWithoutLegalFrameworksInput>
 }
 
 export type ConcessioneCreateNestedOneWithoutObblighiInput = {
@@ -1086,6 +1315,14 @@ export type ConcessioneCreateWithoutConcessionarioInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -1100,6 +1337,7 @@ export type ConcessioneCreateWithoutConcessionarioInput = {
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
 }
@@ -1121,6 +1359,14 @@ export type ConcessioneUncheckedCreateWithoutConcessionarioInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -1135,6 +1381,7 @@ export type ConcessioneUncheckedCreateWithoutConcessionarioInput = {
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
 }
@@ -1185,6 +1432,14 @@ export type ConcessioneScalarWhereInput = {
   riferimentoCatastale?: Prisma.StringNullableFilter<"Concessione"> | string | null
   canoneAnnuo?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.StringNullableFilter<"Concessione"> | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFilter<"Concessione"> | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.EnumConcessionObjectTypeNullableFilter<"Concessione"> | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFilter<"Concessione"> | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFilter<"Concessione"> | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFilter<"Concessione"> | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFilter<"Concessione"> | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFilter<"Concessione"> | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFilter<"Concessione"> | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFilter<"Concessione"> | $Enums.StatoConcessione
   descrizioneBene?: Prisma.StringNullableFilter<"Concessione"> | string | null
   ubicazione?: Prisma.StringNullableFilter<"Concessione"> | string | null
@@ -1192,6 +1447,198 @@ export type ConcessioneScalarWhereInput = {
   concessionarioId?: Prisma.StringFilter<"Concessione"> | string
   createdAt?: Prisma.DateTimeFilter<"Concessione"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Concessione"> | Date | string
+}
+
+export type ConcessioneCreateWithoutLegalFrameworksInput = {
+  id?: string
+  numeroAtto: string
+  dataRilascio: Date | string
+  dataScadenza: Date | string
+  normaRiferimento: $Enums.NormaRiferimento
+  tipologiaBene: $Enums.TipologiaBene
+  attivita: $Enums.AttivitaConcessione
+  superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
+  canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
+  stato: $Enums.StatoConcessione
+  descrizioneBene?: string | null
+  ubicazione?: string | null
+  note?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessionario: Prisma.ConcessionarioCreateNestedOneWithoutConcessioniInput
+  obblighi?: Prisma.ObbligoConcessorioCreateNestedManyWithoutConcessioneInput
+  scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
+  criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
+  procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutConcessioneInput
+  sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
+  pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
+  report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
+}
+
+export type ConcessioneUncheckedCreateWithoutLegalFrameworksInput = {
+  id?: string
+  numeroAtto: string
+  dataRilascio: Date | string
+  dataScadenza: Date | string
+  normaRiferimento: $Enums.NormaRiferimento
+  tipologiaBene: $Enums.TipologiaBene
+  attivita: $Enums.AttivitaConcessione
+  superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
+  canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
+  stato: $Enums.StatoConcessione
+  descrizioneBene?: string | null
+  ubicazione?: string | null
+  note?: string | null
+  concessionarioId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  obblighi?: Prisma.ObbligoConcessorioUncheckedCreateNestedManyWithoutConcessioneInput
+  scadenze?: Prisma.ScadenzaUncheckedCreateNestedManyWithoutConcessioneInput
+  criticita?: Prisma.CriticitaUncheckedCreateNestedManyWithoutConcessioneInput
+  procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
+  sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
+  pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
+  report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
+}
+
+export type ConcessioneCreateOrConnectWithoutLegalFrameworksInput = {
+  where: Prisma.ConcessioneWhereUniqueInput
+  create: Prisma.XOR<Prisma.ConcessioneCreateWithoutLegalFrameworksInput, Prisma.ConcessioneUncheckedCreateWithoutLegalFrameworksInput>
+}
+
+export type ConcessioneUpsertWithoutLegalFrameworksInput = {
+  update: Prisma.XOR<Prisma.ConcessioneUpdateWithoutLegalFrameworksInput, Prisma.ConcessioneUncheckedUpdateWithoutLegalFrameworksInput>
+  create: Prisma.XOR<Prisma.ConcessioneCreateWithoutLegalFrameworksInput, Prisma.ConcessioneUncheckedCreateWithoutLegalFrameworksInput>
+  where?: Prisma.ConcessioneWhereInput
+}
+
+export type ConcessioneUpdateToOneWithWhereWithoutLegalFrameworksInput = {
+  where?: Prisma.ConcessioneWhereInput
+  data: Prisma.XOR<Prisma.ConcessioneUpdateWithoutLegalFrameworksInput, Prisma.ConcessioneUncheckedUpdateWithoutLegalFrameworksInput>
+}
+
+export type ConcessioneUpdateWithoutLegalFrameworksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
+  dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  normaRiferimento?: Prisma.EnumNormaRiferimentoFieldUpdateOperationsInput | $Enums.NormaRiferimento
+  tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
+  attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
+  superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
+  stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
+  descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessionario?: Prisma.ConcessionarioUpdateOneRequiredWithoutConcessioniNestedInput
+  obblighi?: Prisma.ObbligoConcessorioUpdateManyWithoutConcessioneNestedInput
+  scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
+  criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
+  procedimenti?: Prisma.ProcedimentoUpdateManyWithoutConcessioneNestedInput
+  sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
+  pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
+  report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
+}
+
+export type ConcessioneUncheckedUpdateWithoutLegalFrameworksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
+  dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  normaRiferimento?: Prisma.EnumNormaRiferimentoFieldUpdateOperationsInput | $Enums.NormaRiferimento
+  tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
+  attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
+  superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
+  stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
+  descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionarioId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  obblighi?: Prisma.ObbligoConcessorioUncheckedUpdateManyWithoutConcessioneNestedInput
+  scadenze?: Prisma.ScadenzaUncheckedUpdateManyWithoutConcessioneNestedInput
+  criticita?: Prisma.CriticitaUncheckedUpdateManyWithoutConcessioneNestedInput
+  procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
+  pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
 }
 
 export type ConcessioneCreateWithoutObblighiInput = {
@@ -1211,6 +1658,14 @@ export type ConcessioneCreateWithoutObblighiInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -1225,6 +1680,7 @@ export type ConcessioneCreateWithoutObblighiInput = {
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
 }
@@ -1246,6 +1702,14 @@ export type ConcessioneUncheckedCreateWithoutObblighiInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -1260,6 +1724,7 @@ export type ConcessioneUncheckedCreateWithoutObblighiInput = {
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
 }
@@ -1297,6 +1762,14 @@ export type ConcessioneUpdateWithoutObblighiInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1311,6 +1784,7 @@ export type ConcessioneUpdateWithoutObblighiInput = {
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
 }
@@ -1332,6 +1806,14 @@ export type ConcessioneUncheckedUpdateWithoutObblighiInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1346,6 +1828,7 @@ export type ConcessioneUncheckedUpdateWithoutObblighiInput = {
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
 }
@@ -1367,6 +1850,14 @@ export type ConcessioneCreateWithoutScadenzeInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -1381,6 +1872,7 @@ export type ConcessioneCreateWithoutScadenzeInput = {
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
 }
@@ -1402,6 +1894,14 @@ export type ConcessioneUncheckedCreateWithoutScadenzeInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -1416,6 +1916,7 @@ export type ConcessioneUncheckedCreateWithoutScadenzeInput = {
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
 }
@@ -1453,6 +1954,14 @@ export type ConcessioneUpdateWithoutScadenzeInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1467,6 +1976,7 @@ export type ConcessioneUpdateWithoutScadenzeInput = {
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
 }
@@ -1488,6 +1998,14 @@ export type ConcessioneUncheckedUpdateWithoutScadenzeInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1502,6 +2020,7 @@ export type ConcessioneUncheckedUpdateWithoutScadenzeInput = {
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
 }
@@ -1523,6 +2042,14 @@ export type ConcessioneCreateWithoutCriticitaInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -1537,6 +2064,7 @@ export type ConcessioneCreateWithoutCriticitaInput = {
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
 }
@@ -1558,6 +2086,14 @@ export type ConcessioneUncheckedCreateWithoutCriticitaInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -1572,6 +2108,7 @@ export type ConcessioneUncheckedCreateWithoutCriticitaInput = {
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
 }
@@ -1609,6 +2146,14 @@ export type ConcessioneUpdateWithoutCriticitaInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1623,6 +2168,7 @@ export type ConcessioneUpdateWithoutCriticitaInput = {
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
 }
@@ -1644,6 +2190,14 @@ export type ConcessioneUncheckedUpdateWithoutCriticitaInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1658,6 +2212,7 @@ export type ConcessioneUncheckedUpdateWithoutCriticitaInput = {
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
 }
@@ -1679,6 +2234,14 @@ export type ConcessioneCreateWithoutProcedimentiInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -1693,6 +2256,7 @@ export type ConcessioneCreateWithoutProcedimentiInput = {
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
 }
@@ -1714,6 +2278,14 @@ export type ConcessioneUncheckedCreateWithoutProcedimentiInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -1728,6 +2300,7 @@ export type ConcessioneUncheckedCreateWithoutProcedimentiInput = {
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
 }
@@ -1765,6 +2338,14 @@ export type ConcessioneUpdateWithoutProcedimentiInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1779,6 +2360,7 @@ export type ConcessioneUpdateWithoutProcedimentiInput = {
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
 }
@@ -1800,6 +2382,14 @@ export type ConcessioneUncheckedUpdateWithoutProcedimentiInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1814,6 +2404,7 @@ export type ConcessioneUncheckedUpdateWithoutProcedimentiInput = {
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
 }
@@ -1835,6 +2426,14 @@ export type ConcessioneCreateWithoutSopralluoghiInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -1849,6 +2448,7 @@ export type ConcessioneCreateWithoutSopralluoghiInput = {
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
 }
@@ -1870,6 +2470,14 @@ export type ConcessioneUncheckedCreateWithoutSopralluoghiInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -1884,6 +2492,7 @@ export type ConcessioneUncheckedCreateWithoutSopralluoghiInput = {
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
 }
@@ -1921,6 +2530,14 @@ export type ConcessioneUpdateWithoutSopralluoghiInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1935,6 +2552,7 @@ export type ConcessioneUpdateWithoutSopralluoghiInput = {
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
 }
@@ -1956,6 +2574,14 @@ export type ConcessioneUncheckedUpdateWithoutSopralluoghiInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1970,6 +2596,7 @@ export type ConcessioneUncheckedUpdateWithoutSopralluoghiInput = {
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
 }
@@ -1991,6 +2618,14 @@ export type ConcessioneCreateWithoutPagamentiInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -2005,6 +2640,7 @@ export type ConcessioneCreateWithoutPagamentiInput = {
   sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
 }
@@ -2026,6 +2662,14 @@ export type ConcessioneUncheckedCreateWithoutPagamentiInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -2040,6 +2684,7 @@ export type ConcessioneUncheckedCreateWithoutPagamentiInput = {
   sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
 }
@@ -2077,6 +2722,14 @@ export type ConcessioneUpdateWithoutPagamentiInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2091,6 +2744,7 @@ export type ConcessioneUpdateWithoutPagamentiInput = {
   sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
 }
@@ -2112,6 +2766,14 @@ export type ConcessioneUncheckedUpdateWithoutPagamentiInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2126,6 +2788,7 @@ export type ConcessioneUncheckedUpdateWithoutPagamentiInput = {
   sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
 }
@@ -2147,6 +2810,14 @@ export type ConcessioneCreateWithoutDocumentiInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -2161,6 +2832,7 @@ export type ConcessioneCreateWithoutDocumentiInput = {
   sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
 }
@@ -2182,6 +2854,14 @@ export type ConcessioneUncheckedCreateWithoutDocumentiInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -2196,6 +2876,7 @@ export type ConcessioneUncheckedCreateWithoutDocumentiInput = {
   sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
 }
@@ -2233,6 +2914,14 @@ export type ConcessioneUpdateWithoutDocumentiInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2247,6 +2936,7 @@ export type ConcessioneUpdateWithoutDocumentiInput = {
   sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
 }
@@ -2268,6 +2958,14 @@ export type ConcessioneUncheckedUpdateWithoutDocumentiInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2282,6 +2980,7 @@ export type ConcessioneUncheckedUpdateWithoutDocumentiInput = {
   sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
 }
@@ -2303,6 +3002,14 @@ export type ConcessioneCreateWithoutReportInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -2317,6 +3024,7 @@ export type ConcessioneCreateWithoutReportInput = {
   sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
 }
@@ -2338,6 +3046,14 @@ export type ConcessioneUncheckedCreateWithoutReportInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -2352,6 +3068,7 @@ export type ConcessioneUncheckedCreateWithoutReportInput = {
   sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
 }
@@ -2389,6 +3106,14 @@ export type ConcessioneUpdateWithoutReportInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2403,6 +3128,7 @@ export type ConcessioneUpdateWithoutReportInput = {
   sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
 }
@@ -2424,6 +3150,14 @@ export type ConcessioneUncheckedUpdateWithoutReportInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2438,6 +3172,7 @@ export type ConcessioneUncheckedUpdateWithoutReportInput = {
   sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
 }
@@ -2459,6 +3194,14 @@ export type ConcessioneCreateWithoutNormaImpattiInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -2474,6 +3217,7 @@ export type ConcessioneCreateWithoutNormaImpattiInput = {
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
 }
 
@@ -2494,6 +3238,14 @@ export type ConcessioneUncheckedCreateWithoutNormaImpattiInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -2509,6 +3261,7 @@ export type ConcessioneUncheckedCreateWithoutNormaImpattiInput = {
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
 }
 
@@ -2545,6 +3298,14 @@ export type ConcessioneUpdateWithoutNormaImpattiInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2560,6 +3321,7 @@ export type ConcessioneUpdateWithoutNormaImpattiInput = {
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
 }
 
@@ -2580,6 +3342,14 @@ export type ConcessioneUncheckedUpdateWithoutNormaImpattiInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2595,6 +3365,7 @@ export type ConcessioneUncheckedUpdateWithoutNormaImpattiInput = {
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
 }
 
@@ -2615,6 +3386,14 @@ export type ConcessioneCreateWithoutActivityLogsInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -2630,6 +3409,7 @@ export type ConcessioneCreateWithoutActivityLogsInput = {
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
 }
 
@@ -2650,6 +3430,14 @@ export type ConcessioneUncheckedCreateWithoutActivityLogsInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -2665,6 +3453,7 @@ export type ConcessioneUncheckedCreateWithoutActivityLogsInput = {
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
 }
 
@@ -2701,6 +3490,14 @@ export type ConcessioneUpdateWithoutActivityLogsInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2716,6 +3513,7 @@ export type ConcessioneUpdateWithoutActivityLogsInput = {
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
 }
 
@@ -2736,6 +3534,14 @@ export type ConcessioneUncheckedUpdateWithoutActivityLogsInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2751,6 +3557,7 @@ export type ConcessioneUncheckedUpdateWithoutActivityLogsInput = {
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
 }
 
@@ -2771,6 +3578,14 @@ export type ConcessioneCreateManyConcessionarioInput = {
   riferimentoCatastale?: string | null
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
   stato: $Enums.StatoConcessione
   descrizioneBene?: string | null
   ubicazione?: string | null
@@ -2796,6 +3611,14 @@ export type ConcessioneUpdateWithoutConcessionarioInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2810,6 +3633,7 @@ export type ConcessioneUpdateWithoutConcessionarioInput = {
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
 }
@@ -2831,6 +3655,14 @@ export type ConcessioneUncheckedUpdateWithoutConcessionarioInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2845,6 +3677,7 @@ export type ConcessioneUncheckedUpdateWithoutConcessionarioInput = {
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
 }
@@ -2866,6 +3699,14 @@ export type ConcessioneUncheckedUpdateManyWithoutConcessionarioInput = {
   riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
   stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
   descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2888,6 +3729,7 @@ export type ConcessioneCountOutputType = {
   pagamenti: number
   documenti: number
   report: number
+  legalFrameworks: number
   normaImpatti: number
   activityLogs: number
 }
@@ -2901,6 +3743,7 @@ export type ConcessioneCountOutputTypeSelect<ExtArgs extends runtime.Types.Exten
   pagamenti?: boolean | ConcessioneCountOutputTypeCountPagamentiArgs
   documenti?: boolean | ConcessioneCountOutputTypeCountDocumentiArgs
   report?: boolean | ConcessioneCountOutputTypeCountReportArgs
+  legalFrameworks?: boolean | ConcessioneCountOutputTypeCountLegalFrameworksArgs
   normaImpatti?: boolean | ConcessioneCountOutputTypeCountNormaImpattiArgs
   activityLogs?: boolean | ConcessioneCountOutputTypeCountActivityLogsArgs
 }
@@ -2974,6 +3817,13 @@ export type ConcessioneCountOutputTypeCountReportArgs<ExtArgs extends runtime.Ty
 /**
  * ConcessioneCountOutputType without action
  */
+export type ConcessioneCountOutputTypeCountLegalFrameworksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ConcessioneLegalFrameworkWhereInput
+}
+
+/**
+ * ConcessioneCountOutputType without action
+ */
 export type ConcessioneCountOutputTypeCountNormaImpattiArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.NormaImpattoWhereInput
 }
@@ -3003,6 +3853,14 @@ export type ConcessioneSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   riferimentoCatastale?: boolean
   canoneAnnuo?: boolean
   categoriaCanone?: boolean
+  concessionVertical?: boolean
+  concessionObjectType?: boolean
+  awardingProcedureType?: boolean
+  removableWorksProfile?: boolean
+  seasonalityProfile?: boolean
+  feeRegime?: boolean
+  comparativeProcedureStatus?: boolean
+  thirdPartyManagementStatus?: boolean
   stato?: boolean
   descrizioneBene?: boolean
   ubicazione?: boolean
@@ -3019,6 +3877,7 @@ export type ConcessioneSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   pagamenti?: boolean | Prisma.Concessione$pagamentiArgs<ExtArgs>
   documenti?: boolean | Prisma.Concessione$documentiArgs<ExtArgs>
   report?: boolean | Prisma.Concessione$reportArgs<ExtArgs>
+  legalFrameworks?: boolean | Prisma.Concessione$legalFrameworksArgs<ExtArgs>
   normaImpatti?: boolean | Prisma.Concessione$normaImpattiArgs<ExtArgs>
   activityLogs?: boolean | Prisma.Concessione$activityLogsArgs<ExtArgs>
   _count?: boolean | Prisma.ConcessioneCountOutputTypeDefaultArgs<ExtArgs>
@@ -3041,6 +3900,14 @@ export type ConcessioneSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   riferimentoCatastale?: boolean
   canoneAnnuo?: boolean
   categoriaCanone?: boolean
+  concessionVertical?: boolean
+  concessionObjectType?: boolean
+  awardingProcedureType?: boolean
+  removableWorksProfile?: boolean
+  seasonalityProfile?: boolean
+  feeRegime?: boolean
+  comparativeProcedureStatus?: boolean
+  thirdPartyManagementStatus?: boolean
   stato?: boolean
   descrizioneBene?: boolean
   ubicazione?: boolean
@@ -3068,6 +3935,14 @@ export type ConcessioneSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   riferimentoCatastale?: boolean
   canoneAnnuo?: boolean
   categoriaCanone?: boolean
+  concessionVertical?: boolean
+  concessionObjectType?: boolean
+  awardingProcedureType?: boolean
+  removableWorksProfile?: boolean
+  seasonalityProfile?: boolean
+  feeRegime?: boolean
+  comparativeProcedureStatus?: boolean
+  thirdPartyManagementStatus?: boolean
   stato?: boolean
   descrizioneBene?: boolean
   ubicazione?: boolean
@@ -3095,6 +3970,14 @@ export type ConcessioneSelectScalar = {
   riferimentoCatastale?: boolean
   canoneAnnuo?: boolean
   categoriaCanone?: boolean
+  concessionVertical?: boolean
+  concessionObjectType?: boolean
+  awardingProcedureType?: boolean
+  removableWorksProfile?: boolean
+  seasonalityProfile?: boolean
+  feeRegime?: boolean
+  comparativeProcedureStatus?: boolean
+  thirdPartyManagementStatus?: boolean
   stato?: boolean
   descrizioneBene?: boolean
   ubicazione?: boolean
@@ -3104,7 +3987,7 @@ export type ConcessioneSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ConcessioneOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "numeroAtto" | "dataRilascio" | "dataScadenza" | "normaRiferimento" | "tipologiaBene" | "attivita" | "superficieMq" | "latitudineGis" | "longitudineGis" | "coordinateGis" | "areaDescrizione" | "zonaPortuale" | "riferimentoCatastale" | "canoneAnnuo" | "categoriaCanone" | "stato" | "descrizioneBene" | "ubicazione" | "note" | "concessionarioId" | "createdAt" | "updatedAt", ExtArgs["result"]["concessione"]>
+export type ConcessioneOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "numeroAtto" | "dataRilascio" | "dataScadenza" | "normaRiferimento" | "tipologiaBene" | "attivita" | "superficieMq" | "latitudineGis" | "longitudineGis" | "coordinateGis" | "areaDescrizione" | "zonaPortuale" | "riferimentoCatastale" | "canoneAnnuo" | "categoriaCanone" | "concessionVertical" | "concessionObjectType" | "awardingProcedureType" | "removableWorksProfile" | "seasonalityProfile" | "feeRegime" | "comparativeProcedureStatus" | "thirdPartyManagementStatus" | "stato" | "descrizioneBene" | "ubicazione" | "note" | "concessionarioId" | "createdAt" | "updatedAt", ExtArgs["result"]["concessione"]>
 export type ConcessioneInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   concessionario?: boolean | Prisma.ConcessionarioDefaultArgs<ExtArgs>
   obblighi?: boolean | Prisma.Concessione$obblighiArgs<ExtArgs>
@@ -3115,6 +3998,7 @@ export type ConcessioneInclude<ExtArgs extends runtime.Types.Extensions.Internal
   pagamenti?: boolean | Prisma.Concessione$pagamentiArgs<ExtArgs>
   documenti?: boolean | Prisma.Concessione$documentiArgs<ExtArgs>
   report?: boolean | Prisma.Concessione$reportArgs<ExtArgs>
+  legalFrameworks?: boolean | Prisma.Concessione$legalFrameworksArgs<ExtArgs>
   normaImpatti?: boolean | Prisma.Concessione$normaImpattiArgs<ExtArgs>
   activityLogs?: boolean | Prisma.Concessione$activityLogsArgs<ExtArgs>
   _count?: boolean | Prisma.ConcessioneCountOutputTypeDefaultArgs<ExtArgs>
@@ -3138,6 +4022,7 @@ export type $ConcessionePayload<ExtArgs extends runtime.Types.Extensions.Interna
     pagamenti: Prisma.$PagamentoPayload<ExtArgs>[]
     documenti: Prisma.$DocumentoPayload<ExtArgs>[]
     report: Prisma.$ReportPayload<ExtArgs>[]
+    legalFrameworks: Prisma.$ConcessioneLegalFrameworkPayload<ExtArgs>[]
     normaImpatti: Prisma.$NormaImpattoPayload<ExtArgs>[]
     activityLogs: Prisma.$ActivityLogPayload<ExtArgs>[]
   }
@@ -3158,6 +4043,14 @@ export type $ConcessionePayload<ExtArgs extends runtime.Types.Extensions.Interna
     riferimentoCatastale: string | null
     canoneAnnuo: runtime.Decimal | null
     categoriaCanone: string | null
+    concessionVertical: $Enums.ConcessionVertical
+    concessionObjectType: $Enums.ConcessionObjectType | null
+    awardingProcedureType: $Enums.AwardingProcedureType
+    removableWorksProfile: $Enums.RemovableWorksProfile
+    seasonalityProfile: $Enums.SeasonalityProfile
+    feeRegime: $Enums.FeeRegime
+    comparativeProcedureStatus: $Enums.ComparativeProcedureStatus
+    thirdPartyManagementStatus: $Enums.ThirdPartyManagementStatus
     stato: $Enums.StatoConcessione
     descrizioneBene: string | null
     ubicazione: string | null
@@ -3568,6 +4461,7 @@ export interface Prisma__ConcessioneClient<T, Null = never, ExtArgs extends runt
   pagamenti<T extends Prisma.Concessione$pagamentiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$pagamentiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PagamentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documenti<T extends Prisma.Concessione$documentiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$documentiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   report<T extends Prisma.Concessione$reportArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$reportArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  legalFrameworks<T extends Prisma.Concessione$legalFrameworksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$legalFrameworksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConcessioneLegalFrameworkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   normaImpatti<T extends Prisma.Concessione$normaImpattiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$normaImpattiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NormaImpattoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   activityLogs<T extends Prisma.Concessione$activityLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$activityLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -3615,6 +4509,14 @@ export interface ConcessioneFieldRefs {
   readonly riferimentoCatastale: Prisma.FieldRef<"Concessione", 'String'>
   readonly canoneAnnuo: Prisma.FieldRef<"Concessione", 'Decimal'>
   readonly categoriaCanone: Prisma.FieldRef<"Concessione", 'String'>
+  readonly concessionVertical: Prisma.FieldRef<"Concessione", 'ConcessionVertical'>
+  readonly concessionObjectType: Prisma.FieldRef<"Concessione", 'ConcessionObjectType'>
+  readonly awardingProcedureType: Prisma.FieldRef<"Concessione", 'AwardingProcedureType'>
+  readonly removableWorksProfile: Prisma.FieldRef<"Concessione", 'RemovableWorksProfile'>
+  readonly seasonalityProfile: Prisma.FieldRef<"Concessione", 'SeasonalityProfile'>
+  readonly feeRegime: Prisma.FieldRef<"Concessione", 'FeeRegime'>
+  readonly comparativeProcedureStatus: Prisma.FieldRef<"Concessione", 'ComparativeProcedureStatus'>
+  readonly thirdPartyManagementStatus: Prisma.FieldRef<"Concessione", 'ThirdPartyManagementStatus'>
   readonly stato: Prisma.FieldRef<"Concessione", 'StatoConcessione'>
   readonly descrizioneBene: Prisma.FieldRef<"Concessione", 'String'>
   readonly ubicazione: Prisma.FieldRef<"Concessione", 'String'>
@@ -4212,6 +5114,30 @@ export type Concessione$reportArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.ReportScalarFieldEnum | Prisma.ReportScalarFieldEnum[]
+}
+
+/**
+ * Concessione.legalFrameworks
+ */
+export type Concessione$legalFrameworksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ConcessioneLegalFramework
+   */
+  select?: Prisma.ConcessioneLegalFrameworkSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ConcessioneLegalFramework
+   */
+  omit?: Prisma.ConcessioneLegalFrameworkOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ConcessioneLegalFrameworkInclude<ExtArgs> | null
+  where?: Prisma.ConcessioneLegalFrameworkWhereInput
+  orderBy?: Prisma.ConcessioneLegalFrameworkOrderByWithRelationInput | Prisma.ConcessioneLegalFrameworkOrderByWithRelationInput[]
+  cursor?: Prisma.ConcessioneLegalFrameworkWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ConcessioneLegalFrameworkScalarFieldEnum | Prisma.ConcessioneLegalFrameworkScalarFieldEnum[]
 }
 
 /**

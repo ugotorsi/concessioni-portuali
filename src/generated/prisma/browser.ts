@@ -33,6 +33,11 @@ export type Concessionario = Prisma.ConcessionarioModel
  */
 export type Concessione = Prisma.ConcessioneModel
 /**
+ * Model ConcessioneLegalFramework
+ * 
+ */
+export type ConcessioneLegalFramework = Prisma.ConcessioneLegalFrameworkModel
+/**
  * Model ObbligoConcessorio
  * 
  */

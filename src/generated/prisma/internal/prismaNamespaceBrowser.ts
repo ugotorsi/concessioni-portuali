@@ -54,6 +54,7 @@ export const ModelName = {
   User: 'User',
   Concessionario: 'Concessionario',
   Concessione: 'Concessione',
+  ConcessioneLegalFramework: 'ConcessioneLegalFramework',
   ObbligoConcessorio: 'ObbligoConcessorio',
   Scadenza: 'Scadenza',
   Criticita: 'Criticita',
@@ -143,6 +144,14 @@ export const ConcessioneScalarFieldEnum = {
   riferimentoCatastale: 'riferimentoCatastale',
   canoneAnnuo: 'canoneAnnuo',
   categoriaCanone: 'categoriaCanone',
+  concessionVertical: 'concessionVertical',
+  concessionObjectType: 'concessionObjectType',
+  awardingProcedureType: 'awardingProcedureType',
+  removableWorksProfile: 'removableWorksProfile',
+  seasonalityProfile: 'seasonalityProfile',
+  feeRegime: 'feeRegime',
+  comparativeProcedureStatus: 'comparativeProcedureStatus',
+  thirdPartyManagementStatus: 'thirdPartyManagementStatus',
   stato: 'stato',
   descrizioneBene: 'descrizioneBene',
   ubicazione: 'ubicazione',
@@ -153,6 +162,17 @@ export const ConcessioneScalarFieldEnum = {
 } as const
 
 export type ConcessioneScalarFieldEnum = (typeof ConcessioneScalarFieldEnum)[keyof typeof ConcessioneScalarFieldEnum]
+
+
+export const ConcessioneLegalFrameworkScalarFieldEnum = {
+  id: 'id',
+  concessioneId: 'concessioneId',
+  framework: 'framework',
+  note: 'note',
+  createdAt: 'createdAt'
+} as const
+
+export type ConcessioneLegalFrameworkScalarFieldEnum = (typeof ConcessioneLegalFrameworkScalarFieldEnum)[keyof typeof ConcessioneLegalFrameworkScalarFieldEnum]
 
 
 export const ObbligoConcessorioScalarFieldEnum = {
@@ -254,6 +274,7 @@ export const ProcedimentoScalarFieldEnum = {
   dataOsservazioniPreavviso: 'dataOsservazioniPreavviso',
   valutazioneOsservazioniPreavviso: 'valutazioneOsservazioniPreavviso',
   motivazioneMancatoPreavviso: 'motivazioneMancatoPreavviso',
+  checklistProfile: 'checklistProfile',
   checklistContraddittorioCompleta: 'checklistContraddittorioCompleta',
   noteChecklistContraddittorio: 'noteChecklistContraddittorio',
   stato: 'stato',

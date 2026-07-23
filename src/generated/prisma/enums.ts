@@ -60,6 +60,115 @@ export const AttivitaConcessione = {
 export type AttivitaConcessione = (typeof AttivitaConcessione)[keyof typeof AttivitaConcessione]
 
 
+export const ConcessionVertical = {
+  PORTUALE_ADSP: 'PORTUALE_ADSP',
+  MARITTIMA_TURISTICO_RICREATIVA: 'MARITTIMA_TURISTICO_RICREATIVA',
+  ALTRA_CONCESSIONE_DEMANIALE: 'ALTRA_CONCESSIONE_DEMANIALE'
+} as const
+
+export type ConcessionVertical = (typeof ConcessionVertical)[keyof typeof ConcessionVertical]
+
+
+export const LegalFramework = {
+  ART_36_COD_NAV: 'ART_36_COD_NAV',
+  ART_18_L_84_1994: 'ART_18_L_84_1994',
+  ART_37_COD_NAV: 'ART_37_COD_NAV',
+  ART_47_COD_NAV: 'ART_47_COD_NAV',
+  DL_400_1993: 'DL_400_1993',
+  DIR_2006_123_ART_12: 'DIR_2006_123_ART_12',
+  ALTRO: 'ALTRO'
+} as const
+
+export type LegalFramework = (typeof LegalFramework)[keyof typeof LegalFramework]
+
+
+export const ConcessionObjectType = {
+  AREA_DEMANIALE: 'AREA_DEMANIALE',
+  BANCHINA: 'BANCHINA',
+  MOLO: 'MOLO',
+  SPECCHIO_ACQUEO: 'SPECCHIO_ACQUEO',
+  PERTINENZA_DEMANIALE: 'PERTINENZA_DEMANIALE',
+  MANUFATTO: 'MANUFATTO',
+  LOCALE: 'LOCALE',
+  ALTRO: 'ALTRO'
+} as const
+
+export type ConcessionObjectType = (typeof ConcessionObjectType)[keyof typeof ConcessionObjectType]
+
+
+export const AwardingProcedureType = {
+  DIRETTA: 'DIRETTA',
+  COMPARATIVA_ART37: 'COMPARATIVA_ART37',
+  EVIDENZA_PUBBLICA: 'EVIDENZA_PUBBLICA',
+  RINNOVO: 'RINNOVO',
+  PROROGA_TECNICA: 'PROROGA_TECNICA',
+  ALTRO: 'ALTRO'
+} as const
+
+export type AwardingProcedureType = (typeof AwardingProcedureType)[keyof typeof AwardingProcedureType]
+
+
+export const RemovableWorksProfile = {
+  NON_RILEVATO: 'NON_RILEVATO',
+  PREVALENTE_AMOVIBILE: 'PREVALENTE_AMOVIBILE',
+  MISTO: 'MISTO',
+  PREVALENTE_NON_AMOVIBILE: 'PREVALENTE_NON_AMOVIBILE'
+} as const
+
+export type RemovableWorksProfile = (typeof RemovableWorksProfile)[keyof typeof RemovableWorksProfile]
+
+
+export const SeasonalityProfile = {
+  ANNUALE: 'ANNUALE',
+  STAGIONALE: 'STAGIONALE',
+  MISTO: 'MISTO',
+  NON_RILEVATO: 'NON_RILEVATO'
+} as const
+
+export type SeasonalityProfile = (typeof SeasonalityProfile)[keyof typeof SeasonalityProfile]
+
+
+export const FeeRegime = {
+  PORTUALE: 'PORTUALE',
+  TURISTICO_RICREATIVO_DL400: 'TURISTICO_RICREATIVO_DL400',
+  ORDINARIO_DEMANIALE: 'ORDINARIO_DEMANIALE',
+  ALTRO: 'ALTRO'
+} as const
+
+export type FeeRegime = (typeof FeeRegime)[keyof typeof FeeRegime]
+
+
+export const ComparativeProcedureStatus = {
+  NON_APPLICABILE: 'NON_APPLICABILE',
+  DA_AVVIARE: 'DA_AVVIARE',
+  IN_CORSO: 'IN_CORSO',
+  CONCLUSA: 'CONCLUSA',
+  CONTENZIOSO: 'CONTENZIOSO'
+} as const
+
+export type ComparativeProcedureStatus = (typeof ComparativeProcedureStatus)[keyof typeof ComparativeProcedureStatus]
+
+
+export const ThirdPartyManagementStatus = {
+  DIRETTA: 'DIRETTA',
+  AFFIDAMENTO_AUTORIZZATO: 'AFFIDAMENTO_AUTORIZZATO',
+  AFFIDAMENTO_DA_VERIFICARE: 'AFFIDAMENTO_DA_VERIFICARE',
+  AFFIDAMENTO_NON_AUTORIZZATO: 'AFFIDAMENTO_NON_AUTORIZZATO'
+} as const
+
+export type ThirdPartyManagementStatus = (typeof ThirdPartyManagementStatus)[keyof typeof ThirdPartyManagementStatus]
+
+
+export const ChecklistProfile = {
+  CORE: 'CORE',
+  PORTUALE_ADSP: 'PORTUALE_ADSP',
+  TURISTICO_RICREATIVO: 'TURISTICO_RICREATIVO',
+  MISTO: 'MISTO'
+} as const
+
+export type ChecklistProfile = (typeof ChecklistProfile)[keyof typeof ChecklistProfile]
+
+
 export const StatoConcessione = {
   ATTIVA: 'ATTIVA',
   SCADUTA: 'SCADUTA',

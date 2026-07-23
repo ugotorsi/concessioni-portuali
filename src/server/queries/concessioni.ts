@@ -64,6 +64,8 @@ export interface ConcessioneListItem {
   normaRiferimento: string;
   tipologiaBene: string;
   attivita: string;
+  concessionVertical: string;
+  feeRegime: string;
   superficieMq: number | null;
   canoneAnnuo: number | null;
   ubicazione: string | null;
@@ -104,6 +106,15 @@ export interface ConcessioneDetail {
   riferimentoCatastale: string | null;
   canoneAnnuo: number | null;
   categoriaCanone: string | null;
+  concessionVertical: string;
+  concessionObjectType: string | null;
+  awardingProcedureType: string;
+  removableWorksProfile: string;
+  seasonalityProfile: string;
+  feeRegime: string;
+  comparativeProcedureStatus: string;
+  thirdPartyManagementStatus: string;
+  legalFrameworks: string[];
   stato: string;
   descrizioneBene: string | null;
   ubicazione: string | null;
@@ -277,6 +288,8 @@ export async function getConcessioniList(
         normaRiferimento: true,
         tipologiaBene: true,
         attivita: true,
+        concessionVertical: true,
+        feeRegime: true,
         superficieMq: true,
         canoneAnnuo: true,
         ubicazione: true,
@@ -361,6 +374,8 @@ export async function getConcessioniList(
         normaRiferimento: item.normaRiferimento,
         tipologiaBene: item.tipologiaBene,
         attivita: item.attivita,
+        concessionVertical: item.concessionVertical,
+        feeRegime: item.feeRegime,
         superficieMq: item.superficieMq ? Number(item.superficieMq) : null,
         canoneAnnuo: item.canoneAnnuo ? Number(item.canoneAnnuo) : null,
         ubicazione: item.ubicazione,
@@ -417,6 +432,14 @@ export async function getConcessioneDetail(id: string): Promise<ConcessioneDetai
       },
       report: {
         orderBy: { createdAt: "desc" },
+      },
+      legalFrameworks: {
+        select: {
+          framework: true,
+        },
+        orderBy: {
+          framework: "asc",
+        },
       },
     },
   });
@@ -480,6 +503,15 @@ export async function getConcessioneDetail(id: string): Promise<ConcessioneDetai
     riferimentoCatastale: concessione.riferimentoCatastale,
     canoneAnnuo: concessione.canoneAnnuo ? Number(concessione.canoneAnnuo) : null,
     categoriaCanone: concessione.categoriaCanone,
+    concessionVertical: concessione.concessionVertical,
+    concessionObjectType: concessione.concessionObjectType,
+    awardingProcedureType: concessione.awardingProcedureType,
+    removableWorksProfile: concessione.removableWorksProfile,
+    seasonalityProfile: concessione.seasonalityProfile,
+    feeRegime: concessione.feeRegime,
+    comparativeProcedureStatus: concessione.comparativeProcedureStatus,
+    thirdPartyManagementStatus: concessione.thirdPartyManagementStatus,
+    legalFrameworks: concessione.legalFrameworks.map((item) => item.framework),
     stato: concessione.stato,
     descrizioneBene: concessione.descrizioneBene,
     ubicazione: concessione.ubicazione,

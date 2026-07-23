@@ -11,6 +11,7 @@
 export type * from './models/User'
 export type * from './models/Concessionario'
 export type * from './models/Concessione'
+export type * from './models/ConcessioneLegalFramework'
 export type * from './models/ObbligoConcessorio'
 export type * from './models/Scadenza'
 export type * from './models/Criticita'

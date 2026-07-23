@@ -3,6 +3,12 @@ import bcrypt from "bcryptjs";
 import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import {
+  inferDefaultConcessionVertical,
+  inferDefaultFeeRegime,
+  inferInitialLegalFrameworks,
+  mapTipologiaBeneToConcessionObjectType,
+} from "../src/lib/concession-vertical";
 import { PrismaClient } from "../src/generated/prisma/client";
 import type {
   Art47CodNavLettera,
@@ -480,6 +486,11 @@ async function main() {
 
   const concessioniByKey: Record<string, string> = {};
   for (const item of concessioniData) {
+    const concessionVertical = inferDefaultConcessionVertical({
+      attivita: item.attivita,
+      normaRiferimento: item.normaRiferimento,
+    });
+
     const created = await prisma.concessione.create({
       data: {
         numeroAtto: item.numeroAtto,
@@ -497,6 +508,17 @@ async function main() {
         riferimentoCatastale: item.riferimentoCatastale,
         canoneAnnuo: item.canoneAnnuo,
         categoriaCanone: item.categoriaCanone,
+        concessionVertical,
+        concessionObjectType: mapTipologiaBeneToConcessionObjectType(item.tipologiaBene),
+        awardingProcedureType: "ALTRO",
+        removableWorksProfile: "NON_RILEVATO",
+        seasonalityProfile: "NON_RILEVATO",
+        feeRegime: inferDefaultFeeRegime({
+          concessionVertical,
+          normaRiferimento: item.normaRiferimento,
+        }),
+        comparativeProcedureStatus: "NON_APPLICABILE",
+        thirdPartyManagementStatus: "DIRETTA",
         stato: item.stato,
         descrizioneBene: item.descrizioneBene,
         ubicazione: item.ubicazione,
@@ -1212,6 +1234,7 @@ async function main() {
         concessioneId: concessioniByKey["con-005"],
         criticitaId: criticitaByKey["crit-004"],
         tipologia: "CHIARIMENTI",
+        checklistProfile: "PORTUALE_ADSP",
         origineProcedimento: "ISTANZA_PARTE",
         procedimentoUfficio: false,
         riferimentoNormativo: "art. 45-bis cod. nav.",
@@ -1248,6 +1271,7 @@ async function main() {
         concessioneId: concessioniByKey["con-002"],
         criticitaId: criticitaByKey["crit-001"],
         tipologia: "DIFFIDA",
+        checklistProfile: "PORTUALE_ADSP",
         origineProcedimento: "UFFICIO",
         procedimentoUfficio: true,
         riferimentoNormativo: "art. 18 l. 84/1994",
@@ -1283,6 +1307,7 @@ async function main() {
         concessioneId: concessioniByKey["con-006"],
         criticitaId: criticitaByKey["crit-005"],
         tipologia: "AVVIO_DECADENZA",
+        checklistProfile: "PORTUALE_ADSP",
         origineProcedimento: "UFFICIO",
         procedimentoUfficio: true,
         riferimentoNormativo: "art. 47 cod. nav.",
@@ -1315,6 +1340,7 @@ async function main() {
         concessioneId: concessioniByKey["con-001"],
         criticitaId: criticitaByKey["crit-003"],
         tipologia: "ORDINE_RIPRISTINO",
+        checklistProfile: "PORTUALE_ADSP",
         riferimentoNormativo: "art. 54 cod. nav.",
         dataAvvio: daysAgo(12),
         dataScadenzaContraddittorio: daysFromNow(22),
@@ -1325,6 +1351,7 @@ async function main() {
       {
         concessioneId: concessioniByKey["con-003"],
         criticitaId: criticitaByKey["crit-001"],
+        checklistProfile: "PORTUALE_ADSP",
         tipologia: "RECUPERO_CANONI",
         riferimentoNormativo: "art. 18 l. 84/1994",
         dataAvvio: daysAgo(7),
@@ -1336,6 +1363,7 @@ async function main() {
       {
         concessioneId: concessioniByKey["con-006"],
         criticitaId: criticitaByKey["crit-005"],
+        checklistProfile: "PORTUALE_ADSP",
         tipologia: "AVVIO_DECADENZA",
         riferimentoNormativo: "art. 47 cod. nav.",
         dataAvvio: daysAgo(9),
@@ -1347,6 +1375,7 @@ async function main() {
       {
         concessioneId: concessioniByKey["con-007"],
         criticitaId: criticitaByKey["crit-006"],
+        checklistProfile: "PORTUALE_ADSP",
         tipologia: "AVVIO_REVOCA",
         riferimentoNormativo: "art. 42 cod. nav.",
         dataAvvio: daysAgo(6),
@@ -1358,6 +1387,7 @@ async function main() {
       {
         concessioneId: concessioniByKey["con-002"],
         tipologia: "NUOVA_PROCEDURA",
+        checklistProfile: "TURISTICO_RICREATIVO",
         riferimentoNormativo: "art. 18 l. 84/1994",
         dataAvvio: daysAgo(3),
         dataScadenzaContraddittorio: daysFromNow(40),
@@ -1366,6 +1396,52 @@ async function main() {
           "Verificare invio comunicazione di avvio procedimento, termine per controdeduzioni e documentazione fotografica.",
       },
     ],
+  });
+
+  const concessioniRowsForFrameworks = await prisma.concessione.findMany({
+    select: {
+      id: true,
+      normaRiferimento: true,
+      attivita: true,
+      concessionVertical: true,
+      criticita: {
+        where: {
+          OR: [{ rilevanzaArt47: true }, { letteraArt47: { not: null } }, { rischioDecadenza: { not: null } }],
+        },
+        select: { id: true },
+        take: 1,
+      },
+      procedimenti: {
+        where: {
+          OR: [
+            { tipologia: "AVVIO_DECADENZA" },
+            { riferimentoNormativo: { contains: "art. 47" } },
+          ],
+        },
+        select: { id: true },
+        take: 1,
+      },
+    },
+  });
+
+  const legalFrameworkRows = concessioniRowsForFrameworks.flatMap((item) => {
+    const hasArt47Signals = item.criticita.length > 0 || item.procedimenti.length > 0;
+    const frameworks = inferInitialLegalFrameworks({
+      normaRiferimento: item.normaRiferimento,
+      concessionVertical: item.concessionVertical,
+      hasArt47Signals,
+    });
+
+    return frameworks.map((framework) => ({
+      concessioneId: item.id,
+      framework,
+      note: framework === "ART_47_COD_NAV" ? "Associato solo in presenza di segnali istruttori art. 47." : null,
+    }));
+  });
+
+  await prisma.concessioneLegalFramework.createMany({
+    data: legalFrameworkRows,
+    skipDuplicates: true,
   });
 
   await prisma.report.createMany({
