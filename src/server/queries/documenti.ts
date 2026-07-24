@@ -131,11 +131,19 @@ function buildDocumentoTenantWhere(
 
 export async function getDocumentiList(params: GetDocumentiListParams): Promise<DocumentoListItem[]> {
   const tenantContext = await getCurrentTenantContext();
+  const tenantWhere = buildDocumentoTenantWhere(tenantContext);
+  const filtersWhere = buildWhere(params);
+  const hasTenantWhere = Object.keys(tenantWhere).length > 0;
+  const hasFiltersWhere = Object.keys(filtersWhere).length > 0;
+
+  const where: Prisma.DocumentoWhereInput = hasTenantWhere
+    ? hasFiltersWhere
+      ? { AND: [tenantWhere, filtersWhere] }
+      : tenantWhere
+    : filtersWhere;
+
   const rows = await prisma.documento.findMany({
-    where: {
-      ...buildDocumentoTenantWhere(tenantContext),
-      ...buildWhere(params),
-    },
+    where,
     orderBy: [{ createdAt: "desc" }],
     select: {
       id: true,

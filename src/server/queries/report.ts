@@ -306,11 +306,19 @@ function tipologiaPriority(tipologia: string): number {
 
 export async function getReportList(params: GetReportListParams): Promise<GetReportListResult> {
   const tenantContext = await getCurrentTenantContext();
+  const tenantWhere = buildReportTenantWhere(tenantContext);
+  const filtersWhere = buildWhere(params);
+  const hasTenantWhere = Object.keys(tenantWhere).length > 0;
+  const hasFiltersWhere = Object.keys(filtersWhere).length > 0;
+
+  const where: Prisma.ReportWhereInput = hasTenantWhere
+    ? hasFiltersWhere
+      ? { AND: [tenantWhere, filtersWhere] }
+      : tenantWhere
+    : filtersWhere;
+
   const rows = await prisma.report.findMany({
-    where: {
-      ...buildReportTenantWhere(tenantContext),
-      ...buildWhere(params),
-    },
+    where,
     select: {
       id: true,
       tipologia: true,

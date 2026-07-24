@@ -274,25 +274,38 @@ export async function getConcessioniList(
 
   const search = params.search?.trim();
   const scadenzaWhere = getScadenzaWhere(params.scadenza);
+  const tenantWhere = buildConcessioneTenantWhere(tenantContext);
+  const andConditions: Prisma.ConcessioneWhereInput[] = [];
+
+  if (Object.keys(tenantWhere).length > 0) {
+    andConditions.push(tenantWhere);
+  }
+
+  if (search) {
+    andConditions.push({
+      OR: [
+        { numeroAtto: { contains: search } },
+        { ubicazione: { contains: search } },
+        { descrizioneBene: { contains: search } },
+        { areaDescrizione: { contains: search } },
+        { zonaPortuale: { contains: search } },
+        { riferimentoCatastale: { contains: search } },
+        {
+          concessionario: {
+            denominazione: { contains: search },
+          },
+        },
+      ],
+    });
+  }
 
   const where: Prisma.ConcessioneWhereInput = {
-    ...buildConcessioneTenantWhere(tenantContext),
-    ...(search
+    ...(andConditions.length > 1
       ? {
-          OR: [
-            { numeroAtto: { contains: search } },
-            { ubicazione: { contains: search } },
-            { descrizioneBene: { contains: search } },
-            { areaDescrizione: { contains: search } },
-            { zonaPortuale: { contains: search } },
-            { riferimentoCatastale: { contains: search } },
-            {
-              concessionario: {
-                denominazione: { contains: search },
-              },
-            },
-          ],
+          AND: andConditions,
         }
+      : andConditions.length === 1
+        ? andConditions[0]
       : {}),
     ...(params.stato ? { stato: params.stato } : {}),
     ...(params.tipologiaBene ? { tipologiaBene: params.tipologiaBene } : {}),
