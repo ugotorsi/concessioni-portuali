@@ -42,46 +42,62 @@ export default async function VerticaleWorkspacePage({ params }: VerticaleWorksp
                 <CardTitle>{data.verticale.label}</CardTitle>
                 <CardDescription>{data.verticale.description}</CardDescription>
               </div>
-              <Badge variant={data.verticale.hasConcessioni ? "success" : "default"}>{data.verticale.coverageLabel}</Badge>
+              <Badge variant={data.verticale.hasConcessioni ? "success" : "default"}>
+                {data.verticale.hasConcessioni
+                  ? "Con concessioni nel perimetro"
+                  : "Nessuna concessione nel perimetro corrente"}
+              </Badge>
             </div>
           </CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
+          <CardContent className="space-y-3">
+            <p className="text-xs text-slate-600">{data.verticale.coverageLabel}</p>
+            <div className="flex flex-wrap gap-2">
             <Link
               href={`/concessioni?concessionVertical=${data.verticale.value}`}
+              data-testid="workspace-link-concessioni"
               className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
             >
               Apri concessioni filtrate
             </Link>
             <Link
               href="/documenti"
+              data-testid="workspace-link-documenti"
               className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"
             >
-              Vai a documenti
+              Apri la sezione documenti
             </Link>
             <Link
               href="/report"
+              data-testid="workspace-link-report"
               className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"
             >
-              Vai a report
+              Consulta i report del perimetro
             </Link>
             <Link
               href="/criticita"
+              data-testid="workspace-link-criticita"
               className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"
             >
-              Vai a criticita
+              Apri le criticita
             </Link>
             <Link
               href="/scadenze"
+              data-testid="workspace-link-scadenze"
               className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"
             >
-              Vai a scadenze
+              Consulta le scadenze
             </Link>
             <Link
               href="/procedimenti"
+              data-testid="workspace-link-procedimenti"
               className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"
             >
-              Vai a procedimenti
+              Apri i procedimenti
             </Link>
+            </div>
+            <p className="text-xs text-slate-600" data-testid="workspace-links-scope-note">
+              La sezione si apre sul perimetro tenant corrente; non e applicato un filtro verticale.
+            </p>
           </CardContent>
         </Card>
 

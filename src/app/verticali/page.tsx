@@ -33,11 +33,16 @@ export default async function VerticaliPage() {
               <CardHeader>
                 <div className="flex items-center justify-between gap-3">
                   <CardTitle className="text-lg">{item.label}</CardTitle>
-                  <Badge variant={item.hasConcessioni ? "success" : "default"}>{item.coverageLabel}</Badge>
+                  <Badge variant={item.hasConcessioni ? "success" : "default"}>
+                    {item.hasConcessioni
+                      ? "Con concessioni nel perimetro"
+                      : "Nessuna concessione nel perimetro corrente"}
+                  </Badge>
                 </div>
                 <CardDescription>{item.description}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
+                <p className="text-xs text-slate-600">{item.coverageLabel}</p>
                 <p className="text-sm text-slate-700">
                   Concessioni visibili nel perimetro corrente: <span className="font-semibold" data-testid={`vertical-count-${item.slug}`}>{item.concessioniCount}</span>
                 </p>

@@ -78,12 +78,16 @@ export async function getVerticaliOverview(): Promise<VerticaleOverviewItem[]> {
 }
 
 export async function getVerticaliDashboardSummary(): Promise<{
-  totalVerticali: number;
+  totalVerticaliConfigurate: number;
+  verticaliConConcessioniNelPerimetro: number;
   items: VerticaliDashboardSummaryItem[];
 }> {
   const rows = await getVerticaliOverview();
+  const verticaliConConcessioniNelPerimetro = rows.filter((item) => item.hasConcessioni).length;
+
   return {
-    totalVerticali: rows.length,
+    totalVerticaliConfigurate: rows.length,
+    verticaliConConcessioniNelPerimetro,
     items: rows.map((item) => ({
       value: item.value,
       slug: item.slug,

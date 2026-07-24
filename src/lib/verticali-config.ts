@@ -27,9 +27,9 @@ const VERTICAL_DESCRIPTION_BY_VALUE: Record<ConcessionVerticalValue, string> = {
 };
 
 const VERTICAL_COVERAGE_BY_VALUE: Record<ConcessionVerticalValue, string> = {
-  PORTUALE_ADSP: "Operativa",
-  MARITTIMA_TURISTICO_RICREATIVA: "Operativa",
-  ALTRA_CONCESSIONE_DEMANIALE: "Operativa",
+  PORTUALE_ADSP: "Perimetro configurato",
+  MARITTIMA_TURISTICO_RICREATIVA: "Perimetro configurato",
+  ALTRA_CONCESSIONE_DEMANIALE: "Perimetro configurato",
 };
 
 export const VERTICALI_CONFIG: VerticaleConfigItem[] = CONCESSION_VERTICAL_VALUES.map((value) => ({

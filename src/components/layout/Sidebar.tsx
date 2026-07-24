@@ -25,27 +25,29 @@ import {
 
 import { cn } from "@/lib/utils";
 import type { DemoRole } from "@/lib/auth";
+import { isNavItemActive, type NavMatchMode } from "@/components/layout/nav-active";
 
 interface NavItem {
   href: string;
   label: string;
   icon: ComponentType<{ className?: string }>;
+  matchMode?: NavMatchMode;
 }
 
 const backofficeNavItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/concessioni", label: "Concessioni", icon: Ship },
-  { href: "/verticali", label: "Verticali", icon: Layers },
+  { href: "/concessioni", label: "Concessioni", icon: Ship, matchMode: "section" },
+  { href: "/verticali", label: "Verticali", icon: Layers, matchMode: "section" },
   { href: "/mappa", label: "Mappa", icon: Map },
   { href: "/concessionari", label: "Concessionari", icon: Users },
-  { href: "/criticita", label: "Criticità", icon: AlertTriangle },
-  { href: "/scadenze", label: "Scadenze", icon: CalendarClock },
-  { href: "/pagamenti", label: "Pagamenti", icon: Wallet },
-  { href: "/sopralluoghi", label: "Sopralluoghi", icon: ClipboardList },
-  { href: "/procedimenti", label: "Procedimenti", icon: Wrench },
-  { href: "/report", label: "Report", icon: FileText },
-  { href: "/documenti", label: "Documenti", icon: FileText },
-  { href: "/normativa", label: "Normativa", icon: Library },
+  { href: "/criticita", label: "Criticità", icon: AlertTriangle, matchMode: "section" },
+  { href: "/scadenze", label: "Scadenze", icon: CalendarClock, matchMode: "section" },
+  { href: "/pagamenti", label: "Pagamenti", icon: Wallet, matchMode: "section" },
+  { href: "/sopralluoghi", label: "Sopralluoghi", icon: ClipboardList, matchMode: "section" },
+  { href: "/procedimenti", label: "Procedimenti", icon: Wrench, matchMode: "section" },
+  { href: "/report", label: "Report", icon: FileText, matchMode: "section" },
+  { href: "/documenti", label: "Documenti", icon: FileText, matchMode: "section" },
+  { href: "/normativa", label: "Normativa", icon: Library, matchMode: "section" },
   { href: "/audit", label: "Audit", icon: ScrollText },
   { href: "/ai", label: "Assistente AI", icon: Lightbulb },
   { href: "/demo", label: "Demo", icon: Presentation },
@@ -55,12 +57,12 @@ const backofficeNavItems: NavItem[] = [
 
 const adspNavItems: NavItem[] = [
   { href: "/adsp", label: "Portale AdSP", icon: Shield },
-  { href: "/concessioni", label: "Concessioni", icon: Ship },
-  { href: "/verticali", label: "Verticali", icon: Layers },
+  { href: "/concessioni", label: "Concessioni", icon: Ship, matchMode: "section" },
+  { href: "/verticali", label: "Verticali", icon: Layers, matchMode: "section" },
   { href: "/mappa", label: "Mappa", icon: Map },
-  { href: "/report", label: "Report", icon: FileText },
-  { href: "/documenti", label: "Documenti", icon: FileText },
-  { href: "/normativa", label: "Normativa", icon: Library },
+  { href: "/report", label: "Report", icon: FileText, matchMode: "section" },
+  { href: "/documenti", label: "Documenti", icon: FileText, matchMode: "section" },
+  { href: "/normativa", label: "Normativa", icon: Library, matchMode: "section" },
   { href: "/demo", label: "Demo", icon: Presentation },
   { href: "/demo-scenari", label: "Scenari demo", icon: Presentation },
   { href: "/demo-guidata", label: "Demo guidata", icon: Presentation },
@@ -85,13 +87,14 @@ export function Sidebar({ role, roleLabel }: SidebarProps) {
 
       <nav className="grid gap-1 px-3 py-4 sm:px-4" aria-label="Navigazione principale">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = isNavItemActive(pathname, item.href, item.matchMode ?? "exact");
           const Icon = item.icon;
 
           return (
             <Link
               key={item.href}
               href={item.href}
+              aria-current={isActive ? "page" : undefined}
               className={cn(
                 "inline-flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 isActive

@@ -18,3 +18,21 @@ test("admin vede la verticale concessione in lista e dettaglio", async ({ page }
   await expect(page.getByTestId("concessione-vertical-detail")).toBeVisible();
   await expect(page.getByTestId("concessione-legal-frameworks-detail")).toBeVisible();
 });
+
+test("concessioni filters expose explicit accessible labels", async ({ page }) => {
+  await loginAndExpectLanding(page, "admin@demo.local", "admin123", /\/dashboard$/);
+
+  await page.goto("/concessioni");
+  await expect(page).toHaveURL(/\/concessioni$/);
+
+  await expect(page.getByLabel("Ricerca")).toBeVisible();
+  await expect(page.getByLabel("Stato")).toBeVisible();
+  await expect(page.getByLabel("Tipologia bene")).toBeVisible();
+  await expect(page.getByLabel("Attivita")).toBeVisible();
+  await expect(page.getByLabel("Verticale")).toBeVisible();
+  await expect(page.getByLabel("Concessionario")).toBeVisible();
+  await expect(page.getByLabel("Scadenza")).toBeVisible();
+
+  await expect(page.locator('label[for="concessioni-filter-verticale"]')).toBeVisible();
+  await expect(page.locator("#concessioni-filter-verticale")).toBeVisible();
+});

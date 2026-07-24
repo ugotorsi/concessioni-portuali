@@ -27,8 +27,18 @@ test("auth + role redirects baseline", async ({ page, context }) => {
   await expect(page).toHaveURL(/\/adsp$/);
 
   await context.clearCookies();
-  await page.goto("/dashboard");
-  await expect(page).toHaveURL(/\/login/);
+  const guestPage = await context.newPage();
+
+  await guestPage.goto("/dashboard");
+  await expect(guestPage).toHaveURL(/\/login/);
+
+  await guestPage.goto("/verticali");
+  await expect(guestPage).toHaveURL(/\/login/);
+
+  await guestPage.goto("/verticali/portuale-adsp");
+  await expect(guestPage).toHaveURL(/\/login/);
+
+  await guestPage.close();
 });
 
 test("generic auth error and lockout baseline", async ({ page }) => {

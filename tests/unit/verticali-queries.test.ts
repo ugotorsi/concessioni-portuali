@@ -39,7 +39,7 @@ vi.mock("@/lib/tenant-auth", async () => {
   };
 });
 
-import { getVerticaleWorkspaceBySlug, getVerticaliOverview } from "@/server/queries/verticali";
+import { getVerticaleWorkspaceBySlug, getVerticaliDashboardSummary, getVerticaliOverview } from "@/server/queries/verticali";
 
 describe("verticali queries", () => {
   beforeEach(() => {
@@ -144,5 +144,25 @@ describe("verticali queries", () => {
       report: 5,
     });
     expect(result?.concessioni[0]?.criticitaAperteCount).toBe(2);
+  });
+
+  it("reports configured and represented vertical counts in dashboard summary", async () => {
+    prismaMock.concessione.count
+      .mockResolvedValueOnce(2)
+      .mockResolvedValueOnce(0)
+      .mockResolvedValueOnce(1);
+
+    const summary = await getVerticaliDashboardSummary();
+
+    expect(summary.totalVerticaliConfigurate).toBe(3);
+    expect(summary.verticaliConConcessioniNelPerimetro).toBe(2);
+    expect(summary.items).toHaveLength(3);
+    expect(summary.items[0]).toEqual(
+      expect.objectContaining({
+        slug: expect.any(String),
+        label: expect.any(String),
+        concessioniCount: expect.any(Number),
+      }),
+    );
   });
 });

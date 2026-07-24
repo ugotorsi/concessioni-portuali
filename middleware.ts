@@ -8,6 +8,7 @@ const PROTECTED_PREFIXES = [
   "/dashboard",
   "/mappa",
   "/concessioni",
+  "/verticali",
   "/concessionari",
   "/criticita",
   "/scadenze",

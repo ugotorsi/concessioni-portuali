@@ -133,14 +133,17 @@ export default async function DashboardPage() {
       <section className="mt-4 grid gap-4 xl:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>Verticali operative</CardTitle>
+            <CardTitle>Verticali</CardTitle>
             <CardDescription>
-              Accesso rapido ai workspace verticali con conteggi concessioni nel perimetro corrente.
+              Dati disponibili nel perimetro corrente per i workspace verticali configurati.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3" data-testid="dashboard-verticali-operative">
             <p className="text-sm text-slate-700">
-              Verticali configurate: <span className="font-semibold">{verticaliSummary.totalVerticali}</span>
+              Verticali configurate: <span className="font-semibold">{verticaliSummary.totalVerticaliConfigurate}</span>
+            </p>
+            <p className="text-sm text-slate-700">
+              Verticali con concessioni nel perimetro: <span className="font-semibold">{verticaliSummary.verticaliConConcessioniNelPerimetro}</span>
             </p>
 
             <div className="grid gap-2 sm:grid-cols-2">
@@ -151,7 +154,7 @@ export default async function DashboardPage() {
                   className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 hover:bg-slate-100"
                 >
                   <p className="font-medium">{item.label}</p>
-                  <p className="text-xs text-slate-600">Concessioni: {item.concessioniCount}</p>
+                  <p className="text-xs text-slate-600">Concessioni per verticale: {item.concessioniCount}</p>
                 </Link>
               ))}
             </div>
