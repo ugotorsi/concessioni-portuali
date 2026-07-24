@@ -410,9 +410,55 @@ enum LegalSourceType {
 }
 
 enum LegalSourceStatus {
-  VIGENTE
-  SUPERATA
-  BOZZA
+  CURRENT
+  CURRENT_SUBJECT_TO_REVIEW
+  PENDING_VALIDITY_CHECK
+  HISTORICAL
+  SUPERSEDED
+  PARTIALLY_SUPERSEDED
+  DRAFT_OR_ONGOING_PROCEDURE
+  CASE_SPECIFIC
+  MISSING_SOURCE
+}
+
+enum LegalSourceRole {
+  NORMATIVE
+  PROCEDURAL
+  PROGRAMMATIC
+  STRATEGIC
+  ENVIRONMENTAL
+  ADVISORY
+  TECHNICAL_GUIDANCE
+  SUPPORTING_MAP
+  PREPARATORY
+  CASE_SPECIFIC
+}
+
+enum LegalSourceConfidence {
+  HIGH
+  MEDIUM
+  LOW
+  INSUFFICIENT
+}
+
+enum LegalTerritorialScope {
+  NATIONAL
+  AUTHORITY
+  PORT
+  PORT_AREA
+}
+
+enum LegalRank {
+  NATIONAL_LAW
+  AUTHORITY_REGULATION
+  PORT_ORDINANCE
+  PLANNING_INSTRUMENT
+  PROCEDURE_DOCUMENT
+  ENVIRONMENTAL_ACT
+  TECHNICAL_GUIDANCE
+  ADVISORY_OPINION
+  CARTOGRAPHIC_SUPPORT
+  OTHER
 }
 
 enum SourceRelationType {
@@ -457,23 +503,23 @@ enum ImportRunStatus {
 }
 
 model Ente {
-  id          String             @id @default(cuid())
-  nome        String
-  codice      String             @unique
-  tipo        EnteTipo           @default(ALTRO)
-  stato       EnteStato          @default(ATTIVO)
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-  concessioni Concessione[]
-  documenti   Documento[]
-  report      Report[]
-  activityLog ActivityLog[]
-  memberships TenantMembership[]
-  ports       Port[]
+  id           String             @id @default(cuid())
+  nome         String
+  codice       String             @unique
+  tipo         EnteTipo           @default(ALTRO)
+  stato        EnteStato          @default(ATTIVO)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  concessioni  Concessione[]
+  documenti    Documento[]
+  report       Report[]
+  activityLog  ActivityLog[]
+  memberships  TenantMembership[]
+  ports        Port[]
   legalSources LegalSource[]
-  legalRules  LegalRule[]
+  legalRules   LegalRule[]
   documentGaps DocumentGap[]
-  importRuns  ImportRun[]
+  importRuns   ImportRun[]
 
   @@index([tipo])
   @@index([stato])
@@ -488,9 +534,9 @@ model Authority {
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
 
-  ports      Port[]
+  ports        Port[]
   legalSources LegalSource[]
-  importRuns ImportRun[]
+  importRuns   ImportRun[]
 
   @@index([level])
   @@index([createdAt])
@@ -505,13 +551,13 @@ model Port {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  ente       Ente?      @relation(fields: [enteId], references: [id], onDelete: SetNull)
-  authority  Authority? @relation(fields: [authorityId], references: [id], onDelete: SetNull)
-  areas      PortArea[]
+  ente         Ente?         @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  authority    Authority?    @relation(fields: [authorityId], references: [id], onDelete: SetNull)
+  areas        PortArea[]
   legalSources LegalSource[]
-  legalRules LegalRule[]
+  legalRules   LegalRule[]
   documentGaps DocumentGap[]
-  importRuns ImportRun[]
+  importRuns   ImportRun[]
 
   @@index([enteId])
   @@index([authorityId])
@@ -535,28 +581,28 @@ model PortArea {
 }
 
 model ImportRun {
-  id            String         @id @default(cuid())
+  id            String          @id @default(cuid())
   packCode      String
   packVersion   String
   manifestPath  String
   status        ImportRunStatus @default(IN_PROGRESS)
-  sourceCount   Int            @default(0)
-  ruleCount     Int            @default(0)
-  relationCount Int            @default(0)
-  gapCount      Int            @default(0)
+  sourceCount   Int             @default(0)
+  ruleCount     Int             @default(0)
+  relationCount Int             @default(0)
+  gapCount      Int             @default(0)
   warnings      Json?
   errorMessage  String?
   enteId        String?
   authorityId   String?
   portId        String?
-  startedAt     DateTime       @default(now())
+  startedAt     DateTime        @default(now())
   finishedAt    DateTime?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 
-  ente       Ente?      @relation(fields: [enteId], references: [id], onDelete: SetNull)
-  authority  Authority? @relation(fields: [authorityId], references: [id], onDelete: SetNull)
-  port       Port?      @relation(fields: [portId], references: [id], onDelete: SetNull)
+  ente         Ente?         @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  authority    Authority?    @relation(fields: [authorityId], references: [id], onDelete: SetNull)
+  port         Port?         @relation(fields: [portId], references: [id], onDelete: SetNull)
   legalSources LegalSource[]
 
   @@index([packCode])
@@ -566,37 +612,57 @@ model ImportRun {
 }
 
 model LegalSource {
-  id               String            @id @default(cuid())
-  sourceKey        String            @unique
-  title            String
-  sourceType       LegalSourceType
-  status           LegalSourceStatus @default(VIGENTE)
-  publicationDate  DateTime?
-  effectiveFrom    DateTime?
-  effectiveTo      DateTime?
-  notes            String?
-  fileName         String?
-  filePath         String?
-  fileChecksumSha256 String?
-  fileMimeType     String?
-  fileSizeBytes    Int?
-  enteId           String?
-  authorityId      String?
-  portId           String?
-  importRunId      String?
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  id                   String                @id @default(cuid())
+  sourceKey            String                @unique
+  title                String
+  sourceType           LegalSourceType
+  status               LegalSourceStatus     @default(CURRENT_SUBJECT_TO_REVIEW)
+  role                 LegalSourceRole       @default(NORMATIVE)
+  legalRank            LegalRank             @default(OTHER)
+  territorialScope     LegalTerritorialScope @default(AUTHORITY)
+  confidence           LegalSourceConfidence @default(MEDIUM)
+  issuingBody          String?
+  sourceNumber         String?
+  sourceDate           DateTime?
+  sourceOrigin         String?
+  portAreaCode         String?
+  tags                 Json?
+  humanReviewRequired  Boolean               @default(true)
+  isConformative       Boolean               @default(true)
+  isExtractable        Boolean               @default(true)
+  duplicateOfSourceKey String?
+  publicationDate      DateTime?
+  effectiveFrom        DateTime?
+  effectiveTo          DateTime?
+  notes                String?
+  fileName             String?
+  filePath             String?
+  fileChecksumSha256   String?
+  fileMimeType         String?
+  fileSizeBytes        Int?
+  enteId               String?
+  authorityId          String?
+  portId               String?
+  importRunId          String?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
 
-  ente       Ente?      @relation(fields: [enteId], references: [id], onDelete: SetNull)
-  authority  Authority? @relation(fields: [authorityId], references: [id], onDelete: SetNull)
-  port       Port?      @relation(fields: [portId], references: [id], onDelete: SetNull)
-  importRun  ImportRun? @relation(fields: [importRunId], references: [id], onDelete: SetNull)
-  rules      LegalRule[]
+  ente              Ente?            @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  authority         Authority?       @relation(fields: [authorityId], references: [id], onDelete: SetNull)
+  port              Port?            @relation(fields: [portId], references: [id], onDelete: SetNull)
+  importRun         ImportRun?       @relation(fields: [importRunId], references: [id], onDelete: SetNull)
+  rules             LegalRule[]
   outgoingRelations SourceRelation[] @relation("SourceRelationFrom")
   incomingRelations SourceRelation[] @relation("SourceRelationTo")
 
   @@index([sourceType])
   @@index([status])
+  @@index([role])
+  @@index([legalRank])
+  @@index([territorialScope])
+  @@index([confidence])
+  @@index([isConformative])
+  @@index([isExtractable])
   @@index([enteId])
   @@index([portId])
   @@index([effectiveFrom])
@@ -604,12 +670,12 @@ model LegalSource {
 }
 
 model SourceRelation {
-  id            String             @id @default(cuid())
-  fromSourceId  String
-  toSourceId    String
-  relationType  SourceRelationType
-  note          String?
-  createdAt     DateTime           @default(now())
+  id           String             @id @default(cuid())
+  fromSourceId String
+  toSourceId   String
+  relationType SourceRelationType
+  note         String?
+  createdAt    DateTime           @default(now())
 
   fromSource LegalSource @relation("SourceRelationFrom", fields: [fromSourceId], references: [id], onDelete: Cascade)
   toSource   LegalSource @relation("SourceRelationTo", fields: [toSourceId], references: [id], onDelete: Cascade)
@@ -621,37 +687,37 @@ model SourceRelation {
 }
 
 model LegalRule {
-  id                        String                   @id @default(cuid())
-  sourceId                  String
-  ruleCode                  String
-  title                     String
-  summary                   String
-  category                  LegalRuleCategory
-  status                    LegalRuleStatus          @default(ATTIVA)
-  priority                  Int                      @default(100)
-  enteId                    String?
-  portId                    String?
-  matchConcessionVertical   ConcessionVertical?
-  matchObjectType           ConcessionObjectType?
-  matchAttivita             AttivitaConcessione?
-  matchAwardingProcedure    AwardingProcedureType?
-  matchFeeRegime            FeeRegime?
-  matchComparativeStatus    ComparativeProcedureStatus?
-  requiresRilevanzaArt47    Boolean?
-  matchArt47Letter          Art47CodNavLettera?
-  requiresMorosita          Boolean?
-  requiresPolizzaValida     Boolean?
-  outputSeverity            GravitaCriticita         @default(MEDIA)
-  outcomeTitle              String
-  outcomeSummary            String
-  disclaimer                String?
-  humanReviewRequired       Boolean                  @default(true)
-  createdAt                 DateTime                 @default(now())
-  updatedAt                 DateTime                 @updatedAt
+  id                      String                      @id @default(cuid())
+  sourceId                String
+  ruleCode                String
+  title                   String
+  summary                 String
+  category                LegalRuleCategory
+  status                  LegalRuleStatus             @default(ATTIVA)
+  priority                Int                         @default(100)
+  enteId                  String?
+  portId                  String?
+  matchConcessionVertical ConcessionVertical?
+  matchObjectType         ConcessionObjectType?
+  matchAttivita           AttivitaConcessione?
+  matchAwardingProcedure  AwardingProcedureType?
+  matchFeeRegime          FeeRegime?
+  matchComparativeStatus  ComparativeProcedureStatus?
+  requiresRilevanzaArt47  Boolean?
+  matchArt47Letter        Art47CodNavLettera?
+  requiresMorosita        Boolean?
+  requiresPolizzaValida   Boolean?
+  outputSeverity          GravitaCriticita            @default(MEDIA)
+  outcomeTitle            String
+  outcomeSummary          String
+  disclaimer              String?
+  humanReviewRequired     Boolean                     @default(true)
+  createdAt               DateTime                    @default(now())
+  updatedAt               DateTime                    @updatedAt
 
-  source       LegalSource  @relation(fields: [sourceId], references: [id], onDelete: Cascade)
-  ente         Ente?        @relation(fields: [enteId], references: [id], onDelete: SetNull)
-  port         Port?        @relation(fields: [portId], references: [id], onDelete: SetNull)
+  source       LegalSource   @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  ente         Ente?         @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  port         Port?         @relation(fields: [portId], references: [id], onDelete: SetNull)
   documentGaps DocumentGap[]
 
   @@unique([sourceId, ruleCode])
@@ -693,13 +759,13 @@ model DocumentGap {
 }
 
 model TenantMembership {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
   enteId    String
   role      RuoloUser
-  isDefault Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  isDefault Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   ente Ente @relation(fields: [enteId], references: [id], onDelete: Cascade)
@@ -712,26 +778,26 @@ model TenantMembership {
 }
 
 model User {
-  id                  String        @id @default(cuid())
+  id                  String             @id @default(cuid())
   nome                String
-  email               String        @unique
+  email               String             @unique
   passwordHash        String?
   ruolo               RuoloUser
-  attivo              Boolean       @default(true)
-  failedLoginAttempts Int           @default(0)
+  attivo              Boolean            @default(true)
+  failedLoginAttempts Int                @default(0)
   lockedUntil         DateTime?
   lastFailedLoginAt   DateTime?
   lastLoginAt         DateTime?
   passwordChangedAt   DateTime?
-  mustChangePassword  Boolean       @default(false)
-  mfaEnabled          Boolean       @default(false)
+  mustChangePassword  Boolean            @default(false)
+  mfaEnabled          Boolean            @default(false)
   mfaSecret           String?
   mfaRecoveryCodes    Json?
   mfaVerifiedAt       DateTime?
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
   activityLogs        ActivityLog[]
-  documentiCaricati   Documento[]   @relation("DocumentoUploader")
+  documentiCaricati   Documento[]        @relation("DocumentoUploader")
   tenantMemberships   TenantMembership[]
 
   @@index([ruolo])
@@ -762,52 +828,52 @@ model Concessionario {
 }
 
 model Concessione {
-  id               String              @id @default(cuid())
-  numeroAtto       String
-  dataRilascio     DateTime
-  dataScadenza     DateTime
-  normaRiferimento NormaRiferimento
-  tipologiaBene    TipologiaBene
-  attivita         AttivitaConcessione
-  superficieMq     Decimal?
-  latitudineGis    Decimal?
-  longitudineGis   Decimal?
-  coordinateGis    String?
-  areaDescrizione  String?
-  zonaPortuale     String?
-  riferimentoCatastale String?
-  canoneAnnuo      Decimal?
-  categoriaCanone  String?
-  concessionVertical ConcessionVertical @default(PORTUALE_ADSP)
-  concessionObjectType ConcessionObjectType?
-  awardingProcedureType AwardingProcedureType @default(ALTRO)
-  removableWorksProfile RemovableWorksProfile @default(NON_RILEVATO)
-  seasonalityProfile SeasonalityProfile @default(NON_RILEVATO)
-  feeRegime        FeeRegime            @default(ALTRO)
+  id                         String                     @id @default(cuid())
+  numeroAtto                 String
+  dataRilascio               DateTime
+  dataScadenza               DateTime
+  normaRiferimento           NormaRiferimento
+  tipologiaBene              TipologiaBene
+  attivita                   AttivitaConcessione
+  superficieMq               Decimal?
+  latitudineGis              Decimal?
+  longitudineGis             Decimal?
+  coordinateGis              String?
+  areaDescrizione            String?
+  zonaPortuale               String?
+  riferimentoCatastale       String?
+  canoneAnnuo                Decimal?
+  categoriaCanone            String?
+  concessionVertical         ConcessionVertical         @default(PORTUALE_ADSP)
+  concessionObjectType       ConcessionObjectType?
+  awardingProcedureType      AwardingProcedureType      @default(ALTRO)
+  removableWorksProfile      RemovableWorksProfile      @default(NON_RILEVATO)
+  seasonalityProfile         SeasonalityProfile         @default(NON_RILEVATO)
+  feeRegime                  FeeRegime                  @default(ALTRO)
   comparativeProcedureStatus ComparativeProcedureStatus @default(NON_APPLICABILE)
   thirdPartyManagementStatus ThirdPartyManagementStatus @default(DIRETTA)
-  stato            StatoConcessione
-  descrizioneBene  String?
-  ubicazione       String?
-  note             String?
-  concessionarioId String
-  enteId           String?
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
+  stato                      StatoConcessione
+  descrizioneBene            String?
+  ubicazione                 String?
+  note                       String?
+  concessionarioId           String
+  enteId                     String?
+  createdAt                  DateTime                   @default(now())
+  updatedAt                  DateTime                   @updatedAt
 
-  concessionario Concessionario       @relation(fields: [concessionarioId], references: [id], onDelete: Restrict)
-  ente          Ente?                @relation(fields: [enteId], references: [id], onDelete: SetNull)
-  obblighi       ObbligoConcessorio[]
-  scadenze       Scadenza[]
-  criticita      Criticita[]
-  procedimenti   Procedimento[]
-  sopralluoghi   Sopralluogo[]
-  pagamenti      Pagamento[]
-  documenti      Documento[]
-  report         Report[]
+  concessionario  Concessionario              @relation(fields: [concessionarioId], references: [id], onDelete: Restrict)
+  ente            Ente?                       @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  obblighi        ObbligoConcessorio[]
+  scadenze        Scadenza[]
+  criticita       Criticita[]
+  procedimenti    Procedimento[]
+  sopralluoghi    Sopralluogo[]
+  pagamenti       Pagamento[]
+  documenti       Documento[]
+  report          Report[]
   legalFrameworks ConcessioneLegalFramework[]
-  normaImpatti   NormaImpatto[]
-  activityLogs   ActivityLog[]
+  normaImpatti    NormaImpatto[]
+  activityLogs    ActivityLog[]
 
   @@index([stato])
   @@index([dataScadenza])
@@ -826,11 +892,11 @@ model Concessione {
 }
 
 model ConcessioneLegalFramework {
-  id           String         @id @default(cuid())
+  id            String         @id @default(cuid())
   concessioneId String
-  framework    LegalFramework
-  note         String?
-  createdAt    DateTime       @default(now())
+  framework     LegalFramework
+  note          String?
+  createdAt     DateTime       @default(now())
 
   concessione Concessione @relation(fields: [concessioneId], references: [id], onDelete: Cascade)
 
@@ -882,34 +948,34 @@ model Scadenza {
 }
 
 model Criticita {
-  id                      String             @id @default(cuid())
-  concessioneId           String
-  tipologia               TipologiaCriticita
-  gravita                 GravitaCriticita
-  fonte                   FonteCriticita
-  descrizione             String
-  riferimentoNormativo    String?
-  azioneConsigliata       String?
-  latitudineGis           Decimal?
-  longitudineGis          Decimal?
-  localizzazioneDescrizione String?
-  rilevanzaArt47          Boolean            @default(false)
-  letteraArt47            Art47CodNavLettera?
-  rischioDecadenza        LivelloRischioDecadenza?
-  motivazioneArt47        String?
-  azioneIstruttoriaArt47  String?
-  regolarizzata           Boolean            @default(false)
-  dataRegolarizzazione    DateTime?
-  descrizioneRegolarizzazione String?
-  esitoRegolarizzazione   EsitoRegolarizzazione?
-  verificataRegolarizzazione Boolean         @default(false)
+  id                           String                   @id @default(cuid())
+  concessioneId                String
+  tipologia                    TipologiaCriticita
+  gravita                      GravitaCriticita
+  fonte                        FonteCriticita
+  descrizione                  String
+  riferimentoNormativo         String?
+  azioneConsigliata            String?
+  latitudineGis                Decimal?
+  longitudineGis               Decimal?
+  localizzazioneDescrizione    String?
+  rilevanzaArt47               Boolean                  @default(false)
+  letteraArt47                 Art47CodNavLettera?
+  rischioDecadenza             LivelloRischioDecadenza?
+  motivazioneArt47             String?
+  azioneIstruttoriaArt47       String?
+  regolarizzata                Boolean                  @default(false)
+  dataRegolarizzazione         DateTime?
+  descrizioneRegolarizzazione  String?
+  esitoRegolarizzazione        EsitoRegolarizzazione?
+  verificataRegolarizzazione   Boolean                  @default(false)
   dataVerificaRegolarizzazione DateTime?
   noteVerificaRegolarizzazione String?
-  stato                   StatoCriticita
-  dataRilevazione         DateTime           @default(now())
-  dataUltimoAggiornamento DateTime?
-  createdAt               DateTime           @default(now())
-  updatedAt               DateTime           @updatedAt
+  stato                        StatoCriticita
+  dataRilevazione              DateTime                 @default(now())
+  dataUltimoAggiornamento      DateTime?
+  createdAt                    DateTime                 @default(now())
+  updatedAt                    DateTime                 @updatedAt
 
   concessione  Concessione    @relation(fields: [concessioneId], references: [id], onDelete: Cascade)
   procedimenti Procedimento[]
@@ -933,50 +999,50 @@ model Criticita {
 }
 
 model Procedimento {
-  id                          String                @id @default(cuid())
-  concessioneId               String
-  criticitaId                 String?
-  tipologia                   TipologiaProcedimento
-  origineProcedimento         OrigineProcedimento   @default(UFFICIO)
-  procedimentoUfficio         Boolean               @default(true)
-  riferimentoNormativo        String?
-  dataAvvio                   DateTime?
-  dataScadenzaContraddittorio DateTime?
-  dataProvvedimentoFinale     DateTime?
-  comunicazioneAvvioInviata   Boolean               @default(false)
-  dataComunicazioneAvvio      DateTime?
-  termineMemorieGiorni        Int?
-  termineMemorieScadenza      DateTime?
-  memorieRicevute             Boolean               @default(false)
-  dataRicezioneMemorie        DateTime?
-  audizioneRichiesta          Boolean               @default(false)
-  audizioneSvolta             Boolean               @default(false)
-  dataAudizione               DateTime?
-  sopralluogoIstruttorioSvolto Boolean              @default(false)
-  contestazioneFormaleInviata Boolean               @default(false)
-  dataContestazioneFormale    DateTime?
-  controdeduzioniValutate     Boolean               @default(false)
-  motivazioneValutazione      String?
-  propostaEsitoIstruttorio    EsitoIstruttorioProcedimento?
-  preavvisoRigettoApplicabile Boolean               @default(false)
-  statoPreavvisoRigetto       StatoPreavvisoRigetto @default(NON_VALUTATO)
-  dataPreavvisoRigetto        DateTime?
-  termineOsservazioniPreavviso DateTime?
-  osservazioniPreavvisoRicevute Boolean             @default(false)
-  dataOsservazioniPreavviso   DateTime?
+  id                               String                        @id @default(cuid())
+  concessioneId                    String
+  criticitaId                      String?
+  tipologia                        TipologiaProcedimento
+  origineProcedimento              OrigineProcedimento           @default(UFFICIO)
+  procedimentoUfficio              Boolean                       @default(true)
+  riferimentoNormativo             String?
+  dataAvvio                        DateTime?
+  dataScadenzaContraddittorio      DateTime?
+  dataProvvedimentoFinale          DateTime?
+  comunicazioneAvvioInviata        Boolean                       @default(false)
+  dataComunicazioneAvvio           DateTime?
+  termineMemorieGiorni             Int?
+  termineMemorieScadenza           DateTime?
+  memorieRicevute                  Boolean                       @default(false)
+  dataRicezioneMemorie             DateTime?
+  audizioneRichiesta               Boolean                       @default(false)
+  audizioneSvolta                  Boolean                       @default(false)
+  dataAudizione                    DateTime?
+  sopralluogoIstruttorioSvolto     Boolean                       @default(false)
+  contestazioneFormaleInviata      Boolean                       @default(false)
+  dataContestazioneFormale         DateTime?
+  controdeduzioniValutate          Boolean                       @default(false)
+  motivazioneValutazione           String?
+  propostaEsitoIstruttorio         EsitoIstruttorioProcedimento?
+  preavvisoRigettoApplicabile      Boolean                       @default(false)
+  statoPreavvisoRigetto            StatoPreavvisoRigetto         @default(NON_VALUTATO)
+  dataPreavvisoRigetto             DateTime?
+  termineOsservazioniPreavviso     DateTime?
+  osservazioniPreavvisoRicevute    Boolean                       @default(false)
+  dataOsservazioniPreavviso        DateTime?
   valutazioneOsservazioniPreavviso String?
-  motivazioneMancatoPreavviso String?
-  checklistProfile            ChecklistProfile      @default(CORE)
-  checklistContraddittorioCompleta Boolean          @default(false)
-  noteChecklistContraddittorio String?
-  stato                       StatoProcedimento
-  noteIstruttorie             String?
-  createdAt                   DateTime              @default(now())
-  updatedAt                   DateTime              @updatedAt
+  motivazioneMancatoPreavviso      String?
+  checklistProfile                 ChecklistProfile              @default(CORE)
+  checklistContraddittorioCompleta Boolean                       @default(false)
+  noteChecklistContraddittorio     String?
+  stato                            StatoProcedimento
+  noteIstruttorie                  String?
+  createdAt                        DateTime                      @default(now())
+  updatedAt                        DateTime                      @updatedAt
 
-  concessione Concessione @relation(fields: [concessioneId], references: [id], onDelete: Cascade)
-  criticita   Criticita?  @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
-  documenti   Documento[]
+  concessione  Concessione    @relation(fields: [concessioneId], references: [id], onDelete: Cascade)
+  criticita    Criticita?     @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
+  documenti    Documento[]
   normaImpatti NormaImpatto[]
 
   @@index([concessioneId])
@@ -996,22 +1062,22 @@ model Procedimento {
 }
 
 model Sopralluogo {
-  id                     String           @id @default(cuid())
-  concessioneId          String
-  data                   DateTime
-  operatori              String
-  esito                  EsitoSopralluogo
-  conformitaPlanimetrica Boolean          @default(false)
-  latitudineGis          Decimal?
-  longitudineGis         Decimal?
+  id                        String           @id @default(cuid())
+  concessioneId             String
+  data                      DateTime
+  operatori                 String
+  esito                     EsitoSopralluogo
+  conformitaPlanimetrica    Boolean          @default(false)
+  latitudineGis             Decimal?
+  longitudineGis            Decimal?
   localizzazioneDescrizione String?
-  statoManutentivo       String?
-  sicurezza              String?
-  occupazione            String?
-  interferenze           String?
-  descrizione            String?
-  createdAt              DateTime         @default(now())
-  updatedAt              DateTime         @updatedAt
+  statoManutentivo          String?
+  sicurezza                 String?
+  occupazione               String?
+  interferenze              String?
+  descrizione               String?
+  createdAt                 DateTime         @default(now())
+  updatedAt                 DateTime         @updatedAt
 
   concessione Concessione @relation(fields: [concessioneId], references: [id], onDelete: Cascade)
   documenti   Documento[]
@@ -1048,61 +1114,61 @@ model Pagamento {
 }
 
 model Documento {
-  id                   String             @id @default(cuid())
-  nome                 String
-  tipologia            TipologiaDocumento
-  statoDocumento       StatoDocumento     @default(ATTIVO)
-  direzione            DocumentoDirezione?
-  canale               DocumentoCanale?
-  numeroProtocollo     String?
-  dataProtocollo       DateTime?
-  mittente             String?
-  destinatario         String?
-  pecMessageId         String?
+  id                        String              @id @default(cuid())
+  nome                      String
+  tipologia                 TipologiaDocumento
+  statoDocumento            StatoDocumento      @default(ATTIVO)
+  direzione                 DocumentoDirezione?
+  canale                    DocumentoCanale?
+  numeroProtocollo          String?
+  dataProtocollo            DateTime?
+  mittente                  String?
+  destinatario              String?
+  pecMessageId              String?
   pecRicevutaAccettazioneId String?
-  pecRicevutaConsegnaId String?
-  pecWarningMancataRicevuta Boolean       @default(false)
-  mimeType             String?
-  dimensioneBytes      Int?
-  checksumSha256       String?
-  sha256               String?
-  url                  String?
-  storagePath          String?
-  storageKey           String?
-  storageProvider      String?
-  storageBucket        String?
-  publicUrl            String?
-  nomeStorage          String?
-  originalName         String?
-  sizeBytes            Int?
-  documentType         String?
-  documentDate         DateTime?
-  source               String?
-  status               String?
-  dataDocumento        DateTime?
-  descrizione          String?
-  uploadedByUserId     String?
-  uploadedByUserEmail  String?
-  uploadedByUserRole   String?
-  archivedAt           DateTime?
-  enteId               String?
-  concessioneId        String?
-  criticitaId          String?
-  procedimentoId       String?
-  sopralluogoId        String?
-  pagamentoId          String?
-  reportId             String?
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
+  pecRicevutaConsegnaId     String?
+  pecWarningMancataRicevuta Boolean             @default(false)
+  mimeType                  String?
+  dimensioneBytes           Int?
+  checksumSha256            String?
+  sha256                    String?
+  url                       String?
+  storagePath               String?
+  storageKey                String?
+  storageProvider           String?
+  storageBucket             String?
+  publicUrl                 String?
+  nomeStorage               String?
+  originalName              String?
+  sizeBytes                 Int?
+  documentType              String?
+  documentDate              DateTime?
+  source                    String?
+  status                    String?
+  dataDocumento             DateTime?
+  descrizione               String?
+  uploadedByUserId          String?
+  uploadedByUserEmail       String?
+  uploadedByUserRole        String?
+  archivedAt                DateTime?
+  enteId                    String?
+  concessioneId             String?
+  criticitaId               String?
+  procedimentoId            String?
+  sopralluogoId             String?
+  pagamentoId               String?
+  reportId                  String?
+  createdAt                 DateTime            @default(now())
+  updatedAt                 DateTime            @updatedAt
 
-  uploadedByUser User? @relation("DocumentoUploader", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
-  ente          Ente?  @relation(fields: [enteId], references: [id], onDelete: SetNull)
-  concessione    Concessione? @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
-  criticita      Criticita?   @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
+  uploadedByUser User?         @relation("DocumentoUploader", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
+  ente           Ente?         @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  concessione    Concessione?  @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
+  criticita      Criticita?    @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
   procedimento   Procedimento? @relation(fields: [procedimentoId], references: [id], onDelete: SetNull)
-  sopralluogo    Sopralluogo? @relation(fields: [sopralluogoId], references: [id], onDelete: SetNull)
-  pagamento      Pagamento?   @relation(fields: [pagamentoId], references: [id], onDelete: SetNull)
-  report         Report?      @relation(fields: [reportId], references: [id], onDelete: SetNull)
+  sopralluogo    Sopralluogo?  @relation(fields: [sopralluogoId], references: [id], onDelete: SetNull)
+  pagamento      Pagamento?    @relation(fields: [pagamentoId], references: [id], onDelete: SetNull)
+  report         Report?       @relation(fields: [reportId], references: [id], onDelete: SetNull)
 
   @@index([uploadedByUserId])
   @@index([statoDocumento])
@@ -1135,9 +1201,9 @@ model Report {
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
-  ente       Ente?        @relation(fields: [enteId], references: [id], onDelete: SetNull)
-  concessione Concessione? @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
-  documenti   Documento[]
+  ente         Ente?          @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  concessione  Concessione?   @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
+  documenti    Documento[]
   normaImpatti NormaImpatto[]
 
   @@index([enteId])
@@ -1148,14 +1214,14 @@ model Report {
 }
 
 model NormaFonte {
-  id            String         @id @default(cuid())
-  codice        String         @unique
+  id            String      @id @default(cuid())
+  codice        String      @unique
   titolo        String
   enteEmittente String?
   ambito        NormaAmbito
   descrizione   String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   versioni NormaVersione[]
   impatti  NormaImpatto[]
@@ -1166,17 +1232,17 @@ model NormaFonte {
 }
 
 model NormaVersione {
-  id               String             @id @default(cuid())
-  normaFonteId     String
-  versione         String
-  stato            StatoNormaVersione
+  id                String             @id @default(cuid())
+  normaFonteId      String
+  versione          String
+  stato             StatoNormaVersione
   dataEntrataVigore DateTime
-  dataFineVigore   DateTime?
-  urlTesto         String?
-  sintesi          String
-  note             String?
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  dataFineVigore    DateTime?
+  urlTesto          String?
+  sintesi           String
+  note              String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 
   normaFonte NormaFonte     @relation(fields: [normaFonteId], references: [id], onDelete: Cascade)
   impatti    NormaImpatto[]
@@ -1203,12 +1269,12 @@ model NormaImpatto {
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
 
-  normaFonte    NormaFonte      @relation(fields: [normaFonteId], references: [id], onDelete: Cascade)
-  normaVersione NormaVersione?  @relation(fields: [normaVersioneId], references: [id], onDelete: SetNull)
-  concessione   Concessione?    @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
-  criticita     Criticita?      @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
-  procedimento  Procedimento?   @relation(fields: [procedimentoId], references: [id], onDelete: SetNull)
-  report        Report?         @relation(fields: [reportId], references: [id], onDelete: SetNull)
+  normaFonte    NormaFonte     @relation(fields: [normaFonteId], references: [id], onDelete: Cascade)
+  normaVersione NormaVersione? @relation(fields: [normaVersioneId], references: [id], onDelete: SetNull)
+  concessione   Concessione?   @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
+  criticita     Criticita?     @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
+  procedimento  Procedimento?  @relation(fields: [procedimentoId], references: [id], onDelete: SetNull)
+  report        Report?        @relation(fields: [reportId], references: [id], onDelete: SetNull)
 
   @@index([normaFonteId])
   @@index([normaVersioneId])
@@ -1222,7 +1288,7 @@ model NormaImpatto {
 }
 
 model ActivityLog {
-  id            String   @id @default(cuid())
+  id            String     @id @default(cuid())
   userId        String?
   userEmail     String?
   userRole      String?
@@ -1237,9 +1303,9 @@ model ActivityLog {
   metadata      Json?
   previousHash  String?
   currentHash   String
-  createdAt     DateTime @default(now())
+  createdAt     DateTime   @default(now())
 
-  ente       Ente?        @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  ente        Ente?        @relation(fields: [enteId], references: [id], onDelete: SetNull)
   user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
   concessione Concessione? @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
 

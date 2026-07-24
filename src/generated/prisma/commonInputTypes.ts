@@ -295,6 +295,39 @@ export type EnumLegalSourceStatusFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumLegalSourceStatusFilter<$PrismaModel> | $Enums.LegalSourceStatus
 }
 
+export type EnumLegalSourceRoleFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceRole | Prisma.EnumLegalSourceRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceRole[] | Prisma.ListEnumLegalSourceRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceRole[] | Prisma.ListEnumLegalSourceRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceRoleFilter<$PrismaModel> | $Enums.LegalSourceRole
+}
+
+export type EnumLegalRankFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalRank | Prisma.EnumLegalRankFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalRank[] | Prisma.ListEnumLegalRankFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalRank[] | Prisma.ListEnumLegalRankFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalRankFilter<$PrismaModel> | $Enums.LegalRank
+}
+
+export type EnumLegalTerritorialScopeFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalTerritorialScope | Prisma.EnumLegalTerritorialScopeFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalTerritorialScope[] | Prisma.ListEnumLegalTerritorialScopeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalTerritorialScope[] | Prisma.ListEnumLegalTerritorialScopeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalTerritorialScopeFilter<$PrismaModel> | $Enums.LegalTerritorialScope
+}
+
+export type EnumLegalSourceConfidenceFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceConfidence | Prisma.EnumLegalSourceConfidenceFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceConfidence[] | Prisma.ListEnumLegalSourceConfidenceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceConfidence[] | Prisma.ListEnumLegalSourceConfidenceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceConfidenceFilter<$PrismaModel> | $Enums.LegalSourceConfidence
+}
+
+export type BoolFilter<$PrismaModel = never> = {
+  equals?: boolean | Prisma.BooleanFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedBoolFilter<$PrismaModel> | boolean
+}
+
 export type IntNullableFilter<$PrismaModel = never> = {
   equals?: number | Prisma.IntFieldRefInput<$PrismaModel> | null
   in?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel> | null
@@ -324,6 +357,54 @@ export type EnumLegalSourceStatusWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumLegalSourceStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumLegalSourceStatusFilter<$PrismaModel>
+}
+
+export type EnumLegalSourceRoleWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceRole | Prisma.EnumLegalSourceRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceRole[] | Prisma.ListEnumLegalSourceRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceRole[] | Prisma.ListEnumLegalSourceRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceRoleWithAggregatesFilter<$PrismaModel> | $Enums.LegalSourceRole
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalSourceRoleFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalSourceRoleFilter<$PrismaModel>
+}
+
+export type EnumLegalRankWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalRank | Prisma.EnumLegalRankFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalRank[] | Prisma.ListEnumLegalRankFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalRank[] | Prisma.ListEnumLegalRankFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalRankWithAggregatesFilter<$PrismaModel> | $Enums.LegalRank
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalRankFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalRankFilter<$PrismaModel>
+}
+
+export type EnumLegalTerritorialScopeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalTerritorialScope | Prisma.EnumLegalTerritorialScopeFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalTerritorialScope[] | Prisma.ListEnumLegalTerritorialScopeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalTerritorialScope[] | Prisma.ListEnumLegalTerritorialScopeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalTerritorialScopeWithAggregatesFilter<$PrismaModel> | $Enums.LegalTerritorialScope
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalTerritorialScopeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalTerritorialScopeFilter<$PrismaModel>
+}
+
+export type EnumLegalSourceConfidenceWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceConfidence | Prisma.EnumLegalSourceConfidenceFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceConfidence[] | Prisma.ListEnumLegalSourceConfidenceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceConfidence[] | Prisma.ListEnumLegalSourceConfidenceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceConfidenceWithAggregatesFilter<$PrismaModel> | $Enums.LegalSourceConfidence
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalSourceConfidenceFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalSourceConfidenceFilter<$PrismaModel>
+}
+
+export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: boolean | Prisma.BooleanFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedBoolFilter<$PrismaModel>
+  _max?: Prisma.NestedBoolFilter<$PrismaModel>
 }
 
 export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -434,11 +515,6 @@ export type EnumGravitaCriticitaFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumGravitaCriticitaFilter<$PrismaModel> | $Enums.GravitaCriticita
 }
 
-export type BoolFilter<$PrismaModel = never> = {
-  equals?: boolean | Prisma.BooleanFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedBoolFilter<$PrismaModel> | boolean
-}
-
 export type EnumLegalRuleCategoryWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.LegalRuleCategory | Prisma.EnumLegalRuleCategoryFieldRefInput<$PrismaModel>
   in?: $Enums.LegalRuleCategory[] | Prisma.ListEnumLegalRuleCategoryFieldRefInput<$PrismaModel>
@@ -545,14 +621,6 @@ export type EnumGravitaCriticitaWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumGravitaCriticitaFilter<$PrismaModel>
   _max?: Prisma.NestedEnumGravitaCriticitaFilter<$PrismaModel>
-}
-
-export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: boolean | Prisma.BooleanFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedBoolFilter<$PrismaModel>
-  _max?: Prisma.NestedBoolFilter<$PrismaModel>
 }
 
 export type EnumDocumentGapStatusFilter<$PrismaModel = never> = {
@@ -1556,6 +1624,39 @@ export type NestedEnumLegalSourceStatusFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumLegalSourceStatusFilter<$PrismaModel> | $Enums.LegalSourceStatus
 }
 
+export type NestedEnumLegalSourceRoleFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceRole | Prisma.EnumLegalSourceRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceRole[] | Prisma.ListEnumLegalSourceRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceRole[] | Prisma.ListEnumLegalSourceRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceRoleFilter<$PrismaModel> | $Enums.LegalSourceRole
+}
+
+export type NestedEnumLegalRankFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalRank | Prisma.EnumLegalRankFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalRank[] | Prisma.ListEnumLegalRankFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalRank[] | Prisma.ListEnumLegalRankFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalRankFilter<$PrismaModel> | $Enums.LegalRank
+}
+
+export type NestedEnumLegalTerritorialScopeFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalTerritorialScope | Prisma.EnumLegalTerritorialScopeFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalTerritorialScope[] | Prisma.ListEnumLegalTerritorialScopeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalTerritorialScope[] | Prisma.ListEnumLegalTerritorialScopeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalTerritorialScopeFilter<$PrismaModel> | $Enums.LegalTerritorialScope
+}
+
+export type NestedEnumLegalSourceConfidenceFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceConfidence | Prisma.EnumLegalSourceConfidenceFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceConfidence[] | Prisma.ListEnumLegalSourceConfidenceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceConfidence[] | Prisma.ListEnumLegalSourceConfidenceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceConfidenceFilter<$PrismaModel> | $Enums.LegalSourceConfidence
+}
+
+export type NestedBoolFilter<$PrismaModel = never> = {
+  equals?: boolean | Prisma.BooleanFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedBoolFilter<$PrismaModel> | boolean
+}
+
 export type NestedEnumLegalSourceTypeWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.LegalSourceType | Prisma.EnumLegalSourceTypeFieldRefInput<$PrismaModel>
   in?: $Enums.LegalSourceType[] | Prisma.ListEnumLegalSourceTypeFieldRefInput<$PrismaModel>
@@ -1574,6 +1675,54 @@ export type NestedEnumLegalSourceStatusWithAggregatesFilter<$PrismaModel = never
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumLegalSourceStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumLegalSourceStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumLegalSourceRoleWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceRole | Prisma.EnumLegalSourceRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceRole[] | Prisma.ListEnumLegalSourceRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceRole[] | Prisma.ListEnumLegalSourceRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceRoleWithAggregatesFilter<$PrismaModel> | $Enums.LegalSourceRole
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalSourceRoleFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalSourceRoleFilter<$PrismaModel>
+}
+
+export type NestedEnumLegalRankWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalRank | Prisma.EnumLegalRankFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalRank[] | Prisma.ListEnumLegalRankFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalRank[] | Prisma.ListEnumLegalRankFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalRankWithAggregatesFilter<$PrismaModel> | $Enums.LegalRank
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalRankFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalRankFilter<$PrismaModel>
+}
+
+export type NestedEnumLegalTerritorialScopeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalTerritorialScope | Prisma.EnumLegalTerritorialScopeFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalTerritorialScope[] | Prisma.ListEnumLegalTerritorialScopeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalTerritorialScope[] | Prisma.ListEnumLegalTerritorialScopeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalTerritorialScopeWithAggregatesFilter<$PrismaModel> | $Enums.LegalTerritorialScope
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalTerritorialScopeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalTerritorialScopeFilter<$PrismaModel>
+}
+
+export type NestedEnumLegalSourceConfidenceWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceConfidence | Prisma.EnumLegalSourceConfidenceFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceConfidence[] | Prisma.ListEnumLegalSourceConfidenceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceConfidence[] | Prisma.ListEnumLegalSourceConfidenceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceConfidenceWithAggregatesFilter<$PrismaModel> | $Enums.LegalSourceConfidence
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalSourceConfidenceFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalSourceConfidenceFilter<$PrismaModel>
+}
+
+export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: boolean | Prisma.BooleanFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedBoolFilter<$PrismaModel>
+  _max?: Prisma.NestedBoolFilter<$PrismaModel>
 }
 
 export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -1695,11 +1844,6 @@ export type NestedEnumGravitaCriticitaFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumGravitaCriticitaFilter<$PrismaModel> | $Enums.GravitaCriticita
 }
 
-export type NestedBoolFilter<$PrismaModel = never> = {
-  equals?: boolean | Prisma.BooleanFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedBoolFilter<$PrismaModel> | boolean
-}
-
 export type NestedEnumLegalRuleCategoryWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.LegalRuleCategory | Prisma.EnumLegalRuleCategoryFieldRefInput<$PrismaModel>
   in?: $Enums.LegalRuleCategory[] | Prisma.ListEnumLegalRuleCategoryFieldRefInput<$PrismaModel>
@@ -1806,14 +1950,6 @@ export type NestedEnumGravitaCriticitaWithAggregatesFilter<$PrismaModel = never>
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumGravitaCriticitaFilter<$PrismaModel>
   _max?: Prisma.NestedEnumGravitaCriticitaFilter<$PrismaModel>
-}
-
-export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: boolean | Prisma.BooleanFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedBoolFilter<$PrismaModel>
-  _max?: Prisma.NestedBoolFilter<$PrismaModel>
 }
 
 export type NestedEnumDocumentGapStatusFilter<$PrismaModel = never> = {

@@ -34,8 +34,14 @@ export async function GET(request: NextRequest) {
     page,
     pageSize,
     search: url.searchParams.get("search") ?? undefined,
-    sourceType: url.searchParams.get("sourceType") ?? undefined,
+    authorityKey: url.searchParams.get("authority") ?? undefined,
+    portKey: url.searchParams.get("port") ?? undefined,
+    legalRank: url.searchParams.get("rank") ?? undefined,
     status: url.searchParams.get("status") ?? undefined,
+    role: url.searchParams.get("role") ?? undefined,
+    referenceDate: url.searchParams.get("referenceDate") ?? undefined,
+    issuingBody: url.searchParams.get("issuingBody") ?? undefined,
+    sourceNumber: url.searchParams.get("sourceNumber") ?? undefined,
   });
 
   return NextResponse.json(result);

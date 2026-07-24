@@ -13,6 +13,7 @@ async function main() {
   console.log("[legal-import] rules:", result.ruleCount);
   console.log("[legal-import] relations:", result.relationCount);
   console.log("[legal-import] gaps:", result.gapCount);
+  console.log("[legal-import] summary:", JSON.stringify(result.summary));
 
   if (result.warnings.length > 0) {
     console.log("[legal-import] warnings:");

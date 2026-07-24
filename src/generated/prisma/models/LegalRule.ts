@@ -1037,10 +1037,6 @@ export type EnumGravitaCriticitaFieldUpdateOperationsInput = {
   set?: $Enums.GravitaCriticita
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type LegalRuleCreateNestedOneWithoutDocumentGapsInput = {
   create?: Prisma.XOR<Prisma.LegalRuleCreateWithoutDocumentGapsInput, Prisma.LegalRuleUncheckedCreateWithoutDocumentGapsInput>
   connectOrCreate?: Prisma.LegalRuleCreateOrConnectWithoutDocumentGapsInput

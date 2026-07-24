@@ -40,6 +40,19 @@ export type LegalSourceMinAggregateOutputType = {
   title: string | null
   sourceType: $Enums.LegalSourceType | null
   status: $Enums.LegalSourceStatus | null
+  role: $Enums.LegalSourceRole | null
+  legalRank: $Enums.LegalRank | null
+  territorialScope: $Enums.LegalTerritorialScope | null
+  confidence: $Enums.LegalSourceConfidence | null
+  issuingBody: string | null
+  sourceNumber: string | null
+  sourceDate: Date | null
+  sourceOrigin: string | null
+  portAreaCode: string | null
+  humanReviewRequired: boolean | null
+  isConformative: boolean | null
+  isExtractable: boolean | null
+  duplicateOfSourceKey: string | null
   publicationDate: Date | null
   effectiveFrom: Date | null
   effectiveTo: Date | null
@@ -63,6 +76,19 @@ export type LegalSourceMaxAggregateOutputType = {
   title: string | null
   sourceType: $Enums.LegalSourceType | null
   status: $Enums.LegalSourceStatus | null
+  role: $Enums.LegalSourceRole | null
+  legalRank: $Enums.LegalRank | null
+  territorialScope: $Enums.LegalTerritorialScope | null
+  confidence: $Enums.LegalSourceConfidence | null
+  issuingBody: string | null
+  sourceNumber: string | null
+  sourceDate: Date | null
+  sourceOrigin: string | null
+  portAreaCode: string | null
+  humanReviewRequired: boolean | null
+  isConformative: boolean | null
+  isExtractable: boolean | null
+  duplicateOfSourceKey: string | null
   publicationDate: Date | null
   effectiveFrom: Date | null
   effectiveTo: Date | null
@@ -86,6 +112,20 @@ export type LegalSourceCountAggregateOutputType = {
   title: number
   sourceType: number
   status: number
+  role: number
+  legalRank: number
+  territorialScope: number
+  confidence: number
+  issuingBody: number
+  sourceNumber: number
+  sourceDate: number
+  sourceOrigin: number
+  portAreaCode: number
+  tags: number
+  humanReviewRequired: number
+  isConformative: number
+  isExtractable: number
+  duplicateOfSourceKey: number
   publicationDate: number
   effectiveFrom: number
   effectiveTo: number
@@ -119,6 +159,19 @@ export type LegalSourceMinAggregateInputType = {
   title?: true
   sourceType?: true
   status?: true
+  role?: true
+  legalRank?: true
+  territorialScope?: true
+  confidence?: true
+  issuingBody?: true
+  sourceNumber?: true
+  sourceDate?: true
+  sourceOrigin?: true
+  portAreaCode?: true
+  humanReviewRequired?: true
+  isConformative?: true
+  isExtractable?: true
+  duplicateOfSourceKey?: true
   publicationDate?: true
   effectiveFrom?: true
   effectiveTo?: true
@@ -142,6 +195,19 @@ export type LegalSourceMaxAggregateInputType = {
   title?: true
   sourceType?: true
   status?: true
+  role?: true
+  legalRank?: true
+  territorialScope?: true
+  confidence?: true
+  issuingBody?: true
+  sourceNumber?: true
+  sourceDate?: true
+  sourceOrigin?: true
+  portAreaCode?: true
+  humanReviewRequired?: true
+  isConformative?: true
+  isExtractable?: true
+  duplicateOfSourceKey?: true
   publicationDate?: true
   effectiveFrom?: true
   effectiveTo?: true
@@ -165,6 +231,20 @@ export type LegalSourceCountAggregateInputType = {
   title?: true
   sourceType?: true
   status?: true
+  role?: true
+  legalRank?: true
+  territorialScope?: true
+  confidence?: true
+  issuingBody?: true
+  sourceNumber?: true
+  sourceDate?: true
+  sourceOrigin?: true
+  portAreaCode?: true
+  tags?: true
+  humanReviewRequired?: true
+  isConformative?: true
+  isExtractable?: true
+  duplicateOfSourceKey?: true
   publicationDate?: true
   effectiveFrom?: true
   effectiveTo?: true
@@ -275,6 +355,20 @@ export type LegalSourceGroupByOutputType = {
   title: string
   sourceType: $Enums.LegalSourceType
   status: $Enums.LegalSourceStatus
+  role: $Enums.LegalSourceRole
+  legalRank: $Enums.LegalRank
+  territorialScope: $Enums.LegalTerritorialScope
+  confidence: $Enums.LegalSourceConfidence
+  issuingBody: string | null
+  sourceNumber: string | null
+  sourceDate: Date | null
+  sourceOrigin: string | null
+  portAreaCode: string | null
+  tags: runtime.JsonValue | null
+  humanReviewRequired: boolean
+  isConformative: boolean
+  isExtractable: boolean
+  duplicateOfSourceKey: string | null
   publicationDate: Date | null
   effectiveFrom: Date | null
   effectiveTo: Date | null
@@ -321,6 +415,20 @@ export type LegalSourceWhereInput = {
   title?: Prisma.StringFilter<"LegalSource"> | string
   sourceType?: Prisma.EnumLegalSourceTypeFilter<"LegalSource"> | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFilter<"LegalSource"> | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFilter<"LegalSource"> | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFilter<"LegalSource"> | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFilter<"LegalSource"> | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFilter<"LegalSource"> | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.StringNullableFilter<"LegalSource"> | string | null
+  sourceNumber?: Prisma.StringNullableFilter<"LegalSource"> | string | null
+  sourceDate?: Prisma.DateTimeNullableFilter<"LegalSource"> | Date | string | null
+  sourceOrigin?: Prisma.StringNullableFilter<"LegalSource"> | string | null
+  portAreaCode?: Prisma.StringNullableFilter<"LegalSource"> | string | null
+  tags?: Prisma.JsonNullableFilter<"LegalSource">
+  humanReviewRequired?: Prisma.BoolFilter<"LegalSource"> | boolean
+  isConformative?: Prisma.BoolFilter<"LegalSource"> | boolean
+  isExtractable?: Prisma.BoolFilter<"LegalSource"> | boolean
+  duplicateOfSourceKey?: Prisma.StringNullableFilter<"LegalSource"> | string | null
   publicationDate?: Prisma.DateTimeNullableFilter<"LegalSource"> | Date | string | null
   effectiveFrom?: Prisma.DateTimeNullableFilter<"LegalSource"> | Date | string | null
   effectiveTo?: Prisma.DateTimeNullableFilter<"LegalSource"> | Date | string | null
@@ -351,6 +459,20 @@ export type LegalSourceOrderByWithRelationInput = {
   title?: Prisma.SortOrder
   sourceType?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+  legalRank?: Prisma.SortOrder
+  territorialScope?: Prisma.SortOrder
+  confidence?: Prisma.SortOrder
+  issuingBody?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceOrigin?: Prisma.SortOrderInput | Prisma.SortOrder
+  portAreaCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  tags?: Prisma.SortOrderInput | Prisma.SortOrder
+  humanReviewRequired?: Prisma.SortOrder
+  isConformative?: Prisma.SortOrder
+  isExtractable?: Prisma.SortOrder
+  duplicateOfSourceKey?: Prisma.SortOrderInput | Prisma.SortOrder
   publicationDate?: Prisma.SortOrderInput | Prisma.SortOrder
   effectiveFrom?: Prisma.SortOrderInput | Prisma.SortOrder
   effectiveTo?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -384,6 +506,20 @@ export type LegalSourceWhereUniqueInput = Prisma.AtLeast<{
   title?: Prisma.StringFilter<"LegalSource"> | string
   sourceType?: Prisma.EnumLegalSourceTypeFilter<"LegalSource"> | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFilter<"LegalSource"> | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFilter<"LegalSource"> | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFilter<"LegalSource"> | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFilter<"LegalSource"> | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFilter<"LegalSource"> | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.StringNullableFilter<"LegalSource"> | string | null
+  sourceNumber?: Prisma.StringNullableFilter<"LegalSource"> | string | null
+  sourceDate?: Prisma.DateTimeNullableFilter<"LegalSource"> | Date | string | null
+  sourceOrigin?: Prisma.StringNullableFilter<"LegalSource"> | string | null
+  portAreaCode?: Prisma.StringNullableFilter<"LegalSource"> | string | null
+  tags?: Prisma.JsonNullableFilter<"LegalSource">
+  humanReviewRequired?: Prisma.BoolFilter<"LegalSource"> | boolean
+  isConformative?: Prisma.BoolFilter<"LegalSource"> | boolean
+  isExtractable?: Prisma.BoolFilter<"LegalSource"> | boolean
+  duplicateOfSourceKey?: Prisma.StringNullableFilter<"LegalSource"> | string | null
   publicationDate?: Prisma.DateTimeNullableFilter<"LegalSource"> | Date | string | null
   effectiveFrom?: Prisma.DateTimeNullableFilter<"LegalSource"> | Date | string | null
   effectiveTo?: Prisma.DateTimeNullableFilter<"LegalSource"> | Date | string | null
@@ -414,6 +550,20 @@ export type LegalSourceOrderByWithAggregationInput = {
   title?: Prisma.SortOrder
   sourceType?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+  legalRank?: Prisma.SortOrder
+  territorialScope?: Prisma.SortOrder
+  confidence?: Prisma.SortOrder
+  issuingBody?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceOrigin?: Prisma.SortOrderInput | Prisma.SortOrder
+  portAreaCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  tags?: Prisma.SortOrderInput | Prisma.SortOrder
+  humanReviewRequired?: Prisma.SortOrder
+  isConformative?: Prisma.SortOrder
+  isExtractable?: Prisma.SortOrder
+  duplicateOfSourceKey?: Prisma.SortOrderInput | Prisma.SortOrder
   publicationDate?: Prisma.SortOrderInput | Prisma.SortOrder
   effectiveFrom?: Prisma.SortOrderInput | Prisma.SortOrder
   effectiveTo?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -445,6 +595,20 @@ export type LegalSourceScalarWhereWithAggregatesInput = {
   title?: Prisma.StringWithAggregatesFilter<"LegalSource"> | string
   sourceType?: Prisma.EnumLegalSourceTypeWithAggregatesFilter<"LegalSource"> | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusWithAggregatesFilter<"LegalSource"> | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleWithAggregatesFilter<"LegalSource"> | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankWithAggregatesFilter<"LegalSource"> | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeWithAggregatesFilter<"LegalSource"> | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceWithAggregatesFilter<"LegalSource"> | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.StringNullableWithAggregatesFilter<"LegalSource"> | string | null
+  sourceNumber?: Prisma.StringNullableWithAggregatesFilter<"LegalSource"> | string | null
+  sourceDate?: Prisma.DateTimeNullableWithAggregatesFilter<"LegalSource"> | Date | string | null
+  sourceOrigin?: Prisma.StringNullableWithAggregatesFilter<"LegalSource"> | string | null
+  portAreaCode?: Prisma.StringNullableWithAggregatesFilter<"LegalSource"> | string | null
+  tags?: Prisma.JsonNullableWithAggregatesFilter<"LegalSource">
+  humanReviewRequired?: Prisma.BoolWithAggregatesFilter<"LegalSource"> | boolean
+  isConformative?: Prisma.BoolWithAggregatesFilter<"LegalSource"> | boolean
+  isExtractable?: Prisma.BoolWithAggregatesFilter<"LegalSource"> | boolean
+  duplicateOfSourceKey?: Prisma.StringNullableWithAggregatesFilter<"LegalSource"> | string | null
   publicationDate?: Prisma.DateTimeNullableWithAggregatesFilter<"LegalSource"> | Date | string | null
   effectiveFrom?: Prisma.DateTimeNullableWithAggregatesFilter<"LegalSource"> | Date | string | null
   effectiveTo?: Prisma.DateTimeNullableWithAggregatesFilter<"LegalSource"> | Date | string | null
@@ -468,6 +632,20 @@ export type LegalSourceCreateInput = {
   title: string
   sourceType: $Enums.LegalSourceType
   status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
   publicationDate?: Date | string | null
   effectiveFrom?: Date | string | null
   effectiveTo?: Date | string | null
@@ -494,6 +672,20 @@ export type LegalSourceUncheckedCreateInput = {
   title: string
   sourceType: $Enums.LegalSourceType
   status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
   publicationDate?: Date | string | null
   effectiveFrom?: Date | string | null
   effectiveTo?: Date | string | null
@@ -520,6 +712,20 @@ export type LegalSourceUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -546,6 +752,20 @@ export type LegalSourceUncheckedUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -572,6 +792,20 @@ export type LegalSourceCreateManyInput = {
   title: string
   sourceType: $Enums.LegalSourceType
   status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
   publicationDate?: Date | string | null
   effectiveFrom?: Date | string | null
   effectiveTo?: Date | string | null
@@ -595,6 +829,20 @@ export type LegalSourceUpdateManyMutationInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -614,6 +862,20 @@ export type LegalSourceUncheckedUpdateManyInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -647,6 +909,20 @@ export type LegalSourceCountOrderByAggregateInput = {
   title?: Prisma.SortOrder
   sourceType?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+  legalRank?: Prisma.SortOrder
+  territorialScope?: Prisma.SortOrder
+  confidence?: Prisma.SortOrder
+  issuingBody?: Prisma.SortOrder
+  sourceNumber?: Prisma.SortOrder
+  sourceDate?: Prisma.SortOrder
+  sourceOrigin?: Prisma.SortOrder
+  portAreaCode?: Prisma.SortOrder
+  tags?: Prisma.SortOrder
+  humanReviewRequired?: Prisma.SortOrder
+  isConformative?: Prisma.SortOrder
+  isExtractable?: Prisma.SortOrder
+  duplicateOfSourceKey?: Prisma.SortOrder
   publicationDate?: Prisma.SortOrder
   effectiveFrom?: Prisma.SortOrder
   effectiveTo?: Prisma.SortOrder
@@ -674,6 +950,19 @@ export type LegalSourceMaxOrderByAggregateInput = {
   title?: Prisma.SortOrder
   sourceType?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+  legalRank?: Prisma.SortOrder
+  territorialScope?: Prisma.SortOrder
+  confidence?: Prisma.SortOrder
+  issuingBody?: Prisma.SortOrder
+  sourceNumber?: Prisma.SortOrder
+  sourceDate?: Prisma.SortOrder
+  sourceOrigin?: Prisma.SortOrder
+  portAreaCode?: Prisma.SortOrder
+  humanReviewRequired?: Prisma.SortOrder
+  isConformative?: Prisma.SortOrder
+  isExtractable?: Prisma.SortOrder
+  duplicateOfSourceKey?: Prisma.SortOrder
   publicationDate?: Prisma.SortOrder
   effectiveFrom?: Prisma.SortOrder
   effectiveTo?: Prisma.SortOrder
@@ -697,6 +986,19 @@ export type LegalSourceMinOrderByAggregateInput = {
   title?: Prisma.SortOrder
   sourceType?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+  legalRank?: Prisma.SortOrder
+  territorialScope?: Prisma.SortOrder
+  confidence?: Prisma.SortOrder
+  issuingBody?: Prisma.SortOrder
+  sourceNumber?: Prisma.SortOrder
+  sourceDate?: Prisma.SortOrder
+  sourceOrigin?: Prisma.SortOrder
+  portAreaCode?: Prisma.SortOrder
+  humanReviewRequired?: Prisma.SortOrder
+  isConformative?: Prisma.SortOrder
+  isExtractable?: Prisma.SortOrder
+  duplicateOfSourceKey?: Prisma.SortOrder
   publicationDate?: Prisma.SortOrder
   effectiveFrom?: Prisma.SortOrder
   effectiveTo?: Prisma.SortOrder
@@ -899,6 +1201,26 @@ export type EnumLegalSourceStatusFieldUpdateOperationsInput = {
   set?: $Enums.LegalSourceStatus
 }
 
+export type EnumLegalSourceRoleFieldUpdateOperationsInput = {
+  set?: $Enums.LegalSourceRole
+}
+
+export type EnumLegalRankFieldUpdateOperationsInput = {
+  set?: $Enums.LegalRank
+}
+
+export type EnumLegalTerritorialScopeFieldUpdateOperationsInput = {
+  set?: $Enums.LegalTerritorialScope
+}
+
+export type EnumLegalSourceConfidenceFieldUpdateOperationsInput = {
+  set?: $Enums.LegalSourceConfidence
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
 export type NullableIntFieldUpdateOperationsInput = {
   set?: number | null
   increment?: number
@@ -955,6 +1277,20 @@ export type LegalSourceCreateWithoutEnteInput = {
   title: string
   sourceType: $Enums.LegalSourceType
   status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
   publicationDate?: Date | string | null
   effectiveFrom?: Date | string | null
   effectiveTo?: Date | string | null
@@ -980,6 +1316,20 @@ export type LegalSourceUncheckedCreateWithoutEnteInput = {
   title: string
   sourceType: $Enums.LegalSourceType
   status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
   publicationDate?: Date | string | null
   effectiveFrom?: Date | string | null
   effectiveTo?: Date | string | null
@@ -1034,6 +1384,20 @@ export type LegalSourceScalarWhereInput = {
   title?: Prisma.StringFilter<"LegalSource"> | string
   sourceType?: Prisma.EnumLegalSourceTypeFilter<"LegalSource"> | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFilter<"LegalSource"> | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFilter<"LegalSource"> | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFilter<"LegalSource"> | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFilter<"LegalSource"> | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFilter<"LegalSource"> | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.StringNullableFilter<"LegalSource"> | string | null
+  sourceNumber?: Prisma.StringNullableFilter<"LegalSource"> | string | null
+  sourceDate?: Prisma.DateTimeNullableFilter<"LegalSource"> | Date | string | null
+  sourceOrigin?: Prisma.StringNullableFilter<"LegalSource"> | string | null
+  portAreaCode?: Prisma.StringNullableFilter<"LegalSource"> | string | null
+  tags?: Prisma.JsonNullableFilter<"LegalSource">
+  humanReviewRequired?: Prisma.BoolFilter<"LegalSource"> | boolean
+  isConformative?: Prisma.BoolFilter<"LegalSource"> | boolean
+  isExtractable?: Prisma.BoolFilter<"LegalSource"> | boolean
+  duplicateOfSourceKey?: Prisma.StringNullableFilter<"LegalSource"> | string | null
   publicationDate?: Prisma.DateTimeNullableFilter<"LegalSource"> | Date | string | null
   effectiveFrom?: Prisma.DateTimeNullableFilter<"LegalSource"> | Date | string | null
   effectiveTo?: Prisma.DateTimeNullableFilter<"LegalSource"> | Date | string | null
@@ -1057,6 +1421,20 @@ export type LegalSourceCreateWithoutAuthorityInput = {
   title: string
   sourceType: $Enums.LegalSourceType
   status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
   publicationDate?: Date | string | null
   effectiveFrom?: Date | string | null
   effectiveTo?: Date | string | null
@@ -1082,6 +1460,20 @@ export type LegalSourceUncheckedCreateWithoutAuthorityInput = {
   title: string
   sourceType: $Enums.LegalSourceType
   status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
   publicationDate?: Date | string | null
   effectiveFrom?: Date | string | null
   effectiveTo?: Date | string | null
@@ -1133,6 +1525,20 @@ export type LegalSourceCreateWithoutPortInput = {
   title: string
   sourceType: $Enums.LegalSourceType
   status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
   publicationDate?: Date | string | null
   effectiveFrom?: Date | string | null
   effectiveTo?: Date | string | null
@@ -1158,6 +1564,20 @@ export type LegalSourceUncheckedCreateWithoutPortInput = {
   title: string
   sourceType: $Enums.LegalSourceType
   status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
   publicationDate?: Date | string | null
   effectiveFrom?: Date | string | null
   effectiveTo?: Date | string | null
@@ -1209,6 +1629,20 @@ export type LegalSourceCreateWithoutImportRunInput = {
   title: string
   sourceType: $Enums.LegalSourceType
   status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
   publicationDate?: Date | string | null
   effectiveFrom?: Date | string | null
   effectiveTo?: Date | string | null
@@ -1234,6 +1668,20 @@ export type LegalSourceUncheckedCreateWithoutImportRunInput = {
   title: string
   sourceType: $Enums.LegalSourceType
   status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
   publicationDate?: Date | string | null
   effectiveFrom?: Date | string | null
   effectiveTo?: Date | string | null
@@ -1285,6 +1733,20 @@ export type LegalSourceCreateWithoutOutgoingRelationsInput = {
   title: string
   sourceType: $Enums.LegalSourceType
   status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
   publicationDate?: Date | string | null
   effectiveFrom?: Date | string | null
   effectiveTo?: Date | string | null
@@ -1310,6 +1772,20 @@ export type LegalSourceUncheckedCreateWithoutOutgoingRelationsInput = {
   title: string
   sourceType: $Enums.LegalSourceType
   status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
   publicationDate?: Date | string | null
   effectiveFrom?: Date | string | null
   effectiveTo?: Date | string | null
@@ -1340,6 +1816,20 @@ export type LegalSourceCreateWithoutIncomingRelationsInput = {
   title: string
   sourceType: $Enums.LegalSourceType
   status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
   publicationDate?: Date | string | null
   effectiveFrom?: Date | string | null
   effectiveTo?: Date | string | null
@@ -1365,6 +1855,20 @@ export type LegalSourceUncheckedCreateWithoutIncomingRelationsInput = {
   title: string
   sourceType: $Enums.LegalSourceType
   status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
   publicationDate?: Date | string | null
   effectiveFrom?: Date | string | null
   effectiveTo?: Date | string | null
@@ -1406,6 +1910,20 @@ export type LegalSourceUpdateWithoutOutgoingRelationsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1431,6 +1949,20 @@ export type LegalSourceUncheckedUpdateWithoutOutgoingRelationsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1467,6 +1999,20 @@ export type LegalSourceUpdateWithoutIncomingRelationsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1492,6 +2038,20 @@ export type LegalSourceUncheckedUpdateWithoutIncomingRelationsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1517,6 +2077,20 @@ export type LegalSourceCreateWithoutRulesInput = {
   title: string
   sourceType: $Enums.LegalSourceType
   status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
   publicationDate?: Date | string | null
   effectiveFrom?: Date | string | null
   effectiveTo?: Date | string | null
@@ -1542,6 +2116,20 @@ export type LegalSourceUncheckedCreateWithoutRulesInput = {
   title: string
   sourceType: $Enums.LegalSourceType
   status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
   publicationDate?: Date | string | null
   effectiveFrom?: Date | string | null
   effectiveTo?: Date | string | null
@@ -1583,6 +2171,20 @@ export type LegalSourceUpdateWithoutRulesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1608,6 +2210,20 @@ export type LegalSourceUncheckedUpdateWithoutRulesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1633,6 +2249,20 @@ export type LegalSourceCreateManyEnteInput = {
   title: string
   sourceType: $Enums.LegalSourceType
   status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
   publicationDate?: Date | string | null
   effectiveFrom?: Date | string | null
   effectiveTo?: Date | string | null
@@ -1655,6 +2285,20 @@ export type LegalSourceUpdateWithoutEnteInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1680,6 +2324,20 @@ export type LegalSourceUncheckedUpdateWithoutEnteInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1705,6 +2363,20 @@ export type LegalSourceUncheckedUpdateManyWithoutEnteInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1727,6 +2399,20 @@ export type LegalSourceCreateManyAuthorityInput = {
   title: string
   sourceType: $Enums.LegalSourceType
   status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
   publicationDate?: Date | string | null
   effectiveFrom?: Date | string | null
   effectiveTo?: Date | string | null
@@ -1749,6 +2435,20 @@ export type LegalSourceUpdateWithoutAuthorityInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1774,6 +2474,20 @@ export type LegalSourceUncheckedUpdateWithoutAuthorityInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1799,6 +2513,20 @@ export type LegalSourceUncheckedUpdateManyWithoutAuthorityInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1821,6 +2549,20 @@ export type LegalSourceCreateManyPortInput = {
   title: string
   sourceType: $Enums.LegalSourceType
   status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
   publicationDate?: Date | string | null
   effectiveFrom?: Date | string | null
   effectiveTo?: Date | string | null
@@ -1843,6 +2585,20 @@ export type LegalSourceUpdateWithoutPortInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1868,6 +2624,20 @@ export type LegalSourceUncheckedUpdateWithoutPortInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1893,6 +2663,20 @@ export type LegalSourceUncheckedUpdateManyWithoutPortInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1915,6 +2699,20 @@ export type LegalSourceCreateManyImportRunInput = {
   title: string
   sourceType: $Enums.LegalSourceType
   status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
   publicationDate?: Date | string | null
   effectiveFrom?: Date | string | null
   effectiveTo?: Date | string | null
@@ -1937,6 +2735,20 @@ export type LegalSourceUpdateWithoutImportRunInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1962,6 +2774,20 @@ export type LegalSourceUncheckedUpdateWithoutImportRunInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1987,6 +2813,20 @@ export type LegalSourceUncheckedUpdateManyWithoutImportRunInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2058,6 +2898,20 @@ export type LegalSourceSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   title?: boolean
   sourceType?: boolean
   status?: boolean
+  role?: boolean
+  legalRank?: boolean
+  territorialScope?: boolean
+  confidence?: boolean
+  issuingBody?: boolean
+  sourceNumber?: boolean
+  sourceDate?: boolean
+  sourceOrigin?: boolean
+  portAreaCode?: boolean
+  tags?: boolean
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: boolean
   publicationDate?: boolean
   effectiveFrom?: boolean
   effectiveTo?: boolean
@@ -2089,6 +2943,20 @@ export type LegalSourceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   title?: boolean
   sourceType?: boolean
   status?: boolean
+  role?: boolean
+  legalRank?: boolean
+  territorialScope?: boolean
+  confidence?: boolean
+  issuingBody?: boolean
+  sourceNumber?: boolean
+  sourceDate?: boolean
+  sourceOrigin?: boolean
+  portAreaCode?: boolean
+  tags?: boolean
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: boolean
   publicationDate?: boolean
   effectiveFrom?: boolean
   effectiveTo?: boolean
@@ -2116,6 +2984,20 @@ export type LegalSourceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   title?: boolean
   sourceType?: boolean
   status?: boolean
+  role?: boolean
+  legalRank?: boolean
+  territorialScope?: boolean
+  confidence?: boolean
+  issuingBody?: boolean
+  sourceNumber?: boolean
+  sourceDate?: boolean
+  sourceOrigin?: boolean
+  portAreaCode?: boolean
+  tags?: boolean
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: boolean
   publicationDate?: boolean
   effectiveFrom?: boolean
   effectiveTo?: boolean
@@ -2143,6 +3025,20 @@ export type LegalSourceSelectScalar = {
   title?: boolean
   sourceType?: boolean
   status?: boolean
+  role?: boolean
+  legalRank?: boolean
+  territorialScope?: boolean
+  confidence?: boolean
+  issuingBody?: boolean
+  sourceNumber?: boolean
+  sourceDate?: boolean
+  sourceOrigin?: boolean
+  portAreaCode?: boolean
+  tags?: boolean
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: boolean
   publicationDate?: boolean
   effectiveFrom?: boolean
   effectiveTo?: boolean
@@ -2160,7 +3056,7 @@ export type LegalSourceSelectScalar = {
   updatedAt?: boolean
 }
 
-export type LegalSourceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sourceKey" | "title" | "sourceType" | "status" | "publicationDate" | "effectiveFrom" | "effectiveTo" | "notes" | "fileName" | "filePath" | "fileChecksumSha256" | "fileMimeType" | "fileSizeBytes" | "enteId" | "authorityId" | "portId" | "importRunId" | "createdAt" | "updatedAt", ExtArgs["result"]["legalSource"]>
+export type LegalSourceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sourceKey" | "title" | "sourceType" | "status" | "role" | "legalRank" | "territorialScope" | "confidence" | "issuingBody" | "sourceNumber" | "sourceDate" | "sourceOrigin" | "portAreaCode" | "tags" | "humanReviewRequired" | "isConformative" | "isExtractable" | "duplicateOfSourceKey" | "publicationDate" | "effectiveFrom" | "effectiveTo" | "notes" | "fileName" | "filePath" | "fileChecksumSha256" | "fileMimeType" | "fileSizeBytes" | "enteId" | "authorityId" | "portId" | "importRunId" | "createdAt" | "updatedAt", ExtArgs["result"]["legalSource"]>
 export type LegalSourceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   ente?: boolean | Prisma.LegalSource$enteArgs<ExtArgs>
   authority?: boolean | Prisma.LegalSource$authorityArgs<ExtArgs>
@@ -2201,6 +3097,20 @@ export type $LegalSourcePayload<ExtArgs extends runtime.Types.Extensions.Interna
     title: string
     sourceType: $Enums.LegalSourceType
     status: $Enums.LegalSourceStatus
+    role: $Enums.LegalSourceRole
+    legalRank: $Enums.LegalRank
+    territorialScope: $Enums.LegalTerritorialScope
+    confidence: $Enums.LegalSourceConfidence
+    issuingBody: string | null
+    sourceNumber: string | null
+    sourceDate: Date | null
+    sourceOrigin: string | null
+    portAreaCode: string | null
+    tags: runtime.JsonValue | null
+    humanReviewRequired: boolean
+    isConformative: boolean
+    isExtractable: boolean
+    duplicateOfSourceKey: string | null
     publicationDate: Date | null
     effectiveFrom: Date | null
     effectiveTo: Date | null
@@ -2651,6 +3561,20 @@ export interface LegalSourceFieldRefs {
   readonly title: Prisma.FieldRef<"LegalSource", 'String'>
   readonly sourceType: Prisma.FieldRef<"LegalSource", 'LegalSourceType'>
   readonly status: Prisma.FieldRef<"LegalSource", 'LegalSourceStatus'>
+  readonly role: Prisma.FieldRef<"LegalSource", 'LegalSourceRole'>
+  readonly legalRank: Prisma.FieldRef<"LegalSource", 'LegalRank'>
+  readonly territorialScope: Prisma.FieldRef<"LegalSource", 'LegalTerritorialScope'>
+  readonly confidence: Prisma.FieldRef<"LegalSource", 'LegalSourceConfidence'>
+  readonly issuingBody: Prisma.FieldRef<"LegalSource", 'String'>
+  readonly sourceNumber: Prisma.FieldRef<"LegalSource", 'String'>
+  readonly sourceDate: Prisma.FieldRef<"LegalSource", 'DateTime'>
+  readonly sourceOrigin: Prisma.FieldRef<"LegalSource", 'String'>
+  readonly portAreaCode: Prisma.FieldRef<"LegalSource", 'String'>
+  readonly tags: Prisma.FieldRef<"LegalSource", 'Json'>
+  readonly humanReviewRequired: Prisma.FieldRef<"LegalSource", 'Boolean'>
+  readonly isConformative: Prisma.FieldRef<"LegalSource", 'Boolean'>
+  readonly isExtractable: Prisma.FieldRef<"LegalSource", 'Boolean'>
+  readonly duplicateOfSourceKey: Prisma.FieldRef<"LegalSource", 'String'>
   readonly publicationDate: Prisma.FieldRef<"LegalSource", 'DateTime'>
   readonly effectiveFrom: Prisma.FieldRef<"LegalSource", 'DateTime'>
   readonly effectiveTo: Prisma.FieldRef<"LegalSource", 'DateTime'>

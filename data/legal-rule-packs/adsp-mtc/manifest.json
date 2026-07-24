@@ -2,115 +2,974 @@
   "packCode": "adsp-mtc-legal-pack",
   "packVersion": "2026.07.24",
   "tenantEnteCode": "DEMO-ENTE-ADSP",
-  "authority": {
-    "code": "ADSP-MTC",
-    "name": "Autorita di Sistema Portuale del Mar Tirreno Centrale",
-    "level": "ADSP"
-  },
-  "port": {
-    "code": "NAPOLI-SALERNO",
-    "name": "Sistema Portuale Napoli-Salerno"
-  },
-  "areas": [
+  "authorities": [
     {
+      "authorityKey": "ADSP-MTC",
+      "code": "ADSP-MTC",
+      "name": "Autorita di Sistema Portuale del Mar Tirreno Centrale",
+      "level": "ADSP"
+    }
+  ],
+  "ports": [
+    {
+      "portKey": "PORT-NAP-SAL",
+      "code": "NAPOLI-SALERNO",
+      "name": "Sistema Portuale Napoli-Salerno",
+      "authorityKey": "ADSP-MTC"
+    },
+    {
+      "portKey": "PORT-NAPOLI",
       "code": "NAPOLI",
-      "name": "Ambito Porto di Napoli"
+      "name": "Porto di Napoli",
+      "authorityKey": "ADSP-MTC"
     },
     {
+      "portKey": "PORT-SALERNO",
       "code": "SALERNO",
-      "name": "Ambito Porto di Salerno"
+      "name": "Porto di Salerno",
+      "authorityKey": "ADSP-MTC"
     },
     {
+      "portKey": "PORT-CASTELLAMMARE",
       "code": "CASTELLAMMARE",
-      "name": "Ambito Castellammare di Stabia"
+      "name": "Porto di Castellammare di Stabia",
+      "authorityKey": "ADSP-MTC"
+    }
+  ],
+  "portAreas": [
+    {
+      "portAreaKey": "AREA-CASTELLAMMARE",
+      "portKey": "PORT-CASTELLAMMARE",
+      "code": "CASTELLAMMARE",
+      "name": "Ambito Castellammare",
+      "note": "Area con supporti cartografici locali"
     }
   ],
   "sources": [
     {
-      "sourceKey": "DLB-2024-30-CANONI",
-      "title": "Regolamento canoni art. 18",
-      "sourceType": "DELIBERA",
-      "status": "VIGENTE",
-      "publicationDate": "2024-07-22T00:00:00.000Z",
-      "effectiveFrom": "2024-07-22T00:00:00.000Z",
-      "fileName": "delibera-CG-n.-30-del-22.07.2024-Regolamento-canoni-18.pdf",
-      "filePath": "delibera-CG-n.-30-del-22.07.2024-Regolamento-canoni-18.pdf"
+      "stableKey": "ARPAC-ACT",
+      "filename": "ARPAC.pdf",
+      "relativePath": "ARPAC.pdf",
+      "title": "Parere/atto ARPAC su profili ambientali",
+      "issuingBody": "ARPAC",
+      "documentType": "ENVIRONMENTAL_ACT",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "ENVIRONMENTAL_ACT",
+      "territorialScope": "AUTHORITY",
+      "status": "CURRENT_SUBJECT_TO_REVIEW",
+      "role": "ENVIRONMENTAL",
+      "isConformative": false,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "MEDIUM",
+      "humanReviewRequired": true,
+      "checksum": "39ff0b756232aa755ce45b5f76cd0196072b8d6fc73fa4ecf5c82d038b0eef74",
+      "size": 1054610,
+      "notes": "Atto ambientale procedimentale, non titolo concessorio.",
+      "tags": [
+        "AMBIENTE",
+        "PROCEDIMENTO"
+      ]
     },
     {
-      "sourceKey": "ORD-2019-1-ART16",
-      "title": "Regolamento art. 16 ordinanza n. 1/2019",
-      "sourceType": "ORDINANZA",
-      "status": "VIGENTE",
-      "publicationDate": "2019-01-07T00:00:00.000Z",
-      "effectiveFrom": "2019-01-07T00:00:00.000Z",
-      "fileName": "Ordinanza-n.-1-del-07.01.2019-Regolamento-art.-16.pdf",
-      "filePath": "Ordinanza-n.-1-del-07.01.2019-Regolamento-art.-16.pdf"
+      "stableKey": "DEASP-2020",
+      "filename": "DEASP_ADSP-MTC-2020.pdf",
+      "relativePath": "DEASP_ADSP-MTC-2020.pdf",
+      "title": "DEASP 2020",
+      "issuingBody": "AdSP MTC",
+      "documentType": "PLANNING_INSTRUMENT",
+      "sourceNumber": "2020",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "PLANNING_INSTRUMENT",
+      "territorialScope": "AUTHORITY",
+      "status": "SUPERSEDED",
+      "role": "ENVIRONMENTAL",
+      "isConformative": false,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "MEDIUM",
+      "humanReviewRequired": true,
+      "checksum": "2260f6499564d479eb5b222fee4024006abd90511f3703c397d0ae8b12ca0b5f",
+      "size": 11138048,
+      "notes": "Da verificare superamento per aggiornamento 2024.",
+      "tags": [
+        "DEASP",
+        "ENERGIA",
+        "AMBIENTE"
+      ]
     },
     {
-      "sourceKey": "DLB-2018-358-AREE",
-      "title": "Regolamento d uso delle aree demaniali marittime",
-      "sourceType": "DELIBERA",
-      "status": "VIGENTE",
-      "publicationDate": "2018-11-19T00:00:00.000Z",
-      "effectiveFrom": "2018-11-19T00:00:00.000Z",
-      "fileName": "delibera-n.-358-del-19.11.2018-Regolamento-duso-delle-aree-demaniali-marittime-AdSP-MTC-DEFINITIVO-1.pdf",
-      "filePath": "delibera-n.-358-del-19.11.2018-Regolamento-duso-delle-aree-demaniali-marittime-AdSP-MTC-DEFINITIVO-1.pdf"
+      "stableKey": "DEASP-2024",
+      "filename": "delibera-n.-356-del-10.10.2024-DEASP-2024.pdf",
+      "relativePath": "delibera-n.-356-del-10.10.2024-DEASP-2024.pdf",
+      "title": "DEASP 2024",
+      "issuingBody": "AdSP MTC",
+      "documentType": "PLANNING_INSTRUMENT",
+      "sourceNumber": "356/2024",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "PLANNING_INSTRUMENT",
+      "territorialScope": "AUTHORITY",
+      "status": "CURRENT_SUBJECT_TO_REVIEW",
+      "role": "ENVIRONMENTAL",
+      "isConformative": false,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "MEDIUM",
+      "humanReviewRequired": true,
+      "checksum": "58f2fd974b2d24e4490d8185fd3c492036f2f26aea56e193740e4502550de67d",
+      "size": 8511718,
+      "notes": "Strumento energetico-ambientale non sostitutivo PRP.",
+      "tags": [
+        "DEASP",
+        "AMBIENTE"
+      ]
     },
     {
-      "sourceKey": "POT-2023-2025-REV2024",
-      "title": "POT 2023-2025 revisione annuale 2024",
-      "sourceType": "PIANO",
-      "status": "VIGENTE",
-      "publicationDate": "2024-10-10T00:00:00.000Z",
-      "effectiveFrom": "2024-10-10T00:00:00.000Z",
-      "fileName": "POT-2023-2025-revisione-annuale-2024_OK-1.pdf",
-      "filePath": "POT-2023-2025-revisione-annuale-2024_OK-1.pdf"
+      "stableKey": "DLB-2018-358-AREE",
+      "filename": "delibera-n.-358-del-19.11.2018-Regolamento-duso-delle-aree-demaniali-marittime-AdSP-MTC-DEFINITIVO-1.pdf",
+      "relativePath": "delibera-n.-358-del-19.11.2018-Regolamento-duso-delle-aree-demaniali-marittime-AdSP-MTC-DEFINITIVO-1.pdf",
+      "title": "Regolamento d uso aree demaniali marittime",
+      "issuingBody": "AdSP MTC",
+      "documentType": "AUTHORITY_REGULATION",
+      "sourceNumber": "358/2018",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "AUTHORITY_REGULATION",
+      "territorialScope": "AUTHORITY",
+      "status": "CURRENT_SUBJECT_TO_REVIEW",
+      "role": "NORMATIVE",
+      "isConformative": true,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "MEDIUM",
+      "humanReviewRequired": true,
+      "checksum": "2e6881e4f08f553947a476e349f22d7b2ac0e13c2d95c48db9a55624c39a79fc",
+      "size": 979539,
+      "notes": "Da coordinare con regolamenti successivi senza abrogazione automatica.",
+      "tags": [
+        "REGOLAMENTO",
+        "DEMANIO"
+      ]
     },
     {
-      "sourceKey": "TAR-2025-OP",
-      "title": "Tariffe anno 2025",
-      "sourceType": "TARIFFA",
-      "status": "VIGENTE",
-      "publicationDate": "2025-01-01T00:00:00.000Z",
-      "effectiveFrom": "2025-01-01T00:00:00.000Z",
-      "fileName": "Tariffe-Anno-2025-OP-1.pdf",
-      "filePath": "Tariffe-Anno-2025-OP-1.pdf"
+      "stableKey": "DLB-2021-220",
+      "filename": "delibera-n.-220-del-18.06.2021.pdf",
+      "relativePath": "delibera-n.-220-del-18.06.2021.pdf",
+      "title": "Delibera n. 220 del 18.06.2021",
+      "issuingBody": "AdSP MTC",
+      "documentType": "PROCEDURE_DOCUMENT",
+      "sourceNumber": "220/2021",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "PROCEDURE_DOCUMENT",
+      "territorialScope": "AUTHORITY",
+      "status": "HISTORICAL",
+      "role": "PROCEDURAL",
+      "isConformative": false,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "LOW",
+      "humanReviewRequired": true,
+      "checksum": "a2d381de1305a5e95759ea8f23c9fab842a209ca4e7d1d832cf0053af052f8ea",
+      "size": 83647,
+      "notes": "Atto storico non vigente automaticamente.",
+      "tags": [
+        "STORICO"
+      ]
     },
     {
-      "sourceKey": "GAR-2015-REQ",
+      "stableKey": "DLB-2021-8",
+      "filename": "delibera-n.-8-del-12.01.2021.pdf",
+      "relativePath": "delibera-n.-8-del-12.01.2021.pdf",
+      "title": "Delibera n. 8 del 12.01.2021",
+      "issuingBody": "AdSP MTC",
+      "documentType": "PROCEDURE_DOCUMENT",
+      "sourceNumber": "8/2021",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "PROCEDURE_DOCUMENT",
+      "territorialScope": "AUTHORITY",
+      "status": "HISTORICAL",
+      "role": "PREPARATORY",
+      "isConformative": false,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "LOW",
+      "humanReviewRequired": true,
+      "checksum": "5562b07814cccdbdb87a707809888fab977c2a26eba701da7c68ac8ac53dd7ef",
+      "size": 233632,
+      "notes": "Atto storico preparatorio.",
+      "tags": [
+        "PREPARATORIO",
+        "STORICO"
+      ]
+    },
+    {
+      "stableKey": "DLB-2024-30-CANONI",
+      "filename": "delibera-CG-n.-30-del-22.07.2024-Regolamento-canoni-18.pdf",
+      "relativePath": "delibera-CG-n.-30-del-22.07.2024-Regolamento-canoni-18.pdf",
+      "title": "Regolamento canoni art. 18 (Delibera CG n. 30/2024)",
+      "issuingBody": "AdSP MTC - Comitato di Gestione",
+      "documentType": "AUTHORITY_REGULATION",
+      "sourceNumber": "30/2024",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "AUTHORITY_REGULATION",
+      "territorialScope": "AUTHORITY",
+      "status": "CURRENT_SUBJECT_TO_REVIEW",
+      "role": "NORMATIVE",
+      "isConformative": true,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "MEDIUM",
+      "humanReviewRequired": true,
+      "checksum": "8be2b9aedb21f0944df3253fc69a8b356803346e7461424a29bcf95c8b075d3c",
+      "size": 211165,
+      "notes": "Nessuna conclusione automatica su abrogazioni implicite.",
+      "tags": [
+        "ART18",
+        "CANONI"
+      ]
+    },
+    {
+      "stableKey": "DLB-CCN-2020-8",
+      "filename": "delibera-Commissione-Consultiva-Napoli-n.-8-del-19.10.2020.pdf",
+      "relativePath": "delibera-Commissione-Consultiva-Napoli-n.-8-del-19.10.2020.pdf",
+      "title": "Delibera Commissione Consultiva Napoli n. 8/2020",
+      "issuingBody": "Commissione Consultiva Napoli",
+      "documentType": "PROCEDURE_DOCUMENT",
+      "sourceNumber": "8/2020",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAPOLI"
+      ],
+      "legalRank": "PROCEDURE_DOCUMENT",
+      "territorialScope": "PORT",
+      "status": "HISTORICAL",
+      "role": "PREPARATORY",
+      "isConformative": false,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "LOW",
+      "humanReviewRequired": true,
+      "checksum": "0019153b79c38a9ecf1453b3cdc1950c01c2d2de9f9ff3c21aff5c6b2b7b2e7d",
+      "size": 234788,
+      "notes": "Atto consultivo preparatorio locale.",
+      "tags": [
+        "CONSULTIVO",
+        "PREPARATORIO"
+      ]
+    },
+    {
+      "stableKey": "DLB-CG-2020-65",
+      "filename": "delibera-CG-n.-65-del-27.11.2020.pdf",
+      "relativePath": "delibera-CG-n.-65-del-27.11.2020.pdf",
+      "title": "Delibera CG n. 65 del 27.11.2020",
+      "issuingBody": "AdSP MTC - Comitato di Gestione",
+      "documentType": "PROCEDURE_DOCUMENT",
+      "sourceNumber": "65/2020",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "PROCEDURE_DOCUMENT",
+      "territorialScope": "AUTHORITY",
+      "status": "HISTORICAL",
+      "role": "PREPARATORY",
+      "isConformative": false,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "LOW",
+      "humanReviewRequired": true,
+      "checksum": "27c1a12d792212f6493db7d8328e985c4701628a63074810dc4a88f64857a7c5",
+      "size": 146244,
+      "notes": "Atto storico preparatorio.",
+      "tags": [
+        "STORICO",
+        "PREPARATORIO"
+      ]
+    },
+    {
+      "stableKey": "DLB-CG-2021-80",
+      "filename": "delibera-CG-n.-80-del-26.10.2021.pdf",
+      "relativePath": "delibera-CG-n.-80-del-26.10.2021.pdf",
+      "title": "Delibera CG n. 80 del 26.10.2021",
+      "issuingBody": "AdSP MTC - Comitato di Gestione",
+      "documentType": "PROCEDURE_DOCUMENT",
+      "sourceNumber": "80/2021",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "PROCEDURE_DOCUMENT",
+      "territorialScope": "AUTHORITY",
+      "status": "HISTORICAL",
+      "role": "PREPARATORY",
+      "isConformative": false,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "LOW",
+      "humanReviewRequired": true,
+      "checksum": "4359214bf66cfc7d0876a3f6f7de0b4bc9bf453d27735405f97130543e37f4e4",
+      "size": 123856,
+      "notes": "Atto storico preparatorio.",
+      "tags": [
+        "STORICO",
+        "PREPARATORIO"
+      ]
+    },
+    {
+      "stableKey": "DLB-CG-2023-35",
+      "filename": "delibera-CG-n.-35-del-12.07.2023.pdf",
+      "relativePath": "delibera-CG-n.-35-del-12.07.2023.pdf",
+      "title": "Delibera CG n. 35 del 12.07.2023",
+      "issuingBody": "AdSP MTC - Comitato di Gestione",
+      "documentType": "PROCEDURE_DOCUMENT",
+      "sourceNumber": "35/2023",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "PROCEDURE_DOCUMENT",
+      "territorialScope": "AUTHORITY",
+      "status": "HISTORICAL",
+      "role": "PREPARATORY",
+      "isConformative": false,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "LOW",
+      "humanReviewRequired": true,
+      "checksum": "5d631b4d7311ce1db7f83f60a796b4f73a3ff3772097f34c22393d632b018eae",
+      "size": 126206,
+      "notes": "Atto preparatorio/storico.",
+      "tags": [
+        "PREPARATORIO"
+      ]
+    },
+    {
+      "stableKey": "DLB-CG-2024-45",
+      "filename": "delibera-CG-n.-45-del-28.10.2024.pdf",
+      "relativePath": "delibera-CG-n.-45-del-28.10.2024.pdf",
+      "title": "Delibera CG n. 45 del 28.10.2024",
+      "issuingBody": "AdSP MTC - Comitato di Gestione",
+      "documentType": "PROCEDURE_DOCUMENT",
+      "sourceNumber": "45/2024",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "PROCEDURE_DOCUMENT",
+      "territorialScope": "AUTHORITY",
+      "status": "CURRENT_SUBJECT_TO_REVIEW",
+      "role": "PROCEDURAL",
+      "isConformative": false,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "MEDIUM",
+      "humanReviewRequired": true,
+      "checksum": "10c9b4dd34ce706741733c62051d000859285f7fb9b30e76676e1b2adbff9cc7",
+      "size": 100735,
+      "notes": "Atto procedurale di riferimento interno.",
+      "tags": [
+        "PROCEDURA"
+      ]
+    },
+    {
+      "stableKey": "DLB-CG-2026-1",
+      "filename": "delibera-CG-n.-1-del-12.02.2026.pdf",
+      "relativePath": "delibera-CG-n.-1-del-12.02.2026.pdf",
+      "title": "Delibera CG n. 1 del 12.02.2026",
+      "issuingBody": "AdSP MTC - Comitato di Gestione",
+      "documentType": "PROCEDURE_DOCUMENT",
+      "sourceNumber": "1/2026",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "PROCEDURE_DOCUMENT",
+      "territorialScope": "AUTHORITY",
+      "status": "CURRENT_SUBJECT_TO_REVIEW",
+      "role": "PROCEDURAL",
+      "isConformative": false,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "MEDIUM",
+      "humanReviewRequired": true,
+      "checksum": "ddf31c1281afdb25ed6dbb8c3bcaeb6b5c0e5fef97d89b90e71cad478d83bf7e",
+      "size": 125349,
+      "notes": "Atto procedurale da contestualizzare.",
+      "tags": [
+        "DELIBERA",
+        "PROCEDURA"
+      ]
+    },
+    {
+      "stableKey": "DPSS-A3-REV2",
+      "filename": "DPSS_RI_ALL_SCHEDE-Napoli-A3_REV2.pdf",
+      "relativePath": "DPSS_RI_ALL_SCHEDE-Napoli-A3_REV2.pdf",
+      "title": "DPSS - Schede Napoli A3 REV2",
+      "issuingBody": "AdSP MTC",
+      "documentType": "PLANNING_INSTRUMENT",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "PLANNING_INSTRUMENT",
+      "territorialScope": "AUTHORITY",
+      "status": "CURRENT_SUBJECT_TO_REVIEW",
+      "role": "STRATEGIC",
+      "isConformative": false,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "MEDIUM",
+      "humanReviewRequired": true,
+      "checksum": "52d56bb00f90ad435480612d8b95b4a125804bdaa4e385d12d004c06ceb4f42c",
+      "size": 6056191,
+      "notes": "Livello strategico: non sostitutivo PRP analitico.",
+      "tags": [
+        "DPSS",
+        "STRATEGICO"
+      ]
+    },
+    {
+      "stableKey": "GAR-2015-REQ",
+      "filename": "REQUISITI-GARANZIA-FIDEIUSSORIA-PER-AUTORITA-PORTUALE_sett2015.pdf",
+      "relativePath": "REQUISITI-GARANZIA-FIDEIUSSORIA-PER-AUTORITA-PORTUALE_sett2015.pdf",
       "title": "Requisiti garanzia fideiussoria",
-      "sourceType": "REGOLAMENTO",
-      "status": "VIGENTE",
-      "publicationDate": "2015-09-01T00:00:00.000Z",
-      "effectiveFrom": "2015-09-01T00:00:00.000Z",
-      "fileName": "REQUISITI-GARANZIA-FIDEIUSSORIA-PER-AUTORITA-PORTUALE_sett2015.pdf",
-      "filePath": "REQUISITI-GARANZIA-FIDEIUSSORIA-PER-AUTORITA-PORTUALE_sett2015.pdf"
+      "issuingBody": "Autorita Portuale",
+      "documentType": "TECHNICAL_NOTE",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "TECHNICAL_GUIDANCE",
+      "territorialScope": "AUTHORITY",
+      "status": "PENDING_VALIDITY_CHECK",
+      "role": "TECHNICAL_GUIDANCE",
+      "isConformative": false,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "MEDIUM",
+      "humanReviewRequired": true,
+      "checksum": "9b09c93541b47ae5ea26b86bcb1b36f1222a38942ed58193944de47a32b10c69",
+      "size": 139251,
+      "notes": "Prassi/guida tecnica da verificare su aggiornamenti.",
+      "tags": [
+        "FIDEIUSSIONE",
+        "GUIDA"
+      ]
     },
     {
-      "sourceKey": "PAR-2026-51",
-      "title": "Parere n. 51/2026",
-      "sourceType": "PARERE",
-      "status": "VIGENTE",
-      "publicationDate": "2026-02-20T00:00:00.000Z",
-      "effectiveFrom": "2026-02-20T00:00:00.000Z",
-      "fileName": "Parere-n.-51_2026_signed.pdf",
-      "filePath": "Parere-n.-51_2026_signed.pdf"
+      "stableKey": "INDIZIONE-PUBB-SITO",
+      "filename": "indizione-modificata-per-pubblicazione-sito.pdf",
+      "relativePath": "indizione-modificata-per-pubblicazione-sito.pdf",
+      "title": "Indizione modificata per pubblicazione sito",
+      "issuingBody": "AdSP MTC",
+      "documentType": "PROCEDURE_DOCUMENT",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "PROCEDURE_DOCUMENT",
+      "territorialScope": "AUTHORITY",
+      "status": "DRAFT_OR_ONGOING_PROCEDURE",
+      "role": "PREPARATORY",
+      "isConformative": false,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "LOW",
+      "humanReviewRequired": true,
+      "checksum": "a85349025f33a18b74bfe616f8a3164a0bf5421c3085b5bd528c9e501322bc96",
+      "size": 207364,
+      "notes": "Atto preparatorio/procedurale in corso.",
+      "tags": [
+        "PROCEDURA",
+        "DRAFT"
+      ]
     },
     {
-      "sourceKey": "PLN-NAP-CST-1",
-      "title": "Planimetria ambito Castellammare",
-      "sourceType": "PLANIMETRIA",
-      "status": "VIGENTE",
-      "publicationDate": "2024-06-18T00:00:00.000Z",
-      "effectiveFrom": "2024-06-18T00:00:00.000Z",
-      "fileName": "planimetria-c_di_stabia-1.jpg",
-      "filePath": "planimetria-c_di_stabia-1.jpg"
+      "stableKey": "ITER-PRP",
+      "filename": "IterPRP.pdf",
+      "relativePath": "IterPRP.pdf",
+      "title": "Iter PRP",
+      "issuingBody": "AdSP MTC",
+      "documentType": "PROCEDURE_DOCUMENT",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "PROCEDURE_DOCUMENT",
+      "territorialScope": "AUTHORITY",
+      "status": "DRAFT_OR_ONGOING_PROCEDURE",
+      "role": "PROCEDURAL",
+      "isConformative": false,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "LOW",
+      "humanReviewRequired": true,
+      "checksum": "e731107efe932b90d3ae3fd37ad03d7647a7edf21e6f8bd78e52a91f7ee67b55",
+      "size": 60565,
+      "notes": "Iter procedimentale PRP: non sostituisce PRP vigente.",
+      "tags": [
+        "PRP",
+        "ITER"
+      ]
+    },
+    {
+      "stableKey": "MAP-CASTELLAMMARE-1",
+      "filename": "planimetria-c_di_stabia-1.jpg",
+      "relativePath": "planimetria-c_di_stabia-1.jpg",
+      "title": "Planimetria Castellammare",
+      "issuingBody": "AdSP MTC",
+      "documentType": "SUPPORTING_MAP",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-CASTELLAMMARE"
+      ],
+      "portAreaKey": "AREA-CASTELLAMMARE",
+      "legalRank": "CARTOGRAPHIC_SUPPORT",
+      "territorialScope": "PORT_AREA",
+      "status": "CURRENT_SUBJECT_TO_REVIEW",
+      "role": "SUPPORTING_MAP",
+      "isConformative": false,
+      "isExtractable": false,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "LOW",
+      "humanReviewRequired": true,
+      "checksum": "9322d0c8c9dd3acaac65bf027cd719878dd31688e13fd1e5927c2cc6ea644c28",
+      "size": 261729,
+      "notes": "Supporto istruttorio non autonomamente conformativo.",
+      "tags": [
+        "PLANIMETRIA",
+        "MAPPA"
+      ]
+    },
+    {
+      "stableKey": "MAP-NAPOLI-PORTO",
+      "filename": "planimetriaportonapoli.pdf",
+      "relativePath": "planimetriaportonapoli.pdf",
+      "title": "Planimetria Porto Napoli",
+      "issuingBody": "AdSP MTC",
+      "documentType": "SUPPORTING_MAP",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAPOLI"
+      ],
+      "legalRank": "CARTOGRAPHIC_SUPPORT",
+      "territorialScope": "PORT",
+      "status": "CURRENT_SUBJECT_TO_REVIEW",
+      "role": "SUPPORTING_MAP",
+      "isConformative": false,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "LOW",
+      "humanReviewRequired": true,
+      "checksum": "4732a71b39b7ee4e117566d77dc7390872ffdbd0407911d1e4ff106234b85ad2",
+      "size": 3355848,
+      "notes": "Supporto cartografico non conformativo autonomo.",
+      "tags": [
+        "PLANIMETRIA",
+        "MAPPA"
+      ]
+    },
+    {
+      "stableKey": "MASE-2025-0034920",
+      "filename": "MASE-2025-0034920.pdf",
+      "relativePath": "MASE-2025-0034920.pdf",
+      "title": "Nota MASE 2025/0034920",
+      "issuingBody": "MASE",
+      "documentType": "ENVIRONMENTAL_ACT",
+      "sourceNumber": "0034920/2025",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "ENVIRONMENTAL_ACT",
+      "territorialScope": "AUTHORITY",
+      "status": "CURRENT_SUBJECT_TO_REVIEW",
+      "role": "ENVIRONMENTAL",
+      "isConformative": false,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "MEDIUM",
+      "humanReviewRequired": true,
+      "checksum": "8391b316755c288c143888747bf55efbdeab6e204354aa01f787ca3bd59212f1",
+      "size": 800921,
+      "notes": "Atto ambientale collegato al procedimento.",
+      "tags": [
+        "MASE",
+        "AMBIENTE"
+      ]
+    },
+    {
+      "stableKey": "MASTERPLAN-SALERNO",
+      "filename": "Masterplan-Salerno-Stato-Attuale.jpg",
+      "relativePath": "Masterplan-Salerno-Stato-Attuale.jpg",
+      "title": "Masterplan Salerno - stato attuale",
+      "issuingBody": "AdSP MTC",
+      "documentType": "SUPPORTING_MAP",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-SALERNO"
+      ],
+      "legalRank": "CARTOGRAPHIC_SUPPORT",
+      "territorialScope": "PORT",
+      "status": "CURRENT_SUBJECT_TO_REVIEW",
+      "role": "SUPPORTING_MAP",
+      "isConformative": false,
+      "isExtractable": false,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "LOW",
+      "humanReviewRequired": true,
+      "checksum": "466d6d7564c9c91923b8c4948f38ed2449cc9cfa9faac6288305b25ec1cc6f54",
+      "size": 149200,
+      "notes": "Supporto cartografico non conformativo autonomo.",
+      "tags": [
+        "MASTERPLAN",
+        "MAPPA"
+      ]
+    },
+    {
+      "stableKey": "ORD-2019-1-ART16",
+      "filename": "Ordinanza-n.-1-del-07.01.2019-Regolamento-art.-16.pdf",
+      "relativePath": "Ordinanza-n.-1-del-07.01.2019-Regolamento-art.-16.pdf",
+      "title": "Regolamento art. 16 - Ordinanza n. 1/2019",
+      "issuingBody": "AdSP MTC",
+      "documentType": "ORDINANCE",
+      "sourceNumber": "1/2019",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "PORT_ORDINANCE",
+      "territorialScope": "AUTHORITY",
+      "status": "PENDING_VALIDITY_CHECK",
+      "role": "NORMATIVE",
+      "isConformative": true,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "MEDIUM",
+      "humanReviewRequired": true,
+      "checksum": "ab9b1b28c649000ceaf9df10f18d4910df3e0523472f31ce12a948de116bf50b",
+      "size": 2924173,
+      "notes": "Regolamento art.16: vigenza da verificare formalmente.",
+      "tags": [
+        "ART16",
+        "REGOLAMENTO"
+      ]
+    },
+    {
+      "stableKey": "ORD-2026-17",
+      "filename": "ordinanza-n.-17-del-23.02.2026_priv.pdf",
+      "relativePath": "ordinanza-n.-17-del-23.02.2026_priv.pdf",
+      "title": "Ordinanza n. 17 del 23.02.2026",
+      "issuingBody": "AdSP MTC",
+      "documentType": "ORDINANCE",
+      "sourceNumber": "17/2026",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "PORT_ORDINANCE",
+      "territorialScope": "AUTHORITY",
+      "status": "CURRENT_SUBJECT_TO_REVIEW",
+      "role": "NORMATIVE",
+      "isConformative": true,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "MEDIUM",
+      "humanReviewRequired": true,
+      "checksum": "dc9f3bf19f50f230c732b5c018f773c3c880a3a34e10417fc0fcbb8aa2bcf7a5",
+      "size": 1236796,
+      "notes": "Ordinanza annuale 2026; vigenza da verificare nel dettaglio.",
+      "tags": [
+        "ORDINANZA",
+        "2026"
+      ]
+    },
+    {
+      "stableKey": "ORD-2026-18",
+      "filename": "ordinanza-n.-18-del-23.02.2026_priv.pdf",
+      "relativePath": "ordinanza-n.-18-del-23.02.2026_priv.pdf",
+      "title": "Ordinanza n. 18 del 23.02.2026",
+      "issuingBody": "AdSP MTC",
+      "documentType": "ORDINANCE",
+      "sourceNumber": "18/2026",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "PORT_ORDINANCE",
+      "territorialScope": "AUTHORITY",
+      "status": "CURRENT_SUBJECT_TO_REVIEW",
+      "role": "NORMATIVE",
+      "isConformative": true,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "MEDIUM",
+      "humanReviewRequired": true,
+      "checksum": "349ba3c7c1c5d0eadd34414bcd238b6afd21b9f5d9ad1b4f91cdc10322fbb5e8",
+      "size": 1417525,
+      "notes": "Ordinanza annuale 2026; vigenza da verificare nel dettaglio.",
+      "tags": [
+        "ORDINANZA",
+        "2026"
+      ]
+    },
+    {
+      "stableKey": "ORD-2026-19",
+      "filename": "ordinanza-n.-19-del-23.02.2026_priv.pdf",
+      "relativePath": "ordinanza-n.-19-del-23.02.2026_priv.pdf",
+      "title": "Ordinanza n. 19 del 23.02.2026",
+      "issuingBody": "AdSP MTC",
+      "documentType": "ORDINANCE",
+      "sourceNumber": "19/2026",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "PORT_ORDINANCE",
+      "territorialScope": "AUTHORITY",
+      "status": "CURRENT_SUBJECT_TO_REVIEW",
+      "role": "NORMATIVE",
+      "isConformative": true,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "MEDIUM",
+      "humanReviewRequired": true,
+      "checksum": "50c1a18f8f2b8df2d15872f9f89631b4289976ceec56501eb94010e7b99d54ed",
+      "size": 927669,
+      "notes": "Ordinanza annuale 2026; vigenza da verificare nel dettaglio.",
+      "tags": [
+        "ORDINANZA",
+        "2026"
+      ]
+    },
+    {
+      "stableKey": "ORD-2026-20",
+      "filename": "ordinanza-n.-20-del-23.02.2026_priv.pdf",
+      "relativePath": "ordinanza-n.-20-del-23.02.2026_priv.pdf",
+      "title": "Ordinanza n. 20 del 23.02.2026",
+      "issuingBody": "AdSP MTC",
+      "documentType": "ORDINANCE",
+      "sourceNumber": "20/2026",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "PORT_ORDINANCE",
+      "territorialScope": "AUTHORITY",
+      "status": "CURRENT_SUBJECT_TO_REVIEW",
+      "role": "NORMATIVE",
+      "isConformative": true,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "MEDIUM",
+      "humanReviewRequired": true,
+      "checksum": "c69d343491fa11def5187b824495f82a83c160a2ec9d3b2ef8a33657d9069299",
+      "size": 1285694,
+      "notes": "Ordinanza annuale 2026; vigenza da verificare nel dettaglio.",
+      "tags": [
+        "ORDINANZA",
+        "2026"
+      ]
+    },
+    {
+      "stableKey": "PAR-2026-51",
+      "filename": "Parere-n.-51_2026_signed.pdf",
+      "relativePath": "Parere-n.-51_2026_signed.pdf",
+      "title": "Parere ART n. 51/2026",
+      "issuingBody": "Autorita di Regolazione dei Trasporti",
+      "documentType": "ART_OPINION",
+      "sourceNumber": "51/2026",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "ADVISORY_OPINION",
+      "territorialScope": "AUTHORITY",
+      "status": "CASE_SPECIFIC",
+      "role": "ADVISORY",
+      "isConformative": false,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "LOW",
+      "humanReviewRequired": true,
+      "checksum": "d37c75f8f70f16d0ddd19b21152ec226c3461dea578db00cde4806146ee79805",
+      "size": 499869,
+      "notes": "Parere caso-specifico: non norma generale automatica.",
+      "tags": [
+        "PARERE",
+        "ART"
+      ]
+    },
+    {
+      "stableKey": "POT-2017-2020",
+      "filename": "Piano-Operativo-Triennale-2017_2019-con-proiezione-al-2020.pdf",
+      "relativePath": "Piano-Operativo-Triennale-2017_2019-con-proiezione-al-2020.pdf",
+      "title": "POT 2017-2019 con proiezione 2020",
+      "issuingBody": "AdSP MTC",
+      "documentType": "PLANNING_INSTRUMENT",
+      "sourceNumber": "2017-2019",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "PLANNING_INSTRUMENT",
+      "territorialScope": "AUTHORITY",
+      "status": "HISTORICAL",
+      "role": "PROGRAMMATIC",
+      "isConformative": false,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "LOW",
+      "humanReviewRequired": true,
+      "checksum": "71686ed2a8de05d1c66566c19e0e7a2cbe73e245eb9bff446eb8b46f1a329569",
+      "size": 8224681,
+      "notes": "Strumento programmatorio storico non sostitutivo PRP.",
+      "tags": [
+        "POT",
+        "STORICO"
+      ]
+    },
+    {
+      "stableKey": "POT-2023-2025-REV2024",
+      "filename": "POT-2023-2025-revisione-annuale-2024_OK-1.pdf",
+      "relativePath": "POT-2023-2025-revisione-annuale-2024_OK-1.pdf",
+      "title": "POT 2023-2025 revisione annuale 2024",
+      "issuingBody": "AdSP MTC",
+      "documentType": "PLANNING_INSTRUMENT",
+      "sourceNumber": "2023-2025",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "PLANNING_INSTRUMENT",
+      "territorialScope": "AUTHORITY",
+      "status": "CURRENT_SUBJECT_TO_REVIEW",
+      "role": "PROGRAMMATIC",
+      "isConformative": false,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "MEDIUM",
+      "humanReviewRequired": true,
+      "checksum": "7279607233309ba09ffa5fbbe529f58d2e32dbf64d43793d88739dc7b6892cfe",
+      "size": 1051284,
+      "notes": "POT programmatorio non sostitutivo PRP.",
+      "tags": [
+        "POT",
+        "PROGRAMMA"
+      ]
+    },
+    {
+      "stableKey": "POT-BOZZA-2013-2015",
+      "filename": "bozza_pot_2013-2015.pdf",
+      "relativePath": "bozza_pot_2013-2015.pdf",
+      "title": "Bozza POT 2013-2015",
+      "issuingBody": "Autorita Portuale",
+      "documentType": "PLANNING_INSTRUMENT",
+      "sourceNumber": "2013-2015",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "PLANNING_INSTRUMENT",
+      "territorialScope": "AUTHORITY",
+      "status": "HISTORICAL",
+      "role": "PROGRAMMATIC",
+      "isConformative": false,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "LOW",
+      "humanReviewRequired": true,
+      "checksum": "deb4edf17b686ddb13d78a1f0e53384481d1b099eb425170983515d97148f599",
+      "size": 1751309,
+      "notes": "Bozza storica non sostitutiva PRP.",
+      "tags": [
+        "POT",
+        "STORICO"
+      ]
+    },
+    {
+      "stableKey": "SPESA-2010-524",
+      "filename": "3-Spese-di-istruttoria-delibera-AP-n_524_2010.pdf",
+      "relativePath": "3-Spese-di-istruttoria-delibera-AP-n_524_2010.pdf",
+      "title": "Spese di istruttoria - delibera AP n. 524/2010",
+      "issuingBody": "Autorita Portuale",
+      "documentType": "TARIFF",
+      "sourceNumber": "524/2010",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "TECHNICAL_GUIDANCE",
+      "territorialScope": "AUTHORITY",
+      "status": "HISTORICAL",
+      "role": "TECHNICAL_GUIDANCE",
+      "isConformative": false,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "LOW",
+      "humanReviewRequired": true,
+      "checksum": "1c70c9f70f4ead8e23b67e55aee20c2f001f588542fe63ca582349d4ef9a6b6f",
+      "size": 178101,
+      "notes": "Documento storico: non usare importi correnti automatici.",
+      "tags": [
+        "SPESE",
+        "STORICO"
+      ]
+    },
+    {
+      "stableKey": "TAR-2025-OP",
+      "filename": "Tariffe-Anno-2025-OP-1.pdf",
+      "relativePath": "Tariffe-Anno-2025-OP-1.pdf",
+      "title": "Tariffe anno 2025",
+      "issuingBody": "AdSP MTC",
+      "documentType": "TARIFF",
+      "sourceNumber": "2025",
+      "authorityKey": "ADSP-MTC",
+      "portKeys": [
+        "PORT-NAP-SAL"
+      ],
+      "legalRank": "AUTHORITY_REGULATION",
+      "territorialScope": "AUTHORITY",
+      "status": "HISTORICAL",
+      "role": "NORMATIVE",
+      "isConformative": true,
+      "isExtractable": true,
+      "sourceOrigin": "LOCAL_CORPUS",
+      "confidence": "MEDIUM",
+      "humanReviewRequired": true,
+      "checksum": "2cf2dc84113f03abd3f6b2682e525deaccde63df8cef51f77aebab0f634e6d3a",
+      "size": 710539,
+      "notes": "Fonte annuale 2025: non corrente per referenceDate 2026.",
+      "tags": [
+        "TARIFFE",
+        "ANNUALE"
+      ]
     }
   ],
   "rules": [
     {
-      "sourceKey": "DLB-2024-30-CANONI",
-      "ruleCode": "CAN-01",
+      "ruleId": "RULE-CAN-01",
+      "sourceStableKey": "DLB-2024-30-CANONI",
       "title": "Monitoraggio morosita canoni art. 18",
       "summary": "In presenza di morosita e regime portuale, attivare istruttoria rafforzata con diffida.",
       "category": "CANONE",
@@ -129,8 +988,8 @@
       }
     },
     {
-      "sourceKey": "GAR-2015-REQ",
-      "ruleCode": "GAR-01",
+      "ruleId": "RULE-GAR-01",
+      "sourceStableKey": "GAR-2015-REQ",
       "title": "Controllo garanzia fideiussoria valida",
       "summary": "Per concessioni attive con garanzia richiesta, bloccare avanzamento istruttorio senza evidenza valida.",
       "category": "GARANZIA",
@@ -143,15 +1002,15 @@
       "outcome": {
         "outputSeverity": "ALTA",
         "outcomeTitle": "Garanzia non valida",
-        "outcomeSummary": "Richiedere immediata integrazione fideiussoria prima di ulteriori passaggi.",
+        "outcomeSummary": "Richiedere integrazione fideiussoria prima dei passaggi successivi.",
         "humanReviewRequired": true
       }
     },
     {
-      "sourceKey": "DLB-2018-358-AREE",
-      "ruleCode": "OCC-01",
+      "ruleId": "RULE-OCC-01",
+      "sourceStableKey": "DLB-2018-358-AREE",
       "title": "Occupazione difforme su banchina",
-      "summary": "Per occupazione su banchina commerciale, imporre verifica tecnica e conformita planimetrica.",
+      "summary": "Per occupazione su banchina commerciale, attivare verifica tecnica e planimetrica.",
       "category": "OCCUPAZIONE",
       "status": "ATTIVA",
       "priority": 30,
@@ -168,10 +1027,10 @@
       }
     },
     {
-      "sourceKey": "ORD-2019-1-ART16",
-      "ruleCode": "SUB-01",
+      "ruleId": "RULE-SUB-01",
+      "sourceStableKey": "ORD-2019-1-ART16",
       "title": "Subingresso non autorizzato",
-      "summary": "Se emerge rilevanza art. 47 lettera E, predisporre verifica su titolo legittimante.",
+      "summary": "Se emerge rilevanza art.47 lettera E, predisporre verifica sul titolo legittimante.",
       "category": "SUBINGRESSO",
       "status": "ATTIVA",
       "priority": 15,
@@ -182,15 +1041,15 @@
       "outcome": {
         "outputSeverity": "URGENTE",
         "outcomeTitle": "Potenziale subingresso abusivo",
-        "outcomeSummary": "Avviare istruttoria dedicata con richiesta documenti sul titolo di disponibilita.",
+        "outcomeSummary": "Avviare istruttoria dedicata e richiesta documentale.",
         "humanReviewRequired": true
       }
     },
     {
-      "sourceKey": "DLB-2024-30-CANONI",
-      "ruleCode": "PRO-01",
+      "ruleId": "RULE-PRO-01",
+      "sourceStableKey": "DLB-2024-30-CANONI",
       "title": "Comparativa art. 37 da avviare",
-      "summary": "Su procedure comparative da avviare, attivare checklist istruttoria per evidenza pubblica.",
+      "summary": "Su procedure comparative da avviare, attivare checklist istruttoria di evidenza pubblica.",
       "category": "PROCEDURA",
       "status": "ATTIVA",
       "priority": 40,
@@ -201,15 +1060,15 @@
       "outcome": {
         "outputSeverity": "MEDIA",
         "outcomeTitle": "Procedura comparativa in avvio",
-        "outcomeSummary": "Completare checklist procedimentale e pubblicazione documenti essenziali.",
+        "outcomeSummary": "Completare checklist e pubblicazione documenti essenziali.",
         "humanReviewRequired": true
       }
     },
     {
-      "sourceKey": "POT-2023-2025-REV2024",
-      "ruleCode": "DOC-01",
+      "ruleId": "RULE-DOC-01",
+      "sourceStableKey": "POT-2023-2025-REV2024",
       "title": "Presidio documentale strategico",
-      "summary": "Nei procedimenti portuali attivi mantenere set minimo documentale sempre aggiornato.",
+      "summary": "Nei procedimenti portuali attivi mantenere set minimo documentale aggiornato.",
       "category": "DOCUMENTAZIONE",
       "status": "ATTIVA",
       "priority": 50,
@@ -226,31 +1085,40 @@
   ],
   "relations": [
     {
-      "fromSourceKey": "DLB-2024-30-CANONI",
-      "toSourceKey": "TAR-2025-OP",
+      "relationId": "REL-001",
+      "fromSourceStableKey": "DLB-2024-30-CANONI",
+      "toSourceStableKey": "TAR-2025-OP",
       "relationType": "ATTUA",
-      "note": "La delibera canoni e attuata dal quadro tariffario annuale."
+      "note": "La disciplina canoni e attuata dal quadro tariffario annuale."
     },
     {
-      "fromSourceKey": "DLB-2018-358-AREE",
-      "toSourceKey": "PLN-NAP-CST-1",
-      "relationType": "ALLEGA"
+      "relationId": "REL-002",
+      "fromSourceStableKey": "DLB-2018-358-AREE",
+      "toSourceStableKey": "MAP-CASTELLAMMARE-1",
+      "relationType": "ALLEGA",
+      "note": "Richiamo a supporto cartografico istruttorio."
     },
     {
-      "fromSourceKey": "PAR-2026-51",
-      "toSourceKey": "DLB-2024-30-CANONI",
-      "relationType": "RICHIAMA"
+      "relationId": "REL-003",
+      "fromSourceStableKey": "PAR-2026-51",
+      "toSourceStableKey": "DLB-2024-30-CANONI",
+      "relationType": "RICHIAMA",
+      "note": "Parere collegato al quadro canoni."
     }
   ],
   "gaps": [
     {
       "gapKey": "GAP-CAN-2026-01",
       "title": "Ricevute canone incomplete",
-      "description": "Mancano quietanze complete sulle ultime annualita rilevanti.",
+      "description": "Mancano quietanze complete sulle annualita rilevanti.",
       "severity": "ALTA",
       "status": "APERTA",
-      "requiredDocumentTypes": ["PAGAMENTO", "NOTA"],
-      "linkedRuleCode": "CAN-01"
+      "requiredDocumentTypes": [
+        "PAGAMENTO",
+        "NOTA"
+      ],
+      "linkedRuleCode": "RULE-CAN-01",
+      "notes": "Gap essenziale per confermare morosita."
     },
     {
       "gapKey": "GAP-GAR-2026-01",
@@ -258,17 +1126,33 @@
       "description": "Assenza di documento fideiussorio coerente con importo canone corrente.",
       "severity": "URGENTE",
       "status": "APERTA",
-      "requiredDocumentTypes": ["FIDEIUSSIONE"],
-      "linkedRuleCode": "GAR-01"
+      "requiredDocumentTypes": [
+        "FIDEIUSSIONE"
+      ],
+      "linkedRuleCode": "RULE-GAR-01",
+      "notes": "Richiesta integrazione obbligatoria con verifica umana."
     },
     {
-      "gapKey": "GAP-PLN-2026-01",
-      "title": "Planimetria non allineata",
-      "description": "La planimetria disponibile non riflette gli ultimi rilievi di campo.",
-      "severity": "MEDIA",
-      "status": "IN_GESTIONE",
-      "requiredDocumentTypes": ["PLANIMETRIA", "VERBALE"],
-      "linkedRuleCode": "OCC-01"
+      "gapKey": "GAP-PRP-NTA-ATF",
+      "title": "Fonti PRP/NTA/ATF mancanti",
+      "description": "Assenza nel corpus locale di PRP/NTA/ATF formalmente vigenti per valutazioni conformative complete.",
+      "severity": "ALTA",
+      "status": "APERTA",
+      "requiredDocumentTypes": [
+        "PRP",
+        "NTA",
+        "ATF"
+      ],
+      "linkedRuleCode": "RULE-DOC-01",
+      "notes": "Riduce confidence a INSUFFICIENT nei casi che richiedono tali fonti."
+    }
+  ],
+  "duplicates": [
+    {
+      "duplicateFilename": "MASE-2025-0034920 (1).pdf",
+      "duplicateRelativePath": "MASE-2025-0034920 (1).pdf",
+      "duplicateOfStableKey": "MASE-2025-0034920",
+      "notes": "Duplicato binario con stesso hash del file principale."
     }
   ]
 }

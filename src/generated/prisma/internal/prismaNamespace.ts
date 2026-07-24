@@ -2473,6 +2473,20 @@ export const LegalSourceScalarFieldEnum = {
   title: 'title',
   sourceType: 'sourceType',
   status: 'status',
+  role: 'role',
+  legalRank: 'legalRank',
+  territorialScope: 'territorialScope',
+  confidence: 'confidence',
+  issuingBody: 'issuingBody',
+  sourceNumber: 'sourceNumber',
+  sourceDate: 'sourceDate',
+  sourceOrigin: 'sourceOrigin',
+  portAreaCode: 'portAreaCode',
+  tags: 'tags',
+  humanReviewRequired: 'humanReviewRequired',
+  isConformative: 'isConformative',
+  isExtractable: 'isExtractable',
+  duplicateOfSourceKey: 'duplicateOfSourceKey',
   publicationDate: 'publicationDate',
   effectiveFrom: 'effectiveFrom',
   effectiveTo: 'effectiveTo',
@@ -3141,6 +3155,69 @@ export type ListEnumLegalSourceStatusFieldRefInput<$PrismaModel> = FieldRefInput
 
 
 /**
+ * Reference to a field of type 'LegalSourceRole'
+ */
+export type EnumLegalSourceRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalSourceRole'>
+    
+
+
+/**
+ * Reference to a field of type 'LegalSourceRole[]'
+ */
+export type ListEnumLegalSourceRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalSourceRole[]'>
+    
+
+
+/**
+ * Reference to a field of type 'LegalRank'
+ */
+export type EnumLegalRankFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalRank'>
+    
+
+
+/**
+ * Reference to a field of type 'LegalRank[]'
+ */
+export type ListEnumLegalRankFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalRank[]'>
+    
+
+
+/**
+ * Reference to a field of type 'LegalTerritorialScope'
+ */
+export type EnumLegalTerritorialScopeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalTerritorialScope'>
+    
+
+
+/**
+ * Reference to a field of type 'LegalTerritorialScope[]'
+ */
+export type ListEnumLegalTerritorialScopeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalTerritorialScope[]'>
+    
+
+
+/**
+ * Reference to a field of type 'LegalSourceConfidence'
+ */
+export type EnumLegalSourceConfidenceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalSourceConfidence'>
+    
+
+
+/**
+ * Reference to a field of type 'LegalSourceConfidence[]'
+ */
+export type ListEnumLegalSourceConfidenceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalSourceConfidence[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
  * Reference to a field of type 'SourceRelationType'
  */
 export type EnumSourceRelationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SourceRelationType'>
@@ -3263,13 +3340,6 @@ export type EnumComparativeProcedureStatusFieldRefInput<$PrismaModel> = FieldRef
  * Reference to a field of type 'ComparativeProcedureStatus[]'
  */
 export type ListEnumComparativeProcedureStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ComparativeProcedureStatus[]'>
-    
-
-
-/**
- * Reference to a field of type 'Boolean'
- */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 

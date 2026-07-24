@@ -550,12 +550,70 @@ export type LegalSourceType = (typeof LegalSourceType)[keyof typeof LegalSourceT
 
 
 export const LegalSourceStatus = {
-  VIGENTE: 'VIGENTE',
-  SUPERATA: 'SUPERATA',
-  BOZZA: 'BOZZA'
+  CURRENT: 'CURRENT',
+  CURRENT_SUBJECT_TO_REVIEW: 'CURRENT_SUBJECT_TO_REVIEW',
+  PENDING_VALIDITY_CHECK: 'PENDING_VALIDITY_CHECK',
+  HISTORICAL: 'HISTORICAL',
+  SUPERSEDED: 'SUPERSEDED',
+  PARTIALLY_SUPERSEDED: 'PARTIALLY_SUPERSEDED',
+  DRAFT_OR_ONGOING_PROCEDURE: 'DRAFT_OR_ONGOING_PROCEDURE',
+  CASE_SPECIFIC: 'CASE_SPECIFIC',
+  MISSING_SOURCE: 'MISSING_SOURCE'
 } as const
 
 export type LegalSourceStatus = (typeof LegalSourceStatus)[keyof typeof LegalSourceStatus]
+
+
+export const LegalSourceRole = {
+  NORMATIVE: 'NORMATIVE',
+  PROCEDURAL: 'PROCEDURAL',
+  PROGRAMMATIC: 'PROGRAMMATIC',
+  STRATEGIC: 'STRATEGIC',
+  ENVIRONMENTAL: 'ENVIRONMENTAL',
+  ADVISORY: 'ADVISORY',
+  TECHNICAL_GUIDANCE: 'TECHNICAL_GUIDANCE',
+  SUPPORTING_MAP: 'SUPPORTING_MAP',
+  PREPARATORY: 'PREPARATORY',
+  CASE_SPECIFIC: 'CASE_SPECIFIC'
+} as const
+
+export type LegalSourceRole = (typeof LegalSourceRole)[keyof typeof LegalSourceRole]
+
+
+export const LegalSourceConfidence = {
+  HIGH: 'HIGH',
+  MEDIUM: 'MEDIUM',
+  LOW: 'LOW',
+  INSUFFICIENT: 'INSUFFICIENT'
+} as const
+
+export type LegalSourceConfidence = (typeof LegalSourceConfidence)[keyof typeof LegalSourceConfidence]
+
+
+export const LegalTerritorialScope = {
+  NATIONAL: 'NATIONAL',
+  AUTHORITY: 'AUTHORITY',
+  PORT: 'PORT',
+  PORT_AREA: 'PORT_AREA'
+} as const
+
+export type LegalTerritorialScope = (typeof LegalTerritorialScope)[keyof typeof LegalTerritorialScope]
+
+
+export const LegalRank = {
+  NATIONAL_LAW: 'NATIONAL_LAW',
+  AUTHORITY_REGULATION: 'AUTHORITY_REGULATION',
+  PORT_ORDINANCE: 'PORT_ORDINANCE',
+  PLANNING_INSTRUMENT: 'PLANNING_INSTRUMENT',
+  PROCEDURE_DOCUMENT: 'PROCEDURE_DOCUMENT',
+  ENVIRONMENTAL_ACT: 'ENVIRONMENTAL_ACT',
+  TECHNICAL_GUIDANCE: 'TECHNICAL_GUIDANCE',
+  ADVISORY_OPINION: 'ADVISORY_OPINION',
+  CARTOGRAPHIC_SUPPORT: 'CARTOGRAPHIC_SUPPORT',
+  OTHER: 'OTHER'
+} as const
+
+export type LegalRank = (typeof LegalRank)[keyof typeof LegalRank]
 
 
 export const SourceRelationType = {

@@ -1,9 +1,38 @@
 export const ORCHESTRATION_DISCLAIMER =
-  "Output tecnico di supporto istruttorio: non costituisce decisione amministrativa; verifica umana obbligatoria.";
+  "Output di supporto istruttorio: non costituisce decisione amministrativa. Verifica professionale richiesta. La valutazione dipende da completezza documentale e vigenza delle fonti.";
+
+export type ResolutionConfidence = "HIGH" | "MEDIUM" | "LOW" | "INSUFFICIENT";
+
+export type SourceExclusionReason =
+  | "NOT_CURRENT"
+  | "AUTHORITY_MISMATCH"
+  | "PORT_MISMATCH"
+  | "PORT_AREA_MISMATCH"
+  | "EFFECTIVE_FROM_FUTURE"
+  | "EFFECTIVE_TO_EXPIRED"
+  | "STATUS_HISTORICAL"
+  | "STATUS_SUPERSEDED"
+  | "STATUS_PARTIALLY_SUPERSEDED"
+  | "STATUS_PENDING_VALIDITY"
+  | "STATUS_DRAFT_OR_ONGOING"
+  | "STATUS_CASE_SPECIFIC"
+  | "STATUS_MISSING_SOURCE"
+  | "NOT_CONFORMATIVE_SUPPORT";
 
 export interface RuleResolutionInput {
   enteId?: string | null;
-  portCode?: string;
+  referenceDate?: string;
+  authorityKey?: string;
+  authorityId?: string;
+  portKey?: string;
+  portId?: string;
+  portArea?: string;
+  domain?: string;
+  institution?: string;
+  procedureType?: string;
+  titleType?: string;
+  includeHistorical?: boolean;
+  includePending?: boolean;
   concessionVertical?: string;
   concessionObjectType?: string;
   attivita?: string;
@@ -16,9 +45,44 @@ export interface RuleResolutionInput {
   polizzaValida?: boolean;
 }
 
+export interface EvaluatedSourceResult {
+  id: string;
+  stableKey: string;
+  title: string;
+  documentType: string;
+  legalRank: string | null;
+  territorialScope: string | null;
+  sourceNumber: string | null;
+  sourceDate: string | null;
+  issuingBody: string | null;
+  status: string;
+  role: string;
+  confidence: ResolutionConfidence;
+  humanReviewRequired: true;
+  isConformative: boolean;
+  isExtractable: boolean;
+  relativePath: string | null;
+  effectiveFrom: string | null;
+  effectiveTo: string | null;
+  applicable: boolean;
+  exclusionReasons: SourceExclusionReason[];
+}
+
+export interface PotentialConflictResult {
+  code: string;
+  message: string;
+  sourceStableKeys: string[];
+}
+
+export interface MissingSourceResult {
+  code: string;
+  message: string;
+  humanReviewRequired: true;
+}
+
 export interface ApplicableRuleResult {
   id: string;
-  ruleCode: string;
+  ruleId: string;
   title: string;
   summary: string;
   category: string;
@@ -28,10 +92,10 @@ export interface ApplicableRuleResult {
   outcomeSummary: string;
   source: {
     id: string;
-    sourceKey: string;
+    stableKey: string;
     title: string;
-    sourceType: string;
-    filePath: string | null;
+    documentType: string;
+    relativePath: string | null;
   };
   matchedCriteria: string[];
   disclaimer: string;
@@ -51,10 +115,24 @@ export interface ApplicableGapResult {
 }
 
 export interface RuleResolutionResult {
+  applicableSources: EvaluatedSourceResult[];
+  applicableRules: ApplicableRuleResult[];
+  excludedByTerritory: EvaluatedSourceResult[];
+  excludedByDate: EvaluatedSourceResult[];
+  historicalSources: EvaluatedSourceResult[];
+  supersededSources: EvaluatedSourceResult[];
+  partiallySupersededSources: EvaluatedSourceResult[];
+  pendingValiditySources: EvaluatedSourceResult[];
+  draftOrOngoingSources: EvaluatedSourceResult[];
+  caseSpecificSources: EvaluatedSourceResult[];
+  potentialConflicts: PotentialConflictResult[];
+  missingSources: MissingSourceResult[];
+  knownGaps: ApplicableGapResult[];
+  reasoningTrace: string[];
+  overallConfidence: ResolutionConfidence;
   disclaimer: string;
   humanReviewRequired: true;
+  professionalReviewBadge: "Verifica professionale richiesta";
   evaluatedAt: string;
   totalRulesEvaluated: number;
-  matchedRules: ApplicableRuleResult[];
-  relatedDocumentGaps: ApplicableGapResult[];
 }

@@ -94,9 +94,9 @@ export default async function NormativaOrchestrazionePage() {
                 <TableBody>
                   {sources.items.map((source) => (
                     <TableRow key={source.id}>
-                      <TableCell className="font-semibold text-slate-900">{source.sourceKey}</TableCell>
-                      <TableCell>{source.sourceType}</TableCell>
-                      <TableCell>{source.status}</TableCell>
+                      <TableCell className="font-semibold text-slate-900">{source.stableKey}</TableCell>
+                      <TableCell>{source.documentType}</TableCell>
+                      <TableCell>{source.status} / {source.role}</TableCell>
                       <TableCell>{source.rulesCount}</TableCell>
                     </TableRow>
                   ))}
