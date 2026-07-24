@@ -23,6 +23,46 @@ export * from './enums';
  */
 export type Ente = Prisma.EnteModel
 /**
+ * Model Authority
+ * 
+ */
+export type Authority = Prisma.AuthorityModel
+/**
+ * Model Port
+ * 
+ */
+export type Port = Prisma.PortModel
+/**
+ * Model PortArea
+ * 
+ */
+export type PortArea = Prisma.PortAreaModel
+/**
+ * Model ImportRun
+ * 
+ */
+export type ImportRun = Prisma.ImportRunModel
+/**
+ * Model LegalSource
+ * 
+ */
+export type LegalSource = Prisma.LegalSourceModel
+/**
+ * Model SourceRelation
+ * 
+ */
+export type SourceRelation = Prisma.SourceRelationModel
+/**
+ * Model LegalRule
+ * 
+ */
+export type LegalRule = Prisma.LegalRuleModel
+/**
+ * Model DocumentGap
+ * 
+ */
+export type DocumentGap = Prisma.DocumentGapModel
+/**
  * Model TenantMembership
  * 
  */

@@ -945,16 +945,8 @@ export type EnumTipologiaCriticitaFieldUpdateOperationsInput = {
   set?: $Enums.TipologiaCriticita
 }
 
-export type EnumGravitaCriticitaFieldUpdateOperationsInput = {
-  set?: $Enums.GravitaCriticita
-}
-
 export type EnumFonteCriticitaFieldUpdateOperationsInput = {
   set?: $Enums.FonteCriticita
-}
-
-export type NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput = {
-  set?: $Enums.Art47CodNavLettera | null
 }
 
 export type NullableEnumLivelloRischioDecadenzaFieldUpdateOperationsInput = {

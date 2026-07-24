@@ -519,3 +519,96 @@ export const EnteStato = {
 } as const
 
 export type EnteStato = (typeof EnteStato)[keyof typeof EnteStato]
+
+
+export const AuthorityLevel = {
+  UE: 'UE',
+  NAZIONALE: 'NAZIONALE',
+  REGIONALE: 'REGIONALE',
+  LOCALE: 'LOCALE',
+  ADSP: 'ADSP',
+  ALTRO: 'ALTRO'
+} as const
+
+export type AuthorityLevel = (typeof AuthorityLevel)[keyof typeof AuthorityLevel]
+
+
+export const LegalSourceType = {
+  LEGGE: 'LEGGE',
+  DECRETO: 'DECRETO',
+  REGOLAMENTO: 'REGOLAMENTO',
+  DELIBERA: 'DELIBERA',
+  ORDINANZA: 'ORDINANZA',
+  PIANO: 'PIANO',
+  PARERE: 'PARERE',
+  TARIFFA: 'TARIFFA',
+  PLANIMETRIA: 'PLANIMETRIA',
+  ALTRO: 'ALTRO'
+} as const
+
+export type LegalSourceType = (typeof LegalSourceType)[keyof typeof LegalSourceType]
+
+
+export const LegalSourceStatus = {
+  VIGENTE: 'VIGENTE',
+  SUPERATA: 'SUPERATA',
+  BOZZA: 'BOZZA'
+} as const
+
+export type LegalSourceStatus = (typeof LegalSourceStatus)[keyof typeof LegalSourceStatus]
+
+
+export const SourceRelationType = {
+  MODIFICA: 'MODIFICA',
+  ATTUA: 'ATTUA',
+  RICHIAMA: 'RICHIAMA',
+  DEROGA: 'DEROGA',
+  ALLEGA: 'ALLEGA',
+  COORDINA: 'COORDINA'
+} as const
+
+export type SourceRelationType = (typeof SourceRelationType)[keyof typeof SourceRelationType]
+
+
+export const LegalRuleCategory = {
+  TITOLO: 'TITOLO',
+  PROCEDURA: 'PROCEDURA',
+  CANONE: 'CANONE',
+  GARANZIA: 'GARANZIA',
+  DOCUMENTAZIONE: 'DOCUMENTAZIONE',
+  SUBINGRESSO: 'SUBINGRESSO',
+  SICUREZZA: 'SICUREZZA',
+  OCCUPAZIONE: 'OCCUPAZIONE',
+  ALTRO: 'ALTRO'
+} as const
+
+export type LegalRuleCategory = (typeof LegalRuleCategory)[keyof typeof LegalRuleCategory]
+
+
+export const LegalRuleStatus = {
+  ATTIVA: 'ATTIVA',
+  SUPERATA: 'SUPERATA',
+  BOZZA: 'BOZZA'
+} as const
+
+export type LegalRuleStatus = (typeof LegalRuleStatus)[keyof typeof LegalRuleStatus]
+
+
+export const DocumentGapStatus = {
+  APERTA: 'APERTA',
+  IN_GESTIONE: 'IN_GESTIONE',
+  RISOLTA: 'RISOLTA',
+  ARCHIVIATA: 'ARCHIVIATA'
+} as const
+
+export type DocumentGapStatus = (typeof DocumentGapStatus)[keyof typeof DocumentGapStatus]
+
+
+export const ImportRunStatus = {
+  IN_PROGRESS: 'IN_PROGRESS',
+  SUCCESS: 'SUCCESS',
+  PARTIAL: 'PARTIAL',
+  FAILED: 'FAILED'
+} as const
+
+export type ImportRunStatus = (typeof ImportRunStatus)[keyof typeof ImportRunStatus]

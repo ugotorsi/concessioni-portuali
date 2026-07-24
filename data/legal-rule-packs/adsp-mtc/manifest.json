@@ -1,0 +1,274 @@
+{
+  "packCode": "adsp-mtc-legal-pack",
+  "packVersion": "2026.07.24",
+  "tenantEnteCode": "DEMO-ENTE-ADSP",
+  "authority": {
+    "code": "ADSP-MTC",
+    "name": "Autorita di Sistema Portuale del Mar Tirreno Centrale",
+    "level": "ADSP"
+  },
+  "port": {
+    "code": "NAPOLI-SALERNO",
+    "name": "Sistema Portuale Napoli-Salerno"
+  },
+  "areas": [
+    {
+      "code": "NAPOLI",
+      "name": "Ambito Porto di Napoli"
+    },
+    {
+      "code": "SALERNO",
+      "name": "Ambito Porto di Salerno"
+    },
+    {
+      "code": "CASTELLAMMARE",
+      "name": "Ambito Castellammare di Stabia"
+    }
+  ],
+  "sources": [
+    {
+      "sourceKey": "DLB-2024-30-CANONI",
+      "title": "Regolamento canoni art. 18",
+      "sourceType": "DELIBERA",
+      "status": "VIGENTE",
+      "publicationDate": "2024-07-22T00:00:00.000Z",
+      "effectiveFrom": "2024-07-22T00:00:00.000Z",
+      "fileName": "delibera-CG-n.-30-del-22.07.2024-Regolamento-canoni-18.pdf",
+      "filePath": "delibera-CG-n.-30-del-22.07.2024-Regolamento-canoni-18.pdf"
+    },
+    {
+      "sourceKey": "ORD-2019-1-ART16",
+      "title": "Regolamento art. 16 ordinanza n. 1/2019",
+      "sourceType": "ORDINANZA",
+      "status": "VIGENTE",
+      "publicationDate": "2019-01-07T00:00:00.000Z",
+      "effectiveFrom": "2019-01-07T00:00:00.000Z",
+      "fileName": "Ordinanza-n.-1-del-07.01.2019-Regolamento-art.-16.pdf",
+      "filePath": "Ordinanza-n.-1-del-07.01.2019-Regolamento-art.-16.pdf"
+    },
+    {
+      "sourceKey": "DLB-2018-358-AREE",
+      "title": "Regolamento d uso delle aree demaniali marittime",
+      "sourceType": "DELIBERA",
+      "status": "VIGENTE",
+      "publicationDate": "2018-11-19T00:00:00.000Z",
+      "effectiveFrom": "2018-11-19T00:00:00.000Z",
+      "fileName": "delibera-n.-358-del-19.11.2018-Regolamento-duso-delle-aree-demaniali-marittime-AdSP-MTC-DEFINITIVO-1.pdf",
+      "filePath": "delibera-n.-358-del-19.11.2018-Regolamento-duso-delle-aree-demaniali-marittime-AdSP-MTC-DEFINITIVO-1.pdf"
+    },
+    {
+      "sourceKey": "POT-2023-2025-REV2024",
+      "title": "POT 2023-2025 revisione annuale 2024",
+      "sourceType": "PIANO",
+      "status": "VIGENTE",
+      "publicationDate": "2024-10-10T00:00:00.000Z",
+      "effectiveFrom": "2024-10-10T00:00:00.000Z",
+      "fileName": "POT-2023-2025-revisione-annuale-2024_OK-1.pdf",
+      "filePath": "POT-2023-2025-revisione-annuale-2024_OK-1.pdf"
+    },
+    {
+      "sourceKey": "TAR-2025-OP",
+      "title": "Tariffe anno 2025",
+      "sourceType": "TARIFFA",
+      "status": "VIGENTE",
+      "publicationDate": "2025-01-01T00:00:00.000Z",
+      "effectiveFrom": "2025-01-01T00:00:00.000Z",
+      "fileName": "Tariffe-Anno-2025-OP-1.pdf",
+      "filePath": "Tariffe-Anno-2025-OP-1.pdf"
+    },
+    {
+      "sourceKey": "GAR-2015-REQ",
+      "title": "Requisiti garanzia fideiussoria",
+      "sourceType": "REGOLAMENTO",
+      "status": "VIGENTE",
+      "publicationDate": "2015-09-01T00:00:00.000Z",
+      "effectiveFrom": "2015-09-01T00:00:00.000Z",
+      "fileName": "REQUISITI-GARANZIA-FIDEIUSSORIA-PER-AUTORITA-PORTUALE_sett2015.pdf",
+      "filePath": "REQUISITI-GARANZIA-FIDEIUSSORIA-PER-AUTORITA-PORTUALE_sett2015.pdf"
+    },
+    {
+      "sourceKey": "PAR-2026-51",
+      "title": "Parere n. 51/2026",
+      "sourceType": "PARERE",
+      "status": "VIGENTE",
+      "publicationDate": "2026-02-20T00:00:00.000Z",
+      "effectiveFrom": "2026-02-20T00:00:00.000Z",
+      "fileName": "Parere-n.-51_2026_signed.pdf",
+      "filePath": "Parere-n.-51_2026_signed.pdf"
+    },
+    {
+      "sourceKey": "PLN-NAP-CST-1",
+      "title": "Planimetria ambito Castellammare",
+      "sourceType": "PLANIMETRIA",
+      "status": "VIGENTE",
+      "publicationDate": "2024-06-18T00:00:00.000Z",
+      "effectiveFrom": "2024-06-18T00:00:00.000Z",
+      "fileName": "planimetria-c_di_stabia-1.jpg",
+      "filePath": "planimetria-c_di_stabia-1.jpg"
+    }
+  ],
+  "rules": [
+    {
+      "sourceKey": "DLB-2024-30-CANONI",
+      "ruleCode": "CAN-01",
+      "title": "Monitoraggio morosita canoni art. 18",
+      "summary": "In presenza di morosita e regime portuale, attivare istruttoria rafforzata con diffida.",
+      "category": "CANONE",
+      "status": "ATTIVA",
+      "priority": 10,
+      "matcher": {
+        "concessionVertical": "PORTUALE_ADSP",
+        "feeRegime": "PORTUALE",
+        "requiresMorosita": true
+      },
+      "outcome": {
+        "outputSeverity": "URGENTE",
+        "outcomeTitle": "Morosita rilevante",
+        "outcomeSummary": "Avviare diffida e piano rientro con verifica documentale periodica.",
+        "humanReviewRequired": true
+      }
+    },
+    {
+      "sourceKey": "GAR-2015-REQ",
+      "ruleCode": "GAR-01",
+      "title": "Controllo garanzia fideiussoria valida",
+      "summary": "Per concessioni attive con garanzia richiesta, bloccare avanzamento istruttorio senza evidenza valida.",
+      "category": "GARANZIA",
+      "status": "ATTIVA",
+      "priority": 20,
+      "matcher": {
+        "concessionVertical": "PORTUALE_ADSP",
+        "requiresPolizzaValida": false
+      },
+      "outcome": {
+        "outputSeverity": "ALTA",
+        "outcomeTitle": "Garanzia non valida",
+        "outcomeSummary": "Richiedere immediata integrazione fideiussoria prima di ulteriori passaggi.",
+        "humanReviewRequired": true
+      }
+    },
+    {
+      "sourceKey": "DLB-2018-358-AREE",
+      "ruleCode": "OCC-01",
+      "title": "Occupazione difforme su banchina",
+      "summary": "Per occupazione su banchina commerciale, imporre verifica tecnica e conformita planimetrica.",
+      "category": "OCCUPAZIONE",
+      "status": "ATTIVA",
+      "priority": 30,
+      "matcher": {
+        "concessionVertical": "PORTUALE_ADSP",
+        "concessionObjectType": "BANCHINA",
+        "attivita": "COMMERCIALE"
+      },
+      "outcome": {
+        "outputSeverity": "ALTA",
+        "outcomeTitle": "Occupazione da verificare",
+        "outcomeSummary": "Attivare sopralluogo con confronto planimetrico e relazione tecnica.",
+        "humanReviewRequired": true
+      }
+    },
+    {
+      "sourceKey": "ORD-2019-1-ART16",
+      "ruleCode": "SUB-01",
+      "title": "Subingresso non autorizzato",
+      "summary": "Se emerge rilevanza art. 47 lettera E, predisporre verifica su titolo legittimante.",
+      "category": "SUBINGRESSO",
+      "status": "ATTIVA",
+      "priority": 15,
+      "matcher": {
+        "requiresRilevanzaArt47": true,
+        "letteraArt47": "E_SUBINGRESSO_ABUSIVO"
+      },
+      "outcome": {
+        "outputSeverity": "URGENTE",
+        "outcomeTitle": "Potenziale subingresso abusivo",
+        "outcomeSummary": "Avviare istruttoria dedicata con richiesta documenti sul titolo di disponibilita.",
+        "humanReviewRequired": true
+      }
+    },
+    {
+      "sourceKey": "DLB-2024-30-CANONI",
+      "ruleCode": "PRO-01",
+      "title": "Comparativa art. 37 da avviare",
+      "summary": "Su procedure comparative da avviare, attivare checklist istruttoria per evidenza pubblica.",
+      "category": "PROCEDURA",
+      "status": "ATTIVA",
+      "priority": 40,
+      "matcher": {
+        "awardingProcedureType": "COMPARATIVA_ART37",
+        "comparativeProcedureStatus": "DA_AVVIARE"
+      },
+      "outcome": {
+        "outputSeverity": "MEDIA",
+        "outcomeTitle": "Procedura comparativa in avvio",
+        "outcomeSummary": "Completare checklist procedimentale e pubblicazione documenti essenziali.",
+        "humanReviewRequired": true
+      }
+    },
+    {
+      "sourceKey": "POT-2023-2025-REV2024",
+      "ruleCode": "DOC-01",
+      "title": "Presidio documentale strategico",
+      "summary": "Nei procedimenti portuali attivi mantenere set minimo documentale sempre aggiornato.",
+      "category": "DOCUMENTAZIONE",
+      "status": "ATTIVA",
+      "priority": 50,
+      "matcher": {
+        "concessionVertical": "PORTUALE_ADSP"
+      },
+      "outcome": {
+        "outputSeverity": "MEDIA",
+        "outcomeTitle": "Aggiornamento dossier",
+        "outcomeSummary": "Verificare completezza fascicolo su titolo, planimetria, pagamenti e garanzie.",
+        "humanReviewRequired": true
+      }
+    }
+  ],
+  "relations": [
+    {
+      "fromSourceKey": "DLB-2024-30-CANONI",
+      "toSourceKey": "TAR-2025-OP",
+      "relationType": "ATTUA",
+      "note": "La delibera canoni e attuata dal quadro tariffario annuale."
+    },
+    {
+      "fromSourceKey": "DLB-2018-358-AREE",
+      "toSourceKey": "PLN-NAP-CST-1",
+      "relationType": "ALLEGA"
+    },
+    {
+      "fromSourceKey": "PAR-2026-51",
+      "toSourceKey": "DLB-2024-30-CANONI",
+      "relationType": "RICHIAMA"
+    }
+  ],
+  "gaps": [
+    {
+      "gapKey": "GAP-CAN-2026-01",
+      "title": "Ricevute canone incomplete",
+      "description": "Mancano quietanze complete sulle ultime annualita rilevanti.",
+      "severity": "ALTA",
+      "status": "APERTA",
+      "requiredDocumentTypes": ["PAGAMENTO", "NOTA"],
+      "linkedRuleCode": "CAN-01"
+    },
+    {
+      "gapKey": "GAP-GAR-2026-01",
+      "title": "Fideiussione non aggiornata",
+      "description": "Assenza di documento fideiussorio coerente con importo canone corrente.",
+      "severity": "URGENTE",
+      "status": "APERTA",
+      "requiredDocumentTypes": ["FIDEIUSSIONE"],
+      "linkedRuleCode": "GAR-01"
+    },
+    {
+      "gapKey": "GAP-PLN-2026-01",
+      "title": "Planimetria non allineata",
+      "description": "La planimetria disponibile non riflette gli ultimi rilievi di campo.",
+      "severity": "MEDIA",
+      "status": "IN_GESTIONE",
+      "requiredDocumentTypes": ["PLANIMETRIA", "VERBALE"],
+      "linkedRuleCode": "OCC-01"
+    }
+  ]
+}

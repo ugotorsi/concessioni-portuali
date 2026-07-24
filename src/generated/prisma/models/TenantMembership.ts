@@ -415,10 +415,6 @@ export type EnumRuoloUserFieldUpdateOperationsInput = {
   set?: $Enums.RuoloUser
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type TenantMembershipCreateNestedManyWithoutUserInput = {
   create?: Prisma.XOR<Prisma.TenantMembershipCreateWithoutUserInput, Prisma.TenantMembershipUncheckedCreateWithoutUserInput> | Prisma.TenantMembershipCreateWithoutUserInput[] | Prisma.TenantMembershipUncheckedCreateWithoutUserInput[]
   connectOrCreate?: Prisma.TenantMembershipCreateOrConnectWithoutUserInput | Prisma.TenantMembershipCreateOrConnectWithoutUserInput[]

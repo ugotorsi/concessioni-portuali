@@ -52,6 +52,14 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Ente: 'Ente',
+  Authority: 'Authority',
+  Port: 'Port',
+  PortArea: 'PortArea',
+  ImportRun: 'ImportRun',
+  LegalSource: 'LegalSource',
+  SourceRelation: 'SourceRelation',
+  LegalRule: 'LegalRule',
+  DocumentGap: 'DocumentGap',
   TenantMembership: 'TenantMembership',
   User: 'User',
   Concessionario: 'Concessionario',
@@ -98,6 +106,159 @@ export const EnteScalarFieldEnum = {
 } as const
 
 export type EnteScalarFieldEnum = (typeof EnteScalarFieldEnum)[keyof typeof EnteScalarFieldEnum]
+
+
+export const AuthorityScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  level: 'level',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AuthorityScalarFieldEnum = (typeof AuthorityScalarFieldEnum)[keyof typeof AuthorityScalarFieldEnum]
+
+
+export const PortScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  enteId: 'enteId',
+  authorityId: 'authorityId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PortScalarFieldEnum = (typeof PortScalarFieldEnum)[keyof typeof PortScalarFieldEnum]
+
+
+export const PortAreaScalarFieldEnum = {
+  id: 'id',
+  portId: 'portId',
+  code: 'code',
+  name: 'name',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PortAreaScalarFieldEnum = (typeof PortAreaScalarFieldEnum)[keyof typeof PortAreaScalarFieldEnum]
+
+
+export const ImportRunScalarFieldEnum = {
+  id: 'id',
+  packCode: 'packCode',
+  packVersion: 'packVersion',
+  manifestPath: 'manifestPath',
+  status: 'status',
+  sourceCount: 'sourceCount',
+  ruleCount: 'ruleCount',
+  relationCount: 'relationCount',
+  gapCount: 'gapCount',
+  warnings: 'warnings',
+  errorMessage: 'errorMessage',
+  enteId: 'enteId',
+  authorityId: 'authorityId',
+  portId: 'portId',
+  startedAt: 'startedAt',
+  finishedAt: 'finishedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ImportRunScalarFieldEnum = (typeof ImportRunScalarFieldEnum)[keyof typeof ImportRunScalarFieldEnum]
+
+
+export const LegalSourceScalarFieldEnum = {
+  id: 'id',
+  sourceKey: 'sourceKey',
+  title: 'title',
+  sourceType: 'sourceType',
+  status: 'status',
+  publicationDate: 'publicationDate',
+  effectiveFrom: 'effectiveFrom',
+  effectiveTo: 'effectiveTo',
+  notes: 'notes',
+  fileName: 'fileName',
+  filePath: 'filePath',
+  fileChecksumSha256: 'fileChecksumSha256',
+  fileMimeType: 'fileMimeType',
+  fileSizeBytes: 'fileSizeBytes',
+  enteId: 'enteId',
+  authorityId: 'authorityId',
+  portId: 'portId',
+  importRunId: 'importRunId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LegalSourceScalarFieldEnum = (typeof LegalSourceScalarFieldEnum)[keyof typeof LegalSourceScalarFieldEnum]
+
+
+export const SourceRelationScalarFieldEnum = {
+  id: 'id',
+  fromSourceId: 'fromSourceId',
+  toSourceId: 'toSourceId',
+  relationType: 'relationType',
+  note: 'note',
+  createdAt: 'createdAt'
+} as const
+
+export type SourceRelationScalarFieldEnum = (typeof SourceRelationScalarFieldEnum)[keyof typeof SourceRelationScalarFieldEnum]
+
+
+export const LegalRuleScalarFieldEnum = {
+  id: 'id',
+  sourceId: 'sourceId',
+  ruleCode: 'ruleCode',
+  title: 'title',
+  summary: 'summary',
+  category: 'category',
+  status: 'status',
+  priority: 'priority',
+  enteId: 'enteId',
+  portId: 'portId',
+  matchConcessionVertical: 'matchConcessionVertical',
+  matchObjectType: 'matchObjectType',
+  matchAttivita: 'matchAttivita',
+  matchAwardingProcedure: 'matchAwardingProcedure',
+  matchFeeRegime: 'matchFeeRegime',
+  matchComparativeStatus: 'matchComparativeStatus',
+  requiresRilevanzaArt47: 'requiresRilevanzaArt47',
+  matchArt47Letter: 'matchArt47Letter',
+  requiresMorosita: 'requiresMorosita',
+  requiresPolizzaValida: 'requiresPolizzaValida',
+  outputSeverity: 'outputSeverity',
+  outcomeTitle: 'outcomeTitle',
+  outcomeSummary: 'outcomeSummary',
+  disclaimer: 'disclaimer',
+  humanReviewRequired: 'humanReviewRequired',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LegalRuleScalarFieldEnum = (typeof LegalRuleScalarFieldEnum)[keyof typeof LegalRuleScalarFieldEnum]
+
+
+export const DocumentGapScalarFieldEnum = {
+  id: 'id',
+  gapKey: 'gapKey',
+  title: 'title',
+  description: 'description',
+  severity: 'severity',
+  status: 'status',
+  requiredDocumentTypes: 'requiredDocumentTypes',
+  notes: 'notes',
+  humanReviewRequired: 'humanReviewRequired',
+  enteId: 'enteId',
+  portId: 'portId',
+  ruleId: 'ruleId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DocumentGapScalarFieldEnum = (typeof DocumentGapScalarFieldEnum)[keyof typeof DocumentGapScalarFieldEnum]
 
 
 export const TenantMembershipScalarFieldEnum = {
@@ -519,6 +680,14 @@ export const QueryMode = {
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
 export const JsonNullValueFilter = {
   DbNull: DbNull,
   JsonNull: JsonNull,
@@ -526,12 +695,4 @@ export const JsonNullValueFilter = {
 } as const
 
 export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
-
-
-export const NullsOrder = {
-  first: 'first',
-  last: 'last'
-} as const
-
-export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 

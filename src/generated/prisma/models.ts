@@ -9,6 +9,14 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/Ente'
+export type * from './models/Authority'
+export type * from './models/Port'
+export type * from './models/PortArea'
+export type * from './models/ImportRun'
+export type * from './models/LegalSource'
+export type * from './models/SourceRelation'
+export type * from './models/LegalRule'
+export type * from './models/DocumentGap'
 export type * from './models/TenantMembership'
 export type * from './models/User'
 export type * from './models/Concessionario'

@@ -1170,10 +1170,6 @@ export type EnumConcessionVerticalFieldUpdateOperationsInput = {
   set?: $Enums.ConcessionVertical
 }
 
-export type NullableEnumConcessionObjectTypeFieldUpdateOperationsInput = {
-  set?: $Enums.ConcessionObjectType | null
-}
-
 export type EnumAwardingProcedureTypeFieldUpdateOperationsInput = {
   set?: $Enums.AwardingProcedureType
 }

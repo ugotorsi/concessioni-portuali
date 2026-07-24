@@ -1244,14 +1244,6 @@ export type EnumOrigineProcedimentoFieldUpdateOperationsInput = {
   set?: $Enums.OrigineProcedimento
 }
 
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput = {
   set?: $Enums.EsitoIstruttorioProcedimento | null
 }

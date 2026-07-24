@@ -100,16 +100,22 @@ export default async function NormativaPage({ searchParams }: NormativaPageProps
       </section>
 
       <section className="mt-4">
-        {canManageNormativaUpdate(role) ? (
-          <div className="mb-4 flex justify-end">
+        <div className="mb-4 flex flex-wrap justify-end gap-2">
+          <Link
+            href="/normativa/orchestrazione"
+            className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-900 hover:bg-slate-50"
+          >
+            Orchestrazione regole
+          </Link>
+          {canManageNormativaUpdate(role) ? (
             <Link
               href="/normativa/aggiornamento"
               className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
             >
               Aggiornamento normativo
             </Link>
-          </div>
-        ) : null}
+          ) : null}
+        </div>
         <NormativaFiltersBar filtersData={filtersData} current={filters} />
       </section>
 

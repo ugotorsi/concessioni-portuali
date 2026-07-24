@@ -235,6 +235,25 @@ Nota transitoria: in sviluppo e mantenuto anche un fallback legacy ruolo/cookie 
 - Export CSV sui moduli operativi
 - PDF report istituzionale server-side (PDFKit) su route dedicate con layout professionale, sezioni standard e metadata documento
 
+## Legal sources taxonomy and orchestration (39C-3)
+- Nuovo sottosistema tecnico per tassonomia fonti legali e orchestrazione regole applicabili.
+- Modelli dedicati: Authority, Port, PortArea, LegalSource, LegalRule, SourceRelation, DocumentGap, ImportRun.
+- Import pack idempotente da manifest locale:
+   - `npm run legal:import:adsp-mtc`
+   - manifest: `data/legal-rule-packs/adsp-mtc/manifest.json`
+- API protette:
+   - `GET /api/legal-sources`
+   - `POST /api/legal-rules/resolve`
+- UI dedicata:
+   - `/normativa/orchestrazione`
+- Presidio obbligatorio:
+   - output assistivo, non decisorio;
+   - `humanReviewRequired=true` in ogni risposta orchestratore;
+   - disclaimer legale sempre presente.
+
+Documentazione tecnica estesa:
+- `docs/LEGAL_SOURCES_TAXONOMY_ORCHESTRATION.md`
+
 ## Scenari demo istituzionali (Issue #17)
 - Nuova pagina dedicata: `/demo-scenari`.
 - Finalità: raccontare casi istruttori realistici in contesto PA/AdSP senza automatismi decisori.

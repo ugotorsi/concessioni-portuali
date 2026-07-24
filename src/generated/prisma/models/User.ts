@@ -674,22 +674,6 @@ export type UserUpdateOneRequiredWithoutTenantMembershipsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutTenantMembershipsInput, Prisma.UserUpdateWithoutTenantMembershipsInput>, Prisma.UserUncheckedUpdateWithoutTenantMembershipsInput>
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type UserCreateNestedOneWithoutDocumentiCaricatiInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentiCaricatiInput, Prisma.UserUncheckedCreateWithoutDocumentiCaricatiInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentiCaricatiInput

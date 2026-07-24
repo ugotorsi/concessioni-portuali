@@ -387,6 +387,75 @@ enum EnteStato {
   DISATTIVATO
 }
 
+enum AuthorityLevel {
+  UE
+  NAZIONALE
+  REGIONALE
+  LOCALE
+  ADSP
+  ALTRO
+}
+
+enum LegalSourceType {
+  LEGGE
+  DECRETO
+  REGOLAMENTO
+  DELIBERA
+  ORDINANZA
+  PIANO
+  PARERE
+  TARIFFA
+  PLANIMETRIA
+  ALTRO
+}
+
+enum LegalSourceStatus {
+  VIGENTE
+  SUPERATA
+  BOZZA
+}
+
+enum SourceRelationType {
+  MODIFICA
+  ATTUA
+  RICHIAMA
+  DEROGA
+  ALLEGA
+  COORDINA
+}
+
+enum LegalRuleCategory {
+  TITOLO
+  PROCEDURA
+  CANONE
+  GARANZIA
+  DOCUMENTAZIONE
+  SUBINGRESSO
+  SICUREZZA
+  OCCUPAZIONE
+  ALTRO
+}
+
+enum LegalRuleStatus {
+  ATTIVA
+  SUPERATA
+  BOZZA
+}
+
+enum DocumentGapStatus {
+  APERTA
+  IN_GESTIONE
+  RISOLTA
+  ARCHIVIATA
+}
+
+enum ImportRunStatus {
+  IN_PROGRESS
+  SUCCESS
+  PARTIAL
+  FAILED
+}
+
 model Ente {
   id          String             @id @default(cuid())
   nome        String
@@ -400,9 +469,226 @@ model Ente {
   report      Report[]
   activityLog ActivityLog[]
   memberships TenantMembership[]
+  ports       Port[]
+  legalSources LegalSource[]
+  legalRules  LegalRule[]
+  documentGaps DocumentGap[]
+  importRuns  ImportRun[]
 
   @@index([tipo])
   @@index([stato])
+  @@index([createdAt])
+}
+
+model Authority {
+  id        String         @id @default(cuid())
+  code      String         @unique
+  name      String
+  level     AuthorityLevel @default(ALTRO)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  ports      Port[]
+  legalSources LegalSource[]
+  importRuns ImportRun[]
+
+  @@index([level])
+  @@index([createdAt])
+}
+
+model Port {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  enteId      String?
+  authorityId String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  ente       Ente?      @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  authority  Authority? @relation(fields: [authorityId], references: [id], onDelete: SetNull)
+  areas      PortArea[]
+  legalSources LegalSource[]
+  legalRules LegalRule[]
+  documentGaps DocumentGap[]
+  importRuns ImportRun[]
+
+  @@index([enteId])
+  @@index([authorityId])
+  @@index([createdAt])
+}
+
+model PortArea {
+  id        String   @id @default(cuid())
+  portId    String
+  code      String
+  name      String
+  note      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  port Port @relation(fields: [portId], references: [id], onDelete: Cascade)
+
+  @@unique([portId, code])
+  @@index([portId])
+  @@index([createdAt])
+}
+
+model ImportRun {
+  id            String         @id @default(cuid())
+  packCode      String
+  packVersion   String
+  manifestPath  String
+  status        ImportRunStatus @default(IN_PROGRESS)
+  sourceCount   Int            @default(0)
+  ruleCount     Int            @default(0)
+  relationCount Int            @default(0)
+  gapCount      Int            @default(0)
+  warnings      Json?
+  errorMessage  String?
+  enteId        String?
+  authorityId   String?
+  portId        String?
+  startedAt     DateTime       @default(now())
+  finishedAt    DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  ente       Ente?      @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  authority  Authority? @relation(fields: [authorityId], references: [id], onDelete: SetNull)
+  port       Port?      @relation(fields: [portId], references: [id], onDelete: SetNull)
+  legalSources LegalSource[]
+
+  @@index([packCode])
+  @@index([status])
+  @@index([enteId])
+  @@index([createdAt])
+}
+
+model LegalSource {
+  id               String            @id @default(cuid())
+  sourceKey        String            @unique
+  title            String
+  sourceType       LegalSourceType
+  status           LegalSourceStatus @default(VIGENTE)
+  publicationDate  DateTime?
+  effectiveFrom    DateTime?
+  effectiveTo      DateTime?
+  notes            String?
+  fileName         String?
+  filePath         String?
+  fileChecksumSha256 String?
+  fileMimeType     String?
+  fileSizeBytes    Int?
+  enteId           String?
+  authorityId      String?
+  portId           String?
+  importRunId      String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  ente       Ente?      @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  authority  Authority? @relation(fields: [authorityId], references: [id], onDelete: SetNull)
+  port       Port?      @relation(fields: [portId], references: [id], onDelete: SetNull)
+  importRun  ImportRun? @relation(fields: [importRunId], references: [id], onDelete: SetNull)
+  rules      LegalRule[]
+  outgoingRelations SourceRelation[] @relation("SourceRelationFrom")
+  incomingRelations SourceRelation[] @relation("SourceRelationTo")
+
+  @@index([sourceType])
+  @@index([status])
+  @@index([enteId])
+  @@index([portId])
+  @@index([effectiveFrom])
+  @@index([createdAt])
+}
+
+model SourceRelation {
+  id            String             @id @default(cuid())
+  fromSourceId  String
+  toSourceId    String
+  relationType  SourceRelationType
+  note          String?
+  createdAt     DateTime           @default(now())
+
+  fromSource LegalSource @relation("SourceRelationFrom", fields: [fromSourceId], references: [id], onDelete: Cascade)
+  toSource   LegalSource @relation("SourceRelationTo", fields: [toSourceId], references: [id], onDelete: Cascade)
+
+  @@unique([fromSourceId, toSourceId, relationType])
+  @@index([fromSourceId])
+  @@index([toSourceId])
+  @@index([relationType])
+}
+
+model LegalRule {
+  id                        String                   @id @default(cuid())
+  sourceId                  String
+  ruleCode                  String
+  title                     String
+  summary                   String
+  category                  LegalRuleCategory
+  status                    LegalRuleStatus          @default(ATTIVA)
+  priority                  Int                      @default(100)
+  enteId                    String?
+  portId                    String?
+  matchConcessionVertical   ConcessionVertical?
+  matchObjectType           ConcessionObjectType?
+  matchAttivita             AttivitaConcessione?
+  matchAwardingProcedure    AwardingProcedureType?
+  matchFeeRegime            FeeRegime?
+  matchComparativeStatus    ComparativeProcedureStatus?
+  requiresRilevanzaArt47    Boolean?
+  matchArt47Letter          Art47CodNavLettera?
+  requiresMorosita          Boolean?
+  requiresPolizzaValida     Boolean?
+  outputSeverity            GravitaCriticita         @default(MEDIA)
+  outcomeTitle              String
+  outcomeSummary            String
+  disclaimer                String?
+  humanReviewRequired       Boolean                  @default(true)
+  createdAt                 DateTime                 @default(now())
+  updatedAt                 DateTime                 @updatedAt
+
+  source       LegalSource  @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  ente         Ente?        @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  port         Port?        @relation(fields: [portId], references: [id], onDelete: SetNull)
+  documentGaps DocumentGap[]
+
+  @@unique([sourceId, ruleCode])
+  @@index([status])
+  @@index([category])
+  @@index([priority])
+  @@index([enteId])
+  @@index([portId])
+  @@index([matchConcessionVertical])
+  @@index([createdAt])
+}
+
+model DocumentGap {
+  id                    String            @id @default(cuid())
+  gapKey                String            @unique
+  title                 String
+  description           String
+  severity              GravitaCriticita  @default(MEDIA)
+  status                DocumentGapStatus @default(APERTA)
+  requiredDocumentTypes Json?
+  notes                 String?
+  humanReviewRequired   Boolean           @default(true)
+  enteId                String?
+  portId                String?
+  ruleId                String?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  ente Ente?      @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  port Port?      @relation(fields: [portId], references: [id], onDelete: SetNull)
+  rule LegalRule? @relation(fields: [ruleId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([severity])
+  @@index([enteId])
+  @@index([portId])
+  @@index([ruleId])
   @@index([createdAt])
 }
 
