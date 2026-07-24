@@ -1,6 +1,13 @@
 import { expect, test } from "playwright/test";
 import { loginAndExpectLanding } from "./helpers/auth";
 
+function normalizeTitle(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
 async function pauseDemoAndOpenModule(page: import("playwright/test").Page, expectedUrl: RegExp) {
   for (let attempt = 0; attempt < 3; attempt += 1) {
     const pauseButton = page.getByTestId("guided-demo-action-pause-open");
@@ -14,7 +21,7 @@ async function pauseDemoAndOpenModule(page: import("playwright/test").Page, expe
 
     await Promise.all([
       page.waitForURL(expectedUrl, { timeout: 5000 }).catch(() => null),
-      pauseButton.click({ timeout: 5000 }),
+      pauseButton.click({ timeout: 5000 }).catch(async () => pauseButton.click({ timeout: 5000, force: true })),
     ]);
 
     if (expectedUrl.test(page.url())) {
@@ -26,7 +33,7 @@ async function pauseDemoAndOpenModule(page: import("playwright/test").Page, expe
     if (await actionLink.isVisible().catch(() => false)) {
       await Promise.all([
         page.waitForURL(expectedUrl, { timeout: 5000 }).catch(() => null),
-        actionLink.click({ timeout: 5000 }),
+        actionLink.click({ timeout: 5000 }).catch(async () => actionLink.click({ timeout: 5000, force: true })),
       ]);
       if (expectedUrl.test(page.url())) {
         return;
@@ -40,9 +47,12 @@ async function pauseDemoAndOpenModule(page: import("playwright/test").Page, expe
 }
 
 async function goToSlideWithTitle(page: import("playwright/test").Page, title: string) {
+  const expected = normalizeTitle(title);
+  const currentTitleLocator = page.getByTestId("guided-demo-current-title");
+
   for (let attempt = 0; attempt < 35; attempt += 1) {
-    const currentTitle = (await page.getByTestId("guided-demo-current-title").textContent()) ?? "";
-    if (currentTitle.includes(title)) {
+    const currentTitle = ((await currentTitleLocator.textContent()) ?? "").trim();
+    if (normalizeTitle(currentTitle).includes(expected)) {
       return;
     }
 
@@ -51,7 +61,15 @@ async function goToSlideWithTitle(page: import("playwright/test").Page, title: s
       break;
     }
 
+    await expect(nextButton).toBeEnabled();
     await nextButton.click();
+
+    await expect
+      .poll(
+        async () => ((await currentTitleLocator.textContent()) ?? "").trim(),
+        { timeout: 5000 },
+      )
+      .not.toBe(currentTitle);
   }
 
   throw new Error(`Slide non trovata: ${title}`);

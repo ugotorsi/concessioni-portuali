@@ -4,15 +4,16 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { loginAndExpectLanding } from "./helpers/auth";
 
-test("admin uploads and downloads a fascicolo document", async ({ page }) => {
+test("admin uploads and downloads a fascicolo document", async ({ page }, testInfo) => {
   await loginAndExpectLanding(page, "admin@demo.local", "admin123", /\/dashboard$/);
 
   await page.goto("/documenti");
   await expect(page.getByRole("heading", { name: "Fascicolo documentale" }).first()).toBeVisible();
 
+  const uniqueToken = `${Date.now()}-w${testInfo.workerIndex}-r${testInfo.retry}`;
   const tmpDir = await mkdtemp(path.join(tmpdir(), "cp-doc-e2e-"));
-  const filePath = path.join(tmpDir, "verbale-upload-e2e.txt");
-  const uniqueTitle = `Verbale upload E2E ${Date.now()}`;
+  const filePath = path.join(tmpDir, `verbale-upload-e2e-${uniqueToken}.txt`);
+  const uniqueTitle = `Verbale upload E2E ${uniqueToken}`;
   await writeFile(filePath, "Documento E2E baseline fascicolo");
 
   const uploadForm = page.locator("form", {
@@ -30,9 +31,27 @@ test("admin uploads and downloads a fascicolo document", async ({ page }) => {
   await uploadForm.locator('input[name="dataProtocollo"]').fill("2026-03-10");
   await uploadForm.locator('input[name="pecMessageId"]').fill(`<e2e-${Date.now()}@pec.demo>`);
   await uploadForm.locator('input[name="pecRicevutaAccettazioneId"]').fill("ACC-E2E-001");
-  await uploadForm.locator('select[name="concessioneId"]').selectOption({ index: 1 });
+
+  const concessioneSelect = uploadForm.locator('select[name="concessioneId"]');
+  const concessioneId = await concessioneSelect.evaluate((selectElement) => {
+    const options = Array.from((selectElement as HTMLSelectElement).options);
+    const firstUsable = options.find((option) => option.value.trim().length > 0);
+    return firstUsable?.value ?? "";
+  });
+  expect(concessioneId).not.toBe("");
+  await concessioneSelect.selectOption(concessioneId);
+
   await Promise.all([
-    page.waitForResponse((response) => response.request().method() === "POST"),
+    page.waitForResponse(
+      (response) => {
+        if (response.request().method() !== "POST") {
+          return false;
+        }
+        const url = new URL(response.url());
+        return url.pathname === "/documenti";
+      },
+      { timeout: 20000 },
+    ),
     uploadForm.getByRole("button", { name: "Carica documento" }).click(),
   ]);
 

@@ -4,7 +4,7 @@ export default defineConfig({
   testDir: "tests/e2e",
   timeout: 60_000,
   retries: process.env.CI ? 1 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI ? 1 : 4,
   reporter: [["list"], ["html", { open: "never" }]],
   expect: {
     timeout: 10_000,
@@ -20,5 +20,8 @@ export default defineConfig({
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    env: {
+      NEXTAUTH_URL: "http://localhost:3000",
+    },
   },
 });

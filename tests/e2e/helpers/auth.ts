@@ -6,31 +6,19 @@ export async function loginAndExpectLanding(
   password: string,
   expectedLanding: RegExp,
 ) {
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    const reachedLogin = await page
-      .goto("/login", { waitUntil: "domcontentloaded", timeout: 15000 })
-      .then(() => true)
-      .catch(() => false);
+  const authErrorMessage = "Credenziali non valide o account temporaneamente bloccato.";
 
-    if (!reachedLogin) {
-      await page.waitForTimeout(300);
-      continue;
-    }
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await page.context().clearCookies();
+    await page.goto("/login", { waitUntil: "domcontentloaded", timeout: 20000 });
 
     const emailInput = page.getByTestId("login-email");
     const passwordInput = page.getByTestId("login-password");
     const submitButton = page.getByTestId("login-submit");
-    const loginFormReady = await emailInput.isVisible({ timeout: 5000 }).catch(() => false);
 
-    if (!loginFormReady) {
-      if (expectedLanding.test(page.url())) {
-        return;
-      }
-
-      await page.goto("/logout").catch(() => null);
-      await page.waitForTimeout(250);
-      continue;
-    }
+    await expect(emailInput).toBeVisible({ timeout: 10000 });
+    await expect(passwordInput).toBeVisible({ timeout: 10000 });
+    await expect(submitButton).toBeVisible({ timeout: 10000 });
 
     await emailInput.fill(email);
     await passwordInput.fill(password);
@@ -46,12 +34,18 @@ export async function loginAndExpectLanding(
       submitButton.click(),
     ]);
 
-    try {
-      await expect(page).toHaveURL(expectedLanding, { timeout: 10000 });
+    const landed = await page
+      .waitForURL(expectedLanding, { timeout: 15000 })
+      .then(() => true)
+      .catch(() => false);
+
+    if (landed) {
       return;
-    } catch {
-      // Retry transient login/redirect failures seen under parallel E2E load.
-      await page.waitForTimeout(500);
+    }
+
+    const hasAuthError = await page.getByText(authErrorMessage).isVisible().catch(() => false);
+    if (hasAuthError) {
+      throw new Error(`Login rejected for user ${email}.`);
     }
   }
 
