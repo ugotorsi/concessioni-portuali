@@ -11,6 +11,20 @@ export interface InvestorDemoModuleItem {
   note: string;
 }
 
+export interface InvestorDemoLinkItem {
+  label: string;
+  href: string;
+  description?: string;
+}
+
+export interface InvestorDemoVerticalItem {
+  slug: string;
+  title: string;
+  subtitle: string;
+  bullets: string[];
+  links: InvestorDemoLinkItem[];
+}
+
 export const investorDemoIdentity: InvestorDemoIdentity = {
   userName: "Demo Investitore",
   organization: "Ambiente dimostrativo",
@@ -58,6 +72,100 @@ export const investorDemoNormativa: InvestorDemoModuleItem[] = [
   { title: "Fonte demo N-02", status: "In presidio", note: "Fonte simulata con collegamento procedurale" },
   { title: "Fonte demo N-03", status: "In osservazione", note: "Possibile impatto istruttorio" },
 ];
+
+export const investorDemoPrimaryLinks: InvestorDemoLinkItem[] = [
+  { label: "Dashboard", href: "/dashboard" },
+  { label: "Demo", href: "/demo" },
+  { label: "Verticali", href: "/verticali" },
+  { label: "Concessioni", href: "/concessioni" },
+  { label: "Procedimenti", href: "/procedimenti" },
+  { label: "Documenti", href: "/documenti" },
+  { label: "Scadenze", href: "/scadenze" },
+  { label: "Normativa", href: "/normativa" },
+  { label: "Orchestrazione", href: "/normativa/orchestrazione" },
+];
+
+export const investorDemoPageSections = [
+  {
+    title: "Panoramica prodotto",
+    body: "Piattaforma dimostrativa per governo istruttorio concessorio con dataset simulato e nessun effetto amministrativo.",
+  },
+  {
+    title: "Flusso istruttorio",
+    body: "Tracciamento passaggi da segnalazione a report, con supervisione umana e verifica professionale obbligatoria.",
+  },
+  {
+    title: "Monitoraggio concessioni",
+    body: "Viste aggregate su titoli, obblighi, canoni e scadenze per presidio operativo del portafoglio concessorio.",
+  },
+  {
+    title: "Gestione documentale",
+    body: "Classificazione, tracciamento aggiornamenti e collegamento ai moduli procedimentali su contenuti fittizi.",
+  },
+  {
+    title: "Scadenze",
+    body: "Agenda dimostrativa degli adempimenti prioritari, con evidenze temporali e alert sintetici simulati.",
+  },
+  {
+    title: "Motore normativo",
+    body: "Orchestrazione assistita di fonti applicabili, conflitti e gap documentali con confidence dichiarata.",
+  },
+];
+
+export const investorDemoVerticals: InvestorDemoVerticalItem[] = [
+  {
+    slug: "concessioni",
+    title: "Concessioni portuali",
+    subtitle: "Presidio operativo su titoli e adempimenti concessori",
+    bullets: [
+      "Monitoraggio titoli",
+      "Scadenze",
+      "Canoni",
+      "Obblighi",
+      "Procedimenti",
+    ],
+    links: [
+      { label: "Apri Concessioni", href: "/concessioni" },
+      { label: "Apri Procedimenti", href: "/procedimenti" },
+      { label: "Apri Scadenze", href: "/scadenze" },
+    ],
+  },
+  {
+    slug: "normativa",
+    title: "Fonti normative",
+    subtitle: "Lettura assistita delle fonti e dei relativi impatti",
+    bullets: [
+      "Tassonomia",
+      "Fonti applicabili",
+      "Conflitti",
+      "Gap documentali",
+      "Verifica professionale",
+    ],
+    links: [
+      { label: "Apri Normativa", href: "/normativa" },
+      { label: "Apri Orchestrazione", href: "/normativa/orchestrazione" },
+    ],
+  },
+  {
+    slug: "documentale",
+    title: "Gestione documentale",
+    subtitle: "Classificazione e ricerca su fascicoli simulati",
+    bullets: [
+      "Classificazione",
+      "Versioni",
+      "Ricerca",
+      "Collegamento ai procedimenti",
+    ],
+    links: [
+      { label: "Apri Documenti", href: "/documenti" },
+      { label: "Apri Procedimenti", href: "/procedimenti" },
+    ],
+  },
+];
+
+export function getInvestorDemoVerticalBySlug(slug: string): InvestorDemoVerticalItem | null {
+  return investorDemoVerticals.find((item) => item.slug === slug) ?? null;
+}
 
 export const investorDemoOrchestration = {
   authority: "AdSP Mar Tirreno Centrale",

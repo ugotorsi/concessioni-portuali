@@ -14,6 +14,8 @@ import {
   TableRow,
 } from "@/components/ui/Table";
 import { requireRole } from "@/lib/auth";
+import { isInvestorDemoMode } from "@/lib/investor-demo";
+import { getInvestorDemoVerticalBySlug } from "@/lib/investor-demo-data";
 import { formatDateIT } from "@/lib/utils";
 import { getVerticaleWorkspaceBySlug } from "@/server/queries/verticali";
 
@@ -24,8 +26,60 @@ interface VerticaleWorkspacePageProps {
 export const dynamic = "force-dynamic";
 
 export default async function VerticaleWorkspacePage({ params }: VerticaleWorkspacePageProps) {
-  await requireRole();
   const { verticale } = await params;
+
+  if (isInvestorDemoMode()) {
+    const normalizedSlug = verticale === "concessioni-portuali" ? "concessioni" : verticale;
+    const data = getInvestorDemoVerticalBySlug(normalizedSlug);
+
+    if (!data) {
+      notFound();
+    }
+
+    return (
+      <AppShell title={data.title} subtitle={data.subtitle}>
+        <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-4" data-testid="investor-demo-verticale-detail">
+          <Card>
+            <CardHeader>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <CardTitle>{data.title}</CardTitle>
+                  <CardDescription>{data.subtitle}</CardDescription>
+                </div>
+                <Badge variant="success">Demo statica</Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700">
+                {data.bullets.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+              <div className="flex flex-wrap gap-2">
+                <Link
+                  href="/verticali"
+                  className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
+                >
+                  Torna alle verticali
+                </Link>
+                {data.links.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </AppShell>
+    );
+  }
+
+  await requireRole();
   const data = await getVerticaleWorkspaceBySlug(verticale);
 
   if (!data) {

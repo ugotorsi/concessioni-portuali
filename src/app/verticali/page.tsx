@@ -3,12 +3,73 @@ import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { isInvestorDemoMode } from "@/lib/investor-demo";
+import { investorDemoVerticals } from "@/lib/investor-demo-data";
 import { requireRole } from "@/lib/auth";
 import { getVerticaliOverview } from "@/server/queries/verticali";
 
 export const dynamic = "force-dynamic";
 
 export default async function VerticaliPage() {
+  if (isInvestorDemoMode()) {
+    return (
+      <AppShell
+        title="Verticali"
+        subtitle="Percorsi dimostrativi verticali su dataset statico"
+      >
+        <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-4" data-testid="investor-demo-verticali">
+          <Card>
+            <CardHeader>
+              <CardTitle>Verticali dimostrative</CardTitle>
+              <CardDescription>
+                In modalita investitore ogni verticale e rappresentata con contenuti statici e link applicativi sicuri.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {investorDemoVerticals.map((verticale) => (
+              <Card key={verticale.slug}>
+                <CardHeader>
+                  <div className="flex items-center justify-between gap-3">
+                    <CardTitle className="text-lg">{verticale.title}</CardTitle>
+                    <Badge variant="success">Demo statica</Badge>
+                  </div>
+                  <CardDescription>{verticale.subtitle}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700">
+                    {verticale.bullets.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+
+                  <div className="flex flex-wrap gap-2">
+                    <Link
+                      href={`/verticali/${verticale.slug}`}
+                      className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
+                    >
+                      Apri verticale
+                    </Link>
+                    {verticale.links.map((item) => (
+                      <Link
+                        key={`${verticale.slug}-${item.href}`}
+                        href={item.href}
+                        className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </section>
+        </div>
+      </AppShell>
+    );
+  }
+
   await requireRole();
   const verticali = await getVerticaliOverview();
 

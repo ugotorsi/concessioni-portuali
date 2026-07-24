@@ -27,6 +27,8 @@ describe("investor demo mode helpers", () => {
 
   it("matches only allowed demo routes", () => {
     expect(isInvestorDemoRoute("/dashboard")).toBe(true);
+    expect(isInvestorDemoRoute("/demo")).toBe(true);
+    expect(isInvestorDemoRoute("/verticali")).toBe(true);
     expect(isInvestorDemoRoute("/normativa/orchestrazione")).toBe(true);
     expect(isInvestorDemoRoute("/documenti/abc")).toBe(true);
 

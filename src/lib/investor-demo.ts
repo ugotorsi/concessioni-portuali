@@ -2,6 +2,8 @@ export const INVESTOR_DEMO_MODE_ENV_KEY = "INVESTOR_DEMO_MODE";
 
 const DEMO_ROUTE_PREFIXES = [
   "/dashboard",
+  "/demo",
+  "/verticali",
   "/concessioni",
   "/procedimenti",
   "/documenti",

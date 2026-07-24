@@ -94,10 +94,13 @@ export default async function DashboardPage() {
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
               <Link href="/concessioni" className="inline-flex h-10 items-center rounded-md border border-slate-300 px-3 text-sm font-medium hover:bg-slate-100">Concessioni</Link>
+              <Link href="/demo" className="inline-flex h-10 items-center rounded-md border border-slate-300 px-3 text-sm font-medium hover:bg-slate-100">Demo</Link>
+              <Link href="/verticali" className="inline-flex h-10 items-center rounded-md border border-slate-300 px-3 text-sm font-medium hover:bg-slate-100">Verticali</Link>
               <Link href="/procedimenti" className="inline-flex h-10 items-center rounded-md border border-slate-300 px-3 text-sm font-medium hover:bg-slate-100">Procedimenti</Link>
               <Link href="/documenti" className="inline-flex h-10 items-center rounded-md border border-slate-300 px-3 text-sm font-medium hover:bg-slate-100">Documenti</Link>
               <Link href="/scadenze" className="inline-flex h-10 items-center rounded-md border border-slate-300 px-3 text-sm font-medium hover:bg-slate-100">Scadenze</Link>
               <Link href="/normativa" className="inline-flex h-10 items-center rounded-md bg-slate-900 px-3 text-sm font-medium text-white hover:bg-slate-800">Normativa</Link>
+              <Link href="/normativa/orchestrazione" className="inline-flex h-10 items-center rounded-md border border-slate-300 px-3 text-sm font-medium hover:bg-slate-100">Orchestrazione</Link>
             </CardContent>
           </Card>
         </section>

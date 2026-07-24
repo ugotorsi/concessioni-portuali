@@ -6,8 +6,10 @@ import {
   investorDemoDocumenti,
   investorDemoNormativa,
   investorDemoOrchestration,
+  investorDemoPrimaryLinks,
   investorDemoProcedimenti,
   investorDemoScadenze,
+  investorDemoVerticals,
 } from "@/lib/investor-demo-data";
 
 function flattenStrings(input: unknown): string {
@@ -35,8 +37,17 @@ describe("investor demo fixtures", () => {
     expect(investorDemoDocumenti.length).toBeGreaterThan(0);
     expect(investorDemoScadenze.length).toBeGreaterThan(0);
     expect(investorDemoNormativa.length).toBeGreaterThan(0);
+    expect(investorDemoVerticals.length).toBeGreaterThanOrEqual(3);
+    expect(investorDemoPrimaryLinks.length).toBeGreaterThanOrEqual(8);
     expect(investorDemoDashboard.porti.length).toBe(3);
     expect(investorDemoOrchestration.reasoningTrace.length).toBeGreaterThan(0);
+  });
+
+  it("contains required vertical slugs for demo navigation", () => {
+    const slugs = investorDemoVerticals.map((item) => item.slug);
+
+    expect(slugs).toContain("concessioni");
+    expect(slugs).toContain("normativa");
   });
 
   it("does not include direct personal contact details", () => {
