@@ -38,12 +38,17 @@ Contenuti:
 ## Importer
 Script:
 - `npm run legal:import:adsp-mtc`
+- `npm run db:normalize:legal-status:dry-run`
+- `npm run db:normalize:legal-status`
 
 Comportamento:
 - valida manifest con schema `zod`;
 - calcola checksum SHA-256 e size dei file presenti;
 - in caso di file mancanti registra warning e continua (stato `PARTIAL`);
 - aggiorna `ImportRun` con conteggi e timestamp.
+
+Prerequisito DB (dataset legacy):
+- se nel DB sono presenti stati legacy `VIGENTE`, `SUPERATA`, `BOZZA`, eseguire prima la normalizzazione versionata (`dry-run` e poi run reale) prima di `prisma db push`.
 
 ## Orchestratore
 Servizio:

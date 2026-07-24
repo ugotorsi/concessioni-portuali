@@ -19,6 +19,8 @@
     "cloud:check": "npm run test && npm run build && npm run check",
     "cloud:prepare-db": "npm run db:push && npm run db:seed",
     "legal:import:adsp-mtc": "tsx src/server/legal-rules/cli/import-adsp-mtc.ts",
+    "db:normalize:legal-status": "tsx scripts/db/normalize-legal-source-status.ts",
+    "db:normalize:legal-status:dry-run": "tsx scripts/db/normalize-legal-source-status.ts --dry-run",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
     "db:generate": "prisma generate",

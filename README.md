@@ -36,9 +36,15 @@ Posizionamento attuale:
 ## Prisma
 Comandi principali:
 - `npm run db:generate`
+- `npm run db:normalize:legal-status:dry-run`
+- `npm run db:normalize:legal-status`
 - `npm run db:push`
 - `npm run db:seed`
 - `npm run db:studio`
+
+Normalizzazione enum legacy `LegalSourceStatus` (39C-3):
+- mapping: `VIGENTE -> CURRENT_SUBJECT_TO_REVIEW`, `SUPERATA -> SUPERSEDED`, `BOZZA -> DRAFT_OR_ONGOING_PROCEDURE`;
+- eseguire prima `db:normalize:legal-status:dry-run` e poi `db:normalize:legal-status` prima di `db:push` quando il DB contiene dati storici.
 
 ## Comandi principali progetto
 - `npm run dev`
