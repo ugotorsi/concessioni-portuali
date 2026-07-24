@@ -1,6 +1,8 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { investorDemoIdentity } from "@/lib/investor-demo-data";
+import { isInvestorDemoMode } from "@/lib/investor-demo";
 import { getAuthSession } from "@/lib/next-auth";
 
 export const DEMO_ROLES = [
@@ -40,6 +42,10 @@ function isDemoRole(value: string | undefined): value is DemoRole {
 }
 
 export async function getCurrentRole(): Promise<DemoRole | null> {
+  if (isInvestorDemoMode()) {
+    return "ADMIN";
+  }
+
   const session = await getAuthSession();
   const sessionRole = session?.user?.role;
 
@@ -61,6 +67,15 @@ export async function getCurrentRole(): Promise<DemoRole | null> {
 }
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
+  if (isInvestorDemoMode()) {
+    return {
+      id: investorDemoIdentity.tenantId,
+      email: "investor-demo@local",
+      name: investorDemoIdentity.userName,
+      role: "ADMIN",
+    };
+  }
+
   const session = await getAuthSession();
   const role = session?.user?.role;
 

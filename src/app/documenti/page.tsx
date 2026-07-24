@@ -7,6 +7,8 @@ import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
 import { BACKOFFICE_ROLES, requireRole } from "@/lib/auth";
+import { isInvestorDemoMode } from "@/lib/investor-demo";
+import { investorDemoDocumenti } from "@/lib/investor-demo-data";
 import { formatDateIT, formatEnumLabel } from "@/lib/utils";
 import { archiveDocumentoAction, createDocumentoUploadAction, updateDocumentoMetadataAction } from "@/server/actions/documenti";
 import { DOCUMENT_CANALE_VALUES, DOCUMENT_DIREZIONE_VALUES } from "@/server/documents/protocollo";
@@ -40,6 +42,39 @@ function toDateInputValue(value: Date | null): string {
 export const dynamic = "force-dynamic";
 
 export default async function DocumentiPage({ searchParams }: DocumentiPageProps) {
+  if (isInvestorDemoMode()) {
+    return (
+      <AppShell title="Fascicolo documentale" subtitle="Archivio dimostrativo su dati simulati">
+        <Card>
+          <CardHeader>
+            <CardTitle>Documenti demo</CardTitle>
+            <CardDescription>Contenuti fittizi non connessi a database o storage reale</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Titolo</TableHead>
+                  <TableHead>Stato</TableHead>
+                  <TableHead>Nota</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {investorDemoDocumenti.map((item) => (
+                  <TableRow key={item.title}>
+                    <TableCell className="font-medium text-slate-900">{item.title}</TableCell>
+                    <TableCell>{item.status}</TableCell>
+                    <TableCell>{item.note}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </AppShell>
+    );
+  }
+
   const role = await requireRole();
   const canUpload = BACKOFFICE_ROLES.includes(role);
   const params = (await searchParams) ?? {};

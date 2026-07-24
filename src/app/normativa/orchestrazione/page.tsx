@@ -5,12 +5,106 @@ import { RuleOrchestratorPanel } from "@/components/normativa/RuleOrchestratorPa
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
 import { canViewNormativa, requireRole } from "@/lib/auth";
+import { isInvestorDemoMode } from "@/lib/investor-demo";
+import { investorDemoOrchestration } from "@/lib/investor-demo-data";
 import { formatDateIT } from "@/lib/utils";
 import { getLegalOrchestrationSummary, getLegalSources, getRecentImportRuns } from "@/server/legal-rules/queries";
 
 export const dynamic = "force-dynamic";
 
 export default async function NormativaOrchestrazionePage() {
+  if (isInvestorDemoMode()) {
+    return (
+      <AppShell
+        title="Orchestrazione Regole"
+        subtitle="Tassonomia e valutazione assistita su dataset dimostrativo"
+      >
+        <div className="grid gap-4" data-testid="investor-demo-orchestrazione">
+          <div className="flex items-center justify-between">
+            <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+              {investorDemoOrchestration.professionalBadge}
+            </div>
+            <Link href="/normativa" className="text-sm font-medium text-slate-700 underline underline-offset-4">
+              Torna alla normativa
+            </Link>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Valutazione assistita demo</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm text-slate-700">
+              <p><span className="font-semibold text-slate-900">Autorita:</span> {investorDemoOrchestration.authority}</p>
+              <p><span className="font-semibold text-slate-900">Porto:</span> {investorDemoOrchestration.port}</p>
+              <p><span className="font-semibold text-slate-900">Confidence:</span> {investorDemoOrchestration.confidence}</p>
+              <p className="rounded-md border border-slate-200 bg-slate-50 p-3 text-slate-800">{investorDemoOrchestration.disclaimer}</p>
+            </CardContent>
+          </Card>
+
+          <section className="grid gap-4 xl:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Coverage fonti</CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-3 text-sm">
+                <div>
+                  <p className="font-semibold text-slate-900">Applicabili</p>
+                  <ul className="list-disc space-y-1 pl-5 text-slate-700">
+                    {investorDemoOrchestration.applicableSources.map((item) => <li key={item}>{item}</li>)}
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-900">Escluse per territorio</p>
+                  <ul className="list-disc space-y-1 pl-5 text-slate-700">
+                    {investorDemoOrchestration.excludedByTerritory.map((item) => <li key={item}>{item}</li>)}
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-900">Storiche</p>
+                  <ul className="list-disc space-y-1 pl-5 text-slate-700">
+                    {investorDemoOrchestration.historicalSources.map((item) => <li key={item}>{item}</li>)}
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-900">In attesa integrazione</p>
+                  <ul className="list-disc space-y-1 pl-5 text-slate-700">
+                    {investorDemoOrchestration.pendingSources.map((item) => <li key={item}>{item}</li>)}
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Reasoning trace</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <div>
+                  <p className="font-semibold text-slate-900">Conflitti</p>
+                  <ul className="list-disc space-y-1 pl-5 text-slate-700">
+                    {investorDemoOrchestration.conflicts.map((item) => <li key={item}>{item}</li>)}
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-900">Gap</p>
+                  <ul className="list-disc space-y-1 pl-5 text-slate-700">
+                    {investorDemoOrchestration.gaps.map((item) => <li key={item}>{item}</li>)}
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-900">Trace</p>
+                  <ol className="list-decimal space-y-1 pl-5 text-slate-700">
+                    {investorDemoOrchestration.reasoningTrace.map((item) => <li key={item}>{item}</li>)}
+                  </ol>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        </div>
+      </AppShell>
+    );
+  }
+
   const role = await requireRole();
   if (!canViewNormativa(role)) {
     return null;

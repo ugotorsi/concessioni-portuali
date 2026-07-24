@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/Table";
 import { getConcessionVerticalLabel } from "@/lib/concession-vertical-labels";
 import { CONCESSION_VERTICAL_VALUES } from "@/lib/concession-vertical";
+import { isInvestorDemoMode } from "@/lib/investor-demo";
+import { investorDemoConcessioni } from "@/lib/investor-demo-data";
 import { formatCurrencyEUR, formatDateIT, formatEnumLabel } from "@/lib/utils";
 import {
   ATTIVITA_CONCESSIONE_VALUES,
@@ -52,6 +54,39 @@ function pickString(value: string | string[] | undefined): string | undefined {
 export const dynamic = "force-dynamic";
 
 export default async function ConcessioniPage({ searchParams }: ConcessioniPageProps) {
+  if (isInvestorDemoMode()) {
+    return (
+      <AppShell title="Concessioni" subtitle="Vista dimostrativa su concessioni simulate">
+        <Card>
+          <CardHeader>
+            <CardTitle>Concessioni demo</CardTitle>
+            <CardDescription>Dataset fittizio non collegato al database</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Titolo</TableHead>
+                  <TableHead>Stato</TableHead>
+                  <TableHead>Nota</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {investorDemoConcessioni.map((item) => (
+                  <TableRow key={item.title}>
+                    <TableCell className="font-medium text-slate-900">{item.title}</TableCell>
+                    <TableCell>{item.status}</TableCell>
+                    <TableCell>{item.note}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </AppShell>
+    );
+  }
+
   const resolvedSearch = (await searchParams) ?? {};
 
   const filters: GetConcessioniListParams = {

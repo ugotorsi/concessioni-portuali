@@ -6,6 +6,8 @@ import { NormativaFiltersBar } from "@/components/normativa/NormativaFiltersBar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
 import { canManageNormativaUpdate, canViewNormativa, requireRole } from "@/lib/auth";
+import { isInvestorDemoMode } from "@/lib/investor-demo";
+import { investorDemoNormativa } from "@/lib/investor-demo-data";
 import { formatDateIT } from "@/lib/utils";
 import {
   NORMA_AMBITO_VALUES,
@@ -36,6 +38,86 @@ function pickString(value: string | string[] | undefined): string | undefined {
 export const dynamic = "force-dynamic";
 
 export default async function NormativaPage({ searchParams }: NormativaPageProps) {
+  if (isInvestorDemoMode()) {
+    return (
+      <AppShell title="Normativa" subtitle="Registro dimostrativo su fonti simulate">
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Fonti censite</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-semibold text-slate-900">{investorDemoNormativa.length}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Versioni vigenti</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-semibold text-emerald-700">2</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>In consultazione</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-semibold text-amber-700">1</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Impatti mappati</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-semibold text-slate-900">5</p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <section className="mt-4">
+          <div className="mb-4 flex justify-end">
+            <Link
+              href="/normativa/orchestrazione"
+              className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-900 hover:bg-slate-50"
+            >
+              Orchestrazione regole
+            </Link>
+          </div>
+        </section>
+
+        <section className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Registro fonti normative demo</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Titolo</TableHead>
+                    <TableHead>Stato</TableHead>
+                    <TableHead>Nota</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {investorDemoNormativa.map((item) => (
+                    <TableRow key={item.title}>
+                      <TableCell className="font-semibold text-slate-900">{item.title}</TableCell>
+                      <TableCell>{item.status}</TableCell>
+                      <TableCell>{item.note}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </section>
+      </AppShell>
+    );
+  }
+
   const role = await requireRole();
 
   if (!canViewNormativa(role)) {

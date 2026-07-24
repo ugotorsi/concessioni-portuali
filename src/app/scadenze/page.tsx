@@ -15,6 +15,8 @@ import {
   TableRow,
 } from "@/components/ui/Table";
 import { formatDateIT, formatEnumLabel } from "@/lib/utils";
+import { isInvestorDemoMode } from "@/lib/investor-demo";
+import { investorDemoScadenze } from "@/lib/investor-demo-data";
 import {
   SCADENZA_STATO_VALUES,
   SCADENZA_TIPOLOGIA_VALUES,
@@ -51,6 +53,39 @@ function pickString(value: string | string[] | undefined): string | undefined {
 export const dynamic = "force-dynamic";
 
 export default async function ScadenzePage({ searchParams }: ScadenzePageProps) {
+  if (isInvestorDemoMode()) {
+    return (
+      <AppShell title="Scadenze" subtitle="Calendario dimostrativo su dati simulati">
+        <Card>
+          <CardHeader>
+            <CardTitle>Scadenze demo</CardTitle>
+            <CardDescription>Nessun collegamento a scadenziario reale in questa modalita</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Titolo</TableHead>
+                  <TableHead>Stato</TableHead>
+                  <TableHead>Nota</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {investorDemoScadenze.map((item) => (
+                  <TableRow key={item.title}>
+                    <TableCell className="font-medium text-slate-900">{item.title}</TableCell>
+                    <TableCell>{item.status}</TableCell>
+                    <TableCell>{item.note}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </AppShell>
+    );
+  }
+
   const role = await requireRole(BACKOFFICE_ROLES);
   const canExport = canExportOperationalData(role);
   const resolvedSearch = (await searchParams) ?? {};

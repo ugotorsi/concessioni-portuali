@@ -23,6 +23,8 @@ import {
   TableRow,
 } from "@/components/ui/Table";
 import { formatDateIT, formatEnumLabel } from "@/lib/utils";
+import { isInvestorDemoMode } from "@/lib/investor-demo";
+import { investorDemoProcedimenti } from "@/lib/investor-demo-data";
 import {
   PROCEDIMENTI_CHECKLIST_VALUES,
   PROCEDIMENTI_MEMORIE_VALUES,
@@ -64,6 +66,39 @@ function pickString(value: string | string[] | undefined): string | undefined {
 export const dynamic = "force-dynamic";
 
 export default async function ProcedimentiPage({ searchParams }: ProcedimentiPageProps) {
+  if (isInvestorDemoMode()) {
+    return (
+      <AppShell title="Procedimenti" subtitle="Vista dimostrativa su procedimenti simulati">
+        <Card>
+          <CardHeader>
+            <CardTitle>Procedimenti demo</CardTitle>
+            <CardDescription>Nessun dato personale o amministrativo reale</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Titolo</TableHead>
+                  <TableHead>Stato</TableHead>
+                  <TableHead>Nota</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {investorDemoProcedimenti.map((item) => (
+                  <TableRow key={item.title}>
+                    <TableCell className="font-medium text-slate-900">{item.title}</TableCell>
+                    <TableCell>{item.status}</TableCell>
+                    <TableCell>{item.note}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </AppShell>
+    );
+  }
+
   const role = await requireRole(BACKOFFICE_ROLES);
   const canWrite = canManageProcedimenti(role);
   const canExport = canExportOperationalData(role);

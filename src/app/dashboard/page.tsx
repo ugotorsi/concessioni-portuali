@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/Table";
 import { formatCurrencyEUR, formatDateIT, formatEnumLabel } from "@/lib/utils";
 import { BACKOFFICE_ROLES, requireRole } from "@/lib/auth";
+import { isInvestorDemoMode } from "@/lib/investor-demo";
+import { investorDemoDashboard } from "@/lib/investor-demo-data";
 import { getDashboardData } from "@/server/queries/dashboard";
 import { getVerticaliDashboardSummary } from "@/server/queries/verticali";
 
@@ -55,6 +57,54 @@ function formatDeltaLabel(giorniDelta: number): string {
 }
 
 export default async function DashboardPage() {
+  if (isInvestorDemoMode()) {
+    return (
+      <AppShell
+        title="Dashboard"
+        subtitle="Vista investitore su dati simulati e non persistiti"
+      >
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4" data-testid="investor-demo-dashboard">
+          <MetricCard title="Concessioni monitorate" value={investorDemoDashboard.concessioniMonitorate} description="Dataset dimostrativo" />
+          <MetricCard title="Procedimenti in istruttoria" value={investorDemoDashboard.procedimentiInIstruttoria} description="Stato simulato" tone="warning" />
+          <MetricCard title="Scadenze entro 90 giorni" value={investorDemoDashboard.scadenze90Giorni} description="Presidio dimostrativo" tone="warning" />
+          <MetricCard title="Possibili anomalie da verificare" value={investorDemoDashboard.anomalieDaVerificare} description="Segnalazioni simulate" tone="danger" />
+          <MetricCard title="Fonti documentali censite" value={investorDemoDashboard.fontiDocumentali} description="Raccolta simulata" />
+          <MetricCard title="Porti pilota" value={investorDemoDashboard.portiPilota} description="Perimetro dimostrativo" />
+        </section>
+
+        <section className="mt-4 grid gap-4 xl:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Contesto istituzionale simulato</CardTitle>
+              <CardDescription>{investorDemoDashboard.autorita}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ul className="grid gap-2 text-sm text-slate-700">
+                {investorDemoDashboard.porti.map((porto) => (
+                  <li key={porto} className="rounded-md border border-slate-200 bg-slate-50 p-2">{porto}</li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Navigazione demo</CardTitle>
+              <CardDescription>Accesso rapido alle sezioni abilitate in modalita investitore</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-2">
+              <Link href="/concessioni" className="inline-flex h-10 items-center rounded-md border border-slate-300 px-3 text-sm font-medium hover:bg-slate-100">Concessioni</Link>
+              <Link href="/procedimenti" className="inline-flex h-10 items-center rounded-md border border-slate-300 px-3 text-sm font-medium hover:bg-slate-100">Procedimenti</Link>
+              <Link href="/documenti" className="inline-flex h-10 items-center rounded-md border border-slate-300 px-3 text-sm font-medium hover:bg-slate-100">Documenti</Link>
+              <Link href="/scadenze" className="inline-flex h-10 items-center rounded-md border border-slate-300 px-3 text-sm font-medium hover:bg-slate-100">Scadenze</Link>
+              <Link href="/normativa" className="inline-flex h-10 items-center rounded-md bg-slate-900 px-3 text-sm font-medium text-white hover:bg-slate-800">Normativa</Link>
+            </CardContent>
+          </Card>
+        </section>
+      </AppShell>
+    );
+  }
+
   await requireRole(BACKOFFICE_ROLES);
   const [data, verticaliSummary] = await Promise.all([getDashboardData(), getVerticaliDashboardSummary()]);
 
