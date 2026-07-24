@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/Table";
 import { getConcessionVerticalLabel } from "@/lib/concession-vertical-labels";
+import { CONCESSION_VERTICAL_VALUES } from "@/lib/concession-vertical";
 import { formatCurrencyEUR, formatDateIT, formatEnumLabel } from "@/lib/utils";
 import {
   ATTIVITA_CONCESSIONE_VALUES,
@@ -71,6 +72,12 @@ export default async function ConcessioniPage({ searchParams }: ConcessioniPageP
       const value = pickString(resolvedSearch.attivita);
       return value && ATTIVITA_CONCESSIONE_VALUES.includes(value as (typeof ATTIVITA_CONCESSIONE_VALUES)[number])
         ? (value as (typeof ATTIVITA_CONCESSIONE_VALUES)[number])
+        : undefined;
+    })(),
+    concessionVertical: (() => {
+      const value = pickString(resolvedSearch.concessionVertical);
+      return value && CONCESSION_VERTICAL_VALUES.includes(value as (typeof CONCESSION_VERTICAL_VALUES)[number])
+        ? (value as (typeof CONCESSION_VERTICAL_VALUES)[number])
         : undefined;
     })(),
     concessionarioId: pickString(resolvedSearch.concessionarioId),
@@ -230,7 +237,7 @@ export default async function ConcessioniPage({ searchParams }: ConcessioniPageP
                 })}
                 {listData.items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center text-slate-500">
+                    <TableCell colSpan={10} className="text-center text-slate-500">
                       Nessuna concessione trovata con i filtri correnti.
                     </TableCell>
                   </TableRow>

@@ -15,6 +15,7 @@ import {
 import { formatCurrencyEUR, formatDateIT, formatEnumLabel } from "@/lib/utils";
 import { BACKOFFICE_ROLES, requireRole } from "@/lib/auth";
 import { getDashboardData } from "@/server/queries/dashboard";
+import { getVerticaliDashboardSummary } from "@/server/queries/verticali";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +56,7 @@ function formatDeltaLabel(giorniDelta: number): string {
 
 export default async function DashboardPage() {
   await requireRole(BACKOFFICE_ROLES);
-  const data = await getDashboardData();
+  const [data, verticaliSummary] = await Promise.all([getDashboardData(), getVerticaliDashboardSummary()]);
 
   return (
     <AppShell
@@ -130,6 +131,42 @@ export default async function DashboardPage() {
       </section>
 
       <section className="mt-4 grid gap-4 xl:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>Verticali operative</CardTitle>
+            <CardDescription>
+              Accesso rapido ai workspace verticali con conteggi concessioni nel perimetro corrente.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3" data-testid="dashboard-verticali-operative">
+            <p className="text-sm text-slate-700">
+              Verticali configurate: <span className="font-semibold">{verticaliSummary.totalVerticali}</span>
+            </p>
+
+            <div className="grid gap-2 sm:grid-cols-2">
+              {verticaliSummary.items.map((item) => (
+                <Link
+                  key={item.slug}
+                  href={`/verticali/${item.slug}`}
+                  className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 hover:bg-slate-100"
+                >
+                  <p className="font-medium">{item.label}</p>
+                  <p className="text-xs text-slate-600">Concessioni: {item.concessioniCount}</p>
+                </Link>
+              ))}
+            </div>
+
+            <div>
+              <Link
+                href="/verticali"
+                className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
+              >
+                Apri area verticali
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Scenari demo istituzionali</CardTitle>

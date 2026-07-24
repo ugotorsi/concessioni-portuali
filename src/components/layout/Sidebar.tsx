@@ -9,6 +9,7 @@ import {
   ClipboardList,
   DoorOpen,
   FileText,
+  Layers,
   LayoutDashboard,
   Lightbulb,
   Library,
@@ -34,6 +35,7 @@ interface NavItem {
 const backofficeNavItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/concessioni", label: "Concessioni", icon: Ship },
+  { href: "/verticali", label: "Verticali", icon: Layers },
   { href: "/mappa", label: "Mappa", icon: Map },
   { href: "/concessionari", label: "Concessionari", icon: Users },
   { href: "/criticita", label: "Criticità", icon: AlertTriangle },
@@ -54,6 +56,7 @@ const backofficeNavItems: NavItem[] = [
 const adspNavItems: NavItem[] = [
   { href: "/adsp", label: "Portale AdSP", icon: Shield },
   { href: "/concessioni", label: "Concessioni", icon: Ship },
+  { href: "/verticali", label: "Verticali", icon: Layers },
   { href: "/mappa", label: "Mappa", icon: Map },
   { href: "/report", label: "Report", icon: FileText },
   { href: "/documenti", label: "Documenti", icon: FileText },

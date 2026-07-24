@@ -1,20 +1,15 @@
 import { expect, test } from "playwright/test";
-
-async function login(page: import("playwright/test").Page, email: string, password: string) {
-  await page.goto("/login");
-  await page.getByTestId("login-email").fill(email);
-  await page.getByTestId("login-password").fill(password);
-  await page.getByTestId("login-submit").click();
-}
+import { loginAndExpectLanding } from "./helpers/auth";
 
 test("admin vede la verticale concessione in lista e dettaglio", async ({ page }) => {
-  await login(page, "admin@demo.local", "admin123");
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await loginAndExpectLanding(page, "admin@demo.local", "admin123", /\/dashboard$/);
 
   await page.goto("/concessioni");
   await expect(page).toHaveURL(/\/concessioni$/);
-  await expect(page.getByText("Portuale / AdSP").first()).toBeVisible();
-  await expect(page.getByText("Turistico-ricreativa / Comune costiero").first()).toBeVisible();
+  await expect(page.getByTestId(/concessione-vertical-/).first()).toBeVisible();
+  const concessioniTable = page.locator("tbody");
+  await expect(concessioniTable.getByText("Portuale / AdSP").first()).toBeVisible();
+  await expect(concessioniTable.getByText("Turistico-ricreativa / Comune costiero").first()).toBeVisible();
 
   const dettaglioLink = page.getByRole("link", { name: "Apri scheda" }).first();
   await expect(dettaglioLink).toBeVisible();

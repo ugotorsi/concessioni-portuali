@@ -3,6 +3,7 @@ import { addDays, startOfDay } from "date-fns";
 import { formatEnumLabel } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, isTenantContextConstrained } from "@/lib/tenant-auth";
+import { VERTICALI_CONFIG, type ConcessionVerticalValue } from "@/lib/verticali-config";
 import type { Prisma } from "@/generated/prisma/client";
 
 export const STATO_CONCESSIONE_VALUES = [
@@ -52,6 +53,7 @@ export interface GetConcessioniListParams {
   stato?: StatoConcessioneValue;
   tipologiaBene?: TipologiaBeneValue;
   attivita?: AttivitaConcessioneValue;
+  concessionVertical?: ConcessionVerticalValue;
   concessionarioId?: string;
   scadenza?: ConcessioniScadenzaFilter;
 }
@@ -209,6 +211,7 @@ export interface ConcessioniFiltersData {
   stati: Array<{ value: string; label: string }>;
   tipologieBene: Array<{ value: string; label: string }>;
   attivita: Array<{ value: string; label: string }>;
+  verticali: Array<{ value: ConcessionVerticalValue; label: string }>;
   scadenze: Array<{ value: ConcessioniScadenzaFilter; label: string }>;
 }
 
@@ -294,6 +297,7 @@ export async function getConcessioniList(
     ...(params.stato ? { stato: params.stato } : {}),
     ...(params.tipologiaBene ? { tipologiaBene: params.tipologiaBene } : {}),
     ...(params.attivita ? { attivita: params.attivita } : {}),
+    ...(params.concessionVertical ? { concessionVertical: params.concessionVertical } : {}),
     ...(params.concessionarioId ? { concessionarioId: params.concessionarioId } : {}),
     ...(scadenzaWhere ? { dataScadenza: scadenzaWhere } : {}),
   };
@@ -651,6 +655,7 @@ export async function getConcessioniFilters(): Promise<ConcessioniFiltersData> {
     stati: STATO_CONCESSIONE_VALUES.map((value) => ({ value, label: formatEnumLabel(value) })),
     tipologieBene: TIPOLOGIA_BENE_VALUES.map((value) => ({ value, label: formatEnumLabel(value) })),
     attivita: ATTIVITA_CONCESSIONE_VALUES.map((value) => ({ value, label: formatEnumLabel(value) })),
+    verticali: VERTICALI_CONFIG.map((item) => ({ value: item.value, label: item.label })),
     scadenze: [
       { value: "SCADUTE", label: "Scadute" },
       { value: "ENTRO_30_GIORNI", label: "Entro 30 giorni" },

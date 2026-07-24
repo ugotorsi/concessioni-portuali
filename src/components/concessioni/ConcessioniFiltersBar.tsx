@@ -44,6 +44,15 @@ export function ConcessioniFiltersBar({ filtersData, current }: ConcessioniFilte
         ))}
       </Select>
 
+      <Select name="concessionVertical" defaultValue={current.concessionVertical ?? ""}>
+        <option value="">Verticale (tutte)</option>
+        {filtersData.verticali.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </Select>
+
       <Select name="concessionarioId" defaultValue={current.concessionarioId ?? ""}>
         <option value="">Concessionario (tutti)</option>
         {filtersData.concessionari.map((option) => (
