@@ -2,6 +2,12 @@ import { addDays, differenceInCalendarDays, startOfDay } from "date-fns";
 
 import { formatEnumLabel } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
+import {
+  buildTenantConcessioneWhere,
+  getCurrentTenantContext,
+  isTenantContextConstrained,
+  requireTenantAccess,
+} from "@/lib/tenant-auth";
 import type { Prisma } from "@/generated/prisma/client";
 
 export const SCADENZA_TIPOLOGIA_VALUES = [
@@ -177,10 +183,14 @@ export async function getScadenzeList(params: GetScadenzeListParams): Promise<Ge
   const in30 = addDays(today, 30);
   const in60 = addDays(today, 60);
   const in90 = addDays(today, 90);
+  const tenantContext = await getCurrentTenantContext();
+  const concessioneTenantWhere = buildTenantConcessioneWhere(tenantContext);
+  const hasConcessioneTenantScope = Object.keys(concessioneTenantWhere).length > 0;
   const search = params.search?.trim();
   const periodWhere = getPeriodWhere(params.periodo);
 
   const where: Prisma.ScadenzaWhereInput = {
+    ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
     ...(search
       ? {
           OR: [
@@ -239,12 +249,39 @@ export async function getScadenzeList(params: GetScadenzeListParams): Promise<Ge
       },
     }),
     Promise.all([
-      prisma.scadenza.count(),
-      prisma.scadenza.count({ where: { dataScadenza: { lt: today } } }),
-      prisma.scadenza.count({ where: { dataScadenza: { gte: today, lte: in30 } } }),
-      prisma.scadenza.count({ where: { dataScadenza: { gte: today, lte: in60 } } }),
-      prisma.scadenza.count({ where: { dataScadenza: { gte: today, lte: in90 } } }),
-      prisma.scadenza.count({ where: { stato: "GESTITA" } }),
+      prisma.scadenza.count({
+        where: hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : undefined,
+      }),
+      prisma.scadenza.count({
+        where: {
+          dataScadenza: { lt: today },
+          ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
+        },
+      }),
+      prisma.scadenza.count({
+        where: {
+          dataScadenza: { gte: today, lte: in30 },
+          ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
+        },
+      }),
+      prisma.scadenza.count({
+        where: {
+          dataScadenza: { gte: today, lte: in60 },
+          ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
+        },
+      }),
+      prisma.scadenza.count({
+        where: {
+          dataScadenza: { gte: today, lte: in90 },
+          ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
+        },
+      }),
+      prisma.scadenza.count({
+        where: {
+          stato: "GESTITA",
+          ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
+        },
+      }),
     ]),
   ]);
 
@@ -295,6 +332,7 @@ export async function getScadenzeList(params: GetScadenzeListParams): Promise<Ge
 }
 
 export async function getScadenzaDetail(id: string): Promise<ScadenzaDetail | null> {
+  const tenantContext = await getCurrentTenantContext();
   const scadenza = await prisma.scadenza.findUnique({
     where: { id },
     include: {
@@ -333,6 +371,17 @@ export async function getScadenzaDetail(id: string): Promise<ScadenzaDetail | nu
 
   if (!scadenza) {
     return null;
+  }
+
+  if (tenantContext && isTenantContextConstrained(tenantContext)) {
+    try {
+      requireTenantAccess(tenantContext, scadenza.concessione.enteId, {
+        mode: "read",
+        allowWhenEnteMissing: true,
+      });
+    } catch {
+      return null;
+    }
   }
 
   return {
@@ -398,7 +447,10 @@ export async function getScadenzaDetail(id: string): Promise<ScadenzaDetail | nu
 }
 
 export async function getScadenzeFilters(): Promise<ScadenzeFiltersData> {
+  const tenantContext = await getCurrentTenantContext();
+  const concessioneTenantWhere = buildTenantConcessioneWhere(tenantContext);
   const concessioni = await prisma.concessione.findMany({
+    where: concessioneTenantWhere,
     orderBy: [{ dataScadenza: "asc" }],
     select: {
       id: true,

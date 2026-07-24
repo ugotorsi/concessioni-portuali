@@ -1,6 +1,7 @@
 import { addDays, differenceInCalendarDays, startOfDay } from "date-fns";
 
 import { prisma } from "@/lib/prisma";
+import { buildTenantConcessioneWhere, getCurrentTenantContext } from "@/lib/tenant-auth";
 
 const RECOVERABLE_DASHBOARD_QUERY_ERROR_CODES = new Set([
   "P1001", // Database unavailable or not reachable.
@@ -133,6 +134,9 @@ export async function getDashboardData(): Promise<DashboardData> {
   const in90Giorni = addDays(oggi, 90);
   const in60Giorni = addDays(oggi, 60);
   const normativaEnabled = hasNormativaDelegates();
+  const tenantContext = await getCurrentTenantContext();
+  const concessioneTenantWhere = buildTenantConcessioneWhere(tenantContext);
+  const hasConcessioneTenantScope = Object.keys(concessioneTenantWhere).length > 0;
 
   let dashboardRows: any = null;
 
@@ -154,37 +158,47 @@ export async function getDashboardData(): Promise<DashboardData> {
       pagamentiCriticiRows,
       procedimentiRows,
     ] = await Promise.all([
-      prisma.concessione.count(),
-      prisma.concessione.count({ where: { stato: "ATTIVA" } }),
+      prisma.concessione.count({ where: concessioneTenantWhere }),
+      prisma.concessione.count({ where: { ...concessioneTenantWhere, stato: "ATTIVA" } }),
       prisma.concessione.count({
         where: {
+          ...concessioneTenantWhere,
           dataScadenza: {
             gte: oggi,
             lte: in90Giorni,
           },
         },
       }),
-      prisma.criticita.count({ where: { stato: { in: ["APERTA", "IN_GESTIONE"] } } }),
+      prisma.criticita.count({
+        where: {
+          stato: { in: ["APERTA", "IN_GESTIONE"] },
+          ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
+        },
+      }),
       prisma.criticita.count({
         where: {
           gravita: "URGENTE",
           stato: { in: ["APERTA", "IN_GESTIONE"] },
+          ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
         },
       }),
       prisma.criticita.count({
         where: {
           tipologia: "MOROSITA",
           stato: { in: ["APERTA", "IN_GESTIONE"] },
+          ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
         },
       }),
       prisma.pagamento.count({
         where: {
           stato: { in: ["NON_PAGATO", "PARZIALE", "SCADUTO"] },
+          ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
         },
       }),
       prisma.procedimento.count({
         where: {
           stato: "IN_CORSO",
+          ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
         },
       }),
       prisma.scadenza.count({
@@ -201,6 +215,7 @@ export async function getDashboardData(): Promise<DashboardData> {
               },
             },
           ],
+          ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
         },
       }),
       normativaEnabled ? prisma.normaFonte.count() : Promise.resolve(0),
@@ -210,6 +225,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       prisma.criticita.findMany({
         where: {
           stato: { in: ["APERTA", "IN_GESTIONE"] },
+          ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
         },
         orderBy: [{ gravita: "desc" }, { dataRilevazione: "desc" }],
         take: 6,
@@ -233,6 +249,7 @@ export async function getDashboardData(): Promise<DashboardData> {
           stato: {
             in: ["APERTA", "SCADUTA"],
           },
+          ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
         },
         orderBy: [{ dataScadenza: "asc" }],
         take: 8,
@@ -253,6 +270,7 @@ export async function getDashboardData(): Promise<DashboardData> {
           stato: {
             in: ["NON_PAGATO", "PARZIALE", "SCADUTO"],
           },
+          ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
         },
         orderBy: [{ dataScadenza: "asc" }],
         select: {
@@ -274,6 +292,7 @@ export async function getDashboardData(): Promise<DashboardData> {
           stato: {
             in: ["DA_AVVIARE", "IN_CORSO"],
           },
+          ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
         },
         orderBy: [{ dataScadenzaContraddittorio: "asc" }, { createdAt: "desc" }],
         take: 5,

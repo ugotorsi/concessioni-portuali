@@ -1,6 +1,7 @@
 import { buildCsv, buildCsvFilename, csvResponse } from "@/lib/csv";
 import { canExportOperationalData, getCurrentRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { buildTenantConcessioneWhere, getCurrentTenantContext } from "@/lib/tenant-auth";
 import { buildRateLimitKey, checkRateLimit, createRateLimitResponse } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
@@ -26,7 +27,16 @@ export async function GET(request: Request): Promise<Response> {
     return new Response("Forbidden", { status: 403 });
   }
 
+  const tenantContext = await getCurrentTenantContext();
+  const concessioneTenantWhere = buildTenantConcessioneWhere(tenantContext);
+  const hasConcessioneTenantScope = Object.keys(concessioneTenantWhere).length > 0;
+
   const rows = await prisma.criticita.findMany({
+    where: hasConcessioneTenantScope
+      ? {
+          concessione: concessioneTenantWhere,
+        }
+      : undefined,
     orderBy: [{ dataRilevazione: "desc" }],
     select: {
       id: true,

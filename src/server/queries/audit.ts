@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { getCurrentTenantContext, isTenantContextConstrained } from "@/lib/tenant-auth";
 
 export interface AuditLogListItem {
   id: string;
@@ -16,7 +17,41 @@ export interface AuditLogListItem {
 }
 
 export async function getLatestAuditLogs(limit = 100): Promise<AuditLogListItem[]> {
+  const tenantContext = await getCurrentTenantContext();
+  const where = (() => {
+    if (!tenantContext || !isTenantContextConstrained(tenantContext)) {
+      return undefined;
+    }
+
+    if (tenantContext.accessibleTenantIds.length === 0) {
+      return {
+        OR: [{ enteId: null, concessioneId: null }],
+      };
+    }
+
+    return {
+      OR: [
+        {
+          enteId: {
+            in: tenantContext.accessibleTenantIds,
+          },
+        },
+        {
+          enteId: null,
+          concessione: {
+            is: {
+              enteId: {
+                in: tenantContext.accessibleTenantIds,
+              },
+            },
+          },
+        },
+      ],
+    };
+  })();
+
   const rows = await prisma.activityLog.findMany({
+    where,
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     take: limit,
     select: {

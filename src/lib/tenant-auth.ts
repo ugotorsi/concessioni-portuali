@@ -1,6 +1,7 @@
 import { getCurrentUser, type DemoRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getDefaultTenantMembership, isTenantScopedRole, type TenantMembershipLike } from "@/lib/tenant";
+import type { Prisma } from "@/generated/prisma/client";
 
 export interface CurrentTenantContext {
   userId: string;
@@ -136,4 +137,60 @@ export async function getCurrentTenantContext(): Promise<CurrentTenantContext | 
 
 export function isTenantContextConstrained(context: CurrentTenantContext): boolean {
   return !context.isAdmin && isTenantScopedRole(context.role);
+}
+
+export function buildTenantConcessioneWhere(
+  context: Pick<CurrentTenantContext, "isAdmin" | "accessibleTenantIds" | "role"> | null,
+  options?: { allowWhenEnteMissing?: boolean },
+): Prisma.ConcessioneWhereInput {
+  if (!context || context.isAdmin || !isTenantScopedRole(context.role)) {
+    return {};
+  }
+
+  const allowWhenEnteMissing = options?.allowWhenEnteMissing ?? true;
+  const tenantIds = context.accessibleTenantIds;
+
+  if (tenantIds.length === 0) {
+    return allowWhenEnteMissing ? { enteId: null } : { id: { in: [] } };
+  }
+
+  if (!allowWhenEnteMissing) {
+    return { enteId: { in: tenantIds } };
+  }
+
+  return {
+    OR: [{ enteId: { in: tenantIds } }, { enteId: null }],
+  };
+}
+
+export function resolveResourceTenantId(input: {
+  resourceEnteId?: string | null;
+  concessioneEnteId?: string | null;
+}): string | null {
+  return input.resourceEnteId ?? input.concessioneEnteId ?? null;
+}
+
+export async function requireConcessioneTenantAccess(
+  context: Pick<CurrentTenantContext, "isAdmin" | "accessibleTenantIds" | "role">,
+  concessioneId: string,
+  options?: { mode?: "read" | "write"; allowWhenEnteMissing?: boolean },
+): Promise<{ id: string; enteId: string | null }> {
+  const concessione = await prisma.concessione.findUnique({
+    where: { id: concessioneId },
+    select: {
+      id: true,
+      enteId: true,
+    },
+  });
+
+  if (!concessione) {
+    throw new Error("Concessione non trovata.");
+  }
+
+  requireTenantAccess(context, concessione.enteId, {
+    mode: options?.mode ?? "read",
+    allowWhenEnteMissing: options?.allowWhenEnteMissing,
+  });
+
+  return concessione;
 }

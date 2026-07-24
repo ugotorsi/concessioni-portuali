@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { canManageSopralluoghi, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getCurrentTenantContext, requireConcessioneTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 import { SOPRALLUOGO_ESITO_VALUES } from "@/server/queries/sopralluoghi";
 
@@ -91,6 +92,28 @@ export async function createSopralluogoAction(formData: FormData) {
       },
     });
     throw new Error(parsed.error.issues[0]?.message ?? "Dati non validi.");
+  }
+
+  const tenantContext = await getCurrentTenantContext();
+  if (tenantContext) {
+    try {
+      await requireConcessioneTenantAccess(tenantContext, parsed.data.concessioneId, {
+        mode: "write",
+        allowWhenEnteMissing: false,
+      });
+    } catch (error) {
+      await auditFailure({
+        azione: "AUTHZ_DENIED",
+        entita: "Sopralluogo",
+        concessioneId: parsed.data.concessioneId,
+        actor: { userRole: role },
+        metadata: {
+          actionType: "SOPRALLUOGO_CREATE",
+          reason: error instanceof Error ? error.message : "TENANT_WRITE_DENIED",
+        },
+      });
+      throw new Error("Operazione non autorizzata per il tenant corrente.");
+    }
   }
 
   const created = await prisma.sopralluogo.create({

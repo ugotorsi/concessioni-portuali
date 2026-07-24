@@ -10,6 +10,7 @@ import {
   type DemoRole,
 } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getCurrentTenantContext, requireConcessioneTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 import {
   CRITICITA_ART47_LETTERA_VALUES,
@@ -245,6 +246,7 @@ function ensureTipologiaByRole(role: DemoRole, tipologia: string) {
 
 export async function createCriticitaAction(formData: FormData) {
   const role = await requireRole();
+  const tenantContext = await getCurrentTenantContext();
   await ensureCanWriteCriticita(role, "CRITICITA_CREATE");
 
   const parsed = createCriticitaSchema.safeParse({
@@ -298,6 +300,27 @@ export async function createCriticitaAction(formData: FormData) {
     throw error;
   }
 
+  if (tenantContext) {
+    try {
+      await requireConcessioneTenantAccess(tenantContext, parsed.data.concessioneId, {
+        mode: "write",
+        allowWhenEnteMissing: false,
+      });
+    } catch (error) {
+      await auditFailure({
+        azione: "AUTHZ_DENIED",
+        entita: "Criticita",
+        concessioneId: parsed.data.concessioneId,
+        actor: { userRole: role },
+        metadata: {
+          actionType: "CRITICITA_CREATE",
+          reason: error instanceof Error ? error.message : "TENANT_WRITE_DENIED",
+        },
+      });
+      throw new Error("Operazione non autorizzata per il tenant corrente.");
+    }
+  }
+
   const created = await prisma.criticita.create({
     data: {
       concessioneId: parsed.data.concessioneId,
@@ -346,6 +369,7 @@ export async function createCriticitaAction(formData: FormData) {
 
 export async function updateCriticitaAction(formData: FormData) {
   const role = await requireRole();
+  const tenantContext = await getCurrentTenantContext();
   await ensureCanWriteCriticita(role, "CRITICITA_UPDATE");
 
   const parsed = updateCriticitaSchema.safeParse({
@@ -415,6 +439,28 @@ export async function updateCriticitaAction(formData: FormData) {
       },
     });
     throw error;
+  }
+
+  if (tenantContext) {
+    try {
+      await requireConcessioneTenantAccess(tenantContext, existing.concessioneId, {
+        mode: "write",
+        allowWhenEnteMissing: false,
+      });
+    } catch (error) {
+      await auditFailure({
+        azione: "AUTHZ_DENIED",
+        entita: "Criticita",
+        entitaId: existing.id,
+        concessioneId: existing.concessioneId,
+        actor: { userRole: role },
+        metadata: {
+          actionType: "CRITICITA_UPDATE",
+          reason: error instanceof Error ? error.message : "TENANT_WRITE_DENIED",
+        },
+      });
+      throw new Error("Operazione non autorizzata per il tenant corrente.");
+    }
   }
 
   await prisma.criticita.update({

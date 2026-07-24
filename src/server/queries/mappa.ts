@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { buildTenantConcessioneWhere, getCurrentTenantContext } from "@/lib/tenant-auth";
 
 export type MappaMarkerType = "CONCESSIONE" | "CRITICITA" | "SOPRALLUOGO";
 export type MappaRiskLevel = "BASSO" | "MEDIO" | "ALTO" | "CRITICO";
@@ -102,8 +103,13 @@ function pickCoordinates(args: {
 }
 
 export async function getMappaDemoData(): Promise<MappaDemoData> {
+  const tenantContext = await getCurrentTenantContext();
+  const concessioneTenantWhere = buildTenantConcessioneWhere(tenantContext);
+  const hasConcessioneTenantScope = Object.keys(concessioneTenantWhere).length > 0;
+
   const [concessioniRows, criticitaRows, sopralluoghiRows] = await Promise.all([
     prisma.concessione.findMany({
+      where: concessioneTenantWhere,
       select: {
         id: true,
         numeroAtto: true,
@@ -120,6 +126,7 @@ export async function getMappaDemoData(): Promise<MappaDemoData> {
     prisma.criticita.findMany({
       where: {
         stato: { in: ["APERTA", "IN_GESTIONE"] },
+        ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
       },
       select: {
         id: true,
@@ -146,6 +153,7 @@ export async function getMappaDemoData(): Promise<MappaDemoData> {
     prisma.sopralluogo.findMany({
       where: {
         esito: { in: ["CON_RILIEVI", "NEGATIVO", "POSITIVO"] },
+        ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
       },
       select: {
         id: true,

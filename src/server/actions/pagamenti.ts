@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { canManagePagamenti, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 import { PAGAMENTO_STATO_VALUES } from "@/server/queries/pagamenti";
 
@@ -103,7 +104,15 @@ export async function updatePagamentoAction(formData: FormData) {
 
   const existing = await prisma.pagamento.findUnique({
     where: { id: parsed.data.id },
-    select: { id: true, concessioneId: true },
+    select: {
+      id: true,
+      concessioneId: true,
+      concessione: {
+        select: {
+          enteId: true,
+        },
+      },
+    },
   });
 
   if (!existing) {
@@ -117,6 +126,30 @@ export async function updatePagamentoAction(formData: FormData) {
       },
     });
     throw new Error("Pagamento non trovato.");
+  }
+
+  const tenantContext = await getCurrentTenantContext();
+  if (tenantContext) {
+    try {
+      requireTenantAccess(tenantContext, existing.concessione.enteId, {
+        mode: "write",
+        allowWhenEnteMissing: false,
+      });
+    } catch {
+      await auditFailure({
+        azione: "AUTHZ_DENIED",
+        entita: "Pagamento",
+        entitaId: existing.id,
+        concessioneId: existing.concessioneId,
+        enteId: existing.concessione.enteId,
+        actor: { userRole: role },
+        metadata: {
+          actionType: "PAGAMENTO_UPDATE",
+          reason: "TENANT_WRITE_DENIED",
+        },
+      });
+      throw new Error("Operazione non autorizzata per il tenant corrente.");
+    }
   }
 
   await prisma.pagamento.update({

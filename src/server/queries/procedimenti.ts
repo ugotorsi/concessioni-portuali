@@ -7,6 +7,12 @@ import {
   getProcedimentoWarningLevel,
 } from "@/lib/procedimento-checklist";
 import { prisma } from "@/lib/prisma";
+import {
+  buildTenantConcessioneWhere,
+  getCurrentTenantContext,
+  isTenantContextConstrained,
+  requireTenantAccess,
+} from "@/lib/tenant-auth";
 import { formatEnumLabel } from "@/lib/utils";
 import type { Prisma } from "@/generated/prisma/client";
 
@@ -305,12 +311,18 @@ function getPeriodoWhere(periodo?: ProcedimentiPeriodoValue): Prisma.Procediment
   }
 }
 
-function buildWhere(params: GetProcedimentiListParams): Prisma.ProcedimentoWhereInput {
+function buildWhere(
+  params: GetProcedimentiListParams,
+  tenantContext: Awaited<ReturnType<typeof getCurrentTenantContext>>,
+): Prisma.ProcedimentoWhereInput {
   const search = params.search?.trim();
   const today = startOfDay(new Date());
   const in7 = addDays(today, 7);
+  const concessioneTenantWhere = buildTenantConcessioneWhere(tenantContext);
+  const hasConcessioneTenantScope = Object.keys(concessioneTenantWhere).length > 0;
 
   return {
+    ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
     ...(search
       ? {
           OR: [
@@ -504,9 +516,10 @@ function toListItem(
 
 export async function getProcedimentiList(params: GetProcedimentiListParams): Promise<GetProcedimentiListResult> {
   const today = startOfDay(new Date());
+  const tenantContext = await getCurrentTenantContext();
 
   const rows = await prisma.procedimento.findMany({
-    where: buildWhere(params),
+    where: buildWhere(params, tenantContext),
     select: {
       id: true,
       tipologia: true,
@@ -592,6 +605,7 @@ export async function getProcedimentiList(params: GetProcedimentiListParams): Pr
 
 export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDetail | null> {
   const today = startOfDay(new Date());
+  const tenantContext = await getCurrentTenantContext();
 
   const procedimento = await prisma.procedimento.findUnique({
     where: { id },
@@ -653,6 +667,17 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
 
   if (!procedimento) {
     return null;
+  }
+
+  if (tenantContext && isTenantContextConstrained(tenantContext)) {
+    try {
+      requireTenantAccess(tenantContext, procedimento.concessione.enteId, {
+        mode: "read",
+        allowWhenEnteMissing: true,
+      });
+    } catch {
+      return null;
+    }
   }
 
   const documentiCollegati = await prisma.documento.findMany({
@@ -883,8 +908,12 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
 }
 
 export async function getProcedimentiFilters(): Promise<ProcedimentiFiltersData> {
+  const tenantContext = await getCurrentTenantContext();
+  const concessioneTenantWhere = buildTenantConcessioneWhere(tenantContext);
+  const hasConcessioneTenantScope = Object.keys(concessioneTenantWhere).length > 0;
   const [concessioni, criticita] = await Promise.all([
     prisma.concessione.findMany({
+      where: concessioneTenantWhere,
       orderBy: [{ dataScadenza: "asc" }],
       select: {
         id: true,
@@ -895,6 +924,7 @@ export async function getProcedimentiFilters(): Promise<ProcedimentiFiltersData>
       },
     }),
     prisma.criticita.findMany({
+      where: hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : undefined,
       orderBy: [{ dataRilevazione: "desc" }],
       select: {
         id: true,

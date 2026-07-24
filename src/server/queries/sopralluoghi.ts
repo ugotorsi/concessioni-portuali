@@ -1,6 +1,12 @@
 import { endOfYear, startOfDay, startOfYear, subDays } from "date-fns";
 
 import { prisma } from "@/lib/prisma";
+import {
+  buildTenantConcessioneWhere,
+  getCurrentTenantContext,
+  isTenantContextConstrained,
+  requireTenantAccess,
+} from "@/lib/tenant-auth";
 import { formatEnumLabel } from "@/lib/utils";
 import type { Prisma } from "@/generated/prisma/client";
 
@@ -223,10 +229,25 @@ function buildWhere(params: GetSopralluoghiListParams): Prisma.SopralluogoWhereI
   };
 }
 
+function applyConcessioneTenantScope(
+  where: Prisma.SopralluogoWhereInput,
+  tenantContext: Awaited<ReturnType<typeof getCurrentTenantContext>>,
+): Prisma.SopralluogoWhereInput {
+  const concessioneTenantWhere = buildTenantConcessioneWhere(tenantContext);
+  if (Object.keys(concessioneTenantWhere).length === 0) {
+    return where;
+  }
+
+  return {
+    AND: [where, { concessione: concessioneTenantWhere }],
+  };
+}
+
 export async function getSopralluoghiList(
   params: GetSopralluoghiListParams,
 ): Promise<GetSopralluoghiListResult> {
-  const where = buildWhere(params);
+  const tenantContext = await getCurrentTenantContext();
+  const where = applyConcessioneTenantScope(buildWhere(params), tenantContext);
 
   const rows = await prisma.sopralluogo.findMany({
     where,
@@ -300,6 +321,7 @@ export async function getSopralluoghiList(
 }
 
 export async function getSopralluogoDetail(id: string): Promise<SopralluogoDetail | null> {
+  const tenantContext = await getCurrentTenantContext();
   const sopralluogo = await prisma.sopralluogo.findUnique({
     where: { id },
     include: {
@@ -338,6 +360,17 @@ export async function getSopralluogoDetail(id: string): Promise<SopralluogoDetai
 
   if (!sopralluogo) {
     return null;
+  }
+
+  if (tenantContext && isTenantContextConstrained(tenantContext)) {
+    try {
+      requireTenantAccess(tenantContext, sopralluogo.concessione.enteId, {
+        mode: "read",
+        allowWhenEnteMissing: true,
+      });
+    } catch {
+      return null;
+    }
   }
 
   const documentiCollegati = await prisma.documento.findMany({
@@ -422,7 +455,10 @@ export async function getSopralluogoDetail(id: string): Promise<SopralluogoDetai
 }
 
 export async function getSopralluoghiFilters(): Promise<SopralluoghiFiltersData> {
+  const tenantContext = await getCurrentTenantContext();
+  const concessioneTenantWhere = buildTenantConcessioneWhere(tenantContext);
   const concessioni = await prisma.concessione.findMany({
+    where: concessioneTenantWhere,
     orderBy: [{ dataScadenza: "asc" }],
     select: {
       id: true,

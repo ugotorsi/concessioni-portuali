@@ -1,6 +1,12 @@
 import { differenceInCalendarDays, startOfDay } from "date-fns";
 
 import { prisma } from "@/lib/prisma";
+import {
+  buildTenantConcessioneWhere,
+  getCurrentTenantContext,
+  isTenantContextConstrained,
+  requireTenantAccess,
+} from "@/lib/tenant-auth";
 import { formatEnumLabel } from "@/lib/utils";
 import type { Prisma } from "@/generated/prisma/client";
 
@@ -211,30 +217,65 @@ function toPagamentoItem(
   };
 }
 
-function buildWhere(params: GetPagamentiListParams): Prisma.PagamentoWhereInput {
+function buildWhere(
+  params: GetPagamentiListParams,
+  tenantContext: Awaited<ReturnType<typeof getCurrentTenantContext>>,
+): Prisma.PagamentoWhereInput {
   const search = params.search?.trim();
+  const concessioneTenantWhere = buildTenantConcessioneWhere(tenantContext);
+  const hasConcessioneTenantScope = Object.keys(concessioneTenantWhere).length > 0;
+  const andFilters: Prisma.PagamentoWhereInput[] = [];
 
-  return {
-    ...(search
-      ? {
-          OR: [
-            { concessione: { numeroAtto: { contains: search } } },
-            { concessione: { ubicazione: { contains: search } } },
-            { concessione: { concessionario: { denominazione: { contains: search } } } },
-          ],
-        }
-      : {}),
-    ...(params.stato ? { stato: params.stato } : {}),
-    ...(typeof params.anno === "number" ? { annoRiferimento: params.anno } : {}),
-    ...(params.concessioneId ? { concessioneId: params.concessioneId } : {}),
-    ...(params.concessionarioId ? { concessione: { concessionarioId: params.concessionarioId } } : {}),
-    ...getCriticitaPagamentoWhere(params.criticita),
-  };
+  if (hasConcessioneTenantScope) {
+    andFilters.push({ concessione: concessioneTenantWhere });
+  }
+
+  if (search) {
+    andFilters.push({
+      OR: [
+        { concessione: { numeroAtto: { contains: search } } },
+        { concessione: { ubicazione: { contains: search } } },
+        { concessione: { concessionario: { denominazione: { contains: search } } } },
+      ],
+    });
+  }
+
+  if (params.stato) {
+    andFilters.push({ stato: params.stato });
+  }
+
+  if (typeof params.anno === "number") {
+    andFilters.push({ annoRiferimento: params.anno });
+  }
+
+  if (params.concessioneId) {
+    andFilters.push({ concessioneId: params.concessioneId });
+  }
+
+  if (params.concessionarioId) {
+    andFilters.push({ concessione: { concessionarioId: params.concessionarioId } });
+  }
+
+  const criticitaWhere = getCriticitaPagamentoWhere(params.criticita);
+  if (Object.keys(criticitaWhere).length > 0) {
+    andFilters.push(criticitaWhere);
+  }
+
+  if (andFilters.length === 0) {
+    return {};
+  }
+
+  if (andFilters.length === 1) {
+    return andFilters[0];
+  }
+
+  return { AND: andFilters };
 }
 
 export async function getPagamentiList(params: GetPagamentiListParams): Promise<GetPagamentiListResult> {
   const today = startOfDay(new Date());
-  const where = buildWhere(params);
+  const tenantContext = await getCurrentTenantContext();
+  const where = buildWhere(params, tenantContext);
 
   const rows = await prisma.pagamento.findMany({
     where,
@@ -284,7 +325,8 @@ export async function getPagamentiList(params: GetPagamentiListParams): Promise<
 }
 
 export async function getPagamentiSummary(params: GetPagamentiListParams): Promise<PagamentiSummary> {
-  const where = buildWhere(params);
+  const tenantContext = await getCurrentTenantContext();
+  const where = buildWhere(params, tenantContext);
 
   const rows = await prisma.pagamento.findMany({
     where,
@@ -341,12 +383,17 @@ export async function getPagamentiSummary(params: GetPagamentiListParams): Promi
 }
 
 export async function getPagamentiFilters(): Promise<PagamentiFiltersData> {
+  const tenantContext = await getCurrentTenantContext();
+  const concessioneTenantWhere = buildTenantConcessioneWhere(tenantContext);
+  const hasConcessioneTenantScope = Object.keys(concessioneTenantWhere).length > 0;
   const [concessioni, concessionari, anniRows] = await Promise.all([
     prisma.concessione.findMany({
+      where: concessioneTenantWhere,
       orderBy: [{ dataScadenza: "asc" }],
       select: {
         id: true,
         numeroAtto: true,
+        concessionarioId: true,
         concessionario: {
           select: {
             denominazione: true,
@@ -355,6 +402,13 @@ export async function getPagamentiFilters(): Promise<PagamentiFiltersData> {
       },
     }),
     prisma.concessionario.findMany({
+      where: hasConcessioneTenantScope
+        ? {
+            concessioni: {
+              some: concessioneTenantWhere,
+            },
+          }
+        : undefined,
       orderBy: [{ denominazione: "asc" }],
       select: {
         id: true,
@@ -362,6 +416,11 @@ export async function getPagamentiFilters(): Promise<PagamentiFiltersData> {
       },
     }),
     prisma.pagamento.findMany({
+      where: hasConcessioneTenantScope
+        ? {
+            concessione: concessioneTenantWhere,
+          }
+        : undefined,
       select: { annoRiferimento: true },
       distinct: ["annoRiferimento"],
       orderBy: [{ annoRiferimento: "desc" }],
@@ -386,6 +445,7 @@ export async function getPagamentiFilters(): Promise<PagamentiFiltersData> {
 }
 
 export async function getPagamentoDetail(id: string): Promise<PagamentoDetail | null> {
+  const tenantContext = await getCurrentTenantContext();
   const pagamento = await prisma.pagamento.findUnique({
     where: { id },
     include: {
@@ -439,6 +499,17 @@ export async function getPagamentoDetail(id: string): Promise<PagamentoDetail | 
 
   if (!pagamento) {
     return null;
+  }
+
+  if (tenantContext && isTenantContextConstrained(tenantContext)) {
+    try {
+      requireTenantAccess(tenantContext, pagamento.concessione.enteId, {
+        mode: "read",
+        allowWhenEnteMissing: true,
+      });
+    } catch {
+      return null;
+    }
   }
 
   const today = startOfDay(new Date());

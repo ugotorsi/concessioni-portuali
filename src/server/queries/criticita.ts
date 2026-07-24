@@ -2,6 +2,12 @@ import { startOfDay } from "date-fns";
 
 import { formatEnumLabel } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
+import {
+  buildTenantConcessioneWhere,
+  getCurrentTenantContext,
+  isTenantContextConstrained,
+  requireTenantAccess,
+} from "@/lib/tenant-auth";
 import type { Prisma } from "@/generated/prisma/client";
 
 export const CRITICITA_TIPOLOGIA_VALUES = [
@@ -259,6 +265,9 @@ function statoOrderValue(value: string): number {
 export async function getCriticitaList(
   params: GetCriticitaListParams,
 ): Promise<GetCriticitaListResult> {
+  const tenantContext = await getCurrentTenantContext();
+  const concessioneTenantWhere = buildTenantConcessioneWhere(tenantContext);
+  const hasConcessioneTenantScope = Object.keys(concessioneTenantWhere).length > 0;
   const search = params.search?.trim();
   const andFilters: Prisma.CriticitaWhereInput[] = [];
 
@@ -270,6 +279,7 @@ export async function getCriticitaList(
   }
 
   const where: Prisma.CriticitaWhereInput = {
+    ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
     ...(search
       ? {
           OR: [
@@ -356,12 +366,39 @@ export async function getCriticitaList(
       },
     }),
     Promise.all([
-      prisma.criticita.count(),
-      prisma.criticita.count({ where: { stato: "APERTA" } }),
-      prisma.criticita.count({ where: { gravita: "URGENTE" } }),
-      prisma.criticita.count({ where: { gravita: "ALTA" } }),
-      prisma.criticita.count({ where: { stato: "IN_GESTIONE" } }),
-      prisma.criticita.count({ where: { stato: "RISOLTA" } }),
+      prisma.criticita.count({
+        where: hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : undefined,
+      }),
+      prisma.criticita.count({
+        where: {
+          stato: "APERTA",
+          ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
+        },
+      }),
+      prisma.criticita.count({
+        where: {
+          gravita: "URGENTE",
+          ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
+        },
+      }),
+      prisma.criticita.count({
+        where: {
+          gravita: "ALTA",
+          ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
+        },
+      }),
+      prisma.criticita.count({
+        where: {
+          stato: "IN_GESTIONE",
+          ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
+        },
+      }),
+      prisma.criticita.count({
+        where: {
+          stato: "RISOLTA",
+          ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
+        },
+      }),
     ]),
   ]);
 
@@ -427,6 +464,7 @@ export async function getCriticitaList(
 }
 
 export async function getCriticitaDetail(id: string): Promise<CriticitaDetail | null> {
+  const tenantContext = await getCurrentTenantContext();
   const criticita = await prisma.criticita.findUnique({
     where: { id },
     include: {
@@ -461,6 +499,17 @@ export async function getCriticitaDetail(id: string): Promise<CriticitaDetail | 
 
   if (!criticita) {
     return null;
+  }
+
+  if (tenantContext && isTenantContextConstrained(tenantContext)) {
+    try {
+      requireTenantAccess(tenantContext, criticita.concessione.enteId, {
+        mode: "read",
+        allowWhenEnteMissing: true,
+      });
+    } catch {
+      return null;
+    }
   }
 
   const documentiCollegati = await prisma.documento.findMany({
@@ -569,7 +618,10 @@ export async function getCriticitaDetail(id: string): Promise<CriticitaDetail | 
 }
 
 export async function getCriticitaFilters(): Promise<CriticitaFiltersData> {
+  const tenantContext = await getCurrentTenantContext();
+  const concessioneTenantWhere = buildTenantConcessioneWhere(tenantContext);
   const concessioni = await prisma.concessione.findMany({
+    where: concessioneTenantWhere,
     orderBy: [{ dataScadenza: "asc" }],
     select: {
       id: true,

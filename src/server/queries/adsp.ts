@@ -1,6 +1,7 @@
 import { addDays, startOfDay } from "date-fns";
 
 import { prisma } from "@/lib/prisma";
+import { buildTenantConcessioneWhere, getCurrentTenantContext } from "@/lib/tenant-auth";
 
 export interface AdspKpi {
   concessioniMonitorate: number;
@@ -47,6 +48,9 @@ export interface AdspData {
 export async function getAdspData(): Promise<AdspData> {
   const today = startOfDay(new Date());
   const in30Days = addDays(today, 30);
+  const tenantContext = await getCurrentTenantContext();
+  const concessioneTenantWhere = buildTenantConcessioneWhere(tenantContext);
+  const hasConcessioneTenantScope = Object.keys(concessioneTenantWhere).length > 0;
 
   const [
     concessioniMonitorate,
@@ -59,19 +63,43 @@ export async function getAdspData(): Promise<AdspData> {
     criticitaApertePrincipaliRows,
     procedimentiInCorsoRows,
   ] = await Promise.all([
-    prisma.concessione.count(),
-    prisma.criticita.count({ where: { stato: { in: ["APERTA", "IN_GESTIONE"] } } }),
-    prisma.procedimento.count({ where: { stato: { in: ["DA_AVVIARE", "IN_CORSO"] } } }),
-    prisma.report.count({ where: { validato: true } }),
+    prisma.concessione.count({ where: concessioneTenantWhere }),
+    prisma.criticita.count({
+      where: {
+        stato: { in: ["APERTA", "IN_GESTIONE"] },
+        ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
+      },
+    }),
+    prisma.procedimento.count({
+      where: {
+        stato: { in: ["DA_AVVIARE", "IN_CORSO"] },
+        ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
+      },
+    }),
+    prisma.report.count({
+      where: {
+        validato: true,
+        ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
+      },
+    }),
     prisma.scadenza.count({
       where: {
         stato: { in: ["APERTA", "SCADUTA"] },
         dataScadenza: { lte: in30Days },
+        ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
       },
     }),
-    prisma.pagamento.count({ where: { stato: { in: ["NON_PAGATO", "PARZIALE", "SCADUTO"] } } }),
+    prisma.pagamento.count({
+      where: {
+        stato: { in: ["NON_PAGATO", "PARZIALE", "SCADUTO"] },
+        ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
+      },
+    }),
     prisma.report.findMany({
-      where: { validato: true },
+      where: {
+        validato: true,
+        ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
+      },
       orderBy: [{ createdAt: "desc" }],
       take: 6,
       select: {
@@ -87,7 +115,10 @@ export async function getAdspData(): Promise<AdspData> {
       },
     }),
     prisma.criticita.findMany({
-      where: { stato: { in: ["APERTA", "IN_GESTIONE"] } },
+      where: {
+        stato: { in: ["APERTA", "IN_GESTIONE"] },
+        ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
+      },
       orderBy: [{ gravita: "desc" }, { dataRilevazione: "desc" }],
       take: 6,
       select: {
@@ -104,7 +135,10 @@ export async function getAdspData(): Promise<AdspData> {
       },
     }),
     prisma.procedimento.findMany({
-      where: { stato: { in: ["DA_AVVIARE", "IN_CORSO"] } },
+      where: {
+        stato: { in: ["DA_AVVIARE", "IN_CORSO"] },
+        ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
+      },
       orderBy: [{ dataScadenzaContraddittorio: "asc" }, { createdAt: "desc" }],
       take: 6,
       select: {

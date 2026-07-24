@@ -7,6 +7,7 @@ import { z } from "zod";
 import { canManageProcedimenti, requireRole } from "@/lib/auth";
 import { isContraddittorioCompleto } from "@/lib/procedimento-checklist";
 import { prisma } from "@/lib/prisma";
+import { getCurrentTenantContext, requireConcessioneTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 import {
   PROCEDIMENTO_ORIGINE_VALUES,
@@ -250,6 +251,7 @@ function normalizeChecklist(input: {
 
 export async function createProcedimentoAction(formData: FormData) {
   const role = await requireRole();
+  const tenantContext = await getCurrentTenantContext();
 
   if (role === "VIEWER_ADSP") {
     await auditFailure({
@@ -325,6 +327,27 @@ export async function createProcedimentoAction(formData: FormData) {
       },
     });
     throw new Error(parsed.error.issues[0]?.message ?? "Dati non validi.");
+  }
+
+  if (tenantContext) {
+    try {
+      await requireConcessioneTenantAccess(tenantContext, parsed.data.concessioneId, {
+        mode: "write",
+        allowWhenEnteMissing: false,
+      });
+    } catch (error) {
+      await auditFailure({
+        azione: "AUTHZ_DENIED",
+        entita: "Procedimento",
+        concessioneId: parsed.data.concessioneId,
+        actor: { userRole: role },
+        metadata: {
+          actionType: "PROCEDIMENTO_CREATE",
+          reason: error instanceof Error ? error.message : "TENANT_WRITE_DENIED",
+        },
+      });
+      throw new Error("Operazione non autorizzata per il tenant corrente.");
+    }
   }
 
   const criticitaId = parsed.data.criticitaId?.trim() ? parsed.data.criticitaId : null;
@@ -427,6 +450,7 @@ export async function createProcedimentoAction(formData: FormData) {
 
 export async function updateProcedimentoChecklistAction(formData: FormData) {
   const role = await requireRole();
+  const tenantContext = await getCurrentTenantContext();
 
   if (role === "VIEWER_ADSP") {
     await auditFailure({
@@ -513,6 +537,28 @@ export async function updateProcedimentoChecklistAction(formData: FormData) {
       },
     });
     throw new Error("Procedimento non trovato.");
+  }
+
+  if (tenantContext) {
+    try {
+      await requireConcessioneTenantAccess(tenantContext, procedimento.concessioneId, {
+        mode: "write",
+        allowWhenEnteMissing: false,
+      });
+    } catch (error) {
+      await auditFailure({
+        azione: "AUTHZ_DENIED",
+        entita: "Procedimento",
+        entitaId: procedimento.id,
+        concessioneId: procedimento.concessioneId,
+        actor: { userRole: role },
+        metadata: {
+          actionType: "PROCEDIMENTO_CHECKLIST_UPDATE",
+          reason: error instanceof Error ? error.message : "TENANT_WRITE_DENIED",
+        },
+      });
+      throw new Error("Operazione non autorizzata per il tenant corrente.");
+    }
   }
 
   const checklistData = normalizeChecklist({
