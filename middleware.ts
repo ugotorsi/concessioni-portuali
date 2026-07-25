@@ -4,7 +4,7 @@ import { getToken } from "next-auth/jwt";
 import { isInvestorDemoMode, isInvestorDemoRoute } from "@/lib/investor-demo";
 import { buildRateLimitKey, checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 
-const PUBLIC_PATHS = new Set(["/", "/login", "/logout", "/demo", "/api/staging-r2-diag"]);
+const PUBLIC_PATHS = new Set(["/", "/login", "/logout", "/demo"]);
 const PROTECTED_PREFIXES = [
   "/dashboard",
   "/mappa",
