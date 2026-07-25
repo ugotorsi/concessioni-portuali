@@ -183,6 +183,7 @@ export default async function NormativaOrchestrazionePage() {
                     <TableHead>Tipologia</TableHead>
                     <TableHead>Stato</TableHead>
                     <TableHead>Regole</TableHead>
+                    <TableHead>Download</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -192,11 +193,23 @@ export default async function NormativaOrchestrazionePage() {
                       <TableCell>{source.documentType}</TableCell>
                       <TableCell>{source.status} / {source.role}</TableCell>
                       <TableCell>{source.rulesCount}</TableCell>
+                      <TableCell>
+                        {source.relativePath ? (
+                          <a
+                            href={`/legal-sources/${source.id}/download`}
+                            className="text-sm underline underline-offset-4"
+                          >
+                            Scarica documento
+                          </a>
+                        ) : (
+                          <span className="text-xs text-slate-500">-</span>
+                        )}
+                      </TableCell>
                     </TableRow>
                   ))}
                   {sources.items.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center text-slate-500">
+                      <TableCell colSpan={5} className="text-center text-slate-500">
                         Nessuna fonte disponibile. Eseguire import pack.
                       </TableCell>
                     </TableRow>
