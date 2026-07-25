@@ -396,12 +396,6 @@ async function createSignedCanonicalPut(stableKey: string): Promise<{
   const command = new PutObjectCommand({
     Bucket: bucket,
     Key: storageKey,
-    ContentType: mimeType,
-    ContentLength: source.size,
-    Metadata: {
-      sha256: source.checksum,
-      sourcekey: source.stableKey,
-    },
   });
 
   const expiresInSeconds = 300;
@@ -415,11 +409,7 @@ async function createSignedCanonicalPut(stableKey: string): Promise<{
     storageKey,
     method: "PUT",
     uploadUrl,
-    requiredHeaders: {
-      "content-type": mimeType,
-      "x-amz-meta-sha256": source.checksum,
-      "x-amz-meta-sourcekey": source.stableKey,
-    },
+    requiredHeaders: {},
     expiresInSeconds,
   };
 }
@@ -466,6 +456,15 @@ async function finalizeCanonicalUpload(stableKey: string): Promise<{
   if (remote.body.byteLength !== source.size) {
     throw new Error("Uploaded object size mismatch.");
   }
+
+  await adapter.put({
+    storageKey,
+    body: remote.body,
+    mimeType: inferMimeType(source.filename),
+    originalName: source.filename,
+    sha256: source.checksum,
+    sizeBytes: source.size,
+  });
 
   const currentStorageKey = await readDbStorageKeyById(targetRow.id, storageColumn);
   let databaseUpdated = false;
