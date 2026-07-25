@@ -2,9 +2,12 @@ import { createHash, randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { NextResponse } from "next/server";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { prisma } from "@/lib/prisma";
 import { getDocumentStorageAdapter } from "@/server/documents/storage";
+import { getS3StorageConfig } from "@/server/documents/storage/config";
 import { DocumentStorageS3Error } from "@/server/documents/storage/s3StorageAdapter";
 import { legalRulePackManifestSchema } from "@/server/legal-rules/manifest";
 
@@ -345,6 +348,146 @@ async function handleCanonicalUpload(request: Request): Promise<NextResponse> {
   });
 }
 
+function makeSigningClient(): { client: S3Client; bucket: string } {
+  const config = getS3StorageConfig();
+  return {
+    bucket: config.bucket,
+    client: new S3Client({
+      endpoint: config.endpoint,
+      region: config.region,
+      credentials: {
+        accessKeyId: config.accessKeyId,
+        secretAccessKey: config.secretAccessKey,
+      },
+      forcePathStyle: config.forcePathStyle,
+    }),
+  };
+}
+
+async function createSignedCanonicalPut(stableKey: string): Promise<{
+  stableKey: string;
+  fileName: string;
+  checksum: string;
+  size: number;
+  storageKey: string;
+  method: "PUT";
+  uploadUrl: string;
+  requiredHeaders: Record<string, string>;
+  expiresInSeconds: number;
+}> {
+  const sources = await loadCanonicalSources();
+  const source = sources.find((item) => item.stableKey === stableKey);
+  if (!source) {
+    throw new Error("Stable key not found in canonical manifest.");
+  }
+
+  const matches = await prisma.legalSource.findMany({
+    where: { sourceKey: stableKey },
+    select: { id: true },
+  });
+  if (matches.length !== 1) {
+    throw new Error("LegalSource mapping is not unique.");
+  }
+
+  const storageKey = toCanonicalStorageKey(source.stableKey, source.filename);
+  const mimeType = inferMimeType(source.filename);
+  const { client, bucket } = makeSigningClient();
+
+  const command = new PutObjectCommand({
+    Bucket: bucket,
+    Key: storageKey,
+    ContentType: mimeType,
+    ContentLength: source.size,
+    Metadata: {
+      sha256: source.checksum,
+      sourcekey: source.stableKey,
+    },
+  });
+
+  const expiresInSeconds = 300;
+  const uploadUrl = await getSignedUrl(client, command, { expiresIn: expiresInSeconds });
+
+  return {
+    stableKey: source.stableKey,
+    fileName: source.filename,
+    checksum: source.checksum,
+    size: source.size,
+    storageKey,
+    method: "PUT",
+    uploadUrl,
+    requiredHeaders: {
+      "content-type": mimeType,
+      "x-amz-meta-sha256": source.checksum,
+      "x-amz-meta-sourcekey": source.stableKey,
+    },
+    expiresInSeconds,
+  };
+}
+
+async function finalizeCanonicalUpload(stableKey: string): Promise<{
+  stableKey: string;
+  storageColumn: StorageColumn;
+  storageKey: string;
+  uploaded: boolean;
+  alreadyPresentAndMatching: boolean;
+  databaseUpdated: boolean;
+  databaseAlreadyLinked: boolean;
+}> {
+  const sources = await loadCanonicalSources();
+  const source = sources.find((item) => item.stableKey === stableKey);
+  if (!source) {
+    throw new Error("Stable key not found in canonical manifest.");
+  }
+
+  const storageColumn = await resolveStorageColumn();
+  const matches = await prisma.legalSource.findMany({
+    where: { sourceKey: stableKey },
+    select: { id: true },
+  });
+  if (matches.length !== 1) {
+    throw new Error("LegalSource mapping is not unique.");
+  }
+
+  const storageKey = toCanonicalStorageKey(source.stableKey, source.filename);
+  const targetRow = matches[0]!;
+  const adapter = getDocumentStorageAdapter();
+
+  const exists = await adapter.exists(storageKey);
+  if (!exists) {
+    throw new Error("Uploaded object not found in bucket.");
+  }
+
+  const remote = await adapter.get(storageKey);
+  const remoteHash = sha256Hex(remote.body);
+  if (remoteHash !== source.checksum) {
+    throw new Error("Uploaded object checksum mismatch.");
+  }
+
+  if (remote.body.byteLength !== source.size) {
+    throw new Error("Uploaded object size mismatch.");
+  }
+
+  const currentStorageKey = await readDbStorageKeyById(targetRow.id, storageColumn);
+  let databaseUpdated = false;
+  let databaseAlreadyLinked = false;
+  if (currentStorageKey === storageKey) {
+    databaseAlreadyLinked = true;
+  } else {
+    await writeDbStorageKeyById(targetRow.id, storageKey, storageColumn);
+    databaseUpdated = true;
+  }
+
+  return {
+    stableKey,
+    storageColumn,
+    storageKey,
+    uploaded: true,
+    alreadyPresentAndMatching: true,
+    databaseUpdated,
+    databaseAlreadyLinked,
+  };
+}
+
 async function runCanonicalVerification() {
   const sources = await loadCanonicalSources();
   const storageColumn = await resolveStorageColumn();
@@ -544,6 +687,18 @@ export async function GET(request: Request) {
     }
   }
 
+  if (operation === "legal-sources-sign-put") {
+    const stableKey = (url.searchParams.get("stableKey") ?? "").trim();
+    if (!stableKey) {
+      return badRequest("Missing stableKey.", "STABLE_KEY_REQUIRED");
+    }
+    try {
+      return NextResponse.json(await createSignedCanonicalPut(stableKey));
+    } catch (error) {
+      return internalFailure(error instanceof Error ? error.message : String(error), "LEGAL_SOURCES_SIGN_FAILED");
+    }
+  }
+
   const backendExpected = process.env.DOCUMENT_STORAGE_BACKEND === "s3";
   const bucketExpected = process.env.S3_BUCKET === EXPECTED_BUCKET;
   const regionExpected = process.env.S3_REGION === "auto";
@@ -697,7 +852,7 @@ export async function POST(request: Request): Promise<Response> {
 
   const url = new URL(request.url);
   const operation = url.searchParams.get("op") ?? "";
-  if (operation !== "legal-sources-upload") {
+  if (operation !== "legal-sources-upload" && operation !== "legal-sources-finalize") {
     return badRequest("Unsupported POST operation.", "UNSUPPORTED_OPERATION");
   }
 
@@ -708,6 +863,14 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
+    if (operation === "legal-sources-finalize") {
+      const stableKey = (request.headers.get("x-legal-stable-key") ?? "").trim();
+      if (!stableKey) {
+        return badRequest("Missing x-legal-stable-key.", "STABLE_KEY_REQUIRED");
+      }
+      return NextResponse.json(await finalizeCanonicalUpload(stableKey));
+    }
+
     return await handleCanonicalUpload(request);
   } catch (error) {
     if (error instanceof DocumentStorageS3Error) {
