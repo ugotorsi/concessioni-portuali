@@ -2,7 +2,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { NextResponse } from "next/server";
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { ListObjectsV2Command, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { prisma } from "@/lib/prisma";
@@ -634,6 +634,67 @@ async function runCanonicalVerification() {
   };
 }
 
+async function runCanonicalBucketListing() {
+  const sources = await loadCanonicalSources();
+  const expectedKeys = sources.map((source) => toCanonicalStorageKey(source.stableKey, source.filename));
+  const expectedSet = new Set(expectedKeys);
+
+  const { client, bucket } = makeSigningClient();
+  if (bucket !== EXPECTED_BUCKET) {
+    throw new Error(`Unexpected bucket configured: ${bucket}`);
+  }
+
+  const listedKeys: string[] = [];
+  const keySizes = new Map<string, number>();
+
+  let continuationToken: string | undefined;
+  do {
+    const response = await client.send(
+      new ListObjectsV2Command({
+        Bucket: bucket,
+        Prefix: "legal-sources/",
+        ContinuationToken: continuationToken,
+      }),
+    );
+
+    for (const item of response.Contents ?? []) {
+      if (!item.Key) {
+        continue;
+      }
+      listedKeys.push(item.Key);
+      keySizes.set(item.Key, item.Size ?? 0);
+    }
+
+    continuationToken = response.IsTruncated ? response.NextContinuationToken : undefined;
+  } while (continuationToken);
+
+  const listedSet = new Set(listedKeys);
+  const matchingCanonicalObjects = expectedKeys.filter((key) => listedSet.has(key));
+  const missingCanonicalObjects = expectedKeys.filter((key) => !listedSet.has(key));
+  const unexpectedObjects = [...listedSet].filter((key) => !expectedSet.has(key));
+  const zeroLengthObjects = [...listedSet].filter((key) => (keySizes.get(key) ?? 0) <= 0);
+
+  const keyOccurrence = new Map<string, number>();
+  for (const key of listedKeys) {
+    keyOccurrence.set(key, (keyOccurrence.get(key) ?? 0) + 1);
+  }
+  const duplicateKeys = [...keyOccurrence.entries()].filter(([, count]) => count > 1).map(([key]) => key);
+
+  return {
+    listedObjectsUnderPrefix: listedKeys.length,
+    expectedCanonicalObjects: expectedKeys.length,
+    matchingCanonicalObjects: matchingCanonicalObjects.length,
+    missingCanonicalObjects: missingCanonicalObjects.length,
+    unexpectedObjects: unexpectedObjects.length,
+    zeroLengthObjects: zeroLengthObjects.length,
+    duplicateKeys: duplicateKeys.length,
+    unexpectedObjectKeys: unexpectedObjects,
+    missingCanonicalKeys: missingCanonicalObjects,
+    zeroLengthObjectKeys: zeroLengthObjects,
+    duplicateKeyList: duplicateKeys,
+  };
+}
+
 function validateRuntimeGuards(): NextResponse | null {
   if (process.env.VERCEL_ENV !== "preview") {
     return unauthorized();
@@ -683,6 +744,14 @@ export async function GET(request: Request) {
       return NextResponse.json(await runCanonicalVerification());
     } catch (error) {
       return internalFailure(error instanceof Error ? error.message : String(error), "LEGAL_SOURCES_VERIFY_FAILED");
+    }
+  }
+
+  if (operation === "legal-sources-list") {
+    try {
+      return NextResponse.json(await runCanonicalBucketListing());
+    } catch (error) {
+      return internalFailure(error instanceof Error ? error.message : String(error), "LEGAL_SOURCES_LIST_FAILED");
     }
   }
 
