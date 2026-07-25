@@ -13,6 +13,20 @@ interface DiagResponse {
   deleteOk: boolean;
   bucketExpected: boolean;
   backendExpected: boolean;
+  endpointPresent: boolean;
+  endpointTrimmed: boolean;
+  endpointHasOuterQuotes: boolean;
+  endpointHasWhitespace: boolean;
+  endpointHasNewline: boolean;
+  endpointParseOk: boolean;
+  endpointProtocolHttps: boolean;
+  endpointHasUsername: boolean;
+  endpointHasPassword: boolean;
+  endpointHasQuery: boolean;
+  endpointHasHash: boolean;
+  endpointPathIsRoot: boolean;
+  endpointHostR2Compatible: boolean;
+  endpointIncludesBucketName: boolean;
   errorCode?: string;
 }
 
@@ -36,6 +50,18 @@ function unauthorized(): NextResponse {
   return NextResponse.json({ error: "Not found" }, { status: 404 });
 }
 
+function hasOuterQuotes(input: string): boolean {
+  return (
+    (input.startsWith('"') && input.endsWith('"') && input.length >= 2) ||
+    (input.startsWith("'") && input.endsWith("'") && input.length >= 2)
+  );
+}
+
+function isR2CompatibleHost(hostname: string): boolean {
+  const normalized = hostname.toLowerCase();
+  return normalized.endsWith(".r2.cloudflarestorage.com") || normalized === "r2.cloudflarestorage.com";
+}
+
 export async function GET(request: Request) {
   if (process.env.VERCEL_ENV !== "preview") {
     return unauthorized();
@@ -55,7 +81,37 @@ export async function GET(request: Request) {
   const bucketExpected = process.env.S3_BUCKET === "concessioni-portuali-staging";
   const regionExpected = process.env.S3_REGION === "auto";
   const forcePathStyleExpected = process.env.S3_FORCE_PATH_STYLE === "true";
+  const endpointRaw = process.env.S3_ENDPOINT ?? "";
   const endpointPresent = hasText(process.env.S3_ENDPOINT);
+  const endpointTrimmed = endpointRaw === endpointRaw.trim();
+  const endpointHasOuterQuotes = hasOuterQuotes(endpointRaw);
+  const endpointHasWhitespace = /[ \t]/.test(endpointRaw);
+  const endpointHasNewline = /[\r\n]/.test(endpointRaw);
+
+  let endpointParseOk = false;
+  let endpointProtocolHttps = false;
+  let endpointHasUsername = false;
+  let endpointHasPassword = false;
+  let endpointHasQuery = false;
+  let endpointHasHash = false;
+  let endpointPathIsRoot = false;
+  let endpointHostR2Compatible = false;
+
+  try {
+    const parsedEndpoint = new URL(endpointRaw);
+    endpointParseOk = true;
+    endpointProtocolHttps = parsedEndpoint.protocol === "https:";
+    endpointHasUsername = parsedEndpoint.username.length > 0;
+    endpointHasPassword = parsedEndpoint.password.length > 0;
+    endpointHasQuery = parsedEndpoint.search.length > 0;
+    endpointHasHash = parsedEndpoint.hash.length > 0;
+    endpointPathIsRoot = parsedEndpoint.pathname === "/" || parsedEndpoint.pathname.length === 0;
+    endpointHostR2Compatible = isR2CompatibleHost(parsedEndpoint.hostname);
+  } catch {
+    endpointParseOk = false;
+  }
+
+  const endpointIncludesBucketName = endpointRaw.toLowerCase().includes("concessioni-portuali-staging");
   const accessKeyPresent = hasText(process.env.S3_ACCESS_KEY_ID);
   const secretKeyPresent = hasText(process.env.S3_SECRET_ACCESS_KEY);
 
@@ -75,10 +131,44 @@ export async function GET(request: Request) {
     deleteOk: false,
     bucketExpected,
     backendExpected,
+    endpointPresent,
+    endpointTrimmed,
+    endpointHasOuterQuotes,
+    endpointHasWhitespace,
+    endpointHasNewline,
+    endpointParseOk,
+    endpointProtocolHttps,
+    endpointHasUsername,
+    endpointHasPassword,
+    endpointHasQuery,
+    endpointHasHash,
+    endpointPathIsRoot,
+    endpointHostR2Compatible,
+    endpointIncludesBucketName,
   };
 
   if (!configValid) {
     response.errorCode = "CONFIG_MISMATCH";
+    return NextResponse.json(response);
+  }
+
+  if (!endpointParseOk) {
+    response.errorCode = "ENDPOINT_PARSE_ERROR";
+    return NextResponse.json(response);
+  }
+
+  const endpointFormatValid =
+    endpointProtocolHttps &&
+    !endpointHasUsername &&
+    !endpointHasPassword &&
+    !endpointHasQuery &&
+    !endpointHasHash &&
+    endpointPathIsRoot &&
+    endpointHostR2Compatible &&
+    !endpointIncludesBucketName;
+
+  if (!endpointFormatValid) {
+    response.errorCode = "ENDPOINT_FORMAT_ERROR";
     return NextResponse.json(response);
   }
 
