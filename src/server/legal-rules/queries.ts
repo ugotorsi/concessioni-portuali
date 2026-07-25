@@ -28,7 +28,7 @@ export interface LegalSourceListItem {
   sourceNumber: string | null;
   publicationDate: Date | null;
   effectiveFrom: Date | null;
-  relativePath: string | null;
+  hasStoredFile: boolean;
   checksum: string | null;
   rulesCount: number;
 }
@@ -67,19 +67,6 @@ function parseReferenceDate(referenceDate: string | undefined): Date | null {
   }
 
   return parsed;
-}
-
-function sanitizeRelativePath(pathValue: string | null): string | null {
-  if (!pathValue) {
-    return null;
-  }
-
-  const normalized = pathValue.replace(/\\/g, "/");
-  if (normalized.startsWith("/") || normalized.includes(":/")) {
-    return null;
-  }
-
-  return normalized;
 }
 
 export async function getLegalSources(
@@ -192,7 +179,7 @@ export async function getLegalSources(
       sourceNumber: row.sourceNumber,
       publicationDate: row.publicationDate,
       effectiveFrom: row.effectiveFrom,
-      relativePath: sanitizeRelativePath(row.filePath),
+      hasStoredFile: Boolean(row.filePath),
       checksum: row.fileChecksumSha256,
       rulesCount: row._count.rules,
     })),

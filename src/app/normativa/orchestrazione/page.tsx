@@ -194,7 +194,7 @@ export default async function NormativaOrchestrazionePage() {
                       <TableCell>{source.status} / {source.role}</TableCell>
                       <TableCell>{source.rulesCount}</TableCell>
                       <TableCell>
-                        {source.relativePath ? (
+                        {source.hasStoredFile ? (
                           <a
                             href={`/legal-sources/${source.id}/download`}
                             className="text-sm underline underline-offset-4"
