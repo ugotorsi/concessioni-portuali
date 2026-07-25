@@ -4,14 +4,27 @@ import { INVESTOR_DEMO_MODE_ENV_KEY, isInvestorDemoMode, isInvestorDemoRoute } f
 
 describe("investor demo mode helpers", () => {
   const originalValue = process.env[INVESTOR_DEMO_MODE_ENV_KEY];
+  const originalNodeEnv = process.env.NODE_ENV;
+  const originalVercelEnv = process.env.VERCEL_ENV;
 
   afterEach(() => {
     if (typeof originalValue === "undefined") {
       delete process.env[INVESTOR_DEMO_MODE_ENV_KEY];
-      return;
+    } else {
+      process.env[INVESTOR_DEMO_MODE_ENV_KEY] = originalValue;
     }
 
-    process.env[INVESTOR_DEMO_MODE_ENV_KEY] = originalValue;
+    if (typeof originalNodeEnv === "undefined") {
+      delete process.env.NODE_ENV;
+    } else {
+      process.env.NODE_ENV = originalNodeEnv;
+    }
+
+    if (typeof originalVercelEnv === "undefined") {
+      delete process.env.VERCEL_ENV;
+    } else {
+      process.env.VERCEL_ENV = originalVercelEnv;
+    }
   });
 
   it("enables demo mode only when env is exactly true", () => {
@@ -35,5 +48,13 @@ describe("investor demo mode helpers", () => {
     expect(isInvestorDemoRoute("/api/auth/session")).toBe(false);
     expect(isInvestorDemoRoute("/login")).toBe(false);
     expect(isInvestorDemoRoute("/audit")).toBe(false);
+  });
+
+  it("fails closed in production even when demo env flag is true", () => {
+    process.env[INVESTOR_DEMO_MODE_ENV_KEY] = "true";
+    process.env.VERCEL_ENV = "production";
+    process.env.NODE_ENV = "production";
+
+    expect(isInvestorDemoMode()).toBe(false);
   });
 });

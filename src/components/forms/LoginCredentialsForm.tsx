@@ -66,7 +66,7 @@ export function LoginCredentialsForm({ initialErrorMessage }: LoginCredentialsFo
           required
           autoComplete="username"
           className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900"
-          placeholder="admin@demo.local"
+          placeholder="nome@organizzazione.it"
         />
       </label>
       <label className="grid gap-1 text-sm">

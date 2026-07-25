@@ -1,3 +1,5 @@
+import { getRuntimeEnvironment } from "@/lib/runtime-environment";
+
 export const INVESTOR_DEMO_MODE_ENV_KEY = "INVESTOR_DEMO_MODE";
 
 const DEMO_ROUTE_PREFIXES = [
@@ -12,7 +14,7 @@ const DEMO_ROUTE_PREFIXES = [
 ] as const;
 
 export function isInvestorDemoMode(): boolean {
-  return process.env[INVESTOR_DEMO_MODE_ENV_KEY] === "true";
+  return getRuntimeEnvironment().demoAuthenticationAllowed;
 }
 
 export function isInvestorDemoRoute(pathname: string): boolean {

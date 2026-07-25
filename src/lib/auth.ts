@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { investorDemoIdentity } from "@/lib/investor-demo-data";
 import { isInvestorDemoMode } from "@/lib/investor-demo";
 import { getAuthSession } from "@/lib/next-auth";
+import { getRuntimeEnvironment } from "@/lib/runtime-environment";
 
 export const DEMO_ROLES = [
   "ADMIN",
@@ -42,7 +43,9 @@ function isDemoRole(value: string | undefined): value is DemoRole {
 }
 
 export async function getCurrentRole(): Promise<DemoRole | null> {
-  if (isInvestorDemoMode()) {
+  const runtime = getRuntimeEnvironment();
+
+  if (runtime.demoAuthenticationAllowed && isInvestorDemoMode()) {
     return "ADMIN";
   }
 
@@ -53,8 +56,7 @@ export async function getCurrentRole(): Promise<DemoRole | null> {
     return sessionRole;
   }
 
-  // Temporary fallback for local demo continuity while transitioning from cookie auth.
-  if (process.env.NODE_ENV !== "production") {
+  if (runtime.demoAuthenticationAllowed) {
     const cookieStore = await cookies();
     const role = cookieStore.get(DEMO_ROLE_COOKIE)?.value;
 
@@ -67,7 +69,9 @@ export async function getCurrentRole(): Promise<DemoRole | null> {
 }
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
-  if (isInvestorDemoMode()) {
+  const runtime = getRuntimeEnvironment();
+
+  if (runtime.demoAuthenticationAllowed && isInvestorDemoMode()) {
     return {
       id: investorDemoIdentity.tenantId,
       email: "investor-demo@local",

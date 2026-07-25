@@ -10,6 +10,7 @@ import {
   getRoleLabel,
   type DemoRole,
 } from "@/lib/auth";
+import { getRuntimeEnvironment } from "@/lib/runtime-environment";
 
 function getPostLoginPath(role: DemoRole): string {
   return role === "VIEWER_ADSP" ? "/adsp" : "/dashboard";
@@ -44,6 +45,9 @@ function getErrorMessage(error: string | undefined): string | null {
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const runtime = getRuntimeEnvironment();
+  const demoAuthenticationAllowed = runtime.demoAuthenticationAllowed;
+
   const resolvedParams = searchParams
     ? "then" in searchParams
       ? await searchParams
@@ -62,6 +66,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   async function loginAsRole(formData: FormData) {
     "use server";
+
+    if (!getRuntimeEnvironment().demoAuthenticationAllowed) {
+      redirect("/login?error=invalid");
+    }
 
     const role = formData.get("role");
 
@@ -88,29 +96,26 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Piattaforma interna</p>
         <h1 className="mt-2 text-3xl font-semibold text-slate-900">Accesso demo</h1>
         <p className="mt-3 max-w-3xl text-sm text-slate-700 sm:text-base">
-          Accedi con credenziali demo reali (email e password) per usare la piattaforma.
+          {demoAuthenticationAllowed
+            ? "Accedi con credenziali demo abilitate per l'ambiente corrente."
+            : "Accedi con credenziali autorizzate per l'ambiente corrente."}
         </p>
 
         <section className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4">
           <h2 className="text-base font-semibold text-slate-900">Login con email e password</h2>
           <LoginCredentialsForm initialErrorMessage={errorMessage} />
-          <div className="mt-4 text-sm text-slate-700">
-            <p className="font-medium text-slate-900">Credenziali demo</p>
-            <ul className="mt-2 grid gap-1">
-              <li>admin@demo.local / admin123</li>
-              <li>giuridico@demo.local / giuridico123</li>
-              <li>tecnico@demo.local / tecnico123</li>
-              <li>economico@demo.local / economico123</li>
-              <li>adsp@demo.local / adsp123</li>
-            </ul>
-          </div>
+          {demoAuthenticationAllowed ? (
+            <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+              Ambiente demo autorizzato. Utilizzare esclusivamente dati fittizi.
+            </div>
+          ) : null}
         </section>
 
-        {process.env.NODE_ENV !== "production" ? (
+        {demoAuthenticationAllowed ? (
           <section className="mt-8">
             <h2 className="text-base font-semibold text-slate-900">Fallback demo legacy (solo sviluppo)</h2>
             <p className="mt-2 text-sm text-slate-700">
-              Accesso rapido ruolo/cookie mantenuto temporaneamente per retrocompatibilita locale.
+              Accesso rapido ruolo/cookie disponibile solo in ambiente demo autorizzato.
             </p>
             <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {DEMO_ROLES.map((role) => (
