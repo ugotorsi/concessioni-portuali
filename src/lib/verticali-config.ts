@@ -21,9 +21,9 @@ const VERTICAL_DESCRIPTION_BY_VALUE: Record<ConcessionVerticalValue, string> = {
   PORTUALE_ADSP:
     "Gestione operativa concessioni portuali con presidio su scadenze, criticita istruttorie e monitoraggio dei rapporti in area AdSP.",
   MARITTIMA_TURISTICO_RICREATIVA:
-    "Vista dedicata alle concessioni marittime turistico-ricreative con attenzione a uso del bene, stagionalita e procedimenti correlati.",
+    "Sottoambito della verticale demaniale marittimo-costiera, con attenzione a uso del bene, stagionalita e procedimenti correlati.",
   ALTRA_CONCESSIONE_DEMANIALE:
-    "Perimetro residuale per concessioni demaniali non riconducibili ai due ambiti principali, con monitoraggio operativo centralizzato.",
+    "Perimetro residuale per concessioni demaniali marittimo-costiere non riconducibili ai sottoambiti principali, con monitoraggio operativo centralizzato.",
 };
 
 const VERTICAL_COVERAGE_BY_VALUE: Record<ConcessionVerticalValue, string> = {

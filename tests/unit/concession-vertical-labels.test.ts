@@ -6,7 +6,7 @@ describe("concession vertical labels", () => {
   it("maps expected vertical labels", () => {
     expect(getConcessionVerticalLabel("PORTUALE_ADSP")).toBe("Portuale / AdSP");
     expect(getConcessionVerticalLabel("MARITTIMA_TURISTICO_RICREATIVA")).toBe(
-      "Turistico-ricreativa / Comune costiero",
+      "Sottoambito marittimo turistico-ricreativo",
     );
     expect(getConcessionVerticalLabel("ALTRA_CONCESSIONE_DEMANIALE")).toBe("Altro demanio");
   });
