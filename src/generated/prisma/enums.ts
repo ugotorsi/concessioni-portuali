@@ -356,6 +356,37 @@ export const EsitoIstruttorioProcedimento = {
 export type EsitoIstruttorioProcedimento = (typeof EsitoIstruttorioProcedimento)[keyof typeof EsitoIstruttorioProcedimento]
 
 
+export const TipoDecisioneProcedimento = {
+  DECADENZA_DICHIARATA: 'DECADENZA_DICHIARATA',
+  REVOCA_DISPOSTA: 'REVOCA_DISPOSTA',
+  ARCHIVIAZIONE: 'ARCHIVIAZIONE',
+  CHIUSURA_SENZA_EFFETTO: 'CHIUSURA_SENZA_EFFETTO'
+} as const
+
+export type TipoDecisioneProcedimento = (typeof TipoDecisioneProcedimento)[keyof typeof TipoDecisioneProcedimento]
+
+
+export const EffettoTitoloProcedimento = {
+  NESSUNO: 'NESSUNO',
+  CONCESSIONE_DECADUTA: 'CONCESSIONE_DECADUTA',
+  CONCESSIONE_REVOCATA: 'CONCESSIONE_REVOCATA'
+} as const
+
+export type EffettoTitoloProcedimento = (typeof EffettoTitoloProcedimento)[keyof typeof EffettoTitoloProcedimento]
+
+
+export const StatoEffettoProcedimento = {
+  NON_PREVISTO: 'NON_PREVISTO',
+  PENDENTE: 'PENDENTE',
+  PRONTO: 'PRONTO',
+  APPLICATO: 'APPLICATO',
+  BLOCCATO: 'BLOCCATO',
+  ERRORE: 'ERRORE'
+} as const
+
+export type StatoEffettoProcedimento = (typeof StatoEffettoProcedimento)[keyof typeof StatoEffettoProcedimento]
+
+
 export const OrigineProcedimento = {
   UFFICIO: 'UFFICIO',
   ISTANZA_PARTE: 'ISTANZA_PARTE',

@@ -208,6 +208,7 @@ export type EnteWhereInput = {
   legalRules?: Prisma.LegalRuleListRelationFilter
   documentGaps?: Prisma.DocumentGapListRelationFilter
   importRuns?: Prisma.ImportRunListRelationFilter
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoListRelationFilter
 }
 
 export type EnteOrderByWithRelationInput = {
@@ -228,6 +229,7 @@ export type EnteOrderByWithRelationInput = {
   legalRules?: Prisma.LegalRuleOrderByRelationAggregateInput
   documentGaps?: Prisma.DocumentGapOrderByRelationAggregateInput
   importRuns?: Prisma.ImportRunOrderByRelationAggregateInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoOrderByRelationAggregateInput
 }
 
 export type EnteWhereUniqueInput = Prisma.AtLeast<{
@@ -251,6 +253,7 @@ export type EnteWhereUniqueInput = Prisma.AtLeast<{
   legalRules?: Prisma.LegalRuleListRelationFilter
   documentGaps?: Prisma.DocumentGapListRelationFilter
   importRuns?: Prisma.ImportRunListRelationFilter
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoListRelationFilter
 }, "id" | "codice">
 
 export type EnteOrderByWithAggregationInput = {
@@ -297,6 +300,7 @@ export type EnteCreateInput = {
   legalRules?: Prisma.LegalRuleCreateNestedManyWithoutEnteInput
   documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutEnteInput
   importRuns?: Prisma.ImportRunCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateInput = {
@@ -317,6 +321,7 @@ export type EnteUncheckedCreateInput = {
   legalRules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutEnteInput
   documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutEnteInput
   importRuns?: Prisma.ImportRunUncheckedCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUpdateInput = {
@@ -337,6 +342,7 @@ export type EnteUpdateInput = {
   legalRules?: Prisma.LegalRuleUpdateManyWithoutEnteNestedInput
   documentGaps?: Prisma.DocumentGapUpdateManyWithoutEnteNestedInput
   importRuns?: Prisma.ImportRunUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateInput = {
@@ -357,6 +363,7 @@ export type EnteUncheckedUpdateInput = {
   legalRules?: Prisma.LegalRuleUncheckedUpdateManyWithoutEnteNestedInput
   documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutEnteNestedInput
   importRuns?: Prisma.ImportRunUncheckedUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteCreateManyInput = {
@@ -571,6 +578,22 @@ export type EnteUpdateOneWithoutDocumentiNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.EnteUpdateToOneWithWhereWithoutDocumentiInput, Prisma.EnteUpdateWithoutDocumentiInput>, Prisma.EnteUncheckedUpdateWithoutDocumentiInput>
 }
 
+export type EnteCreateNestedOneWithoutDecisioniProcedimentoInput = {
+  create?: Prisma.XOR<Prisma.EnteCreateWithoutDecisioniProcedimentoInput, Prisma.EnteUncheckedCreateWithoutDecisioniProcedimentoInput>
+  connectOrCreate?: Prisma.EnteCreateOrConnectWithoutDecisioniProcedimentoInput
+  connect?: Prisma.EnteWhereUniqueInput
+}
+
+export type EnteUpdateOneWithoutDecisioniProcedimentoNestedInput = {
+  create?: Prisma.XOR<Prisma.EnteCreateWithoutDecisioniProcedimentoInput, Prisma.EnteUncheckedCreateWithoutDecisioniProcedimentoInput>
+  connectOrCreate?: Prisma.EnteCreateOrConnectWithoutDecisioniProcedimentoInput
+  upsert?: Prisma.EnteUpsertWithoutDecisioniProcedimentoInput
+  disconnect?: Prisma.EnteWhereInput | boolean
+  delete?: Prisma.EnteWhereInput | boolean
+  connect?: Prisma.EnteWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EnteUpdateToOneWithWhereWithoutDecisioniProcedimentoInput, Prisma.EnteUpdateWithoutDecisioniProcedimentoInput>, Prisma.EnteUncheckedUpdateWithoutDecisioniProcedimentoInput>
+}
+
 export type EnteCreateNestedOneWithoutReportInput = {
   create?: Prisma.XOR<Prisma.EnteCreateWithoutReportInput, Prisma.EnteUncheckedCreateWithoutReportInput>
   connectOrCreate?: Prisma.EnteCreateOrConnectWithoutReportInput
@@ -620,6 +643,7 @@ export type EnteCreateWithoutPortsInput = {
   legalRules?: Prisma.LegalRuleCreateNestedManyWithoutEnteInput
   documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutEnteInput
   importRuns?: Prisma.ImportRunCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateWithoutPortsInput = {
@@ -639,6 +663,7 @@ export type EnteUncheckedCreateWithoutPortsInput = {
   legalRules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutEnteInput
   documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutEnteInput
   importRuns?: Prisma.ImportRunUncheckedCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteCreateOrConnectWithoutPortsInput = {
@@ -674,6 +699,7 @@ export type EnteUpdateWithoutPortsInput = {
   legalRules?: Prisma.LegalRuleUpdateManyWithoutEnteNestedInput
   documentGaps?: Prisma.DocumentGapUpdateManyWithoutEnteNestedInput
   importRuns?: Prisma.ImportRunUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutPortsInput = {
@@ -693,6 +719,7 @@ export type EnteUncheckedUpdateWithoutPortsInput = {
   legalRules?: Prisma.LegalRuleUncheckedUpdateManyWithoutEnteNestedInput
   documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutEnteNestedInput
   importRuns?: Prisma.ImportRunUncheckedUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteCreateWithoutImportRunsInput = {
@@ -712,6 +739,7 @@ export type EnteCreateWithoutImportRunsInput = {
   legalSources?: Prisma.LegalSourceCreateNestedManyWithoutEnteInput
   legalRules?: Prisma.LegalRuleCreateNestedManyWithoutEnteInput
   documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateWithoutImportRunsInput = {
@@ -731,6 +759,7 @@ export type EnteUncheckedCreateWithoutImportRunsInput = {
   legalSources?: Prisma.LegalSourceUncheckedCreateNestedManyWithoutEnteInput
   legalRules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutEnteInput
   documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteCreateOrConnectWithoutImportRunsInput = {
@@ -766,6 +795,7 @@ export type EnteUpdateWithoutImportRunsInput = {
   legalSources?: Prisma.LegalSourceUpdateManyWithoutEnteNestedInput
   legalRules?: Prisma.LegalRuleUpdateManyWithoutEnteNestedInput
   documentGaps?: Prisma.DocumentGapUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutImportRunsInput = {
@@ -785,6 +815,7 @@ export type EnteUncheckedUpdateWithoutImportRunsInput = {
   legalSources?: Prisma.LegalSourceUncheckedUpdateManyWithoutEnteNestedInput
   legalRules?: Prisma.LegalRuleUncheckedUpdateManyWithoutEnteNestedInput
   documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteCreateWithoutLegalSourcesInput = {
@@ -804,6 +835,7 @@ export type EnteCreateWithoutLegalSourcesInput = {
   legalRules?: Prisma.LegalRuleCreateNestedManyWithoutEnteInput
   documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutEnteInput
   importRuns?: Prisma.ImportRunCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateWithoutLegalSourcesInput = {
@@ -823,6 +855,7 @@ export type EnteUncheckedCreateWithoutLegalSourcesInput = {
   legalRules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutEnteInput
   documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutEnteInput
   importRuns?: Prisma.ImportRunUncheckedCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteCreateOrConnectWithoutLegalSourcesInput = {
@@ -858,6 +891,7 @@ export type EnteUpdateWithoutLegalSourcesInput = {
   legalRules?: Prisma.LegalRuleUpdateManyWithoutEnteNestedInput
   documentGaps?: Prisma.DocumentGapUpdateManyWithoutEnteNestedInput
   importRuns?: Prisma.ImportRunUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutLegalSourcesInput = {
@@ -877,6 +911,7 @@ export type EnteUncheckedUpdateWithoutLegalSourcesInput = {
   legalRules?: Prisma.LegalRuleUncheckedUpdateManyWithoutEnteNestedInput
   documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutEnteNestedInput
   importRuns?: Prisma.ImportRunUncheckedUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteCreateWithoutLegalRulesInput = {
@@ -896,6 +931,7 @@ export type EnteCreateWithoutLegalRulesInput = {
   legalSources?: Prisma.LegalSourceCreateNestedManyWithoutEnteInput
   documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutEnteInput
   importRuns?: Prisma.ImportRunCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateWithoutLegalRulesInput = {
@@ -915,6 +951,7 @@ export type EnteUncheckedCreateWithoutLegalRulesInput = {
   legalSources?: Prisma.LegalSourceUncheckedCreateNestedManyWithoutEnteInput
   documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutEnteInput
   importRuns?: Prisma.ImportRunUncheckedCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteCreateOrConnectWithoutLegalRulesInput = {
@@ -950,6 +987,7 @@ export type EnteUpdateWithoutLegalRulesInput = {
   legalSources?: Prisma.LegalSourceUpdateManyWithoutEnteNestedInput
   documentGaps?: Prisma.DocumentGapUpdateManyWithoutEnteNestedInput
   importRuns?: Prisma.ImportRunUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutLegalRulesInput = {
@@ -969,6 +1007,7 @@ export type EnteUncheckedUpdateWithoutLegalRulesInput = {
   legalSources?: Prisma.LegalSourceUncheckedUpdateManyWithoutEnteNestedInput
   documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutEnteNestedInput
   importRuns?: Prisma.ImportRunUncheckedUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteCreateWithoutDocumentGapsInput = {
@@ -988,6 +1027,7 @@ export type EnteCreateWithoutDocumentGapsInput = {
   legalSources?: Prisma.LegalSourceCreateNestedManyWithoutEnteInput
   legalRules?: Prisma.LegalRuleCreateNestedManyWithoutEnteInput
   importRuns?: Prisma.ImportRunCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateWithoutDocumentGapsInput = {
@@ -1007,6 +1047,7 @@ export type EnteUncheckedCreateWithoutDocumentGapsInput = {
   legalSources?: Prisma.LegalSourceUncheckedCreateNestedManyWithoutEnteInput
   legalRules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutEnteInput
   importRuns?: Prisma.ImportRunUncheckedCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteCreateOrConnectWithoutDocumentGapsInput = {
@@ -1042,6 +1083,7 @@ export type EnteUpdateWithoutDocumentGapsInput = {
   legalSources?: Prisma.LegalSourceUpdateManyWithoutEnteNestedInput
   legalRules?: Prisma.LegalRuleUpdateManyWithoutEnteNestedInput
   importRuns?: Prisma.ImportRunUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutDocumentGapsInput = {
@@ -1061,6 +1103,7 @@ export type EnteUncheckedUpdateWithoutDocumentGapsInput = {
   legalSources?: Prisma.LegalSourceUncheckedUpdateManyWithoutEnteNestedInput
   legalRules?: Prisma.LegalRuleUncheckedUpdateManyWithoutEnteNestedInput
   importRuns?: Prisma.ImportRunUncheckedUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteCreateWithoutMembershipsInput = {
@@ -1080,6 +1123,7 @@ export type EnteCreateWithoutMembershipsInput = {
   legalRules?: Prisma.LegalRuleCreateNestedManyWithoutEnteInput
   documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutEnteInput
   importRuns?: Prisma.ImportRunCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateWithoutMembershipsInput = {
@@ -1099,6 +1143,7 @@ export type EnteUncheckedCreateWithoutMembershipsInput = {
   legalRules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutEnteInput
   documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutEnteInput
   importRuns?: Prisma.ImportRunUncheckedCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteCreateOrConnectWithoutMembershipsInput = {
@@ -1134,6 +1179,7 @@ export type EnteUpdateWithoutMembershipsInput = {
   legalRules?: Prisma.LegalRuleUpdateManyWithoutEnteNestedInput
   documentGaps?: Prisma.DocumentGapUpdateManyWithoutEnteNestedInput
   importRuns?: Prisma.ImportRunUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutMembershipsInput = {
@@ -1153,6 +1199,7 @@ export type EnteUncheckedUpdateWithoutMembershipsInput = {
   legalRules?: Prisma.LegalRuleUncheckedUpdateManyWithoutEnteNestedInput
   documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutEnteNestedInput
   importRuns?: Prisma.ImportRunUncheckedUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteCreateWithoutConcessioniInput = {
@@ -1172,6 +1219,7 @@ export type EnteCreateWithoutConcessioniInput = {
   legalRules?: Prisma.LegalRuleCreateNestedManyWithoutEnteInput
   documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutEnteInput
   importRuns?: Prisma.ImportRunCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateWithoutConcessioniInput = {
@@ -1191,6 +1239,7 @@ export type EnteUncheckedCreateWithoutConcessioniInput = {
   legalRules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutEnteInput
   documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutEnteInput
   importRuns?: Prisma.ImportRunUncheckedCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteCreateOrConnectWithoutConcessioniInput = {
@@ -1226,6 +1275,7 @@ export type EnteUpdateWithoutConcessioniInput = {
   legalRules?: Prisma.LegalRuleUpdateManyWithoutEnteNestedInput
   documentGaps?: Prisma.DocumentGapUpdateManyWithoutEnteNestedInput
   importRuns?: Prisma.ImportRunUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutConcessioniInput = {
@@ -1245,6 +1295,7 @@ export type EnteUncheckedUpdateWithoutConcessioniInput = {
   legalRules?: Prisma.LegalRuleUncheckedUpdateManyWithoutEnteNestedInput
   documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutEnteNestedInput
   importRuns?: Prisma.ImportRunUncheckedUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteCreateWithoutDocumentiInput = {
@@ -1264,6 +1315,7 @@ export type EnteCreateWithoutDocumentiInput = {
   legalRules?: Prisma.LegalRuleCreateNestedManyWithoutEnteInput
   documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutEnteInput
   importRuns?: Prisma.ImportRunCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateWithoutDocumentiInput = {
@@ -1283,6 +1335,7 @@ export type EnteUncheckedCreateWithoutDocumentiInput = {
   legalRules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutEnteInput
   documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutEnteInput
   importRuns?: Prisma.ImportRunUncheckedCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteCreateOrConnectWithoutDocumentiInput = {
@@ -1318,6 +1371,7 @@ export type EnteUpdateWithoutDocumentiInput = {
   legalRules?: Prisma.LegalRuleUpdateManyWithoutEnteNestedInput
   documentGaps?: Prisma.DocumentGapUpdateManyWithoutEnteNestedInput
   importRuns?: Prisma.ImportRunUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutDocumentiInput = {
@@ -1329,6 +1383,103 @@ export type EnteUncheckedUpdateWithoutDocumentiInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   concessioni?: Prisma.ConcessioneUncheckedUpdateManyWithoutEnteNestedInput
+  report?: Prisma.ReportUncheckedUpdateManyWithoutEnteNestedInput
+  activityLog?: Prisma.ActivityLogUncheckedUpdateManyWithoutEnteNestedInput
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutEnteNestedInput
+  ports?: Prisma.PortUncheckedUpdateManyWithoutEnteNestedInput
+  legalSources?: Prisma.LegalSourceUncheckedUpdateManyWithoutEnteNestedInput
+  legalRules?: Prisma.LegalRuleUncheckedUpdateManyWithoutEnteNestedInput
+  documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutEnteNestedInput
+  importRuns?: Prisma.ImportRunUncheckedUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
+}
+
+export type EnteCreateWithoutDecisioniProcedimentoInput = {
+  id?: string
+  nome: string
+  codice: string
+  tipo?: $Enums.EnteTipo
+  stato?: $Enums.EnteStato
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessioni?: Prisma.ConcessioneCreateNestedManyWithoutEnteInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutEnteInput
+  report?: Prisma.ReportCreateNestedManyWithoutEnteInput
+  activityLog?: Prisma.ActivityLogCreateNestedManyWithoutEnteInput
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutEnteInput
+  ports?: Prisma.PortCreateNestedManyWithoutEnteInput
+  legalSources?: Prisma.LegalSourceCreateNestedManyWithoutEnteInput
+  legalRules?: Prisma.LegalRuleCreateNestedManyWithoutEnteInput
+  documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutEnteInput
+  importRuns?: Prisma.ImportRunCreateNestedManyWithoutEnteInput
+}
+
+export type EnteUncheckedCreateWithoutDecisioniProcedimentoInput = {
+  id?: string
+  nome: string
+  codice: string
+  tipo?: $Enums.EnteTipo
+  stato?: $Enums.EnteStato
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessioni?: Prisma.ConcessioneUncheckedCreateNestedManyWithoutEnteInput
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutEnteInput
+  report?: Prisma.ReportUncheckedCreateNestedManyWithoutEnteInput
+  activityLog?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutEnteInput
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutEnteInput
+  ports?: Prisma.PortUncheckedCreateNestedManyWithoutEnteInput
+  legalSources?: Prisma.LegalSourceUncheckedCreateNestedManyWithoutEnteInput
+  legalRules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutEnteInput
+  documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutEnteInput
+  importRuns?: Prisma.ImportRunUncheckedCreateNestedManyWithoutEnteInput
+}
+
+export type EnteCreateOrConnectWithoutDecisioniProcedimentoInput = {
+  where: Prisma.EnteWhereUniqueInput
+  create: Prisma.XOR<Prisma.EnteCreateWithoutDecisioniProcedimentoInput, Prisma.EnteUncheckedCreateWithoutDecisioniProcedimentoInput>
+}
+
+export type EnteUpsertWithoutDecisioniProcedimentoInput = {
+  update: Prisma.XOR<Prisma.EnteUpdateWithoutDecisioniProcedimentoInput, Prisma.EnteUncheckedUpdateWithoutDecisioniProcedimentoInput>
+  create: Prisma.XOR<Prisma.EnteCreateWithoutDecisioniProcedimentoInput, Prisma.EnteUncheckedCreateWithoutDecisioniProcedimentoInput>
+  where?: Prisma.EnteWhereInput
+}
+
+export type EnteUpdateToOneWithWhereWithoutDecisioniProcedimentoInput = {
+  where?: Prisma.EnteWhereInput
+  data: Prisma.XOR<Prisma.EnteUpdateWithoutDecisioniProcedimentoInput, Prisma.EnteUncheckedUpdateWithoutDecisioniProcedimentoInput>
+}
+
+export type EnteUpdateWithoutDecisioniProcedimentoInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  codice?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.EnumEnteTipoFieldUpdateOperationsInput | $Enums.EnteTipo
+  stato?: Prisma.EnumEnteStatoFieldUpdateOperationsInput | $Enums.EnteStato
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessioni?: Prisma.ConcessioneUpdateManyWithoutEnteNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutEnteNestedInput
+  report?: Prisma.ReportUpdateManyWithoutEnteNestedInput
+  activityLog?: Prisma.ActivityLogUpdateManyWithoutEnteNestedInput
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutEnteNestedInput
+  ports?: Prisma.PortUpdateManyWithoutEnteNestedInput
+  legalSources?: Prisma.LegalSourceUpdateManyWithoutEnteNestedInput
+  legalRules?: Prisma.LegalRuleUpdateManyWithoutEnteNestedInput
+  documentGaps?: Prisma.DocumentGapUpdateManyWithoutEnteNestedInput
+  importRuns?: Prisma.ImportRunUpdateManyWithoutEnteNestedInput
+}
+
+export type EnteUncheckedUpdateWithoutDecisioniProcedimentoInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  codice?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.EnumEnteTipoFieldUpdateOperationsInput | $Enums.EnteTipo
+  stato?: Prisma.EnumEnteStatoFieldUpdateOperationsInput | $Enums.EnteStato
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessioni?: Prisma.ConcessioneUncheckedUpdateManyWithoutEnteNestedInput
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutEnteNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutEnteNestedInput
   activityLog?: Prisma.ActivityLogUncheckedUpdateManyWithoutEnteNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutEnteNestedInput
@@ -1356,6 +1507,7 @@ export type EnteCreateWithoutReportInput = {
   legalRules?: Prisma.LegalRuleCreateNestedManyWithoutEnteInput
   documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutEnteInput
   importRuns?: Prisma.ImportRunCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateWithoutReportInput = {
@@ -1375,6 +1527,7 @@ export type EnteUncheckedCreateWithoutReportInput = {
   legalRules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutEnteInput
   documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutEnteInput
   importRuns?: Prisma.ImportRunUncheckedCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteCreateOrConnectWithoutReportInput = {
@@ -1410,6 +1563,7 @@ export type EnteUpdateWithoutReportInput = {
   legalRules?: Prisma.LegalRuleUpdateManyWithoutEnteNestedInput
   documentGaps?: Prisma.DocumentGapUpdateManyWithoutEnteNestedInput
   importRuns?: Prisma.ImportRunUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutReportInput = {
@@ -1429,6 +1583,7 @@ export type EnteUncheckedUpdateWithoutReportInput = {
   legalRules?: Prisma.LegalRuleUncheckedUpdateManyWithoutEnteNestedInput
   documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutEnteNestedInput
   importRuns?: Prisma.ImportRunUncheckedUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteCreateWithoutActivityLogInput = {
@@ -1448,6 +1603,7 @@ export type EnteCreateWithoutActivityLogInput = {
   legalRules?: Prisma.LegalRuleCreateNestedManyWithoutEnteInput
   documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutEnteInput
   importRuns?: Prisma.ImportRunCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateWithoutActivityLogInput = {
@@ -1467,6 +1623,7 @@ export type EnteUncheckedCreateWithoutActivityLogInput = {
   legalRules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutEnteInput
   documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutEnteInput
   importRuns?: Prisma.ImportRunUncheckedCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteCreateOrConnectWithoutActivityLogInput = {
@@ -1502,6 +1659,7 @@ export type EnteUpdateWithoutActivityLogInput = {
   legalRules?: Prisma.LegalRuleUpdateManyWithoutEnteNestedInput
   documentGaps?: Prisma.DocumentGapUpdateManyWithoutEnteNestedInput
   importRuns?: Prisma.ImportRunUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutActivityLogInput = {
@@ -1521,6 +1679,7 @@ export type EnteUncheckedUpdateWithoutActivityLogInput = {
   legalRules?: Prisma.LegalRuleUncheckedUpdateManyWithoutEnteNestedInput
   documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutEnteNestedInput
   importRuns?: Prisma.ImportRunUncheckedUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 
@@ -1539,6 +1698,7 @@ export type EnteCountOutputType = {
   legalRules: number
   documentGaps: number
   importRuns: number
+  decisioniProcedimento: number
 }
 
 export type EnteCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1552,6 +1712,7 @@ export type EnteCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   legalRules?: boolean | EnteCountOutputTypeCountLegalRulesArgs
   documentGaps?: boolean | EnteCountOutputTypeCountDocumentGapsArgs
   importRuns?: boolean | EnteCountOutputTypeCountImportRunsArgs
+  decisioniProcedimento?: boolean | EnteCountOutputTypeCountDecisioniProcedimentoArgs
 }
 
 /**
@@ -1634,6 +1795,13 @@ export type EnteCountOutputTypeCountImportRunsArgs<ExtArgs extends runtime.Types
   where?: Prisma.ImportRunWhereInput
 }
 
+/**
+ * EnteCountOutputType without action
+ */
+export type EnteCountOutputTypeCountDecisioniProcedimentoArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DecisioneProcedimentoWhereInput
+}
+
 
 export type EnteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1653,6 +1821,7 @@ export type EnteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   legalRules?: boolean | Prisma.Ente$legalRulesArgs<ExtArgs>
   documentGaps?: boolean | Prisma.Ente$documentGapsArgs<ExtArgs>
   importRuns?: boolean | Prisma.Ente$importRunsArgs<ExtArgs>
+  decisioniProcedimento?: boolean | Prisma.Ente$decisioniProcedimentoArgs<ExtArgs>
   _count?: boolean | Prisma.EnteCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["ente"]>
 
@@ -1698,6 +1867,7 @@ export type EnteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   legalRules?: boolean | Prisma.Ente$legalRulesArgs<ExtArgs>
   documentGaps?: boolean | Prisma.Ente$documentGapsArgs<ExtArgs>
   importRuns?: boolean | Prisma.Ente$importRunsArgs<ExtArgs>
+  decisioniProcedimento?: boolean | Prisma.Ente$decisioniProcedimentoArgs<ExtArgs>
   _count?: boolean | Prisma.EnteCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type EnteIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1716,6 +1886,7 @@ export type $EntePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     legalRules: Prisma.$LegalRulePayload<ExtArgs>[]
     documentGaps: Prisma.$DocumentGapPayload<ExtArgs>[]
     importRuns: Prisma.$ImportRunPayload<ExtArgs>[]
+    decisioniProcedimento: Prisma.$DecisioneProcedimentoPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2129,6 +2300,7 @@ export interface Prisma__EnteClient<T, Null = never, ExtArgs extends runtime.Typ
   legalRules<T extends Prisma.Ente$legalRulesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$legalRulesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LegalRulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documentGaps<T extends Prisma.Ente$documentGapsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$documentGapsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentGapPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   importRuns<T extends Prisma.Ente$importRunsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$importRunsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ImportRunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  decisioniProcedimento<T extends Prisma.Ente$decisioniProcedimentoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$decisioniProcedimentoArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DecisioneProcedimentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2795,6 +2967,30 @@ export type Ente$importRunsArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.ImportRunScalarFieldEnum | Prisma.ImportRunScalarFieldEnum[]
+}
+
+/**
+ * Ente.decisioniProcedimento
+ */
+export type Ente$decisioniProcedimentoArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DecisioneProcedimento
+   */
+  select?: Prisma.DecisioneProcedimentoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DecisioneProcedimento
+   */
+  omit?: Prisma.DecisioneProcedimentoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DecisioneProcedimentoInclude<ExtArgs> | null
+  where?: Prisma.DecisioneProcedimentoWhereInput
+  orderBy?: Prisma.DecisioneProcedimentoOrderByWithRelationInput | Prisma.DecisioneProcedimentoOrderByWithRelationInput[]
+  cursor?: Prisma.DecisioneProcedimentoWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DecisioneProcedimentoScalarFieldEnum | Prisma.DecisioneProcedimentoScalarFieldEnum[]
 }
 
 /**

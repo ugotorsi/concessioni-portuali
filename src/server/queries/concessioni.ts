@@ -201,6 +201,22 @@ export interface ConcessioneDetail {
     validato: boolean;
     createdAt: Date;
   }>;
+  ultimaDecisioneConclusiva: {
+    id: string;
+    procedimentoId: string;
+    tipologiaProcedimento: string;
+    tipoDecisione: string;
+    numeroAtto: string;
+    dataAtto: Date;
+    dataEfficacia: Date;
+    organoCompetente: string;
+    effettoTitolo: string;
+    statoEffetto: "NON_PREVISTO" | "PENDENTE" | "PRONTO" | "APPLICATO" | "BLOCCATO" | "ERRORE";
+    effettoApplicatoAt: Date | null;
+    statoConcessionePrecedente: string | null;
+    statoConcessioneSuccessivo: string | null;
+    documentoId: string | null;
+  } | null;
 }
 
 export interface ConcessioniFiltersData {
@@ -479,6 +495,30 @@ export async function getConcessioneDetail(id: string): Promise<ConcessioneDetai
       report: {
         orderBy: { createdAt: "desc" },
       },
+      decisioniProcedimento: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        select: {
+          id: true,
+          procedimentoId: true,
+          tipoDecisione: true,
+          numeroAtto: true,
+          dataAtto: true,
+          dataEfficacia: true,
+          organoCompetente: true,
+          effettoTitolo: true,
+          statoEffetto: true,
+          effettoApplicatoAt: true,
+          statoConcessionePrecedente: true,
+          statoConcessioneSuccessivo: true,
+          documentoId: true,
+          procedimento: {
+            select: {
+              tipologia: true,
+            },
+          },
+        },
+      },
       legalFrameworks: {
         select: {
           framework: true,
@@ -637,6 +677,24 @@ export async function getConcessioneDetail(id: string): Promise<ConcessioneDetai
       validato: item.validato,
       createdAt: item.createdAt,
     })),
+    ultimaDecisioneConclusiva: concessione.decisioniProcedimento[0]
+      ? {
+          statoEffetto: concessione.decisioniProcedimento[0].statoEffetto,
+          effettoApplicatoAt: concessione.decisioniProcedimento[0].effettoApplicatoAt,
+          id: concessione.decisioniProcedimento[0].id,
+          procedimentoId: concessione.decisioniProcedimento[0].procedimentoId,
+          tipologiaProcedimento: concessione.decisioniProcedimento[0].procedimento.tipologia,
+          tipoDecisione: concessione.decisioniProcedimento[0].tipoDecisione,
+          numeroAtto: concessione.decisioniProcedimento[0].numeroAtto,
+          dataAtto: concessione.decisioniProcedimento[0].dataAtto,
+          dataEfficacia: concessione.decisioniProcedimento[0].dataEfficacia,
+          organoCompetente: concessione.decisioniProcedimento[0].organoCompetente,
+          effettoTitolo: concessione.decisioniProcedimento[0].effettoTitolo,
+          statoConcessionePrecedente: concessione.decisioniProcedimento[0].statoConcessionePrecedente,
+          statoConcessioneSuccessivo: concessione.decisioniProcedimento[0].statoConcessioneSuccessivo,
+          documentoId: concessione.decisioniProcedimento[0].documentoId,
+        }
+      : null,
   };
 }
 

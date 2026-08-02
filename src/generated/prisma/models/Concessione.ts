@@ -454,6 +454,7 @@ export type ConcessioneWhereInput = {
   pagamenti?: Prisma.PagamentoListRelationFilter
   documenti?: Prisma.DocumentoListRelationFilter
   report?: Prisma.ReportListRelationFilter
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoListRelationFilter
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkListRelationFilter
   normaImpatti?: Prisma.NormaImpattoListRelationFilter
   activityLogs?: Prisma.ActivityLogListRelationFilter
@@ -502,6 +503,7 @@ export type ConcessioneOrderByWithRelationInput = {
   pagamenti?: Prisma.PagamentoOrderByRelationAggregateInput
   documenti?: Prisma.DocumentoOrderByRelationAggregateInput
   report?: Prisma.ReportOrderByRelationAggregateInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoOrderByRelationAggregateInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkOrderByRelationAggregateInput
   normaImpatti?: Prisma.NormaImpattoOrderByRelationAggregateInput
   activityLogs?: Prisma.ActivityLogOrderByRelationAggregateInput
@@ -553,6 +555,7 @@ export type ConcessioneWhereUniqueInput = Prisma.AtLeast<{
   pagamenti?: Prisma.PagamentoListRelationFilter
   documenti?: Prisma.DocumentoListRelationFilter
   report?: Prisma.ReportListRelationFilter
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoListRelationFilter
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkListRelationFilter
   normaImpatti?: Prisma.NormaImpattoListRelationFilter
   activityLogs?: Prisma.ActivityLogListRelationFilter
@@ -677,6 +680,7 @@ export type ConcessioneCreateInput = {
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
@@ -723,6 +727,7 @@ export type ConcessioneUncheckedCreateInput = {
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
@@ -769,6 +774,7 @@ export type ConcessioneUpdateInput = {
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
@@ -815,6 +821,7 @@ export type ConcessioneUncheckedUpdateInput = {
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -1312,6 +1319,22 @@ export type ConcessioneUpdateOneWithoutDocumentiNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ConcessioneUpdateToOneWithWhereWithoutDocumentiInput, Prisma.ConcessioneUpdateWithoutDocumentiInput>, Prisma.ConcessioneUncheckedUpdateWithoutDocumentiInput>
 }
 
+export type ConcessioneCreateNestedOneWithoutDecisioniProcedimentoInput = {
+  create?: Prisma.XOR<Prisma.ConcessioneCreateWithoutDecisioniProcedimentoInput, Prisma.ConcessioneUncheckedCreateWithoutDecisioniProcedimentoInput>
+  connectOrCreate?: Prisma.ConcessioneCreateOrConnectWithoutDecisioniProcedimentoInput
+  connect?: Prisma.ConcessioneWhereUniqueInput
+}
+
+export type ConcessioneUpdateOneWithoutDecisioniProcedimentoNestedInput = {
+  create?: Prisma.XOR<Prisma.ConcessioneCreateWithoutDecisioniProcedimentoInput, Prisma.ConcessioneUncheckedCreateWithoutDecisioniProcedimentoInput>
+  connectOrCreate?: Prisma.ConcessioneCreateOrConnectWithoutDecisioniProcedimentoInput
+  upsert?: Prisma.ConcessioneUpsertWithoutDecisioniProcedimentoInput
+  disconnect?: Prisma.ConcessioneWhereInput | boolean
+  delete?: Prisma.ConcessioneWhereInput | boolean
+  connect?: Prisma.ConcessioneWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ConcessioneUpdateToOneWithWhereWithoutDecisioniProcedimentoInput, Prisma.ConcessioneUpdateWithoutDecisioniProcedimentoInput>, Prisma.ConcessioneUncheckedUpdateWithoutDecisioniProcedimentoInput>
+}
+
 export type ConcessioneCreateNestedOneWithoutReportInput = {
   create?: Prisma.XOR<Prisma.ConcessioneCreateWithoutReportInput, Prisma.ConcessioneUncheckedCreateWithoutReportInput>
   connectOrCreate?: Prisma.ConcessioneCreateOrConnectWithoutReportInput
@@ -1400,6 +1423,7 @@ export type ConcessioneCreateWithoutEnteInput = {
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
@@ -1445,6 +1469,7 @@ export type ConcessioneUncheckedCreateWithoutEnteInput = {
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
@@ -1554,6 +1579,7 @@ export type ConcessioneCreateWithoutConcessionarioInput = {
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
@@ -1599,6 +1625,7 @@ export type ConcessioneUncheckedCreateWithoutConcessionarioInput = {
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
@@ -1671,6 +1698,7 @@ export type ConcessioneCreateWithoutLegalFrameworksInput = {
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
 }
@@ -1716,6 +1744,7 @@ export type ConcessioneUncheckedCreateWithoutLegalFrameworksInput = {
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
 }
@@ -1777,6 +1806,7 @@ export type ConcessioneUpdateWithoutLegalFrameworksInput = {
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
 }
@@ -1822,6 +1852,7 @@ export type ConcessioneUncheckedUpdateWithoutLegalFrameworksInput = {
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
 }
@@ -1866,6 +1897,7 @@ export type ConcessioneCreateWithoutObblighiInput = {
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
@@ -1911,6 +1943,7 @@ export type ConcessioneUncheckedCreateWithoutObblighiInput = {
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
@@ -1972,6 +2005,7 @@ export type ConcessioneUpdateWithoutObblighiInput = {
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
@@ -2017,6 +2051,7 @@ export type ConcessioneUncheckedUpdateWithoutObblighiInput = {
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -2062,6 +2097,7 @@ export type ConcessioneCreateWithoutScadenzeInput = {
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
@@ -2107,6 +2143,7 @@ export type ConcessioneUncheckedCreateWithoutScadenzeInput = {
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
@@ -2168,6 +2205,7 @@ export type ConcessioneUpdateWithoutScadenzeInput = {
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
@@ -2213,6 +2251,7 @@ export type ConcessioneUncheckedUpdateWithoutScadenzeInput = {
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -2258,6 +2297,7 @@ export type ConcessioneCreateWithoutCriticitaInput = {
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
@@ -2303,6 +2343,7 @@ export type ConcessioneUncheckedCreateWithoutCriticitaInput = {
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
@@ -2364,6 +2405,7 @@ export type ConcessioneUpdateWithoutCriticitaInput = {
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
@@ -2409,6 +2451,7 @@ export type ConcessioneUncheckedUpdateWithoutCriticitaInput = {
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -2454,6 +2497,7 @@ export type ConcessioneCreateWithoutProcedimentiInput = {
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
@@ -2499,6 +2543,7 @@ export type ConcessioneUncheckedCreateWithoutProcedimentiInput = {
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
@@ -2560,6 +2605,7 @@ export type ConcessioneUpdateWithoutProcedimentiInput = {
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
@@ -2605,6 +2651,7 @@ export type ConcessioneUncheckedUpdateWithoutProcedimentiInput = {
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -2650,6 +2697,7 @@ export type ConcessioneCreateWithoutSopralluoghiInput = {
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
@@ -2695,6 +2743,7 @@ export type ConcessioneUncheckedCreateWithoutSopralluoghiInput = {
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
@@ -2756,6 +2805,7 @@ export type ConcessioneUpdateWithoutSopralluoghiInput = {
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
@@ -2801,6 +2851,7 @@ export type ConcessioneUncheckedUpdateWithoutSopralluoghiInput = {
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -2846,6 +2897,7 @@ export type ConcessioneCreateWithoutPagamentiInput = {
   sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
@@ -2891,6 +2943,7 @@ export type ConcessioneUncheckedCreateWithoutPagamentiInput = {
   sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
@@ -2952,6 +3005,7 @@ export type ConcessioneUpdateWithoutPagamentiInput = {
   sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
@@ -2997,6 +3051,7 @@ export type ConcessioneUncheckedUpdateWithoutPagamentiInput = {
   sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -3042,6 +3097,7 @@ export type ConcessioneCreateWithoutDocumentiInput = {
   sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
@@ -3087,6 +3143,7 @@ export type ConcessioneUncheckedCreateWithoutDocumentiInput = {
   sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
@@ -3148,6 +3205,7 @@ export type ConcessioneUpdateWithoutDocumentiInput = {
   sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
@@ -3192,6 +3250,207 @@ export type ConcessioneUncheckedUpdateWithoutDocumentiInput = {
   procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
+  normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
+}
+
+export type ConcessioneCreateWithoutDecisioniProcedimentoInput = {
+  id?: string
+  numeroAtto: string
+  dataRilascio: Date | string
+  dataScadenza: Date | string
+  normaRiferimento: $Enums.NormaRiferimento
+  tipologiaBene: $Enums.TipologiaBene
+  attivita: $Enums.AttivitaConcessione
+  superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
+  canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
+  stato: $Enums.StatoConcessione
+  descrizioneBene?: string | null
+  ubicazione?: string | null
+  note?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessionario: Prisma.ConcessionarioCreateNestedOneWithoutConcessioniInput
+  ente?: Prisma.EnteCreateNestedOneWithoutConcessioniInput
+  obblighi?: Prisma.ObbligoConcessorioCreateNestedManyWithoutConcessioneInput
+  scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
+  criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
+  procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutConcessioneInput
+  sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
+  pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
+  report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
+  normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
+}
+
+export type ConcessioneUncheckedCreateWithoutDecisioniProcedimentoInput = {
+  id?: string
+  numeroAtto: string
+  dataRilascio: Date | string
+  dataScadenza: Date | string
+  normaRiferimento: $Enums.NormaRiferimento
+  tipologiaBene: $Enums.TipologiaBene
+  attivita: $Enums.AttivitaConcessione
+  superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
+  canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
+  stato: $Enums.StatoConcessione
+  descrizioneBene?: string | null
+  ubicazione?: string | null
+  note?: string | null
+  concessionarioId: string
+  enteId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  obblighi?: Prisma.ObbligoConcessorioUncheckedCreateNestedManyWithoutConcessioneInput
+  scadenze?: Prisma.ScadenzaUncheckedCreateNestedManyWithoutConcessioneInput
+  criticita?: Prisma.CriticitaUncheckedCreateNestedManyWithoutConcessioneInput
+  procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
+  sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
+  pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
+  report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
+  normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
+}
+
+export type ConcessioneCreateOrConnectWithoutDecisioniProcedimentoInput = {
+  where: Prisma.ConcessioneWhereUniqueInput
+  create: Prisma.XOR<Prisma.ConcessioneCreateWithoutDecisioniProcedimentoInput, Prisma.ConcessioneUncheckedCreateWithoutDecisioniProcedimentoInput>
+}
+
+export type ConcessioneUpsertWithoutDecisioniProcedimentoInput = {
+  update: Prisma.XOR<Prisma.ConcessioneUpdateWithoutDecisioniProcedimentoInput, Prisma.ConcessioneUncheckedUpdateWithoutDecisioniProcedimentoInput>
+  create: Prisma.XOR<Prisma.ConcessioneCreateWithoutDecisioniProcedimentoInput, Prisma.ConcessioneUncheckedCreateWithoutDecisioniProcedimentoInput>
+  where?: Prisma.ConcessioneWhereInput
+}
+
+export type ConcessioneUpdateToOneWithWhereWithoutDecisioniProcedimentoInput = {
+  where?: Prisma.ConcessioneWhereInput
+  data: Prisma.XOR<Prisma.ConcessioneUpdateWithoutDecisioniProcedimentoInput, Prisma.ConcessioneUncheckedUpdateWithoutDecisioniProcedimentoInput>
+}
+
+export type ConcessioneUpdateWithoutDecisioniProcedimentoInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
+  dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  normaRiferimento?: Prisma.EnumNormaRiferimentoFieldUpdateOperationsInput | $Enums.NormaRiferimento
+  tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
+  attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
+  superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
+  stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
+  descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessionario?: Prisma.ConcessionarioUpdateOneRequiredWithoutConcessioniNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutConcessioniNestedInput
+  obblighi?: Prisma.ObbligoConcessorioUpdateManyWithoutConcessioneNestedInput
+  scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
+  criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
+  procedimenti?: Prisma.ProcedimentoUpdateManyWithoutConcessioneNestedInput
+  sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
+  pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
+  report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
+  normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
+}
+
+export type ConcessioneUncheckedUpdateWithoutDecisioniProcedimentoInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
+  dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  normaRiferimento?: Prisma.EnumNormaRiferimentoFieldUpdateOperationsInput | $Enums.NormaRiferimento
+  tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
+  attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
+  superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
+  stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
+  descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionarioId?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  obblighi?: Prisma.ObbligoConcessorioUncheckedUpdateManyWithoutConcessioneNestedInput
+  scadenze?: Prisma.ScadenzaUncheckedUpdateManyWithoutConcessioneNestedInput
+  criticita?: Prisma.CriticitaUncheckedUpdateManyWithoutConcessioneNestedInput
+  procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
+  pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -3238,6 +3497,7 @@ export type ConcessioneCreateWithoutReportInput = {
   sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
@@ -3283,6 +3543,7 @@ export type ConcessioneUncheckedCreateWithoutReportInput = {
   sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
@@ -3344,6 +3605,7 @@ export type ConcessioneUpdateWithoutReportInput = {
   sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
@@ -3389,6 +3651,7 @@ export type ConcessioneUncheckedUpdateWithoutReportInput = {
   sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -3435,6 +3698,7 @@ export type ConcessioneCreateWithoutNormaImpattiInput = {
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
 }
@@ -3480,6 +3744,7 @@ export type ConcessioneUncheckedCreateWithoutNormaImpattiInput = {
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
 }
@@ -3541,6 +3806,7 @@ export type ConcessioneUpdateWithoutNormaImpattiInput = {
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
 }
@@ -3586,6 +3852,7 @@ export type ConcessioneUncheckedUpdateWithoutNormaImpattiInput = {
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
 }
@@ -3631,6 +3898,7 @@ export type ConcessioneCreateWithoutActivityLogsInput = {
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
 }
@@ -3676,6 +3944,7 @@ export type ConcessioneUncheckedCreateWithoutActivityLogsInput = {
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
 }
@@ -3737,6 +4006,7 @@ export type ConcessioneUpdateWithoutActivityLogsInput = {
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
 }
@@ -3782,6 +4052,7 @@ export type ConcessioneUncheckedUpdateWithoutActivityLogsInput = {
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
 }
@@ -3860,6 +4131,7 @@ export type ConcessioneUpdateWithoutEnteInput = {
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
@@ -3905,6 +4177,7 @@ export type ConcessioneUncheckedUpdateWithoutEnteInput = {
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -4018,6 +4291,7 @@ export type ConcessioneUpdateWithoutConcessionarioInput = {
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
@@ -4063,6 +4337,7 @@ export type ConcessioneUncheckedUpdateWithoutConcessionarioInput = {
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
   legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -4116,6 +4391,7 @@ export type ConcessioneCountOutputType = {
   pagamenti: number
   documenti: number
   report: number
+  decisioniProcedimento: number
   legalFrameworks: number
   normaImpatti: number
   activityLogs: number
@@ -4130,6 +4406,7 @@ export type ConcessioneCountOutputTypeSelect<ExtArgs extends runtime.Types.Exten
   pagamenti?: boolean | ConcessioneCountOutputTypeCountPagamentiArgs
   documenti?: boolean | ConcessioneCountOutputTypeCountDocumentiArgs
   report?: boolean | ConcessioneCountOutputTypeCountReportArgs
+  decisioniProcedimento?: boolean | ConcessioneCountOutputTypeCountDecisioniProcedimentoArgs
   legalFrameworks?: boolean | ConcessioneCountOutputTypeCountLegalFrameworksArgs
   normaImpatti?: boolean | ConcessioneCountOutputTypeCountNormaImpattiArgs
   activityLogs?: boolean | ConcessioneCountOutputTypeCountActivityLogsArgs
@@ -4204,6 +4481,13 @@ export type ConcessioneCountOutputTypeCountReportArgs<ExtArgs extends runtime.Ty
 /**
  * ConcessioneCountOutputType without action
  */
+export type ConcessioneCountOutputTypeCountDecisioniProcedimentoArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DecisioneProcedimentoWhereInput
+}
+
+/**
+ * ConcessioneCountOutputType without action
+ */
 export type ConcessioneCountOutputTypeCountLegalFrameworksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ConcessioneLegalFrameworkWhereInput
 }
@@ -4266,6 +4550,7 @@ export type ConcessioneSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   pagamenti?: boolean | Prisma.Concessione$pagamentiArgs<ExtArgs>
   documenti?: boolean | Prisma.Concessione$documentiArgs<ExtArgs>
   report?: boolean | Prisma.Concessione$reportArgs<ExtArgs>
+  decisioniProcedimento?: boolean | Prisma.Concessione$decisioniProcedimentoArgs<ExtArgs>
   legalFrameworks?: boolean | Prisma.Concessione$legalFrameworksArgs<ExtArgs>
   normaImpatti?: boolean | Prisma.Concessione$normaImpattiArgs<ExtArgs>
   activityLogs?: boolean | Prisma.Concessione$activityLogsArgs<ExtArgs>
@@ -4393,6 +4678,7 @@ export type ConcessioneInclude<ExtArgs extends runtime.Types.Extensions.Internal
   pagamenti?: boolean | Prisma.Concessione$pagamentiArgs<ExtArgs>
   documenti?: boolean | Prisma.Concessione$documentiArgs<ExtArgs>
   report?: boolean | Prisma.Concessione$reportArgs<ExtArgs>
+  decisioniProcedimento?: boolean | Prisma.Concessione$decisioniProcedimentoArgs<ExtArgs>
   legalFrameworks?: boolean | Prisma.Concessione$legalFrameworksArgs<ExtArgs>
   normaImpatti?: boolean | Prisma.Concessione$normaImpattiArgs<ExtArgs>
   activityLogs?: boolean | Prisma.Concessione$activityLogsArgs<ExtArgs>
@@ -4420,6 +4706,7 @@ export type $ConcessionePayload<ExtArgs extends runtime.Types.Extensions.Interna
     pagamenti: Prisma.$PagamentoPayload<ExtArgs>[]
     documenti: Prisma.$DocumentoPayload<ExtArgs>[]
     report: Prisma.$ReportPayload<ExtArgs>[]
+    decisioniProcedimento: Prisma.$DecisioneProcedimentoPayload<ExtArgs>[]
     legalFrameworks: Prisma.$ConcessioneLegalFrameworkPayload<ExtArgs>[]
     normaImpatti: Prisma.$NormaImpattoPayload<ExtArgs>[]
     activityLogs: Prisma.$ActivityLogPayload<ExtArgs>[]
@@ -4861,6 +5148,7 @@ export interface Prisma__ConcessioneClient<T, Null = never, ExtArgs extends runt
   pagamenti<T extends Prisma.Concessione$pagamentiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$pagamentiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PagamentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documenti<T extends Prisma.Concessione$documentiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$documentiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   report<T extends Prisma.Concessione$reportArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$reportArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  decisioniProcedimento<T extends Prisma.Concessione$decisioniProcedimentoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$decisioniProcedimentoArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DecisioneProcedimentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   legalFrameworks<T extends Prisma.Concessione$legalFrameworksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$legalFrameworksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConcessioneLegalFrameworkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   normaImpatti<T extends Prisma.Concessione$normaImpattiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$normaImpattiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NormaImpattoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   activityLogs<T extends Prisma.Concessione$activityLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$activityLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -5534,6 +5822,30 @@ export type Concessione$reportArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.ReportScalarFieldEnum | Prisma.ReportScalarFieldEnum[]
+}
+
+/**
+ * Concessione.decisioniProcedimento
+ */
+export type Concessione$decisioniProcedimentoArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DecisioneProcedimento
+   */
+  select?: Prisma.DecisioneProcedimentoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DecisioneProcedimento
+   */
+  omit?: Prisma.DecisioneProcedimentoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DecisioneProcedimentoInclude<ExtArgs> | null
+  where?: Prisma.DecisioneProcedimentoWhereInput
+  orderBy?: Prisma.DecisioneProcedimentoOrderByWithRelationInput | Prisma.DecisioneProcedimentoOrderByWithRelationInput[]
+  cursor?: Prisma.DecisioneProcedimentoWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DecisioneProcedimentoScalarFieldEnum | Prisma.DecisioneProcedimentoScalarFieldEnum[]
 }
 
 /**

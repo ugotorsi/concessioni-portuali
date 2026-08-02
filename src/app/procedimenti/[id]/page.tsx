@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { SubmitButtonPending } from "@/components/forms/SubmitButtonPending";
 import { GravitaBadge, StatoBadge as CriticitaStatoBadge } from "@/components/criticita/CriticitaBadges";
 import { EntityDocumentsPanel } from "@/components/documents/EntityDocumentsPanel";
 import { AppShell } from "@/components/layout/AppShell";
@@ -28,7 +29,7 @@ import {
   TableRow,
 } from "@/components/ui/Table";
 import { Textarea } from "@/components/ui/Textarea";
-import { canManageProcedimenti, requireRole } from "@/lib/auth";
+import { canFinalizeProcedimentoDecision, canManageProcedimenti, requireRole } from "@/lib/auth";
 import {
   getChecklistContraddittorioItems,
   getOrigineProcedimentoLabel,
@@ -37,7 +38,8 @@ import {
   getStatoPreavvisoRigettoLabel,
 } from "@/lib/procedimento-checklist";
 import { formatCurrencyEUR, formatDateIT, formatEnumLabel } from "@/lib/utils";
-import { updateProcedimentoChecklistAction } from "@/server/actions/procedimenti";
+import { finalizeProcedimentoDecisionAction, updateProcedimentoChecklistAction } from "@/server/actions/procedimenti";
+import { getDecisionRulePreviewForTipologia } from "@/server/procedimenti/decisioni";
 import { getLetturaProcedimentale, getProcedimentoDetail } from "@/server/queries/procedimenti";
 import { getNormeForProcedimento } from "@/server/queries/normativa";
 
@@ -49,9 +51,29 @@ interface ProcedimentoDetailPageProps {
 
 export const dynamic = "force-dynamic";
 
+function getStatoEffettoLabel(value: "NON_PREVISTO" | "PENDENTE" | "PRONTO" | "APPLICATO" | "BLOCCATO" | "ERRORE") {
+  switch (value) {
+    case "NON_PREVISTO":
+      return "Effetto non previsto";
+    case "PENDENTE":
+      return "Effetto pendente";
+    case "PRONTO":
+      return "Effetto pronto";
+    case "APPLICATO":
+      return "Effetto applicato";
+    case "BLOCCATO":
+      return "Effetto bloccato";
+    case "ERRORE":
+      return "Errore applicazione";
+    default:
+      return value;
+  }
+}
+
 export default async function ProcedimentoDetailPage({ params }: ProcedimentoDetailPageProps) {
   const role = await requireRole();
   const canWriteChecklist = canManageProcedimenti(role);
+  const canFinalizeDecision = canFinalizeProcedimentoDecision(role);
   const { id } = await params;
   const detail = await getProcedimentoDetail(id);
 
@@ -76,6 +98,13 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
     giorniRitardoContraddittorio: detail.procedimento.giorniRitardoContraddittorio,
   });
   const normeCollegate = await getNormeForProcedimento(detail.procedimento.id);
+  const decisionRules = getDecisionRulePreviewForTipologia(detail.procedimento.tipologia);
+  const hasDecision = detail.procedimento.decisioneConclusiva !== null;
+  const decisioneConclusiva = detail.procedimento.decisioneConclusiva;
+  const canRenderFinalizeForm =
+    canFinalizeDecision &&
+    !hasDecision &&
+    ["DA_AVVIARE", "IN_CORSO"].includes(detail.procedimento.stato);
 
   return (
     <AppShell
@@ -408,6 +437,137 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
             </CardContent>
           </Card>
         </section>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Decisione conclusiva</CardTitle>
+            <CardDescription>
+              Sezione separata dalla proposta istruttoria: la proposta non produce effetti automatici sul titolo.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-3 md:grid-cols-2 text-sm text-slate-700">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-slate-500">Proposta istruttoria (non vincolante)</p>
+                <p className="mt-1">{detail.procedimento.propostaEsitoIstruttorio ? formatEnumLabel(detail.procedimento.propostaEsitoIstruttorio) : "Nessuna proposta"}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-slate-500">Checklist contraddittorio</p>
+                <div className="mt-1">
+                  <ProcedimentoChecklistBadge complete={detail.procedimento.checklistContraddittorioCompleta} />
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+              <p className="text-xs uppercase tracking-wide text-slate-500">Matrice decisionale applicata in questo incremento</p>
+              <ul className="mt-2 space-y-2 text-sm text-slate-700">
+                {decisionRules.map((rule) => (
+                  <li key={rule.tipoDecisione} className="rounded-md border border-slate-200 bg-white px-3 py-2">
+                    <span className="font-medium text-slate-900">{rule.label}</span>: {rule.effettoLabel}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {decisioneConclusiva ? (
+              <div className="space-y-3 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+                <p className="font-semibold">Decisione registrata (read-only)</p>
+                <div className="grid gap-2 md:grid-cols-2">
+                  <p><span className="font-medium">Tipo decisione:</span> {formatEnumLabel(decisioneConclusiva.tipoDecisione)}</p>
+                  <p><span className="font-medium">Effetto:</span> {formatEnumLabel(decisioneConclusiva.effettoTitolo)}</p>
+                  <p><span className="font-medium">Numero atto:</span> {decisioneConclusiva.numeroAtto}</p>
+                  <p><span className="font-medium">Data atto:</span> {formatDateIT(decisioneConclusiva.dataAtto)}</p>
+                  <p><span className="font-medium">Data efficacia:</span> {formatDateIT(decisioneConclusiva.dataEfficacia)}</p>
+                  <p><span className="font-medium">Stato effetto:</span> {getStatoEffettoLabel(decisioneConclusiva.statoEffetto)}</p>
+                  <p><span className="font-medium">Effetto applicato il:</span> {decisioneConclusiva.effettoApplicatoAt ? formatDateIT(decisioneConclusiva.effettoApplicatoAt) : "Non ancora applicato"}</p>
+                  <p><span className="font-medium">Organo competente:</span> {decisioneConclusiva.organoCompetente}</p>
+                  <p><span className="font-medium">Registrato da:</span> {decisioneConclusiva.registeredByUserEmail ?? decisioneConclusiva.registeredByUserId}</p>
+                  <p><span className="font-medium">Stato concessione:</span> {decisioneConclusiva.statoConcessionePrecedente ? `${formatEnumLabel(decisioneConclusiva.statoConcessionePrecedente)} -> ${decisioneConclusiva.statoConcessioneSuccessivo ? formatEnumLabel(decisioneConclusiva.statoConcessioneSuccessivo) : "nessuna variazione"}` : "Nessuna variazione"}</p>
+                </div>
+                {decisioneConclusiva.statoEffetto === "PENDENTE" ? (
+                  <p className="rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-amber-900">
+                    Decisione registrata - effetto previsto dal {formatDateIT(decisioneConclusiva.dataEfficacia)} - non ancora applicato.
+                  </p>
+                ) : null}
+                <p><span className="font-medium">Motivazione sintetica:</span> {decisioneConclusiva.motivazioneSintetica}</p>
+                <div className="flex flex-wrap gap-3">
+                  {decisioneConclusiva.documentoId ? (
+                    <Link href={`/documenti/${decisioneConclusiva.documentoId}/download`} className="text-sm underline underline-offset-4">
+                      Apri documento atto conclusivo
+                    </Link>
+                  ) : null}
+                  <Link href={`/concessioni/${detail.concessione.id}`} className="text-sm underline underline-offset-4">
+                    Apri concessione collegata
+                  </Link>
+                  <Link href="/audit" className="text-sm underline underline-offset-4">
+                    Apri audit trail
+                  </Link>
+                </div>
+              </div>
+            ) : null}
+
+            {canRenderFinalizeForm ? (
+              <form action={finalizeProcedimentoDecisionAction} className="space-y-3 rounded-md border border-slate-200 bg-white p-3">
+                <input type="hidden" name="procedimentoId" value={detail.procedimento.id} />
+                <input type="hidden" name="confermaFinalizzazione" value="CONFIRMO_DECISIONE" />
+                <p className="text-sm font-medium text-slate-900">Registra decisione conclusiva</p>
+                <p className="text-xs text-slate-500">Azione irreversibile lato applicativo: dopo il salvataggio la decisione resta in sola lettura.</p>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <label className="text-sm text-slate-700">
+                    Tipo decisione
+                    <Select name="decisionType" required defaultValue={decisionRules[0]?.tipoDecisione ?? ""}>
+                      {decisionRules.map((rule) => (
+                        <option key={rule.tipoDecisione} value={rule.tipoDecisione}>
+                          {rule.label}
+                        </option>
+                      ))}
+                    </Select>
+                  </label>
+                  <label className="text-sm text-slate-700">
+                    Documento atto conclusivo
+                    <Select name="documentoId" defaultValue="">
+                      <option value="">Nessun documento selezionato</option>
+                      {detail.documentiPrincipali.map((doc) => (
+                        <option key={doc.id} value={doc.id}>
+                          {doc.nome} ({formatEnumLabel(doc.tipologia)})
+                        </option>
+                      ))}
+                    </Select>
+                  </label>
+                  <label className="text-sm text-slate-700">
+                    Numero atto
+                    <Input name="numeroAtto" required placeholder="Es. DEL-2026-001" />
+                  </label>
+                  <label className="text-sm text-slate-700">
+                    Data atto
+                    <Input name="dataAtto" type="date" required />
+                  </label>
+                  <label className="text-sm text-slate-700">
+                    Data efficacia
+                    <Input name="dataEfficacia" type="date" required />
+                  </label>
+                  <label className="text-sm text-slate-700">
+                    Organo competente (adotta l atto)
+                    <Input name="organoCompetente" required placeholder="Es. Comitato di Gestione" />
+                  </label>
+                  <label className="text-sm text-slate-700 md:col-span-2">
+                    Motivazione sintetica
+                    <Textarea name="motivazioneSintetica" rows={3} required />
+                  </label>
+                </div>
+                <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                  Conferma esplicita richiesta: la proposta istruttoria resta separata dalla decisione e non produce effetti automatici.
+                </div>
+                <SubmitButtonPending pendingLabel="Registrazione decisione in corso...">Conferma decisione conclusiva</SubmitButtonPending>
+              </form>
+            ) : null}
+
+            {!canFinalizeDecision ? (
+              <p className="text-sm text-slate-500">Profilo non autorizzato alla registrazione della decisione conclusiva.</p>
+            ) : null}
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>

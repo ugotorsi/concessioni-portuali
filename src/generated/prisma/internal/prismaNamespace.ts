@@ -405,6 +405,7 @@ export const ModelName = {
   Sopralluogo: 'Sopralluogo',
   Pagamento: 'Pagamento',
   Documento: 'Documento',
+  DecisioneProcedimento: 'DecisioneProcedimento',
   Report: 'Report',
   NormaFonte: 'NormaFonte',
   NormaVersione: 'NormaVersione',
@@ -425,7 +426,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "sopralluogo" | "pagamento" | "documento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "sopralluogo" | "pagamento" | "documento" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1983,6 +1984,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    DecisioneProcedimento: {
+      payload: Prisma.$DecisioneProcedimentoPayload<ExtArgs>
+      fields: Prisma.DecisioneProcedimentoFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DecisioneProcedimentoFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DecisioneProcedimentoPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DecisioneProcedimentoFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DecisioneProcedimentoPayload>
+        }
+        findFirst: {
+          args: Prisma.DecisioneProcedimentoFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DecisioneProcedimentoPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DecisioneProcedimentoFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DecisioneProcedimentoPayload>
+        }
+        findMany: {
+          args: Prisma.DecisioneProcedimentoFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DecisioneProcedimentoPayload>[]
+        }
+        create: {
+          args: Prisma.DecisioneProcedimentoCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DecisioneProcedimentoPayload>
+        }
+        createMany: {
+          args: Prisma.DecisioneProcedimentoCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DecisioneProcedimentoCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DecisioneProcedimentoPayload>[]
+        }
+        delete: {
+          args: Prisma.DecisioneProcedimentoDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DecisioneProcedimentoPayload>
+        }
+        update: {
+          args: Prisma.DecisioneProcedimentoUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DecisioneProcedimentoPayload>
+        }
+        deleteMany: {
+          args: Prisma.DecisioneProcedimentoDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DecisioneProcedimentoUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DecisioneProcedimentoUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DecisioneProcedimentoPayload>[]
+        }
+        upsert: {
+          args: Prisma.DecisioneProcedimentoUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DecisioneProcedimentoPayload>
+        }
+        aggregate: {
+          args: Prisma.DecisioneProcedimentoAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDecisioneProcedimento>
+        }
+        groupBy: {
+          args: Prisma.DecisioneProcedimentoGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DecisioneProcedimentoGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DecisioneProcedimentoCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DecisioneProcedimentoCountAggregateOutputType> | number
+        }
+      }
+    }
     Report: {
       payload: Prisma.$ReportPayload<ExtArgs>
       fields: Prisma.ReportFieldRefs
@@ -2877,6 +2952,32 @@ export const DocumentoScalarFieldEnum = {
 } as const
 
 export type DocumentoScalarFieldEnum = (typeof DocumentoScalarFieldEnum)[keyof typeof DocumentoScalarFieldEnum]
+
+
+export const DecisioneProcedimentoScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  procedimentoId: 'procedimentoId',
+  concessioneId: 'concessioneId',
+  tipoDecisione: 'tipoDecisione',
+  numeroAtto: 'numeroAtto',
+  dataAtto: 'dataAtto',
+  dataEfficacia: 'dataEfficacia',
+  organoCompetente: 'organoCompetente',
+  motivazioneSintetica: 'motivazioneSintetica',
+  documentoId: 'documentoId',
+  effettoTitolo: 'effettoTitolo',
+  statoEffetto: 'statoEffetto',
+  effettoApplicatoAt: 'effettoApplicatoAt',
+  effectVersion: 'effectVersion',
+  statoConcessionePrecedente: 'statoConcessionePrecedente',
+  statoConcessioneSuccessivo: 'statoConcessioneSuccessivo',
+  registeredByUserId: 'registeredByUserId',
+  idempotencyKey: 'idempotencyKey',
+  createdAt: 'createdAt'
+} as const
+
+export type DecisioneProcedimentoScalarFieldEnum = (typeof DecisioneProcedimentoScalarFieldEnum)[keyof typeof DecisioneProcedimentoScalarFieldEnum]
 
 
 export const ReportScalarFieldEnum = {
@@ -3806,6 +3907,48 @@ export type ListEnumDocumentoCanaleFieldRefInput<$PrismaModel> = FieldRefInputTy
 
 
 /**
+ * Reference to a field of type 'TipoDecisioneProcedimento'
+ */
+export type EnumTipoDecisioneProcedimentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoDecisioneProcedimento'>
+
+
+
+/**
+ * Reference to a field of type 'TipoDecisioneProcedimento[]'
+ */
+export type ListEnumTipoDecisioneProcedimentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoDecisioneProcedimento[]'>
+
+
+
+/**
+ * Reference to a field of type 'EffettoTitoloProcedimento'
+ */
+export type EnumEffettoTitoloProcedimentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EffettoTitoloProcedimento'>
+
+
+
+/**
+ * Reference to a field of type 'EffettoTitoloProcedimento[]'
+ */
+export type ListEnumEffettoTitoloProcedimentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EffettoTitoloProcedimento[]'>
+
+
+
+/**
+ * Reference to a field of type 'StatoEffettoProcedimento'
+ */
+export type EnumStatoEffettoProcedimentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatoEffettoProcedimento'>
+
+
+
+/**
+ * Reference to a field of type 'StatoEffettoProcedimento[]'
+ */
+export type ListEnumStatoEffettoProcedimentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatoEffettoProcedimento[]'>
+
+
+
+/**
  * Reference to a field of type 'TipologiaReport'
  */
 export type EnumTipologiaReportFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipologiaReport'>
@@ -4019,6 +4162,7 @@ export type GlobalOmitConfig = {
   sopralluogo?: Prisma.SopralluogoOmit
   pagamento?: Prisma.PagamentoOmit
   documento?: Prisma.DocumentoOmit
+  decisioneProcedimento?: Prisma.DecisioneProcedimentoOmit
   report?: Prisma.ReportOmit
   normaFonte?: Prisma.NormaFonteOmit
   normaVersione?: Prisma.NormaVersioneOmit

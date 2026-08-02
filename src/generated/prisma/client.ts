@@ -147,6 +147,11 @@ export type Pagamento = Prisma.PagamentoModel
  */
 export type Documento = Prisma.DocumentoModel
 /**
+ * Model DecisioneProcedimento
+ *
+ */
+export type DecisioneProcedimento = Prisma.DecisioneProcedimentoModel
+/**
  * Model Report
  * 
  */
