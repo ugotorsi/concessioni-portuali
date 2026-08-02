@@ -193,6 +193,25 @@ export interface ProcedimentoDetail {
     giorniResiduiContraddittorio: number | null;
     giorniRitardoContraddittorio: number | null;
     createdAt: Date;
+    decisioneConclusiva: {
+      id: string;
+      tipoDecisione: string;
+      numeroAtto: string;
+      dataAtto: Date;
+      dataEfficacia: Date;
+      organoCompetente: string;
+      motivazioneSintetica: string;
+      effettoTitolo: string;
+      statoConcessionePrecedente: string | null;
+      statoConcessioneSuccessivo: string | null;
+      statoEffetto: "NON_PREVISTO" | "PENDENTE" | "PRONTO" | "APPLICATO" | "BLOCCATO" | "ERRORE";
+      effettoApplicatoAt: Date | null;
+      documentoId: string | null;
+      documentoNome: string | null;
+      registeredByUserId: string;
+      registeredByUserEmail: string | null;
+      createdAt: Date;
+    } | null;
   };
   concessione: {
     id: string;
@@ -610,6 +629,22 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
   const procedimento = await prisma.procedimento.findUnique({
     where: { id },
     include: {
+      decisioneProcedimento: {
+        include: {
+          documento: {
+            select: {
+              id: true,
+              nome: true,
+            },
+          },
+          registeredByUser: {
+            select: {
+              id: true,
+              email: true,
+            },
+          },
+        },
+      },
       criticita: {
         select: {
           id: true,
@@ -842,6 +877,27 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
       giorniResiduiContraddittorio,
       giorniRitardoContraddittorio,
       createdAt: procedimento.createdAt,
+      decisioneConclusiva: procedimento.decisioneProcedimento
+        ? {
+            statoEffetto: procedimento.decisioneProcedimento.statoEffetto,
+            effettoApplicatoAt: procedimento.decisioneProcedimento.effettoApplicatoAt,
+            id: procedimento.decisioneProcedimento.id,
+            tipoDecisione: procedimento.decisioneProcedimento.tipoDecisione,
+            numeroAtto: procedimento.decisioneProcedimento.numeroAtto,
+            dataAtto: procedimento.decisioneProcedimento.dataAtto,
+            dataEfficacia: procedimento.decisioneProcedimento.dataEfficacia,
+            organoCompetente: procedimento.decisioneProcedimento.organoCompetente,
+            motivazioneSintetica: procedimento.decisioneProcedimento.motivazioneSintetica,
+            effettoTitolo: procedimento.decisioneProcedimento.effettoTitolo,
+            statoConcessionePrecedente: procedimento.decisioneProcedimento.statoConcessionePrecedente,
+            statoConcessioneSuccessivo: procedimento.decisioneProcedimento.statoConcessioneSuccessivo,
+            documentoId: procedimento.decisioneProcedimento.documentoId,
+            documentoNome: procedimento.decisioneProcedimento.documento?.nome ?? null,
+            registeredByUserId: procedimento.decisioneProcedimento.registeredByUserId,
+            registeredByUserEmail: procedimento.decisioneProcedimento.registeredByUser?.email ?? null,
+            createdAt: procedimento.decisioneProcedimento.createdAt,
+          }
+        : null,
     },
     concessione: {
       id: procedimento.concessione.id,

@@ -1,14 +1,28 @@
 "use server";
 
+import { createHash } from "node:crypto";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
-import { canManageProcedimenti, requireRole } from "@/lib/auth";
+import { canFinalizeProcedimentoDecision, canManageProcedimenti, getCurrentUser, requireRole } from "@/lib/auth";
+import { Prisma } from "@/generated/prisma/client";
 import { isContraddittorioCompleto } from "@/lib/procedimento-checklist";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireConcessioneTenantAccess } from "@/lib/tenant-auth";
+import { computeAuditHash, sanitizeMetadata } from "@/server/audit/hash";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
+import { getAuditRequestContext } from "@/server/audit/requestContext";
+import {
+  applyRegisteredDecisionEffect,
+  auditAlreadyAppliedDecisionEffect,
+} from "@/server/procedimenti/applyRegisteredDecisionEffect";
+import {
+  DECISIONE_PROCEDIMENTO_TIPO_VALUES,
+  getDecisionRulePreviewForTipologia,
+  resolveDecisionOutcome,
+} from "@/server/procedimenti/decisioni";
 import {
   PROCEDIMENTO_ORIGINE_VALUES,
   PROCEDIMENTO_STATO_PREAVVISO_RIGETTO_VALUES,
@@ -83,6 +97,121 @@ const updateProcedimentoChecklistSchema = z.object({
   motivazioneMancatoPreavviso: z.string().trim().optional(),
   noteChecklistContraddittorio: z.string().trim().optional(),
 });
+
+const finalizeProcedimentoDecisionSchema = z.object({
+  procedimentoId: z.string().min(1, "Procedimento non valido."),
+  decisionType: z.enum(DECISIONE_PROCEDIMENTO_TIPO_VALUES, {
+    message: "Tipo decisione non valido.",
+  }),
+  numeroAtto: z.string().trim().min(1, "Numero atto obbligatorio.").max(120),
+  dataAtto: z.string().trim().min(1, "Data atto obbligatoria."),
+  dataEfficacia: z.string().trim().min(1, "Data efficacia obbligatoria."),
+  organoCompetente: z.string().trim().min(1, "Organo competente obbligatorio.").max(180),
+  motivazioneSintetica: z.string().trim().min(1, "Motivazione sintetica obbligatoria.").max(2000),
+  documentoId: z
+    .string()
+    .trim()
+    .optional()
+    .transform((value) => {
+      if (!value || value.length === 0) {
+        return undefined;
+      }
+      return value;
+    }),
+  confermaFinalizzazione: z.literal("CONFIRMO_DECISIONE", {
+    message: "Conferma esplicita obbligatoria.",
+  }),
+});
+
+function toIsoDate(value: string): Date {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    throw new Error("Data non valida.");
+  }
+  return parsed;
+}
+
+function buildDecisionIdempotencyKey(input: {
+  procedimentoId: string;
+  decisionType: string;
+  numeroAtto: string;
+  dataAtto: Date;
+  dataEfficacia: Date;
+}): string {
+  const payload = `${input.procedimentoId}|${input.decisionType}|${input.numeroAtto}|${input.dataAtto.toISOString()}|${input.dataEfficacia.toISOString()}`;
+  return createHash("sha256").update(payload).digest("hex");
+}
+
+function computeInitialEffectStatus(input: {
+  effettoTitolo: "NESSUNO" | "CONCESSIONE_DECADUTA" | "CONCESSIONE_REVOCATA";
+  dataEfficacia: Date;
+  now: Date;
+}): "NON_PREVISTO" | "PENDENTE" | "PRONTO" {
+  if (input.effettoTitolo === "NESSUNO") {
+    return "NON_PREVISTO";
+  }
+
+  if (input.dataEfficacia.getTime() > input.now.getTime()) {
+    return "PENDENTE";
+  }
+
+  return "PRONTO";
+}
+
+type P2002Target = "procedimentoId" | "idempotencyKey";
+
+class FinalizeDecisionApplyError extends Error {
+  public readonly decisioneRegistrata = true;
+  public readonly effettoApplicato = false;
+
+  constructor(
+    public readonly codiceErrore: string,
+    public readonly statoEffetto: "NON_PREVISTO" | "PENDENTE" | "PRONTO" | "APPLICATO" | "BLOCCATO" | "ERRORE",
+    public readonly decisioneId: string,
+    cause?: unknown,
+  ) {
+    super(codiceErrore, { cause });
+    this.name = "FinalizeDecisionApplyError";
+  }
+}
+
+function normalizeOptionalString(value: string | null | undefined): string | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed === "" ? null : trimmed;
+}
+
+function extractP2002Targets(error: Prisma.PrismaClientKnownRequestError): P2002Target[] {
+  const meta = error.meta as { target?: unknown } | undefined;
+  const rawTarget = meta?.target;
+
+  const targetValues: string[] = [];
+  if (Array.isArray(rawTarget)) {
+    for (const item of rawTarget) {
+      if (typeof item === "string") {
+        targetValues.push(item);
+      }
+    }
+  } else if (typeof rawTarget === "string") {
+    targetValues.push(rawTarget);
+  }
+
+  const joined = targetValues.join("|").toLowerCase();
+  const targets: P2002Target[] = [];
+
+  if (joined.includes("procedimentoid")) {
+    targets.push("procedimentoId");
+  }
+
+  if (joined.includes("idempotencykey")) {
+    targets.push("idempotencyKey");
+  }
+
+  return targets;
+}
 
 function toDate(value: string | undefined): Date | null {
   if (!value || value.trim() === "") {
@@ -638,6 +767,594 @@ export async function updateProcedimentoChecklistAction(formData: FormData) {
   revalidatePath("/procedimenti");
   revalidatePath(`/procedimenti/${procedimento.id}`);
   revalidatePath(`/concessioni/${procedimento.concessioneId}`);
+  revalidatePath("/dashboard");
+  redirect(`/procedimenti/${procedimento.id}`);
+}
+
+export async function finalizeProcedimentoDecisionAction(formData: FormData) {
+  const role = await requireRole();
+  const tenantContext = await getCurrentTenantContext();
+  const currentUser = await getCurrentUser();
+  const requestContext = await getAuditRequestContext();
+
+  if (!currentUser?.id) {
+    throw new Error("Utente autenticato non disponibile.");
+  }
+
+  if (!canFinalizeProcedimentoDecision(role)) {
+    await auditFailure({
+      azione: "AUTHZ_DENIED",
+      entita: "DecisioneProcedimento",
+      actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+      metadata: {
+        actionType: "PROCEDIMENTO_DECISION_FINALIZE",
+        reason: "ROLE_NOT_ALLOWED",
+      },
+    });
+    if (role === "VIEWER_ADSP") {
+      redirect("/adsp");
+    }
+    throw new Error("Profilo non autorizzato alla registrazione della decisione conclusiva.");
+  }
+
+  const parsed = finalizeProcedimentoDecisionSchema.safeParse({
+    procedimentoId: formData.get("procedimentoId"),
+    decisionType: formData.get("decisionType"),
+    numeroAtto: formData.get("numeroAtto"),
+    dataAtto: formData.get("dataAtto"),
+    dataEfficacia: formData.get("dataEfficacia"),
+    organoCompetente: formData.get("organoCompetente"),
+    motivazioneSintetica: formData.get("motivazioneSintetica"),
+    documentoId: formData.get("documentoId")?.toString(),
+    confermaFinalizzazione: formData.get("confermaFinalizzazione"),
+  });
+
+  if (!parsed.success) {
+    await auditFailure({
+      azione: "PROCEDIMENTO_DECISION_FINALIZE",
+      entita: "DecisioneProcedimento",
+      actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+      metadata: {
+        reason: "VALIDATION_ERROR",
+        issue: parsed.error.issues[0]?.message ?? "Dati decisione non validi.",
+      },
+    });
+    throw new Error(parsed.error.issues[0]?.message ?? "Dati decisione non validi.");
+  }
+
+  const dataAtto = toIsoDate(parsed.data.dataAtto);
+  const dataEfficacia = toIsoDate(parsed.data.dataEfficacia);
+  if (dataEfficacia < dataAtto) {
+    throw new Error("La data di efficacia non puo essere anteriore alla data atto.");
+  }
+
+  const procedimento = await prisma.procedimento.findUnique({
+    where: { id: parsed.data.procedimentoId },
+    select: {
+      id: true,
+      concessioneId: true,
+      tipologia: true,
+      stato: true,
+      checklistContraddittorioCompleta: true,
+      propostaEsitoIstruttorio: true,
+      decisioneProcedimento: {
+        select: {
+          id: true,
+        },
+      },
+      concessione: {
+        select: {
+          id: true,
+          enteId: true,
+          stato: true,
+        },
+      },
+    },
+  });
+
+  if (!procedimento) {
+    await auditFailure({
+      azione: "PROCEDIMENTO_DECISION_FINALIZE",
+      entita: "DecisioneProcedimento",
+      actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+      metadata: {
+        reason: "PROCEDIMENTO_NOT_FOUND",
+      },
+    });
+    throw new Error("Procedimento non trovato.");
+  }
+
+  if (tenantContext) {
+    try {
+      await requireConcessioneTenantAccess(tenantContext, procedimento.concessioneId, {
+        mode: "write",
+        allowWhenEnteMissing: false,
+      });
+    } catch (error) {
+      await auditFailure({
+        azione: "AUTHZ_DENIED",
+        entita: "DecisioneProcedimento",
+        entitaId: procedimento.id,
+        concessioneId: procedimento.concessioneId,
+        enteId: procedimento.concessione.enteId,
+        actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+        metadata: {
+          actionType: "PROCEDIMENTO_DECISION_FINALIZE",
+          reason: error instanceof Error ? error.message : "TENANT_WRITE_DENIED",
+        },
+      });
+      throw new Error("Operazione non autorizzata per il tenant corrente.");
+    }
+  }
+
+  if (["CONCLUSO", "ARCHIVIATO"].includes(procedimento.stato)) {
+    throw new Error("Procedimento gia concluso o archiviato: registrazione decisione non consentita.");
+  }
+
+  if (procedimento.decisioneProcedimento) {
+    throw new Error("Decisione conclusiva gia registrata per il procedimento.");
+  }
+
+  const decisionPreview = getDecisionRulePreviewForTipologia(procedimento.tipologia);
+  const outcome = resolveDecisionOutcome({
+    tipologiaProcedimento: procedimento.tipologia,
+    tipoDecisione: parsed.data.decisionType,
+  });
+
+  if (outcome.requiresChecklist && !procedimento.checklistContraddittorioCompleta) {
+    throw new Error("Checklist contraddittorio incompleta: finalizzazione non consentita.");
+  }
+
+  if (outcome.requiresDocumento && !parsed.data.documentoId) {
+    throw new Error("Documento atto conclusivo obbligatorio per la decisione selezionata.");
+  }
+
+  let documento: { id: string; concessioneId: string | null; procedimentoId: string | null } | null = null;
+  if (parsed.data.documentoId) {
+    documento = await prisma.documento.findUnique({
+      where: { id: parsed.data.documentoId },
+      select: {
+        id: true,
+        concessioneId: true,
+        procedimentoId: true,
+      },
+    });
+
+    if (!documento) {
+      throw new Error("Documento indicato non trovato.");
+    }
+
+    const linkedToProcedimento = documento.procedimentoId === procedimento.id;
+    const linkedToConcessione = documento.concessioneId === procedimento.concessioneId;
+    if (!linkedToProcedimento && !linkedToConcessione) {
+      throw new Error("Documento non coerente con procedimento o concessione collegata.");
+    }
+  }
+
+  if (outcome.statoConcessioneSuccessivo && !procedimento.concessioneId) {
+    throw new Error("Concessione non collegata: impossibile applicare effetto sul titolo.");
+  }
+
+  if (
+    outcome.statoConcessioneSuccessivo &&
+    ["DECADUTA", "REVOCATA", "ARCHIVIATA"].includes(procedimento.concessione.stato)
+  ) {
+    throw new Error("Stato concessione incompatibile con l effetto richiesto.");
+  }
+
+  const idempotencyKey = buildDecisionIdempotencyKey({
+    procedimentoId: procedimento.id,
+    decisionType: parsed.data.decisionType,
+    numeroAtto: parsed.data.numeroAtto,
+    dataAtto,
+    dataEfficacia,
+  });
+
+  const initialEffectStatus = computeInitialEffectStatus({
+    effettoTitolo: outcome.effettoTitolo,
+    dataEfficacia,
+    now: new Date(),
+  });
+
+  let createdDecisionId: string | null = null;
+  let createdDecisionEnteId: string | null = procedimento.concessione.enteId;
+  let createdDecisionConcessioneId: string | null = procedimento.concessioneId;
+  let recoveredFromIdempotentReplay = false;
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      const latest = await tx.procedimento.findUnique({
+        where: { id: procedimento.id },
+        select: {
+          id: true,
+          stato: true,
+          tipologia: true,
+          checklistContraddittorioCompleta: true,
+          concessioneId: true,
+          concessione: {
+            select: {
+              id: true,
+              stato: true,
+            },
+          },
+          decisioneProcedimento: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      });
+
+      if (!latest) {
+        throw new Error("Procedimento non trovato.");
+      }
+
+      if (["CONCLUSO", "ARCHIVIATO"].includes(latest.stato) || latest.decisioneProcedimento) {
+        throw new Error("Decisione gia applicata o procedimento gia concluso.");
+      }
+
+      if (outcome.requiresChecklist && !latest.checklistContraddittorioCompleta) {
+        throw new Error("Checklist contraddittorio incompleta: finalizzazione non consentita.");
+      }
+
+      const createdDecision = await tx.decisioneProcedimento.create({
+        data: {
+          enteId: procedimento.concessione.enteId,
+          procedimentoId: latest.id,
+          concessioneId: latest.concessioneId,
+          tipoDecisione: parsed.data.decisionType,
+          numeroAtto: parsed.data.numeroAtto,
+          dataAtto,
+          dataEfficacia,
+          organoCompetente: parsed.data.organoCompetente,
+          motivazioneSintetica: parsed.data.motivazioneSintetica,
+          documentoId: documento?.id ?? null,
+          effettoTitolo: outcome.effettoTitolo,
+          statoConcessionePrecedente: latest.concessione?.stato ?? null,
+          statoConcessioneSuccessivo: outcome.statoConcessioneSuccessivo,
+          registeredByUserId: currentUser?.id ?? "",
+          idempotencyKey,
+        },
+        select: {
+          id: true,
+          enteId: true,
+          concessioneId: true,
+        },
+      });
+
+      await tx.$executeRaw`
+        UPDATE "DecisioneProcedimento"
+        SET
+          "statoEffetto" = ${initialEffectStatus}::"StatoEffettoProcedimento",
+          "effectVersion" = COALESCE("effectVersion", 0)
+        WHERE "id" = ${createdDecision.id}
+      `;
+
+      await tx.procedimento.update({
+        where: { id: latest.id },
+        data: {
+          stato: outcome.statoFinaleProcedimento,
+          dataProvvedimentoFinale: dataAtto,
+        },
+      });
+
+      createdDecisionId = createdDecision.id;
+      createdDecisionEnteId = createdDecision.enteId;
+      createdDecisionConcessioneId = createdDecision.concessioneId;
+
+      await tx.activityLog.create({
+        data: await (async () => {
+          const metadata = sanitizeMetadata({
+            procedimentoId: procedimento.id,
+            concessioneId: procedimento.concessioneId,
+            tipoDecisione: parsed.data.decisionType,
+            decisioniConsentite: decisionPreview.map((item) => item.tipoDecisione),
+            numeroAtto: parsed.data.numeroAtto,
+            organoCompetente: parsed.data.organoCompetente,
+            registeredByUserId: currentUser.id,
+            statoConcessionePrecedente: procedimento.concessione.stato,
+            statoConcessioneSuccessivo: outcome.statoConcessioneSuccessivo,
+            dataEfficacia: dataEfficacia.toISOString(),
+            effettoTitolo: outcome.effettoTitolo,
+            statoEffetto: initialEffectStatus,
+          });
+
+          const previous = await tx.activityLog.findFirst({
+            orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+            select: { currentHash: true },
+          });
+
+          const createdAt = new Date();
+          const previousHash = previous?.currentHash ?? null;
+          const currentHash = computeAuditHash({
+            previousHash,
+            createdAt,
+            azione: "DECISIONE_REGISTRATA",
+            entita: "DecisioneProcedimento",
+            entitaId: createdDecision.id,
+            enteId: procedimento.concessione.enteId ?? null,
+            concessioneId: procedimento.concessioneId,
+            esito: "SUCCESS",
+            actor: {
+              userId: currentUser.id,
+              userEmail: currentUser.email,
+              userRole: role,
+            },
+            metadata,
+          });
+
+          return {
+            userId: currentUser.id,
+            userEmail: currentUser.email,
+            userRole: role,
+            enteId: procedimento.concessione.enteId,
+            concessioneId: procedimento.concessioneId,
+            ipAddress: requestContext.ipAddress,
+            userAgent: requestContext.userAgent,
+            azione: "DECISIONE_REGISTRATA",
+            entita: "DecisioneProcedimento",
+            entitaId: createdDecision.id,
+            esito: "SUCCESS",
+            metadata: metadata ?? undefined,
+            previousHash,
+            currentHash,
+            createdAt,
+          };
+        })(),
+      });
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      const targets = extractP2002Targets(error);
+      if (targets.length === 0) {
+        throw new Error("P2002_TARGET_UNRECOGNIZED");
+      }
+
+      const findWhere = targets.includes("procedimentoId")
+        ? { procedimentoId: procedimento.id }
+        : { idempotencyKey };
+
+      const existing = await prisma.decisioneProcedimento.findUnique({
+        where: findWhere,
+        select: {
+          id: true,
+          enteId: true,
+          procedimentoId: true,
+          concessioneId: true,
+          tipoDecisione: true,
+          numeroAtto: true,
+          dataAtto: true,
+          dataEfficacia: true,
+          documentoId: true,
+          organoCompetente: true,
+          effettoTitolo: true,
+          statoConcessionePrecedente: true,
+          statoConcessioneSuccessivo: true,
+          idempotencyKey: true,
+        },
+      });
+
+      if (!existing) {
+        throw new Error("P2002_REPLAY_NOT_RECOVERABLE");
+      }
+
+      const existingOutcome = resolveDecisionOutcome({
+        tipologiaProcedimento: procedimento.tipologia as (typeof PROCEDIMENTO_TIPOLOGIA_VALUES)[number],
+        tipoDecisione: existing.tipoDecisione as (typeof DECISIONE_PROCEDIMENTO_TIPO_VALUES)[number],
+      });
+
+      const expectedSemantic = {
+        procedimentoId: procedimento.id,
+        concessioneId: procedimento.concessioneId,
+        tipoDecisione: parsed.data.decisionType,
+        numeroAtto: parsed.data.numeroAtto,
+        dataAttoIso: dataAtto.toISOString(),
+        dataEfficaciaIso: dataEfficacia.toISOString(),
+        documentoId: documento?.id ?? null,
+        organoCompetente: normalizeOptionalString(parsed.data.organoCompetente),
+        esito: outcome.statoFinaleProcedimento,
+        effettoTitolo: outcome.effettoTitolo,
+        statoConcessionePrecedente: procedimento.concessione.stato,
+        statoConcessioneSuccessivo: outcome.statoConcessioneSuccessivo,
+      };
+
+      const existingSemantic = {
+        procedimentoId: existing.procedimentoId,
+        concessioneId: existing.concessioneId,
+        tipoDecisione: existing.tipoDecisione,
+        numeroAtto: existing.numeroAtto,
+        dataAttoIso: existing.dataAtto.toISOString(),
+        dataEfficaciaIso: existing.dataEfficacia.toISOString(),
+        documentoId: existing.documentoId,
+        organoCompetente: normalizeOptionalString(existing.organoCompetente),
+        esito: existingOutcome.statoFinaleProcedimento,
+        effettoTitolo: existing.effettoTitolo,
+        statoConcessionePrecedente: existing.statoConcessionePrecedente,
+        statoConcessioneSuccessivo: existing.statoConcessioneSuccessivo,
+      };
+
+      const equivalent =
+        existingSemantic.procedimentoId === expectedSemantic.procedimentoId &&
+        existingSemantic.concessioneId === expectedSemantic.concessioneId &&
+        existingSemantic.tipoDecisione === expectedSemantic.tipoDecisione &&
+        existingSemantic.numeroAtto === expectedSemantic.numeroAtto &&
+        existingSemantic.dataAttoIso === expectedSemantic.dataAttoIso &&
+        existingSemantic.dataEfficaciaIso === expectedSemantic.dataEfficaciaIso &&
+        existingSemantic.documentoId === expectedSemantic.documentoId &&
+        existingSemantic.organoCompetente === expectedSemantic.organoCompetente &&
+        existingSemantic.esito === expectedSemantic.esito &&
+        existingSemantic.effettoTitolo === expectedSemantic.effettoTitolo &&
+        existingSemantic.statoConcessionePrecedente === expectedSemantic.statoConcessionePrecedente &&
+        existingSemantic.statoConcessioneSuccessivo === expectedSemantic.statoConcessioneSuccessivo;
+
+      const consistentKey = existing.idempotencyKey === idempotencyKey;
+      if (!equivalent || !consistentKey) {
+        throw new Error("IDEMPOTENCY_CONFLICT");
+      }
+
+      await auditSuccess({
+        azione: "DECISIONE_REGISTRATA",
+        entita: "DecisioneProcedimento",
+        entitaId: existing.id,
+        concessioneId: existing.concessioneId,
+        enteId: existing.enteId,
+        actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+        metadata: sanitizeMetadata({
+          idempotentReplay: true,
+          procedimentoId: procedimento.id,
+          decisionType: parsed.data.decisionType,
+          p2002Targets: targets,
+        }),
+      });
+
+      createdDecisionId = existing.id;
+      createdDecisionEnteId = existing.enteId;
+      createdDecisionConcessioneId = existing.concessioneId;
+      recoveredFromIdempotentReplay = true;
+    }
+
+    if (recoveredFromIdempotentReplay) {
+      // Equivalent duplicate submission is treated as a successful idempotent replay.
+    } else {
+      await auditFailure({
+        azione: "PROCEDIMENTO_DECISION_FINALIZE",
+        entita: "DecisioneProcedimento",
+        entitaId: procedimento.id,
+        concessioneId: procedimento.concessioneId,
+        enteId: procedimento.concessione.enteId,
+        actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+        metadata: {
+          reason: "FINALIZATION_FAILED",
+          decisionType: parsed.data.decisionType,
+          issue: error instanceof Error ? error.message : "Errore durante finalizzazione.",
+        },
+      });
+
+      if (error instanceof Error && error.message === "IDEMPOTENCY_CONFLICT") {
+        throw new Error("IDEMPOTENCY_CONFLICT");
+      }
+
+      if (error instanceof Error && error.message === "P2002_TARGET_UNRECOGNIZED") {
+        throw new Error("P2002_TARGET_UNRECOGNIZED");
+      }
+
+      if (error instanceof Error && error.message === "P2002_REPLAY_NOT_RECOVERABLE") {
+        throw new Error("P2002_REPLAY_NOT_RECOVERABLE");
+      }
+
+      throw error;
+    }
+  }
+
+  if (!createdDecisionId) {
+    throw new Error("Registrazione decisione non completata.");
+  }
+
+  if (initialEffectStatus === "PENDENTE") {
+    await auditSuccess({
+      azione: "EFFETTO_PENDENTE",
+      entita: "DecisioneProcedimento",
+      entitaId: createdDecisionId,
+      concessioneId: createdDecisionConcessioneId,
+      enteId: createdDecisionEnteId,
+      actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+      metadata: sanitizeMetadata({
+        dataEfficacia: dataEfficacia.toISOString(),
+        note: "Decisione registrata: effetto previsto futuro non ancora applicato.",
+      }),
+      requestContext,
+    });
+  }
+
+  if (initialEffectStatus === "PRONTO") {
+    await auditSuccess({
+      azione: "EFFETTO_PRONTO",
+      entita: "DecisioneProcedimento",
+      entitaId: createdDecisionId,
+      concessioneId: createdDecisionConcessioneId,
+      enteId: createdDecisionEnteId,
+      actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+      metadata: sanitizeMetadata({
+        dataEfficacia: dataEfficacia.toISOString(),
+        note: "Effetto pronto per applicazione tecnica separata.",
+      }),
+      requestContext,
+    });
+
+    let applyResult;
+    try {
+      applyResult = await applyRegisteredDecisionEffect({
+        decisioneId: createdDecisionId,
+        actor: {
+          userId: currentUser.id,
+          userEmail: currentUser.email,
+          userRole: role,
+        },
+        tenantContext: tenantContext
+          ? {
+              isAdmin: tenantContext.isAdmin,
+              accessibleTenantIds: tenantContext.accessibleTenantIds,
+              role: tenantContext.role,
+            }
+          : null,
+        requestContext,
+      });
+    } catch (error) {
+      const rawCode =
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        typeof (error as { code?: unknown }).code === "string"
+          ? ((error as { code: string }).code ?? "EFFECT_APPLY_FAILED")
+          : error instanceof Error
+            ? error.message
+            : "EFFECT_APPLY_FAILED";
+
+      const persistedStatoEffettoRaw =
+        typeof error === "object" &&
+        error !== null &&
+        "persistedStatoEffetto" in error
+          ? (error as { persistedStatoEffetto?: unknown }).persistedStatoEffetto
+          : undefined;
+
+      const isKnownStatoEffetto = (value: unknown): value is FinalizeDecisionApplyError["statoEffetto"] =>
+        value === "NON_PREVISTO" ||
+        value === "PENDENTE" ||
+        value === "PRONTO" ||
+        value === "APPLICATO" ||
+        value === "BLOCCATO" ||
+        value === "ERRORE";
+
+      const statoEffetto: FinalizeDecisionApplyError["statoEffetto"] =
+        rawCode === "CONCESSIONE_STATE_CONFLICT"
+          ? isKnownStatoEffetto(persistedStatoEffettoRaw)
+            ? persistedStatoEffettoRaw
+            : "PRONTO"
+          : "ERRORE";
+
+      throw new FinalizeDecisionApplyError(rawCode, statoEffetto, createdDecisionId, error);
+    }
+
+    if (applyResult.status === "ALREADY_APPLIED") {
+      await auditAlreadyAppliedDecisionEffect({
+        decisioneId: createdDecisionId,
+        concessioneId: createdDecisionConcessioneId,
+        enteId: createdDecisionEnteId,
+        actor: {
+          userId: currentUser.id,
+          userEmail: currentUser.email,
+          userRole: role,
+        },
+        requestContext,
+      });
+    }
+  }
+
+  revalidatePath("/procedimenti");
+  revalidatePath(`/procedimenti/${procedimento.id}`);
+  revalidatePath(`/concessioni/${procedimento.concessioneId}`);
+  revalidatePath("/concessioni");
+  revalidatePath("/audit");
   revalidatePath("/dashboard");
   redirect(`/procedimenti/${procedimento.id}`);
 }

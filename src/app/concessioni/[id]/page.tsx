@@ -292,6 +292,77 @@ export default async function ConcessioneDetailPage({ params }: ConcessioneDetai
 
         <Card>
           <CardHeader>
+            <CardTitle>Ultimo evento decisionale conclusivo</CardTitle>
+            <CardDescription>
+              Tracciamento dell ultimo provvedimento conclusivo collegato al titolo concessorio.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {concessione.ultimaDecisioneConclusiva ? (
+              <div className="grid gap-3 text-sm text-slate-700 md:grid-cols-2 xl:grid-cols-4">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Procedimento origine</p>
+                  <p className="mt-1 text-slate-900">{formatEnumLabel(concessione.ultimaDecisioneConclusiva.tipologiaProcedimento)}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Decisione</p>
+                  <p className="mt-1 text-slate-900">{formatEnumLabel(concessione.ultimaDecisioneConclusiva.tipoDecisione)}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Numero atto</p>
+                  <p className="mt-1 text-slate-900">{concessione.ultimaDecisioneConclusiva.numeroAtto}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Data atto</p>
+                  <p className="mt-1 text-slate-900">{formatDateIT(concessione.ultimaDecisioneConclusiva.dataAtto)}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Data efficacia</p>
+                  <p className="mt-1 text-slate-900">{formatDateIT(concessione.ultimaDecisioneConclusiva.dataEfficacia)}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Organo competente</p>
+                  <p className="mt-1 text-slate-900">{concessione.ultimaDecisioneConclusiva.organoCompetente}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Effetto sul titolo</p>
+                  <p className="mt-1 text-slate-900">{formatEnumLabel(concessione.ultimaDecisioneConclusiva.effettoTitolo)}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Stato effetto</p>
+                  <p className="mt-1 text-slate-900">{getStatoEffettoLabel(concessione.ultimaDecisioneConclusiva.statoEffetto)}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Effetto applicato il</p>
+                  <p className="mt-1 text-slate-900">{concessione.ultimaDecisioneConclusiva.effettoApplicatoAt ? formatDateIT(concessione.ultimaDecisioneConclusiva.effettoApplicatoAt) : "Non ancora applicato"}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Stato concessione</p>
+                  <p className="mt-1 text-slate-900">
+                    {concessione.ultimaDecisioneConclusiva.statoConcessionePrecedente
+                      ? `${formatEnumLabel(concessione.ultimaDecisioneConclusiva.statoConcessionePrecedente)} -> ${concessione.ultimaDecisioneConclusiva.statoConcessioneSuccessivo ? formatEnumLabel(concessione.ultimaDecisioneConclusiva.statoConcessioneSuccessivo) : "nessuna variazione"}`
+                      : "Nessuna variazione"}
+                  </p>
+                </div>
+                <div className="xl:col-span-4 flex flex-wrap gap-3">
+                  <Link href={`/procedimenti/${concessione.ultimaDecisioneConclusiva.procedimentoId}`} className="text-sm underline underline-offset-4">
+                    Apri procedimento di origine
+                  </Link>
+                  {concessione.ultimaDecisioneConclusiva.documentoId ? (
+                    <Link href={`/documenti/${concessione.ultimaDecisioneConclusiva.documentoId}/download`} className="text-sm underline underline-offset-4">
+                      Apri documento atto
+                    </Link>
+                  ) : null}
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-slate-500">Nessuna decisione conclusiva registrata per questa concessione.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
             <CardTitle>Obblighi concessori</CardTitle>
           </CardHeader>
           <CardContent>
@@ -538,4 +609,23 @@ export default async function ConcessioneDetailPage({ params }: ConcessioneDetai
       </div>
     </AppShell>
   );
+}
+
+function getStatoEffettoLabel(value: "NON_PREVISTO" | "PENDENTE" | "PRONTO" | "APPLICATO" | "BLOCCATO" | "ERRORE") {
+  switch (value) {
+    case "NON_PREVISTO":
+      return "Effetto non previsto";
+    case "PENDENTE":
+      return "Effetto pendente";
+    case "PRONTO":
+      return "Effetto pronto";
+    case "APPLICATO":
+      return "Effetto applicato";
+    case "BLOCCATO":
+      return "Effetto bloccato";
+    case "ERRORE":
+      return "Errore applicazione";
+    default:
+      return value;
+  }
 }

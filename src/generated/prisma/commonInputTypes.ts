@@ -1272,6 +1272,74 @@ export type EnumDocumentoCanaleNullableWithAggregatesFilter<$PrismaModel = never
   _max?: Prisma.NestedEnumDocumentoCanaleNullableFilter<$PrismaModel>
 }
 
+export type EnumTipoDecisioneProcedimentoFilter<$PrismaModel = never> = {
+  equals?: $Enums.TipoDecisioneProcedimento | Prisma.EnumTipoDecisioneProcedimentoFieldRefInput<$PrismaModel>
+  in?: $Enums.TipoDecisioneProcedimento[] | Prisma.ListEnumTipoDecisioneProcedimentoFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TipoDecisioneProcedimento[] | Prisma.ListEnumTipoDecisioneProcedimentoFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTipoDecisioneProcedimentoFilter<$PrismaModel> | $Enums.TipoDecisioneProcedimento
+}
+
+export type EnumEffettoTitoloProcedimentoFilter<$PrismaModel = never> = {
+  equals?: $Enums.EffettoTitoloProcedimento | Prisma.EnumEffettoTitoloProcedimentoFieldRefInput<$PrismaModel>
+  in?: $Enums.EffettoTitoloProcedimento[] | Prisma.ListEnumEffettoTitoloProcedimentoFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EffettoTitoloProcedimento[] | Prisma.ListEnumEffettoTitoloProcedimentoFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEffettoTitoloProcedimentoFilter<$PrismaModel> | $Enums.EffettoTitoloProcedimento
+}
+
+export type EnumStatoEffettoProcedimentoFilter<$PrismaModel = never> = {
+  equals?: $Enums.StatoEffettoProcedimento | Prisma.EnumStatoEffettoProcedimentoFieldRefInput<$PrismaModel>
+  in?: $Enums.StatoEffettoProcedimento[] | Prisma.ListEnumStatoEffettoProcedimentoFieldRefInput<$PrismaModel>
+  notIn?: $Enums.StatoEffettoProcedimento[] | Prisma.ListEnumStatoEffettoProcedimentoFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumStatoEffettoProcedimentoFilter<$PrismaModel> | $Enums.StatoEffettoProcedimento
+}
+
+export type EnumStatoConcessioneNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.StatoConcessione | Prisma.EnumStatoConcessioneFieldRefInput<$PrismaModel> | null
+  in?: $Enums.StatoConcessione[] | Prisma.ListEnumStatoConcessioneFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.StatoConcessione[] | Prisma.ListEnumStatoConcessioneFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumStatoConcessioneNullableFilter<$PrismaModel> | $Enums.StatoConcessione | null
+}
+
+export type EnumTipoDecisioneProcedimentoWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.TipoDecisioneProcedimento | Prisma.EnumTipoDecisioneProcedimentoFieldRefInput<$PrismaModel>
+  in?: $Enums.TipoDecisioneProcedimento[] | Prisma.ListEnumTipoDecisioneProcedimentoFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TipoDecisioneProcedimento[] | Prisma.ListEnumTipoDecisioneProcedimentoFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTipoDecisioneProcedimentoWithAggregatesFilter<$PrismaModel> | $Enums.TipoDecisioneProcedimento
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumTipoDecisioneProcedimentoFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumTipoDecisioneProcedimentoFilter<$PrismaModel>
+}
+
+export type EnumEffettoTitoloProcedimentoWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EffettoTitoloProcedimento | Prisma.EnumEffettoTitoloProcedimentoFieldRefInput<$PrismaModel>
+  in?: $Enums.EffettoTitoloProcedimento[] | Prisma.ListEnumEffettoTitoloProcedimentoFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EffettoTitoloProcedimento[] | Prisma.ListEnumEffettoTitoloProcedimentoFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEffettoTitoloProcedimentoWithAggregatesFilter<$PrismaModel> | $Enums.EffettoTitoloProcedimento
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEffettoTitoloProcedimentoFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEffettoTitoloProcedimentoFilter<$PrismaModel>
+}
+
+export type EnumStatoEffettoProcedimentoWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.StatoEffettoProcedimento | Prisma.EnumStatoEffettoProcedimentoFieldRefInput<$PrismaModel>
+  in?: $Enums.StatoEffettoProcedimento[] | Prisma.ListEnumStatoEffettoProcedimentoFieldRefInput<$PrismaModel>
+  notIn?: $Enums.StatoEffettoProcedimento[] | Prisma.ListEnumStatoEffettoProcedimentoFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumStatoEffettoProcedimentoWithAggregatesFilter<$PrismaModel> | $Enums.StatoEffettoProcedimento
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumStatoEffettoProcedimentoFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumStatoEffettoProcedimentoFilter<$PrismaModel>
+}
+
+export type EnumStatoConcessioneNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.StatoConcessione | Prisma.EnumStatoConcessioneFieldRefInput<$PrismaModel> | null
+  in?: $Enums.StatoConcessione[] | Prisma.ListEnumStatoConcessioneFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.StatoConcessione[] | Prisma.ListEnumStatoConcessioneFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumStatoConcessioneNullableWithAggregatesFilter<$PrismaModel> | $Enums.StatoConcessione | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumStatoConcessioneNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumStatoConcessioneNullableFilter<$PrismaModel>
+}
+
 export type EnumTipologiaReportFilter<$PrismaModel = never> = {
   equals?: $Enums.TipologiaReport | Prisma.EnumTipologiaReportFieldRefInput<$PrismaModel>
   in?: $Enums.TipologiaReport[] | Prisma.ListEnumTipologiaReportFieldRefInput<$PrismaModel>
@@ -2599,6 +2667,74 @@ export type NestedEnumDocumentoCanaleNullableWithAggregatesFilter<$PrismaModel =
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumDocumentoCanaleNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumDocumentoCanaleNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumTipoDecisioneProcedimentoFilter<$PrismaModel = never> = {
+  equals?: $Enums.TipoDecisioneProcedimento | Prisma.EnumTipoDecisioneProcedimentoFieldRefInput<$PrismaModel>
+  in?: $Enums.TipoDecisioneProcedimento[] | Prisma.ListEnumTipoDecisioneProcedimentoFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TipoDecisioneProcedimento[] | Prisma.ListEnumTipoDecisioneProcedimentoFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTipoDecisioneProcedimentoFilter<$PrismaModel> | $Enums.TipoDecisioneProcedimento
+}
+
+export type NestedEnumEffettoTitoloProcedimentoFilter<$PrismaModel = never> = {
+  equals?: $Enums.EffettoTitoloProcedimento | Prisma.EnumEffettoTitoloProcedimentoFieldRefInput<$PrismaModel>
+  in?: $Enums.EffettoTitoloProcedimento[] | Prisma.ListEnumEffettoTitoloProcedimentoFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EffettoTitoloProcedimento[] | Prisma.ListEnumEffettoTitoloProcedimentoFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEffettoTitoloProcedimentoFilter<$PrismaModel> | $Enums.EffettoTitoloProcedimento
+}
+
+export type NestedEnumStatoEffettoProcedimentoFilter<$PrismaModel = never> = {
+  equals?: $Enums.StatoEffettoProcedimento | Prisma.EnumStatoEffettoProcedimentoFieldRefInput<$PrismaModel>
+  in?: $Enums.StatoEffettoProcedimento[] | Prisma.ListEnumStatoEffettoProcedimentoFieldRefInput<$PrismaModel>
+  notIn?: $Enums.StatoEffettoProcedimento[] | Prisma.ListEnumStatoEffettoProcedimentoFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumStatoEffettoProcedimentoFilter<$PrismaModel> | $Enums.StatoEffettoProcedimento
+}
+
+export type NestedEnumStatoConcessioneNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.StatoConcessione | Prisma.EnumStatoConcessioneFieldRefInput<$PrismaModel> | null
+  in?: $Enums.StatoConcessione[] | Prisma.ListEnumStatoConcessioneFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.StatoConcessione[] | Prisma.ListEnumStatoConcessioneFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumStatoConcessioneNullableFilter<$PrismaModel> | $Enums.StatoConcessione | null
+}
+
+export type NestedEnumTipoDecisioneProcedimentoWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.TipoDecisioneProcedimento | Prisma.EnumTipoDecisioneProcedimentoFieldRefInput<$PrismaModel>
+  in?: $Enums.TipoDecisioneProcedimento[] | Prisma.ListEnumTipoDecisioneProcedimentoFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TipoDecisioneProcedimento[] | Prisma.ListEnumTipoDecisioneProcedimentoFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTipoDecisioneProcedimentoWithAggregatesFilter<$PrismaModel> | $Enums.TipoDecisioneProcedimento
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumTipoDecisioneProcedimentoFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumTipoDecisioneProcedimentoFilter<$PrismaModel>
+}
+
+export type NestedEnumEffettoTitoloProcedimentoWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EffettoTitoloProcedimento | Prisma.EnumEffettoTitoloProcedimentoFieldRefInput<$PrismaModel>
+  in?: $Enums.EffettoTitoloProcedimento[] | Prisma.ListEnumEffettoTitoloProcedimentoFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EffettoTitoloProcedimento[] | Prisma.ListEnumEffettoTitoloProcedimentoFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEffettoTitoloProcedimentoWithAggregatesFilter<$PrismaModel> | $Enums.EffettoTitoloProcedimento
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEffettoTitoloProcedimentoFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEffettoTitoloProcedimentoFilter<$PrismaModel>
+}
+
+export type NestedEnumStatoEffettoProcedimentoWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.StatoEffettoProcedimento | Prisma.EnumStatoEffettoProcedimentoFieldRefInput<$PrismaModel>
+  in?: $Enums.StatoEffettoProcedimento[] | Prisma.ListEnumStatoEffettoProcedimentoFieldRefInput<$PrismaModel>
+  notIn?: $Enums.StatoEffettoProcedimento[] | Prisma.ListEnumStatoEffettoProcedimentoFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumStatoEffettoProcedimentoWithAggregatesFilter<$PrismaModel> | $Enums.StatoEffettoProcedimento
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumStatoEffettoProcedimentoFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumStatoEffettoProcedimentoFilter<$PrismaModel>
+}
+
+export type NestedEnumStatoConcessioneNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.StatoConcessione | Prisma.EnumStatoConcessioneFieldRefInput<$PrismaModel> | null
+  in?: $Enums.StatoConcessione[] | Prisma.ListEnumStatoConcessioneFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.StatoConcessione[] | Prisma.ListEnumStatoConcessioneFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumStatoConcessioneNullableWithAggregatesFilter<$PrismaModel> | $Enums.StatoConcessione | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumStatoConcessioneNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumStatoConcessioneNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumTipologiaReportFilter<$PrismaModel = never> = {

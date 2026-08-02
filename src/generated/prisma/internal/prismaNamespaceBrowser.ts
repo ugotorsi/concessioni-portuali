@@ -72,6 +72,7 @@ export const ModelName = {
   Sopralluogo: 'Sopralluogo',
   Pagamento: 'Pagamento',
   Documento: 'Documento',
+  DecisioneProcedimento: 'DecisioneProcedimento',
   Report: 'Report',
   NormaFonte: 'NormaFonte',
   NormaVersione: 'NormaVersione',
@@ -580,6 +581,32 @@ export const DocumentoScalarFieldEnum = {
 } as const
 
 export type DocumentoScalarFieldEnum = (typeof DocumentoScalarFieldEnum)[keyof typeof DocumentoScalarFieldEnum]
+
+
+export const DecisioneProcedimentoScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  procedimentoId: 'procedimentoId',
+  concessioneId: 'concessioneId',
+  tipoDecisione: 'tipoDecisione',
+  numeroAtto: 'numeroAtto',
+  dataAtto: 'dataAtto',
+  dataEfficacia: 'dataEfficacia',
+  organoCompetente: 'organoCompetente',
+  motivazioneSintetica: 'motivazioneSintetica',
+  documentoId: 'documentoId',
+  effettoTitolo: 'effettoTitolo',
+  statoEffetto: 'statoEffetto',
+  effettoApplicatoAt: 'effettoApplicatoAt',
+  effectVersion: 'effectVersion',
+  statoConcessionePrecedente: 'statoConcessionePrecedente',
+  statoConcessioneSuccessivo: 'statoConcessioneSuccessivo',
+  registeredByUserId: 'registeredByUserId',
+  idempotencyKey: 'idempotencyKey',
+  createdAt: 'createdAt'
+} as const
+
+export type DecisioneProcedimentoScalarFieldEnum = (typeof DecisioneProcedimentoScalarFieldEnum)[keyof typeof DecisioneProcedimentoScalarFieldEnum]
 
 
 export const ReportScalarFieldEnum = {

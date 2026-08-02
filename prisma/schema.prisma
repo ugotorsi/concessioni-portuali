@@ -267,6 +267,28 @@ enum EsitoIstruttorioProcedimento {
   ALTRO
 }
 
+enum TipoDecisioneProcedimento {
+  DECADENZA_DICHIARATA
+  REVOCA_DISPOSTA
+  ARCHIVIAZIONE
+  CHIUSURA_SENZA_EFFETTO
+}
+
+enum EffettoTitoloProcedimento {
+  NESSUNO
+  CONCESSIONE_DECADUTA
+  CONCESSIONE_REVOCATA
+}
+
+enum StatoEffettoProcedimento {
+  NON_PREVISTO
+  PENDENTE
+  PRONTO
+  APPLICATO
+  BLOCCATO
+  ERRORE
+}
+
 enum OrigineProcedimento {
   UFFICIO
   ISTANZA_PARTE
@@ -520,6 +542,7 @@ model Ente {
   legalRules   LegalRule[]
   documentGaps DocumentGap[]
   importRuns   ImportRun[]
+  decisioniProcedimento DecisioneProcedimento[]
 
   @@index([tipo])
   @@index([stato])
@@ -799,6 +822,7 @@ model User {
   activityLogs        ActivityLog[]
   documentiCaricati   Documento[]        @relation("DocumentoUploader")
   tenantMemberships   TenantMembership[]
+  decisioniProcedimentoRegistrate DecisioneProcedimento[] @relation("DecisioneProcedimentoRegisteredBy")
 
   @@index([ruolo])
   @@index([attivo])
@@ -871,6 +895,7 @@ model Concessione {
   pagamenti       Pagamento[]
   documenti       Documento[]
   report          Report[]
+  decisioniProcedimento DecisioneProcedimento[]
   legalFrameworks ConcessioneLegalFramework[]
   normaImpatti    NormaImpatto[]
   activityLogs    ActivityLog[]
@@ -1042,6 +1067,7 @@ model Procedimento {
 
   concessione  Concessione    @relation(fields: [concessioneId], references: [id], onDelete: Cascade)
   criticita    Criticita?     @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
+  decisioneProcedimento DecisioneProcedimento?
   documenti    Documento[]
   normaImpatti NormaImpatto[]
 
@@ -1169,6 +1195,7 @@ model Documento {
   sopralluogo    Sopralluogo?  @relation(fields: [sopralluogoId], references: [id], onDelete: SetNull)
   pagamento      Pagamento?    @relation(fields: [pagamentoId], references: [id], onDelete: SetNull)
   report         Report?       @relation(fields: [reportId], references: [id], onDelete: SetNull)
+  decisioniProcedimento DecisioneProcedimento[]
 
   @@index([uploadedByUserId])
   @@index([statoDocumento])
@@ -1186,6 +1213,44 @@ model Documento {
   @@index([dataProtocollo])
   @@index([pecWarningMancataRicevuta])
   @@index([dataDocumento])
+  @@index([createdAt])
+}
+
+model DecisioneProcedimento {
+  id                         String                     @id @default(cuid())
+  enteId                     String?
+  procedimentoId             String                     @unique
+  concessioneId              String?
+  tipoDecisione              TipoDecisioneProcedimento
+  numeroAtto                 String
+  dataAtto                   DateTime
+  dataEfficacia              DateTime
+  organoCompetente           String
+  motivazioneSintetica       String
+  documentoId                String?
+  effettoTitolo              EffettoTitoloProcedimento @default(NESSUNO)
+  statoEffetto               StatoEffettoProcedimento  @default(BLOCCATO)
+  effettoApplicatoAt         DateTime?
+  effectVersion              Int                        @default(0)
+  statoConcessionePrecedente StatoConcessione?
+  statoConcessioneSuccessivo StatoConcessione?
+  registeredByUserId         String
+  idempotencyKey             String                     @unique
+  createdAt                  DateTime                   @default(now())
+
+  ente             Ente?        @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  procedimento     Procedimento @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  concessione      Concessione? @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
+  documento        Documento?   @relation(fields: [documentoId], references: [id], onDelete: SetNull)
+  registeredByUser User         @relation("DecisioneProcedimentoRegisteredBy", fields: [registeredByUserId], references: [id], onDelete: Restrict)
+
+  @@index([enteId])
+  @@index([procedimentoId])
+  @@index([concessioneId])
+  @@index([documentoId])
+  @@index([registeredByUserId])
+  @@index([tipoDecisione])
+  @@index([statoEffetto, dataEfficacia])
   @@index([createdAt])
 }
 
