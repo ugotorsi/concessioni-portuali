@@ -35,7 +35,19 @@ describe("db recon preview temp service", () => {
     await expect(runDbReconPreviewTemp(100)).rejects.toBeInstanceOf(ReconConfigError);
   });
 
-  it("fails when DIRECT_URL is empty", async () => {
+  it("fails when DIRECT_URL is undefined", async () => {
+    process.env.DIRECT_URL = undefined;
+
+    await expect(runDbReconPreviewTemp(100)).rejects.toBeInstanceOf(ReconConfigError);
+  });
+
+  it("fails when DIRECT_URL is empty string", async () => {
+    process.env.DIRECT_URL = "";
+
+    await expect(runDbReconPreviewTemp(100)).rejects.toBeInstanceOf(ReconConfigError);
+  });
+
+  it("fails when DIRECT_URL contains only spaces", async () => {
     process.env.DIRECT_URL = "   ";
 
     await expect(runDbReconPreviewTemp(100)).rejects.toBeInstanceOf(ReconConfigError);
@@ -209,6 +221,10 @@ describe("db recon preview temp service", () => {
     expect(classifyDbReconError(error)).toBe("DIRECT_URL_MISSING");
   });
 
+  it("classifies ReconTimeoutError as DB_TIMEOUT", () => {
+    expect(classifyDbReconError(new ReconTimeoutError("DB recon timeout."))).toBe("DB_TIMEOUT");
+  });
+
   it("classifies DIRECT_URL invalid as sanitized code", () => {
     const error = new ReconConfigError("DIRECT_URL is malformed.", "DIRECT_URL_INVALID");
     expect(classifyDbReconError(error)).toBe("DIRECT_URL_INVALID");
@@ -230,14 +246,36 @@ describe("db recon preview temp service", () => {
     expect(classifyDbReconError(timeout)).toBe("DB_TIMEOUT");
   });
 
-  it("classifies recognized TLS errors", () => {
-    const tls = Object.assign(new Error("certificate verify failed"), { code: "CERT_HAS_EXPIRED" });
-    expect(classifyDbReconError(tls)).toBe("DB_TLS_FAILED");
+  it("classifies recognized TLS errors by specific codes", () => {
+    const certExpired = Object.assign(new Error("certificate verify failed"), { code: "CERT_HAS_EXPIRED" });
+    const selfSignedChain = Object.assign(new Error("self signed"), { code: "SELF_SIGNED_CERT_IN_CHAIN" });
+    const altName = Object.assign(new Error("hostname mismatch"), { code: "ERR_TLS_CERT_ALTNAME_INVALID" });
+
+    expect(classifyDbReconError(certExpired)).toBe("DB_TLS_FAILED");
+    expect(classifyDbReconError(selfSignedChain)).toBe("DB_TLS_FAILED");
+    expect(classifyDbReconError(altName)).toBe("DB_TLS_FAILED");
+  });
+
+  it("classifies recognized TLS errors by specific certificate messages", () => {
+    const verifyFirstCert = new Error("unable to verify the first certificate");
+    expect(classifyDbReconError(verifyFirstCert)).toBe("DB_TLS_FAILED");
   });
 
   it("does not classify sslmode warning text as tls failure", () => {
     const warning = new Error("SECURITY WARNING: sslmode=require treated as alias for verify-full");
     expect(classifyDbReconError(warning)).toBe("DB_UNKNOWN_FAILURE");
+  });
+
+  it("does not classify generic ssl/tls warning-like messages as tls failure", () => {
+    const sslModeRequire = new Error("sslmode=require");
+    const sslWarning = new Error("SSL warning");
+    const tlsConfig = new Error("TLS configuration");
+    const verifyFull = new Error("use sslmode=verify-full");
+
+    expect(classifyDbReconError(sslModeRequire)).toBe("DB_UNKNOWN_FAILURE");
+    expect(classifyDbReconError(sslWarning)).toBe("DB_UNKNOWN_FAILURE");
+    expect(classifyDbReconError(tlsConfig)).toBe("DB_UNKNOWN_FAILURE");
+    expect(classifyDbReconError(verifyFull)).toBe("DB_UNKNOWN_FAILURE");
   });
 
   it("classifies unknown errors as DB_UNKNOWN_FAILURE", () => {

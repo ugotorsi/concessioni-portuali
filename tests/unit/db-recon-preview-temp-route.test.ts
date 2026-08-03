@@ -38,7 +38,12 @@ vi.mock("@/server/db-recon-preview-temp", async () => {
       this.diagnosticCode = diagnosticCode;
     }
   }
-  class ReconTimeoutError extends Error {}
+  class ReconTimeoutError extends Error {
+    constructor(message: string) {
+      super(message);
+      this.name = "ReconTimeoutError";
+    }
+  }
   ReconConfigErrorRef.value = ReconConfigError;
   ReconTimeoutErrorRef.value = ReconTimeoutError;
 
@@ -375,6 +380,17 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
 
     expect(response.status).toBe(500);
     expect(payload.errorCode).toBe("DB_TIMEOUT");
+  });
+
+  it("classifies application timeout as DB_TIMEOUT", async () => {
+    runDbReconPreviewTempMock.mockRejectedValue(new ReconTimeoutErrorRef.value("DB recon timeout."));
+
+    const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(payload).toEqual({ error: "DB recon failed.", errorCode: "DB_TIMEOUT" });
   });
 
   it("classifies TLS errors", async () => {

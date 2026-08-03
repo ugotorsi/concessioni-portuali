@@ -148,13 +148,13 @@ export function synthesizePostgresVersion(raw: string): string {
   return `PostgreSQL ${match[1]}`;
 }
 
-function validateDirectUrl(raw: string | undefined): string {
-  if (raw === undefined) {
+function validateDirectUrl(raw: string | undefined | null): string {
+  if (raw == null) {
     throw new ReconConfigError("DIRECT_URL is missing.", "DIRECT_URL_MISSING");
   }
 
   if (raw.trim().length === 0) {
-    throw new ReconConfigError("DIRECT_URL is empty.", "DIRECT_URL_INVALID");
+    throw new ReconConfigError("DIRECT_URL is empty.", "DIRECT_URL_MISSING");
   }
 
   if (raw === "[SENSITIVE]") {
@@ -241,26 +241,22 @@ function isTlsLikeError(code: string | null, message: string): boolean {
     "SELF_SIGNED_CERT_IN_CHAIN",
     "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
   ]);
+  const tlsMessagePatterns = [
+    "unable to verify the first certificate",
+    "certificate has expired",
+    "hostname/ip does not match certificate",
+    "self signed certificate",
+  ];
 
   if (tlsCodes.has(normalizedCode)) {
     return true;
   }
 
-  if (normalizedCode.includes("TLS") || normalizedCode.includes("SSL") || normalizedCode.includes("CERT")) {
+  if (normalizedCode.startsWith("ERR_TLS_")) {
     return true;
   }
 
-  // Ignore known pg sslmode warning text because it is not the actual runtime failure.
-  if (message.includes("security warning") && message.includes("sslmode")) {
-    return false;
-  }
-
-  return (
-    message.includes("tls")
-    || message.includes("ssl")
-    || message.includes("certificate")
-    || message.includes("self signed")
-  );
+  return tlsMessagePatterns.some((pattern) => message.includes(pattern));
 }
 
 export function classifyDbReconError(error: unknown): DbReconErrorCode {
