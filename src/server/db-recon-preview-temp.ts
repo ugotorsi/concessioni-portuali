@@ -80,6 +80,27 @@ export class ReconTimeoutError extends Error {
   }
 }
 
+interface PgClientLike {
+  connect(): Promise<unknown>;
+  query(sql: string): Promise<{ rows: Array<Record<string, unknown>> }>;
+  end(): Promise<void>;
+  connection?: {
+    stream?: {
+      destroy?: () => void;
+    };
+  };
+}
+
+interface ReconDeps {
+  clientFactory?: (config: {
+    connectionString: string;
+    ssl: { rejectUnauthorized: false };
+    connectionTimeoutMillis: number;
+    query_timeout: number;
+    statement_timeout: number;
+  }) => PgClientLike;
+}
+
 export function isReadOnlySql(sql: string): boolean {
   const normalized = sql.trim().toUpperCase();
   return normalized.startsWith("SELECT") || normalized.startsWith("SHOW");
@@ -116,55 +137,122 @@ export function synthesizePostgresVersion(raw: string): string {
   return `PostgreSQL ${match[1]}`;
 }
 
-assertReadOnlyQueries();
-
-export async function runDbReconPreviewTemp(timeoutMs = DEFAULT_TIMEOUT_MS): Promise<DbReconPreviewTempResult> {
-  const directUrl = process.env.DIRECT_URL;
-
-  if (!directUrl || directUrl.trim().length === 0 || directUrl === "[SENSITIVE]") {
-    throw new ReconConfigError("DIRECT_URL is not configured for the active runtime target.");
+function validateDirectUrl(raw: string | undefined): string {
+  if (raw === undefined) {
+    throw new ReconConfigError("DIRECT_URL is missing.");
   }
 
-  const client = new Client({
+  if (raw.trim().length === 0) {
+    throw new ReconConfigError("DIRECT_URL is empty.");
+  }
+
+  if (raw === "[SENSITIVE]") {
+    throw new ReconConfigError("DIRECT_URL placeholder is invalid.");
+  }
+
+  if (!(raw.startsWith("postgres://") || raw.startsWith("postgresql://"))) {
+    throw new ReconConfigError("DIRECT_URL must use a PostgreSQL scheme.");
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    throw new ReconConfigError("DIRECT_URL is malformed.");
+  }
+
+  if (!parsed.hostname) {
+    throw new ReconConfigError("DIRECT_URL host is missing.");
+  }
+
+  const databaseName = (parsed.pathname || "").replace(/^\//, "");
+  if (!databaseName) {
+    throw new ReconConfigError("DIRECT_URL database is missing.");
+  }
+
+  if (!parsed.searchParams.has("sslmode")) {
+    throw new ReconConfigError("DIRECT_URL sslmode is missing.");
+  }
+
+  return raw;
+}
+
+async function safeCloseClient(client: PgClientLike): Promise<void> {
+  try {
+    await client.end();
+  } catch {
+    client.connection?.stream?.destroy?.();
+  }
+}
+
+assertReadOnlyQueries();
+
+export async function runDbReconPreviewTemp(timeoutMs = DEFAULT_TIMEOUT_MS, deps: ReconDeps = {}): Promise<DbReconPreviewTempResult> {
+  const directUrl = validateDirectUrl(process.env.DIRECT_URL);
+  const clientFactory = deps.clientFactory ?? ((config) => new Client(config));
+
+  const client = clientFactory({
     connectionString: directUrl,
     ssl: { rejectUnauthorized: false },
     connectionTimeoutMillis: timeoutMs,
     query_timeout: timeoutMs,
+    statement_timeout: timeoutMs,
   });
 
-  const reconPromise = (async () => {
+  let timedOut = false;
+  const timeout = setTimeout(() => {
+    timedOut = true;
+    client.connection?.stream?.destroy?.();
+  }, timeoutMs);
+
+  const queryReadOnly = async (sql: string) => {
+    if (timedOut) {
+      throw new ReconTimeoutError("DB recon timeout.");
+    }
+
+    try {
+      return await client.query(sql);
+    } catch (error) {
+      if (timedOut) {
+        throw new ReconTimeoutError("DB recon timeout.");
+      }
+      throw error;
+    }
+  };
+
+  try {
     await client.connect();
 
-    const identity = await client.query(READ_ONLY_SQL.identity);
-    const version = await client.query(READ_ONLY_SQL.version);
-    const migrationsPresent = await client.query(READ_ONLY_SQL.prismaMigrationsPresent);
+    const identity = await queryReadOnly(READ_ONLY_SQL.identity);
+    const version = await queryReadOnly(READ_ONLY_SQL.version);
+    const migrationsPresent = await queryReadOnly(READ_ONLY_SQL.prismaMigrationsPresent);
 
     let prismaMigrationsCount: number | null = null;
     if (migrationsPresent.rows[0]?.present) {
-      const migrationCount = await client.query(READ_ONLY_SQL.prismaMigrationsCount);
-      prismaMigrationsCount = migrationCount.rows[0]?.count ?? null;
+      const migrationCount = await queryReadOnly(READ_ONLY_SQL.prismaMigrationsCount);
+      prismaMigrationsCount = (migrationCount.rows[0]?.count as number) ?? null;
     }
 
-    const publicTablesCount = await client.query(READ_ONLY_SQL.publicTablesCount);
-    const targetTables = await client.query(READ_ONLY_SQL.targetTables);
-    const enums = await client.query(READ_ONLY_SQL.enums);
-    const columns = await client.query(READ_ONLY_SQL.decisionColumns);
-    const indexesCount = await client.query(READ_ONLY_SQL.decisionIndexesCount);
-    const constraintsCount = await client.query(READ_ONLY_SQL.decisionConstraintsCount);
-    const recordCounts = await client.query(READ_ONLY_SQL.recordCounts);
+    const publicTablesCount = await queryReadOnly(READ_ONLY_SQL.publicTablesCount);
+    const targetTables = await queryReadOnly(READ_ONLY_SQL.targetTables);
+    const enums = await queryReadOnly(READ_ONLY_SQL.enums);
+    const columns = await queryReadOnly(READ_ONLY_SQL.decisionColumns);
+    const indexesCount = await queryReadOnly(READ_ONLY_SQL.decisionIndexesCount);
+    const constraintsCount = await queryReadOnly(READ_ONLY_SQL.decisionConstraintsCount);
+    const recordCounts = await queryReadOnly(READ_ONLY_SQL.recordCounts);
 
-    const tableSet = new Set<string>(targetTables.rows.map((row) => row.table_name));
-    const enumSet = new Set<string>(enums.rows.map((row) => row.typname));
-    const columnSet = new Set<string>(columns.rows.map((row) => row.column_name));
+    const tableSet = new Set<string>(targetTables.rows.map((row) => row.table_name as string));
+    const enumSet = new Set<string>(enums.rows.map((row) => row.typname as string));
+    const columnSet = new Set<string>(columns.rows.map((row) => row.column_name as string));
 
     return {
       connected: true as const,
-      currentDatabase: identity.rows[0]?.current_database ?? "unknown",
-      currentSchema: identity.rows[0]?.current_schema ?? "unknown",
-      postgresVersion: synthesizePostgresVersion(version.rows[0]?.server_version ?? ""),
+      currentDatabase: (identity.rows[0]?.current_database as string) ?? "unknown",
+      currentSchema: (identity.rows[0]?.current_schema as string) ?? "unknown",
+      postgresVersion: synthesizePostgresVersion((version.rows[0]?.server_version as string) ?? ""),
       prismaMigrationsPresent: Boolean(migrationsPresent.rows[0]?.present),
       prismaMigrationsCount,
-      publicTablesCount: publicTablesCount.rows[0]?.count ?? 0,
+      publicTablesCount: (publicTablesCount.rows[0]?.count as number) ?? 0,
       tablesPresence: {
         Ente: tableSet.has("Ente"),
         User: tableSet.has("User"),
@@ -182,21 +270,23 @@ export async function runDbReconPreviewTemp(timeoutMs = DEFAULT_TIMEOUT_MS): Pro
         effettoApplicatoAt: columnSet.has("effettoApplicatoAt"),
         effectVersion: columnSet.has("effectVersion"),
       },
-      decisioneProcedimentoIndexesCount: indexesCount.rows[0]?.count ?? 0,
-      decisioneProcedimentoConstraintsCount: constraintsCount.rows[0]?.count ?? 0,
+      decisioneProcedimentoIndexesCount: (indexesCount.rows[0]?.count as number) ?? 0,
+      decisioneProcedimentoConstraintsCount: (constraintsCount.rows[0]?.count as number) ?? 0,
       recordCounts: {
-        Ente: recordCounts.rows[0]?.ente_count ?? null,
-        User: recordCounts.rows[0]?.user_count ?? null,
-        Concessione: recordCounts.rows[0]?.concessione_count ?? null,
-        Procedimento: recordCounts.rows[0]?.procedimento_count ?? null,
-        DecisioneProcedimento: recordCounts.rows[0]?.decisioneprocedimento_count ?? null,
+        Ente: (recordCounts.rows[0]?.ente_count as number | null) ?? null,
+        User: (recordCounts.rows[0]?.user_count as number | null) ?? null,
+        Concessione: (recordCounts.rows[0]?.concessione_count as number | null) ?? null,
+        Procedimento: (recordCounts.rows[0]?.procedimento_count as number | null) ?? null,
+        DecisioneProcedimento: (recordCounts.rows[0]?.decisioneprocedimento_count as number | null) ?? null,
       },
     };
-  })();
-
-  try {
-    return await withTimeout(reconPromise, timeoutMs, "DB recon timeout.");
+  } catch (error) {
+    if (timedOut || error instanceof ReconTimeoutError) {
+      throw new ReconTimeoutError("DB recon timeout.");
+    }
+    throw error;
   } finally {
-    await client.end().catch(() => undefined);
+    clearTimeout(timeout);
+    await safeCloseClient(client);
   }
 }
