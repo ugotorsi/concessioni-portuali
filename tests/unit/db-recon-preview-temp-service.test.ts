@@ -44,15 +44,15 @@ function makeWorkingClientFactory(failAt?: { connect?: true; queryIndex?: number
       case 10:
         return { rows: [{ count: 6 }] };
       case 11:
-        return {
-          rows: [{
-            ente_count: 1,
-            user_count: 2,
-            concessione_count: 3,
-            procedimento_count: 4,
-            decisioneprocedimento_count: 5,
-          }],
-        };
+        return { rows: [{ count: 1 }] };
+      case 12:
+        return { rows: [{ count: 2 }] };
+      case 13:
+        return { rows: [{ count: 3 }] };
+      case 14:
+        return { rows: [{ count: 4 }] };
+      case 15:
+        return { rows: [{ count: 5 }] };
       default:
         return { rows: [] };
     }
@@ -391,5 +391,195 @@ describe("db recon preview temp service", () => {
 
     expect(classifyDbReconError(error)).toBe("DB_TIMEOUT");
     expect(classifyDbReconErrorStage(error)).toBe("PUBLIC_TABLES");
+  });
+
+  it("returns connected=true on empty database and skips all record counts", async () => {
+    process.env.DIRECT_URL = "postgresql://u:p@localhost:5432/db?sslmode=require";
+    const queryMock = vi
+      .fn()
+      .mockResolvedValueOnce({ rows: [{ current_database: "db", current_schema: "public" }] })
+      .mockResolvedValueOnce({ rows: [{ server_version: "PostgreSQL 16.4 on x86_64" }] })
+      .mockResolvedValueOnce({ rows: [{ present: false }] })
+      .mockResolvedValueOnce({ rows: [{ count: 0 }] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ count: 0 }] })
+      .mockResolvedValueOnce({ rows: [{ count: 0 }] });
+
+    const clientFactory = vi.fn(() => ({
+      connect: vi.fn().mockResolvedValue(undefined),
+      query: queryMock,
+      end: vi.fn().mockResolvedValue(undefined),
+    }));
+
+    const result = await runDbReconPreviewTemp(100, { clientFactory });
+
+    expect(result.connected).toBe(true);
+    expect(result.publicTablesCount).toBe(0);
+    expect(result.prismaMigrationsPresent).toBe(false);
+    expect(result.prismaMigrationsCount).toBeNull();
+    expect(result.recordCounts).toEqual({
+      Ente: { present: false, count: null },
+      User: { present: false, count: null },
+      Concessione: { present: false, count: null },
+      Procedimento: { present: false, count: null },
+      DecisioneProcedimento: { present: false, count: null },
+    });
+
+    const countSqlCalls = queryMock.mock.calls
+      .map((call) => call[0] as string)
+      .filter((sql) => sql.includes("COUNT(*)::int AS count FROM public.\""));
+    expect(countSqlCalls).toEqual([]);
+  });
+
+  it("sets present=true and count=0 when key table exists but is empty", async () => {
+    process.env.DIRECT_URL = "postgresql://u:p@localhost:5432/db?sslmode=require";
+    const queryMock = vi
+      .fn()
+      .mockResolvedValueOnce({ rows: [{ current_database: "db", current_schema: "public" }] })
+      .mockResolvedValueOnce({ rows: [{ server_version: "PostgreSQL 16.4 on x86_64" }] })
+      .mockResolvedValueOnce({ rows: [{ present: false }] })
+      .mockResolvedValueOnce({ rows: [{ count: 1 }] })
+      .mockResolvedValueOnce({ rows: [{ table_name: "Ente" }] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ count: 0 }] })
+      .mockResolvedValueOnce({ rows: [{ count: 0 }] })
+      .mockResolvedValueOnce({ rows: [{ count: 0 }] });
+
+    const clientFactory = vi.fn(() => ({
+      connect: vi.fn().mockResolvedValue(undefined),
+      query: queryMock,
+      end: vi.fn().mockResolvedValue(undefined),
+    }));
+
+    const result = await runDbReconPreviewTemp(100, { clientFactory });
+
+    expect(result.recordCounts.Ente).toEqual({ present: true, count: 0 });
+    expect(result.recordCounts.User).toEqual({ present: false, count: null });
+  });
+
+  it("returns exact counts for present key tables and null for absent ones", async () => {
+    process.env.DIRECT_URL = "postgresql://u:p@localhost:5432/db?sslmode=require";
+    const queryMock = vi
+      .fn()
+      .mockResolvedValueOnce({ rows: [{ current_database: "db", current_schema: "public" }] })
+      .mockResolvedValueOnce({ rows: [{ server_version: "PostgreSQL 16.4 on x86_64" }] })
+      .mockResolvedValueOnce({ rows: [{ present: true }] })
+      .mockResolvedValueOnce({ rows: [{ count: 2 }] })
+      .mockResolvedValueOnce({ rows: [{ count: 3 }] })
+      .mockResolvedValueOnce({ rows: [{ table_name: "Ente" }, { table_name: "Concessione" }, { table_name: "DecisioneProcedimento" }] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ count: 0 }] })
+      .mockResolvedValueOnce({ rows: [{ count: 0 }] })
+      .mockResolvedValueOnce({ rows: [{ count: 7 }] })
+      .mockResolvedValueOnce({ rows: [{ count: 11 }] })
+      .mockResolvedValueOnce({ rows: [{ count: 13 }] });
+
+    const clientFactory = vi.fn(() => ({
+      connect: vi.fn().mockResolvedValue(undefined),
+      query: queryMock,
+      end: vi.fn().mockResolvedValue(undefined),
+    }));
+
+    const result = await runDbReconPreviewTemp(100, { clientFactory });
+
+    expect(result.recordCounts).toEqual({
+      Ente: { present: true, count: 7 },
+      User: { present: false, count: null },
+      Concessione: { present: true, count: 11 },
+      Procedimento: { present: false, count: null },
+      DecisioneProcedimento: { present: true, count: 13 },
+    });
+
+    const countSqlCalls = queryMock.mock.calls
+      .map((call) => call[0] as string)
+      .filter((sql) => sql.startsWith('SELECT COUNT(*)::int AS count FROM public."'));
+
+    expect(countSqlCalls).toEqual([
+      'SELECT COUNT(*)::int AS count FROM public."Ente"',
+      'SELECT COUNT(*)::int AS count FROM public."Concessione"',
+      'SELECT COUNT(*)::int AS count FROM public."DecisioneProcedimento"',
+    ]);
+  });
+
+  it("maps count query failure on present table to DB_QUERY_FAILED at RECORD_COUNTS", async () => {
+    process.env.DIRECT_URL = "postgresql://u:p@localhost:5432/db?sslmode=require";
+    const queryMock = vi
+      .fn()
+      .mockResolvedValueOnce({ rows: [{ current_database: "db", current_schema: "public" }] })
+      .mockResolvedValueOnce({ rows: [{ server_version: "PostgreSQL 16.4 on x86_64" }] })
+      .mockResolvedValueOnce({ rows: [{ present: false }] })
+      .mockResolvedValueOnce({ rows: [{ count: 0 }] })
+      .mockResolvedValueOnce({ rows: [{ table_name: "Ente" }] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ count: 0 }] })
+      .mockResolvedValueOnce({ rows: [{ count: 0 }] })
+      .mockRejectedValueOnce(new Error("count failed"));
+
+    const clientFactory = vi.fn(() => ({
+      connect: vi.fn().mockResolvedValue(undefined),
+      query: queryMock,
+      end: vi.fn().mockResolvedValue(undefined),
+    }));
+
+    const error = await runDbReconPreviewTemp(100, { clientFactory }).catch((e) => e);
+
+    expect(classifyDbReconError(error)).toBe("DB_QUERY_FAILED");
+    expect(classifyDbReconErrorStage(error)).toBe("RECORD_COUNTS");
+  });
+
+  it("uses only static allowlisted table identifiers for dynamic count queries", async () => {
+    process.env.DIRECT_URL = "postgresql://u:p@localhost:5432/db?sslmode=require";
+    const queryMock = vi
+      .fn()
+      .mockResolvedValueOnce({ rows: [{ current_database: "db", current_schema: "public" }] })
+      .mockResolvedValueOnce({ rows: [{ server_version: "PostgreSQL 16.4 on x86_64" }] })
+      .mockResolvedValueOnce({ rows: [{ present: false }] })
+      .mockResolvedValueOnce({ rows: [{ count: 5 }] })
+      .mockResolvedValueOnce({
+        rows: [
+          { table_name: "Ente" },
+          { table_name: "User" },
+          { table_name: "Concessione" },
+          { table_name: "Procedimento" },
+          { table_name: "DecisioneProcedimento" },
+          { table_name: "InjectedTable" },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ count: 0 }] })
+      .mockResolvedValueOnce({ rows: [{ count: 0 }] })
+      .mockResolvedValueOnce({ rows: [{ count: 1 }] })
+      .mockResolvedValueOnce({ rows: [{ count: 2 }] })
+      .mockResolvedValueOnce({ rows: [{ count: 3 }] })
+      .mockResolvedValueOnce({ rows: [{ count: 4 }] })
+      .mockResolvedValueOnce({ rows: [{ count: 5 }] });
+
+    const clientFactory = vi.fn(() => ({
+      connect: vi.fn().mockResolvedValue(undefined),
+      query: queryMock,
+      end: vi.fn().mockResolvedValue(undefined),
+    }));
+
+    await runDbReconPreviewTemp(100, { clientFactory });
+
+    const countSqlCalls = queryMock.mock.calls
+      .map((call) => call[0] as string)
+      .filter((sql) => sql.includes("SELECT COUNT(*)::int AS count FROM public."));
+
+    expect(countSqlCalls).toEqual([
+      'SELECT COUNT(*)::int AS count FROM public."Ente"',
+      'SELECT COUNT(*)::int AS count FROM public."User"',
+      'SELECT COUNT(*)::int AS count FROM public."Concessione"',
+      'SELECT COUNT(*)::int AS count FROM public."Procedimento"',
+      'SELECT COUNT(*)::int AS count FROM public."DecisioneProcedimento"',
+    ]);
+    expect(countSqlCalls.some((sql) => sql.includes("InjectedTable"))).toBe(false);
+    expect(countSqlCalls.every((sql) => isReadOnlySql(sql))).toBe(true);
   });
 });

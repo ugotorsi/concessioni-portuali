@@ -62,13 +62,22 @@ export const READ_ONLY_SQL = {
     "SELECT COUNT(*)::int AS count FROM pg_indexes WHERE schemaname='public' AND tablename='DecisioneProcedimento'",
   decisionConstraintsCount:
     "SELECT COUNT(*)::int AS count FROM pg_constraint c JOIN pg_class cl ON cl.oid=c.conrelid JOIN pg_namespace n ON n.oid=cl.relnamespace WHERE n.nspname='public' AND cl.relname='DecisioneProcedimento'",
-  recordCounts: `SELECT
-    CASE WHEN to_regclass('public."Ente"') IS NULL THEN NULL ELSE (SELECT COUNT(*)::int FROM public."Ente") END AS ente_count,
-    CASE WHEN to_regclass('public."User"') IS NULL THEN NULL ELSE (SELECT COUNT(*)::int FROM public."User") END AS user_count,
-    CASE WHEN to_regclass('public."Concessione"') IS NULL THEN NULL ELSE (SELECT COUNT(*)::int FROM public."Concessione") END AS concessione_count,
-    CASE WHEN to_regclass('public."Procedimento"') IS NULL THEN NULL ELSE (SELECT COUNT(*)::int FROM public."Procedimento") END AS procedimento_count,
-    CASE WHEN to_regclass('public."DecisioneProcedimento"') IS NULL THEN NULL ELSE (SELECT COUNT(*)::int FROM public."DecisioneProcedimento") END AS decisioneprocedimento_count`,
 } as const;
+
+const RECORD_COUNT_TABLES = [
+  { tableKey: "Ente", sqlIdentifier: '"Ente"' },
+  { tableKey: "User", sqlIdentifier: '"User"' },
+  { tableKey: "Concessione", sqlIdentifier: '"Concessione"' },
+  { tableKey: "Procedimento", sqlIdentifier: '"Procedimento"' },
+  { tableKey: "DecisioneProcedimento", sqlIdentifier: '"DecisioneProcedimento"' },
+] as const;
+
+type RecordCountTableKey = (typeof RECORD_COUNT_TABLES)[number]["tableKey"];
+
+interface RecordCountStatus {
+  present: boolean;
+  count: number | null;
+}
 
 export interface DbReconPreviewTempResult {
   connected: true;
@@ -97,13 +106,7 @@ export interface DbReconPreviewTempResult {
   };
   decisioneProcedimentoIndexesCount: number;
   decisioneProcedimentoConstraintsCount: number;
-  recordCounts: {
-    Ente: number | null;
-    User: number | null;
-    Concessione: number | null;
-    Procedimento: number | null;
-    DecisioneProcedimento: number | null;
-  };
+  recordCounts: Record<RecordCountTableKey, RecordCountStatus>;
 }
 
 export class ReconConfigError extends Error {
@@ -176,6 +179,12 @@ export function assertReadOnlyQueries(): void {
     if (!isReadOnlySql(sql)) {
       throw new Error("Detected non read-only SQL in db recon queries.");
     }
+  }
+}
+
+function assertReadOnlySql(sql: string): void {
+  if (!isReadOnlySql(sql)) {
+    throw new Error("Detected non read-only SQL in db recon queries.");
   }
 }
 
@@ -465,11 +474,35 @@ export async function runDbReconPreviewTemp(timeoutMs = DEFAULT_TIMEOUT_MS, deps
     const columns = await withStage("COLUMNS", async () => queryReadOnly(READ_ONLY_SQL.decisionColumns));
     const indexesCount = await withStage("KEY_TABLES", async () => queryReadOnly(READ_ONLY_SQL.decisionIndexesCount));
     const constraintsCount = await withStage("KEY_TABLES", async () => queryReadOnly(READ_ONLY_SQL.decisionConstraintsCount));
-    const recordCounts = await withStage("RECORD_COUNTS", async () => queryReadOnly(READ_ONLY_SQL.recordCounts));
 
     const tableSet = new Set<string>(targetTables.rows.map((row) => row.table_name as string));
     const enumSet = new Set<string>(enums.rows.map((row) => row.typname as string));
     const columnSet = new Set<string>(columns.rows.map((row) => row.column_name as string));
+
+    const recordCounts: Record<RecordCountTableKey, RecordCountStatus> = {
+      Ente: { present: false, count: null },
+      User: { present: false, count: null },
+      Concessione: { present: false, count: null },
+      Procedimento: { present: false, count: null },
+      DecisioneProcedimento: { present: false, count: null },
+    };
+
+    await withStage("RECORD_COUNTS", async () => {
+      for (const table of RECORD_COUNT_TABLES) {
+        if (!tableSet.has(table.tableKey)) {
+          continue;
+        }
+
+        const sql = `SELECT COUNT(*)::int AS count FROM public.${table.sqlIdentifier}`;
+        assertReadOnlySql(sql);
+
+        const result = await queryReadOnly(sql);
+        recordCounts[table.tableKey] = {
+          present: true,
+          count: (result.rows[0]?.count as number) ?? 0,
+        };
+      }
+    });
 
     return {
       connected: true as const,
@@ -498,13 +531,7 @@ export async function runDbReconPreviewTemp(timeoutMs = DEFAULT_TIMEOUT_MS, deps
       },
       decisioneProcedimentoIndexesCount: (indexesCount.rows[0]?.count as number) ?? 0,
       decisioneProcedimentoConstraintsCount: (constraintsCount.rows[0]?.count as number) ?? 0,
-      recordCounts: {
-        Ente: (recordCounts.rows[0]?.ente_count as number | null) ?? null,
-        User: (recordCounts.rows[0]?.user_count as number | null) ?? null,
-        Concessione: (recordCounts.rows[0]?.concessione_count as number | null) ?? null,
-        Procedimento: (recordCounts.rows[0]?.procedimento_count as number | null) ?? null,
-        DecisioneProcedimento: (recordCounts.rows[0]?.decisioneprocedimento_count as number | null) ?? null,
-      },
+      recordCounts,
     };
   } catch (error) {
     if (timedOut || error instanceof ReconTimeoutError) {
