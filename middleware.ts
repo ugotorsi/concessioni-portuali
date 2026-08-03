@@ -5,6 +5,7 @@ import { isInvestorDemoMode, isInvestorDemoRoute } from "@/lib/investor-demo";
 import { buildRateLimitKey, checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 
 const PUBLIC_PATHS = new Set(["/", "/login", "/logout", "/demo"]);
+const DB_RECON_PREVIEW_TEMP_PATH = "/api/admin/db-recon-preview-temp";
 const PROTECTED_PREFIXES = [
   "/dashboard",
   "/mappa",
@@ -101,6 +102,11 @@ export async function middleware(request: NextRequest) {
   }
 
   if (investorDemoMode && isInvestorDemoRoute(pathname)) {
+    return withSecurityHeaders(NextResponse.next());
+  }
+
+  // Allow only the exact temporary DB recon endpoint to reach route-level auth/guardrails.
+  if (pathname === DB_RECON_PREVIEW_TEMP_PATH) {
     return withSecurityHeaders(NextResponse.next());
   }
 
