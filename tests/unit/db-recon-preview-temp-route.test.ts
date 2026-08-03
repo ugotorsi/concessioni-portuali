@@ -133,12 +133,65 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
       decisioneProcedimentoIndexesCount: 8,
       decisioneProcedimentoConstraintsCount: 6,
       recordCounts: {
-        Ente: 1,
-        User: 5,
-        Concessione: 3,
-        Procedimento: 2,
-        DecisioneProcedimento: 1,
+        Ente: { present: true, count: 1 },
+        User: { present: true, count: 5 },
+        Concessione: { present: true, count: 3 },
+        Procedimento: { present: true, count: 2 },
+        DecisioneProcedimento: { present: true, count: 1 },
       },
+    });
+  });
+
+  it("returns 200 for empty database snapshot", async () => {
+    runDbReconPreviewTempMock.mockResolvedValue({
+      connected: true,
+      currentDatabase: "concessioni_staging",
+      currentSchema: "public",
+      postgresVersion: "PostgreSQL 16.4",
+      prismaMigrationsPresent: false,
+      prismaMigrationsCount: null,
+      publicTablesCount: 0,
+      tablesPresence: {
+        Ente: false,
+        User: false,
+        Concessione: false,
+        Procedimento: false,
+        DecisioneProcedimento: false,
+      },
+      enumsPresence: {
+        TipoDecisioneProcedimento: false,
+        EffettoTitoloProcedimento: false,
+        StatoEffettoProcedimento: false,
+      },
+      columnsPresence: {
+        statoEffetto: false,
+        effettoApplicatoAt: false,
+        effectVersion: false,
+      },
+      decisioneProcedimentoIndexesCount: 0,
+      decisioneProcedimentoConstraintsCount: 0,
+      recordCounts: {
+        Ente: { present: false, count: null },
+        User: { present: false, count: null },
+        Concessione: { present: false, count: null },
+        Procedimento: { present: false, count: null },
+        DecisioneProcedimento: { present: false, count: null },
+      },
+    });
+
+    const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.connected).toBe(true);
+    expect(payload.publicTablesCount).toBe(0);
+    expect(payload.prismaMigrationsPresent).toBe(false);
+    expect(payload.recordCounts).toEqual({
+      Ente: { present: false, count: null },
+      User: { present: false, count: null },
+      Concessione: { present: false, count: null },
+      Procedimento: { present: false, count: null },
+      DecisioneProcedimento: { present: false, count: null },
     });
   });
 
