@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
+  classifyDbReconError,
   READ_ONLY_SQL,
   ReconConfigError,
   ReconTimeoutError,
@@ -201,5 +202,45 @@ describe("db recon preview temp service", () => {
     expect(error).toBeInstanceOf(ReconTimeoutError);
     expect(destroyMock).toHaveBeenCalledTimes(1);
     expect(queryMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("classifies DIRECT_URL missing as sanitized code", () => {
+    const error = new ReconConfigError("DIRECT_URL is missing.", "DIRECT_URL_MISSING");
+    expect(classifyDbReconError(error)).toBe("DIRECT_URL_MISSING");
+  });
+
+  it("classifies DIRECT_URL invalid as sanitized code", () => {
+    const error = new ReconConfigError("DIRECT_URL is malformed.", "DIRECT_URL_INVALID");
+    expect(classifyDbReconError(error)).toBe("DIRECT_URL_INVALID");
+  });
+
+  it("classifies standard postgres/sql/network codes", () => {
+    const auth = Object.assign(new Error("x"), { code: "28P01" });
+    const dbMissing = Object.assign(new Error("x"), { code: "3D000" });
+    const dns1 = Object.assign(new Error("x"), { code: "ENOTFOUND" });
+    const dns2 = Object.assign(new Error("x"), { code: "EAI_AGAIN" });
+    const refused = Object.assign(new Error("x"), { code: "ECONNREFUSED" });
+    const timeout = Object.assign(new Error("x"), { code: "ETIMEDOUT" });
+
+    expect(classifyDbReconError(auth)).toBe("DB_AUTH_FAILED");
+    expect(classifyDbReconError(dbMissing)).toBe("DB_DATABASE_NOT_FOUND");
+    expect(classifyDbReconError(dns1)).toBe("DB_DNS_FAILED");
+    expect(classifyDbReconError(dns2)).toBe("DB_DNS_FAILED");
+    expect(classifyDbReconError(refused)).toBe("DB_CONNECTION_REFUSED");
+    expect(classifyDbReconError(timeout)).toBe("DB_TIMEOUT");
+  });
+
+  it("classifies recognized TLS errors", () => {
+    const tls = Object.assign(new Error("certificate verify failed"), { code: "CERT_HAS_EXPIRED" });
+    expect(classifyDbReconError(tls)).toBe("DB_TLS_FAILED");
+  });
+
+  it("does not classify sslmode warning text as tls failure", () => {
+    const warning = new Error("SECURITY WARNING: sslmode=require treated as alias for verify-full");
+    expect(classifyDbReconError(warning)).toBe("DB_UNKNOWN_FAILURE");
+  });
+
+  it("classifies unknown errors as DB_UNKNOWN_FAILURE", () => {
+    expect(classifyDbReconError(new Error("unknown"))).toBe("DB_UNKNOWN_FAILURE");
   });
 });

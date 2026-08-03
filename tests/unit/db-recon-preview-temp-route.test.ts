@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 const getAuthSessionMock = vi.hoisted(() => vi.fn());
 const runDbReconPreviewTempMock = vi.hoisted(() => vi.fn());
@@ -30,7 +30,14 @@ vi.mock("@/server/db-recon-preview-temp", async () => {
   const actual = await vi.importActual<typeof import("@/server/db-recon-preview-temp")>(
     "@/server/db-recon-preview-temp",
   );
-  class ReconConfigError extends Error {}
+  class ReconConfigError extends Error {
+    diagnosticCode: "DIRECT_URL_MISSING" | "DIRECT_URL_INVALID";
+
+    constructor(message: string, diagnosticCode: "DIRECT_URL_MISSING" | "DIRECT_URL_INVALID" = "DIRECT_URL_INVALID") {
+      super(message);
+      this.diagnosticCode = diagnosticCode;
+    }
+  }
   class ReconTimeoutError extends Error {}
   ReconConfigErrorRef.value = ReconConfigError;
   ReconTimeoutErrorRef.value = ReconTimeoutError;
@@ -47,6 +54,13 @@ import { GET, constantTimeTokenMatch } from "@/app/api/admin/db-recon-preview-te
 
 const ORIGINAL_ENV = { ...process.env };
 const TEMP_TOKEN = "temporary-preview-token-123";
+const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+function makeTechnicalError(code: string, message: string): Error & { code: string } {
+  const error = new Error(message) as Error & { code: string };
+  error.code = code;
+  return error;
+}
 
 function makeRequest(options?: { tokenHeader?: string; query?: string }) {
   const url = `https://example.test/api/admin/db-recon-preview-temp${options?.query ?? ""}`;
@@ -76,6 +90,7 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
 
     auditSuccessMock.mockResolvedValue(undefined);
     auditFailureMock.mockResolvedValue(undefined);
+    consoleErrorSpy.mockClear();
 
     runDbReconPreviewTempMock.mockResolvedValue({
       connected: true,
@@ -112,6 +127,10 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
         DecisioneProcedimento: 1,
       },
     });
+  });
+
+  afterAll(() => {
+    consoleErrorSpy.mockRestore();
   });
 
   it("accepts real ADMIN session", async () => {
@@ -272,26 +291,130 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
     expect(timingSafeEqualMock).not.toHaveBeenCalled();
   });
 
-  it("keeps no-store on config error", async () => {
-    runDbReconPreviewTempMock.mockRejectedValue(new ReconConfigErrorRef.value("bad"));
+  it("classifies DIRECT_URL missing", async () => {
+    runDbReconPreviewTempMock.mockRejectedValue(
+      new ReconConfigErrorRef.value("DIRECT_URL is missing.", "DIRECT_URL_MISSING"),
+    );
 
     const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
+    const payload = await response.json();
 
     expect(response.status).toBe(500);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(payload).toEqual({ error: "DB recon failed.", errorCode: "DIRECT_URL_MISSING" });
   });
 
-  it("keeps no-store on timeout error", async () => {
-    runDbReconPreviewTempMock.mockRejectedValue(new ReconTimeoutErrorRef.value("timeout"));
+  it("classifies DIRECT_URL invalid", async () => {
+    runDbReconPreviewTempMock.mockRejectedValue(
+      new ReconConfigErrorRef.value("DIRECT_URL is malformed.", "DIRECT_URL_INVALID"),
+    );
 
     const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
+    const payload = await response.json();
 
-    expect(response.status).toBe(504);
+    expect(response.status).toBe(500);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(payload).toEqual({ error: "DB recon failed.", errorCode: "DIRECT_URL_INVALID" });
   });
 
-  it("keeps sanitized generic DB error response", async () => {
-    runDbReconPreviewTempMock.mockRejectedValue(new Error("postgresql://user:pass@host/db"));
+  it("classifies postgres auth error 28P01", async () => {
+    runDbReconPreviewTempMock.mockRejectedValue(makeTechnicalError("28P01", "auth failed"));
+
+    const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(payload.errorCode).toBe("DB_AUTH_FAILED");
+  });
+
+  it("classifies postgres database not found 3D000", async () => {
+    runDbReconPreviewTempMock.mockRejectedValue(makeTechnicalError("3D000", "db missing"));
+
+    const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(payload.errorCode).toBe("DB_DATABASE_NOT_FOUND");
+  });
+
+  it("classifies ENOTFOUND as DNS failure", async () => {
+    runDbReconPreviewTempMock.mockRejectedValue(makeTechnicalError("ENOTFOUND", "dns failed"));
+
+    const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(payload.errorCode).toBe("DB_DNS_FAILED");
+  });
+
+  it("classifies EAI_AGAIN as DNS failure", async () => {
+    runDbReconPreviewTempMock.mockRejectedValue(makeTechnicalError("EAI_AGAIN", "dns temporary failure"));
+
+    const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(payload.errorCode).toBe("DB_DNS_FAILED");
+  });
+
+  it("classifies ECONNREFUSED as connection refused", async () => {
+    runDbReconPreviewTempMock.mockRejectedValue(makeTechnicalError("ECONNREFUSED", "conn refused"));
+
+    const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(payload.errorCode).toBe("DB_CONNECTION_REFUSED");
+  });
+
+  it("classifies ETIMEDOUT as timeout", async () => {
+    runDbReconPreviewTempMock.mockRejectedValue(makeTechnicalError("ETIMEDOUT", "timeout"));
+
+    const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(payload.errorCode).toBe("DB_TIMEOUT");
+  });
+
+  it("classifies TLS errors", async () => {
+    runDbReconPreviewTempMock.mockRejectedValue(
+      makeTechnicalError("CERT_HAS_EXPIRED", "certificate expired"),
+    );
+
+    const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(payload.errorCode).toBe("DB_TLS_FAILED");
+  });
+
+  it("classifies query failures", async () => {
+    runDbReconPreviewTempMock.mockRejectedValue({
+      message: "outer",
+      cause: makeTechnicalError("XX000", "query failed"),
+      name: "ReconQueryError",
+    });
+
+    const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(payload.errorCode).toBe("DB_QUERY_FAILED");
+  });
+
+  it("classifies unknown failures", async () => {
+    runDbReconPreviewTempMock.mockRejectedValue(new Error("unexpected"));
+
+    const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(payload.errorCode).toBe("DB_UNKNOWN_FAILURE");
+  });
+
+  it("does not expose original message, stack, host, URL or credentials in payload, log or audit", async () => {
+    runDbReconPreviewTempMock.mockRejectedValue(new Error("postgresql://user:pass@db-host.internal/demo"));
 
     const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
     const payload = await response.json();
@@ -299,7 +422,44 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
     expect(response.status).toBe(500);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
     expect(payload.error).toBe("DB recon failed.");
-    expect(JSON.stringify(payload).toLowerCase()).not.toContain("postgresql://");
+    expect(typeof payload.errorCode).toBe("string");
+
+    const payloadSerialized = JSON.stringify(payload).toLowerCase();
+    expect(payloadSerialized).not.toContain("postgresql://");
+    expect(payloadSerialized).not.toContain("db-host.internal");
+    expect(payloadSerialized).not.toContain("user:");
+    expect(payloadSerialized).not.toContain("pass");
+    expect(payloadSerialized).not.toContain("stack");
+
+    const logArg = consoleErrorSpy.mock.calls[0]?.[0];
+    expect(logArg).toEqual({ event: "db_recon_failed", errorCode: payload.errorCode });
+    expect(Object.keys(logArg)).toEqual(["event", "errorCode"]);
+
+    const logSerialized = JSON.stringify(logArg).toLowerCase();
+    expect(logSerialized).not.toContain("postgresql://");
+    expect(logSerialized).not.toContain("db-host.internal");
+
+    const failureAudit = auditFailureMock.mock.calls[0]?.[0];
+    const failureAuditSerialized = JSON.stringify(failureAudit).toLowerCase();
+    expect(failureAuditSerialized).not.toContain("postgresql://");
+    expect(failureAuditSerialized).not.toContain("db-host.internal");
+    expect(failureAuditSerialized).not.toContain("password");
+    expect(failureAuditSerialized).not.toContain("x-db-recon-token");
+    expect(failureAuditSerialized).not.toContain("db_recon_temp_token");
+    expect(failureAuditSerialized).not.toContain("sha256");
+    expect(failureAuditSerialized).not.toContain("length");
+  });
+
+  it("does not treat sslmode warning text as tls failure", async () => {
+    runDbReconPreviewTempMock.mockRejectedValue(
+      new Error("SECURITY WARNING: sslmode require treated as alias for verify-full"),
+    );
+
+    const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(payload.errorCode).toBe("DB_UNKNOWN_FAILURE");
   });
 });
 
