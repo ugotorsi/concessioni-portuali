@@ -31,38 +31,12 @@ function getCommitShaShort(): string | null {
   return sha.slice(0, 12);
 }
 
-function getAuditMetadata(
-  result: string,
-  environment: string | null,
-  branch: string | null,
-  authMethod?: ReconAuthMethod,
-) {
-  const metadata: {
-    route: string;
-    environment: string | null;
-    branch: string | null;
-    commit: string | null;
-    result: string;
-    authMethod?: ReconAuthMethod;
-  } = {
-    route: "/api/admin/db-recon-preview-temp",
-    environment,
-    branch,
-    commit: getCommitShaShort(),
-    result,
-  };
-
-  if (authMethod) {
-    metadata.authMethod = authMethod;
-  }
-
-  return metadata;
+function getAuditMetadata(authMethod?: ReconAuthMethod) {
+  return authMethod ? { authMethod } : {};
 }
 
 async function auditRouteSuccess(
   user: { id?: string; email?: string | null; role?: string | null },
-  environment: string | null,
-  branch: string | null,
   authMethod: ReconAuthMethod,
 ) {
   await auditSuccess({
@@ -73,15 +47,12 @@ async function auditRouteSuccess(
       userEmail: user.email ?? null,
       userRole: user.role ?? null,
     },
-    metadata: getAuditMetadata("SUCCESS", environment, branch, authMethod),
+    metadata: getAuditMetadata(authMethod),
   }).catch(() => undefined);
 }
 
 async function auditRouteFailure(
-  result: string,
   user: { id?: string; email?: string | null; role?: string | null } | null,
-  environment: string | null,
-  branch: string | null,
   authMethod?: ReconAuthMethod,
 ) {
   await auditFailure({
@@ -92,7 +63,7 @@ async function auditRouteFailure(
       userEmail: user?.email ?? null,
       userRole: user?.role ?? null,
     },
-    metadata: getAuditMetadata(result, environment, branch, authMethod),
+    metadata: getAuditMetadata(authMethod),
   }).catch(() => undefined);
 }
 
@@ -109,14 +80,14 @@ export async function GET(request: Request) {
   const branch = process.env.VERCEL_GIT_COMMIT_REF ?? null;
 
   if (environment !== EXPECTED_PREVIEW_ENV) {
-    await auditRouteFailure("FORBIDDEN_ENVIRONMENT", null, environment, branch);
+    await auditRouteFailure(null);
     return forbidden("Endpoint available only in preview environment.");
   }
 
   // Intentional behavior: PR preview deployments run with their PR branch ref,
   // so this endpoint remains unavailable until code is merged into staging-operativo.
   if (branch !== EXPECTED_BRANCH) {
-    await auditRouteFailure("FORBIDDEN_BRANCH", null, environment, branch);
+    await auditRouteFailure(null);
     return forbidden("Endpoint available only on staging-operativo branch.");
   }
 
@@ -134,10 +105,7 @@ export async function GET(request: Request) {
 
     if (expectedToken === undefined || expectedToken.trim().length === 0) {
       await auditRouteFailure(
-        "UNAUTHENTICATED",
         sessionUser ? { id: sessionUser.id, email: sessionUser.email, role } : null,
-        environment,
-        branch,
         "temporary-token",
       );
       return NextResponse.json({ error: "Authentication required." }, { status: 401, headers: { "Cache-Control": "no-store" } });
@@ -145,10 +113,7 @@ export async function GET(request: Request) {
 
     if (!providedToken || !constantTimeTokenMatch(providedToken, expectedToken)) {
       await auditRouteFailure(
-        "UNAUTHENTICATED",
         sessionUser ? { id: sessionUser.id, email: sessionUser.email, role } : null,
-        environment,
-        branch,
         "temporary-token",
       );
       return NextResponse.json({ error: "Authentication required." }, { status: 401, headers: { "Cache-Control": "no-store" } });
@@ -159,10 +124,7 @@ export async function GET(request: Request) {
 
   if (!authMethod) {
     await auditRouteFailure(
-      "UNAUTHENTICATED",
       sessionUser ? { id: sessionUser.id, email: sessionUser.email, role } : null,
-      environment,
-      branch,
     );
     return NextResponse.json({ error: "Authentication required." }, { status: 401, headers: { "Cache-Control": "no-store" } });
   }
@@ -171,8 +133,6 @@ export async function GET(request: Request) {
     const recon = await runDbReconPreviewTemp();
     await auditRouteSuccess(
       { id: sessionUser?.id, email: sessionUser?.email, role },
-      environment,
-      branch,
       authMethod,
     );
 
@@ -193,10 +153,7 @@ export async function GET(request: Request) {
   } catch (error) {
     if (error instanceof ReconConfigError) {
       await auditRouteFailure(
-        "CONFIG_ERROR",
         sessionUser ? { id: sessionUser.id, email: sessionUser.email, role } : null,
-        environment,
-        branch,
         authMethod,
       );
       return NextResponse.json(
@@ -207,10 +164,7 @@ export async function GET(request: Request) {
 
     if (error instanceof ReconTimeoutError) {
       await auditRouteFailure(
-        "TIMEOUT",
         sessionUser ? { id: sessionUser.id, email: sessionUser.email, role } : null,
-        environment,
-        branch,
         authMethod,
       );
       return NextResponse.json(
@@ -220,10 +174,7 @@ export async function GET(request: Request) {
     }
 
     await auditRouteFailure(
-      "DB_ERROR",
       sessionUser ? { id: sessionUser.id, email: sessionUser.email, role } : null,
-      environment,
-      branch,
       authMethod,
     );
 

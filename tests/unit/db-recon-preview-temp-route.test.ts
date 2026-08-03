@@ -132,6 +132,7 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
     expect(auditSuccessMock).toHaveBeenCalledTimes(1);
     const auditArgs = auditSuccessMock.mock.calls[0][0];
     expect(auditArgs.metadata.authMethod).toBe("session");
+    expect(auditArgs.metadata).toEqual({ authMethod: "session" });
   });
 
   it("accepts correct temporary token", async () => {
@@ -144,6 +145,7 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
     expect(auditSuccessMock).toHaveBeenCalledTimes(1);
     const auditArgs = auditSuccessMock.mock.calls[0][0];
     expect(auditArgs.metadata.authMethod).toBe("temporary-token");
+    expect(auditArgs.metadata).toEqual({ authMethod: "temporary-token" });
   });
 
   it("rejects wrong temporary token", async () => {
@@ -211,6 +213,33 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
     expect(successAuditSerialized).not.toContain(TEMP_TOKEN.toLowerCase());
     expect(successAuditSerialized).not.toContain("x-db-recon-token");
     expect(successAuditSerialized).not.toContain("db_recon_temp_token");
+    expect(successAuditSerialized).not.toContain("sha256");
+    expect(successAuditSerialized).not.toContain("length");
+    expect(successAudit.metadata).toEqual({ authMethod: "temporary-token" });
+  });
+
+  it("does not include route/env/branch/commit/result in route-controlled audit metadata", async () => {
+    const sessionResponse = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
+    expect(sessionResponse.status).toBe(200);
+
+    const successAudit = auditSuccessMock.mock.calls[0][0];
+    expect(successAudit.metadata).toEqual({ authMethod: "temporary-token" });
+    expect(successAudit.metadata.route).toBeUndefined();
+    expect(successAudit.metadata.environment).toBeUndefined();
+    expect(successAudit.metadata.branch).toBeUndefined();
+    expect(successAudit.metadata.commit).toBeUndefined();
+    expect(successAudit.metadata.result).toBeUndefined();
+
+    const unauthorized = await GET(makeRequest({ tokenHeader: "wrong-token" }));
+    expect(unauthorized.status).toBe(401);
+
+    const failureAudit = auditFailureMock.mock.calls[auditFailureMock.mock.calls.length - 1]?.[0];
+    expect(failureAudit.metadata).toEqual({ authMethod: "temporary-token" });
+    expect(failureAudit.metadata.route).toBeUndefined();
+    expect(failureAudit.metadata.environment).toBeUndefined();
+    expect(failureAudit.metadata.branch).toBeUndefined();
+    expect(failureAudit.metadata.commit).toBeUndefined();
+    expect(failureAudit.metadata.result).toBeUndefined();
   });
 
   it("does not accept token via query string", async () => {
