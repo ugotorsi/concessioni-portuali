@@ -4,10 +4,9 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import { getAuthSession } from "@/lib/next-auth";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 import {
+  classifyDbReconError,
   EXPECTED_BRANCH,
   EXPECTED_PREVIEW_ENV,
-  ReconConfigError,
-  ReconTimeoutError,
   runDbReconPreviewTemp,
 } from "@/server/db-recon-preview-temp";
 
@@ -151,27 +150,8 @@ export async function GET(request: Request) {
       },
     );
   } catch (error) {
-    if (error instanceof ReconConfigError) {
-      await auditRouteFailure(
-        sessionUser ? { id: sessionUser.id, email: sessionUser.email, role } : null,
-        authMethod,
-      );
-      return NextResponse.json(
-        { error: "Runtime configuration for DB recon is invalid." },
-        { status: 500, headers: { "Cache-Control": "no-store" } },
-      );
-    }
-
-    if (error instanceof ReconTimeoutError) {
-      await auditRouteFailure(
-        sessionUser ? { id: sessionUser.id, email: sessionUser.email, role } : null,
-        authMethod,
-      );
-      return NextResponse.json(
-        { error: "DB recon timeout." },
-        { status: 504, headers: { "Cache-Control": "no-store" } },
-      );
-    }
+    const errorCode = classifyDbReconError(error);
+    console.error({ event: "db_recon_failed", errorCode });
 
     await auditRouteFailure(
       sessionUser ? { id: sessionUser.id, email: sessionUser.email, role } : null,
@@ -179,7 +159,7 @@ export async function GET(request: Request) {
     );
 
     return NextResponse.json(
-      { error: "DB recon failed." },
+      { error: "DB recon failed.", errorCode },
       { status: 500, headers: { "Cache-Control": "no-store" } },
     );
   }
