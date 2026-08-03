@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   classifyDbReconError,
+  classifyDbReconErrorStage,
   READ_ONLY_SQL,
   ReconConfigError,
   ReconTimeoutError,
@@ -11,6 +12,65 @@ import {
 } from "@/server/db-recon-preview-temp";
 
 const ORIGINAL_ENV = { ...process.env };
+
+function makeWorkingClientFactory(failAt?: { connect?: true; queryIndex?: number; error?: Error }) {
+  let queryIndex = 0;
+
+  const query = vi.fn(async () => {
+    queryIndex += 1;
+    if (failAt?.queryIndex === queryIndex) {
+      throw failAt.error ?? new Error("query failed");
+    }
+
+    switch (queryIndex) {
+      case 1:
+        return { rows: [{ current_database: "db", current_schema: "public" }] };
+      case 2:
+        return { rows: [{ server_version: "PostgreSQL 16.4 on x86_64" }] };
+      case 3:
+        return { rows: [{ present: true }] };
+      case 4:
+        return { rows: [{ count: 1 }] };
+      case 5:
+        return { rows: [{ count: 10 }] };
+      case 6:
+        return { rows: [{ table_name: "Ente" }, { table_name: "User" }, { table_name: "Concessione" }, { table_name: "Procedimento" }, { table_name: "DecisioneProcedimento" }] };
+      case 7:
+        return { rows: [{ typname: "TipoDecisioneProcedimento" }, { typname: "EffettoTitoloProcedimento" }, { typname: "StatoEffettoProcedimento" }] };
+      case 8:
+        return { rows: [{ column_name: "statoEffetto" }, { column_name: "effettoApplicatoAt" }, { column_name: "effectVersion" }] };
+      case 9:
+        return { rows: [{ count: 8 }] };
+      case 10:
+        return { rows: [{ count: 6 }] };
+      case 11:
+        return {
+          rows: [{
+            ente_count: 1,
+            user_count: 2,
+            concessione_count: 3,
+            procedimento_count: 4,
+            decisioneprocedimento_count: 5,
+          }],
+        };
+      default:
+        return { rows: [] };
+    }
+  });
+
+  return vi.fn(() => ({
+    connect: failAt?.connect
+      ? vi.fn().mockRejectedValue(failAt.error ?? new Error("connect failed"))
+      : vi.fn().mockResolvedValue(undefined),
+    query,
+    end: vi.fn().mockResolvedValue(undefined),
+    connection: {
+      stream: {
+        destroy: vi.fn(),
+      },
+    },
+  }));
+}
 
 describe("db recon preview temp service", () => {
   afterEach(() => {
@@ -142,7 +202,9 @@ describe("db recon preview temp service", () => {
       end: endMock,
     }));
 
-    await expect(runDbReconPreviewTemp(100, { clientFactory })).rejects.toThrow("connect failed");
+    const error = await runDbReconPreviewTemp(100, { clientFactory }).catch((e) => e);
+    expect(classifyDbReconError(error)).toBe("DB_UNKNOWN_FAILURE");
+    expect(classifyDbReconErrorStage(error)).toBe("CONNECTION_PROBE");
     expect(endMock).toHaveBeenCalledTimes(1);
   });
 
@@ -159,7 +221,9 @@ describe("db recon preview temp service", () => {
       end: endMock,
     }));
 
-    await expect(runDbReconPreviewTemp(100, { clientFactory })).rejects.toThrow("query failed");
+    const error = await runDbReconPreviewTemp(100, { clientFactory }).catch((e) => e);
+    expect(classifyDbReconError(error)).toBe("DB_QUERY_FAILED");
+    expect(classifyDbReconErrorStage(error)).toBe("SERVER_IDENTITY");
     expect(endMock).toHaveBeenCalledTimes(1);
   });
 
@@ -177,7 +241,9 @@ describe("db recon preview temp service", () => {
       },
     }));
 
-    await expect(runDbReconPreviewTemp(100, { clientFactory })).rejects.toThrow("query failed");
+    const error = await runDbReconPreviewTemp(100, { clientFactory }).catch((e) => e);
+    expect(classifyDbReconError(error)).toBe("DB_QUERY_FAILED");
+    expect(classifyDbReconErrorStage(error)).toBe("CURRENT_DATABASE");
     expect(destroyMock).toHaveBeenCalledTimes(1);
   });
 
@@ -280,5 +346,50 @@ describe("db recon preview temp service", () => {
 
   it("classifies unknown errors as DB_UNKNOWN_FAILURE", () => {
     expect(classifyDbReconError(new Error("unknown"))).toBe("DB_UNKNOWN_FAILURE");
+  });
+
+  it("classifies unknown errors stage fallback as UNKNOWN", () => {
+    expect(classifyDbReconErrorStage(new Error("unknown"))).toBe("UNKNOWN");
+  });
+
+  it("classifies connection probe stage on connect failure", async () => {
+    process.env.DIRECT_URL = "postgresql://u:p@localhost:5432/db?sslmode=require";
+    const factory = makeWorkingClientFactory({ connect: true, error: new Error("connect") });
+
+    const error = await runDbReconPreviewTemp(100, { clientFactory: factory }).catch((e) => e);
+
+    expect(classifyDbReconErrorStage(error)).toBe("CONNECTION_PROBE");
+  });
+
+  it.each([
+    { queryIndex: 1, stage: "CURRENT_DATABASE" },
+    { queryIndex: 2, stage: "SERVER_IDENTITY" },
+    { queryIndex: 3, stage: "MIGRATIONS_TABLE_CHECK" },
+    { queryIndex: 4, stage: "MIGRATIONS_COUNT" },
+    { queryIndex: 5, stage: "PUBLIC_TABLES" },
+    { queryIndex: 6, stage: "KEY_TABLES" },
+    { queryIndex: 7, stage: "ENUMS" },
+    { queryIndex: 8, stage: "COLUMNS" },
+    { queryIndex: 11, stage: "RECORD_COUNTS" },
+  ] as const)("classifies query stage $stage", async ({ queryIndex, stage }) => {
+    process.env.DIRECT_URL = "postgresql://u:p@localhost:5432/db?sslmode=require";
+    const queryError = Object.assign(new Error("query failed"), { code: "XX000" });
+    const factory = makeWorkingClientFactory({ queryIndex, error: queryError });
+
+    const error = await runDbReconPreviewTemp(100, { clientFactory: factory }).catch((e) => e);
+
+    expect(classifyDbReconError(error)).toBe("DB_QUERY_FAILED");
+    expect(classifyDbReconErrorStage(error)).toBe(stage);
+  });
+
+  it("classifies timeout from query as DB_TIMEOUT with stage", async () => {
+    process.env.DIRECT_URL = "postgresql://u:p@localhost:5432/db?sslmode=require";
+    const timeoutError = Object.assign(new Error("timeout"), { code: "ETIMEDOUT" });
+    const factory = makeWorkingClientFactory({ queryIndex: 5, error: timeoutError });
+
+    const error = await runDbReconPreviewTemp(100, { clientFactory: factory }).catch((e) => e);
+
+    expect(classifyDbReconError(error)).toBe("DB_TIMEOUT");
+    expect(classifyDbReconErrorStage(error)).toBe("PUBLIC_TABLES");
   });
 });

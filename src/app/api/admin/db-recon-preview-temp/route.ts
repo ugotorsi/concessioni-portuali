@@ -5,6 +5,7 @@ import { getAuthSession } from "@/lib/next-auth";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 import {
   classifyDbReconError,
+  classifyDbReconErrorStage,
   EXPECTED_BRANCH,
   EXPECTED_PREVIEW_ENV,
   runDbReconPreviewTemp,
@@ -151,7 +152,8 @@ export async function GET(request: Request) {
     );
   } catch (error) {
     const errorCode = classifyDbReconError(error);
-    console.error({ event: "db_recon_failed", errorCode });
+    const errorStage = classifyDbReconErrorStage(error);
+    console.error({ event: "db_recon_failed", errorCode, errorStage });
 
     await auditRouteFailure(
       sessionUser ? { id: sessionUser.id, email: sessionUser.email, role } : null,
@@ -159,7 +161,7 @@ export async function GET(request: Request) {
     );
 
     return NextResponse.json(
-      { error: "DB recon failed.", errorCode },
+      { error: "DB recon failed.", errorCode, errorStage },
       { status: 500, headers: { "Cache-Control": "no-store" } },
     );
   }

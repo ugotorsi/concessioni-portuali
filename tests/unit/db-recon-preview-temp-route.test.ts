@@ -67,6 +67,14 @@ function makeTechnicalError(code: string, message: string): Error & { code: stri
   return error;
 }
 
+function makeStagedError(stage: string, cause: unknown): { name: string; stage: string; cause: unknown } {
+  return {
+    name: "ReconStageError",
+    stage,
+    cause,
+  };
+}
+
 function makeRequest(options?: { tokenHeader?: string; query?: string }) {
   const url = `https://example.test/api/admin/db-recon-preview-temp${options?.query ?? ""}`;
   const headers = new Headers();
@@ -306,7 +314,7 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
 
     expect(response.status).toBe(500);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
-    expect(payload).toEqual({ error: "DB recon failed.", errorCode: "DIRECT_URL_MISSING" });
+    expect(payload).toEqual({ error: "DB recon failed.", errorCode: "DIRECT_URL_MISSING", errorStage: "UNKNOWN" });
   });
 
   it("classifies DIRECT_URL invalid", async () => {
@@ -319,7 +327,7 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
 
     expect(response.status).toBe(500);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
-    expect(payload).toEqual({ error: "DB recon failed.", errorCode: "DIRECT_URL_INVALID" });
+    expect(payload).toEqual({ error: "DB recon failed.", errorCode: "DIRECT_URL_INVALID", errorStage: "UNKNOWN" });
   });
 
   it("classifies postgres auth error 28P01", async () => {
@@ -330,6 +338,7 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
 
     expect(response.status).toBe(500);
     expect(payload.errorCode).toBe("DB_AUTH_FAILED");
+    expect(payload.errorStage).toBe("UNKNOWN");
   });
 
   it("classifies postgres database not found 3D000", async () => {
@@ -340,6 +349,7 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
 
     expect(response.status).toBe(500);
     expect(payload.errorCode).toBe("DB_DATABASE_NOT_FOUND");
+    expect(payload.errorStage).toBe("UNKNOWN");
   });
 
   it("classifies ENOTFOUND as DNS failure", async () => {
@@ -350,6 +360,7 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
 
     expect(response.status).toBe(500);
     expect(payload.errorCode).toBe("DB_DNS_FAILED");
+    expect(payload.errorStage).toBe("UNKNOWN");
   });
 
   it("classifies EAI_AGAIN as DNS failure", async () => {
@@ -360,6 +371,7 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
 
     expect(response.status).toBe(500);
     expect(payload.errorCode).toBe("DB_DNS_FAILED");
+    expect(payload.errorStage).toBe("UNKNOWN");
   });
 
   it("classifies ECONNREFUSED as connection refused", async () => {
@@ -370,6 +382,7 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
 
     expect(response.status).toBe(500);
     expect(payload.errorCode).toBe("DB_CONNECTION_REFUSED");
+    expect(payload.errorStage).toBe("UNKNOWN");
   });
 
   it("classifies ETIMEDOUT as timeout", async () => {
@@ -380,6 +393,7 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
 
     expect(response.status).toBe(500);
     expect(payload.errorCode).toBe("DB_TIMEOUT");
+    expect(payload.errorStage).toBe("UNKNOWN");
   });
 
   it("classifies application timeout as DB_TIMEOUT", async () => {
@@ -390,7 +404,7 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
 
     expect(response.status).toBe(500);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
-    expect(payload).toEqual({ error: "DB recon failed.", errorCode: "DB_TIMEOUT" });
+    expect(payload).toEqual({ error: "DB recon failed.", errorCode: "DB_TIMEOUT", errorStage: "UNKNOWN" });
   });
 
   it("classifies TLS errors", async () => {
@@ -403,20 +417,22 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
 
     expect(response.status).toBe(500);
     expect(payload.errorCode).toBe("DB_TLS_FAILED");
+    expect(payload.errorStage).toBe("UNKNOWN");
   });
 
   it("classifies query failures", async () => {
-    runDbReconPreviewTempMock.mockRejectedValue({
+    runDbReconPreviewTempMock.mockRejectedValue(makeStagedError("COLUMNS", {
       message: "outer",
       cause: makeTechnicalError("XX000", "query failed"),
       name: "ReconQueryError",
-    });
+    }));
 
     const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
     const payload = await response.json();
 
     expect(response.status).toBe(500);
     expect(payload.errorCode).toBe("DB_QUERY_FAILED");
+    expect(payload.errorStage).toBe("COLUMNS");
   });
 
   it("classifies unknown failures", async () => {
@@ -427,6 +443,7 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
 
     expect(response.status).toBe(500);
     expect(payload.errorCode).toBe("DB_UNKNOWN_FAILURE");
+    expect(payload.errorStage).toBe("UNKNOWN");
   });
 
   it("does not expose original message, stack, host, URL or credentials in payload, log or audit", async () => {
@@ -439,6 +456,8 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
     expect(response.headers.get("Cache-Control")).toBe("no-store");
     expect(payload.error).toBe("DB recon failed.");
     expect(typeof payload.errorCode).toBe("string");
+    expect(typeof payload.errorStage).toBe("string");
+    expect(Object.keys(payload)).toEqual(["error", "errorCode", "errorStage"]);
 
     const payloadSerialized = JSON.stringify(payload).toLowerCase();
     expect(payloadSerialized).not.toContain("postgresql://");
@@ -448,8 +467,8 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
     expect(payloadSerialized).not.toContain("stack");
 
     const logArg = consoleErrorSpy.mock.calls[0]?.[0];
-    expect(logArg).toEqual({ event: "db_recon_failed", errorCode: payload.errorCode });
-    expect(Object.keys(logArg)).toEqual(["event", "errorCode"]);
+    expect(logArg).toEqual({ event: "db_recon_failed", errorCode: payload.errorCode, errorStage: payload.errorStage });
+    expect(Object.keys(logArg)).toEqual(["event", "errorCode", "errorStage"]);
 
     const logSerialized = JSON.stringify(logArg).toLowerCase();
     expect(logSerialized).not.toContain("postgresql://");
@@ -476,6 +495,7 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
 
     expect(response.status).toBe(500);
     expect(payload.errorCode).toBe("DB_UNKNOWN_FAILURE");
+    expect(payload.errorStage).toBe("UNKNOWN");
   });
 });
 

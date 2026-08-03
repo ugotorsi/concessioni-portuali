@@ -15,6 +15,34 @@ export type DbReconErrorCode =
   | "DB_TIMEOUT"
   | "DB_QUERY_FAILED"
   | "DB_UNKNOWN_FAILURE";
+export type DbReconErrorStage =
+  | "CONNECTION_PROBE"
+  | "SERVER_IDENTITY"
+  | "CURRENT_DATABASE"
+  | "CURRENT_SCHEMA"
+  | "MIGRATIONS_TABLE_CHECK"
+  | "MIGRATIONS_COUNT"
+  | "PUBLIC_TABLES"
+  | "KEY_TABLES"
+  | "ENUMS"
+  | "COLUMNS"
+  | "RECORD_COUNTS"
+  | "UNKNOWN";
+
+const ALLOWED_ERROR_STAGES = new Set<DbReconErrorStage>([
+  "CONNECTION_PROBE",
+  "SERVER_IDENTITY",
+  "CURRENT_DATABASE",
+  "CURRENT_SCHEMA",
+  "MIGRATIONS_TABLE_CHECK",
+  "MIGRATIONS_COUNT",
+  "PUBLIC_TABLES",
+  "KEY_TABLES",
+  "ENUMS",
+  "COLUMNS",
+  "RECORD_COUNTS",
+  "UNKNOWN",
+]);
 
 export const READ_ONLY_SQL = {
   identity: "SELECT current_database() AS current_database, current_schema() AS current_schema",
@@ -101,6 +129,18 @@ class ReconQueryError extends Error {
   constructor(cause: unknown) {
     super("DB recon query failed.");
     this.name = "ReconQueryError";
+    this.cause = cause;
+  }
+}
+
+class ReconStageError extends Error {
+  readonly stage: DbReconErrorStage;
+  readonly cause: unknown;
+
+  constructor(stage: DbReconErrorStage, cause: unknown) {
+    super("DB recon staged failure.");
+    this.name = "ReconStageError";
+    this.stage = stage;
     this.cause = cause;
   }
 }
@@ -232,6 +272,60 @@ function getNestedErrorMessage(error: unknown): string {
   return getNestedErrorMessage(nested);
 }
 
+function getNestedErrorName(error: unknown): string {
+  if (!error || typeof error !== "object") {
+    return "";
+  }
+
+  const maybeName = (error as { name?: unknown }).name;
+  if (typeof maybeName === "string" && maybeName.length > 0) {
+    return maybeName;
+  }
+
+  const nested = (error as { cause?: unknown }).cause;
+  if (nested === error) {
+    return "";
+  }
+
+  return getNestedErrorName(nested);
+}
+
+function hasNestedErrorName(error: unknown, expectedName: string): boolean {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const maybeName = (error as { name?: unknown }).name;
+  if (typeof maybeName === "string" && maybeName === expectedName) {
+    return true;
+  }
+
+  const nested = (error as { cause?: unknown }).cause;
+  if (nested === error) {
+    return false;
+  }
+
+  return hasNestedErrorName(nested, expectedName);
+}
+
+function getNestedErrorStage(error: unknown): DbReconErrorStage | null {
+  if (!error || typeof error !== "object") {
+    return null;
+  }
+
+  const maybeStage = (error as { stage?: unknown }).stage;
+  if (typeof maybeStage === "string" && ALLOWED_ERROR_STAGES.has(maybeStage as DbReconErrorStage)) {
+    return maybeStage as DbReconErrorStage;
+  }
+
+  const nested = (error as { cause?: unknown }).cause;
+  if (nested === error) {
+    return null;
+  }
+
+  return getNestedErrorStage(nested);
+}
+
 function isTlsLikeError(code: string | null, message: string): boolean {
   const normalizedCode = code?.toUpperCase() ?? "";
   const tlsCodes = new Set([
@@ -277,20 +371,7 @@ export function classifyDbReconError(error: unknown): DbReconErrorCode {
     return error.diagnosticCode;
   }
 
-  if (error instanceof ReconTimeoutError) {
-    return "DB_TIMEOUT";
-  }
-
-  const timeoutName = (
-    error
-    && typeof error === "object"
-    && "name" in error
-    && typeof (error as { name?: unknown }).name === "string"
-  )
-    ? (error as { name: string }).name
-    : "";
-
-  if (timeoutName === "ReconTimeoutError") {
+  if (error instanceof ReconTimeoutError || hasNestedErrorName(error, "ReconTimeoutError")) {
     return "DB_TIMEOUT";
   }
 
@@ -317,20 +398,7 @@ export function classifyDbReconError(error: unknown): DbReconErrorCode {
     return "DB_TLS_FAILED";
   }
 
-  const errorName = (
-    error
-    && typeof error === "object"
-    && "name" in error
-    && typeof (error as { name?: unknown }).name === "string"
-  )
-    ? (error as { name: string }).name
-    : "";
-
-  if (error instanceof ReconQueryError) {
-    return "DB_QUERY_FAILED";
-  }
-
-  if (errorName === "ReconQueryError") {
+  if (error instanceof ReconQueryError || hasNestedErrorName(error, "ReconQueryError")) {
     return "DB_QUERY_FAILED";
   }
 
@@ -340,7 +408,8 @@ export function classifyDbReconError(error: unknown): DbReconErrorCode {
 assertReadOnlyQueries();
 
 export async function runDbReconPreviewTemp(timeoutMs = DEFAULT_TIMEOUT_MS, deps: ReconDeps = {}): Promise<DbReconPreviewTempResult> {
-  const directUrl = validateDirectUrl(process.env.DIRECT_URL);
+  const directUrl = validateDirectUrl((process.env as { DIRECT_URL?: string | null }).DIRECT_URL ?? undefined);
+
   const clientFactory = deps.clientFactory ?? ((config) => new Client(config));
 
   const client = clientFactory({
@@ -373,25 +442,30 @@ export async function runDbReconPreviewTemp(timeoutMs = DEFAULT_TIMEOUT_MS, deps
   };
 
   try {
-    await client.connect();
+    await withStage("CONNECTION_PROBE", async () => {
+      await client.connect();
+    });
 
-    const identity = await queryReadOnly(READ_ONLY_SQL.identity);
-    const version = await queryReadOnly(READ_ONLY_SQL.version);
-    const migrationsPresent = await queryReadOnly(READ_ONLY_SQL.prismaMigrationsPresent);
+    const identity = await withStage("CURRENT_DATABASE", async () => queryReadOnly(READ_ONLY_SQL.identity));
+    const version = await withStage("SERVER_IDENTITY", async () => queryReadOnly(READ_ONLY_SQL.version));
+    const migrationsPresent = await withStage(
+      "MIGRATIONS_TABLE_CHECK",
+      async () => queryReadOnly(READ_ONLY_SQL.prismaMigrationsPresent),
+    );
 
     let prismaMigrationsCount: number | null = null;
     if (migrationsPresent.rows[0]?.present) {
-      const migrationCount = await queryReadOnly(READ_ONLY_SQL.prismaMigrationsCount);
+      const migrationCount = await withStage("MIGRATIONS_COUNT", async () => queryReadOnly(READ_ONLY_SQL.prismaMigrationsCount));
       prismaMigrationsCount = (migrationCount.rows[0]?.count as number) ?? null;
     }
 
-    const publicTablesCount = await queryReadOnly(READ_ONLY_SQL.publicTablesCount);
-    const targetTables = await queryReadOnly(READ_ONLY_SQL.targetTables);
-    const enums = await queryReadOnly(READ_ONLY_SQL.enums);
-    const columns = await queryReadOnly(READ_ONLY_SQL.decisionColumns);
-    const indexesCount = await queryReadOnly(READ_ONLY_SQL.decisionIndexesCount);
-    const constraintsCount = await queryReadOnly(READ_ONLY_SQL.decisionConstraintsCount);
-    const recordCounts = await queryReadOnly(READ_ONLY_SQL.recordCounts);
+    const publicTablesCount = await withStage("PUBLIC_TABLES", async () => queryReadOnly(READ_ONLY_SQL.publicTablesCount));
+    const targetTables = await withStage("KEY_TABLES", async () => queryReadOnly(READ_ONLY_SQL.targetTables));
+    const enums = await withStage("ENUMS", async () => queryReadOnly(READ_ONLY_SQL.enums));
+    const columns = await withStage("COLUMNS", async () => queryReadOnly(READ_ONLY_SQL.decisionColumns));
+    const indexesCount = await withStage("KEY_TABLES", async () => queryReadOnly(READ_ONLY_SQL.decisionIndexesCount));
+    const constraintsCount = await withStage("KEY_TABLES", async () => queryReadOnly(READ_ONLY_SQL.decisionConstraintsCount));
+    const recordCounts = await withStage("RECORD_COUNTS", async () => queryReadOnly(READ_ONLY_SQL.recordCounts));
 
     const tableSet = new Set<string>(targetTables.rows.map((row) => row.table_name as string));
     const enumSet = new Set<string>(enums.rows.map((row) => row.typname as string));
@@ -440,5 +514,17 @@ export async function runDbReconPreviewTemp(timeoutMs = DEFAULT_TIMEOUT_MS, deps
   } finally {
     clearTimeout(timeout);
     await safeCloseClient(client);
+  }
+}
+
+export function classifyDbReconErrorStage(error: unknown): DbReconErrorStage {
+  return getNestedErrorStage(error) ?? "UNKNOWN";
+}
+
+async function withStage<T>(stage: DbReconErrorStage, operation: () => Promise<T>): Promise<T> {
+  try {
+    return await operation();
+  } catch (error) {
+    throw new ReconStageError(stage, error);
   }
 }
