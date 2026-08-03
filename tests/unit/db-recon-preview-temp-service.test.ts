@@ -58,6 +58,62 @@ describe("db recon preview temp service", () => {
     await expect(runDbReconPreviewTemp(100)).rejects.toBeInstanceOf(ReconConfigError);
   });
 
+  it("fails when DIRECT_URL has no hostname", async () => {
+    const invalidUrl = "postgresql:///fake_db?sslmode=require";
+    process.env.DIRECT_URL = invalidUrl;
+
+    const connectMock = vi.fn();
+    const clientFactory = vi.fn(() => ({
+      connect: connectMock,
+      query: vi.fn(),
+      end: vi.fn().mockResolvedValue(undefined),
+    }));
+
+    let captured: unknown;
+    try {
+      await runDbReconPreviewTemp(100, { clientFactory });
+    } catch (error) {
+      captured = error;
+    }
+
+    expect(captured).toBeInstanceOf(ReconConfigError);
+    expect(clientFactory).not.toHaveBeenCalled();
+    expect(connectMock).not.toHaveBeenCalled();
+
+    const message = captured instanceof Error ? captured.message : "";
+    expect(message).not.toContain(invalidUrl);
+    expect(message.toLowerCase()).not.toContain("postgresql://");
+    expect(message).toBe("DIRECT_URL host is missing.");
+  });
+
+  it("fails when DIRECT_URL has no database name", async () => {
+    const invalidUrl = "postgresql://localhost/?sslmode=require";
+    process.env.DIRECT_URL = invalidUrl;
+
+    const connectMock = vi.fn();
+    const clientFactory = vi.fn(() => ({
+      connect: connectMock,
+      query: vi.fn(),
+      end: vi.fn().mockResolvedValue(undefined),
+    }));
+
+    let captured: unknown;
+    try {
+      await runDbReconPreviewTemp(100, { clientFactory });
+    } catch (error) {
+      captured = error;
+    }
+
+    expect(captured).toBeInstanceOf(ReconConfigError);
+    expect(clientFactory).not.toHaveBeenCalled();
+    expect(connectMock).not.toHaveBeenCalled();
+
+    const message = captured instanceof Error ? captured.message : "";
+    expect(message).not.toContain(invalidUrl);
+    expect(message.toLowerCase()).not.toContain("postgresql://");
+    expect(message).toBe("DIRECT_URL database is missing.");
+  });
+
   it("fails when DIRECT_URL misses sslmode", async () => {
     process.env.DIRECT_URL = "postgresql://u:p@localhost:5432/db";
 

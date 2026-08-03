@@ -114,20 +114,6 @@ export function assertReadOnlyQueries(): void {
   }
 }
 
-export function withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: string): Promise<T> {
-  let timeout: NodeJS.Timeout | null = null;
-
-  const timeoutPromise = new Promise<T>((_, reject) => {
-    timeout = setTimeout(() => reject(new ReconTimeoutError(message)), timeoutMs);
-  });
-
-  return Promise.race([promise, timeoutPromise]).finally(() => {
-    if (timeout) {
-      clearTimeout(timeout);
-    }
-  }) as Promise<T>;
-}
-
 export function synthesizePostgresVersion(raw: string): string {
   const match = raw.match(/^PostgreSQL\s+([0-9]+(?:\.[0-9]+)?)/i);
   if (!match) {
