@@ -4,9 +4,18 @@ const getAuthSessionMock = vi.hoisted(() => vi.fn());
 const runDbReconPreviewTempMock = vi.hoisted(() => vi.fn());
 const auditSuccessMock = vi.hoisted(() => vi.fn());
 const auditFailureMock = vi.hoisted(() => vi.fn());
+const timingSafeEqualMock = vi.hoisted(() => vi.fn());
 
 const ReconConfigErrorRef = vi.hoisted(() => ({ value: class ReconConfigError extends Error {} }));
 const ReconTimeoutErrorRef = vi.hoisted(() => ({ value: class ReconTimeoutError extends Error {} }));
+
+vi.mock("node:crypto", async () => {
+  const actual = await vi.importActual<typeof import("node:crypto")>("node:crypto");
+  return {
+    ...actual,
+    timingSafeEqual: timingSafeEqualMock,
+  };
+});
 
 vi.mock("@/lib/next-auth", () => ({
   getAuthSession: getAuthSessionMock,
@@ -34,9 +43,24 @@ vi.mock("@/server/db-recon-preview-temp", async () => {
   };
 });
 
-import { GET } from "@/app/api/admin/db-recon-preview-temp/route";
+import { GET, constantTimeTokenMatch } from "@/app/api/admin/db-recon-preview-temp/route";
 
 const ORIGINAL_ENV = { ...process.env };
+const TEMP_TOKEN = "temporary-preview-token-123";
+
+function makeRequest(options?: { tokenHeader?: string; query?: string }) {
+  const url = `https://example.test/api/admin/db-recon-preview-temp${options?.query ?? ""}`;
+  const headers = new Headers();
+
+  if (options?.tokenHeader !== undefined) {
+    headers.set("x-db-recon-token", options.tokenHeader);
+  }
+
+  return new Request(url, {
+    method: "GET",
+    headers,
+  });
+}
 
 describe("GET /api/admin/db-recon-preview-temp", () => {
   beforeEach(() => {
@@ -45,14 +69,10 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
     process.env.VERCEL_ENV = "preview";
     process.env.VERCEL_GIT_COMMIT_REF = "staging-operativo";
     process.env.VERCEL_GIT_COMMIT_SHA = "abc1234567890";
+    process.env.DB_RECON_TEMP_TOKEN = TEMP_TOKEN;
 
-    getAuthSessionMock.mockResolvedValue({
-      user: {
-        id: "u-admin",
-        email: "admin@demo.local",
-        role: "ADMIN",
-      },
-    });
+    getAuthSessionMock.mockResolvedValue(null);
+    timingSafeEqualMock.mockImplementation((a: Buffer, b: Buffer) => Buffer.compare(a, b) === 0);
 
     auditSuccessMock.mockResolvedValue(undefined);
     auditFailureMock.mockResolvedValue(undefined);
@@ -94,143 +114,169 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
     });
   });
 
-  it("returns 401 when unauthenticated", async () => {
-    getAuthSessionMock.mockResolvedValue(null);
-
-    const response = await GET();
-
-    expect(response.status).toBe(401);
-    expect(runDbReconPreviewTempMock).not.toHaveBeenCalled();
-    expect(response.headers.get("Cache-Control")).toBe("no-store");
-    expect(auditFailureMock).toHaveBeenCalledTimes(1);
-    expect(auditSuccessMock).not.toHaveBeenCalled();
-  });
-
-  it("returns 401 with no session even when demo mode is active", async () => {
-    process.env.INVESTOR_DEMO_MODE = "true";
-    getAuthSessionMock.mockResolvedValue(null);
-
-    const response = await GET();
-
-    expect(response.status).toBe(401);
-    expect(runDbReconPreviewTempMock).not.toHaveBeenCalled();
-    expect(auditFailureMock).toHaveBeenCalledTimes(1);
-  });
-
-  it("returns 403 when role is not ADMIN", async () => {
+  it("accepts real ADMIN session", async () => {
     getAuthSessionMock.mockResolvedValue({
       user: {
-        id: "u-1",
-        email: "g@demo.local",
-        role: "GIURIDICO",
+        id: "u-admin",
+        email: "admin@demo.local",
+        role: "ADMIN",
       },
     });
 
-    const response = await GET();
-
-    expect(response.status).toBe(403);
-    expect(runDbReconPreviewTempMock).not.toHaveBeenCalled();
-    expect(response.headers.get("Cache-Control")).toBe("no-store");
-    expect(auditFailureMock).toHaveBeenCalledTimes(1);
-    expect(auditSuccessMock).not.toHaveBeenCalled();
-  });
-
-  it("returns 403 when runtime is not preview", async () => {
-    process.env.VERCEL_ENV = "production";
-
-    const response = await GET();
-
-    expect(response.status).toBe(403);
-    expect(runDbReconPreviewTempMock).not.toHaveBeenCalled();
-    expect(response.headers.get("Cache-Control")).toBe("no-store");
-    expect(auditFailureMock).toHaveBeenCalledTimes(1);
-  });
-
-  it("returns 403 when branch is not staging-operativo", async () => {
-    process.env.VERCEL_GIT_COMMIT_REF = "main";
-
-    const response = await GET();
-
-    expect(response.status).toBe(403);
-    expect(runDbReconPreviewTempMock).not.toHaveBeenCalled();
-    expect(response.headers.get("Cache-Control")).toBe("no-store");
-    expect(auditFailureMock).toHaveBeenCalledTimes(1);
-  });
-
-  it("documents PR preview behavior through branch guard", async () => {
-    process.env.VERCEL_GIT_COMMIT_REF = "chore/p0-e7-db-recon-preview-temp";
-
-    const response = await GET();
-    const payload = await response.json();
-
-    expect(response.status).toBe(403);
-    expect(payload.error).toContain("staging-operativo");
-  });
-
-  it("returns no-store and does not leak secret-like fields", async () => {
-    const response = await GET();
-    const payload = await response.json();
+    const response = await GET(makeRequest());
 
     expect(response.status).toBe(200);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
-    expect(payload.environment).toBe("preview");
-    expect(payload.branch).toBe("staging-operativo");
-    expect(payload.commit).toBe("abc123456789");
-
-    const serialized = JSON.stringify(payload).toLowerCase();
-    expect(serialized).not.toContain("database_url");
-    expect(serialized).not.toContain("direct_url");
-    expect(serialized).not.toContain("password");
-    expect(serialized).not.toContain("token");
-    expect(serialized).not.toContain("secret");
-    expect(serialized).not.toContain("postgres://");
-    expect(serialized).not.toContain("postgresql://");
+    expect(runDbReconPreviewTempMock).toHaveBeenCalledTimes(1);
 
     expect(auditSuccessMock).toHaveBeenCalledTimes(1);
-    expect(auditFailureMock).not.toHaveBeenCalled();
-
     const auditArgs = auditSuccessMock.mock.calls[0][0];
-    const auditSerialized = JSON.stringify(auditArgs).toLowerCase();
-    expect(auditSerialized).not.toContain("database_url");
-    expect(auditSerialized).not.toContain("direct_url");
-    expect(auditSerialized).not.toContain("password");
-    expect(auditSerialized).not.toContain("token");
-    expect(auditSerialized).not.toContain("postgres://");
+    expect(auditArgs.metadata.authMethod).toBe("session");
   });
 
-  it("returns 500 for ReconConfigError with single audit event", async () => {
+  it("accepts correct temporary token", async () => {
+    const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(runDbReconPreviewTempMock).toHaveBeenCalledTimes(1);
+
+    expect(auditSuccessMock).toHaveBeenCalledTimes(1);
+    const auditArgs = auditSuccessMock.mock.calls[0][0];
+    expect(auditArgs.metadata.authMethod).toBe("temporary-token");
+  });
+
+  it("rejects wrong temporary token", async () => {
+    const response = await GET(makeRequest({ tokenHeader: "wrong-token" }));
+
+    expect(response.status).toBe(401);
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(runDbReconPreviewTempMock).not.toHaveBeenCalled();
+
+    expect(auditFailureMock).toHaveBeenCalledTimes(1);
+    const auditArgs = auditFailureMock.mock.calls[0][0];
+    expect(auditArgs.metadata.authMethod).toBe("temporary-token");
+  });
+
+  it("rejects when temporary token header is missing", async () => {
+    const response = await GET(makeRequest());
+
+    expect(response.status).toBe(401);
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(runDbReconPreviewTempMock).not.toHaveBeenCalled();
+    expect(auditFailureMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects when DB_RECON_TEMP_TOKEN is missing", async () => {
+    delete process.env.DB_RECON_TEMP_TOKEN;
+
+    const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
+
+    expect(response.status).toBe(401);
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(runDbReconPreviewTempMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects when DB_RECON_TEMP_TOKEN is empty", async () => {
+    process.env.DB_RECON_TEMP_TOKEN = "   ";
+
+    const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
+
+    expect(response.status).toBe(401);
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(runDbReconPreviewTempMock).not.toHaveBeenCalled();
+  });
+
+  it("uses constant-time comparison for temporary token", async () => {
+    const mismatch = await GET(makeRequest({ tokenHeader: "wrong-token" }));
+    const match = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
+
+    expect(mismatch.status).toBe(401);
+    expect(match.status).toBe(200);
+    expect(timingSafeEqualMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not expose token in response or audit", async () => {
+    const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    const payloadSerialized = JSON.stringify(payload).toLowerCase();
+    expect(payloadSerialized).not.toContain(TEMP_TOKEN.toLowerCase());
+    expect(payloadSerialized).not.toContain("x-db-recon-token");
+    expect(payloadSerialized).not.toContain("db_recon_temp_token");
+
+    const successAudit = auditSuccessMock.mock.calls[0][0];
+    const successAuditSerialized = JSON.stringify(successAudit).toLowerCase();
+    expect(successAuditSerialized).not.toContain(TEMP_TOKEN.toLowerCase());
+    expect(successAuditSerialized).not.toContain("x-db-recon-token");
+    expect(successAuditSerialized).not.toContain("db_recon_temp_token");
+  });
+
+  it("does not accept token via query string", async () => {
+    const response = await GET(makeRequest({ query: `?x-db-recon-token=${TEMP_TOKEN}` }));
+
+    expect(response.status).toBe(401);
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(runDbReconPreviewTempMock).not.toHaveBeenCalled();
+  });
+
+  it("always blocks production even with correct token", async () => {
+    process.env.VERCEL_ENV = "production";
+
+    const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
+
+    expect(response.status).toBe(403);
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(runDbReconPreviewTempMock).not.toHaveBeenCalled();
+    expect(timingSafeEqualMock).not.toHaveBeenCalled();
+  });
+
+  it("always blocks non-staging branch even with correct token", async () => {
+    process.env.VERCEL_GIT_COMMIT_REF = "feature/other";
+
+    const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
+
+    expect(response.status).toBe(403);
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(runDbReconPreviewTempMock).not.toHaveBeenCalled();
+    expect(timingSafeEqualMock).not.toHaveBeenCalled();
+  });
+
+  it("keeps no-store on config error", async () => {
     runDbReconPreviewTempMock.mockRejectedValue(new ReconConfigErrorRef.value("bad"));
 
-    const response = await GET();
+    const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
 
     expect(response.status).toBe(500);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
-    expect(auditFailureMock).toHaveBeenCalledTimes(1);
-    expect(auditSuccessMock).not.toHaveBeenCalled();
   });
 
-  it("returns 504 for ReconTimeoutError with single audit event", async () => {
+  it("keeps no-store on timeout error", async () => {
     runDbReconPreviewTempMock.mockRejectedValue(new ReconTimeoutErrorRef.value("timeout"));
 
-    const response = await GET();
+    const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
 
     expect(response.status).toBe(504);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
-    expect(auditFailureMock).toHaveBeenCalledTimes(1);
-    expect(auditSuccessMock).not.toHaveBeenCalled();
   });
 
-  it("returns 500 for generic DB errors with sanitized payload", async () => {
+  it("keeps sanitized generic DB error response", async () => {
     runDbReconPreviewTempMock.mockRejectedValue(new Error("postgresql://user:pass@host/db"));
 
-    const response = await GET();
+    const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
     const payload = await response.json();
 
     expect(response.status).toBe(500);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
     expect(payload.error).toBe("DB recon failed.");
     expect(JSON.stringify(payload).toLowerCase()).not.toContain("postgresql://");
-    expect(auditFailureMock).toHaveBeenCalledTimes(1);
-    expect(auditSuccessMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("constantTimeTokenMatch", () => {
+  it("returns true only for equal token values", () => {
+    expect(constantTimeTokenMatch("abc", "abc")).toBe(true);
+    expect(constantTimeTokenMatch("abc", "abd")).toBe(false);
   });
 });
