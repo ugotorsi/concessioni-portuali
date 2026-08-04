@@ -1,0 +1,6 @@
+PHASE3_STATUS_LABEL=corrected_retry
+PRISMA_DIFF_COMMAND_CORRECTED=npx prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --script
+PRISMA_DIFF_EXIT_CORRECTED=0
+AUTHORITATIVE_RESULT_LABEL=authoritative_result
+AUTHORITATIVE_RESULT_FILE=artifacts/p0-e8-dry-run/phase3_diff.sql
+AUTHORITATIVE_RESULT_EXPECTED_LINE=-- This is an empty migration.
