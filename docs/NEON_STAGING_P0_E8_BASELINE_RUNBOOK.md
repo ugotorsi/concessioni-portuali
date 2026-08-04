@@ -69,7 +69,12 @@ Stop condition:
 
 Stop condition:
 
-- Exit code diverso da 0 o errore SQL inatteso.
+- STOP CONDITION: se l'hash SHA256 del file baseline non coincide esattamente con
+   FFA1BB29079925FBC87DFCFD56D03704F8349CB7FDBE925961A932D469B7BCF6,
+   non applicare alcun SQL e interrompere immediatamente la procedura.
+- Stop se exit code diverso da 0.
+- Stop su qualsiasi errore SQL.
+- Stop se emergono oggetti inattesi nel database durante i controlli immediati.
 
 ## 6. Verifica immediata
 

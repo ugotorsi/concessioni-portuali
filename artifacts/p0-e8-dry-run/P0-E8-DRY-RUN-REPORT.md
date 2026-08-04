@@ -181,34 +181,20 @@ Conclusion:
 - Temporary PostgreSQL container removed.
 - Temporary DBs removed with container lifecycle.
 
-## Artifacts produced and committed
+## Cronologia commit PR #62
 
-- artifacts/p0-e8-dry-run/phase1_precheck.txt
-- artifacts/p0-e8-dry-run/phase2_apply_status.txt
-- artifacts/p0-e8-dry-run/phase2_enums.txt
-- artifacts/p0-e8-dry-run/phase2_post_counts.txt
-- artifacts/p0-e8-dry-run/phase2_tables.txt
-- artifacts/p0-e8-dry-run/phase3_status.txt
-- artifacts/p0-e8-dry-run/phase3_validate.log
-- artifacts/p0-e8-dry-run/phase3_generate.log
-- artifacts/p0-e8-dry-run/phase3_diff_status_retry.txt
-- artifacts/p0-e8-dry-run/phase3_diff.sql
-- artifacts/p0-e8-dry-run/phase3_static_checks.txt
-- artifacts/p0-e8-dry-run/phase3_enum_checks.txt
-- artifacts/p0-e8-dry-run/phase3_no_dml_drop_check.txt
-- artifacts/p0-e8-dry-run/phase4_status.log
-- artifacts/p0-e8-dry-run/phase4_deploy.log
-- artifacts/p0-e8-dry-run/phase4_summary.txt
-- artifacts/p0-e8-dry-run/phase4_post_deploy_diff.sql
-- artifacts/p0-e8-dry-run/phase4_migration_rows.txt
+- 12b6d56: baseline e audit offline.
+- a07211a: dry-run reale e runbook iniziale.
+- f7931ce: correzioni di tracciabilita, log mancanti e gate del runbook.
 
-## Git inventory snapshot (raw command output)
+## Inventario cumulativo della PR #62
 
-Command:
+Questo elenco rappresenta tutti i file aggiunti o modificati dalla PR rispetto a origin/staging-operativo.
+E stato generato realmente con:
 
-- `git show --name-only --pretty=format: HEAD`
+- `git diff --name-only origin/staging-operativo...HEAD`
 
-Output at dry-run commit `a07211a`:
+Questo perimetro comprende baseline, audit iniziale, dry-run, evidenze e runbook prodotti dai vari commit della PR.
 
 - artifacts/p0-e8-dry-run/P0-E8-DRY-RUN-REPORT.md
 - artifacts/p0-e8-dry-run/phase1_precheck.txt
@@ -220,10 +206,37 @@ Output at dry-run commit `a07211a`:
 - artifacts/p0-e8-dry-run/phase3_diff_status_retry.txt
 - artifacts/p0-e8-dry-run/phase3_enum_checks.txt
 - artifacts/p0-e8-dry-run/phase3_expected_from_schema.sql
+- artifacts/p0-e8-dry-run/phase3_generate.log
 - artifacts/p0-e8-dry-run/phase3_no_dml_drop_check.txt
 - artifacts/p0-e8-dry-run/phase3_static_checks.txt
 - artifacts/p0-e8-dry-run/phase3_status.txt
+- artifacts/p0-e8-dry-run/phase3_validate.log
+- artifacts/p0-e8-dry-run/phase4_deploy.log
 - artifacts/p0-e8-dry-run/phase4_migration_rows.txt
 - artifacts/p0-e8-dry-run/phase4_post_deploy_diff.sql
+- artifacts/p0-e8-dry-run/phase4_status.log
 - artifacts/p0-e8-dry-run/phase4_summary.txt
+- artifacts/staging/p0-e8-baseline-audit/audit-report.md
+- artifacts/staging/p0-e8-baseline-audit/baseline-static-verification.json
+- artifacts/staging/p0-e8-baseline-audit/object-matrix.csv
+- artifacts/staging/p0-e8-baseline-audit/strategy-and-dry-run.md
+- docs/NEON_STAGING_P0_E8_BASELINE_RUNBOOK.md
+- prisma/baselines/20260803_p0_e8_empty_to_current/baseline.sql
+- scripts/db/p0-e8-baseline-audit.mjs
+
+## Inventario del commit correttivo f7931ce
+
+Questo elenco rappresenta esclusivamente i file contenuti nel commit correttivo.
+E stato generato realmente con:
+
+- `git show --name-only --pretty=format: f7931ce`
+
+- artifacts/p0-e8-dry-run/P0-E8-DRY-RUN-REPORT.md
+- artifacts/p0-e8-dry-run/phase3_diff_status_retry.txt
+- artifacts/p0-e8-dry-run/phase3_generate.log
+- artifacts/p0-e8-dry-run/phase3_static_checks.txt
+- artifacts/p0-e8-dry-run/phase3_status.txt
+- artifacts/p0-e8-dry-run/phase3_validate.log
+- artifacts/p0-e8-dry-run/phase4_deploy.log
+- artifacts/p0-e8-dry-run/phase4_status.log
 - docs/NEON_STAGING_P0_E8_BASELINE_RUNBOOK.md
