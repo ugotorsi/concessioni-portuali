@@ -36,7 +36,7 @@ Scope: local temporary PostgreSQL only
 5. Prisma checks on DB A:
    - npx prisma validate
    - npx prisma generate
-   - npx prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --script
+   - npx prisma migrate diff (see Phase 3 command correction note)
 6. Strategy B simulation on DB B:
    - apply same baseline SQL
    - npx prisma migrate resolve --applied 20260727_decisione_procedimento_minima
@@ -66,10 +66,30 @@ Result: PASS
 
 ## Phase 3 schema comparison (DB A vs prisma/schema.prisma)
 
+### Phase 3 attempts and authoritative outcome
+
+- `initial_attempt` artifact: artifacts/p0-e8-dry-run/phase3_status.txt
+- `corrected_retry` artifact: artifacts/p0-e8-dry-run/phase3_diff_status_retry.txt
+- `authoritative_result` artifact: artifacts/p0-e8-dry-run/phase3_diff.sql
+
+Initial attempt details:
+
+- First diff command used incompatible Prisma 7 arguments (`--to-schema-datamodel`).
+- Exit code 1 in this attempt is a CLI argument compatibility error, not schema drift evidence.
+- Evidence is preserved and not removed.
+
+Corrected retry details:
+
+- Corrected command:
+  - `npx prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --script`
+- Retry exit code: 0.
+- Authoritative diff file content:
+  - `-- This is an empty migration.`
+
+Other Phase 3 checks:
+
 - prisma validate: exit 0
 - prisma generate: exit 0
-- migrate diff: exit 0
-- diff output: "-- This is an empty migration."
 - expected tables from schema: 27
 - actual tables in DB: 27
 - missing tables: 0
@@ -83,8 +103,12 @@ Result: PASS
 
 ## Static SQL checks
 
-- baseline DROP statements: 0
-- baseline DML statements (INSERT/UPDATE/DELETE/TRUNCATE): 0
+- Non-authoritative lexical counter:
+  - `NON_AUTHORITATIVE_DML_TOKEN_HITS=110`
+  - Interpretation: lexical token hits can match words in identifiers/comments/text and are not statement evidence.
+- Authoritative statement-level checks (anchored to start of statement):
+  - DROP statements: 0
+  - DML statements (INSERT/UPDATE/DELETE/TRUNCATE): 0
 
 Result: PASS
 
@@ -157,20 +181,49 @@ Conclusion:
 - Temporary PostgreSQL container removed.
 - Temporary DBs removed with container lifecycle.
 
-## Artifacts produced
+## Artifacts produced and committed
 
 - artifacts/p0-e8-dry-run/phase1_precheck.txt
 - artifacts/p0-e8-dry-run/phase2_apply_status.txt
+- artifacts/p0-e8-dry-run/phase2_enums.txt
 - artifacts/p0-e8-dry-run/phase2_post_counts.txt
 - artifacts/p0-e8-dry-run/phase2_tables.txt
-- artifacts/p0-e8-dry-run/phase2_enums.txt
+- artifacts/p0-e8-dry-run/phase3_status.txt
 - artifacts/p0-e8-dry-run/phase3_validate.log
 - artifacts/p0-e8-dry-run/phase3_generate.log
+- artifacts/p0-e8-dry-run/phase3_diff_status_retry.txt
 - artifacts/p0-e8-dry-run/phase3_diff.sql
 - artifacts/p0-e8-dry-run/phase3_static_checks.txt
 - artifacts/p0-e8-dry-run/phase3_enum_checks.txt
 - artifacts/p0-e8-dry-run/phase3_no_dml_drop_check.txt
 - artifacts/p0-e8-dry-run/phase4_status.log
 - artifacts/p0-e8-dry-run/phase4_deploy.log
+- artifacts/p0-e8-dry-run/phase4_summary.txt
 - artifacts/p0-e8-dry-run/phase4_post_deploy_diff.sql
 - artifacts/p0-e8-dry-run/phase4_migration_rows.txt
+
+## Git inventory snapshot (raw command output)
+
+Command:
+
+- `git show --name-only --pretty=format: HEAD`
+
+Output at dry-run commit `a07211a`:
+
+- artifacts/p0-e8-dry-run/P0-E8-DRY-RUN-REPORT.md
+- artifacts/p0-e8-dry-run/phase1_precheck.txt
+- artifacts/p0-e8-dry-run/phase2_apply_status.txt
+- artifacts/p0-e8-dry-run/phase2_enums.txt
+- artifacts/p0-e8-dry-run/phase2_post_counts.txt
+- artifacts/p0-e8-dry-run/phase2_tables.txt
+- artifacts/p0-e8-dry-run/phase3_diff.sql
+- artifacts/p0-e8-dry-run/phase3_diff_status_retry.txt
+- artifacts/p0-e8-dry-run/phase3_enum_checks.txt
+- artifacts/p0-e8-dry-run/phase3_expected_from_schema.sql
+- artifacts/p0-e8-dry-run/phase3_no_dml_drop_check.txt
+- artifacts/p0-e8-dry-run/phase3_static_checks.txt
+- artifacts/p0-e8-dry-run/phase3_status.txt
+- artifacts/p0-e8-dry-run/phase4_migration_rows.txt
+- artifacts/p0-e8-dry-run/phase4_post_deploy_diff.sql
+- artifacts/p0-e8-dry-run/phase4_summary.txt
+- docs/NEON_STAGING_P0_E8_BASELINE_RUNBOOK.md

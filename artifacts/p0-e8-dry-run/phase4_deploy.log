@@ -1,0 +1,6 @@
+Datasource "db": PostgreSQL database "p0e8_dryrun_b", schema "public" at "<redacted-host>"
+
+2 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
