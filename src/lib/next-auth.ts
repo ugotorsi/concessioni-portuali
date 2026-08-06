@@ -6,38 +6,73 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 
 const DUMMY_PASSWORD_HASH = "$2a$10$7x44xI7qxyfGeQ8YV6f8wum8Iat3A80efjhbj4AtNQ35n4NQH6aQW";
-const AUTH_DIAGNOSTICS = true;
 
-type AuthDiagnosticStage =
-  | "INVALID_CREDENTIALS_PAYLOAD"
-  | "USER_NOT_FOUND"
-  | "INACTIVE"
-  | "PASSWORD_HASH_MISSING"
-  | "LOCKED"
-  | "PASSWORD_MISMATCH"
-  | "MFA"
-  | "SESSION_CREATED";
-
-function logAuthDiagnostic(
-  key:
-    | "USER_FOUND"
-    | "ACTIVE"
-    | "PASSWORD_HASH_PRESENT"
-    | "LOCKED"
-    | "PASSWORD_MATCH"
-    | "MFA_ENABLED"
-    | "MUST_CHANGE_PASSWORD",
-  value: boolean,
-): void {
-  if (AUTH_DIAGNOSTICS) {
-    console.info(`AUTH_DIAG_${key}=${value}`);
-  }
+function isStagingAdminBypassEnabled(): boolean {
+  return process.env.STAGING_ADMIN_BYPASS === "true" && process.env.VERCEL_ENV === "preview";
 }
 
-function logAuthDiagnosticStage(stage: AuthDiagnosticStage): void {
-  if (AUTH_DIAGNOSTICS) {
-    console.info(`AUTH_DIAG_REJECTION_STAGE=${stage}`);
+function isStagingAdminBypassRequest(rawCredentials: unknown): boolean {
+  if (!rawCredentials || typeof rawCredentials !== "object") {
+    return false;
   }
+
+  return (rawCredentials as { stagingBypass?: unknown }).stagingBypass === "true";
+}
+
+interface StagingBypassSessionUser {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+}
+
+export async function tryStagingAdminBypass(
+  rawCredentials: unknown,
+): Promise<StagingBypassSessionUser | null> {
+  if (!isStagingAdminBypassRequest(rawCredentials)) {
+    return null;
+  }
+
+  if (!isStagingAdminBypassEnabled()) {
+    return null;
+  }
+
+  const activeAdmins = await prisma.user.findMany({
+    where: {
+      ruolo: "ADMIN",
+      attivo: true,
+    },
+    select: {
+      id: true,
+      email: true,
+      nome: true,
+      ruolo: true,
+    },
+  });
+
+  if (activeAdmins.length !== 1) {
+    return null;
+  }
+
+  const adminUser = activeAdmins[0];
+  const now = new Date();
+
+  await prisma.user.update({
+    where: { id: adminUser.id },
+    data: {
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      lastFailedLoginAt: null,
+      lastLoginAt: now,
+    },
+  });
+
+  return {
+    id: adminUser.id,
+    email: adminUser.email,
+    name: adminUser.nome,
+    role: adminUser.ruolo,
+  };
 }
 
 const credentialsSchema = z.object({
@@ -79,12 +114,16 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
+        stagingBypass: { label: "Staging Bypass", type: "text" },
       },
       async authorize(rawCredentials) {
+        if (isStagingAdminBypassRequest(rawCredentials)) {
+          return tryStagingAdminBypass(rawCredentials);
+        }
+
         const parsed = credentialsSchema.safeParse(rawCredentials);
 
         if (!parsed.success) {
-          logAuthDiagnosticStage("INVALID_CREDENTIALS_PAYLOAD");
           return null;
         }
 
@@ -108,37 +147,25 @@ export const authOptions: NextAuthOptions = {
             mustChangePassword: true,
           },
         });
-        logAuthDiagnostic("USER_FOUND", Boolean(user));
 
         if (!user) {
           await bcrypt.compare(parsed.data.password, DUMMY_PASSWORD_HASH);
-          logAuthDiagnosticStage("USER_NOT_FOUND");
           return null;
         }
 
-        logAuthDiagnostic("ACTIVE", Boolean(user.attivo));
-        logAuthDiagnostic("PASSWORD_HASH_PRESENT", Boolean(user.passwordHash));
-        logAuthDiagnostic("LOCKED", Boolean(user.lockedUntil && user.lockedUntil > now));
-        logAuthDiagnostic("MFA_ENABLED", Boolean(user.mfaEnabled));
-        logAuthDiagnostic("MUST_CHANGE_PASSWORD", Boolean(user.mustChangePassword));
-
         if (!user.attivo) {
-          logAuthDiagnosticStage("INACTIVE");
           return null;
         }
 
         if (!user.passwordHash) {
-          logAuthDiagnosticStage("PASSWORD_HASH_MISSING");
           return null;
         }
 
         if (user.lockedUntil && user.lockedUntil > now) {
-          logAuthDiagnosticStage("LOCKED");
           return null;
         }
 
         const isPasswordValid = await bcrypt.compare(parsed.data.password, user.passwordHash);
-        logAuthDiagnostic("PASSWORD_MATCH", isPasswordValid);
 
         if (!isPasswordValid) {
           const updatedAttempts = user.failedLoginAttempts + 1;
@@ -153,12 +180,10 @@ export const authOptions: NextAuthOptions = {
             },
           });
 
-          logAuthDiagnosticStage("PASSWORD_MISMATCH");
           return null;
         }
 
         if (user.mfaEnabled) {
-          logAuthDiagnosticStage("MFA");
           return null;
         }
 
@@ -172,7 +197,6 @@ export const authOptions: NextAuthOptions = {
           },
         });
 
-        logAuthDiagnosticStage("SESSION_CREATED");
         return {
           id: user.id,
           email: user.email,
