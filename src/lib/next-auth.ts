@@ -6,7 +6,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 
 const DUMMY_PASSWORD_HASH = "$2a$10$7x44xI7qxyfGeQ8YV6f8wum8Iat3A80efjhbj4AtNQ35n4NQH6aQW";
-const AUTH_DIAGNOSTICS = process.env.AUTH_DIAGNOSTICS === "true";
+const AUTH_DIAGNOSTICS = true;
 
 type AuthDiagnosticStage =
   | "INVALID_CREDENTIALS_PAYLOAD"
