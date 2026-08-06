@@ -1,10 +1,6 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { investorDemoIdentity } from "@/lib/investor-demo-data";
-import { isInvestorDemoMode } from "@/lib/investor-demo";
 import { getAuthSession } from "@/lib/next-auth";
-import { getRuntimeEnvironment } from "@/lib/runtime-environment";
 
 export const DEMO_ROLES = [
   "ADMIN",
@@ -25,8 +21,6 @@ export const BACKOFFICE_ROLES: DemoRole[] = [
   "ECONOMICO",
 ];
 
-export const DEMO_ROLE_COOKIE = "cp_demo_role";
-
 export interface CurrentUser {
   id: string;
   email: string;
@@ -43,12 +37,6 @@ function isDemoRole(value: string | undefined): value is DemoRole {
 }
 
 export async function getCurrentRole(): Promise<DemoRole | null> {
-  const runtime = getRuntimeEnvironment();
-
-  if (runtime.demoAuthenticationAllowed && isInvestorDemoMode()) {
-    return "ADMIN";
-  }
-
   const session = await getAuthSession();
   const sessionRole = session?.user?.role;
 
@@ -56,30 +44,10 @@ export async function getCurrentRole(): Promise<DemoRole | null> {
     return sessionRole;
   }
 
-  if (runtime.demoAuthenticationAllowed) {
-    const cookieStore = await cookies();
-    const role = cookieStore.get(DEMO_ROLE_COOKIE)?.value;
-
-    if (isDemoRole(role)) {
-      return role;
-    }
-  }
-
   return null;
 }
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
-  const runtime = getRuntimeEnvironment();
-
-  if (runtime.demoAuthenticationAllowed && isInvestorDemoMode()) {
-    return {
-      id: investorDemoIdentity.tenantId,
-      email: "investor-demo@local",
-      name: investorDemoIdentity.userName,
-      role: "ADMIN",
-    };
-  }
-
   const session = await getAuthSession();
   const role = session?.user?.role;
 
@@ -139,7 +107,7 @@ export function getRoleLabel(role: DemoRole): string {
 export function getRoleDescription(role: DemoRole): string {
   switch (role) {
     case "ADMIN":
-      return "Accesso completo alla vista Back-office società in modalità dimostrativa.";
+      return "Accesso completo alla vista Back-office società.";
     case "OPERATORE_SOCIETA":
       return "Profilo operativo Back-office società per monitoraggio e coordinamento.";
     case "GIURIDICO":
@@ -151,7 +119,7 @@ export function getRoleDescription(role: DemoRole): string {
     case "VIEWER_ADSP":
       return "Vista consultiva AdSP con focus su report validati e quadro sintetico.";
     default:
-      return "Profilo demo";
+      return "Profilo applicativo";
   }
 }
 

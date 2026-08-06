@@ -1,10 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-import { isInvestorDemoMode, isInvestorDemoRoute } from "@/lib/investor-demo";
 import { buildRateLimitKey, checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 
-const PUBLIC_PATHS = new Set(["/", "/login", "/logout", "/demo"]);
+const PUBLIC_PATHS = new Set(["/", "/login", "/logout"]);
 const DB_RECON_PREVIEW_TEMP_PATH = "/api/admin/db-recon-preview-temp";
 const PROTECTED_PREFIXES = [
   "/dashboard",
@@ -71,7 +70,6 @@ function withSecurityHeaders(response: NextResponse): NextResponse {
 
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
-  const investorDemoMode = isInvestorDemoMode();
 
   if (shouldRateLimit(pathname)) {
     const result = await checkRateLimit({
@@ -98,10 +96,6 @@ export async function middleware(request: NextRequest) {
   }
 
   if (PUBLIC_PATHS.has(pathname)) {
-    return withSecurityHeaders(NextResponse.next());
-  }
-
-  if (investorDemoMode && isInvestorDemoRoute(pathname)) {
     return withSecurityHeaders(NextResponse.next());
   }
 

@@ -51,7 +51,6 @@ const backofficeNavItems: NavItem[] = [
   { href: "/normativa/orchestrazione", label: "Orchestrazione", icon: Library, matchMode: "exact" },
   { href: "/audit", label: "Audit", icon: ScrollText },
   { href: "/ai", label: "Assistente AI", icon: Lightbulb },
-  { href: "/demo", label: "Demo", icon: Presentation },
   { href: "/demo-scenari", label: "Scenari demo", icon: Presentation },
   { href: "/demo-guidata", label: "Demo guidata", icon: Presentation },
 ];
@@ -65,7 +64,6 @@ const adspNavItems: NavItem[] = [
   { href: "/documenti", label: "Documenti", icon: FileText, matchMode: "section" },
   { href: "/normativa", label: "Normativa", icon: Library, matchMode: "section" },
   { href: "/normativa/orchestrazione", label: "Orchestrazione", icon: Library, matchMode: "exact" },
-  { href: "/demo", label: "Demo", icon: Presentation },
   { href: "/demo-scenari", label: "Scenari demo", icon: Presentation },
   { href: "/demo-guidata", label: "Demo guidata", icon: Presentation },
 ];
@@ -118,7 +116,7 @@ export function Sidebar({ role, roleLabel }: SidebarProps) {
             className="inline-flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-800 hover:text-white"
           >
             <Users className="h-4 w-4" aria-hidden="true" />
-            <span>Cambia profilo demo</span>
+            <span>Cambia profilo</span>
           </Link>
           <Link
             href="/logout"

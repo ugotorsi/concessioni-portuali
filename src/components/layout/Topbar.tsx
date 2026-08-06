@@ -31,7 +31,7 @@ export function Topbar({ title, subtitle, roleLabel, roleDescription }: TopbarPr
             <p>{roleDescription}</p>
             <div className="mt-1 inline-flex gap-3">
               <Link href="/login" className="underline underline-offset-4">
-                Cambia profilo demo
+                Cambia profilo
               </Link>
               <Link href="/logout" className="underline underline-offset-4">
                 Logout

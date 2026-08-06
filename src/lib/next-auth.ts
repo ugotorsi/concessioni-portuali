@@ -3,9 +3,7 @@ import { getServerSession, type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { z } from "zod";
 
-import { isDemoIdentityEmail } from "@/lib/demo-auth";
 import { prisma } from "@/lib/prisma";
-import { getRuntimeEnvironment } from "@/lib/runtime-environment";
 
 const DUMMY_PASSWORD_HASH = "$2a$10$7x44xI7qxyfGeQ8YV6f8wum8Iat3A80efjhbj4AtNQ35n4NQH6aQW";
 
@@ -34,17 +32,6 @@ function getAuthLockoutMinutes(): number {
   return parsed;
 }
 
-export function canAuthenticateEmailForRuntime(
-  email: string,
-  runtime: Pick<ReturnType<typeof getRuntimeEnvironment>, "demoAuthenticationAllowed">,
-): boolean {
-  if (isDemoIdentityEmail(email) && !runtime.demoAuthenticationAllowed) {
-    return false;
-  }
-
-  return true;
-}
-
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET ?? "phase1-demo-auth-secret-change-me",
   session: {
@@ -71,12 +58,6 @@ export const authOptions: NextAuthOptions = {
         const maxFailedAttempts = getAuthMaxFailedAttempts();
         const lockoutMinutes = getAuthLockoutMinutes();
         const email = parsed.data.email.toLowerCase();
-        const runtime = getRuntimeEnvironment();
-
-        if (!canAuthenticateEmailForRuntime(email, runtime)) {
-          await bcrypt.compare(parsed.data.password, DUMMY_PASSWORD_HASH);
-          return null;
-        }
 
         const user = await prisma.user.findUnique({
           where: { email },

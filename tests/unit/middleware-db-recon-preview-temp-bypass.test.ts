@@ -2,19 +2,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 const getTokenMock = vi.hoisted(() => vi.fn());
-const isInvestorDemoModeMock = vi.hoisted(() => vi.fn());
-const isInvestorDemoRouteMock = vi.hoisted(() => vi.fn());
 const buildRateLimitKeyMock = vi.hoisted(() => vi.fn());
 const checkRateLimitMock = vi.hoisted(() => vi.fn());
 const getRateLimitHeadersMock = vi.hoisted(() => vi.fn());
 
 vi.mock("next-auth/jwt", () => ({
   getToken: getTokenMock,
-}));
-
-vi.mock("@/lib/investor-demo", () => ({
-  isInvestorDemoMode: isInvestorDemoModeMock,
-  isInvestorDemoRoute: isInvestorDemoRouteMock,
 }));
 
 vi.mock("@/lib/rate-limit", () => ({
@@ -32,8 +25,6 @@ function makeRequest(path: string) {
 describe("middleware DB recon temporary endpoint bypass", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    isInvestorDemoModeMock.mockReturnValue(false);
-    isInvestorDemoRouteMock.mockReturnValue(false);
     buildRateLimitKeyMock.mockReturnValue("rate-limit-key");
     checkRateLimitMock.mockResolvedValue({
       allowed: true,

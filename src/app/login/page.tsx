@@ -1,16 +1,7 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { LoginCredentialsForm } from "@/components/forms/LoginCredentialsForm";
-import {
-  DEMO_ROLE_COOKIE,
-  DEMO_ROLES,
-  getCurrentRole,
-  getRoleDescription,
-  getRoleLabel,
-  type DemoRole,
-} from "@/lib/auth";
-import { getRuntimeEnvironment } from "@/lib/runtime-environment";
+import { getCurrentRole, type DemoRole } from "@/lib/auth";
 
 function getPostLoginPath(role: DemoRole): string {
   return role === "VIEWER_ADSP" ? "/adsp" : "/dashboard";
@@ -45,9 +36,6 @@ function getErrorMessage(error: string | undefined): string | null {
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const runtime = getRuntimeEnvironment();
-  const demoAuthenticationAllowed = runtime.demoAuthenticationAllowed;
-
   const resolvedParams = searchParams
     ? "then" in searchParams
       ? await searchParams
@@ -64,78 +52,19 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     : resolvedParams?.error;
   const errorMessage = getErrorMessage(errorParam);
 
-  async function loginAsRole(formData: FormData) {
-    "use server";
-
-    if (!getRuntimeEnvironment().demoAuthenticationAllowed) {
-      redirect("/login?error=invalid");
-    }
-
-    const role = formData.get("role");
-
-    if (typeof role !== "string" || !DEMO_ROLES.includes(role as DemoRole)) {
-      redirect("/login");
-    }
-
-    const typedRole = role as DemoRole;
-    const cookieStore = await cookies();
-
-    cookieStore.set(DEMO_ROLE_COOKIE, typedRole, {
-      httpOnly: true,
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 8,
-    });
-
-    redirect(getPostLoginPath(typedRole));
-  }
-
   return (
     <main className="min-h-screen bg-slate-100 px-4 py-10 sm:px-6">
       <div className="mx-auto w-full max-w-[1100px] rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
         <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Piattaforma interna</p>
-        <h1 className="mt-2 text-3xl font-semibold text-slate-900">Accesso demo</h1>
+        <h1 className="mt-2 text-3xl font-semibold text-slate-900">Accesso alla piattaforma</h1>
         <p className="mt-3 max-w-3xl text-sm text-slate-700 sm:text-base">
-          {demoAuthenticationAllowed
-            ? "Accedi con credenziali demo abilitate per l'ambiente corrente."
-            : "Accedi con credenziali autorizzate per l'ambiente corrente."}
+          Accedi con credenziali autorizzate per l&apos;ambiente corrente.
         </p>
 
         <section className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4">
           <h2 className="text-base font-semibold text-slate-900">Login con email e password</h2>
           <LoginCredentialsForm initialErrorMessage={errorMessage} />
-          {demoAuthenticationAllowed ? (
-            <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-              Ambiente demo autorizzato. Utilizzare esclusivamente dati fittizi.
-            </div>
-          ) : null}
         </section>
-
-        {demoAuthenticationAllowed ? (
-          <section className="mt-8">
-            <h2 className="text-base font-semibold text-slate-900">Fallback demo legacy (solo sviluppo)</h2>
-            <p className="mt-2 text-sm text-slate-700">
-              Accesso rapido ruolo/cookie disponibile solo in ambiente demo autorizzato.
-            </p>
-            <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {DEMO_ROLES.map((role) => (
-                <article key={role} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-sm font-semibold text-slate-900">{getRoleLabel(role)}</p>
-                  <p className="mt-2 min-h-14 text-sm text-slate-700">{getRoleDescription(role)}</p>
-                  <form action={loginAsRole} className="mt-4">
-                    <input type="hidden" name="role" value={role} />
-                    <button
-                      type="submit"
-                      className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white transition-colors hover:bg-slate-800"
-                    >
-                      Accedi come {getRoleLabel(role)}
-                    </button>
-                  </form>
-                </article>
-              ))}
-            </div>
-          </section>
-        ) : null}
       </div>
     </main>
   );
