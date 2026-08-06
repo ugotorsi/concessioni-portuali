@@ -6,6 +6,38 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 
 const DUMMY_PASSWORD_HASH = "$2a$10$7x44xI7qxyfGeQ8YV6f8wum8Iat3A80efjhbj4AtNQ35n4NQH6aQW";
+const AUTH_DIAGNOSTICS = process.env.AUTH_DIAGNOSTICS === "true";
+
+type AuthDiagnosticStage =
+  | "USER_NOT_FOUND"
+  | "INACTIVE"
+  | "PASSWORD_HASH_MISSING"
+  | "LOCKED"
+  | "PASSWORD_MISMATCH"
+  | "MFA"
+  | "SESSION_CREATED";
+
+function logAuthDiagnostic(
+  key:
+    | "USER_FOUND"
+    | "ACTIVE"
+    | "PASSWORD_HASH_PRESENT"
+    | "LOCKED"
+    | "PASSWORD_MATCH"
+    | "MFA_ENABLED"
+    | "MUST_CHANGE_PASSWORD",
+  value: boolean,
+): void {
+  if (AUTH_DIAGNOSTICS) {
+    console.info(`AUTH_DIAG_${key}=${value}`);
+  }
+}
+
+function logAuthDiagnosticStage(stage: AuthDiagnosticStage): void {
+  if (AUTH_DIAGNOSTICS) {
+    console.info(`AUTH_DIAG_REJECTION_STAGE=${stage}`);
+  }
+}
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -71,23 +103,40 @@ export const authOptions: NextAuthOptions = {
             failedLoginAttempts: true,
             lockedUntil: true,
             mfaEnabled: true,
+            mustChangePassword: true,
           },
         });
+        logAuthDiagnostic("USER_FOUND", Boolean(user));
 
         if (!user) {
           await bcrypt.compare(parsed.data.password, DUMMY_PASSWORD_HASH);
+          logAuthDiagnosticStage("USER_NOT_FOUND");
           return null;
         }
 
-        if (!user.attivo || !user.passwordHash) {
+        logAuthDiagnostic("ACTIVE", Boolean(user.attivo));
+        logAuthDiagnostic("PASSWORD_HASH_PRESENT", Boolean(user.passwordHash));
+        logAuthDiagnostic("LOCKED", Boolean(user.lockedUntil && user.lockedUntil > now));
+        logAuthDiagnostic("MFA_ENABLED", Boolean(user.mfaEnabled));
+        logAuthDiagnostic("MUST_CHANGE_PASSWORD", Boolean(user.mustChangePassword));
+
+        if (!user.attivo) {
+          logAuthDiagnosticStage("INACTIVE");
+          return null;
+        }
+
+        if (!user.passwordHash) {
+          logAuthDiagnosticStage("PASSWORD_HASH_MISSING");
           return null;
         }
 
         if (user.lockedUntil && user.lockedUntil > now) {
+          logAuthDiagnosticStage("LOCKED");
           return null;
         }
 
         const isPasswordValid = await bcrypt.compare(parsed.data.password, user.passwordHash);
+        logAuthDiagnostic("PASSWORD_MATCH", isPasswordValid);
 
         if (!isPasswordValid) {
           const updatedAttempts = user.failedLoginAttempts + 1;
@@ -102,10 +151,12 @@ export const authOptions: NextAuthOptions = {
             },
           });
 
+          logAuthDiagnosticStage("PASSWORD_MISMATCH");
           return null;
         }
 
         if (user.mfaEnabled) {
+          logAuthDiagnosticStage("MFA");
           return null;
         }
 
@@ -119,6 +170,7 @@ export const authOptions: NextAuthOptions = {
           },
         });
 
+        logAuthDiagnosticStage("SESSION_CREATED");
         return {
           id: user.id,
           email: user.email,
