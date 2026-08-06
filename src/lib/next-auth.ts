@@ -37,50 +37,11 @@ export async function tryStagingAdminBypass(
     return null;
   }
 
-  const stagingAdminEmail = process.env.STAGING_ADMIN_EMAIL?.trim().toLowerCase();
-
-  if (!stagingAdminEmail) {
-    return null;
-  }
-
-  const adminUser = await prisma.user.findFirst({
-    where: {
-      email: {
-        equals: stagingAdminEmail,
-        mode: "insensitive",
-      },
-      ruolo: "ADMIN",
-      attivo: true,
-    },
-    select: {
-      id: true,
-      email: true,
-      nome: true,
-      ruolo: true,
-    },
-  });
-
-  if (!adminUser) {
-    return null;
-  }
-
-  const now = new Date();
-
-  await prisma.user.update({
-    where: { id: adminUser.id },
-    data: {
-      failedLoginAttempts: 0,
-      lockedUntil: null,
-      lastFailedLoginAt: null,
-      lastLoginAt: now,
-    },
-  });
-
   return {
-    id: adminUser.id,
-    email: adminUser.email,
-    name: adminUser.nome,
-    role: adminUser.ruolo,
+    id: "staging-preview-admin",
+    email: "staging-admin@preview.invalid",
+    name: "Amministratore staging",
+    role: "ADMIN",
   };
 }
 
