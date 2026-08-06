@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-function setBypassEnv(enabled: boolean, vercelEnv: string) {
+function setBypassEnv(enabled: boolean, vercelEnv: string, stagingAdminEmail?: string) {
   if (enabled) {
     process.env.STAGING_ADMIN_BYPASS = "true";
   } else {
@@ -8,6 +8,12 @@ function setBypassEnv(enabled: boolean, vercelEnv: string) {
   }
 
   process.env.VERCEL_ENV = vercelEnv;
+
+  if (typeof stagingAdminEmail === "string") {
+    process.env.STAGING_ADMIN_EMAIL = stagingAdminEmail;
+  } else {
+    delete process.env.STAGING_ADMIN_EMAIL;
+  }
 }
 
 describe("next-auth staging admin bypass", () => {
@@ -16,17 +22,18 @@ describe("next-auth staging admin bypass", () => {
     vi.clearAllMocks();
     delete process.env.STAGING_ADMIN_BYPASS;
     delete process.env.VERCEL_ENV;
+    delete process.env.STAGING_ADMIN_EMAIL;
   });
 
   async function loadAuthModule() {
-    const findManyMock = vi.fn();
+    const findFirstMock = vi.fn();
     const updateMock = vi.fn();
     const compareMock = vi.fn();
 
     vi.doMock("@/lib/prisma", () => ({
       prisma: {
         user: {
-          findMany: findManyMock,
+          findFirst: findFirstMock,
           findUnique: vi.fn(),
           update: updateMock,
         },
@@ -42,32 +49,70 @@ describe("next-auth staging admin bypass", () => {
 
     return {
       tryStagingAdminBypass: nextAuthModule.tryStagingAdminBypass,
-      findManyMock,
+      findFirstMock,
       updateMock,
       compareMock,
     };
   }
 
-  it("allows bypass only in preview with STAGING_ADMIN_BYPASS=true and returns ADMIN session payload", async () => {
+  it("denies bypass when STAGING_ADMIN_BYPASS is not true", async () => {
+    setBypassEnv(false, "preview", "admin@example.it");
+
+    const { tryStagingAdminBypass, findFirstMock, updateMock } = await loadAuthModule();
+
+    const result = await tryStagingAdminBypass({ stagingBypass: "true" });
+
+    expect(result).toBeNull();
+    expect(findFirstMock).not.toHaveBeenCalled();
+    expect(updateMock).not.toHaveBeenCalled();
+  });
+
+  it("denies bypass when VERCEL_ENV is not preview", async () => {
+    setBypassEnv(true, "production", "admin@example.it");
+
+    const { tryStagingAdminBypass, findFirstMock, updateMock } = await loadAuthModule();
+
+    const result = await tryStagingAdminBypass({ stagingBypass: "true" });
+
+    expect(result).toBeNull();
+    expect(findFirstMock).not.toHaveBeenCalled();
+    expect(updateMock).not.toHaveBeenCalled();
+  });
+
+  it("denies bypass when STAGING_ADMIN_EMAIL is missing", async () => {
     setBypassEnv(true, "preview");
 
-    const { tryStagingAdminBypass, findManyMock, updateMock, compareMock } = await loadAuthModule();
+    const { tryStagingAdminBypass, findFirstMock, updateMock } = await loadAuthModule();
 
-    findManyMock.mockResolvedValue([
-      {
-        id: "admin-1",
-        email: "admin@example.it",
-        nome: "Admin",
-        ruolo: "ADMIN",
-      },
-    ]);
+    const result = await tryStagingAdminBypass({ stagingBypass: "true" });
+
+    expect(result).toBeNull();
+    expect(findFirstMock).not.toHaveBeenCalled();
+    expect(updateMock).not.toHaveBeenCalled();
+  });
+
+  it("allows bypass for configured active ADMIN and returns ADMIN session payload", async () => {
+    setBypassEnv(true, "preview", "admin@example.it");
+
+    const { tryStagingAdminBypass, findFirstMock, updateMock, compareMock } = await loadAuthModule();
+
+    findFirstMock.mockResolvedValue({
+      id: "admin-1",
+      email: "admin@example.it",
+      nome: "Admin",
+      ruolo: "ADMIN",
+    });
     updateMock.mockResolvedValue({});
 
     const result = await tryStagingAdminBypass({ stagingBypass: "true" });
 
-    expect(findManyMock).toHaveBeenCalledTimes(1);
-    expect(findManyMock).toHaveBeenCalledWith({
+    expect(findFirstMock).toHaveBeenCalledTimes(1);
+    expect(findFirstMock).toHaveBeenCalledWith({
       where: {
+        email: {
+          equals: "admin@example.it",
+          mode: "insensitive",
+        },
         ruolo: "ADMIN",
         attivo: true,
       },
@@ -88,49 +133,74 @@ describe("next-auth staging admin bypass", () => {
     });
   });
 
-  it("denies bypass in production even if STAGING_ADMIN_BYPASS=true", async () => {
-    setBypassEnv(true, "production");
+  it("denies bypass when configured user does not exist", async () => {
+    setBypassEnv(true, "preview", "admin@example.it");
 
-    const { tryStagingAdminBypass, findManyMock, updateMock, compareMock } = await loadAuthModule();
+    const { tryStagingAdminBypass, findFirstMock, updateMock, compareMock } = await loadAuthModule();
+
+    findFirstMock.mockResolvedValue(null);
 
     const result = await tryStagingAdminBypass({ stagingBypass: "true" });
 
     expect(result).toBeNull();
-    expect(findManyMock).not.toHaveBeenCalled();
+    expect(findFirstMock).toHaveBeenCalledTimes(1);
     expect(updateMock).not.toHaveBeenCalled();
     expect(compareMock).not.toHaveBeenCalled();
   });
 
-  it("denies bypass when no active ADMIN exists", async () => {
-    setBypassEnv(true, "preview");
+  it("denies bypass when configured user is not ADMIN", async () => {
+    setBypassEnv(true, "preview", "not-admin@example.it");
 
-    const { tryStagingAdminBypass, findManyMock, updateMock, compareMock } = await loadAuthModule();
+    const { tryStagingAdminBypass, findFirstMock, updateMock, compareMock } = await loadAuthModule();
 
-    findManyMock.mockResolvedValue([]);
+    findFirstMock.mockResolvedValue(null);
 
     const result = await tryStagingAdminBypass({ stagingBypass: "true" });
 
     expect(result).toBeNull();
-    expect(findManyMock).toHaveBeenCalledTimes(1);
+    expect(findFirstMock).toHaveBeenCalledTimes(1);
     expect(updateMock).not.toHaveBeenCalled();
     expect(compareMock).not.toHaveBeenCalled();
   });
 
-  it("denies bypass when multiple active ADMIN users exist", async () => {
-    setBypassEnv(true, "preview");
+  it("denies bypass when configured user is not active", async () => {
+    setBypassEnv(true, "preview", "inactive-admin@example.it");
 
-    const { tryStagingAdminBypass, findManyMock, updateMock, compareMock } = await loadAuthModule();
+    const { tryStagingAdminBypass, findFirstMock, updateMock, compareMock } = await loadAuthModule();
 
-    findManyMock.mockResolvedValue([
-      { id: "admin-1", email: "admin-1@example.it", nome: "Admin One", ruolo: "ADMIN" },
-      { id: "admin-2", email: "admin-2@example.it", nome: "Admin Two", ruolo: "ADMIN" },
-    ]);
+    findFirstMock.mockResolvedValue(null);
 
     const result = await tryStagingAdminBypass({ stagingBypass: "true" });
 
     expect(result).toBeNull();
-    expect(findManyMock).toHaveBeenCalledTimes(1);
+    expect(findFirstMock).toHaveBeenCalledTimes(1);
     expect(updateMock).not.toHaveBeenCalled();
+    expect(compareMock).not.toHaveBeenCalled();
+  });
+
+  it("allows bypass even when other ADMIN users exist", async () => {
+    setBypassEnv(true, "preview", "target-admin@example.it");
+
+    const { tryStagingAdminBypass, findFirstMock, updateMock, compareMock } = await loadAuthModule();
+
+    findFirstMock.mockResolvedValue({
+      id: "admin-target",
+      email: "target-admin@example.it",
+      nome: "Target Admin",
+      ruolo: "ADMIN",
+    });
+    updateMock.mockResolvedValue({});
+
+    const result = await tryStagingAdminBypass({ stagingBypass: "true" });
+
+    expect(result).toEqual({
+      id: "admin-target",
+      email: "target-admin@example.it",
+      name: "Target Admin",
+      role: "ADMIN",
+    });
+    expect(findFirstMock).toHaveBeenCalledTimes(1);
+    expect(updateMock).toHaveBeenCalledTimes(1);
     expect(compareMock).not.toHaveBeenCalled();
   });
 });
