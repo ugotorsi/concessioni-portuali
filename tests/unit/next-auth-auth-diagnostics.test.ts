@@ -31,6 +31,7 @@ describe("next-auth auth diagnostics logging safety", () => {
     );
     expect(source).toContain('logAuthDiagnostic("PASSWORD_MATCH", isPasswordValid);');
 
+    expect(source).toContain('logAuthDiagnosticStage("INVALID_CREDENTIALS_PAYLOAD");');
     expect(source).toContain('logAuthDiagnosticStage("USER_NOT_FOUND");');
     expect(source).toContain('logAuthDiagnosticStage("INACTIVE");');
     expect(source).toContain('logAuthDiagnosticStage("PASSWORD_HASH_MISSING");');

@@ -9,6 +9,7 @@ const DUMMY_PASSWORD_HASH = "$2a$10$7x44xI7qxyfGeQ8YV6f8wum8Iat3A80efjhbj4AtNQ35
 const AUTH_DIAGNOSTICS = process.env.AUTH_DIAGNOSTICS === "true";
 
 type AuthDiagnosticStage =
+  | "INVALID_CREDENTIALS_PAYLOAD"
   | "USER_NOT_FOUND"
   | "INACTIVE"
   | "PASSWORD_HASH_MISSING"
@@ -83,6 +84,7 @@ export const authOptions: NextAuthOptions = {
         const parsed = credentialsSchema.safeParse(rawCredentials);
 
         if (!parsed.success) {
+          logAuthDiagnosticStage("INVALID_CREDENTIALS_PAYLOAD");
           return null;
         }
 
