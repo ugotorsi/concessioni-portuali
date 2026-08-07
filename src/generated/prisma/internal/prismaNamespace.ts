@@ -402,6 +402,7 @@ export const ModelName = {
   Scadenza: 'Scadenza',
   Criticita: 'Criticita',
   Procedimento: 'Procedimento',
+  ProcedimentoResponsabileAssignment: 'ProcedimentoResponsabileAssignment',
   Sopralluogo: 'Sopralluogo',
   Pagamento: 'Pagamento',
   Documento: 'Documento',
@@ -426,7 +427,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "sopralluogo" | "pagamento" | "documento" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1762,6 +1763,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ProcedimentoResponsabileAssignment: {
+      payload: Prisma.$ProcedimentoResponsabileAssignmentPayload<ExtArgs>
+      fields: Prisma.ProcedimentoResponsabileAssignmentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ProcedimentoResponsabileAssignmentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProcedimentoResponsabileAssignmentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ProcedimentoResponsabileAssignmentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProcedimentoResponsabileAssignmentPayload>
+        }
+        findFirst: {
+          args: Prisma.ProcedimentoResponsabileAssignmentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProcedimentoResponsabileAssignmentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ProcedimentoResponsabileAssignmentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProcedimentoResponsabileAssignmentPayload>
+        }
+        findMany: {
+          args: Prisma.ProcedimentoResponsabileAssignmentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProcedimentoResponsabileAssignmentPayload>[]
+        }
+        create: {
+          args: Prisma.ProcedimentoResponsabileAssignmentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProcedimentoResponsabileAssignmentPayload>
+        }
+        createMany: {
+          args: Prisma.ProcedimentoResponsabileAssignmentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ProcedimentoResponsabileAssignmentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProcedimentoResponsabileAssignmentPayload>[]
+        }
+        delete: {
+          args: Prisma.ProcedimentoResponsabileAssignmentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProcedimentoResponsabileAssignmentPayload>
+        }
+        update: {
+          args: Prisma.ProcedimentoResponsabileAssignmentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProcedimentoResponsabileAssignmentPayload>
+        }
+        deleteMany: {
+          args: Prisma.ProcedimentoResponsabileAssignmentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ProcedimentoResponsabileAssignmentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ProcedimentoResponsabileAssignmentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProcedimentoResponsabileAssignmentPayload>[]
+        }
+        upsert: {
+          args: Prisma.ProcedimentoResponsabileAssignmentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProcedimentoResponsabileAssignmentPayload>
+        }
+        aggregate: {
+          args: Prisma.ProcedimentoResponsabileAssignmentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateProcedimentoResponsabileAssignment>
+        }
+        groupBy: {
+          args: Prisma.ProcedimentoResponsabileAssignmentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProcedimentoResponsabileAssignmentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ProcedimentoResponsabileAssignmentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProcedimentoResponsabileAssignmentCountAggregateOutputType> | number
+        }
+      }
+    }
     Sopralluogo: {
       payload: Prisma.$SopralluogoPayload<ExtArgs>
       fields: Prisma.SopralluogoFieldRefs
@@ -2864,6 +2939,23 @@ export const ProcedimentoScalarFieldEnum = {
 } as const
 
 export type ProcedimentoScalarFieldEnum = (typeof ProcedimentoScalarFieldEnum)[keyof typeof ProcedimentoScalarFieldEnum]
+
+
+export const ProcedimentoResponsabileAssignmentScalarFieldEnum = {
+  id: 'id',
+  procedimentoId: 'procedimentoId',
+  responsabileNome: 'responsabileNome',
+  responsabileEmail: 'responsabileEmail',
+  unitaOrganizzativa: 'unitaOrganizzativa',
+  decorrenza: 'decorrenza',
+  cessazione: 'cessazione',
+  motivoAssegnazione: 'motivoAssegnazione',
+  comunicataAt: 'comunicataAt',
+  registeredByUserId: 'registeredByUserId',
+  createdAt: 'createdAt'
+} as const
+
+export type ProcedimentoResponsabileAssignmentScalarFieldEnum = (typeof ProcedimentoResponsabileAssignmentScalarFieldEnum)[keyof typeof ProcedimentoResponsabileAssignmentScalarFieldEnum]
 
 
 export const SopralluogoScalarFieldEnum = {
@@ -4168,6 +4260,7 @@ export type GlobalOmitConfig = {
   scadenza?: Prisma.ScadenzaOmit
   criticita?: Prisma.CriticitaOmit
   procedimento?: Prisma.ProcedimentoOmit
+  procedimentoResponsabileAssignment?: Prisma.ProcedimentoResponsabileAssignmentOmit
   sopralluogo?: Prisma.SopralluogoOmit
   pagamento?: Prisma.PagamentoOmit
   documento?: Prisma.DocumentoOmit

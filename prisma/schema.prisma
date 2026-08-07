@@ -801,28 +801,29 @@ model TenantMembership {
 }
 
 model User {
-  id                              String                  @id @default(cuid())
-  nome                            String
-  email                           String                  @unique
-  passwordHash                    String?
-  ruolo                           RuoloUser
-  attivo                          Boolean                 @default(true)
-  failedLoginAttempts             Int                     @default(0)
-  lockedUntil                     DateTime?
-  lastFailedLoginAt               DateTime?
-  lastLoginAt                     DateTime?
-  passwordChangedAt               DateTime?
-  mustChangePassword              Boolean                 @default(false)
-  mfaEnabled                      Boolean                 @default(false)
-  mfaSecret                       String?
-  mfaRecoveryCodes                Json?
-  mfaVerifiedAt                   DateTime?
-  createdAt                       DateTime                @default(now())
-  updatedAt                       DateTime                @updatedAt
-  activityLogs                    ActivityLog[]
-  documentiCaricati               Documento[]             @relation("DocumentoUploader")
-  tenantMemberships               TenantMembership[]
-  decisioniProcedimentoRegistrate DecisioneProcedimento[] @relation("DecisioneProcedimentoRegisteredBy")
+  id                                            String                               @id @default(cuid())
+  nome                                          String
+  email                                         String                               @unique
+  passwordHash                                  String?
+  ruolo                                         RuoloUser
+  attivo                                        Boolean                              @default(true)
+  failedLoginAttempts                           Int                                  @default(0)
+  lockedUntil                                   DateTime?
+  lastFailedLoginAt                             DateTime?
+  lastLoginAt                                   DateTime?
+  passwordChangedAt                             DateTime?
+  mustChangePassword                            Boolean                              @default(false)
+  mfaEnabled                                    Boolean                              @default(false)
+  mfaSecret                                     String?
+  mfaRecoveryCodes                              Json?
+  mfaVerifiedAt                                 DateTime?
+  createdAt                                     DateTime                             @default(now())
+  updatedAt                                     DateTime                             @updatedAt
+  activityLogs                                  ActivityLog[]
+  documentiCaricati                             Documento[]                          @relation("DocumentoUploader")
+  tenantMemberships                             TenantMembership[]
+  decisioniProcedimentoRegistrate               DecisioneProcedimento[]              @relation("DecisioneProcedimentoRegisteredBy")
+  procedimentoResponsabileAssignmentsRegistrate ProcedimentoResponsabileAssignment[] @relation("ProcedimentoResponsabileAssignmentRegisteredBy")
 
   @@index([ruolo])
   @@index([attivo])
@@ -1069,11 +1070,12 @@ model Procedimento {
   createdAt                        DateTime                      @default(now())
   updatedAt                        DateTime                      @updatedAt
 
-  concessione           Concessione            @relation(fields: [concessioneId], references: [id], onDelete: Cascade)
-  criticita             Criticita?             @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
-  decisioneProcedimento DecisioneProcedimento?
-  documenti             Documento[]
-  normaImpatti          NormaImpatto[]
+  concessione             Concessione                          @relation(fields: [concessioneId], references: [id], onDelete: Cascade)
+  criticita               Criticita?                           @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
+  decisioneProcedimento   DecisioneProcedimento?
+  responsabileAssignments ProcedimentoResponsabileAssignment[]
+  documenti               Documento[]
+  normaImpatti            NormaImpatto[]
 
   @@index([concessioneId])
   @@index([criticitaId])
@@ -1089,6 +1091,28 @@ model Procedimento {
   @@index([termineMemorieScadenza])
   @@index([contestazioneFormaleInviata])
   @@index([createdAt])
+}
+
+model ProcedimentoResponsabileAssignment {
+  id                 String    @id @default(cuid())
+  procedimentoId     String
+  responsabileNome   String
+  responsabileEmail  String?
+  unitaOrganizzativa String
+  decorrenza         DateTime
+  cessazione         DateTime?
+  motivoAssegnazione String?
+  comunicataAt       DateTime?
+  registeredByUserId String?
+  createdAt          DateTime  @default(now())
+
+  procedimento     Procedimento @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  registeredByUser User?        @relation("ProcedimentoResponsabileAssignmentRegisteredBy", fields: [registeredByUserId], references: [id], onDelete: SetNull)
+
+  @@index([procedimentoId])
+  @@index([decorrenza])
+  @@index([cessazione])
+  @@index([registeredByUserId])
 }
 
 model Sopralluogo {

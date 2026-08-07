@@ -108,6 +108,11 @@ export type Criticita = Prisma.CriticitaModel
  */
 export type Procedimento = Prisma.ProcedimentoModel
 /**
+ * Model ProcedimentoResponsabileAssignment
+ * 
+ */
+export type ProcedimentoResponsabileAssignment = Prisma.ProcedimentoResponsabileAssignmentModel
+/**
  * Model Sopralluogo
  * 
  */

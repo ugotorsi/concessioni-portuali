@@ -119,6 +119,15 @@ function requiredTrimmedString(message: string, maxLength?: number) {
   }, constrained);
 }
 
+const reassignProcedimentoResponsabileSchema = z.object({
+  procedimentoId: z.string().min(1, "Procedimento non valido."),
+  responsabileNome: requiredTrimmedString("RESPONSABILE_PROCEDIMENTO_MANCANTE", 180),
+  responsabileEmail: z.string().trim().optional(),
+  unitaOrganizzativa: requiredTrimmedString("UNITA_ORGANIZZATIVA_MANCANTE", 180),
+  decorrenza: requiredTrimmedString("DATA_ASSEGNAZIONE_INVALIDA"),
+  motivoAssegnazione: z.string().trim().optional(),
+});
+
 const finalizeProcedimentoDecisionSchema = z.object({
   procedimentoId: z.string().min(1, "Procedimento non valido."),
   decisionType: z.enum(DECISIONE_PROCEDIMENTO_TIPO_VALUES, {
@@ -146,6 +155,14 @@ function toIsoDate(value: string): Date {
     throw new Error("Data non valida.");
   }
   return parsed;
+}
+
+function toAssignmentDate(value: string): Date {
+  try {
+    return toIsoDate(value);
+  } catch {
+    throw new Error("DATA_ASSEGNAZIONE_INVALIDA");
+  }
 }
 
 function buildDecisionIdempotencyKey(input: {
@@ -402,6 +419,7 @@ function normalizeChecklist(input: {
 export async function createProcedimentoAction(formData: FormData) {
   const role = await requireRole();
   const tenantContext = await getCurrentTenantContext();
+  const currentUser = await getCurrentUser();
 
   if (role === "VIEWER_ADSP") {
     await auditFailure({
@@ -557,26 +575,48 @@ export async function createProcedimentoAction(formData: FormData) {
     noteChecklistContraddittorio: parsed.data.noteChecklistContraddittorio,
   });
 
-  const created = await prisma.procedimento.create({
-    data: {
-      concessioneId: parsed.data.concessioneId,
-      criticitaId,
-      responsabileProcedimentoNome: toNullable(parsed.data.responsabileProcedimentoNome),
-      responsabileProcedimentoEmail: toNullable(parsed.data.responsabileProcedimentoEmail),
-      unitaOrganizzativaResponsabile: toNullable(parsed.data.unitaOrganizzativaResponsabile),
-      responsabileAssegnatoAt: toDate(parsed.data.responsabileAssegnatoAt),
-      tipologia: parsed.data.tipologia,
-      stato: parsed.data.stato,
-      riferimentoNormativo: toNullable(parsed.data.riferimentoNormativo),
-      dataAvvio: toDate(parsed.data.dataAvvio),
-      dataScadenzaContraddittorio: toDate(parsed.data.dataScadenzaContraddittorio),
-      ...checklistData,
-      noteIstruttorie: toNullable(parsed.data.noteIstruttorie),
-    },
-    select: {
-      id: true,
-      concessioneId: true,
-    },
+  const responsabileNome = toNullable(parsed.data.responsabileProcedimentoNome);
+  const unitaOrganizzativa = toNullable(parsed.data.unitaOrganizzativaResponsabile);
+  const responsabileAssegnatoAt = toDate(parsed.data.responsabileAssegnatoAt);
+  const createInitialAssignment = Boolean(responsabileNome && unitaOrganizzativa && responsabileAssegnatoAt);
+
+  const created = await prisma.$transaction(async (tx) => {
+    const createdProcedimento = await tx.procedimento.create({
+      data: {
+        concessioneId: parsed.data.concessioneId,
+        criticitaId,
+        responsabileProcedimentoNome: responsabileNome,
+        responsabileProcedimentoEmail: toNullable(parsed.data.responsabileProcedimentoEmail),
+        unitaOrganizzativaResponsabile: unitaOrganizzativa,
+        responsabileAssegnatoAt,
+        tipologia: parsed.data.tipologia,
+        stato: parsed.data.stato,
+        riferimentoNormativo: toNullable(parsed.data.riferimentoNormativo),
+        dataAvvio: toDate(parsed.data.dataAvvio),
+        dataScadenzaContraddittorio: toDate(parsed.data.dataScadenzaContraddittorio),
+        ...checklistData,
+        noteIstruttorie: toNullable(parsed.data.noteIstruttorie),
+      },
+      select: {
+        id: true,
+        concessioneId: true,
+      },
+    });
+
+    if (createInitialAssignment && responsabileNome && unitaOrganizzativa && responsabileAssegnatoAt) {
+      await tx.procedimentoResponsabileAssignment.create({
+        data: {
+          procedimentoId: createdProcedimento.id,
+          responsabileNome,
+          responsabileEmail: toNullable(parsed.data.responsabileProcedimentoEmail),
+          unitaOrganizzativa,
+          decorrenza: responsabileAssegnatoAt,
+          registeredByUserId: currentUser?.id ?? null,
+        },
+      });
+    }
+
+    return createdProcedimento;
   });
 
   await auditSuccess({
@@ -596,6 +636,7 @@ export async function createProcedimentoAction(formData: FormData) {
       propostaEsitoIstruttorio: checklistData.propostaEsitoIstruttorio,
       preavvisoRigettoApplicabile: checklistData.preavvisoRigettoApplicabile,
       statoPreavvisoRigetto: checklistData.statoPreavvisoRigetto,
+      initialResponsibilityAssignmentCreated: createInitialAssignment,
     },
   });
 
@@ -604,6 +645,168 @@ export async function createProcedimentoAction(formData: FormData) {
   revalidatePath(`/concessioni/${created.concessioneId}`);
   revalidatePath("/dashboard");
   redirect(`/procedimenti/${created.id}`);
+}
+
+export async function reassignProcedimentoResponsabileAction(formData: FormData) {
+  const role = await requireRole();
+  const tenantContext = await getCurrentTenantContext();
+  const currentUser = await getCurrentUser();
+
+  if (!currentUser?.id) {
+    throw new Error("Utente autenticato non disponibile.");
+  }
+
+  if (!canManageProcedimenti(role)) {
+    throw new Error("Profilo non autorizzato alla gestione dei procedimenti.");
+  }
+
+  const parsed = reassignProcedimentoResponsabileSchema.safeParse({
+    procedimentoId: formData.get("procedimentoId"),
+    responsabileNome: formData.get("responsabileNome"),
+    responsabileEmail: formData.get("responsabileEmail")?.toString(),
+    unitaOrganizzativa: formData.get("unitaOrganizzativa"),
+    decorrenza: formData.get("decorrenza"),
+    motivoAssegnazione: formData.get("motivoAssegnazione")?.toString(),
+  });
+
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Dati assegnazione non validi.");
+  }
+
+  const decorrenza = toAssignmentDate(parsed.data.decorrenza);
+  const procedimento = await prisma.procedimento.findUnique({
+    where: { id: parsed.data.procedimentoId },
+    select: {
+      id: true,
+      concessioneId: true,
+      responsabileProcedimentoNome: true,
+      responsabileProcedimentoEmail: true,
+      unitaOrganizzativaResponsabile: true,
+      responsabileAssegnatoAt: true,
+    },
+  });
+
+  if (!procedimento) {
+    throw new Error("Procedimento non trovato.");
+  }
+
+  if (tenantContext) {
+    await requireConcessioneTenantAccess(tenantContext, procedimento.concessioneId, {
+      mode: "write",
+      allowWhenEnteMissing: false,
+    });
+  }
+
+  try {
+    const assignmentResult = await prisma.$transaction(async (tx) => {
+      const activeAssignment = await tx.procedimentoResponsabileAssignment.findFirst({
+        where: { procedimentoId: procedimento.id, cessazione: null },
+        orderBy: { decorrenza: "desc" },
+      });
+
+      if (activeAssignment && decorrenza < activeAssignment.decorrenza) {
+        throw new Error("DATA_RIASSEGNAZIONE_ANTECEDENTE");
+      }
+
+      if (activeAssignment) {
+        const closed = await tx.procedimentoResponsabileAssignment.updateMany({
+          where: { id: activeAssignment.id, cessazione: null },
+          data: { cessazione: decorrenza },
+        });
+
+        if (closed.count !== 1) {
+          throw new Error("RIASSEGNAZIONE_CONCORRENTE");
+        }
+      }
+
+      let legacySnapshotNotReconstructable = false;
+      if (!activeAssignment) {
+        const responsabileNome = normalizeOptionalString(procedimento.responsabileProcedimentoNome);
+        const responsabileEmail = normalizeOptionalString(procedimento.responsabileProcedimentoEmail);
+        const unitaOrganizzativa = normalizeOptionalString(procedimento.unitaOrganizzativaResponsabile);
+        const decorrenzaLegacy = procedimento.responsabileAssegnatoAt;
+
+        if (responsabileNome && unitaOrganizzativa && decorrenzaLegacy) {
+          if (decorrenza < decorrenzaLegacy) {
+            throw new Error("DATA_RIASSEGNAZIONE_ANTECEDENTE");
+          }
+
+          await tx.procedimentoResponsabileAssignment.create({
+            data: {
+              procedimentoId: procedimento.id,
+              responsabileNome,
+              responsabileEmail,
+              unitaOrganizzativa,
+              decorrenza: decorrenzaLegacy,
+              cessazione: decorrenza,
+              comunicataAt: null,
+              registeredByUserId: null,
+            },
+          });
+        } else {
+          legacySnapshotNotReconstructable = true;
+        }
+      }
+
+      await tx.procedimentoResponsabileAssignment.create({
+        data: {
+          procedimentoId: procedimento.id,
+          responsabileNome: parsed.data.responsabileNome,
+          responsabileEmail: toNullable(parsed.data.responsabileEmail),
+          unitaOrganizzativa: parsed.data.unitaOrganizzativa,
+          decorrenza,
+          motivoAssegnazione: toNullable(parsed.data.motivoAssegnazione),
+          registeredByUserId: currentUser.id,
+        },
+      });
+
+      await tx.procedimento.update({
+        where: { id: procedimento.id },
+        data: {
+          responsabileProcedimentoNome: parsed.data.responsabileNome,
+          responsabileProcedimentoEmail: toNullable(parsed.data.responsabileEmail),
+          unitaOrganizzativaResponsabile: parsed.data.unitaOrganizzativa,
+          responsabileAssegnatoAt: decorrenza,
+        },
+      });
+
+      return { legacySnapshotNotReconstructable };
+    });
+
+    if (assignmentResult.legacySnapshotNotReconstructable) {
+      await auditSuccess({
+        azione: "STORICO_RESPONSABILE_PRECEDENTE_NON_RICOSTRUIBILE",
+        entita: "Procedimento",
+        entitaId: procedimento.id,
+        concessioneId: procedimento.concessioneId,
+        actor: { userId: currentUser.id, userEmail: currentUser.email, userRole: role },
+      });
+    }
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      throw new Error("RIASSEGNAZIONE_CONCORRENTE");
+    }
+    throw error;
+  }
+
+  await auditSuccess({
+    azione: "PROCEDIMENTO_RESPONSABILE_RIASSEGNATO",
+    entita: "Procedimento",
+    entitaId: procedimento.id,
+    concessioneId: procedimento.concessioneId,
+    actor: { userId: currentUser.id, userEmail: currentUser.email, userRole: role },
+    metadata: {
+      responsabileNome: parsed.data.responsabileNome,
+      unitaOrganizzativa: parsed.data.unitaOrganizzativa,
+      decorrenza: decorrenza.toISOString(),
+      hasMotivoAssegnazione: Boolean(toNullable(parsed.data.motivoAssegnazione)),
+    },
+  });
+
+  revalidatePath("/procedimenti");
+  revalidatePath(`/procedimenti/${procedimento.id}`);
+  revalidatePath(`/concessioni/${procedimento.concessioneId}`);
+  redirect(`/procedimenti/${procedimento.id}`);
 }
 
 export async function updateProcedimentoChecklistAction(formData: FormData) {

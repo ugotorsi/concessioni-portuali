@@ -320,6 +320,7 @@ export type UserWhereInput = {
   documentiCaricati?: Prisma.DocumentoListRelationFilter
   tenantMemberships?: Prisma.TenantMembershipListRelationFilter
   decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoListRelationFilter
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -345,6 +346,7 @@ export type UserOrderByWithRelationInput = {
   documentiCaricati?: Prisma.DocumentoOrderByRelationAggregateInput
   tenantMemberships?: Prisma.TenantMembershipOrderByRelationAggregateInput
   decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoOrderByRelationAggregateInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -373,6 +375,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   documentiCaricati?: Prisma.DocumentoListRelationFilter
   tenantMemberships?: Prisma.TenantMembershipListRelationFilter
   decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoListRelationFilter
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -448,6 +451,7 @@ export type UserCreateInput = {
   documentiCaricati?: Prisma.DocumentoCreateNestedManyWithoutUploadedByUserInput
   tenantMemberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutRegisteredByUserInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentCreateNestedManyWithoutRegisteredByUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -473,6 +477,7 @@ export type UserUncheckedCreateInput = {
   documentiCaricati?: Prisma.DocumentoUncheckedCreateNestedManyWithoutUploadedByUserInput
   tenantMemberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutRegisteredByUserInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentUncheckedCreateNestedManyWithoutRegisteredByUserInput
 }
 
 export type UserUpdateInput = {
@@ -498,6 +503,7 @@ export type UserUpdateInput = {
   documentiCaricati?: Prisma.DocumentoUpdateManyWithoutUploadedByUserNestedInput
   tenantMemberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoUpdateManyWithoutRegisteredByUserNestedInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentUpdateManyWithoutRegisteredByUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -523,6 +529,7 @@ export type UserUncheckedUpdateInput = {
   documentiCaricati?: Prisma.DocumentoUncheckedUpdateManyWithoutUploadedByUserNestedInput
   tenantMemberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutRegisteredByUserNestedInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentUncheckedUpdateManyWithoutRegisteredByUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -681,6 +688,22 @@ export type UserUpdateOneRequiredWithoutTenantMembershipsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutTenantMembershipsInput, Prisma.UserUpdateWithoutTenantMembershipsInput>, Prisma.UserUncheckedUpdateWithoutTenantMembershipsInput>
 }
 
+export type UserCreateNestedOneWithoutProcedimentoResponsabileAssignmentsRegistrateInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutProcedimentoResponsabileAssignmentsRegistrateInput, Prisma.UserUncheckedCreateWithoutProcedimentoResponsabileAssignmentsRegistrateInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutProcedimentoResponsabileAssignmentsRegistrateInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutProcedimentoResponsabileAssignmentsRegistrateNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutProcedimentoResponsabileAssignmentsRegistrateInput, Prisma.UserUncheckedCreateWithoutProcedimentoResponsabileAssignmentsRegistrateInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutProcedimentoResponsabileAssignmentsRegistrateInput
+  upsert?: Prisma.UserUpsertWithoutProcedimentoResponsabileAssignmentsRegistrateInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutProcedimentoResponsabileAssignmentsRegistrateInput, Prisma.UserUpdateWithoutProcedimentoResponsabileAssignmentsRegistrateInput>, Prisma.UserUncheckedUpdateWithoutProcedimentoResponsabileAssignmentsRegistrateInput>
+}
+
 export type UserCreateNestedOneWithoutDocumentiCaricatiInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentiCaricatiInput, Prisma.UserUncheckedCreateWithoutDocumentiCaricatiInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentiCaricatiInput
@@ -749,6 +772,7 @@ export type UserCreateWithoutTenantMembershipsInput = {
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
   documentiCaricati?: Prisma.DocumentoCreateNestedManyWithoutUploadedByUserInput
   decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutRegisteredByUserInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentCreateNestedManyWithoutRegisteredByUserInput
 }
 
 export type UserUncheckedCreateWithoutTenantMembershipsInput = {
@@ -773,6 +797,7 @@ export type UserUncheckedCreateWithoutTenantMembershipsInput = {
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
   documentiCaricati?: Prisma.DocumentoUncheckedCreateNestedManyWithoutUploadedByUserInput
   decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutRegisteredByUserInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentUncheckedCreateNestedManyWithoutRegisteredByUserInput
 }
 
 export type UserCreateOrConnectWithoutTenantMembershipsInput = {
@@ -813,6 +838,7 @@ export type UserUpdateWithoutTenantMembershipsInput = {
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
   documentiCaricati?: Prisma.DocumentoUpdateManyWithoutUploadedByUserNestedInput
   decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoUpdateManyWithoutRegisteredByUserNestedInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentUpdateManyWithoutRegisteredByUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTenantMembershipsInput = {
@@ -836,6 +862,123 @@ export type UserUncheckedUpdateWithoutTenantMembershipsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
   documentiCaricati?: Prisma.DocumentoUncheckedUpdateManyWithoutUploadedByUserNestedInput
+  decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutRegisteredByUserNestedInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentUncheckedUpdateManyWithoutRegisteredByUserNestedInput
+}
+
+export type UserCreateWithoutProcedimentoResponsabileAssignmentsRegistrateInput = {
+  id?: string
+  nome: string
+  email: string
+  passwordHash?: string | null
+  ruolo: $Enums.RuoloUser
+  attivo?: boolean
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastFailedLoginAt?: Date | string | null
+  lastLoginAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  mustChangePassword?: boolean
+  mfaEnabled?: boolean
+  mfaSecret?: string | null
+  mfaRecoveryCodes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mfaVerifiedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  documentiCaricati?: Prisma.DocumentoCreateNestedManyWithoutUploadedByUserInput
+  tenantMemberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
+  decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutRegisteredByUserInput
+}
+
+export type UserUncheckedCreateWithoutProcedimentoResponsabileAssignmentsRegistrateInput = {
+  id?: string
+  nome: string
+  email: string
+  passwordHash?: string | null
+  ruolo: $Enums.RuoloUser
+  attivo?: boolean
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastFailedLoginAt?: Date | string | null
+  lastLoginAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  mustChangePassword?: boolean
+  mfaEnabled?: boolean
+  mfaSecret?: string | null
+  mfaRecoveryCodes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mfaVerifiedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  documentiCaricati?: Prisma.DocumentoUncheckedCreateNestedManyWithoutUploadedByUserInput
+  tenantMemberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
+  decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutRegisteredByUserInput
+}
+
+export type UserCreateOrConnectWithoutProcedimentoResponsabileAssignmentsRegistrateInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutProcedimentoResponsabileAssignmentsRegistrateInput, Prisma.UserUncheckedCreateWithoutProcedimentoResponsabileAssignmentsRegistrateInput>
+}
+
+export type UserUpsertWithoutProcedimentoResponsabileAssignmentsRegistrateInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutProcedimentoResponsabileAssignmentsRegistrateInput, Prisma.UserUncheckedUpdateWithoutProcedimentoResponsabileAssignmentsRegistrateInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutProcedimentoResponsabileAssignmentsRegistrateInput, Prisma.UserUncheckedCreateWithoutProcedimentoResponsabileAssignmentsRegistrateInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutProcedimentoResponsabileAssignmentsRegistrateInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutProcedimentoResponsabileAssignmentsRegistrateInput, Prisma.UserUncheckedUpdateWithoutProcedimentoResponsabileAssignmentsRegistrateInput>
+}
+
+export type UserUpdateWithoutProcedimentoResponsabileAssignmentsRegistrateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ruolo?: Prisma.EnumRuoloUserFieldUpdateOperationsInput | $Enums.RuoloUser
+  attivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastFailedLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mfaEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mfaSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mfaRecoveryCodes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mfaVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  documentiCaricati?: Prisma.DocumentoUpdateManyWithoutUploadedByUserNestedInput
+  tenantMemberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
+  decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoUpdateManyWithoutRegisteredByUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutProcedimentoResponsabileAssignmentsRegistrateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ruolo?: Prisma.EnumRuoloUserFieldUpdateOperationsInput | $Enums.RuoloUser
+  attivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastFailedLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mfaEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mfaSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mfaRecoveryCodes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mfaVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  documentiCaricati?: Prisma.DocumentoUncheckedUpdateManyWithoutUploadedByUserNestedInput
+  tenantMemberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutRegisteredByUserNestedInput
 }
 
@@ -861,6 +1004,7 @@ export type UserCreateWithoutDocumentiCaricatiInput = {
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
   tenantMemberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutRegisteredByUserInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentCreateNestedManyWithoutRegisteredByUserInput
 }
 
 export type UserUncheckedCreateWithoutDocumentiCaricatiInput = {
@@ -885,6 +1029,7 @@ export type UserUncheckedCreateWithoutDocumentiCaricatiInput = {
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
   tenantMemberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutRegisteredByUserInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentUncheckedCreateNestedManyWithoutRegisteredByUserInput
 }
 
 export type UserCreateOrConnectWithoutDocumentiCaricatiInput = {
@@ -925,6 +1070,7 @@ export type UserUpdateWithoutDocumentiCaricatiInput = {
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
   tenantMemberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoUpdateManyWithoutRegisteredByUserNestedInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentUpdateManyWithoutRegisteredByUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDocumentiCaricatiInput = {
@@ -949,6 +1095,7 @@ export type UserUncheckedUpdateWithoutDocumentiCaricatiInput = {
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
   tenantMemberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutRegisteredByUserNestedInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentUncheckedUpdateManyWithoutRegisteredByUserNestedInput
 }
 
 export type UserCreateWithoutDecisioniProcedimentoRegistrateInput = {
@@ -973,6 +1120,7 @@ export type UserCreateWithoutDecisioniProcedimentoRegistrateInput = {
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
   documentiCaricati?: Prisma.DocumentoCreateNestedManyWithoutUploadedByUserInput
   tenantMemberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentCreateNestedManyWithoutRegisteredByUserInput
 }
 
 export type UserUncheckedCreateWithoutDecisioniProcedimentoRegistrateInput = {
@@ -997,6 +1145,7 @@ export type UserUncheckedCreateWithoutDecisioniProcedimentoRegistrateInput = {
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
   documentiCaricati?: Prisma.DocumentoUncheckedCreateNestedManyWithoutUploadedByUserInput
   tenantMemberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentUncheckedCreateNestedManyWithoutRegisteredByUserInput
 }
 
 export type UserCreateOrConnectWithoutDecisioniProcedimentoRegistrateInput = {
@@ -1037,6 +1186,7 @@ export type UserUpdateWithoutDecisioniProcedimentoRegistrateInput = {
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
   documentiCaricati?: Prisma.DocumentoUpdateManyWithoutUploadedByUserNestedInput
   tenantMemberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentUpdateManyWithoutRegisteredByUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDecisioniProcedimentoRegistrateInput = {
@@ -1061,6 +1211,7 @@ export type UserUncheckedUpdateWithoutDecisioniProcedimentoRegistrateInput = {
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
   documentiCaricati?: Prisma.DocumentoUncheckedUpdateManyWithoutUploadedByUserNestedInput
   tenantMemberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentUncheckedUpdateManyWithoutRegisteredByUserNestedInput
 }
 
 export type UserCreateWithoutActivityLogsInput = {
@@ -1085,6 +1236,7 @@ export type UserCreateWithoutActivityLogsInput = {
   documentiCaricati?: Prisma.DocumentoCreateNestedManyWithoutUploadedByUserInput
   tenantMemberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutRegisteredByUserInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentCreateNestedManyWithoutRegisteredByUserInput
 }
 
 export type UserUncheckedCreateWithoutActivityLogsInput = {
@@ -1109,6 +1261,7 @@ export type UserUncheckedCreateWithoutActivityLogsInput = {
   documentiCaricati?: Prisma.DocumentoUncheckedCreateNestedManyWithoutUploadedByUserInput
   tenantMemberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutRegisteredByUserInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentUncheckedCreateNestedManyWithoutRegisteredByUserInput
 }
 
 export type UserCreateOrConnectWithoutActivityLogsInput = {
@@ -1149,6 +1302,7 @@ export type UserUpdateWithoutActivityLogsInput = {
   documentiCaricati?: Prisma.DocumentoUpdateManyWithoutUploadedByUserNestedInput
   tenantMemberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoUpdateManyWithoutRegisteredByUserNestedInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentUpdateManyWithoutRegisteredByUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutActivityLogsInput = {
@@ -1173,6 +1327,7 @@ export type UserUncheckedUpdateWithoutActivityLogsInput = {
   documentiCaricati?: Prisma.DocumentoUncheckedUpdateManyWithoutUploadedByUserNestedInput
   tenantMemberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutRegisteredByUserNestedInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentUncheckedUpdateManyWithoutRegisteredByUserNestedInput
 }
 
 
@@ -1185,6 +1340,7 @@ export type UserCountOutputType = {
   documentiCaricati: number
   tenantMemberships: number
   decisioniProcedimentoRegistrate: number
+  procedimentoResponsabileAssignmentsRegistrate: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1192,6 +1348,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   documentiCaricati?: boolean | UserCountOutputTypeCountDocumentiCaricatiArgs
   tenantMemberships?: boolean | UserCountOutputTypeCountTenantMembershipsArgs
   decisioniProcedimentoRegistrate?: boolean | UserCountOutputTypeCountDecisioniProcedimentoRegistrateArgs
+  procedimentoResponsabileAssignmentsRegistrate?: boolean | UserCountOutputTypeCountProcedimentoResponsabileAssignmentsRegistrateArgs
 }
 
 /**
@@ -1232,6 +1389,13 @@ export type UserCountOutputTypeCountDecisioniProcedimentoRegistrateArgs<ExtArgs 
   where?: Prisma.DecisioneProcedimentoWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountProcedimentoResponsabileAssignmentsRegistrateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ProcedimentoResponsabileAssignmentWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1256,6 +1420,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   documentiCaricati?: boolean | Prisma.User$documentiCaricatiArgs<ExtArgs>
   tenantMemberships?: boolean | Prisma.User$tenantMembershipsArgs<ExtArgs>
   decisioniProcedimentoRegistrate?: boolean | Prisma.User$decisioniProcedimentoRegistrateArgs<ExtArgs>
+  procedimentoResponsabileAssignmentsRegistrate?: boolean | Prisma.User$procedimentoResponsabileAssignmentsRegistrateArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1328,6 +1493,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   documentiCaricati?: boolean | Prisma.User$documentiCaricatiArgs<ExtArgs>
   tenantMemberships?: boolean | Prisma.User$tenantMembershipsArgs<ExtArgs>
   decisioniProcedimentoRegistrate?: boolean | Prisma.User$decisioniProcedimentoRegistrateArgs<ExtArgs>
+  procedimentoResponsabileAssignmentsRegistrate?: boolean | Prisma.User$procedimentoResponsabileAssignmentsRegistrateArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1340,6 +1506,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     documentiCaricati: Prisma.$DocumentoPayload<ExtArgs>[]
     tenantMemberships: Prisma.$TenantMembershipPayload<ExtArgs>[]
     decisioniProcedimentoRegistrate: Prisma.$DecisioneProcedimentoPayload<ExtArgs>[]
+    procedimentoResponsabileAssignmentsRegistrate: Prisma.$ProcedimentoResponsabileAssignmentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1758,6 +1925,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   documentiCaricati<T extends Prisma.User$documentiCaricatiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentiCaricatiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tenantMemberships<T extends Prisma.User$tenantMembershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$tenantMembershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TenantMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   decisioniProcedimentoRegistrate<T extends Prisma.User$decisioniProcedimentoRegistrateArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$decisioniProcedimentoRegistrateArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DecisioneProcedimentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  procedimentoResponsabileAssignmentsRegistrate<T extends Prisma.User$procedimentoResponsabileAssignmentsRegistrateArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$procedimentoResponsabileAssignmentsRegistrateArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProcedimentoResponsabileAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2291,6 +2459,30 @@ export type User$decisioniProcedimentoRegistrateArgs<ExtArgs extends runtime.Typ
   take?: number
   skip?: number
   distinct?: Prisma.DecisioneProcedimentoScalarFieldEnum | Prisma.DecisioneProcedimentoScalarFieldEnum[]
+}
+
+/**
+ * User.procedimentoResponsabileAssignmentsRegistrate
+ */
+export type User$procedimentoResponsabileAssignmentsRegistrateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ProcedimentoResponsabileAssignment
+   */
+  select?: Prisma.ProcedimentoResponsabileAssignmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ProcedimentoResponsabileAssignment
+   */
+  omit?: Prisma.ProcedimentoResponsabileAssignmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProcedimentoResponsabileAssignmentInclude<ExtArgs> | null
+  where?: Prisma.ProcedimentoResponsabileAssignmentWhereInput
+  orderBy?: Prisma.ProcedimentoResponsabileAssignmentOrderByWithRelationInput | Prisma.ProcedimentoResponsabileAssignmentOrderByWithRelationInput[]
+  cursor?: Prisma.ProcedimentoResponsabileAssignmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ProcedimentoResponsabileAssignmentScalarFieldEnum | Prisma.ProcedimentoResponsabileAssignmentScalarFieldEnum[]
 }
 
 /**

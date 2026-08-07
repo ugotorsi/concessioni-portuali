@@ -158,6 +158,18 @@ export interface ProcedimentoDetail {
     responsabileProcedimentoEmail: string | null;
     unitaOrganizzativaResponsabile: string | null;
     responsabileAssegnatoAt: Date | null;
+    responsabileAssignments: Array<{
+      id: string;
+      responsabileNome: string;
+      responsabileEmail: string | null;
+      unitaOrganizzativa: string;
+      decorrenza: Date;
+      cessazione: Date | null;
+      motivoAssegnazione: string | null;
+      comunicataAt: Date | null;
+      registeredByUserId: string | null;
+      registeredByUserEmail: string | null;
+    }>;
     tipologia: string;
     checklistProfile: string;
     riferimentoNormativo: string | null;
@@ -670,6 +682,25 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
           },
         },
       },
+      responsabileAssignments: {
+        orderBy: [{ decorrenza: "desc" }],
+        select: {
+          id: true,
+          responsabileNome: true,
+          responsabileEmail: true,
+          unitaOrganizzativa: true,
+          decorrenza: true,
+          cessazione: true,
+          motivoAssegnazione: true,
+          comunicataAt: true,
+          registeredByUserId: true,
+          registeredByUser: {
+            select: {
+              email: true,
+            },
+          },
+        },
+      },
       criticita: {
         select: {
           id: true,
@@ -863,6 +894,18 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
       responsabileProcedimentoEmail: procedimento.responsabileProcedimentoEmail,
       unitaOrganizzativaResponsabile: procedimento.unitaOrganizzativaResponsabile,
       responsabileAssegnatoAt: procedimento.responsabileAssegnatoAt,
+      responsabileAssignments: procedimento.responsabileAssignments.map((assignment) => ({
+        id: assignment.id,
+        responsabileNome: assignment.responsabileNome,
+        responsabileEmail: assignment.responsabileEmail,
+        unitaOrganizzativa: assignment.unitaOrganizzativa,
+        decorrenza: assignment.decorrenza,
+        cessazione: assignment.cessazione,
+        motivoAssegnazione: assignment.motivoAssegnazione,
+        comunicataAt: assignment.comunicataAt,
+        registeredByUserId: assignment.registeredByUserId,
+        registeredByUserEmail: assignment.registeredByUser?.email ?? null,
+      })),
       tipologia: procedimento.tipologia,
       checklistProfile: procedimento.checklistProfile,
       riferimentoNormativo: procedimento.riferimentoNormativo,

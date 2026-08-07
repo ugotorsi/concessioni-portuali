@@ -69,6 +69,7 @@ export const ModelName = {
   Scadenza: 'Scadenza',
   Criticita: 'Criticita',
   Procedimento: 'Procedimento',
+  ProcedimentoResponsabileAssignment: 'ProcedimentoResponsabileAssignment',
   Sopralluogo: 'Sopralluogo',
   Pagamento: 'Pagamento',
   Documento: 'Documento',
@@ -493,6 +494,23 @@ export const ProcedimentoScalarFieldEnum = {
 } as const
 
 export type ProcedimentoScalarFieldEnum = (typeof ProcedimentoScalarFieldEnum)[keyof typeof ProcedimentoScalarFieldEnum]
+
+
+export const ProcedimentoResponsabileAssignmentScalarFieldEnum = {
+  id: 'id',
+  procedimentoId: 'procedimentoId',
+  responsabileNome: 'responsabileNome',
+  responsabileEmail: 'responsabileEmail',
+  unitaOrganizzativa: 'unitaOrganizzativa',
+  decorrenza: 'decorrenza',
+  cessazione: 'cessazione',
+  motivoAssegnazione: 'motivoAssegnazione',
+  comunicataAt: 'comunicataAt',
+  registeredByUserId: 'registeredByUserId',
+  createdAt: 'createdAt'
+} as const
+
+export type ProcedimentoResponsabileAssignmentScalarFieldEnum = (typeof ProcedimentoResponsabileAssignmentScalarFieldEnum)[keyof typeof ProcedimentoResponsabileAssignmentScalarFieldEnum]
 
 
 export const SopralluogoScalarFieldEnum = {

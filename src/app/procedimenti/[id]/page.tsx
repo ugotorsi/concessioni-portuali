@@ -38,7 +38,11 @@ import {
   getStatoPreavvisoRigettoLabel,
 } from "@/lib/procedimento-checklist";
 import { formatCurrencyEUR, formatDateIT, formatEnumLabel } from "@/lib/utils";
-import { finalizeProcedimentoDecisionAction, updateProcedimentoChecklistAction } from "@/server/actions/procedimenti";
+import {
+  finalizeProcedimentoDecisionAction,
+  reassignProcedimentoResponsabileAction,
+  updateProcedimentoChecklistAction,
+} from "@/server/actions/procedimenti";
 import { getDecisionRulePreviewForTipologia } from "@/server/procedimenti/decisioni";
 import { getLetturaProcedimentale, getProcedimentoDetail } from "@/server/queries/procedimenti";
 import { getNormeForProcedimento } from "@/server/queries/normativa";
@@ -206,7 +210,7 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
                 <p className="mt-1">{detail.procedimento.noteIstruttorie ?? "-"}</p>
               </div>
               <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500">Responsabile procedimento</p>
+                <p className="text-xs uppercase tracking-wide text-slate-500">Responsabile attuale</p>
                 <p className="mt-1">{detail.procedimento.responsabileProcedimentoNome ?? "-"}</p>
               </div>
               <div>
@@ -220,6 +224,67 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-500">Data assegnazione responsabile</p>
                 <p className="mt-1">{detail.procedimento.responsabileAssegnatoAt ? formatDateIT(detail.procedimento.responsabileAssegnatoAt) : "-"}</p>
+              </div>
+              <p className="md:col-span-2 text-xs text-slate-500">
+                Il responsabile amministrativo e distinto dal soggetto che registra l assegnazione nel software e non implica competenza all adozione del provvedimento finale.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Storico responsabilita</CardTitle>
+              <CardDescription>Registro cronologico delle assegnazioni amministrative.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {canWriteChecklist ? (
+                <form action={reassignProcedimentoResponsabileAction} className="space-y-3 rounded-md border border-slate-200 bg-slate-50 p-3">
+                  <input type="hidden" name="procedimentoId" value={detail.procedimento.id} />
+                  <p className="text-sm font-medium text-slate-900">Riassegna responsabile</p>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <label className="text-sm text-slate-700">
+                      Responsabile
+                      <Input name="responsabileNome" required />
+                    </label>
+                    <label className="text-sm text-slate-700">
+                      Email responsabile (opzionale)
+                      <Input name="responsabileEmail" type="email" />
+                    </label>
+                    <label className="text-sm text-slate-700">
+                      Unita organizzativa
+                      <Input name="unitaOrganizzativa" required />
+                    </label>
+                    <label className="text-sm text-slate-700">
+                      Decorrenza
+                      <Input name="decorrenza" type="date" required />
+                    </label>
+                    <label className="text-sm text-slate-700 md:col-span-2">
+                      Motivo assegnazione (opzionale)
+                      <Textarea name="motivoAssegnazione" rows={2} />
+                    </label>
+                  </div>
+                  <Button type="submit">Riassegna responsabile</Button>
+                </form>
+              ) : null}
+
+              <div className="space-y-3">
+                {detail.procedimento.responsabileAssignments.map((assignment) => (
+                  <div key={assignment.id} className="rounded-md border border-slate-200 bg-white p-3 text-sm text-slate-700">
+                    <div className="grid gap-2 md:grid-cols-2">
+                      <p><span className="font-medium text-slate-900">Responsabile:</span> {assignment.responsabileNome}</p>
+                      <p><span className="font-medium text-slate-900">Email:</span> {assignment.responsabileEmail ?? "-"}</p>
+                      <p><span className="font-medium text-slate-900">Unita:</span> {assignment.unitaOrganizzativa}</p>
+                      <p><span className="font-medium text-slate-900">Dal:</span> {formatDateIT(assignment.decorrenza)}</p>
+                      <p><span className="font-medium text-slate-900">Al:</span> {assignment.cessazione ? formatDateIT(assignment.cessazione) : "In corso"}</p>
+                      <p><span className="font-medium text-slate-900">Comunicata:</span> {assignment.comunicataAt ? formatDateIT(assignment.comunicataAt) : "Non comunicata"}</p>
+                      <p><span className="font-medium text-slate-900">Registrata da:</span> {assignment.registeredByUserEmail ?? assignment.registeredByUserId ?? "-"}</p>
+                      <p><span className="font-medium text-slate-900">Motivo:</span> {assignment.motivoAssegnazione ?? "-"}</p>
+                    </div>
+                  </div>
+                ))}
+                {detail.procedimento.responsabileAssignments.length === 0 ? (
+                  <p className="text-sm text-slate-500">Nessuna assegnazione storica registrata.</p>
+                ) : null}
               </div>
             </CardContent>
           </Card>
