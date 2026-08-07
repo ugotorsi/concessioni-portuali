@@ -102,6 +102,16 @@ const updateProcedimentoChecklistSchema = z.object({
   noteChecklistContraddittorio: z.string().trim().optional(),
 });
 
+const STAGING_PREVIEW_ADMIN_ID = "staging-preview-admin";
+
+function resolveAssignmentRegisteredByUserId(currentUserId: string | null | undefined): string | null {
+  if (!currentUserId || currentUserId === STAGING_PREVIEW_ADMIN_ID) {
+    return null;
+  }
+
+  return currentUserId;
+}
+
 function requiredTrimmedString(message: string, maxLength?: number) {
   const base = z.string().trim().min(1, message);
   const constrained = typeof maxLength === "number" ? base.max(maxLength, message) : base;
@@ -579,6 +589,7 @@ export async function createProcedimentoAction(formData: FormData) {
   const unitaOrganizzativa = toNullable(parsed.data.unitaOrganizzativaResponsabile);
   const responsabileAssegnatoAt = toDate(parsed.data.responsabileAssegnatoAt);
   const createInitialAssignment = Boolean(responsabileNome && unitaOrganizzativa && responsabileAssegnatoAt);
+  const registeredByUserId = resolveAssignmentRegisteredByUserId(currentUser?.id);
 
   const created = await prisma.$transaction(async (tx) => {
     const createdProcedimento = await tx.procedimento.create({
@@ -611,7 +622,7 @@ export async function createProcedimentoAction(formData: FormData) {
           responsabileEmail: toNullable(parsed.data.responsabileProcedimentoEmail),
           unitaOrganizzativa,
           decorrenza: responsabileAssegnatoAt,
-          registeredByUserId: currentUser?.id ?? null,
+          registeredByUserId,
         },
       });
     }
@@ -655,6 +666,8 @@ export async function reassignProcedimentoResponsabileAction(formData: FormData)
   if (!currentUser?.id) {
     throw new Error("Utente autenticato non disponibile.");
   }
+
+  const registeredByUserId = resolveAssignmentRegisteredByUserId(currentUser.id);
 
   if (!canManageProcedimenti(role)) {
     throw new Error("Profilo non autorizzato alla gestione dei procedimenti.");
@@ -756,7 +769,7 @@ export async function reassignProcedimentoResponsabileAction(formData: FormData)
           unitaOrganizzativa: parsed.data.unitaOrganizzativa,
           decorrenza,
           motivoAssegnazione: toNullable(parsed.data.motivoAssegnazione),
-          registeredByUserId: currentUser.id,
+          registeredByUserId,
         },
       });
 

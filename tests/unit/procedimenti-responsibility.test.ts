@@ -135,6 +135,19 @@ describe("procedimento responsibility assignments", () => {
     expect(assignmentInput).not.toHaveProperty("comunicataAt");
   });
 
+  it("create procedimento non collega il technical admin Preview a User", async () => {
+    getCurrentUserMock.mockResolvedValueOnce({
+      id: "staging-preview-admin",
+      email: "staging-admin@preview.invalid",
+      role: "ADMIN",
+    });
+
+    await expect(createProcedimentoAction(createFormData())).rejects.toThrow("REDIRECT:/procedimenti/proc-1");
+
+    const assignmentInput = txMock.procedimentoResponsabileAssignment.create.mock.calls[0]?.[0]?.data;
+    expect(assignmentInput).toMatchObject({ registeredByUserId: null });
+  });
+
   it("riassegnazione chiude solo la precedente, crea il nuovo snapshot e aggiorna Procedimento", async () => {
     await expect(reassignProcedimentoResponsabileAction(reassignFormData())).rejects.toThrow("REDIRECT:/procedimenti/proc-1");
 
@@ -168,6 +181,22 @@ describe("procedimento responsibility assignments", () => {
       responsabileEmail: "mario@ente.test",
       unitaOrganizzativa: "Ufficio Demanio",
       decorrenza: new Date("2026-08-01T00:00:00.000Z"),
+    });
+  });
+
+  it("riassegnazione non collega il technical admin Preview a User", async () => {
+    getCurrentUserMock.mockResolvedValueOnce({
+      id: "staging-preview-admin",
+      email: "staging-admin@preview.invalid",
+      role: "ADMIN",
+    });
+
+    await expect(reassignProcedimentoResponsabileAction(reassignFormData())).rejects.toThrow("REDIRECT:/procedimenti/proc-1");
+
+    const assignmentInput = txMock.procedimentoResponsabileAssignment.create.mock.calls[0]?.[0]?.data;
+    expect(assignmentInput).toMatchObject({
+      responsabileNome: "Lucia Bianchi",
+      registeredByUserId: null,
     });
   });
 
