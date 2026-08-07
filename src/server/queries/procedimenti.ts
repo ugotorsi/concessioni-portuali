@@ -233,7 +233,7 @@ export interface ProcedimentoDetail {
       effettoApplicatoAt: Date | null;
       documentoId: string | null;
       documentoNome: string | null;
-      registeredByUserId: string;
+      registeredByUserId: string | null;
       registeredByUserEmail: string | null;
       createdAt: Date;
     } | null;
