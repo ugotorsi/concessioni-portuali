@@ -109,6 +109,25 @@ describe("applyRegisteredDecisionEffect", () => {
       }),
     );
     expect(txMock.activityLog.create).toHaveBeenCalledTimes(1);
+    expect(txMock.activityLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ userId: "user-1" }) }),
+    );
+  });
+
+  it("persiste null negli audit effetto quando l action risolve un technical Preview actor", async () => {
+    const result = await applyRegisteredDecisionEffect({
+      decisioneId: "dec-1",
+      actor: {
+        userId: null,
+        userEmail: "staging-admin@preview.invalid",
+        userRole: "ADMIN",
+      },
+    });
+
+    expect(result.status).toBe("APPLIED");
+    expect(txMock.activityLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ userId: null }) }),
+    );
   });
 
   it("restituisce NOT_READY prima della data di efficacia", async () => {

@@ -313,6 +313,42 @@ describe("finalizeProcedimentoDecisionAction", () => {
     expect(txMock.concessione.update).not.toHaveBeenCalled();
     expect(applyRegisteredDecisionEffectMock).toHaveBeenCalledTimes(1);
     expect(txMock.activityLog.create).toHaveBeenCalledTimes(1);
+    expect(txMock.decisioneProcedimento.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ registeredByUserId: "user-1" }) }),
+    );
+    expect(txMock.activityLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ userId: "user-1" }) }),
+    );
+    expect(auditSuccessMock).toHaveBeenCalledWith(
+      expect.objectContaining({ azione: "EFFETTO_PRONTO", actor: expect.objectContaining({ userId: "user-1" }) }),
+    );
+    expect(applyRegisteredDecisionEffectMock).toHaveBeenCalledWith(
+      expect.objectContaining({ actor: expect.objectContaining({ userId: "user-1" }) }),
+    );
+  });
+
+  it("technical Preview registra decisione e audit senza FK User", async () => {
+    requireRoleMock.mockResolvedValue("ADMIN");
+    getCurrentUserMock.mockResolvedValue({
+      id: "staging-preview-admin",
+      email: "staging-admin@preview.invalid",
+      role: "ADMIN",
+    });
+
+    await expect(finalizeProcedimentoDecisionAction(baseFormData())).rejects.toThrow("REDIRECT:/procedimenti/proc-1");
+
+    expect(txMock.decisioneProcedimento.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ registeredByUserId: null }) }),
+    );
+    expect(txMock.activityLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ userId: null }) }),
+    );
+    expect(auditSuccessMock).toHaveBeenCalledWith(
+      expect.objectContaining({ azione: "EFFETTO_PRONTO", actor: expect.objectContaining({ userId: null }) }),
+    );
+    expect(applyRegisteredDecisionEffectMock).toHaveBeenCalledWith(
+      expect.objectContaining({ actor: expect.objectContaining({ userId: null }) }),
+    );
   });
 
   it("archiviazione non aggiorna concessione", async () => {

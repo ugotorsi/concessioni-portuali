@@ -322,7 +322,7 @@ export type DecisioneProcedimentoGroupByOutputType = {
   effectVersion: number
   statoConcessionePrecedente: $Enums.StatoConcessione | null
   statoConcessioneSuccessivo: $Enums.StatoConcessione | null
-  registeredByUserId: string
+  registeredByUserId: string | null
   idempotencyKey: string
   createdAt: Date
   _count: DecisioneProcedimentoCountAggregateOutputType | null
@@ -373,14 +373,14 @@ export type DecisioneProcedimentoWhereInput = {
   effectVersion?: Prisma.IntFilter<"DecisioneProcedimento"> | number
   statoConcessionePrecedente?: Prisma.EnumStatoConcessioneNullableFilter<"DecisioneProcedimento"> | $Enums.StatoConcessione | null
   statoConcessioneSuccessivo?: Prisma.EnumStatoConcessioneNullableFilter<"DecisioneProcedimento"> | $Enums.StatoConcessione | null
-  registeredByUserId?: Prisma.StringFilter<"DecisioneProcedimento"> | string
+  registeredByUserId?: Prisma.StringNullableFilter<"DecisioneProcedimento"> | string | null
   idempotencyKey?: Prisma.StringFilter<"DecisioneProcedimento"> | string
   createdAt?: Prisma.DateTimeFilter<"DecisioneProcedimento"> | Date | string
   ente?: Prisma.XOR<Prisma.EnteNullableScalarRelationFilter, Prisma.EnteWhereInput> | null
   procedimento?: Prisma.XOR<Prisma.ProcedimentoScalarRelationFilter, Prisma.ProcedimentoWhereInput>
   concessione?: Prisma.XOR<Prisma.ConcessioneNullableScalarRelationFilter, Prisma.ConcessioneWhereInput> | null
   documento?: Prisma.XOR<Prisma.DocumentoNullableScalarRelationFilter, Prisma.DocumentoWhereInput> | null
-  registeredByUser?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  registeredByUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
 
 export type DecisioneProcedimentoOrderByWithRelationInput = {
@@ -406,7 +406,7 @@ export type DecisioneProcedimentoOrderByWithRelationInput = {
   effectVersion?: Prisma.SortOrder
   statoConcessionePrecedente?: Prisma.SortOrderInput | Prisma.SortOrder
   statoConcessioneSuccessivo?: Prisma.SortOrderInput | Prisma.SortOrder
-  registeredByUserId?: Prisma.SortOrder
+  registeredByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   ente?: Prisma.EnteOrderByWithRelationInput
@@ -443,13 +443,13 @@ export type DecisioneProcedimentoWhereUniqueInput = Prisma.AtLeast<{
   effectVersion?: Prisma.IntFilter<"DecisioneProcedimento"> | number
   statoConcessionePrecedente?: Prisma.EnumStatoConcessioneNullableFilter<"DecisioneProcedimento"> | $Enums.StatoConcessione | null
   statoConcessioneSuccessivo?: Prisma.EnumStatoConcessioneNullableFilter<"DecisioneProcedimento"> | $Enums.StatoConcessione | null
-  registeredByUserId?: Prisma.StringFilter<"DecisioneProcedimento"> | string
+  registeredByUserId?: Prisma.StringNullableFilter<"DecisioneProcedimento"> | string | null
   createdAt?: Prisma.DateTimeFilter<"DecisioneProcedimento"> | Date | string
   ente?: Prisma.XOR<Prisma.EnteNullableScalarRelationFilter, Prisma.EnteWhereInput> | null
   procedimento?: Prisma.XOR<Prisma.ProcedimentoScalarRelationFilter, Prisma.ProcedimentoWhereInput>
   concessione?: Prisma.XOR<Prisma.ConcessioneNullableScalarRelationFilter, Prisma.ConcessioneWhereInput> | null
   documento?: Prisma.XOR<Prisma.DocumentoNullableScalarRelationFilter, Prisma.DocumentoWhereInput> | null
-  registeredByUser?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  registeredByUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }, "id" | "procedimentoId" | "idempotencyKey">
 
 export type DecisioneProcedimentoOrderByWithAggregationInput = {
@@ -475,7 +475,7 @@ export type DecisioneProcedimentoOrderByWithAggregationInput = {
   effectVersion?: Prisma.SortOrder
   statoConcessionePrecedente?: Prisma.SortOrderInput | Prisma.SortOrder
   statoConcessioneSuccessivo?: Prisma.SortOrderInput | Prisma.SortOrder
-  registeredByUserId?: Prisma.SortOrder
+  registeredByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.DecisioneProcedimentoCountOrderByAggregateInput
@@ -511,7 +511,7 @@ export type DecisioneProcedimentoScalarWhereWithAggregatesInput = {
   effectVersion?: Prisma.IntWithAggregatesFilter<"DecisioneProcedimento"> | number
   statoConcessionePrecedente?: Prisma.EnumStatoConcessioneNullableWithAggregatesFilter<"DecisioneProcedimento"> | $Enums.StatoConcessione | null
   statoConcessioneSuccessivo?: Prisma.EnumStatoConcessioneNullableWithAggregatesFilter<"DecisioneProcedimento"> | $Enums.StatoConcessione | null
-  registeredByUserId?: Prisma.StringWithAggregatesFilter<"DecisioneProcedimento"> | string
+  registeredByUserId?: Prisma.StringNullableWithAggregatesFilter<"DecisioneProcedimento"> | string | null
   idempotencyKey?: Prisma.StringWithAggregatesFilter<"DecisioneProcedimento"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"DecisioneProcedimento"> | Date | string
 }
@@ -541,7 +541,7 @@ export type DecisioneProcedimentoCreateInput = {
   procedimento: Prisma.ProcedimentoCreateNestedOneWithoutDecisioneProcedimentoInput
   concessione?: Prisma.ConcessioneCreateNestedOneWithoutDecisioniProcedimentoInput
   documento?: Prisma.DocumentoCreateNestedOneWithoutDecisioniProcedimentoInput
-  registeredByUser: Prisma.UserCreateNestedOneWithoutDecisioniProcedimentoRegistrateInput
+  registeredByUser?: Prisma.UserCreateNestedOneWithoutDecisioniProcedimentoRegistrateInput
 }
 
 export type DecisioneProcedimentoUncheckedCreateInput = {
@@ -567,7 +567,7 @@ export type DecisioneProcedimentoUncheckedCreateInput = {
   effectVersion?: number
   statoConcessionePrecedente?: $Enums.StatoConcessione | null
   statoConcessioneSuccessivo?: $Enums.StatoConcessione | null
-  registeredByUserId: string
+  registeredByUserId?: string | null
   idempotencyKey: string
   createdAt?: Date | string
 }
@@ -597,7 +597,7 @@ export type DecisioneProcedimentoUpdateInput = {
   procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutDecisioneProcedimentoNestedInput
   concessione?: Prisma.ConcessioneUpdateOneWithoutDecisioniProcedimentoNestedInput
   documento?: Prisma.DocumentoUpdateOneWithoutDecisioniProcedimentoNestedInput
-  registeredByUser?: Prisma.UserUpdateOneRequiredWithoutDecisioniProcedimentoRegistrateNestedInput
+  registeredByUser?: Prisma.UserUpdateOneWithoutDecisioniProcedimentoRegistrateNestedInput
 }
 
 export type DecisioneProcedimentoUncheckedUpdateInput = {
@@ -623,7 +623,7 @@ export type DecisioneProcedimentoUncheckedUpdateInput = {
   effectVersion?: Prisma.IntFieldUpdateOperationsInput | number
   statoConcessionePrecedente?: Prisma.NullableEnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione | null
   statoConcessioneSuccessivo?: Prisma.NullableEnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione | null
-  registeredByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  registeredByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -651,7 +651,7 @@ export type DecisioneProcedimentoCreateManyInput = {
   effectVersion?: number
   statoConcessionePrecedente?: $Enums.StatoConcessione | null
   statoConcessioneSuccessivo?: $Enums.StatoConcessione | null
-  registeredByUserId: string
+  registeredByUserId?: string | null
   idempotencyKey: string
   createdAt?: Date | string
 }
@@ -702,7 +702,7 @@ export type DecisioneProcedimentoUncheckedUpdateManyInput = {
   effectVersion?: Prisma.IntFieldUpdateOperationsInput | number
   statoConcessionePrecedente?: Prisma.NullableEnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione | null
   statoConcessioneSuccessivo?: Prisma.NullableEnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione | null
-  registeredByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  registeredByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1054,7 +1054,7 @@ export type DecisioneProcedimentoCreateWithoutEnteInput = {
   procedimento: Prisma.ProcedimentoCreateNestedOneWithoutDecisioneProcedimentoInput
   concessione?: Prisma.ConcessioneCreateNestedOneWithoutDecisioniProcedimentoInput
   documento?: Prisma.DocumentoCreateNestedOneWithoutDecisioniProcedimentoInput
-  registeredByUser: Prisma.UserCreateNestedOneWithoutDecisioniProcedimentoRegistrateInput
+  registeredByUser?: Prisma.UserCreateNestedOneWithoutDecisioniProcedimentoRegistrateInput
 }
 
 export type DecisioneProcedimentoUncheckedCreateWithoutEnteInput = {
@@ -1079,7 +1079,7 @@ export type DecisioneProcedimentoUncheckedCreateWithoutEnteInput = {
   effectVersion?: number
   statoConcessionePrecedente?: $Enums.StatoConcessione | null
   statoConcessioneSuccessivo?: $Enums.StatoConcessione | null
-  registeredByUserId: string
+  registeredByUserId?: string | null
   idempotencyKey: string
   createdAt?: Date | string
 }
@@ -1136,7 +1136,7 @@ export type DecisioneProcedimentoScalarWhereInput = {
   effectVersion?: Prisma.IntFilter<"DecisioneProcedimento"> | number
   statoConcessionePrecedente?: Prisma.EnumStatoConcessioneNullableFilter<"DecisioneProcedimento"> | $Enums.StatoConcessione | null
   statoConcessioneSuccessivo?: Prisma.EnumStatoConcessioneNullableFilter<"DecisioneProcedimento"> | $Enums.StatoConcessione | null
-  registeredByUserId?: Prisma.StringFilter<"DecisioneProcedimento"> | string
+  registeredByUserId?: Prisma.StringNullableFilter<"DecisioneProcedimento"> | string | null
   idempotencyKey?: Prisma.StringFilter<"DecisioneProcedimento"> | string
   createdAt?: Prisma.DateTimeFilter<"DecisioneProcedimento"> | Date | string
 }
@@ -1245,7 +1245,7 @@ export type DecisioneProcedimentoCreateWithoutConcessioneInput = {
   ente?: Prisma.EnteCreateNestedOneWithoutDecisioniProcedimentoInput
   procedimento: Prisma.ProcedimentoCreateNestedOneWithoutDecisioneProcedimentoInput
   documento?: Prisma.DocumentoCreateNestedOneWithoutDecisioniProcedimentoInput
-  registeredByUser: Prisma.UserCreateNestedOneWithoutDecisioniProcedimentoRegistrateInput
+  registeredByUser?: Prisma.UserCreateNestedOneWithoutDecisioniProcedimentoRegistrateInput
 }
 
 export type DecisioneProcedimentoUncheckedCreateWithoutConcessioneInput = {
@@ -1270,7 +1270,7 @@ export type DecisioneProcedimentoUncheckedCreateWithoutConcessioneInput = {
   effectVersion?: number
   statoConcessionePrecedente?: $Enums.StatoConcessione | null
   statoConcessioneSuccessivo?: $Enums.StatoConcessione | null
-  registeredByUserId: string
+  registeredByUserId?: string | null
   idempotencyKey: string
   createdAt?: Date | string
 }
@@ -1325,7 +1325,7 @@ export type DecisioneProcedimentoCreateWithoutProcedimentoInput = {
   ente?: Prisma.EnteCreateNestedOneWithoutDecisioniProcedimentoInput
   concessione?: Prisma.ConcessioneCreateNestedOneWithoutDecisioniProcedimentoInput
   documento?: Prisma.DocumentoCreateNestedOneWithoutDecisioniProcedimentoInput
-  registeredByUser: Prisma.UserCreateNestedOneWithoutDecisioniProcedimentoRegistrateInput
+  registeredByUser?: Prisma.UserCreateNestedOneWithoutDecisioniProcedimentoRegistrateInput
 }
 
 export type DecisioneProcedimentoUncheckedCreateWithoutProcedimentoInput = {
@@ -1350,7 +1350,7 @@ export type DecisioneProcedimentoUncheckedCreateWithoutProcedimentoInput = {
   effectVersion?: number
   statoConcessionePrecedente?: $Enums.StatoConcessione | null
   statoConcessioneSuccessivo?: $Enums.StatoConcessione | null
-  registeredByUserId: string
+  registeredByUserId?: string | null
   idempotencyKey: string
   createdAt?: Date | string
 }
@@ -1395,7 +1395,7 @@ export type DecisioneProcedimentoUpdateWithoutProcedimentoInput = {
   ente?: Prisma.EnteUpdateOneWithoutDecisioniProcedimentoNestedInput
   concessione?: Prisma.ConcessioneUpdateOneWithoutDecisioniProcedimentoNestedInput
   documento?: Prisma.DocumentoUpdateOneWithoutDecisioniProcedimentoNestedInput
-  registeredByUser?: Prisma.UserUpdateOneRequiredWithoutDecisioniProcedimentoRegistrateNestedInput
+  registeredByUser?: Prisma.UserUpdateOneWithoutDecisioniProcedimentoRegistrateNestedInput
 }
 
 export type DecisioneProcedimentoUncheckedUpdateWithoutProcedimentoInput = {
@@ -1420,7 +1420,7 @@ export type DecisioneProcedimentoUncheckedUpdateWithoutProcedimentoInput = {
   effectVersion?: Prisma.IntFieldUpdateOperationsInput | number
   statoConcessionePrecedente?: Prisma.NullableEnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione | null
   statoConcessioneSuccessivo?: Prisma.NullableEnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione | null
-  registeredByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  registeredByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1449,7 +1449,7 @@ export type DecisioneProcedimentoCreateWithoutDocumentoInput = {
   ente?: Prisma.EnteCreateNestedOneWithoutDecisioniProcedimentoInput
   procedimento: Prisma.ProcedimentoCreateNestedOneWithoutDecisioneProcedimentoInput
   concessione?: Prisma.ConcessioneCreateNestedOneWithoutDecisioniProcedimentoInput
-  registeredByUser: Prisma.UserCreateNestedOneWithoutDecisioniProcedimentoRegistrateInput
+  registeredByUser?: Prisma.UserCreateNestedOneWithoutDecisioniProcedimentoRegistrateInput
 }
 
 export type DecisioneProcedimentoUncheckedCreateWithoutDocumentoInput = {
@@ -1474,7 +1474,7 @@ export type DecisioneProcedimentoUncheckedCreateWithoutDocumentoInput = {
   effectVersion?: number
   statoConcessionePrecedente?: $Enums.StatoConcessione | null
   statoConcessioneSuccessivo?: $Enums.StatoConcessione | null
-  registeredByUserId: string
+  registeredByUserId?: string | null
   idempotencyKey: string
   createdAt?: Date | string
 }
@@ -1527,7 +1527,7 @@ export type DecisioneProcedimentoCreateManyEnteInput = {
   effectVersion?: number
   statoConcessionePrecedente?: $Enums.StatoConcessione | null
   statoConcessioneSuccessivo?: $Enums.StatoConcessione | null
-  registeredByUserId: string
+  registeredByUserId?: string | null
   idempotencyKey: string
   createdAt?: Date | string
 }
@@ -1556,7 +1556,7 @@ export type DecisioneProcedimentoUpdateWithoutEnteInput = {
   procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutDecisioneProcedimentoNestedInput
   concessione?: Prisma.ConcessioneUpdateOneWithoutDecisioniProcedimentoNestedInput
   documento?: Prisma.DocumentoUpdateOneWithoutDecisioniProcedimentoNestedInput
-  registeredByUser?: Prisma.UserUpdateOneRequiredWithoutDecisioniProcedimentoRegistrateNestedInput
+  registeredByUser?: Prisma.UserUpdateOneWithoutDecisioniProcedimentoRegistrateNestedInput
 }
 
 export type DecisioneProcedimentoUncheckedUpdateWithoutEnteInput = {
@@ -1581,7 +1581,7 @@ export type DecisioneProcedimentoUncheckedUpdateWithoutEnteInput = {
   effectVersion?: Prisma.IntFieldUpdateOperationsInput | number
   statoConcessionePrecedente?: Prisma.NullableEnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione | null
   statoConcessioneSuccessivo?: Prisma.NullableEnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione | null
-  registeredByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  registeredByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1608,7 +1608,7 @@ export type DecisioneProcedimentoUncheckedUpdateManyWithoutEnteInput = {
   effectVersion?: Prisma.IntFieldUpdateOperationsInput | number
   statoConcessionePrecedente?: Prisma.NullableEnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione | null
   statoConcessioneSuccessivo?: Prisma.NullableEnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione | null
-  registeredByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  registeredByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1743,7 +1743,7 @@ export type DecisioneProcedimentoCreateManyConcessioneInput = {
   effectVersion?: number
   statoConcessionePrecedente?: $Enums.StatoConcessione | null
   statoConcessioneSuccessivo?: $Enums.StatoConcessione | null
-  registeredByUserId: string
+  registeredByUserId?: string | null
   idempotencyKey: string
   createdAt?: Date | string
 }
@@ -1772,7 +1772,7 @@ export type DecisioneProcedimentoUpdateWithoutConcessioneInput = {
   ente?: Prisma.EnteUpdateOneWithoutDecisioniProcedimentoNestedInput
   procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutDecisioneProcedimentoNestedInput
   documento?: Prisma.DocumentoUpdateOneWithoutDecisioniProcedimentoNestedInput
-  registeredByUser?: Prisma.UserUpdateOneRequiredWithoutDecisioniProcedimentoRegistrateNestedInput
+  registeredByUser?: Prisma.UserUpdateOneWithoutDecisioniProcedimentoRegistrateNestedInput
 }
 
 export type DecisioneProcedimentoUncheckedUpdateWithoutConcessioneInput = {
@@ -1797,7 +1797,7 @@ export type DecisioneProcedimentoUncheckedUpdateWithoutConcessioneInput = {
   effectVersion?: Prisma.IntFieldUpdateOperationsInput | number
   statoConcessionePrecedente?: Prisma.NullableEnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione | null
   statoConcessioneSuccessivo?: Prisma.NullableEnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione | null
-  registeredByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  registeredByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1824,7 +1824,7 @@ export type DecisioneProcedimentoUncheckedUpdateManyWithoutConcessioneInput = {
   effectVersion?: Prisma.IntFieldUpdateOperationsInput | number
   statoConcessionePrecedente?: Prisma.NullableEnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione | null
   statoConcessioneSuccessivo?: Prisma.NullableEnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione | null
-  registeredByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  registeredByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1851,7 +1851,7 @@ export type DecisioneProcedimentoCreateManyDocumentoInput = {
   effectVersion?: number
   statoConcessionePrecedente?: $Enums.StatoConcessione | null
   statoConcessioneSuccessivo?: $Enums.StatoConcessione | null
-  registeredByUserId: string
+  registeredByUserId?: string | null
   idempotencyKey: string
   createdAt?: Date | string
 }
@@ -1880,7 +1880,7 @@ export type DecisioneProcedimentoUpdateWithoutDocumentoInput = {
   ente?: Prisma.EnteUpdateOneWithoutDecisioniProcedimentoNestedInput
   procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutDecisioneProcedimentoNestedInput
   concessione?: Prisma.ConcessioneUpdateOneWithoutDecisioniProcedimentoNestedInput
-  registeredByUser?: Prisma.UserUpdateOneRequiredWithoutDecisioniProcedimentoRegistrateNestedInput
+  registeredByUser?: Prisma.UserUpdateOneWithoutDecisioniProcedimentoRegistrateNestedInput
 }
 
 export type DecisioneProcedimentoUncheckedUpdateWithoutDocumentoInput = {
@@ -1905,7 +1905,7 @@ export type DecisioneProcedimentoUncheckedUpdateWithoutDocumentoInput = {
   effectVersion?: Prisma.IntFieldUpdateOperationsInput | number
   statoConcessionePrecedente?: Prisma.NullableEnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione | null
   statoConcessioneSuccessivo?: Prisma.NullableEnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione | null
-  registeredByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  registeredByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1932,7 +1932,7 @@ export type DecisioneProcedimentoUncheckedUpdateManyWithoutDocumentoInput = {
   effectVersion?: Prisma.IntFieldUpdateOperationsInput | number
   statoConcessionePrecedente?: Prisma.NullableEnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione | null
   statoConcessioneSuccessivo?: Prisma.NullableEnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione | null
-  registeredByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  registeredByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1969,7 +1969,7 @@ export type DecisioneProcedimentoSelect<ExtArgs extends runtime.Types.Extensions
   procedimento?: boolean | Prisma.ProcedimentoDefaultArgs<ExtArgs>
   concessione?: boolean | Prisma.DecisioneProcedimento$concessioneArgs<ExtArgs>
   documento?: boolean | Prisma.DecisioneProcedimento$documentoArgs<ExtArgs>
-  registeredByUser?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  registeredByUser?: boolean | Prisma.DecisioneProcedimento$registeredByUserArgs<ExtArgs>
 }, ExtArgs["result"]["decisioneProcedimento"]>
 
 export type DecisioneProcedimentoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -2002,7 +2002,7 @@ export type DecisioneProcedimentoSelectCreateManyAndReturn<ExtArgs extends runti
   procedimento?: boolean | Prisma.ProcedimentoDefaultArgs<ExtArgs>
   concessione?: boolean | Prisma.DecisioneProcedimento$concessioneArgs<ExtArgs>
   documento?: boolean | Prisma.DecisioneProcedimento$documentoArgs<ExtArgs>
-  registeredByUser?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  registeredByUser?: boolean | Prisma.DecisioneProcedimento$registeredByUserArgs<ExtArgs>
 }, ExtArgs["result"]["decisioneProcedimento"]>
 
 export type DecisioneProcedimentoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -2035,7 +2035,7 @@ export type DecisioneProcedimentoSelectUpdateManyAndReturn<ExtArgs extends runti
   procedimento?: boolean | Prisma.ProcedimentoDefaultArgs<ExtArgs>
   concessione?: boolean | Prisma.DecisioneProcedimento$concessioneArgs<ExtArgs>
   documento?: boolean | Prisma.DecisioneProcedimento$documentoArgs<ExtArgs>
-  registeredByUser?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  registeredByUser?: boolean | Prisma.DecisioneProcedimento$registeredByUserArgs<ExtArgs>
 }, ExtArgs["result"]["decisioneProcedimento"]>
 
 export type DecisioneProcedimentoSelectScalar = {
@@ -2072,21 +2072,21 @@ export type DecisioneProcedimentoInclude<ExtArgs extends runtime.Types.Extension
   procedimento?: boolean | Prisma.ProcedimentoDefaultArgs<ExtArgs>
   concessione?: boolean | Prisma.DecisioneProcedimento$concessioneArgs<ExtArgs>
   documento?: boolean | Prisma.DecisioneProcedimento$documentoArgs<ExtArgs>
-  registeredByUser?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  registeredByUser?: boolean | Prisma.DecisioneProcedimento$registeredByUserArgs<ExtArgs>
 }
 export type DecisioneProcedimentoIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   ente?: boolean | Prisma.DecisioneProcedimento$enteArgs<ExtArgs>
   procedimento?: boolean | Prisma.ProcedimentoDefaultArgs<ExtArgs>
   concessione?: boolean | Prisma.DecisioneProcedimento$concessioneArgs<ExtArgs>
   documento?: boolean | Prisma.DecisioneProcedimento$documentoArgs<ExtArgs>
-  registeredByUser?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  registeredByUser?: boolean | Prisma.DecisioneProcedimento$registeredByUserArgs<ExtArgs>
 }
 export type DecisioneProcedimentoIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   ente?: boolean | Prisma.DecisioneProcedimento$enteArgs<ExtArgs>
   procedimento?: boolean | Prisma.ProcedimentoDefaultArgs<ExtArgs>
   concessione?: boolean | Prisma.DecisioneProcedimento$concessioneArgs<ExtArgs>
   documento?: boolean | Prisma.DecisioneProcedimento$documentoArgs<ExtArgs>
-  registeredByUser?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  registeredByUser?: boolean | Prisma.DecisioneProcedimento$registeredByUserArgs<ExtArgs>
 }
 
 export type $DecisioneProcedimentoPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2096,7 +2096,7 @@ export type $DecisioneProcedimentoPayload<ExtArgs extends runtime.Types.Extensio
     procedimento: Prisma.$ProcedimentoPayload<ExtArgs>
     concessione: Prisma.$ConcessionePayload<ExtArgs> | null
     documento: Prisma.$DocumentoPayload<ExtArgs> | null
-    registeredByUser: Prisma.$UserPayload<ExtArgs>
+    registeredByUser: Prisma.$UserPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2121,7 +2121,7 @@ export type $DecisioneProcedimentoPayload<ExtArgs extends runtime.Types.Extensio
     effectVersion: number
     statoConcessionePrecedente: $Enums.StatoConcessione | null
     statoConcessioneSuccessivo: $Enums.StatoConcessione | null
-    registeredByUserId: string
+    registeredByUserId: string | null
     idempotencyKey: string
     createdAt: Date
   }, ExtArgs["result"]["decisioneProcedimento"]>
@@ -2522,7 +2522,7 @@ export interface Prisma__DecisioneProcedimentoClient<T, Null = never, ExtArgs ex
   procedimento<T extends Prisma.ProcedimentoDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProcedimentoDefaultArgs<ExtArgs>>): Prisma.Prisma__ProcedimentoClient<runtime.Types.Result.GetResult<Prisma.$ProcedimentoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   concessione<T extends Prisma.DecisioneProcedimento$concessioneArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DecisioneProcedimento$concessioneArgs<ExtArgs>>): Prisma.Prisma__ConcessioneClient<runtime.Types.Result.GetResult<Prisma.$ConcessionePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   documento<T extends Prisma.DecisioneProcedimento$documentoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DecisioneProcedimento$documentoArgs<ExtArgs>>): Prisma.Prisma__DocumentoClient<runtime.Types.Result.GetResult<Prisma.$DocumentoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  registeredByUser<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  registeredByUser<T extends Prisma.DecisioneProcedimento$registeredByUserArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DecisioneProcedimento$registeredByUserArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3032,6 +3032,25 @@ export type DecisioneProcedimento$documentoArgs<ExtArgs extends runtime.Types.Ex
    */
   include?: Prisma.DocumentoInclude<ExtArgs> | null
   where?: Prisma.DocumentoWhereInput
+}
+
+/**
+ * DecisioneProcedimento.registeredByUser
+ */
+export type DecisioneProcedimento$registeredByUserArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

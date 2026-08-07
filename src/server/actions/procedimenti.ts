@@ -1026,11 +1026,13 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
     throw new Error("Utente autenticato non disponibile.");
   }
 
+  const persistedUserId = resolveAssignmentRegisteredByUserId(currentUser.id);
+
   if (!canRegisterProcedimentoDecision(role)) {
     await auditFailure({
       azione: "AUTHZ_DENIED",
       entita: "DecisioneProcedimento",
-      actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+      actor: { userId: persistedUserId, userEmail: currentUser.email, userRole: role },
       metadata: {
         actionType: "PROCEDIMENTO_DECISION_FINALIZE",
         reason: "ROLE_NOT_ALLOWED",
@@ -1063,7 +1065,7 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
     await auditFailure({
       azione: "PROCEDIMENTO_DECISION_FINALIZE",
       entita: "DecisioneProcedimento",
-      actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+      actor: { userId: persistedUserId, userEmail: currentUser.email, userRole: role },
       metadata: {
         reason: "VALIDATION_ERROR",
         issue: parsed.error.issues[0]?.message ?? "Dati decisione non validi.",
@@ -1109,7 +1111,7 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
     await auditFailure({
       azione: "PROCEDIMENTO_DECISION_FINALIZE",
       entita: "DecisioneProcedimento",
-      actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+      actor: { userId: persistedUserId, userEmail: currentUser.email, userRole: role },
       metadata: {
         reason: "PROCEDIMENTO_NOT_FOUND",
       },
@@ -1130,7 +1132,7 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
         entitaId: procedimento.id,
         concessioneId: procedimento.concessioneId,
         enteId: procedimento.concessione.enteId,
-        actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+        actor: { userId: persistedUserId, userEmail: currentUser.email, userRole: role },
         metadata: {
           actionType: "PROCEDIMENTO_DECISION_FINALIZE",
           reason: error instanceof Error ? error.message : "TENANT_WRITE_DENIED",
@@ -1295,7 +1297,7 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
           effettoTitolo: outcome.effettoTitolo,
           statoConcessionePrecedente: latest.concessione?.stato ?? null,
           statoConcessioneSuccessivo: outcome.statoConcessioneSuccessivo,
-          registeredByUserId: currentUser?.id ?? "",
+          registeredByUserId: persistedUserId,
           idempotencyKey,
         },
         select: {
@@ -1338,7 +1340,7 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
             adottanteNome: normalizeOptionalString(parsed.data.adottanteNome),
             adottanteQualifica: normalizeOptionalString(parsed.data.adottanteQualifica),
             scostamentoDaIstruttoria: parsed.data.scostamentoDaIstruttoria,
-            registeredByUserId: currentUser.id,
+            registeredByUserId: persistedUserId,
             statoConcessionePrecedente: procedimento.concessione.stato,
             statoConcessioneSuccessivo: outcome.statoConcessioneSuccessivo,
             dataEfficacia: dataEfficacia.toISOString(),
@@ -1363,7 +1365,7 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
             concessioneId: procedimento.concessioneId,
             esito: "SUCCESS",
             actor: {
-              userId: currentUser.id,
+              userId: persistedUserId,
               userEmail: currentUser.email,
               userRole: role,
             },
@@ -1371,7 +1373,7 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
           });
 
           return {
-            userId: currentUser.id,
+            userId: persistedUserId,
             userEmail: currentUser.email,
             userRole: role,
             enteId: procedimento.concessione.enteId,
@@ -1507,7 +1509,7 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
         entitaId: existing.id,
         concessioneId: existing.concessioneId,
         enteId: existing.enteId,
-        actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+        actor: { userId: persistedUserId, userEmail: currentUser.email, userRole: role },
         metadata: sanitizeMetadata({
           idempotentReplay: true,
           procedimentoId: procedimento.id,
@@ -1531,7 +1533,7 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
         entitaId: procedimento.id,
         concessioneId: procedimento.concessioneId,
         enteId: procedimento.concessione.enteId,
-        actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+        actor: { userId: persistedUserId, userEmail: currentUser.email, userRole: role },
         metadata: {
           reason: "FINALIZATION_FAILED",
           decisionType: parsed.data.decisionType,
@@ -1566,7 +1568,7 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
       entitaId: createdDecisionId,
       concessioneId: createdDecisionConcessioneId,
       enteId: createdDecisionEnteId,
-      actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+      actor: { userId: persistedUserId, userEmail: currentUser.email, userRole: role },
       metadata: sanitizeMetadata({
         dataEfficacia: dataEfficacia.toISOString(),
         note: "Decisione registrata: effetto previsto futuro non ancora applicato.",
@@ -1582,7 +1584,7 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
       entitaId: createdDecisionId,
       concessioneId: createdDecisionConcessioneId,
       enteId: createdDecisionEnteId,
-      actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+      actor: { userId: persistedUserId, userEmail: currentUser.email, userRole: role },
       metadata: sanitizeMetadata({
         dataEfficacia: dataEfficacia.toISOString(),
         note: "Effetto pronto per applicazione tecnica separata.",
@@ -1595,7 +1597,7 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
       applyResult = await applyRegisteredDecisionEffect({
         decisioneId: createdDecisionId,
         actor: {
-          userId: currentUser.id,
+          userId: persistedUserId,
           userEmail: currentUser.email,
           userRole: role,
         },
@@ -1650,7 +1652,7 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
         concessioneId: createdDecisionConcessioneId,
         enteId: createdDecisionEnteId,
         actor: {
-          userId: currentUser.id,
+          userId: persistedUserId,
           userEmail: currentUser.email,
           userRole: role,
         },

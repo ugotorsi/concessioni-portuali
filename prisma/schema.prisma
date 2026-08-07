@@ -1267,7 +1267,7 @@ model DecisioneProcedimento {
   effectVersion                     Int                       @default(0)
   statoConcessionePrecedente        StatoConcessione?
   statoConcessioneSuccessivo        StatoConcessione?
-  registeredByUserId                String
+  registeredByUserId                String?
   idempotencyKey                    String                    @unique
   createdAt                         DateTime                  @default(now())
 
@@ -1275,7 +1275,7 @@ model DecisioneProcedimento {
   procedimento     Procedimento @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
   concessione      Concessione? @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
   documento        Documento?   @relation(fields: [documentoId], references: [id], onDelete: SetNull)
-  registeredByUser User         @relation("DecisioneProcedimentoRegisteredBy", fields: [registeredByUserId], references: [id], onDelete: Restrict)
+  registeredByUser User?        @relation("DecisioneProcedimentoRegisteredBy", fields: [registeredByUserId], references: [id], onDelete: Restrict)
 
   @@index([enteId])
   @@index([procedimentoId])

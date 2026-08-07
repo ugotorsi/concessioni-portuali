@@ -726,10 +726,12 @@ export type UserCreateNestedOneWithoutDecisioniProcedimentoRegistrateInput = {
   connect?: Prisma.UserWhereUniqueInput
 }
 
-export type UserUpdateOneRequiredWithoutDecisioniProcedimentoRegistrateNestedInput = {
+export type UserUpdateOneWithoutDecisioniProcedimentoRegistrateNestedInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutDecisioniProcedimentoRegistrateInput, Prisma.UserUncheckedCreateWithoutDecisioniProcedimentoRegistrateInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutDecisioniProcedimentoRegistrateInput
   upsert?: Prisma.UserUpsertWithoutDecisioniProcedimentoRegistrateInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDecisioniProcedimentoRegistrateInput, Prisma.UserUpdateWithoutDecisioniProcedimentoRegistrateInput>, Prisma.UserUncheckedUpdateWithoutDecisioniProcedimentoRegistrateInput>
 }
