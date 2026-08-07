@@ -182,6 +182,12 @@ describe("procedimento responsibility assignments", () => {
       unitaOrganizzativa: "Ufficio Demanio",
       decorrenza: new Date("2026-08-01T00:00:00.000Z"),
     });
+    expect(auditSuccessMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        azione: "PROCEDIMENTO_RESPONSABILE_RIASSEGNATO",
+        actor: expect.objectContaining({ userId: "user-1" }),
+      }),
+    );
   });
 
   it("riassegnazione non collega il technical admin Preview a User", async () => {
@@ -198,6 +204,12 @@ describe("procedimento responsibility assignments", () => {
       responsabileNome: "Lucia Bianchi",
       registeredByUserId: null,
     });
+    expect(auditSuccessMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        azione: "PROCEDIMENTO_RESPONSABILE_RIASSEGNATO",
+        actor: expect.objectContaining({ userId: null }),
+      }),
+    );
   });
 
   it("bootstrap legacy P0-A conserva il responsabile precedente e registra solo la nuova assegnazione", async () => {

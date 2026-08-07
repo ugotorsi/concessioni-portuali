@@ -792,7 +792,7 @@ export async function reassignProcedimentoResponsabileAction(formData: FormData)
         entita: "Procedimento",
         entitaId: procedimento.id,
         concessioneId: procedimento.concessioneId,
-        actor: { userId: currentUser.id, userEmail: currentUser.email, userRole: role },
+        actor: { userId: registeredByUserId, userEmail: currentUser.email, userRole: role },
       });
     }
   } catch (error) {
@@ -807,7 +807,7 @@ export async function reassignProcedimentoResponsabileAction(formData: FormData)
     entita: "Procedimento",
     entitaId: procedimento.id,
     concessioneId: procedimento.concessioneId,
-    actor: { userId: currentUser.id, userEmail: currentUser.email, userRole: role },
+    actor: { userId: registeredByUserId, userEmail: currentUser.email, userRole: role },
     metadata: {
       responsabileNome: parsed.data.responsabileNome,
       unitaOrganizzativa: parsed.data.unitaOrganizzativa,
