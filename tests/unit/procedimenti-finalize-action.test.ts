@@ -95,10 +95,25 @@ function buildProcedimento(input?: Partial<{
   checklistContraddittorioCompleta: boolean;
   concessioneStato: string;
   hasDecision: boolean;
+  responsabileProcedimentoNome: string | null;
+  unitaOrganizzativaResponsabile: string | null;
+  responsabileAssegnatoAt: Date | null;
 }>) {
   return {
     id: "proc-1",
     concessioneId: "con-1",
+    responsabileProcedimentoNome:
+      input && "responsabileProcedimentoNome" in input
+        ? (input.responsabileProcedimentoNome ?? null)
+        : "Responsabile Demo",
+    unitaOrganizzativaResponsabile:
+      input && "unitaOrganizzativaResponsabile" in input
+        ? (input.unitaOrganizzativaResponsabile ?? null)
+        : "Ufficio Demanio",
+    responsabileAssegnatoAt:
+      input && "responsabileAssegnatoAt" in input
+        ? (input.responsabileAssegnatoAt ?? null)
+        : new Date("2026-06-01T00:00:00.000Z"),
     tipologia: input?.tipologia ?? "AVVIO_DECADENZA",
     stato: input?.stato ?? "IN_CORSO",
     checklistContraddittorioCompleta: input?.checklistContraddittorioCompleta ?? true,
@@ -117,12 +132,16 @@ function baseFormData() {
   fd.set("procedimentoId", "proc-1");
   fd.set("decisionType", "DECADENZA_DICHIARATA");
   fd.set("numeroAtto", "DEC-2026-001");
+  fd.set("protocolloAtto", "PROT-2026-001");
   fd.set("dataAtto", "2026-07-01");
   fd.set("dataEfficacia", "2026-07-02");
   fd.set("organoCompetente", "Comitato di Gestione");
+  fd.set("adottanteNome", "Presidente Comitato");
+  fd.set("adottanteQualifica", "Presidente");
+  fd.set("scostamentoDaIstruttoria", "false");
   fd.set("motivazioneSintetica", "Grave inadempimento accertato.");
   fd.set("documentoId", "doc-1");
-  fd.set("confermaFinalizzazione", "CONFIRMO_DECISIONE");
+  fd.set("confermaFinalizzazione", "CONFIRMO_REGISTRAZIONE_ATTO");
   return fd;
 }
 
@@ -145,10 +164,15 @@ function existingEquivalentDecision(overrides?: Partial<Record<string, unknown>>
     concessioneId: "con-1",
     tipoDecisione: "DECADENZA_DICHIARATA",
     numeroAtto: "DEC-2026-001",
+    protocolloAtto: "PROT-2026-001",
     dataAtto: new Date("2026-07-01T00:00:00.000Z"),
     dataEfficacia: new Date("2026-07-02T00:00:00.000Z"),
     documentoId: "doc-1",
     organoCompetente: "Comitato di Gestione",
+    adottanteNome: "Presidente Comitato",
+    adottanteQualifica: "Presidente",
+    scostamentoDaIstruttoria: false,
+    motivazioneScostamentoIstruttoria: null,
     effettoTitolo: "CONCESSIONE_DECADUTA",
     statoConcessionePrecedente: "ATTIVA",
     statoConcessioneSuccessivo: "DECADUTA",
@@ -225,7 +249,42 @@ describe("finalizeProcedimentoDecisionAction", () => {
     const fd = baseFormData();
     fd.delete("documentoId");
 
-    await expect(finalizeProcedimentoDecisionAction(fd)).rejects.toThrow(/documento/i);
+    await expect(finalizeProcedimentoDecisionAction(fd)).rejects.toThrow("DOCUMENTO_ATTO_MANCANTE");
+    expect(prismaMock.$transaction).not.toHaveBeenCalled();
+  });
+
+  it("rifiuta registrazione se manca responsabile procedimento", async () => {
+    prismaMock.procedimento.findUnique.mockResolvedValue(
+      buildProcedimento({ responsabileProcedimentoNome: null }),
+    );
+
+    await expect(finalizeProcedimentoDecisionAction(baseFormData())).rejects.toThrow("RESPONSABILE_PROCEDIMENTO_MANCANTE");
+    expect(prismaMock.$transaction).not.toHaveBeenCalled();
+  });
+
+  it("rifiuta registrazione se manca unita organizzativa responsabile", async () => {
+    prismaMock.procedimento.findUnique.mockResolvedValue(
+      buildProcedimento({ unitaOrganizzativaResponsabile: null }),
+    );
+
+    await expect(finalizeProcedimentoDecisionAction(baseFormData())).rejects.toThrow("RESPONSABILE_PROCEDIMENTO_MANCANTE");
+    expect(prismaMock.$transaction).not.toHaveBeenCalled();
+  });
+
+  it("rifiuta registrazione se manca protocollo atto", async () => {
+    const fd = baseFormData();
+    fd.delete("protocolloAtto");
+
+    await expect(finalizeProcedimentoDecisionAction(fd)).rejects.toThrow("PROTOCOLLO_ATTO_MANCANTE");
+    expect(prismaMock.$transaction).not.toHaveBeenCalled();
+  });
+
+  it("rifiuta se scostamento dichiarato senza motivazione", async () => {
+    const fd = baseFormData();
+    fd.set("scostamentoDaIstruttoria", "true");
+    fd.set("motivazioneScostamentoIstruttoria", "   ");
+
+    await expect(finalizeProcedimentoDecisionAction(fd)).rejects.toThrow("MOTIVAZIONE_SCOSTAMENTO_ISTRUTTORIA_MANCANTE");
     expect(prismaMock.$transaction).not.toHaveBeenCalled();
   });
 
@@ -259,7 +318,6 @@ describe("finalizeProcedimentoDecisionAction", () => {
   it("archiviazione non aggiorna concessione", async () => {
     const fd = baseFormData();
     fd.set("decisionType", "ARCHIVIAZIONE");
-    fd.delete("documentoId");
 
     await expect(finalizeProcedimentoDecisionAction(fd)).rejects.toThrow("REDIRECT:/procedimenti/proc-1");
 
@@ -276,7 +334,6 @@ describe("finalizeProcedimentoDecisionAction", () => {
 
     const fd = baseFormData();
     fd.set("decisionType", "CHIUSURA_SENZA_EFFETTO");
-    fd.delete("documentoId");
 
     await expect(finalizeProcedimentoDecisionAction(fd)).rejects.toThrow("REDIRECT:/procedimenti/proc-1");
 
@@ -408,5 +465,58 @@ describe("finalizeProcedimentoDecisionAction", () => {
       statoEffetto: "PRONTO",
       codiceErrore: "CONCESSIONE_STATE_CONFLICT",
     });
+  });
+
+  it("registeredByUserId deriva da currentUser e non da adottanteNome", async () => {
+    const fd = baseFormData();
+    fd.set("adottanteNome", "Soggetto Esterno");
+    fd.set("adottanteQualifica", "Autorita Competente");
+
+    await expect(finalizeProcedimentoDecisionAction(fd)).rejects.toThrow("REDIRECT:/procedimenti/proc-1");
+
+    expect(txMock.decisioneProcedimento.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          registeredByUserId: "user-1",
+          adottanteNome: "Soggetto Esterno",
+          adottanteQualifica: "Autorita Competente",
+        }),
+      }),
+    );
+  });
+
+  it("ADMIN puo registrare il provvedimento", async () => {
+    requireRoleMock.mockResolvedValue("ADMIN");
+    getCurrentUserMock.mockResolvedValue({
+      id: "admin-1",
+      email: "admin@demo.local",
+      role: "ADMIN",
+    });
+
+    await expect(finalizeProcedimentoDecisionAction(baseFormData())).rejects.toThrow("REDIRECT:/procedimenti/proc-1");
+    expect(txMock.decisioneProcedimento.create).toHaveBeenCalled();
+  });
+
+  it("GIURIDICO puo registrare il provvedimento", async () => {
+    requireRoleMock.mockResolvedValue("GIURIDICO");
+
+    await expect(finalizeProcedimentoDecisionAction(baseFormData())).rejects.toThrow("REDIRECT:/procedimenti/proc-1");
+    expect(txMock.decisioneProcedimento.create).toHaveBeenCalled();
+  });
+
+  it("organo competente resta dato dichiarato e non deriva dal ruolo", async () => {
+    requireRoleMock.mockResolvedValue("ADMIN");
+    const fd = baseFormData();
+    fd.set("organoCompetente", "Comitato Portuale Straordinario");
+
+    await expect(finalizeProcedimentoDecisionAction(fd)).rejects.toThrow("REDIRECT:/procedimenti/proc-1");
+
+    expect(txMock.decisioneProcedimento.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          organoCompetente: "Comitato Portuale Straordinario",
+        }),
+      }),
+    );
   });
 });

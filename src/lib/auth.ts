@@ -143,8 +143,12 @@ export function canValidateReport(role: DemoRole): boolean {
   return ["ADMIN", "GIURIDICO"].includes(role);
 }
 
-export function canFinalizeProcedimentoDecision(role: DemoRole): boolean {
+export function canRegisterProcedimentoDecision(role: DemoRole): boolean {
   return ["ADMIN", "GIURIDICO"].includes(role);
+}
+
+export function canFinalizeProcedimentoDecision(role: DemoRole): boolean {
+  return canRegisterProcedimentoDecision(role);
 }
 
 export function canViewNormativa(_role: DemoRole): boolean {

@@ -38,6 +38,10 @@ export type ProcedimentoMinAggregateOutputType = {
   id: string | null
   concessioneId: string | null
   criticitaId: string | null
+  responsabileProcedimentoNome: string | null
+  responsabileProcedimentoEmail: string | null
+  unitaOrganizzativaResponsabile: string | null
+  responsabileAssegnatoAt: Date | null
   tipologia: $Enums.TipologiaProcedimento | null
   origineProcedimento: $Enums.OrigineProcedimento | null
   procedimentoUfficio: boolean | null
@@ -81,6 +85,10 @@ export type ProcedimentoMaxAggregateOutputType = {
   id: string | null
   concessioneId: string | null
   criticitaId: string | null
+  responsabileProcedimentoNome: string | null
+  responsabileProcedimentoEmail: string | null
+  unitaOrganizzativaResponsabile: string | null
+  responsabileAssegnatoAt: Date | null
   tipologia: $Enums.TipologiaProcedimento | null
   origineProcedimento: $Enums.OrigineProcedimento | null
   procedimentoUfficio: boolean | null
@@ -124,6 +132,10 @@ export type ProcedimentoCountAggregateOutputType = {
   id: number
   concessioneId: number
   criticitaId: number
+  responsabileProcedimentoNome: number
+  responsabileProcedimentoEmail: number
+  unitaOrganizzativaResponsabile: number
+  responsabileAssegnatoAt: number
   tipologia: number
   origineProcedimento: number
   procedimentoUfficio: number
@@ -177,6 +189,10 @@ export type ProcedimentoMinAggregateInputType = {
   id?: true
   concessioneId?: true
   criticitaId?: true
+  responsabileProcedimentoNome?: true
+  responsabileProcedimentoEmail?: true
+  unitaOrganizzativaResponsabile?: true
+  responsabileAssegnatoAt?: true
   tipologia?: true
   origineProcedimento?: true
   procedimentoUfficio?: true
@@ -220,6 +236,10 @@ export type ProcedimentoMaxAggregateInputType = {
   id?: true
   concessioneId?: true
   criticitaId?: true
+  responsabileProcedimentoNome?: true
+  responsabileProcedimentoEmail?: true
+  unitaOrganizzativaResponsabile?: true
+  responsabileAssegnatoAt?: true
   tipologia?: true
   origineProcedimento?: true
   procedimentoUfficio?: true
@@ -263,6 +283,10 @@ export type ProcedimentoCountAggregateInputType = {
   id?: true
   concessioneId?: true
   criticitaId?: true
+  responsabileProcedimentoNome?: true
+  responsabileProcedimentoEmail?: true
+  unitaOrganizzativaResponsabile?: true
+  responsabileAssegnatoAt?: true
   tipologia?: true
   origineProcedimento?: true
   procedimentoUfficio?: true
@@ -393,6 +417,10 @@ export type ProcedimentoGroupByOutputType = {
   id: string
   concessioneId: string
   criticitaId: string | null
+  responsabileProcedimentoNome: string | null
+  responsabileProcedimentoEmail: string | null
+  unitaOrganizzativaResponsabile: string | null
+  responsabileAssegnatoAt: Date | null
   tipologia: $Enums.TipologiaProcedimento
   origineProcedimento: $Enums.OrigineProcedimento
   procedimentoUfficio: boolean
@@ -459,6 +487,10 @@ export type ProcedimentoWhereInput = {
   id?: Prisma.StringFilter<"Procedimento"> | string
   concessioneId?: Prisma.StringFilter<"Procedimento"> | string
   criticitaId?: Prisma.StringNullableFilter<"Procedimento"> | string | null
+  responsabileProcedimentoNome?: Prisma.StringNullableFilter<"Procedimento"> | string | null
+  responsabileProcedimentoEmail?: Prisma.StringNullableFilter<"Procedimento"> | string | null
+  unitaOrganizzativaResponsabile?: Prisma.StringNullableFilter<"Procedimento"> | string | null
+  responsabileAssegnatoAt?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFilter<"Procedimento"> | $Enums.TipologiaProcedimento
   origineProcedimento?: Prisma.EnumOrigineProcedimentoFilter<"Procedimento"> | $Enums.OrigineProcedimento
   procedimentoUfficio?: Prisma.BoolFilter<"Procedimento"> | boolean
@@ -507,6 +539,10 @@ export type ProcedimentoOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrder
   criticitaId?: Prisma.SortOrderInput | Prisma.SortOrder
+  responsabileProcedimentoNome?: Prisma.SortOrderInput | Prisma.SortOrder
+  responsabileProcedimentoEmail?: Prisma.SortOrderInput | Prisma.SortOrder
+  unitaOrganizzativaResponsabile?: Prisma.SortOrderInput | Prisma.SortOrder
+  responsabileAssegnatoAt?: Prisma.SortOrderInput | Prisma.SortOrder
   tipologia?: Prisma.SortOrder
   origineProcedimento?: Prisma.SortOrder
   procedimentoUfficio?: Prisma.SortOrder
@@ -558,6 +594,10 @@ export type ProcedimentoWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.ProcedimentoWhereInput | Prisma.ProcedimentoWhereInput[]
   concessioneId?: Prisma.StringFilter<"Procedimento"> | string
   criticitaId?: Prisma.StringNullableFilter<"Procedimento"> | string | null
+  responsabileProcedimentoNome?: Prisma.StringNullableFilter<"Procedimento"> | string | null
+  responsabileProcedimentoEmail?: Prisma.StringNullableFilter<"Procedimento"> | string | null
+  unitaOrganizzativaResponsabile?: Prisma.StringNullableFilter<"Procedimento"> | string | null
+  responsabileAssegnatoAt?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFilter<"Procedimento"> | $Enums.TipologiaProcedimento
   origineProcedimento?: Prisma.EnumOrigineProcedimentoFilter<"Procedimento"> | $Enums.OrigineProcedimento
   procedimentoUfficio?: Prisma.BoolFilter<"Procedimento"> | boolean
@@ -606,6 +646,10 @@ export type ProcedimentoOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrder
   criticitaId?: Prisma.SortOrderInput | Prisma.SortOrder
+  responsabileProcedimentoNome?: Prisma.SortOrderInput | Prisma.SortOrder
+  responsabileProcedimentoEmail?: Prisma.SortOrderInput | Prisma.SortOrder
+  unitaOrganizzativaResponsabile?: Prisma.SortOrderInput | Prisma.SortOrder
+  responsabileAssegnatoAt?: Prisma.SortOrderInput | Prisma.SortOrder
   tipologia?: Prisma.SortOrder
   origineProcedimento?: Prisma.SortOrder
   procedimentoUfficio?: Prisma.SortOrder
@@ -657,6 +701,10 @@ export type ProcedimentoScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Procedimento"> | string
   concessioneId?: Prisma.StringWithAggregatesFilter<"Procedimento"> | string
   criticitaId?: Prisma.StringNullableWithAggregatesFilter<"Procedimento"> | string | null
+  responsabileProcedimentoNome?: Prisma.StringNullableWithAggregatesFilter<"Procedimento"> | string | null
+  responsabileProcedimentoEmail?: Prisma.StringNullableWithAggregatesFilter<"Procedimento"> | string | null
+  unitaOrganizzativaResponsabile?: Prisma.StringNullableWithAggregatesFilter<"Procedimento"> | string | null
+  responsabileAssegnatoAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Procedimento"> | Date | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoWithAggregatesFilter<"Procedimento"> | $Enums.TipologiaProcedimento
   origineProcedimento?: Prisma.EnumOrigineProcedimentoWithAggregatesFilter<"Procedimento"> | $Enums.OrigineProcedimento
   procedimentoUfficio?: Prisma.BoolWithAggregatesFilter<"Procedimento"> | boolean
@@ -698,6 +746,10 @@ export type ProcedimentoScalarWhereWithAggregatesInput = {
 
 export type ProcedimentoCreateInput = {
   id?: string
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
   tipologia: $Enums.TipologiaProcedimento
   origineProcedimento?: $Enums.OrigineProcedimento
   procedimentoUfficio?: boolean
@@ -746,6 +798,10 @@ export type ProcedimentoUncheckedCreateInput = {
   id?: string
   concessioneId: string
   criticitaId?: string | null
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
   tipologia: $Enums.TipologiaProcedimento
   origineProcedimento?: $Enums.OrigineProcedimento
   procedimentoUfficio?: boolean
@@ -790,6 +846,10 @@ export type ProcedimentoUncheckedCreateInput = {
 
 export type ProcedimentoUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
   origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
   procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -838,6 +898,10 @@ export type ProcedimentoUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.StringFieldUpdateOperationsInput | string
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
   origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
   procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -884,6 +948,10 @@ export type ProcedimentoCreateManyInput = {
   id?: string
   concessioneId: string
   criticitaId?: string | null
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
   tipologia: $Enums.TipologiaProcedimento
   origineProcedimento?: $Enums.OrigineProcedimento
   procedimentoUfficio?: boolean
@@ -925,6 +993,10 @@ export type ProcedimentoCreateManyInput = {
 
 export type ProcedimentoUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
   origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
   procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -968,6 +1040,10 @@ export type ProcedimentoUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.StringFieldUpdateOperationsInput | string
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
   origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
   procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1021,6 +1097,10 @@ export type ProcedimentoCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrder
   criticitaId?: Prisma.SortOrder
+  responsabileProcedimentoNome?: Prisma.SortOrder
+  responsabileProcedimentoEmail?: Prisma.SortOrder
+  unitaOrganizzativaResponsabile?: Prisma.SortOrder
+  responsabileAssegnatoAt?: Prisma.SortOrder
   tipologia?: Prisma.SortOrder
   origineProcedimento?: Prisma.SortOrder
   procedimentoUfficio?: Prisma.SortOrder
@@ -1068,6 +1148,10 @@ export type ProcedimentoMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrder
   criticitaId?: Prisma.SortOrder
+  responsabileProcedimentoNome?: Prisma.SortOrder
+  responsabileProcedimentoEmail?: Prisma.SortOrder
+  unitaOrganizzativaResponsabile?: Prisma.SortOrder
+  responsabileAssegnatoAt?: Prisma.SortOrder
   tipologia?: Prisma.SortOrder
   origineProcedimento?: Prisma.SortOrder
   procedimentoUfficio?: Prisma.SortOrder
@@ -1111,6 +1195,10 @@ export type ProcedimentoMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrder
   criticitaId?: Prisma.SortOrder
+  responsabileProcedimentoNome?: Prisma.SortOrder
+  responsabileProcedimentoEmail?: Prisma.SortOrder
+  unitaOrganizzativaResponsabile?: Prisma.SortOrder
+  responsabileAssegnatoAt?: Prisma.SortOrder
   tipologia?: Prisma.SortOrder
   origineProcedimento?: Prisma.SortOrder
   procedimentoUfficio?: Prisma.SortOrder
@@ -1320,6 +1408,10 @@ export type ProcedimentoUpdateOneWithoutNormaImpattiNestedInput = {
 
 export type ProcedimentoCreateWithoutConcessioneInput = {
   id?: string
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
   tipologia: $Enums.TipologiaProcedimento
   origineProcedimento?: $Enums.OrigineProcedimento
   procedimentoUfficio?: boolean
@@ -1366,6 +1458,10 @@ export type ProcedimentoCreateWithoutConcessioneInput = {
 export type ProcedimentoUncheckedCreateWithoutConcessioneInput = {
   id?: string
   criticitaId?: string | null
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
   tipologia: $Enums.TipologiaProcedimento
   origineProcedimento?: $Enums.OrigineProcedimento
   procedimentoUfficio?: boolean
@@ -1441,6 +1537,10 @@ export type ProcedimentoScalarWhereInput = {
   id?: Prisma.StringFilter<"Procedimento"> | string
   concessioneId?: Prisma.StringFilter<"Procedimento"> | string
   criticitaId?: Prisma.StringNullableFilter<"Procedimento"> | string | null
+  responsabileProcedimentoNome?: Prisma.StringNullableFilter<"Procedimento"> | string | null
+  responsabileProcedimentoEmail?: Prisma.StringNullableFilter<"Procedimento"> | string | null
+  unitaOrganizzativaResponsabile?: Prisma.StringNullableFilter<"Procedimento"> | string | null
+  responsabileAssegnatoAt?: Prisma.DateTimeNullableFilter<"Procedimento"> | Date | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFilter<"Procedimento"> | $Enums.TipologiaProcedimento
   origineProcedimento?: Prisma.EnumOrigineProcedimentoFilter<"Procedimento"> | $Enums.OrigineProcedimento
   procedimentoUfficio?: Prisma.BoolFilter<"Procedimento"> | boolean
@@ -1482,6 +1582,10 @@ export type ProcedimentoScalarWhereInput = {
 
 export type ProcedimentoCreateWithoutCriticitaInput = {
   id?: string
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
   tipologia: $Enums.TipologiaProcedimento
   origineProcedimento?: $Enums.OrigineProcedimento
   procedimentoUfficio?: boolean
@@ -1528,6 +1632,10 @@ export type ProcedimentoCreateWithoutCriticitaInput = {
 export type ProcedimentoUncheckedCreateWithoutCriticitaInput = {
   id?: string
   concessioneId: string
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
   tipologia: $Enums.TipologiaProcedimento
   origineProcedimento?: $Enums.OrigineProcedimento
   procedimentoUfficio?: boolean
@@ -1598,6 +1706,10 @@ export type ProcedimentoUpdateManyWithWhereWithoutCriticitaInput = {
 
 export type ProcedimentoCreateWithoutDocumentiInput = {
   id?: string
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
   tipologia: $Enums.TipologiaProcedimento
   origineProcedimento?: $Enums.OrigineProcedimento
   procedimentoUfficio?: boolean
@@ -1645,6 +1757,10 @@ export type ProcedimentoUncheckedCreateWithoutDocumentiInput = {
   id?: string
   concessioneId: string
   criticitaId?: string | null
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
   tipologia: $Enums.TipologiaProcedimento
   origineProcedimento?: $Enums.OrigineProcedimento
   procedimentoUfficio?: boolean
@@ -1704,6 +1820,10 @@ export type ProcedimentoUpdateToOneWithWhereWithoutDocumentiInput = {
 
 export type ProcedimentoUpdateWithoutDocumentiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
   origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
   procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1751,6 +1871,10 @@ export type ProcedimentoUncheckedUpdateWithoutDocumentiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.StringFieldUpdateOperationsInput | string
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
   origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
   procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1794,6 +1918,10 @@ export type ProcedimentoUncheckedUpdateWithoutDocumentiInput = {
 
 export type ProcedimentoCreateWithoutDecisioneProcedimentoInput = {
   id?: string
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
   tipologia: $Enums.TipologiaProcedimento
   origineProcedimento?: $Enums.OrigineProcedimento
   procedimentoUfficio?: boolean
@@ -1841,6 +1969,10 @@ export type ProcedimentoUncheckedCreateWithoutDecisioneProcedimentoInput = {
   id?: string
   concessioneId: string
   criticitaId?: string | null
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
   tipologia: $Enums.TipologiaProcedimento
   origineProcedimento?: $Enums.OrigineProcedimento
   procedimentoUfficio?: boolean
@@ -1900,6 +2032,10 @@ export type ProcedimentoUpdateToOneWithWhereWithoutDecisioneProcedimentoInput = 
 
 export type ProcedimentoUpdateWithoutDecisioneProcedimentoInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
   origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
   procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1947,6 +2083,10 @@ export type ProcedimentoUncheckedUpdateWithoutDecisioneProcedimentoInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.StringFieldUpdateOperationsInput | string
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
   origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
   procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1990,6 +2130,10 @@ export type ProcedimentoUncheckedUpdateWithoutDecisioneProcedimentoInput = {
 
 export type ProcedimentoCreateWithoutNormaImpattiInput = {
   id?: string
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
   tipologia: $Enums.TipologiaProcedimento
   origineProcedimento?: $Enums.OrigineProcedimento
   procedimentoUfficio?: boolean
@@ -2037,6 +2181,10 @@ export type ProcedimentoUncheckedCreateWithoutNormaImpattiInput = {
   id?: string
   concessioneId: string
   criticitaId?: string | null
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
   tipologia: $Enums.TipologiaProcedimento
   origineProcedimento?: $Enums.OrigineProcedimento
   procedimentoUfficio?: boolean
@@ -2096,6 +2244,10 @@ export type ProcedimentoUpdateToOneWithWhereWithoutNormaImpattiInput = {
 
 export type ProcedimentoUpdateWithoutNormaImpattiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
   origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
   procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2143,6 +2295,10 @@ export type ProcedimentoUncheckedUpdateWithoutNormaImpattiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.StringFieldUpdateOperationsInput | string
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
   origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
   procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2187,6 +2343,10 @@ export type ProcedimentoUncheckedUpdateWithoutNormaImpattiInput = {
 export type ProcedimentoCreateManyConcessioneInput = {
   id?: string
   criticitaId?: string | null
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
   tipologia: $Enums.TipologiaProcedimento
   origineProcedimento?: $Enums.OrigineProcedimento
   procedimentoUfficio?: boolean
@@ -2228,6 +2388,10 @@ export type ProcedimentoCreateManyConcessioneInput = {
 
 export type ProcedimentoUpdateWithoutConcessioneInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
   origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
   procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2274,6 +2438,10 @@ export type ProcedimentoUpdateWithoutConcessioneInput = {
 export type ProcedimentoUncheckedUpdateWithoutConcessioneInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
   origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
   procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2319,6 +2487,10 @@ export type ProcedimentoUncheckedUpdateWithoutConcessioneInput = {
 export type ProcedimentoUncheckedUpdateManyWithoutConcessioneInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
   origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
   procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2361,6 +2533,10 @@ export type ProcedimentoUncheckedUpdateManyWithoutConcessioneInput = {
 export type ProcedimentoCreateManyCriticitaInput = {
   id?: string
   concessioneId: string
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
   tipologia: $Enums.TipologiaProcedimento
   origineProcedimento?: $Enums.OrigineProcedimento
   procedimentoUfficio?: boolean
@@ -2402,6 +2578,10 @@ export type ProcedimentoCreateManyCriticitaInput = {
 
 export type ProcedimentoUpdateWithoutCriticitaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
   origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
   procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2448,6 +2628,10 @@ export type ProcedimentoUpdateWithoutCriticitaInput = {
 export type ProcedimentoUncheckedUpdateWithoutCriticitaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.StringFieldUpdateOperationsInput | string
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
   origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
   procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2493,6 +2677,10 @@ export type ProcedimentoUncheckedUpdateWithoutCriticitaInput = {
 export type ProcedimentoUncheckedUpdateManyWithoutCriticitaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.StringFieldUpdateOperationsInput | string
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
   origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
   procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2576,6 +2764,10 @@ export type ProcedimentoSelect<ExtArgs extends runtime.Types.Extensions.Internal
   id?: boolean
   concessioneId?: boolean
   criticitaId?: boolean
+  responsabileProcedimentoNome?: boolean
+  responsabileProcedimentoEmail?: boolean
+  unitaOrganizzativaResponsabile?: boolean
+  responsabileAssegnatoAt?: boolean
   tipologia?: boolean
   origineProcedimento?: boolean
   procedimentoUfficio?: boolean
@@ -2625,6 +2817,10 @@ export type ProcedimentoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   id?: boolean
   concessioneId?: boolean
   criticitaId?: boolean
+  responsabileProcedimentoNome?: boolean
+  responsabileProcedimentoEmail?: boolean
+  unitaOrganizzativaResponsabile?: boolean
+  responsabileAssegnatoAt?: boolean
   tipologia?: boolean
   origineProcedimento?: boolean
   procedimentoUfficio?: boolean
@@ -2670,6 +2866,10 @@ export type ProcedimentoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   id?: boolean
   concessioneId?: boolean
   criticitaId?: boolean
+  responsabileProcedimentoNome?: boolean
+  responsabileProcedimentoEmail?: boolean
+  unitaOrganizzativaResponsabile?: boolean
+  responsabileAssegnatoAt?: boolean
   tipologia?: boolean
   origineProcedimento?: boolean
   procedimentoUfficio?: boolean
@@ -2715,6 +2915,10 @@ export type ProcedimentoSelectScalar = {
   id?: boolean
   concessioneId?: boolean
   criticitaId?: boolean
+  responsabileProcedimentoNome?: boolean
+  responsabileProcedimentoEmail?: boolean
+  unitaOrganizzativaResponsabile?: boolean
+  responsabileAssegnatoAt?: boolean
   tipologia?: boolean
   origineProcedimento?: boolean
   procedimentoUfficio?: boolean
@@ -2754,7 +2958,7 @@ export type ProcedimentoSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ProcedimentoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "concessioneId" | "criticitaId" | "tipologia" | "origineProcedimento" | "procedimentoUfficio" | "riferimentoNormativo" | "dataAvvio" | "dataScadenzaContraddittorio" | "dataProvvedimentoFinale" | "comunicazioneAvvioInviata" | "dataComunicazioneAvvio" | "termineMemorieGiorni" | "termineMemorieScadenza" | "memorieRicevute" | "dataRicezioneMemorie" | "audizioneRichiesta" | "audizioneSvolta" | "dataAudizione" | "sopralluogoIstruttorioSvolto" | "contestazioneFormaleInviata" | "dataContestazioneFormale" | "controdeduzioniValutate" | "motivazioneValutazione" | "propostaEsitoIstruttorio" | "preavvisoRigettoApplicabile" | "statoPreavvisoRigetto" | "dataPreavvisoRigetto" | "termineOsservazioniPreavviso" | "osservazioniPreavvisoRicevute" | "dataOsservazioniPreavviso" | "valutazioneOsservazioniPreavviso" | "motivazioneMancatoPreavviso" | "checklistProfile" | "checklistContraddittorioCompleta" | "noteChecklistContraddittorio" | "stato" | "noteIstruttorie" | "createdAt" | "updatedAt", ExtArgs["result"]["procedimento"]>
+export type ProcedimentoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "concessioneId" | "criticitaId" | "responsabileProcedimentoNome" | "responsabileProcedimentoEmail" | "unitaOrganizzativaResponsabile" | "responsabileAssegnatoAt" | "tipologia" | "origineProcedimento" | "procedimentoUfficio" | "riferimentoNormativo" | "dataAvvio" | "dataScadenzaContraddittorio" | "dataProvvedimentoFinale" | "comunicazioneAvvioInviata" | "dataComunicazioneAvvio" | "termineMemorieGiorni" | "termineMemorieScadenza" | "memorieRicevute" | "dataRicezioneMemorie" | "audizioneRichiesta" | "audizioneSvolta" | "dataAudizione" | "sopralluogoIstruttorioSvolto" | "contestazioneFormaleInviata" | "dataContestazioneFormale" | "controdeduzioniValutate" | "motivazioneValutazione" | "propostaEsitoIstruttorio" | "preavvisoRigettoApplicabile" | "statoPreavvisoRigetto" | "dataPreavvisoRigetto" | "termineOsservazioniPreavviso" | "osservazioniPreavvisoRicevute" | "dataOsservazioniPreavviso" | "valutazioneOsservazioniPreavviso" | "motivazioneMancatoPreavviso" | "checklistProfile" | "checklistContraddittorioCompleta" | "noteChecklistContraddittorio" | "stato" | "noteIstruttorie" | "createdAt" | "updatedAt", ExtArgs["result"]["procedimento"]>
 export type ProcedimentoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   concessione?: boolean | Prisma.ConcessioneDefaultArgs<ExtArgs>
   criticita?: boolean | Prisma.Procedimento$criticitaArgs<ExtArgs>
@@ -2785,6 +2989,10 @@ export type $ProcedimentoPayload<ExtArgs extends runtime.Types.Extensions.Intern
     id: string
     concessioneId: string
     criticitaId: string | null
+    responsabileProcedimentoNome: string | null
+    responsabileProcedimentoEmail: string | null
+    unitaOrganizzativaResponsabile: string | null
+    responsabileAssegnatoAt: Date | null
     tipologia: $Enums.TipologiaProcedimento
     origineProcedimento: $Enums.OrigineProcedimento
     procedimentoUfficio: boolean
@@ -3253,6 +3461,10 @@ export interface ProcedimentoFieldRefs {
   readonly id: Prisma.FieldRef<"Procedimento", 'String'>
   readonly concessioneId: Prisma.FieldRef<"Procedimento", 'String'>
   readonly criticitaId: Prisma.FieldRef<"Procedimento", 'String'>
+  readonly responsabileProcedimentoNome: Prisma.FieldRef<"Procedimento", 'String'>
+  readonly responsabileProcedimentoEmail: Prisma.FieldRef<"Procedimento", 'String'>
+  readonly unitaOrganizzativaResponsabile: Prisma.FieldRef<"Procedimento", 'String'>
+  readonly responsabileAssegnatoAt: Prisma.FieldRef<"Procedimento", 'DateTime'>
   readonly tipologia: Prisma.FieldRef<"Procedimento", 'TipologiaProcedimento'>
   readonly origineProcedimento: Prisma.FieldRef<"Procedimento", 'OrigineProcedimento'>
   readonly procedimentoUfficio: Prisma.FieldRef<"Procedimento", 'Boolean'>

@@ -84,6 +84,10 @@ export interface GetProcedimentiListParams {
 
 export interface ProcedimentoListItem {
   id: string;
+  responsabileProcedimentoNome: string | null;
+  responsabileProcedimentoEmail: string | null;
+  unitaOrganizzativaResponsabile: string | null;
+  responsabileAssegnatoAt: Date | null;
   tipologia: string;
   checklistProfile: string;
   riferimentoNormativo: string | null;
@@ -150,6 +154,10 @@ export interface ProcedimentiFiltersData {
 export interface ProcedimentoDetail {
   procedimento: {
     id: string;
+    responsabileProcedimentoNome: string | null;
+    responsabileProcedimentoEmail: string | null;
+    unitaOrganizzativaResponsabile: string | null;
+    responsabileAssegnatoAt: Date | null;
     tipologia: string;
     checklistProfile: string;
     riferimentoNormativo: string | null;
@@ -197,9 +205,14 @@ export interface ProcedimentoDetail {
       id: string;
       tipoDecisione: string;
       numeroAtto: string;
+      protocolloAtto: string | null;
       dataAtto: Date;
       dataEfficacia: Date;
       organoCompetente: string;
+      adottanteNome: string | null;
+      adottanteQualifica: string | null;
+      scostamentoDaIstruttoria: boolean;
+      motivazioneScostamentoIstruttoria: string | null;
       motivazioneSintetica: string;
       effettoTitolo: string;
       statoConcessionePrecedente: string | null;
@@ -398,6 +411,10 @@ function statoPriority(stato: string): number {
 function toListItem(
   row: {
     id: string;
+    responsabileProcedimentoNome: string | null;
+    responsabileProcedimentoEmail: string | null;
+    unitaOrganizzativaResponsabile: string | null;
+    responsabileAssegnatoAt: Date | null;
     tipologia: string;
     checklistProfile: string;
     riferimentoNormativo: string | null;
@@ -501,6 +518,10 @@ function toListItem(
 
   return {
     id: row.id,
+    responsabileProcedimentoNome: row.responsabileProcedimentoNome,
+    responsabileProcedimentoEmail: row.responsabileProcedimentoEmail,
+    unitaOrganizzativaResponsabile: row.unitaOrganizzativaResponsabile,
+    responsabileAssegnatoAt: row.responsabileAssegnatoAt,
     tipologia: row.tipologia,
     checklistProfile: row.checklistProfile,
     riferimentoNormativo: row.riferimentoNormativo,
@@ -541,6 +562,10 @@ export async function getProcedimentiList(params: GetProcedimentiListParams): Pr
     where: buildWhere(params, tenantContext),
     select: {
       id: true,
+      responsabileProcedimentoNome: true,
+      responsabileProcedimentoEmail: true,
+      unitaOrganizzativaResponsabile: true,
+      responsabileAssegnatoAt: true,
       tipologia: true,
       checklistProfile: true,
       riferimentoNormativo: true,
@@ -834,6 +859,10 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
   return {
     procedimento: {
       id: procedimento.id,
+      responsabileProcedimentoNome: procedimento.responsabileProcedimentoNome,
+      responsabileProcedimentoEmail: procedimento.responsabileProcedimentoEmail,
+      unitaOrganizzativaResponsabile: procedimento.unitaOrganizzativaResponsabile,
+      responsabileAssegnatoAt: procedimento.responsabileAssegnatoAt,
       tipologia: procedimento.tipologia,
       checklistProfile: procedimento.checklistProfile,
       riferimentoNormativo: procedimento.riferimentoNormativo,
@@ -884,9 +913,14 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
             id: procedimento.decisioneProcedimento.id,
             tipoDecisione: procedimento.decisioneProcedimento.tipoDecisione,
             numeroAtto: procedimento.decisioneProcedimento.numeroAtto,
+            protocolloAtto: procedimento.decisioneProcedimento.protocolloAtto,
             dataAtto: procedimento.decisioneProcedimento.dataAtto,
             dataEfficacia: procedimento.decisioneProcedimento.dataEfficacia,
             organoCompetente: procedimento.decisioneProcedimento.organoCompetente,
+            adottanteNome: procedimento.decisioneProcedimento.adottanteNome,
+            adottanteQualifica: procedimento.decisioneProcedimento.adottanteQualifica,
+            scostamentoDaIstruttoria: procedimento.decisioneProcedimento.scostamentoDaIstruttoria,
+            motivazioneScostamentoIstruttoria: procedimento.decisioneProcedimento.motivazioneScostamentoIstruttoria,
             motivazioneSintetica: procedimento.decisioneProcedimento.motivazioneSintetica,
             effettoTitolo: procedimento.decisioneProcedimento.effettoTitolo,
             statoConcessionePrecedente: procedimento.decisioneProcedimento.statoConcessionePrecedente,

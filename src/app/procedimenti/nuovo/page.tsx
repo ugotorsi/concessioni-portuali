@@ -123,6 +123,41 @@ export default async function NuovoProcedimentoPage({ searchParams }: NuovoProce
                 <Input id="riferimentoNormativo" name="riferimentoNormativo" />
               </div>
 
+              <div className="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Responsabile del procedimento</p>
+                  <p className="text-xs text-slate-600">
+                    Dato organizzativo amministrativo: non dipende dall account applicativo che usa il software.
+                  </p>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-1">
+                    <label htmlFor="responsabileProcedimentoNome" className="text-sm font-medium text-slate-700">
+                      Nome responsabile procedimento
+                    </label>
+                    <Input id="responsabileProcedimentoNome" name="responsabileProcedimentoNome" />
+                  </div>
+                  <div className="space-y-1">
+                    <label htmlFor="responsabileProcedimentoEmail" className="text-sm font-medium text-slate-700">
+                      Email responsabile procedimento (opzionale)
+                    </label>
+                    <Input id="responsabileProcedimentoEmail" name="responsabileProcedimentoEmail" type="email" />
+                  </div>
+                  <div className="space-y-1">
+                    <label htmlFor="unitaOrganizzativaResponsabile" className="text-sm font-medium text-slate-700">
+                      Unita organizzativa responsabile
+                    </label>
+                    <Input id="unitaOrganizzativaResponsabile" name="unitaOrganizzativaResponsabile" />
+                  </div>
+                  <div className="space-y-1">
+                    <label htmlFor="responsabileAssegnatoAt" className="text-sm font-medium text-slate-700">
+                      Data assegnazione responsabile
+                    </label>
+                    <Input id="responsabileAssegnatoAt" name="responsabileAssegnatoAt" type="date" />
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-1">
                 <label htmlFor="noteIstruttorie" className="text-sm font-medium text-slate-700">
                   Note istruttorie

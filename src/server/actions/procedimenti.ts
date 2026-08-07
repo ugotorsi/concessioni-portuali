@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
-import { canFinalizeProcedimentoDecision, canManageProcedimenti, getCurrentUser, requireRole } from "@/lib/auth";
+import { canManageProcedimenti, canRegisterProcedimentoDecision, getCurrentUser, requireRole } from "@/lib/auth";
 import { Prisma } from "@/generated/prisma/client";
 import { isContraddittorioCompleto } from "@/lib/procedimento-checklist";
 import { prisma } from "@/lib/prisma";
@@ -34,6 +34,10 @@ import {
 const createProcedimentoSchema = z.object({
   concessioneId: z.string().min(1, "Seleziona una concessione."),
   criticitaId: z.string().optional(),
+  responsabileProcedimentoNome: z.string().trim().optional(),
+  responsabileProcedimentoEmail: z.string().trim().optional(),
+  unitaOrganizzativaResponsabile: z.string().trim().optional(),
+  responsabileAssegnatoAt: z.string().optional(),
   tipologia: z.enum(PROCEDIMENTO_TIPOLOGIA_VALUES, { message: "Tipologia procedimento non valida." }),
   origineProcedimento: z.enum(PROCEDIMENTO_ORIGINE_VALUES),
   procedimentoUfficio: z.boolean(),
@@ -98,27 +102,40 @@ const updateProcedimentoChecklistSchema = z.object({
   noteChecklistContraddittorio: z.string().trim().optional(),
 });
 
+function requiredTrimmedString(message: string, maxLength?: number) {
+  const base = z.string().trim().min(1, message);
+  const constrained = typeof maxLength === "number" ? base.max(maxLength, message) : base;
+
+  return z.preprocess((value) => {
+    if (typeof value === "string") {
+      return value;
+    }
+
+    if (value === null || value === undefined) {
+      return "";
+    }
+
+    return String(value);
+  }, constrained);
+}
+
 const finalizeProcedimentoDecisionSchema = z.object({
   procedimentoId: z.string().min(1, "Procedimento non valido."),
   decisionType: z.enum(DECISIONE_PROCEDIMENTO_TIPO_VALUES, {
     message: "Tipo decisione non valido.",
   }),
-  numeroAtto: z.string().trim().min(1, "Numero atto obbligatorio.").max(120),
-  dataAtto: z.string().trim().min(1, "Data atto obbligatoria."),
-  dataEfficacia: z.string().trim().min(1, "Data efficacia obbligatoria."),
-  organoCompetente: z.string().trim().min(1, "Organo competente obbligatorio.").max(180),
+  numeroAtto: requiredTrimmedString("NUMERO_ATTO_MANCANTE", 120),
+  protocolloAtto: requiredTrimmedString("PROTOCOLLO_ATTO_MANCANTE", 180),
+  dataAtto: requiredTrimmedString("DATA_ATTO_MANCANTE"),
+  dataEfficacia: requiredTrimmedString("DATA_EFFICACIA_MANCANTE"),
+  organoCompetente: requiredTrimmedString("ORGANO_COMPETENTE_MANCANTE", 180),
+  adottanteNome: z.string().trim().optional(),
+  adottanteQualifica: z.string().trim().optional(),
+  scostamentoDaIstruttoria: z.boolean(),
+  motivazioneScostamentoIstruttoria: z.string().trim().optional(),
   motivazioneSintetica: z.string().trim().min(1, "Motivazione sintetica obbligatoria.").max(2000),
-  documentoId: z
-    .string()
-    .trim()
-    .optional()
-    .transform((value) => {
-      if (!value || value.length === 0) {
-        return undefined;
-      }
-      return value;
-    }),
-  confermaFinalizzazione: z.literal("CONFIRMO_DECISIONE", {
+  documentoId: requiredTrimmedString("DOCUMENTO_ATTO_MANCANTE"),
+  confermaFinalizzazione: z.literal("CONFIRMO_REGISTRAZIONE_ATTO", {
     message: "Conferma esplicita obbligatoria.",
   }),
 });
@@ -182,6 +199,10 @@ function normalizeOptionalString(value: string | null | undefined): string | nul
 
   const trimmed = value.trim();
   return trimmed === "" ? null : trimmed;
+}
+
+function hasNonEmptyText(value: string | null | undefined): boolean {
+  return normalizeOptionalString(value) !== null;
 }
 
 function extractP2002Targets(error: Prisma.PrismaClientKnownRequestError): P2002Target[] {
@@ -411,6 +432,10 @@ export async function createProcedimentoAction(formData: FormData) {
   const parsed = createProcedimentoSchema.safeParse({
     concessioneId: formData.get("concessioneId"),
     criticitaId: formData.get("criticitaId")?.toString(),
+    responsabileProcedimentoNome: formData.get("responsabileProcedimentoNome")?.toString(),
+    responsabileProcedimentoEmail: formData.get("responsabileProcedimentoEmail")?.toString(),
+    unitaOrganizzativaResponsabile: formData.get("unitaOrganizzativaResponsabile")?.toString(),
+    responsabileAssegnatoAt: formData.get("responsabileAssegnatoAt")?.toString(),
     tipologia: formData.get("tipologia"),
     origineProcedimento: formData.get("origineProcedimento") ?? "UFFICIO",
     procedimentoUfficio: toBoolean(formData.get("procedimentoUfficio")),
@@ -536,6 +561,10 @@ export async function createProcedimentoAction(formData: FormData) {
     data: {
       concessioneId: parsed.data.concessioneId,
       criticitaId,
+      responsabileProcedimentoNome: toNullable(parsed.data.responsabileProcedimentoNome),
+      responsabileProcedimentoEmail: toNullable(parsed.data.responsabileProcedimentoEmail),
+      unitaOrganizzativaResponsabile: toNullable(parsed.data.unitaOrganizzativaResponsabile),
+      responsabileAssegnatoAt: toDate(parsed.data.responsabileAssegnatoAt),
       tipologia: parsed.data.tipologia,
       stato: parsed.data.stato,
       riferimentoNormativo: toNullable(parsed.data.riferimentoNormativo),
@@ -781,7 +810,7 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
     throw new Error("Utente autenticato non disponibile.");
   }
 
-  if (!canFinalizeProcedimentoDecision(role)) {
+  if (!canRegisterProcedimentoDecision(role)) {
     await auditFailure({
       azione: "AUTHZ_DENIED",
       entita: "DecisioneProcedimento",
@@ -801,9 +830,14 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
     procedimentoId: formData.get("procedimentoId"),
     decisionType: formData.get("decisionType"),
     numeroAtto: formData.get("numeroAtto"),
+    protocolloAtto: formData.get("protocolloAtto"),
     dataAtto: formData.get("dataAtto"),
     dataEfficacia: formData.get("dataEfficacia"),
     organoCompetente: formData.get("organoCompetente"),
+    adottanteNome: formData.get("adottanteNome")?.toString(),
+    adottanteQualifica: formData.get("adottanteQualifica")?.toString(),
+    scostamentoDaIstruttoria: toBoolean(formData.get("scostamentoDaIstruttoria")),
+    motivazioneScostamentoIstruttoria: formData.get("motivazioneScostamentoIstruttoria")?.toString(),
     motivazioneSintetica: formData.get("motivazioneSintetica"),
     documentoId: formData.get("documentoId")?.toString(),
     confermaFinalizzazione: formData.get("confermaFinalizzazione"),
@@ -836,6 +870,9 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
       tipologia: true,
       stato: true,
       checklistContraddittorioCompleta: true,
+      responsabileProcedimentoNome: true,
+      unitaOrganizzativaResponsabile: true,
+      responsabileAssegnatoAt: true,
       propostaEsitoIstruttorio: true,
       decisioneProcedimento: {
         select: {
@@ -891,6 +928,21 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
     throw new Error("Procedimento gia concluso o archiviato: registrazione decisione non consentita.");
   }
 
+  if (
+    !hasNonEmptyText(procedimento.responsabileProcedimentoNome) ||
+    !hasNonEmptyText(procedimento.unitaOrganizzativaResponsabile) ||
+    !procedimento.responsabileAssegnatoAt
+  ) {
+    throw new Error("RESPONSABILE_PROCEDIMENTO_MANCANTE");
+  }
+
+  if (
+    parsed.data.scostamentoDaIstruttoria &&
+    !hasNonEmptyText(parsed.data.motivazioneScostamentoIstruttoria)
+  ) {
+    throw new Error("MOTIVAZIONE_SCOSTAMENTO_ISTRUTTORIA_MANCANTE");
+  }
+
   if (procedimento.decisioneProcedimento) {
     throw new Error("Decisione conclusiva gia registrata per il procedimento.");
   }
@@ -909,26 +961,23 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
     throw new Error("Documento atto conclusivo obbligatorio per la decisione selezionata.");
   }
 
-  let documento: { id: string; concessioneId: string | null; procedimentoId: string | null } | null = null;
-  if (parsed.data.documentoId) {
-    documento = await prisma.documento.findUnique({
-      where: { id: parsed.data.documentoId },
-      select: {
-        id: true,
-        concessioneId: true,
-        procedimentoId: true,
-      },
-    });
+  const documento = await prisma.documento.findUnique({
+    where: { id: parsed.data.documentoId },
+    select: {
+      id: true,
+      concessioneId: true,
+      procedimentoId: true,
+    },
+  });
 
-    if (!documento) {
-      throw new Error("Documento indicato non trovato.");
-    }
+  if (!documento) {
+    throw new Error("Documento indicato non trovato.");
+  }
 
-    const linkedToProcedimento = documento.procedimentoId === procedimento.id;
-    const linkedToConcessione = documento.concessioneId === procedimento.concessioneId;
-    if (!linkedToProcedimento && !linkedToConcessione) {
-      throw new Error("Documento non coerente con procedimento o concessione collegata.");
-    }
+  const linkedToProcedimento = documento.procedimentoId === procedimento.id;
+  const linkedToConcessione = documento.concessioneId === procedimento.concessioneId;
+  if (!linkedToProcedimento && !linkedToConcessione) {
+    throw new Error("Documento non coerente con procedimento o concessione collegata.");
   }
 
   if (outcome.statoConcessioneSuccessivo && !procedimento.concessioneId) {
@@ -970,6 +1019,9 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
           stato: true,
           tipologia: true,
           checklistContraddittorioCompleta: true,
+          responsabileProcedimentoNome: true,
+          unitaOrganizzativaResponsabile: true,
+          responsabileAssegnatoAt: true,
           concessioneId: true,
           concessione: {
             select: {
@@ -997,6 +1049,14 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
         throw new Error("Checklist contraddittorio incompleta: finalizzazione non consentita.");
       }
 
+      if (
+        !hasNonEmptyText(latest.responsabileProcedimentoNome) ||
+        !hasNonEmptyText(latest.unitaOrganizzativaResponsabile) ||
+        !latest.responsabileAssegnatoAt
+      ) {
+        throw new Error("RESPONSABILE_PROCEDIMENTO_MANCANTE");
+      }
+
       const createdDecision = await tx.decisioneProcedimento.create({
         data: {
           enteId: procedimento.concessione.enteId,
@@ -1004,9 +1064,16 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
           concessioneId: latest.concessioneId,
           tipoDecisione: parsed.data.decisionType,
           numeroAtto: parsed.data.numeroAtto,
+          protocolloAtto: parsed.data.protocolloAtto,
           dataAtto,
           dataEfficacia,
           organoCompetente: parsed.data.organoCompetente,
+          adottanteNome: normalizeOptionalString(parsed.data.adottanteNome),
+          adottanteQualifica: normalizeOptionalString(parsed.data.adottanteQualifica),
+          scostamentoDaIstruttoria: parsed.data.scostamentoDaIstruttoria,
+          motivazioneScostamentoIstruttoria: parsed.data.scostamentoDaIstruttoria
+            ? normalizeOptionalString(parsed.data.motivazioneScostamentoIstruttoria)
+            : null,
           motivazioneSintetica: parsed.data.motivazioneSintetica,
           documentoId: documento?.id ?? null,
           effettoTitolo: outcome.effettoTitolo,
@@ -1050,7 +1117,11 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
             tipoDecisione: parsed.data.decisionType,
             decisioniConsentite: decisionPreview.map((item) => item.tipoDecisione),
             numeroAtto: parsed.data.numeroAtto,
+            protocolloAtto: parsed.data.protocolloAtto,
             organoCompetente: parsed.data.organoCompetente,
+            adottanteNome: normalizeOptionalString(parsed.data.adottanteNome),
+            adottanteQualifica: normalizeOptionalString(parsed.data.adottanteQualifica),
+            scostamentoDaIstruttoria: parsed.data.scostamentoDaIstruttoria,
             registeredByUserId: currentUser.id,
             statoConcessionePrecedente: procedimento.concessione.stato,
             statoConcessioneSuccessivo: outcome.statoConcessioneSuccessivo,
@@ -1123,10 +1194,15 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
           concessioneId: true,
           tipoDecisione: true,
           numeroAtto: true,
+          protocolloAtto: true,
           dataAtto: true,
           dataEfficacia: true,
           documentoId: true,
           organoCompetente: true,
+          adottanteNome: true,
+          adottanteQualifica: true,
+          scostamentoDaIstruttoria: true,
+          motivazioneScostamentoIstruttoria: true,
           effettoTitolo: true,
           statoConcessionePrecedente: true,
           statoConcessioneSuccessivo: true,
@@ -1148,10 +1224,17 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
         concessioneId: procedimento.concessioneId,
         tipoDecisione: parsed.data.decisionType,
         numeroAtto: parsed.data.numeroAtto,
+        protocolloAtto: parsed.data.protocolloAtto,
         dataAttoIso: dataAtto.toISOString(),
         dataEfficaciaIso: dataEfficacia.toISOString(),
         documentoId: documento?.id ?? null,
         organoCompetente: normalizeOptionalString(parsed.data.organoCompetente),
+        adottanteNome: normalizeOptionalString(parsed.data.adottanteNome),
+        adottanteQualifica: normalizeOptionalString(parsed.data.adottanteQualifica),
+        scostamentoDaIstruttoria: parsed.data.scostamentoDaIstruttoria,
+        motivazioneScostamentoIstruttoria: parsed.data.scostamentoDaIstruttoria
+          ? normalizeOptionalString(parsed.data.motivazioneScostamentoIstruttoria)
+          : null,
         esito: outcome.statoFinaleProcedimento,
         effettoTitolo: outcome.effettoTitolo,
         statoConcessionePrecedente: procedimento.concessione.stato,
@@ -1163,10 +1246,15 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
         concessioneId: existing.concessioneId,
         tipoDecisione: existing.tipoDecisione,
         numeroAtto: existing.numeroAtto,
+        protocolloAtto: normalizeOptionalString(existing.protocolloAtto),
         dataAttoIso: existing.dataAtto.toISOString(),
         dataEfficaciaIso: existing.dataEfficacia.toISOString(),
         documentoId: existing.documentoId,
         organoCompetente: normalizeOptionalString(existing.organoCompetente),
+        adottanteNome: normalizeOptionalString(existing.adottanteNome),
+        adottanteQualifica: normalizeOptionalString(existing.adottanteQualifica),
+        scostamentoDaIstruttoria: existing.scostamentoDaIstruttoria,
+        motivazioneScostamentoIstruttoria: normalizeOptionalString(existing.motivazioneScostamentoIstruttoria),
         esito: existingOutcome.statoFinaleProcedimento,
         effettoTitolo: existing.effettoTitolo,
         statoConcessionePrecedente: existing.statoConcessionePrecedente,
@@ -1178,10 +1266,15 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
         existingSemantic.concessioneId === expectedSemantic.concessioneId &&
         existingSemantic.tipoDecisione === expectedSemantic.tipoDecisione &&
         existingSemantic.numeroAtto === expectedSemantic.numeroAtto &&
+        existingSemantic.protocolloAtto === expectedSemantic.protocolloAtto &&
         existingSemantic.dataAttoIso === expectedSemantic.dataAttoIso &&
         existingSemantic.dataEfficaciaIso === expectedSemantic.dataEfficaciaIso &&
         existingSemantic.documentoId === expectedSemantic.documentoId &&
         existingSemantic.organoCompetente === expectedSemantic.organoCompetente &&
+        existingSemantic.adottanteNome === expectedSemantic.adottanteNome &&
+        existingSemantic.adottanteQualifica === expectedSemantic.adottanteQualifica &&
+        existingSemantic.scostamentoDaIstruttoria === expectedSemantic.scostamentoDaIstruttoria &&
+        existingSemantic.motivazioneScostamentoIstruttoria === expectedSemantic.motivazioneScostamentoIstruttoria &&
         existingSemantic.esito === expectedSemantic.esito &&
         existingSemantic.effettoTitolo === expectedSemantic.effettoTitolo &&
         existingSemantic.statoConcessionePrecedente === expectedSemantic.statoConcessionePrecedente &&

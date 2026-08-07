@@ -2820,6 +2820,10 @@ export const ProcedimentoScalarFieldEnum = {
   id: 'id',
   concessioneId: 'concessioneId',
   criticitaId: 'criticitaId',
+  responsabileProcedimentoNome: 'responsabileProcedimentoNome',
+  responsabileProcedimentoEmail: 'responsabileProcedimentoEmail',
+  unitaOrganizzativaResponsabile: 'unitaOrganizzativaResponsabile',
+  responsabileAssegnatoAt: 'responsabileAssegnatoAt',
   tipologia: 'tipologia',
   origineProcedimento: 'origineProcedimento',
   procedimentoUfficio: 'procedimentoUfficio',
@@ -2961,9 +2965,14 @@ export const DecisioneProcedimentoScalarFieldEnum = {
   concessioneId: 'concessioneId',
   tipoDecisione: 'tipoDecisione',
   numeroAtto: 'numeroAtto',
+  protocolloAtto: 'protocolloAtto',
   dataAtto: 'dataAtto',
   dataEfficacia: 'dataEfficacia',
   organoCompetente: 'organoCompetente',
+  adottanteNome: 'adottanteNome',
+  adottanteQualifica: 'adottanteQualifica',
+  scostamentoDaIstruttoria: 'scostamentoDaIstruttoria',
+  motivazioneScostamentoIstruttoria: 'motivazioneScostamentoIstruttoria',
   motivazioneSintetica: 'motivazioneSintetica',
   documentoId: 'documentoId',
   effettoTitolo: 'effettoTitolo',
@@ -3910,42 +3919,42 @@ export type ListEnumDocumentoCanaleFieldRefInput<$PrismaModel> = FieldRefInputTy
  * Reference to a field of type 'TipoDecisioneProcedimento'
  */
 export type EnumTipoDecisioneProcedimentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoDecisioneProcedimento'>
-
+    
 
 
 /**
  * Reference to a field of type 'TipoDecisioneProcedimento[]'
  */
 export type ListEnumTipoDecisioneProcedimentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoDecisioneProcedimento[]'>
-
+    
 
 
 /**
  * Reference to a field of type 'EffettoTitoloProcedimento'
  */
 export type EnumEffettoTitoloProcedimentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EffettoTitoloProcedimento'>
-
+    
 
 
 /**
  * Reference to a field of type 'EffettoTitoloProcedimento[]'
  */
 export type ListEnumEffettoTitoloProcedimentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EffettoTitoloProcedimento[]'>
-
+    
 
 
 /**
  * Reference to a field of type 'StatoEffettoProcedimento'
  */
 export type EnumStatoEffettoProcedimentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatoEffettoProcedimento'>
-
+    
 
 
 /**
  * Reference to a field of type 'StatoEffettoProcedimento[]'
  */
 export type ListEnumStatoEffettoProcedimentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatoEffettoProcedimento[]'>
-
+    
 
 
 /**

@@ -525,23 +525,23 @@ enum ImportRunStatus {
 }
 
 model Ente {
-  id           String             @id @default(cuid())
-  nome         String
-  codice       String             @unique
-  tipo         EnteTipo           @default(ALTRO)
-  stato        EnteStato          @default(ATTIVO)
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
-  concessioni  Concessione[]
-  documenti    Documento[]
-  report       Report[]
-  activityLog  ActivityLog[]
-  memberships  TenantMembership[]
-  ports        Port[]
-  legalSources LegalSource[]
-  legalRules   LegalRule[]
-  documentGaps DocumentGap[]
-  importRuns   ImportRun[]
+  id                    String                  @id @default(cuid())
+  nome                  String
+  codice                String                  @unique
+  tipo                  EnteTipo                @default(ALTRO)
+  stato                 EnteStato               @default(ATTIVO)
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  concessioni           Concessione[]
+  documenti             Documento[]
+  report                Report[]
+  activityLog           ActivityLog[]
+  memberships           TenantMembership[]
+  ports                 Port[]
+  legalSources          LegalSource[]
+  legalRules            LegalRule[]
+  documentGaps          DocumentGap[]
+  importRuns            ImportRun[]
   decisioniProcedimento DecisioneProcedimento[]
 
   @@index([tipo])
@@ -801,27 +801,27 @@ model TenantMembership {
 }
 
 model User {
-  id                  String             @id @default(cuid())
-  nome                String
-  email               String             @unique
-  passwordHash        String?
-  ruolo               RuoloUser
-  attivo              Boolean            @default(true)
-  failedLoginAttempts Int                @default(0)
-  lockedUntil         DateTime?
-  lastFailedLoginAt   DateTime?
-  lastLoginAt         DateTime?
-  passwordChangedAt   DateTime?
-  mustChangePassword  Boolean            @default(false)
-  mfaEnabled          Boolean            @default(false)
-  mfaSecret           String?
-  mfaRecoveryCodes    Json?
-  mfaVerifiedAt       DateTime?
-  createdAt           DateTime           @default(now())
-  updatedAt           DateTime           @updatedAt
-  activityLogs        ActivityLog[]
-  documentiCaricati   Documento[]        @relation("DocumentoUploader")
-  tenantMemberships   TenantMembership[]
+  id                              String                  @id @default(cuid())
+  nome                            String
+  email                           String                  @unique
+  passwordHash                    String?
+  ruolo                           RuoloUser
+  attivo                          Boolean                 @default(true)
+  failedLoginAttempts             Int                     @default(0)
+  lockedUntil                     DateTime?
+  lastFailedLoginAt               DateTime?
+  lastLoginAt                     DateTime?
+  passwordChangedAt               DateTime?
+  mustChangePassword              Boolean                 @default(false)
+  mfaEnabled                      Boolean                 @default(false)
+  mfaSecret                       String?
+  mfaRecoveryCodes                Json?
+  mfaVerifiedAt                   DateTime?
+  createdAt                       DateTime                @default(now())
+  updatedAt                       DateTime                @updatedAt
+  activityLogs                    ActivityLog[]
+  documentiCaricati               Documento[]             @relation("DocumentoUploader")
+  tenantMemberships               TenantMembership[]
   decisioniProcedimentoRegistrate DecisioneProcedimento[] @relation("DecisioneProcedimentoRegisteredBy")
 
   @@index([ruolo])
@@ -885,20 +885,20 @@ model Concessione {
   createdAt                  DateTime                   @default(now())
   updatedAt                  DateTime                   @updatedAt
 
-  concessionario  Concessionario              @relation(fields: [concessionarioId], references: [id], onDelete: Restrict)
-  ente            Ente?                       @relation(fields: [enteId], references: [id], onDelete: SetNull)
-  obblighi        ObbligoConcessorio[]
-  scadenze        Scadenza[]
-  criticita       Criticita[]
-  procedimenti    Procedimento[]
-  sopralluoghi    Sopralluogo[]
-  pagamenti       Pagamento[]
-  documenti       Documento[]
-  report          Report[]
+  concessionario        Concessionario              @relation(fields: [concessionarioId], references: [id], onDelete: Restrict)
+  ente                  Ente?                       @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  obblighi              ObbligoConcessorio[]
+  scadenze              Scadenza[]
+  criticita             Criticita[]
+  procedimenti          Procedimento[]
+  sopralluoghi          Sopralluogo[]
+  pagamenti             Pagamento[]
+  documenti             Documento[]
+  report                Report[]
   decisioniProcedimento DecisioneProcedimento[]
-  legalFrameworks ConcessioneLegalFramework[]
-  normaImpatti    NormaImpatto[]
-  activityLogs    ActivityLog[]
+  legalFrameworks       ConcessioneLegalFramework[]
+  normaImpatti          NormaImpatto[]
+  activityLogs          ActivityLog[]
 
   @@index([stato])
   @@index([dataScadenza])
@@ -1027,6 +1027,10 @@ model Procedimento {
   id                               String                        @id @default(cuid())
   concessioneId                    String
   criticitaId                      String?
+  responsabileProcedimentoNome     String?
+  responsabileProcedimentoEmail    String?
+  unitaOrganizzativaResponsabile   String?
+  responsabileAssegnatoAt          DateTime?
   tipologia                        TipologiaProcedimento
   origineProcedimento              OrigineProcedimento           @default(UFFICIO)
   procedimentoUfficio              Boolean                       @default(true)
@@ -1065,11 +1069,11 @@ model Procedimento {
   createdAt                        DateTime                      @default(now())
   updatedAt                        DateTime                      @updatedAt
 
-  concessione  Concessione    @relation(fields: [concessioneId], references: [id], onDelete: Cascade)
-  criticita    Criticita?     @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
+  concessione           Concessione            @relation(fields: [concessioneId], references: [id], onDelete: Cascade)
+  criticita             Criticita?             @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
   decisioneProcedimento DecisioneProcedimento?
-  documenti    Documento[]
-  normaImpatti NormaImpatto[]
+  documenti             Documento[]
+  normaImpatti          NormaImpatto[]
 
   @@index([concessioneId])
   @@index([criticitaId])
@@ -1187,14 +1191,14 @@ model Documento {
   createdAt                 DateTime            @default(now())
   updatedAt                 DateTime            @updatedAt
 
-  uploadedByUser User?         @relation("DocumentoUploader", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
-  ente           Ente?         @relation(fields: [enteId], references: [id], onDelete: SetNull)
-  concessione    Concessione?  @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
-  criticita      Criticita?    @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
-  procedimento   Procedimento? @relation(fields: [procedimentoId], references: [id], onDelete: SetNull)
-  sopralluogo    Sopralluogo?  @relation(fields: [sopralluogoId], references: [id], onDelete: SetNull)
-  pagamento      Pagamento?    @relation(fields: [pagamentoId], references: [id], onDelete: SetNull)
-  report         Report?       @relation(fields: [reportId], references: [id], onDelete: SetNull)
+  uploadedByUser        User?                   @relation("DocumentoUploader", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
+  ente                  Ente?                   @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  concessione           Concessione?            @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
+  criticita             Criticita?              @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
+  procedimento          Procedimento?           @relation(fields: [procedimentoId], references: [id], onDelete: SetNull)
+  sopralluogo           Sopralluogo?            @relation(fields: [sopralluogoId], references: [id], onDelete: SetNull)
+  pagamento             Pagamento?              @relation(fields: [pagamentoId], references: [id], onDelete: SetNull)
+  report                Report?                 @relation(fields: [reportId], references: [id], onDelete: SetNull)
   decisioniProcedimento DecisioneProcedimento[]
 
   @@index([uploadedByUserId])
@@ -1217,26 +1221,31 @@ model Documento {
 }
 
 model DecisioneProcedimento {
-  id                         String                     @id @default(cuid())
-  enteId                     String?
-  procedimentoId             String                     @unique
-  concessioneId              String?
-  tipoDecisione              TipoDecisioneProcedimento
-  numeroAtto                 String
-  dataAtto                   DateTime
-  dataEfficacia              DateTime
-  organoCompetente           String
-  motivazioneSintetica       String
-  documentoId                String?
-  effettoTitolo              EffettoTitoloProcedimento @default(NESSUNO)
-  statoEffetto               StatoEffettoProcedimento  @default(BLOCCATO)
-  effettoApplicatoAt         DateTime?
-  effectVersion              Int                        @default(0)
-  statoConcessionePrecedente StatoConcessione?
-  statoConcessioneSuccessivo StatoConcessione?
-  registeredByUserId         String
-  idempotencyKey             String                     @unique
-  createdAt                  DateTime                   @default(now())
+  id                                String                    @id @default(cuid())
+  enteId                            String?
+  procedimentoId                    String                    @unique
+  concessioneId                     String?
+  tipoDecisione                     TipoDecisioneProcedimento
+  numeroAtto                        String
+  protocolloAtto                    String?
+  dataAtto                          DateTime
+  dataEfficacia                     DateTime
+  organoCompetente                  String
+  adottanteNome                     String?
+  adottanteQualifica                String?
+  scostamentoDaIstruttoria          Boolean                   @default(false)
+  motivazioneScostamentoIstruttoria String?
+  motivazioneSintetica              String
+  documentoId                       String?
+  effettoTitolo                     EffettoTitoloProcedimento @default(NESSUNO)
+  statoEffetto                      StatoEffettoProcedimento  @default(BLOCCATO)
+  effettoApplicatoAt                DateTime?
+  effectVersion                     Int                       @default(0)
+  statoConcessionePrecedente        StatoConcessione?
+  statoConcessioneSuccessivo        StatoConcessione?
+  registeredByUserId                String
+  idempotencyKey                    String                    @unique
+  createdAt                         DateTime                  @default(now())
 
   ente             Ente?        @relation(fields: [enteId], references: [id], onDelete: SetNull)
   procedimento     Procedimento @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
