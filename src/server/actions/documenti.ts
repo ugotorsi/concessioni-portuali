@@ -13,6 +13,16 @@ import { DOCUMENT_CANALE_VALUES, DOCUMENT_DIREZIONE_VALUES, normalizeProtocolloM
 import { storeDocumentFile } from "@/server/documents/storage";
 import { DocumentStorageS3Error } from "@/server/documents/storage/s3StorageAdapter";
 
+const STAGING_PREVIEW_ADMIN_ID = "staging-preview-admin";
+
+function resolveDocumentoUploadedByUserId(currentUserId: string | null | undefined): string | null {
+  if (!currentUserId || currentUserId === STAGING_PREVIEW_ADMIN_ID) {
+    return null;
+  }
+
+  return currentUserId;
+}
+
 async function assertLinkedEntitiesExist(input: {
   concessioneId?: string;
   criticitaId?: string;
@@ -221,6 +231,7 @@ export async function createDocumentoUploadAction(formData: FormData) {
   }
 
   const currentUser = await getCurrentUser();
+  const persistedUserId = resolveDocumentoUploadedByUserId(currentUser?.id);
   const tenantContext = await getCurrentTenantContext();
   const linkedTenant = await resolveLinkedTenantForDocumento(payload);
 
@@ -236,7 +247,7 @@ export async function createDocumentoUploadAction(formData: FormData) {
         entita: "Documento",
         concessioneId: payload.concessioneId ?? null,
         enteId: linkedTenant.enteId,
-        actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+        actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
         metadata: {
           actionType: "DOCUMENT_UPLOAD",
           reason: "CROSS_TENANT_BLOCKED",
@@ -269,7 +280,7 @@ export async function createDocumentoUploadAction(formData: FormData) {
       pecRicevutaAccettazioneId: payload.pecRicevutaAccettazioneId ?? null,
       pecRicevutaConsegnaId: payload.pecRicevutaConsegnaId ?? null,
       pecWarningMancataRicevuta: payload.pecWarningMancataRicevuta,
-      uploadedByUserId: currentUser?.id ?? null,
+      uploadedByUserId: persistedUserId,
       uploadedByUserEmail: currentUser?.email ?? null,
       uploadedByUserRole: role,
       enteId: linkedTenant.enteId,
@@ -315,7 +326,7 @@ export async function createDocumentoUploadAction(formData: FormData) {
       entita: "Documento",
       entitaId: created.id,
       concessioneId: created.concessioneId,
-      actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+      actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
       metadata: {
         reason: "STORAGE_WRITE_FAILED",
         issue: error instanceof Error ? error.message : "Errore storage documento.",
@@ -350,7 +361,7 @@ export async function createDocumentoUploadAction(formData: FormData) {
     entita: "Documento",
     entitaId: created.id,
     concessioneId: created.concessioneId,
-    actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+    actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
     metadata: {
       tipologia: payload.tipologia,
       source: payload.source,
