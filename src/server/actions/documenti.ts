@@ -421,6 +421,7 @@ export async function archiveDocumentoAction(formData: FormData) {
   }
 
   const currentUser = await getCurrentUser();
+  const persistedUserId = resolveDocumentoUploadedByUserId(currentUser?.id);
 
   const existing = await prisma.documento.findUnique({
     where: { id: parsed.data.id },
@@ -453,7 +454,7 @@ export async function archiveDocumentoAction(formData: FormData) {
         entita: "Documento",
         entitaId: parsed.data.id,
         enteId: resourceEnteId,
-        actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+        actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
         metadata: {
           actionType: "DOCUMENT_ARCHIVE",
           reason: "CROSS_TENANT_BLOCKED",
@@ -486,7 +487,7 @@ export async function archiveDocumentoAction(formData: FormData) {
     entita: "Documento",
     entitaId: updated.id,
     concessioneId: updated.concessioneId,
-    actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+    actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
     metadata: {
       changedFields: ["statoDocumento", "archivedAt"],
     },
@@ -617,6 +618,7 @@ export async function updateDocumentoMetadataAction(formData: FormData) {
   });
 
   const currentUser = await getCurrentUser();
+  const persistedUserId = resolveDocumentoUploadedByUserId(currentUser?.id);
 
   const existing = await prisma.documento.findUnique({
     where: { id: parsed.data.id },
@@ -649,7 +651,7 @@ export async function updateDocumentoMetadataAction(formData: FormData) {
         entita: "Documento",
         entitaId: parsed.data.id,
         enteId: resourceEnteId,
-        actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+        actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
         metadata: {
           actionType: "DOCUMENT_METADATA_UPDATE",
           reason: "CROSS_TENANT_BLOCKED",
@@ -692,7 +694,7 @@ export async function updateDocumentoMetadataAction(formData: FormData) {
     entita: "Documento",
     entitaId: updated.id,
     concessioneId: updated.concessioneId,
-    actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+    actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
     metadata: {
       changedFields: [
         "nome",

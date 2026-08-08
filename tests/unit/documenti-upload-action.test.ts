@@ -7,10 +7,12 @@ const requireTenantAccessMock = vi.hoisted(() => vi.fn());
 const auditFailureMock = vi.hoisted(() => vi.fn());
 const auditSuccessMock = vi.hoisted(() => vi.fn());
 const storeDocumentFileMock = vi.hoisted(() => vi.fn());
+const revalidatePathMock = vi.hoisted(() => vi.fn());
+const redirectMock = vi.hoisted(() => vi.fn());
 
 const prismaMock = vi.hoisted(() => ({
   procedimento: { findUnique: vi.fn() },
-  documento: { create: vi.fn(), update: vi.fn() },
+  documento: { create: vi.fn(), findUnique: vi.fn(), update: vi.fn() },
 }));
 
 vi.mock("@/lib/auth", () => ({
@@ -50,24 +52,57 @@ vi.mock("@/server/documents/validation", () => ({
     procedimentoId: "procedimento-1",
     file: new File(["contenuto"], "verbale.txt", { type: "text/plain" }),
   })),
-  DOCUMENT_TIPOLOGIA_VALUES: [],
+  DOCUMENT_TIPOLOGIA_VALUES: ["VERBALE"],
 }));
 vi.mock("@/server/documents/protocollo", () => ({
-  DOCUMENT_CANALE_VALUES: [],
-  DOCUMENT_DIREZIONE_VALUES: [],
-  normalizeProtocolloMetadata: vi.fn(),
+  DOCUMENT_CANALE_VALUES: ["PEC"],
+  DOCUMENT_DIREZIONE_VALUES: ["ENTRATA"],
+  normalizeProtocolloMetadata: vi.fn((input) => ({
+    ...input,
+    dataProtocollo: input.dataProtocollo ? new Date(`${input.dataProtocollo}T00:00:00.000Z`) : null,
+    pecWarningMancataRicevuta: false,
+  })),
 }));
 vi.mock("@/server/documents/storage", () => ({ storeDocumentFile: storeDocumentFileMock }));
-vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
-vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
+vi.mock("next/cache", () => ({ revalidatePath: revalidatePathMock }));
+vi.mock("next/navigation", () => ({ redirect: redirectMock }));
 
-import { createDocumentoUploadAction } from "@/server/actions/documenti";
+import {
+  archiveDocumentoAction,
+  createDocumentoUploadAction,
+  updateDocumentoMetadataAction,
+} from "@/server/actions/documenti";
+
+function archiveFormData() {
+  const formData = new FormData();
+  formData.set("id", "documento-1");
+  return formData;
+}
+
+function metadataFormData() {
+  const formData = archiveFormData();
+  formData.set("nome", "Verbale aggiornato");
+  formData.set("tipologia", "VERBALE");
+  formData.set("descrizione", "Descrizione aggiornata");
+  formData.set("direzione", "ENTRATA");
+  formData.set("canale", "PEC");
+  formData.set("numeroProtocollo", "PG/2026/002");
+  formData.set("dataProtocollo", "2026-08-02");
+  return formData;
+}
 
 describe("createDocumentoUploadAction", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     requireRoleMock.mockResolvedValue("ADMIN");
     getCurrentTenantContextMock.mockResolvedValue(null);
+    getCurrentUserMock.mockResolvedValue({ id: "user-1", email: "admin@example.test" });
+    requireTenantAccessMock.mockImplementation(() => undefined);
+    prismaMock.documento.findUnique.mockResolvedValue({
+      id: "documento-1",
+      enteId: "ente-1",
+      concessione: { enteId: "ente-1" },
+    });
     prismaMock.procedimento.findUnique.mockResolvedValue({
       id: "procedimento-1",
       concessione: { enteId: "ente-1" },
@@ -136,6 +171,92 @@ describe("createDocumentoUploadAction", () => {
     );
     expect(auditSuccessMock).toHaveBeenCalledWith(
       expect.objectContaining({ actor: expect.objectContaining({ userId: "user-1" }) }),
+    );
+  });
+});
+
+describe("document archive and metadata audit actors", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    requireRoleMock.mockResolvedValue("ADMIN");
+    getCurrentTenantContextMock.mockResolvedValue(null);
+    getCurrentUserMock.mockResolvedValue({ id: "user-1", email: "admin@example.test" });
+    requireTenantAccessMock.mockImplementation(() => undefined);
+    prismaMock.documento.findUnique.mockResolvedValue({
+      id: "documento-1",
+      enteId: "ente-1",
+      concessione: { enteId: "ente-1" },
+    });
+    prismaMock.documento.update.mockResolvedValue({
+      id: "documento-1",
+      concessioneId: "concessione-1",
+      criticitaId: null,
+      procedimentoId: "procedimento-1",
+      sopralluogoId: null,
+      pagamentoId: null,
+      reportId: null,
+    });
+    auditSuccessMock.mockResolvedValue(undefined);
+    auditFailureMock.mockResolvedValue(undefined);
+  });
+
+  it("archives with a null audit User FK for the technical Preview actor", async () => {
+    getCurrentUserMock.mockResolvedValue({ id: "staging-preview-admin", email: "preview@example.test" });
+
+    await archiveDocumentoAction(archiveFormData());
+
+    expect(prismaMock.documento.update).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ statoDocumento: "ARCHIVIATO", status: "ARCHIVIATO" }) }),
+    );
+    expect(auditSuccessMock).toHaveBeenCalledWith(
+      expect.objectContaining({ azione: "DOCUMENT_ARCHIVE", actor: expect.objectContaining({ userId: null }) }),
+    );
+    expect(revalidatePathMock).toHaveBeenCalledWith("/procedimenti/procedimento-1");
+    expect(redirectMock).toHaveBeenCalledWith("/documenti");
+  });
+
+  it("archives with the persisted actor User FK", async () => {
+    await archiveDocumentoAction(archiveFormData());
+
+    expect(auditSuccessMock).toHaveBeenCalledWith(
+      expect.objectContaining({ actor: expect.objectContaining({ userId: "user-1" }) }),
+    );
+  });
+
+  it("updates metadata with a null audit User FK for the technical Preview actor", async () => {
+    getCurrentUserMock.mockResolvedValue({ id: "staging-preview-admin", email: "preview@example.test" });
+
+    await updateDocumentoMetadataAction(metadataFormData());
+
+    expect(prismaMock.documento.update).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ nome: "Verbale aggiornato", numeroProtocollo: "PG/2026/002" }) }),
+    );
+    expect(auditSuccessMock).toHaveBeenCalledWith(
+      expect.objectContaining({ azione: "DOCUMENT_METADATA_UPDATE", actor: expect.objectContaining({ userId: null }) }),
+    );
+    expect(redirectMock).toHaveBeenCalledWith("/documenti");
+  });
+
+  it("updates metadata with the persisted actor User FK", async () => {
+    await updateDocumentoMetadataAction(metadataFormData());
+
+    expect(auditSuccessMock).toHaveBeenCalledWith(
+      expect.objectContaining({ actor: expect.objectContaining({ userId: "user-1" }) }),
+    );
+  });
+
+  it("writes a null audit User FK when tenant enforcement denies the technical Preview actor", async () => {
+    getCurrentUserMock.mockResolvedValue({ id: "staging-preview-admin", email: "preview@example.test" });
+    getCurrentTenantContextMock.mockResolvedValue({});
+    requireTenantAccessMock.mockImplementation(() => {
+      throw new Error("TENANT_WRITE_DENIED");
+    });
+
+    await expect(archiveDocumentoAction(archiveFormData())).rejects.toThrow("Accesso tenant non consentito.");
+
+    expect(prismaMock.documento.update).not.toHaveBeenCalled();
+    expect(auditFailureMock).toHaveBeenCalledWith(
+      expect.objectContaining({ actor: expect.objectContaining({ userId: null }) }),
     );
   });
 });
