@@ -36,6 +36,7 @@ export interface DocumentoListItem {
   source: string | null;
   status: string | null;
   dataDocumento: Date | null;
+  descrizione: string | null;
   direzione: string | null;
   canale: string | null;
   numeroProtocollo: string | null;
@@ -158,6 +159,7 @@ export async function getDocumentiList(params: GetDocumentiListParams): Promise<
       source: true,
       status: true,
       dataDocumento: true,
+      descrizione: true,
       direzione: true,
       canale: true,
       numeroProtocollo: true,

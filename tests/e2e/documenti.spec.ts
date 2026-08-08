@@ -14,6 +14,7 @@ test("admin uploads and downloads a fascicolo document", async ({ page }, testIn
   const tmpDir = await mkdtemp(path.join(tmpdir(), "cp-doc-e2e-"));
   const filePath = path.join(tmpDir, `verbale-upload-e2e-${uniqueToken}.txt`);
   const uniqueTitle = `Verbale upload E2E ${uniqueToken}`;
+  const metadataDescription = `Descrizione E2E ${uniqueToken}`;
   await writeFile(filePath, "Documento E2E baseline fascicolo");
 
   const uploadForm = page.locator("form", {
@@ -25,6 +26,7 @@ test("admin uploads and downloads a fascicolo document", async ({ page }, testIn
   await uploadForm.locator('select[name="tipologia"]').selectOption("VERBALE");
   await uploadForm.locator('select[name="source"]').selectOption("UPLOAD_UTENTE");
   await uploadForm.locator('select[name="status"]').selectOption("ATTIVO");
+  await uploadForm.locator('[name="descrizione"]').fill(metadataDescription);
   await uploadForm.locator('select[name="direzione"]').selectOption("ENTRATA");
   await uploadForm.locator('select[name="canale"]').selectOption("PEC");
   await uploadForm.locator('input[name="numeroProtocollo"]').fill(`PG/2026/${Date.now()}`);
@@ -61,6 +63,7 @@ test("admin uploads and downloads a fascicolo document", async ({ page }, testIn
   const uploadedRow = page.locator("tr", { hasText: uniqueTitle }).first();
   await expect(uploadedRow).toBeVisible({ timeout: 20000 });
   await expect(uploadedRow).toContainText("Warning PEC");
+  await expect(uploadedRow.locator('[name="descrizione"]')).toHaveValue(metadataDescription);
 
   const [download] = await Promise.all([
     page.waitForEvent("download"),

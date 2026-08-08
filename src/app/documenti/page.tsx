@@ -376,7 +376,7 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
                                 </option>
                               ))}
                             </Select>
-                            <Input name="descrizione" placeholder="Descrizione" />
+                            <Input name="descrizione" defaultValue={item.descrizione ?? ""} placeholder="Descrizione" />
                             <Select name="direzione" defaultValue={item.direzione ?? ""}>
                               <option value="">Direzione non indicata</option>
                               {filters.direzioni.map((value) => (
