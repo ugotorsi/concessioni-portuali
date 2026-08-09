@@ -557,6 +557,7 @@ export type DocumentoWhereInput = {
   pagamento?: Prisma.XOR<Prisma.PagamentoNullableScalarRelationFilter, Prisma.PagamentoWhereInput> | null
   report?: Prisma.XOR<Prisma.ReportNullableScalarRelationFilter, Prisma.ReportWhereInput> | null
   decisioniProcedimento?: Prisma.DecisioneProcedimentoListRelationFilter
+  fascicoloObservations?: Prisma.FascicoloObservationListRelationFilter
 }
 
 export type DocumentoOrderByWithRelationInput = {
@@ -615,6 +616,7 @@ export type DocumentoOrderByWithRelationInput = {
   pagamento?: Prisma.PagamentoOrderByWithRelationInput
   report?: Prisma.ReportOrderByWithRelationInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoOrderByRelationAggregateInput
+  fascicoloObservations?: Prisma.FascicoloObservationOrderByRelationAggregateInput
 }
 
 export type DocumentoWhereUniqueInput = Prisma.AtLeast<{
@@ -676,6 +678,7 @@ export type DocumentoWhereUniqueInput = Prisma.AtLeast<{
   pagamento?: Prisma.XOR<Prisma.PagamentoNullableScalarRelationFilter, Prisma.PagamentoWhereInput> | null
   report?: Prisma.XOR<Prisma.ReportNullableScalarRelationFilter, Prisma.ReportWhereInput> | null
   decisioniProcedimento?: Prisma.DecisioneProcedimentoListRelationFilter
+  fascicoloObservations?: Prisma.FascicoloObservationListRelationFilter
 }, "id">
 
 export type DocumentoOrderByWithAggregationInput = {
@@ -832,6 +835,7 @@ export type DocumentoCreateInput = {
   pagamento?: Prisma.PagamentoCreateNestedOneWithoutDocumentiInput
   report?: Prisma.ReportCreateNestedOneWithoutDocumentiInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutDocumentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutDocumentoInput
 }
 
 export type DocumentoUncheckedCreateInput = {
@@ -882,6 +886,7 @@ export type DocumentoUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutDocumentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutDocumentoInput
 }
 
 export type DocumentoUpdateInput = {
@@ -932,6 +937,7 @@ export type DocumentoUpdateInput = {
   pagamento?: Prisma.PagamentoUpdateOneWithoutDocumentiNestedInput
   report?: Prisma.ReportUpdateOneWithoutDocumentiNestedInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutDocumentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutDocumentoNestedInput
 }
 
 export type DocumentoUncheckedUpdateInput = {
@@ -982,6 +988,7 @@ export type DocumentoUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutDocumentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutDocumentoNestedInput
 }
 
 export type DocumentoCreateManyInput = {
@@ -1288,6 +1295,11 @@ export type DocumentoMinOrderByAggregateInput = {
 export type DocumentoSumOrderByAggregateInput = {
   dimensioneBytes?: Prisma.SortOrder
   sizeBytes?: Prisma.SortOrder
+}
+
+export type DocumentoScalarRelationFilter = {
+  is?: Prisma.DocumentoWhereInput
+  isNot?: Prisma.DocumentoWhereInput
 }
 
 export type DocumentoNullableScalarRelationFilter = {
@@ -1605,6 +1617,20 @@ export type NullableEnumDocumentoCanaleFieldUpdateOperationsInput = {
   set?: $Enums.DocumentoCanale | null
 }
 
+export type DocumentoCreateNestedOneWithoutFascicoloObservationsInput = {
+  create?: Prisma.XOR<Prisma.DocumentoCreateWithoutFascicoloObservationsInput, Prisma.DocumentoUncheckedCreateWithoutFascicoloObservationsInput>
+  connectOrCreate?: Prisma.DocumentoCreateOrConnectWithoutFascicoloObservationsInput
+  connect?: Prisma.DocumentoWhereUniqueInput
+}
+
+export type DocumentoUpdateOneRequiredWithoutFascicoloObservationsNestedInput = {
+  create?: Prisma.XOR<Prisma.DocumentoCreateWithoutFascicoloObservationsInput, Prisma.DocumentoUncheckedCreateWithoutFascicoloObservationsInput>
+  connectOrCreate?: Prisma.DocumentoCreateOrConnectWithoutFascicoloObservationsInput
+  upsert?: Prisma.DocumentoUpsertWithoutFascicoloObservationsInput
+  connect?: Prisma.DocumentoWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DocumentoUpdateToOneWithWhereWithoutFascicoloObservationsInput, Prisma.DocumentoUpdateWithoutFascicoloObservationsInput>, Prisma.DocumentoUncheckedUpdateWithoutFascicoloObservationsInput>
+}
+
 export type DocumentoCreateNestedOneWithoutDecisioniProcedimentoInput = {
   create?: Prisma.XOR<Prisma.DocumentoCreateWithoutDecisioniProcedimentoInput, Prisma.DocumentoUncheckedCreateWithoutDecisioniProcedimentoInput>
   connectOrCreate?: Prisma.DocumentoCreateOrConnectWithoutDecisioniProcedimentoInput
@@ -1710,6 +1736,7 @@ export type DocumentoCreateWithoutEnteInput = {
   pagamento?: Prisma.PagamentoCreateNestedOneWithoutDocumentiInput
   report?: Prisma.ReportCreateNestedOneWithoutDocumentiInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutDocumentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutDocumentoInput
 }
 
 export type DocumentoUncheckedCreateWithoutEnteInput = {
@@ -1759,6 +1786,7 @@ export type DocumentoUncheckedCreateWithoutEnteInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutDocumentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutDocumentoInput
 }
 
 export type DocumentoCreateOrConnectWithoutEnteInput = {
@@ -1886,6 +1914,7 @@ export type DocumentoCreateWithoutUploadedByUserInput = {
   pagamento?: Prisma.PagamentoCreateNestedOneWithoutDocumentiInput
   report?: Prisma.ReportCreateNestedOneWithoutDocumentiInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutDocumentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutDocumentoInput
 }
 
 export type DocumentoUncheckedCreateWithoutUploadedByUserInput = {
@@ -1935,6 +1964,7 @@ export type DocumentoUncheckedCreateWithoutUploadedByUserInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutDocumentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutDocumentoInput
 }
 
 export type DocumentoCreateOrConnectWithoutUploadedByUserInput = {
@@ -2010,6 +2040,7 @@ export type DocumentoCreateWithoutConcessioneInput = {
   pagamento?: Prisma.PagamentoCreateNestedOneWithoutDocumentiInput
   report?: Prisma.ReportCreateNestedOneWithoutDocumentiInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutDocumentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutDocumentoInput
 }
 
 export type DocumentoUncheckedCreateWithoutConcessioneInput = {
@@ -2059,6 +2090,7 @@ export type DocumentoUncheckedCreateWithoutConcessioneInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutDocumentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutDocumentoInput
 }
 
 export type DocumentoCreateOrConnectWithoutConcessioneInput = {
@@ -2134,6 +2166,7 @@ export type DocumentoCreateWithoutCriticitaInput = {
   pagamento?: Prisma.PagamentoCreateNestedOneWithoutDocumentiInput
   report?: Prisma.ReportCreateNestedOneWithoutDocumentiInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutDocumentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutDocumentoInput
 }
 
 export type DocumentoUncheckedCreateWithoutCriticitaInput = {
@@ -2183,6 +2216,7 @@ export type DocumentoUncheckedCreateWithoutCriticitaInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutDocumentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutDocumentoInput
 }
 
 export type DocumentoCreateOrConnectWithoutCriticitaInput = {
@@ -2258,6 +2292,7 @@ export type DocumentoCreateWithoutProcedimentoInput = {
   pagamento?: Prisma.PagamentoCreateNestedOneWithoutDocumentiInput
   report?: Prisma.ReportCreateNestedOneWithoutDocumentiInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutDocumentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutDocumentoInput
 }
 
 export type DocumentoUncheckedCreateWithoutProcedimentoInput = {
@@ -2307,6 +2342,7 @@ export type DocumentoUncheckedCreateWithoutProcedimentoInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutDocumentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutDocumentoInput
 }
 
 export type DocumentoCreateOrConnectWithoutProcedimentoInput = {
@@ -2382,6 +2418,7 @@ export type DocumentoCreateWithoutSopralluogoInput = {
   pagamento?: Prisma.PagamentoCreateNestedOneWithoutDocumentiInput
   report?: Prisma.ReportCreateNestedOneWithoutDocumentiInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutDocumentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutDocumentoInput
 }
 
 export type DocumentoUncheckedCreateWithoutSopralluogoInput = {
@@ -2431,6 +2468,7 @@ export type DocumentoUncheckedCreateWithoutSopralluogoInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutDocumentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutDocumentoInput
 }
 
 export type DocumentoCreateOrConnectWithoutSopralluogoInput = {
@@ -2506,6 +2544,7 @@ export type DocumentoCreateWithoutPagamentoInput = {
   sopralluogo?: Prisma.SopralluogoCreateNestedOneWithoutDocumentiInput
   report?: Prisma.ReportCreateNestedOneWithoutDocumentiInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutDocumentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutDocumentoInput
 }
 
 export type DocumentoUncheckedCreateWithoutPagamentoInput = {
@@ -2555,6 +2594,7 @@ export type DocumentoUncheckedCreateWithoutPagamentoInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutDocumentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutDocumentoInput
 }
 
 export type DocumentoCreateOrConnectWithoutPagamentoInput = {
@@ -2581,6 +2621,222 @@ export type DocumentoUpdateWithWhereUniqueWithoutPagamentoInput = {
 export type DocumentoUpdateManyWithWhereWithoutPagamentoInput = {
   where: Prisma.DocumentoScalarWhereInput
   data: Prisma.XOR<Prisma.DocumentoUpdateManyMutationInput, Prisma.DocumentoUncheckedUpdateManyWithoutPagamentoInput>
+}
+
+export type DocumentoCreateWithoutFascicoloObservationsInput = {
+  id?: string
+  nome: string
+  tipologia: $Enums.TipologiaDocumento
+  statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
+  mimeType?: string | null
+  dimensioneBytes?: number | null
+  checksumSha256?: string | null
+  sha256?: string | null
+  url?: string | null
+  storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
+  nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
+  dataDocumento?: Date | string | null
+  descrizione?: string | null
+  uploadedByUserEmail?: string | null
+  uploadedByUserRole?: string | null
+  archivedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  uploadedByUser?: Prisma.UserCreateNestedOneWithoutDocumentiCaricatiInput
+  ente?: Prisma.EnteCreateNestedOneWithoutDocumentiInput
+  concessione?: Prisma.ConcessioneCreateNestedOneWithoutDocumentiInput
+  criticita?: Prisma.CriticitaCreateNestedOneWithoutDocumentiInput
+  procedimento?: Prisma.ProcedimentoCreateNestedOneWithoutDocumentiInput
+  sopralluogo?: Prisma.SopralluogoCreateNestedOneWithoutDocumentiInput
+  pagamento?: Prisma.PagamentoCreateNestedOneWithoutDocumentiInput
+  report?: Prisma.ReportCreateNestedOneWithoutDocumentiInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutDocumentoInput
+}
+
+export type DocumentoUncheckedCreateWithoutFascicoloObservationsInput = {
+  id?: string
+  nome: string
+  tipologia: $Enums.TipologiaDocumento
+  statoDocumento?: $Enums.StatoDocumento
+  direzione?: $Enums.DocumentoDirezione | null
+  canale?: $Enums.DocumentoCanale | null
+  numeroProtocollo?: string | null
+  dataProtocollo?: Date | string | null
+  mittente?: string | null
+  destinatario?: string | null
+  pecMessageId?: string | null
+  pecRicevutaAccettazioneId?: string | null
+  pecRicevutaConsegnaId?: string | null
+  pecWarningMancataRicevuta?: boolean
+  mimeType?: string | null
+  dimensioneBytes?: number | null
+  checksumSha256?: string | null
+  sha256?: string | null
+  url?: string | null
+  storagePath?: string | null
+  storageKey?: string | null
+  storageProvider?: string | null
+  storageBucket?: string | null
+  publicUrl?: string | null
+  nomeStorage?: string | null
+  originalName?: string | null
+  sizeBytes?: number | null
+  documentType?: string | null
+  documentDate?: Date | string | null
+  source?: string | null
+  status?: string | null
+  dataDocumento?: Date | string | null
+  descrizione?: string | null
+  uploadedByUserId?: string | null
+  uploadedByUserEmail?: string | null
+  uploadedByUserRole?: string | null
+  archivedAt?: Date | string | null
+  enteId?: string | null
+  concessioneId?: string | null
+  criticitaId?: string | null
+  procedimentoId?: string | null
+  sopralluogoId?: string | null
+  pagamentoId?: string | null
+  reportId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutDocumentoInput
+}
+
+export type DocumentoCreateOrConnectWithoutFascicoloObservationsInput = {
+  where: Prisma.DocumentoWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocumentoCreateWithoutFascicoloObservationsInput, Prisma.DocumentoUncheckedCreateWithoutFascicoloObservationsInput>
+}
+
+export type DocumentoUpsertWithoutFascicoloObservationsInput = {
+  update: Prisma.XOR<Prisma.DocumentoUpdateWithoutFascicoloObservationsInput, Prisma.DocumentoUncheckedUpdateWithoutFascicoloObservationsInput>
+  create: Prisma.XOR<Prisma.DocumentoCreateWithoutFascicoloObservationsInput, Prisma.DocumentoUncheckedCreateWithoutFascicoloObservationsInput>
+  where?: Prisma.DocumentoWhereInput
+}
+
+export type DocumentoUpdateToOneWithWhereWithoutFascicoloObservationsInput = {
+  where?: Prisma.DocumentoWhereInput
+  data: Prisma.XOR<Prisma.DocumentoUpdateWithoutFascicoloObservationsInput, Prisma.DocumentoUncheckedUpdateWithoutFascicoloObservationsInput>
+}
+
+export type DocumentoUpdateWithoutFascicoloObservationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
+  statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedByUserRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  uploadedByUser?: Prisma.UserUpdateOneWithoutDocumentiCaricatiNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutDocumentiNestedInput
+  concessione?: Prisma.ConcessioneUpdateOneWithoutDocumentiNestedInput
+  criticita?: Prisma.CriticitaUpdateOneWithoutDocumentiNestedInput
+  procedimento?: Prisma.ProcedimentoUpdateOneWithoutDocumentiNestedInput
+  sopralluogo?: Prisma.SopralluogoUpdateOneWithoutDocumentiNestedInput
+  pagamento?: Prisma.PagamentoUpdateOneWithoutDocumentiNestedInput
+  report?: Prisma.ReportUpdateOneWithoutDocumentiNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutDocumentoNestedInput
+}
+
+export type DocumentoUncheckedUpdateWithoutFascicoloObservationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  tipologia?: Prisma.EnumTipologiaDocumentoFieldUpdateOperationsInput | $Enums.TipologiaDocumento
+  statoDocumento?: Prisma.EnumStatoDocumentoFieldUpdateOperationsInput | $Enums.StatoDocumento
+  direzione?: Prisma.NullableEnumDocumentoDirezioneFieldUpdateOperationsInput | $Enums.DocumentoDirezione | null
+  canale?: Prisma.NullableEnumDocumentoCanaleFieldUpdateOperationsInput | $Enums.DocumentoCanale | null
+  numeroProtocollo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataProtocollo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mittente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destinatario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaAccettazioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecRicevutaConsegnaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pecWarningMancataRicevuta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensioneBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  checksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nomeStorage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataDocumento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  descrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedByUserEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedByUserRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sopralluogoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pagamentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reportId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutDocumentoNestedInput
 }
 
 export type DocumentoCreateWithoutDecisioniProcedimentoInput = {
@@ -2630,6 +2886,7 @@ export type DocumentoCreateWithoutDecisioniProcedimentoInput = {
   sopralluogo?: Prisma.SopralluogoCreateNestedOneWithoutDocumentiInput
   pagamento?: Prisma.PagamentoCreateNestedOneWithoutDocumentiInput
   report?: Prisma.ReportCreateNestedOneWithoutDocumentiInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutDocumentoInput
 }
 
 export type DocumentoUncheckedCreateWithoutDecisioniProcedimentoInput = {
@@ -2679,6 +2936,7 @@ export type DocumentoUncheckedCreateWithoutDecisioniProcedimentoInput = {
   reportId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutDocumentoInput
 }
 
 export type DocumentoCreateOrConnectWithoutDecisioniProcedimentoInput = {
@@ -2744,6 +3002,7 @@ export type DocumentoUpdateWithoutDecisioniProcedimentoInput = {
   sopralluogo?: Prisma.SopralluogoUpdateOneWithoutDocumentiNestedInput
   pagamento?: Prisma.PagamentoUpdateOneWithoutDocumentiNestedInput
   report?: Prisma.ReportUpdateOneWithoutDocumentiNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutDocumentoNestedInput
 }
 
 export type DocumentoUncheckedUpdateWithoutDecisioniProcedimentoInput = {
@@ -2793,6 +3052,7 @@ export type DocumentoUncheckedUpdateWithoutDecisioniProcedimentoInput = {
   reportId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutDocumentoNestedInput
 }
 
 export type DocumentoCreateWithoutReportInput = {
@@ -2842,6 +3102,7 @@ export type DocumentoCreateWithoutReportInput = {
   sopralluogo?: Prisma.SopralluogoCreateNestedOneWithoutDocumentiInput
   pagamento?: Prisma.PagamentoCreateNestedOneWithoutDocumentiInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutDocumentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutDocumentoInput
 }
 
 export type DocumentoUncheckedCreateWithoutReportInput = {
@@ -2891,6 +3152,7 @@ export type DocumentoUncheckedCreateWithoutReportInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutDocumentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutDocumentoInput
 }
 
 export type DocumentoCreateOrConnectWithoutReportInput = {
@@ -3014,6 +3276,7 @@ export type DocumentoUpdateWithoutEnteInput = {
   pagamento?: Prisma.PagamentoUpdateOneWithoutDocumentiNestedInput
   report?: Prisma.ReportUpdateOneWithoutDocumentiNestedInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutDocumentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutDocumentoNestedInput
 }
 
 export type DocumentoUncheckedUpdateWithoutEnteInput = {
@@ -3063,6 +3326,7 @@ export type DocumentoUncheckedUpdateWithoutEnteInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutDocumentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutDocumentoNestedInput
 }
 
 export type DocumentoUncheckedUpdateManyWithoutEnteInput = {
@@ -3208,6 +3472,7 @@ export type DocumentoUpdateWithoutUploadedByUserInput = {
   pagamento?: Prisma.PagamentoUpdateOneWithoutDocumentiNestedInput
   report?: Prisma.ReportUpdateOneWithoutDocumentiNestedInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutDocumentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutDocumentoNestedInput
 }
 
 export type DocumentoUncheckedUpdateWithoutUploadedByUserInput = {
@@ -3257,6 +3522,7 @@ export type DocumentoUncheckedUpdateWithoutUploadedByUserInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutDocumentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutDocumentoNestedInput
 }
 
 export type DocumentoUncheckedUpdateManyWithoutUploadedByUserInput = {
@@ -3402,6 +3668,7 @@ export type DocumentoUpdateWithoutConcessioneInput = {
   pagamento?: Prisma.PagamentoUpdateOneWithoutDocumentiNestedInput
   report?: Prisma.ReportUpdateOneWithoutDocumentiNestedInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutDocumentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutDocumentoNestedInput
 }
 
 export type DocumentoUncheckedUpdateWithoutConcessioneInput = {
@@ -3451,6 +3718,7 @@ export type DocumentoUncheckedUpdateWithoutConcessioneInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutDocumentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutDocumentoNestedInput
 }
 
 export type DocumentoUncheckedUpdateManyWithoutConcessioneInput = {
@@ -3596,6 +3864,7 @@ export type DocumentoUpdateWithoutCriticitaInput = {
   pagamento?: Prisma.PagamentoUpdateOneWithoutDocumentiNestedInput
   report?: Prisma.ReportUpdateOneWithoutDocumentiNestedInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutDocumentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutDocumentoNestedInput
 }
 
 export type DocumentoUncheckedUpdateWithoutCriticitaInput = {
@@ -3645,6 +3914,7 @@ export type DocumentoUncheckedUpdateWithoutCriticitaInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutDocumentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutDocumentoNestedInput
 }
 
 export type DocumentoUncheckedUpdateManyWithoutCriticitaInput = {
@@ -3790,6 +4060,7 @@ export type DocumentoUpdateWithoutProcedimentoInput = {
   pagamento?: Prisma.PagamentoUpdateOneWithoutDocumentiNestedInput
   report?: Prisma.ReportUpdateOneWithoutDocumentiNestedInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutDocumentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutDocumentoNestedInput
 }
 
 export type DocumentoUncheckedUpdateWithoutProcedimentoInput = {
@@ -3839,6 +4110,7 @@ export type DocumentoUncheckedUpdateWithoutProcedimentoInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutDocumentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutDocumentoNestedInput
 }
 
 export type DocumentoUncheckedUpdateManyWithoutProcedimentoInput = {
@@ -3984,6 +4256,7 @@ export type DocumentoUpdateWithoutSopralluogoInput = {
   pagamento?: Prisma.PagamentoUpdateOneWithoutDocumentiNestedInput
   report?: Prisma.ReportUpdateOneWithoutDocumentiNestedInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutDocumentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutDocumentoNestedInput
 }
 
 export type DocumentoUncheckedUpdateWithoutSopralluogoInput = {
@@ -4033,6 +4306,7 @@ export type DocumentoUncheckedUpdateWithoutSopralluogoInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutDocumentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutDocumentoNestedInput
 }
 
 export type DocumentoUncheckedUpdateManyWithoutSopralluogoInput = {
@@ -4178,6 +4452,7 @@ export type DocumentoUpdateWithoutPagamentoInput = {
   sopralluogo?: Prisma.SopralluogoUpdateOneWithoutDocumentiNestedInput
   report?: Prisma.ReportUpdateOneWithoutDocumentiNestedInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutDocumentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutDocumentoNestedInput
 }
 
 export type DocumentoUncheckedUpdateWithoutPagamentoInput = {
@@ -4227,6 +4502,7 @@ export type DocumentoUncheckedUpdateWithoutPagamentoInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutDocumentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutDocumentoNestedInput
 }
 
 export type DocumentoUncheckedUpdateManyWithoutPagamentoInput = {
@@ -4372,6 +4648,7 @@ export type DocumentoUpdateWithoutReportInput = {
   sopralluogo?: Prisma.SopralluogoUpdateOneWithoutDocumentiNestedInput
   pagamento?: Prisma.PagamentoUpdateOneWithoutDocumentiNestedInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutDocumentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutDocumentoNestedInput
 }
 
 export type DocumentoUncheckedUpdateWithoutReportInput = {
@@ -4421,6 +4698,7 @@ export type DocumentoUncheckedUpdateWithoutReportInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutDocumentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutDocumentoNestedInput
 }
 
 export type DocumentoUncheckedUpdateManyWithoutReportInput = {
@@ -4478,10 +4756,12 @@ export type DocumentoUncheckedUpdateManyWithoutReportInput = {
 
 export type DocumentoCountOutputType = {
   decisioniProcedimento: number
+  fascicoloObservations: number
 }
 
 export type DocumentoCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   decisioniProcedimento?: boolean | DocumentoCountOutputTypeCountDecisioniProcedimentoArgs
+  fascicoloObservations?: boolean | DocumentoCountOutputTypeCountFascicoloObservationsArgs
 }
 
 /**
@@ -4499,6 +4779,13 @@ export type DocumentoCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Ex
  */
 export type DocumentoCountOutputTypeCountDecisioniProcedimentoArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.DecisioneProcedimentoWhereInput
+}
+
+/**
+ * DocumentoCountOutputType without action
+ */
+export type DocumentoCountOutputTypeCountFascicoloObservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FascicoloObservationWhereInput
 }
 
 
@@ -4558,6 +4845,7 @@ export type DocumentoSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   pagamento?: boolean | Prisma.Documento$pagamentoArgs<ExtArgs>
   report?: boolean | Prisma.Documento$reportArgs<ExtArgs>
   decisioniProcedimento?: boolean | Prisma.Documento$decisioniProcedimentoArgs<ExtArgs>
+  fascicoloObservations?: boolean | Prisma.Documento$fascicoloObservationsArgs<ExtArgs>
   _count?: boolean | Prisma.DocumentoCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["documento"]>
 
@@ -4735,6 +5023,7 @@ export type DocumentoInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
   pagamento?: boolean | Prisma.Documento$pagamentoArgs<ExtArgs>
   report?: boolean | Prisma.Documento$reportArgs<ExtArgs>
   decisioniProcedimento?: boolean | Prisma.Documento$decisioniProcedimentoArgs<ExtArgs>
+  fascicoloObservations?: boolean | Prisma.Documento$fascicoloObservationsArgs<ExtArgs>
   _count?: boolean | Prisma.DocumentoCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type DocumentoIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4770,6 +5059,7 @@ export type $DocumentoPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     pagamento: Prisma.$PagamentoPayload<ExtArgs> | null
     report: Prisma.$ReportPayload<ExtArgs> | null
     decisioniProcedimento: Prisma.$DecisioneProcedimentoPayload<ExtArgs>[]
+    fascicoloObservations: Prisma.$FascicoloObservationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -5221,6 +5511,7 @@ export interface Prisma__DocumentoClient<T, Null = never, ExtArgs extends runtim
   pagamento<T extends Prisma.Documento$pagamentoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Documento$pagamentoArgs<ExtArgs>>): Prisma.Prisma__PagamentoClient<runtime.Types.Result.GetResult<Prisma.$PagamentoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   report<T extends Prisma.Documento$reportArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Documento$reportArgs<ExtArgs>>): Prisma.Prisma__ReportClient<runtime.Types.Result.GetResult<Prisma.$ReportPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   decisioniProcedimento<T extends Prisma.Documento$decisioniProcedimentoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Documento$decisioniProcedimentoArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DecisioneProcedimentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  fascicoloObservations<T extends Prisma.Documento$fascicoloObservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Documento$fascicoloObservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloObservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5870,6 +6161,30 @@ export type Documento$decisioniProcedimentoArgs<ExtArgs extends runtime.Types.Ex
   take?: number
   skip?: number
   distinct?: Prisma.DecisioneProcedimentoScalarFieldEnum | Prisma.DecisioneProcedimentoScalarFieldEnum[]
+}
+
+/**
+ * Documento.fascicoloObservations
+ */
+export type Documento$fascicoloObservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FascicoloObservation
+   */
+  select?: Prisma.FascicoloObservationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FascicoloObservation
+   */
+  omit?: Prisma.FascicoloObservationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FascicoloObservationInclude<ExtArgs> | null
+  where?: Prisma.FascicoloObservationWhereInput
+  orderBy?: Prisma.FascicoloObservationOrderByWithRelationInput | Prisma.FascicoloObservationOrderByWithRelationInput[]
+  cursor?: Prisma.FascicoloObservationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FascicoloObservationScalarFieldEnum | Prisma.FascicoloObservationScalarFieldEnum[]
 }
 
 /**

@@ -73,6 +73,7 @@ export const ModelName = {
   Sopralluogo: 'Sopralluogo',
   Pagamento: 'Pagamento',
   Documento: 'Documento',
+  FascicoloObservation: 'FascicoloObservation',
   DecisioneProcedimento: 'DecisioneProcedimento',
   Report: 'Report',
   NormaFonte: 'NormaFonte',
@@ -605,6 +606,30 @@ export const DocumentoScalarFieldEnum = {
 export type DocumentoScalarFieldEnum = (typeof DocumentoScalarFieldEnum)[keyof typeof DocumentoScalarFieldEnum]
 
 
+export const FascicoloObservationScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  procedimentoId: 'procedimentoId',
+  documentoId: 'documentoId',
+  kind: 'kind',
+  ruleCode: 'ruleCode',
+  ruleVersion: 'ruleVersion',
+  factsSnapshot: 'factsSnapshot',
+  status: 'status',
+  detectedAt: 'detectedAt',
+  reviewedAt: 'reviewedAt',
+  reviewedByUserId: 'reviewedByUserId',
+  reviewedByActorId: 'reviewedByActorId',
+  reviewedByEmail: 'reviewedByEmail',
+  reviewedByRole: 'reviewedByRole',
+  reviewNote: 'reviewNote',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FascicoloObservationScalarFieldEnum = (typeof FascicoloObservationScalarFieldEnum)[keyof typeof FascicoloObservationScalarFieldEnum]
+
+
 export const DecisioneProcedimentoScalarFieldEnum = {
   id: 'id',
   enteId: 'enteId',
@@ -738,6 +763,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

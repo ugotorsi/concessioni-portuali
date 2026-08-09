@@ -5,6 +5,7 @@ import { SubmitButtonPending } from "@/components/forms/SubmitButtonPending";
 import { GravitaBadge, StatoBadge as CriticitaStatoBadge } from "@/components/criticita/CriticitaBadges";
 import { EntityDocumentsPanel } from "@/components/documents/EntityDocumentsPanel";
 import { AppShell } from "@/components/layout/AppShell";
+import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloObservationsPanel";
 import {
   ProcedimentoGiorniBadge,
   ProcedimentoChecklistBadge,
@@ -45,6 +46,7 @@ import {
 } from "@/server/actions/procedimenti";
 import { getDecisionRulePreviewForTipologia } from "@/server/procedimenti/decisioni";
 import { getLetturaProcedimentale, getProcedimentoDetail } from "@/server/queries/procedimenti";
+import { getFascicoloObservations } from "@/server/queries/fascicolo-observations";
 import { getNormeForProcedimento } from "@/server/queries/normativa";
 
 import { PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES } from "@/server/queries/procedimenti";
@@ -84,6 +86,8 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
   if (!detail) {
     notFound();
   }
+
+  const fascicoloObservations = await getFascicoloObservations(detail.procedimento.id);
 
   const checklist = getChecklistContraddittorioItems(detail.procedimento);
   const checklistGuidance = getProcedimentoChecklistGuidance(detail.procedimento);
@@ -288,6 +292,12 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
               </div>
             </CardContent>
           </Card>
+
+          <FascicoloObservationsPanel
+            procedimentoId={detail.procedimento.id}
+            canReview={canWriteChecklist}
+            observations={fascicoloObservations}
+          />
 
           <Card>
             <CardHeader>

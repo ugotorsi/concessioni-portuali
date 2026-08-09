@@ -23,6 +23,23 @@ export const RuoloUser = {
 export type RuoloUser = (typeof RuoloUser)[keyof typeof RuoloUser]
 
 
+export const FascicoloObservationKind = {
+  DOCUMENT_COMPLETENESS: 'DOCUMENT_COMPLETENESS'
+} as const
+
+export type FascicoloObservationKind = (typeof FascicoloObservationKind)[keyof typeof FascicoloObservationKind]
+
+
+export const FascicoloObservationStatus = {
+  PROPOSTO: 'PROPOSTO',
+  VALIDATO: 'VALIDATO',
+  RIFIUTATO: 'RIFIUTATO',
+  SUPERATO: 'SUPERATO'
+} as const
+
+export type FascicoloObservationStatus = (typeof FascicoloObservationStatus)[keyof typeof FascicoloObservationStatus]
+
+
 export const NormaRiferimento = {
   ART_36_COD_NAV: 'ART_36_COD_NAV',
   ART_18_L_84_1994: 'ART_18_L_84_1994',

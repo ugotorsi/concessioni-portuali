@@ -40,52 +40,62 @@ async function resolveActor(actor?: AuditActor): Promise<Required<AuditActor>> {
   };
 }
 
-export async function createAuditLog(input: CreateAuditLogInput) {
-  const actor = await resolveActor(input.actor);
-  const context = input.requestContext ?? (await getAuditRequestContext());
+async function createAuditLogRecord(
+  tx: Prisma.TransactionClient,
+  input: CreateAuditLogInput,
+  actor: Required<AuditActor>,
+  context: AuditRequestContext,
+) {
   const metadata = sanitizeMetadata(input.metadata);
   const createdAt = new Date();
+  const previous = await tx.activityLog.findFirst({
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    select: { currentHash: true },
+  });
 
-  return prisma.$transaction(async (tx) => {
-    const previous = await tx.activityLog.findFirst({
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      select: { currentHash: true },
-    });
+  const previousHash = previous?.currentHash ?? null;
+  const currentHash = computeAuditHash({
+    previousHash,
+    createdAt,
+    azione: input.azione,
+    entita: input.entita,
+    entitaId: input.entitaId ?? null,
+    enteId: input.enteId ?? null,
+    concessioneId: input.concessioneId ?? null,
+    esito: input.esito,
+    actor,
+    metadata,
+  });
 
-    const previousHash = previous?.currentHash ?? null;
-    const currentHash = computeAuditHash({
-      previousHash,
-      createdAt,
+  return tx.activityLog.create({
+    data: {
+      userId: actor.userId,
+      userEmail: actor.userEmail,
+      userRole: actor.userRole,
+      enteId: input.enteId ?? null,
+      concessioneId: input.concessioneId ?? null,
       azione: input.azione,
       entita: input.entita,
       entitaId: input.entitaId ?? null,
-      enteId: input.enteId ?? null,
-      concessioneId: input.concessioneId ?? null,
+      ipAddress: context.ipAddress,
+      userAgent: context.userAgent,
       esito: input.esito,
-      actor,
-      metadata,
-    });
-
-    return tx.activityLog.create({
-      data: {
-        userId: actor.userId,
-        userEmail: actor.userEmail,
-        userRole: actor.userRole,
-        enteId: input.enteId ?? null,
-        concessioneId: input.concessioneId ?? null,
-        azione: input.azione,
-        entita: input.entita,
-        entitaId: input.entitaId ?? null,
-        ipAddress: context.ipAddress,
-        userAgent: context.userAgent,
-        esito: input.esito,
-        metadata: metadata ?? undefined,
-        previousHash,
-        currentHash,
-        createdAt,
-      },
-    });
+      metadata: metadata ?? undefined,
+      previousHash,
+      currentHash,
+      createdAt,
+    },
   });
+}
+
+export async function createAuditLogInTransaction(tx: Prisma.TransactionClient, input: CreateAuditLogInput) {
+  const actor = await resolveActor(input.actor);
+  const context = input.requestContext ?? (await getAuditRequestContext());
+  return createAuditLogRecord(tx, input, actor, context);
+}
+
+export async function createAuditLog(input: CreateAuditLogInput) {
+  return prisma.$transaction((tx) => createAuditLogInTransaction(tx, input));
 }
 
 export function auditSuccess(input: Omit<CreateAuditLogInput, "esito">) {

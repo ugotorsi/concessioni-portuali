@@ -406,6 +406,7 @@ export const ModelName = {
   Sopralluogo: 'Sopralluogo',
   Pagamento: 'Pagamento',
   Documento: 'Documento',
+  FascicoloObservation: 'FascicoloObservation',
   DecisioneProcedimento: 'DecisioneProcedimento',
   Report: 'Report',
   NormaFonte: 'NormaFonte',
@@ -427,7 +428,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "fascicoloObservation" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2059,6 +2060,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    FascicoloObservation: {
+      payload: Prisma.$FascicoloObservationPayload<ExtArgs>
+      fields: Prisma.FascicoloObservationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FascicoloObservationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloObservationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FascicoloObservationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloObservationPayload>
+        }
+        findFirst: {
+          args: Prisma.FascicoloObservationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloObservationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FascicoloObservationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloObservationPayload>
+        }
+        findMany: {
+          args: Prisma.FascicoloObservationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloObservationPayload>[]
+        }
+        create: {
+          args: Prisma.FascicoloObservationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloObservationPayload>
+        }
+        createMany: {
+          args: Prisma.FascicoloObservationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FascicoloObservationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloObservationPayload>[]
+        }
+        delete: {
+          args: Prisma.FascicoloObservationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloObservationPayload>
+        }
+        update: {
+          args: Prisma.FascicoloObservationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloObservationPayload>
+        }
+        deleteMany: {
+          args: Prisma.FascicoloObservationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FascicoloObservationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FascicoloObservationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloObservationPayload>[]
+        }
+        upsert: {
+          args: Prisma.FascicoloObservationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloObservationPayload>
+        }
+        aggregate: {
+          args: Prisma.FascicoloObservationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFascicoloObservation>
+        }
+        groupBy: {
+          args: Prisma.FascicoloObservationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FascicoloObservationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FascicoloObservationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FascicoloObservationCountAggregateOutputType> | number
+        }
+      }
+    }
     DecisioneProcedimento: {
       payload: Prisma.$DecisioneProcedimentoPayload<ExtArgs>
       fields: Prisma.DecisioneProcedimentoFieldRefs
@@ -3050,6 +3125,30 @@ export const DocumentoScalarFieldEnum = {
 export type DocumentoScalarFieldEnum = (typeof DocumentoScalarFieldEnum)[keyof typeof DocumentoScalarFieldEnum]
 
 
+export const FascicoloObservationScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  procedimentoId: 'procedimentoId',
+  documentoId: 'documentoId',
+  kind: 'kind',
+  ruleCode: 'ruleCode',
+  ruleVersion: 'ruleVersion',
+  factsSnapshot: 'factsSnapshot',
+  status: 'status',
+  detectedAt: 'detectedAt',
+  reviewedAt: 'reviewedAt',
+  reviewedByUserId: 'reviewedByUserId',
+  reviewedByActorId: 'reviewedByActorId',
+  reviewedByEmail: 'reviewedByEmail',
+  reviewedByRole: 'reviewedByRole',
+  reviewNote: 'reviewNote',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FascicoloObservationScalarFieldEnum = (typeof FascicoloObservationScalarFieldEnum)[keyof typeof FascicoloObservationScalarFieldEnum]
+
+
 export const DecisioneProcedimentoScalarFieldEnum = {
   id: 'id',
   enteId: 'enteId',
@@ -3183,6 +3282,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -4008,6 +4114,34 @@ export type ListEnumDocumentoCanaleFieldRefInput<$PrismaModel> = FieldRefInputTy
 
 
 /**
+ * Reference to a field of type 'FascicoloObservationKind'
+ */
+export type EnumFascicoloObservationKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FascicoloObservationKind'>
+    
+
+
+/**
+ * Reference to a field of type 'FascicoloObservationKind[]'
+ */
+export type ListEnumFascicoloObservationKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FascicoloObservationKind[]'>
+    
+
+
+/**
+ * Reference to a field of type 'FascicoloObservationStatus'
+ */
+export type EnumFascicoloObservationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FascicoloObservationStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'FascicoloObservationStatus[]'
+ */
+export type ListEnumFascicoloObservationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FascicoloObservationStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'TipoDecisioneProcedimento'
  */
 export type EnumTipoDecisioneProcedimentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoDecisioneProcedimento'>
@@ -4264,6 +4398,7 @@ export type GlobalOmitConfig = {
   sopralluogo?: Prisma.SopralluogoOmit
   pagamento?: Prisma.PagamentoOmit
   documento?: Prisma.DocumentoOmit
+  fascicoloObservation?: Prisma.FascicoloObservationOmit
   decisioneProcedimento?: Prisma.DecisioneProcedimentoOmit
   report?: Prisma.ReportOmit
   normaFonte?: Prisma.NormaFonteOmit
