@@ -152,6 +152,7 @@ export interface ProcedimentiFiltersData {
 }
 
 export interface ProcedimentoDetail {
+  canonicalEnteId: string | null;
   procedimento: {
     id: string;
     responsabileProcedimentoNome: string | null;
@@ -888,6 +889,7 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
   });
 
   return {
+    canonicalEnteId: procedimento.concessione.enteId ?? null,
     procedimento: {
       id: procedimento.id,
       responsabileProcedimentoNome: procedimento.responsabileProcedimentoNome,

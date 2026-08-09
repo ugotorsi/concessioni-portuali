@@ -88,6 +88,7 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
   }
 
   const fascicoloObservations = await getFascicoloObservations(detail.procedimento.id);
+  const hasCanonicalTenant = Boolean(detail.canonicalEnteId);
 
   const checklist = getChecklistContraddittorioItems(detail.procedimento);
   const checklistGuidance = getProcedimentoChecklistGuidance(detail.procedimento);
@@ -296,6 +297,7 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
           <FascicoloObservationsPanel
             procedimentoId={detail.procedimento.id}
             canReview={canWriteChecklist}
+            hasCanonicalTenant={hasCanonicalTenant}
             observations={fascicoloObservations}
           />
 

@@ -8,6 +8,7 @@ import { formatDateIT } from "@/lib/utils";
 interface FascicoloObservationsPanelProps {
   procedimentoId: string;
   canReview: boolean;
+  hasCanonicalTenant: boolean;
   observations: Awaited<ReturnType<typeof import("@/server/queries/fascicolo-observations").getFascicoloObservations>>;
 }
 
@@ -21,7 +22,7 @@ function statusVariant(status: "PROPOSTO" | "VALIDATO" | "RIFIUTATO" | "SUPERATO
   return "default" as const;
 }
 
-export function FascicoloObservationsPanel({ procedimentoId, canReview, observations }: FascicoloObservationsPanelProps) {
+export function FascicoloObservationsPanel({ procedimentoId, canReview, hasCanonicalTenant, observations }: FascicoloObservationsPanelProps) {
   return (
     <Card>
       <CardHeader>
@@ -29,11 +30,16 @@ export function FascicoloObservationsPanel({ procedimentoId, canReview, observat
         <CardDescription>Supporto tecnico non vincolante, sottoposto a verifica umana.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {canReview ? (
+        {canReview && hasCanonicalTenant ? (
           <form action={refreshFascicoloObservationsAction}>
             <input type="hidden" name="procedimentoId" value={procedimentoId} />
             <Button type="submit" variant="outline">Aggiorna osservazioni</Button>
           </form>
+        ) : null}
+        {!hasCanonicalTenant ? (
+          <p className="text-sm text-slate-600">
+            Le osservazioni del fascicolo non sono disponibili finché il procedimento non è associato a un ente competente.
+          </p>
         ) : null}
 
         {observations.map((observation) => (
