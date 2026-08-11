@@ -696,6 +696,13 @@ export type EnumConcessionVerticalFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumConcessionVerticalFilter<$PrismaModel> | $Enums.ConcessionVertical
 }
 
+export type EnumPortActivityLegalTypeNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.PortActivityLegalType | Prisma.EnumPortActivityLegalTypeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.PortActivityLegalType[] | Prisma.ListEnumPortActivityLegalTypeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.PortActivityLegalType[] | Prisma.ListEnumPortActivityLegalTypeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumPortActivityLegalTypeNullableFilter<$PrismaModel> | $Enums.PortActivityLegalType | null
+}
+
 export type EnumAwardingProcedureTypeFilter<$PrismaModel = never> = {
   equals?: $Enums.AwardingProcedureType | Prisma.EnumAwardingProcedureTypeFieldRefInput<$PrismaModel>
   in?: $Enums.AwardingProcedureType[] | Prisma.ListEnumAwardingProcedureTypeFieldRefInput<$PrismaModel>
@@ -799,6 +806,16 @@ export type EnumConcessionVerticalWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumConcessionVerticalFilter<$PrismaModel>
   _max?: Prisma.NestedEnumConcessionVerticalFilter<$PrismaModel>
+}
+
+export type EnumPortActivityLegalTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PortActivityLegalType | Prisma.EnumPortActivityLegalTypeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.PortActivityLegalType[] | Prisma.ListEnumPortActivityLegalTypeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.PortActivityLegalType[] | Prisma.ListEnumPortActivityLegalTypeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumPortActivityLegalTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.PortActivityLegalType | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPortActivityLegalTypeNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPortActivityLegalTypeNullableFilter<$PrismaModel>
 }
 
 export type EnumAwardingProcedureTypeWithAggregatesFilter<$PrismaModel = never> = {
@@ -2195,6 +2212,13 @@ export type NestedEnumConcessionVerticalFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumConcessionVerticalFilter<$PrismaModel> | $Enums.ConcessionVertical
 }
 
+export type NestedEnumPortActivityLegalTypeNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.PortActivityLegalType | Prisma.EnumPortActivityLegalTypeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.PortActivityLegalType[] | Prisma.ListEnumPortActivityLegalTypeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.PortActivityLegalType[] | Prisma.ListEnumPortActivityLegalTypeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumPortActivityLegalTypeNullableFilter<$PrismaModel> | $Enums.PortActivityLegalType | null
+}
+
 export type NestedEnumAwardingProcedureTypeFilter<$PrismaModel = never> = {
   equals?: $Enums.AwardingProcedureType | Prisma.EnumAwardingProcedureTypeFieldRefInput<$PrismaModel>
   in?: $Enums.AwardingProcedureType[] | Prisma.ListEnumAwardingProcedureTypeFieldRefInput<$PrismaModel>
@@ -2298,6 +2322,16 @@ export type NestedEnumConcessionVerticalWithAggregatesFilter<$PrismaModel = neve
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumConcessionVerticalFilter<$PrismaModel>
   _max?: Prisma.NestedEnumConcessionVerticalFilter<$PrismaModel>
+}
+
+export type NestedEnumPortActivityLegalTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PortActivityLegalType | Prisma.EnumPortActivityLegalTypeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.PortActivityLegalType[] | Prisma.ListEnumPortActivityLegalTypeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.PortActivityLegalType[] | Prisma.ListEnumPortActivityLegalTypeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumPortActivityLegalTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.PortActivityLegalType | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPortActivityLegalTypeNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPortActivityLegalTypeNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumAwardingProcedureTypeWithAggregatesFilter<$PrismaModel = never> = {

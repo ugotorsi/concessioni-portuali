@@ -2945,6 +2945,7 @@ export const ConcessioneScalarFieldEnum = {
   canoneAnnuo: 'canoneAnnuo',
   categoriaCanone: 'categoriaCanone',
   concessionVertical: 'concessionVertical',
+  portActivityLegalType: 'portActivityLegalType',
   concessionObjectType: 'concessionObjectType',
   awardingProcedureType: 'awardingProcedureType',
   removableWorksProfile: 'removableWorksProfile',
@@ -3848,6 +3849,20 @@ export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMo
 
 
 /**
+ * Reference to a field of type 'PortActivityLegalType'
+ */
+export type EnumPortActivityLegalTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PortActivityLegalType'>
+    
+
+
+/**
+ * Reference to a field of type 'PortActivityLegalType[]'
+ */
+export type ListEnumPortActivityLegalTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PortActivityLegalType[]'>
+    
+
+
+/**
  * Reference to a field of type 'RemovableWorksProfile'
  */
 export type EnumRemovableWorksProfileFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RemovableWorksProfile'>
@@ -4243,14 +4258,14 @@ export type ListEnumFascicoloObservationStatusFieldRefInput<$PrismaModel> = Fiel
  * Reference to a field of type 'FascicoloChecklistEvidenceStatus'
  */
 export type EnumFascicoloChecklistEvidenceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FascicoloChecklistEvidenceStatus'>
-
+    
 
 
 /**
  * Reference to a field of type 'FascicoloChecklistEvidenceStatus[]'
  */
 export type ListEnumFascicoloChecklistEvidenceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FascicoloChecklistEvidenceStatus[]'>
-
+    
 
 
 /**

@@ -158,7 +158,7 @@ export type Documento = Prisma.DocumentoModel
 export type FascicoloObservation = Prisma.FascicoloObservationModel
 /**
  * Model FascicoloChecklistEvidence
- *
+ * 
  */
 export type FascicoloChecklistEvidence = Prisma.FascicoloChecklistEvidenceModel
 /**

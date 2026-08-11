@@ -58,6 +58,7 @@ export type ConcessioneMinAggregateOutputType = {
   canoneAnnuo: runtime.Decimal | null
   categoriaCanone: string | null
   concessionVertical: $Enums.ConcessionVertical | null
+  portActivityLegalType: $Enums.PortActivityLegalType | null
   concessionObjectType: $Enums.ConcessionObjectType | null
   awardingProcedureType: $Enums.AwardingProcedureType | null
   removableWorksProfile: $Enums.RemovableWorksProfile | null
@@ -93,6 +94,7 @@ export type ConcessioneMaxAggregateOutputType = {
   canoneAnnuo: runtime.Decimal | null
   categoriaCanone: string | null
   concessionVertical: $Enums.ConcessionVertical | null
+  portActivityLegalType: $Enums.PortActivityLegalType | null
   concessionObjectType: $Enums.ConcessionObjectType | null
   awardingProcedureType: $Enums.AwardingProcedureType | null
   removableWorksProfile: $Enums.RemovableWorksProfile | null
@@ -128,6 +130,7 @@ export type ConcessioneCountAggregateOutputType = {
   canoneAnnuo: number
   categoriaCanone: number
   concessionVertical: number
+  portActivityLegalType: number
   concessionObjectType: number
   awardingProcedureType: number
   removableWorksProfile: number
@@ -179,6 +182,7 @@ export type ConcessioneMinAggregateInputType = {
   canoneAnnuo?: true
   categoriaCanone?: true
   concessionVertical?: true
+  portActivityLegalType?: true
   concessionObjectType?: true
   awardingProcedureType?: true
   removableWorksProfile?: true
@@ -214,6 +218,7 @@ export type ConcessioneMaxAggregateInputType = {
   canoneAnnuo?: true
   categoriaCanone?: true
   concessionVertical?: true
+  portActivityLegalType?: true
   concessionObjectType?: true
   awardingProcedureType?: true
   removableWorksProfile?: true
@@ -249,6 +254,7 @@ export type ConcessioneCountAggregateInputType = {
   canoneAnnuo?: true
   categoriaCanone?: true
   concessionVertical?: true
+  portActivityLegalType?: true
   concessionObjectType?: true
   awardingProcedureType?: true
   removableWorksProfile?: true
@@ -371,6 +377,7 @@ export type ConcessioneGroupByOutputType = {
   canoneAnnuo: runtime.Decimal | null
   categoriaCanone: string | null
   concessionVertical: $Enums.ConcessionVertical
+  portActivityLegalType: $Enums.PortActivityLegalType | null
   concessionObjectType: $Enums.ConcessionObjectType | null
   awardingProcedureType: $Enums.AwardingProcedureType
   removableWorksProfile: $Enums.RemovableWorksProfile
@@ -429,6 +436,7 @@ export type ConcessioneWhereInput = {
   canoneAnnuo?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.StringNullableFilter<"Concessione"> | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFilter<"Concessione"> | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.EnumPortActivityLegalTypeNullableFilter<"Concessione"> | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.EnumConcessionObjectTypeNullableFilter<"Concessione"> | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFilter<"Concessione"> | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFilter<"Concessione"> | $Enums.RemovableWorksProfile
@@ -478,6 +486,7 @@ export type ConcessioneOrderByWithRelationInput = {
   canoneAnnuo?: Prisma.SortOrderInput | Prisma.SortOrder
   categoriaCanone?: Prisma.SortOrderInput | Prisma.SortOrder
   concessionVertical?: Prisma.SortOrder
+  portActivityLegalType?: Prisma.SortOrderInput | Prisma.SortOrder
   concessionObjectType?: Prisma.SortOrderInput | Prisma.SortOrder
   awardingProcedureType?: Prisma.SortOrder
   removableWorksProfile?: Prisma.SortOrder
@@ -530,6 +539,7 @@ export type ConcessioneWhereUniqueInput = Prisma.AtLeast<{
   canoneAnnuo?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.StringNullableFilter<"Concessione"> | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFilter<"Concessione"> | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.EnumPortActivityLegalTypeNullableFilter<"Concessione"> | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.EnumConcessionObjectTypeNullableFilter<"Concessione"> | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFilter<"Concessione"> | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFilter<"Concessione"> | $Enums.RemovableWorksProfile
@@ -579,6 +589,7 @@ export type ConcessioneOrderByWithAggregationInput = {
   canoneAnnuo?: Prisma.SortOrderInput | Prisma.SortOrder
   categoriaCanone?: Prisma.SortOrderInput | Prisma.SortOrder
   concessionVertical?: Prisma.SortOrder
+  portActivityLegalType?: Prisma.SortOrderInput | Prisma.SortOrder
   concessionObjectType?: Prisma.SortOrderInput | Prisma.SortOrder
   awardingProcedureType?: Prisma.SortOrder
   removableWorksProfile?: Prisma.SortOrder
@@ -622,6 +633,7 @@ export type ConcessioneScalarWhereWithAggregatesInput = {
   canoneAnnuo?: Prisma.DecimalNullableWithAggregatesFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.StringNullableWithAggregatesFilter<"Concessione"> | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalWithAggregatesFilter<"Concessione"> | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.EnumPortActivityLegalTypeNullableWithAggregatesFilter<"Concessione"> | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.EnumConcessionObjectTypeNullableWithAggregatesFilter<"Concessione"> | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeWithAggregatesFilter<"Concessione"> | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileWithAggregatesFilter<"Concessione"> | $Enums.RemovableWorksProfile
@@ -657,6 +669,7 @@ export type ConcessioneCreateInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -704,6 +717,7 @@ export type ConcessioneUncheckedCreateInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -751,6 +765,7 @@ export type ConcessioneUpdateInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -798,6 +813,7 @@ export type ConcessioneUncheckedUpdateInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -845,6 +861,7 @@ export type ConcessioneCreateManyInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -880,6 +897,7 @@ export type ConcessioneUpdateManyMutationInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -913,6 +931,7 @@ export type ConcessioneUncheckedUpdateManyInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -958,6 +977,7 @@ export type ConcessioneCountOrderByAggregateInput = {
   canoneAnnuo?: Prisma.SortOrder
   categoriaCanone?: Prisma.SortOrder
   concessionVertical?: Prisma.SortOrder
+  portActivityLegalType?: Prisma.SortOrder
   concessionObjectType?: Prisma.SortOrder
   awardingProcedureType?: Prisma.SortOrder
   removableWorksProfile?: Prisma.SortOrder
@@ -1000,6 +1020,7 @@ export type ConcessioneMaxOrderByAggregateInput = {
   canoneAnnuo?: Prisma.SortOrder
   categoriaCanone?: Prisma.SortOrder
   concessionVertical?: Prisma.SortOrder
+  portActivityLegalType?: Prisma.SortOrder
   concessionObjectType?: Prisma.SortOrder
   awardingProcedureType?: Prisma.SortOrder
   removableWorksProfile?: Prisma.SortOrder
@@ -1035,6 +1056,7 @@ export type ConcessioneMinOrderByAggregateInput = {
   canoneAnnuo?: Prisma.SortOrder
   categoriaCanone?: Prisma.SortOrder
   concessionVertical?: Prisma.SortOrder
+  portActivityLegalType?: Prisma.SortOrder
   concessionObjectType?: Prisma.SortOrder
   awardingProcedureType?: Prisma.SortOrder
   removableWorksProfile?: Prisma.SortOrder
@@ -1175,6 +1197,10 @@ export type NullableDecimalFieldUpdateOperationsInput = {
 
 export type EnumConcessionVerticalFieldUpdateOperationsInput = {
   set?: $Enums.ConcessionVertical
+}
+
+export type NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput = {
+  set?: $Enums.PortActivityLegalType | null
 }
 
 export type EnumAwardingProcedureTypeFieldUpdateOperationsInput = {
@@ -1401,6 +1427,7 @@ export type ConcessioneCreateWithoutEnteInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -1447,6 +1474,7 @@ export type ConcessioneUncheckedCreateWithoutEnteInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -1522,6 +1550,7 @@ export type ConcessioneScalarWhereInput = {
   canoneAnnuo?: Prisma.DecimalNullableFilter<"Concessione"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.StringNullableFilter<"Concessione"> | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFilter<"Concessione"> | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.EnumPortActivityLegalTypeNullableFilter<"Concessione"> | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.EnumConcessionObjectTypeNullableFilter<"Concessione"> | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFilter<"Concessione"> | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFilter<"Concessione"> | $Enums.RemovableWorksProfile
@@ -1557,6 +1586,7 @@ export type ConcessioneCreateWithoutConcessionarioInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -1603,6 +1633,7 @@ export type ConcessioneUncheckedCreateWithoutConcessionarioInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -1675,6 +1706,7 @@ export type ConcessioneCreateWithoutLegalFrameworksInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -1721,6 +1753,7 @@ export type ConcessioneUncheckedCreateWithoutLegalFrameworksInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -1783,6 +1816,7 @@ export type ConcessioneUpdateWithoutLegalFrameworksInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -1829,6 +1863,7 @@ export type ConcessioneUncheckedUpdateWithoutLegalFrameworksInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -1875,6 +1910,7 @@ export type ConcessioneCreateWithoutObblighiInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -1921,6 +1957,7 @@ export type ConcessioneUncheckedCreateWithoutObblighiInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -1983,6 +2020,7 @@ export type ConcessioneUpdateWithoutObblighiInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -2029,6 +2067,7 @@ export type ConcessioneUncheckedUpdateWithoutObblighiInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -2075,6 +2114,7 @@ export type ConcessioneCreateWithoutScadenzeInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -2121,6 +2161,7 @@ export type ConcessioneUncheckedCreateWithoutScadenzeInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -2183,6 +2224,7 @@ export type ConcessioneUpdateWithoutScadenzeInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -2229,6 +2271,7 @@ export type ConcessioneUncheckedUpdateWithoutScadenzeInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -2275,6 +2318,7 @@ export type ConcessioneCreateWithoutCriticitaInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -2321,6 +2365,7 @@ export type ConcessioneUncheckedCreateWithoutCriticitaInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -2383,6 +2428,7 @@ export type ConcessioneUpdateWithoutCriticitaInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -2429,6 +2475,7 @@ export type ConcessioneUncheckedUpdateWithoutCriticitaInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -2475,6 +2522,7 @@ export type ConcessioneCreateWithoutProcedimentiInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -2521,6 +2569,7 @@ export type ConcessioneUncheckedCreateWithoutProcedimentiInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -2583,6 +2632,7 @@ export type ConcessioneUpdateWithoutProcedimentiInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -2629,6 +2679,7 @@ export type ConcessioneUncheckedUpdateWithoutProcedimentiInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -2675,6 +2726,7 @@ export type ConcessioneCreateWithoutSopralluoghiInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -2721,6 +2773,7 @@ export type ConcessioneUncheckedCreateWithoutSopralluoghiInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -2783,6 +2836,7 @@ export type ConcessioneUpdateWithoutSopralluoghiInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -2829,6 +2883,7 @@ export type ConcessioneUncheckedUpdateWithoutSopralluoghiInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -2875,6 +2930,7 @@ export type ConcessioneCreateWithoutPagamentiInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -2921,6 +2977,7 @@ export type ConcessioneUncheckedCreateWithoutPagamentiInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -2983,6 +3040,7 @@ export type ConcessioneUpdateWithoutPagamentiInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -3029,6 +3087,7 @@ export type ConcessioneUncheckedUpdateWithoutPagamentiInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -3075,6 +3134,7 @@ export type ConcessioneCreateWithoutDocumentiInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -3121,6 +3181,7 @@ export type ConcessioneUncheckedCreateWithoutDocumentiInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -3183,6 +3244,7 @@ export type ConcessioneUpdateWithoutDocumentiInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -3229,6 +3291,7 @@ export type ConcessioneUncheckedUpdateWithoutDocumentiInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -3275,6 +3338,7 @@ export type ConcessioneCreateWithoutDecisioniProcedimentoInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -3321,6 +3385,7 @@ export type ConcessioneUncheckedCreateWithoutDecisioniProcedimentoInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -3383,6 +3448,7 @@ export type ConcessioneUpdateWithoutDecisioniProcedimentoInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -3429,6 +3495,7 @@ export type ConcessioneUncheckedUpdateWithoutDecisioniProcedimentoInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -3475,6 +3542,7 @@ export type ConcessioneCreateWithoutReportInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -3521,6 +3589,7 @@ export type ConcessioneUncheckedCreateWithoutReportInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -3583,6 +3652,7 @@ export type ConcessioneUpdateWithoutReportInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -3629,6 +3699,7 @@ export type ConcessioneUncheckedUpdateWithoutReportInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -3675,6 +3746,7 @@ export type ConcessioneCreateWithoutNormaImpattiInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -3721,6 +3793,7 @@ export type ConcessioneUncheckedCreateWithoutNormaImpattiInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -3783,6 +3856,7 @@ export type ConcessioneUpdateWithoutNormaImpattiInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -3829,6 +3903,7 @@ export type ConcessioneUncheckedUpdateWithoutNormaImpattiInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -3875,6 +3950,7 @@ export type ConcessioneCreateWithoutActivityLogsInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -3921,6 +3997,7 @@ export type ConcessioneUncheckedCreateWithoutActivityLogsInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -3983,6 +4060,7 @@ export type ConcessioneUpdateWithoutActivityLogsInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -4029,6 +4107,7 @@ export type ConcessioneUncheckedUpdateWithoutActivityLogsInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -4075,6 +4154,7 @@ export type ConcessioneCreateManyEnteInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -4109,6 +4189,7 @@ export type ConcessioneUpdateWithoutEnteInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -4155,6 +4236,7 @@ export type ConcessioneUncheckedUpdateWithoutEnteInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -4201,6 +4283,7 @@ export type ConcessioneUncheckedUpdateManyWithoutEnteInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -4235,6 +4318,7 @@ export type ConcessioneCreateManyConcessionarioInput = {
   canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: string | null
   concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
   concessionObjectType?: $Enums.ConcessionObjectType | null
   awardingProcedureType?: $Enums.AwardingProcedureType
   removableWorksProfile?: $Enums.RemovableWorksProfile
@@ -4269,6 +4353,7 @@ export type ConcessioneUpdateWithoutConcessionarioInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -4315,6 +4400,7 @@ export type ConcessioneUncheckedUpdateWithoutConcessionarioInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -4361,6 +4447,7 @@ export type ConcessioneUncheckedUpdateManyWithoutConcessionarioInput = {
   canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
   concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
   awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
   removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
@@ -4525,6 +4612,7 @@ export type ConcessioneSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   canoneAnnuo?: boolean
   categoriaCanone?: boolean
   concessionVertical?: boolean
+  portActivityLegalType?: boolean
   concessionObjectType?: boolean
   awardingProcedureType?: boolean
   removableWorksProfile?: boolean
@@ -4575,6 +4663,7 @@ export type ConcessioneSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   canoneAnnuo?: boolean
   categoriaCanone?: boolean
   concessionVertical?: boolean
+  portActivityLegalType?: boolean
   concessionObjectType?: boolean
   awardingProcedureType?: boolean
   removableWorksProfile?: boolean
@@ -4612,6 +4701,7 @@ export type ConcessioneSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   canoneAnnuo?: boolean
   categoriaCanone?: boolean
   concessionVertical?: boolean
+  portActivityLegalType?: boolean
   concessionObjectType?: boolean
   awardingProcedureType?: boolean
   removableWorksProfile?: boolean
@@ -4649,6 +4739,7 @@ export type ConcessioneSelectScalar = {
   canoneAnnuo?: boolean
   categoriaCanone?: boolean
   concessionVertical?: boolean
+  portActivityLegalType?: boolean
   concessionObjectType?: boolean
   awardingProcedureType?: boolean
   removableWorksProfile?: boolean
@@ -4666,7 +4757,7 @@ export type ConcessioneSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ConcessioneOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "numeroAtto" | "dataRilascio" | "dataScadenza" | "normaRiferimento" | "tipologiaBene" | "attivita" | "superficieMq" | "latitudineGis" | "longitudineGis" | "coordinateGis" | "areaDescrizione" | "zonaPortuale" | "riferimentoCatastale" | "canoneAnnuo" | "categoriaCanone" | "concessionVertical" | "concessionObjectType" | "awardingProcedureType" | "removableWorksProfile" | "seasonalityProfile" | "feeRegime" | "comparativeProcedureStatus" | "thirdPartyManagementStatus" | "stato" | "descrizioneBene" | "ubicazione" | "note" | "concessionarioId" | "enteId" | "createdAt" | "updatedAt", ExtArgs["result"]["concessione"]>
+export type ConcessioneOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "numeroAtto" | "dataRilascio" | "dataScadenza" | "normaRiferimento" | "tipologiaBene" | "attivita" | "superficieMq" | "latitudineGis" | "longitudineGis" | "coordinateGis" | "areaDescrizione" | "zonaPortuale" | "riferimentoCatastale" | "canoneAnnuo" | "categoriaCanone" | "concessionVertical" | "portActivityLegalType" | "concessionObjectType" | "awardingProcedureType" | "removableWorksProfile" | "seasonalityProfile" | "feeRegime" | "comparativeProcedureStatus" | "thirdPartyManagementStatus" | "stato" | "descrizioneBene" | "ubicazione" | "note" | "concessionarioId" | "enteId" | "createdAt" | "updatedAt", ExtArgs["result"]["concessione"]>
 export type ConcessioneInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   concessionario?: boolean | Prisma.ConcessionarioDefaultArgs<ExtArgs>
   ente?: boolean | Prisma.Concessione$enteArgs<ExtArgs>
@@ -4729,6 +4820,7 @@ export type $ConcessionePayload<ExtArgs extends runtime.Types.Extensions.Interna
     canoneAnnuo: runtime.Decimal | null
     categoriaCanone: string | null
     concessionVertical: $Enums.ConcessionVertical
+    portActivityLegalType: $Enums.PortActivityLegalType | null
     concessionObjectType: $Enums.ConcessionObjectType | null
     awardingProcedureType: $Enums.AwardingProcedureType
     removableWorksProfile: $Enums.RemovableWorksProfile
@@ -5198,6 +5290,7 @@ export interface ConcessioneFieldRefs {
   readonly canoneAnnuo: Prisma.FieldRef<"Concessione", 'Decimal'>
   readonly categoriaCanone: Prisma.FieldRef<"Concessione", 'String'>
   readonly concessionVertical: Prisma.FieldRef<"Concessione", 'ConcessionVertical'>
+  readonly portActivityLegalType: Prisma.FieldRef<"Concessione", 'PortActivityLegalType'>
   readonly concessionObjectType: Prisma.FieldRef<"Concessione", 'ConcessionObjectType'>
   readonly awardingProcedureType: Prisma.FieldRef<"Concessione", 'AwardingProcedureType'>
   readonly removableWorksProfile: Prisma.FieldRef<"Concessione", 'RemovableWorksProfile'>

@@ -159,6 +159,10 @@ export function canManageNormativaUpdate(role: DemoRole): boolean {
   return ["ADMIN", "OPERATORE_SOCIETA", "GIURIDICO"].includes(role);
 }
 
+export function canManageConcessioneLegalClassification(role: DemoRole): boolean {
+  return ["ADMIN", "OPERATORE_SOCIETA", "GIURIDICO"].includes(role);
+}
+
 export function canUseAI(role: DemoRole): boolean {
   return ["ADMIN", "OPERATORE_SOCIETA", "GIURIDICO", "TECNICO", "ECONOMICO"].includes(role);
 }

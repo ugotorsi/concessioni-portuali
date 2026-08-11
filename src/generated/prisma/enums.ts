@@ -95,6 +95,16 @@ export const ConcessionVertical = {
 export type ConcessionVertical = (typeof ConcessionVertical)[keyof typeof ConcessionVertical]
 
 
+export const PortActivityLegalType = {
+  OPERAZIONI_PORTUALI: 'OPERAZIONI_PORTUALI',
+  SERVIZI_PORTUALI: 'SERVIZI_PORTUALI',
+  PASSEGGERI: 'PASSEGGERI',
+  ALTRO: 'ALTRO'
+} as const
+
+export type PortActivityLegalType = (typeof PortActivityLegalType)[keyof typeof PortActivityLegalType]
+
+
 export const LegalFramework = {
   ART_36_COD_NAV: 'ART_36_COD_NAV',
   ART_18_L_84_1994: 'ART_18_L_84_1994',

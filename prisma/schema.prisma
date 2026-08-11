@@ -69,6 +69,13 @@ enum ConcessionVertical {
   ALTRA_CONCESSIONE_DEMANIALE
 }
 
+enum PortActivityLegalType {
+  OPERAZIONI_PORTUALI
+  SERVIZI_PORTUALI
+  PASSEGGERI
+  ALTRO
+}
+
 enum LegalFramework {
   ART_36_COD_NAV
   ART_18_L_84_1994
@@ -892,6 +899,7 @@ model Concessione {
   canoneAnnuo                Decimal?
   categoriaCanone            String?
   concessionVertical         ConcessionVertical         @default(PORTUALE_ADSP)
+  portActivityLegalType      PortActivityLegalType?
   concessionObjectType       ConcessionObjectType?
   awardingProcedureType      AwardingProcedureType      @default(ALTRO)
   removableWorksProfile      RemovableWorksProfile      @default(NON_RILEVATO)

@@ -352,6 +352,7 @@ export const ConcessioneScalarFieldEnum = {
   canoneAnnuo: 'canoneAnnuo',
   categoriaCanone: 'categoriaCanone',
   concessionVertical: 'concessionVertical',
+  portActivityLegalType: 'portActivityLegalType',
   concessionObjectType: 'concessionObjectType',
   awardingProcedureType: 'awardingProcedureType',
   removableWorksProfile: 'removableWorksProfile',

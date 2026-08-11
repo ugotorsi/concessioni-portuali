@@ -110,6 +110,7 @@ export interface ConcessioneDetail {
   canoneAnnuo: number | null;
   categoriaCanone: string | null;
   concessionVertical: string;
+  portActivityLegalType: "OPERAZIONI_PORTUALI" | "SERVIZI_PORTUALI" | "PASSEGGERI" | "ALTRO" | null;
   concessionObjectType: string | null;
   awardingProcedureType: string;
   removableWorksProfile: string;
@@ -590,6 +591,7 @@ export async function getConcessioneDetail(id: string): Promise<ConcessioneDetai
     canoneAnnuo: concessione.canoneAnnuo ? Number(concessione.canoneAnnuo) : null,
     categoriaCanone: concessione.categoriaCanone,
     concessionVertical: concessione.concessionVertical,
+    portActivityLegalType: concessione.portActivityLegalType,
     concessionObjectType: concessione.concessionObjectType,
     awardingProcedureType: concessione.awardingProcedureType,
     removableWorksProfile: concessione.removableWorksProfile,

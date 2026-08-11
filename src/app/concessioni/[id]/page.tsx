@@ -6,7 +6,9 @@ import { EntityDocumentsPanel } from "@/components/documents/EntityDocumentsPane
 import { GravitaBadge, StatoBadge } from "@/components/concessioni/ConcessioniBadges";
 import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Select } from "@/components/ui/Select";
 import {
   Table,
   TableBody,
@@ -15,9 +17,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/Table";
-import { BACKOFFICE_ROLES, requireRole } from "@/lib/auth";
+import { BACKOFFICE_ROLES, canManageConcessioneLegalClassification, requireRole } from "@/lib/auth";
 import { getConcessionVerticalLabel, getLegalFrameworkLabel } from "@/lib/concession-vertical-labels";
+import {
+  getPortActivityLegalTypeLabel,
+  PORT_ACTIVITY_LEGAL_TYPE_VALUES,
+} from "@/lib/port-activity-legal-type";
 import { formatCurrencyEUR, formatDateIT, formatEnumLabel } from "@/lib/utils";
+import { updateConcessionePortActivityLegalType } from "@/server/actions/concessioni";
 import { getConcessioneDetail } from "@/server/queries/concessioni";
 
 interface ConcessioneDetailPageProps {
@@ -33,6 +40,7 @@ export const dynamic = "force-dynamic";
 export default async function ConcessioneDetailPage({ params }: ConcessioneDetailPageProps) {
   const role = await requireRole();
   const canUploadDocumenti = BACKOFFICE_ROLES.includes(role);
+  const canManageLegalClassification = canManageConcessioneLegalClassification(role);
   const { id } = await params;
   const concessione = await getConcessioneDetail(id);
 
@@ -166,6 +174,30 @@ export default async function ConcessioneDetailPage({ params }: ConcessioneDetai
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-500">Attività</p>
                 <p className="mt-1 text-slate-900">{formatEnumLabel(concessione.attivita)}</p>
+              </div>
+              <div className="md:col-span-2">
+                <p className="text-xs uppercase tracking-wide text-slate-500">Classificazione giuridica attività portuale</p>
+                <p className="mt-1 text-slate-900">{getPortActivityLegalTypeLabel(concessione.portActivityLegalType)}</p>
+                {canManageLegalClassification ? (
+                  <form action={updateConcessionePortActivityLegalType} className="mt-2 flex flex-wrap items-center gap-2">
+                    <input type="hidden" name="concessioneId" value={concessione.id} />
+                    <Select
+                      name="portActivityLegalType"
+                      defaultValue={concessione.portActivityLegalType ?? ""}
+                      className="max-w-sm"
+                    >
+                      <option value="">Non classificata</option>
+                      {PORT_ACTIVITY_LEGAL_TYPE_VALUES.map((value) => (
+                        <option key={value} value={value}>{getPortActivityLegalTypeLabel(value)}</option>
+                      ))}
+                    </Select>
+                    <Button type="submit" size="sm">Aggiorna classificazione</Button>
+                  </form>
+                ) : null}
+                <p className="mt-2 text-xs text-slate-500">
+                  Classificazione istruttoria inserita da un operatore. Non determina automaticamente il regime applicabile,
+                  l&apos;esito del procedimento o effetti sul titolo concessorio.
+                </p>
               </div>
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-500">Verticale</p>
