@@ -1357,6 +1357,23 @@ export type EnumFascicoloObservationStatusWithAggregatesFilter<$PrismaModel = ne
   _max?: Prisma.NestedEnumFascicoloObservationStatusFilter<$PrismaModel>
 }
 
+export type EnumFascicoloChecklistEvidenceStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloChecklistEvidenceStatus | Prisma.EnumFascicoloChecklistEvidenceStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloChecklistEvidenceStatus[] | Prisma.ListEnumFascicoloChecklistEvidenceStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloChecklistEvidenceStatus[] | Prisma.ListEnumFascicoloChecklistEvidenceStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloChecklistEvidenceStatusFilter<$PrismaModel> | $Enums.FascicoloChecklistEvidenceStatus
+}
+
+export type EnumFascicoloChecklistEvidenceStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloChecklistEvidenceStatus | Prisma.EnumFascicoloChecklistEvidenceStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloChecklistEvidenceStatus[] | Prisma.ListEnumFascicoloChecklistEvidenceStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloChecklistEvidenceStatus[] | Prisma.ListEnumFascicoloChecklistEvidenceStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloChecklistEvidenceStatusWithAggregatesFilter<$PrismaModel> | $Enums.FascicoloChecklistEvidenceStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFascicoloChecklistEvidenceStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFascicoloChecklistEvidenceStatusFilter<$PrismaModel>
+}
+
 export type EnumTipoDecisioneProcedimentoFilter<$PrismaModel = never> = {
   equals?: $Enums.TipoDecisioneProcedimento | Prisma.EnumTipoDecisioneProcedimentoFieldRefInput<$PrismaModel>
   in?: $Enums.TipoDecisioneProcedimento[] | Prisma.ListEnumTipoDecisioneProcedimentoFieldRefInput<$PrismaModel>
@@ -2810,6 +2827,23 @@ export type NestedEnumFascicoloObservationStatusWithAggregatesFilter<$PrismaMode
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumFascicoloObservationStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumFascicoloObservationStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumFascicoloChecklistEvidenceStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloChecklistEvidenceStatus | Prisma.EnumFascicoloChecklistEvidenceStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloChecklistEvidenceStatus[] | Prisma.ListEnumFascicoloChecklistEvidenceStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloChecklistEvidenceStatus[] | Prisma.ListEnumFascicoloChecklistEvidenceStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloChecklistEvidenceStatusFilter<$PrismaModel> | $Enums.FascicoloChecklistEvidenceStatus
+}
+
+export type NestedEnumFascicoloChecklistEvidenceStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloChecklistEvidenceStatus | Prisma.EnumFascicoloChecklistEvidenceStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloChecklistEvidenceStatus[] | Prisma.ListEnumFascicoloChecklistEvidenceStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloChecklistEvidenceStatus[] | Prisma.ListEnumFascicoloChecklistEvidenceStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloChecklistEvidenceStatusWithAggregatesFilter<$PrismaModel> | $Enums.FascicoloChecklistEvidenceStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFascicoloChecklistEvidenceStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFascicoloChecklistEvidenceStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumTipoDecisioneProcedimentoFilter<$PrismaModel = never> = {

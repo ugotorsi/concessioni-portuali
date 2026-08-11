@@ -29,6 +29,12 @@ enum FascicoloObservationStatus {
   SUPERATO
 }
 
+enum FascicoloChecklistEvidenceStatus {
+  PROPOSTO
+  VALIDATO
+  RIFIUTATO
+}
+
 enum NormaRiferimento {
   ART_36_COD_NAV
   ART_18_L_84_1994
@@ -536,13 +542,13 @@ enum ImportRunStatus {
 }
 
 model Ente {
-  id                    String                  @id @default(cuid())
+  id                    String                       @id @default(cuid())
   nome                  String
-  codice                String                  @unique
-  tipo                  EnteTipo                @default(ALTRO)
-  stato                 EnteStato               @default(ATTIVO)
-  createdAt             DateTime                @default(now())
-  updatedAt             DateTime                @updatedAt
+  codice                String                       @unique
+  tipo                  EnteTipo                     @default(ALTRO)
+  stato                 EnteStato                    @default(ATTIVO)
+  createdAt             DateTime                     @default(now())
+  updatedAt             DateTime                     @updatedAt
   concessioni           Concessione[]
   documenti             Documento[]
   report                Report[]
@@ -555,6 +561,7 @@ model Ente {
   importRuns            ImportRun[]
   decisioniProcedimento DecisioneProcedimento[]
   fascicoloObservations FascicoloObservation[]
+  checklistEvidence     FascicoloChecklistEvidence[]
 
   @@index([tipo])
   @@index([stato])
@@ -837,6 +844,8 @@ model User {
   decisioniProcedimentoRegistrate               DecisioneProcedimento[]              @relation("DecisioneProcedimentoRegisteredBy")
   procedimentoResponsabileAssignmentsRegistrate ProcedimentoResponsabileAssignment[] @relation("ProcedimentoResponsabileAssignmentRegisteredBy")
   fascicoloObservationsReviewed                 FascicoloObservation[]               @relation("FascicoloObservationReviewedBy")
+  checklistEvidenceCreated                      FascicoloChecklistEvidence[]         @relation("ChecklistEvidenceCreatedBy")
+  checklistEvidenceReviewed                     FascicoloChecklistEvidence[]         @relation("ChecklistEvidenceReviewedBy")
 
   @@index([ruolo])
   @@index([attivo])
@@ -1090,6 +1099,7 @@ model Procedimento {
   documenti               Documento[]
   normaImpatti            NormaImpatto[]
   fascicoloObservations   FascicoloObservation[]
+  checklistEvidence       FascicoloChecklistEvidence[]
 
   @@index([concessioneId])
   @@index([criticitaId])
@@ -1229,16 +1239,17 @@ model Documento {
   createdAt                 DateTime            @default(now())
   updatedAt                 DateTime            @updatedAt
 
-  uploadedByUser        User?                   @relation("DocumentoUploader", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
-  ente                  Ente?                   @relation(fields: [enteId], references: [id], onDelete: SetNull)
-  concessione           Concessione?            @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
-  criticita             Criticita?              @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
-  procedimento          Procedimento?           @relation(fields: [procedimentoId], references: [id], onDelete: SetNull)
-  sopralluogo           Sopralluogo?            @relation(fields: [sopralluogoId], references: [id], onDelete: SetNull)
-  pagamento             Pagamento?              @relation(fields: [pagamentoId], references: [id], onDelete: SetNull)
-  report                Report?                 @relation(fields: [reportId], references: [id], onDelete: SetNull)
+  uploadedByUser        User?                        @relation("DocumentoUploader", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
+  ente                  Ente?                        @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  concessione           Concessione?                 @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
+  criticita             Criticita?                   @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
+  procedimento          Procedimento?                @relation(fields: [procedimentoId], references: [id], onDelete: SetNull)
+  sopralluogo           Sopralluogo?                 @relation(fields: [sopralluogoId], references: [id], onDelete: SetNull)
+  pagamento             Pagamento?                   @relation(fields: [pagamentoId], references: [id], onDelete: SetNull)
+  report                Report?                      @relation(fields: [reportId], references: [id], onDelete: SetNull)
   decisioniProcedimento DecisioneProcedimento[]
   fascicoloObservations FascicoloObservation[]
+  checklistEvidence     FascicoloChecklistEvidence[]
 
   @@index([uploadedByUserId])
   @@index([statoDocumento])
@@ -1290,6 +1301,40 @@ model FascicoloObservation {
   @@index([documentoId])
   @@index([reviewedByUserId])
   @@index([detectedAt])
+}
+
+model FascicoloChecklistEvidence {
+  id                String                           @id @default(cuid())
+  enteId            String
+  procedimentoId    String
+  documentoId       String
+  checklistItemCode String
+  status            FascicoloChecklistEvidenceStatus @default(PROPOSTO)
+  createdAt         DateTime                         @default(now())
+  createdByActorId  String
+  createdByUserId   String?
+  createdByEmail    String
+  createdByRole     String
+  reviewedAt        DateTime?
+  reviewedByActorId String?
+  reviewedByUserId  String?
+  reviewedByEmail   String?
+  reviewedByRole    String?
+  reviewNote        String?
+
+  ente           Ente         @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  procedimento   Procedimento @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  documento      Documento    @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+  createdByUser  User?        @relation("ChecklistEvidenceCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  reviewedByUser User?        @relation("ChecklistEvidenceReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([enteId, procedimentoId, documentoId, checklistItemCode])
+  @@index([enteId, procedimentoId, checklistItemCode])
+  @@index([documentoId])
+  @@index([createdByUserId])
+  @@index([reviewedByUserId])
+  @@index([createdAt])
+  @@index([reviewedAt])
 }
 
 model DecisioneProcedimento {

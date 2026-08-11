@@ -74,6 +74,7 @@ export const ModelName = {
   Pagamento: 'Pagamento',
   Documento: 'Documento',
   FascicoloObservation: 'FascicoloObservation',
+  FascicoloChecklistEvidence: 'FascicoloChecklistEvidence',
   DecisioneProcedimento: 'DecisioneProcedimento',
   Report: 'Report',
   NormaFonte: 'NormaFonte',
@@ -628,6 +629,29 @@ export const FascicoloObservationScalarFieldEnum = {
 } as const
 
 export type FascicoloObservationScalarFieldEnum = (typeof FascicoloObservationScalarFieldEnum)[keyof typeof FascicoloObservationScalarFieldEnum]
+
+
+export const FascicoloChecklistEvidenceScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  procedimentoId: 'procedimentoId',
+  documentoId: 'documentoId',
+  checklistItemCode: 'checklistItemCode',
+  status: 'status',
+  createdAt: 'createdAt',
+  createdByActorId: 'createdByActorId',
+  createdByUserId: 'createdByUserId',
+  createdByEmail: 'createdByEmail',
+  createdByRole: 'createdByRole',
+  reviewedAt: 'reviewedAt',
+  reviewedByActorId: 'reviewedByActorId',
+  reviewedByUserId: 'reviewedByUserId',
+  reviewedByEmail: 'reviewedByEmail',
+  reviewedByRole: 'reviewedByRole',
+  reviewNote: 'reviewNote'
+} as const
+
+export type FascicoloChecklistEvidenceScalarFieldEnum = (typeof FascicoloChecklistEvidenceScalarFieldEnum)[keyof typeof FascicoloChecklistEvidenceScalarFieldEnum]
 
 
 export const DecisioneProcedimentoScalarFieldEnum = {

@@ -5,6 +5,7 @@ import { SubmitButtonPending } from "@/components/forms/SubmitButtonPending";
 import { GravitaBadge, StatoBadge as CriticitaStatoBadge } from "@/components/criticita/CriticitaBadges";
 import { EntityDocumentsPanel } from "@/components/documents/EntityDocumentsPanel";
 import { AppShell } from "@/components/layout/AppShell";
+import { ChecklistItemEvidence } from "@/components/procedimenti/ChecklistItemEvidence";
 import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloObservationsPanel";
 import {
   ProcedimentoGiorniBadge,
@@ -46,6 +47,7 @@ import {
 } from "@/server/actions/procedimenti";
 import { getDecisionRulePreviewForTipologia } from "@/server/procedimenti/decisioni";
 import { getLetturaProcedimentale, getProcedimentoDetail } from "@/server/queries/procedimenti";
+import { getChecklistEvidenceData } from "@/server/queries/checklist-evidence";
 import { getFascicoloObservations } from "@/server/queries/fascicolo-observations";
 import { getNormeForProcedimento } from "@/server/queries/normativa";
 
@@ -88,6 +90,7 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
   }
 
   const fascicoloObservations = await getFascicoloObservations(detail.procedimento.id);
+  const checklistEvidenceData = await getChecklistEvidenceData(detail.procedimento.id);
   const hasCanonicalTenant = Boolean(detail.canonicalEnteId);
 
   const checklist = getChecklistContraddittorioItems(detail.procedimento);
@@ -387,15 +390,31 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
               ) : null}
 
               <div className="space-y-2">
+                <p className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                  Collegamento istruttorio al fascicolo. L&apos;associazione del documento non certifica la completezza, la regolarità, la validità o la sufficienza giuridica della documentazione e non modifica automaticamente lo stato della checklist o l&apos;esito del procedimento.
+                </p>
+                {!checklistEvidenceData.hasCanonicalTenant ? (
+                  <p className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
+                    Le evidenze istruttorie non sono associabili finché il procedimento non dispone di un tenant canonico.
+                  </p>
+                ) : null}
                 {checklist.map((item) => (
-                  <div key={item.key} className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
-                    <div>
-                      <p className="text-slate-900">{item.label}</p>
-                      <p className="text-xs text-slate-500">{item.required ? "Passaggio essenziale" : "Passaggio consigliato"}</p>
+                  <div key={item.code} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-slate-900">{item.label}</p>
+                        <p className="text-xs text-slate-500">{item.required ? "Passaggio essenziale" : "Passaggio consigliato"}</p>
+                      </div>
+                      <Badge variant={item.completed ? "success" : item.required ? "danger" : "default"}>
+                        {item.completed ? "Presente" : item.required ? "Mancante" : "Non compilato"}
+                      </Badge>
                     </div>
-                    <Badge variant={item.completed ? "success" : item.required ? "danger" : "default"}>
-                      {item.completed ? "Presente" : item.required ? "Mancante" : "Non compilato"}
-                    </Badge>
+                    <ChecklistItemEvidence
+                      procedimentoId={detail.procedimento.id}
+                      itemCode={item.code}
+                      canManage={canWriteChecklist}
+                      data={checklistEvidenceData}
+                    />
                   </div>
                 ))}
               </div>

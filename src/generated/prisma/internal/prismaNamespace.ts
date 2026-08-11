@@ -407,6 +407,7 @@ export const ModelName = {
   Pagamento: 'Pagamento',
   Documento: 'Documento',
   FascicoloObservation: 'FascicoloObservation',
+  FascicoloChecklistEvidence: 'FascicoloChecklistEvidence',
   DecisioneProcedimento: 'DecisioneProcedimento',
   Report: 'Report',
   NormaFonte: 'NormaFonte',
@@ -428,7 +429,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "fascicoloObservation" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2134,6 +2135,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    FascicoloChecklistEvidence: {
+      payload: Prisma.$FascicoloChecklistEvidencePayload<ExtArgs>
+      fields: Prisma.FascicoloChecklistEvidenceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FascicoloChecklistEvidenceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloChecklistEvidencePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FascicoloChecklistEvidenceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloChecklistEvidencePayload>
+        }
+        findFirst: {
+          args: Prisma.FascicoloChecklistEvidenceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloChecklistEvidencePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FascicoloChecklistEvidenceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloChecklistEvidencePayload>
+        }
+        findMany: {
+          args: Prisma.FascicoloChecklistEvidenceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloChecklistEvidencePayload>[]
+        }
+        create: {
+          args: Prisma.FascicoloChecklistEvidenceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloChecklistEvidencePayload>
+        }
+        createMany: {
+          args: Prisma.FascicoloChecklistEvidenceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FascicoloChecklistEvidenceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloChecklistEvidencePayload>[]
+        }
+        delete: {
+          args: Prisma.FascicoloChecklistEvidenceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloChecklistEvidencePayload>
+        }
+        update: {
+          args: Prisma.FascicoloChecklistEvidenceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloChecklistEvidencePayload>
+        }
+        deleteMany: {
+          args: Prisma.FascicoloChecklistEvidenceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FascicoloChecklistEvidenceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FascicoloChecklistEvidenceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloChecklistEvidencePayload>[]
+        }
+        upsert: {
+          args: Prisma.FascicoloChecklistEvidenceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloChecklistEvidencePayload>
+        }
+        aggregate: {
+          args: Prisma.FascicoloChecklistEvidenceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFascicoloChecklistEvidence>
+        }
+        groupBy: {
+          args: Prisma.FascicoloChecklistEvidenceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FascicoloChecklistEvidenceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FascicoloChecklistEvidenceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FascicoloChecklistEvidenceCountAggregateOutputType> | number
+        }
+      }
+    }
     DecisioneProcedimento: {
       payload: Prisma.$DecisioneProcedimentoPayload<ExtArgs>
       fields: Prisma.DecisioneProcedimentoFieldRefs
@@ -3149,6 +3224,29 @@ export const FascicoloObservationScalarFieldEnum = {
 export type FascicoloObservationScalarFieldEnum = (typeof FascicoloObservationScalarFieldEnum)[keyof typeof FascicoloObservationScalarFieldEnum]
 
 
+export const FascicoloChecklistEvidenceScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  procedimentoId: 'procedimentoId',
+  documentoId: 'documentoId',
+  checklistItemCode: 'checklistItemCode',
+  status: 'status',
+  createdAt: 'createdAt',
+  createdByActorId: 'createdByActorId',
+  createdByUserId: 'createdByUserId',
+  createdByEmail: 'createdByEmail',
+  createdByRole: 'createdByRole',
+  reviewedAt: 'reviewedAt',
+  reviewedByActorId: 'reviewedByActorId',
+  reviewedByUserId: 'reviewedByUserId',
+  reviewedByEmail: 'reviewedByEmail',
+  reviewedByRole: 'reviewedByRole',
+  reviewNote: 'reviewNote'
+} as const
+
+export type FascicoloChecklistEvidenceScalarFieldEnum = (typeof FascicoloChecklistEvidenceScalarFieldEnum)[keyof typeof FascicoloChecklistEvidenceScalarFieldEnum]
+
+
 export const DecisioneProcedimentoScalarFieldEnum = {
   id: 'id',
   enteId: 'enteId',
@@ -4142,6 +4240,20 @@ export type ListEnumFascicoloObservationStatusFieldRefInput<$PrismaModel> = Fiel
 
 
 /**
+ * Reference to a field of type 'FascicoloChecklistEvidenceStatus'
+ */
+export type EnumFascicoloChecklistEvidenceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FascicoloChecklistEvidenceStatus'>
+
+
+
+/**
+ * Reference to a field of type 'FascicoloChecklistEvidenceStatus[]'
+ */
+export type ListEnumFascicoloChecklistEvidenceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FascicoloChecklistEvidenceStatus[]'>
+
+
+
+/**
  * Reference to a field of type 'TipoDecisioneProcedimento'
  */
 export type EnumTipoDecisioneProcedimentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoDecisioneProcedimento'>
@@ -4399,6 +4511,7 @@ export type GlobalOmitConfig = {
   pagamento?: Prisma.PagamentoOmit
   documento?: Prisma.DocumentoOmit
   fascicoloObservation?: Prisma.FascicoloObservationOmit
+  fascicoloChecklistEvidence?: Prisma.FascicoloChecklistEvidenceOmit
   decisioneProcedimento?: Prisma.DecisioneProcedimentoOmit
   report?: Prisma.ReportOmit
   normaFonte?: Prisma.NormaFonteOmit
