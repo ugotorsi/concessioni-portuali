@@ -75,6 +75,7 @@ export const ModelName = {
   Documento: 'Documento',
   FascicoloObservation: 'FascicoloObservation',
   FascicoloChecklistEvidence: 'FascicoloChecklistEvidence',
+  FascicoloDocumentRequirementProposal: 'FascicoloDocumentRequirementProposal',
   DecisioneProcedimento: 'DecisioneProcedimento',
   Report: 'Report',
   NormaFonte: 'NormaFonte',
@@ -653,6 +654,45 @@ export const FascicoloChecklistEvidenceScalarFieldEnum = {
 } as const
 
 export type FascicoloChecklistEvidenceScalarFieldEnum = (typeof FascicoloChecklistEvidenceScalarFieldEnum)[keyof typeof FascicoloChecklistEvidenceScalarFieldEnum]
+
+
+export const FascicoloDocumentRequirementProposalScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  procedimentoId: 'procedimentoId',
+  legalSourceId: 'legalSourceId',
+  legalRuleId: 'legalRuleId',
+  documentGapId: 'documentGapId',
+  status: 'status',
+  matcherAlgorithmVersion: 'matcherAlgorithmVersion',
+  screeningFingerprint: 'screeningFingerprint',
+  canonicalArt18Snapshot: 'canonicalArt18Snapshot',
+  portActivityLegalTypeSnapshot: 'portActivityLegalTypeSnapshot',
+  sourceStableKeySnapshot: 'sourceStableKeySnapshot',
+  sourceTitleSnapshot: 'sourceTitleSnapshot',
+  sourceRelevantProvisionsSnapshot: 'sourceRelevantProvisionsSnapshot',
+  ruleCodeSnapshot: 'ruleCodeSnapshot',
+  ruleContractVersionSnapshot: 'ruleContractVersionSnapshot',
+  legalRuleDefinitionSnapshot: 'legalRuleDefinitionSnapshot',
+  gapKeySnapshot: 'gapKeySnapshot',
+  gapLabelSnapshot: 'gapLabelSnapshot',
+  gapDescriptionSnapshot: 'gapDescriptionSnapshot',
+  matchedCriteriaSnapshot: 'matchedCriteriaSnapshot',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  createdByUserId: 'createdByUserId',
+  createdByActorId: 'createdByActorId',
+  createdByEmail: 'createdByEmail',
+  createdByRole: 'createdByRole',
+  reviewedAt: 'reviewedAt',
+  reviewedByUserId: 'reviewedByUserId',
+  reviewedByActorId: 'reviewedByActorId',
+  reviewedByEmail: 'reviewedByEmail',
+  reviewedByRole: 'reviewedByRole',
+  reviewNote: 'reviewNote'
+} as const
+
+export type FascicoloDocumentRequirementProposalScalarFieldEnum = (typeof FascicoloDocumentRequirementProposalScalarFieldEnum)[keyof typeof FascicoloDocumentRequirementProposalScalarFieldEnum]
 
 
 export const DecisioneProcedimentoScalarFieldEnum = {

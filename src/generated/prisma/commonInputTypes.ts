@@ -1391,6 +1391,40 @@ export type EnumFascicoloChecklistEvidenceStatusWithAggregatesFilter<$PrismaMode
   _max?: Prisma.NestedEnumFascicoloChecklistEvidenceStatusFilter<$PrismaModel>
 }
 
+export type EnumFascicoloDocumentRequirementProposalStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloDocumentRequirementProposalStatus | Prisma.EnumFascicoloDocumentRequirementProposalStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloDocumentRequirementProposalStatus[] | Prisma.ListEnumFascicoloDocumentRequirementProposalStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloDocumentRequirementProposalStatus[] | Prisma.ListEnumFascicoloDocumentRequirementProposalStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloDocumentRequirementProposalStatusFilter<$PrismaModel> | $Enums.FascicoloDocumentRequirementProposalStatus
+}
+
+export type EnumPortActivityLegalTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.PortActivityLegalType | Prisma.EnumPortActivityLegalTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.PortActivityLegalType[] | Prisma.ListEnumPortActivityLegalTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PortActivityLegalType[] | Prisma.ListEnumPortActivityLegalTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPortActivityLegalTypeFilter<$PrismaModel> | $Enums.PortActivityLegalType
+}
+
+export type EnumFascicoloDocumentRequirementProposalStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloDocumentRequirementProposalStatus | Prisma.EnumFascicoloDocumentRequirementProposalStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloDocumentRequirementProposalStatus[] | Prisma.ListEnumFascicoloDocumentRequirementProposalStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloDocumentRequirementProposalStatus[] | Prisma.ListEnumFascicoloDocumentRequirementProposalStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloDocumentRequirementProposalStatusWithAggregatesFilter<$PrismaModel> | $Enums.FascicoloDocumentRequirementProposalStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFascicoloDocumentRequirementProposalStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFascicoloDocumentRequirementProposalStatusFilter<$PrismaModel>
+}
+
+export type EnumPortActivityLegalTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PortActivityLegalType | Prisma.EnumPortActivityLegalTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.PortActivityLegalType[] | Prisma.ListEnumPortActivityLegalTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PortActivityLegalType[] | Prisma.ListEnumPortActivityLegalTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPortActivityLegalTypeWithAggregatesFilter<$PrismaModel> | $Enums.PortActivityLegalType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPortActivityLegalTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPortActivityLegalTypeFilter<$PrismaModel>
+}
+
 export type EnumTipoDecisioneProcedimentoFilter<$PrismaModel = never> = {
   equals?: $Enums.TipoDecisioneProcedimento | Prisma.EnumTipoDecisioneProcedimentoFieldRefInput<$PrismaModel>
   in?: $Enums.TipoDecisioneProcedimento[] | Prisma.ListEnumTipoDecisioneProcedimentoFieldRefInput<$PrismaModel>
@@ -2878,6 +2912,40 @@ export type NestedEnumFascicoloChecklistEvidenceStatusWithAggregatesFilter<$Pris
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumFascicoloChecklistEvidenceStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumFascicoloChecklistEvidenceStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumFascicoloDocumentRequirementProposalStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloDocumentRequirementProposalStatus | Prisma.EnumFascicoloDocumentRequirementProposalStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloDocumentRequirementProposalStatus[] | Prisma.ListEnumFascicoloDocumentRequirementProposalStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloDocumentRequirementProposalStatus[] | Prisma.ListEnumFascicoloDocumentRequirementProposalStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloDocumentRequirementProposalStatusFilter<$PrismaModel> | $Enums.FascicoloDocumentRequirementProposalStatus
+}
+
+export type NestedEnumPortActivityLegalTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.PortActivityLegalType | Prisma.EnumPortActivityLegalTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.PortActivityLegalType[] | Prisma.ListEnumPortActivityLegalTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PortActivityLegalType[] | Prisma.ListEnumPortActivityLegalTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPortActivityLegalTypeFilter<$PrismaModel> | $Enums.PortActivityLegalType
+}
+
+export type NestedEnumFascicoloDocumentRequirementProposalStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloDocumentRequirementProposalStatus | Prisma.EnumFascicoloDocumentRequirementProposalStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloDocumentRequirementProposalStatus[] | Prisma.ListEnumFascicoloDocumentRequirementProposalStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloDocumentRequirementProposalStatus[] | Prisma.ListEnumFascicoloDocumentRequirementProposalStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloDocumentRequirementProposalStatusWithAggregatesFilter<$PrismaModel> | $Enums.FascicoloDocumentRequirementProposalStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFascicoloDocumentRequirementProposalStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFascicoloDocumentRequirementProposalStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumPortActivityLegalTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PortActivityLegalType | Prisma.EnumPortActivityLegalTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.PortActivityLegalType[] | Prisma.ListEnumPortActivityLegalTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PortActivityLegalType[] | Prisma.ListEnumPortActivityLegalTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPortActivityLegalTypeWithAggregatesFilter<$PrismaModel> | $Enums.PortActivityLegalType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPortActivityLegalTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPortActivityLegalTypeFilter<$PrismaModel>
 }
 
 export type NestedEnumTipoDecisioneProcedimentoFilter<$PrismaModel = never> = {

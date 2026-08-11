@@ -162,6 +162,11 @@ export type FascicoloObservation = Prisma.FascicoloObservationModel
  */
 export type FascicoloChecklistEvidence = Prisma.FascicoloChecklistEvidenceModel
 /**
+ * Model FascicoloDocumentRequirementProposal
+ * 
+ */
+export type FascicoloDocumentRequirementProposal = Prisma.FascicoloDocumentRequirementProposalModel
+/**
  * Model DecisioneProcedimento
  * 
  */

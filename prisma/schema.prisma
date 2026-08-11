@@ -35,6 +35,12 @@ enum FascicoloChecklistEvidenceStatus {
   RIFIUTATO
 }
 
+enum FascicoloDocumentRequirementProposalStatus {
+  PROPOSTO
+  VALIDATO
+  RIFIUTATO
+}
+
 enum NormaRiferimento {
   ART_36_COD_NAV
   ART_18_L_84_1994
@@ -549,26 +555,27 @@ enum ImportRunStatus {
 }
 
 model Ente {
-  id                    String                       @id @default(cuid())
-  nome                  String
-  codice                String                       @unique
-  tipo                  EnteTipo                     @default(ALTRO)
-  stato                 EnteStato                    @default(ATTIVO)
-  createdAt             DateTime                     @default(now())
-  updatedAt             DateTime                     @updatedAt
-  concessioni           Concessione[]
-  documenti             Documento[]
-  report                Report[]
-  activityLog           ActivityLog[]
-  memberships           TenantMembership[]
-  ports                 Port[]
-  legalSources          LegalSource[]
-  legalRules            LegalRule[]
-  documentGaps          DocumentGap[]
-  importRuns            ImportRun[]
-  decisioniProcedimento DecisioneProcedimento[]
-  fascicoloObservations FascicoloObservation[]
-  checklistEvidence     FascicoloChecklistEvidence[]
+  id                           String                                 @id @default(cuid())
+  nome                         String
+  codice                       String                                 @unique
+  tipo                         EnteTipo                               @default(ALTRO)
+  stato                        EnteStato                              @default(ATTIVO)
+  createdAt                    DateTime                               @default(now())
+  updatedAt                    DateTime                               @updatedAt
+  concessioni                  Concessione[]
+  documenti                    Documento[]
+  report                       Report[]
+  activityLog                  ActivityLog[]
+  memberships                  TenantMembership[]
+  ports                        Port[]
+  legalSources                 LegalSource[]
+  legalRules                   LegalRule[]
+  documentGaps                 DocumentGap[]
+  importRuns                   ImportRun[]
+  decisioniProcedimento        DecisioneProcedimento[]
+  fascicoloObservations        FascicoloObservation[]
+  checklistEvidence            FascicoloChecklistEvidence[]
+  documentRequirementProposals FascicoloDocumentRequirementProposal[]
 
   @@index([tipo])
   @@index([stato])
@@ -696,13 +703,14 @@ model LegalSource {
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
 
-  ente              Ente?            @relation(fields: [enteId], references: [id], onDelete: SetNull)
-  authority         Authority?       @relation(fields: [authorityId], references: [id], onDelete: SetNull)
-  port              Port?            @relation(fields: [portId], references: [id], onDelete: SetNull)
-  importRun         ImportRun?       @relation(fields: [importRunId], references: [id], onDelete: SetNull)
-  rules             LegalRule[]
-  outgoingRelations SourceRelation[] @relation("SourceRelationFrom")
-  incomingRelations SourceRelation[] @relation("SourceRelationTo")
+  ente                         Ente?                                  @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  authority                    Authority?                             @relation(fields: [authorityId], references: [id], onDelete: SetNull)
+  port                         Port?                                  @relation(fields: [portId], references: [id], onDelete: SetNull)
+  importRun                    ImportRun?                             @relation(fields: [importRunId], references: [id], onDelete: SetNull)
+  rules                        LegalRule[]
+  documentRequirementProposals FascicoloDocumentRequirementProposal[]
+  outgoingRelations            SourceRelation[]                       @relation("SourceRelationFrom")
+  incomingRelations            SourceRelation[]                       @relation("SourceRelationTo")
 
   @@index([sourceType])
   @@index([status])
@@ -764,10 +772,11 @@ model LegalRule {
   createdAt               DateTime                    @default(now())
   updatedAt               DateTime                    @updatedAt
 
-  source       LegalSource   @relation(fields: [sourceId], references: [id], onDelete: Cascade)
-  ente         Ente?         @relation(fields: [enteId], references: [id], onDelete: SetNull)
-  port         Port?         @relation(fields: [portId], references: [id], onDelete: SetNull)
-  documentGaps DocumentGap[]
+  source                       LegalSource                            @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  ente                         Ente?                                  @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  port                         Port?                                  @relation(fields: [portId], references: [id], onDelete: SetNull)
+  documentGaps                 DocumentGap[]
+  documentRequirementProposals FascicoloDocumentRequirementProposal[]
 
   @@unique([sourceId, ruleCode])
   @@index([status])
@@ -795,9 +804,10 @@ model DocumentGap {
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
 
-  ente Ente?      @relation(fields: [enteId], references: [id], onDelete: SetNull)
-  port Port?      @relation(fields: [portId], references: [id], onDelete: SetNull)
-  rule LegalRule? @relation(fields: [ruleId], references: [id], onDelete: SetNull)
+  ente                         Ente?                                  @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  port                         Port?                                  @relation(fields: [portId], references: [id], onDelete: SetNull)
+  rule                         LegalRule?                             @relation(fields: [ruleId], references: [id], onDelete: SetNull)
+  documentRequirementProposals FascicoloDocumentRequirementProposal[]
 
   @@index([status])
   @@index([severity])
@@ -827,32 +837,34 @@ model TenantMembership {
 }
 
 model User {
-  id                                            String                               @id @default(cuid())
+  id                                            String                                 @id @default(cuid())
   nome                                          String
-  email                                         String                               @unique
+  email                                         String                                 @unique
   passwordHash                                  String?
   ruolo                                         RuoloUser
-  attivo                                        Boolean                              @default(true)
-  failedLoginAttempts                           Int                                  @default(0)
+  attivo                                        Boolean                                @default(true)
+  failedLoginAttempts                           Int                                    @default(0)
   lockedUntil                                   DateTime?
   lastFailedLoginAt                             DateTime?
   lastLoginAt                                   DateTime?
   passwordChangedAt                             DateTime?
-  mustChangePassword                            Boolean                              @default(false)
-  mfaEnabled                                    Boolean                              @default(false)
+  mustChangePassword                            Boolean                                @default(false)
+  mfaEnabled                                    Boolean                                @default(false)
   mfaSecret                                     String?
   mfaRecoveryCodes                              Json?
   mfaVerifiedAt                                 DateTime?
-  createdAt                                     DateTime                             @default(now())
-  updatedAt                                     DateTime                             @updatedAt
+  createdAt                                     DateTime                               @default(now())
+  updatedAt                                     DateTime                               @updatedAt
   activityLogs                                  ActivityLog[]
-  documentiCaricati                             Documento[]                          @relation("DocumentoUploader")
+  documentiCaricati                             Documento[]                            @relation("DocumentoUploader")
   tenantMemberships                             TenantMembership[]
-  decisioniProcedimentoRegistrate               DecisioneProcedimento[]              @relation("DecisioneProcedimentoRegisteredBy")
-  procedimentoResponsabileAssignmentsRegistrate ProcedimentoResponsabileAssignment[] @relation("ProcedimentoResponsabileAssignmentRegisteredBy")
-  fascicoloObservationsReviewed                 FascicoloObservation[]               @relation("FascicoloObservationReviewedBy")
-  checklistEvidenceCreated                      FascicoloChecklistEvidence[]         @relation("ChecklistEvidenceCreatedBy")
-  checklistEvidenceReviewed                     FascicoloChecklistEvidence[]         @relation("ChecklistEvidenceReviewedBy")
+  decisioniProcedimentoRegistrate               DecisioneProcedimento[]                @relation("DecisioneProcedimentoRegisteredBy")
+  procedimentoResponsabileAssignmentsRegistrate ProcedimentoResponsabileAssignment[]   @relation("ProcedimentoResponsabileAssignmentRegisteredBy")
+  fascicoloObservationsReviewed                 FascicoloObservation[]                 @relation("FascicoloObservationReviewedBy")
+  checklistEvidenceCreated                      FascicoloChecklistEvidence[]           @relation("ChecklistEvidenceCreatedBy")
+  checklistEvidenceReviewed                     FascicoloChecklistEvidence[]           @relation("ChecklistEvidenceReviewedBy")
+  documentRequirementProposalsCreated           FascicoloDocumentRequirementProposal[] @relation("DocumentRequirementProposalCreatedBy")
+  documentRequirementProposalsReviewed          FascicoloDocumentRequirementProposal[] @relation("DocumentRequirementProposalReviewedBy")
 
   @@index([ruolo])
   @@index([attivo])
@@ -1100,14 +1112,15 @@ model Procedimento {
   createdAt                        DateTime                      @default(now())
   updatedAt                        DateTime                      @updatedAt
 
-  concessione             Concessione                          @relation(fields: [concessioneId], references: [id], onDelete: Cascade)
-  criticita               Criticita?                           @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
-  decisioneProcedimento   DecisioneProcedimento?
-  responsabileAssignments ProcedimentoResponsabileAssignment[]
-  documenti               Documento[]
-  normaImpatti            NormaImpatto[]
-  fascicoloObservations   FascicoloObservation[]
-  checklistEvidence       FascicoloChecklistEvidence[]
+  concessione                  Concessione                            @relation(fields: [concessioneId], references: [id], onDelete: Cascade)
+  criticita                    Criticita?                             @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
+  decisioneProcedimento        DecisioneProcedimento?
+  responsabileAssignments      ProcedimentoResponsabileAssignment[]
+  documenti                    Documento[]
+  normaImpatti                 NormaImpatto[]
+  fascicoloObservations        FascicoloObservation[]
+  checklistEvidence            FascicoloChecklistEvidence[]
+  documentRequirementProposals FascicoloDocumentRequirementProposal[]
 
   @@index([concessioneId])
   @@index([criticitaId])
@@ -1343,6 +1356,59 @@ model FascicoloChecklistEvidence {
   @@index([reviewedByUserId])
   @@index([createdAt])
   @@index([reviewedAt])
+}
+
+model FascicoloDocumentRequirementProposal {
+  id                               String                                     @id @default(cuid())
+  enteId                           String
+  procedimentoId                   String
+  legalSourceId                    String
+  legalRuleId                      String
+  documentGapId                    String
+  status                           FascicoloDocumentRequirementProposalStatus @default(PROPOSTO)
+  matcherAlgorithmVersion          String
+  screeningFingerprint             String
+  canonicalArt18Snapshot           NormaRiferimento
+  portActivityLegalTypeSnapshot    PortActivityLegalType
+  sourceStableKeySnapshot          String
+  sourceTitleSnapshot              String
+  sourceRelevantProvisionsSnapshot Json
+  ruleCodeSnapshot                 String
+  ruleContractVersionSnapshot      Int
+  legalRuleDefinitionSnapshot      Json
+  gapKeySnapshot                   String
+  gapLabelSnapshot                 String
+  gapDescriptionSnapshot           String
+  matchedCriteriaSnapshot          Json
+  createdAt                        DateTime                                   @default(now())
+  updatedAt                        DateTime                                   @updatedAt
+  createdByUserId                  String?
+  createdByActorId                 String
+  createdByEmail                   String
+  createdByRole                    String
+  reviewedAt                       DateTime?
+  reviewedByUserId                 String?
+  reviewedByActorId                String?
+  reviewedByEmail                  String?
+  reviewedByRole                   String?
+  reviewNote                       String?
+
+  ente           Ente         @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  procedimento   Procedimento @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  legalSource    LegalSource  @relation(fields: [legalSourceId], references: [id], onDelete: Restrict)
+  legalRule      LegalRule    @relation(fields: [legalRuleId], references: [id], onDelete: Restrict)
+  documentGap    DocumentGap  @relation(fields: [documentGapId], references: [id], onDelete: Restrict)
+  createdByUser  User?        @relation("DocumentRequirementProposalCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  reviewedByUser User?        @relation("DocumentRequirementProposalReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([enteId, procedimentoId, screeningFingerprint])
+  @@index([enteId, procedimentoId, status])
+  @@index([legalSourceId])
+  @@index([legalRuleId])
+  @@index([documentGapId])
+  @@index([createdByUserId])
+  @@index([reviewedByUserId])
+  @@index([createdAt])
 }
 
 model DecisioneProcedimento {

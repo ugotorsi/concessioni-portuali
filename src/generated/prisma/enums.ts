@@ -49,6 +49,15 @@ export const FascicoloChecklistEvidenceStatus = {
 export type FascicoloChecklistEvidenceStatus = (typeof FascicoloChecklistEvidenceStatus)[keyof typeof FascicoloChecklistEvidenceStatus]
 
 
+export const FascicoloDocumentRequirementProposalStatus = {
+  PROPOSTO: 'PROPOSTO',
+  VALIDATO: 'VALIDATO',
+  RIFIUTATO: 'RIFIUTATO'
+} as const
+
+export type FascicoloDocumentRequirementProposalStatus = (typeof FascicoloDocumentRequirementProposalStatus)[keyof typeof FascicoloDocumentRequirementProposalStatus]
+
+
 export const NormaRiferimento = {
   ART_36_COD_NAV: 'ART_36_COD_NAV',
   ART_18_L_84_1994: 'ART_18_L_84_1994',

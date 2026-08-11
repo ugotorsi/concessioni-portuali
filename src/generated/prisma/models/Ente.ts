@@ -211,6 +211,7 @@ export type EnteWhereInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoListRelationFilter
   fascicoloObservations?: Prisma.FascicoloObservationListRelationFilter
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceListRelationFilter
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalListRelationFilter
 }
 
 export type EnteOrderByWithRelationInput = {
@@ -234,6 +235,7 @@ export type EnteOrderByWithRelationInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoOrderByRelationAggregateInput
   fascicoloObservations?: Prisma.FascicoloObservationOrderByRelationAggregateInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceOrderByRelationAggregateInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalOrderByRelationAggregateInput
 }
 
 export type EnteWhereUniqueInput = Prisma.AtLeast<{
@@ -260,6 +262,7 @@ export type EnteWhereUniqueInput = Prisma.AtLeast<{
   decisioniProcedimento?: Prisma.DecisioneProcedimentoListRelationFilter
   fascicoloObservations?: Prisma.FascicoloObservationListRelationFilter
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceListRelationFilter
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalListRelationFilter
 }, "id" | "codice">
 
 export type EnteOrderByWithAggregationInput = {
@@ -309,6 +312,7 @@ export type EnteCreateInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateInput = {
@@ -332,6 +336,7 @@ export type EnteUncheckedCreateInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUpdateInput = {
@@ -355,6 +360,7 @@ export type EnteUpdateInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateInput = {
@@ -378,6 +384,7 @@ export type EnteUncheckedUpdateInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteCreateManyInput = {
@@ -620,6 +627,20 @@ export type EnteUpdateOneRequiredWithoutChecklistEvidenceNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.EnteUpdateToOneWithWhereWithoutChecklistEvidenceInput, Prisma.EnteUpdateWithoutChecklistEvidenceInput>, Prisma.EnteUncheckedUpdateWithoutChecklistEvidenceInput>
 }
 
+export type EnteCreateNestedOneWithoutDocumentRequirementProposalsInput = {
+  create?: Prisma.XOR<Prisma.EnteCreateWithoutDocumentRequirementProposalsInput, Prisma.EnteUncheckedCreateWithoutDocumentRequirementProposalsInput>
+  connectOrCreate?: Prisma.EnteCreateOrConnectWithoutDocumentRequirementProposalsInput
+  connect?: Prisma.EnteWhereUniqueInput
+}
+
+export type EnteUpdateOneRequiredWithoutDocumentRequirementProposalsNestedInput = {
+  create?: Prisma.XOR<Prisma.EnteCreateWithoutDocumentRequirementProposalsInput, Prisma.EnteUncheckedCreateWithoutDocumentRequirementProposalsInput>
+  connectOrCreate?: Prisma.EnteCreateOrConnectWithoutDocumentRequirementProposalsInput
+  upsert?: Prisma.EnteUpsertWithoutDocumentRequirementProposalsInput
+  connect?: Prisma.EnteWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EnteUpdateToOneWithWhereWithoutDocumentRequirementProposalsInput, Prisma.EnteUpdateWithoutDocumentRequirementProposalsInput>, Prisma.EnteUncheckedUpdateWithoutDocumentRequirementProposalsInput>
+}
+
 export type EnteCreateNestedOneWithoutDecisioniProcedimentoInput = {
   create?: Prisma.XOR<Prisma.EnteCreateWithoutDecisioniProcedimentoInput, Prisma.EnteUncheckedCreateWithoutDecisioniProcedimentoInput>
   connectOrCreate?: Prisma.EnteCreateOrConnectWithoutDecisioniProcedimentoInput
@@ -688,6 +709,7 @@ export type EnteCreateWithoutPortsInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateWithoutPortsInput = {
@@ -710,6 +732,7 @@ export type EnteUncheckedCreateWithoutPortsInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteCreateOrConnectWithoutPortsInput = {
@@ -748,6 +771,7 @@ export type EnteUpdateWithoutPortsInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutPortsInput = {
@@ -770,6 +794,7 @@ export type EnteUncheckedUpdateWithoutPortsInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteCreateWithoutImportRunsInput = {
@@ -792,6 +817,7 @@ export type EnteCreateWithoutImportRunsInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateWithoutImportRunsInput = {
@@ -814,6 +840,7 @@ export type EnteUncheckedCreateWithoutImportRunsInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteCreateOrConnectWithoutImportRunsInput = {
@@ -852,6 +879,7 @@ export type EnteUpdateWithoutImportRunsInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutImportRunsInput = {
@@ -874,6 +902,7 @@ export type EnteUncheckedUpdateWithoutImportRunsInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteCreateWithoutLegalSourcesInput = {
@@ -896,6 +925,7 @@ export type EnteCreateWithoutLegalSourcesInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateWithoutLegalSourcesInput = {
@@ -918,6 +948,7 @@ export type EnteUncheckedCreateWithoutLegalSourcesInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteCreateOrConnectWithoutLegalSourcesInput = {
@@ -956,6 +987,7 @@ export type EnteUpdateWithoutLegalSourcesInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutLegalSourcesInput = {
@@ -978,6 +1010,7 @@ export type EnteUncheckedUpdateWithoutLegalSourcesInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteCreateWithoutLegalRulesInput = {
@@ -1000,6 +1033,7 @@ export type EnteCreateWithoutLegalRulesInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateWithoutLegalRulesInput = {
@@ -1022,6 +1056,7 @@ export type EnteUncheckedCreateWithoutLegalRulesInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteCreateOrConnectWithoutLegalRulesInput = {
@@ -1060,6 +1095,7 @@ export type EnteUpdateWithoutLegalRulesInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutLegalRulesInput = {
@@ -1082,6 +1118,7 @@ export type EnteUncheckedUpdateWithoutLegalRulesInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteCreateWithoutDocumentGapsInput = {
@@ -1104,6 +1141,7 @@ export type EnteCreateWithoutDocumentGapsInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateWithoutDocumentGapsInput = {
@@ -1126,6 +1164,7 @@ export type EnteUncheckedCreateWithoutDocumentGapsInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteCreateOrConnectWithoutDocumentGapsInput = {
@@ -1164,6 +1203,7 @@ export type EnteUpdateWithoutDocumentGapsInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutDocumentGapsInput = {
@@ -1186,6 +1226,7 @@ export type EnteUncheckedUpdateWithoutDocumentGapsInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteCreateWithoutMembershipsInput = {
@@ -1208,6 +1249,7 @@ export type EnteCreateWithoutMembershipsInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateWithoutMembershipsInput = {
@@ -1230,6 +1272,7 @@ export type EnteUncheckedCreateWithoutMembershipsInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteCreateOrConnectWithoutMembershipsInput = {
@@ -1268,6 +1311,7 @@ export type EnteUpdateWithoutMembershipsInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutMembershipsInput = {
@@ -1290,6 +1334,7 @@ export type EnteUncheckedUpdateWithoutMembershipsInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteCreateWithoutConcessioniInput = {
@@ -1312,6 +1357,7 @@ export type EnteCreateWithoutConcessioniInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateWithoutConcessioniInput = {
@@ -1334,6 +1380,7 @@ export type EnteUncheckedCreateWithoutConcessioniInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteCreateOrConnectWithoutConcessioniInput = {
@@ -1372,6 +1419,7 @@ export type EnteUpdateWithoutConcessioniInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutConcessioniInput = {
@@ -1394,6 +1442,7 @@ export type EnteUncheckedUpdateWithoutConcessioniInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteCreateWithoutDocumentiInput = {
@@ -1416,6 +1465,7 @@ export type EnteCreateWithoutDocumentiInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateWithoutDocumentiInput = {
@@ -1438,6 +1488,7 @@ export type EnteUncheckedCreateWithoutDocumentiInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteCreateOrConnectWithoutDocumentiInput = {
@@ -1476,6 +1527,7 @@ export type EnteUpdateWithoutDocumentiInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutDocumentiInput = {
@@ -1498,6 +1550,7 @@ export type EnteUncheckedUpdateWithoutDocumentiInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteCreateWithoutFascicoloObservationsInput = {
@@ -1520,6 +1573,7 @@ export type EnteCreateWithoutFascicoloObservationsInput = {
   importRuns?: Prisma.ImportRunCreateNestedManyWithoutEnteInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateWithoutFascicoloObservationsInput = {
@@ -1542,6 +1596,7 @@ export type EnteUncheckedCreateWithoutFascicoloObservationsInput = {
   importRuns?: Prisma.ImportRunUncheckedCreateNestedManyWithoutEnteInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteCreateOrConnectWithoutFascicoloObservationsInput = {
@@ -1580,6 +1635,7 @@ export type EnteUpdateWithoutFascicoloObservationsInput = {
   importRuns?: Prisma.ImportRunUpdateManyWithoutEnteNestedInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutFascicoloObservationsInput = {
@@ -1602,6 +1658,7 @@ export type EnteUncheckedUpdateWithoutFascicoloObservationsInput = {
   importRuns?: Prisma.ImportRunUncheckedUpdateManyWithoutEnteNestedInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteCreateWithoutChecklistEvidenceInput = {
@@ -1624,6 +1681,7 @@ export type EnteCreateWithoutChecklistEvidenceInput = {
   importRuns?: Prisma.ImportRunCreateNestedManyWithoutEnteInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateWithoutChecklistEvidenceInput = {
@@ -1646,6 +1704,7 @@ export type EnteUncheckedCreateWithoutChecklistEvidenceInput = {
   importRuns?: Prisma.ImportRunUncheckedCreateNestedManyWithoutEnteInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteCreateOrConnectWithoutChecklistEvidenceInput = {
@@ -1684,6 +1743,7 @@ export type EnteUpdateWithoutChecklistEvidenceInput = {
   importRuns?: Prisma.ImportRunUpdateManyWithoutEnteNestedInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutChecklistEvidenceInput = {
@@ -1706,6 +1766,115 @@ export type EnteUncheckedUpdateWithoutChecklistEvidenceInput = {
   importRuns?: Prisma.ImportRunUncheckedUpdateManyWithoutEnteNestedInput
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
+}
+
+export type EnteCreateWithoutDocumentRequirementProposalsInput = {
+  id?: string
+  nome: string
+  codice: string
+  tipo?: $Enums.EnteTipo
+  stato?: $Enums.EnteStato
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessioni?: Prisma.ConcessioneCreateNestedManyWithoutEnteInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutEnteInput
+  report?: Prisma.ReportCreateNestedManyWithoutEnteInput
+  activityLog?: Prisma.ActivityLogCreateNestedManyWithoutEnteInput
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutEnteInput
+  ports?: Prisma.PortCreateNestedManyWithoutEnteInput
+  legalSources?: Prisma.LegalSourceCreateNestedManyWithoutEnteInput
+  legalRules?: Prisma.LegalRuleCreateNestedManyWithoutEnteInput
+  documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutEnteInput
+  importRuns?: Prisma.ImportRunCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutEnteInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutEnteInput
+}
+
+export type EnteUncheckedCreateWithoutDocumentRequirementProposalsInput = {
+  id?: string
+  nome: string
+  codice: string
+  tipo?: $Enums.EnteTipo
+  stato?: $Enums.EnteStato
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessioni?: Prisma.ConcessioneUncheckedCreateNestedManyWithoutEnteInput
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutEnteInput
+  report?: Prisma.ReportUncheckedCreateNestedManyWithoutEnteInput
+  activityLog?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutEnteInput
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutEnteInput
+  ports?: Prisma.PortUncheckedCreateNestedManyWithoutEnteInput
+  legalSources?: Prisma.LegalSourceUncheckedCreateNestedManyWithoutEnteInput
+  legalRules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutEnteInput
+  documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutEnteInput
+  importRuns?: Prisma.ImportRunUncheckedCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutEnteInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutEnteInput
+}
+
+export type EnteCreateOrConnectWithoutDocumentRequirementProposalsInput = {
+  where: Prisma.EnteWhereUniqueInput
+  create: Prisma.XOR<Prisma.EnteCreateWithoutDocumentRequirementProposalsInput, Prisma.EnteUncheckedCreateWithoutDocumentRequirementProposalsInput>
+}
+
+export type EnteUpsertWithoutDocumentRequirementProposalsInput = {
+  update: Prisma.XOR<Prisma.EnteUpdateWithoutDocumentRequirementProposalsInput, Prisma.EnteUncheckedUpdateWithoutDocumentRequirementProposalsInput>
+  create: Prisma.XOR<Prisma.EnteCreateWithoutDocumentRequirementProposalsInput, Prisma.EnteUncheckedCreateWithoutDocumentRequirementProposalsInput>
+  where?: Prisma.EnteWhereInput
+}
+
+export type EnteUpdateToOneWithWhereWithoutDocumentRequirementProposalsInput = {
+  where?: Prisma.EnteWhereInput
+  data: Prisma.XOR<Prisma.EnteUpdateWithoutDocumentRequirementProposalsInput, Prisma.EnteUncheckedUpdateWithoutDocumentRequirementProposalsInput>
+}
+
+export type EnteUpdateWithoutDocumentRequirementProposalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  codice?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.EnumEnteTipoFieldUpdateOperationsInput | $Enums.EnteTipo
+  stato?: Prisma.EnumEnteStatoFieldUpdateOperationsInput | $Enums.EnteStato
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessioni?: Prisma.ConcessioneUpdateManyWithoutEnteNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutEnteNestedInput
+  report?: Prisma.ReportUpdateManyWithoutEnteNestedInput
+  activityLog?: Prisma.ActivityLogUpdateManyWithoutEnteNestedInput
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutEnteNestedInput
+  ports?: Prisma.PortUpdateManyWithoutEnteNestedInput
+  legalSources?: Prisma.LegalSourceUpdateManyWithoutEnteNestedInput
+  legalRules?: Prisma.LegalRuleUpdateManyWithoutEnteNestedInput
+  documentGaps?: Prisma.DocumentGapUpdateManyWithoutEnteNestedInput
+  importRuns?: Prisma.ImportRunUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutEnteNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutEnteNestedInput
+}
+
+export type EnteUncheckedUpdateWithoutDocumentRequirementProposalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  codice?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.EnumEnteTipoFieldUpdateOperationsInput | $Enums.EnteTipo
+  stato?: Prisma.EnumEnteStatoFieldUpdateOperationsInput | $Enums.EnteStato
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessioni?: Prisma.ConcessioneUncheckedUpdateManyWithoutEnteNestedInput
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutEnteNestedInput
+  report?: Prisma.ReportUncheckedUpdateManyWithoutEnteNestedInput
+  activityLog?: Prisma.ActivityLogUncheckedUpdateManyWithoutEnteNestedInput
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutEnteNestedInput
+  ports?: Prisma.PortUncheckedUpdateManyWithoutEnteNestedInput
+  legalSources?: Prisma.LegalSourceUncheckedUpdateManyWithoutEnteNestedInput
+  legalRules?: Prisma.LegalRuleUncheckedUpdateManyWithoutEnteNestedInput
+  documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutEnteNestedInput
+  importRuns?: Prisma.ImportRunUncheckedUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutEnteNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteCreateWithoutDecisioniProcedimentoInput = {
@@ -1728,6 +1897,7 @@ export type EnteCreateWithoutDecisioniProcedimentoInput = {
   importRuns?: Prisma.ImportRunCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateWithoutDecisioniProcedimentoInput = {
@@ -1750,6 +1920,7 @@ export type EnteUncheckedCreateWithoutDecisioniProcedimentoInput = {
   importRuns?: Prisma.ImportRunUncheckedCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteCreateOrConnectWithoutDecisioniProcedimentoInput = {
@@ -1788,6 +1959,7 @@ export type EnteUpdateWithoutDecisioniProcedimentoInput = {
   importRuns?: Prisma.ImportRunUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutDecisioniProcedimentoInput = {
@@ -1810,6 +1982,7 @@ export type EnteUncheckedUpdateWithoutDecisioniProcedimentoInput = {
   importRuns?: Prisma.ImportRunUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteCreateWithoutReportInput = {
@@ -1832,6 +2005,7 @@ export type EnteCreateWithoutReportInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateWithoutReportInput = {
@@ -1854,6 +2028,7 @@ export type EnteUncheckedCreateWithoutReportInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteCreateOrConnectWithoutReportInput = {
@@ -1892,6 +2067,7 @@ export type EnteUpdateWithoutReportInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutReportInput = {
@@ -1914,6 +2090,7 @@ export type EnteUncheckedUpdateWithoutReportInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteCreateWithoutActivityLogInput = {
@@ -1936,6 +2113,7 @@ export type EnteCreateWithoutActivityLogInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
 }
 
 export type EnteUncheckedCreateWithoutActivityLogInput = {
@@ -1958,6 +2136,7 @@ export type EnteUncheckedCreateWithoutActivityLogInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutEnteInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
 }
 
 export type EnteCreateOrConnectWithoutActivityLogInput = {
@@ -1996,6 +2175,7 @@ export type EnteUpdateWithoutActivityLogInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutActivityLogInput = {
@@ -2018,6 +2198,7 @@ export type EnteUncheckedUpdateWithoutActivityLogInput = {
   decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutEnteNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
 }
 
 
@@ -2039,6 +2220,7 @@ export type EnteCountOutputType = {
   decisioniProcedimento: number
   fascicoloObservations: number
   checklistEvidence: number
+  documentRequirementProposals: number
 }
 
 export type EnteCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2055,6 +2237,7 @@ export type EnteCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   decisioniProcedimento?: boolean | EnteCountOutputTypeCountDecisioniProcedimentoArgs
   fascicoloObservations?: boolean | EnteCountOutputTypeCountFascicoloObservationsArgs
   checklistEvidence?: boolean | EnteCountOutputTypeCountChecklistEvidenceArgs
+  documentRequirementProposals?: boolean | EnteCountOutputTypeCountDocumentRequirementProposalsArgs
 }
 
 /**
@@ -2158,6 +2341,13 @@ export type EnteCountOutputTypeCountChecklistEvidenceArgs<ExtArgs extends runtim
   where?: Prisma.FascicoloChecklistEvidenceWhereInput
 }
 
+/**
+ * EnteCountOutputType without action
+ */
+export type EnteCountOutputTypeCountDocumentRequirementProposalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FascicoloDocumentRequirementProposalWhereInput
+}
+
 
 export type EnteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2180,6 +2370,7 @@ export type EnteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   decisioniProcedimento?: boolean | Prisma.Ente$decisioniProcedimentoArgs<ExtArgs>
   fascicoloObservations?: boolean | Prisma.Ente$fascicoloObservationsArgs<ExtArgs>
   checklistEvidence?: boolean | Prisma.Ente$checklistEvidenceArgs<ExtArgs>
+  documentRequirementProposals?: boolean | Prisma.Ente$documentRequirementProposalsArgs<ExtArgs>
   _count?: boolean | Prisma.EnteCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["ente"]>
 
@@ -2228,6 +2419,7 @@ export type EnteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   decisioniProcedimento?: boolean | Prisma.Ente$decisioniProcedimentoArgs<ExtArgs>
   fascicoloObservations?: boolean | Prisma.Ente$fascicoloObservationsArgs<ExtArgs>
   checklistEvidence?: boolean | Prisma.Ente$checklistEvidenceArgs<ExtArgs>
+  documentRequirementProposals?: boolean | Prisma.Ente$documentRequirementProposalsArgs<ExtArgs>
   _count?: boolean | Prisma.EnteCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type EnteIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -2249,6 +2441,7 @@ export type $EntePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     decisioniProcedimento: Prisma.$DecisioneProcedimentoPayload<ExtArgs>[]
     fascicoloObservations: Prisma.$FascicoloObservationPayload<ExtArgs>[]
     checklistEvidence: Prisma.$FascicoloChecklistEvidencePayload<ExtArgs>[]
+    documentRequirementProposals: Prisma.$FascicoloDocumentRequirementProposalPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2665,6 +2858,7 @@ export interface Prisma__EnteClient<T, Null = never, ExtArgs extends runtime.Typ
   decisioniProcedimento<T extends Prisma.Ente$decisioniProcedimentoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$decisioniProcedimentoArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DecisioneProcedimentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   fascicoloObservations<T extends Prisma.Ente$fascicoloObservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$fascicoloObservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloObservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   checklistEvidence<T extends Prisma.Ente$checklistEvidenceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$checklistEvidenceArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloChecklistEvidencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documentRequirementProposals<T extends Prisma.Ente$documentRequirementProposalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$documentRequirementProposalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloDocumentRequirementProposalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3403,6 +3597,30 @@ export type Ente$checklistEvidenceArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.FascicoloChecklistEvidenceScalarFieldEnum | Prisma.FascicoloChecklistEvidenceScalarFieldEnum[]
+}
+
+/**
+ * Ente.documentRequirementProposals
+ */
+export type Ente$documentRequirementProposalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FascicoloDocumentRequirementProposal
+   */
+  select?: Prisma.FascicoloDocumentRequirementProposalSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FascicoloDocumentRequirementProposal
+   */
+  omit?: Prisma.FascicoloDocumentRequirementProposalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FascicoloDocumentRequirementProposalInclude<ExtArgs> | null
+  where?: Prisma.FascicoloDocumentRequirementProposalWhereInput
+  orderBy?: Prisma.FascicoloDocumentRequirementProposalOrderByWithRelationInput | Prisma.FascicoloDocumentRequirementProposalOrderByWithRelationInput[]
+  cursor?: Prisma.FascicoloDocumentRequirementProposalWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FascicoloDocumentRequirementProposalScalarFieldEnum | Prisma.FascicoloDocumentRequirementProposalScalarFieldEnum[]
 }
 
 /**

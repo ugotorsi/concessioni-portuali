@@ -408,6 +408,7 @@ export const ModelName = {
   Documento: 'Documento',
   FascicoloObservation: 'FascicoloObservation',
   FascicoloChecklistEvidence: 'FascicoloChecklistEvidence',
+  FascicoloDocumentRequirementProposal: 'FascicoloDocumentRequirementProposal',
   DecisioneProcedimento: 'DecisioneProcedimento',
   Report: 'Report',
   NormaFonte: 'NormaFonte',
@@ -429,7 +430,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2209,6 +2210,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    FascicoloDocumentRequirementProposal: {
+      payload: Prisma.$FascicoloDocumentRequirementProposalPayload<ExtArgs>
+      fields: Prisma.FascicoloDocumentRequirementProposalFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FascicoloDocumentRequirementProposalFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloDocumentRequirementProposalPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FascicoloDocumentRequirementProposalFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloDocumentRequirementProposalPayload>
+        }
+        findFirst: {
+          args: Prisma.FascicoloDocumentRequirementProposalFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloDocumentRequirementProposalPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FascicoloDocumentRequirementProposalFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloDocumentRequirementProposalPayload>
+        }
+        findMany: {
+          args: Prisma.FascicoloDocumentRequirementProposalFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloDocumentRequirementProposalPayload>[]
+        }
+        create: {
+          args: Prisma.FascicoloDocumentRequirementProposalCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloDocumentRequirementProposalPayload>
+        }
+        createMany: {
+          args: Prisma.FascicoloDocumentRequirementProposalCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FascicoloDocumentRequirementProposalCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloDocumentRequirementProposalPayload>[]
+        }
+        delete: {
+          args: Prisma.FascicoloDocumentRequirementProposalDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloDocumentRequirementProposalPayload>
+        }
+        update: {
+          args: Prisma.FascicoloDocumentRequirementProposalUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloDocumentRequirementProposalPayload>
+        }
+        deleteMany: {
+          args: Prisma.FascicoloDocumentRequirementProposalDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FascicoloDocumentRequirementProposalUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FascicoloDocumentRequirementProposalUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloDocumentRequirementProposalPayload>[]
+        }
+        upsert: {
+          args: Prisma.FascicoloDocumentRequirementProposalUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloDocumentRequirementProposalPayload>
+        }
+        aggregate: {
+          args: Prisma.FascicoloDocumentRequirementProposalAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFascicoloDocumentRequirementProposal>
+        }
+        groupBy: {
+          args: Prisma.FascicoloDocumentRequirementProposalGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FascicoloDocumentRequirementProposalGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FascicoloDocumentRequirementProposalCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FascicoloDocumentRequirementProposalCountAggregateOutputType> | number
+        }
+      }
+    }
     DecisioneProcedimento: {
       payload: Prisma.$DecisioneProcedimentoPayload<ExtArgs>
       fields: Prisma.DecisioneProcedimentoFieldRefs
@@ -3248,6 +3323,45 @@ export const FascicoloChecklistEvidenceScalarFieldEnum = {
 export type FascicoloChecklistEvidenceScalarFieldEnum = (typeof FascicoloChecklistEvidenceScalarFieldEnum)[keyof typeof FascicoloChecklistEvidenceScalarFieldEnum]
 
 
+export const FascicoloDocumentRequirementProposalScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  procedimentoId: 'procedimentoId',
+  legalSourceId: 'legalSourceId',
+  legalRuleId: 'legalRuleId',
+  documentGapId: 'documentGapId',
+  status: 'status',
+  matcherAlgorithmVersion: 'matcherAlgorithmVersion',
+  screeningFingerprint: 'screeningFingerprint',
+  canonicalArt18Snapshot: 'canonicalArt18Snapshot',
+  portActivityLegalTypeSnapshot: 'portActivityLegalTypeSnapshot',
+  sourceStableKeySnapshot: 'sourceStableKeySnapshot',
+  sourceTitleSnapshot: 'sourceTitleSnapshot',
+  sourceRelevantProvisionsSnapshot: 'sourceRelevantProvisionsSnapshot',
+  ruleCodeSnapshot: 'ruleCodeSnapshot',
+  ruleContractVersionSnapshot: 'ruleContractVersionSnapshot',
+  legalRuleDefinitionSnapshot: 'legalRuleDefinitionSnapshot',
+  gapKeySnapshot: 'gapKeySnapshot',
+  gapLabelSnapshot: 'gapLabelSnapshot',
+  gapDescriptionSnapshot: 'gapDescriptionSnapshot',
+  matchedCriteriaSnapshot: 'matchedCriteriaSnapshot',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  createdByUserId: 'createdByUserId',
+  createdByActorId: 'createdByActorId',
+  createdByEmail: 'createdByEmail',
+  createdByRole: 'createdByRole',
+  reviewedAt: 'reviewedAt',
+  reviewedByUserId: 'reviewedByUserId',
+  reviewedByActorId: 'reviewedByActorId',
+  reviewedByEmail: 'reviewedByEmail',
+  reviewedByRole: 'reviewedByRole',
+  reviewNote: 'reviewNote'
+} as const
+
+export type FascicoloDocumentRequirementProposalScalarFieldEnum = (typeof FascicoloDocumentRequirementProposalScalarFieldEnum)[keyof typeof FascicoloDocumentRequirementProposalScalarFieldEnum]
+
+
 export const DecisioneProcedimentoScalarFieldEnum = {
   id: 'id',
   enteId: 'enteId',
@@ -4269,6 +4383,20 @@ export type ListEnumFascicoloChecklistEvidenceStatusFieldRefInput<$PrismaModel> 
 
 
 /**
+ * Reference to a field of type 'FascicoloDocumentRequirementProposalStatus'
+ */
+export type EnumFascicoloDocumentRequirementProposalStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FascicoloDocumentRequirementProposalStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'FascicoloDocumentRequirementProposalStatus[]'
+ */
+export type ListEnumFascicoloDocumentRequirementProposalStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FascicoloDocumentRequirementProposalStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'TipoDecisioneProcedimento'
  */
 export type EnumTipoDecisioneProcedimentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoDecisioneProcedimento'>
@@ -4527,6 +4655,7 @@ export type GlobalOmitConfig = {
   documento?: Prisma.DocumentoOmit
   fascicoloObservation?: Prisma.FascicoloObservationOmit
   fascicoloChecklistEvidence?: Prisma.FascicoloChecklistEvidenceOmit
+  fascicoloDocumentRequirementProposal?: Prisma.FascicoloDocumentRequirementProposalOmit
   decisioneProcedimento?: Prisma.DecisioneProcedimentoOmit
   report?: Prisma.ReportOmit
   normaFonte?: Prisma.NormaFonteOmit

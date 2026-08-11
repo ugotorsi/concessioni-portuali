@@ -253,6 +253,7 @@ export type DocumentGapWhereInput = {
   ente?: Prisma.XOR<Prisma.EnteNullableScalarRelationFilter, Prisma.EnteWhereInput> | null
   port?: Prisma.XOR<Prisma.PortNullableScalarRelationFilter, Prisma.PortWhereInput> | null
   rule?: Prisma.XOR<Prisma.LegalRuleNullableScalarRelationFilter, Prisma.LegalRuleWhereInput> | null
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalListRelationFilter
 }
 
 export type DocumentGapOrderByWithRelationInput = {
@@ -273,6 +274,7 @@ export type DocumentGapOrderByWithRelationInput = {
   ente?: Prisma.EnteOrderByWithRelationInput
   port?: Prisma.PortOrderByWithRelationInput
   rule?: Prisma.LegalRuleOrderByWithRelationInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalOrderByRelationAggregateInput
 }
 
 export type DocumentGapWhereUniqueInput = Prisma.AtLeast<{
@@ -296,6 +298,7 @@ export type DocumentGapWhereUniqueInput = Prisma.AtLeast<{
   ente?: Prisma.XOR<Prisma.EnteNullableScalarRelationFilter, Prisma.EnteWhereInput> | null
   port?: Prisma.XOR<Prisma.PortNullableScalarRelationFilter, Prisma.PortWhereInput> | null
   rule?: Prisma.XOR<Prisma.LegalRuleNullableScalarRelationFilter, Prisma.LegalRuleWhereInput> | null
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalListRelationFilter
 }, "id" | "gapKey">
 
 export type DocumentGapOrderByWithAggregationInput = {
@@ -353,6 +356,7 @@ export type DocumentGapCreateInput = {
   ente?: Prisma.EnteCreateNestedOneWithoutDocumentGapsInput
   port?: Prisma.PortCreateNestedOneWithoutDocumentGapsInput
   rule?: Prisma.LegalRuleCreateNestedOneWithoutDocumentGapsInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutDocumentGapInput
 }
 
 export type DocumentGapUncheckedCreateInput = {
@@ -370,6 +374,7 @@ export type DocumentGapUncheckedCreateInput = {
   ruleId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutDocumentGapInput
 }
 
 export type DocumentGapUpdateInput = {
@@ -387,6 +392,7 @@ export type DocumentGapUpdateInput = {
   ente?: Prisma.EnteUpdateOneWithoutDocumentGapsNestedInput
   port?: Prisma.PortUpdateOneWithoutDocumentGapsNestedInput
   rule?: Prisma.LegalRuleUpdateOneWithoutDocumentGapsNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutDocumentGapNestedInput
 }
 
 export type DocumentGapUncheckedUpdateInput = {
@@ -404,6 +410,7 @@ export type DocumentGapUncheckedUpdateInput = {
   ruleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutDocumentGapNestedInput
 }
 
 export type DocumentGapCreateManyInput = {
@@ -511,6 +518,11 @@ export type DocumentGapMinOrderByAggregateInput = {
   ruleId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type DocumentGapScalarRelationFilter = {
+  is?: Prisma.DocumentGapWhereInput
+  isNot?: Prisma.DocumentGapWhereInput
 }
 
 export type DocumentGapCreateNestedManyWithoutEnteInput = {
@@ -643,6 +655,20 @@ export type EnumDocumentGapStatusFieldUpdateOperationsInput = {
   set?: $Enums.DocumentGapStatus
 }
 
+export type DocumentGapCreateNestedOneWithoutDocumentRequirementProposalsInput = {
+  create?: Prisma.XOR<Prisma.DocumentGapCreateWithoutDocumentRequirementProposalsInput, Prisma.DocumentGapUncheckedCreateWithoutDocumentRequirementProposalsInput>
+  connectOrCreate?: Prisma.DocumentGapCreateOrConnectWithoutDocumentRequirementProposalsInput
+  connect?: Prisma.DocumentGapWhereUniqueInput
+}
+
+export type DocumentGapUpdateOneRequiredWithoutDocumentRequirementProposalsNestedInput = {
+  create?: Prisma.XOR<Prisma.DocumentGapCreateWithoutDocumentRequirementProposalsInput, Prisma.DocumentGapUncheckedCreateWithoutDocumentRequirementProposalsInput>
+  connectOrCreate?: Prisma.DocumentGapCreateOrConnectWithoutDocumentRequirementProposalsInput
+  upsert?: Prisma.DocumentGapUpsertWithoutDocumentRequirementProposalsInput
+  connect?: Prisma.DocumentGapWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DocumentGapUpdateToOneWithWhereWithoutDocumentRequirementProposalsInput, Prisma.DocumentGapUpdateWithoutDocumentRequirementProposalsInput>, Prisma.DocumentGapUncheckedUpdateWithoutDocumentRequirementProposalsInput>
+}
+
 export type DocumentGapCreateWithoutEnteInput = {
   id?: string
   gapKey: string
@@ -657,6 +683,7 @@ export type DocumentGapCreateWithoutEnteInput = {
   updatedAt?: Date | string
   port?: Prisma.PortCreateNestedOneWithoutDocumentGapsInput
   rule?: Prisma.LegalRuleCreateNestedOneWithoutDocumentGapsInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutDocumentGapInput
 }
 
 export type DocumentGapUncheckedCreateWithoutEnteInput = {
@@ -673,6 +700,7 @@ export type DocumentGapUncheckedCreateWithoutEnteInput = {
   ruleId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutDocumentGapInput
 }
 
 export type DocumentGapCreateOrConnectWithoutEnteInput = {
@@ -735,6 +763,7 @@ export type DocumentGapCreateWithoutPortInput = {
   updatedAt?: Date | string
   ente?: Prisma.EnteCreateNestedOneWithoutDocumentGapsInput
   rule?: Prisma.LegalRuleCreateNestedOneWithoutDocumentGapsInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutDocumentGapInput
 }
 
 export type DocumentGapUncheckedCreateWithoutPortInput = {
@@ -751,6 +780,7 @@ export type DocumentGapUncheckedCreateWithoutPortInput = {
   ruleId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutDocumentGapInput
 }
 
 export type DocumentGapCreateOrConnectWithoutPortInput = {
@@ -793,6 +823,7 @@ export type DocumentGapCreateWithoutRuleInput = {
   updatedAt?: Date | string
   ente?: Prisma.EnteCreateNestedOneWithoutDocumentGapsInput
   port?: Prisma.PortCreateNestedOneWithoutDocumentGapsInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutDocumentGapInput
 }
 
 export type DocumentGapUncheckedCreateWithoutRuleInput = {
@@ -809,6 +840,7 @@ export type DocumentGapUncheckedCreateWithoutRuleInput = {
   portId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutDocumentGapInput
 }
 
 export type DocumentGapCreateOrConnectWithoutRuleInput = {
@@ -835,6 +867,90 @@ export type DocumentGapUpdateWithWhereUniqueWithoutRuleInput = {
 export type DocumentGapUpdateManyWithWhereWithoutRuleInput = {
   where: Prisma.DocumentGapScalarWhereInput
   data: Prisma.XOR<Prisma.DocumentGapUpdateManyMutationInput, Prisma.DocumentGapUncheckedUpdateManyWithoutRuleInput>
+}
+
+export type DocumentGapCreateWithoutDocumentRequirementProposalsInput = {
+  id?: string
+  gapKey: string
+  title: string
+  description: string
+  severity?: $Enums.GravitaCriticita
+  status?: $Enums.DocumentGapStatus
+  requiredDocumentTypes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notes?: string | null
+  humanReviewRequired?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  ente?: Prisma.EnteCreateNestedOneWithoutDocumentGapsInput
+  port?: Prisma.PortCreateNestedOneWithoutDocumentGapsInput
+  rule?: Prisma.LegalRuleCreateNestedOneWithoutDocumentGapsInput
+}
+
+export type DocumentGapUncheckedCreateWithoutDocumentRequirementProposalsInput = {
+  id?: string
+  gapKey: string
+  title: string
+  description: string
+  severity?: $Enums.GravitaCriticita
+  status?: $Enums.DocumentGapStatus
+  requiredDocumentTypes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notes?: string | null
+  humanReviewRequired?: boolean
+  enteId?: string | null
+  portId?: string | null
+  ruleId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type DocumentGapCreateOrConnectWithoutDocumentRequirementProposalsInput = {
+  where: Prisma.DocumentGapWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocumentGapCreateWithoutDocumentRequirementProposalsInput, Prisma.DocumentGapUncheckedCreateWithoutDocumentRequirementProposalsInput>
+}
+
+export type DocumentGapUpsertWithoutDocumentRequirementProposalsInput = {
+  update: Prisma.XOR<Prisma.DocumentGapUpdateWithoutDocumentRequirementProposalsInput, Prisma.DocumentGapUncheckedUpdateWithoutDocumentRequirementProposalsInput>
+  create: Prisma.XOR<Prisma.DocumentGapCreateWithoutDocumentRequirementProposalsInput, Prisma.DocumentGapUncheckedCreateWithoutDocumentRequirementProposalsInput>
+  where?: Prisma.DocumentGapWhereInput
+}
+
+export type DocumentGapUpdateToOneWithWhereWithoutDocumentRequirementProposalsInput = {
+  where?: Prisma.DocumentGapWhereInput
+  data: Prisma.XOR<Prisma.DocumentGapUpdateWithoutDocumentRequirementProposalsInput, Prisma.DocumentGapUncheckedUpdateWithoutDocumentRequirementProposalsInput>
+}
+
+export type DocumentGapUpdateWithoutDocumentRequirementProposalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  gapKey?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.EnumGravitaCriticitaFieldUpdateOperationsInput | $Enums.GravitaCriticita
+  status?: Prisma.EnumDocumentGapStatusFieldUpdateOperationsInput | $Enums.DocumentGapStatus
+  requiredDocumentTypes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ente?: Prisma.EnteUpdateOneWithoutDocumentGapsNestedInput
+  port?: Prisma.PortUpdateOneWithoutDocumentGapsNestedInput
+  rule?: Prisma.LegalRuleUpdateOneWithoutDocumentGapsNestedInput
+}
+
+export type DocumentGapUncheckedUpdateWithoutDocumentRequirementProposalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  gapKey?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.EnumGravitaCriticitaFieldUpdateOperationsInput | $Enums.GravitaCriticita
+  status?: Prisma.EnumDocumentGapStatusFieldUpdateOperationsInput | $Enums.DocumentGapStatus
+  requiredDocumentTypes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ruleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type DocumentGapCreateManyEnteInput = {
@@ -867,6 +983,7 @@ export type DocumentGapUpdateWithoutEnteInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   port?: Prisma.PortUpdateOneWithoutDocumentGapsNestedInput
   rule?: Prisma.LegalRuleUpdateOneWithoutDocumentGapsNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutDocumentGapNestedInput
 }
 
 export type DocumentGapUncheckedUpdateWithoutEnteInput = {
@@ -883,6 +1000,7 @@ export type DocumentGapUncheckedUpdateWithoutEnteInput = {
   ruleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutDocumentGapNestedInput
 }
 
 export type DocumentGapUncheckedUpdateManyWithoutEnteInput = {
@@ -931,6 +1049,7 @@ export type DocumentGapUpdateWithoutPortInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ente?: Prisma.EnteUpdateOneWithoutDocumentGapsNestedInput
   rule?: Prisma.LegalRuleUpdateOneWithoutDocumentGapsNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutDocumentGapNestedInput
 }
 
 export type DocumentGapUncheckedUpdateWithoutPortInput = {
@@ -947,6 +1066,7 @@ export type DocumentGapUncheckedUpdateWithoutPortInput = {
   ruleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutDocumentGapNestedInput
 }
 
 export type DocumentGapUncheckedUpdateManyWithoutPortInput = {
@@ -995,6 +1115,7 @@ export type DocumentGapUpdateWithoutRuleInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ente?: Prisma.EnteUpdateOneWithoutDocumentGapsNestedInput
   port?: Prisma.PortUpdateOneWithoutDocumentGapsNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutDocumentGapNestedInput
 }
 
 export type DocumentGapUncheckedUpdateWithoutRuleInput = {
@@ -1011,6 +1132,7 @@ export type DocumentGapUncheckedUpdateWithoutRuleInput = {
   portId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutDocumentGapNestedInput
 }
 
 export type DocumentGapUncheckedUpdateManyWithoutRuleInput = {
@@ -1029,6 +1151,35 @@ export type DocumentGapUncheckedUpdateManyWithoutRuleInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+
+/**
+ * Count Type DocumentGapCountOutputType
+ */
+
+export type DocumentGapCountOutputType = {
+  documentRequirementProposals: number
+}
+
+export type DocumentGapCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  documentRequirementProposals?: boolean | DocumentGapCountOutputTypeCountDocumentRequirementProposalsArgs
+}
+
+/**
+ * DocumentGapCountOutputType without action
+ */
+export type DocumentGapCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocumentGapCountOutputType
+   */
+  select?: Prisma.DocumentGapCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * DocumentGapCountOutputType without action
+ */
+export type DocumentGapCountOutputTypeCountDocumentRequirementProposalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FascicoloDocumentRequirementProposalWhereInput
+}
 
 
 export type DocumentGapSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1049,6 +1200,8 @@ export type DocumentGapSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   ente?: boolean | Prisma.DocumentGap$enteArgs<ExtArgs>
   port?: boolean | Prisma.DocumentGap$portArgs<ExtArgs>
   rule?: boolean | Prisma.DocumentGap$ruleArgs<ExtArgs>
+  documentRequirementProposals?: boolean | Prisma.DocumentGap$documentRequirementProposalsArgs<ExtArgs>
+  _count?: boolean | Prisma.DocumentGapCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["documentGap"]>
 
 export type DocumentGapSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1113,6 +1266,8 @@ export type DocumentGapInclude<ExtArgs extends runtime.Types.Extensions.Internal
   ente?: boolean | Prisma.DocumentGap$enteArgs<ExtArgs>
   port?: boolean | Prisma.DocumentGap$portArgs<ExtArgs>
   rule?: boolean | Prisma.DocumentGap$ruleArgs<ExtArgs>
+  documentRequirementProposals?: boolean | Prisma.DocumentGap$documentRequirementProposalsArgs<ExtArgs>
+  _count?: boolean | Prisma.DocumentGapCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type DocumentGapIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   ente?: boolean | Prisma.DocumentGap$enteArgs<ExtArgs>
@@ -1131,6 +1286,7 @@ export type $DocumentGapPayload<ExtArgs extends runtime.Types.Extensions.Interna
     ente: Prisma.$EntePayload<ExtArgs> | null
     port: Prisma.$PortPayload<ExtArgs> | null
     rule: Prisma.$LegalRulePayload<ExtArgs> | null
+    documentRequirementProposals: Prisma.$FascicoloDocumentRequirementProposalPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1544,6 +1700,7 @@ export interface Prisma__DocumentGapClient<T, Null = never, ExtArgs extends runt
   ente<T extends Prisma.DocumentGap$enteArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentGap$enteArgs<ExtArgs>>): Prisma.Prisma__EnteClient<runtime.Types.Result.GetResult<Prisma.$EntePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   port<T extends Prisma.DocumentGap$portArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentGap$portArgs<ExtArgs>>): Prisma.Prisma__PortClient<runtime.Types.Result.GetResult<Prisma.$PortPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   rule<T extends Prisma.DocumentGap$ruleArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentGap$ruleArgs<ExtArgs>>): Prisma.Prisma__LegalRuleClient<runtime.Types.Result.GetResult<Prisma.$LegalRulePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  documentRequirementProposals<T extends Prisma.DocumentGap$documentRequirementProposalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentGap$documentRequirementProposalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloDocumentRequirementProposalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2042,6 +2199,30 @@ export type DocumentGap$ruleArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   include?: Prisma.LegalRuleInclude<ExtArgs> | null
   where?: Prisma.LegalRuleWhereInput
+}
+
+/**
+ * DocumentGap.documentRequirementProposals
+ */
+export type DocumentGap$documentRequirementProposalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FascicoloDocumentRequirementProposal
+   */
+  select?: Prisma.FascicoloDocumentRequirementProposalSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FascicoloDocumentRequirementProposal
+   */
+  omit?: Prisma.FascicoloDocumentRequirementProposalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FascicoloDocumentRequirementProposalInclude<ExtArgs> | null
+  where?: Prisma.FascicoloDocumentRequirementProposalWhereInput
+  orderBy?: Prisma.FascicoloDocumentRequirementProposalOrderByWithRelationInput | Prisma.FascicoloDocumentRequirementProposalOrderByWithRelationInput[]
+  cursor?: Prisma.FascicoloDocumentRequirementProposalWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FascicoloDocumentRequirementProposalScalarFieldEnum | Prisma.FascicoloDocumentRequirementProposalScalarFieldEnum[]
 }
 
 /**
