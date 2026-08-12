@@ -6,6 +6,7 @@ import { GravitaBadge, StatoBadge as CriticitaStatoBadge } from "@/components/cr
 import { EntityDocumentsPanel } from "@/components/documents/EntityDocumentsPanel";
 import { AppShell } from "@/components/layout/AppShell";
 import { ChecklistItemEvidence } from "@/components/procedimenti/ChecklistItemEvidence";
+import { FascicoloDocumentRequirementProposalsPanel } from "@/components/procedimenti/FascicoloDocumentRequirementProposalsPanel";
 import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloObservationsPanel";
 import {
   ProcedimentoGiorniBadge,
@@ -48,6 +49,7 @@ import {
 import { getDecisionRulePreviewForTipologia } from "@/server/procedimenti/decisioni";
 import { getLetturaProcedimentale, getProcedimentoDetail } from "@/server/queries/procedimenti";
 import { getChecklistEvidenceData } from "@/server/queries/checklist-evidence";
+import { getFascicoloDocumentRequirementProposals } from "@/server/queries/fascicolo-document-requirements";
 import { getFascicoloObservations } from "@/server/queries/fascicolo-observations";
 import { getNormeForProcedimento } from "@/server/queries/normativa";
 
@@ -80,7 +82,8 @@ function getStatoEffettoLabel(value: "NON_PREVISTO" | "PENDENTE" | "PRONTO" | "A
 
 export default async function ProcedimentoDetailPage({ params }: ProcedimentoDetailPageProps) {
   const role = await requireRole();
-  const canWriteChecklist = canManageProcedimenti(role);
+  const canReview = canManageProcedimenti(role);
+  const canWriteChecklist = canReview;
   const canRegisterDecision = canRegisterProcedimentoDecision(role);
   const { id } = await params;
   const detail = await getProcedimentoDetail(id);
@@ -90,6 +93,7 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
   }
 
   const fascicoloObservations = await getFascicoloObservations(detail.procedimento.id);
+  const fascicoloDocumentRequirements = await getFascicoloDocumentRequirementProposals(detail.procedimento.id);
   const checklistEvidenceData = await getChecklistEvidenceData(detail.procedimento.id);
   const hasCanonicalTenant = Boolean(detail.canonicalEnteId);
 
@@ -302,6 +306,12 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
             canReview={canWriteChecklist}
             hasCanonicalTenant={hasCanonicalTenant}
             observations={fascicoloObservations}
+          />
+
+          <FascicoloDocumentRequirementProposalsPanel
+            proposals={fascicoloDocumentRequirements.proposals}
+            canReview={canReview}
+            hasCanonicalTenant={hasCanonicalTenant}
           />
 
           <Card>
