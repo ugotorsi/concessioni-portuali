@@ -7,6 +7,7 @@ import { EntityDocumentsPanel } from "@/components/documents/EntityDocumentsPane
 import { AppShell } from "@/components/layout/AppShell";
 import { ChecklistItemEvidence } from "@/components/procedimenti/ChecklistItemEvidence";
 import { FascicoloDocumentRequirementProposalsPanel } from "@/components/procedimenti/FascicoloDocumentRequirementProposalsPanel";
+import { FascicoloDocumentRequirementScreeningTrigger } from "@/components/procedimenti/FascicoloDocumentRequirementScreeningTrigger";
 import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloObservationsPanel";
 import {
   ProcedimentoGiorniBadge,
@@ -57,6 +58,7 @@ import { PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES } from "@/server/queries/procedim
 
 interface ProcedimentoDetailPageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ screening?: string | string[] }>;
 }
 
 export const dynamic = "force-dynamic";
@@ -80,12 +82,14 @@ function getStatoEffettoLabel(value: "NON_PREVISTO" | "PENDENTE" | "PRONTO" | "A
   }
 }
 
-export default async function ProcedimentoDetailPage({ params }: ProcedimentoDetailPageProps) {
+export default async function ProcedimentoDetailPage({ params, searchParams }: ProcedimentoDetailPageProps) {
   const role = await requireRole();
   const canReview = canManageProcedimenti(role);
   const canWriteChecklist = canReview;
   const canRegisterDecision = canRegisterProcedimentoDecision(role);
   const { id } = await params;
+  const { screening } = await searchParams;
+  const screeningDone = screening === "done";
   const detail = await getProcedimentoDetail(id);
 
   if (!detail) {
@@ -306,6 +310,13 @@ export default async function ProcedimentoDetailPage({ params }: ProcedimentoDet
             canReview={canWriteChecklist}
             hasCanonicalTenant={hasCanonicalTenant}
             observations={fascicoloObservations}
+          />
+
+          <FascicoloDocumentRequirementScreeningTrigger
+            procedimentoId={detail.procedimento.id}
+            canRun={canReview}
+            hasCanonicalTenant={hasCanonicalTenant}
+            screeningDone={screeningDone}
           />
 
           <FascicoloDocumentRequirementProposalsPanel
