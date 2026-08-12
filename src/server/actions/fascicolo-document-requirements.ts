@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import type { Prisma } from "@/generated/prisma/client";
@@ -24,6 +25,11 @@ import {
 const STAGING_PREVIEW_ADMIN_ID = "staging-preview-admin";
 
 const createSchema = z.object({ procedimentoId: z.string().min(1) }).strict();
+const reviewSchema = z.object({
+  proposalId: z.string().trim().min(1),
+  targetStatus: z.enum(["VALIDATO", "RIFIUTATO"]),
+  reviewNote: z.string().trim().optional(),
+}).strict();
 
 function resolvePersistedUserId(currentUserId: string): string | null {
   return currentUserId === STAGING_PREVIEW_ADMIN_ID ? null : currentUserId;
@@ -236,4 +242,98 @@ export async function createFascicoloDocumentRequirementProposal(input: { proced
 
     return { eligible: true as const, created: inserted.count === 1, proposal };
   });
+}
+
+export async function reviewFascicoloDocumentRequirementProposalAction(formData: FormData) {
+  const role = await requireRole();
+  if (!canManageProcedimenti(role)) {
+    throw new Error("Profilo non autorizzato alla verifica umana dei requisiti documentali proposti.");
+  }
+
+  const currentUser = await getCurrentUser();
+  if (!currentUser) {
+    throw new Error("Utente non autenticato.");
+  }
+
+  const parsed = reviewSchema.parse({
+    proposalId: formData.get("proposalId"),
+    targetStatus: formData.get("targetStatus"),
+    reviewNote: formData.get("reviewNote")?.toString(),
+  });
+  const normalizedReviewNote = parsed.reviewNote || null;
+  if (parsed.targetStatus === "RIFIUTATO" && !normalizedReviewNote) {
+    throw new Error("La nota di review e obbligatoria per il rifiuto.");
+  }
+
+  const proposal = await prisma.fascicoloDocumentRequirementProposal.findUnique({
+    where: { id: parsed.proposalId },
+    select: {
+      id: true,
+      status: true,
+      enteId: true,
+      procedimentoId: true,
+      screeningFingerprint: true,
+      ruleCodeSnapshot: true,
+      gapKeySnapshot: true,
+      procedimento: {
+        select: {
+          concessioneId: true,
+          concessione: { select: { enteId: true } },
+        },
+      },
+    },
+  });
+  const canonicalEnteId = proposal?.procedimento.concessione.enteId ?? null;
+  if (!proposal || !canonicalEnteId || proposal.enteId !== canonicalEnteId) {
+    throw new Error("Proposta non disponibile o non coerente con il tenant canonico.");
+  }
+  if (proposal.status !== "PROPOSTO") {
+    throw new Error("Proposta gia revisionata o non piu disponibile per la verifica.");
+  }
+
+  const tenantContext = await getCurrentTenantContext();
+  if (tenantContext) {
+    requireTenantAccess(tenantContext, canonicalEnteId, { mode: "write", allowWhenEnteMissing: false });
+  }
+
+  const reviewedByUserId = resolvePersistedUserId(currentUser.id);
+  await prisma.$transaction(async (tx) => {
+    const reviewedAt = new Date();
+    const result = await tx.fascicoloDocumentRequirementProposal.updateMany({
+      where: { id: proposal.id, enteId: canonicalEnteId, status: "PROPOSTO" },
+      data: {
+        status: parsed.targetStatus,
+        reviewedAt,
+        reviewedByUserId,
+        reviewedByActorId: currentUser.id,
+        reviewedByEmail: currentUser.email,
+        reviewedByRole: role,
+        reviewNote: normalizedReviewNote,
+      },
+    });
+    if (result.count !== 1) {
+      throw new Error("Proposta gia revisionata o modificata da un altro revisore.");
+    }
+
+    await createAuditLogInTransaction(tx, {
+      azione: "FASCICOLO_DOCUMENT_REQUIREMENT_PROPOSAL_REVIEW",
+      entita: "FascicoloDocumentRequirementProposal",
+      entitaId: proposal.id,
+      enteId: canonicalEnteId,
+      concessioneId: proposal.procedimento.concessioneId,
+      esito: "SUCCESS",
+      actor: { userId: reviewedByUserId, userEmail: currentUser.email, userRole: role },
+      metadata: {
+        proposalId: proposal.id,
+        previousStatus: "PROPOSTO",
+        newStatus: parsed.targetStatus,
+        screeningFingerprint: proposal.screeningFingerprint,
+        ruleCodeSnapshot: proposal.ruleCodeSnapshot,
+        gapKeySnapshot: proposal.gapKeySnapshot,
+        reviewNotePresent: normalizedReviewNote !== null,
+      },
+    });
+  });
+
+  revalidatePath(`/procedimenti/${proposal.procedimentoId}`);
 }

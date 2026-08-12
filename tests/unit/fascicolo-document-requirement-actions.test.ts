@@ -6,18 +6,23 @@ const getCurrentUserMock = vi.hoisted(() => vi.fn());
 const getCurrentTenantContextMock = vi.hoisted(() => vi.fn());
 const requireTenantAccessMock = vi.hoisted(() => vi.fn());
 const auditInTransactionMock = vi.hoisted(() => vi.fn());
+const revalidatePathMock = vi.hoisted(() => vi.fn());
+const evaluateRequirementMock = vi.hoisted(() => vi.fn());
+const genericResolverMock = vi.hoisted(() => vi.fn());
 
 const txMock = vi.hoisted(() => ({
   fascicoloDocumentRequirementProposal: {
     createMany: vi.fn(),
     findUniqueOrThrow: vi.fn(),
+    updateMany: vi.fn(),
   },
 }));
 const prismaMock = vi.hoisted(() => ({
   procedimento: { findUnique: vi.fn(), update: vi.fn() },
-  legalSource: { findUnique: vi.fn() },
-  legalRule: { findUnique: vi.fn() },
-  documentGap: { findUnique: vi.fn() },
+  fascicoloDocumentRequirementProposal: { findUnique: vi.fn() },
+  legalSource: { findUnique: vi.fn(), update: vi.fn() },
+  legalRule: { findUnique: vi.fn(), update: vi.fn() },
+  documentGap: { findUnique: vi.fn(), update: vi.fn() },
   concessione: { update: vi.fn() },
   documento: { update: vi.fn() },
   criticita: { update: vi.fn() },
@@ -39,8 +44,18 @@ vi.mock("@/lib/tenant-auth", () => ({
   requireTenantAccess: requireTenantAccessMock,
 }));
 vi.mock("@/server/audit/auditLog", () => ({ createAuditLogInTransaction: auditInTransactionMock }));
+vi.mock("next/cache", () => ({ revalidatePath: revalidatePathMock }));
+vi.mock("@/server/fascicolo-document-requirements/matcher", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/server/fascicolo-document-requirements/matcher")>();
+  evaluateRequirementMock.mockImplementation(actual.evaluateP1C1DocumentRequirement);
+  return { ...actual, evaluateP1C1DocumentRequirement: evaluateRequirementMock };
+});
+vi.mock("@/server/legal-rules/orchestrator", () => ({ resolveApplicableLegalRules: genericResolverMock }));
 
-import { createFascicoloDocumentRequirementProposal } from "@/server/actions/fascicolo-document-requirements";
+import {
+  createFascicoloDocumentRequirementProposal,
+  reviewFascicoloDocumentRequirementProposalAction,
+} from "@/server/actions/fascicolo-document-requirements";
 
 const procedimento = {
   id: "procedimento-1",
@@ -93,6 +108,28 @@ const proposal = {
   status: "PROPOSTO",
   screeningFingerprint: "a".repeat(64),
 };
+const reviewProposal = {
+  id: "proposal-1",
+  status: "PROPOSTO",
+  enteId: "ente-1",
+  procedimentoId: "procedimento-1",
+  screeningFingerprint: "a".repeat(64),
+  ruleCodeSnapshot: "P1C_ART18_ART16_AUTH_REQUIREMENT",
+  gapKeySnapshot: "REQ-AUTORIZZAZIONE-ART16",
+  procedimento: {
+    concessioneId: "concessione-1",
+    concessione: { enteId: "ente-1" },
+  },
+};
+
+function reviewForm(targetStatus: string, reviewNote?: string, extra?: Record<string, string>) {
+  const formData = new FormData();
+  formData.set("proposalId", "proposal-1");
+  formData.set("targetStatus", targetStatus);
+  if (reviewNote !== undefined) formData.set("reviewNote", reviewNote);
+  for (const [key, value] of Object.entries(extra ?? {})) formData.set(key, value);
+  return formData;
+}
 
 describe("P1-C1 document requirement create action", () => {
   beforeEach(() => {
@@ -326,5 +363,251 @@ describe("P1-C1 document requirement create action", () => {
     ]) {
       expect(model.update).not.toHaveBeenCalled();
     }
+  });
+});
+
+describe("P1-C1 document requirement review action", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    requireRoleMock.mockResolvedValue("ADMIN");
+    canManageProcedimentiMock.mockReturnValue(true);
+    getCurrentUserMock.mockResolvedValue({ id: "user-1", email: "admin@example.test", role: "ADMIN" });
+    getCurrentTenantContextMock.mockResolvedValue({});
+    requireTenantAccessMock.mockImplementation(() => undefined);
+    prismaMock.fascicoloDocumentRequirementProposal.findUnique.mockResolvedValue(reviewProposal);
+    txMock.fascicoloDocumentRequirementProposal.updateMany.mockResolvedValue({ count: 1 });
+    auditInTransactionMock.mockResolvedValue({});
+  });
+
+  it.each(["ADMIN", "OPERATORE_SOCIETA", "GIURIDICO"])("allows %s to review", async (role) => {
+    requireRoleMock.mockResolvedValue(role);
+    await reviewFascicoloDocumentRequirementProposalAction(reviewForm("VALIDATO"));
+    expect(canManageProcedimentiMock).toHaveBeenCalledWith(role);
+    expect(txMock.fascicoloDocumentRequirementProposal.updateMany).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects an unauthorized role before proposal read, write, or audit", async () => {
+    canManageProcedimentiMock.mockReturnValue(false);
+    await expect(reviewFascicoloDocumentRequirementProposalAction(reviewForm("VALIDATO"))).rejects.toThrow(
+      "non autorizzato",
+    );
+    expect(prismaMock.fascicoloDocumentRequirementProposal.findUnique).not.toHaveBeenCalled();
+    expect(prismaMock.$transaction).not.toHaveBeenCalled();
+    expect(auditInTransactionMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects cross-tenant access before write or audit", async () => {
+    requireTenantAccessMock.mockImplementation(() => {
+      throw new Error("tenant denied");
+    });
+    await expect(reviewFascicoloDocumentRequirementProposalAction(reviewForm("VALIDATO"))).rejects.toThrow(
+      "tenant denied",
+    );
+    expect(requireTenantAccessMock).toHaveBeenCalledWith(
+      expect.anything(),
+      "ente-1",
+      { mode: "write", allowWhenEnteMissing: false },
+    );
+    expect(prismaMock.$transaction).not.toHaveBeenCalled();
+    expect(auditInTransactionMock).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when proposal tenant differs from the canonical tenant", async () => {
+    prismaMock.fascicoloDocumentRequirementProposal.findUnique.mockResolvedValue({
+      ...reviewProposal,
+      enteId: "ente-2",
+    });
+    await expect(reviewFascicoloDocumentRequirementProposalAction(reviewForm("VALIDATO"))).rejects.toThrow(
+      "tenant canonico",
+    );
+    expect(requireTenantAccessMock).not.toHaveBeenCalled();
+    expect(prismaMock.$transaction).not.toHaveBeenCalled();
+  });
+
+  it("reviews PROPOSTO as VALIDATO through the guarded update", async () => {
+    await reviewFascicoloDocumentRequirementProposalAction(reviewForm("VALIDATO"));
+    expect(txMock.fascicoloDocumentRequirementProposal.updateMany).toHaveBeenCalledWith({
+      where: { id: "proposal-1", enteId: "ente-1", status: "PROPOSTO" },
+      data: expect.objectContaining({ status: "VALIDATO" }),
+    });
+    expect(revalidatePathMock).toHaveBeenCalledWith("/procedimenti/procedimento-1");
+  });
+
+  it.each([
+    ["missing", undefined],
+    ["whitespace", "   "],
+  ])("normalizes a %s VALIDATO note to null", async (_label, note) => {
+    await reviewFascicoloDocumentRequirementProposalAction(reviewForm("VALIDATO", note));
+    expect(txMock.fascicoloDocumentRequirementProposal.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ reviewNote: null }) }),
+    );
+  });
+
+  it("trims and stores a non-empty VALIDATO note", async () => {
+    await reviewFascicoloDocumentRequirementProposalAction(reviewForm("VALIDATO", "  Applicabile  "));
+    expect(txMock.fascicoloDocumentRequirementProposal.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ reviewNote: "Applicabile" }) }),
+    );
+  });
+
+  it("reviews PROPOSTO as RIFIUTATO with a trimmed note", async () => {
+    await reviewFascicoloDocumentRequirementProposalAction(reviewForm("RIFIUTATO", "  Non applicabile  "));
+    expect(txMock.fascicoloDocumentRequirementProposal.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ status: "RIFIUTATO", reviewNote: "Non applicabile" }) }),
+    );
+  });
+
+  it.each([
+    ["missing", undefined],
+    ["empty", ""],
+    ["whitespace", "   "],
+  ])("rejects a %s RIFIUTATO note before write or audit", async (_label, note) => {
+    await expect(reviewFascicoloDocumentRequirementProposalAction(reviewForm("RIFIUTATO", note))).rejects.toThrow(
+      "nota di review",
+    );
+    expect(prismaMock.$transaction).not.toHaveBeenCalled();
+    expect(auditInTransactionMock).not.toHaveBeenCalled();
+  });
+
+  it.each(["PROPOSTO", "SUPERATO", "", "VALIDATO "])("rejects invalid target status %j", async (status) => {
+    await expect(reviewFascicoloDocumentRequirementProposalAction(reviewForm(status))).rejects.toThrow();
+    expect(prismaMock.fascicoloDocumentRequirementProposal.findUnique).not.toHaveBeenCalled();
+    expect(prismaMock.$transaction).not.toHaveBeenCalled();
+  });
+
+  it.each(["VALIDATO", "RIFIUTATO"])("treats current %s as terminal", async (status) => {
+    prismaMock.fascicoloDocumentRequirementProposal.findUnique.mockResolvedValue({ ...reviewProposal, status });
+    await expect(reviewFascicoloDocumentRequirementProposalAction(reviewForm("VALIDATO"))).rejects.toThrow(
+      "gia revisionata",
+    );
+    expect(prismaMock.$transaction).not.toHaveBeenCalled();
+    expect(auditInTransactionMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects a CAS loser and creates no audit", async () => {
+    txMock.fascicoloDocumentRequirementProposal.updateMany.mockResolvedValue({ count: 0 });
+    await expect(reviewFascicoloDocumentRequirementProposalAction(reviewForm("VALIDATO"))).rejects.toThrow(
+      "altro revisore",
+    );
+    expect(auditInTransactionMock).not.toHaveBeenCalled();
+    expect(revalidatePathMock).not.toHaveBeenCalled();
+  });
+
+  it("creates exactly one review audit in the same transaction", async () => {
+    await reviewFascicoloDocumentRequirementProposalAction(reviewForm("VALIDATO"));
+    expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+    expect(auditInTransactionMock).toHaveBeenCalledTimes(1);
+    expect(auditInTransactionMock).toHaveBeenCalledWith(txMock, expect.objectContaining({
+      azione: "FASCICOLO_DOCUMENT_REQUIREMENT_PROPOSAL_REVIEW",
+      entita: "FascicoloDocumentRequirementProposal",
+      entitaId: "proposal-1",
+      enteId: "ente-1",
+      concessioneId: "concessione-1",
+    }));
+  });
+
+  it("rejects the transaction path and does not revalidate when audit fails", async () => {
+    auditInTransactionMock.mockRejectedValue(new Error("audit failed"));
+    await expect(reviewFascicoloDocumentRequirementProposalAction(reviewForm("VALIDATO"))).rejects.toThrow(
+      "audit failed",
+    );
+    expect(txMock.fascicoloDocumentRequirementProposal.updateMany).toHaveBeenCalledTimes(1);
+    expect(revalidatePathMock).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["staging-preview-admin", null],
+    ["user-1", "user-1"],
+  ])("stores review actor %s with expected User FK", async (actorId, expectedUserId) => {
+    getCurrentUserMock.mockResolvedValue({ id: actorId, email: "actor@example.test", role: "ADMIN" });
+    await reviewFascicoloDocumentRequirementProposalAction(reviewForm("VALIDATO"));
+    expect(txMock.fascicoloDocumentRequirementProposal.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          reviewedByActorId: actorId,
+          reviewedByUserId: expectedUserId,
+          reviewedByEmail: "actor@example.test",
+          reviewedByRole: "ADMIN",
+        }),
+      }),
+    );
+    expect(prismaMock.user.create).not.toHaveBeenCalled();
+  });
+
+  it("ignores client attempts to override reviewer, tenant, and current state", async () => {
+    await reviewFascicoloDocumentRequirementProposalAction(reviewForm("VALIDATO", undefined, {
+      enteId: "ente-2",
+      currentStatus: "RIFIUTATO",
+      reviewedByActorId: "attacker",
+      reviewedByUserId: "attacker",
+      reviewedByEmail: "attacker@example.test",
+      reviewedByRole: "ADMIN",
+      reviewedAt: "2000-01-01T00:00:00.000Z",
+    }));
+    expect(txMock.fascicoloDocumentRequirementProposal.updateMany).toHaveBeenCalledWith({
+      where: { id: "proposal-1", enteId: "ente-1", status: "PROPOSTO" },
+      data: expect.objectContaining({
+        reviewedByActorId: "user-1",
+        reviewedByUserId: "user-1",
+        reviewedByEmail: "admin@example.test",
+        reviewedByRole: "ADMIN",
+      }),
+    });
+  });
+
+  it("writes bounded audit metadata without duplicating the review note", async () => {
+    await reviewFascicoloDocumentRequirementProposalAction(reviewForm("RIFIUTATO", "Non applicabile"));
+    const auditInput = auditInTransactionMock.mock.calls[0][1];
+    expect(auditInput.metadata).toEqual({
+      proposalId: "proposal-1",
+      previousStatus: "PROPOSTO",
+      newStatus: "RIFIUTATO",
+      screeningFingerprint: "a".repeat(64),
+      ruleCodeSnapshot: "P1C_ART18_ART16_AUTH_REQUIREMENT",
+      gapKeySnapshot: "REQ-AUTORIZZAZIONE-ART16",
+      reviewNotePresent: true,
+    });
+    expect(JSON.stringify(auditInput.metadata)).not.toContain("Non applicabile");
+  });
+
+  it("permits exactly one winner when two reviewers observed PROPOSTO", async () => {
+    txMock.fascicoloDocumentRequirementProposal.updateMany
+      .mockResolvedValueOnce({ count: 1 })
+      .mockResolvedValueOnce({ count: 0 });
+    const results = await Promise.allSettled([
+      reviewFascicoloDocumentRequirementProposalAction(reviewForm("VALIDATO")),
+      reviewFascicoloDocumentRequirementProposalAction(reviewForm("RIFIUTATO", "Non applicabile")),
+    ]);
+    expect(results.map((result) => result.status).sort()).toEqual(["fulfilled", "rejected"]);
+    expect(txMock.fascicoloDocumentRequirementProposal.updateMany).toHaveBeenCalledTimes(2);
+    expect(auditInTransactionMock).toHaveBeenCalledTimes(1);
+    expect(auditInTransactionMock).toHaveBeenCalledWith(
+      txMock,
+      expect.objectContaining({ metadata: expect.objectContaining({ newStatus: "VALIDATO" }) }),
+    );
+  });
+
+  it("does not reevaluate matcher, resolver, catalog, or forbidden models during review", async () => {
+    await reviewFascicoloDocumentRequirementProposalAction(reviewForm("VALIDATO"));
+    expect(evaluateRequirementMock).not.toHaveBeenCalled();
+    expect(genericResolverMock).not.toHaveBeenCalled();
+    expect(prismaMock.legalSource.findUnique).not.toHaveBeenCalled();
+    expect(prismaMock.legalRule.findUnique).not.toHaveBeenCalled();
+    expect(prismaMock.documentGap.findUnique).not.toHaveBeenCalled();
+    for (const model of [
+      prismaMock.procedimento,
+      prismaMock.concessione,
+      prismaMock.documento,
+      prismaMock.criticita,
+      prismaMock.decisioneProcedimento,
+      prismaMock.fascicoloObservation,
+      prismaMock.fascicoloChecklistEvidence,
+      prismaMock.legalSource,
+      prismaMock.legalRule,
+      prismaMock.documentGap,
+    ]) {
+      expect(model.update).not.toHaveBeenCalled();
+    }
+    expect(prismaMock.user.create).not.toHaveBeenCalled();
   });
 });
