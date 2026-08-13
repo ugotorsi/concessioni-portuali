@@ -5,16 +5,25 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { getFascicoloDocumentRequirementEvidenceData } from "@/server/queries/fascicolo-document-requirement-evidence";
 import type { getFascicoloDocumentRequirementProposals } from "@/server/queries/fascicolo-document-requirements";
 
 const createProposalMock = vi.hoisted(() => vi.fn());
 const reviewProposalMock = vi.hoisted(() => vi.fn());
+const createEvidenceMock = vi.hoisted(() => vi.fn());
+const revokeEvidenceMock = vi.hoisted(() => vi.fn());
+const refreshMock = vi.hoisted(() => vi.fn());
 const matcherMock = vi.hoisted(() => vi.fn());
 const genericResolverMock = vi.hoisted(() => vi.fn());
 
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: refreshMock }) }));
 vi.mock("@/server/actions/fascicolo-document-requirements", () => ({
   createFascicoloDocumentRequirementProposal: createProposalMock,
   reviewFascicoloDocumentRequirementProposalAction: reviewProposalMock,
+}));
+vi.mock("@/server/actions/fascicolo-document-requirement-evidence", () => ({
+  createFascicoloDocumentRequirementEvidence: createEvidenceMock,
+  revokeFascicoloDocumentRequirementEvidence: revokeEvidenceMock,
 }));
 vi.mock("@/server/fascicolo-document-requirements/matcher", () => ({
   evaluateP1C1DocumentRequirement: matcherMock,
@@ -26,6 +35,8 @@ vi.mock("@/server/legal-rules/orchestrator", () => ({
 import { FascicoloDocumentRequirementProposalsPanel } from "@/components/procedimenti/FascicoloDocumentRequirementProposalsPanel";
 
 type Proposal = Awaited<ReturnType<typeof getFascicoloDocumentRequirementProposals>>["proposals"][number];
+type EvidenceData = Awaited<ReturnType<typeof getFascicoloDocumentRequirementEvidenceData>>;
+type Association = EvidenceData["associationsByProposalId"][string][number];
 
 function proposal(status: Proposal["status"] = "PROPOSTO", overrides: Partial<Proposal> = {}): Proposal {
   return {
@@ -61,17 +72,68 @@ function proposal(status: Proposal["status"] = "PROPOSTO", overrides: Partial<Pr
   };
 }
 
+const activeAssociation: Association = {
+  id: "evidence-active",
+  proposalId: "proposal-1",
+  documentoId: "documento-1",
+  createdAt: new Date("2026-08-12T08:00:00.000Z"),
+  createdByActorId: "creator-actor",
+  createdByEmail: "creator@example.test",
+  createdByRole: "ADMIN",
+  revokedAt: null,
+  revokedByActorId: null,
+  revokedByEmail: null,
+  revokedByRole: null,
+  revocationNote: null,
+  documento: {
+    id: "documento-1",
+    nome: "Titolo autorizzatorio.pdf",
+    tipologia: "ATTO",
+    statoDocumento: "ATTIVO",
+    dataDocumento: new Date("2026-08-01T00:00:00.000Z"),
+    createdAt: new Date("2026-08-01T08:00:00.000Z"),
+  },
+};
+
+const revokedAssociation: Association = {
+  ...activeAssociation,
+  id: "evidence-revoked",
+  documentoId: "documento-2",
+  revokedAt: new Date("2026-08-12T09:00:00.000Z"),
+  revokedByActorId: "reviewer-actor",
+  revokedByEmail: "reviewer@example.test",
+  revokedByRole: "GIURIDICO",
+  revocationNote: "Collegamento errato",
+  documento: {
+    ...activeAssociation.documento,
+    id: "documento-2",
+    nome: "Documento revocato.pdf",
+  },
+};
+
+function evidenceData(overrides: Partial<EvidenceData> = {}): EvidenceData {
+  return {
+    hasCanonicalTenant: true,
+    associationsByProposalId: { "proposal-1": [] },
+    eligibleDocumentsByProposalId: { "proposal-1": [] },
+    ...overrides,
+  };
+}
+
 function renderPanel({
   proposals = [proposal()],
+  evidence = evidenceData(),
   canReview = true,
   hasCanonicalTenant = true,
 }: {
   proposals?: Proposal[];
+  evidence?: EvidenceData;
   canReview?: boolean;
   hasCanonicalTenant?: boolean;
 } = {}) {
   return renderToStaticMarkup(createElement(FascicoloDocumentRequirementProposalsPanel, {
     proposals,
+    evidenceData: evidence,
     canReview,
     hasCanonicalTenant,
   }));
@@ -79,6 +141,13 @@ function renderPanel({
 
 function pageSource() {
   return readFileSync(resolve(process.cwd(), "src/app/procedimenti/[id]/page.tsx"), "utf8");
+}
+
+function evidenceSectionSource() {
+  return readFileSync(
+    resolve(process.cwd(), "src/components/procedimenti/FascicoloDocumentRequirementEvidenceSection.tsx"),
+    "utf8",
+  );
 }
 
 function formContaining(html: string, text: string) {
@@ -293,5 +362,155 @@ describe("P1-C1 document requirement proposal UI", () => {
     expect(observationsIndex).toBeGreaterThan(-1);
     expect(proposalsIndex).toBeGreaterThan(observationsIndex);
     expect(checklistIndex).toBeGreaterThan(proposalsIndex);
+  });
+
+  it("41. imports the evidence query on the procedimento page", () => {
+    expect(pageSource()).toContain("getFascicoloDocumentRequirementEvidenceData");
+  });
+
+  it("42. calls the evidence query exactly once per page render", () => {
+    expect(pageSource().match(/await getFascicoloDocumentRequirementEvidenceData\(/g)).toHaveLength(1);
+  });
+
+  it("43. passes the evidence dataset to the proposal panel", () => {
+    expect(pageSource()).toContain("evidenceData={fascicoloDocumentRequirementEvidence}");
+  });
+
+  it("44. renders the evidence section for a VALIDATO proposal", () => {
+    expect(renderPanel({ proposals: [proposal("VALIDATO")] })).toContain("Evidenze documentali associate");
+  });
+
+  it("45. does not render the evidence section for a PROPOSTO proposal", () => {
+    expect(renderPanel({ proposals: [proposal("PROPOSTO")] })).not.toContain("Evidenze documentali associate");
+  });
+
+  it("46. does not render the evidence section for a RIFIUTATO proposal", () => {
+    expect(renderPanel({ proposals: [proposal("RIFIUTATO")] })).not.toContain("Evidenze documentali associate");
+  });
+
+  it("47. renders persisted active evidence facts", () => {
+    const html = renderPanel({
+      proposals: [proposal("VALIDATO")],
+      evidence: evidenceData({ associationsByProposalId: { "proposal-1": [activeAssociation] } }),
+    });
+    expect(html).toContain("Titolo autorizzatorio.pdf");
+    expect(html).toContain("creator@example.test");
+    expect(html).toContain("ADMIN");
+  });
+
+  it("48. renders revoked evidence in a separate history", () => {
+    const html = renderPanel({
+      proposals: [proposal("VALIDATO")],
+      evidence: evidenceData({ associationsByProposalId: { "proposal-1": [revokedAssociation] } }),
+    });
+    expect(html).toContain("Storico associazioni revocate");
+    expect(html).toContain("Documento revocato.pdf");
+    expect(html).toContain("Collegamento errato");
+    expect(html).not.toContain("Revoca associazione");
+  });
+
+  it("49. offers only backend-returned eligible documents", () => {
+    const html = renderPanel({
+      proposals: [proposal("VALIDATO")],
+      evidence: evidenceData({
+        eligibleDocumentsByProposalId: {
+          "proposal-1": [{
+            id: "documento-3",
+            nome: "Documento candidato.pdf",
+            tipologia: "ATTO",
+            dataDocumento: null,
+            createdAt: new Date("2026-08-02T08:00:00.000Z"),
+          }],
+        },
+      }),
+    });
+    expect(html).toContain("name=\"documentoId\"");
+    expect(html).toContain("Documento candidato.pdf");
+    expect(html).toContain("Associa documento");
+  });
+
+  it("50. calls create with proposalId and documentoId only", () => {
+    const source = evidenceSectionSource();
+    expect(source).toContain("createFascicoloDocumentRequirementEvidence({ proposalId, documentoId })");
+    expect(source).not.toMatch(/createFascicoloDocumentRequirementEvidence\(\{[^}]+(?:enteId|procedimentoId|tenant|status|ruleCode|gapKey)/s);
+  });
+
+  it("51. requires a bounded revocation note", () => {
+    const html = renderPanel({
+      proposals: [proposal("VALIDATO")],
+      evidence: evidenceData({ associationsByProposalId: { "proposal-1": [activeAssociation] } }),
+    });
+    const form = formContaining(html, "Revoca associazione");
+    expect(form).toContain("name=\"revocationNote\"");
+    expect(form).toContain("required=\"\"");
+    expect(form).toContain("maxLength=\"2000\"");
+  });
+
+  it("52. calls revoke with evidenceId and revocationNote only", () => {
+    const source = evidenceSectionSource();
+    expect(source).toContain("revokeFascicoloDocumentRequirementEvidence({ evidenceId, revocationNote })");
+    expect(source).not.toMatch(/revokeFascicoloDocumentRequirementEvidence\(\{[^}]+(?:enteId|procedimentoId|tenant|status|ruleCode|gapKey)/s);
+  });
+
+  it("53. keeps unauthorized evidence display read-only", () => {
+    const html = renderPanel({
+      proposals: [proposal("VALIDATO")],
+      canReview: false,
+      evidence: evidenceData({
+        associationsByProposalId: { "proposal-1": [activeAssociation, revokedAssociation] },
+        eligibleDocumentsByProposalId: {
+          "proposal-1": [{
+            id: "documento-3",
+            nome: "Documento candidato.pdf",
+            tipologia: "ATTO",
+            dataDocumento: null,
+            createdAt: new Date("2026-08-02T08:00:00.000Z"),
+          }],
+        },
+      }),
+    });
+    expect(html).toContain("Titolo autorizzatorio.pdf");
+    expect(html).toContain("Storico associazioni revocate");
+    expect(html).not.toContain("Associa documento");
+    expect(html).not.toContain("Revoca associazione");
+    expect(html).not.toContain("name=\"revocationNote\"");
+  });
+
+  it("54. reuses the existing document download route", () => {
+    const html = renderPanel({
+      proposals: [proposal("VALIDATO")],
+      evidence: evidenceData({ associationsByProposalId: { "proposal-1": [activeAssociation] } }),
+    });
+    expect(html).toContain("/documenti/documento-1/download");
+  });
+
+  it("55. introduces no upload workflow", () => {
+    const source = evidenceSectionSource();
+    expect(source).not.toContain("createDocumentoUploadAction");
+    expect(source).not.toContain("type=\"file\"");
+    expect(source).not.toContain("Carica documento");
+  });
+
+  it("56. uses the compact human-boundary copy without forbidden conclusions", () => {
+    const html = renderPanel({ proposals: [proposal("VALIDATO")] }).toLowerCase();
+    expect(html).toContain("collegamento istruttorio");
+    for (const claim of [
+      "requisito soddisfatto",
+      "documentazione completa",
+      "documento valido",
+      "documento sufficiente",
+      "titolo verificato",
+      "autorizzazione valida",
+      "esito positivo",
+    ]) {
+      expect(html).not.toContain(claim);
+    }
+  });
+
+  it("57. keeps the UI free of backend, schema, storage, and legal-rule authority", () => {
+    const source = evidenceSectionSource();
+    for (const forbidden of ["@/lib/prisma", "enteId", "procedimentoId", "storageKey", "ruleCode", "gapKey"] ) {
+      expect(source).not.toContain(forbidden);
+    }
   });
 });

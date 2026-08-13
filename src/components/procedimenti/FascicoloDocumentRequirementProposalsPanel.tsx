@@ -1,15 +1,19 @@
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { FascicoloDocumentRequirementEvidenceSection } from "@/components/procedimenti/FascicoloDocumentRequirementEvidenceSection";
 import { Textarea } from "@/components/ui/Textarea";
 import { formatDateIT } from "@/lib/utils";
 import { reviewFascicoloDocumentRequirementProposalAction } from "@/server/actions/fascicolo-document-requirements";
+import type { getFascicoloDocumentRequirementEvidenceData } from "@/server/queries/fascicolo-document-requirement-evidence";
 import type { getFascicoloDocumentRequirementProposals } from "@/server/queries/fascicolo-document-requirements";
 
 type ProposalData = Awaited<ReturnType<typeof getFascicoloDocumentRequirementProposals>>["proposals"];
+type EvidenceData = Awaited<ReturnType<typeof getFascicoloDocumentRequirementEvidenceData>>;
 
 interface FascicoloDocumentRequirementProposalsPanelProps {
   proposals: ProposalData;
+  evidenceData: EvidenceData;
   canReview: boolean;
   hasCanonicalTenant: boolean;
 }
@@ -56,6 +60,7 @@ function getRelevantProvisions(snapshot: unknown) {
 
 export function FascicoloDocumentRequirementProposalsPanel({
   proposals,
+  evidenceData,
   canReview,
   hasCanonicalTenant,
 }: FascicoloDocumentRequirementProposalsPanelProps) {
@@ -70,6 +75,8 @@ export function FascicoloDocumentRequirementProposalsPanel({
           const status = statusDetails(proposal.status);
           const matchedFacts = getMatchedFacts(proposal.matchedCriteriaSnapshot);
           const canReviewProposal = proposal.status === "PROPOSTO" && canReview && hasCanonicalTenant;
+          const associations = evidenceData.associationsByProposalId[proposal.id] ?? [];
+          const eligibleDocuments = evidenceData.eligibleDocumentsByProposalId[proposal.id] ?? [];
 
           return (
             <article key={proposal.id} className="space-y-4 rounded-md border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
@@ -132,6 +139,15 @@ export function FascicoloDocumentRequirementProposalsPanel({
                   Non accerta l'esistenza o l'assenza del titolo, né la sua validità, efficacia o sufficienza; non determina la completezza documentale, la regolarità del procedimento, l'ammissibilità dell'istanza o la concedibilità.
                 </p>
               </div>
+
+              {proposal.status === "VALIDATO" ? (
+                <FascicoloDocumentRequirementEvidenceSection
+                  proposalId={proposal.id}
+                  associations={associations}
+                  eligibleDocuments={eligibleDocuments}
+                  canManage={canReview && hasCanonicalTenant && evidenceData.hasCanonicalTenant}
+                />
+              ) : null}
 
               {canReviewProposal ? (
                 <div className="grid gap-3 lg:grid-cols-2">

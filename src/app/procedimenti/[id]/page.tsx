@@ -50,6 +50,7 @@ import {
 import { getDecisionRulePreviewForTipologia } from "@/server/procedimenti/decisioni";
 import { getLetturaProcedimentale, getProcedimentoDetail } from "@/server/queries/procedimenti";
 import { getChecklistEvidenceData } from "@/server/queries/checklist-evidence";
+import { getFascicoloDocumentRequirementEvidenceData } from "@/server/queries/fascicolo-document-requirement-evidence";
 import { getFascicoloDocumentRequirementProposals } from "@/server/queries/fascicolo-document-requirements";
 import { getFascicoloObservations } from "@/server/queries/fascicolo-observations";
 import { getNormeForProcedimento } from "@/server/queries/normativa";
@@ -98,6 +99,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
 
   const fascicoloObservations = await getFascicoloObservations(detail.procedimento.id);
   const fascicoloDocumentRequirements = await getFascicoloDocumentRequirementProposals(detail.procedimento.id);
+  const fascicoloDocumentRequirementEvidence = await getFascicoloDocumentRequirementEvidenceData(detail.procedimento.id);
   const checklistEvidenceData = await getChecklistEvidenceData(detail.procedimento.id);
   const hasCanonicalTenant = Boolean(detail.canonicalEnteId);
 
@@ -321,6 +323,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
 
           <FascicoloDocumentRequirementProposalsPanel
             proposals={fascicoloDocumentRequirements.proposals}
+            evidenceData={fascicoloDocumentRequirementEvidence}
             canReview={canReview}
             hasCanonicalTenant={hasCanonicalTenant}
           />
