@@ -76,6 +76,7 @@ export const ModelName = {
   FascicoloObservation: 'FascicoloObservation',
   FascicoloChecklistEvidence: 'FascicoloChecklistEvidence',
   FascicoloDocumentRequirementProposal: 'FascicoloDocumentRequirementProposal',
+  FascicoloDocumentRequirementEvidence: 'FascicoloDocumentRequirementEvidence',
   DecisioneProcedimento: 'DecisioneProcedimento',
   Report: 'Report',
   NormaFonte: 'NormaFonte',
@@ -693,6 +694,27 @@ export const FascicoloDocumentRequirementProposalScalarFieldEnum = {
 } as const
 
 export type FascicoloDocumentRequirementProposalScalarFieldEnum = (typeof FascicoloDocumentRequirementProposalScalarFieldEnum)[keyof typeof FascicoloDocumentRequirementProposalScalarFieldEnum]
+
+
+export const FascicoloDocumentRequirementEvidenceScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  proposalId: 'proposalId',
+  documentoId: 'documentoId',
+  createdAt: 'createdAt',
+  createdByUserId: 'createdByUserId',
+  createdByActorId: 'createdByActorId',
+  createdByEmail: 'createdByEmail',
+  createdByRole: 'createdByRole',
+  revokedAt: 'revokedAt',
+  revokedByUserId: 'revokedByUserId',
+  revokedByActorId: 'revokedByActorId',
+  revokedByEmail: 'revokedByEmail',
+  revokedByRole: 'revokedByRole',
+  revocationNote: 'revocationNote'
+} as const
+
+export type FascicoloDocumentRequirementEvidenceScalarFieldEnum = (typeof FascicoloDocumentRequirementEvidenceScalarFieldEnum)[keyof typeof FascicoloDocumentRequirementEvidenceScalarFieldEnum]
 
 
 export const DecisioneProcedimentoScalarFieldEnum = {

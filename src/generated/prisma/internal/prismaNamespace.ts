@@ -409,6 +409,7 @@ export const ModelName = {
   FascicoloObservation: 'FascicoloObservation',
   FascicoloChecklistEvidence: 'FascicoloChecklistEvidence',
   FascicoloDocumentRequirementProposal: 'FascicoloDocumentRequirementProposal',
+  FascicoloDocumentRequirementEvidence: 'FascicoloDocumentRequirementEvidence',
   DecisioneProcedimento: 'DecisioneProcedimento',
   Report: 'Report',
   NormaFonte: 'NormaFonte',
@@ -430,7 +431,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2284,6 +2285,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    FascicoloDocumentRequirementEvidence: {
+      payload: Prisma.$FascicoloDocumentRequirementEvidencePayload<ExtArgs>
+      fields: Prisma.FascicoloDocumentRequirementEvidenceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FascicoloDocumentRequirementEvidenceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloDocumentRequirementEvidencePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FascicoloDocumentRequirementEvidenceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloDocumentRequirementEvidencePayload>
+        }
+        findFirst: {
+          args: Prisma.FascicoloDocumentRequirementEvidenceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloDocumentRequirementEvidencePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FascicoloDocumentRequirementEvidenceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloDocumentRequirementEvidencePayload>
+        }
+        findMany: {
+          args: Prisma.FascicoloDocumentRequirementEvidenceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloDocumentRequirementEvidencePayload>[]
+        }
+        create: {
+          args: Prisma.FascicoloDocumentRequirementEvidenceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloDocumentRequirementEvidencePayload>
+        }
+        createMany: {
+          args: Prisma.FascicoloDocumentRequirementEvidenceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FascicoloDocumentRequirementEvidenceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloDocumentRequirementEvidencePayload>[]
+        }
+        delete: {
+          args: Prisma.FascicoloDocumentRequirementEvidenceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloDocumentRequirementEvidencePayload>
+        }
+        update: {
+          args: Prisma.FascicoloDocumentRequirementEvidenceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloDocumentRequirementEvidencePayload>
+        }
+        deleteMany: {
+          args: Prisma.FascicoloDocumentRequirementEvidenceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloDocumentRequirementEvidencePayload>[]
+        }
+        upsert: {
+          args: Prisma.FascicoloDocumentRequirementEvidenceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloDocumentRequirementEvidencePayload>
+        }
+        aggregate: {
+          args: Prisma.FascicoloDocumentRequirementEvidenceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFascicoloDocumentRequirementEvidence>
+        }
+        groupBy: {
+          args: Prisma.FascicoloDocumentRequirementEvidenceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FascicoloDocumentRequirementEvidenceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FascicoloDocumentRequirementEvidenceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FascicoloDocumentRequirementEvidenceCountAggregateOutputType> | number
+        }
+      }
+    }
     DecisioneProcedimento: {
       payload: Prisma.$DecisioneProcedimentoPayload<ExtArgs>
       fields: Prisma.DecisioneProcedimentoFieldRefs
@@ -3360,6 +3435,27 @@ export const FascicoloDocumentRequirementProposalScalarFieldEnum = {
 } as const
 
 export type FascicoloDocumentRequirementProposalScalarFieldEnum = (typeof FascicoloDocumentRequirementProposalScalarFieldEnum)[keyof typeof FascicoloDocumentRequirementProposalScalarFieldEnum]
+
+
+export const FascicoloDocumentRequirementEvidenceScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  proposalId: 'proposalId',
+  documentoId: 'documentoId',
+  createdAt: 'createdAt',
+  createdByUserId: 'createdByUserId',
+  createdByActorId: 'createdByActorId',
+  createdByEmail: 'createdByEmail',
+  createdByRole: 'createdByRole',
+  revokedAt: 'revokedAt',
+  revokedByUserId: 'revokedByUserId',
+  revokedByActorId: 'revokedByActorId',
+  revokedByEmail: 'revokedByEmail',
+  revokedByRole: 'revokedByRole',
+  revocationNote: 'revocationNote'
+} as const
+
+export type FascicoloDocumentRequirementEvidenceScalarFieldEnum = (typeof FascicoloDocumentRequirementEvidenceScalarFieldEnum)[keyof typeof FascicoloDocumentRequirementEvidenceScalarFieldEnum]
 
 
 export const DecisioneProcedimentoScalarFieldEnum = {
@@ -4656,6 +4752,7 @@ export type GlobalOmitConfig = {
   fascicoloObservation?: Prisma.FascicoloObservationOmit
   fascicoloChecklistEvidence?: Prisma.FascicoloChecklistEvidenceOmit
   fascicoloDocumentRequirementProposal?: Prisma.FascicoloDocumentRequirementProposalOmit
+  fascicoloDocumentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceOmit
   decisioneProcedimento?: Prisma.DecisioneProcedimentoOmit
   report?: Prisma.ReportOmit
   normaFonte?: Prisma.NormaFonteOmit

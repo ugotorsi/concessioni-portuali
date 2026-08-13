@@ -576,6 +576,7 @@ model Ente {
   fascicoloObservations        FascicoloObservation[]
   checklistEvidence            FascicoloChecklistEvidence[]
   documentRequirementProposals FascicoloDocumentRequirementProposal[]
+  documentRequirementEvidence  FascicoloDocumentRequirementEvidence[]
 
   @@index([tipo])
   @@index([stato])
@@ -865,6 +866,8 @@ model User {
   checklistEvidenceReviewed                     FascicoloChecklistEvidence[]           @relation("ChecklistEvidenceReviewedBy")
   documentRequirementProposalsCreated           FascicoloDocumentRequirementProposal[] @relation("DocumentRequirementProposalCreatedBy")
   documentRequirementProposalsReviewed          FascicoloDocumentRequirementProposal[] @relation("DocumentRequirementProposalReviewedBy")
+  documentRequirementEvidenceCreated            FascicoloDocumentRequirementEvidence[] @relation("DocumentRequirementEvidenceCreatedBy")
+  documentRequirementEvidenceRevoked            FascicoloDocumentRequirementEvidence[] @relation("DocumentRequirementEvidenceRevokedBy")
 
   @@index([ruolo])
   @@index([attivo])
@@ -1271,6 +1274,7 @@ model Documento {
   decisioniProcedimento DecisioneProcedimento[]
   fascicoloObservations FascicoloObservation[]
   checklistEvidence     FascicoloChecklistEvidence[]
+  requirementEvidence  FascicoloDocumentRequirementEvidence[]
 
   @@index([uploadedByUserId])
   @@index([statoDocumento])
@@ -1400,6 +1404,7 @@ model FascicoloDocumentRequirementProposal {
   documentGap    DocumentGap  @relation(fields: [documentGapId], references: [id], onDelete: Restrict)
   createdByUser  User?        @relation("DocumentRequirementProposalCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
   reviewedByUser User?        @relation("DocumentRequirementProposalReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+  evidence       FascicoloDocumentRequirementEvidence[]
 
   @@unique([enteId, procedimentoId, screeningFingerprint])
   @@index([enteId, procedimentoId, status])
@@ -1408,6 +1413,37 @@ model FascicoloDocumentRequirementProposal {
   @@index([documentGapId])
   @@index([createdByUserId])
   @@index([reviewedByUserId])
+  @@index([createdAt])
+}
+
+model FascicoloDocumentRequirementEvidence {
+  id                 String    @id @default(cuid())
+  enteId             String
+  proposalId         String
+  documentoId        String
+  createdAt          DateTime  @default(now())
+  createdByUserId    String?
+  createdByActorId   String
+  createdByEmail     String
+  createdByRole      String
+  revokedAt          DateTime?
+  revokedByUserId    String?
+  revokedByActorId   String?
+  revokedByEmail     String?
+  revokedByRole      String?
+  revocationNote     String?
+
+  ente          Ente                                  @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  proposal      FascicoloDocumentRequirementProposal @relation(fields: [proposalId], references: [id], onDelete: Restrict)
+  documento     Documento                             @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+  createdByUser User?                                 @relation("DocumentRequirementEvidenceCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  revokedByUser User?                                 @relation("DocumentRequirementEvidenceRevokedBy", fields: [revokedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([enteId, proposalId, documentoId])
+  @@index([enteId, proposalId])
+  @@index([documentoId])
+  @@index([createdByUserId])
+  @@index([revokedByUserId])
   @@index([createdAt])
 }
 

@@ -326,6 +326,8 @@ export type UserWhereInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceListRelationFilter
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalListRelationFilter
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalListRelationFilter
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceListRelationFilter
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -357,6 +359,8 @@ export type UserOrderByWithRelationInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceOrderByRelationAggregateInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalOrderByRelationAggregateInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalOrderByRelationAggregateInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceOrderByRelationAggregateInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -391,6 +395,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceListRelationFilter
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalListRelationFilter
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalListRelationFilter
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceListRelationFilter
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -472,6 +478,8 @@ export type UserCreateInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutReviewedByUserInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutCreatedByUserInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutRevokedByUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -503,6 +511,8 @@ export type UserUncheckedCreateInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutReviewedByUserInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutCreatedByUserInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutRevokedByUserInput
 }
 
 export type UserUpdateInput = {
@@ -534,6 +544,8 @@ export type UserUpdateInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutReviewedByUserNestedInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutCreatedByUserNestedInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutRevokedByUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -565,6 +577,8 @@ export type UserUncheckedUpdateInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutReviewedByUserNestedInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutCreatedByUserNestedInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutRevokedByUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -835,6 +849,38 @@ export type UserUpdateOneWithoutDocumentRequirementProposalsReviewedNestedInput 
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDocumentRequirementProposalsReviewedInput, Prisma.UserUpdateWithoutDocumentRequirementProposalsReviewedInput>, Prisma.UserUncheckedUpdateWithoutDocumentRequirementProposalsReviewedInput>
 }
 
+export type UserCreateNestedOneWithoutDocumentRequirementEvidenceCreatedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentRequirementEvidenceCreatedInput, Prisma.UserUncheckedCreateWithoutDocumentRequirementEvidenceCreatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentRequirementEvidenceCreatedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutDocumentRequirementEvidenceRevokedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentRequirementEvidenceRevokedInput, Prisma.UserUncheckedCreateWithoutDocumentRequirementEvidenceRevokedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentRequirementEvidenceRevokedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutDocumentRequirementEvidenceCreatedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentRequirementEvidenceCreatedInput, Prisma.UserUncheckedCreateWithoutDocumentRequirementEvidenceCreatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentRequirementEvidenceCreatedInput
+  upsert?: Prisma.UserUpsertWithoutDocumentRequirementEvidenceCreatedInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDocumentRequirementEvidenceCreatedInput, Prisma.UserUpdateWithoutDocumentRequirementEvidenceCreatedInput>, Prisma.UserUncheckedUpdateWithoutDocumentRequirementEvidenceCreatedInput>
+}
+
+export type UserUpdateOneWithoutDocumentRequirementEvidenceRevokedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentRequirementEvidenceRevokedInput, Prisma.UserUncheckedCreateWithoutDocumentRequirementEvidenceRevokedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentRequirementEvidenceRevokedInput
+  upsert?: Prisma.UserUpsertWithoutDocumentRequirementEvidenceRevokedInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDocumentRequirementEvidenceRevokedInput, Prisma.UserUpdateWithoutDocumentRequirementEvidenceRevokedInput>, Prisma.UserUncheckedUpdateWithoutDocumentRequirementEvidenceRevokedInput>
+}
+
 export type UserCreateNestedOneWithoutDecisioniProcedimentoRegistrateInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutDecisioniProcedimentoRegistrateInput, Prisma.UserUncheckedCreateWithoutDecisioniProcedimentoRegistrateInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutDecisioniProcedimentoRegistrateInput
@@ -895,6 +941,8 @@ export type UserCreateWithoutTenantMembershipsInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutReviewedByUserInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutCreatedByUserInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutRevokedByUserInput
 }
 
 export type UserUncheckedCreateWithoutTenantMembershipsInput = {
@@ -925,6 +973,8 @@ export type UserUncheckedCreateWithoutTenantMembershipsInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutReviewedByUserInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutCreatedByUserInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutRevokedByUserInput
 }
 
 export type UserCreateOrConnectWithoutTenantMembershipsInput = {
@@ -971,6 +1021,8 @@ export type UserUpdateWithoutTenantMembershipsInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutReviewedByUserNestedInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutCreatedByUserNestedInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutRevokedByUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTenantMembershipsInput = {
@@ -1001,6 +1053,8 @@ export type UserUncheckedUpdateWithoutTenantMembershipsInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutReviewedByUserNestedInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutCreatedByUserNestedInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutRevokedByUserNestedInput
 }
 
 export type UserCreateWithoutProcedimentoResponsabileAssignmentsRegistrateInput = {
@@ -1031,6 +1085,8 @@ export type UserCreateWithoutProcedimentoResponsabileAssignmentsRegistrateInput 
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutReviewedByUserInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutCreatedByUserInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutRevokedByUserInput
 }
 
 export type UserUncheckedCreateWithoutProcedimentoResponsabileAssignmentsRegistrateInput = {
@@ -1061,6 +1117,8 @@ export type UserUncheckedCreateWithoutProcedimentoResponsabileAssignmentsRegistr
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutReviewedByUserInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutCreatedByUserInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutRevokedByUserInput
 }
 
 export type UserCreateOrConnectWithoutProcedimentoResponsabileAssignmentsRegistrateInput = {
@@ -1107,6 +1165,8 @@ export type UserUpdateWithoutProcedimentoResponsabileAssignmentsRegistrateInput 
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutReviewedByUserNestedInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutCreatedByUserNestedInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutRevokedByUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProcedimentoResponsabileAssignmentsRegistrateInput = {
@@ -1137,6 +1197,8 @@ export type UserUncheckedUpdateWithoutProcedimentoResponsabileAssignmentsRegistr
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutReviewedByUserNestedInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutCreatedByUserNestedInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutRevokedByUserNestedInput
 }
 
 export type UserCreateWithoutDocumentiCaricatiInput = {
@@ -1167,6 +1229,8 @@ export type UserCreateWithoutDocumentiCaricatiInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutReviewedByUserInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutCreatedByUserInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutRevokedByUserInput
 }
 
 export type UserUncheckedCreateWithoutDocumentiCaricatiInput = {
@@ -1197,6 +1261,8 @@ export type UserUncheckedCreateWithoutDocumentiCaricatiInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutReviewedByUserInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutCreatedByUserInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutRevokedByUserInput
 }
 
 export type UserCreateOrConnectWithoutDocumentiCaricatiInput = {
@@ -1243,6 +1309,8 @@ export type UserUpdateWithoutDocumentiCaricatiInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutReviewedByUserNestedInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutCreatedByUserNestedInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutRevokedByUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDocumentiCaricatiInput = {
@@ -1273,6 +1341,8 @@ export type UserUncheckedUpdateWithoutDocumentiCaricatiInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutReviewedByUserNestedInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutCreatedByUserNestedInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutRevokedByUserNestedInput
 }
 
 export type UserCreateWithoutFascicoloObservationsReviewedInput = {
@@ -1303,6 +1373,8 @@ export type UserCreateWithoutFascicoloObservationsReviewedInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutReviewedByUserInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutCreatedByUserInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutRevokedByUserInput
 }
 
 export type UserUncheckedCreateWithoutFascicoloObservationsReviewedInput = {
@@ -1333,6 +1405,8 @@ export type UserUncheckedCreateWithoutFascicoloObservationsReviewedInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutReviewedByUserInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutCreatedByUserInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutRevokedByUserInput
 }
 
 export type UserCreateOrConnectWithoutFascicoloObservationsReviewedInput = {
@@ -1379,6 +1453,8 @@ export type UserUpdateWithoutFascicoloObservationsReviewedInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutReviewedByUserNestedInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutCreatedByUserNestedInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutRevokedByUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFascicoloObservationsReviewedInput = {
@@ -1409,6 +1485,8 @@ export type UserUncheckedUpdateWithoutFascicoloObservationsReviewedInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutReviewedByUserNestedInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutCreatedByUserNestedInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutRevokedByUserNestedInput
 }
 
 export type UserCreateWithoutChecklistEvidenceCreatedInput = {
@@ -1439,6 +1517,8 @@ export type UserCreateWithoutChecklistEvidenceCreatedInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutReviewedByUserInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutCreatedByUserInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutRevokedByUserInput
 }
 
 export type UserUncheckedCreateWithoutChecklistEvidenceCreatedInput = {
@@ -1469,6 +1549,8 @@ export type UserUncheckedCreateWithoutChecklistEvidenceCreatedInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutReviewedByUserInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutCreatedByUserInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutRevokedByUserInput
 }
 
 export type UserCreateOrConnectWithoutChecklistEvidenceCreatedInput = {
@@ -1504,6 +1586,8 @@ export type UserCreateWithoutChecklistEvidenceReviewedInput = {
   checklistEvidenceCreated?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutCreatedByUserInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutCreatedByUserInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutRevokedByUserInput
 }
 
 export type UserUncheckedCreateWithoutChecklistEvidenceReviewedInput = {
@@ -1534,6 +1618,8 @@ export type UserUncheckedCreateWithoutChecklistEvidenceReviewedInput = {
   checklistEvidenceCreated?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutCreatedByUserInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutCreatedByUserInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutRevokedByUserInput
 }
 
 export type UserCreateOrConnectWithoutChecklistEvidenceReviewedInput = {
@@ -1580,6 +1666,8 @@ export type UserUpdateWithoutChecklistEvidenceCreatedInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutReviewedByUserNestedInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutCreatedByUserNestedInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutRevokedByUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChecklistEvidenceCreatedInput = {
@@ -1610,6 +1698,8 @@ export type UserUncheckedUpdateWithoutChecklistEvidenceCreatedInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutReviewedByUserNestedInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutCreatedByUserNestedInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutRevokedByUserNestedInput
 }
 
 export type UserUpsertWithoutChecklistEvidenceReviewedInput = {
@@ -1651,6 +1741,8 @@ export type UserUpdateWithoutChecklistEvidenceReviewedInput = {
   checklistEvidenceCreated?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutCreatedByUserNestedInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutCreatedByUserNestedInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutRevokedByUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChecklistEvidenceReviewedInput = {
@@ -1681,6 +1773,8 @@ export type UserUncheckedUpdateWithoutChecklistEvidenceReviewedInput = {
   checklistEvidenceCreated?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutCreatedByUserNestedInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutCreatedByUserNestedInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutRevokedByUserNestedInput
 }
 
 export type UserCreateWithoutDocumentRequirementProposalsCreatedInput = {
@@ -1711,6 +1805,8 @@ export type UserCreateWithoutDocumentRequirementProposalsCreatedInput = {
   checklistEvidenceCreated?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutCreatedByUserInput
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutReviewedByUserInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutRevokedByUserInput
 }
 
 export type UserUncheckedCreateWithoutDocumentRequirementProposalsCreatedInput = {
@@ -1741,6 +1837,8 @@ export type UserUncheckedCreateWithoutDocumentRequirementProposalsCreatedInput =
   checklistEvidenceCreated?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutCreatedByUserInput
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutReviewedByUserInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutRevokedByUserInput
 }
 
 export type UserCreateOrConnectWithoutDocumentRequirementProposalsCreatedInput = {
@@ -1776,6 +1874,8 @@ export type UserCreateWithoutDocumentRequirementProposalsReviewedInput = {
   checklistEvidenceCreated?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutCreatedByUserInput
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutReviewedByUserInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutRevokedByUserInput
 }
 
 export type UserUncheckedCreateWithoutDocumentRequirementProposalsReviewedInput = {
@@ -1806,6 +1906,8 @@ export type UserUncheckedCreateWithoutDocumentRequirementProposalsReviewedInput 
   checklistEvidenceCreated?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutCreatedByUserInput
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutReviewedByUserInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutRevokedByUserInput
 }
 
 export type UserCreateOrConnectWithoutDocumentRequirementProposalsReviewedInput = {
@@ -1852,6 +1954,8 @@ export type UserUpdateWithoutDocumentRequirementProposalsCreatedInput = {
   checklistEvidenceCreated?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutCreatedByUserNestedInput
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutReviewedByUserNestedInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutRevokedByUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDocumentRequirementProposalsCreatedInput = {
@@ -1882,6 +1986,8 @@ export type UserUncheckedUpdateWithoutDocumentRequirementProposalsCreatedInput =
   checklistEvidenceCreated?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutCreatedByUserNestedInput
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutReviewedByUserNestedInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutRevokedByUserNestedInput
 }
 
 export type UserUpsertWithoutDocumentRequirementProposalsReviewedInput = {
@@ -1923,6 +2029,8 @@ export type UserUpdateWithoutDocumentRequirementProposalsReviewedInput = {
   checklistEvidenceCreated?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutCreatedByUserNestedInput
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutReviewedByUserNestedInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutRevokedByUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDocumentRequirementProposalsReviewedInput = {
@@ -1953,6 +2061,296 @@ export type UserUncheckedUpdateWithoutDocumentRequirementProposalsReviewedInput 
   checklistEvidenceCreated?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutCreatedByUserNestedInput
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutReviewedByUserNestedInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutRevokedByUserNestedInput
+}
+
+export type UserCreateWithoutDocumentRequirementEvidenceCreatedInput = {
+  id?: string
+  nome: string
+  email: string
+  passwordHash?: string | null
+  ruolo: $Enums.RuoloUser
+  attivo?: boolean
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastFailedLoginAt?: Date | string | null
+  lastLoginAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  mustChangePassword?: boolean
+  mfaEnabled?: boolean
+  mfaSecret?: string | null
+  mfaRecoveryCodes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mfaVerifiedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  documentiCaricati?: Prisma.DocumentoCreateNestedManyWithoutUploadedByUserInput
+  tenantMemberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
+  decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutRegisteredByUserInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentCreateNestedManyWithoutRegisteredByUserInput
+  fascicoloObservationsReviewed?: Prisma.FascicoloObservationCreateNestedManyWithoutReviewedByUserInput
+  checklistEvidenceCreated?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutCreatedByUserInput
+  checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutRevokedByUserInput
+}
+
+export type UserUncheckedCreateWithoutDocumentRequirementEvidenceCreatedInput = {
+  id?: string
+  nome: string
+  email: string
+  passwordHash?: string | null
+  ruolo: $Enums.RuoloUser
+  attivo?: boolean
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastFailedLoginAt?: Date | string | null
+  lastLoginAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  mustChangePassword?: boolean
+  mfaEnabled?: boolean
+  mfaSecret?: string | null
+  mfaRecoveryCodes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mfaVerifiedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  documentiCaricati?: Prisma.DocumentoUncheckedCreateNestedManyWithoutUploadedByUserInput
+  tenantMemberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
+  decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutRegisteredByUserInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentUncheckedCreateNestedManyWithoutRegisteredByUserInput
+  fascicoloObservationsReviewed?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutReviewedByUserInput
+  checklistEvidenceCreated?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutCreatedByUserInput
+  checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutRevokedByUserInput
+}
+
+export type UserCreateOrConnectWithoutDocumentRequirementEvidenceCreatedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentRequirementEvidenceCreatedInput, Prisma.UserUncheckedCreateWithoutDocumentRequirementEvidenceCreatedInput>
+}
+
+export type UserCreateWithoutDocumentRequirementEvidenceRevokedInput = {
+  id?: string
+  nome: string
+  email: string
+  passwordHash?: string | null
+  ruolo: $Enums.RuoloUser
+  attivo?: boolean
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastFailedLoginAt?: Date | string | null
+  lastLoginAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  mustChangePassword?: boolean
+  mfaEnabled?: boolean
+  mfaSecret?: string | null
+  mfaRecoveryCodes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mfaVerifiedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  documentiCaricati?: Prisma.DocumentoCreateNestedManyWithoutUploadedByUserInput
+  tenantMemberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
+  decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutRegisteredByUserInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentCreateNestedManyWithoutRegisteredByUserInput
+  fascicoloObservationsReviewed?: Prisma.FascicoloObservationCreateNestedManyWithoutReviewedByUserInput
+  checklistEvidenceCreated?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutCreatedByUserInput
+  checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutCreatedByUserInput
+}
+
+export type UserUncheckedCreateWithoutDocumentRequirementEvidenceRevokedInput = {
+  id?: string
+  nome: string
+  email: string
+  passwordHash?: string | null
+  ruolo: $Enums.RuoloUser
+  attivo?: boolean
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  lastFailedLoginAt?: Date | string | null
+  lastLoginAt?: Date | string | null
+  passwordChangedAt?: Date | string | null
+  mustChangePassword?: boolean
+  mfaEnabled?: boolean
+  mfaSecret?: string | null
+  mfaRecoveryCodes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mfaVerifiedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  documentiCaricati?: Prisma.DocumentoUncheckedCreateNestedManyWithoutUploadedByUserInput
+  tenantMemberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
+  decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutRegisteredByUserInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentUncheckedCreateNestedManyWithoutRegisteredByUserInput
+  fascicoloObservationsReviewed?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutReviewedByUserInput
+  checklistEvidenceCreated?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutCreatedByUserInput
+  checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutCreatedByUserInput
+}
+
+export type UserCreateOrConnectWithoutDocumentRequirementEvidenceRevokedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentRequirementEvidenceRevokedInput, Prisma.UserUncheckedCreateWithoutDocumentRequirementEvidenceRevokedInput>
+}
+
+export type UserUpsertWithoutDocumentRequirementEvidenceCreatedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDocumentRequirementEvidenceCreatedInput, Prisma.UserUncheckedUpdateWithoutDocumentRequirementEvidenceCreatedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentRequirementEvidenceCreatedInput, Prisma.UserUncheckedCreateWithoutDocumentRequirementEvidenceCreatedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDocumentRequirementEvidenceCreatedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDocumentRequirementEvidenceCreatedInput, Prisma.UserUncheckedUpdateWithoutDocumentRequirementEvidenceCreatedInput>
+}
+
+export type UserUpdateWithoutDocumentRequirementEvidenceCreatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ruolo?: Prisma.EnumRuoloUserFieldUpdateOperationsInput | $Enums.RuoloUser
+  attivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastFailedLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mfaEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mfaSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mfaRecoveryCodes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mfaVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  documentiCaricati?: Prisma.DocumentoUpdateManyWithoutUploadedByUserNestedInput
+  tenantMemberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
+  decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoUpdateManyWithoutRegisteredByUserNestedInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentUpdateManyWithoutRegisteredByUserNestedInput
+  fascicoloObservationsReviewed?: Prisma.FascicoloObservationUpdateManyWithoutReviewedByUserNestedInput
+  checklistEvidenceCreated?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutCreatedByUserNestedInput
+  checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutRevokedByUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDocumentRequirementEvidenceCreatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ruolo?: Prisma.EnumRuoloUserFieldUpdateOperationsInput | $Enums.RuoloUser
+  attivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastFailedLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mfaEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mfaSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mfaRecoveryCodes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mfaVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  documentiCaricati?: Prisma.DocumentoUncheckedUpdateManyWithoutUploadedByUserNestedInput
+  tenantMemberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
+  decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutRegisteredByUserNestedInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentUncheckedUpdateManyWithoutRegisteredByUserNestedInput
+  fascicoloObservationsReviewed?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutReviewedByUserNestedInput
+  checklistEvidenceCreated?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutRevokedByUserNestedInput
+}
+
+export type UserUpsertWithoutDocumentRequirementEvidenceRevokedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDocumentRequirementEvidenceRevokedInput, Prisma.UserUncheckedUpdateWithoutDocumentRequirementEvidenceRevokedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentRequirementEvidenceRevokedInput, Prisma.UserUncheckedCreateWithoutDocumentRequirementEvidenceRevokedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDocumentRequirementEvidenceRevokedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDocumentRequirementEvidenceRevokedInput, Prisma.UserUncheckedUpdateWithoutDocumentRequirementEvidenceRevokedInput>
+}
+
+export type UserUpdateWithoutDocumentRequirementEvidenceRevokedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ruolo?: Prisma.EnumRuoloUserFieldUpdateOperationsInput | $Enums.RuoloUser
+  attivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastFailedLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mfaEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mfaSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mfaRecoveryCodes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mfaVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  documentiCaricati?: Prisma.DocumentoUpdateManyWithoutUploadedByUserNestedInput
+  tenantMemberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
+  decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoUpdateManyWithoutRegisteredByUserNestedInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentUpdateManyWithoutRegisteredByUserNestedInput
+  fascicoloObservationsReviewed?: Prisma.FascicoloObservationUpdateManyWithoutReviewedByUserNestedInput
+  checklistEvidenceCreated?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutCreatedByUserNestedInput
+  checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutCreatedByUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDocumentRequirementEvidenceRevokedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ruolo?: Prisma.EnumRuoloUserFieldUpdateOperationsInput | $Enums.RuoloUser
+  attivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastFailedLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mfaEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mfaSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mfaRecoveryCodes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mfaVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  documentiCaricati?: Prisma.DocumentoUncheckedUpdateManyWithoutUploadedByUserNestedInput
+  tenantMemberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
+  decisioniProcedimentoRegistrate?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutRegisteredByUserNestedInput
+  procedimentoResponsabileAssignmentsRegistrate?: Prisma.ProcedimentoResponsabileAssignmentUncheckedUpdateManyWithoutRegisteredByUserNestedInput
+  fascicoloObservationsReviewed?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutReviewedByUserNestedInput
+  checklistEvidenceCreated?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutCreatedByUserNestedInput
 }
 
 export type UserCreateWithoutDecisioniProcedimentoRegistrateInput = {
@@ -1983,6 +2381,8 @@ export type UserCreateWithoutDecisioniProcedimentoRegistrateInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutReviewedByUserInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutCreatedByUserInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutRevokedByUserInput
 }
 
 export type UserUncheckedCreateWithoutDecisioniProcedimentoRegistrateInput = {
@@ -2013,6 +2413,8 @@ export type UserUncheckedCreateWithoutDecisioniProcedimentoRegistrateInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutReviewedByUserInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutCreatedByUserInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutRevokedByUserInput
 }
 
 export type UserCreateOrConnectWithoutDecisioniProcedimentoRegistrateInput = {
@@ -2059,6 +2461,8 @@ export type UserUpdateWithoutDecisioniProcedimentoRegistrateInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutReviewedByUserNestedInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutCreatedByUserNestedInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutRevokedByUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDecisioniProcedimentoRegistrateInput = {
@@ -2089,6 +2493,8 @@ export type UserUncheckedUpdateWithoutDecisioniProcedimentoRegistrateInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutReviewedByUserNestedInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutCreatedByUserNestedInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutRevokedByUserNestedInput
 }
 
 export type UserCreateWithoutActivityLogsInput = {
@@ -2119,6 +2525,8 @@ export type UserCreateWithoutActivityLogsInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutReviewedByUserInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutCreatedByUserInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutRevokedByUserInput
 }
 
 export type UserUncheckedCreateWithoutActivityLogsInput = {
@@ -2149,6 +2557,8 @@ export type UserUncheckedCreateWithoutActivityLogsInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutReviewedByUserInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutCreatedByUserInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutReviewedByUserInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutCreatedByUserInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutRevokedByUserInput
 }
 
 export type UserCreateOrConnectWithoutActivityLogsInput = {
@@ -2195,6 +2605,8 @@ export type UserUpdateWithoutActivityLogsInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutReviewedByUserNestedInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutCreatedByUserNestedInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutRevokedByUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutActivityLogsInput = {
@@ -2225,6 +2637,8 @@ export type UserUncheckedUpdateWithoutActivityLogsInput = {
   checklistEvidenceReviewed?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutReviewedByUserNestedInput
   documentRequirementProposalsCreated?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutCreatedByUserNestedInput
   documentRequirementProposalsReviewed?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutReviewedByUserNestedInput
+  documentRequirementEvidenceCreated?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  documentRequirementEvidenceRevoked?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutRevokedByUserNestedInput
 }
 
 
@@ -2243,6 +2657,8 @@ export type UserCountOutputType = {
   checklistEvidenceReviewed: number
   documentRequirementProposalsCreated: number
   documentRequirementProposalsReviewed: number
+  documentRequirementEvidenceCreated: number
+  documentRequirementEvidenceRevoked: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2256,6 +2672,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   checklistEvidenceReviewed?: boolean | UserCountOutputTypeCountChecklistEvidenceReviewedArgs
   documentRequirementProposalsCreated?: boolean | UserCountOutputTypeCountDocumentRequirementProposalsCreatedArgs
   documentRequirementProposalsReviewed?: boolean | UserCountOutputTypeCountDocumentRequirementProposalsReviewedArgs
+  documentRequirementEvidenceCreated?: boolean | UserCountOutputTypeCountDocumentRequirementEvidenceCreatedArgs
+  documentRequirementEvidenceRevoked?: boolean | UserCountOutputTypeCountDocumentRequirementEvidenceRevokedArgs
 }
 
 /**
@@ -2338,6 +2756,20 @@ export type UserCountOutputTypeCountDocumentRequirementProposalsReviewedArgs<Ext
   where?: Prisma.FascicoloDocumentRequirementProposalWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountDocumentRequirementEvidenceCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FascicoloDocumentRequirementEvidenceWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountDocumentRequirementEvidenceRevokedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FascicoloDocumentRequirementEvidenceWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2368,6 +2800,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   checklistEvidenceReviewed?: boolean | Prisma.User$checklistEvidenceReviewedArgs<ExtArgs>
   documentRequirementProposalsCreated?: boolean | Prisma.User$documentRequirementProposalsCreatedArgs<ExtArgs>
   documentRequirementProposalsReviewed?: boolean | Prisma.User$documentRequirementProposalsReviewedArgs<ExtArgs>
+  documentRequirementEvidenceCreated?: boolean | Prisma.User$documentRequirementEvidenceCreatedArgs<ExtArgs>
+  documentRequirementEvidenceRevoked?: boolean | Prisma.User$documentRequirementEvidenceRevokedArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -2446,6 +2880,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   checklistEvidenceReviewed?: boolean | Prisma.User$checklistEvidenceReviewedArgs<ExtArgs>
   documentRequirementProposalsCreated?: boolean | Prisma.User$documentRequirementProposalsCreatedArgs<ExtArgs>
   documentRequirementProposalsReviewed?: boolean | Prisma.User$documentRequirementProposalsReviewedArgs<ExtArgs>
+  documentRequirementEvidenceCreated?: boolean | Prisma.User$documentRequirementEvidenceCreatedArgs<ExtArgs>
+  documentRequirementEvidenceRevoked?: boolean | Prisma.User$documentRequirementEvidenceRevokedArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -2464,6 +2900,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     checklistEvidenceReviewed: Prisma.$FascicoloChecklistEvidencePayload<ExtArgs>[]
     documentRequirementProposalsCreated: Prisma.$FascicoloDocumentRequirementProposalPayload<ExtArgs>[]
     documentRequirementProposalsReviewed: Prisma.$FascicoloDocumentRequirementProposalPayload<ExtArgs>[]
+    documentRequirementEvidenceCreated: Prisma.$FascicoloDocumentRequirementEvidencePayload<ExtArgs>[]
+    documentRequirementEvidenceRevoked: Prisma.$FascicoloDocumentRequirementEvidencePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2888,6 +3326,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   checklistEvidenceReviewed<T extends Prisma.User$checklistEvidenceReviewedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$checklistEvidenceReviewedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloChecklistEvidencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documentRequirementProposalsCreated<T extends Prisma.User$documentRequirementProposalsCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentRequirementProposalsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloDocumentRequirementProposalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documentRequirementProposalsReviewed<T extends Prisma.User$documentRequirementProposalsReviewedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentRequirementProposalsReviewedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloDocumentRequirementProposalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documentRequirementEvidenceCreated<T extends Prisma.User$documentRequirementEvidenceCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentRequirementEvidenceCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloDocumentRequirementEvidencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documentRequirementEvidenceRevoked<T extends Prisma.User$documentRequirementEvidenceRevokedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentRequirementEvidenceRevokedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloDocumentRequirementEvidencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3565,6 +4005,54 @@ export type User$documentRequirementProposalsReviewedArgs<ExtArgs extends runtim
   take?: number
   skip?: number
   distinct?: Prisma.FascicoloDocumentRequirementProposalScalarFieldEnum | Prisma.FascicoloDocumentRequirementProposalScalarFieldEnum[]
+}
+
+/**
+ * User.documentRequirementEvidenceCreated
+ */
+export type User$documentRequirementEvidenceCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FascicoloDocumentRequirementEvidence
+   */
+  select?: Prisma.FascicoloDocumentRequirementEvidenceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FascicoloDocumentRequirementEvidence
+   */
+  omit?: Prisma.FascicoloDocumentRequirementEvidenceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FascicoloDocumentRequirementEvidenceInclude<ExtArgs> | null
+  where?: Prisma.FascicoloDocumentRequirementEvidenceWhereInput
+  orderBy?: Prisma.FascicoloDocumentRequirementEvidenceOrderByWithRelationInput | Prisma.FascicoloDocumentRequirementEvidenceOrderByWithRelationInput[]
+  cursor?: Prisma.FascicoloDocumentRequirementEvidenceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FascicoloDocumentRequirementEvidenceScalarFieldEnum | Prisma.FascicoloDocumentRequirementEvidenceScalarFieldEnum[]
+}
+
+/**
+ * User.documentRequirementEvidenceRevoked
+ */
+export type User$documentRequirementEvidenceRevokedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FascicoloDocumentRequirementEvidence
+   */
+  select?: Prisma.FascicoloDocumentRequirementEvidenceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FascicoloDocumentRequirementEvidence
+   */
+  omit?: Prisma.FascicoloDocumentRequirementEvidenceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FascicoloDocumentRequirementEvidenceInclude<ExtArgs> | null
+  where?: Prisma.FascicoloDocumentRequirementEvidenceWhereInput
+  orderBy?: Prisma.FascicoloDocumentRequirementEvidenceOrderByWithRelationInput | Prisma.FascicoloDocumentRequirementEvidenceOrderByWithRelationInput[]
+  cursor?: Prisma.FascicoloDocumentRequirementEvidenceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FascicoloDocumentRequirementEvidenceScalarFieldEnum | Prisma.FascicoloDocumentRequirementEvidenceScalarFieldEnum[]
 }
 
 /**

@@ -435,6 +435,7 @@ export type FascicoloDocumentRequirementProposalWhereInput = {
   documentGap?: Prisma.XOR<Prisma.DocumentGapScalarRelationFilter, Prisma.DocumentGapWhereInput>
   createdByUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   reviewedByUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceListRelationFilter
 }
 
 export type FascicoloDocumentRequirementProposalOrderByWithRelationInput = {
@@ -478,6 +479,7 @@ export type FascicoloDocumentRequirementProposalOrderByWithRelationInput = {
   documentGap?: Prisma.DocumentGapOrderByWithRelationInput
   createdByUser?: Prisma.UserOrderByWithRelationInput
   reviewedByUser?: Prisma.UserOrderByWithRelationInput
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceOrderByRelationAggregateInput
 }
 
 export type FascicoloDocumentRequirementProposalWhereUniqueInput = Prisma.AtLeast<{
@@ -525,6 +527,7 @@ export type FascicoloDocumentRequirementProposalWhereUniqueInput = Prisma.AtLeas
   documentGap?: Prisma.XOR<Prisma.DocumentGapScalarRelationFilter, Prisma.DocumentGapWhereInput>
   createdByUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   reviewedByUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceListRelationFilter
 }, "id" | "enteId_procedimentoId_screeningFingerprint">
 
 export type FascicoloDocumentRequirementProposalOrderByWithAggregationInput = {
@@ -641,6 +644,7 @@ export type FascicoloDocumentRequirementProposalCreateInput = {
   documentGap: Prisma.DocumentGapCreateNestedOneWithoutDocumentRequirementProposalsInput
   createdByUser?: Prisma.UserCreateNestedOneWithoutDocumentRequirementProposalsCreatedInput
   reviewedByUser?: Prisma.UserCreateNestedOneWithoutDocumentRequirementProposalsReviewedInput
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutProposalInput
 }
 
 export type FascicoloDocumentRequirementProposalUncheckedCreateInput = {
@@ -677,6 +681,7 @@ export type FascicoloDocumentRequirementProposalUncheckedCreateInput = {
   reviewedByEmail?: string | null
   reviewedByRole?: string | null
   reviewNote?: string | null
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutProposalInput
 }
 
 export type FascicoloDocumentRequirementProposalUpdateInput = {
@@ -713,6 +718,7 @@ export type FascicoloDocumentRequirementProposalUpdateInput = {
   documentGap?: Prisma.DocumentGapUpdateOneRequiredWithoutDocumentRequirementProposalsNestedInput
   createdByUser?: Prisma.UserUpdateOneWithoutDocumentRequirementProposalsCreatedNestedInput
   reviewedByUser?: Prisma.UserUpdateOneWithoutDocumentRequirementProposalsReviewedNestedInput
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutProposalNestedInput
 }
 
 export type FascicoloDocumentRequirementProposalUncheckedUpdateInput = {
@@ -749,6 +755,7 @@ export type FascicoloDocumentRequirementProposalUncheckedUpdateInput = {
   reviewedByEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedByRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutProposalNestedInput
 }
 
 export type FascicoloDocumentRequirementProposalCreateManyInput = {
@@ -976,6 +983,11 @@ export type FascicoloDocumentRequirementProposalMinOrderByAggregateInput = {
 
 export type FascicoloDocumentRequirementProposalSumOrderByAggregateInput = {
   ruleContractVersionSnapshot?: Prisma.SortOrder
+}
+
+export type FascicoloDocumentRequirementProposalScalarRelationFilter = {
+  is?: Prisma.FascicoloDocumentRequirementProposalWhereInput
+  isNot?: Prisma.FascicoloDocumentRequirementProposalWhereInput
 }
 
 export type FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput = {
@@ -1280,6 +1292,20 @@ export type EnumPortActivityLegalTypeFieldUpdateOperationsInput = {
   set?: $Enums.PortActivityLegalType
 }
 
+export type FascicoloDocumentRequirementProposalCreateNestedOneWithoutEvidenceInput = {
+  create?: Prisma.XOR<Prisma.FascicoloDocumentRequirementProposalCreateWithoutEvidenceInput, Prisma.FascicoloDocumentRequirementProposalUncheckedCreateWithoutEvidenceInput>
+  connectOrCreate?: Prisma.FascicoloDocumentRequirementProposalCreateOrConnectWithoutEvidenceInput
+  connect?: Prisma.FascicoloDocumentRequirementProposalWhereUniqueInput
+}
+
+export type FascicoloDocumentRequirementProposalUpdateOneRequiredWithoutEvidenceNestedInput = {
+  create?: Prisma.XOR<Prisma.FascicoloDocumentRequirementProposalCreateWithoutEvidenceInput, Prisma.FascicoloDocumentRequirementProposalUncheckedCreateWithoutEvidenceInput>
+  connectOrCreate?: Prisma.FascicoloDocumentRequirementProposalCreateOrConnectWithoutEvidenceInput
+  upsert?: Prisma.FascicoloDocumentRequirementProposalUpsertWithoutEvidenceInput
+  connect?: Prisma.FascicoloDocumentRequirementProposalWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.FascicoloDocumentRequirementProposalUpdateToOneWithWhereWithoutEvidenceInput, Prisma.FascicoloDocumentRequirementProposalUpdateWithoutEvidenceInput>, Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateWithoutEvidenceInput>
+}
+
 export type FascicoloDocumentRequirementProposalCreateWithoutEnteInput = {
   id?: string
   status?: $Enums.FascicoloDocumentRequirementProposalStatus
@@ -1313,6 +1339,7 @@ export type FascicoloDocumentRequirementProposalCreateWithoutEnteInput = {
   documentGap: Prisma.DocumentGapCreateNestedOneWithoutDocumentRequirementProposalsInput
   createdByUser?: Prisma.UserCreateNestedOneWithoutDocumentRequirementProposalsCreatedInput
   reviewedByUser?: Prisma.UserCreateNestedOneWithoutDocumentRequirementProposalsReviewedInput
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutProposalInput
 }
 
 export type FascicoloDocumentRequirementProposalUncheckedCreateWithoutEnteInput = {
@@ -1348,6 +1375,7 @@ export type FascicoloDocumentRequirementProposalUncheckedCreateWithoutEnteInput 
   reviewedByEmail?: string | null
   reviewedByRole?: string | null
   reviewNote?: string | null
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutProposalInput
 }
 
 export type FascicoloDocumentRequirementProposalCreateOrConnectWithoutEnteInput = {
@@ -1448,6 +1476,7 @@ export type FascicoloDocumentRequirementProposalCreateWithoutLegalSourceInput = 
   documentGap: Prisma.DocumentGapCreateNestedOneWithoutDocumentRequirementProposalsInput
   createdByUser?: Prisma.UserCreateNestedOneWithoutDocumentRequirementProposalsCreatedInput
   reviewedByUser?: Prisma.UserCreateNestedOneWithoutDocumentRequirementProposalsReviewedInput
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutProposalInput
 }
 
 export type FascicoloDocumentRequirementProposalUncheckedCreateWithoutLegalSourceInput = {
@@ -1483,6 +1512,7 @@ export type FascicoloDocumentRequirementProposalUncheckedCreateWithoutLegalSourc
   reviewedByEmail?: string | null
   reviewedByRole?: string | null
   reviewNote?: string | null
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutProposalInput
 }
 
 export type FascicoloDocumentRequirementProposalCreateOrConnectWithoutLegalSourceInput = {
@@ -1544,6 +1574,7 @@ export type FascicoloDocumentRequirementProposalCreateWithoutLegalRuleInput = {
   documentGap: Prisma.DocumentGapCreateNestedOneWithoutDocumentRequirementProposalsInput
   createdByUser?: Prisma.UserCreateNestedOneWithoutDocumentRequirementProposalsCreatedInput
   reviewedByUser?: Prisma.UserCreateNestedOneWithoutDocumentRequirementProposalsReviewedInput
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutProposalInput
 }
 
 export type FascicoloDocumentRequirementProposalUncheckedCreateWithoutLegalRuleInput = {
@@ -1579,6 +1610,7 @@ export type FascicoloDocumentRequirementProposalUncheckedCreateWithoutLegalRuleI
   reviewedByEmail?: string | null
   reviewedByRole?: string | null
   reviewNote?: string | null
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutProposalInput
 }
 
 export type FascicoloDocumentRequirementProposalCreateOrConnectWithoutLegalRuleInput = {
@@ -1640,6 +1672,7 @@ export type FascicoloDocumentRequirementProposalCreateWithoutDocumentGapInput = 
   legalRule: Prisma.LegalRuleCreateNestedOneWithoutDocumentRequirementProposalsInput
   createdByUser?: Prisma.UserCreateNestedOneWithoutDocumentRequirementProposalsCreatedInput
   reviewedByUser?: Prisma.UserCreateNestedOneWithoutDocumentRequirementProposalsReviewedInput
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutProposalInput
 }
 
 export type FascicoloDocumentRequirementProposalUncheckedCreateWithoutDocumentGapInput = {
@@ -1675,6 +1708,7 @@ export type FascicoloDocumentRequirementProposalUncheckedCreateWithoutDocumentGa
   reviewedByEmail?: string | null
   reviewedByRole?: string | null
   reviewNote?: string | null
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutProposalInput
 }
 
 export type FascicoloDocumentRequirementProposalCreateOrConnectWithoutDocumentGapInput = {
@@ -1736,6 +1770,7 @@ export type FascicoloDocumentRequirementProposalCreateWithoutCreatedByUserInput 
   legalRule: Prisma.LegalRuleCreateNestedOneWithoutDocumentRequirementProposalsInput
   documentGap: Prisma.DocumentGapCreateNestedOneWithoutDocumentRequirementProposalsInput
   reviewedByUser?: Prisma.UserCreateNestedOneWithoutDocumentRequirementProposalsReviewedInput
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutProposalInput
 }
 
 export type FascicoloDocumentRequirementProposalUncheckedCreateWithoutCreatedByUserInput = {
@@ -1771,6 +1806,7 @@ export type FascicoloDocumentRequirementProposalUncheckedCreateWithoutCreatedByU
   reviewedByEmail?: string | null
   reviewedByRole?: string | null
   reviewNote?: string | null
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutProposalInput
 }
 
 export type FascicoloDocumentRequirementProposalCreateOrConnectWithoutCreatedByUserInput = {
@@ -1816,6 +1852,7 @@ export type FascicoloDocumentRequirementProposalCreateWithoutReviewedByUserInput
   legalRule: Prisma.LegalRuleCreateNestedOneWithoutDocumentRequirementProposalsInput
   documentGap: Prisma.DocumentGapCreateNestedOneWithoutDocumentRequirementProposalsInput
   createdByUser?: Prisma.UserCreateNestedOneWithoutDocumentRequirementProposalsCreatedInput
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutProposalInput
 }
 
 export type FascicoloDocumentRequirementProposalUncheckedCreateWithoutReviewedByUserInput = {
@@ -1851,6 +1888,7 @@ export type FascicoloDocumentRequirementProposalUncheckedCreateWithoutReviewedBy
   reviewedByEmail?: string | null
   reviewedByRole?: string | null
   reviewNote?: string | null
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutProposalInput
 }
 
 export type FascicoloDocumentRequirementProposalCreateOrConnectWithoutReviewedByUserInput = {
@@ -1928,6 +1966,7 @@ export type FascicoloDocumentRequirementProposalCreateWithoutProcedimentoInput =
   documentGap: Prisma.DocumentGapCreateNestedOneWithoutDocumentRequirementProposalsInput
   createdByUser?: Prisma.UserCreateNestedOneWithoutDocumentRequirementProposalsCreatedInput
   reviewedByUser?: Prisma.UserCreateNestedOneWithoutDocumentRequirementProposalsReviewedInput
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutProposalInput
 }
 
 export type FascicoloDocumentRequirementProposalUncheckedCreateWithoutProcedimentoInput = {
@@ -1963,6 +2002,7 @@ export type FascicoloDocumentRequirementProposalUncheckedCreateWithoutProcedimen
   reviewedByEmail?: string | null
   reviewedByRole?: string | null
   reviewNote?: string | null
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutProposalInput
 }
 
 export type FascicoloDocumentRequirementProposalCreateOrConnectWithoutProcedimentoInput = {
@@ -1989,6 +2029,166 @@ export type FascicoloDocumentRequirementProposalUpdateWithWhereUniqueWithoutProc
 export type FascicoloDocumentRequirementProposalUpdateManyWithWhereWithoutProcedimentoInput = {
   where: Prisma.FascicoloDocumentRequirementProposalScalarWhereInput
   data: Prisma.XOR<Prisma.FascicoloDocumentRequirementProposalUpdateManyMutationInput, Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutProcedimentoInput>
+}
+
+export type FascicoloDocumentRequirementProposalCreateWithoutEvidenceInput = {
+  id?: string
+  status?: $Enums.FascicoloDocumentRequirementProposalStatus
+  matcherAlgorithmVersion: string
+  screeningFingerprint: string
+  canonicalArt18Snapshot: $Enums.NormaRiferimento
+  portActivityLegalTypeSnapshot: $Enums.PortActivityLegalType
+  sourceStableKeySnapshot: string
+  sourceTitleSnapshot: string
+  sourceRelevantProvisionsSnapshot: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  ruleCodeSnapshot: string
+  ruleContractVersionSnapshot: number
+  legalRuleDefinitionSnapshot: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  gapKeySnapshot: string
+  gapLabelSnapshot: string
+  gapDescriptionSnapshot: string
+  matchedCriteriaSnapshot: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdByActorId: string
+  createdByEmail: string
+  createdByRole: string
+  reviewedAt?: Date | string | null
+  reviewedByActorId?: string | null
+  reviewedByEmail?: string | null
+  reviewedByRole?: string | null
+  reviewNote?: string | null
+  ente: Prisma.EnteCreateNestedOneWithoutDocumentRequirementProposalsInput
+  procedimento: Prisma.ProcedimentoCreateNestedOneWithoutDocumentRequirementProposalsInput
+  legalSource: Prisma.LegalSourceCreateNestedOneWithoutDocumentRequirementProposalsInput
+  legalRule: Prisma.LegalRuleCreateNestedOneWithoutDocumentRequirementProposalsInput
+  documentGap: Prisma.DocumentGapCreateNestedOneWithoutDocumentRequirementProposalsInput
+  createdByUser?: Prisma.UserCreateNestedOneWithoutDocumentRequirementProposalsCreatedInput
+  reviewedByUser?: Prisma.UserCreateNestedOneWithoutDocumentRequirementProposalsReviewedInput
+}
+
+export type FascicoloDocumentRequirementProposalUncheckedCreateWithoutEvidenceInput = {
+  id?: string
+  enteId: string
+  procedimentoId: string
+  legalSourceId: string
+  legalRuleId: string
+  documentGapId: string
+  status?: $Enums.FascicoloDocumentRequirementProposalStatus
+  matcherAlgorithmVersion: string
+  screeningFingerprint: string
+  canonicalArt18Snapshot: $Enums.NormaRiferimento
+  portActivityLegalTypeSnapshot: $Enums.PortActivityLegalType
+  sourceStableKeySnapshot: string
+  sourceTitleSnapshot: string
+  sourceRelevantProvisionsSnapshot: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  ruleCodeSnapshot: string
+  ruleContractVersionSnapshot: number
+  legalRuleDefinitionSnapshot: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  gapKeySnapshot: string
+  gapLabelSnapshot: string
+  gapDescriptionSnapshot: string
+  matchedCriteriaSnapshot: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdByUserId?: string | null
+  createdByActorId: string
+  createdByEmail: string
+  createdByRole: string
+  reviewedAt?: Date | string | null
+  reviewedByUserId?: string | null
+  reviewedByActorId?: string | null
+  reviewedByEmail?: string | null
+  reviewedByRole?: string | null
+  reviewNote?: string | null
+}
+
+export type FascicoloDocumentRequirementProposalCreateOrConnectWithoutEvidenceInput = {
+  where: Prisma.FascicoloDocumentRequirementProposalWhereUniqueInput
+  create: Prisma.XOR<Prisma.FascicoloDocumentRequirementProposalCreateWithoutEvidenceInput, Prisma.FascicoloDocumentRequirementProposalUncheckedCreateWithoutEvidenceInput>
+}
+
+export type FascicoloDocumentRequirementProposalUpsertWithoutEvidenceInput = {
+  update: Prisma.XOR<Prisma.FascicoloDocumentRequirementProposalUpdateWithoutEvidenceInput, Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateWithoutEvidenceInput>
+  create: Prisma.XOR<Prisma.FascicoloDocumentRequirementProposalCreateWithoutEvidenceInput, Prisma.FascicoloDocumentRequirementProposalUncheckedCreateWithoutEvidenceInput>
+  where?: Prisma.FascicoloDocumentRequirementProposalWhereInput
+}
+
+export type FascicoloDocumentRequirementProposalUpdateToOneWithWhereWithoutEvidenceInput = {
+  where?: Prisma.FascicoloDocumentRequirementProposalWhereInput
+  data: Prisma.XOR<Prisma.FascicoloDocumentRequirementProposalUpdateWithoutEvidenceInput, Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateWithoutEvidenceInput>
+}
+
+export type FascicoloDocumentRequirementProposalUpdateWithoutEvidenceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumFascicoloDocumentRequirementProposalStatusFieldUpdateOperationsInput | $Enums.FascicoloDocumentRequirementProposalStatus
+  matcherAlgorithmVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  screeningFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  canonicalArt18Snapshot?: Prisma.EnumNormaRiferimentoFieldUpdateOperationsInput | $Enums.NormaRiferimento
+  portActivityLegalTypeSnapshot?: Prisma.EnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType
+  sourceStableKeySnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTitleSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceRelevantProvisionsSnapshot?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  ruleCodeSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  ruleContractVersionSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  legalRuleDefinitionSnapshot?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  gapKeySnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  gapLabelSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  gapDescriptionSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  matchedCriteriaSnapshot?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdByActorId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByRole?: Prisma.StringFieldUpdateOperationsInput | string
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewedByActorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedByEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedByRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ente?: Prisma.EnteUpdateOneRequiredWithoutDocumentRequirementProposalsNestedInput
+  procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutDocumentRequirementProposalsNestedInput
+  legalSource?: Prisma.LegalSourceUpdateOneRequiredWithoutDocumentRequirementProposalsNestedInput
+  legalRule?: Prisma.LegalRuleUpdateOneRequiredWithoutDocumentRequirementProposalsNestedInput
+  documentGap?: Prisma.DocumentGapUpdateOneRequiredWithoutDocumentRequirementProposalsNestedInput
+  createdByUser?: Prisma.UserUpdateOneWithoutDocumentRequirementProposalsCreatedNestedInput
+  reviewedByUser?: Prisma.UserUpdateOneWithoutDocumentRequirementProposalsReviewedNestedInput
+}
+
+export type FascicoloDocumentRequirementProposalUncheckedUpdateWithoutEvidenceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.StringFieldUpdateOperationsInput | string
+  procedimentoId?: Prisma.StringFieldUpdateOperationsInput | string
+  legalSourceId?: Prisma.StringFieldUpdateOperationsInput | string
+  legalRuleId?: Prisma.StringFieldUpdateOperationsInput | string
+  documentGapId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumFascicoloDocumentRequirementProposalStatusFieldUpdateOperationsInput | $Enums.FascicoloDocumentRequirementProposalStatus
+  matcherAlgorithmVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  screeningFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  canonicalArt18Snapshot?: Prisma.EnumNormaRiferimentoFieldUpdateOperationsInput | $Enums.NormaRiferimento
+  portActivityLegalTypeSnapshot?: Prisma.EnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType
+  sourceStableKeySnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTitleSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceRelevantProvisionsSnapshot?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  ruleCodeSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  ruleContractVersionSnapshot?: Prisma.IntFieldUpdateOperationsInput | number
+  legalRuleDefinitionSnapshot?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  gapKeySnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  gapLabelSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  gapDescriptionSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  matchedCriteriaSnapshot?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdByActorId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByRole?: Prisma.StringFieldUpdateOperationsInput | string
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedByActorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedByEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedByRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type FascicoloDocumentRequirementProposalCreateManyEnteInput = {
@@ -2059,6 +2259,7 @@ export type FascicoloDocumentRequirementProposalUpdateWithoutEnteInput = {
   documentGap?: Prisma.DocumentGapUpdateOneRequiredWithoutDocumentRequirementProposalsNestedInput
   createdByUser?: Prisma.UserUpdateOneWithoutDocumentRequirementProposalsCreatedNestedInput
   reviewedByUser?: Prisma.UserUpdateOneWithoutDocumentRequirementProposalsReviewedNestedInput
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutProposalNestedInput
 }
 
 export type FascicoloDocumentRequirementProposalUncheckedUpdateWithoutEnteInput = {
@@ -2094,6 +2295,7 @@ export type FascicoloDocumentRequirementProposalUncheckedUpdateWithoutEnteInput 
   reviewedByEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedByRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutProposalNestedInput
 }
 
 export type FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteInput = {
@@ -2199,6 +2401,7 @@ export type FascicoloDocumentRequirementProposalUpdateWithoutLegalSourceInput = 
   documentGap?: Prisma.DocumentGapUpdateOneRequiredWithoutDocumentRequirementProposalsNestedInput
   createdByUser?: Prisma.UserUpdateOneWithoutDocumentRequirementProposalsCreatedNestedInput
   reviewedByUser?: Prisma.UserUpdateOneWithoutDocumentRequirementProposalsReviewedNestedInput
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutProposalNestedInput
 }
 
 export type FascicoloDocumentRequirementProposalUncheckedUpdateWithoutLegalSourceInput = {
@@ -2234,6 +2437,7 @@ export type FascicoloDocumentRequirementProposalUncheckedUpdateWithoutLegalSourc
   reviewedByEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedByRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutProposalNestedInput
 }
 
 export type FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutLegalSourceInput = {
@@ -2339,6 +2543,7 @@ export type FascicoloDocumentRequirementProposalUpdateWithoutLegalRuleInput = {
   documentGap?: Prisma.DocumentGapUpdateOneRequiredWithoutDocumentRequirementProposalsNestedInput
   createdByUser?: Prisma.UserUpdateOneWithoutDocumentRequirementProposalsCreatedNestedInput
   reviewedByUser?: Prisma.UserUpdateOneWithoutDocumentRequirementProposalsReviewedNestedInput
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutProposalNestedInput
 }
 
 export type FascicoloDocumentRequirementProposalUncheckedUpdateWithoutLegalRuleInput = {
@@ -2374,6 +2579,7 @@ export type FascicoloDocumentRequirementProposalUncheckedUpdateWithoutLegalRuleI
   reviewedByEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedByRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutProposalNestedInput
 }
 
 export type FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutLegalRuleInput = {
@@ -2479,6 +2685,7 @@ export type FascicoloDocumentRequirementProposalUpdateWithoutDocumentGapInput = 
   legalRule?: Prisma.LegalRuleUpdateOneRequiredWithoutDocumentRequirementProposalsNestedInput
   createdByUser?: Prisma.UserUpdateOneWithoutDocumentRequirementProposalsCreatedNestedInput
   reviewedByUser?: Prisma.UserUpdateOneWithoutDocumentRequirementProposalsReviewedNestedInput
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutProposalNestedInput
 }
 
 export type FascicoloDocumentRequirementProposalUncheckedUpdateWithoutDocumentGapInput = {
@@ -2514,6 +2721,7 @@ export type FascicoloDocumentRequirementProposalUncheckedUpdateWithoutDocumentGa
   reviewedByEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedByRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutProposalNestedInput
 }
 
 export type FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutDocumentGapInput = {
@@ -2654,6 +2862,7 @@ export type FascicoloDocumentRequirementProposalUpdateWithoutCreatedByUserInput 
   legalRule?: Prisma.LegalRuleUpdateOneRequiredWithoutDocumentRequirementProposalsNestedInput
   documentGap?: Prisma.DocumentGapUpdateOneRequiredWithoutDocumentRequirementProposalsNestedInput
   reviewedByUser?: Prisma.UserUpdateOneWithoutDocumentRequirementProposalsReviewedNestedInput
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutProposalNestedInput
 }
 
 export type FascicoloDocumentRequirementProposalUncheckedUpdateWithoutCreatedByUserInput = {
@@ -2689,6 +2898,7 @@ export type FascicoloDocumentRequirementProposalUncheckedUpdateWithoutCreatedByU
   reviewedByEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedByRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutProposalNestedInput
 }
 
 export type FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutCreatedByUserInput = {
@@ -2759,6 +2969,7 @@ export type FascicoloDocumentRequirementProposalUpdateWithoutReviewedByUserInput
   legalRule?: Prisma.LegalRuleUpdateOneRequiredWithoutDocumentRequirementProposalsNestedInput
   documentGap?: Prisma.DocumentGapUpdateOneRequiredWithoutDocumentRequirementProposalsNestedInput
   createdByUser?: Prisma.UserUpdateOneWithoutDocumentRequirementProposalsCreatedNestedInput
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutProposalNestedInput
 }
 
 export type FascicoloDocumentRequirementProposalUncheckedUpdateWithoutReviewedByUserInput = {
@@ -2794,6 +3005,7 @@ export type FascicoloDocumentRequirementProposalUncheckedUpdateWithoutReviewedBy
   reviewedByEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedByRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutProposalNestedInput
 }
 
 export type FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutReviewedByUserInput = {
@@ -2899,6 +3111,7 @@ export type FascicoloDocumentRequirementProposalUpdateWithoutProcedimentoInput =
   documentGap?: Prisma.DocumentGapUpdateOneRequiredWithoutDocumentRequirementProposalsNestedInput
   createdByUser?: Prisma.UserUpdateOneWithoutDocumentRequirementProposalsCreatedNestedInput
   reviewedByUser?: Prisma.UserUpdateOneWithoutDocumentRequirementProposalsReviewedNestedInput
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutProposalNestedInput
 }
 
 export type FascicoloDocumentRequirementProposalUncheckedUpdateWithoutProcedimentoInput = {
@@ -2934,6 +3147,7 @@ export type FascicoloDocumentRequirementProposalUncheckedUpdateWithoutProcedimen
   reviewedByEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedByRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutProposalNestedInput
 }
 
 export type FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutProcedimentoInput = {
@@ -2971,6 +3185,35 @@ export type FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutProced
   reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
+
+/**
+ * Count Type FascicoloDocumentRequirementProposalCountOutputType
+ */
+
+export type FascicoloDocumentRequirementProposalCountOutputType = {
+  evidence: number
+}
+
+export type FascicoloDocumentRequirementProposalCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  evidence?: boolean | FascicoloDocumentRequirementProposalCountOutputTypeCountEvidenceArgs
+}
+
+/**
+ * FascicoloDocumentRequirementProposalCountOutputType without action
+ */
+export type FascicoloDocumentRequirementProposalCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FascicoloDocumentRequirementProposalCountOutputType
+   */
+  select?: Prisma.FascicoloDocumentRequirementProposalCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * FascicoloDocumentRequirementProposalCountOutputType without action
+ */
+export type FascicoloDocumentRequirementProposalCountOutputTypeCountEvidenceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FascicoloDocumentRequirementEvidenceWhereInput
+}
 
 
 export type FascicoloDocumentRequirementProposalSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -3014,6 +3257,8 @@ export type FascicoloDocumentRequirementProposalSelect<ExtArgs extends runtime.T
   documentGap?: boolean | Prisma.DocumentGapDefaultArgs<ExtArgs>
   createdByUser?: boolean | Prisma.FascicoloDocumentRequirementProposal$createdByUserArgs<ExtArgs>
   reviewedByUser?: boolean | Prisma.FascicoloDocumentRequirementProposal$reviewedByUserArgs<ExtArgs>
+  evidence?: boolean | Prisma.FascicoloDocumentRequirementProposal$evidenceArgs<ExtArgs>
+  _count?: boolean | Prisma.FascicoloDocumentRequirementProposalCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["fascicoloDocumentRequirementProposal"]>
 
 export type FascicoloDocumentRequirementProposalSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -3147,6 +3392,8 @@ export type FascicoloDocumentRequirementProposalInclude<ExtArgs extends runtime.
   documentGap?: boolean | Prisma.DocumentGapDefaultArgs<ExtArgs>
   createdByUser?: boolean | Prisma.FascicoloDocumentRequirementProposal$createdByUserArgs<ExtArgs>
   reviewedByUser?: boolean | Prisma.FascicoloDocumentRequirementProposal$reviewedByUserArgs<ExtArgs>
+  evidence?: boolean | Prisma.FascicoloDocumentRequirementProposal$evidenceArgs<ExtArgs>
+  _count?: boolean | Prisma.FascicoloDocumentRequirementProposalCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type FascicoloDocumentRequirementProposalIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   ente?: boolean | Prisma.EnteDefaultArgs<ExtArgs>
@@ -3177,6 +3424,7 @@ export type $FascicoloDocumentRequirementProposalPayload<ExtArgs extends runtime
     documentGap: Prisma.$DocumentGapPayload<ExtArgs>
     createdByUser: Prisma.$UserPayload<ExtArgs> | null
     reviewedByUser: Prisma.$UserPayload<ExtArgs> | null
+    evidence: Prisma.$FascicoloDocumentRequirementEvidencePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3613,6 +3861,7 @@ export interface Prisma__FascicoloDocumentRequirementProposalClient<T, Null = ne
   documentGap<T extends Prisma.DocumentGapDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentGapDefaultArgs<ExtArgs>>): Prisma.Prisma__DocumentGapClient<runtime.Types.Result.GetResult<Prisma.$DocumentGapPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   createdByUser<T extends Prisma.FascicoloDocumentRequirementProposal$createdByUserArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FascicoloDocumentRequirementProposal$createdByUserArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   reviewedByUser<T extends Prisma.FascicoloDocumentRequirementProposal$reviewedByUserArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FascicoloDocumentRequirementProposal$reviewedByUserArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  evidence<T extends Prisma.FascicoloDocumentRequirementProposal$evidenceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FascicoloDocumentRequirementProposal$evidenceArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloDocumentRequirementEvidencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4111,6 +4360,30 @@ export type FascicoloDocumentRequirementProposal$reviewedByUserArgs<ExtArgs exte
    */
   include?: Prisma.UserInclude<ExtArgs> | null
   where?: Prisma.UserWhereInput
+}
+
+/**
+ * FascicoloDocumentRequirementProposal.evidence
+ */
+export type FascicoloDocumentRequirementProposal$evidenceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FascicoloDocumentRequirementEvidence
+   */
+  select?: Prisma.FascicoloDocumentRequirementEvidenceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FascicoloDocumentRequirementEvidence
+   */
+  omit?: Prisma.FascicoloDocumentRequirementEvidenceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FascicoloDocumentRequirementEvidenceInclude<ExtArgs> | null
+  where?: Prisma.FascicoloDocumentRequirementEvidenceWhereInput
+  orderBy?: Prisma.FascicoloDocumentRequirementEvidenceOrderByWithRelationInput | Prisma.FascicoloDocumentRequirementEvidenceOrderByWithRelationInput[]
+  cursor?: Prisma.FascicoloDocumentRequirementEvidenceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FascicoloDocumentRequirementEvidenceScalarFieldEnum | Prisma.FascicoloDocumentRequirementEvidenceScalarFieldEnum[]
 }
 
 /**
