@@ -1,5 +1,7 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -8,10 +10,9 @@ import { BACKOFFICE_ROLES, getCurrentUser, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
-import { buildLinkedEntityMetadata, parseUploadDocumentFormData, DOCUMENT_TIPOLOGIA_VALUES } from "@/server/documents/validation";
+import { parseUploadDocumentFormData, DOCUMENT_TIPOLOGIA_VALUES } from "@/server/documents/validation";
 import { DOCUMENT_CANALE_VALUES, DOCUMENT_DIREZIONE_VALUES, normalizeProtocolloMetadata } from "@/server/documents/protocollo";
-import { storeDocumentFile } from "@/server/documents/storage";
-import { DocumentStorageS3Error } from "@/server/documents/storage/s3StorageAdapter";
+import { uploadDocument } from "@/server/documents/uploadService";
 
 const STAGING_PREVIEW_ADMIN_ID = "staging-preview-admin";
 
@@ -257,131 +258,35 @@ export async function createDocumentoUploadAction(formData: FormData) {
     }
   }
 
-  const linked = buildLinkedEntityMetadata(payload);
-
-  const created = await prisma.documento.create({
-    data: {
-      nome: payload.nome,
-      tipologia: payload.tipologia,
-      documentType: payload.tipologia,
-      source: payload.source,
-      status: payload.status,
-      descrizione: payload.descrizione ?? null,
-      dataDocumento: payload.dataDocumento ?? null,
-      documentDate: payload.dataDocumento ?? new Date(),
-      statoDocumento: payload.status,
-      direzione: payload.direzione ?? null,
-      canale: payload.canale ?? null,
-      numeroProtocollo: payload.numeroProtocollo ?? null,
-      dataProtocollo: payload.dataProtocollo ?? null,
-      mittente: payload.mittente ?? null,
-      destinatario: payload.destinatario ?? null,
-      pecMessageId: payload.pecMessageId ?? null,
-      pecRicevutaAccettazioneId: payload.pecRicevutaAccettazioneId ?? null,
-      pecRicevutaConsegnaId: payload.pecRicevutaConsegnaId ?? null,
-      pecWarningMancataRicevuta: payload.pecWarningMancataRicevuta,
-      uploadedByUserId: persistedUserId,
-      uploadedByUserEmail: currentUser?.email ?? null,
-      uploadedByUserRole: role,
-      enteId: linkedTenant.enteId,
-      concessioneId: payload.concessioneId ?? null,
-      criticitaId: payload.criticitaId ?? null,
-      procedimentoId: payload.procedimentoId ?? null,
-      sopralluogoId: payload.sopralluogoId ?? null,
-      pagamentoId: payload.pagamentoId ?? null,
-      reportId: payload.reportId ?? null,
-    },
-    select: {
-      id: true,
-      concessioneId: true,
-      criticitaId: true,
-      procedimentoId: true,
-      sopralluogoId: true,
-      pagamentoId: true,
-      reportId: true,
-    },
-  });
-
-  let stored;
-  try {
-    stored = await storeDocumentFile({ documentId: created.id, file: payload.file });
-  } catch (error) {
-    const storageDiagnostics =
-      error instanceof DocumentStorageS3Error
-        ? {
-            provider: error.diagnostics.provider,
-            operation: error.diagnostics.operation,
-            code: error.diagnostics.code,
-            statusCode: error.diagnostics.statusCode,
-            retryable: error.diagnostics.retryable,
-            bucketConfigured: error.diagnostics.bucketConfigured,
-            endpointConfigured: error.diagnostics.endpointConfigured,
-            regionConfigured: error.diagnostics.regionConfigured,
-            forcePathStyle: error.diagnostics.forcePathStyle,
-          }
-        : undefined;
-
-    await auditFailure({
-      azione: "DOCUMENT_UPLOAD",
-      entita: "Documento",
-      entitaId: created.id,
-      concessioneId: created.concessioneId,
-      actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
-      metadata: {
-        reason: "STORAGE_WRITE_FAILED",
-        issue: error instanceof Error ? error.message : "Errore storage documento.",
-        storageDiagnostics,
-      },
-      enteId: linkedTenant.enteId,
-    });
-    throw new Error("Caricamento documento non riuscito: errore durante la persistenza storage.");
-  }
-
-  await prisma.documento.update({
-    where: { id: created.id },
-    data: {
-      nomeStorage: stored.fileName,
-      storagePath: stored.storageKey,
-      storageKey: stored.storageKey,
-      storageProvider: stored.storageProvider,
-      storageBucket: stored.bucket,
-      publicUrl: stored.publicUrl ?? null,
-      mimeType: stored.mimeType,
-      originalName: stored.originalName,
-      dimensioneBytes: stored.sizeBytes,
-      sizeBytes: stored.sizeBytes,
-      checksumSha256: stored.sha256,
-      sha256: stored.sha256,
-      url: `/documenti/${created.id}/download`,
-    },
-  });
-
-  await auditSuccess({
-    azione: "DOCUMENT_UPLOAD",
-    entita: "Documento",
-    entitaId: created.id,
-    concessioneId: created.concessioneId,
-    actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
-    metadata: {
-      tipologia: payload.tipologia,
-      source: payload.source,
-      status: payload.status,
-      mimeType: stored.mimeType,
-      dimensioneBytes: stored.sizeBytes,
-      storageProvider: stored.storageProvider,
-      storageKey: stored.storageKey,
-      protocollo: {
-        direzione: payload.direzione ?? null,
-        canale: payload.canale ?? null,
-        numeroProtocollo: payload.numeroProtocollo ?? null,
-        dataProtocollo: payload.dataProtocollo?.toISOString() ?? null,
-        pecWarningMancataRicevuta: payload.pecWarningMancataRicevuta,
-      },
-      notaLegale: "Metadato registrato a fini istruttori",
-      linkedEntities: linked,
-    },
+  const uploaded = await uploadDocument({
+    documentId: randomUUID(),
+    file: payload.file,
+    actor: { id: currentUser?.id ?? STAGING_PREVIEW_ADMIN_ID, email: currentUser?.email ?? null, role },
     enteId: linkedTenant.enteId,
+    concessioneId: payload.concessioneId,
+    criticitaId: payload.criticitaId,
+    procedimentoId: payload.procedimentoId,
+    sopralluogoId: payload.sopralluogoId,
+    pagamentoId: payload.pagamentoId,
+    reportId: payload.reportId,
+    nome: payload.nome,
+    tipologia: payload.tipologia,
+    descrizione: payload.descrizione,
+    dataDocumento: payload.dataDocumento,
+    source: payload.source,
+    status: payload.status,
+    direzione: payload.direzione,
+    canale: payload.canale,
+    numeroProtocollo: payload.numeroProtocollo,
+    dataProtocollo: payload.dataProtocollo,
+    mittente: payload.mittente,
+    destinatario: payload.destinatario,
+    pecMessageId: payload.pecMessageId,
+    pecRicevutaAccettazioneId: payload.pecRicevutaAccettazioneId,
+    pecRicevutaConsegnaId: payload.pecRicevutaConsegnaId,
+    pecWarningMancataRicevuta: payload.pecWarningMancataRicevuta,
   });
+  const created = uploaded.document;
 
   revalidateLinkedPaths({
     concessioneId: created.concessioneId ?? undefined,

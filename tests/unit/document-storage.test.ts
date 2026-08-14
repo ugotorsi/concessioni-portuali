@@ -7,10 +7,12 @@ import { afterEach, describe, expect, it } from "vitest";
 import { getDocumentStorageBackend } from "@/server/documents/storage/config";
 import { LocalStorageAdapter } from "@/server/documents/storage/localStorageAdapter";
 import {
+  deleteDocumentFile,
   getDocumentStorageAdapter,
   readStoredDocument,
   resetDocumentStorageAdapterForTests,
   storeDocumentFile,
+  storeDocumentFileAtKey,
   storedDocumentExists,
 } from "@/server/documents/storage";
 
@@ -87,6 +89,25 @@ describe("local storage adapter", () => {
 
     const loaded = await readStoredDocument(stored.storageKey);
     expect(loaded.toString("utf8")).toBe("hash-check-content");
+
+    await rm(root, { recursive: true, force: true });
+  });
+
+  it("stores at a caller-supplied deterministic key and deletes that exact object", async () => {
+    const root = await withTempStorageRoot();
+    process.env.DOCUMENT_STORAGE_BACKEND = "local";
+    process.env.DOCUMENT_STORAGE_ROOT = root;
+    const storageKey = `documents/ente-1/${"a".repeat(32)}/${"b".repeat(64)}`;
+    const file = new File(["deterministic-content"], "ignored-name.txt", { type: "text/plain" });
+
+    const stored = await storeDocumentFileAtKey({ storageKey, file });
+
+    expect(stored.storageKey).toBe(storageKey);
+    expect(stored.sha256).toHaveLength(64);
+    expect(await storedDocumentExists(storageKey)).toBe(true);
+
+    await deleteDocumentFile(storageKey);
+    expect(await storedDocumentExists(storageKey)).toBe(false);
 
     await rm(root, { recursive: true, force: true });
   });

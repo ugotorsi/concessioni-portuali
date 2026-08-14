@@ -15,6 +15,18 @@ function buildStorageKey(documentId: string, originalName: string): string {
   return `${documentId}/${now}-${sanitizeFileName(originalName)}`;
 }
 
+async function fileStorageInput(file: File) {
+  const arrayBuffer = await file.arrayBuffer();
+  const body = Buffer.from(arrayBuffer);
+  const sha256 = createHash("sha256").update(body).digest("hex");
+
+  return { body, sha256 };
+}
+
+export async function computeDocumentFileSha256(file: File): Promise<string> {
+  return (await fileStorageInput(file)).sha256;
+}
+
 let adapter: DocumentStorageAdapter | null = null;
 
 export function getDocumentStorageAdapter(): DocumentStorageAdapter {
@@ -39,20 +51,30 @@ export async function storeDocumentFile(input: {
   documentId: string;
   file: File;
 }): Promise<StoredDocumentObject> {
-  const storage = getDocumentStorageAdapter();
-  const arrayBuffer = await input.file.arrayBuffer();
-  const body = Buffer.from(arrayBuffer);
-  const sha256 = createHash("sha256").update(body).digest("hex");
   const storageKey = buildStorageKey(input.documentId, input.file.name);
 
+  return storeDocumentFileAtKey({ storageKey, file: input.file });
+}
+
+export async function storeDocumentFileAtKey(input: {
+  storageKey: string;
+  file: File;
+}): Promise<StoredDocumentObject> {
+  const storage = getDocumentStorageAdapter();
+  const { body, sha256 } = await fileStorageInput(input.file);
+
   return storage.put({
-    storageKey,
+    storageKey: input.storageKey,
     body,
     mimeType: input.file.type || "application/octet-stream",
     originalName: input.file.name,
     sha256,
     sizeBytes: input.file.size,
   });
+}
+
+export async function deleteDocumentFile(storageKey: string): Promise<void> {
+  return getDocumentStorageAdapter().delete(storageKey);
 }
 
 export async function readStoredDocument(storageKey: string): Promise<Buffer> {

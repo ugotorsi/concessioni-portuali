@@ -6,7 +6,9 @@ const getCurrentTenantContextMock = vi.hoisted(() => vi.fn());
 const requireTenantAccessMock = vi.hoisted(() => vi.fn());
 const auditFailureMock = vi.hoisted(() => vi.fn());
 const auditSuccessMock = vi.hoisted(() => vi.fn());
+const uploadDocumentMock = vi.hoisted(() => vi.fn());
 const storeDocumentFileMock = vi.hoisted(() => vi.fn());
+const checksumMock = vi.hoisted(() => vi.fn());
 const revalidatePathMock = vi.hoisted(() => vi.fn());
 const redirectMock = vi.hoisted(() => vi.fn());
 
@@ -29,9 +31,17 @@ vi.mock("@/lib/tenant-auth", () => ({
 vi.mock("@/server/audit/auditLog", () => ({
   auditFailure: auditFailureMock,
   auditSuccess: auditSuccessMock,
+  createAuditLogInTransaction: vi.fn(),
+}));
+vi.mock("@/server/documents/storage", () => ({
+  computeDocumentFileSha256: checksumMock,
+  storeDocumentFile: storeDocumentFileMock,
+  storeDocumentFileAtKey: vi.fn(),
+  deleteDocumentFile: vi.fn(),
 }));
 vi.mock("@/server/documents/validation", () => ({
   buildLinkedEntityMetadata: vi.fn(() => ({ procedimentoId: "procedimento-1" })),
+  validateUploadFile: vi.fn(),
   parseUploadDocumentFormData: vi.fn(() => ({
     nome: "verbale.txt",
     tipologia: "VERBALE",
@@ -63,7 +73,7 @@ vi.mock("@/server/documents/protocollo", () => ({
     pecWarningMancataRicevuta: false,
   })),
 }));
-vi.mock("@/server/documents/storage", () => ({ storeDocumentFile: storeDocumentFileMock }));
+vi.mock("@/server/documents/uploadService", () => ({ uploadDocument: uploadDocumentMock }));
 vi.mock("next/cache", () => ({ revalidatePath: revalidatePathMock }));
 vi.mock("next/navigation", () => ({ redirect: redirectMock }));
 
@@ -72,6 +82,7 @@ import {
   createDocumentoUploadAction,
   updateDocumentoMetadataAction,
 } from "@/server/actions/documenti";
+import { DocumentStorageS3Error } from "@/server/documents/storage/s3StorageAdapter";
 
 function archiveFormData() {
   const formData = new FormData();
@@ -117,16 +128,19 @@ describe("createDocumentoUploadAction", () => {
       reportId: null,
     });
     prismaMock.documento.update.mockResolvedValue({});
-    storeDocumentFileMock.mockResolvedValue({
-      fileName: "stored-verbale.txt",
+    uploadDocumentMock.mockResolvedValue({
+      created: true,
       storageKey: "documento-1/123-verbale.txt",
-      storageProvider: "local",
-      bucket: null,
-      publicUrl: null,
-      mimeType: "text/plain",
-      originalName: "verbale.txt",
-      sizeBytes: 9,
-      sha256: "sha256-test",
+      checksum: "sha256-test",
+      document: {
+        id: "documento-1",
+        concessioneId: null,
+        criticitaId: null,
+        procedimentoId: "procedimento-1",
+        sopralluogoId: null,
+        pagamentoId: null,
+        reportId: null,
+      },
     });
     auditSuccessMock.mockResolvedValue(undefined);
     auditFailureMock.mockResolvedValue(undefined);
@@ -137,27 +151,17 @@ describe("createDocumentoUploadAction", () => {
 
     await createDocumentoUploadAction(new FormData());
 
-    expect(prismaMock.documento.create).toHaveBeenCalledWith(
+    expect(uploadDocumentMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({
-          uploadedByUserId: null,
-          procedimentoId: "procedimento-1",
-          nome: "verbale.txt",
-          tipologia: "VERBALE",
-          source: "UPLOAD_UTENTE",
-          status: "ATTIVO",
-          descrizione: "Verbale istruttorio",
-          numeroProtocollo: "PG/2026/001",
-        }),
+        actor: { id: "staging-preview-admin", email: "preview@example.test", role: "ADMIN" },
+        procedimentoId: "procedimento-1",
+        nome: "verbale.txt",
+        tipologia: "VERBALE",
+        source: "UPLOAD_UTENTE",
+        status: "ATTIVO",
+        descrizione: "Verbale istruttorio",
+        numeroProtocollo: "PG/2026/001",
       }),
-    );
-    expect(prismaMock.documento.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({ storageKey: "documento-1/123-verbale.txt" }),
-      }),
-    );
-    expect(auditSuccessMock).toHaveBeenCalledWith(
-      expect.objectContaining({ actor: expect.objectContaining({ userId: null }) }),
     );
   });
 
@@ -166,12 +170,70 @@ describe("createDocumentoUploadAction", () => {
 
     await createDocumentoUploadAction(new FormData());
 
-    expect(prismaMock.documento.create).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ uploadedByUserId: "user-1" }) }),
+    expect(uploadDocumentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ actor: { id: "user-1", email: "admin@example.test", role: "ADMIN" } }),
     );
-    expect(auditSuccessMock).toHaveBeenCalledWith(
-      expect.objectContaining({ actor: expect.objectContaining({ userId: "user-1" }) }),
+  });
+
+  it("preserves null email and redirects after a successful upload", async () => {
+    getCurrentUserMock.mockResolvedValue({ id: "user-1", email: null });
+
+    await createDocumentoUploadAction(new FormData());
+
+    expect(uploadDocumentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ actor: { id: "user-1", email: null, role: "ADMIN" } }),
     );
+    expect(redirectMock).toHaveBeenCalledWith("/documenti");
+  });
+
+  it("preserves S3 storage diagnostics and the user-facing failure through the shared service", async () => {
+    const { uploadDocument } = await vi.importActual<typeof import("@/server/documents/uploadService")>(
+      "@/server/documents/uploadService",
+    );
+    storeDocumentFileMock.mockRejectedValue(new DocumentStorageS3Error("Storage S3 PUT failed (TimeoutError).", {
+      provider: "s3",
+      operation: "PUT",
+      code: "TimeoutError",
+      statusCode: 503,
+      retryable: true,
+      bucketConfigured: true,
+      endpointConfigured: true,
+      regionConfigured: true,
+      forcePathStyle: true,
+    }));
+    checksumMock.mockResolvedValue("a".repeat(64));
+
+    await expect(uploadDocument({
+      documentId: "documento-1",
+      file: new File(["contenuto"], "verbale.txt", { type: "text/plain" }),
+      actor: { id: "user-1", email: null, role: "ADMIN" },
+      enteId: "ente-1",
+      procedimentoId: "procedimento-1",
+      nome: "verbale.txt",
+      tipologia: "VERBALE",
+      source: "UPLOAD_UTENTE",
+      status: "ATTIVO",
+    })).rejects.toThrow("Caricamento documento non riuscito: errore durante la persistenza storage.");
+
+    expect(auditFailureMock).toHaveBeenCalledWith(expect.objectContaining({
+      azione: "DOCUMENT_UPLOAD",
+      actor: expect.objectContaining({ userEmail: null }),
+      metadata: {
+        reason: "STORAGE_WRITE_FAILED",
+        issue: "Storage S3 PUT failed (TimeoutError).",
+        storageDiagnostics: {
+          provider: "s3",
+          operation: "PUT",
+          code: "TimeoutError",
+          statusCode: 503,
+          retryable: true,
+          bucketConfigured: true,
+          endpointConfigured: true,
+          regionConfigured: true,
+          forcePathStyle: true,
+        },
+      },
+    }));
   });
 });
 
