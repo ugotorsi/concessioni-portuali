@@ -838,36 +838,37 @@ model TenantMembership {
 }
 
 model User {
-  id                                            String                                 @id @default(cuid())
+  id                                            String                                       @id @default(cuid())
   nome                                          String
-  email                                         String                                 @unique
+  email                                         String                                       @unique
   passwordHash                                  String?
   ruolo                                         RuoloUser
-  attivo                                        Boolean                                @default(true)
-  failedLoginAttempts                           Int                                    @default(0)
+  attivo                                        Boolean                                      @default(true)
+  failedLoginAttempts                           Int                                          @default(0)
   lockedUntil                                   DateTime?
   lastFailedLoginAt                             DateTime?
   lastLoginAt                                   DateTime?
   passwordChangedAt                             DateTime?
-  mustChangePassword                            Boolean                                @default(false)
-  mfaEnabled                                    Boolean                                @default(false)
+  mustChangePassword                            Boolean                                      @default(false)
+  mfaEnabled                                    Boolean                                      @default(false)
   mfaSecret                                     String?
   mfaRecoveryCodes                              Json?
   mfaVerifiedAt                                 DateTime?
-  createdAt                                     DateTime                               @default(now())
-  updatedAt                                     DateTime                               @updatedAt
+  createdAt                                     DateTime                                     @default(now())
+  updatedAt                                     DateTime                                     @updatedAt
   activityLogs                                  ActivityLog[]
-  documentiCaricati                             Documento[]                            @relation("DocumentoUploader")
+  documentiCaricati                             Documento[]                                  @relation("DocumentoUploader")
   tenantMemberships                             TenantMembership[]
-  decisioniProcedimentoRegistrate               DecisioneProcedimento[]                @relation("DecisioneProcedimentoRegisteredBy")
-  procedimentoResponsabileAssignmentsRegistrate ProcedimentoResponsabileAssignment[]   @relation("ProcedimentoResponsabileAssignmentRegisteredBy")
-  fascicoloObservationsReviewed                 FascicoloObservation[]                 @relation("FascicoloObservationReviewedBy")
-  checklistEvidenceCreated                      FascicoloChecklistEvidence[]           @relation("ChecklistEvidenceCreatedBy")
-  checklistEvidenceReviewed                     FascicoloChecklistEvidence[]           @relation("ChecklistEvidenceReviewedBy")
-  documentRequirementProposalsCreated           FascicoloDocumentRequirementProposal[] @relation("DocumentRequirementProposalCreatedBy")
-  documentRequirementProposalsReviewed          FascicoloDocumentRequirementProposal[] @relation("DocumentRequirementProposalReviewedBy")
-  documentRequirementEvidenceCreated            FascicoloDocumentRequirementEvidence[] @relation("DocumentRequirementEvidenceCreatedBy")
-  documentRequirementEvidenceRevoked            FascicoloDocumentRequirementEvidence[] @relation("DocumentRequirementEvidenceRevokedBy")
+  decisioniProcedimentoRegistrate               DecisioneProcedimento[]                      @relation("DecisioneProcedimentoRegisteredBy")
+  procedimentoResponsabileAssignmentsRegistrate ProcedimentoResponsabileAssignment[]         @relation("ProcedimentoResponsabileAssignmentRegisteredBy")
+  fascicoloObservationsReviewed                 FascicoloObservation[]                       @relation("FascicoloObservationReviewedBy")
+  checklistEvidenceCreated                      FascicoloChecklistEvidence[]                 @relation("ChecklistEvidenceCreatedBy")
+  checklistEvidenceReviewed                     FascicoloChecklistEvidence[]                 @relation("ChecklistEvidenceReviewedBy")
+  documentRequirementProposalsCreated           FascicoloDocumentRequirementProposal[]       @relation("DocumentRequirementProposalCreatedBy")
+  documentRequirementProposalsReviewed          FascicoloDocumentRequirementProposal[]       @relation("DocumentRequirementProposalReviewedBy")
+  documentRequirementEvidenceCreated            FascicoloDocumentRequirementEvidence[]       @relation("DocumentRequirementEvidenceCreatedBy")
+  documentRequirementEvidenceRevoked            FascicoloDocumentRequirementEvidence[]       @relation("DocumentRequirementEvidenceRevokedBy")
+  documentRequirementEvidenceReviews            FascicoloDocumentRequirementEvidenceReview[] @relation("DocumentRequirementEvidenceReviewedBy")
 
   @@index([ruolo])
   @@index([attivo])
@@ -1263,18 +1264,18 @@ model Documento {
   createdAt                 DateTime            @default(now())
   updatedAt                 DateTime            @updatedAt
 
-  uploadedByUser        User?                        @relation("DocumentoUploader", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
-  ente                  Ente?                        @relation(fields: [enteId], references: [id], onDelete: SetNull)
-  concessione           Concessione?                 @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
-  criticita             Criticita?                   @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
-  procedimento          Procedimento?                @relation(fields: [procedimentoId], references: [id], onDelete: SetNull)
-  sopralluogo           Sopralluogo?                 @relation(fields: [sopralluogoId], references: [id], onDelete: SetNull)
-  pagamento             Pagamento?                   @relation(fields: [pagamentoId], references: [id], onDelete: SetNull)
-  report                Report?                      @relation(fields: [reportId], references: [id], onDelete: SetNull)
+  uploadedByUser        User?                                  @relation("DocumentoUploader", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
+  ente                  Ente?                                  @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  concessione           Concessione?                           @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
+  criticita             Criticita?                             @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
+  procedimento          Procedimento?                          @relation(fields: [procedimentoId], references: [id], onDelete: SetNull)
+  sopralluogo           Sopralluogo?                           @relation(fields: [sopralluogoId], references: [id], onDelete: SetNull)
+  pagamento             Pagamento?                             @relation(fields: [pagamentoId], references: [id], onDelete: SetNull)
+  report                Report?                                @relation(fields: [reportId], references: [id], onDelete: SetNull)
   decisioniProcedimento DecisioneProcedimento[]
   fascicoloObservations FascicoloObservation[]
   checklistEvidence     FascicoloChecklistEvidence[]
-  requirementEvidence  FascicoloDocumentRequirementEvidence[]
+  requirementEvidence   FascicoloDocumentRequirementEvidence[]
 
   @@index([uploadedByUserId])
   @@index([statoDocumento])
@@ -1397,13 +1398,13 @@ model FascicoloDocumentRequirementProposal {
   reviewedByRole                   String?
   reviewNote                       String?
 
-  ente           Ente         @relation(fields: [enteId], references: [id], onDelete: Restrict)
-  procedimento   Procedimento @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
-  legalSource    LegalSource  @relation(fields: [legalSourceId], references: [id], onDelete: Restrict)
-  legalRule      LegalRule    @relation(fields: [legalRuleId], references: [id], onDelete: Restrict)
-  documentGap    DocumentGap  @relation(fields: [documentGapId], references: [id], onDelete: Restrict)
-  createdByUser  User?        @relation("DocumentRequirementProposalCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
-  reviewedByUser User?        @relation("DocumentRequirementProposalReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+  ente           Ente                                   @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  procedimento   Procedimento                           @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  legalSource    LegalSource                            @relation(fields: [legalSourceId], references: [id], onDelete: Restrict)
+  legalRule      LegalRule                              @relation(fields: [legalRuleId], references: [id], onDelete: Restrict)
+  documentGap    DocumentGap                            @relation(fields: [documentGapId], references: [id], onDelete: Restrict)
+  createdByUser  User?                                  @relation("DocumentRequirementProposalCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  reviewedByUser User?                                  @relation("DocumentRequirementProposalReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
   evidence       FascicoloDocumentRequirementEvidence[]
 
   @@unique([enteId, procedimentoId, screeningFingerprint])
@@ -1417,33 +1418,51 @@ model FascicoloDocumentRequirementProposal {
 }
 
 model FascicoloDocumentRequirementEvidence {
-  id                 String    @id @default(cuid())
-  enteId             String
-  proposalId         String
-  documentoId        String
-  createdAt          DateTime  @default(now())
-  createdByUserId    String?
-  createdByActorId   String
-  createdByEmail     String
-  createdByRole      String
-  revokedAt          DateTime?
-  revokedByUserId    String?
-  revokedByActorId   String?
-  revokedByEmail     String?
-  revokedByRole      String?
-  revocationNote     String?
+  id               String    @id @default(cuid())
+  enteId           String
+  proposalId       String
+  documentoId      String
+  createdAt        DateTime  @default(now())
+  createdByUserId  String?
+  createdByActorId String
+  createdByEmail   String
+  createdByRole    String
+  revokedAt        DateTime?
+  revokedByUserId  String?
+  revokedByActorId String?
+  revokedByEmail   String?
+  revokedByRole    String?
+  revocationNote   String?
 
-  ente          Ente                                  @relation(fields: [enteId], references: [id], onDelete: Restrict)
-  proposal      FascicoloDocumentRequirementProposal @relation(fields: [proposalId], references: [id], onDelete: Restrict)
-  documento     Documento                             @relation(fields: [documentoId], references: [id], onDelete: Restrict)
-  createdByUser User?                                 @relation("DocumentRequirementEvidenceCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
-  revokedByUser User?                                 @relation("DocumentRequirementEvidenceRevokedBy", fields: [revokedByUserId], references: [id], onDelete: SetNull)
+  ente          Ente                                        @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  proposal      FascicoloDocumentRequirementProposal        @relation(fields: [proposalId], references: [id], onDelete: Restrict)
+  documento     Documento                                   @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+  createdByUser User?                                       @relation("DocumentRequirementEvidenceCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  revokedByUser User?                                       @relation("DocumentRequirementEvidenceRevokedBy", fields: [revokedByUserId], references: [id], onDelete: SetNull)
+  review        FascicoloDocumentRequirementEvidenceReview?
 
   @@unique([enteId, proposalId, documentoId])
   @@index([enteId, proposalId])
   @@index([documentoId])
   @@index([createdByUserId])
   @@index([revokedByUserId])
+  @@index([createdAt])
+}
+
+model FascicoloDocumentRequirementEvidenceReview {
+  id                String   @id @default(cuid())
+  evidenceId        String   @unique
+  createdAt         DateTime @default(now())
+  reviewedByUserId  String?
+  reviewedByActorId String
+  reviewedByEmail   String
+  reviewedByRole    String
+  reviewNote        String?
+
+  evidence       FascicoloDocumentRequirementEvidence @relation(fields: [evidenceId], references: [id], onDelete: Restrict)
+  reviewedByUser User?                                @relation("DocumentRequirementEvidenceReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([reviewedByUserId])
   @@index([createdAt])
 }
 

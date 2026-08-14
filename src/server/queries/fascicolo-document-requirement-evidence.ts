@@ -46,6 +46,16 @@ export async function getFascicoloDocumentRequirementEvidenceData(procedimentoId
         revokedByEmail: true,
         revokedByRole: true,
         revocationNote: true,
+        review: {
+          select: {
+            id: true,
+            createdAt: true,
+            reviewedByActorId: true,
+            reviewedByEmail: true,
+            reviewedByRole: true,
+            reviewNote: true,
+          },
+        },
         documento: {
           select: {
             id: true,
