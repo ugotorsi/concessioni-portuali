@@ -148,48 +148,48 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           <CardHeader>
             <CardTitle>Header procedimento</CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-            <div>
+          <CardContent className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <div className="min-w-0">
               <p className="text-xs uppercase tracking-wide text-slate-500">Tipologia</p>
               <div className="mt-1">
                 <ProcedimentoTipologiaBadge value={detail.procedimento.tipologia} />
               </div>
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs uppercase tracking-wide text-slate-500">Stato</p>
               <div className="mt-1">
                 <ProcedimentoStatoBadge value={detail.procedimento.stato} />
               </div>
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs uppercase tracking-wide text-slate-500">Concessione</p>
-              <p className="mt-1 font-semibold text-slate-900">{detail.concessione.numeroAtto}</p>
+              <p className="mt-1 max-w-full whitespace-normal [overflow-wrap:anywhere] font-semibold text-slate-900">{detail.concessione.numeroAtto}</p>
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs uppercase tracking-wide text-slate-500">Concessionario</p>
-              <p className="mt-1 text-slate-900">{detail.concessionario.denominazione}</p>
+              <p className="mt-1 max-w-full whitespace-normal [overflow-wrap:anywhere] text-slate-900">{detail.concessionario.denominazione}</p>
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs uppercase tracking-wide text-slate-500">Riferimento normativo</p>
-              <p className="mt-1 text-slate-900">{detail.procedimento.riferimentoNormativo ?? "-"}</p>
+              <p className="mt-1 max-w-full whitespace-normal [overflow-wrap:anywhere] text-slate-900">{detail.procedimento.riferimentoNormativo ?? "-"}</p>
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs uppercase tracking-wide text-slate-500">Data avvio</p>
-              <p className="mt-1 text-slate-900">
+              <p className="mt-1 max-w-full whitespace-normal [overflow-wrap:anywhere] text-slate-900">
                 {detail.procedimento.dataAvvio ? formatDateIT(detail.procedimento.dataAvvio) : "-"}
               </p>
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs uppercase tracking-wide text-slate-500">Termine contraddittorio</p>
-              <p className="mt-1 text-slate-900">
+              <p className="mt-1 max-w-full whitespace-normal [overflow-wrap:anywhere] text-slate-900">
                 {detail.procedimento.dataScadenzaContraddittorio
                   ? formatDateIT(detail.procedimento.dataScadenzaContraddittorio)
                   : "-"}
               </p>
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs uppercase tracking-wide text-slate-500">Data provvedimento finale</p>
-              <p className="mt-1 text-slate-900">
+              <p className="mt-1 max-w-full whitespace-normal [overflow-wrap:anywhere] text-slate-900">
                 {detail.procedimento.dataProvvedimentoFinale
                   ? formatDateIT(detail.procedimento.dataProvvedimentoFinale)
                   : "-"}
