@@ -11,6 +11,7 @@ import type { getFascicoloDocumentRequirementProposals } from "@/server/queries/
 const createProposalMock = vi.hoisted(() => vi.fn());
 const reviewProposalMock = vi.hoisted(() => vi.fn());
 const createEvidenceMock = vi.hoisted(() => vi.fn());
+const reviewEvidenceMock = vi.hoisted(() => vi.fn());
 const revokeEvidenceMock = vi.hoisted(() => vi.fn());
 const uploadEvidenceMock = vi.hoisted(() => vi.fn());
 const refreshMock = vi.hoisted(() => vi.fn());
@@ -24,6 +25,7 @@ vi.mock("@/server/actions/fascicolo-document-requirements", () => ({
 }));
 vi.mock("@/server/actions/fascicolo-document-requirement-evidence", () => ({
   createFascicoloDocumentRequirementEvidence: createEvidenceMock,
+  reviewFascicoloDocumentRequirementEvidence: reviewEvidenceMock,
   revokeFascicoloDocumentRequirementEvidence: revokeEvidenceMock,
 }));
 vi.mock("@/server/actions/fascicolo-document-requirement-upload", () => ({
@@ -89,6 +91,7 @@ const activeAssociation: Association = {
   revokedByEmail: null,
   revokedByRole: null,
   revocationNote: null,
+  review: null,
   documento: {
     id: "documento-1",
     nome: "Titolo autorizzatorio.pdf",
@@ -113,6 +116,25 @@ const revokedAssociation: Association = {
     id: "documento-2",
     nome: "Documento revocato.pdf",
   },
+};
+
+const evidenceReview: NonNullable<Association["review"]> = {
+  id: "review-1",
+  createdAt: new Date("2026-08-13T10:30:00.000Z"),
+  reviewedByActorId: "reviewer-actor",
+  reviewedByEmail: "reviewer@example.test",
+  reviewedByRole: "GIURIDICO",
+  reviewNote: "Esaminata la documentazione disponibile.",
+};
+
+const reviewedAssociation: Association = {
+  ...activeAssociation,
+  review: evidenceReview,
+};
+
+const revokedReviewedAssociation: Association = {
+  ...revokedAssociation,
+  review: evidenceReview,
 };
 
 function evidenceData(overrides: Partial<EvidenceData> = {}): EvidenceData {
@@ -152,6 +174,13 @@ function evidenceSectionSource() {
     resolve(process.cwd(), "src/components/procedimenti/FascicoloDocumentRequirementEvidenceSection.tsx"),
     "utf8",
   );
+}
+
+function reviewActionInputSource() {
+  const source = evidenceSectionSource();
+  const start = source.indexOf("await reviewFascicoloDocumentRequirementEvidence({");
+  const end = source.indexOf("        });", start);
+  return source.slice(start, end);
 }
 
 function uploadFormSource() {
@@ -665,6 +694,131 @@ describe("P1-C1 document requirement proposal UI", () => {
       "esito del procedimento",
     ]) {
       expect(html).not.toContain(claim);
+    }
+  });
+
+  it("73. shows the review control for active unreviewed evidence to an authorized user", () => {
+    const html = renderPanel({
+      proposals: [proposal("VALIDATO")],
+      evidence: evidenceData({ associationsByProposalId: { "proposal-1": [activeAssociation] } }),
+    });
+    expect(html).toContain("Esame umano");
+    expect(html).toContain("Registra esame");
+  });
+
+  it("74. shows the immutable receipt without another form for reviewed active evidence", () => {
+    const html = renderPanel({
+      proposals: [proposal("VALIDATO")],
+      evidence: evidenceData({ associationsByProposalId: { "proposal-1": [reviewedAssociation] } }),
+    });
+    expect(html).toContain("Esame registrato");
+    expect(html).toContain("reviewer@example.test");
+    expect(html).toContain("GIURIDICO");
+    expect(html).toContain("Data esame");
+    expect(html).toContain("Esaminata la documentazione disponibile.");
+    expect(html).not.toContain("Registra esame");
+  });
+
+  it("75. keeps a reviewed receipt as historical provenance after revocation", () => {
+    const html = renderPanel({
+      proposals: [proposal("VALIDATO")],
+      evidence: evidenceData({ associationsByProposalId: { "proposal-1": [revokedReviewedAssociation] } }),
+    });
+    expect(html).toContain("Storico associazioni revocate");
+    expect(html).toContain("Ricevuta storica dell&#x27;esame umano svolto prima della revoca dell&#x27;evidenza.");
+    expect(html).toContain("Esame registrato");
+    expect(html).not.toContain("Registra esame");
+  });
+
+  it("76. offers no review mutation for revoked unreviewed evidence", () => {
+    const html = renderPanel({
+      proposals: [proposal("VALIDATO")],
+      evidence: evidenceData({ associationsByProposalId: { "proposal-1": [revokedAssociation] } }),
+    });
+    expect(html).toContain("Documento revocato.pdf");
+    expect(html).not.toContain("Registra esame");
+    expect(html).not.toContain("name=\"reviewNote\"");
+  });
+
+  it("77. offers no review mutation to an unauthorized user", () => {
+    const html = renderPanel({
+      proposals: [proposal("VALIDATO")],
+      canReview: false,
+      evidence: evidenceData({ associationsByProposalId: { "proposal-1": [activeAssociation] } }),
+    });
+    expect(html).toContain("Titolo autorizzatorio.pdf");
+    expect(html).not.toContain("Registra esame");
+    expect(html).not.toContain("name=\"reviewNote\"");
+  });
+
+  it("78. supports an optional review note bounded to 2000 characters", () => {
+    const html = renderPanel({
+      proposals: [proposal("VALIDATO")],
+      evidence: evidenceData({ associationsByProposalId: { "proposal-1": [activeAssociation] } }),
+    });
+    const form = formContaining(html, "Registra esame");
+    expect(form).toContain("Nota sull&#x27;esame (facoltativa)");
+    expect(form).toContain("name=\"reviewNote\"");
+    expect(form).toContain("maxLength=\"2000\"");
+    expect(form).not.toContain("required=\"\"");
+  });
+
+  it("79. submits only evidenceId and the optional review note", () => {
+    const input = reviewActionInputSource();
+    expect(input).toContain("evidenceId");
+    expect(input).toContain("reviewNote");
+    for (const forbidden of ["enteId", "tenant", "procedimentoId", "concessioneId", "proposalId", "documentoId"]) {
+      expect(input).not.toContain(forbidden);
+    }
+  });
+
+  it("80. guards duplicate review submission and disables the pending control", () => {
+    const source = evidenceSectionSource();
+    expect(source).toContain("if (reviewSubmittingRef.current)");
+    expect(source).toContain("reviewSubmittingRef.current = true;");
+    expect(source).toContain("reviewSubmittingRef.current = false;");
+    expect(source).toContain("disabled={pendingAction === `review:${association.id}`}");
+    expect(source).toContain("Registrazione...");
+  });
+
+  it("81. refreshes canonical receipt data with neutral success and error messages", () => {
+    const source = evidenceSectionSource();
+    expect(source).toContain("router.refresh();");
+    expect(source).toContain("Dati dell\\u0027esame aggiornati.");
+    expect(source).toContain("Esame non registrato. Verificare i dati e riprovare.");
+    expect(source).toContain("role=\"status\"");
+    expect(source).toContain("role=\"alert\"");
+  });
+
+  it("82. preserves upload, association, revocation, download, and history alongside review UI", () => {
+    const html = renderPanel({
+      proposals: [proposal("VALIDATO")],
+      evidence: evidenceData({ associationsByProposalId: { "proposal-1": [activeAssociation, revokedAssociation] } }),
+    });
+    for (const preserved of [
+      "Carica e associa documento",
+      "Associa un documento esistente",
+      "Revoca associazione",
+      "/documenti/documento-1/download",
+      "Storico associazioni revocate",
+    ]) {
+      expect(html).toContain(preserved);
+    }
+  });
+
+  it("83. gives the evidence receipt no approval, validity, sufficiency, or outcome meaning", () => {
+    const source = evidenceSectionSource().toLowerCase();
+    for (const forbidden of [
+      "approva",
+      "accetta",
+      "rifiuta",
+      "conferma validità",
+      "documento valido",
+      "documento sufficiente",
+      "esito positivo",
+      "esito del procedimento",
+    ]) {
+      expect(source).not.toContain(forbidden);
     }
   });
 });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FormEvent, useState, useTransition } from "react";
+import { FormEvent, useRef, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { FascicoloDocumentRequirementUploadForm } from "@/components/procedimenti/FascicoloDocumentRequirementUploadForm";
@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/Textarea";
 import { formatDateIT, formatEnumLabel } from "@/lib/utils";
 import {
   createFascicoloDocumentRequirementEvidence,
+  reviewFascicoloDocumentRequirementEvidence,
   revokeFascicoloDocumentRequirementEvidence,
 } from "@/server/actions/fascicolo-document-requirement-evidence";
 import type { getFascicoloDocumentRequirementEvidenceData } from "@/server/queries/fascicolo-document-requirement-evidence";
@@ -29,6 +30,30 @@ function actorLabel(email: string | null | undefined, actorId: string | null | u
   return email ?? actorId ?? "-";
 }
 
+function EvidenceReviewReceipt({
+  review,
+  historical = false,
+}: {
+  review: NonNullable<Association["review"]>;
+  historical?: boolean;
+}) {
+  return (
+    <div className="space-y-1 border-t border-slate-100 pt-2 text-xs text-slate-600">
+      <p className="text-slate-700">Esame umano</p>
+      <p className="font-medium text-slate-800">Esame registrato</p>
+      {historical ? (
+        <p>Ricevuta storica dell&apos;esame umano svolto prima della revoca dell&apos;evidenza.</p>
+      ) : null}
+      <p>
+        Esaminato da {review.reviewedByEmail ?? "Operatore"} ({review.reviewedByRole}) · Data esame {formatDateIT(review.createdAt)}
+      </p>
+      {review.reviewNote ? (
+        <p><span className="font-medium text-slate-700">Nota sull&apos;esame:</span> {review.reviewNote}</p>
+      ) : null}
+    </div>
+  );
+}
+
 export function FascicoloDocumentRequirementEvidenceSection({
   proposalId,
   associations,
@@ -37,8 +62,10 @@ export function FascicoloDocumentRequirementEvidenceSection({
 }: FascicoloDocumentRequirementEvidenceSectionProps) {
   const router = useRouter();
   const [, startTransition] = useTransition();
+  const reviewSubmittingRef = useRef(false);
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const activeAssociations = associations.filter((association) => association.revokedAt === null);
   const revokedAssociations = associations.filter((association) => association.revokedAt !== null);
 
@@ -89,6 +116,34 @@ export function FascicoloDocumentRequirementEvidenceSection({
     });
   }
 
+  function submitReview(event: FormEvent<HTMLFormElement>, evidenceId: string) {
+    event.preventDefault();
+    if (reviewSubmittingRef.current) {
+      return;
+    }
+
+    const reviewNote = String(new FormData(event.currentTarget).get("reviewNote") ?? "").trim();
+    reviewSubmittingRef.current = true;
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    setPendingAction(`review:${evidenceId}`);
+    startTransition(async () => {
+      try {
+        await reviewFascicoloDocumentRequirementEvidence({
+          evidenceId,
+          ...(reviewNote ? { reviewNote } : {}),
+        });
+        setSuccessMessage("Dati dell\u0027esame aggiornati.");
+        router.refresh();
+      } catch {
+        setErrorMessage("Esame non registrato. Verificare i dati e riprovare.");
+      } finally {
+        reviewSubmittingRef.current = false;
+        setPendingAction(null);
+      }
+    });
+  }
+
   return (
     <section className="space-y-3 border-t border-slate-200 pt-3">
       <div className="space-y-1">
@@ -116,6 +171,33 @@ export function FascicoloDocumentRequirementEvidenceSection({
             <p>
               Associata da {actorLabel(association.createdByEmail, association.createdByActorId)} ({association.createdByRole}).
             </p>
+            {association.review ? (
+              <EvidenceReviewReceipt review={association.review} />
+            ) : canManage ? (
+              <form onSubmit={(event) => submitReview(event, association.id)} className="space-y-2 border-t border-slate-100 pt-2">
+                <p className="text-slate-700">Esame umano</p>
+                <div className="flex flex-wrap items-end gap-2">
+                  <label className="min-w-64 flex-1 text-xs text-slate-700">
+                    Nota sull&apos;esame (facoltativa)
+                    <Textarea
+                      name="reviewNote"
+                      maxLength={2000}
+                      rows={2}
+                      className="mt-1"
+                      disabled={pendingAction === `review:${association.id}`}
+                    />
+                  </label>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    variant="outline"
+                    disabled={pendingAction === `review:${association.id}`}
+                  >
+                    {pendingAction === `review:${association.id}` ? "Registrazione..." : "Registra esame"}
+                  </Button>
+                </div>
+              </form>
+            ) : null}
             {canManage ? (
               <form onSubmit={(event) => submitRevocation(event, association.id)} className="flex flex-wrap items-end gap-2">
                 <label className="min-w-64 flex-1 text-xs text-slate-700">
@@ -175,6 +257,9 @@ export function FascicoloDocumentRequirementEvidenceSection({
       {errorMessage ? (
         <p role="alert" className="text-xs text-rose-700">{errorMessage}</p>
       ) : null}
+      {successMessage ? (
+        <p role="status" className="text-xs text-emerald-700">{successMessage}</p>
+      ) : null}
 
       {revokedAssociations.length > 0 ? (
         <div className="space-y-2 border-t border-slate-200 pt-3">
@@ -197,6 +282,9 @@ export function FascicoloDocumentRequirementEvidenceSection({
                 Revocata il {association.revokedAt ? formatDateIT(association.revokedAt) : "-"} da {actorLabel(association.revokedByEmail, association.revokedByActorId)} ({association.revokedByRole ?? "-"}).
               </p>
               <p><span className="font-medium text-slate-700">Motivo della revoca:</span> {association.revocationNote ?? "-"}</p>
+              {association.review ? (
+                <EvidenceReviewReceipt review={association.review} historical />
+              ) : null}
             </div>
           ))}
         </div>
