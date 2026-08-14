@@ -201,6 +201,10 @@ function formContaining(html: string, text: string) {
   return html.match(new RegExp(`<form[\\s\\S]*?${text}[\\s\\S]*?</form>`))?.[0] ?? "";
 }
 
+function humanReviewSummary(html: string) {
+  return html.match(/<div[^>]*data-testid="human-review-summary"[\s\S]*?<\/div>/)?.[0] ?? "";
+}
+
 describe("P1-C1 document requirement proposal UI", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -819,6 +823,113 @@ describe("P1-C1 document requirement proposal UI", () => {
       "esito del procedimento",
     ]) {
       expect(source).not.toContain(forbidden);
+    }
+  });
+
+  it("84. reports the neutral empty state when there is no active evidence", () => {
+    const html = renderPanel({ proposals: [proposal("VALIDATO")] });
+    expect(humanReviewSummary(html)).toContain("Nessuna evidenza attiva associata.");
+  });
+
+  it("85. reports zero receipts for two unreviewed active evidence records", () => {
+    const secondActiveAssociation: Association = {
+      ...activeAssociation,
+      id: "evidence-active-2",
+      documentoId: "documento-active-2",
+      documento: { ...activeAssociation.documento, id: "documento-active-2", nome: "Secondo documento.pdf" },
+    };
+    const html = renderPanel({
+      proposals: [proposal("VALIDATO")],
+      evidence: evidenceData({ associationsByProposalId: { "proposal-1": [activeAssociation, secondActiveAssociation] } }),
+    });
+    expect(humanReviewSummary(html)).toContain("Ricevuta presente per 0 di 2 evidenze attive.");
+  });
+
+  it("86. reports one receipt for two active evidence records", () => {
+    const secondActiveAssociation: Association = {
+      ...activeAssociation,
+      id: "evidence-active-2",
+      documentoId: "documento-active-2",
+      documento: { ...activeAssociation.documento, id: "documento-active-2", nome: "Secondo documento.pdf" },
+    };
+    const html = renderPanel({
+      proposals: [proposal("VALIDATO")],
+      evidence: evidenceData({ associationsByProposalId: { "proposal-1": [reviewedAssociation, secondActiveAssociation] } }),
+    });
+    expect(humanReviewSummary(html)).toContain("Ricevuta presente per 1 di 2 evidenze attive.");
+  });
+
+  it("87. reports two receipts for two active evidence records without completion wording", () => {
+    const secondReviewedAssociation: Association = {
+      ...reviewedAssociation,
+      id: "evidence-reviewed-2",
+      documentoId: "documento-reviewed-2",
+      documento: { ...activeAssociation.documento, id: "documento-reviewed-2", nome: "Secondo documento.pdf" },
+      review: { ...evidenceReview, id: "review-2" },
+    };
+    const html = renderPanel({
+      proposals: [proposal("VALIDATO")],
+      evidence: evidenceData({ associationsByProposalId: { "proposal-1": [reviewedAssociation, secondReviewedAssociation] } }),
+    });
+    expect(humanReviewSummary(html)).toContain("Ricevuta presente per 2 di 2 evidenze attive.");
+  });
+
+  it("88. excludes revoked unreviewed evidence from the numerator and denominator", () => {
+    const html = renderPanel({
+      proposals: [proposal("VALIDATO")],
+      evidence: evidenceData({ associationsByProposalId: { "proposal-1": [activeAssociation, revokedAssociation] } }),
+    });
+    expect(humanReviewSummary(html)).toContain("Ricevuta presente per 0 di 1 evidenze attive.");
+  });
+
+  it("89. excludes reviewed revoked evidence from the numerator and denominator", () => {
+    const html = renderPanel({
+      proposals: [proposal("VALIDATO")],
+      evidence: evidenceData({ associationsByProposalId: { "proposal-1": [activeAssociation, revokedReviewedAssociation] } }),
+    });
+    expect(humanReviewSummary(html)).toContain("Ricevuta presente per 0 di 1 evidenze attive.");
+    expect(html).toContain("Ricevuta storica dell&#x27;esame umano svolto prima della revoca dell&#x27;evidenza.");
+  });
+
+  it("90. keeps the summary free of completion and legal-outcome wording", () => {
+    const summary = humanReviewSummary(renderPanel({
+      proposals: [proposal("VALIDATO")],
+      evidence: evidenceData({ associationsByProposalId: { "proposal-1": [reviewedAssociation] } }),
+    })).toLowerCase();
+    for (const forbidden of [
+      "tutte esaminate",
+      "esame completato",
+      "completo",
+      "completato",
+      "soddisfatto",
+      "pronto",
+      "conforme",
+      "valido",
+      "sufficiente",
+      "approvato",
+      "checklist",
+      "esito",
+    ]) {
+      expect(summary).not.toContain(forbidden);
+    }
+  });
+
+  it("91. preserves detailed review and existing evidence controls alongside the summary", () => {
+    const html = renderPanel({
+      proposals: [proposal("VALIDATO")],
+      evidence: evidenceData({ associationsByProposalId: { "proposal-1": [reviewedAssociation, activeAssociation, revokedReviewedAssociation] } }),
+    });
+    for (const preserved of [
+      "Esame registrato",
+      "Registra esame",
+      "Carica e associa documento",
+      "Associa un documento esistente",
+      "Revoca associazione",
+      "/documenti/documento-1/download",
+      "Storico associazioni revocate",
+      "Ricevuta storica",
+    ]) {
+      expect(html).toContain(preserved);
     }
   });
 });

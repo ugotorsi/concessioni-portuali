@@ -67,6 +67,7 @@ export function FascicoloDocumentRequirementEvidenceSection({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const activeAssociations = associations.filter((association) => association.revokedAt === null);
+  const reviewedActiveAssociations = activeAssociations.filter((association) => association.review !== null);
   const revokedAssociations = associations.filter((association) => association.revokedAt !== null);
 
   function submitAssociation(event: FormEvent<HTMLFormElement>) {
@@ -150,6 +151,15 @@ export function FascicoloDocumentRequirementEvidenceSection({
         <h4 className="text-sm font-semibold text-slate-900">Evidenze documentali associate</h4>
         <p className="text-xs text-slate-600">
           L&apos;associazione documenta un collegamento istruttorio e non certifica validità, completezza, sufficienza o efficacia giuridica.
+        </p>
+      </div>
+
+      <div data-testid="human-review-summary" className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+        <p className="font-medium text-slate-800">Esame umano</p>
+        <p className="mt-1">
+          {activeAssociations.length === 0
+            ? "Nessuna evidenza attiva associata."
+            : `Ricevuta presente per ${reviewedActiveAssociations.length} di ${activeAssociations.length} evidenze attive.`}
         </p>
       </div>
 
