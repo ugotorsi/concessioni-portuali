@@ -12,6 +12,7 @@ const createProposalMock = vi.hoisted(() => vi.fn());
 const reviewProposalMock = vi.hoisted(() => vi.fn());
 const createEvidenceMock = vi.hoisted(() => vi.fn());
 const revokeEvidenceMock = vi.hoisted(() => vi.fn());
+const uploadEvidenceMock = vi.hoisted(() => vi.fn());
 const refreshMock = vi.hoisted(() => vi.fn());
 const matcherMock = vi.hoisted(() => vi.fn());
 const genericResolverMock = vi.hoisted(() => vi.fn());
@@ -24,6 +25,9 @@ vi.mock("@/server/actions/fascicolo-document-requirements", () => ({
 vi.mock("@/server/actions/fascicolo-document-requirement-evidence", () => ({
   createFascicoloDocumentRequirementEvidence: createEvidenceMock,
   revokeFascicoloDocumentRequirementEvidence: revokeEvidenceMock,
+}));
+vi.mock("@/server/actions/fascicolo-document-requirement-upload", () => ({
+  uploadFascicoloDocumentRequirementEvidence: uploadEvidenceMock,
 }));
 vi.mock("@/server/fascicolo-document-requirements/matcher", () => ({
   evaluateP1C1DocumentRequirement: matcherMock,
@@ -148,6 +152,20 @@ function evidenceSectionSource() {
     resolve(process.cwd(), "src/components/procedimenti/FascicoloDocumentRequirementEvidenceSection.tsx"),
     "utf8",
   );
+}
+
+function uploadFormSource() {
+  return readFileSync(
+    resolve(process.cwd(), "src/components/procedimenti/FascicoloDocumentRequirementUploadForm.tsx"),
+    "utf8",
+  );
+}
+
+function uploadActionInputSource() {
+  const source = uploadFormSource();
+  const start = source.indexOf("await uploadFascicoloDocumentRequirementEvidence({");
+  const end = source.indexOf("      });", start);
+  return source.slice(start, end);
 }
 
 function formContaining(html: string, text: string) {
@@ -484,11 +502,10 @@ describe("P1-C1 document requirement proposal UI", () => {
     expect(html).toContain("/documenti/documento-1/download");
   });
 
-  it("55. introduces no upload workflow", () => {
+  it("55. reuses the proposal-bound upload action instead of the general upload action", () => {
     const source = evidenceSectionSource();
     expect(source).not.toContain("createDocumentoUploadAction");
-    expect(source).not.toContain("type=\"file\"");
-    expect(source).not.toContain("Carica documento");
+    expect(uploadFormSource()).toContain("uploadFascicoloDocumentRequirementEvidence");
   });
 
   it("56. uses the compact human-boundary copy without forbidden conclusions", () => {
@@ -508,9 +525,146 @@ describe("P1-C1 document requirement proposal UI", () => {
   });
 
   it("57. keeps the UI free of backend, schema, storage, and legal-rule authority", () => {
-    const source = evidenceSectionSource();
+    const source = `${evidenceSectionSource()}\n${uploadFormSource()}`;
     for (const forbidden of ["@/lib/prisma", "enteId", "procedimentoId", "storageKey", "ruleCode", "gapKey"] ) {
       expect(source).not.toContain(forbidden);
+    }
+  });
+
+  it("58. exposes upload only for an authorized VALIDATO proposal", () => {
+    const html = renderPanel({ proposals: [proposal("VALIDATO")], canReview: true });
+    expect(html).toContain("Carica e associa documento");
+    expect(html).toContain("type=\"file\"");
+  });
+
+  it("59. exposes no upload control for PROPOSTO or RIFIUTATO proposals", () => {
+    expect(renderPanel({ proposals: [proposal("PROPOSTO")] })).not.toContain("Carica e associa documento");
+    expect(renderPanel({ proposals: [proposal("RIFIUTATO")] })).not.toContain("Carica e associa documento");
+  });
+
+  it("60. keeps upload unavailable in read-only presentation", () => {
+    const html = renderPanel({ proposals: [proposal("VALIDATO")], canReview: false });
+    expect(html).not.toContain("Carica e associa documento");
+    expect(html).not.toContain("type=\"file\"");
+  });
+
+  it("61. renders only the permitted upload form fields", () => {
+    const html = renderPanel({ proposals: [proposal("VALIDATO")] });
+    const form = formContaining(html, "Carica e associa documento");
+    expect(Array.from(form.matchAll(/name="([^"]+)"/g), (match) => match[1])).toEqual([
+      "file",
+      "tipologia",
+      "nome",
+      "descrizione",
+      "dataDocumento",
+    ]);
+    expect(form).toContain("type=\"file\"");
+    expect(form).toContain("required=\"\"");
+  });
+
+  it("62. submits proposalId, operationId, file, and permitted metadata only", () => {
+    const input = uploadActionInputSource();
+    for (const field of ["proposalId", "operationId", "file", "tipologia", "nome", "descrizione", "dataDocumento"]) {
+      expect(input).toContain(field);
+    }
+    for (const forbidden of ["enteId", "tenant", "procedimentoId", "concessioneId", "status", "source", "rule", "gap", "eligibility", "outcome"]) {
+      expect(input).not.toContain(forbidden);
+    }
+  });
+
+  it("63. generates an opaque operation ID with the browser cryptographic UUID primitive", () => {
+    const source = uploadFormSource();
+    expect(source).toContain("crypto.randomUUID()");
+    expect(source).not.toMatch(/randomUUID\([^)]*(?:proposalId|file|tipologia)/);
+  });
+
+  it("64. keeps one operation ID stable for the active submission attempt", () => {
+    const source = uploadFormSource();
+    expect(source).toContain("const operationIdRef = useRef<string | null>(null)");
+    expect(source).toContain("const operationId = operationIdRef.current ?? crypto.randomUUID();");
+    expect(source).toContain("operationIdRef.current = operationId;");
+    expect(source).toContain("onChange={startNewFileAttempt}");
+    expect(source).toMatch(/function startNewFileAttempt\(\)[\s\S]*if \(!submittingRef\.current\)[\s\S]*operationIdRef\.current = null;/);
+  });
+
+  it("65. prevents duplicate submission and disables controls while pending", () => {
+    const source = uploadFormSource();
+    expect(source).toContain("if (submittingRef.current)");
+    expect(source).toContain("submittingRef.current = true;");
+    expect(source).toContain("disabled={isSubmitting}");
+    expect(source).toContain("Caricamento...");
+  });
+
+  it("66. resets form and operation state after success", () => {
+    const source = uploadFormSource();
+    expect(source).toContain("form.reset();");
+    expect(source).toContain("operationIdRef.current = null;");
+  });
+
+  it("67. refreshes authoritative evidence data after success", () => {
+    expect(uploadFormSource()).toContain("router.refresh();");
+  });
+
+  it("68. uses legally neutral accessible success microcopy", () => {
+    const source = uploadFormSource();
+    expect(source).toContain("Documento caricato e associato.");
+    expect(source).toContain("role=\"status\"");
+    for (const claim of ["requisito soddisfatto", "titolo verificato", "autorizzazione valida", "conformità accertata"]) {
+      expect(source.toLowerCase()).not.toContain(claim);
+    }
+  });
+
+  it("69. sanitizes upload failure without exposing storage details", () => {
+    const source = uploadFormSource();
+    expect(source).toContain("Caricamento non completato. Verificare i dati e riprovare.");
+    expect(source).toContain("role=\"alert\"");
+    for (const forbidden of ["storageKey", "bucket", "endpoint", "S3", "R2", "DATABASE_URL", "error.message"]) {
+      expect(source).not.toContain(forbidden);
+    }
+  });
+
+  it("70. preserves separate upload-new and associate-existing choices", () => {
+    const html = renderPanel({
+      proposals: [proposal("VALIDATO")],
+      evidence: evidenceData({
+        eligibleDocumentsByProposalId: {
+          "proposal-1": [{
+            id: "documento-3",
+            nome: "Documento candidato.pdf",
+            tipologia: "ATTO",
+            dataDocumento: null,
+            createdAt: new Date("2026-08-02T08:00:00.000Z"),
+          }],
+        },
+      }),
+    });
+    expect(html).toContain("Carica e associa documento");
+    expect(html).toContain("Associa un documento esistente");
+    expect(html).toContain("Associa documento");
+  });
+
+  it("71. preserves revocation, download, and revoked-history UI", () => {
+    const html = renderPanel({
+      proposals: [proposal("VALIDATO")],
+      evidence: evidenceData({ associationsByProposalId: { "proposal-1": [activeAssociation, revokedAssociation] } }),
+    });
+    expect(html).toContain("Revoca associazione");
+    expect(html).toContain("/documenti/documento-1/download");
+    expect(html).toContain("Storico associazioni revocate");
+    expect(html).toContain("Documento revocato.pdf");
+  });
+
+  it("72. introduces no automatic legal conclusion in the upload affordance", () => {
+    const html = renderPanel({ proposals: [proposal("VALIDATO")] }).toLowerCase();
+    for (const claim of [
+      "requisito soddisfatto",
+      "titolo verificato",
+      "autorizzazione valida",
+      "autorizzazione mancante",
+      "conformità accertata",
+      "esito del procedimento",
+    ]) {
+      expect(html).not.toContain(claim);
     }
   });
 });

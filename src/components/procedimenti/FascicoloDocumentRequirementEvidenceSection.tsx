@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/Button";
+import { FascicoloDocumentRequirementUploadForm } from "@/components/procedimenti/FascicoloDocumentRequirementUploadForm";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { formatDateIT, formatEnumLabel } from "@/lib/utils";
@@ -146,23 +147,29 @@ export function FascicoloDocumentRequirementEvidenceSection({
       </div>
 
       {canManage ? (
-        eligibleDocuments.length > 0 ? (
-          <form onSubmit={submitAssociation} className="flex flex-wrap items-center gap-2">
-            <Select name="documentoId" required defaultValue="" className="min-w-64" disabled={pendingAction === "create"}>
-              <option value="" disabled>Seleziona documento</option>
-              {eligibleDocuments.map((documento) => (
-                <option key={documento.id} value={documento.id}>
-                  {documento.nome} · {formatEnumLabel(documento.tipologia)}
-                </option>
-              ))}
-            </Select>
-            <Button type="submit" size="sm" variant="outline" disabled={pendingAction === "create"}>
-              {pendingAction === "create" ? "Associazione in corso..." : "Associa documento"}
-            </Button>
-          </form>
-        ) : (
-          <p className="text-xs text-slate-500">Nessun documento attivo associabile disponibile nel procedimento.</p>
-        )
+        <div className="space-y-3">
+          <FascicoloDocumentRequirementUploadForm proposalId={proposalId} />
+          <div className="space-y-2">
+            <h5 className="text-sm font-medium text-slate-900">Associa un documento esistente</h5>
+            {eligibleDocuments.length > 0 ? (
+              <form onSubmit={submitAssociation} className="flex flex-wrap items-center gap-2">
+                <Select name="documentoId" required defaultValue="" className="min-w-64" disabled={pendingAction === "create"}>
+                  <option value="" disabled>Seleziona documento</option>
+                  {eligibleDocuments.map((documento) => (
+                    <option key={documento.id} value={documento.id}>
+                      {documento.nome} · {formatEnumLabel(documento.tipologia)}
+                    </option>
+                  ))}
+                </Select>
+                <Button type="submit" size="sm" variant="outline" disabled={pendingAction === "create"}>
+                  {pendingAction === "create" ? "Associazione in corso..." : "Associa documento"}
+                </Button>
+              </form>
+            ) : (
+              <p className="text-xs text-slate-500">Nessun documento attivo associabile disponibile nel procedimento.</p>
+            )}
+          </div>
+        </div>
       ) : null}
 
       {errorMessage ? (
