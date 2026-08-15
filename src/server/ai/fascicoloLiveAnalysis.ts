@@ -5,18 +5,16 @@ import {
   type AiAnalysisProviderRequestV1,
 } from "@/server/ai/fascicoloAnalysis";
 import {
-  AI_FASCICOLO_SNAPSHOT_V1_SCHEMA_VERSION,
   buildAiFascicoloSnapshotV1,
 } from "@/server/ai/fascicoloSnapshot";
+import { AI_FASCICOLO_SNAPSHOT_V1_SCHEMA_VERSION } from "@/server/ai/fascicoloSnapshotContract";
+import {
+  AiProviderAdapterError,
+  type AiProviderFailureCategory,
+} from "@/server/ai/providerErrors";
 
-export type AiProviderFailureCategory = "UNAVAILABLE" | "TIMEOUT" | "RATE_LIMITED" | "CONFIGURATION";
-
-export class AiProviderAdapterError extends Error {
-  constructor(readonly category: AiProviderFailureCategory) {
-    super(category);
-    this.name = "AiProviderAdapterError";
-  }
-}
+export { AiProviderAdapterError } from "@/server/ai/providerErrors";
+export type { AiProviderFailureCategory } from "@/server/ai/providerErrors";
 
 export type AiFascicoloLiveAnalysisErrorCode =
   | "AI_INPUT_TOO_LARGE"

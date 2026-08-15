@@ -1,9 +1,7 @@
 import { z } from "zod";
 
-import {
-  AI_FASCICOLO_SNAPSHOT_V1_SCHEMA_VERSION,
-  type buildAiFascicoloSnapshotV1,
-} from "@/server/ai/fascicoloSnapshot";
+import { AI_FASCICOLO_SNAPSHOT_V1_SCHEMA_VERSION } from "@/server/ai/fascicoloSnapshotContract";
+import type { buildAiFascicoloSnapshotV1 } from "@/server/ai/fascicoloSnapshot";
 
 export const AI_FASCICOLO_ANALYSIS_V1_SCHEMA_VERSION = "ai-fascicolo-analysis/v1" as const;
 

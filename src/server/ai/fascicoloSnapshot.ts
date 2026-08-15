@@ -8,8 +8,9 @@ import { getFascicoloDocumentRequirementEvidenceData } from "@/server/queries/fa
 import { getFascicoloDocumentRequirementProposals } from "@/server/queries/fascicolo-document-requirements";
 import { getFascicoloObservations } from "@/server/queries/fascicolo-observations";
 import { getProcedimentoDetail } from "@/server/queries/procedimenti";
+import { AI_FASCICOLO_SNAPSHOT_V1_SCHEMA_VERSION } from "@/server/ai/fascicoloSnapshotContract";
 
-export const AI_FASCICOLO_SNAPSHOT_V1_SCHEMA_VERSION = "ai-fascicolo-snapshot/v1" as const;
+export { AI_FASCICOLO_SNAPSHOT_V1_SCHEMA_VERSION } from "@/server/ai/fascicoloSnapshotContract";
 export const AI_FASCICOLO_SNAPSHOT_CONTENT_HASH_ALGORITHM = "sha256" as const;
 
 type SnapshotErrorCode =

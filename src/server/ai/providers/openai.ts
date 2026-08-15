@@ -1,5 +1,5 @@
 import type { AiAnalysisProvider, AiAnalysisProviderRequestV1 } from "@/server/ai/fascicoloAnalysis";
-import { AiProviderAdapterError } from "@/server/ai/fascicoloLiveAnalysis";
+import { AiProviderAdapterError } from "@/server/ai/providerErrors";
 
 export const OPENAI_ANALYSIS_MODEL = "gpt-5.6-terra" as const;
 export const OPENAI_RESPONSES_ENDPOINTS = {
