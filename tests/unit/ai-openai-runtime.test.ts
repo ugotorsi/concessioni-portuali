@@ -17,11 +17,13 @@ vi.mock("@/server/ai/fascicoloLiveAnalysis", () => ({
 
 import {
   AI_OPENAI_RUNTIME_ENV_NAMES,
+  AI_REAL_DATA_ACTIVATION_ENV_NAMES,
   OpenAiRuntimeConfigurationError,
   createOpenAiFascicoloRuntimeFromEnv,
   type OpenAiRuntimeEnv,
 } from "@/server/ai/openaiRuntime";
 import type { OpenAiFetch } from "@/server/ai/providers/openai";
+import { AiRealDataActivationError } from "@/server/ai/realDataActivation";
 
 const SECRET = "sk-runtime-DO-NOT-LEAK";
 
@@ -33,6 +35,9 @@ function validEnv(overrides: Partial<OpenAiRuntimeEnv> = {}): OpenAiRuntimeEnv {
     AI_OPENAI_MAX_RAW_RESPONSE_BYTES: "262144",
     AI_OPENAI_MAX_OUTPUT_TOKENS: "8192",
     AI_MAX_INPUT_BYTES: "262144",
+    AI_REAL_DATA_ENABLED: "true",
+    AI_REAL_DATA_APPROVAL_ID: "UNIT-TEST-APPROVAL",
+    AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
     ...overrides,
   };
 }
@@ -74,6 +79,11 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
       "AI_OPENAI_MAX_OUTPUT_TOKENS",
       "AI_MAX_INPUT_BYTES",
     ]);
+    expect(AI_REAL_DATA_ACTIVATION_ENV_NAMES).toEqual([
+      "AI_REAL_DATA_ENABLED",
+      "AI_REAL_DATA_APPROVAL_ID",
+      "AI_PROVIDER_PROJECT_CLASS",
+    ]);
     expect(createProviderMock).not.toHaveBeenCalled();
     expect(createServiceMock).not.toHaveBeenCalled();
     expect(providerAnalyzeMock).not.toHaveBeenCalled();
@@ -96,6 +106,7 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
     expect(createServiceMock).toHaveBeenCalledWith({
       provider: { analyze: providerAnalyzeMock },
       maxInputBytes: 262144,
+      realDataActivation: expect.objectContaining({ enabled: true }),
     });
     expect(runtime).toEqual({ analyze: serviceAnalyzeMock });
     expect(transport).not.toHaveBeenCalled();
@@ -106,6 +117,42 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
     const transport = fakeTransport();
     createOpenAiFascicoloRuntimeFromEnv(validEnv({ AI_OPENAI_REGION: "EU" }), { transport });
     expect(createProviderMock).toHaveBeenCalledWith(expect.objectContaining({ region: "EU" }));
+    expect(transport).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    "AI_REAL_DATA_ENABLED",
+    "AI_REAL_DATA_APPROVAL_ID",
+    "AI_PROVIDER_PROJECT_CLASS",
+  ] as const)("fails closed before composition when %s is missing", (envName) => {
+    const runtimeEnv = validEnv();
+    delete runtimeEnv[envName];
+    const transport = fakeTransport();
+    expect(() => createOpenAiFascicoloRuntimeFromEnv(runtimeEnv, { transport })).toThrowError(
+      expect.objectContaining({ code: "AI_REAL_DATA_DISABLED" }),
+    );
+    expect(createProviderMock).not.toHaveBeenCalled();
+    expect(createServiceMock).not.toHaveBeenCalled();
+    expect(transport).not.toHaveBeenCalled();
+    expect(serviceAnalyzeMock).not.toHaveBeenCalled();
+  });
+
+  it("fails closed for malformed activation without leaking governance values", () => {
+    const approval = "APPROVAL-SECRET-DO-NOT-LEAK";
+    const transport = fakeTransport();
+    try {
+      createOpenAiFascicoloRuntimeFromEnv(validEnv({
+        AI_REAL_DATA_ENABLED: "TRUE",
+        AI_REAL_DATA_APPROVAL_ID: approval,
+      }), { transport });
+      throw new Error("Expected disabled gate");
+    } catch (error) {
+      expect(error).toBeInstanceOf(AiRealDataActivationError);
+      expect((error as Error).message).toBe("AI_REAL_DATA_DISABLED");
+      expect((error as Error).message).not.toContain(approval);
+    }
+    expect(createProviderMock).not.toHaveBeenCalled();
+    expect(createServiceMock).not.toHaveBeenCalled();
     expect(transport).not.toHaveBeenCalled();
   });
 

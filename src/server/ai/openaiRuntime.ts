@@ -7,6 +7,11 @@ import {
   type OpenAiFetch,
   type OpenAiRegion,
 } from "@/server/ai/providers/openai";
+import {
+  assertRealDataActivation,
+  createRealDataActivationPolicy,
+  type RealDataActivationEnv,
+} from "@/server/ai/realDataActivation";
 
 export const AI_OPENAI_RUNTIME_ENV_NAMES = [
   "AI_OPENAI_API_KEY",
@@ -17,8 +22,11 @@ export const AI_OPENAI_RUNTIME_ENV_NAMES = [
   "AI_MAX_INPUT_BYTES",
 ] as const;
 
+export { AI_REAL_DATA_ACTIVATION_ENV_NAMES } from "@/server/ai/realDataActivation";
+
 type OpenAiRuntimeEnvName = (typeof AI_OPENAI_RUNTIME_ENV_NAMES)[number];
-export type OpenAiRuntimeEnv = Partial<Record<OpenAiRuntimeEnvName, string | undefined>>;
+export type OpenAiRuntimeEnv = Partial<Record<OpenAiRuntimeEnvName, string | undefined>>
+  & RealDataActivationEnv;
 
 export class OpenAiRuntimeConfigurationError extends Error {
   readonly code = "AI_CONFIGURATION_ERROR" as const;
@@ -89,6 +97,8 @@ export function createOpenAiFascicoloRuntimeFromEnv(
   env: OpenAiRuntimeEnv = process.env as unknown as OpenAiRuntimeEnv,
   dependencies: { transport?: OpenAiFetch } = {},
 ): FascicoloLiveAnalysisService {
+  const realDataActivation = createRealDataActivationPolicy(env);
+  assertRealDataActivation(realDataActivation);
   const config = parseRuntimeConfig(env);
   const provider = createOpenAiAnalysisProvider({
     apiKey: config.apiKey,
@@ -101,5 +111,6 @@ export function createOpenAiFascicoloRuntimeFromEnv(
   return createFascicoloLiveAnalysisService({
     provider,
     maxInputBytes: config.maxInputBytes,
+    realDataActivation,
   });
 }

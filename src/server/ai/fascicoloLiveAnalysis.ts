@@ -12,6 +12,10 @@ import {
   AiProviderAdapterError,
   type AiProviderFailureCategory,
 } from "@/server/ai/providerErrors";
+import {
+  assertRealDataActivation,
+  type RealDataActivationPolicy,
+} from "@/server/ai/realDataActivation";
 
 export { AiProviderAdapterError } from "@/server/ai/providerErrors";
 export type { AiProviderFailureCategory } from "@/server/ai/providerErrors";
@@ -84,6 +88,7 @@ function mapAdapterError(error: AiProviderAdapterError): AiFascicoloLiveAnalysis
 export function createFascicoloLiveAnalysisService(config: {
   provider: AiAnalysisProvider;
   maxInputBytes?: number;
+  realDataActivation?: RealDataActivationPolicy;
   logger?: AiFascicoloLiveAnalysisLogger;
   providerIdentifier?: string;
   modelIdentifier?: string;
@@ -94,6 +99,7 @@ export function createFascicoloLiveAnalysisService(config: {
   return {
     async analyze(procedimentoId: string) {
       const snapshot = await buildAiFascicoloSnapshotV1(procedimentoId);
+      assertRealDataActivation(config.realDataActivation);
       const startedAt = Date.now();
       let measuredInputBytes = 0;
 

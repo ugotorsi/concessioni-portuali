@@ -21,10 +21,26 @@ import {
 import {
   AiFascicoloLiveAnalysisError,
   AiProviderAdapterError,
-  createFascicoloLiveAnalysisService,
+  createFascicoloLiveAnalysisService as createFascicoloLiveAnalysisServiceBase,
   type AiFascicoloLiveAnalysisLogEvent,
 } from "@/server/ai/fascicoloLiveAnalysis";
 import { AiFascicoloSnapshotError } from "@/server/ai/fascicoloSnapshot";
+import { createRealDataActivationPolicy } from "@/server/ai/realDataActivation";
+
+const approvedActivation = createRealDataActivationPolicy({
+  AI_REAL_DATA_ENABLED: "true",
+  AI_REAL_DATA_APPROVAL_ID: "UNIT-TEST-APPROVAL",
+  AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
+});
+
+function createFascicoloLiveAnalysisService(
+  config: Omit<Parameters<typeof createFascicoloLiveAnalysisServiceBase>[0], "realDataActivation">,
+) {
+  return createFascicoloLiveAnalysisServiceBase({
+    ...config,
+    realDataActivation: approvedActivation,
+  });
+}
 
 function snapshotFixture(note = "Nota tecnica") {
   return {
@@ -93,6 +109,41 @@ describe("AI-01B1 provider-independent live orchestration", () => {
     buildSnapshotMock.mockRejectedValue(snapshotError);
     const { provider, analyze } = fakeProvider();
     const service = createFascicoloLiveAnalysisService({ provider, maxInputBytes: 100_000 });
+    await expect(service.analyze("proc-1")).rejects.toBe(snapshotError);
+    expect(analyze).not.toHaveBeenCalled();
+  });
+
+  it("builds the snapshot once but invokes no provider when the real-data gate is closed", async () => {
+    const { provider, analyze } = fakeProvider();
+    const service = createFascicoloLiveAnalysisServiceBase({
+      provider,
+      maxInputBytes: 100_000,
+      realDataActivation: createRealDataActivationPolicy({}),
+    });
+    await expect(service.analyze("proc-1")).rejects.toSatisfy((error: unknown) => {
+      expect((error as { code?: string }).code).toBe("AI_REAL_DATA_DISABLED");
+      expect((error as Error).message).toBe("AI_REAL_DATA_DISABLED");
+      return true;
+    });
+    expect(buildSnapshotMock).toHaveBeenCalledOnce();
+    expect(analyze).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    "UNAUTHENTICATED",
+    "AI_ROLE_FORBIDDEN",
+    "PROCEDIMENTO_NOT_FOUND",
+    "TENANT_ACCESS_DENIED",
+    "SOURCE_INCONSISTENCY",
+  ] as const)("preserves AI-00 %s before the closed gate", async (code) => {
+    const snapshotError = new AiFascicoloSnapshotError(code);
+    buildSnapshotMock.mockRejectedValue(snapshotError);
+    const { provider, analyze } = fakeProvider();
+    const service = createFascicoloLiveAnalysisServiceBase({
+      provider,
+      maxInputBytes: 100_000,
+      realDataActivation: createRealDataActivationPolicy({}),
+    });
     await expect(service.analyze("proc-1")).rejects.toBe(snapshotError);
     expect(analyze).not.toHaveBeenCalled();
   });
