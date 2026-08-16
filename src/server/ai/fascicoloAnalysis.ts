@@ -207,7 +207,10 @@ export const providerAnalysisPayloadV1Schema = z.object({
 export type ProviderAnalysisPayloadV1 = z.infer<typeof providerAnalysisPayloadV1Schema>;
 type AiFascicoloSnapshotV1 = Awaited<ReturnType<typeof buildAiFascicoloSnapshotV1>>;
 
-type AnalysisErrorCode = "UNSUPPORTED_SNAPSHOT_VERSION" | "INVALID_PROVIDER_OUTPUT";
+type AnalysisErrorCode =
+  | "UNSUPPORTED_SNAPSHOT_VERSION"
+  | "INVALID_PROVIDER_OUTPUT"
+  | "OUTBOUND_TRUSTED_METADATA_MISMATCH";
 
 export class AiFascicoloAnalysisError extends Error {
   constructor(readonly code: AnalysisErrorCode) {
@@ -240,7 +243,7 @@ export interface AiAnalysisProviderRequestV1 {
   };
 }
 
-type AiFascicoloOutboundProviderBoundV1 =
+export type AiFascicoloOutboundProviderBoundV1 =
   AiFascicoloOutboundProjectionResultV1["providerBound"];
 
 export interface AiOutboundAnalysisProviderRequestV1 {
@@ -276,6 +279,22 @@ export interface AiFascicoloTrustedHashContextV1 {
   readonly outboundProjectionHashAlgorithm: typeof AI_FASCICOLO_OUTBOUND_HASH_ALGORITHM;
 }
 
+export interface AiOutboundAnalysisProvider {
+  analyze(request: AiOutboundAnalysisProviderRequestV1): Promise<unknown>;
+}
+
+export interface AiFascicoloOutboundAnalysisV1 {
+  readonly analysisSchemaVersion: typeof AI_FASCICOLO_ANALYSIS_V1_SCHEMA_VERSION;
+  readonly snapshotSchemaVersion: typeof AI_FASCICOLO_SNAPSHOT_V1_SCHEMA_VERSION;
+  readonly outboundSchemaVersion: typeof AI_FASCICOLO_OUTBOUND_V1_SCHEMA_VERSION;
+  readonly sourceSnapshotContentHash: string;
+  readonly outboundProjectionHash: string;
+  readonly outboundProjectionHashAlgorithm: typeof AI_FASCICOLO_OUTBOUND_HASH_ALGORITHM;
+  readonly generatedAt: string;
+  readonly analysis: ProviderAnalysisPayloadV1;
+  readonly limitations: typeof AI_FASCICOLO_OUTBOUND_ANALYSIS_V1_LIMITATIONS;
+}
+
 export function buildOutboundProviderRequest(
   providerBound: AiFascicoloOutboundProviderBoundV1,
 ): AiOutboundAnalysisProviderRequestV1 {
@@ -304,6 +323,52 @@ export function buildOutboundProviderRequest(
     },
   };
   return deepFreeze(request);
+}
+
+function assertOutboundTrustedMetadataConsistency(
+  providerBound: AiFascicoloOutboundProviderBoundV1,
+  trustedHashContext: AiFascicoloTrustedHashContextV1,
+): void {
+  if (
+    trustedHashContext.snapshotSchemaVersion !== AI_FASCICOLO_SNAPSHOT_V1_SCHEMA_VERSION
+    || trustedHashContext.outboundSchemaVersion !== AI_FASCICOLO_OUTBOUND_V1_SCHEMA_VERSION
+    || providerBound.outboundProjection.schemaVersion !== AI_FASCICOLO_OUTBOUND_V1_SCHEMA_VERSION
+    || trustedHashContext.outboundSchemaVersion !== providerBound.outboundProjection.schemaVersion
+    || trustedHashContext.outboundProjectionHash !== providerBound.outboundProjectionHash
+    || trustedHashContext.outboundProjectionHashAlgorithm !== AI_FASCICOLO_OUTBOUND_HASH_ALGORITHM
+    || providerBound.outboundProjectionHashAlgorithm !== AI_FASCICOLO_OUTBOUND_HASH_ALGORITHM
+    || trustedHashContext.outboundProjectionHashAlgorithm !== providerBound.outboundProjectionHashAlgorithm
+  ) {
+    throw new AiFascicoloAnalysisError("OUTBOUND_TRUSTED_METADATA_MISMATCH");
+  }
+}
+
+export async function analyzeFascicoloOutboundV1(input: {
+  readonly providerBound: AiFascicoloOutboundProviderBoundV1;
+  readonly trustedHashContext: AiFascicoloTrustedHashContextV1;
+  readonly provider: AiOutboundAnalysisProvider;
+}): Promise<AiFascicoloOutboundAnalysisV1> {
+  assertOutboundTrustedMetadataConsistency(input.providerBound, input.trustedHashContext);
+
+  const providerOutput = await input.provider.analyze(
+    buildOutboundProviderRequest(input.providerBound),
+  );
+  const parsed = providerAnalysisPayloadV1Schema.safeParse(providerOutput);
+  if (!parsed.success) {
+    throw new AiFascicoloAnalysisError("INVALID_PROVIDER_OUTPUT");
+  }
+
+  return {
+    analysisSchemaVersion: AI_FASCICOLO_ANALYSIS_V1_SCHEMA_VERSION,
+    snapshotSchemaVersion: AI_FASCICOLO_SNAPSHOT_V1_SCHEMA_VERSION,
+    outboundSchemaVersion: AI_FASCICOLO_OUTBOUND_V1_SCHEMA_VERSION,
+    sourceSnapshotContentHash: input.trustedHashContext.sourceSnapshotContentHash,
+    outboundProjectionHash: input.providerBound.outboundProjectionHash,
+    outboundProjectionHashAlgorithm: AI_FASCICOLO_OUTBOUND_HASH_ALGORITHM,
+    generatedAt: new Date().toISOString(),
+    analysis: parsed.data,
+    limitations: isolatedFrozenCopy(AI_FASCICOLO_OUTBOUND_ANALYSIS_V1_LIMITATIONS),
+  };
 }
 
 export interface AiAnalysisProvider {
