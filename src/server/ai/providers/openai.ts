@@ -1,4 +1,9 @@
-import type { AiAnalysisProvider, AiAnalysisProviderRequestV1 } from "@/server/ai/fascicoloAnalysis";
+import type {
+  AiAnalysisProvider,
+  AiAnalysisProviderRequestV1,
+  AiOutboundAnalysisProvider,
+  AiOutboundAnalysisProviderRequestV1,
+} from "@/server/ai/fascicoloAnalysis";
 import { AiProviderAdapterError } from "@/server/ai/providerErrors";
 
 export const OPENAI_ANALYSIS_MODEL = "gpt-5.6-terra" as const;
@@ -9,6 +14,10 @@ export const OPENAI_RESPONSES_ENDPOINTS = {
 
 export type OpenAiRegion = keyof typeof OPENAI_RESPONSES_ENDPOINTS;
 export type OpenAiFetch = (input: string | URL, init?: RequestInit) => Promise<Response>;
+
+type OpenAiAnalysisProviderRequest =
+  | AiAnalysisProviderRequestV1
+  | AiOutboundAnalysisProviderRequestV1;
 
 const basisRefSchema = {
   type: "string",
@@ -134,7 +143,7 @@ function assertConfig(config: {
   }
 }
 
-function buildInstructions(request: AiAnalysisProviderRequestV1): string {
+function buildInstructions(request: OpenAiAnalysisProviderRequest): string {
   return JSON.stringify({
     systemPolicy: request.systemPolicy,
     requestedOutputContract: request.requestedOutputContract,
@@ -149,7 +158,29 @@ function buildSnapshotInput(request: AiAnalysisProviderRequestV1): string {
   ].join("\n");
 }
 
-function buildRequestBody(request: AiAnalysisProviderRequestV1, maxOutputTokens: number) {
+function buildOutboundInput(request: AiOutboundAnalysisProviderRequestV1): string {
+  return [
+    "BEGIN_UNTRUSTED_OUTBOUND_DATA",
+    JSON.stringify(request.outboundData),
+    "END_UNTRUSTED_OUTBOUND_DATA",
+  ].join("\n");
+}
+
+function buildProviderInput(request: OpenAiAnalysisProviderRequest): string {
+  if (typeof request !== "object" || request === null) {
+    throw configurationError();
+  }
+  const hasSnapshotData = "snapshotData" in request;
+  const hasOutboundData = "outboundData" in request;
+  if (hasSnapshotData === hasOutboundData) {
+    throw configurationError();
+  }
+  return hasSnapshotData
+    ? buildSnapshotInput(request)
+    : buildOutboundInput(request);
+}
+
+function buildRequestBody(request: OpenAiAnalysisProviderRequest, maxOutputTokens: number) {
   return {
     model: OPENAI_ANALYSIS_MODEL,
     store: false,
@@ -162,7 +193,7 @@ function buildRequestBody(request: AiAnalysisProviderRequestV1, maxOutputTokens:
     instructions: buildInstructions(request),
     input: [{
       role: "user",
-      content: [{ type: "input_text", text: buildSnapshotInput(request) }],
+      content: [{ type: "input_text", text: buildProviderInput(request) }],
     }],
     text: {
       format: {
@@ -325,65 +356,68 @@ export function createOpenAiAnalysisProvider(config: {
   maxOutputTokens: number;
   region: OpenAiRegion;
   transport?: OpenAiFetch;
-}): AiAnalysisProvider {
+}): AiAnalysisProvider & AiOutboundAnalysisProvider {
   assertConfig(config);
   const endpoint = OPENAI_RESPONSES_ENDPOINTS[config.region];
   const transport = config.transport ?? globalThis.fetch.bind(globalThis);
 
-  return {
-    async analyze(request) {
-      const controller = new AbortController();
-      let timedOut = false;
-      const assertNotTimedOut = () => {
+  function analyze(request: AiAnalysisProviderRequestV1): Promise<unknown>;
+  function analyze(request: AiOutboundAnalysisProviderRequestV1): Promise<unknown>;
+  async function analyze(request: OpenAiAnalysisProviderRequest): Promise<unknown> {
+    const controller = new AbortController();
+    let timedOut = false;
+    const assertNotTimedOut = () => {
+      if (timedOut) {
+        throw new AiProviderAdapterError("TIMEOUT");
+      }
+    };
+    const timeout = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, config.timeoutMs);
+
+    try {
+      const requestBody = buildRequestBody(request, config.maxOutputTokens);
+      let response: Response;
+      try {
+        response = await transport(endpoint, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${config.apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+          signal: controller.signal,
+          redirect: "error",
+        });
+      } catch (error) {
         if (timedOut) {
           throw new AiProviderAdapterError("TIMEOUT");
         }
-      };
-      const timeout = setTimeout(() => {
-        timedOut = true;
-        controller.abort();
-      }, config.timeoutMs);
-
-      try {
-        let response: Response;
-        try {
-          response = await transport(endpoint, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${config.apiKey}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(buildRequestBody(request, config.maxOutputTokens)),
-            signal: controller.signal,
-            redirect: "error",
-          });
-        } catch (error) {
-          if (timedOut) {
-            throw new AiProviderAdapterError("TIMEOUT");
-          }
-          if (error instanceof TypeError) {
-            throw new AiProviderAdapterError("UNAVAILABLE");
-          }
-          throw new OpenAiProtocolError();
+        if (error instanceof TypeError) {
+          throw new AiProviderAdapterError("UNAVAILABLE");
         }
-        assertNotTimedOut();
-
-        if (!response.ok) {
-          throw mapHttpError(response.status);
-        }
-        const body = await readBoundedBody(
-          response,
-          config.maxRawResponseBytes,
-          controller.signal,
-          () => timedOut,
-        );
-        assertNotTimedOut();
-        const payload = extractStructuredPayload(parseJsonBytes(body));
-        assertNotTimedOut();
-        return payload;
-      } finally {
-        clearTimeout(timeout);
+        throw new OpenAiProtocolError();
       }
-    },
-  };
+      assertNotTimedOut();
+
+      if (!response.ok) {
+        throw mapHttpError(response.status);
+      }
+      const body = await readBoundedBody(
+        response,
+        config.maxRawResponseBytes,
+        controller.signal,
+        () => timedOut,
+      );
+      assertNotTimedOut();
+      const payload = extractStructuredPayload(parseJsonBytes(body));
+      assertNotTimedOut();
+      return payload;
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  return { analyze };
 }
