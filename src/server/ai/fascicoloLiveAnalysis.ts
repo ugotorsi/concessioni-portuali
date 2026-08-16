@@ -1,12 +1,15 @@
 import {
   AI_FASCICOLO_ANALYSIS_V1_SCHEMA_VERSION,
-  analyzeFascicoloSnapshotV1,
-  type AiAnalysisProvider,
-  type AiAnalysisProviderRequestV1,
+  analyzeFascicoloOutboundV1,
+  type AiFascicoloOutboundAnalysisV1,
+  type AiFascicoloTrustedHashContextV1,
+  type AiOutboundAnalysisProvider,
+  type AiOutboundAnalysisProviderRequestV1,
 } from "@/server/ai/fascicoloAnalysis";
 import {
   buildAiFascicoloSnapshotV1,
 } from "@/server/ai/fascicoloSnapshot";
+import { projectAiFascicoloOutboundV1 } from "@/server/ai/fascicoloOutboundProjection";
 import { AI_FASCICOLO_SNAPSHOT_V1_SCHEMA_VERSION } from "@/server/ai/fascicoloSnapshotContract";
 import {
   AiProviderAdapterError,
@@ -36,8 +39,9 @@ export class AiFascicoloLiveAnalysisError extends Error {
 
 export interface AiFascicoloLiveAnalysisLogEvent {
   outcome: "SUCCESS" | "ERROR";
-  snapshotContentHash: string;
   snapshotSchemaVersion: typeof AI_FASCICOLO_SNAPSHOT_V1_SCHEMA_VERSION;
+  outboundSchemaVersion: AiFascicoloOutboundAnalysisV1["outboundSchemaVersion"];
+  outboundProjectionHash: string;
   analysisSchemaVersion: typeof AI_FASCICOLO_ANALYSIS_V1_SCHEMA_VERSION;
   inputBytes: number;
   durationMs: number;
@@ -51,7 +55,7 @@ export interface AiFascicoloLiveAnalysisLogger {
 }
 
 export interface FascicoloLiveAnalysisService {
-  analyze(procedimentoId: string): ReturnType<typeof analyzeFascicoloSnapshotV1>;
+  analyze(procedimentoId: string): ReturnType<typeof analyzeFascicoloOutboundV1>;
 }
 
 function assertValidMaxInputBytes(value: number | undefined): asserts value is number {
@@ -68,7 +72,7 @@ function safeLog(logger: AiFascicoloLiveAnalysisLogger | undefined, event: AiFas
   }
 }
 
-function utf8RequestBytes(request: AiAnalysisProviderRequestV1): number {
+function utf8RequestBytes(request: AiOutboundAnalysisProviderRequestV1): number {
   return Buffer.byteLength(JSON.stringify(request), "utf8");
 }
 
@@ -86,24 +90,42 @@ function mapAdapterError(error: AiProviderAdapterError): AiFascicoloLiveAnalysis
 }
 
 export function createFascicoloLiveAnalysisService(config: {
-  provider: AiAnalysisProvider;
+  provider: AiOutboundAnalysisProvider;
   maxInputBytes?: number;
   realDataActivation?: RealDataActivationPolicy;
   logger?: AiFascicoloLiveAnalysisLogger;
   providerIdentifier?: string;
   modelIdentifier?: string;
+  dependencies?: {
+    buildSnapshot?: typeof buildAiFascicoloSnapshotV1;
+    assertActivation?: (policy: RealDataActivationPolicy | undefined) => void;
+    projectOutbound?: typeof projectAiFascicoloOutboundV1;
+    analyzeOutbound?: typeof analyzeFascicoloOutboundV1;
+  };
 }): FascicoloLiveAnalysisService {
   assertValidMaxInputBytes(config.maxInputBytes);
   const maxInputBytes = config.maxInputBytes;
+  const buildSnapshot = config.dependencies?.buildSnapshot ?? buildAiFascicoloSnapshotV1;
+  const assertActivation = config.dependencies?.assertActivation ?? assertRealDataActivation;
+  const projectOutbound = config.dependencies?.projectOutbound ?? projectAiFascicoloOutboundV1;
+  const analyzeOutbound = config.dependencies?.analyzeOutbound ?? analyzeFascicoloOutboundV1;
 
   return {
     async analyze(procedimentoId: string) {
-      const snapshot = await buildAiFascicoloSnapshotV1(procedimentoId);
-      assertRealDataActivation(config.realDataActivation);
+      const snapshot = await buildSnapshot(procedimentoId);
+      assertActivation(config.realDataActivation);
       const startedAt = Date.now();
+      const projection = projectOutbound(snapshot);
+      const trustedHashContext: AiFascicoloTrustedHashContextV1 = {
+        snapshotSchemaVersion: AI_FASCICOLO_SNAPSHOT_V1_SCHEMA_VERSION,
+        outboundSchemaVersion: projection.providerBound.outboundProjection.schemaVersion,
+        sourceSnapshotContentHash: projection.localOnly.sourceSnapshotContentHash,
+        outboundProjectionHash: projection.providerBound.outboundProjectionHash,
+        outboundProjectionHashAlgorithm: projection.providerBound.outboundProjectionHashAlgorithm,
+      };
       let measuredInputBytes = 0;
 
-      const boundedProvider: AiAnalysisProvider = {
+      const boundedProvider: AiOutboundAnalysisProvider = {
         async analyze(request) {
           measuredInputBytes = utf8RequestBytes(request);
           if (measuredInputBytes > maxInputBytes) {
@@ -114,11 +136,16 @@ export function createFascicoloLiveAnalysisService(config: {
       };
 
       try {
-        const result = await analyzeFascicoloSnapshotV1({ snapshot, provider: boundedProvider });
+        const result = await analyzeOutbound({
+          providerBound: projection.providerBound,
+          trustedHashContext,
+          provider: boundedProvider,
+        });
         safeLog(config.logger, {
           outcome: "SUCCESS",
-          snapshotContentHash: snapshot.metadata.contentHash,
           snapshotSchemaVersion: AI_FASCICOLO_SNAPSHOT_V1_SCHEMA_VERSION,
+          outboundSchemaVersion: projection.providerBound.outboundProjection.schemaVersion,
+          outboundProjectionHash: projection.providerBound.outboundProjectionHash,
           analysisSchemaVersion: AI_FASCICOLO_ANALYSIS_V1_SCHEMA_VERSION,
           inputBytes: measuredInputBytes,
           durationMs: Date.now() - startedAt,
@@ -131,8 +158,9 @@ export function createFascicoloLiveAnalysisService(config: {
         if (normalizedError instanceof AiFascicoloLiveAnalysisError) {
           safeLog(config.logger, {
             outcome: "ERROR",
-            snapshotContentHash: snapshot.metadata.contentHash,
             snapshotSchemaVersion: AI_FASCICOLO_SNAPSHOT_V1_SCHEMA_VERSION,
+            outboundSchemaVersion: projection.providerBound.outboundProjection.schemaVersion,
+            outboundProjectionHash: projection.providerBound.outboundProjectionHash,
             analysisSchemaVersion: AI_FASCICOLO_ANALYSIS_V1_SCHEMA_VERSION,
             inputBytes: measuredInputBytes,
             durationMs: Date.now() - startedAt,

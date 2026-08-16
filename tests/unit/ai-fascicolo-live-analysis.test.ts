@@ -15,7 +15,7 @@ vi.mock("@/server/ai/fascicoloSnapshot", async (importOriginal) => {
 
 import {
   AiFascicoloAnalysisError,
-  type AiAnalysisProvider,
+  type AiOutboundAnalysisProvider,
   type ProviderAnalysisPayloadV1,
 } from "@/server/ai/fascicoloAnalysis";
 import {
@@ -42,15 +42,64 @@ function createFascicoloLiveAnalysisService(
   });
 }
 
-function snapshotFixture(note = "Nota tecnica") {
+function snapshotFixture() {
   return {
     content: {
-      procedimento: { id: "proc-1", noteIstruttorie: note },
+      identityContext: {
+        procedimentoId: "proc-1",
+        canonicalEnteId: "ente-1",
+      },
+      procedimento: {
+        id: "proc-1",
+        dataAvvio: "2026-01-01T00:00:00.000Z",
+        dataScadenzaContraddittorio: null,
+        dataProvvedimentoFinale: null,
+        responsabileAssegnatoAt: null,
+        comunicazioneAvvioInviata: true,
+        dataComunicazioneAvvio: null,
+        termineMemorieGiorni: 30,
+        termineMemorieScadenza: null,
+        memorieRicevute: false,
+        dataRicezioneMemorie: null,
+        audizioneRichiesta: false,
+        audizioneSvolta: false,
+        dataAudizione: null,
+        sopralluogoIstruttorioSvolto: false,
+        contestazioneFormaleInviata: false,
+        dataContestazioneFormale: null,
+        controdeduzioniValutate: false,
+        preavvisoRigettoApplicabile: false,
+        dataPreavvisoRigetto: null,
+        termineOsservazioniPreavviso: null,
+        osservazioniPreavvisoRicevute: false,
+        dataOsservazioniPreavviso: null,
+        responsibilityAssignments: [],
+      },
+      concessione: {
+        id: "concessione-1",
+        dataRilascio: "2020-01-01T00:00:00.000Z",
+        dataScadenza: "2030-01-01T00:00:00.000Z",
+      },
+      concessionario: {
+        id: "concessionario-1",
+      },
+      requirements: [],
+      evidence: [],
+      humanReviewReceipts: [],
+      checklist: {
+        checklistContraddittorioCompleta: false,
+        checklistCompletedItems: 0,
+        checklistTotalItems: 1,
+        checklistPercentage: 0,
+        evidence: [],
+      },
+      fascicoloObservations: [],
       documents: [],
       criticita: { coverage: "SELECTED", items: [] },
       pagamenti: { coverage: "SELECTED", items: [] },
       scadenze: { coverage: "SELECTED", items: [] },
       sopralluoghi: { coverage: "SELECTED", items: [] },
+      finalActContext: null,
     },
     metadata: {
       schemaVersion: "ai-fascicolo-snapshot/v1",
@@ -65,10 +114,10 @@ function snapshotFixture(note = "Nota tecnica") {
 
 function validProviderPayload(): ProviderAnalysisPayloadV1 {
   return {
-    summary: { text: "Sintesi registrata.", basisRefs: ["procedimento.id"] },
+    summary: { text: "Sintesi registrata.", basisRefs: ["PROCEDIMENTO_A.dataAvvio"] },
     timeline: [],
-    recordedState: [{ text: "Stato registrato.", basisRefs: ["procedimento.id"] }],
-    signals: [{ type: "INFO", text: "Dato registrato.", basisRefs: ["procedimento.id"] }],
+    recordedState: [{ text: "Stato registrato.", basisRefs: ["PROCEDIMENTO_A.dataAvvio"] }],
+    signals: [{ type: "INFO", text: "Dato registrato.", basisRefs: ["PROCEDIMENTO_A.dataAvvio"] }],
     investigativeQuestions: [],
     suggestedActivities: [],
     legalResearchQuestions: [],
@@ -76,8 +125,8 @@ function validProviderPayload(): ProviderAnalysisPayloadV1 {
 }
 
 function fakeProvider(output: unknown = validProviderPayload()) {
-  const analyze = vi.fn<AiAnalysisProvider["analyze"]>().mockResolvedValue(output);
-  return { provider: { analyze } satisfies AiAnalysisProvider, analyze };
+  const analyze = vi.fn<AiOutboundAnalysisProvider["analyze"]>().mockResolvedValue(output);
+  return { provider: { analyze } satisfies AiOutboundAnalysisProvider, analyze };
 }
 
 function expectLiveError(error: unknown, code: string) {
@@ -173,33 +222,32 @@ describe("AI-01B1 provider-independent live orchestration", () => {
       provider,
       maxInputBytes: Number.MAX_SAFE_INTEGER,
     });
-    await expect(service.analyze("proc-1")).resolves.toMatchObject({ schemaVersion: "ai-fascicolo-analysis/v1" });
+    await expect(service.analyze("proc-1")).resolves.toMatchObject({
+      analysisSchemaVersion: "ai-fascicolo-analysis/v1",
+      snapshotSchemaVersion: "ai-fascicolo-snapshot/v1",
+      outboundSchemaVersion: "ai-fascicolo-outbound/v1",
+      sourceSnapshotContentHash: "a".repeat(64),
+      outboundProjectionHashAlgorithm: "sha256",
+    });
     expect(buildSnapshotMock).toHaveBeenCalledOnce();
     expect(analyze).toHaveBeenCalledOnce();
   });
 
   it("measures the actual provider request in UTF-8 bytes", async () => {
-    const asciiEvents: AiFascicoloLiveAnalysisLogEvent[] = [];
-    const asciiProvider = fakeProvider();
-    const asciiService = createFascicoloLiveAnalysisService({
-      provider: asciiProvider.provider,
+    const events: AiFascicoloLiveAnalysisLogEvent[] = [];
+    const outboundProvider = fakeProvider();
+    const service = createFascicoloLiveAnalysisService({
+      provider: outboundProvider.provider,
       maxInputBytes: 100_000,
-      logger: { log: (event) => asciiEvents.push(event) },
+      logger: { log: (event) => events.push(event) },
     });
-    buildSnapshotMock.mockResolvedValue(snapshotFixture("aaaaaaaa"));
-    await asciiService.analyze("proc-1");
+    await service.analyze("proc-1");
 
-    const unicodeEvents: AiFascicoloLiveAnalysisLogEvent[] = [];
-    const unicodeProvider = fakeProvider();
-    const unicodeService = createFascicoloLiveAnalysisService({
-      provider: unicodeProvider.provider,
-      maxInputBytes: 100_000,
-      logger: { log: (event) => unicodeEvents.push(event) },
-    });
-    buildSnapshotMock.mockResolvedValue(snapshotFixture("àààààààà"));
-    await unicodeService.analyze("proc-1");
-
-    expect(unicodeEvents[0].inputBytes).toBeGreaterThan(asciiEvents[0].inputBytes);
+    const request = outboundProvider.analyze.mock.calls[0][0];
+    const serializedRequest = JSON.stringify(request);
+    expect(serializedRequest).toMatch(/[^\x00-\x7F]/);
+    expect(events[0].inputBytes).toBe(Buffer.byteLength(serializedRequest, "utf8"));
+    expect(events[0].inputBytes).toBeGreaterThan(serializedRequest.length);
   });
 
   it("accepts the exact byte boundary", async () => {
@@ -215,8 +263,14 @@ describe("AI-01B1 provider-independent live orchestration", () => {
 
     const exact = fakeProvider();
     const service = createFascicoloLiveAnalysisService({ provider: exact.provider, maxInputBytes: exactBytes });
-    await expect(service.analyze("proc-1")).resolves.toMatchObject({ schemaVersion: "ai-fascicolo-analysis/v1" });
+    await expect(service.analyze("proc-1")).resolves.toMatchObject({
+      analysisSchemaVersion: "ai-fascicolo-analysis/v1",
+      outboundSchemaVersion: "ai-fascicolo-outbound/v1",
+      outboundProjectionHashAlgorithm: "sha256",
+    });
     expect(exact.analyze).toHaveBeenCalledOnce();
+    const exactRequest = exact.analyze.mock.calls[0][0];
+    expect(Buffer.byteLength(JSON.stringify(exactRequest), "utf8")).toBe(exactBytes);
   });
 
   it("rejects boundary plus one before invoking the configured provider without truncation", async () => {
@@ -245,7 +299,7 @@ describe("AI-01B1 provider-independent live orchestration", () => {
 
   it("invokes the provider at most once and performs no automatic retry", async () => {
     const providerFailure = new Error("PROGRAMMING_FAILURE");
-    const analyze = vi.fn<AiAnalysisProvider["analyze"]>().mockRejectedValue(providerFailure);
+    const analyze = vi.fn<AiOutboundAnalysisProvider["analyze"]>().mockRejectedValue(providerFailure);
     const service = createFascicoloLiveAnalysisService({
       provider: { analyze },
       maxInputBytes: 100_000,
@@ -254,12 +308,15 @@ describe("AI-01B1 provider-independent live orchestration", () => {
     expect(analyze).toHaveBeenCalledOnce();
   });
 
-  it("flows successful and malformed output through authoritative AI-01A validation", async () => {
+  it("flows successful and malformed output through authoritative outbound validation", async () => {
     const valid = fakeProvider();
     const validService = createFascicoloLiveAnalysisService({ provider: valid.provider, maxInputBytes: 100_000 });
     await expect(validService.analyze("proc-1")).resolves.toMatchObject({
-      schemaVersion: "ai-fascicolo-analysis/v1",
-      snapshotContentHash: "a".repeat(64),
+      analysisSchemaVersion: "ai-fascicolo-analysis/v1",
+      snapshotSchemaVersion: "ai-fascicolo-snapshot/v1",
+      outboundSchemaVersion: "ai-fascicolo-outbound/v1",
+      sourceSnapshotContentHash: "a".repeat(64),
+      outboundProjectionHashAlgorithm: "sha256",
     });
 
     const malformed = fakeProvider({ summary: "invalid" });
@@ -278,7 +335,8 @@ describe("AI-01B1 provider-independent live orchestration", () => {
     ["RATE_LIMITED", "AI_PROVIDER_RATE_LIMITED"],
     ["CONFIGURATION", "AI_CONFIGURATION_ERROR"],
   ] as const)("maps normalized adapter %s failures to %s", async (category, expectedCode) => {
-    const analyze = vi.fn<AiAnalysisProvider["analyze"]>().mockRejectedValue(new AiProviderAdapterError(category));
+    const analyze = vi.fn<AiOutboundAnalysisProvider["analyze"]>()
+      .mockRejectedValue(new AiProviderAdapterError(category));
     const service = createFascicoloLiveAnalysisService({ provider: { analyze }, maxInputBytes: 100_000 });
     await expect(service.analyze("proc-1")).rejects.toSatisfy((error: unknown) => {
       expectLiveError(error, expectedCode);
@@ -289,7 +347,7 @@ describe("AI-01B1 provider-independent live orchestration", () => {
 
   it("does not overmap unexpected provider or programming errors", async () => {
     const genericError = new Error("GENERIC_PROVIDER_INTERNAL_DETAIL");
-    const analyze = vi.fn<AiAnalysisProvider["analyze"]>().mockRejectedValue(genericError);
+    const analyze = vi.fn<AiOutboundAnalysisProvider["analyze"]>().mockRejectedValue(genericError);
     const service = createFascicoloLiveAnalysisService({ provider: { analyze }, maxInputBytes: 100_000 });
     await expect(service.analyze("proc-1")).rejects.toBe(genericError);
   });
@@ -311,13 +369,24 @@ describe("AI-01B1 provider-independent live orchestration", () => {
       "durationMs",
       "inputBytes",
       "modelIdentifier",
+      "outboundProjectionHash",
+      "outboundSchemaVersion",
       "outcome",
       "providerIdentifier",
-      "snapshotContentHash",
       "snapshotSchemaVersion",
     ]);
     const serialized = JSON.stringify(events);
-    for (const sensitive of ["Nota tecnica", "provider request", "api key", "authorization", "document"] ) {
+    for (const sensitive of [
+      "a".repeat(64),
+      "proc-1",
+      "ente-1",
+      "concessione-1",
+      "concessionario-1",
+      "Sintesi registrata.",
+      "provider request",
+      "api key",
+      "authorization",
+    ]) {
       expect(serialized.toLowerCase()).not.toContain(sensitive.toLowerCase());
     }
   });
@@ -345,7 +414,10 @@ describe("AI-01B1 provider-independent live orchestration", () => {
       maxInputBytes: 100_000,
       logger,
     });
-    await expect(service.analyze("proc-1")).resolves.toMatchObject({ schemaVersion: "ai-fascicolo-analysis/v1" });
+    await expect(service.analyze("proc-1")).resolves.toMatchObject({
+      analysisSchemaVersion: "ai-fascicolo-analysis/v1",
+      outboundSchemaVersion: "ai-fascicolo-outbound/v1",
+    });
     expect(analyze).toHaveBeenCalledOnce();
     expect(logger.log).toHaveBeenCalledOnce();
   });
@@ -363,7 +435,8 @@ describe("AI-01B1 provider-independent live orchestration", () => {
   });
 
   it("preserves normalized provider timeout when the error logger throws", async () => {
-    const analyze = vi.fn<AiAnalysisProvider["analyze"]>().mockRejectedValue(new AiProviderAdapterError("TIMEOUT"));
+    const analyze = vi.fn<AiOutboundAnalysisProvider["analyze"]>()
+      .mockRejectedValue(new AiProviderAdapterError("TIMEOUT"));
     const logger = { log: vi.fn(() => { throw new Error("LOGGER_FAILURE"); }) };
     const service = createFascicoloLiveAnalysisService({
       provider: { analyze },
