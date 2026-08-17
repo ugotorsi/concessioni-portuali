@@ -1,6 +1,13 @@
 import { z } from "zod";
 
 import {
+  AiFascicoloBasisRefResolutionError,
+  resolveAiFascicoloBasisRefV1,
+  resolveAiFascicoloStatementBasisRefsV1,
+  type AiFascicoloBasisRefRegistryV1,
+  type AiFascicoloResolvedBasisRefV1,
+} from "@/server/ai/fascicoloBasisRefResolution";
+import {
   AI_FASCICOLO_OUTBOUND_HASH_ALGORITHM,
   AI_FASCICOLO_OUTBOUND_V1_SCHEMA_VERSION,
 } from "@/server/ai/fascicoloOutboundProjection";
@@ -283,6 +290,10 @@ export interface AiOutboundAnalysisProvider {
   analyze(request: AiOutboundAnalysisProviderRequestV1): Promise<unknown>;
 }
 
+export interface AiFascicoloResolvedAnalysisBasisRefV1 extends AiFascicoloResolvedBasisRefV1 {
+  readonly statementPath: string;
+}
+
 export interface AiFascicoloOutboundAnalysisV1 {
   readonly analysisSchemaVersion: typeof AI_FASCICOLO_ANALYSIS_V1_SCHEMA_VERSION;
   readonly snapshotSchemaVersion: typeof AI_FASCICOLO_SNAPSHOT_V1_SCHEMA_VERSION;
@@ -292,6 +303,7 @@ export interface AiFascicoloOutboundAnalysisV1 {
   readonly outboundProjectionHashAlgorithm: typeof AI_FASCICOLO_OUTBOUND_HASH_ALGORITHM;
   readonly generatedAt: string;
   readonly analysis: ProviderAnalysisPayloadV1;
+  readonly resolvedBasisRefs: readonly AiFascicoloResolvedAnalysisBasisRefV1[];
   readonly limitations: typeof AI_FASCICOLO_OUTBOUND_ANALYSIS_V1_LIMITATIONS;
 }
 
@@ -343,12 +355,81 @@ function assertOutboundTrustedMetadataConsistency(
   }
 }
 
+function assertBasisRefRegistryConsistency(
+  providerBound: AiFascicoloOutboundProviderBoundV1,
+  trustedHashContext: AiFascicoloTrustedHashContextV1,
+  basisRefRegistry: AiFascicoloBasisRefRegistryV1,
+): void {
+  if (
+    !basisRefRegistry
+    || typeof basisRefRegistry !== "object"
+    || basisRefRegistry.outboundProjectionHash !== providerBound.outboundProjectionHash
+    || basisRefRegistry.outboundProjectionHash !== trustedHashContext.outboundProjectionHash
+    || basisRefRegistry.outboundSchemaVersion !== providerBound.outboundProjection.schemaVersion
+    || basisRefRegistry.outboundSchemaVersion !== trustedHashContext.outboundSchemaVersion
+    || basisRefRegistry.outboundProjectionHashAlgorithm !== providerBound.outboundProjectionHashAlgorithm
+    || basisRefRegistry.outboundProjectionHashAlgorithm !== trustedHashContext.outboundProjectionHashAlgorithm
+  ) {
+    throw new AiFascicoloBasisRefResolutionError();
+  }
+  const procedimentoRef = resolveAiFascicoloBasisRefV1(basisRefRegistry, "PROCEDIMENTO_A");
+  if (
+    procedimentoRef.referenceType !== "ENTITY"
+    || procedimentoRef.alias !== "PROCEDIMENTO_A"
+    || procedimentoRef.kind !== "PROCEDIMENTO"
+    || procedimentoRef.validatedFieldPath !== null
+    || procedimentoRef.canonicalId === null
+  ) {
+    throw new AiFascicoloBasisRefResolutionError();
+  }
+}
+
+function resolveProviderAnalysisBasisRefs(
+  analysis: ProviderAnalysisPayloadV1,
+  registry: AiFascicoloBasisRefRegistryV1,
+): readonly AiFascicoloResolvedAnalysisBasisRefV1[] {
+  const resolved: AiFascicoloResolvedAnalysisBasisRefV1[] = [];
+  const addStatement = (statementPath: string, providerRefs: readonly string[]): void => {
+    for (const item of resolveAiFascicoloStatementBasisRefsV1(registry, providerRefs)) {
+      resolved.push(Object.freeze({ statementPath, ...item }));
+    }
+  };
+
+  addStatement("summary", analysis.summary.basisRefs);
+  analysis.timeline.forEach((statement, index) => {
+    addStatement(`timeline[${index}]`, statement.basisRefs);
+  });
+  analysis.recordedState.forEach((statement, index) => {
+    addStatement(`recordedState[${index}]`, statement.basisRefs);
+  });
+  analysis.signals.forEach((statement, index) => {
+    addStatement(`signals[${index}]`, statement.basisRefs);
+  });
+  analysis.investigativeQuestions.forEach((statement, index) => {
+    addStatement(`investigativeQuestions[${index}]`, statement.basisRefs);
+  });
+  analysis.suggestedActivities.forEach((statement, index) => {
+    addStatement(`suggestedActivities[${index}]`, statement.basisRefs);
+  });
+  analysis.legalResearchQuestions.forEach((statement, index) => {
+    addStatement(`legalResearchQuestions[${index}]`, statement.basisRefs);
+  });
+
+  return Object.freeze(resolved);
+}
+
 export async function analyzeFascicoloOutboundV1(input: {
   readonly providerBound: AiFascicoloOutboundProviderBoundV1;
   readonly trustedHashContext: AiFascicoloTrustedHashContextV1;
+  readonly basisRefRegistry: AiFascicoloBasisRefRegistryV1;
   readonly provider: AiOutboundAnalysisProvider;
 }): Promise<AiFascicoloOutboundAnalysisV1> {
   assertOutboundTrustedMetadataConsistency(input.providerBound, input.trustedHashContext);
+  assertBasisRefRegistryConsistency(
+    input.providerBound,
+    input.trustedHashContext,
+    input.basisRefRegistry,
+  );
 
   const providerOutput = await input.provider.analyze(
     buildOutboundProviderRequest(input.providerBound),
@@ -357,6 +438,7 @@ export async function analyzeFascicoloOutboundV1(input: {
   if (!parsed.success) {
     throw new AiFascicoloAnalysisError("INVALID_PROVIDER_OUTPUT");
   }
+  const resolvedBasisRefs = resolveProviderAnalysisBasisRefs(parsed.data, input.basisRefRegistry);
 
   return {
     analysisSchemaVersion: AI_FASCICOLO_ANALYSIS_V1_SCHEMA_VERSION,
@@ -367,6 +449,7 @@ export async function analyzeFascicoloOutboundV1(input: {
     outboundProjectionHashAlgorithm: AI_FASCICOLO_OUTBOUND_HASH_ALGORITHM,
     generatedAt: new Date().toISOString(),
     analysis: parsed.data,
+    resolvedBasisRefs,
     limitations: isolatedFrozenCopy(AI_FASCICOLO_OUTBOUND_ANALYSIS_V1_LIMITATIONS),
   };
 }

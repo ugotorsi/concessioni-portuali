@@ -6,6 +6,7 @@ import {
   type AiOutboundAnalysisProvider,
   type AiOutboundAnalysisProviderRequestV1,
 } from "@/server/ai/fascicoloAnalysis";
+import { buildAiFascicoloBasisRefRegistryV1 } from "@/server/ai/fascicoloBasisRefResolution";
 import {
   buildAiFascicoloSnapshotV1,
 } from "@/server/ai/fascicoloSnapshot";
@@ -96,26 +97,20 @@ export function createFascicoloLiveAnalysisService(config: {
   logger?: AiFascicoloLiveAnalysisLogger;
   providerIdentifier?: string;
   modelIdentifier?: string;
-  dependencies?: {
-    buildSnapshot?: typeof buildAiFascicoloSnapshotV1;
-    assertActivation?: (policy: RealDataActivationPolicy | undefined) => void;
-    projectOutbound?: typeof projectAiFascicoloOutboundV1;
-    analyzeOutbound?: typeof analyzeFascicoloOutboundV1;
-  };
 }): FascicoloLiveAnalysisService {
   assertValidMaxInputBytes(config.maxInputBytes);
   const maxInputBytes = config.maxInputBytes;
-  const buildSnapshot = config.dependencies?.buildSnapshot ?? buildAiFascicoloSnapshotV1;
-  const assertActivation = config.dependencies?.assertActivation ?? assertRealDataActivation;
-  const projectOutbound = config.dependencies?.projectOutbound ?? projectAiFascicoloOutboundV1;
-  const analyzeOutbound = config.dependencies?.analyzeOutbound ?? analyzeFascicoloOutboundV1;
 
   return {
     async analyze(procedimentoId: string) {
-      const snapshot = await buildSnapshot(procedimentoId);
-      assertActivation(config.realDataActivation);
+      const snapshot = await buildAiFascicoloSnapshotV1(procedimentoId);
+      assertRealDataActivation(config.realDataActivation);
       const startedAt = Date.now();
-      const projection = projectOutbound(snapshot);
+      const projection = projectAiFascicoloOutboundV1(snapshot);
+      const basisRefRegistry = buildAiFascicoloBasisRefRegistryV1({
+        providerBound: projection.providerBound,
+        localAliasMapping: projection.localOnly.localAliasMapping,
+      });
       const trustedHashContext: AiFascicoloTrustedHashContextV1 = {
         snapshotSchemaVersion: AI_FASCICOLO_SNAPSHOT_V1_SCHEMA_VERSION,
         outboundSchemaVersion: projection.providerBound.outboundProjection.schemaVersion,
@@ -136,9 +131,10 @@ export function createFascicoloLiveAnalysisService(config: {
       };
 
       try {
-        const result = await analyzeOutbound({
+        const result = await analyzeFascicoloOutboundV1({
           providerBound: projection.providerBound,
           trustedHashContext,
+          basisRefRegistry,
           provider: boundedProvider,
         });
         safeLog(config.logger, {

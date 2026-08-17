@@ -12,6 +12,10 @@ import {
   type AiOutboundAnalysisProvider,
   type AiOutboundAnalysisProviderRequestV1,
 } from "@/server/ai/fascicoloAnalysis";
+import {
+  AiFascicoloBasisRefResolutionError,
+  buildAiFascicoloBasisRefRegistryV1,
+} from "@/server/ai/fascicoloBasisRefResolution";
 
 const SOURCE_HASH_SENTINEL = "SOURCE_HASH_SENTINEL_LOCAL_ONLY";
 const CANONICAL_CONTENT_SENTINEL = "CANONICAL_CONTENT_SENTINEL";
@@ -113,6 +117,25 @@ function trustedHashContextFixture(): AiFascicoloTrustedHashContextV1 {
   };
 }
 
+function localAliasMappingFixture(): Parameters<
+  typeof buildAiFascicoloBasisRefRegistryV1
+>[0]["localAliasMapping"] {
+  return [
+    { alias: "PROCEDIMENTO_A", kind: "PROCEDIMENTO", canonicalId: `${CANONICAL_DB_ID_SENTINEL}:PROCEDIMENTO` },
+    { alias: "ENTE_A", kind: "ENTE", canonicalId: `${CANONICAL_DB_ID_SENTINEL}:ENTE` },
+    { alias: "TITOLO_A", kind: "CONCESSIONE", canonicalId: `${CANONICAL_DB_ID_SENTINEL}:TITOLO` },
+    { alias: "CONCESSIONARIO_A", kind: "CONCESSIONARIO", canonicalId: `${CANONICAL_DB_ID_SENTINEL}:CONCESSIONARIO` },
+    { alias: "DOC_1", kind: "DOCUMENT", canonicalId: `${CANONICAL_DB_ID_SENTINEL}:DOC_1` },
+  ];
+}
+
+function basisRefRegistryFixture(providerBound = providerBoundFixture()) {
+  return buildAiFascicoloBasisRefRegistryV1({
+    providerBound,
+    localAliasMapping: localAliasMappingFixture(),
+  });
+}
+
 function validProviderPayload(basisRef = "DOC_1.dataDocumento") {
   return {
     summary: {
@@ -144,6 +167,17 @@ async function expectAnalysisError(
   }
 }
 
+async function expectGroundingError(operation: () => Promise<unknown>): Promise<void> {
+  try {
+    await operation();
+    throw new Error("Expected grounding failure");
+  } catch (error) {
+    expect(error).toBeInstanceOf(AiFascicoloBasisRefResolutionError);
+    expect((error as AiFascicoloBasisRefResolutionError).code).toBe("BASISREF_NOT_GROUNDED");
+    expect((error as Error).message).toBe("BASISREF_NOT_GROUNDED");
+  }
+}
+
 describe("AI-01C2B2A outbound analysis execution contract", () => {
   it("calls the injected provider once with the exact C2B1 request and builds trusted metadata", async () => {
     const providerBound = providerBoundFixture() as AiFascicoloOutboundProviderBoundV1 & {
@@ -168,6 +202,7 @@ describe("AI-01C2B2A outbound analysis execution contract", () => {
     const result = await analyzeFascicoloOutboundV1({
       providerBound,
       trustedHashContext: trustedHashContextFixture(),
+      basisRefRegistry: basisRefRegistryFixture(providerBound),
       provider,
     });
     const serializedRequest = JSON.stringify(capturedRequest);
@@ -189,8 +224,18 @@ describe("AI-01C2B2A outbound analysis execution contract", () => {
       outboundProjectionHash: OUTBOUND_HASH,
       outboundProjectionHashAlgorithm: "sha256",
       analysis: validProviderPayload(),
+      resolvedBasisRefs: [{
+        statementPath: "summary",
+        providerRef: "DOC_1.dataDocumento",
+        referenceType: "ENTITY",
+        alias: "DOC_1",
+        kind: "DOCUMENT",
+        validatedFieldPath: "dataDocumento",
+        canonicalId: `${CANONICAL_DB_ID_SENTINEL}:DOC_1`,
+      }],
       limitations: AI_FASCICOLO_OUTBOUND_ANALYSIS_V1_LIMITATIONS,
     });
+    expect(result.analysis.summary.basisRefs).toEqual(["DOC_1.dataDocumento"]);
     expect(result.generatedAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
     expect(Number.isNaN(Date.parse(result.generatedAt))).toBe(false);
     expect(JSON.stringify(result)).toContain(SOURCE_HASH_SENTINEL);
@@ -210,6 +255,7 @@ describe("AI-01C2B2A outbound analysis execution contract", () => {
   ] as const)("rejects a trusted %s mismatch before provider invocation", async (_name, corrupt) => {
     const context = trustedHashContextFixture();
     corrupt(context);
+    const providerBound = providerBoundFixture();
     let calls = 0;
     const provider: AiOutboundAnalysisProvider = {
       async analyze() {
@@ -220,8 +266,9 @@ describe("AI-01C2B2A outbound analysis execution contract", () => {
 
     await expectAnalysisError(
       () => analyzeFascicoloOutboundV1({
-        providerBound: providerBoundFixture(),
+        providerBound,
         trustedHashContext: context,
+        basisRefRegistry: basisRefRegistryFixture(providerBound),
         provider,
       }),
       "OUTBOUND_TRUSTED_METADATA_MISMATCH",
@@ -230,6 +277,7 @@ describe("AI-01C2B2A outbound analysis execution contract", () => {
   });
 
   it("rejects provider attempts to add trusted metadata", async () => {
+    const providerBound = providerBoundFixture();
     let calls = 0;
     const provider: AiOutboundAnalysisProvider = {
       async analyze() {
@@ -247,8 +295,9 @@ describe("AI-01C2B2A outbound analysis execution contract", () => {
 
     await expectAnalysisError(
       () => analyzeFascicoloOutboundV1({
-        providerBound: providerBoundFixture(),
+        providerBound,
         trustedHashContext: trustedHashContextFixture(),
+        basisRefRegistry: basisRefRegistryFixture(providerBound),
         provider,
       }),
       "INVALID_PROVIDER_OUTPUT",
@@ -257,6 +306,7 @@ describe("AI-01C2B2A outbound analysis execution contract", () => {
   });
 
   it("returns the stable sanitized error for malformed provider output", async () => {
+    const providerBound = providerBoundFixture();
     let calls = 0;
     const provider: AiOutboundAnalysisProvider = {
       async analyze() {
@@ -267,8 +317,9 @@ describe("AI-01C2B2A outbound analysis execution contract", () => {
 
     await expectAnalysisError(
       () => analyzeFascicoloOutboundV1({
-        providerBound: providerBoundFixture(),
+        providerBound,
         trustedHashContext: trustedHashContextFixture(),
+        basisRefRegistry: basisRefRegistryFixture(providerBound),
         provider,
       }),
       "INVALID_PROVIDER_OUTPUT",
@@ -277,6 +328,7 @@ describe("AI-01C2B2A outbound analysis execution contract", () => {
   });
 
   it("propagates provider failures without retry or reinterpretation", async () => {
+    const providerBound = providerBoundFixture();
     const providerFailure = new Error("GENERIC_PROVIDER_FAILURE_SENTINEL");
     let calls = 0;
     const provider: AiOutboundAnalysisProvider = {
@@ -287,14 +339,16 @@ describe("AI-01C2B2A outbound analysis execution contract", () => {
     };
 
     await expect(analyzeFascicoloOutboundV1({
-      providerBound: providerBoundFixture(),
+      providerBound,
       trustedHashContext: trustedHashContextFixture(),
+      basisRefRegistry: basisRefRegistryFixture(providerBound),
       provider,
     })).rejects.toBe(providerFailure);
     expect(calls).toBe(1);
   });
 
   it("uses the exact server-owned outbound limitations", async () => {
+    const providerBound = providerBoundFixture();
     const provider: AiOutboundAnalysisProvider = {
       async analyze() {
         return validProviderPayload();
@@ -302,8 +356,9 @@ describe("AI-01C2B2A outbound analysis execution contract", () => {
     };
 
     const result = await analyzeFascicoloOutboundV1({
-      providerBound: providerBoundFixture(),
+      providerBound,
       trustedHashContext: trustedHashContextFixture(),
+      basisRefRegistry: basisRefRegistryFixture(providerBound),
       provider,
     });
     const limitationText = result.limitations.map((item) => item.text).join(" ").toLowerCase();
@@ -319,23 +374,28 @@ describe("AI-01C2B2A outbound analysis execution contract", () => {
     expect(limitationText).toContain("decisioni amministrative");
     expect(limitationText).toContain("effetti giuridici");
     expect(limitationText).toContain("non modifica");
+    expect(result.resolvedBasisRefs).toHaveLength(1);
+    expect(result.analysis.summary.basisRefs).toEqual(["DOC_1.dataDocumento"]);
   });
 
-  it("accepts structurally valid unresolved basisRefs because existence validation is deferred to C2B3", async () => {
+  it("rejects a structurally valid ungrounded basisRef after one provider call", async () => {
     const unresolvedBasisRef = "DOC_999.stato";
+    const providerBound = providerBoundFixture();
+    let calls = 0;
     const provider: AiOutboundAnalysisProvider = {
       async analyze() {
+        calls += 1;
         return validProviderPayload(unresolvedBasisRef);
       },
     };
 
-    const result = await analyzeFascicoloOutboundV1({
-      providerBound: providerBoundFixture(),
+    await expectGroundingError(() => analyzeFascicoloOutboundV1({
+      providerBound,
       trustedHashContext: trustedHashContextFixture(),
+      basisRefRegistry: basisRefRegistryFixture(providerBound),
       provider,
-    });
-
-    expect(result.analysis.summary.basisRefs).toEqual([unresolvedBasisRef]);
+    }));
+    expect(calls).toBe(1);
   });
 
   it("preserves the distinct legacy snapshot entrypoint and provider interface", () => {
