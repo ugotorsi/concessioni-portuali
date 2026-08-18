@@ -41,6 +41,13 @@ enum FascicoloDocumentRequirementProposalStatus {
   RIFIUTATO
 }
 
+enum AiFascicoloHumanReviewDisposition {
+  COMPANY_ACCEPTED
+  COMPANY_REJECTED
+  COMPANY_NEEDS_VERIFICATION
+  COMPANY_AMENDED
+}
+
 enum NormaRiferimento {
   ART_36_COD_NAV
   ART_18_L_84_1994
@@ -577,6 +584,9 @@ model Ente {
   checklistEvidence            FascicoloChecklistEvidence[]
   documentRequirementProposals FascicoloDocumentRequirementProposal[]
   documentRequirementEvidence  FascicoloDocumentRequirementEvidence[]
+  aiFascicoloTrustedReviewMaterials AiFascicoloTrustedReviewMaterial[]
+  aiFascicoloHumanReviewStates      AiFascicoloHumanReviewState[]
+  aiFascicoloHumanReviewEvents      AiFascicoloHumanReviewEvent[]
 
   @@index([tipo])
   @@index([stato])
@@ -869,6 +879,7 @@ model User {
   documentRequirementEvidenceCreated            FascicoloDocumentRequirementEvidence[]       @relation("DocumentRequirementEvidenceCreatedBy")
   documentRequirementEvidenceRevoked            FascicoloDocumentRequirementEvidence[]       @relation("DocumentRequirementEvidenceRevokedBy")
   documentRequirementEvidenceReviews            FascicoloDocumentRequirementEvidenceReview[] @relation("DocumentRequirementEvidenceReviewedBy")
+  aiFascicoloHumanReviewEvents                   AiFascicoloHumanReviewEvent[]
 
   @@index([ruolo])
   @@index([attivo])
@@ -1125,6 +1136,9 @@ model Procedimento {
   fascicoloObservations        FascicoloObservation[]
   checklistEvidence            FascicoloChecklistEvidence[]
   documentRequirementProposals FascicoloDocumentRequirementProposal[]
+  aiFascicoloTrustedReviewMaterials AiFascicoloTrustedReviewMaterial[]
+  aiFascicoloHumanReviewStates      AiFascicoloHumanReviewState[]
+  aiFascicoloHumanReviewEvents      AiFascicoloHumanReviewEvent[]
 
   @@index([concessioneId])
   @@index([criticitaId])
@@ -1635,4 +1649,83 @@ model ActivityLog {
   @@index([entita, entitaId])
   @@index([concessioneId])
   @@index([createdAt])
+}
+
+model AiFascicoloTrustedReviewMaterial {
+  id                              String   @id @default(cuid())
+  enteId                          String
+  procedimentoId                  String
+  identityContractVersion         String
+  canonicalizationVersion         String
+  fingerprintAlgorithm            String
+  fingerprint                     String
+  canonicalPayload                String   @db.Text
+  trustedReviewSchemaVersion      String
+  analysisSchemaVersion           String
+  snapshotSchemaVersion           String
+  outboundSchemaVersion           String
+  sourceSnapshotContentHash       String
+  outboundProjectionHash          String
+  outboundProjectionHashAlgorithm String
+  createdAt                       DateTime @default(now())
+
+  ente         Ente                            @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  procedimento Procedimento                    @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  states       AiFascicoloHumanReviewState[]
+
+  @@unique([enteId, procedimentoId, identityContractVersion, canonicalizationVersion, fingerprintAlgorithm, fingerprint])
+  @@unique([id, enteId, procedimentoId])
+  @@index([enteId, procedimentoId])
+}
+
+model AiFascicoloHumanReviewState {
+  id                String                               @id @default(cuid())
+  materialId        String
+  enteId            String
+  procedimentoId    String
+  statementPath     String
+  version           Int                                  @default(0)
+  latestDisposition AiFascicoloHumanReviewDisposition?
+  createdAt         DateTime                             @default(now())
+  updatedAt         DateTime                             @updatedAt
+
+  material AiFascicoloTrustedReviewMaterial @relation(fields: [materialId, enteId, procedimentoId], references: [id, enteId, procedimentoId], onDelete: Restrict)
+  ente         Ente                           @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  procedimento Procedimento                   @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  events       AiFascicoloHumanReviewEvent[]
+
+  @@unique([materialId, statementPath])
+  @@unique([id, materialId, statementPath, enteId, procedimentoId])
+  @@index([enteId, procedimentoId])
+}
+
+model AiFascicoloHumanReviewEvent {
+  id                 String                               @id @default(cuid())
+  stateId            String
+  materialId         String
+  enteId             String
+  procedimentoId     String
+  statementPath      String
+  sequence           Int
+  disposition        AiFascicoloHumanReviewDisposition
+  humanUserId        String
+  actorIdSnapshot    String
+  actorEmailSnapshot String
+  actorRoleSnapshot  String
+  occurredAt         DateTime
+  createdAt          DateTime                             @default(now())
+  note               String?
+  reason             String?
+  amendmentText      String?
+  idempotencyKey     String
+  commandFingerprint String
+
+  state AiFascicoloHumanReviewState @relation(fields: [stateId, materialId, statementPath, enteId, procedimentoId], references: [id, materialId, statementPath, enteId, procedimentoId], onDelete: Restrict)
+  ente         Ente         @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  procedimento Procedimento @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  humanUser    User         @relation(fields: [humanUserId], references: [id], onDelete: Restrict)
+
+  @@unique([materialId, statementPath, sequence])
+  @@unique([enteId, idempotencyKey])
+  @@index([enteId, procedimentoId])
 }
