@@ -83,7 +83,10 @@ export const ModelName = {
   NormaFonte: 'NormaFonte',
   NormaVersione: 'NormaVersione',
   NormaImpatto: 'NormaImpatto',
-  ActivityLog: 'ActivityLog'
+  ActivityLog: 'ActivityLog',
+  AiFascicoloTrustedReviewMaterial: 'AiFascicoloTrustedReviewMaterial',
+  AiFascicoloHumanReviewState: 'AiFascicoloHumanReviewState',
+  AiFascicoloHumanReviewEvent: 'AiFascicoloHumanReviewEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -849,6 +852,68 @@ export const ActivityLogScalarFieldEnum = {
 } as const
 
 export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[keyof typeof ActivityLogScalarFieldEnum]
+
+
+export const AiFascicoloTrustedReviewMaterialScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  procedimentoId: 'procedimentoId',
+  identityContractVersion: 'identityContractVersion',
+  canonicalizationVersion: 'canonicalizationVersion',
+  fingerprintAlgorithm: 'fingerprintAlgorithm',
+  fingerprint: 'fingerprint',
+  canonicalPayload: 'canonicalPayload',
+  trustedReviewSchemaVersion: 'trustedReviewSchemaVersion',
+  analysisSchemaVersion: 'analysisSchemaVersion',
+  snapshotSchemaVersion: 'snapshotSchemaVersion',
+  outboundSchemaVersion: 'outboundSchemaVersion',
+  sourceSnapshotContentHash: 'sourceSnapshotContentHash',
+  outboundProjectionHash: 'outboundProjectionHash',
+  outboundProjectionHashAlgorithm: 'outboundProjectionHashAlgorithm',
+  createdAt: 'createdAt'
+} as const
+
+export type AiFascicoloTrustedReviewMaterialScalarFieldEnum = (typeof AiFascicoloTrustedReviewMaterialScalarFieldEnum)[keyof typeof AiFascicoloTrustedReviewMaterialScalarFieldEnum]
+
+
+export const AiFascicoloHumanReviewStateScalarFieldEnum = {
+  id: 'id',
+  materialId: 'materialId',
+  enteId: 'enteId',
+  procedimentoId: 'procedimentoId',
+  statementPath: 'statementPath',
+  version: 'version',
+  latestDisposition: 'latestDisposition',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AiFascicoloHumanReviewStateScalarFieldEnum = (typeof AiFascicoloHumanReviewStateScalarFieldEnum)[keyof typeof AiFascicoloHumanReviewStateScalarFieldEnum]
+
+
+export const AiFascicoloHumanReviewEventScalarFieldEnum = {
+  id: 'id',
+  stateId: 'stateId',
+  materialId: 'materialId',
+  enteId: 'enteId',
+  procedimentoId: 'procedimentoId',
+  statementPath: 'statementPath',
+  sequence: 'sequence',
+  disposition: 'disposition',
+  humanUserId: 'humanUserId',
+  actorIdSnapshot: 'actorIdSnapshot',
+  actorEmailSnapshot: 'actorEmailSnapshot',
+  actorRoleSnapshot: 'actorRoleSnapshot',
+  occurredAt: 'occurredAt',
+  createdAt: 'createdAt',
+  note: 'note',
+  reason: 'reason',
+  amendmentText: 'amendmentText',
+  idempotencyKey: 'idempotencyKey',
+  commandFingerprint: 'commandFingerprint'
+} as const
+
+export type AiFascicoloHumanReviewEventScalarFieldEnum = (typeof AiFascicoloHumanReviewEventScalarFieldEnum)[keyof typeof AiFascicoloHumanReviewEventScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -1578,6 +1578,40 @@ export type EnumAuditEsitoWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumAuditEsitoFilter<$PrismaModel>
 }
 
+export type EnumAiFascicoloHumanReviewDispositionNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiFascicoloHumanReviewDisposition | Prisma.EnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel> | null
+  in?: $Enums.AiFascicoloHumanReviewDisposition[] | Prisma.ListEnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.AiFascicoloHumanReviewDisposition[] | Prisma.ListEnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumAiFascicoloHumanReviewDispositionNullableFilter<$PrismaModel> | $Enums.AiFascicoloHumanReviewDisposition | null
+}
+
+export type EnumAiFascicoloHumanReviewDispositionNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiFascicoloHumanReviewDisposition | Prisma.EnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel> | null
+  in?: $Enums.AiFascicoloHumanReviewDisposition[] | Prisma.ListEnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.AiFascicoloHumanReviewDisposition[] | Prisma.ListEnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumAiFascicoloHumanReviewDispositionNullableWithAggregatesFilter<$PrismaModel> | $Enums.AiFascicoloHumanReviewDisposition | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAiFascicoloHumanReviewDispositionNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAiFascicoloHumanReviewDispositionNullableFilter<$PrismaModel>
+}
+
+export type EnumAiFascicoloHumanReviewDispositionFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiFascicoloHumanReviewDisposition | Prisma.EnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel>
+  in?: $Enums.AiFascicoloHumanReviewDisposition[] | Prisma.ListEnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AiFascicoloHumanReviewDisposition[] | Prisma.ListEnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAiFascicoloHumanReviewDispositionFilter<$PrismaModel> | $Enums.AiFascicoloHumanReviewDisposition
+}
+
+export type EnumAiFascicoloHumanReviewDispositionWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiFascicoloHumanReviewDisposition | Prisma.EnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel>
+  in?: $Enums.AiFascicoloHumanReviewDisposition[] | Prisma.ListEnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AiFascicoloHumanReviewDisposition[] | Prisma.ListEnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAiFascicoloHumanReviewDispositionWithAggregatesFilter<$PrismaModel> | $Enums.AiFascicoloHumanReviewDisposition
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAiFascicoloHumanReviewDispositionFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAiFascicoloHumanReviewDispositionFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -3099,6 +3133,40 @@ export type NestedEnumAuditEsitoWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumAuditEsitoFilter<$PrismaModel>
   _max?: Prisma.NestedEnumAuditEsitoFilter<$PrismaModel>
+}
+
+export type NestedEnumAiFascicoloHumanReviewDispositionNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiFascicoloHumanReviewDisposition | Prisma.EnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel> | null
+  in?: $Enums.AiFascicoloHumanReviewDisposition[] | Prisma.ListEnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.AiFascicoloHumanReviewDisposition[] | Prisma.ListEnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumAiFascicoloHumanReviewDispositionNullableFilter<$PrismaModel> | $Enums.AiFascicoloHumanReviewDisposition | null
+}
+
+export type NestedEnumAiFascicoloHumanReviewDispositionNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiFascicoloHumanReviewDisposition | Prisma.EnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel> | null
+  in?: $Enums.AiFascicoloHumanReviewDisposition[] | Prisma.ListEnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.AiFascicoloHumanReviewDisposition[] | Prisma.ListEnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumAiFascicoloHumanReviewDispositionNullableWithAggregatesFilter<$PrismaModel> | $Enums.AiFascicoloHumanReviewDisposition | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAiFascicoloHumanReviewDispositionNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAiFascicoloHumanReviewDispositionNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumAiFascicoloHumanReviewDispositionFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiFascicoloHumanReviewDisposition | Prisma.EnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel>
+  in?: $Enums.AiFascicoloHumanReviewDisposition[] | Prisma.ListEnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AiFascicoloHumanReviewDisposition[] | Prisma.ListEnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAiFascicoloHumanReviewDispositionFilter<$PrismaModel> | $Enums.AiFascicoloHumanReviewDisposition
+}
+
+export type NestedEnumAiFascicoloHumanReviewDispositionWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiFascicoloHumanReviewDisposition | Prisma.EnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel>
+  in?: $Enums.AiFascicoloHumanReviewDisposition[] | Prisma.ListEnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AiFascicoloHumanReviewDisposition[] | Prisma.ListEnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAiFascicoloHumanReviewDispositionWithAggregatesFilter<$PrismaModel> | $Enums.AiFascicoloHumanReviewDisposition
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAiFascicoloHumanReviewDispositionFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAiFascicoloHumanReviewDispositionFilter<$PrismaModel>
 }
 
 

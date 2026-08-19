@@ -58,6 +58,16 @@ export const FascicoloDocumentRequirementProposalStatus = {
 export type FascicoloDocumentRequirementProposalStatus = (typeof FascicoloDocumentRequirementProposalStatus)[keyof typeof FascicoloDocumentRequirementProposalStatus]
 
 
+export const AiFascicoloHumanReviewDisposition = {
+  COMPANY_ACCEPTED: 'COMPANY_ACCEPTED',
+  COMPANY_REJECTED: 'COMPANY_REJECTED',
+  COMPANY_NEEDS_VERIFICATION: 'COMPANY_NEEDS_VERIFICATION',
+  COMPANY_AMENDED: 'COMPANY_AMENDED'
+} as const
+
+export type AiFascicoloHumanReviewDisposition = (typeof AiFascicoloHumanReviewDisposition)[keyof typeof AiFascicoloHumanReviewDisposition]
+
+
 export const NormaRiferimento = {
   ART_36_COD_NAV: 'ART_36_COD_NAV',
   ART_18_L_84_1994: 'ART_18_L_84_1994',

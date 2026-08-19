@@ -537,6 +537,9 @@ export type ProcedimentoWhereInput = {
   fascicoloObservations?: Prisma.FascicoloObservationListRelationFilter
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceListRelationFilter
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalListRelationFilter
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialListRelationFilter
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateListRelationFilter
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventListRelationFilter
 }
 
 export type ProcedimentoOrderByWithRelationInput = {
@@ -593,6 +596,9 @@ export type ProcedimentoOrderByWithRelationInput = {
   fascicoloObservations?: Prisma.FascicoloObservationOrderByRelationAggregateInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceOrderByRelationAggregateInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalOrderByRelationAggregateInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialOrderByRelationAggregateInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateOrderByRelationAggregateInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventOrderByRelationAggregateInput
 }
 
 export type ProcedimentoWhereUniqueInput = Prisma.AtLeast<{
@@ -652,6 +658,9 @@ export type ProcedimentoWhereUniqueInput = Prisma.AtLeast<{
   fascicoloObservations?: Prisma.FascicoloObservationListRelationFilter
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceListRelationFilter
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalListRelationFilter
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialListRelationFilter
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateListRelationFilter
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventListRelationFilter
 }, "id">
 
 export type ProcedimentoOrderByWithAggregationInput = {
@@ -808,6 +817,9 @@ export type ProcedimentoCreateInput = {
   fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutProcedimentoInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutProcedimentoInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateInput = {
@@ -862,6 +874,9 @@ export type ProcedimentoUncheckedCreateInput = {
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutProcedimentoInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutProcedimentoInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUpdateInput = {
@@ -916,6 +931,9 @@ export type ProcedimentoUpdateInput = {
   fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutProcedimentoNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutProcedimentoNestedInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateInput = {
@@ -970,6 +988,9 @@ export type ProcedimentoUncheckedUpdateInput = {
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateManyInput = {
@@ -1490,6 +1511,48 @@ export type ProcedimentoUpdateOneWithoutNormaImpattiNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProcedimentoUpdateToOneWithWhereWithoutNormaImpattiInput, Prisma.ProcedimentoUpdateWithoutNormaImpattiInput>, Prisma.ProcedimentoUncheckedUpdateWithoutNormaImpattiInput>
 }
 
+export type ProcedimentoCreateNestedOneWithoutAiFascicoloTrustedReviewMaterialsInput = {
+  create?: Prisma.XOR<Prisma.ProcedimentoCreateWithoutAiFascicoloTrustedReviewMaterialsInput, Prisma.ProcedimentoUncheckedCreateWithoutAiFascicoloTrustedReviewMaterialsInput>
+  connectOrCreate?: Prisma.ProcedimentoCreateOrConnectWithoutAiFascicoloTrustedReviewMaterialsInput
+  connect?: Prisma.ProcedimentoWhereUniqueInput
+}
+
+export type ProcedimentoUpdateOneRequiredWithoutAiFascicoloTrustedReviewMaterialsNestedInput = {
+  create?: Prisma.XOR<Prisma.ProcedimentoCreateWithoutAiFascicoloTrustedReviewMaterialsInput, Prisma.ProcedimentoUncheckedCreateWithoutAiFascicoloTrustedReviewMaterialsInput>
+  connectOrCreate?: Prisma.ProcedimentoCreateOrConnectWithoutAiFascicoloTrustedReviewMaterialsInput
+  upsert?: Prisma.ProcedimentoUpsertWithoutAiFascicoloTrustedReviewMaterialsInput
+  connect?: Prisma.ProcedimentoWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProcedimentoUpdateToOneWithWhereWithoutAiFascicoloTrustedReviewMaterialsInput, Prisma.ProcedimentoUpdateWithoutAiFascicoloTrustedReviewMaterialsInput>, Prisma.ProcedimentoUncheckedUpdateWithoutAiFascicoloTrustedReviewMaterialsInput>
+}
+
+export type ProcedimentoCreateNestedOneWithoutAiFascicoloHumanReviewStatesInput = {
+  create?: Prisma.XOR<Prisma.ProcedimentoCreateWithoutAiFascicoloHumanReviewStatesInput, Prisma.ProcedimentoUncheckedCreateWithoutAiFascicoloHumanReviewStatesInput>
+  connectOrCreate?: Prisma.ProcedimentoCreateOrConnectWithoutAiFascicoloHumanReviewStatesInput
+  connect?: Prisma.ProcedimentoWhereUniqueInput
+}
+
+export type ProcedimentoUpdateOneRequiredWithoutAiFascicoloHumanReviewStatesNestedInput = {
+  create?: Prisma.XOR<Prisma.ProcedimentoCreateWithoutAiFascicoloHumanReviewStatesInput, Prisma.ProcedimentoUncheckedCreateWithoutAiFascicoloHumanReviewStatesInput>
+  connectOrCreate?: Prisma.ProcedimentoCreateOrConnectWithoutAiFascicoloHumanReviewStatesInput
+  upsert?: Prisma.ProcedimentoUpsertWithoutAiFascicoloHumanReviewStatesInput
+  connect?: Prisma.ProcedimentoWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProcedimentoUpdateToOneWithWhereWithoutAiFascicoloHumanReviewStatesInput, Prisma.ProcedimentoUpdateWithoutAiFascicoloHumanReviewStatesInput>, Prisma.ProcedimentoUncheckedUpdateWithoutAiFascicoloHumanReviewStatesInput>
+}
+
+export type ProcedimentoCreateNestedOneWithoutAiFascicoloHumanReviewEventsInput = {
+  create?: Prisma.XOR<Prisma.ProcedimentoCreateWithoutAiFascicoloHumanReviewEventsInput, Prisma.ProcedimentoUncheckedCreateWithoutAiFascicoloHumanReviewEventsInput>
+  connectOrCreate?: Prisma.ProcedimentoCreateOrConnectWithoutAiFascicoloHumanReviewEventsInput
+  connect?: Prisma.ProcedimentoWhereUniqueInput
+}
+
+export type ProcedimentoUpdateOneRequiredWithoutAiFascicoloHumanReviewEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.ProcedimentoCreateWithoutAiFascicoloHumanReviewEventsInput, Prisma.ProcedimentoUncheckedCreateWithoutAiFascicoloHumanReviewEventsInput>
+  connectOrCreate?: Prisma.ProcedimentoCreateOrConnectWithoutAiFascicoloHumanReviewEventsInput
+  upsert?: Prisma.ProcedimentoUpsertWithoutAiFascicoloHumanReviewEventsInput
+  connect?: Prisma.ProcedimentoWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProcedimentoUpdateToOneWithWhereWithoutAiFascicoloHumanReviewEventsInput, Prisma.ProcedimentoUpdateWithoutAiFascicoloHumanReviewEventsInput>, Prisma.ProcedimentoUncheckedUpdateWithoutAiFascicoloHumanReviewEventsInput>
+}
+
 export type ProcedimentoCreateWithoutConcessioneInput = {
   id?: string
   responsabileProcedimentoNome?: string | null
@@ -1541,6 +1604,9 @@ export type ProcedimentoCreateWithoutConcessioneInput = {
   fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutProcedimentoInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutProcedimentoInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutConcessioneInput = {
@@ -1594,6 +1660,9 @@ export type ProcedimentoUncheckedCreateWithoutConcessioneInput = {
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutProcedimentoInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutProcedimentoInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutConcessioneInput = {
@@ -1723,6 +1792,9 @@ export type ProcedimentoCreateWithoutCriticitaInput = {
   fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutProcedimentoInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutProcedimentoInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutCriticitaInput = {
@@ -1776,6 +1848,9 @@ export type ProcedimentoUncheckedCreateWithoutCriticitaInput = {
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutProcedimentoInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutProcedimentoInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutCriticitaInput = {
@@ -1855,6 +1930,9 @@ export type ProcedimentoCreateWithoutResponsabileAssignmentsInput = {
   fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutProcedimentoInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutProcedimentoInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutResponsabileAssignmentsInput = {
@@ -1908,6 +1986,9 @@ export type ProcedimentoUncheckedCreateWithoutResponsabileAssignmentsInput = {
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutProcedimentoInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutProcedimentoInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutResponsabileAssignmentsInput = {
@@ -1977,6 +2058,9 @@ export type ProcedimentoUpdateWithoutResponsabileAssignmentsInput = {
   fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutProcedimentoNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutProcedimentoNestedInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutResponsabileAssignmentsInput = {
@@ -2030,6 +2114,9 @@ export type ProcedimentoUncheckedUpdateWithoutResponsabileAssignmentsInput = {
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutDocumentiInput = {
@@ -2083,6 +2170,9 @@ export type ProcedimentoCreateWithoutDocumentiInput = {
   fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutProcedimentoInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutProcedimentoInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutDocumentiInput = {
@@ -2136,6 +2226,9 @@ export type ProcedimentoUncheckedCreateWithoutDocumentiInput = {
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutProcedimentoInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutProcedimentoInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutDocumentiInput = {
@@ -2205,6 +2298,9 @@ export type ProcedimentoUpdateWithoutDocumentiInput = {
   fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutProcedimentoNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutProcedimentoNestedInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutDocumentiInput = {
@@ -2258,6 +2354,9 @@ export type ProcedimentoUncheckedUpdateWithoutDocumentiInput = {
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutFascicoloObservationsInput = {
@@ -2311,6 +2410,9 @@ export type ProcedimentoCreateWithoutFascicoloObservationsInput = {
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutProcedimentoInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutProcedimentoInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutFascicoloObservationsInput = {
@@ -2364,6 +2466,9 @@ export type ProcedimentoUncheckedCreateWithoutFascicoloObservationsInput = {
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutProcedimentoInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutProcedimentoInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutFascicoloObservationsInput = {
@@ -2433,6 +2538,9 @@ export type ProcedimentoUpdateWithoutFascicoloObservationsInput = {
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutProcedimentoNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutProcedimentoNestedInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutFascicoloObservationsInput = {
@@ -2486,6 +2594,9 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloObservationsInput = {
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutProcedimentoNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutChecklistEvidenceInput = {
@@ -2539,6 +2650,9 @@ export type ProcedimentoCreateWithoutChecklistEvidenceInput = {
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutProcedimentoInput
   fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutProcedimentoInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutChecklistEvidenceInput = {
@@ -2592,6 +2706,9 @@ export type ProcedimentoUncheckedCreateWithoutChecklistEvidenceInput = {
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutProcedimentoInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutChecklistEvidenceInput = {
@@ -2661,6 +2778,9 @@ export type ProcedimentoUpdateWithoutChecklistEvidenceInput = {
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutProcedimentoNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutProcedimentoNestedInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutChecklistEvidenceInput = {
@@ -2714,6 +2834,9 @@ export type ProcedimentoUncheckedUpdateWithoutChecklistEvidenceInput = {
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutDocumentRequirementProposalsInput = {
@@ -2767,6 +2890,9 @@ export type ProcedimentoCreateWithoutDocumentRequirementProposalsInput = {
   normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutProcedimentoInput
   fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutProcedimentoInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutDocumentRequirementProposalsInput = {
@@ -2820,6 +2946,9 @@ export type ProcedimentoUncheckedCreateWithoutDocumentRequirementProposalsInput 
   normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutProcedimentoInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutProcedimentoInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutDocumentRequirementProposalsInput = {
@@ -2889,6 +3018,9 @@ export type ProcedimentoUpdateWithoutDocumentRequirementProposalsInput = {
   normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutProcedimentoNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutProcedimentoNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutDocumentRequirementProposalsInput = {
@@ -2942,6 +3074,9 @@ export type ProcedimentoUncheckedUpdateWithoutDocumentRequirementProposalsInput 
   normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutDecisioneProcedimentoInput = {
@@ -2995,6 +3130,9 @@ export type ProcedimentoCreateWithoutDecisioneProcedimentoInput = {
   fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutProcedimentoInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutProcedimentoInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutDecisioneProcedimentoInput = {
@@ -3048,6 +3186,9 @@ export type ProcedimentoUncheckedCreateWithoutDecisioneProcedimentoInput = {
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutProcedimentoInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutProcedimentoInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutDecisioneProcedimentoInput = {
@@ -3117,6 +3258,9 @@ export type ProcedimentoUpdateWithoutDecisioneProcedimentoInput = {
   fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutProcedimentoNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutProcedimentoNestedInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutDecisioneProcedimentoInput = {
@@ -3170,6 +3314,9 @@ export type ProcedimentoUncheckedUpdateWithoutDecisioneProcedimentoInput = {
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutNormaImpattiInput = {
@@ -3223,6 +3370,9 @@ export type ProcedimentoCreateWithoutNormaImpattiInput = {
   fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutProcedimentoInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutProcedimentoInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutNormaImpattiInput = {
@@ -3276,6 +3426,9 @@ export type ProcedimentoUncheckedCreateWithoutNormaImpattiInput = {
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutProcedimentoInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutProcedimentoInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutNormaImpattiInput = {
@@ -3345,6 +3498,9 @@ export type ProcedimentoUpdateWithoutNormaImpattiInput = {
   fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutProcedimentoNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutProcedimentoNestedInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutNormaImpattiInput = {
@@ -3398,6 +3554,729 @@ export type ProcedimentoUncheckedUpdateWithoutNormaImpattiInput = {
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutProcedimentoNestedInput
+}
+
+export type ProcedimentoCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
+  id?: string
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
+  tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento?: $Enums.OrigineProcedimento
+  procedimentoUfficio?: boolean
+  riferimentoNormativo?: string | null
+  dataAvvio?: Date | string | null
+  dataScadenzaContraddittorio?: Date | string | null
+  dataProvvedimentoFinale?: Date | string | null
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: Date | string | null
+  termineMemorieGiorni?: number | null
+  termineMemorieScadenza?: Date | string | null
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: Date | string | null
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: Date | string | null
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: Date | string | null
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: string | null
+  propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Date | string | null
+  termineOsservazioniPreavviso?: Date | string | null
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: Date | string | null
+  valutazioneOsservazioniPreavviso?: string | null
+  motivazioneMancatoPreavviso?: string | null
+  checklistProfile?: $Enums.ChecklistProfile
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: string | null
+  stato: $Enums.StatoProcedimento
+  noteIstruttorie?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessione: Prisma.ConcessioneCreateNestedOneWithoutProcedimentiInput
+  criticita?: Prisma.CriticitaCreateNestedOneWithoutProcedimentiInput
+  decisioneProcedimento?: Prisma.DecisioneProcedimentoCreateNestedOneWithoutProcedimentoInput
+  responsabileAssignments?: Prisma.ProcedimentoResponsabileAssignmentCreateNestedManyWithoutProcedimentoInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutProcedimentoInput
+  normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutProcedimentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutProcedimentoInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutProcedimentoInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutProcedimentoInput
+}
+
+export type ProcedimentoUncheckedCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
+  id?: string
+  concessioneId: string
+  criticitaId?: string | null
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
+  tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento?: $Enums.OrigineProcedimento
+  procedimentoUfficio?: boolean
+  riferimentoNormativo?: string | null
+  dataAvvio?: Date | string | null
+  dataScadenzaContraddittorio?: Date | string | null
+  dataProvvedimentoFinale?: Date | string | null
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: Date | string | null
+  termineMemorieGiorni?: number | null
+  termineMemorieScadenza?: Date | string | null
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: Date | string | null
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: Date | string | null
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: Date | string | null
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: string | null
+  propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Date | string | null
+  termineOsservazioniPreavviso?: Date | string | null
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: Date | string | null
+  valutazioneOsservazioniPreavviso?: string | null
+  motivazioneMancatoPreavviso?: string | null
+  checklistProfile?: $Enums.ChecklistProfile
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: string | null
+  stato: $Enums.StatoProcedimento
+  noteIstruttorie?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  decisioneProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedOneWithoutProcedimentoInput
+  responsabileAssignments?: Prisma.ProcedimentoResponsabileAssignmentUncheckedCreateNestedManyWithoutProcedimentoInput
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutProcedimentoInput
+  normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutProcedimentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutProcedimentoInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutProcedimentoInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutProcedimentoInput
+}
+
+export type ProcedimentoCreateOrConnectWithoutAiFascicoloTrustedReviewMaterialsInput = {
+  where: Prisma.ProcedimentoWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProcedimentoCreateWithoutAiFascicoloTrustedReviewMaterialsInput, Prisma.ProcedimentoUncheckedCreateWithoutAiFascicoloTrustedReviewMaterialsInput>
+}
+
+export type ProcedimentoUpsertWithoutAiFascicoloTrustedReviewMaterialsInput = {
+  update: Prisma.XOR<Prisma.ProcedimentoUpdateWithoutAiFascicoloTrustedReviewMaterialsInput, Prisma.ProcedimentoUncheckedUpdateWithoutAiFascicoloTrustedReviewMaterialsInput>
+  create: Prisma.XOR<Prisma.ProcedimentoCreateWithoutAiFascicoloTrustedReviewMaterialsInput, Prisma.ProcedimentoUncheckedCreateWithoutAiFascicoloTrustedReviewMaterialsInput>
+  where?: Prisma.ProcedimentoWhereInput
+}
+
+export type ProcedimentoUpdateToOneWithWhereWithoutAiFascicoloTrustedReviewMaterialsInput = {
+  where?: Prisma.ProcedimentoWhereInput
+  data: Prisma.XOR<Prisma.ProcedimentoUpdateWithoutAiFascicoloTrustedReviewMaterialsInput, Prisma.ProcedimentoUncheckedUpdateWithoutAiFascicoloTrustedReviewMaterialsInput>
+}
+
+export type ProcedimentoUpdateWithoutAiFascicoloTrustedReviewMaterialsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checklistProfile?: Prisma.EnumChecklistProfileFieldUpdateOperationsInput | $Enums.ChecklistProfile
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
+  noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessione?: Prisma.ConcessioneUpdateOneRequiredWithoutProcedimentiNestedInput
+  criticita?: Prisma.CriticitaUpdateOneWithoutProcedimentiNestedInput
+  decisioneProcedimento?: Prisma.DecisioneProcedimentoUpdateOneWithoutProcedimentoNestedInput
+  responsabileAssignments?: Prisma.ProcedimentoResponsabileAssignmentUpdateManyWithoutProcedimentoNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutProcedimentoNestedInput
+  normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutProcedimentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutProcedimentoNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutProcedimentoNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutProcedimentoNestedInput
+}
+
+export type ProcedimentoUncheckedUpdateWithoutAiFascicoloTrustedReviewMaterialsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  concessioneId?: Prisma.StringFieldUpdateOperationsInput | string
+  criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checklistProfile?: Prisma.EnumChecklistProfileFieldUpdateOperationsInput | $Enums.ChecklistProfile
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
+  noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  decisioneProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateOneWithoutProcedimentoNestedInput
+  responsabileAssignments?: Prisma.ProcedimentoResponsabileAssignmentUncheckedUpdateManyWithoutProcedimentoNestedInput
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutProcedimentoNestedInput
+  normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutProcedimentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutProcedimentoNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutProcedimentoNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutProcedimentoNestedInput
+}
+
+export type ProcedimentoCreateWithoutAiFascicoloHumanReviewStatesInput = {
+  id?: string
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
+  tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento?: $Enums.OrigineProcedimento
+  procedimentoUfficio?: boolean
+  riferimentoNormativo?: string | null
+  dataAvvio?: Date | string | null
+  dataScadenzaContraddittorio?: Date | string | null
+  dataProvvedimentoFinale?: Date | string | null
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: Date | string | null
+  termineMemorieGiorni?: number | null
+  termineMemorieScadenza?: Date | string | null
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: Date | string | null
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: Date | string | null
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: Date | string | null
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: string | null
+  propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Date | string | null
+  termineOsservazioniPreavviso?: Date | string | null
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: Date | string | null
+  valutazioneOsservazioniPreavviso?: string | null
+  motivazioneMancatoPreavviso?: string | null
+  checklistProfile?: $Enums.ChecklistProfile
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: string | null
+  stato: $Enums.StatoProcedimento
+  noteIstruttorie?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessione: Prisma.ConcessioneCreateNestedOneWithoutProcedimentiInput
+  criticita?: Prisma.CriticitaCreateNestedOneWithoutProcedimentiInput
+  decisioneProcedimento?: Prisma.DecisioneProcedimentoCreateNestedOneWithoutProcedimentoInput
+  responsabileAssignments?: Prisma.ProcedimentoResponsabileAssignmentCreateNestedManyWithoutProcedimentoInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutProcedimentoInput
+  normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutProcedimentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutProcedimentoInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutProcedimentoInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutProcedimentoInput
+}
+
+export type ProcedimentoUncheckedCreateWithoutAiFascicoloHumanReviewStatesInput = {
+  id?: string
+  concessioneId: string
+  criticitaId?: string | null
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
+  tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento?: $Enums.OrigineProcedimento
+  procedimentoUfficio?: boolean
+  riferimentoNormativo?: string | null
+  dataAvvio?: Date | string | null
+  dataScadenzaContraddittorio?: Date | string | null
+  dataProvvedimentoFinale?: Date | string | null
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: Date | string | null
+  termineMemorieGiorni?: number | null
+  termineMemorieScadenza?: Date | string | null
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: Date | string | null
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: Date | string | null
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: Date | string | null
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: string | null
+  propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Date | string | null
+  termineOsservazioniPreavviso?: Date | string | null
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: Date | string | null
+  valutazioneOsservazioniPreavviso?: string | null
+  motivazioneMancatoPreavviso?: string | null
+  checklistProfile?: $Enums.ChecklistProfile
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: string | null
+  stato: $Enums.StatoProcedimento
+  noteIstruttorie?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  decisioneProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedOneWithoutProcedimentoInput
+  responsabileAssignments?: Prisma.ProcedimentoResponsabileAssignmentUncheckedCreateNestedManyWithoutProcedimentoInput
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutProcedimentoInput
+  normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutProcedimentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutProcedimentoInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutProcedimentoInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutProcedimentoInput
+}
+
+export type ProcedimentoCreateOrConnectWithoutAiFascicoloHumanReviewStatesInput = {
+  where: Prisma.ProcedimentoWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProcedimentoCreateWithoutAiFascicoloHumanReviewStatesInput, Prisma.ProcedimentoUncheckedCreateWithoutAiFascicoloHumanReviewStatesInput>
+}
+
+export type ProcedimentoUpsertWithoutAiFascicoloHumanReviewStatesInput = {
+  update: Prisma.XOR<Prisma.ProcedimentoUpdateWithoutAiFascicoloHumanReviewStatesInput, Prisma.ProcedimentoUncheckedUpdateWithoutAiFascicoloHumanReviewStatesInput>
+  create: Prisma.XOR<Prisma.ProcedimentoCreateWithoutAiFascicoloHumanReviewStatesInput, Prisma.ProcedimentoUncheckedCreateWithoutAiFascicoloHumanReviewStatesInput>
+  where?: Prisma.ProcedimentoWhereInput
+}
+
+export type ProcedimentoUpdateToOneWithWhereWithoutAiFascicoloHumanReviewStatesInput = {
+  where?: Prisma.ProcedimentoWhereInput
+  data: Prisma.XOR<Prisma.ProcedimentoUpdateWithoutAiFascicoloHumanReviewStatesInput, Prisma.ProcedimentoUncheckedUpdateWithoutAiFascicoloHumanReviewStatesInput>
+}
+
+export type ProcedimentoUpdateWithoutAiFascicoloHumanReviewStatesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checklistProfile?: Prisma.EnumChecklistProfileFieldUpdateOperationsInput | $Enums.ChecklistProfile
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
+  noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessione?: Prisma.ConcessioneUpdateOneRequiredWithoutProcedimentiNestedInput
+  criticita?: Prisma.CriticitaUpdateOneWithoutProcedimentiNestedInput
+  decisioneProcedimento?: Prisma.DecisioneProcedimentoUpdateOneWithoutProcedimentoNestedInput
+  responsabileAssignments?: Prisma.ProcedimentoResponsabileAssignmentUpdateManyWithoutProcedimentoNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutProcedimentoNestedInput
+  normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutProcedimentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutProcedimentoNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutProcedimentoNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutProcedimentoNestedInput
+}
+
+export type ProcedimentoUncheckedUpdateWithoutAiFascicoloHumanReviewStatesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  concessioneId?: Prisma.StringFieldUpdateOperationsInput | string
+  criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checklistProfile?: Prisma.EnumChecklistProfileFieldUpdateOperationsInput | $Enums.ChecklistProfile
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
+  noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  decisioneProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateOneWithoutProcedimentoNestedInput
+  responsabileAssignments?: Prisma.ProcedimentoResponsabileAssignmentUncheckedUpdateManyWithoutProcedimentoNestedInput
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutProcedimentoNestedInput
+  normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutProcedimentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutProcedimentoNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutProcedimentoNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutProcedimentoNestedInput
+}
+
+export type ProcedimentoCreateWithoutAiFascicoloHumanReviewEventsInput = {
+  id?: string
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
+  tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento?: $Enums.OrigineProcedimento
+  procedimentoUfficio?: boolean
+  riferimentoNormativo?: string | null
+  dataAvvio?: Date | string | null
+  dataScadenzaContraddittorio?: Date | string | null
+  dataProvvedimentoFinale?: Date | string | null
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: Date | string | null
+  termineMemorieGiorni?: number | null
+  termineMemorieScadenza?: Date | string | null
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: Date | string | null
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: Date | string | null
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: Date | string | null
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: string | null
+  propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Date | string | null
+  termineOsservazioniPreavviso?: Date | string | null
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: Date | string | null
+  valutazioneOsservazioniPreavviso?: string | null
+  motivazioneMancatoPreavviso?: string | null
+  checklistProfile?: $Enums.ChecklistProfile
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: string | null
+  stato: $Enums.StatoProcedimento
+  noteIstruttorie?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessione: Prisma.ConcessioneCreateNestedOneWithoutProcedimentiInput
+  criticita?: Prisma.CriticitaCreateNestedOneWithoutProcedimentiInput
+  decisioneProcedimento?: Prisma.DecisioneProcedimentoCreateNestedOneWithoutProcedimentoInput
+  responsabileAssignments?: Prisma.ProcedimentoResponsabileAssignmentCreateNestedManyWithoutProcedimentoInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutProcedimentoInput
+  normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutProcedimentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutProcedimentoInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutProcedimentoInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutProcedimentoInput
+}
+
+export type ProcedimentoUncheckedCreateWithoutAiFascicoloHumanReviewEventsInput = {
+  id?: string
+  concessioneId: string
+  criticitaId?: string | null
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
+  tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento?: $Enums.OrigineProcedimento
+  procedimentoUfficio?: boolean
+  riferimentoNormativo?: string | null
+  dataAvvio?: Date | string | null
+  dataScadenzaContraddittorio?: Date | string | null
+  dataProvvedimentoFinale?: Date | string | null
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: Date | string | null
+  termineMemorieGiorni?: number | null
+  termineMemorieScadenza?: Date | string | null
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: Date | string | null
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: Date | string | null
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: Date | string | null
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: string | null
+  propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Date | string | null
+  termineOsservazioniPreavviso?: Date | string | null
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: Date | string | null
+  valutazioneOsservazioniPreavviso?: string | null
+  motivazioneMancatoPreavviso?: string | null
+  checklistProfile?: $Enums.ChecklistProfile
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: string | null
+  stato: $Enums.StatoProcedimento
+  noteIstruttorie?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  decisioneProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedOneWithoutProcedimentoInput
+  responsabileAssignments?: Prisma.ProcedimentoResponsabileAssignmentUncheckedCreateNestedManyWithoutProcedimentoInput
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutProcedimentoInput
+  normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutProcedimentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutProcedimentoInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutProcedimentoInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutProcedimentoInput
+}
+
+export type ProcedimentoCreateOrConnectWithoutAiFascicoloHumanReviewEventsInput = {
+  where: Prisma.ProcedimentoWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProcedimentoCreateWithoutAiFascicoloHumanReviewEventsInput, Prisma.ProcedimentoUncheckedCreateWithoutAiFascicoloHumanReviewEventsInput>
+}
+
+export type ProcedimentoUpsertWithoutAiFascicoloHumanReviewEventsInput = {
+  update: Prisma.XOR<Prisma.ProcedimentoUpdateWithoutAiFascicoloHumanReviewEventsInput, Prisma.ProcedimentoUncheckedUpdateWithoutAiFascicoloHumanReviewEventsInput>
+  create: Prisma.XOR<Prisma.ProcedimentoCreateWithoutAiFascicoloHumanReviewEventsInput, Prisma.ProcedimentoUncheckedCreateWithoutAiFascicoloHumanReviewEventsInput>
+  where?: Prisma.ProcedimentoWhereInput
+}
+
+export type ProcedimentoUpdateToOneWithWhereWithoutAiFascicoloHumanReviewEventsInput = {
+  where?: Prisma.ProcedimentoWhereInput
+  data: Prisma.XOR<Prisma.ProcedimentoUpdateWithoutAiFascicoloHumanReviewEventsInput, Prisma.ProcedimentoUncheckedUpdateWithoutAiFascicoloHumanReviewEventsInput>
+}
+
+export type ProcedimentoUpdateWithoutAiFascicoloHumanReviewEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checklistProfile?: Prisma.EnumChecklistProfileFieldUpdateOperationsInput | $Enums.ChecklistProfile
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
+  noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessione?: Prisma.ConcessioneUpdateOneRequiredWithoutProcedimentiNestedInput
+  criticita?: Prisma.CriticitaUpdateOneWithoutProcedimentiNestedInput
+  decisioneProcedimento?: Prisma.DecisioneProcedimentoUpdateOneWithoutProcedimentoNestedInput
+  responsabileAssignments?: Prisma.ProcedimentoResponsabileAssignmentUpdateManyWithoutProcedimentoNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutProcedimentoNestedInput
+  normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutProcedimentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutProcedimentoNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutProcedimentoNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutProcedimentoNestedInput
+}
+
+export type ProcedimentoUncheckedUpdateWithoutAiFascicoloHumanReviewEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  concessioneId?: Prisma.StringFieldUpdateOperationsInput | string
+  criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checklistProfile?: Prisma.EnumChecklistProfileFieldUpdateOperationsInput | $Enums.ChecklistProfile
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
+  noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  decisioneProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateOneWithoutProcedimentoNestedInput
+  responsabileAssignments?: Prisma.ProcedimentoResponsabileAssignmentUncheckedUpdateManyWithoutProcedimentoNestedInput
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutProcedimentoNestedInput
+  normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutProcedimentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutProcedimentoNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutProcedimentoNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateManyConcessioneInput = {
@@ -3497,6 +4376,9 @@ export type ProcedimentoUpdateWithoutConcessioneInput = {
   fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutProcedimentoNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutProcedimentoNestedInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutConcessioneInput = {
@@ -3550,6 +4432,9 @@ export type ProcedimentoUncheckedUpdateWithoutConcessioneInput = {
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateManyWithoutConcessioneInput = {
@@ -3695,6 +4580,9 @@ export type ProcedimentoUpdateWithoutCriticitaInput = {
   fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutProcedimentoNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutProcedimentoNestedInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutCriticitaInput = {
@@ -3748,6 +4636,9 @@ export type ProcedimentoUncheckedUpdateWithoutCriticitaInput = {
   fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutProcedimentoNestedInput
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateManyWithoutCriticitaInput = {
@@ -3808,6 +4699,9 @@ export type ProcedimentoCountOutputType = {
   fascicoloObservations: number
   checklistEvidence: number
   documentRequirementProposals: number
+  aiFascicoloTrustedReviewMaterials: number
+  aiFascicoloHumanReviewStates: number
+  aiFascicoloHumanReviewEvents: number
 }
 
 export type ProcedimentoCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3817,6 +4711,9 @@ export type ProcedimentoCountOutputTypeSelect<ExtArgs extends runtime.Types.Exte
   fascicoloObservations?: boolean | ProcedimentoCountOutputTypeCountFascicoloObservationsArgs
   checklistEvidence?: boolean | ProcedimentoCountOutputTypeCountChecklistEvidenceArgs
   documentRequirementProposals?: boolean | ProcedimentoCountOutputTypeCountDocumentRequirementProposalsArgs
+  aiFascicoloTrustedReviewMaterials?: boolean | ProcedimentoCountOutputTypeCountAiFascicoloTrustedReviewMaterialsArgs
+  aiFascicoloHumanReviewStates?: boolean | ProcedimentoCountOutputTypeCountAiFascicoloHumanReviewStatesArgs
+  aiFascicoloHumanReviewEvents?: boolean | ProcedimentoCountOutputTypeCountAiFascicoloHumanReviewEventsArgs
 }
 
 /**
@@ -3869,6 +4766,27 @@ export type ProcedimentoCountOutputTypeCountChecklistEvidenceArgs<ExtArgs extend
  */
 export type ProcedimentoCountOutputTypeCountDocumentRequirementProposalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.FascicoloDocumentRequirementProposalWhereInput
+}
+
+/**
+ * ProcedimentoCountOutputType without action
+ */
+export type ProcedimentoCountOutputTypeCountAiFascicoloTrustedReviewMaterialsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AiFascicoloTrustedReviewMaterialWhereInput
+}
+
+/**
+ * ProcedimentoCountOutputType without action
+ */
+export type ProcedimentoCountOutputTypeCountAiFascicoloHumanReviewStatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AiFascicoloHumanReviewStateWhereInput
+}
+
+/**
+ * ProcedimentoCountOutputType without action
+ */
+export type ProcedimentoCountOutputTypeCountAiFascicoloHumanReviewEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AiFascicoloHumanReviewEventWhereInput
 }
 
 
@@ -3926,6 +4844,9 @@ export type ProcedimentoSelect<ExtArgs extends runtime.Types.Extensions.Internal
   fascicoloObservations?: boolean | Prisma.Procedimento$fascicoloObservationsArgs<ExtArgs>
   checklistEvidence?: boolean | Prisma.Procedimento$checklistEvidenceArgs<ExtArgs>
   documentRequirementProposals?: boolean | Prisma.Procedimento$documentRequirementProposalsArgs<ExtArgs>
+  aiFascicoloTrustedReviewMaterials?: boolean | Prisma.Procedimento$aiFascicoloTrustedReviewMaterialsArgs<ExtArgs>
+  aiFascicoloHumanReviewStates?: boolean | Prisma.Procedimento$aiFascicoloHumanReviewStatesArgs<ExtArgs>
+  aiFascicoloHumanReviewEvents?: boolean | Prisma.Procedimento$aiFascicoloHumanReviewEventsArgs<ExtArgs>
   _count?: boolean | Prisma.ProcedimentoCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["procedimento"]>
 
@@ -4085,6 +5006,9 @@ export type ProcedimentoInclude<ExtArgs extends runtime.Types.Extensions.Interna
   fascicoloObservations?: boolean | Prisma.Procedimento$fascicoloObservationsArgs<ExtArgs>
   checklistEvidence?: boolean | Prisma.Procedimento$checklistEvidenceArgs<ExtArgs>
   documentRequirementProposals?: boolean | Prisma.Procedimento$documentRequirementProposalsArgs<ExtArgs>
+  aiFascicoloTrustedReviewMaterials?: boolean | Prisma.Procedimento$aiFascicoloTrustedReviewMaterialsArgs<ExtArgs>
+  aiFascicoloHumanReviewStates?: boolean | Prisma.Procedimento$aiFascicoloHumanReviewStatesArgs<ExtArgs>
+  aiFascicoloHumanReviewEvents?: boolean | Prisma.Procedimento$aiFascicoloHumanReviewEventsArgs<ExtArgs>
   _count?: boolean | Prisma.ProcedimentoCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ProcedimentoIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4108,6 +5032,9 @@ export type $ProcedimentoPayload<ExtArgs extends runtime.Types.Extensions.Intern
     fascicoloObservations: Prisma.$FascicoloObservationPayload<ExtArgs>[]
     checklistEvidence: Prisma.$FascicoloChecklistEvidencePayload<ExtArgs>[]
     documentRequirementProposals: Prisma.$FascicoloDocumentRequirementProposalPayload<ExtArgs>[]
+    aiFascicoloTrustedReviewMaterials: Prisma.$AiFascicoloTrustedReviewMaterialPayload<ExtArgs>[]
+    aiFascicoloHumanReviewStates: Prisma.$AiFascicoloHumanReviewStatePayload<ExtArgs>[]
+    aiFascicoloHumanReviewEvents: Prisma.$AiFascicoloHumanReviewEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -4557,6 +5484,9 @@ export interface Prisma__ProcedimentoClient<T, Null = never, ExtArgs extends run
   fascicoloObservations<T extends Prisma.Procedimento$fascicoloObservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Procedimento$fascicoloObservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloObservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   checklistEvidence<T extends Prisma.Procedimento$checklistEvidenceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Procedimento$checklistEvidenceArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloChecklistEvidencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documentRequirementProposals<T extends Prisma.Procedimento$documentRequirementProposalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Procedimento$documentRequirementProposalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloDocumentRequirementProposalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  aiFascicoloTrustedReviewMaterials<T extends Prisma.Procedimento$aiFascicoloTrustedReviewMaterialsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Procedimento$aiFascicoloTrustedReviewMaterialsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiFascicoloTrustedReviewMaterialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  aiFascicoloHumanReviewStates<T extends Prisma.Procedimento$aiFascicoloHumanReviewStatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Procedimento$aiFascicoloHumanReviewStatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiFascicoloHumanReviewStatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  aiFascicoloHumanReviewEvents<T extends Prisma.Procedimento$aiFascicoloHumanReviewEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Procedimento$aiFascicoloHumanReviewEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiFascicoloHumanReviewEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5210,6 +6140,78 @@ export type Procedimento$documentRequirementProposalsArgs<ExtArgs extends runtim
   take?: number
   skip?: number
   distinct?: Prisma.FascicoloDocumentRequirementProposalScalarFieldEnum | Prisma.FascicoloDocumentRequirementProposalScalarFieldEnum[]
+}
+
+/**
+ * Procedimento.aiFascicoloTrustedReviewMaterials
+ */
+export type Procedimento$aiFascicoloTrustedReviewMaterialsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AiFascicoloTrustedReviewMaterial
+   */
+  select?: Prisma.AiFascicoloTrustedReviewMaterialSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AiFascicoloTrustedReviewMaterial
+   */
+  omit?: Prisma.AiFascicoloTrustedReviewMaterialOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AiFascicoloTrustedReviewMaterialInclude<ExtArgs> | null
+  where?: Prisma.AiFascicoloTrustedReviewMaterialWhereInput
+  orderBy?: Prisma.AiFascicoloTrustedReviewMaterialOrderByWithRelationInput | Prisma.AiFascicoloTrustedReviewMaterialOrderByWithRelationInput[]
+  cursor?: Prisma.AiFascicoloTrustedReviewMaterialWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AiFascicoloTrustedReviewMaterialScalarFieldEnum | Prisma.AiFascicoloTrustedReviewMaterialScalarFieldEnum[]
+}
+
+/**
+ * Procedimento.aiFascicoloHumanReviewStates
+ */
+export type Procedimento$aiFascicoloHumanReviewStatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AiFascicoloHumanReviewState
+   */
+  select?: Prisma.AiFascicoloHumanReviewStateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AiFascicoloHumanReviewState
+   */
+  omit?: Prisma.AiFascicoloHumanReviewStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AiFascicoloHumanReviewStateInclude<ExtArgs> | null
+  where?: Prisma.AiFascicoloHumanReviewStateWhereInput
+  orderBy?: Prisma.AiFascicoloHumanReviewStateOrderByWithRelationInput | Prisma.AiFascicoloHumanReviewStateOrderByWithRelationInput[]
+  cursor?: Prisma.AiFascicoloHumanReviewStateWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AiFascicoloHumanReviewStateScalarFieldEnum | Prisma.AiFascicoloHumanReviewStateScalarFieldEnum[]
+}
+
+/**
+ * Procedimento.aiFascicoloHumanReviewEvents
+ */
+export type Procedimento$aiFascicoloHumanReviewEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AiFascicoloHumanReviewEvent
+   */
+  select?: Prisma.AiFascicoloHumanReviewEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AiFascicoloHumanReviewEvent
+   */
+  omit?: Prisma.AiFascicoloHumanReviewEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AiFascicoloHumanReviewEventInclude<ExtArgs> | null
+  where?: Prisma.AiFascicoloHumanReviewEventWhereInput
+  orderBy?: Prisma.AiFascicoloHumanReviewEventOrderByWithRelationInput | Prisma.AiFascicoloHumanReviewEventOrderByWithRelationInput[]
+  cursor?: Prisma.AiFascicoloHumanReviewEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AiFascicoloHumanReviewEventScalarFieldEnum | Prisma.AiFascicoloHumanReviewEventScalarFieldEnum[]
 }
 
 /**

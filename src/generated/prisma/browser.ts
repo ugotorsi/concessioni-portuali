@@ -182,3 +182,18 @@ export type NormaImpatto = Prisma.NormaImpattoModel
  * 
  */
 export type ActivityLog = Prisma.ActivityLogModel
+/**
+ * Model AiFascicoloTrustedReviewMaterial
+ * 
+ */
+export type AiFascicoloTrustedReviewMaterial = Prisma.AiFascicoloTrustedReviewMaterialModel
+/**
+ * Model AiFascicoloHumanReviewState
+ * 
+ */
+export type AiFascicoloHumanReviewState = Prisma.AiFascicoloHumanReviewStateModel
+/**
+ * Model AiFascicoloHumanReviewEvent
+ * 
+ */
+export type AiFascicoloHumanReviewEvent = Prisma.AiFascicoloHumanReviewEventModel

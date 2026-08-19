@@ -416,7 +416,10 @@ export const ModelName = {
   NormaFonte: 'NormaFonte',
   NormaVersione: 'NormaVersione',
   NormaImpatto: 'NormaImpatto',
-  ActivityLog: 'ActivityLog'
+  ActivityLog: 'ActivityLog',
+  AiFascicoloTrustedReviewMaterial: 'AiFascicoloTrustedReviewMaterial',
+  AiFascicoloHumanReviewState: 'AiFascicoloHumanReviewState',
+  AiFascicoloHumanReviewEvent: 'AiFascicoloHumanReviewEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -432,7 +435,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2878,6 +2881,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AiFascicoloTrustedReviewMaterial: {
+      payload: Prisma.$AiFascicoloTrustedReviewMaterialPayload<ExtArgs>
+      fields: Prisma.AiFascicoloTrustedReviewMaterialFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AiFascicoloTrustedReviewMaterialFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloTrustedReviewMaterialPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AiFascicoloTrustedReviewMaterialFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloTrustedReviewMaterialPayload>
+        }
+        findFirst: {
+          args: Prisma.AiFascicoloTrustedReviewMaterialFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloTrustedReviewMaterialPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AiFascicoloTrustedReviewMaterialFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloTrustedReviewMaterialPayload>
+        }
+        findMany: {
+          args: Prisma.AiFascicoloTrustedReviewMaterialFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloTrustedReviewMaterialPayload>[]
+        }
+        create: {
+          args: Prisma.AiFascicoloTrustedReviewMaterialCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloTrustedReviewMaterialPayload>
+        }
+        createMany: {
+          args: Prisma.AiFascicoloTrustedReviewMaterialCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AiFascicoloTrustedReviewMaterialCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloTrustedReviewMaterialPayload>[]
+        }
+        delete: {
+          args: Prisma.AiFascicoloTrustedReviewMaterialDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloTrustedReviewMaterialPayload>
+        }
+        update: {
+          args: Prisma.AiFascicoloTrustedReviewMaterialUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloTrustedReviewMaterialPayload>
+        }
+        deleteMany: {
+          args: Prisma.AiFascicoloTrustedReviewMaterialDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloTrustedReviewMaterialPayload>[]
+        }
+        upsert: {
+          args: Prisma.AiFascicoloTrustedReviewMaterialUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloTrustedReviewMaterialPayload>
+        }
+        aggregate: {
+          args: Prisma.AiFascicoloTrustedReviewMaterialAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAiFascicoloTrustedReviewMaterial>
+        }
+        groupBy: {
+          args: Prisma.AiFascicoloTrustedReviewMaterialGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AiFascicoloTrustedReviewMaterialGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AiFascicoloTrustedReviewMaterialCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AiFascicoloTrustedReviewMaterialCountAggregateOutputType> | number
+        }
+      }
+    }
+    AiFascicoloHumanReviewState: {
+      payload: Prisma.$AiFascicoloHumanReviewStatePayload<ExtArgs>
+      fields: Prisma.AiFascicoloHumanReviewStateFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AiFascicoloHumanReviewStateFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloHumanReviewStatePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AiFascicoloHumanReviewStateFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloHumanReviewStatePayload>
+        }
+        findFirst: {
+          args: Prisma.AiFascicoloHumanReviewStateFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloHumanReviewStatePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AiFascicoloHumanReviewStateFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloHumanReviewStatePayload>
+        }
+        findMany: {
+          args: Prisma.AiFascicoloHumanReviewStateFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloHumanReviewStatePayload>[]
+        }
+        create: {
+          args: Prisma.AiFascicoloHumanReviewStateCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloHumanReviewStatePayload>
+        }
+        createMany: {
+          args: Prisma.AiFascicoloHumanReviewStateCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AiFascicoloHumanReviewStateCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloHumanReviewStatePayload>[]
+        }
+        delete: {
+          args: Prisma.AiFascicoloHumanReviewStateDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloHumanReviewStatePayload>
+        }
+        update: {
+          args: Prisma.AiFascicoloHumanReviewStateUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloHumanReviewStatePayload>
+        }
+        deleteMany: {
+          args: Prisma.AiFascicoloHumanReviewStateDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AiFascicoloHumanReviewStateUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AiFascicoloHumanReviewStateUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloHumanReviewStatePayload>[]
+        }
+        upsert: {
+          args: Prisma.AiFascicoloHumanReviewStateUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloHumanReviewStatePayload>
+        }
+        aggregate: {
+          args: Prisma.AiFascicoloHumanReviewStateAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAiFascicoloHumanReviewState>
+        }
+        groupBy: {
+          args: Prisma.AiFascicoloHumanReviewStateGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AiFascicoloHumanReviewStateGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AiFascicoloHumanReviewStateCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AiFascicoloHumanReviewStateCountAggregateOutputType> | number
+        }
+      }
+    }
+    AiFascicoloHumanReviewEvent: {
+      payload: Prisma.$AiFascicoloHumanReviewEventPayload<ExtArgs>
+      fields: Prisma.AiFascicoloHumanReviewEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AiFascicoloHumanReviewEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloHumanReviewEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AiFascicoloHumanReviewEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloHumanReviewEventPayload>
+        }
+        findFirst: {
+          args: Prisma.AiFascicoloHumanReviewEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloHumanReviewEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AiFascicoloHumanReviewEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloHumanReviewEventPayload>
+        }
+        findMany: {
+          args: Prisma.AiFascicoloHumanReviewEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloHumanReviewEventPayload>[]
+        }
+        create: {
+          args: Prisma.AiFascicoloHumanReviewEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloHumanReviewEventPayload>
+        }
+        createMany: {
+          args: Prisma.AiFascicoloHumanReviewEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AiFascicoloHumanReviewEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloHumanReviewEventPayload>[]
+        }
+        delete: {
+          args: Prisma.AiFascicoloHumanReviewEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloHumanReviewEventPayload>
+        }
+        update: {
+          args: Prisma.AiFascicoloHumanReviewEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloHumanReviewEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.AiFascicoloHumanReviewEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AiFascicoloHumanReviewEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AiFascicoloHumanReviewEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloHumanReviewEventPayload>[]
+        }
+        upsert: {
+          args: Prisma.AiFascicoloHumanReviewEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiFascicoloHumanReviewEventPayload>
+        }
+        aggregate: {
+          args: Prisma.AiFascicoloHumanReviewEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAiFascicoloHumanReviewEvent>
+        }
+        groupBy: {
+          args: Prisma.AiFascicoloHumanReviewEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AiFascicoloHumanReviewEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AiFascicoloHumanReviewEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AiFascicoloHumanReviewEventCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -3664,6 +3889,68 @@ export const ActivityLogScalarFieldEnum = {
 } as const
 
 export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[keyof typeof ActivityLogScalarFieldEnum]
+
+
+export const AiFascicoloTrustedReviewMaterialScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  procedimentoId: 'procedimentoId',
+  identityContractVersion: 'identityContractVersion',
+  canonicalizationVersion: 'canonicalizationVersion',
+  fingerprintAlgorithm: 'fingerprintAlgorithm',
+  fingerprint: 'fingerprint',
+  canonicalPayload: 'canonicalPayload',
+  trustedReviewSchemaVersion: 'trustedReviewSchemaVersion',
+  analysisSchemaVersion: 'analysisSchemaVersion',
+  snapshotSchemaVersion: 'snapshotSchemaVersion',
+  outboundSchemaVersion: 'outboundSchemaVersion',
+  sourceSnapshotContentHash: 'sourceSnapshotContentHash',
+  outboundProjectionHash: 'outboundProjectionHash',
+  outboundProjectionHashAlgorithm: 'outboundProjectionHashAlgorithm',
+  createdAt: 'createdAt'
+} as const
+
+export type AiFascicoloTrustedReviewMaterialScalarFieldEnum = (typeof AiFascicoloTrustedReviewMaterialScalarFieldEnum)[keyof typeof AiFascicoloTrustedReviewMaterialScalarFieldEnum]
+
+
+export const AiFascicoloHumanReviewStateScalarFieldEnum = {
+  id: 'id',
+  materialId: 'materialId',
+  enteId: 'enteId',
+  procedimentoId: 'procedimentoId',
+  statementPath: 'statementPath',
+  version: 'version',
+  latestDisposition: 'latestDisposition',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AiFascicoloHumanReviewStateScalarFieldEnum = (typeof AiFascicoloHumanReviewStateScalarFieldEnum)[keyof typeof AiFascicoloHumanReviewStateScalarFieldEnum]
+
+
+export const AiFascicoloHumanReviewEventScalarFieldEnum = {
+  id: 'id',
+  stateId: 'stateId',
+  materialId: 'materialId',
+  enteId: 'enteId',
+  procedimentoId: 'procedimentoId',
+  statementPath: 'statementPath',
+  sequence: 'sequence',
+  disposition: 'disposition',
+  humanUserId: 'humanUserId',
+  actorIdSnapshot: 'actorIdSnapshot',
+  actorEmailSnapshot: 'actorEmailSnapshot',
+  actorRoleSnapshot: 'actorRoleSnapshot',
+  occurredAt: 'occurredAt',
+  createdAt: 'createdAt',
+  note: 'note',
+  reason: 'reason',
+  amendmentText: 'amendmentText',
+  idempotencyKey: 'idempotencyKey',
+  commandFingerprint: 'commandFingerprint'
+} as const
+
+export type AiFascicoloHumanReviewEventScalarFieldEnum = (typeof AiFascicoloHumanReviewEventScalarFieldEnum)[keyof typeof AiFascicoloHumanReviewEventScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -4694,6 +4981,20 @@ export type ListEnumAuditEsitoFieldRefInput<$PrismaModel> = FieldRefInputType<$P
 
 
 /**
+ * Reference to a field of type 'AiFascicoloHumanReviewDisposition'
+ */
+export type EnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AiFascicoloHumanReviewDisposition'>
+    
+
+
+/**
+ * Reference to a field of type 'AiFascicoloHumanReviewDisposition[]'
+ */
+export type ListEnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AiFascicoloHumanReviewDisposition[]'>
+    
+
+
+/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -4849,6 +5150,9 @@ export type GlobalOmitConfig = {
   normaVersione?: Prisma.NormaVersioneOmit
   normaImpatto?: Prisma.NormaImpattoOmit
   activityLog?: Prisma.ActivityLogOmit
+  aiFascicoloTrustedReviewMaterial?: Prisma.AiFascicoloTrustedReviewMaterialOmit
+  aiFascicoloHumanReviewState?: Prisma.AiFascicoloHumanReviewStateOmit
+  aiFascicoloHumanReviewEvent?: Prisma.AiFascicoloHumanReviewEventOmit
 }
 
 /* Types for Logging */
