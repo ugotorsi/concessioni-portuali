@@ -1,7 +1,12 @@
+import { z } from "zod";
+
 import type {
   AiFascicoloOutboundAnalysisV1,
   AiFascicoloResolvedAnalysisBasisRefV1,
-  ProviderAnalysisPayloadV1,
+} from "@/server/ai/fascicoloAnalysis";
+import {
+  providerAnalysisPayloadV1Schema,
+  type ProviderAnalysisPayloadV1,
 } from "@/server/ai/fascicoloAnalysis";
 import type { AiFascicoloOutboundAliasKind } from "@/server/ai/fascicoloOutboundProjection";
 
@@ -100,6 +105,164 @@ export interface AiFascicoloTrustedReviewV1 {
   readonly statements: readonly AiFascicoloTrustedReviewStatementV1[];
 }
 
+export class AiFascicoloTrustedReviewValidationError extends Error {
+  readonly code = "INVALID_TRUSTED_REVIEW" as const;
+
+  constructor() {
+    super("INVALID_TRUSTED_REVIEW");
+    this.name = "AiFascicoloTrustedReviewValidationError";
+  }
+}
+
+const ALIAS_KIND_VALUES_BASE = [
+  "PROCEDIMENTO",
+  "ENTE",
+  "CONCESSIONE",
+  "CONCESSIONARIO",
+  "RESPONSIBILITY_ASSIGNMENT",
+  "REQUIREMENT",
+  "EVIDENCE",
+  "HUMAN_REVIEW",
+  "CHECKLIST_EVIDENCE",
+  "OBSERVATION",
+  "DOCUMENT",
+  "ISSUE",
+  "PAYMENT",
+  "DEADLINE",
+  "INSPECTION",
+  "FINAL_ACT",
+] as const satisfies readonly AiFascicoloOutboundAliasKind[];
+type MissingAliasKind = Exclude<
+  AiFascicoloOutboundAliasKind,
+  (typeof ALIAS_KIND_VALUES_BASE)[number]
+>;
+const ALIAS_KIND_VALUES: MissingAliasKind extends never
+  ? typeof ALIAS_KIND_VALUES_BASE
+  : never = ALIAS_KIND_VALUES_BASE;
+
+const localValueSchema: z.ZodType<AiFascicoloLocalValueV1> = z.lazy(() => z.union([
+  z.string(),
+  z.number(),
+  z.boolean(),
+  z.null(),
+  z.array(localValueSchema),
+  z.record(z.string(), localValueSchema),
+]));
+const localEvidenceSchema = z.object({
+  provenance: z.literal("LOCAL_AUTHORITATIVE_DATA"),
+  displayLabel: z.string(),
+  fieldLabel: z.string().optional(),
+  value: localValueSchema,
+}).strict();
+const evidenceSchema = z.object({
+  providerRef: z.string(),
+  referenceType: z.enum(["ENTITY", "NON_ENTITY"]),
+  alias: z.string().nullable(),
+  kind: z.enum(ALIAS_KIND_VALUES).nullable(),
+  canonicalId: z.string().nullable(),
+  validatedFieldPath: z.string().nullable(),
+  resolutionStatus: z.enum([
+    "RESOLVED",
+    "MISSING_LOCAL_EVIDENCE",
+    "REQUIRES_HUMAN_REVIEW",
+  ]),
+  local: localEvidenceSchema.nullable(),
+}).strict();
+const providerStatementContentSchema = z.union([
+  providerAnalysisPayloadV1Schema.shape.summary,
+  providerAnalysisPayloadV1Schema.shape.timeline.element,
+  providerAnalysisPayloadV1Schema.shape.recordedState.element,
+  providerAnalysisPayloadV1Schema.shape.signals.element,
+  providerAnalysisPayloadV1Schema.shape.investigativeQuestions.element,
+  providerAnalysisPayloadV1Schema.shape.suggestedActivities.element,
+  providerAnalysisPayloadV1Schema.shape.legalResearchQuestions.element,
+]);
+const trustedReviewSchema = z.object({
+  schemaVersion: z.literal(AI_FASCICOLO_TRUSTED_REVIEW_V1_SCHEMA_VERSION),
+  purpose: z.literal("INTERNAL_COMPANY_PROFESSIONAL_REVIEW"),
+  providerAnalysis: z.object({
+    provenance: z.literal("AI_ORIGINAL"),
+    content: providerAnalysisPayloadV1Schema,
+  }).strict(),
+  statements: z.array(z.object({
+    statementPath: z.string(),
+    providerStatement: z.object({
+      provenance: z.literal("AI_ORIGINAL"),
+      content: providerStatementContentSchema,
+    }).strict(),
+    resolutionStatus: z.enum([
+      "RESOLVED",
+      "MISSING_LOCAL_EVIDENCE",
+      "NO_BASIS_REFS",
+      "REQUIRES_HUMAN_REVIEW",
+    ]),
+    evidence: z.array(evidenceSchema),
+  }).strict()),
+}).strict();
+
+function cloneJsonDomainValue(value: unknown, active: WeakSet<object>): unknown {
+  if (value === null || typeof value === "string" || typeof value === "boolean") {
+    return value;
+  }
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) {
+      throw new AiFascicoloTrustedReviewValidationError();
+    }
+    return value;
+  }
+  if (typeof value !== "object" || active.has(value)) {
+    throw new AiFascicoloTrustedReviewValidationError();
+  }
+
+  const prototype = Object.getPrototypeOf(value);
+  if (
+    (Array.isArray(value) ? prototype !== Array.prototype : prototype !== Object.prototype && prototype !== null)
+    || Object.getOwnPropertySymbols(value).length > 0
+  ) {
+    throw new AiFascicoloTrustedReviewValidationError();
+  }
+
+  active.add(value);
+  try {
+    const descriptors = Object.getOwnPropertyDescriptors(value);
+    const names = Object.getOwnPropertyNames(value);
+    if (Array.isArray(value)) {
+      if (
+        names.length !== value.length + 1
+        || names.some((name) => name !== "length" && (
+          !Number.isInteger(Number(name))
+          || Number(name) < 0
+          || Number(name) >= value.length
+          || String(Number(name)) !== name
+        ))
+      ) {
+        throw new AiFascicoloTrustedReviewValidationError();
+      }
+      const result: unknown[] = [];
+      for (let index = 0; index < value.length; index += 1) {
+        const descriptor = descriptors[String(index)];
+        if (!descriptor?.enumerable || !("value" in descriptor)) {
+          throw new AiFascicoloTrustedReviewValidationError();
+        }
+        result.push(cloneJsonDomainValue(descriptor.value, active));
+      }
+      return result;
+    }
+
+    const entries: [string, unknown][] = [];
+    for (const name of names) {
+      const descriptor = descriptors[name];
+      if (!descriptor?.enumerable || !("value" in descriptor)) {
+        throw new AiFascicoloTrustedReviewValidationError();
+      }
+      entries.push([name, cloneJsonDomainValue(descriptor.value, active)]);
+    }
+    return Object.fromEntries(entries);
+  } finally {
+    active.delete(value);
+  }
+}
+
 function clonePlainValue<T>(value: T): T {
   if (value === null || typeof value !== "object") {
     return value;
@@ -124,6 +287,27 @@ function deepFreeze<T>(value: T): T {
     Object.freeze(value);
   }
   return value;
+}
+
+function assertAiFascicoloTrustedReviewV1(
+  value: unknown,
+): asserts value is AiFascicoloTrustedReviewV1 {
+  if (!trustedReviewSchema.safeParse(value).success) {
+    throw new AiFascicoloTrustedReviewValidationError();
+  }
+}
+
+export function parseAiFascicoloTrustedReviewV1(input: unknown): AiFascicoloTrustedReviewV1 {
+  try {
+    const jsonDomainInput = cloneJsonDomainValue(input, new WeakSet<object>());
+    assertAiFascicoloTrustedReviewV1(jsonDomainInput);
+    return deepFreeze(jsonDomainInput);
+  } catch (error) {
+    if (error instanceof AiFascicoloTrustedReviewValidationError) {
+      throw error;
+    }
+    throw new AiFascicoloTrustedReviewValidationError();
+  }
 }
 
 function collectProviderStatements(
@@ -248,7 +432,7 @@ export function buildAiFascicoloTrustedReviewV1(input: {
     };
   });
 
-  return deepFreeze({
+  return parseAiFascicoloTrustedReviewV1({
     schemaVersion: AI_FASCICOLO_TRUSTED_REVIEW_V1_SCHEMA_VERSION,
     purpose: "INTERNAL_COMPANY_PROFESSIONAL_REVIEW",
     providerAnalysis: {

@@ -49,7 +49,9 @@ const LINEAGE_KEYS = [
   "outboundProjectionHashAlgorithm",
 ] as const;
 
-function validateExactLineage(value: unknown): AiFascicoloTrustedReviewLineageV1 {
+export function parseAiFascicoloTrustedReviewMaterialLineageV1(
+  value: unknown,
+): AiFascicoloTrustedReviewLineageV1 {
   try {
     if (value === null || typeof value !== "object") {
       return fail();
@@ -200,7 +202,7 @@ export function buildAiFascicoloTrustedReviewMaterialIdentityV1(input: {
   readonly trustedReview: AiFascicoloTrustedReviewV1;
   readonly lineage: AiFascicoloTrustedReviewLineageV1;
 }): AiFascicoloTrustedReviewMaterialIdentityV1 {
-  const exactLineage = validateExactLineage(input.lineage);
+  const exactLineage = parseAiFascicoloTrustedReviewMaterialLineageV1(input.lineage);
   const canonicalPayload = canonicalizeAiFascicoloMaterialJson({
     schemaVersion: AI_FASCICOLO_TRUSTED_REVIEW_MATERIAL_V1_SCHEMA_VERSION,
     lineage: exactLineage,

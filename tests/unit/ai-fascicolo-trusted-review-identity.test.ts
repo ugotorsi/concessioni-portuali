@@ -5,6 +5,7 @@ import {
   AiFascicoloTrustedReviewIdentityError,
   buildAiFascicoloTrustedReviewMaterialIdentityV1,
   canonicalizeAiFascicoloMaterialJson,
+  parseAiFascicoloTrustedReviewMaterialLineageV1,
   type AiFascicoloTrustedReviewLineageV1,
 } from "@/server/ai/fascicoloTrustedReviewIdentity";
 
@@ -99,6 +100,46 @@ function expectRejected(value: unknown): void {
 }
 
 describe("AI-01C2B4B2A trusted review material identity", () => {
+  it("parses an exact unknown-input lineage without normalization", () => {
+    const input: unknown = lineageFixture();
+
+    expect(parseAiFascicoloTrustedReviewMaterialLineageV1(input)).toEqual(input);
+  });
+
+  it.each([
+    ["null", null],
+    ["array", []],
+    ["generatedAt", { ...lineageFixture(), generatedAt: "2026-08-19T00:00:00.000Z" }],
+    ["unexpected", { ...lineageFixture(), unexpected: true }],
+    ["wrong type", { ...lineageFixture(), sourceSnapshotContentHash: 1 }],
+    ["empty", { ...lineageFixture(), sourceSnapshotContentHash: "" }],
+  ])("rejects invalid unknown-input lineage: %s", (_name, input) => {
+    expect(() => parseAiFascicoloTrustedReviewMaterialLineageV1(input))
+      .toThrow(AiFascicoloTrustedReviewIdentityError);
+  });
+
+  it("rejects every missing lineage field and non-plain instances", () => {
+    for (const field of [
+      "analysisSchemaVersion",
+      "snapshotSchemaVersion",
+      "outboundSchemaVersion",
+      "sourceSnapshotContentHash",
+      "outboundProjectionHash",
+      "outboundProjectionHashAlgorithm",
+    ] as const) {
+      const input: Record<string, unknown> = { ...lineageFixture() };
+      delete input[field];
+      expect(() => parseAiFascicoloTrustedReviewMaterialLineageV1(input))
+        .toThrow(AiFascicoloTrustedReviewIdentityError);
+    }
+
+    class Lineage extends Object {
+      analysisSchemaVersion = "ai-fascicolo-analysis/v1";
+    }
+    expect(() => parseAiFascicoloTrustedReviewMaterialLineageV1(new Lineage()))
+      .toThrow(AiFascicoloTrustedReviewIdentityError);
+  });
+
   it("matches a hard-coded canonical JSON and SHA-256 golden vector", () => {
     const trustedReview: AiFascicoloTrustedReviewV1 = {
       schemaVersion: "ai-fascicolo-trusted-review/v1",

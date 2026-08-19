@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import type { AiFascicoloOutboundAnalysisV1 } from "@/server/ai/fascicoloAnalysis";
 import {
+  AiFascicoloTrustedReviewValidationError,
   buildAiFascicoloTrustedReviewV1,
+  parseAiFascicoloTrustedReviewV1,
   type AiFascicoloAuthoritativeEvidenceInputV1,
 } from "@/server/ai/fascicoloTrustedReview";
 
@@ -132,6 +134,107 @@ function assertCompleteGraphFrozen(value: unknown, seen = new Set<object>()): vo
 }
 
 describe("AI-01C2B4A trusted local rehydration", () => {
+  function completeGraph(): unknown {
+    return buildAiFascicoloTrustedReviewV1({
+      trustedResult: trustedResultFixture(),
+      authoritativeEvidence: authoritativeEvidenceFixture(),
+    });
+  }
+
+  function expectInvalid(value: unknown): void {
+    expect(() => parseAiFascicoloTrustedReviewV1(value))
+      .toThrow(AiFascicoloTrustedReviewValidationError);
+  }
+
+  it("strictly parses and freezes a complete unknown-input graph", () => {
+    const input: unknown = structuredClone(completeGraph());
+    const parsed = parseAiFascicoloTrustedReviewV1(input);
+
+    expect(parsed).toEqual(input);
+    assertCompleteGraphFrozen(parsed);
+  });
+
+  it("preserves exact provider string contents without normalization", () => {
+    const input = structuredClone(completeGraph()) as ReturnType<
+      typeof buildAiFascicoloTrustedReviewV1
+    >;
+    input.providerAnalysis.content.summary.text = "  Provider text preserved  ";
+    input.statements[0].providerStatement.content.text = "  Provider text preserved  ";
+
+    const parsed = parseAiFascicoloTrustedReviewV1(input);
+
+    expect(parsed.providerAnalysis.content.summary.text).toBe("  Provider text preserved  ");
+    expect(parsed.statements[0].providerStatement.content.text)
+      .toBe("  Provider text preserved  ");
+  });
+
+  it.each([
+    ["null", null],
+    ["array root", []],
+    ["primitive root", "review"],
+    ["missing field", { purpose: "INTERNAL_COMPANY_PROFESSIONAL_REVIEW" }],
+    ["wrong primitive", { ...structuredClone(completeGraph()) as object, purpose: 1 }],
+    ["invalid enum", { ...structuredClone(completeGraph()) as object, purpose: "OTHER" }],
+    ["unexpected field", { ...structuredClone(completeGraph()) as object, extra: true }],
+  ])("rejects invalid top-level input: %s", (_name, value) => {
+    expectInvalid(value);
+  });
+
+  it("rejects malformed statements, evidence, references, and nested extras", () => {
+    const malformedStatement = structuredClone(completeGraph()) as ReturnType<
+      typeof buildAiFascicoloTrustedReviewV1
+    >;
+    (malformedStatement.statements[0] as { providerStatement: unknown }).providerStatement = null;
+
+    const malformedEvidence = structuredClone(completeGraph()) as ReturnType<
+      typeof buildAiFascicoloTrustedReviewV1
+    >;
+    (malformedEvidence.statements[0].evidence as unknown[])[0] = null;
+
+    const malformedReference = structuredClone(completeGraph()) as ReturnType<
+      typeof buildAiFascicoloTrustedReviewV1
+    >;
+    (malformedReference.statements[0].evidence[0] as { referenceType: string }).referenceType = "OTHER";
+
+    const nestedExtra = structuredClone(completeGraph()) as ReturnType<
+      typeof buildAiFascicoloTrustedReviewV1
+    >;
+    (nestedExtra.statements[0].evidence[0] as object & { extra?: boolean }).extra = true;
+
+    for (const value of [malformedStatement, malformedEvidence, malformedReference, nestedExtra]) {
+      expectInvalid(value);
+    }
+  });
+
+  it("rejects invalid provider members and unsupported runtime objects without invoking getters", () => {
+    const invalidArrayMember = structuredClone(completeGraph()) as ReturnType<
+      typeof buildAiFascicoloTrustedReviewV1
+    >;
+    (invalidArrayMember.providerAnalysis.content.timeline as unknown[]).push(null);
+
+    const invalidLocalValue = structuredClone(completeGraph()) as ReturnType<
+      typeof buildAiFascicoloTrustedReviewV1
+    >;
+    invalidLocalValue.statements[0].evidence[0].local!.value = new Date() as never;
+
+    class ReviewClass {
+      schemaVersion = "ai-fascicolo-trusted-review/v1";
+    }
+
+    let getterCalls = 0;
+    const accessor = structuredClone(completeGraph()) as Record<string, unknown>;
+    Object.defineProperty(accessor, "purpose", {
+      enumerable: true,
+      get() { getterCalls += 1; return "INTERNAL_COMPANY_PROFESSIONAL_REVIEW"; },
+    });
+
+    for (const value of [invalidArrayMember, invalidLocalValue, new ReviewClass(), accessor]) {
+      expectInvalid(value);
+    }
+    expectInvalid({ ...structuredClone(completeGraph()) as object, extra: 1n });
+    expect(getterCalls).toBe(0);
+  });
+
   it("resolves entity evidence only by the exact kind, canonical ID, and field path", () => {
     const result = buildAiFascicoloTrustedReviewV1({
       trustedResult: trustedResultFixture(),
