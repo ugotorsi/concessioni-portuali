@@ -22,6 +22,18 @@ interface CreateAuditLogInput {
   requestContext?: AuditRequestContext;
 }
 
+async function acquireActivityLogHashChainTransactionLock(
+  tx: Prisma.TransactionClient,
+): Promise<void> {
+  // Existing callers are not all Serializable, so the global chain needs its own transaction lock.
+  await tx.$queryRaw`
+    SELECT pg_advisory_xact_lock(
+      hashtext('concessioni-portuali'),
+      hashtext('activity-log-hash-chain:v1')
+    )
+  `;
+}
+
 async function resolveActor(actor?: AuditActor): Promise<Required<AuditActor>> {
   if (actor?.userId || actor?.userEmail || actor?.userRole) {
     return {
@@ -48,6 +60,7 @@ async function createAuditLogRecord(
 ) {
   const metadata = sanitizeMetadata(input.metadata);
   const createdAt = new Date();
+  await acquireActivityLogHashChainTransactionLock(tx);
   const previous = await tx.activityLog.findFirst({
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     select: { currentHash: true },
