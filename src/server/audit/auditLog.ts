@@ -26,12 +26,18 @@ async function acquireActivityLogHashChainTransactionLock(
   tx: Prisma.TransactionClient,
 ): Promise<void> {
   // Existing callers are not all Serializable, so the global chain needs its own transaction lock.
-  await tx.$queryRaw`
-    SELECT pg_advisory_xact_lock(
-      hashtext('concessioni-portuali'),
-      hashtext('activity-log-hash-chain:v1')
+  const namespace = "concessioni-portuali";
+  const resource = "activity-log-hash-chain:v1";
+  const rows = await tx.$queryRaw<Array<{ acquired: boolean }>>`
+    SELECT TRUE AS "acquired"
+    FROM pg_advisory_xact_lock(
+      hashtext(${namespace}),
+      hashtext(${resource})
     )
   `;
+  if (rows.length !== 1 || rows[0]?.acquired !== true) {
+    throw new Error("ACTIVITY_LOG_HASH_CHAIN_LOCK_FAILED");
+  }
 }
 
 async function resolveActor(actor?: AuditActor): Promise<Required<AuditActor>> {
