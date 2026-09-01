@@ -10,7 +10,10 @@ import { buildAiFascicoloBasisRefRegistryV1 } from "@/server/ai/fascicoloBasisRe
 import {
   buildAiFascicoloSnapshotV1,
 } from "@/server/ai/fascicoloSnapshot";
-import { projectAiFascicoloOutboundV1 } from "@/server/ai/fascicoloOutboundProjection";
+import {
+  projectAiFascicoloOutboundV1,
+  type AiFascicoloOutboundProjectionResultV1,
+} from "@/server/ai/fascicoloOutboundProjection";
 import { AI_FASCICOLO_SNAPSHOT_V1_SCHEMA_VERSION } from "@/server/ai/fascicoloSnapshotContract";
 import {
   AiProviderAdapterError,
@@ -59,6 +62,25 @@ export interface FascicoloLiveAnalysisService {
   analyze(procedimentoId: string): ReturnType<typeof analyzeFascicoloOutboundV1>;
 }
 
+export interface AiFascicoloLiveAnalysisPreparedContext {
+  readonly snapshot: Awaited<ReturnType<typeof buildAiFascicoloSnapshotV1>>;
+  readonly projection: AiFascicoloOutboundProjectionResultV1;
+  readonly analysis: AiFascicoloOutboundAnalysisV1;
+}
+
+export interface FascicoloLiveAnalysisPreparationService {
+  prepare(procedimentoId: string): Promise<AiFascicoloLiveAnalysisPreparedContext>;
+}
+
+interface FascicoloLiveAnalysisConfig {
+  readonly provider: AiOutboundAnalysisProvider;
+  readonly maxInputBytes?: number;
+  readonly realDataActivation?: RealDataActivationPolicy;
+  readonly logger?: AiFascicoloLiveAnalysisLogger;
+  readonly providerIdentifier?: string;
+  readonly modelIdentifier?: string;
+}
+
 function assertValidMaxInputBytes(value: number | undefined): asserts value is number {
   if (value === undefined || !Number.isSafeInteger(value) || value <= 0) {
     throw new AiFascicoloLiveAnalysisError("AI_CONFIGURATION_ERROR");
@@ -90,19 +112,14 @@ function mapAdapterError(error: AiProviderAdapterError): AiFascicoloLiveAnalysis
   }
 }
 
-export function createFascicoloLiveAnalysisService(config: {
-  provider: AiOutboundAnalysisProvider;
-  maxInputBytes?: number;
-  realDataActivation?: RealDataActivationPolicy;
-  logger?: AiFascicoloLiveAnalysisLogger;
-  providerIdentifier?: string;
-  modelIdentifier?: string;
-}): FascicoloLiveAnalysisService {
+export function createFascicoloLiveAnalysisPreparationService(
+  config: FascicoloLiveAnalysisConfig,
+): FascicoloLiveAnalysisPreparationService {
   assertValidMaxInputBytes(config.maxInputBytes);
   const maxInputBytes = config.maxInputBytes;
 
   return {
-    async analyze(procedimentoId: string) {
+    async prepare(procedimentoId: string) {
       const snapshot = await buildAiFascicoloSnapshotV1(procedimentoId);
       assertRealDataActivation(config.realDataActivation);
       const startedAt = Date.now();
@@ -131,7 +148,7 @@ export function createFascicoloLiveAnalysisService(config: {
       };
 
       try {
-        const result = await analyzeFascicoloOutboundV1({
+        const analysis = await analyzeFascicoloOutboundV1({
           providerBound: projection.providerBound,
           trustedHashContext,
           basisRefRegistry,
@@ -148,7 +165,7 @@ export function createFascicoloLiveAnalysisService(config: {
           ...(config.providerIdentifier ? { providerIdentifier: config.providerIdentifier } : {}),
           ...(config.modelIdentifier ? { modelIdentifier: config.modelIdentifier } : {}),
         });
-        return result;
+        return Object.freeze({ snapshot, projection, analysis });
       } catch (error) {
         const normalizedError = error instanceof AiProviderAdapterError ? mapAdapterError(error) : error;
         if (normalizedError instanceof AiFascicoloLiveAnalysisError) {
@@ -167,6 +184,18 @@ export function createFascicoloLiveAnalysisService(config: {
         }
         throw normalizedError;
       }
+    },
+  };
+}
+
+export function createFascicoloLiveAnalysisService(
+  config: FascicoloLiveAnalysisConfig,
+): FascicoloLiveAnalysisService {
+  const preparation = createFascicoloLiveAnalysisPreparationService(config);
+  return {
+    async analyze(procedimentoId: string) {
+      const context = await preparation.prepare(procedimentoId);
+      return context.analysis;
     },
   };
 }

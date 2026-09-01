@@ -4,12 +4,32 @@ import { resolve } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const buildSnapshotMock = vi.hoisted(() => vi.fn());
+const projectOutboundMock = vi.hoisted(() => vi.fn());
+const analyzeOutboundMock = vi.hoisted(() => vi.fn());
+
+vi.mock("@/server/ai/fascicoloAnalysis", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@/server/ai/fascicoloAnalysis")>();
+  analyzeOutboundMock.mockImplementation(original.analyzeFascicoloOutboundV1);
+  return {
+    ...original,
+    analyzeFascicoloOutboundV1: analyzeOutboundMock,
+  };
+});
 
 vi.mock("@/server/ai/fascicoloSnapshot", async (importOriginal) => {
   const original = await importOriginal<typeof import("@/server/ai/fascicoloSnapshot")>();
   return {
     ...original,
     buildAiFascicoloSnapshotV1: buildSnapshotMock,
+  };
+});
+
+vi.mock("@/server/ai/fascicoloOutboundProjection", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@/server/ai/fascicoloOutboundProjection")>();
+  projectOutboundMock.mockImplementation(original.projectAiFascicoloOutboundV1);
+  return {
+    ...original,
+    projectAiFascicoloOutboundV1: projectOutboundMock,
   };
 });
 
@@ -21,6 +41,7 @@ import {
 import {
   AiFascicoloLiveAnalysisError,
   AiProviderAdapterError,
+  createFascicoloLiveAnalysisPreparationService,
   createFascicoloLiveAnalysisService as createFascicoloLiveAnalysisServiceBase,
   type AiFascicoloLiveAnalysisLogEvent,
 } from "@/server/ai/fascicoloLiveAnalysis";
@@ -151,6 +172,32 @@ describe("AI-01B1 provider-independent live orchestration", () => {
     await service.analyze("proc-1");
     expect(buildSnapshotMock).toHaveBeenCalledOnce();
     expect(buildSnapshotMock).toHaveBeenCalledWith("proc-1");
+  });
+
+  it("prepares the exact snapshot, projection, and analysis references once", async () => {
+    const snapshot = snapshotFixture();
+    buildSnapshotMock.mockResolvedValue(snapshot);
+    const { provider, analyze } = fakeProvider();
+    const preparation = createFascicoloLiveAnalysisPreparationService({
+      provider,
+      maxInputBytes: 100_000,
+      realDataActivation: approvedActivation,
+    });
+
+    const context = await preparation.prepare("proc-1");
+
+    expect(context.snapshot).toBe(snapshot);
+    expect(projectOutboundMock).toHaveBeenCalledOnce();
+    expect(projectOutboundMock).toHaveBeenCalledWith(snapshot);
+    expect(context.projection).toBe(projectOutboundMock.mock.results[0].value);
+    expect(context.analysis.outboundProjectionHash).toBe(
+      context.projection.providerBound.outboundProjectionHash,
+    );
+    const analysisResult = await analyzeOutboundMock.mock.results[0].value;
+    expect(context.analysis).toBe(analysisResult);
+    expect(buildSnapshotMock).toHaveBeenCalledOnce();
+    expect(analyze).toHaveBeenCalledOnce();
+    expect(Object.isFrozen(context)).toBe(true);
   });
 
   it("propagates AI-00 errors unchanged and never invokes the provider", async () => {
