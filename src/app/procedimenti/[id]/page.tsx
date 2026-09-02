@@ -9,6 +9,7 @@ import {
   AiFascicoloTrustedReviewPanel,
   resolveAiFascicoloTrustedReviewSelection,
 } from "@/components/procedimenti/AiFascicoloTrustedReviewPanel";
+import { AiFascicoloTrustedReviewGenerationControl } from "@/components/procedimenti/AiFascicoloTrustedReviewGenerationControl";
 import { ChecklistItemEvidence } from "@/components/procedimenti/ChecklistItemEvidence";
 import { FascicoloDocumentRequirementProposalsPanel } from "@/components/procedimenti/FascicoloDocumentRequirementProposalsPanel";
 import { FascicoloDocumentRequirementScreeningTrigger } from "@/components/procedimenti/FascicoloDocumentRequirementScreeningTrigger";
@@ -366,6 +367,8 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
             hasCanonicalTenant={hasCanonicalTenant}
             observations={fascicoloObservations}
           />
+
+          <AiFascicoloTrustedReviewGenerationControl procedimentoId={detail.procedimento.id} />
 
           <AiFascicoloTrustedReviewPanel
             procedimentoId={detail.procedimento.id}
