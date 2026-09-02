@@ -5,6 +5,10 @@ import { SubmitButtonPending } from "@/components/forms/SubmitButtonPending";
 import { GravitaBadge, StatoBadge as CriticitaStatoBadge } from "@/components/criticita/CriticitaBadges";
 import { EntityDocumentsPanel } from "@/components/documents/EntityDocumentsPanel";
 import { AppShell } from "@/components/layout/AppShell";
+import {
+  AiFascicoloTrustedReviewPanel,
+  resolveAiFascicoloTrustedReviewSelection,
+} from "@/components/procedimenti/AiFascicoloTrustedReviewPanel";
 import { ChecklistItemEvidence } from "@/components/procedimenti/ChecklistItemEvidence";
 import { FascicoloDocumentRequirementProposalsPanel } from "@/components/procedimenti/FascicoloDocumentRequirementProposalsPanel";
 import { FascicoloDocumentRequirementScreeningTrigger } from "@/components/procedimenti/FascicoloDocumentRequirementScreeningTrigger";
@@ -54,15 +58,59 @@ import { getFascicoloDocumentRequirementEvidenceData } from "@/server/queries/fa
 import { getFascicoloDocumentRequirementProposals } from "@/server/queries/fascicolo-document-requirements";
 import { getFascicoloObservations } from "@/server/queries/fascicolo-observations";
 import { getNormeForProcedimento } from "@/server/queries/normativa";
+import { getAiFascicoloHumanReviewReadModel } from "@/server/queries/ai-fascicolo-human-review";
+import { getAiFascicoloTrustedReviewMaterialsReadModel } from "@/server/queries/ai-fascicolo-trusted-review-materials";
 
 import { PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES } from "@/server/queries/procedimenti";
 
 interface ProcedimentoDetailPageProps {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ screening?: string | string[] }>;
+  searchParams: Promise<{
+    screening?: string | string[];
+    materialId?: string | string[];
+    statementPath?: string | string[];
+  }>;
 }
 
 export const dynamic = "force-dynamic";
+
+async function loadAiFascicoloTrustedReviewPanelData(input: {
+  readonly procedimentoId: string;
+  readonly materialId?: string | string[];
+  readonly statementPath?: string | string[];
+}) {
+  let trustedReviewMaterials = null;
+  let readError = false;
+  try {
+    trustedReviewMaterials = await getAiFascicoloTrustedReviewMaterialsReadModel({
+      procedimentoId: input.procedimentoId,
+    });
+  } catch {
+    readError = true;
+  }
+  const selection = resolveAiFascicoloTrustedReviewSelection(
+    trustedReviewMaterials?.materials ?? [],
+    input.materialId,
+    input.statementPath,
+  );
+  let humanReview = null;
+  if (selection.kind === "COMPLETE") {
+    try {
+      humanReview = await getAiFascicoloHumanReviewReadModel({
+        materialId: selection.material.materialId,
+        statementPath: selection.statementPath,
+      });
+    } catch {
+      readError = true;
+    }
+  }
+  return {
+    materials: trustedReviewMaterials?.materials ?? [],
+    selection,
+    humanReview,
+    readError,
+  };
+}
 
 function getStatoEffettoLabel(value: "NON_PREVISTO" | "PENDENTE" | "PRONTO" | "APPLICATO" | "BLOCCATO" | "ERRORE") {
   switch (value) {
@@ -89,7 +137,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   const canWriteChecklist = canReview;
   const canRegisterDecision = canRegisterProcedimentoDecision(role);
   const { id } = await params;
-  const { screening } = await searchParams;
+  const { screening, materialId, statementPath } = await searchParams;
   const screeningDone = screening === "done";
   const detail = await getProcedimentoDetail(id);
 
@@ -102,6 +150,11 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   const fascicoloDocumentRequirementEvidence = await getFascicoloDocumentRequirementEvidenceData(detail.procedimento.id);
   const checklistEvidenceData = await getChecklistEvidenceData(detail.procedimento.id);
   const hasCanonicalTenant = Boolean(detail.canonicalEnteId);
+  const trustedReviewPanelData = await loadAiFascicoloTrustedReviewPanelData({
+    procedimentoId: detail.procedimento.id,
+    materialId,
+    statementPath,
+  });
 
   const checklist = getChecklistContraddittorioItems(detail.procedimento);
   const checklistGuidance = getProcedimentoChecklistGuidance(detail.procedimento);
@@ -312,6 +365,14 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
             canReview={canWriteChecklist}
             hasCanonicalTenant={hasCanonicalTenant}
             observations={fascicoloObservations}
+          />
+
+          <AiFascicoloTrustedReviewPanel
+            procedimentoId={detail.procedimento.id}
+            materials={trustedReviewPanelData.materials}
+            selection={trustedReviewPanelData.selection}
+            humanReview={trustedReviewPanelData.humanReview}
+            readError={trustedReviewPanelData.readError}
           />
 
           <FascicoloDocumentRequirementScreeningTrigger
