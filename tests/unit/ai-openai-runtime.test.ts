@@ -5,8 +5,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const createProviderMock = vi.hoisted(() => vi.fn());
 const createServiceMock = vi.hoisted(() => vi.fn());
+const createTrustedReviewServiceMock = vi.hoisted(() => vi.fn());
 const providerAnalyzeMock = vi.hoisted(() => vi.fn());
 const serviceAnalyzeMock = vi.hoisted(() => vi.fn());
+const trustedReviewExecuteMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/server/ai/providers/openai", () => ({
   createOpenAiAnalysisProvider: createProviderMock,
@@ -14,12 +16,16 @@ vi.mock("@/server/ai/providers/openai", () => ({
 vi.mock("@/server/ai/fascicoloLiveAnalysis", () => ({
   createFascicoloLiveAnalysisService: createServiceMock,
 }));
+vi.mock("@/server/ai/fascicoloTrustedReviewProduction", () => ({
+  createFascicoloTrustedReviewProductionService: createTrustedReviewServiceMock,
+}));
 
 import {
   AI_OPENAI_RUNTIME_ENV_NAMES,
   AI_REAL_DATA_ACTIVATION_ENV_NAMES,
   OpenAiRuntimeConfigurationError,
   createOpenAiFascicoloRuntimeFromEnv,
+  createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv,
   type OpenAiRuntimeEnv,
 } from "@/server/ai/openaiRuntime";
 import type { OpenAiFetch } from "@/server/ai/providers/openai";
@@ -68,6 +74,7 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
     vi.clearAllMocks();
     createProviderMock.mockReturnValue({ analyze: providerAnalyzeMock });
     createServiceMock.mockReturnValue({ analyze: serviceAnalyzeMock });
+    createTrustedReviewServiceMock.mockReturnValue({ execute: trustedReviewExecuteMock });
   });
 
   it("imports without reading env, creating a provider, or composing a service", () => {
@@ -88,6 +95,71 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
     expect(createServiceMock).not.toHaveBeenCalled();
     expect(providerAnalyzeMock).not.toHaveBeenCalled();
     expect(serviceAnalyzeMock).not.toHaveBeenCalled();
+  });
+
+  it("composes the B2C6 production service from the same server-owned runtime config", () => {
+    const transport = fakeTransport();
+    const runtime = createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv(
+      validEnv(),
+      { transport },
+    );
+
+    expect(createProviderMock).toHaveBeenCalledOnce();
+    expect(createProviderMock).toHaveBeenCalledWith({
+      apiKey: SECRET,
+      region: "GLOBAL",
+      timeoutMs: 45000,
+      maxRawResponseBytes: 262144,
+      maxOutputTokens: 8192,
+      transport,
+    });
+    expect(createTrustedReviewServiceMock).toHaveBeenCalledOnce();
+    expect(createTrustedReviewServiceMock).toHaveBeenCalledWith({
+      provider: { analyze: providerAnalyzeMock },
+      maxInputBytes: 262144,
+      realDataActivation: expect.objectContaining({ enabled: true }),
+    });
+    expect(runtime).toEqual({ execute: trustedReviewExecuteMock });
+    expect(transport).not.toHaveBeenCalled();
+    expect(providerAnalyzeMock).not.toHaveBeenCalled();
+    expect(trustedReviewExecuteMock).not.toHaveBeenCalled();
+  });
+
+  it("keeps live and trusted-review runtime configuration behaviorally aligned", () => {
+    const runtimeEnv = validEnv({ AI_OPENAI_REGION: "EU", AI_MAX_INPUT_BYTES: "131072" });
+
+    createOpenAiFascicoloRuntimeFromEnv(runtimeEnv);
+    const liveConfig = createServiceMock.mock.calls[0][0];
+    createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv(runtimeEnv);
+    const trustedReviewConfig = createTrustedReviewServiceMock.mock.calls[0][0];
+
+    expect(trustedReviewConfig).toEqual(liveConfig);
+    expect(createProviderMock).toHaveBeenCalledTimes(2);
+    expect(createProviderMock).toHaveBeenNthCalledWith(1, expect.objectContaining({ region: "EU" }));
+    expect(createProviderMock).toHaveBeenNthCalledWith(2, expect.objectContaining({ region: "EU" }));
+    expect(liveConfig.maxInputBytes).toBe(131072);
+    expect(trustedReviewConfig.maxInputBytes).toBe(131072);
+  });
+
+  it("fails closed before B2C6 composition for disabled activation or invalid configuration", () => {
+    const disabled = validEnv();
+    delete disabled.AI_REAL_DATA_ENABLED;
+    expect(() => createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv(disabled)).toThrowError(
+      expect.objectContaining({ code: "AI_REAL_DATA_DISABLED" }),
+    );
+    expect(createTrustedReviewServiceMock).not.toHaveBeenCalled();
+
+    expect(() => createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv(
+      validEnv({ AI_OPENAI_TIMEOUT_MS: "invalid" }),
+    )).toThrowError(expect.objectContaining({ code: "AI_CONFIGURATION_ERROR" }));
+    expect(createTrustedReviewServiceMock).not.toHaveBeenCalled();
+  });
+
+  it("exposes no direct provider or authority override in the normal trusted-review runtime contract", () => {
+    expect(createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv.length).toBe(0);
+    expect(sourceText()).not.toMatch(
+      /createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv\s*\([^)]*(?:provider|model|activation|maxInputBytes|preparation|tenant|actor)/s,
+    );
   });
 
   it("parses complete GLOBAL configuration and composes provider plus B1 service", () => {
@@ -244,9 +316,10 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
   it("contains no top-level env read, alias, logging, route, persistence, or automatic analysis", () => {
     const source = sourceText();
     expect(source.match(/process\.env/g)).toHaveLength(1);
-    expect(source).toContain("env: OpenAiRuntimeEnv = process.env as unknown as OpenAiRuntimeEnv");
-    const factoryIndex = source.indexOf("export function createOpenAiFascicoloRuntimeFromEnv");
-    expect(source.indexOf("process.env")).toBeGreaterThan(factoryIndex);
+    expect(source).toMatch(
+      /function defaultOpenAiRuntimeEnv\(\): OpenAiRuntimeEnv \{\s*return process\.env as unknown as OpenAiRuntimeEnv;\s*\}/,
+    );
+    expect(source.match(/env: OpenAiRuntimeEnv = defaultOpenAiRuntimeEnv\(\)/g)).toHaveLength(2);
     expect(source).not.toMatch(/(?<!AI_)OPENAI_API_KEY/);
     for (const forbidden of [
       "NEXT_PUBLIC_",

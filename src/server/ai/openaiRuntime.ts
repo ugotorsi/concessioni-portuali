@@ -3,6 +3,10 @@ import {
   type FascicoloLiveAnalysisService,
 } from "@/server/ai/fascicoloLiveAnalysis";
 import {
+  createFascicoloTrustedReviewProductionService,
+  type FascicoloTrustedReviewProductionService,
+} from "@/server/ai/fascicoloTrustedReviewProduction";
+import {
   createOpenAiAnalysisProvider,
   type OpenAiFetch,
   type OpenAiRegion,
@@ -93,10 +97,10 @@ function parseRuntimeConfig(env: OpenAiRuntimeEnv): ParsedOpenAiRuntimeConfig {
   };
 }
 
-export function createOpenAiFascicoloRuntimeFromEnv(
-  env: OpenAiRuntimeEnv = process.env as unknown as OpenAiRuntimeEnv,
-  dependencies: { transport?: OpenAiFetch } = {},
-): FascicoloLiveAnalysisService {
+function createOpenAiFascicoloServiceConfig(
+  env: OpenAiRuntimeEnv,
+  dependencies: { transport?: OpenAiFetch },
+): Parameters<typeof createFascicoloLiveAnalysisService>[0] {
   const realDataActivation = createRealDataActivationPolicy(env);
   assertRealDataActivation(realDataActivation);
   const config = parseRuntimeConfig(env);
@@ -108,9 +112,29 @@ export function createOpenAiFascicoloRuntimeFromEnv(
     region: config.region,
     ...(dependencies.transport ? { transport: dependencies.transport } : {}),
   });
-  return createFascicoloLiveAnalysisService({
+  return {
     provider,
     maxInputBytes: config.maxInputBytes,
     realDataActivation,
-  });
+  };
+}
+
+function defaultOpenAiRuntimeEnv(): OpenAiRuntimeEnv {
+  return process.env as unknown as OpenAiRuntimeEnv;
+}
+
+export function createOpenAiFascicoloRuntimeFromEnv(
+  env: OpenAiRuntimeEnv = defaultOpenAiRuntimeEnv(),
+  dependencies: { transport?: OpenAiFetch } = {},
+): FascicoloLiveAnalysisService {
+  return createFascicoloLiveAnalysisService(createOpenAiFascicoloServiceConfig(env, dependencies));
+}
+
+export function createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv(
+  env: OpenAiRuntimeEnv = defaultOpenAiRuntimeEnv(),
+  dependencies: { transport?: OpenAiFetch } = {},
+): FascicoloTrustedReviewProductionService {
+  return createFascicoloTrustedReviewProductionService(
+    createOpenAiFascicoloServiceConfig(env, dependencies),
+  );
 }
