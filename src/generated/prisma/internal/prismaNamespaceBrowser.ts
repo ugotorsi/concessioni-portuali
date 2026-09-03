@@ -73,6 +73,7 @@ export const ModelName = {
   Sopralluogo: 'Sopralluogo',
   Pagamento: 'Pagamento',
   Documento: 'Documento',
+  DocumentFileVersion: 'DocumentFileVersion',
   FascicoloObservation: 'FascicoloObservation',
   FascicoloChecklistEvidence: 'FascicoloChecklistEvidence',
   FascicoloDocumentRequirementProposal: 'FascicoloDocumentRequirementProposal',
@@ -607,11 +608,31 @@ export const DocumentoScalarFieldEnum = {
   sopralluogoId: 'sopralluogoId',
   pagamentoId: 'pagamentoId',
   reportId: 'reportId',
+  currentFileVersionId: 'currentFileVersionId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type DocumentoScalarFieldEnum = (typeof DocumentoScalarFieldEnum)[keyof typeof DocumentoScalarFieldEnum]
+
+
+export const DocumentFileVersionScalarFieldEnum = {
+  id: 'id',
+  documentId: 'documentId',
+  canonicalEnteId: 'canonicalEnteId',
+  storageProvider: 'storageProvider',
+  storageKey: 'storageKey',
+  storageBucket: 'storageBucket',
+  mimeType: 'mimeType',
+  sizeBytes: 'sizeBytes',
+  sha256: 'sha256',
+  createdByUserId: 'createdByUserId',
+  createdByActorId: 'createdByActorId',
+  createdByRole: 'createdByRole',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentFileVersionScalarFieldEnum = (typeof DocumentFileVersionScalarFieldEnum)[keyof typeof DocumentFileVersionScalarFieldEnum]
 
 
 export const FascicoloObservationScalarFieldEnum = {

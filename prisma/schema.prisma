@@ -584,6 +584,7 @@ model Ente {
   checklistEvidence            FascicoloChecklistEvidence[]
   documentRequirementProposals FascicoloDocumentRequirementProposal[]
   documentRequirementEvidence  FascicoloDocumentRequirementEvidence[]
+  documentFileVersions         DocumentFileVersion[]
   aiFascicoloTrustedReviewMaterials AiFascicoloTrustedReviewMaterial[]
   aiFascicoloHumanReviewStates      AiFascicoloHumanReviewState[]
   aiFascicoloHumanReviewEvents      AiFascicoloHumanReviewEvent[]
@@ -878,6 +879,7 @@ model User {
   documentRequirementProposalsReviewed          FascicoloDocumentRequirementProposal[]       @relation("DocumentRequirementProposalReviewedBy")
   documentRequirementEvidenceCreated            FascicoloDocumentRequirementEvidence[]       @relation("DocumentRequirementEvidenceCreatedBy")
   documentRequirementEvidenceRevoked            FascicoloDocumentRequirementEvidence[]       @relation("DocumentRequirementEvidenceRevokedBy")
+  documentFileVersionsCreated                    DocumentFileVersion[]                         @relation("DocumentFileVersionCreatedBy")
   documentRequirementEvidenceReviews            FascicoloDocumentRequirementEvidenceReview[] @relation("DocumentRequirementEvidenceReviewedBy")
   aiFascicoloHumanReviewEvents                   AiFascicoloHumanReviewEvent[]
 
@@ -1275,6 +1277,7 @@ model Documento {
   sopralluogoId             String?
   pagamentoId               String?
   reportId                  String?
+  currentFileVersionId      String?             @unique
   createdAt                 DateTime            @default(now())
   updatedAt                 DateTime            @updatedAt
 
@@ -1290,6 +1293,8 @@ model Documento {
   fascicoloObservations FascicoloObservation[]
   checklistEvidence     FascicoloChecklistEvidence[]
   requirementEvidence   FascicoloDocumentRequirementEvidence[]
+  fileVersions          DocumentFileVersion[] @relation("DocumentFileVersions")
+  currentFileVersion    DocumentFileVersion?  @relation("CurrentDocumentFileVersion", fields: [currentFileVersionId, id, enteId], references: [id, documentId, canonicalEnteId], onDelete: Restrict, onUpdate: NoAction)
 
   @@index([uploadedByUserId])
   @@index([statoDocumento])
@@ -1308,6 +1313,34 @@ model Documento {
   @@index([pecWarningMancataRicevuta])
   @@index([dataDocumento])
   @@index([createdAt])
+  @@unique([currentFileVersionId, id, enteId])
+}
+
+model DocumentFileVersion {
+  id               String   @id @default(cuid())
+  documentId       String
+  canonicalEnteId  String
+  storageProvider  String
+  storageKey       String
+  storageBucket    String?
+  mimeType         String
+  sizeBytes        Int
+  sha256           String   @db.Char(64)
+  createdByUserId  String?
+  createdByActorId String
+  createdByRole    String
+  createdAt        DateTime @default(now())
+
+  document     Documento  @relation("DocumentFileVersions", fields: [documentId], references: [id], onDelete: Restrict)
+  ente         Ente       @relation(fields: [canonicalEnteId], references: [id], onDelete: Restrict)
+  createdByUser User?     @relation("DocumentFileVersionCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  currentFor   Documento? @relation("CurrentDocumentFileVersion")
+
+  @@unique([documentId, sha256])
+  @@unique([storageProvider, storageKey])
+  @@unique([id, documentId, canonicalEnteId])
+  @@index([canonicalEnteId, documentId, createdAt])
+  @@index([createdByUserId])
 }
 
 model FascicoloObservation {

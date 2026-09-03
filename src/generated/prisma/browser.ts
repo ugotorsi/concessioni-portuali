@@ -128,6 +128,11 @@ export type Pagamento = Prisma.PagamentoModel
  */
 export type Documento = Prisma.DocumentoModel
 /**
+ * Model DocumentFileVersion
+ * 
+ */
+export type DocumentFileVersion = Prisma.DocumentFileVersionModel
+/**
  * Model FascicoloObservation
  * 
  */

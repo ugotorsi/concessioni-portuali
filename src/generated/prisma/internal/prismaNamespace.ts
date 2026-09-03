@@ -406,6 +406,7 @@ export const ModelName = {
   Sopralluogo: 'Sopralluogo',
   Pagamento: 'Pagamento',
   Documento: 'Documento',
+  DocumentFileVersion: 'DocumentFileVersion',
   FascicoloObservation: 'FascicoloObservation',
   FascicoloChecklistEvidence: 'FascicoloChecklistEvidence',
   FascicoloDocumentRequirementProposal: 'FascicoloDocumentRequirementProposal',
@@ -435,7 +436,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2067,6 +2068,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    DocumentFileVersion: {
+      payload: Prisma.$DocumentFileVersionPayload<ExtArgs>
+      fields: Prisma.DocumentFileVersionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocumentFileVersionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentFileVersionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocumentFileVersionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentFileVersionPayload>
+        }
+        findFirst: {
+          args: Prisma.DocumentFileVersionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentFileVersionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocumentFileVersionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentFileVersionPayload>
+        }
+        findMany: {
+          args: Prisma.DocumentFileVersionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentFileVersionPayload>[]
+        }
+        create: {
+          args: Prisma.DocumentFileVersionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentFileVersionPayload>
+        }
+        createMany: {
+          args: Prisma.DocumentFileVersionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocumentFileVersionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentFileVersionPayload>[]
+        }
+        delete: {
+          args: Prisma.DocumentFileVersionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentFileVersionPayload>
+        }
+        update: {
+          args: Prisma.DocumentFileVersionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentFileVersionPayload>
+        }
+        deleteMany: {
+          args: Prisma.DocumentFileVersionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocumentFileVersionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocumentFileVersionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentFileVersionPayload>[]
+        }
+        upsert: {
+          args: Prisma.DocumentFileVersionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentFileVersionPayload>
+        }
+        aggregate: {
+          args: Prisma.DocumentFileVersionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocumentFileVersion>
+        }
+        groupBy: {
+          args: Prisma.DocumentFileVersionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentFileVersionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocumentFileVersionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentFileVersionCountAggregateOutputType> | number
+        }
+      }
+    }
     FascicoloObservation: {
       payload: Prisma.$FascicoloObservationPayload<ExtArgs>
       fields: Prisma.FascicoloObservationFieldRefs
@@ -3644,11 +3719,31 @@ export const DocumentoScalarFieldEnum = {
   sopralluogoId: 'sopralluogoId',
   pagamentoId: 'pagamentoId',
   reportId: 'reportId',
+  currentFileVersionId: 'currentFileVersionId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type DocumentoScalarFieldEnum = (typeof DocumentoScalarFieldEnum)[keyof typeof DocumentoScalarFieldEnum]
+
+
+export const DocumentFileVersionScalarFieldEnum = {
+  id: 'id',
+  documentId: 'documentId',
+  canonicalEnteId: 'canonicalEnteId',
+  storageProvider: 'storageProvider',
+  storageKey: 'storageKey',
+  storageBucket: 'storageBucket',
+  mimeType: 'mimeType',
+  sizeBytes: 'sizeBytes',
+  sha256: 'sha256',
+  createdByUserId: 'createdByUserId',
+  createdByActorId: 'createdByActorId',
+  createdByRole: 'createdByRole',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentFileVersionScalarFieldEnum = (typeof DocumentFileVersionScalarFieldEnum)[keyof typeof DocumentFileVersionScalarFieldEnum]
 
 
 export const FascicoloObservationScalarFieldEnum = {
@@ -5139,6 +5234,7 @@ export type GlobalOmitConfig = {
   sopralluogo?: Prisma.SopralluogoOmit
   pagamento?: Prisma.PagamentoOmit
   documento?: Prisma.DocumentoOmit
+  documentFileVersion?: Prisma.DocumentFileVersionOmit
   fascicoloObservation?: Prisma.FascicoloObservationOmit
   fascicoloChecklistEvidence?: Prisma.FascicoloChecklistEvidenceOmit
   fascicoloDocumentRequirementProposal?: Prisma.FascicoloDocumentRequirementProposalOmit
