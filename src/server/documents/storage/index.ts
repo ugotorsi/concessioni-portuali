@@ -3,7 +3,13 @@ import { createHash } from "node:crypto";
 import { getDocumentStorageBackend } from "./config";
 import { LocalStorageAdapter } from "./localStorageAdapter";
 import { S3StorageAdapter } from "./s3StorageAdapter";
-import type { DocumentStorageAdapter, DocumentStorageBackend, StoredDocumentObject } from "./types";
+import type {
+  DocumentStorageAdapter,
+  DocumentStorageBackend,
+  DocumentStorageCreateResult,
+  DocumentStoragePutInput,
+  StoredDocumentObject,
+} from "./types";
 
 function sanitizeFileName(fileName: string): string {
   const base = fileName.replace(/[^a-zA-Z0-9._-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
@@ -71,6 +77,12 @@ export async function storeDocumentFileAtKey(input: {
     sha256,
     sizeBytes: input.file.size,
   });
+}
+
+export async function createDocumentFileIfAbsent(
+  input: DocumentStoragePutInput,
+): Promise<DocumentStorageCreateResult> {
+  return getDocumentStorageAdapter().createIfAbsent(input);
 }
 
 export async function deleteDocumentFile(storageKey: string): Promise<void> {

@@ -25,8 +25,21 @@ export interface StoredDocumentObject {
   originalName: string;
 }
 
+export type DocumentStorageCreateResult =
+  | {
+      disposition: "CREATED";
+      object: StoredDocumentObject;
+      ownedByAttempt: true;
+    }
+  | {
+      disposition: "ALREADY_EXISTS";
+      object: StoredDocumentObject;
+      ownedByAttempt: false;
+    };
+
 export interface DocumentStorageAdapter {
   put(input: DocumentStoragePutInput): Promise<StoredDocumentObject>;
+  createIfAbsent(input: DocumentStoragePutInput): Promise<DocumentStorageCreateResult>;
   get(storageKey: string): Promise<DocumentStorageGetOutput>;
   delete(storageKey: string): Promise<void>;
   exists(storageKey: string): Promise<boolean>;

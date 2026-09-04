@@ -2,7 +2,13 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 
 import { getDocumentStorageRoot } from "./config";
-import type { DocumentStorageAdapter, DocumentStorageGetOutput, DocumentStoragePutInput, StoredDocumentObject } from "./types";
+import type {
+  DocumentStorageAdapter,
+  DocumentStorageCreateResult,
+  DocumentStorageGetOutput,
+  DocumentStoragePutInput,
+  StoredDocumentObject,
+} from "./types";
 
 function assertSafeStorageKey(storageKey: string): string {
   const normalized = storageKey.trim();
@@ -26,22 +32,41 @@ async function resolveAbsolutePath(storageKey: string): Promise<string> {
   return absolute;
 }
 
+function storedObject(input: DocumentStoragePutInput): StoredDocumentObject {
+  return {
+    storageProvider: "local",
+    storageKey: input.storageKey,
+    fileName: path.basename(input.storageKey),
+    bucket: null,
+    sizeBytes: input.sizeBytes,
+    sha256: input.sha256,
+    mimeType: input.mimeType,
+    originalName: input.originalName,
+  };
+}
+
 export class LocalStorageAdapter implements DocumentStorageAdapter {
   async put(input: DocumentStoragePutInput): Promise<StoredDocumentObject> {
     const absolutePath = await resolveAbsolutePath(input.storageKey);
     await fs.mkdir(path.dirname(absolutePath), { recursive: true });
     await fs.writeFile(absolutePath, input.body);
 
-    return {
-      storageProvider: "local",
-      storageKey: input.storageKey,
-      fileName: path.basename(input.storageKey),
-      bucket: null,
-      sizeBytes: input.sizeBytes,
-      sha256: input.sha256,
-      mimeType: input.mimeType,
-      originalName: input.originalName,
-    };
+    return storedObject(input);
+  }
+
+  async createIfAbsent(input: DocumentStoragePutInput): Promise<DocumentStorageCreateResult> {
+    const absolutePath = await resolveAbsolutePath(input.storageKey);
+    await fs.mkdir(path.dirname(absolutePath), { recursive: true });
+
+    try {
+      await fs.writeFile(absolutePath, input.body, { flag: "wx" });
+      return { disposition: "CREATED", object: storedObject(input), ownedByAttempt: true };
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "EEXIST") {
+        return { disposition: "ALREADY_EXISTS", object: storedObject(input), ownedByAttempt: false };
+      }
+      throw error;
+    }
   }
 
   async get(storageKey: string): Promise<DocumentStorageGetOutput> {

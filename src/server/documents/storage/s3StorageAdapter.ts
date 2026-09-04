@@ -7,7 +7,13 @@ import {
 } from "@aws-sdk/client-s3";
 
 import { getS3StorageConfig } from "./config";
-import type { DocumentStorageAdapter, DocumentStorageGetOutput, DocumentStoragePutInput, StoredDocumentObject } from "./types";
+import type {
+  DocumentStorageAdapter,
+  DocumentStorageCreateResult,
+  DocumentStorageGetOutput,
+  DocumentStoragePutInput,
+  StoredDocumentObject,
+} from "./types";
 
 type StorageOperation = "PUT" | "GET" | "DELETE" | "HEAD";
 
@@ -54,6 +60,10 @@ function extractStatusCode(error: unknown): number | undefined {
 
 function isNotFoundLike(code: string, statusCode?: number): boolean {
   return code === "NotFound" || code === "NoSuchKey" || statusCode === 404;
+}
+
+function isPreconditionFailed(code: string, statusCode?: number): boolean {
+  return code === "PreconditionFailed" || statusCode === 412;
 }
 
 function assertSafeStorageKey(storageKey: string): string {
@@ -124,6 +134,19 @@ export class S3StorageAdapter implements DocumentStorageAdapter {
     }, { cause: error });
   }
 
+  private storedObject(input: DocumentStoragePutInput, storageKey: string): StoredDocumentObject {
+    return {
+      storageProvider: "s3",
+      storageKey,
+      fileName: storageKey.split("/").pop() ?? storageKey,
+      bucket: this.config.bucket,
+      sizeBytes: input.sizeBytes,
+      sha256: input.sha256,
+      mimeType: input.mimeType,
+      originalName: input.originalName,
+    };
+  }
+
   async put(input: DocumentStoragePutInput): Promise<StoredDocumentObject> {
     const storageKey = assertSafeStorageKey(input.storageKey);
 
@@ -144,15 +167,43 @@ export class S3StorageAdapter implements DocumentStorageAdapter {
       throw this.toS3Error("PUT", error);
     }
 
+    return this.storedObject(input, storageKey);
+  }
+
+  async createIfAbsent(input: DocumentStoragePutInput): Promise<DocumentStorageCreateResult> {
+    const storageKey = assertSafeStorageKey(input.storageKey);
+
+    try {
+      await this.client.send(
+        new PutObjectCommand({
+          Bucket: this.config.bucket,
+          Key: storageKey,
+          Body: input.body,
+          ContentType: input.mimeType,
+          IfNoneMatch: "*",
+          Metadata: {
+            sha256: input.sha256,
+            originalname: input.originalName,
+          },
+        }),
+      );
+    } catch (error) {
+      const code = extractErrorCode(error);
+      const statusCode = extractStatusCode(error);
+      if (isPreconditionFailed(code, statusCode)) {
+        return {
+          disposition: "ALREADY_EXISTS",
+          object: this.storedObject(input, storageKey),
+          ownedByAttempt: false,
+        };
+      }
+      throw this.toS3Error("PUT", error);
+    }
+
     return {
-      storageProvider: "s3",
-      storageKey,
-      fileName: storageKey.split("/").pop() ?? storageKey,
-      bucket: this.config.bucket,
-      sizeBytes: input.sizeBytes,
-      sha256: input.sha256,
-      mimeType: input.mimeType,
-      originalName: input.originalName,
+      disposition: "CREATED",
+      object: this.storedObject(input, storageKey),
+      ownedByAttempt: true,
     };
   }
 
