@@ -57,6 +57,7 @@ import {
   reviewFascicoloDocumentRequirementEvidence,
   revokeFascicoloDocumentRequirementEvidence,
 } from "@/server/actions/fascicolo-document-requirement-evidence";
+import { createFascicoloDocumentRequirementEvidenceInTransaction } from "@/server/fascicolo-document-requirement-evidence";
 
 const proposal = {
   id: "proposal-1",
@@ -111,6 +112,19 @@ function revokeInput(revocationNote = "Associazione non pertinente") {
 
 function reviewInput(reviewNote = "Esame documentale registrato", overrides: Record<string, unknown> = {}) {
   return { evidenceId: "evidence-1", reviewNote, ...overrides };
+}
+
+function transactionCreateInput() {
+  return {
+    canonicalEnteId: "ente-1",
+    proposalId: "proposal-1",
+    documentoId: "documento-1",
+    concessioneId: "concessione-1",
+    createdByUserId: "user-1",
+    createdByActorId: "user-1",
+    createdByEmail: "admin@example.test",
+    createdByRole: "ADMIN",
+  };
 }
 
 describe("P1-NEXT-02A requirement evidence actions", () => {
@@ -223,6 +237,50 @@ describe("P1-NEXT-02A requirement evidence actions", () => {
       txMock,
       expect.objectContaining({ azione: "FASCICOLO_DOCUMENT_REQUIREMENT_EVIDENCE_CREATE" }),
     );
+  });
+
+  it("uses only the supplied transaction client in the create primitive", async () => {
+    await expect(createFascicoloDocumentRequirementEvidenceInTransaction(
+      txMock as unknown as import("@/generated/prisma/client").Prisma.TransactionClient,
+      transactionCreateInput(),
+    )).resolves.toEqual({ created: true, evidence: activeEvidence });
+    expect(txMock.fascicoloDocumentRequirementEvidence.createMany).toHaveBeenCalledWith({
+      data: {
+        enteId: "ente-1",
+        proposalId: "proposal-1",
+        documentoId: "documento-1",
+        createdByUserId: "user-1",
+        createdByActorId: "user-1",
+        createdByEmail: "admin@example.test",
+        createdByRole: "ADMIN",
+      },
+      skipDuplicates: true,
+    });
+    expect(txMock.fascicoloDocumentRequirementEvidence.findUniqueOrThrow).toHaveBeenCalledWith({
+      where: {
+        enteId_proposalId_documentoId: {
+          enteId: "ente-1",
+          proposalId: "proposal-1",
+          documentoId: "documento-1",
+        },
+      },
+    });
+    expect(auditInTransactionMock).toHaveBeenCalledWith(
+      txMock,
+      expect.objectContaining({ azione: "FASCICOLO_DOCUMENT_REQUIREMENT_EVIDENCE_CREATE" }),
+    );
+    expect(prismaMock.$transaction).not.toHaveBeenCalled();
+    expect(prismaMock.fascicoloDocumentRequirementEvidence.findUnique).not.toHaveBeenCalled();
+  });
+
+  it("preserves skipDuplicates reuse semantics in the create primitive", async () => {
+    txMock.fascicoloDocumentRequirementEvidence.createMany.mockResolvedValue({ count: 0 });
+    await expect(createFascicoloDocumentRequirementEvidenceInTransaction(
+      txMock as unknown as import("@/generated/prisma/client").Prisma.TransactionClient,
+      transactionCreateInput(),
+    )).resolves.toEqual({ created: false, evidence: activeEvidence });
+    expect(auditInTransactionMock).not.toHaveBeenCalled();
+    expect(prismaMock.$transaction).not.toHaveBeenCalled();
   });
 
   it("propagates CREATE audit failure before revalidation", async () => {

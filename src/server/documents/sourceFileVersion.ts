@@ -25,6 +25,8 @@ export type SourceFileVersion = Awaited<ReturnType<typeof getSourceFileVersionBy
   ? NonNullable<Result>
   : never;
 
+type SourceFileVersionClient = Pick<Prisma.TransactionClient, "documentFileVersion">;
+
 export class SourceFileVersionConflictError extends Error {
   readonly code = "SOURCE_FILE_VERSION_CONFLICT" as const;
 
@@ -79,17 +81,27 @@ function isIdentityP2002(error: unknown): boolean {
   return fields.size === 2 && fields.has("documentId") && fields.has("sha256");
 }
 
-async function findSameDocumentHash(documentId: string, sha256: string) {
-  return prisma.documentFileVersion.findUnique({
+async function findSameDocumentHash(
+  client: SourceFileVersionClient,
+  documentId: string,
+  sha256: string,
+) {
+  return client.documentFileVersion.findUnique({
     where: { documentId_sha256: { documentId, sha256 } },
   });
 }
 
-export async function createSourceFileVersion(
+type SourceFileVersionResult = {
+  outcome: "CREATED" | "REUSED";
+  version: NonNullable<Awaited<ReturnType<typeof findSameDocumentHash>>>;
+};
+
+async function createSourceFileVersionWithClient(
+  client: SourceFileVersionClient,
   rawInput: CreateSourceFileVersionInput,
-): Promise<{ outcome: "CREATED" | "REUSED"; version: NonNullable<Awaited<ReturnType<typeof findSameDocumentHash>>> }> {
+): Promise<SourceFileVersionResult> {
   const input = createSourceFileVersionSchema.parse(rawInput);
-  const existing = await findSameDocumentHash(input.documentId, input.sha256);
+  const existing = await findSameDocumentHash(client, input.documentId, input.sha256);
   if (existing) {
     if (!sameManifest(existing, input)) {
       throw new SourceFileVersionConflictError();
@@ -97,27 +109,49 @@ export async function createSourceFileVersion(
     return { outcome: "REUSED", version: existing };
   }
 
+  const version = await client.documentFileVersion.create({
+    data: {
+      ...input,
+      storageBucket: input.storageBucket ?? null,
+      createdByUserId: input.createdByUserId ?? null,
+    },
+  });
+  return { outcome: "CREATED", version };
+}
+
+export function createSourceFileVersionInTransaction(
+  tx: Prisma.TransactionClient,
+  rawInput: CreateSourceFileVersionInput,
+): Promise<SourceFileVersionResult> {
+  return createSourceFileVersionWithClient(tx, rawInput);
+}
+
+export async function reconcileSourceFileVersionIdentityRaceAfterRollback(
+  rawInput: CreateSourceFileVersionInput,
+  originalError: unknown,
+): Promise<SourceFileVersionResult> {
+  if (!isIdentityP2002(originalError)) {
+    throw originalError;
+  }
+
+  const input = createSourceFileVersionSchema.parse(rawInput);
+  const existing = await findSameDocumentHash(prisma, input.documentId, input.sha256);
+  if (!existing) {
+    throw originalError;
+  }
+  if (!sameManifest(existing, input)) {
+    throw new SourceFileVersionConflictError();
+  }
+  return { outcome: "REUSED", version: existing };
+}
+
+export async function createSourceFileVersion(
+  rawInput: CreateSourceFileVersionInput,
+): Promise<SourceFileVersionResult> {
   try {
-    const version = await prisma.documentFileVersion.create({
-      data: {
-        ...input,
-        storageBucket: input.storageBucket ?? null,
-        createdByUserId: input.createdByUserId ?? null,
-      },
-    });
-    return { outcome: "CREATED", version };
+    return await createSourceFileVersionWithClient(prisma, rawInput);
   } catch (error) {
-    if (!isIdentityP2002(error)) {
-      throw error;
-    }
-    const concurrent = await findSameDocumentHash(input.documentId, input.sha256);
-    if (!concurrent) {
-      throw error;
-    }
-    if (!sameManifest(concurrent, input)) {
-      throw new SourceFileVersionConflictError();
-    }
-    return { outcome: "REUSED", version: concurrent };
+    return reconcileSourceFileVersionIdentityRaceAfterRollback(rawInput, error);
   }
 }
 

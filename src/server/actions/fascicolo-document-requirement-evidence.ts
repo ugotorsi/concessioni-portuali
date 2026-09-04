@@ -8,6 +8,7 @@ import { canManageProcedimenti, getCurrentUser, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { createAuditLogInTransaction } from "@/server/audit/auditLog";
+import { createFascicoloDocumentRequirementEvidenceInTransaction } from "@/server/fascicolo-document-requirement-evidence";
 
 const STAGING_PREVIEW_ADMIN_ID = "staging-preview-admin";
 
@@ -141,52 +142,16 @@ export async function createFascicoloDocumentRequirementEvidence(input: {
   }
 
   const createdByUserId = resolvePersistedUserId(currentUser.id);
-  const result = await prisma.$transaction(async (tx) => {
-    const inserted = await tx.fascicoloDocumentRequirementEvidence.createMany({
-      data: {
-        enteId: canonicalEnteId,
-        proposalId: proposal.id,
-        documentoId: documento.id,
-        createdByUserId,
-        createdByActorId: currentUser.id,
-        createdByEmail: currentUser.email,
-        createdByRole: role,
-      },
-      skipDuplicates: true,
-    });
-    const evidence = await tx.fascicoloDocumentRequirementEvidence.findUniqueOrThrow({
-      where: {
-        enteId_proposalId_documentoId: {
-          enteId: canonicalEnteId,
-          proposalId: proposal.id,
-          documentoId: documento.id,
-        },
-      },
-    });
-
-    if (inserted.count === 0 && evidence.revokedAt !== null) {
-      throw new Error("Associazione revocata: la riassociazione non e consentita.");
-    }
-
-    if (inserted.count === 1) {
-      await createAuditLogInTransaction(tx, {
-        azione: "FASCICOLO_DOCUMENT_REQUIREMENT_EVIDENCE_CREATE",
-        entita: "FascicoloDocumentRequirementEvidence",
-        entitaId: evidence.id,
-        enteId: canonicalEnteId,
-        concessioneId: proposal.procedimento.concessioneId,
-        esito: "SUCCESS",
-        actor: { userId: createdByUserId, userEmail: currentUser.email, userRole: role },
-        metadata: {
-          evidenceId: evidence.id,
-          proposalId: proposal.id,
-          documentoId: documento.id,
-        },
-      });
-    }
-
-    return { created: inserted.count === 1, evidence };
-  });
+  const result = await prisma.$transaction((tx) => createFascicoloDocumentRequirementEvidenceInTransaction(tx, {
+    canonicalEnteId,
+    proposalId: proposal.id,
+    documentoId: documento.id,
+    concessioneId: proposal.procedimento.concessioneId,
+    createdByUserId,
+    createdByActorId: currentUser.id,
+    createdByEmail: currentUser.email,
+    createdByRole: role,
+  }));
 
   revalidatePath(`/procedimenti/${proposal.procedimentoId}`);
   return result;

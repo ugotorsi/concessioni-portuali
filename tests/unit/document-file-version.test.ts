@@ -16,7 +16,9 @@ vi.mock("@/lib/prisma", () => ({
 
 import {
   createSourceFileVersion,
+  createSourceFileVersionInTransaction,
   getSourceFileVersionById,
+  reconcileSourceFileVersionIdentityRaceAfterRollback,
   SourceFileVersionConflictError,
 } from "@/server/documents/sourceFileVersion";
 
@@ -56,6 +58,117 @@ function p2002(target: string | string[]) {
     meta: { modelName: "DocumentFileVersion", target },
   });
 }
+
+const transactionClient = {
+  documentFileVersion: fileVersionMock,
+} as unknown as Prisma.TransactionClient;
+
+describe("B2C9C1A2A transaction-compatible source file version primitives", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    fileVersionMock.findUnique.mockResolvedValue(null);
+    fileVersionMock.create.mockImplementation(async ({ data }) => version(data));
+  });
+
+  it("reuses an exact existing manifest through the transaction client", async () => {
+    fileVersionMock.findUnique.mockResolvedValue(version());
+    await expect(createSourceFileVersionInTransaction(transactionClient, input())).resolves.toMatchObject({
+      outcome: "REUSED",
+      version: { id: "version-1" },
+    });
+    expect(fileVersionMock.create).not.toHaveBeenCalled();
+  });
+
+  it("fails closed for an incoherent existing manifest through the transaction client", async () => {
+    fileVersionMock.findUnique.mockResolvedValue(version({ storageKey: "documents/other" }));
+    await expect(createSourceFileVersionInTransaction(transactionClient, input())).rejects.toBeInstanceOf(
+      SourceFileVersionConflictError,
+    );
+  });
+
+  it("creates a new manifest through the transaction client", async () => {
+    await expect(createSourceFileVersionInTransaction(transactionClient, input())).resolves.toMatchObject({
+      outcome: "CREATED",
+      version: { id: "version-1" },
+    });
+    expect(fileVersionMock.create).toHaveBeenCalledTimes(1);
+  });
+
+  it("propagates identity P2002 without querying the failed transaction again", async () => {
+    const failure = p2002(["documentId", "sha256"]);
+    const events: string[] = [];
+    fileVersionMock.findUnique.mockImplementation(async () => {
+      events.push("findUnique");
+      return null;
+    });
+    fileVersionMock.create.mockImplementation(async () => {
+      events.push("create");
+      throw failure;
+    });
+
+    await expect(createSourceFileVersionInTransaction(transactionClient, input())).rejects.toBe(failure);
+    expect(fileVersionMock.findUnique).toHaveBeenCalledTimes(1);
+    expect(fileVersionMock.create).toHaveBeenCalledTimes(1);
+    expect(events).toEqual(["findUnique", "create"]);
+  });
+
+  it("propagates locator P2002 and non-P2002 without a post-error query", async () => {
+    const locatorFailure = p2002(["storageProvider", "storageKey"]);
+    fileVersionMock.create.mockRejectedValueOnce(locatorFailure);
+    await expect(createSourceFileVersionInTransaction(transactionClient, input())).rejects.toBe(locatorFailure);
+    expect(fileVersionMock.findUnique).toHaveBeenCalledTimes(1);
+
+    vi.clearAllMocks();
+    const runtimeFailure = new Error("database unavailable");
+    fileVersionMock.findUnique.mockResolvedValue(null);
+    fileVersionMock.create.mockRejectedValue(runtimeFailure);
+    await expect(createSourceFileVersionInTransaction(transactionClient, input())).rejects.toBe(runtimeFailure);
+    expect(fileVersionMock.findUnique).toHaveBeenCalledTimes(1);
+  });
+
+  it("reconciles an exact identity race with a fresh global lookup and preserves provenance", async () => {
+    const original = version();
+    fileVersionMock.findUnique.mockResolvedValue(original);
+    const result = await reconcileSourceFileVersionIdentityRaceAfterRollback(input({
+      createdByUserId: "user-2",
+      createdByActorId: "actor-2",
+      createdByRole: "GIURIDICO",
+    }), p2002(["documentId", "sha256"]));
+    expect(result).toEqual({ outcome: "REUSED", version: original });
+    expect(result.version).toMatchObject({
+      createdByUserId: "user-1",
+      createdByActorId: "actor-1",
+      createdByRole: "ADMIN",
+    });
+  });
+
+  it("fails closed when fresh identity reconciliation finds an incoherent manifest", async () => {
+    fileVersionMock.findUnique.mockResolvedValue(version({ sizeBytes: 43 }));
+    await expect(reconcileSourceFileVersionIdentityRaceAfterRollback(
+      input(),
+      p2002("DocumentFileVersion_documentId_sha256_key"),
+    )).rejects.toBeInstanceOf(SourceFileVersionConflictError);
+  });
+
+  it("propagates the original identity error when fresh reconciliation finds no record", async () => {
+    const failure = p2002(["documentId", "sha256"]);
+    await expect(reconcileSourceFileVersionIdentityRaceAfterRollback(input(), failure)).rejects.toBe(failure);
+  });
+
+  it("does not reconcile locator P2002 or other errors", async () => {
+    const locatorFailure = p2002(["storageProvider", "storageKey"]);
+    await expect(reconcileSourceFileVersionIdentityRaceAfterRollback(input(), locatorFailure)).rejects.toBe(
+      locatorFailure,
+    );
+    expect(fileVersionMock.findUnique).not.toHaveBeenCalled();
+
+    const runtimeFailure = new Error("database unavailable");
+    await expect(reconcileSourceFileVersionIdentityRaceAfterRollback(input(), runtimeFailure)).rejects.toBe(
+      runtimeFailure,
+    );
+    expect(fileVersionMock.findUnique).not.toHaveBeenCalled();
+  });
+});
 
 describe("B2C9C1A1 source file version repository", () => {
   beforeEach(() => {
