@@ -6,14 +6,14 @@ import { z } from "zod";
 import { canManageProcedimenti, getCurrentUser, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
-import { createFascicoloDocumentRequirementEvidence } from "@/server/actions/fascicolo-document-requirement-evidence";
-import { deleteDocumentFile } from "@/server/documents/storage";
-import {
-  recordUploadCleanupFailure,
-  recordUploadCompensated,
-  uploadDocument,
-} from "@/server/documents/uploadService";
+import { auditFailure } from "@/server/audit/auditLog";
+import { uploadDocument } from "@/server/documents/uploadService";
 import { DOCUMENT_TIPOLOGIA_VALUES, validateUploadFile } from "@/server/documents/validation";
+import {
+  createFascicoloDocumentRequirementEvidenceAuditInTransaction,
+  createFascicoloDocumentRequirementEvidenceRecordInTransaction,
+  type CreateFascicoloDocumentRequirementEvidenceInput,
+} from "@/server/fascicolo-document-requirement-evidence";
 
 const inputSchema = z.object({
   proposalId: z.string().trim().min(1),
@@ -75,11 +75,40 @@ export async function uploadFascicoloDocumentRequirementEvidence(input: UploadRe
 
   const tenantContext = await getCurrentTenantContext();
   if (tenantContext) {
-    requireTenantAccess(tenantContext, canonicalEnteId, { mode: "write", allowWhenEnteMissing: false });
+    try {
+      requireTenantAccess(tenantContext, canonicalEnteId, { mode: "write", allowWhenEnteMissing: false });
+    } catch {
+      await auditFailure({
+        azione: "AUTHZ_DENIED",
+        entita: "Documento",
+        concessioneId: proposal.procedimento.concessioneId,
+        enteId: canonicalEnteId,
+        actor: {
+          userId: currentUser.id === "staging-preview-admin" ? null : currentUser.id,
+          userEmail: currentUser.email,
+          userRole: role,
+        },
+        metadata: {
+          actionType: "DOCUMENT_REQUIREMENT_EVIDENCE_UPLOAD",
+          reason: "CROSS_TENANT_BLOCKED",
+        },
+      });
+      throw new Error("Accesso tenant non consentito.");
+    }
   }
   validateUploadFile(parsed.file);
 
   const actor = { id: currentUser.id, email: currentUser.email, role };
+  const evidenceInput: CreateFascicoloDocumentRequirementEvidenceInput = {
+    canonicalEnteId,
+    proposalId: proposal.id,
+    documentoId: parsed.operationId,
+    concessioneId: proposal.procedimento.concessioneId,
+    createdByUserId: currentUser.id === "staging-preview-admin" ? null : currentUser.id,
+    createdByActorId: currentUser.id,
+    createdByEmail: currentUser.email,
+    createdByRole: role,
+  };
   const uploaded = await uploadDocument({
     documentId: parsed.operationId,
     file: parsed.file,
@@ -94,106 +123,24 @@ export async function uploadFascicoloDocumentRequirementEvidence(input: UploadRe
     source: "UPLOAD_UTENTE",
     status: "ATTIVO",
     deterministicStorage: { canonicalEnteId, operationId: parsed.operationId },
+    transactionExtension: {
+      createRecord: (tx) => createFascicoloDocumentRequirementEvidenceRecordInTransaction(tx, evidenceInput),
+      writeAudit: async (tx, result) => {
+        if (result.created) {
+          await createFascicoloDocumentRequirementEvidenceAuditInTransaction(tx, evidenceInput, result.evidence.id);
+        }
+      },
+    },
   });
 
-  try {
-    const evidenceResult = await createFascicoloDocumentRequirementEvidence({
-      proposalId: proposal.id,
-      documentoId: uploaded.document.id,
-    });
-    revalidatePath(`/procedimenti/${proposal.procedimentoId}`);
-    return {
-      created: uploaded.created || evidenceResult.created,
-      documentoId: uploaded.document.id,
-      evidenceId: evidenceResult.evidence.id,
-    };
-  } catch (error) {
-    const evidence = await prisma.fascicoloDocumentRequirementEvidence.findUnique({
-      where: {
-        enteId_proposalId_documentoId: {
-          enteId: canonicalEnteId,
-          proposalId: proposal.id,
-          documentoId: uploaded.document.id,
-        },
-      },
-      select: { id: true, revokedAt: true },
-    });
-    if (evidence?.revokedAt === null) {
-      return { created: uploaded.created, documentoId: uploaded.document.id, evidenceId: evidence.id };
-    }
-    if (!uploaded.created) {
-      throw error;
-    }
-
-    let deleted;
-    try {
-      deleted = await prisma.documento.deleteMany({
-        where: {
-          id: uploaded.document.id,
-          enteId: canonicalEnteId,
-          procedimentoId: proposal.procedimentoId,
-        },
-      });
-    } catch (cleanupError) {
-      await recordUploadCleanupFailure({
-        operationId: parsed.operationId,
-        documentId: uploaded.document.id,
-        phase: "EVIDENCE_ASSOCIATION",
-        provider: uploaded.document.storageProvider ?? "unknown",
-        storageKey: uploaded.storageKey,
-        cleanupTarget: "DOCUMENTO",
-        error: cleanupError,
-        actor,
-        enteId: canonicalEnteId,
-        concessioneId: proposal.procedimento.concessioneId,
-      });
-      throw error;
-    }
-    if (deleted.count !== 1) {
-      await recordUploadCleanupFailure({
-        operationId: parsed.operationId,
-        documentId: uploaded.document.id,
-        phase: "EVIDENCE_ASSOCIATION",
-        provider: uploaded.document.storageProvider ?? "unknown",
-        storageKey: uploaded.storageKey,
-        cleanupTarget: "DOCUMENTO",
-        error: new Error("Documento compensation compare-and-delete failed."),
-        actor,
-        enteId: canonicalEnteId,
-        concessioneId: proposal.procedimento.concessioneId,
-      });
-      throw error;
-    }
-
-    try {
-      await deleteDocumentFile(uploaded.storageKey);
-    } catch (cleanupError) {
-      await recordUploadCleanupFailure({
-        operationId: parsed.operationId,
-        documentId: uploaded.document.id,
-        phase: "EVIDENCE_ASSOCIATION",
-        provider: uploaded.document.storageProvider ?? "unknown",
-        storageKey: uploaded.storageKey,
-        cleanupTarget: "OBJECT",
-        error: cleanupError,
-        actor,
-        enteId: canonicalEnteId,
-        concessioneId: proposal.procedimento.concessioneId,
-      });
-      throw error;
-    }
-
-    await recordUploadCompensated({
-      operationId: parsed.operationId,
-      documentId: uploaded.document.id,
-      phase: "EVIDENCE_ASSOCIATION",
-      provider: uploaded.document.storageProvider ?? "unknown",
-      storageKey: uploaded.storageKey,
-      reasonClass: error instanceof Error ? error.name : "UnknownError",
-      actor,
-      enteId: canonicalEnteId,
-      concessioneId: proposal.procedimento.concessioneId,
-    });
-    throw error;
+  const evidenceResult = uploaded.extensionResult;
+  if (!evidenceResult) {
+    throw new Error("Evidenza istruttoria non registrata.");
   }
+  revalidatePath(`/procedimenti/${proposal.procedimentoId}`);
+  return {
+    created: uploaded.created || evidenceResult.created,
+    documentoId: uploaded.document.id,
+    evidenceId: evidenceResult.evidence.id,
+  };
 }

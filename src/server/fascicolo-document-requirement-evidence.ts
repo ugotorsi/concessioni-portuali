@@ -1,18 +1,20 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { createAuditLogInTransaction } from "@/server/audit/auditLog";
 
-export async function createFascicoloDocumentRequirementEvidenceInTransaction(
+export interface CreateFascicoloDocumentRequirementEvidenceInput {
+  canonicalEnteId: string;
+  proposalId: string;
+  documentoId: string;
+  concessioneId: string;
+  createdByUserId: string | null;
+  createdByActorId: string;
+  createdByEmail: string;
+  createdByRole: string;
+}
+
+export async function createFascicoloDocumentRequirementEvidenceRecordInTransaction(
   tx: Prisma.TransactionClient,
-  input: {
-    canonicalEnteId: string;
-    proposalId: string;
-    documentoId: string;
-    concessioneId: string;
-    createdByUserId: string | null;
-    createdByActorId: string;
-    createdByEmail: string;
-    createdByRole: string;
-  },
+  input: CreateFascicoloDocumentRequirementEvidenceInput,
 ) {
   const inserted = await tx.fascicoloDocumentRequirementEvidence.createMany({
     data: {
@@ -40,26 +42,41 @@ export async function createFascicoloDocumentRequirementEvidenceInTransaction(
     throw new Error("Associazione revocata: la riassociazione non e consentita.");
   }
 
-  if (inserted.count === 1) {
-    await createAuditLogInTransaction(tx, {
-      azione: "FASCICOLO_DOCUMENT_REQUIREMENT_EVIDENCE_CREATE",
-      entita: "FascicoloDocumentRequirementEvidence",
-      entitaId: evidence.id,
-      enteId: input.canonicalEnteId,
-      concessioneId: input.concessioneId,
-      esito: "SUCCESS",
-      actor: {
-        userId: input.createdByUserId,
-        userEmail: input.createdByEmail,
-        userRole: input.createdByRole,
-      },
-      metadata: {
-        evidenceId: evidence.id,
-        proposalId: input.proposalId,
-        documentoId: input.documentoId,
-      },
-    });
-  }
-
   return { created: inserted.count === 1, evidence };
+}
+
+export async function createFascicoloDocumentRequirementEvidenceAuditInTransaction(
+  tx: Prisma.TransactionClient,
+  input: CreateFascicoloDocumentRequirementEvidenceInput,
+  evidenceId: string,
+): Promise<void> {
+  await createAuditLogInTransaction(tx, {
+    azione: "FASCICOLO_DOCUMENT_REQUIREMENT_EVIDENCE_CREATE",
+    entita: "FascicoloDocumentRequirementEvidence",
+    entitaId: evidenceId,
+    enteId: input.canonicalEnteId,
+    concessioneId: input.concessioneId,
+    esito: "SUCCESS",
+    actor: {
+      userId: input.createdByUserId,
+      userEmail: input.createdByEmail,
+      userRole: input.createdByRole,
+    },
+    metadata: {
+      evidenceId,
+      proposalId: input.proposalId,
+      documentoId: input.documentoId,
+    },
+  });
+}
+
+export async function createFascicoloDocumentRequirementEvidenceInTransaction(
+  tx: Prisma.TransactionClient,
+  input: CreateFascicoloDocumentRequirementEvidenceInput,
+) {
+  const result = await createFascicoloDocumentRequirementEvidenceRecordInTransaction(tx, input);
+  if (result.created) {
+    await createFascicoloDocumentRequirementEvidenceAuditInTransaction(tx, input, result.evidence.id);
+  }
+  return result;
 }

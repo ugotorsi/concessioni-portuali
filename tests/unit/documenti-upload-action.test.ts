@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const requireRoleMock = vi.hoisted(() => vi.fn());
@@ -6,15 +8,21 @@ const getCurrentTenantContextMock = vi.hoisted(() => vi.fn());
 const requireTenantAccessMock = vi.hoisted(() => vi.fn());
 const auditFailureMock = vi.hoisted(() => vi.fn());
 const auditSuccessMock = vi.hoisted(() => vi.fn());
+const auditInTxMock = vi.hoisted(() => vi.fn());
 const uploadDocumentMock = vi.hoisted(() => vi.fn());
-const storeDocumentFileMock = vi.hoisted(() => vi.fn());
-const checksumMock = vi.hoisted(() => vi.fn());
+const createDocumentFileMock = vi.hoisted(() => vi.fn());
+const createVersionMock = vi.hoisted(() => vi.fn());
+const reconcileVersionMock = vi.hoisted(() => vi.fn());
 const revalidatePathMock = vi.hoisted(() => vi.fn());
 const redirectMock = vi.hoisted(() => vi.fn());
 
+const txMock = vi.hoisted(() => ({
+  documento: { create: vi.fn(), update: vi.fn() },
+}));
 const prismaMock = vi.hoisted(() => ({
   procedimento: { findUnique: vi.fn() },
   documento: { create: vi.fn(), findUnique: vi.fn(), update: vi.fn() },
+  $transaction: vi.fn(),
 }));
 
 vi.mock("@/lib/auth", () => ({
@@ -31,13 +39,14 @@ vi.mock("@/lib/tenant-auth", () => ({
 vi.mock("@/server/audit/auditLog", () => ({
   auditFailure: auditFailureMock,
   auditSuccess: auditSuccessMock,
-  createAuditLogInTransaction: vi.fn(),
+  createAuditLogInTransaction: auditInTxMock,
 }));
 vi.mock("@/server/documents/storage", () => ({
-  computeDocumentFileSha256: checksumMock,
-  storeDocumentFile: storeDocumentFileMock,
-  storeDocumentFileAtKey: vi.fn(),
-  deleteDocumentFile: vi.fn(),
+  createDocumentFileIfAbsent: createDocumentFileMock,
+}));
+vi.mock("@/server/documents/sourceFileVersion", () => ({
+  createSourceFileVersionInTransaction: createVersionMock,
+  reconcileSourceFileVersionIdentityRaceAfterRollback: reconcileVersionMock,
 }));
 vi.mock("@/server/documents/validation", () => ({
   buildLinkedEntityMetadata: vi.fn(() => ({ procedimentoId: "procedimento-1" })),
@@ -128,6 +137,11 @@ describe("createDocumentoUploadAction", () => {
       reportId: null,
     });
     prismaMock.documento.update.mockResolvedValue({});
+    prismaMock.$transaction.mockImplementation(async (callback) => callback(txMock));
+    txMock.documento.create.mockResolvedValue({ id: "documento-1" });
+    txMock.documento.update.mockResolvedValue({ id: "documento-1", procedimentoId: "procedimento-1" });
+    createVersionMock.mockResolvedValue({ outcome: "CREATED", version: { id: "version-1" } });
+    reconcileVersionMock.mockImplementation(async (_input, error) => { throw error; });
     uploadDocumentMock.mockResolvedValue({
       created: true,
       storageKey: "documento-1/123-verbale.txt",
@@ -190,7 +204,7 @@ describe("createDocumentoUploadAction", () => {
     const { uploadDocument } = await vi.importActual<typeof import("@/server/documents/uploadService")>(
       "@/server/documents/uploadService",
     );
-    storeDocumentFileMock.mockRejectedValue(new DocumentStorageS3Error("Storage S3 PUT failed (TimeoutError).", {
+    createDocumentFileMock.mockRejectedValue(new DocumentStorageS3Error("Storage S3 PUT failed (TimeoutError).", {
       provider: "s3",
       operation: "PUT",
       code: "TimeoutError",
@@ -201,8 +215,6 @@ describe("createDocumentoUploadAction", () => {
       regionConfigured: true,
       forcePathStyle: true,
     }));
-    checksumMock.mockResolvedValue("a".repeat(64));
-
     await expect(uploadDocument({
       documentId: "documento-1",
       file: new File(["contenuto"], "verbale.txt", { type: "text/plain" }),
@@ -235,6 +247,86 @@ describe("createDocumentoUploadAction", () => {
       },
     }));
   });
+
+  it("fails closed before storage when no canonical tenant can be derived", async () => {
+    prismaMock.procedimento.findUnique.mockResolvedValue({
+      id: "procedimento-1",
+      concessione: { enteId: null },
+    });
+
+    await expect(createDocumentoUploadAction(new FormData())).rejects.toThrow("Tenant canonico non derivabile");
+    expect(uploadDocumentMock).not.toHaveBeenCalled();
+    expect(auditFailureMock).toHaveBeenCalledWith(expect.objectContaining({
+      metadata: expect.objectContaining({ reason: "CANONICAL_TENANT_REQUIRED" }),
+    }));
+  });
+
+  it.each([["CREATED", true], ["ALREADY_EXISTS", false]] as const)(
+    "uses one normalized buffer and conditional storage for generic %s",
+    async (disposition, ownedByAttempt) => {
+      const { uploadDocument } = await vi.importActual<typeof import("@/server/documents/uploadService")>(
+        "@/server/documents/uploadService",
+      );
+      const file = new File(["contenuto"], "verbale.txt", { type: " TEXT/PLAIN " });
+      const arrayBufferSpy = vi.spyOn(file, "arrayBuffer");
+      const checksum = createHash("sha256").update("contenuto").digest("hex");
+      const storageKey = `documents/ente-1/documento-1/${checksum}`;
+      createDocumentFileMock.mockResolvedValue({
+        disposition,
+        ownedByAttempt,
+        object: {
+          storageProvider: "local",
+          storageKey,
+          fileName: checksum,
+          bucket: null,
+          sizeBytes: Buffer.byteLength("contenuto"),
+          sha256: checksum,
+          mimeType: "text/plain",
+          originalName: "verbale.txt",
+        },
+      });
+
+      await expect(uploadDocument({
+        documentId: "documento-1",
+        file,
+        actor: { id: "user-1", email: null, role: "ADMIN" },
+        enteId: "ente-1",
+        procedimentoId: "procedimento-1",
+        nome: "verbale.txt",
+        tipologia: "VERBALE",
+        source: "UPLOAD_UTENTE",
+        status: "ATTIVO",
+      })).resolves.toMatchObject({ created: true, storageKey, checksum });
+
+      expect(arrayBufferSpy).toHaveBeenCalledTimes(1);
+      expect(createDocumentFileMock).toHaveBeenCalledWith({
+        storageKey,
+        body: Buffer.from("contenuto"),
+        mimeType: "text/plain",
+        originalName: "verbale.txt",
+        sha256: checksum,
+        sizeBytes: Buffer.byteLength("contenuto"),
+      });
+      expect(createVersionMock).toHaveBeenCalledWith(txMock, expect.objectContaining({
+        documentId: "documento-1",
+        canonicalEnteId: "ente-1",
+        storageKey,
+        sizeBytes: Buffer.byteLength("contenuto"),
+        sha256: checksum,
+        mimeType: "text/plain",
+      }));
+      expect(txMock.documento.update).toHaveBeenCalledWith({
+        where: { id: "documento-1" },
+        data: { currentFileVersionId: "version-1" },
+      });
+      expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+      expect(auditInTxMock).toHaveBeenCalledWith(txMock, expect.objectContaining({
+        azione: "DOCUMENT_UPLOAD",
+        entitaId: "documento-1",
+        esito: "SUCCESS",
+      }));
+    },
+  );
 });
 
 describe("document archive and metadata audit actors", () => {

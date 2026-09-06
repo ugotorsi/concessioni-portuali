@@ -1,11 +1,14 @@
-import { auditFailure, auditSuccess, createAuditLogInTransaction } from "@/server/audit/auditLog";
+import { createHash } from "node:crypto";
+
+import { Prisma } from "@/generated/prisma/client";
+import { auditFailure, createAuditLogInTransaction } from "@/server/audit/auditLog";
 import { prisma } from "@/lib/prisma";
+import { createDocumentFileIfAbsent } from "@/server/documents/storage";
 import {
-  computeDocumentFileSha256,
-  deleteDocumentFile,
-  storeDocumentFile,
-  storeDocumentFileAtKey,
-} from "@/server/documents/storage";
+  createSourceFileVersionInTransaction,
+  reconcileSourceFileVersionIdentityRaceAfterRollback,
+  type CreateSourceFileVersionInput,
+} from "@/server/documents/sourceFileVersion";
 import { DocumentStorageS3Error } from "@/server/documents/storage/s3StorageAdapter";
 import type { StoredDocumentObject } from "@/server/documents/storage/types";
 import { validateUploadFile, type ParsedUploadDocumentInput } from "@/server/documents/validation";
@@ -22,7 +25,7 @@ interface UploadDocumentInput {
   documentId: string;
   file: File;
   actor: UploadActor;
-  enteId: string | null;
+  enteId: string;
   concessioneId?: string | null;
   criticitaId?: string | null;
   procedimentoId?: string | null;
@@ -49,6 +52,11 @@ interface UploadDocumentInput {
     canonicalEnteId: string;
     operationId: string;
   };
+}
+
+interface UploadTransactionExtension<Result> {
+  createRecord(tx: Prisma.TransactionClient): Promise<Result>;
+  writeAudit(tx: Prisma.TransactionClient, result: Result): Promise<void>;
 }
 
 interface UploadedDocumentState {
@@ -111,111 +119,30 @@ async function findDocumentState(documentId: string): Promise<UploadedDocumentSt
   });
 }
 
-export async function recordUploadCleanupFailure(input: {
-  operationId: string;
-  documentId: string;
-  phase: string;
-  provider: string;
-  storageKey: string;
-  cleanupTarget: "DOCUMENTO" | "OBJECT";
-  error: unknown;
-  actor: UploadActor;
-  enteId: string;
-  concessioneId: string;
-}) {
-  const metadata = {
-    operationId: input.operationId,
-    documentoId: input.documentId,
-    phase: input.phase,
-    provider: input.provider,
-    storageKey: input.storageKey,
-    cleanupTarget: input.cleanupTarget,
-    errorClass: input.error instanceof Error ? input.error.name : "UnknownError",
-  };
-
-  try {
-    await auditFailure({
-      azione: "DOCUMENT_UPLOAD_CLEANUP_FAILURE",
-      entita: "Documento",
-      entitaId: input.documentId,
-      enteId: input.enteId,
-      concessioneId: input.concessioneId,
-      actor: { userId: persistedUserId(input.actor.id), userEmail: input.actor.email, userRole: input.actor.role },
-      metadata,
-    });
-  } catch (auditError) {
-    console.error("DOCUMENT_UPLOAD_CLEANUP_FAILURE", {
-      ...metadata,
-      auditErrorClass: auditError instanceof Error ? auditError.name : "UnknownError",
-    });
-  }
-}
-
-export async function recordUploadCompensated(input: {
-  operationId: string;
-  documentId: string;
-  phase: string;
-  provider: string;
-  storageKey: string;
-  reasonClass: string;
-  actor: UploadActor;
-  enteId: string;
-  concessioneId: string;
-}) {
-  const metadata = {
-    operationId: input.operationId,
-    documentoId: input.documentId,
-    phase: input.phase,
-    provider: input.provider,
-    storageKey: input.storageKey,
-    reasonClass: input.reasonClass,
-    cleanupState: "DOCUMENTO_AND_OBJECT_DELETED",
-  };
-
-  try {
-    await auditSuccess({
-      azione: "DOCUMENT_UPLOAD_COMPENSATED",
-      entita: "Documento",
-      entitaId: input.documentId,
-      enteId: input.enteId,
-      concessioneId: input.concessioneId,
-      actor: { userId: persistedUserId(input.actor.id), userEmail: input.actor.email, userRole: input.actor.role },
-      metadata,
-    });
-  } catch (auditError) {
-    console.error("DOCUMENT_UPLOAD_COMPENSATED_AUDIT_FAILURE", {
-      operationId: input.operationId,
-      documentoId: input.documentId,
-      phase: input.phase,
-      cleanupState: metadata.cleanupState,
-      errorClass: auditError instanceof Error ? auditError.name : "UnknownError",
-      errorMessage: auditError instanceof Error ? auditError.message : "Compensation audit write failed.",
-    });
-  }
-}
-
-export async function uploadDocument(input: UploadDocumentInput) {
+export async function uploadDocument<Result = never>(
+  input: UploadDocumentInput & { transactionExtension?: UploadTransactionExtension<Result> },
+) {
   validateUploadFile(input.file);
-  const checksum = await computeDocumentFileSha256(input.file);
-  const deterministicKey = input.deterministicStorage
-    ? `documents/${input.deterministicStorage.canonicalEnteId}/${input.deterministicStorage.operationId}/${checksum}`
-    : null;
-
-  if (deterministicKey) {
-    const existing = await findDocumentState(input.documentId);
-    if (existing) {
-      if (!matchesExisting(existing, input, checksum, deterministicKey)) {
-        throw new Error("Conflitto di idempotenza per il documento richiesto.");
-      }
-      return { created: false, document: existing, storageKey: deterministicKey, checksum };
-    }
+  const body = Buffer.from(await input.file.arrayBuffer());
+  const checksum = createHash("sha256").update(body).digest("hex");
+  const mimeType = input.file.type.trim().toLowerCase();
+  const storageKey = `documents/${input.enteId}/${input.documentId}/${checksum}`;
+  const existing = input.deterministicStorage ? await findDocumentState(input.documentId) : null;
+  if (existing && !matchesExisting(existing, input, checksum, storageKey)) {
+    throw new Error("Conflitto di idempotenza per il documento richiesto.");
   }
 
   let stored: StoredDocumentObject;
   try {
-    stored = deterministicKey
-      ? await storeDocumentFileAtKey({ storageKey: deterministicKey, file: input.file })
-      : await storeDocumentFile({ documentId: input.documentId, file: input.file });
+    const receipt = await createDocumentFileIfAbsent({
+      storageKey,
+      body,
+      mimeType,
+      originalName: input.file.name,
+      sha256: checksum,
+      sizeBytes: body.length,
+    });
+    stored = receipt.object;
   } catch (error) {
     const storageDiagnostics =
       error instanceof DocumentStorageS3Error
@@ -251,9 +178,24 @@ export async function uploadDocument(input: UploadDocumentInput) {
     throw new Error("Caricamento documento non riuscito: errore durante la persistenza storage.");
   }
 
-  try {
-    const document = await prisma.$transaction(async (tx) => {
-      const created = await tx.documento.create({
+  const sourceFileVersionInput: CreateSourceFileVersionInput = {
+    documentId: input.documentId,
+    canonicalEnteId: input.enteId,
+    storageProvider: stored.storageProvider,
+    storageKey: stored.storageKey,
+    storageBucket: stored.bucket,
+    mimeType: stored.mimeType,
+    sizeBytes: stored.sizeBytes,
+    sha256: stored.sha256,
+    createdByUserId: persistedUserId(input.actor.id),
+    createdByActorId: input.actor.id,
+    createdByRole: input.actor.role,
+  };
+
+  const runAtomicUnit = (reusedDocument: UploadedDocumentState | null) => prisma.$transaction(async (tx) => {
+    const created = reusedDocument
+      ? await tx.documento.findUniqueOrThrow({ where: { id: reusedDocument.id } })
+      : await tx.documento.create({
         data: {
           id: input.documentId,
           nome: input.nome,
@@ -301,6 +243,16 @@ export async function uploadDocument(input: UploadDocumentInput) {
         },
       });
 
+    const fileVersion = await createSourceFileVersionInTransaction(tx, sourceFileVersionInput);
+    const document = await tx.documento.update({
+      where: { id: created.id },
+      data: { currentFileVersionId: fileVersion.version.id },
+    });
+    const extensionResult = input.transactionExtension
+      ? await input.transactionExtension.createRecord(tx)
+      : undefined;
+
+    if (!reusedDocument) {
       await createAuditLogInTransaction(tx, {
         azione: "DOCUMENT_UPLOAD",
         entita: "Documento",
@@ -339,37 +291,50 @@ export async function uploadDocument(input: UploadDocumentInput) {
           },
         },
       });
+    }
+    if (input.transactionExtension && extensionResult !== undefined) {
+      await input.transactionExtension.writeAudit(tx, extensionResult);
+    }
 
-      return created;
-    });
+    return { created: !reusedDocument, document, extensionResult };
+  });
 
-    return { created: true, document, storageKey: stored.storageKey, checksum };
+  try {
+    const result = await runAtomicUnit(existing);
+    return { ...result, storageKey: stored.storageKey, checksum };
   } catch (error) {
-    if (deterministicKey) {
-      const concurrent = await findDocumentState(input.documentId);
-      if (concurrent && matchesExisting(concurrent, input, checksum, deterministicKey)) {
-        return { created: false, document: concurrent, storageKey: deterministicKey, checksum };
-      }
-    }
-
+    let sourceFileVersionRace = false;
     try {
-      await deleteDocumentFile(stored.storageKey);
-    } catch (cleanupError) {
-      if (input.enteId && input.concessioneId) {
-        await recordUploadCleanupFailure({
-          operationId: input.documentId,
-          documentId: input.documentId,
-          phase: "DOCUMENTO_TRANSACTION",
-          provider: stored.storageProvider,
-          storageKey: stored.storageKey,
-          cleanupTarget: "OBJECT",
-          error: cleanupError,
-          actor: input.actor,
-          enteId: input.enteId,
-          concessioneId: input.concessioneId,
-        });
+      await reconcileSourceFileVersionIdentityRaceAfterRollback(sourceFileVersionInput, error);
+      sourceFileVersionRace = true;
+    } catch (reconciliationError) {
+      if (reconciliationError !== error) {
+        throw reconciliationError;
       }
     }
-    throw error;
+    if (!input.deterministicStorage || (!sourceFileVersionRace && !isDocumentoIdentityP2002(error))) {
+      throw error;
+    }
+    const concurrent = await findDocumentState(input.documentId);
+    if (!concurrent || !matchesExisting(concurrent, input, checksum, storageKey)) {
+      throw new Error("Conflitto di idempotenza per il documento richiesto.");
+    }
+    const retried = await runAtomicUnit(concurrent);
+    return { ...retried, storageKey: stored.storageKey, checksum };
   }
+}
+
+function isDocumentoIdentityP2002(error: unknown): boolean {
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
+    return false;
+  }
+
+  const meta = error.meta as { modelName?: unknown; target?: unknown } | undefined;
+  if (meta?.modelName !== "Documento") {
+    return false;
+  }
+  const target = meta.target;
+  return target === "Documento_pkey"
+    || target === "id"
+    || (Array.isArray(target) && target.length === 1 && target[0] === "id");
 }

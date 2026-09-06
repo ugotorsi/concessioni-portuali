@@ -235,19 +235,32 @@ export async function createDocumentoUploadAction(formData: FormData) {
   const persistedUserId = resolveDocumentoUploadedByUserId(currentUser?.id);
   const tenantContext = await getCurrentTenantContext();
   const linkedTenant = await resolveLinkedTenantForDocumento(payload);
+  if (!linkedTenant.enteId) {
+    await auditFailure({
+      azione: "DOCUMENT_UPLOAD",
+      entita: "Documento",
+      actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
+      metadata: {
+        reason: "CANONICAL_TENANT_REQUIRED",
+        issue: "Tenant canonico non derivabile dalle entita collegate.",
+      },
+    });
+    throw new Error("Tenant canonico non derivabile per il caricamento documento.");
+  }
+  const canonicalEnteId = linkedTenant.enteId;
 
   if (tenantContext) {
     try {
-      requireTenantAccess(tenantContext, linkedTenant.enteId, {
+      requireTenantAccess(tenantContext, canonicalEnteId, {
         mode: "write",
-        allowWhenEnteMissing: true,
+        allowWhenEnteMissing: false,
       });
     } catch {
       await auditFailure({
         azione: "AUTHZ_DENIED",
         entita: "Documento",
         concessioneId: payload.concessioneId ?? null,
-        enteId: linkedTenant.enteId,
+        enteId: canonicalEnteId,
         actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
         metadata: {
           actionType: "DOCUMENT_UPLOAD",
@@ -262,7 +275,7 @@ export async function createDocumentoUploadAction(formData: FormData) {
     documentId: randomUUID(),
     file: payload.file,
     actor: { id: currentUser?.id ?? STAGING_PREVIEW_ADMIN_ID, email: currentUser?.email ?? null, role },
-    enteId: linkedTenant.enteId,
+    enteId: canonicalEnteId,
     concessioneId: payload.concessioneId,
     criticitaId: payload.criticitaId,
     procedimentoId: payload.procedimentoId,
