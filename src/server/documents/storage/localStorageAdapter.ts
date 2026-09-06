@@ -7,8 +7,10 @@ import type {
   DocumentStorageCreateResult,
   DocumentStorageGetOutput,
   DocumentStoragePutInput,
+  DocumentStorageReadResult,
   StoredDocumentObject,
 } from "./types";
+import { DocumentStorageReadUnavailableError } from "./types";
 
 function assertSafeStorageKey(storageKey: string): string {
   const normalized = storageKey.trim();
@@ -74,6 +76,20 @@ export class LocalStorageAdapter implements DocumentStorageAdapter {
     const body = await fs.readFile(absolutePath);
 
     return { body };
+  }
+
+  async read(storageKey: string): Promise<DocumentStorageReadResult> {
+    const absolutePath = await resolveAbsolutePath(storageKey);
+
+    try {
+      return { disposition: "FOUND", body: await fs.readFile(absolutePath) };
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code ?? "UNKNOWN_FILESYSTEM_ERROR";
+      if (code === "ENOENT") {
+        return { disposition: "MISSING" };
+      }
+      throw new DocumentStorageReadUnavailableError({ provider: "local", code, cause: error });
+    }
   }
 
   async delete(storageKey: string): Promise<void> {

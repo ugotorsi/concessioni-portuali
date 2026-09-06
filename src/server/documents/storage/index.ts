@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import { getDocumentStorageBackend } from "./config";
+import { getDocumentStorageBackend, getS3StorageConfig } from "./config";
 import { LocalStorageAdapter } from "./localStorageAdapter";
 import { S3StorageAdapter } from "./s3StorageAdapter";
 import type {
@@ -8,8 +8,10 @@ import type {
   DocumentStorageBackend,
   DocumentStorageCreateResult,
   DocumentStoragePutInput,
+  DocumentStorageReadResult,
   StoredDocumentObject,
 } from "./types";
+import { DocumentStorageReadCoherenceError } from "./types";
 
 function sanitizeFileName(fileName: string): string {
   const base = fileName.replace(/[^a-zA-Z0-9._-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
@@ -106,6 +108,25 @@ export async function readStoredDocumentWithProvider(storageKey: string): Promis
     body: result.body,
     storageProvider: getActiveDocumentStorageBackend(),
   };
+}
+
+export async function readDocumentFileFromProvider(input: {
+  storageProvider: DocumentStorageBackend;
+  storageKey: string;
+  storageBucket?: string | null;
+}): Promise<DocumentStorageReadResult> {
+  const activeProvider = getDocumentStorageBackend();
+  if (input.storageProvider !== activeProvider) {
+    throw new DocumentStorageReadCoherenceError("PROVIDER_MISMATCH");
+  }
+  if (input.storageProvider === "s3" && input.storageBucket) {
+    const configuredBucket = getS3StorageConfig().bucket;
+    if (input.storageBucket !== configuredBucket) {
+      throw new DocumentStorageReadCoherenceError("BUCKET_MISMATCH");
+    }
+  }
+
+  return getDocumentStorageAdapter().read(input.storageKey);
 }
 
 export async function storedDocumentExists(storageKey: string): Promise<boolean> {

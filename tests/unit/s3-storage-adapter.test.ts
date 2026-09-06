@@ -1,4 +1,4 @@
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { describe, expect, it } from "vitest";
 
 import { DocumentStorageS3Error, S3StorageAdapter } from "@/server/documents/storage/s3StorageAdapter";
@@ -82,6 +82,111 @@ describe("s3 storage adapter exists", () => {
         statusCode: 403,
       },
     });
+  });
+});
+
+describe("s3 storage adapter normalized read", () => {
+  it("uses one GetObject and returns a single Buffer", async () => {
+    configureS3();
+    const adapter = new S3StorageAdapter();
+    const commands: unknown[] = [];
+    Object.defineProperty(adapter, "client", {
+      value: {
+        send: async (command: unknown) => {
+          commands.push(command);
+          return { Body: { transformToByteArray: async () => new Uint8Array(Buffer.from("content")) } };
+        },
+      },
+    });
+
+    await expect(adapter.read("doc/file.txt")).resolves.toEqual({
+      disposition: "FOUND",
+      body: Buffer.from("content"),
+    });
+    expect(commands).toHaveLength(1);
+    expect(commands[0]).toBeInstanceOf(GetObjectCommand);
+  });
+
+  it.each([
+    { name: "NoSuchKey", statusCode: 400 },
+    { name: "NotFound", statusCode: 404 },
+    { name: "Unknown", statusCode: 404 },
+  ])("maps missing object signal to MISSING %#", async ({ name, statusCode }) => {
+    configureS3();
+    const adapter = new S3StorageAdapter();
+    let calls = 0;
+    Object.defineProperty(adapter, "client", {
+      value: {
+        send: async () => {
+          calls += 1;
+          const error = new Error(name) as Error & { $metadata?: { httpStatusCode?: number } };
+          error.name = name;
+          error.$metadata = { httpStatusCode: statusCode };
+          throw error;
+        },
+      },
+    });
+
+    await expect(adapter.read("doc/missing.txt")).resolves.toEqual({ disposition: "MISSING" });
+    expect(calls).toBe(1);
+  });
+
+  it.each([
+    { name: "AccessDenied", statusCode: 403 },
+    { name: "InternalError", statusCode: 500 },
+    { name: "NetworkingError", statusCode: undefined },
+  ])("maps non-missing GET failure to unavailable %#", async ({ name, statusCode }) => {
+    configureS3();
+    const adapter = new S3StorageAdapter();
+    Object.defineProperty(adapter, "client", {
+      value: {
+        send: async () => {
+          const error = new Error(name) as Error & { $metadata?: { httpStatusCode?: number } };
+          error.name = name;
+          error.$metadata = { httpStatusCode: statusCode };
+          throw error;
+        },
+      },
+    });
+
+    await expect(adapter.read("doc/unavailable.txt")).rejects.toMatchObject({
+      name: "DocumentStorageReadUnavailableError",
+      provider: "s3",
+      code: name,
+      statusCode,
+    });
+  });
+
+  it("maps body conversion failure to unavailable without a second GET", async () => {
+    configureS3();
+    const adapter = new S3StorageAdapter();
+    let calls = 0;
+    Object.defineProperty(adapter, "client", {
+      value: {
+        send: async () => {
+          calls += 1;
+          return { Body: { transformToByteArray: async () => { throw new Error("stream failed"); } } };
+        },
+      },
+    });
+
+    await expect(adapter.read("doc/file.txt")).rejects.toMatchObject({
+      name: "DocumentStorageReadUnavailableError",
+      code: "BODY_READ_FAILED",
+    });
+    expect(calls).toBe(1);
+  });
+
+  it("preserves invalid locator rejection before GetObject", async () => {
+    configureS3();
+    const adapter = new S3StorageAdapter();
+    let calls = 0;
+    Object.defineProperty(adapter, "client", {
+      value: { send: async () => { calls += 1; return {}; } },
+    });
+
+    await expect(adapter.read("../outside.txt")).rejects.toThrow("Storage key documento non valido.");
+    expect(calls).toBe(0);
   });
 });
 

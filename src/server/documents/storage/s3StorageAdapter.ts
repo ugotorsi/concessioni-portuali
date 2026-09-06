@@ -12,8 +12,10 @@ import type {
   DocumentStorageCreateResult,
   DocumentStorageGetOutput,
   DocumentStoragePutInput,
+  DocumentStorageReadResult,
   StoredDocumentObject,
 } from "./types";
+import { DocumentStorageReadUnavailableError } from "./types";
 
 type StorageOperation = "PUT" | "GET" | "DELETE" | "HEAD";
 
@@ -223,6 +225,36 @@ export class S3StorageAdapter implements DocumentStorageAdapter {
 
     const body = await bodyToBuffer(response.Body);
     return { body };
+  }
+
+  async read(storageKey: string): Promise<DocumentStorageReadResult> {
+    const safeKey = assertSafeStorageKey(storageKey);
+    let response;
+    try {
+      response = await this.client.send(
+        new GetObjectCommand({
+          Bucket: this.config.bucket,
+          Key: safeKey,
+        }),
+      );
+    } catch (error) {
+      const code = extractErrorCode(error);
+      const statusCode = extractStatusCode(error);
+      if (isNotFoundLike(code, statusCode)) {
+        return { disposition: "MISSING" };
+      }
+      throw new DocumentStorageReadUnavailableError({ provider: "s3", code, statusCode, cause: error });
+    }
+
+    try {
+      return { disposition: "FOUND", body: await bodyToBuffer(response.Body) };
+    } catch (error) {
+      throw new DocumentStorageReadUnavailableError({
+        provider: "s3",
+        code: "BODY_READ_FAILED",
+        cause: error,
+      });
+    }
   }
 
   async delete(storageKey: string): Promise<void> {

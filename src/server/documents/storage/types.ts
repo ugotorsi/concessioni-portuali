@@ -13,6 +13,39 @@ export interface DocumentStorageGetOutput {
   body: Buffer;
 }
 
+export type DocumentStorageReadResult =
+  | { disposition: "FOUND"; body: Buffer }
+  | { disposition: "MISSING" };
+
+export class DocumentStorageReadUnavailableError extends Error {
+  readonly provider: DocumentStorageBackend;
+  readonly code: string;
+  readonly statusCode?: number;
+
+  constructor(input: {
+    provider: DocumentStorageBackend;
+    code: string;
+    statusCode?: number;
+    cause?: unknown;
+  }) {
+    super(`Document storage ${input.provider} read unavailable (${input.code}).`, { cause: input.cause });
+    this.name = "DocumentStorageReadUnavailableError";
+    this.provider = input.provider;
+    this.code = input.code;
+    this.statusCode = input.statusCode;
+  }
+}
+
+export class DocumentStorageReadCoherenceError extends Error {
+  readonly code: "PROVIDER_MISMATCH" | "BUCKET_MISMATCH";
+
+  constructor(code: "PROVIDER_MISMATCH" | "BUCKET_MISMATCH") {
+    super(`Document storage read coherence failed (${code}).`);
+    this.name = "DocumentStorageReadCoherenceError";
+    this.code = code;
+  }
+}
+
 export interface StoredDocumentObject {
   storageProvider: DocumentStorageBackend;
   storageKey: string;
@@ -40,6 +73,7 @@ export type DocumentStorageCreateResult =
 export interface DocumentStorageAdapter {
   put(input: DocumentStoragePutInput): Promise<StoredDocumentObject>;
   createIfAbsent(input: DocumentStoragePutInput): Promise<DocumentStorageCreateResult>;
+  read(storageKey: string): Promise<DocumentStorageReadResult>;
   get(storageKey: string): Promise<DocumentStorageGetOutput>;
   delete(storageKey: string): Promise<void>;
   exists(storageKey: string): Promise<boolean>;
