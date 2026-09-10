@@ -339,6 +339,13 @@ export type IntNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedIntNullableFilter<$PrismaModel> | number | null
 }
 
+export type EnumLegalSourceIdentityScopeKindNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceIdentityScopeKind | Prisma.EnumLegalSourceIdentityScopeKindFieldRefInput<$PrismaModel> | null
+  in?: $Enums.LegalSourceIdentityScopeKind[] | Prisma.ListEnumLegalSourceIdentityScopeKindFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.LegalSourceIdentityScopeKind[] | Prisma.ListEnumLegalSourceIdentityScopeKindFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumLegalSourceIdentityScopeKindNullableFilter<$PrismaModel> | $Enums.LegalSourceIdentityScopeKind | null
+}
+
 export type EnumLegalSourceTypeWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.LegalSourceType | Prisma.EnumLegalSourceTypeFieldRefInput<$PrismaModel>
   in?: $Enums.LegalSourceType[] | Prisma.ListEnumLegalSourceTypeFieldRefInput<$PrismaModel>
@@ -421,6 +428,50 @@ export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
   _sum?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _max?: Prisma.NestedIntNullableFilter<$PrismaModel>
+}
+
+export type EnumLegalSourceIdentityScopeKindNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceIdentityScopeKind | Prisma.EnumLegalSourceIdentityScopeKindFieldRefInput<$PrismaModel> | null
+  in?: $Enums.LegalSourceIdentityScopeKind[] | Prisma.ListEnumLegalSourceIdentityScopeKindFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.LegalSourceIdentityScopeKind[] | Prisma.ListEnumLegalSourceIdentityScopeKindFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumLegalSourceIdentityScopeKindNullableWithAggregatesFilter<$PrismaModel> | $Enums.LegalSourceIdentityScopeKind | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalSourceIdentityScopeKindNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalSourceIdentityScopeKindNullableFilter<$PrismaModel>
+}
+
+export type EnumLegalSourceVersionLifecycleStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceVersionLifecycleStatus | Prisma.EnumLegalSourceVersionLifecycleStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceVersionLifecycleStatus[] | Prisma.ListEnumLegalSourceVersionLifecycleStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceVersionLifecycleStatus[] | Prisma.ListEnumLegalSourceVersionLifecycleStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceVersionLifecycleStatusFilter<$PrismaModel> | $Enums.LegalSourceVersionLifecycleStatus
+}
+
+export type EnumLegalSourceVersionLifecycleStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceVersionLifecycleStatus | Prisma.EnumLegalSourceVersionLifecycleStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceVersionLifecycleStatus[] | Prisma.ListEnumLegalSourceVersionLifecycleStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceVersionLifecycleStatus[] | Prisma.ListEnumLegalSourceVersionLifecycleStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceVersionLifecycleStatusWithAggregatesFilter<$PrismaModel> | $Enums.LegalSourceVersionLifecycleStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalSourceVersionLifecycleStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalSourceVersionLifecycleStatusFilter<$PrismaModel>
+}
+
+export type EnumLegalSourceAcquisitionOutcomeFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceAcquisitionOutcome | Prisma.EnumLegalSourceAcquisitionOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceAcquisitionOutcome[] | Prisma.ListEnumLegalSourceAcquisitionOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceAcquisitionOutcome[] | Prisma.ListEnumLegalSourceAcquisitionOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceAcquisitionOutcomeFilter<$PrismaModel> | $Enums.LegalSourceAcquisitionOutcome
+}
+
+export type EnumLegalSourceAcquisitionOutcomeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceAcquisitionOutcome | Prisma.EnumLegalSourceAcquisitionOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceAcquisitionOutcome[] | Prisma.ListEnumLegalSourceAcquisitionOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceAcquisitionOutcome[] | Prisma.ListEnumLegalSourceAcquisitionOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceAcquisitionOutcomeWithAggregatesFilter<$PrismaModel> | $Enums.LegalSourceAcquisitionOutcome
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalSourceAcquisitionOutcomeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalSourceAcquisitionOutcomeFilter<$PrismaModel>
 }
 
 export type EnumSourceRelationTypeFilter<$PrismaModel = never> = {
@@ -1912,6 +1963,13 @@ export type NestedBoolFilter<$PrismaModel = never> = {
   not?: Prisma.NestedBoolFilter<$PrismaModel> | boolean
 }
 
+export type NestedEnumLegalSourceIdentityScopeKindNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceIdentityScopeKind | Prisma.EnumLegalSourceIdentityScopeKindFieldRefInput<$PrismaModel> | null
+  in?: $Enums.LegalSourceIdentityScopeKind[] | Prisma.ListEnumLegalSourceIdentityScopeKindFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.LegalSourceIdentityScopeKind[] | Prisma.ListEnumLegalSourceIdentityScopeKindFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumLegalSourceIdentityScopeKindNullableFilter<$PrismaModel> | $Enums.LegalSourceIdentityScopeKind | null
+}
+
 export type NestedEnumLegalSourceTypeWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.LegalSourceType | Prisma.EnumLegalSourceTypeFieldRefInput<$PrismaModel>
   in?: $Enums.LegalSourceType[] | Prisma.ListEnumLegalSourceTypeFieldRefInput<$PrismaModel>
@@ -2005,6 +2063,50 @@ export type NestedFloatNullableFilter<$PrismaModel = never> = {
   gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
   gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
   not?: Prisma.NestedFloatNullableFilter<$PrismaModel> | number | null
+}
+
+export type NestedEnumLegalSourceIdentityScopeKindNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceIdentityScopeKind | Prisma.EnumLegalSourceIdentityScopeKindFieldRefInput<$PrismaModel> | null
+  in?: $Enums.LegalSourceIdentityScopeKind[] | Prisma.ListEnumLegalSourceIdentityScopeKindFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.LegalSourceIdentityScopeKind[] | Prisma.ListEnumLegalSourceIdentityScopeKindFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumLegalSourceIdentityScopeKindNullableWithAggregatesFilter<$PrismaModel> | $Enums.LegalSourceIdentityScopeKind | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalSourceIdentityScopeKindNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalSourceIdentityScopeKindNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumLegalSourceVersionLifecycleStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceVersionLifecycleStatus | Prisma.EnumLegalSourceVersionLifecycleStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceVersionLifecycleStatus[] | Prisma.ListEnumLegalSourceVersionLifecycleStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceVersionLifecycleStatus[] | Prisma.ListEnumLegalSourceVersionLifecycleStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceVersionLifecycleStatusFilter<$PrismaModel> | $Enums.LegalSourceVersionLifecycleStatus
+}
+
+export type NestedEnumLegalSourceVersionLifecycleStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceVersionLifecycleStatus | Prisma.EnumLegalSourceVersionLifecycleStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceVersionLifecycleStatus[] | Prisma.ListEnumLegalSourceVersionLifecycleStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceVersionLifecycleStatus[] | Prisma.ListEnumLegalSourceVersionLifecycleStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceVersionLifecycleStatusWithAggregatesFilter<$PrismaModel> | $Enums.LegalSourceVersionLifecycleStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalSourceVersionLifecycleStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalSourceVersionLifecycleStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumLegalSourceAcquisitionOutcomeFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceAcquisitionOutcome | Prisma.EnumLegalSourceAcquisitionOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceAcquisitionOutcome[] | Prisma.ListEnumLegalSourceAcquisitionOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceAcquisitionOutcome[] | Prisma.ListEnumLegalSourceAcquisitionOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceAcquisitionOutcomeFilter<$PrismaModel> | $Enums.LegalSourceAcquisitionOutcome
+}
+
+export type NestedEnumLegalSourceAcquisitionOutcomeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceAcquisitionOutcome | Prisma.EnumLegalSourceAcquisitionOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceAcquisitionOutcome[] | Prisma.ListEnumLegalSourceAcquisitionOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceAcquisitionOutcome[] | Prisma.ListEnumLegalSourceAcquisitionOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceAcquisitionOutcomeWithAggregatesFilter<$PrismaModel> | $Enums.LegalSourceAcquisitionOutcome
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalSourceAcquisitionOutcomeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalSourceAcquisitionOutcomeFilter<$PrismaModel>
 }
 
 export type NestedEnumSourceRelationTypeFilter<$PrismaModel = never> = {

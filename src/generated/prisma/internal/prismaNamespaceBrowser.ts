@@ -57,6 +57,8 @@ export const ModelName = {
   PortArea: 'PortArea',
   ImportRun: 'ImportRun',
   LegalSource: 'LegalSource',
+  LegalSourceVersion: 'LegalSourceVersion',
+  LegalSourceAcquisition: 'LegalSourceAcquisition',
   SourceRelation: 'SourceRelation',
   LegalRule: 'LegalRule',
   DocumentGap: 'DocumentGap',
@@ -214,11 +216,63 @@ export const LegalSourceScalarFieldEnum = {
   authorityId: 'authorityId',
   portId: 'portId',
   importRunId: 'importRunId',
+  identityNamespace: 'identityNamespace',
+  identityScopeKind: 'identityScopeKind',
+  identityScopeKey: 'identityScopeKey',
+  canonicalKey: 'canonicalKey',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type LegalSourceScalarFieldEnum = (typeof LegalSourceScalarFieldEnum)[keyof typeof LegalSourceScalarFieldEnum]
+
+
+export const LegalSourceVersionScalarFieldEnum = {
+  id: 'id',
+  sourceFamilyId: 'sourceFamilyId',
+  observedSha256: 'observedSha256',
+  observedSizeBytes: 'observedSizeBytes',
+  observedMimeType: 'observedMimeType',
+  versionLabel: 'versionLabel',
+  publicationDate: 'publicationDate',
+  effectiveFrom: 'effectiveFrom',
+  effectiveTo: 'effectiveTo',
+  legalLifecycleStatus: 'legalLifecycleStatus',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LegalSourceVersionScalarFieldEnum = (typeof LegalSourceVersionScalarFieldEnum)[keyof typeof LegalSourceVersionScalarFieldEnum]
+
+
+export const LegalSourceAcquisitionScalarFieldEnum = {
+  id: 'id',
+  sourceFamilyId: 'sourceFamilyId',
+  sourceVersionId: 'sourceVersionId',
+  outcome: 'outcome',
+  originClass: 'originClass',
+  providerOrChannel: 'providerOrChannel',
+  originalUrl: 'originalUrl',
+  externalSourceId: 'externalSourceId',
+  artifactLocator: 'artifactLocator',
+  originalFilename: 'originalFilename',
+  acquiredAt: 'acquiredAt',
+  observedSha256: 'observedSha256',
+  declaredSha256: 'declaredSha256',
+  observedSizeBytes: 'observedSizeBytes',
+  declaredSizeBytes: 'declaredSizeBytes',
+  observedMimeType: 'observedMimeType',
+  importRunId: 'importRunId',
+  acquiredByActorId: 'acquiredByActorId',
+  acquiredByProcess: 'acquiredByProcess',
+  transformationType: 'transformationType',
+  transformationVersion: 'transformationVersion',
+  transformedContentSha256: 'transformedContentSha256',
+  failureCode: 'failureCode',
+  createdAt: 'createdAt'
+} as const
+
+export type LegalSourceAcquisitionScalarFieldEnum = (typeof LegalSourceAcquisitionScalarFieldEnum)[keyof typeof LegalSourceAcquisitionScalarFieldEnum]
 
 
 export const SourceRelationScalarFieldEnum = {
@@ -810,6 +864,7 @@ export const NormaFonteScalarFieldEnum = {
   enteEmittente: 'enteEmittente',
   ambito: 'ambito',
   descrizione: 'descrizione',
+  legalSourceId: 'legalSourceId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -827,6 +882,7 @@ export const NormaVersioneScalarFieldEnum = {
   urlTesto: 'urlTesto',
   sintesi: 'sintesi',
   note: 'note',
+  legalSourceVersionId: 'legalSourceVersionId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

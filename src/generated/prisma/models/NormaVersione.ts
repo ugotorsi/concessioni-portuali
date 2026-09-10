@@ -34,6 +34,7 @@ export type NormaVersioneMinAggregateOutputType = {
   urlTesto: string | null
   sintesi: string | null
   note: string | null
+  legalSourceVersionId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -48,6 +49,7 @@ export type NormaVersioneMaxAggregateOutputType = {
   urlTesto: string | null
   sintesi: string | null
   note: string | null
+  legalSourceVersionId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -62,6 +64,7 @@ export type NormaVersioneCountAggregateOutputType = {
   urlTesto: number
   sintesi: number
   note: number
+  legalSourceVersionId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -78,6 +81,7 @@ export type NormaVersioneMinAggregateInputType = {
   urlTesto?: true
   sintesi?: true
   note?: true
+  legalSourceVersionId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -92,6 +96,7 @@ export type NormaVersioneMaxAggregateInputType = {
   urlTesto?: true
   sintesi?: true
   note?: true
+  legalSourceVersionId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -106,6 +111,7 @@ export type NormaVersioneCountAggregateInputType = {
   urlTesto?: true
   sintesi?: true
   note?: true
+  legalSourceVersionId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -193,6 +199,7 @@ export type NormaVersioneGroupByOutputType = {
   urlTesto: string | null
   sintesi: string
   note: string | null
+  legalSourceVersionId: string | null
   createdAt: Date
   updatedAt: Date
   _count: NormaVersioneCountAggregateOutputType | null
@@ -228,9 +235,11 @@ export type NormaVersioneWhereInput = {
   urlTesto?: Prisma.StringNullableFilter<"NormaVersione"> | string | null
   sintesi?: Prisma.StringFilter<"NormaVersione"> | string
   note?: Prisma.StringNullableFilter<"NormaVersione"> | string | null
+  legalSourceVersionId?: Prisma.StringNullableFilter<"NormaVersione"> | string | null
   createdAt?: Prisma.DateTimeFilter<"NormaVersione"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"NormaVersione"> | Date | string
   normaFonte?: Prisma.XOR<Prisma.NormaFonteScalarRelationFilter, Prisma.NormaFonteWhereInput>
+  legalSourceVersion?: Prisma.XOR<Prisma.LegalSourceVersionNullableScalarRelationFilter, Prisma.LegalSourceVersionWhereInput> | null
   impatti?: Prisma.NormaImpattoListRelationFilter
 }
 
@@ -244,9 +253,11 @@ export type NormaVersioneOrderByWithRelationInput = {
   urlTesto?: Prisma.SortOrderInput | Prisma.SortOrder
   sintesi?: Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
+  legalSourceVersionId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   normaFonte?: Prisma.NormaFonteOrderByWithRelationInput
+  legalSourceVersion?: Prisma.LegalSourceVersionOrderByWithRelationInput
   impatti?: Prisma.NormaImpattoOrderByRelationAggregateInput
 }
 
@@ -264,9 +275,11 @@ export type NormaVersioneWhereUniqueInput = Prisma.AtLeast<{
   urlTesto?: Prisma.StringNullableFilter<"NormaVersione"> | string | null
   sintesi?: Prisma.StringFilter<"NormaVersione"> | string
   note?: Prisma.StringNullableFilter<"NormaVersione"> | string | null
+  legalSourceVersionId?: Prisma.StringNullableFilter<"NormaVersione"> | string | null
   createdAt?: Prisma.DateTimeFilter<"NormaVersione"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"NormaVersione"> | Date | string
   normaFonte?: Prisma.XOR<Prisma.NormaFonteScalarRelationFilter, Prisma.NormaFonteWhereInput>
+  legalSourceVersion?: Prisma.XOR<Prisma.LegalSourceVersionNullableScalarRelationFilter, Prisma.LegalSourceVersionWhereInput> | null
   impatti?: Prisma.NormaImpattoListRelationFilter
 }, "id" | "normaFonteId_versione">
 
@@ -280,6 +293,7 @@ export type NormaVersioneOrderByWithAggregationInput = {
   urlTesto?: Prisma.SortOrderInput | Prisma.SortOrder
   sintesi?: Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
+  legalSourceVersionId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.NormaVersioneCountOrderByAggregateInput
@@ -300,6 +314,7 @@ export type NormaVersioneScalarWhereWithAggregatesInput = {
   urlTesto?: Prisma.StringNullableWithAggregatesFilter<"NormaVersione"> | string | null
   sintesi?: Prisma.StringWithAggregatesFilter<"NormaVersione"> | string
   note?: Prisma.StringNullableWithAggregatesFilter<"NormaVersione"> | string | null
+  legalSourceVersionId?: Prisma.StringNullableWithAggregatesFilter<"NormaVersione"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"NormaVersione"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"NormaVersione"> | Date | string
 }
@@ -316,6 +331,7 @@ export type NormaVersioneCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   normaFonte: Prisma.NormaFonteCreateNestedOneWithoutVersioniInput
+  legalSourceVersion?: Prisma.LegalSourceVersionCreateNestedOneWithoutLegacyNormaVersioniInput
   impatti?: Prisma.NormaImpattoCreateNestedManyWithoutNormaVersioneInput
 }
 
@@ -329,6 +345,7 @@ export type NormaVersioneUncheckedCreateInput = {
   urlTesto?: string | null
   sintesi: string
   note?: string | null
+  legalSourceVersionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   impatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutNormaVersioneInput
@@ -346,6 +363,7 @@ export type NormaVersioneUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   normaFonte?: Prisma.NormaFonteUpdateOneRequiredWithoutVersioniNestedInput
+  legalSourceVersion?: Prisma.LegalSourceVersionUpdateOneWithoutLegacyNormaVersioniNestedInput
   impatti?: Prisma.NormaImpattoUpdateManyWithoutNormaVersioneNestedInput
 }
 
@@ -359,6 +377,7 @@ export type NormaVersioneUncheckedUpdateInput = {
   urlTesto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sintesi?: Prisma.StringFieldUpdateOperationsInput | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalSourceVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   impatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutNormaVersioneNestedInput
@@ -374,6 +393,7 @@ export type NormaVersioneCreateManyInput = {
   urlTesto?: string | null
   sintesi: string
   note?: string | null
+  legalSourceVersionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -401,6 +421,7 @@ export type NormaVersioneUncheckedUpdateManyInput = {
   urlTesto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sintesi?: Prisma.StringFieldUpdateOperationsInput | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalSourceVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -430,6 +451,7 @@ export type NormaVersioneCountOrderByAggregateInput = {
   urlTesto?: Prisma.SortOrder
   sintesi?: Prisma.SortOrder
   note?: Prisma.SortOrder
+  legalSourceVersionId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -444,6 +466,7 @@ export type NormaVersioneMaxOrderByAggregateInput = {
   urlTesto?: Prisma.SortOrder
   sintesi?: Prisma.SortOrder
   note?: Prisma.SortOrder
+  legalSourceVersionId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -458,6 +481,7 @@ export type NormaVersioneMinOrderByAggregateInput = {
   urlTesto?: Prisma.SortOrder
   sintesi?: Prisma.SortOrder
   note?: Prisma.SortOrder
+  legalSourceVersionId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -465,6 +489,48 @@ export type NormaVersioneMinOrderByAggregateInput = {
 export type NormaVersioneNullableScalarRelationFilter = {
   is?: Prisma.NormaVersioneWhereInput | null
   isNot?: Prisma.NormaVersioneWhereInput | null
+}
+
+export type NormaVersioneCreateNestedManyWithoutLegalSourceVersionInput = {
+  create?: Prisma.XOR<Prisma.NormaVersioneCreateWithoutLegalSourceVersionInput, Prisma.NormaVersioneUncheckedCreateWithoutLegalSourceVersionInput> | Prisma.NormaVersioneCreateWithoutLegalSourceVersionInput[] | Prisma.NormaVersioneUncheckedCreateWithoutLegalSourceVersionInput[]
+  connectOrCreate?: Prisma.NormaVersioneCreateOrConnectWithoutLegalSourceVersionInput | Prisma.NormaVersioneCreateOrConnectWithoutLegalSourceVersionInput[]
+  createMany?: Prisma.NormaVersioneCreateManyLegalSourceVersionInputEnvelope
+  connect?: Prisma.NormaVersioneWhereUniqueInput | Prisma.NormaVersioneWhereUniqueInput[]
+}
+
+export type NormaVersioneUncheckedCreateNestedManyWithoutLegalSourceVersionInput = {
+  create?: Prisma.XOR<Prisma.NormaVersioneCreateWithoutLegalSourceVersionInput, Prisma.NormaVersioneUncheckedCreateWithoutLegalSourceVersionInput> | Prisma.NormaVersioneCreateWithoutLegalSourceVersionInput[] | Prisma.NormaVersioneUncheckedCreateWithoutLegalSourceVersionInput[]
+  connectOrCreate?: Prisma.NormaVersioneCreateOrConnectWithoutLegalSourceVersionInput | Prisma.NormaVersioneCreateOrConnectWithoutLegalSourceVersionInput[]
+  createMany?: Prisma.NormaVersioneCreateManyLegalSourceVersionInputEnvelope
+  connect?: Prisma.NormaVersioneWhereUniqueInput | Prisma.NormaVersioneWhereUniqueInput[]
+}
+
+export type NormaVersioneUpdateManyWithoutLegalSourceVersionNestedInput = {
+  create?: Prisma.XOR<Prisma.NormaVersioneCreateWithoutLegalSourceVersionInput, Prisma.NormaVersioneUncheckedCreateWithoutLegalSourceVersionInput> | Prisma.NormaVersioneCreateWithoutLegalSourceVersionInput[] | Prisma.NormaVersioneUncheckedCreateWithoutLegalSourceVersionInput[]
+  connectOrCreate?: Prisma.NormaVersioneCreateOrConnectWithoutLegalSourceVersionInput | Prisma.NormaVersioneCreateOrConnectWithoutLegalSourceVersionInput[]
+  upsert?: Prisma.NormaVersioneUpsertWithWhereUniqueWithoutLegalSourceVersionInput | Prisma.NormaVersioneUpsertWithWhereUniqueWithoutLegalSourceVersionInput[]
+  createMany?: Prisma.NormaVersioneCreateManyLegalSourceVersionInputEnvelope
+  set?: Prisma.NormaVersioneWhereUniqueInput | Prisma.NormaVersioneWhereUniqueInput[]
+  disconnect?: Prisma.NormaVersioneWhereUniqueInput | Prisma.NormaVersioneWhereUniqueInput[]
+  delete?: Prisma.NormaVersioneWhereUniqueInput | Prisma.NormaVersioneWhereUniqueInput[]
+  connect?: Prisma.NormaVersioneWhereUniqueInput | Prisma.NormaVersioneWhereUniqueInput[]
+  update?: Prisma.NormaVersioneUpdateWithWhereUniqueWithoutLegalSourceVersionInput | Prisma.NormaVersioneUpdateWithWhereUniqueWithoutLegalSourceVersionInput[]
+  updateMany?: Prisma.NormaVersioneUpdateManyWithWhereWithoutLegalSourceVersionInput | Prisma.NormaVersioneUpdateManyWithWhereWithoutLegalSourceVersionInput[]
+  deleteMany?: Prisma.NormaVersioneScalarWhereInput | Prisma.NormaVersioneScalarWhereInput[]
+}
+
+export type NormaVersioneUncheckedUpdateManyWithoutLegalSourceVersionNestedInput = {
+  create?: Prisma.XOR<Prisma.NormaVersioneCreateWithoutLegalSourceVersionInput, Prisma.NormaVersioneUncheckedCreateWithoutLegalSourceVersionInput> | Prisma.NormaVersioneCreateWithoutLegalSourceVersionInput[] | Prisma.NormaVersioneUncheckedCreateWithoutLegalSourceVersionInput[]
+  connectOrCreate?: Prisma.NormaVersioneCreateOrConnectWithoutLegalSourceVersionInput | Prisma.NormaVersioneCreateOrConnectWithoutLegalSourceVersionInput[]
+  upsert?: Prisma.NormaVersioneUpsertWithWhereUniqueWithoutLegalSourceVersionInput | Prisma.NormaVersioneUpsertWithWhereUniqueWithoutLegalSourceVersionInput[]
+  createMany?: Prisma.NormaVersioneCreateManyLegalSourceVersionInputEnvelope
+  set?: Prisma.NormaVersioneWhereUniqueInput | Prisma.NormaVersioneWhereUniqueInput[]
+  disconnect?: Prisma.NormaVersioneWhereUniqueInput | Prisma.NormaVersioneWhereUniqueInput[]
+  delete?: Prisma.NormaVersioneWhereUniqueInput | Prisma.NormaVersioneWhereUniqueInput[]
+  connect?: Prisma.NormaVersioneWhereUniqueInput | Prisma.NormaVersioneWhereUniqueInput[]
+  update?: Prisma.NormaVersioneUpdateWithWhereUniqueWithoutLegalSourceVersionInput | Prisma.NormaVersioneUpdateWithWhereUniqueWithoutLegalSourceVersionInput[]
+  updateMany?: Prisma.NormaVersioneUpdateManyWithWhereWithoutLegalSourceVersionInput | Prisma.NormaVersioneUpdateManyWithWhereWithoutLegalSourceVersionInput[]
+  deleteMany?: Prisma.NormaVersioneScalarWhereInput | Prisma.NormaVersioneScalarWhereInput[]
 }
 
 export type NormaVersioneCreateNestedManyWithoutNormaFonteInput = {
@@ -529,6 +595,80 @@ export type NormaVersioneUpdateOneWithoutImpattiNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.NormaVersioneUpdateToOneWithWhereWithoutImpattiInput, Prisma.NormaVersioneUpdateWithoutImpattiInput>, Prisma.NormaVersioneUncheckedUpdateWithoutImpattiInput>
 }
 
+export type NormaVersioneCreateWithoutLegalSourceVersionInput = {
+  id?: string
+  versione: string
+  stato: $Enums.StatoNormaVersione
+  dataEntrataVigore: Date | string
+  dataFineVigore?: Date | string | null
+  urlTesto?: string | null
+  sintesi: string
+  note?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  normaFonte: Prisma.NormaFonteCreateNestedOneWithoutVersioniInput
+  impatti?: Prisma.NormaImpattoCreateNestedManyWithoutNormaVersioneInput
+}
+
+export type NormaVersioneUncheckedCreateWithoutLegalSourceVersionInput = {
+  id?: string
+  normaFonteId: string
+  versione: string
+  stato: $Enums.StatoNormaVersione
+  dataEntrataVigore: Date | string
+  dataFineVigore?: Date | string | null
+  urlTesto?: string | null
+  sintesi: string
+  note?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  impatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutNormaVersioneInput
+}
+
+export type NormaVersioneCreateOrConnectWithoutLegalSourceVersionInput = {
+  where: Prisma.NormaVersioneWhereUniqueInput
+  create: Prisma.XOR<Prisma.NormaVersioneCreateWithoutLegalSourceVersionInput, Prisma.NormaVersioneUncheckedCreateWithoutLegalSourceVersionInput>
+}
+
+export type NormaVersioneCreateManyLegalSourceVersionInputEnvelope = {
+  data: Prisma.NormaVersioneCreateManyLegalSourceVersionInput | Prisma.NormaVersioneCreateManyLegalSourceVersionInput[]
+  skipDuplicates?: boolean
+}
+
+export type NormaVersioneUpsertWithWhereUniqueWithoutLegalSourceVersionInput = {
+  where: Prisma.NormaVersioneWhereUniqueInput
+  update: Prisma.XOR<Prisma.NormaVersioneUpdateWithoutLegalSourceVersionInput, Prisma.NormaVersioneUncheckedUpdateWithoutLegalSourceVersionInput>
+  create: Prisma.XOR<Prisma.NormaVersioneCreateWithoutLegalSourceVersionInput, Prisma.NormaVersioneUncheckedCreateWithoutLegalSourceVersionInput>
+}
+
+export type NormaVersioneUpdateWithWhereUniqueWithoutLegalSourceVersionInput = {
+  where: Prisma.NormaVersioneWhereUniqueInput
+  data: Prisma.XOR<Prisma.NormaVersioneUpdateWithoutLegalSourceVersionInput, Prisma.NormaVersioneUncheckedUpdateWithoutLegalSourceVersionInput>
+}
+
+export type NormaVersioneUpdateManyWithWhereWithoutLegalSourceVersionInput = {
+  where: Prisma.NormaVersioneScalarWhereInput
+  data: Prisma.XOR<Prisma.NormaVersioneUpdateManyMutationInput, Prisma.NormaVersioneUncheckedUpdateManyWithoutLegalSourceVersionInput>
+}
+
+export type NormaVersioneScalarWhereInput = {
+  AND?: Prisma.NormaVersioneScalarWhereInput | Prisma.NormaVersioneScalarWhereInput[]
+  OR?: Prisma.NormaVersioneScalarWhereInput[]
+  NOT?: Prisma.NormaVersioneScalarWhereInput | Prisma.NormaVersioneScalarWhereInput[]
+  id?: Prisma.StringFilter<"NormaVersione"> | string
+  normaFonteId?: Prisma.StringFilter<"NormaVersione"> | string
+  versione?: Prisma.StringFilter<"NormaVersione"> | string
+  stato?: Prisma.EnumStatoNormaVersioneFilter<"NormaVersione"> | $Enums.StatoNormaVersione
+  dataEntrataVigore?: Prisma.DateTimeFilter<"NormaVersione"> | Date | string
+  dataFineVigore?: Prisma.DateTimeNullableFilter<"NormaVersione"> | Date | string | null
+  urlTesto?: Prisma.StringNullableFilter<"NormaVersione"> | string | null
+  sintesi?: Prisma.StringFilter<"NormaVersione"> | string
+  note?: Prisma.StringNullableFilter<"NormaVersione"> | string | null
+  legalSourceVersionId?: Prisma.StringNullableFilter<"NormaVersione"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"NormaVersione"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"NormaVersione"> | Date | string
+}
+
 export type NormaVersioneCreateWithoutNormaFonteInput = {
   id?: string
   versione: string
@@ -540,6 +680,7 @@ export type NormaVersioneCreateWithoutNormaFonteInput = {
   note?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  legalSourceVersion?: Prisma.LegalSourceVersionCreateNestedOneWithoutLegacyNormaVersioniInput
   impatti?: Prisma.NormaImpattoCreateNestedManyWithoutNormaVersioneInput
 }
 
@@ -552,6 +693,7 @@ export type NormaVersioneUncheckedCreateWithoutNormaFonteInput = {
   urlTesto?: string | null
   sintesi: string
   note?: string | null
+  legalSourceVersionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   impatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutNormaVersioneInput
@@ -583,23 +725,6 @@ export type NormaVersioneUpdateManyWithWhereWithoutNormaFonteInput = {
   data: Prisma.XOR<Prisma.NormaVersioneUpdateManyMutationInput, Prisma.NormaVersioneUncheckedUpdateManyWithoutNormaFonteInput>
 }
 
-export type NormaVersioneScalarWhereInput = {
-  AND?: Prisma.NormaVersioneScalarWhereInput | Prisma.NormaVersioneScalarWhereInput[]
-  OR?: Prisma.NormaVersioneScalarWhereInput[]
-  NOT?: Prisma.NormaVersioneScalarWhereInput | Prisma.NormaVersioneScalarWhereInput[]
-  id?: Prisma.StringFilter<"NormaVersione"> | string
-  normaFonteId?: Prisma.StringFilter<"NormaVersione"> | string
-  versione?: Prisma.StringFilter<"NormaVersione"> | string
-  stato?: Prisma.EnumStatoNormaVersioneFilter<"NormaVersione"> | $Enums.StatoNormaVersione
-  dataEntrataVigore?: Prisma.DateTimeFilter<"NormaVersione"> | Date | string
-  dataFineVigore?: Prisma.DateTimeNullableFilter<"NormaVersione"> | Date | string | null
-  urlTesto?: Prisma.StringNullableFilter<"NormaVersione"> | string | null
-  sintesi?: Prisma.StringFilter<"NormaVersione"> | string
-  note?: Prisma.StringNullableFilter<"NormaVersione"> | string | null
-  createdAt?: Prisma.DateTimeFilter<"NormaVersione"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"NormaVersione"> | Date | string
-}
-
 export type NormaVersioneCreateWithoutImpattiInput = {
   id?: string
   versione: string
@@ -612,6 +737,7 @@ export type NormaVersioneCreateWithoutImpattiInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   normaFonte: Prisma.NormaFonteCreateNestedOneWithoutVersioniInput
+  legalSourceVersion?: Prisma.LegalSourceVersionCreateNestedOneWithoutLegacyNormaVersioniInput
 }
 
 export type NormaVersioneUncheckedCreateWithoutImpattiInput = {
@@ -624,6 +750,7 @@ export type NormaVersioneUncheckedCreateWithoutImpattiInput = {
   urlTesto?: string | null
   sintesi: string
   note?: string | null
+  legalSourceVersionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -656,9 +783,69 @@ export type NormaVersioneUpdateWithoutImpattiInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   normaFonte?: Prisma.NormaFonteUpdateOneRequiredWithoutVersioniNestedInput
+  legalSourceVersion?: Prisma.LegalSourceVersionUpdateOneWithoutLegacyNormaVersioniNestedInput
 }
 
 export type NormaVersioneUncheckedUpdateWithoutImpattiInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  normaFonteId?: Prisma.StringFieldUpdateOperationsInput | string
+  versione?: Prisma.StringFieldUpdateOperationsInput | string
+  stato?: Prisma.EnumStatoNormaVersioneFieldUpdateOperationsInput | $Enums.StatoNormaVersione
+  dataEntrataVigore?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dataFineVigore?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  urlTesto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sintesi?: Prisma.StringFieldUpdateOperationsInput | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalSourceVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type NormaVersioneCreateManyLegalSourceVersionInput = {
+  id?: string
+  normaFonteId: string
+  versione: string
+  stato: $Enums.StatoNormaVersione
+  dataEntrataVigore: Date | string
+  dataFineVigore?: Date | string | null
+  urlTesto?: string | null
+  sintesi: string
+  note?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type NormaVersioneUpdateWithoutLegalSourceVersionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  versione?: Prisma.StringFieldUpdateOperationsInput | string
+  stato?: Prisma.EnumStatoNormaVersioneFieldUpdateOperationsInput | $Enums.StatoNormaVersione
+  dataEntrataVigore?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dataFineVigore?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  urlTesto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sintesi?: Prisma.StringFieldUpdateOperationsInput | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  normaFonte?: Prisma.NormaFonteUpdateOneRequiredWithoutVersioniNestedInput
+  impatti?: Prisma.NormaImpattoUpdateManyWithoutNormaVersioneNestedInput
+}
+
+export type NormaVersioneUncheckedUpdateWithoutLegalSourceVersionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  normaFonteId?: Prisma.StringFieldUpdateOperationsInput | string
+  versione?: Prisma.StringFieldUpdateOperationsInput | string
+  stato?: Prisma.EnumStatoNormaVersioneFieldUpdateOperationsInput | $Enums.StatoNormaVersione
+  dataEntrataVigore?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dataFineVigore?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  urlTesto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sintesi?: Prisma.StringFieldUpdateOperationsInput | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  impatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutNormaVersioneNestedInput
+}
+
+export type NormaVersioneUncheckedUpdateManyWithoutLegalSourceVersionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   normaFonteId?: Prisma.StringFieldUpdateOperationsInput | string
   versione?: Prisma.StringFieldUpdateOperationsInput | string
@@ -681,6 +868,7 @@ export type NormaVersioneCreateManyNormaFonteInput = {
   urlTesto?: string | null
   sintesi: string
   note?: string | null
+  legalSourceVersionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -696,6 +884,7 @@ export type NormaVersioneUpdateWithoutNormaFonteInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  legalSourceVersion?: Prisma.LegalSourceVersionUpdateOneWithoutLegacyNormaVersioniNestedInput
   impatti?: Prisma.NormaImpattoUpdateManyWithoutNormaVersioneNestedInput
 }
 
@@ -708,6 +897,7 @@ export type NormaVersioneUncheckedUpdateWithoutNormaFonteInput = {
   urlTesto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sintesi?: Prisma.StringFieldUpdateOperationsInput | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalSourceVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   impatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutNormaVersioneNestedInput
@@ -722,6 +912,7 @@ export type NormaVersioneUncheckedUpdateManyWithoutNormaFonteInput = {
   urlTesto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sintesi?: Prisma.StringFieldUpdateOperationsInput | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalSourceVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -767,9 +958,11 @@ export type NormaVersioneSelect<ExtArgs extends runtime.Types.Extensions.Interna
   urlTesto?: boolean
   sintesi?: boolean
   note?: boolean
+  legalSourceVersionId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   normaFonte?: boolean | Prisma.NormaFonteDefaultArgs<ExtArgs>
+  legalSourceVersion?: boolean | Prisma.NormaVersione$legalSourceVersionArgs<ExtArgs>
   impatti?: boolean | Prisma.NormaVersione$impattiArgs<ExtArgs>
   _count?: boolean | Prisma.NormaVersioneCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["normaVersione"]>
@@ -784,9 +977,11 @@ export type NormaVersioneSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   urlTesto?: boolean
   sintesi?: boolean
   note?: boolean
+  legalSourceVersionId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   normaFonte?: boolean | Prisma.NormaFonteDefaultArgs<ExtArgs>
+  legalSourceVersion?: boolean | Prisma.NormaVersione$legalSourceVersionArgs<ExtArgs>
 }, ExtArgs["result"]["normaVersione"]>
 
 export type NormaVersioneSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -799,9 +994,11 @@ export type NormaVersioneSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   urlTesto?: boolean
   sintesi?: boolean
   note?: boolean
+  legalSourceVersionId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   normaFonte?: boolean | Prisma.NormaFonteDefaultArgs<ExtArgs>
+  legalSourceVersion?: boolean | Prisma.NormaVersione$legalSourceVersionArgs<ExtArgs>
 }, ExtArgs["result"]["normaVersione"]>
 
 export type NormaVersioneSelectScalar = {
@@ -814,27 +1011,32 @@ export type NormaVersioneSelectScalar = {
   urlTesto?: boolean
   sintesi?: boolean
   note?: boolean
+  legalSourceVersionId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type NormaVersioneOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "normaFonteId" | "versione" | "stato" | "dataEntrataVigore" | "dataFineVigore" | "urlTesto" | "sintesi" | "note" | "createdAt" | "updatedAt", ExtArgs["result"]["normaVersione"]>
+export type NormaVersioneOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "normaFonteId" | "versione" | "stato" | "dataEntrataVigore" | "dataFineVigore" | "urlTesto" | "sintesi" | "note" | "legalSourceVersionId" | "createdAt" | "updatedAt", ExtArgs["result"]["normaVersione"]>
 export type NormaVersioneInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   normaFonte?: boolean | Prisma.NormaFonteDefaultArgs<ExtArgs>
+  legalSourceVersion?: boolean | Prisma.NormaVersione$legalSourceVersionArgs<ExtArgs>
   impatti?: boolean | Prisma.NormaVersione$impattiArgs<ExtArgs>
   _count?: boolean | Prisma.NormaVersioneCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type NormaVersioneIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   normaFonte?: boolean | Prisma.NormaFonteDefaultArgs<ExtArgs>
+  legalSourceVersion?: boolean | Prisma.NormaVersione$legalSourceVersionArgs<ExtArgs>
 }
 export type NormaVersioneIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   normaFonte?: boolean | Prisma.NormaFonteDefaultArgs<ExtArgs>
+  legalSourceVersion?: boolean | Prisma.NormaVersione$legalSourceVersionArgs<ExtArgs>
 }
 
 export type $NormaVersionePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "NormaVersione"
   objects: {
     normaFonte: Prisma.$NormaFontePayload<ExtArgs>
+    legalSourceVersion: Prisma.$LegalSourceVersionPayload<ExtArgs> | null
     impatti: Prisma.$NormaImpattoPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -847,6 +1049,7 @@ export type $NormaVersionePayload<ExtArgs extends runtime.Types.Extensions.Inter
     urlTesto: string | null
     sintesi: string
     note: string | null
+    legalSourceVersionId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["normaVersione"]>
@@ -1244,6 +1447,7 @@ readonly fields: NormaVersioneFieldRefs;
 export interface Prisma__NormaVersioneClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   normaFonte<T extends Prisma.NormaFonteDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NormaFonteDefaultArgs<ExtArgs>>): Prisma.Prisma__NormaFonteClient<runtime.Types.Result.GetResult<Prisma.$NormaFontePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  legalSourceVersion<T extends Prisma.NormaVersione$legalSourceVersionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NormaVersione$legalSourceVersionArgs<ExtArgs>>): Prisma.Prisma__LegalSourceVersionClient<runtime.Types.Result.GetResult<Prisma.$LegalSourceVersionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   impatti<T extends Prisma.NormaVersione$impattiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NormaVersione$impattiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NormaImpattoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1283,6 +1487,7 @@ export interface NormaVersioneFieldRefs {
   readonly urlTesto: Prisma.FieldRef<"NormaVersione", 'String'>
   readonly sintesi: Prisma.FieldRef<"NormaVersione", 'String'>
   readonly note: Prisma.FieldRef<"NormaVersione", 'String'>
+  readonly legalSourceVersionId: Prisma.FieldRef<"NormaVersione", 'String'>
   readonly createdAt: Prisma.FieldRef<"NormaVersione", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"NormaVersione", 'DateTime'>
 }
@@ -1683,6 +1888,25 @@ export type NormaVersioneDeleteManyArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many NormaVersiones to delete.
    */
   limit?: number
+}
+
+/**
+ * NormaVersione.legalSourceVersion
+ */
+export type NormaVersione$legalSourceVersionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LegalSourceVersion
+   */
+  select?: Prisma.LegalSourceVersionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LegalSourceVersion
+   */
+  omit?: Prisma.LegalSourceVersionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LegalSourceVersionInclude<ExtArgs> | null
+  where?: Prisma.LegalSourceVersionWhereInput
 }
 
 /**

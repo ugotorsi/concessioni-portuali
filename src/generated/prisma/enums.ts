@@ -650,6 +650,38 @@ export const LegalSourceStatus = {
 export type LegalSourceStatus = (typeof LegalSourceStatus)[keyof typeof LegalSourceStatus]
 
 
+export const LegalSourceIdentityScopeKind = {
+  GLOBAL: 'GLOBAL',
+  TENANT: 'TENANT'
+} as const
+
+export type LegalSourceIdentityScopeKind = (typeof LegalSourceIdentityScopeKind)[keyof typeof LegalSourceIdentityScopeKind]
+
+
+export const LegalSourceVersionLifecycleStatus = {
+  CURRENT: 'CURRENT',
+  CURRENT_SUBJECT_TO_REVIEW: 'CURRENT_SUBJECT_TO_REVIEW',
+  PENDING_VALIDITY_CHECK: 'PENDING_VALIDITY_CHECK',
+  HISTORICAL: 'HISTORICAL',
+  SUPERSEDED: 'SUPERSEDED',
+  PARTIALLY_SUPERSEDED: 'PARTIALLY_SUPERSEDED',
+  DRAFT_OR_ONGOING_PROCEDURE: 'DRAFT_OR_ONGOING_PROCEDURE',
+  CASE_SPECIFIC: 'CASE_SPECIFIC'
+} as const
+
+export type LegalSourceVersionLifecycleStatus = (typeof LegalSourceVersionLifecycleStatus)[keyof typeof LegalSourceVersionLifecycleStatus]
+
+
+export const LegalSourceAcquisitionOutcome = {
+  ACQUIRED: 'ACQUIRED',
+  MISSING: 'MISSING',
+  INTEGRITY_MISMATCH: 'INTEGRITY_MISMATCH',
+  FAILED: 'FAILED'
+} as const
+
+export type LegalSourceAcquisitionOutcome = (typeof LegalSourceAcquisitionOutcome)[keyof typeof LegalSourceAcquisitionOutcome]
+
+
 export const LegalSourceRole = {
   NORMATIVE: 'NORMATIVE',
   PROCEDURAL: 'PROCEDURAL',

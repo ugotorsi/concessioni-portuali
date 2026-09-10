@@ -480,6 +480,29 @@ enum LegalSourceStatus {
   MISSING_SOURCE
 }
 
+enum LegalSourceIdentityScopeKind {
+  GLOBAL
+  TENANT
+}
+
+enum LegalSourceVersionLifecycleStatus {
+  CURRENT
+  CURRENT_SUBJECT_TO_REVIEW
+  PENDING_VALIDITY_CHECK
+  HISTORICAL
+  SUPERSEDED
+  PARTIALLY_SUPERSEDED
+  DRAFT_OR_ONGOING_PROCEDURE
+  CASE_SPECIFIC
+}
+
+enum LegalSourceAcquisitionOutcome {
+  ACQUIRED
+  MISSING
+  INTEGRITY_MISMATCH
+  FAILED
+}
+
 enum LegalSourceRole {
   NORMATIVE
   PROCEDURAL
@@ -672,6 +695,7 @@ model ImportRun {
   authority    Authority?    @relation(fields: [authorityId], references: [id], onDelete: SetNull)
   port         Port?         @relation(fields: [portId], references: [id], onDelete: SetNull)
   legalSources LegalSource[]
+  legalSourceAcquisitions LegalSourceAcquisition[]
 
   @@index([packCode])
   @@index([status])
@@ -712,6 +736,10 @@ model LegalSource {
   authorityId          String?
   portId               String?
   importRunId          String?
+  identityNamespace    String?
+  identityScopeKind    LegalSourceIdentityScopeKind?
+  identityScopeKey     String?
+  canonicalKey         String?
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
 
@@ -723,7 +751,11 @@ model LegalSource {
   documentRequirementProposals FascicoloDocumentRequirementProposal[]
   outgoingRelations            SourceRelation[]                       @relation("SourceRelationFrom")
   incomingRelations            SourceRelation[]                       @relation("SourceRelationTo")
+  versions                     LegalSourceVersion[]
+  acquisitions                 LegalSourceAcquisition[]
+  legacyNormaFonti             NormaFonte[]
 
+  @@unique([identityNamespace, identityScopeKey, canonicalKey])
   @@index([sourceType])
   @@index([status])
   @@index([role])
@@ -736,6 +768,68 @@ model LegalSource {
   @@index([portId])
   @@index([effectiveFrom])
   @@index([createdAt])
+}
+
+model LegalSourceVersion {
+  id                   String                            @id @default(cuid())
+  sourceFamilyId       String
+  observedSha256       String                            @db.Char(64)
+  observedSizeBytes    Int
+  observedMimeType     String
+  versionLabel         String?
+  publicationDate      DateTime?
+  effectiveFrom        DateTime?
+  effectiveTo          DateTime?
+  legalLifecycleStatus LegalSourceVersionLifecycleStatus
+  createdAt            DateTime                          @default(now())
+  updatedAt            DateTime                          @updatedAt
+
+  sourceFamily        LegalSource                    @relation(fields: [sourceFamilyId], references: [id], onDelete: Restrict)
+  acquisitions        LegalSourceAcquisition[]
+  legacyNormaVersioni NormaVersione[]
+
+  @@unique([sourceFamilyId, observedSha256])
+  @@unique([id, sourceFamilyId])
+  @@unique([id, sourceFamilyId, observedSha256])
+  @@index([sourceFamilyId, legalLifecycleStatus])
+  @@index([effectiveFrom])
+  @@index([effectiveTo])
+}
+
+model LegalSourceAcquisition {
+  id                       String                        @id @default(cuid())
+  sourceFamilyId           String
+  sourceVersionId          String?
+  outcome                  LegalSourceAcquisitionOutcome
+  originClass              String
+  providerOrChannel        String
+  originalUrl              String?
+  externalSourceId         String?
+  artifactLocator          String?
+  originalFilename         String?
+  acquiredAt               DateTime
+  observedSha256           String?                       @db.Char(64)
+  declaredSha256           String?                       @db.Char(64)
+  observedSizeBytes        Int?
+  declaredSizeBytes        Int?
+  observedMimeType         String?
+  importRunId              String?
+  acquiredByActorId        String?
+  acquiredByProcess        String?
+  transformationType       String?
+  transformationVersion    String?
+  transformedContentSha256 String?                       @db.Char(64)
+  failureCode              String?
+  createdAt                DateTime                      @default(now())
+
+  sourceFamily LegalSource          @relation(fields: [sourceFamilyId], references: [id], onDelete: Restrict)
+  sourceVersion LegalSourceVersion? @relation(fields: [sourceVersionId, sourceFamilyId, observedSha256], references: [id, sourceFamilyId, observedSha256], onDelete: Restrict)
+  importRun     ImportRun?           @relation(fields: [importRunId], references: [id], onDelete: Restrict)
+
+  @@index([sourceFamilyId, acquiredAt])
+  @@index([sourceVersionId])
+  @@index([importRunId])
+  @@index([outcome, acquiredAt])
 }
 
 model SourceRelation {
@@ -1587,12 +1681,15 @@ model NormaFonte {
   enteEmittente String?
   ambito        NormaAmbito
   descrizione   String?
+  legalSourceId String?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
-  versioni NormaVersione[]
-  impatti  NormaImpatto[]
+  legalSource LegalSource?   @relation(fields: [legalSourceId], references: [id], onDelete: Restrict)
+  versioni   NormaVersione[]
+  impatti    NormaImpatto[]
 
+  @@index([legalSourceId])
   @@index([ambito])
   @@index([titolo])
   @@index([createdAt])
@@ -1608,14 +1705,17 @@ model NormaVersione {
   urlTesto          String?
   sintesi           String
   note              String?
+  legalSourceVersionId String?
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
 
-  normaFonte NormaFonte     @relation(fields: [normaFonteId], references: [id], onDelete: Cascade)
-  impatti    NormaImpatto[]
+  normaFonte         NormaFonte          @relation(fields: [normaFonteId], references: [id], onDelete: Cascade)
+  legalSourceVersion LegalSourceVersion? @relation(fields: [legalSourceVersionId], references: [id], onDelete: Restrict)
+  impatti            NormaImpatto[]
 
   @@unique([normaFonteId, versione])
   @@index([normaFonteId])
+  @@index([legalSourceVersionId])
   @@index([stato])
   @@index([dataEntrataVigore])
   @@index([createdAt])

@@ -332,6 +332,7 @@ export type ImportRunWhereInput = {
   authority?: Prisma.XOR<Prisma.AuthorityNullableScalarRelationFilter, Prisma.AuthorityWhereInput> | null
   port?: Prisma.XOR<Prisma.PortNullableScalarRelationFilter, Prisma.PortWhereInput> | null
   legalSources?: Prisma.LegalSourceListRelationFilter
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionListRelationFilter
 }
 
 export type ImportRunOrderByWithRelationInput = {
@@ -357,6 +358,7 @@ export type ImportRunOrderByWithRelationInput = {
   authority?: Prisma.AuthorityOrderByWithRelationInput
   port?: Prisma.PortOrderByWithRelationInput
   legalSources?: Prisma.LegalSourceOrderByRelationAggregateInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionOrderByRelationAggregateInput
 }
 
 export type ImportRunWhereUniqueInput = Prisma.AtLeast<{
@@ -385,6 +387,7 @@ export type ImportRunWhereUniqueInput = Prisma.AtLeast<{
   authority?: Prisma.XOR<Prisma.AuthorityNullableScalarRelationFilter, Prisma.AuthorityWhereInput> | null
   port?: Prisma.XOR<Prisma.PortNullableScalarRelationFilter, Prisma.PortWhereInput> | null
   legalSources?: Prisma.LegalSourceListRelationFilter
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionListRelationFilter
 }, "id">
 
 export type ImportRunOrderByWithAggregationInput = {
@@ -457,6 +460,7 @@ export type ImportRunCreateInput = {
   authority?: Prisma.AuthorityCreateNestedOneWithoutImportRunsInput
   port?: Prisma.PortCreateNestedOneWithoutImportRunsInput
   legalSources?: Prisma.LegalSourceCreateNestedManyWithoutImportRunInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutImportRunInput
 }
 
 export type ImportRunUncheckedCreateInput = {
@@ -479,6 +483,7 @@ export type ImportRunUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   legalSources?: Prisma.LegalSourceUncheckedCreateNestedManyWithoutImportRunInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutImportRunInput
 }
 
 export type ImportRunUpdateInput = {
@@ -501,6 +506,7 @@ export type ImportRunUpdateInput = {
   authority?: Prisma.AuthorityUpdateOneWithoutImportRunsNestedInput
   port?: Prisma.PortUpdateOneWithoutImportRunsNestedInput
   legalSources?: Prisma.LegalSourceUpdateManyWithoutImportRunNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutImportRunNestedInput
 }
 
 export type ImportRunUncheckedUpdateInput = {
@@ -523,6 +529,7 @@ export type ImportRunUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   legalSources?: Prisma.LegalSourceUncheckedUpdateManyWithoutImportRunNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutImportRunNestedInput
 }
 
 export type ImportRunCreateManyInput = {
@@ -833,6 +840,22 @@ export type ImportRunUpdateOneWithoutLegalSourcesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ImportRunUpdateToOneWithWhereWithoutLegalSourcesInput, Prisma.ImportRunUpdateWithoutLegalSourcesInput>, Prisma.ImportRunUncheckedUpdateWithoutLegalSourcesInput>
 }
 
+export type ImportRunCreateNestedOneWithoutLegalSourceAcquisitionsInput = {
+  create?: Prisma.XOR<Prisma.ImportRunCreateWithoutLegalSourceAcquisitionsInput, Prisma.ImportRunUncheckedCreateWithoutLegalSourceAcquisitionsInput>
+  connectOrCreate?: Prisma.ImportRunCreateOrConnectWithoutLegalSourceAcquisitionsInput
+  connect?: Prisma.ImportRunWhereUniqueInput
+}
+
+export type ImportRunUpdateOneWithoutLegalSourceAcquisitionsNestedInput = {
+  create?: Prisma.XOR<Prisma.ImportRunCreateWithoutLegalSourceAcquisitionsInput, Prisma.ImportRunUncheckedCreateWithoutLegalSourceAcquisitionsInput>
+  connectOrCreate?: Prisma.ImportRunCreateOrConnectWithoutLegalSourceAcquisitionsInput
+  upsert?: Prisma.ImportRunUpsertWithoutLegalSourceAcquisitionsInput
+  disconnect?: Prisma.ImportRunWhereInput | boolean
+  delete?: Prisma.ImportRunWhereInput | boolean
+  connect?: Prisma.ImportRunWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ImportRunUpdateToOneWithWhereWithoutLegalSourceAcquisitionsInput, Prisma.ImportRunUpdateWithoutLegalSourceAcquisitionsInput>, Prisma.ImportRunUncheckedUpdateWithoutLegalSourceAcquisitionsInput>
+}
+
 export type ImportRunCreateWithoutEnteInput = {
   id?: string
   packCode: string
@@ -852,6 +875,7 @@ export type ImportRunCreateWithoutEnteInput = {
   authority?: Prisma.AuthorityCreateNestedOneWithoutImportRunsInput
   port?: Prisma.PortCreateNestedOneWithoutImportRunsInput
   legalSources?: Prisma.LegalSourceCreateNestedManyWithoutImportRunInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutImportRunInput
 }
 
 export type ImportRunUncheckedCreateWithoutEnteInput = {
@@ -873,6 +897,7 @@ export type ImportRunUncheckedCreateWithoutEnteInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   legalSources?: Prisma.LegalSourceUncheckedCreateNestedManyWithoutImportRunInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutImportRunInput
 }
 
 export type ImportRunCreateOrConnectWithoutEnteInput = {
@@ -944,6 +969,7 @@ export type ImportRunCreateWithoutAuthorityInput = {
   ente?: Prisma.EnteCreateNestedOneWithoutImportRunsInput
   port?: Prisma.PortCreateNestedOneWithoutImportRunsInput
   legalSources?: Prisma.LegalSourceCreateNestedManyWithoutImportRunInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutImportRunInput
 }
 
 export type ImportRunUncheckedCreateWithoutAuthorityInput = {
@@ -965,6 +991,7 @@ export type ImportRunUncheckedCreateWithoutAuthorityInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   legalSources?: Prisma.LegalSourceUncheckedCreateNestedManyWithoutImportRunInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutImportRunInput
 }
 
 export type ImportRunCreateOrConnectWithoutAuthorityInput = {
@@ -1012,6 +1039,7 @@ export type ImportRunCreateWithoutPortInput = {
   ente?: Prisma.EnteCreateNestedOneWithoutImportRunsInput
   authority?: Prisma.AuthorityCreateNestedOneWithoutImportRunsInput
   legalSources?: Prisma.LegalSourceCreateNestedManyWithoutImportRunInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutImportRunInput
 }
 
 export type ImportRunUncheckedCreateWithoutPortInput = {
@@ -1033,6 +1061,7 @@ export type ImportRunUncheckedCreateWithoutPortInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   legalSources?: Prisma.LegalSourceUncheckedCreateNestedManyWithoutImportRunInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutImportRunInput
 }
 
 export type ImportRunCreateOrConnectWithoutPortInput = {
@@ -1080,6 +1109,7 @@ export type ImportRunCreateWithoutLegalSourcesInput = {
   ente?: Prisma.EnteCreateNestedOneWithoutImportRunsInput
   authority?: Prisma.AuthorityCreateNestedOneWithoutImportRunsInput
   port?: Prisma.PortCreateNestedOneWithoutImportRunsInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutImportRunInput
 }
 
 export type ImportRunUncheckedCreateWithoutLegalSourcesInput = {
@@ -1101,6 +1131,7 @@ export type ImportRunUncheckedCreateWithoutLegalSourcesInput = {
   finishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutImportRunInput
 }
 
 export type ImportRunCreateOrConnectWithoutLegalSourcesInput = {
@@ -1138,6 +1169,7 @@ export type ImportRunUpdateWithoutLegalSourcesInput = {
   ente?: Prisma.EnteUpdateOneWithoutImportRunsNestedInput
   authority?: Prisma.AuthorityUpdateOneWithoutImportRunsNestedInput
   port?: Prisma.PortUpdateOneWithoutImportRunsNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutImportRunNestedInput
 }
 
 export type ImportRunUncheckedUpdateWithoutLegalSourcesInput = {
@@ -1159,6 +1191,111 @@ export type ImportRunUncheckedUpdateWithoutLegalSourcesInput = {
   finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutImportRunNestedInput
+}
+
+export type ImportRunCreateWithoutLegalSourceAcquisitionsInput = {
+  id?: string
+  packCode: string
+  packVersion: string
+  manifestPath: string
+  status?: $Enums.ImportRunStatus
+  sourceCount?: number
+  ruleCount?: number
+  relationCount?: number
+  gapCount?: number
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  errorMessage?: string | null
+  startedAt?: Date | string
+  finishedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  ente?: Prisma.EnteCreateNestedOneWithoutImportRunsInput
+  authority?: Prisma.AuthorityCreateNestedOneWithoutImportRunsInput
+  port?: Prisma.PortCreateNestedOneWithoutImportRunsInput
+  legalSources?: Prisma.LegalSourceCreateNestedManyWithoutImportRunInput
+}
+
+export type ImportRunUncheckedCreateWithoutLegalSourceAcquisitionsInput = {
+  id?: string
+  packCode: string
+  packVersion: string
+  manifestPath: string
+  status?: $Enums.ImportRunStatus
+  sourceCount?: number
+  ruleCount?: number
+  relationCount?: number
+  gapCount?: number
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  errorMessage?: string | null
+  enteId?: string | null
+  authorityId?: string | null
+  portId?: string | null
+  startedAt?: Date | string
+  finishedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  legalSources?: Prisma.LegalSourceUncheckedCreateNestedManyWithoutImportRunInput
+}
+
+export type ImportRunCreateOrConnectWithoutLegalSourceAcquisitionsInput = {
+  where: Prisma.ImportRunWhereUniqueInput
+  create: Prisma.XOR<Prisma.ImportRunCreateWithoutLegalSourceAcquisitionsInput, Prisma.ImportRunUncheckedCreateWithoutLegalSourceAcquisitionsInput>
+}
+
+export type ImportRunUpsertWithoutLegalSourceAcquisitionsInput = {
+  update: Prisma.XOR<Prisma.ImportRunUpdateWithoutLegalSourceAcquisitionsInput, Prisma.ImportRunUncheckedUpdateWithoutLegalSourceAcquisitionsInput>
+  create: Prisma.XOR<Prisma.ImportRunCreateWithoutLegalSourceAcquisitionsInput, Prisma.ImportRunUncheckedCreateWithoutLegalSourceAcquisitionsInput>
+  where?: Prisma.ImportRunWhereInput
+}
+
+export type ImportRunUpdateToOneWithWhereWithoutLegalSourceAcquisitionsInput = {
+  where?: Prisma.ImportRunWhereInput
+  data: Prisma.XOR<Prisma.ImportRunUpdateWithoutLegalSourceAcquisitionsInput, Prisma.ImportRunUncheckedUpdateWithoutLegalSourceAcquisitionsInput>
+}
+
+export type ImportRunUpdateWithoutLegalSourceAcquisitionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  packCode?: Prisma.StringFieldUpdateOperationsInput | string
+  packVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  manifestPath?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumImportRunStatusFieldUpdateOperationsInput | $Enums.ImportRunStatus
+  sourceCount?: Prisma.IntFieldUpdateOperationsInput | number
+  ruleCount?: Prisma.IntFieldUpdateOperationsInput | number
+  relationCount?: Prisma.IntFieldUpdateOperationsInput | number
+  gapCount?: Prisma.IntFieldUpdateOperationsInput | number
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ente?: Prisma.EnteUpdateOneWithoutImportRunsNestedInput
+  authority?: Prisma.AuthorityUpdateOneWithoutImportRunsNestedInput
+  port?: Prisma.PortUpdateOneWithoutImportRunsNestedInput
+  legalSources?: Prisma.LegalSourceUpdateManyWithoutImportRunNestedInput
+}
+
+export type ImportRunUncheckedUpdateWithoutLegalSourceAcquisitionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  packCode?: Prisma.StringFieldUpdateOperationsInput | string
+  packVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  manifestPath?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumImportRunStatusFieldUpdateOperationsInput | $Enums.ImportRunStatus
+  sourceCount?: Prisma.IntFieldUpdateOperationsInput | number
+  ruleCount?: Prisma.IntFieldUpdateOperationsInput | number
+  relationCount?: Prisma.IntFieldUpdateOperationsInput | number
+  gapCount?: Prisma.IntFieldUpdateOperationsInput | number
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  legalSources?: Prisma.LegalSourceUncheckedUpdateManyWithoutImportRunNestedInput
 }
 
 export type ImportRunCreateManyEnteInput = {
@@ -1200,6 +1337,7 @@ export type ImportRunUpdateWithoutEnteInput = {
   authority?: Prisma.AuthorityUpdateOneWithoutImportRunsNestedInput
   port?: Prisma.PortUpdateOneWithoutImportRunsNestedInput
   legalSources?: Prisma.LegalSourceUpdateManyWithoutImportRunNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutImportRunNestedInput
 }
 
 export type ImportRunUncheckedUpdateWithoutEnteInput = {
@@ -1221,6 +1359,7 @@ export type ImportRunUncheckedUpdateWithoutEnteInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   legalSources?: Prisma.LegalSourceUncheckedUpdateManyWithoutImportRunNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutImportRunNestedInput
 }
 
 export type ImportRunUncheckedUpdateManyWithoutEnteInput = {
@@ -1282,6 +1421,7 @@ export type ImportRunUpdateWithoutAuthorityInput = {
   ente?: Prisma.EnteUpdateOneWithoutImportRunsNestedInput
   port?: Prisma.PortUpdateOneWithoutImportRunsNestedInput
   legalSources?: Prisma.LegalSourceUpdateManyWithoutImportRunNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutImportRunNestedInput
 }
 
 export type ImportRunUncheckedUpdateWithoutAuthorityInput = {
@@ -1303,6 +1443,7 @@ export type ImportRunUncheckedUpdateWithoutAuthorityInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   legalSources?: Prisma.LegalSourceUncheckedUpdateManyWithoutImportRunNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutImportRunNestedInput
 }
 
 export type ImportRunUncheckedUpdateManyWithoutAuthorityInput = {
@@ -1364,6 +1505,7 @@ export type ImportRunUpdateWithoutPortInput = {
   ente?: Prisma.EnteUpdateOneWithoutImportRunsNestedInput
   authority?: Prisma.AuthorityUpdateOneWithoutImportRunsNestedInput
   legalSources?: Prisma.LegalSourceUpdateManyWithoutImportRunNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutImportRunNestedInput
 }
 
 export type ImportRunUncheckedUpdateWithoutPortInput = {
@@ -1385,6 +1527,7 @@ export type ImportRunUncheckedUpdateWithoutPortInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   legalSources?: Prisma.LegalSourceUncheckedUpdateManyWithoutImportRunNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutImportRunNestedInput
 }
 
 export type ImportRunUncheckedUpdateManyWithoutPortInput = {
@@ -1414,10 +1557,12 @@ export type ImportRunUncheckedUpdateManyWithoutPortInput = {
 
 export type ImportRunCountOutputType = {
   legalSources: number
+  legalSourceAcquisitions: number
 }
 
 export type ImportRunCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   legalSources?: boolean | ImportRunCountOutputTypeCountLegalSourcesArgs
+  legalSourceAcquisitions?: boolean | ImportRunCountOutputTypeCountLegalSourceAcquisitionsArgs
 }
 
 /**
@@ -1435,6 +1580,13 @@ export type ImportRunCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Ex
  */
 export type ImportRunCountOutputTypeCountLegalSourcesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.LegalSourceWhereInput
+}
+
+/**
+ * ImportRunCountOutputType without action
+ */
+export type ImportRunCountOutputTypeCountLegalSourceAcquisitionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LegalSourceAcquisitionWhereInput
 }
 
 
@@ -1461,6 +1613,7 @@ export type ImportRunSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   authority?: boolean | Prisma.ImportRun$authorityArgs<ExtArgs>
   port?: boolean | Prisma.ImportRun$portArgs<ExtArgs>
   legalSources?: boolean | Prisma.ImportRun$legalSourcesArgs<ExtArgs>
+  legalSourceAcquisitions?: boolean | Prisma.ImportRun$legalSourceAcquisitionsArgs<ExtArgs>
   _count?: boolean | Prisma.ImportRunCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["importRun"]>
 
@@ -1539,6 +1692,7 @@ export type ImportRunInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
   authority?: boolean | Prisma.ImportRun$authorityArgs<ExtArgs>
   port?: boolean | Prisma.ImportRun$portArgs<ExtArgs>
   legalSources?: boolean | Prisma.ImportRun$legalSourcesArgs<ExtArgs>
+  legalSourceAcquisitions?: boolean | Prisma.ImportRun$legalSourceAcquisitionsArgs<ExtArgs>
   _count?: boolean | Prisma.ImportRunCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ImportRunIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1559,6 +1713,7 @@ export type $ImportRunPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     authority: Prisma.$AuthorityPayload<ExtArgs> | null
     port: Prisma.$PortPayload<ExtArgs> | null
     legalSources: Prisma.$LegalSourcePayload<ExtArgs>[]
+    legalSourceAcquisitions: Prisma.$LegalSourceAcquisitionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1977,6 +2132,7 @@ export interface Prisma__ImportRunClient<T, Null = never, ExtArgs extends runtim
   authority<T extends Prisma.ImportRun$authorityArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ImportRun$authorityArgs<ExtArgs>>): Prisma.Prisma__AuthorityClient<runtime.Types.Result.GetResult<Prisma.$AuthorityPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   port<T extends Prisma.ImportRun$portArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ImportRun$portArgs<ExtArgs>>): Prisma.Prisma__PortClient<runtime.Types.Result.GetResult<Prisma.$PortPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   legalSources<T extends Prisma.ImportRun$legalSourcesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ImportRun$legalSourcesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LegalSourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  legalSourceAcquisitions<T extends Prisma.ImportRun$legalSourceAcquisitionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ImportRun$legalSourceAcquisitionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LegalSourceAcquisitionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2503,6 +2659,30 @@ export type ImportRun$legalSourcesArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.LegalSourceScalarFieldEnum | Prisma.LegalSourceScalarFieldEnum[]
+}
+
+/**
+ * ImportRun.legalSourceAcquisitions
+ */
+export type ImportRun$legalSourceAcquisitionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LegalSourceAcquisition
+   */
+  select?: Prisma.LegalSourceAcquisitionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LegalSourceAcquisition
+   */
+  omit?: Prisma.LegalSourceAcquisitionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LegalSourceAcquisitionInclude<ExtArgs> | null
+  where?: Prisma.LegalSourceAcquisitionWhereInput
+  orderBy?: Prisma.LegalSourceAcquisitionOrderByWithRelationInput | Prisma.LegalSourceAcquisitionOrderByWithRelationInput[]
+  cursor?: Prisma.LegalSourceAcquisitionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LegalSourceAcquisitionScalarFieldEnum | Prisma.LegalSourceAcquisitionScalarFieldEnum[]
 }
 
 /**

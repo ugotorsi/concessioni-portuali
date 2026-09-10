@@ -48,6 +48,16 @@ export type ImportRun = Prisma.ImportRunModel
  */
 export type LegalSource = Prisma.LegalSourceModel
 /**
+ * Model LegalSourceVersion
+ * 
+ */
+export type LegalSourceVersion = Prisma.LegalSourceVersionModel
+/**
+ * Model LegalSourceAcquisition
+ * 
+ */
+export type LegalSourceAcquisition = Prisma.LegalSourceAcquisitionModel
+/**
  * Model SourceRelation
  * 
  */
