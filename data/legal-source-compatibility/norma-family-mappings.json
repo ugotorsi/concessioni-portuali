@@ -1,0 +1,28 @@
+{
+  "policyVersion": "B2C9_BLOCK_2A_V1",
+  "rules": [
+    {
+      "normaFonteCodice": "ART_18_L84_1994",
+      "target": {
+        "sourceKey": "L-84-1994",
+        "expectedTitle": "L. 28 gennaio 1994 n. 84",
+        "expectedSourceType": "LEGGE",
+        "expectedSourceNumber": "84",
+        "expectedSourceDate": "1994-01-28T00:00:00.000Z"
+      },
+      "evidence": {
+        "kind": "REPOSITORY_CURATED",
+        "description": "The canonical seed defines L-84-1994 as L. 28 gennaio 1994 n. 84; the legacy seed defines ART_18_L84_1994 as article 18 of that act.",
+        "references": [
+          "prisma/seed.ts:261",
+          "prisma/seed.ts:1801",
+          "src/server/fascicolo-document-requirements/types.ts:3"
+        ]
+      },
+      "legacyProvisionLocator": {
+        "article": "18",
+        "legacyCode": "ART_18_L84_1994"
+      }
+    }
+  ]
+}
