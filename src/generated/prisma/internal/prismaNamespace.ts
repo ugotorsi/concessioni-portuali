@@ -390,6 +390,8 @@ export const ModelName = {
   PortArea: 'PortArea',
   ImportRun: 'ImportRun',
   LegalSource: 'LegalSource',
+  LegalExpressionVersion: 'LegalExpressionVersion',
+  LegalSourceIdentityAssertion: 'LegalSourceIdentityAssertion',
   LegalSourceVersion: 'LegalSourceVersion',
   LegalSourceAcquisition: 'LegalSourceAcquisition',
   SourceRelation: 'SourceRelation',
@@ -438,7 +440,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -883,6 +885,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.LegalSourceCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.LegalSourceCountAggregateOutputType> | number
+        }
+      }
+    }
+    LegalExpressionVersion: {
+      payload: Prisma.$LegalExpressionVersionPayload<ExtArgs>
+      fields: Prisma.LegalExpressionVersionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LegalExpressionVersionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalExpressionVersionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LegalExpressionVersionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalExpressionVersionPayload>
+        }
+        findFirst: {
+          args: Prisma.LegalExpressionVersionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalExpressionVersionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LegalExpressionVersionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalExpressionVersionPayload>
+        }
+        findMany: {
+          args: Prisma.LegalExpressionVersionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalExpressionVersionPayload>[]
+        }
+        create: {
+          args: Prisma.LegalExpressionVersionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalExpressionVersionPayload>
+        }
+        createMany: {
+          args: Prisma.LegalExpressionVersionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LegalExpressionVersionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalExpressionVersionPayload>[]
+        }
+        delete: {
+          args: Prisma.LegalExpressionVersionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalExpressionVersionPayload>
+        }
+        update: {
+          args: Prisma.LegalExpressionVersionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalExpressionVersionPayload>
+        }
+        deleteMany: {
+          args: Prisma.LegalExpressionVersionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LegalExpressionVersionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LegalExpressionVersionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalExpressionVersionPayload>[]
+        }
+        upsert: {
+          args: Prisma.LegalExpressionVersionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalExpressionVersionPayload>
+        }
+        aggregate: {
+          args: Prisma.LegalExpressionVersionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLegalExpressionVersion>
+        }
+        groupBy: {
+          args: Prisma.LegalExpressionVersionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LegalExpressionVersionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LegalExpressionVersionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LegalExpressionVersionCountAggregateOutputType> | number
+        }
+      }
+    }
+    LegalSourceIdentityAssertion: {
+      payload: Prisma.$LegalSourceIdentityAssertionPayload<ExtArgs>
+      fields: Prisma.LegalSourceIdentityAssertionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LegalSourceIdentityAssertionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceIdentityAssertionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LegalSourceIdentityAssertionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceIdentityAssertionPayload>
+        }
+        findFirst: {
+          args: Prisma.LegalSourceIdentityAssertionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceIdentityAssertionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LegalSourceIdentityAssertionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceIdentityAssertionPayload>
+        }
+        findMany: {
+          args: Prisma.LegalSourceIdentityAssertionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceIdentityAssertionPayload>[]
+        }
+        create: {
+          args: Prisma.LegalSourceIdentityAssertionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceIdentityAssertionPayload>
+        }
+        createMany: {
+          args: Prisma.LegalSourceIdentityAssertionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LegalSourceIdentityAssertionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceIdentityAssertionPayload>[]
+        }
+        delete: {
+          args: Prisma.LegalSourceIdentityAssertionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceIdentityAssertionPayload>
+        }
+        update: {
+          args: Prisma.LegalSourceIdentityAssertionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceIdentityAssertionPayload>
+        }
+        deleteMany: {
+          args: Prisma.LegalSourceIdentityAssertionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LegalSourceIdentityAssertionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LegalSourceIdentityAssertionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceIdentityAssertionPayload>[]
+        }
+        upsert: {
+          args: Prisma.LegalSourceIdentityAssertionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceIdentityAssertionPayload>
+        }
+        aggregate: {
+          args: Prisma.LegalSourceIdentityAssertionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLegalSourceIdentityAssertion>
+        }
+        groupBy: {
+          args: Prisma.LegalSourceIdentityAssertionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LegalSourceIdentityAssertionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LegalSourceIdentityAssertionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LegalSourceIdentityAssertionCountAggregateOutputType> | number
         }
       }
     }
@@ -3447,6 +3597,9 @@ export const LegalSourceScalarFieldEnum = {
   sourceKey: 'sourceKey',
   title: 'title',
   sourceType: 'sourceType',
+  resourceSemanticType: 'resourceSemanticType',
+  legalAuthorityKind: 'legalAuthorityKind',
+  sourceCharacter: 'sourceCharacter',
   status: 'status',
   role: 'role',
   legalRank: 'legalRank',
@@ -3486,9 +3639,44 @@ export const LegalSourceScalarFieldEnum = {
 export type LegalSourceScalarFieldEnum = (typeof LegalSourceScalarFieldEnum)[keyof typeof LegalSourceScalarFieldEnum]
 
 
+export const LegalExpressionVersionScalarFieldEnum = {
+  id: 'id',
+  sourceFamilyId: 'sourceFamilyId',
+  expressionKey: 'expressionKey',
+  publicationDate: 'publicationDate',
+  effectiveFrom: 'effectiveFrom',
+  effectiveTo: 'effectiveTo',
+  expressionStatus: 'expressionStatus',
+  correctionMetadata: 'correctionMetadata',
+  consolidationMetadata: 'consolidationMetadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LegalExpressionVersionScalarFieldEnum = (typeof LegalExpressionVersionScalarFieldEnum)[keyof typeof LegalExpressionVersionScalarFieldEnum]
+
+
+export const LegalSourceIdentityAssertionScalarFieldEnum = {
+  id: 'id',
+  sourceFamilyId: 'sourceFamilyId',
+  identifierScheme: 'identifierScheme',
+  rawValue: 'rawValue',
+  normalizedValue: 'normalizedValue',
+  issuingAuthority: 'issuingAuthority',
+  jurisdiction: 'jurisdiction',
+  verificationStatus: 'verificationStatus',
+  provenanceReference: 'provenanceReference',
+  verifiedAt: 'verifiedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type LegalSourceIdentityAssertionScalarFieldEnum = (typeof LegalSourceIdentityAssertionScalarFieldEnum)[keyof typeof LegalSourceIdentityAssertionScalarFieldEnum]
+
+
 export const LegalSourceVersionScalarFieldEnum = {
   id: 'id',
   sourceFamilyId: 'sourceFamilyId',
+  legalExpressionVersionId: 'legalExpressionVersionId',
   observedSha256: 'observedSha256',
   observedSizeBytes: 'observedSizeBytes',
   observedMimeType: 'observedMimeType',
@@ -4433,6 +4621,48 @@ export type ListEnumLegalSourceTypeFieldRefInput<$PrismaModel> = FieldRefInputTy
 
 
 /**
+ * Reference to a field of type 'ResourceSemanticType'
+ */
+export type EnumResourceSemanticTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ResourceSemanticType'>
+    
+
+
+/**
+ * Reference to a field of type 'ResourceSemanticType[]'
+ */
+export type ListEnumResourceSemanticTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ResourceSemanticType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'LegalAuthorityKind'
+ */
+export type EnumLegalAuthorityKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalAuthorityKind'>
+    
+
+
+/**
+ * Reference to a field of type 'LegalAuthorityKind[]'
+ */
+export type ListEnumLegalAuthorityKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalAuthorityKind[]'>
+    
+
+
+/**
+ * Reference to a field of type 'SourceCharacter'
+ */
+export type EnumSourceCharacterFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SourceCharacter'>
+    
+
+
+/**
+ * Reference to a field of type 'SourceCharacter[]'
+ */
+export type ListEnumSourceCharacterFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SourceCharacter[]'>
+    
+
+
+/**
  * Reference to a field of type 'LegalSourceStatus'
  */
 export type EnumLegalSourceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalSourceStatus'>
@@ -4520,6 +4750,20 @@ export type EnumLegalSourceIdentityScopeKindFieldRefInput<$PrismaModel> = FieldR
  * Reference to a field of type 'LegalSourceIdentityScopeKind[]'
  */
 export type ListEnumLegalSourceIdentityScopeKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalSourceIdentityScopeKind[]'>
+    
+
+
+/**
+ * Reference to a field of type 'LegalSourceIdentityVerificationStatus'
+ */
+export type EnumLegalSourceIdentityVerificationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalSourceIdentityVerificationStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'LegalSourceIdentityVerificationStatus[]'
+ */
+export type ListEnumLegalSourceIdentityVerificationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalSourceIdentityVerificationStatus[]'>
     
 
 
@@ -5464,6 +5708,8 @@ export type GlobalOmitConfig = {
   portArea?: Prisma.PortAreaOmit
   importRun?: Prisma.ImportRunOmit
   legalSource?: Prisma.LegalSourceOmit
+  legalExpressionVersion?: Prisma.LegalExpressionVersionOmit
+  legalSourceIdentityAssertion?: Prisma.LegalSourceIdentityAssertionOmit
   legalSourceVersion?: Prisma.LegalSourceVersionOmit
   legalSourceAcquisition?: Prisma.LegalSourceAcquisitionOmit
   sourceRelation?: Prisma.SourceRelationOmit

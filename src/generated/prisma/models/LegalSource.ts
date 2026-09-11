@@ -39,6 +39,9 @@ export type LegalSourceMinAggregateOutputType = {
   sourceKey: string | null
   title: string | null
   sourceType: $Enums.LegalSourceType | null
+  resourceSemanticType: $Enums.ResourceSemanticType | null
+  legalAuthorityKind: $Enums.LegalAuthorityKind | null
+  sourceCharacter: $Enums.SourceCharacter | null
   status: $Enums.LegalSourceStatus | null
   role: $Enums.LegalSourceRole | null
   legalRank: $Enums.LegalRank | null
@@ -79,6 +82,9 @@ export type LegalSourceMaxAggregateOutputType = {
   sourceKey: string | null
   title: string | null
   sourceType: $Enums.LegalSourceType | null
+  resourceSemanticType: $Enums.ResourceSemanticType | null
+  legalAuthorityKind: $Enums.LegalAuthorityKind | null
+  sourceCharacter: $Enums.SourceCharacter | null
   status: $Enums.LegalSourceStatus | null
   role: $Enums.LegalSourceRole | null
   legalRank: $Enums.LegalRank | null
@@ -119,6 +125,9 @@ export type LegalSourceCountAggregateOutputType = {
   sourceKey: number
   title: number
   sourceType: number
+  resourceSemanticType: number
+  legalAuthorityKind: number
+  sourceCharacter: number
   status: number
   role: number
   legalRank: number
@@ -170,6 +179,9 @@ export type LegalSourceMinAggregateInputType = {
   sourceKey?: true
   title?: true
   sourceType?: true
+  resourceSemanticType?: true
+  legalAuthorityKind?: true
+  sourceCharacter?: true
   status?: true
   role?: true
   legalRank?: true
@@ -210,6 +222,9 @@ export type LegalSourceMaxAggregateInputType = {
   sourceKey?: true
   title?: true
   sourceType?: true
+  resourceSemanticType?: true
+  legalAuthorityKind?: true
+  sourceCharacter?: true
   status?: true
   role?: true
   legalRank?: true
@@ -250,6 +265,9 @@ export type LegalSourceCountAggregateInputType = {
   sourceKey?: true
   title?: true
   sourceType?: true
+  resourceSemanticType?: true
+  legalAuthorityKind?: true
+  sourceCharacter?: true
   status?: true
   role?: true
   legalRank?: true
@@ -378,6 +396,9 @@ export type LegalSourceGroupByOutputType = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType: $Enums.ResourceSemanticType | null
+  legalAuthorityKind: $Enums.LegalAuthorityKind | null
+  sourceCharacter: $Enums.SourceCharacter | null
   status: $Enums.LegalSourceStatus
   role: $Enums.LegalSourceRole
   legalRank: $Enums.LegalRank
@@ -442,6 +463,9 @@ export type LegalSourceWhereInput = {
   sourceKey?: Prisma.StringFilter<"LegalSource"> | string
   title?: Prisma.StringFilter<"LegalSource"> | string
   sourceType?: Prisma.EnumLegalSourceTypeFilter<"LegalSource"> | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.EnumResourceSemanticTypeNullableFilter<"LegalSource"> | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.EnumLegalAuthorityKindNullableFilter<"LegalSource"> | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.EnumSourceCharacterNullableFilter<"LegalSource"> | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFilter<"LegalSource"> | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFilter<"LegalSource"> | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFilter<"LegalSource"> | $Enums.LegalRank
@@ -484,8 +508,10 @@ export type LegalSourceWhereInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalListRelationFilter
   outgoingRelations?: Prisma.SourceRelationListRelationFilter
   incomingRelations?: Prisma.SourceRelationListRelationFilter
+  expressions?: Prisma.LegalExpressionVersionListRelationFilter
   versions?: Prisma.LegalSourceVersionListRelationFilter
   acquisitions?: Prisma.LegalSourceAcquisitionListRelationFilter
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionListRelationFilter
   legacyNormaFonti?: Prisma.NormaFonteListRelationFilter
 }
 
@@ -494,6 +520,9 @@ export type LegalSourceOrderByWithRelationInput = {
   sourceKey?: Prisma.SortOrder
   title?: Prisma.SortOrder
   sourceType?: Prisma.SortOrder
+  resourceSemanticType?: Prisma.SortOrderInput | Prisma.SortOrder
+  legalAuthorityKind?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceCharacter?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   role?: Prisma.SortOrder
   legalRank?: Prisma.SortOrder
@@ -536,8 +565,10 @@ export type LegalSourceOrderByWithRelationInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalOrderByRelationAggregateInput
   outgoingRelations?: Prisma.SourceRelationOrderByRelationAggregateInput
   incomingRelations?: Prisma.SourceRelationOrderByRelationAggregateInput
+  expressions?: Prisma.LegalExpressionVersionOrderByRelationAggregateInput
   versions?: Prisma.LegalSourceVersionOrderByRelationAggregateInput
   acquisitions?: Prisma.LegalSourceAcquisitionOrderByRelationAggregateInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionOrderByRelationAggregateInput
   legacyNormaFonti?: Prisma.NormaFonteOrderByRelationAggregateInput
 }
 
@@ -550,6 +581,9 @@ export type LegalSourceWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.LegalSourceWhereInput | Prisma.LegalSourceWhereInput[]
   title?: Prisma.StringFilter<"LegalSource"> | string
   sourceType?: Prisma.EnumLegalSourceTypeFilter<"LegalSource"> | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.EnumResourceSemanticTypeNullableFilter<"LegalSource"> | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.EnumLegalAuthorityKindNullableFilter<"LegalSource"> | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.EnumSourceCharacterNullableFilter<"LegalSource"> | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFilter<"LegalSource"> | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFilter<"LegalSource"> | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFilter<"LegalSource"> | $Enums.LegalRank
@@ -592,8 +626,10 @@ export type LegalSourceWhereUniqueInput = Prisma.AtLeast<{
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalListRelationFilter
   outgoingRelations?: Prisma.SourceRelationListRelationFilter
   incomingRelations?: Prisma.SourceRelationListRelationFilter
+  expressions?: Prisma.LegalExpressionVersionListRelationFilter
   versions?: Prisma.LegalSourceVersionListRelationFilter
   acquisitions?: Prisma.LegalSourceAcquisitionListRelationFilter
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionListRelationFilter
   legacyNormaFonti?: Prisma.NormaFonteListRelationFilter
 }, "id" | "sourceKey" | "identityNamespace_identityScopeKey_canonicalKey">
 
@@ -602,6 +638,9 @@ export type LegalSourceOrderByWithAggregationInput = {
   sourceKey?: Prisma.SortOrder
   title?: Prisma.SortOrder
   sourceType?: Prisma.SortOrder
+  resourceSemanticType?: Prisma.SortOrderInput | Prisma.SortOrder
+  legalAuthorityKind?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceCharacter?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   role?: Prisma.SortOrder
   legalRank?: Prisma.SortOrder
@@ -651,6 +690,9 @@ export type LegalSourceScalarWhereWithAggregatesInput = {
   sourceKey?: Prisma.StringWithAggregatesFilter<"LegalSource"> | string
   title?: Prisma.StringWithAggregatesFilter<"LegalSource"> | string
   sourceType?: Prisma.EnumLegalSourceTypeWithAggregatesFilter<"LegalSource"> | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.EnumResourceSemanticTypeNullableWithAggregatesFilter<"LegalSource"> | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.EnumLegalAuthorityKindNullableWithAggregatesFilter<"LegalSource"> | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.EnumSourceCharacterNullableWithAggregatesFilter<"LegalSource"> | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusWithAggregatesFilter<"LegalSource"> | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleWithAggregatesFilter<"LegalSource"> | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankWithAggregatesFilter<"LegalSource"> | $Enums.LegalRank
@@ -692,6 +734,9 @@ export type LegalSourceCreateInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -730,8 +775,10 @@ export type LegalSourceCreateInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutLegalSourceInput
   outgoingRelations?: Prisma.SourceRelationCreateNestedManyWithoutFromSourceInput
   incomingRelations?: Prisma.SourceRelationCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionCreateNestedManyWithoutSourceFamilyInput
   versions?: Prisma.LegalSourceVersionCreateNestedManyWithoutSourceFamilyInput
   acquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionCreateNestedManyWithoutSourceFamilyInput
   legacyNormaFonti?: Prisma.NormaFonteCreateNestedManyWithoutLegalSourceInput
 }
 
@@ -740,6 +787,9 @@ export type LegalSourceUncheckedCreateInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -778,8 +828,10 @@ export type LegalSourceUncheckedCreateInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutLegalSourceInput
   outgoingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutFromSourceInput
   incomingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
   versions?: Prisma.LegalSourceVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedCreateNestedManyWithoutSourceFamilyInput
   legacyNormaFonti?: Prisma.NormaFonteUncheckedCreateNestedManyWithoutLegalSourceInput
 }
 
@@ -788,6 +840,9 @@ export type LegalSourceUpdateInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -826,8 +881,10 @@ export type LegalSourceUpdateInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutLegalSourceNestedInput
   outgoingRelations?: Prisma.SourceRelationUpdateManyWithoutFromSourceNestedInput
   incomingRelations?: Prisma.SourceRelationUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUpdateManyWithoutSourceFamilyNestedInput
   versions?: Prisma.LegalSourceVersionUpdateManyWithoutSourceFamilyNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUpdateManyWithoutSourceFamilyNestedInput
   legacyNormaFonti?: Prisma.NormaFonteUpdateManyWithoutLegalSourceNestedInput
 }
 
@@ -836,6 +893,9 @@ export type LegalSourceUncheckedUpdateInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -874,8 +934,10 @@ export type LegalSourceUncheckedUpdateInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutLegalSourceNestedInput
   outgoingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutFromSourceNestedInput
   incomingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   versions?: Prisma.LegalSourceVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   legacyNormaFonti?: Prisma.NormaFonteUncheckedUpdateManyWithoutLegalSourceNestedInput
 }
 
@@ -884,6 +946,9 @@ export type LegalSourceCreateManyInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -925,6 +990,9 @@ export type LegalSourceUpdateManyMutationInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -962,6 +1030,9 @@ export type LegalSourceUncheckedUpdateManyInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -1019,6 +1090,9 @@ export type LegalSourceCountOrderByAggregateInput = {
   sourceKey?: Prisma.SortOrder
   title?: Prisma.SortOrder
   sourceType?: Prisma.SortOrder
+  resourceSemanticType?: Prisma.SortOrder
+  legalAuthorityKind?: Prisma.SortOrder
+  sourceCharacter?: Prisma.SortOrder
   status?: Prisma.SortOrder
   role?: Prisma.SortOrder
   legalRank?: Prisma.SortOrder
@@ -1064,6 +1138,9 @@ export type LegalSourceMaxOrderByAggregateInput = {
   sourceKey?: Prisma.SortOrder
   title?: Prisma.SortOrder
   sourceType?: Prisma.SortOrder
+  resourceSemanticType?: Prisma.SortOrder
+  legalAuthorityKind?: Prisma.SortOrder
+  sourceCharacter?: Prisma.SortOrder
   status?: Prisma.SortOrder
   role?: Prisma.SortOrder
   legalRank?: Prisma.SortOrder
@@ -1104,6 +1181,9 @@ export type LegalSourceMinOrderByAggregateInput = {
   sourceKey?: Prisma.SortOrder
   title?: Prisma.SortOrder
   sourceType?: Prisma.SortOrder
+  resourceSemanticType?: Prisma.SortOrder
+  legalAuthorityKind?: Prisma.SortOrder
+  sourceCharacter?: Prisma.SortOrder
   status?: Prisma.SortOrder
   role?: Prisma.SortOrder
   legalRank?: Prisma.SortOrder
@@ -1325,6 +1405,18 @@ export type EnumLegalSourceTypeFieldUpdateOperationsInput = {
   set?: $Enums.LegalSourceType
 }
 
+export type NullableEnumResourceSemanticTypeFieldUpdateOperationsInput = {
+  set?: $Enums.ResourceSemanticType | null
+}
+
+export type NullableEnumLegalAuthorityKindFieldUpdateOperationsInput = {
+  set?: $Enums.LegalAuthorityKind | null
+}
+
+export type NullableEnumSourceCharacterFieldUpdateOperationsInput = {
+  set?: $Enums.SourceCharacter | null
+}
+
 export type EnumLegalSourceStatusFieldUpdateOperationsInput = {
   set?: $Enums.LegalSourceStatus
 }
@@ -1359,6 +1451,34 @@ export type NullableIntFieldUpdateOperationsInput = {
 
 export type NullableEnumLegalSourceIdentityScopeKindFieldUpdateOperationsInput = {
   set?: $Enums.LegalSourceIdentityScopeKind | null
+}
+
+export type LegalSourceCreateNestedOneWithoutExpressionsInput = {
+  create?: Prisma.XOR<Prisma.LegalSourceCreateWithoutExpressionsInput, Prisma.LegalSourceUncheckedCreateWithoutExpressionsInput>
+  connectOrCreate?: Prisma.LegalSourceCreateOrConnectWithoutExpressionsInput
+  connect?: Prisma.LegalSourceWhereUniqueInput
+}
+
+export type LegalSourceUpdateOneRequiredWithoutExpressionsNestedInput = {
+  create?: Prisma.XOR<Prisma.LegalSourceCreateWithoutExpressionsInput, Prisma.LegalSourceUncheckedCreateWithoutExpressionsInput>
+  connectOrCreate?: Prisma.LegalSourceCreateOrConnectWithoutExpressionsInput
+  upsert?: Prisma.LegalSourceUpsertWithoutExpressionsInput
+  connect?: Prisma.LegalSourceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LegalSourceUpdateToOneWithWhereWithoutExpressionsInput, Prisma.LegalSourceUpdateWithoutExpressionsInput>, Prisma.LegalSourceUncheckedUpdateWithoutExpressionsInput>
+}
+
+export type LegalSourceCreateNestedOneWithoutIdentityAssertionsInput = {
+  create?: Prisma.XOR<Prisma.LegalSourceCreateWithoutIdentityAssertionsInput, Prisma.LegalSourceUncheckedCreateWithoutIdentityAssertionsInput>
+  connectOrCreate?: Prisma.LegalSourceCreateOrConnectWithoutIdentityAssertionsInput
+  connect?: Prisma.LegalSourceWhereUniqueInput
+}
+
+export type LegalSourceUpdateOneRequiredWithoutIdentityAssertionsNestedInput = {
+  create?: Prisma.XOR<Prisma.LegalSourceCreateWithoutIdentityAssertionsInput, Prisma.LegalSourceUncheckedCreateWithoutIdentityAssertionsInput>
+  connectOrCreate?: Prisma.LegalSourceCreateOrConnectWithoutIdentityAssertionsInput
+  upsert?: Prisma.LegalSourceUpsertWithoutIdentityAssertionsInput
+  connect?: Prisma.LegalSourceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LegalSourceUpdateToOneWithWhereWithoutIdentityAssertionsInput, Prisma.LegalSourceUpdateWithoutIdentityAssertionsInput>, Prisma.LegalSourceUncheckedUpdateWithoutIdentityAssertionsInput>
 }
 
 export type LegalSourceCreateNestedOneWithoutVersionsInput = {
@@ -1466,6 +1586,9 @@ export type LegalSourceCreateWithoutEnteInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -1503,8 +1626,10 @@ export type LegalSourceCreateWithoutEnteInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutLegalSourceInput
   outgoingRelations?: Prisma.SourceRelationCreateNestedManyWithoutFromSourceInput
   incomingRelations?: Prisma.SourceRelationCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionCreateNestedManyWithoutSourceFamilyInput
   versions?: Prisma.LegalSourceVersionCreateNestedManyWithoutSourceFamilyInput
   acquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionCreateNestedManyWithoutSourceFamilyInput
   legacyNormaFonti?: Prisma.NormaFonteCreateNestedManyWithoutLegalSourceInput
 }
 
@@ -1513,6 +1638,9 @@ export type LegalSourceUncheckedCreateWithoutEnteInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -1550,8 +1678,10 @@ export type LegalSourceUncheckedCreateWithoutEnteInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutLegalSourceInput
   outgoingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutFromSourceInput
   incomingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
   versions?: Prisma.LegalSourceVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedCreateNestedManyWithoutSourceFamilyInput
   legacyNormaFonti?: Prisma.NormaFonteUncheckedCreateNestedManyWithoutLegalSourceInput
 }
 
@@ -1589,6 +1719,9 @@ export type LegalSourceScalarWhereInput = {
   sourceKey?: Prisma.StringFilter<"LegalSource"> | string
   title?: Prisma.StringFilter<"LegalSource"> | string
   sourceType?: Prisma.EnumLegalSourceTypeFilter<"LegalSource"> | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.EnumResourceSemanticTypeNullableFilter<"LegalSource"> | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.EnumLegalAuthorityKindNullableFilter<"LegalSource"> | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.EnumSourceCharacterNullableFilter<"LegalSource"> | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFilter<"LegalSource"> | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFilter<"LegalSource"> | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFilter<"LegalSource"> | $Enums.LegalRank
@@ -1630,6 +1763,9 @@ export type LegalSourceCreateWithoutAuthorityInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -1667,8 +1803,10 @@ export type LegalSourceCreateWithoutAuthorityInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutLegalSourceInput
   outgoingRelations?: Prisma.SourceRelationCreateNestedManyWithoutFromSourceInput
   incomingRelations?: Prisma.SourceRelationCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionCreateNestedManyWithoutSourceFamilyInput
   versions?: Prisma.LegalSourceVersionCreateNestedManyWithoutSourceFamilyInput
   acquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionCreateNestedManyWithoutSourceFamilyInput
   legacyNormaFonti?: Prisma.NormaFonteCreateNestedManyWithoutLegalSourceInput
 }
 
@@ -1677,6 +1815,9 @@ export type LegalSourceUncheckedCreateWithoutAuthorityInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -1714,8 +1855,10 @@ export type LegalSourceUncheckedCreateWithoutAuthorityInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutLegalSourceInput
   outgoingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutFromSourceInput
   incomingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
   versions?: Prisma.LegalSourceVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedCreateNestedManyWithoutSourceFamilyInput
   legacyNormaFonti?: Prisma.NormaFonteUncheckedCreateNestedManyWithoutLegalSourceInput
 }
 
@@ -1750,6 +1893,9 @@ export type LegalSourceCreateWithoutPortInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -1787,8 +1933,10 @@ export type LegalSourceCreateWithoutPortInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutLegalSourceInput
   outgoingRelations?: Prisma.SourceRelationCreateNestedManyWithoutFromSourceInput
   incomingRelations?: Prisma.SourceRelationCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionCreateNestedManyWithoutSourceFamilyInput
   versions?: Prisma.LegalSourceVersionCreateNestedManyWithoutSourceFamilyInput
   acquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionCreateNestedManyWithoutSourceFamilyInput
   legacyNormaFonti?: Prisma.NormaFonteCreateNestedManyWithoutLegalSourceInput
 }
 
@@ -1797,6 +1945,9 @@ export type LegalSourceUncheckedCreateWithoutPortInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -1834,8 +1985,10 @@ export type LegalSourceUncheckedCreateWithoutPortInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutLegalSourceInput
   outgoingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutFromSourceInput
   incomingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
   versions?: Prisma.LegalSourceVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedCreateNestedManyWithoutSourceFamilyInput
   legacyNormaFonti?: Prisma.NormaFonteUncheckedCreateNestedManyWithoutLegalSourceInput
 }
 
@@ -1870,6 +2023,9 @@ export type LegalSourceCreateWithoutImportRunInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -1907,8 +2063,10 @@ export type LegalSourceCreateWithoutImportRunInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutLegalSourceInput
   outgoingRelations?: Prisma.SourceRelationCreateNestedManyWithoutFromSourceInput
   incomingRelations?: Prisma.SourceRelationCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionCreateNestedManyWithoutSourceFamilyInput
   versions?: Prisma.LegalSourceVersionCreateNestedManyWithoutSourceFamilyInput
   acquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionCreateNestedManyWithoutSourceFamilyInput
   legacyNormaFonti?: Prisma.NormaFonteCreateNestedManyWithoutLegalSourceInput
 }
 
@@ -1917,6 +2075,9 @@ export type LegalSourceUncheckedCreateWithoutImportRunInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -1954,8 +2115,10 @@ export type LegalSourceUncheckedCreateWithoutImportRunInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutLegalSourceInput
   outgoingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutFromSourceInput
   incomingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
   versions?: Prisma.LegalSourceVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedCreateNestedManyWithoutSourceFamilyInput
   legacyNormaFonti?: Prisma.NormaFonteUncheckedCreateNestedManyWithoutLegalSourceInput
 }
 
@@ -1985,11 +2148,14 @@ export type LegalSourceUpdateManyWithWhereWithoutImportRunInput = {
   data: Prisma.XOR<Prisma.LegalSourceUpdateManyMutationInput, Prisma.LegalSourceUncheckedUpdateManyWithoutImportRunInput>
 }
 
-export type LegalSourceCreateWithoutVersionsInput = {
+export type LegalSourceCreateWithoutExpressionsInput = {
   id?: string
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -2028,15 +2194,20 @@ export type LegalSourceCreateWithoutVersionsInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutLegalSourceInput
   outgoingRelations?: Prisma.SourceRelationCreateNestedManyWithoutFromSourceInput
   incomingRelations?: Prisma.SourceRelationCreateNestedManyWithoutToSourceInput
+  versions?: Prisma.LegalSourceVersionCreateNestedManyWithoutSourceFamilyInput
   acquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionCreateNestedManyWithoutSourceFamilyInput
   legacyNormaFonti?: Prisma.NormaFonteCreateNestedManyWithoutLegalSourceInput
 }
 
-export type LegalSourceUncheckedCreateWithoutVersionsInput = {
+export type LegalSourceUncheckedCreateWithoutExpressionsInput = {
   id?: string
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -2075,7 +2246,457 @@ export type LegalSourceUncheckedCreateWithoutVersionsInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutLegalSourceInput
   outgoingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutFromSourceInput
   incomingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutToSourceInput
+  versions?: Prisma.LegalSourceVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedCreateNestedManyWithoutSourceFamilyInput
+  legacyNormaFonti?: Prisma.NormaFonteUncheckedCreateNestedManyWithoutLegalSourceInput
+}
+
+export type LegalSourceCreateOrConnectWithoutExpressionsInput = {
+  where: Prisma.LegalSourceWhereUniqueInput
+  create: Prisma.XOR<Prisma.LegalSourceCreateWithoutExpressionsInput, Prisma.LegalSourceUncheckedCreateWithoutExpressionsInput>
+}
+
+export type LegalSourceUpsertWithoutExpressionsInput = {
+  update: Prisma.XOR<Prisma.LegalSourceUpdateWithoutExpressionsInput, Prisma.LegalSourceUncheckedUpdateWithoutExpressionsInput>
+  create: Prisma.XOR<Prisma.LegalSourceCreateWithoutExpressionsInput, Prisma.LegalSourceUncheckedCreateWithoutExpressionsInput>
+  where?: Prisma.LegalSourceWhereInput
+}
+
+export type LegalSourceUpdateToOneWithWhereWithoutExpressionsInput = {
+  where?: Prisma.LegalSourceWhereInput
+  data: Prisma.XOR<Prisma.LegalSourceUpdateWithoutExpressionsInput, Prisma.LegalSourceUncheckedUpdateWithoutExpressionsInput>
+}
+
+export type LegalSourceUpdateWithoutExpressionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
+  status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileChecksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  identityNamespace?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityScopeKind?: Prisma.NullableEnumLegalSourceIdentityScopeKindFieldUpdateOperationsInput | $Enums.LegalSourceIdentityScopeKind | null
+  identityScopeKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  canonicalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ente?: Prisma.EnteUpdateOneWithoutLegalSourcesNestedInput
+  authority?: Prisma.AuthorityUpdateOneWithoutLegalSourcesNestedInput
+  port?: Prisma.PortUpdateOneWithoutLegalSourcesNestedInput
+  importRun?: Prisma.ImportRunUpdateOneWithoutLegalSourcesNestedInput
+  rules?: Prisma.LegalRuleUpdateManyWithoutSourceNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutLegalSourceNestedInput
+  outgoingRelations?: Prisma.SourceRelationUpdateManyWithoutFromSourceNestedInput
+  incomingRelations?: Prisma.SourceRelationUpdateManyWithoutToSourceNestedInput
+  versions?: Prisma.LegalSourceVersionUpdateManyWithoutSourceFamilyNestedInput
+  acquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUpdateManyWithoutSourceFamilyNestedInput
+  legacyNormaFonti?: Prisma.NormaFonteUpdateManyWithoutLegalSourceNestedInput
+}
+
+export type LegalSourceUncheckedUpdateWithoutExpressionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
+  status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileChecksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  importRunId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityNamespace?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityScopeKind?: Prisma.NullableEnumLegalSourceIdentityScopeKindFieldUpdateOperationsInput | $Enums.LegalSourceIdentityScopeKind | null
+  identityScopeKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  canonicalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rules?: Prisma.LegalRuleUncheckedUpdateManyWithoutSourceNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutLegalSourceNestedInput
+  outgoingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutFromSourceNestedInput
+  incomingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutToSourceNestedInput
+  versions?: Prisma.LegalSourceVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
+  acquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedUpdateManyWithoutSourceFamilyNestedInput
+  legacyNormaFonti?: Prisma.NormaFonteUncheckedUpdateManyWithoutLegalSourceNestedInput
+}
+
+export type LegalSourceCreateWithoutIdentityAssertionsInput = {
+  id?: string
+  sourceKey: string
+  title: string
+  sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
+  status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
+  publicationDate?: Date | string | null
+  effectiveFrom?: Date | string | null
+  effectiveTo?: Date | string | null
+  notes?: string | null
+  fileName?: string | null
+  filePath?: string | null
+  fileChecksumSha256?: string | null
+  fileMimeType?: string | null
+  fileSizeBytes?: number | null
+  identityNamespace?: string | null
+  identityScopeKind?: $Enums.LegalSourceIdentityScopeKind | null
+  identityScopeKey?: string | null
+  canonicalKey?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  ente?: Prisma.EnteCreateNestedOneWithoutLegalSourcesInput
+  authority?: Prisma.AuthorityCreateNestedOneWithoutLegalSourcesInput
+  port?: Prisma.PortCreateNestedOneWithoutLegalSourcesInput
+  importRun?: Prisma.ImportRunCreateNestedOneWithoutLegalSourcesInput
+  rules?: Prisma.LegalRuleCreateNestedManyWithoutSourceInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutLegalSourceInput
+  outgoingRelations?: Prisma.SourceRelationCreateNestedManyWithoutFromSourceInput
+  incomingRelations?: Prisma.SourceRelationCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionCreateNestedManyWithoutSourceFamilyInput
+  versions?: Prisma.LegalSourceVersionCreateNestedManyWithoutSourceFamilyInput
+  acquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutSourceFamilyInput
+  legacyNormaFonti?: Prisma.NormaFonteCreateNestedManyWithoutLegalSourceInput
+}
+
+export type LegalSourceUncheckedCreateWithoutIdentityAssertionsInput = {
+  id?: string
+  sourceKey: string
+  title: string
+  sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
+  status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
+  publicationDate?: Date | string | null
+  effectiveFrom?: Date | string | null
+  effectiveTo?: Date | string | null
+  notes?: string | null
+  fileName?: string | null
+  filePath?: string | null
+  fileChecksumSha256?: string | null
+  fileMimeType?: string | null
+  fileSizeBytes?: number | null
+  enteId?: string | null
+  authorityId?: string | null
+  portId?: string | null
+  importRunId?: string | null
+  identityNamespace?: string | null
+  identityScopeKind?: $Enums.LegalSourceIdentityScopeKind | null
+  identityScopeKey?: string | null
+  canonicalKey?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  rules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutSourceInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutLegalSourceInput
+  outgoingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutFromSourceInput
+  incomingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
+  versions?: Prisma.LegalSourceVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
+  acquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutSourceFamilyInput
+  legacyNormaFonti?: Prisma.NormaFonteUncheckedCreateNestedManyWithoutLegalSourceInput
+}
+
+export type LegalSourceCreateOrConnectWithoutIdentityAssertionsInput = {
+  where: Prisma.LegalSourceWhereUniqueInput
+  create: Prisma.XOR<Prisma.LegalSourceCreateWithoutIdentityAssertionsInput, Prisma.LegalSourceUncheckedCreateWithoutIdentityAssertionsInput>
+}
+
+export type LegalSourceUpsertWithoutIdentityAssertionsInput = {
+  update: Prisma.XOR<Prisma.LegalSourceUpdateWithoutIdentityAssertionsInput, Prisma.LegalSourceUncheckedUpdateWithoutIdentityAssertionsInput>
+  create: Prisma.XOR<Prisma.LegalSourceCreateWithoutIdentityAssertionsInput, Prisma.LegalSourceUncheckedCreateWithoutIdentityAssertionsInput>
+  where?: Prisma.LegalSourceWhereInput
+}
+
+export type LegalSourceUpdateToOneWithWhereWithoutIdentityAssertionsInput = {
+  where?: Prisma.LegalSourceWhereInput
+  data: Prisma.XOR<Prisma.LegalSourceUpdateWithoutIdentityAssertionsInput, Prisma.LegalSourceUncheckedUpdateWithoutIdentityAssertionsInput>
+}
+
+export type LegalSourceUpdateWithoutIdentityAssertionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
+  status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileChecksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  identityNamespace?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityScopeKind?: Prisma.NullableEnumLegalSourceIdentityScopeKindFieldUpdateOperationsInput | $Enums.LegalSourceIdentityScopeKind | null
+  identityScopeKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  canonicalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ente?: Prisma.EnteUpdateOneWithoutLegalSourcesNestedInput
+  authority?: Prisma.AuthorityUpdateOneWithoutLegalSourcesNestedInput
+  port?: Prisma.PortUpdateOneWithoutLegalSourcesNestedInput
+  importRun?: Prisma.ImportRunUpdateOneWithoutLegalSourcesNestedInput
+  rules?: Prisma.LegalRuleUpdateManyWithoutSourceNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutLegalSourceNestedInput
+  outgoingRelations?: Prisma.SourceRelationUpdateManyWithoutFromSourceNestedInput
+  incomingRelations?: Prisma.SourceRelationUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUpdateManyWithoutSourceFamilyNestedInput
+  versions?: Prisma.LegalSourceVersionUpdateManyWithoutSourceFamilyNestedInput
+  acquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutSourceFamilyNestedInput
+  legacyNormaFonti?: Prisma.NormaFonteUpdateManyWithoutLegalSourceNestedInput
+}
+
+export type LegalSourceUncheckedUpdateWithoutIdentityAssertionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
+  status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileChecksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  importRunId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityNamespace?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityScopeKind?: Prisma.NullableEnumLegalSourceIdentityScopeKindFieldUpdateOperationsInput | $Enums.LegalSourceIdentityScopeKind | null
+  identityScopeKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  canonicalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rules?: Prisma.LegalRuleUncheckedUpdateManyWithoutSourceNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutLegalSourceNestedInput
+  outgoingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutFromSourceNestedInput
+  incomingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
+  versions?: Prisma.LegalSourceVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
+  acquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceFamilyNestedInput
+  legacyNormaFonti?: Prisma.NormaFonteUncheckedUpdateManyWithoutLegalSourceNestedInput
+}
+
+export type LegalSourceCreateWithoutVersionsInput = {
+  id?: string
+  sourceKey: string
+  title: string
+  sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
+  status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
+  publicationDate?: Date | string | null
+  effectiveFrom?: Date | string | null
+  effectiveTo?: Date | string | null
+  notes?: string | null
+  fileName?: string | null
+  filePath?: string | null
+  fileChecksumSha256?: string | null
+  fileMimeType?: string | null
+  fileSizeBytes?: number | null
+  identityNamespace?: string | null
+  identityScopeKind?: $Enums.LegalSourceIdentityScopeKind | null
+  identityScopeKey?: string | null
+  canonicalKey?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  ente?: Prisma.EnteCreateNestedOneWithoutLegalSourcesInput
+  authority?: Prisma.AuthorityCreateNestedOneWithoutLegalSourcesInput
+  port?: Prisma.PortCreateNestedOneWithoutLegalSourcesInput
+  importRun?: Prisma.ImportRunCreateNestedOneWithoutLegalSourcesInput
+  rules?: Prisma.LegalRuleCreateNestedManyWithoutSourceInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutLegalSourceInput
+  outgoingRelations?: Prisma.SourceRelationCreateNestedManyWithoutFromSourceInput
+  incomingRelations?: Prisma.SourceRelationCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionCreateNestedManyWithoutSourceFamilyInput
+  acquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionCreateNestedManyWithoutSourceFamilyInput
+  legacyNormaFonti?: Prisma.NormaFonteCreateNestedManyWithoutLegalSourceInput
+}
+
+export type LegalSourceUncheckedCreateWithoutVersionsInput = {
+  id?: string
+  sourceKey: string
+  title: string
+  sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
+  status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
+  publicationDate?: Date | string | null
+  effectiveFrom?: Date | string | null
+  effectiveTo?: Date | string | null
+  notes?: string | null
+  fileName?: string | null
+  filePath?: string | null
+  fileChecksumSha256?: string | null
+  fileMimeType?: string | null
+  fileSizeBytes?: number | null
+  enteId?: string | null
+  authorityId?: string | null
+  portId?: string | null
+  importRunId?: string | null
+  identityNamespace?: string | null
+  identityScopeKind?: $Enums.LegalSourceIdentityScopeKind | null
+  identityScopeKey?: string | null
+  canonicalKey?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  rules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutSourceInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutLegalSourceInput
+  outgoingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutFromSourceInput
+  incomingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
+  acquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedCreateNestedManyWithoutSourceFamilyInput
   legacyNormaFonti?: Prisma.NormaFonteUncheckedCreateNestedManyWithoutLegalSourceInput
 }
 
@@ -2100,6 +2721,9 @@ export type LegalSourceUpdateWithoutVersionsInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -2138,7 +2762,9 @@ export type LegalSourceUpdateWithoutVersionsInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutLegalSourceNestedInput
   outgoingRelations?: Prisma.SourceRelationUpdateManyWithoutFromSourceNestedInput
   incomingRelations?: Prisma.SourceRelationUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUpdateManyWithoutSourceFamilyNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUpdateManyWithoutSourceFamilyNestedInput
   legacyNormaFonti?: Prisma.NormaFonteUpdateManyWithoutLegalSourceNestedInput
 }
 
@@ -2147,6 +2773,9 @@ export type LegalSourceUncheckedUpdateWithoutVersionsInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -2185,7 +2814,9 @@ export type LegalSourceUncheckedUpdateWithoutVersionsInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutLegalSourceNestedInput
   outgoingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutFromSourceNestedInput
   incomingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   legacyNormaFonti?: Prisma.NormaFonteUncheckedUpdateManyWithoutLegalSourceNestedInput
 }
 
@@ -2194,6 +2825,9 @@ export type LegalSourceCreateWithoutAcquisitionsInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -2232,7 +2866,9 @@ export type LegalSourceCreateWithoutAcquisitionsInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutLegalSourceInput
   outgoingRelations?: Prisma.SourceRelationCreateNestedManyWithoutFromSourceInput
   incomingRelations?: Prisma.SourceRelationCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionCreateNestedManyWithoutSourceFamilyInput
   versions?: Prisma.LegalSourceVersionCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionCreateNestedManyWithoutSourceFamilyInput
   legacyNormaFonti?: Prisma.NormaFonteCreateNestedManyWithoutLegalSourceInput
 }
 
@@ -2241,6 +2877,9 @@ export type LegalSourceUncheckedCreateWithoutAcquisitionsInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -2279,7 +2918,9 @@ export type LegalSourceUncheckedCreateWithoutAcquisitionsInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutLegalSourceInput
   outgoingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutFromSourceInput
   incomingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
   versions?: Prisma.LegalSourceVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedCreateNestedManyWithoutSourceFamilyInput
   legacyNormaFonti?: Prisma.NormaFonteUncheckedCreateNestedManyWithoutLegalSourceInput
 }
 
@@ -2304,6 +2945,9 @@ export type LegalSourceUpdateWithoutAcquisitionsInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -2342,7 +2986,9 @@ export type LegalSourceUpdateWithoutAcquisitionsInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutLegalSourceNestedInput
   outgoingRelations?: Prisma.SourceRelationUpdateManyWithoutFromSourceNestedInput
   incomingRelations?: Prisma.SourceRelationUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUpdateManyWithoutSourceFamilyNestedInput
   versions?: Prisma.LegalSourceVersionUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUpdateManyWithoutSourceFamilyNestedInput
   legacyNormaFonti?: Prisma.NormaFonteUpdateManyWithoutLegalSourceNestedInput
 }
 
@@ -2351,6 +2997,9 @@ export type LegalSourceUncheckedUpdateWithoutAcquisitionsInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -2389,7 +3038,9 @@ export type LegalSourceUncheckedUpdateWithoutAcquisitionsInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutLegalSourceNestedInput
   outgoingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutFromSourceNestedInput
   incomingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   versions?: Prisma.LegalSourceVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   legacyNormaFonti?: Prisma.NormaFonteUncheckedUpdateManyWithoutLegalSourceNestedInput
 }
 
@@ -2398,6 +3049,9 @@ export type LegalSourceCreateWithoutOutgoingRelationsInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -2435,8 +3089,10 @@ export type LegalSourceCreateWithoutOutgoingRelationsInput = {
   rules?: Prisma.LegalRuleCreateNestedManyWithoutSourceInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutLegalSourceInput
   incomingRelations?: Prisma.SourceRelationCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionCreateNestedManyWithoutSourceFamilyInput
   versions?: Prisma.LegalSourceVersionCreateNestedManyWithoutSourceFamilyInput
   acquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionCreateNestedManyWithoutSourceFamilyInput
   legacyNormaFonti?: Prisma.NormaFonteCreateNestedManyWithoutLegalSourceInput
 }
 
@@ -2445,6 +3101,9 @@ export type LegalSourceUncheckedCreateWithoutOutgoingRelationsInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -2482,8 +3141,10 @@ export type LegalSourceUncheckedCreateWithoutOutgoingRelationsInput = {
   rules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutSourceInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutLegalSourceInput
   incomingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
   versions?: Prisma.LegalSourceVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedCreateNestedManyWithoutSourceFamilyInput
   legacyNormaFonti?: Prisma.NormaFonteUncheckedCreateNestedManyWithoutLegalSourceInput
 }
 
@@ -2497,6 +3158,9 @@ export type LegalSourceCreateWithoutIncomingRelationsInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -2534,8 +3198,10 @@ export type LegalSourceCreateWithoutIncomingRelationsInput = {
   rules?: Prisma.LegalRuleCreateNestedManyWithoutSourceInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutLegalSourceInput
   outgoingRelations?: Prisma.SourceRelationCreateNestedManyWithoutFromSourceInput
+  expressions?: Prisma.LegalExpressionVersionCreateNestedManyWithoutSourceFamilyInput
   versions?: Prisma.LegalSourceVersionCreateNestedManyWithoutSourceFamilyInput
   acquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionCreateNestedManyWithoutSourceFamilyInput
   legacyNormaFonti?: Prisma.NormaFonteCreateNestedManyWithoutLegalSourceInput
 }
 
@@ -2544,6 +3210,9 @@ export type LegalSourceUncheckedCreateWithoutIncomingRelationsInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -2581,8 +3250,10 @@ export type LegalSourceUncheckedCreateWithoutIncomingRelationsInput = {
   rules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutSourceInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutLegalSourceInput
   outgoingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutFromSourceInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
   versions?: Prisma.LegalSourceVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedCreateNestedManyWithoutSourceFamilyInput
   legacyNormaFonti?: Prisma.NormaFonteUncheckedCreateNestedManyWithoutLegalSourceInput
 }
 
@@ -2607,6 +3278,9 @@ export type LegalSourceUpdateWithoutOutgoingRelationsInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -2644,8 +3318,10 @@ export type LegalSourceUpdateWithoutOutgoingRelationsInput = {
   rules?: Prisma.LegalRuleUpdateManyWithoutSourceNestedInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutLegalSourceNestedInput
   incomingRelations?: Prisma.SourceRelationUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUpdateManyWithoutSourceFamilyNestedInput
   versions?: Prisma.LegalSourceVersionUpdateManyWithoutSourceFamilyNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUpdateManyWithoutSourceFamilyNestedInput
   legacyNormaFonti?: Prisma.NormaFonteUpdateManyWithoutLegalSourceNestedInput
 }
 
@@ -2654,6 +3330,9 @@ export type LegalSourceUncheckedUpdateWithoutOutgoingRelationsInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -2691,8 +3370,10 @@ export type LegalSourceUncheckedUpdateWithoutOutgoingRelationsInput = {
   rules?: Prisma.LegalRuleUncheckedUpdateManyWithoutSourceNestedInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutLegalSourceNestedInput
   incomingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   versions?: Prisma.LegalSourceVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   legacyNormaFonti?: Prisma.NormaFonteUncheckedUpdateManyWithoutLegalSourceNestedInput
 }
 
@@ -2712,6 +3393,9 @@ export type LegalSourceUpdateWithoutIncomingRelationsInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -2749,8 +3433,10 @@ export type LegalSourceUpdateWithoutIncomingRelationsInput = {
   rules?: Prisma.LegalRuleUpdateManyWithoutSourceNestedInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutLegalSourceNestedInput
   outgoingRelations?: Prisma.SourceRelationUpdateManyWithoutFromSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUpdateManyWithoutSourceFamilyNestedInput
   versions?: Prisma.LegalSourceVersionUpdateManyWithoutSourceFamilyNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUpdateManyWithoutSourceFamilyNestedInput
   legacyNormaFonti?: Prisma.NormaFonteUpdateManyWithoutLegalSourceNestedInput
 }
 
@@ -2759,6 +3445,9 @@ export type LegalSourceUncheckedUpdateWithoutIncomingRelationsInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -2796,8 +3485,10 @@ export type LegalSourceUncheckedUpdateWithoutIncomingRelationsInput = {
   rules?: Prisma.LegalRuleUncheckedUpdateManyWithoutSourceNestedInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutLegalSourceNestedInput
   outgoingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutFromSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   versions?: Prisma.LegalSourceVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   legacyNormaFonti?: Prisma.NormaFonteUncheckedUpdateManyWithoutLegalSourceNestedInput
 }
 
@@ -2806,6 +3497,9 @@ export type LegalSourceCreateWithoutRulesInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -2843,8 +3537,10 @@ export type LegalSourceCreateWithoutRulesInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutLegalSourceInput
   outgoingRelations?: Prisma.SourceRelationCreateNestedManyWithoutFromSourceInput
   incomingRelations?: Prisma.SourceRelationCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionCreateNestedManyWithoutSourceFamilyInput
   versions?: Prisma.LegalSourceVersionCreateNestedManyWithoutSourceFamilyInput
   acquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionCreateNestedManyWithoutSourceFamilyInput
   legacyNormaFonti?: Prisma.NormaFonteCreateNestedManyWithoutLegalSourceInput
 }
 
@@ -2853,6 +3549,9 @@ export type LegalSourceUncheckedCreateWithoutRulesInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -2890,8 +3589,10 @@ export type LegalSourceUncheckedCreateWithoutRulesInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutLegalSourceInput
   outgoingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutFromSourceInput
   incomingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
   versions?: Prisma.LegalSourceVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedCreateNestedManyWithoutSourceFamilyInput
   legacyNormaFonti?: Prisma.NormaFonteUncheckedCreateNestedManyWithoutLegalSourceInput
 }
 
@@ -2916,6 +3617,9 @@ export type LegalSourceUpdateWithoutRulesInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -2953,8 +3657,10 @@ export type LegalSourceUpdateWithoutRulesInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutLegalSourceNestedInput
   outgoingRelations?: Prisma.SourceRelationUpdateManyWithoutFromSourceNestedInput
   incomingRelations?: Prisma.SourceRelationUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUpdateManyWithoutSourceFamilyNestedInput
   versions?: Prisma.LegalSourceVersionUpdateManyWithoutSourceFamilyNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUpdateManyWithoutSourceFamilyNestedInput
   legacyNormaFonti?: Prisma.NormaFonteUpdateManyWithoutLegalSourceNestedInput
 }
 
@@ -2963,6 +3669,9 @@ export type LegalSourceUncheckedUpdateWithoutRulesInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -3000,8 +3709,10 @@ export type LegalSourceUncheckedUpdateWithoutRulesInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutLegalSourceNestedInput
   outgoingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutFromSourceNestedInput
   incomingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   versions?: Prisma.LegalSourceVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   legacyNormaFonti?: Prisma.NormaFonteUncheckedUpdateManyWithoutLegalSourceNestedInput
 }
 
@@ -3010,6 +3721,9 @@ export type LegalSourceCreateWithoutDocumentRequirementProposalsInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -3047,8 +3761,10 @@ export type LegalSourceCreateWithoutDocumentRequirementProposalsInput = {
   rules?: Prisma.LegalRuleCreateNestedManyWithoutSourceInput
   outgoingRelations?: Prisma.SourceRelationCreateNestedManyWithoutFromSourceInput
   incomingRelations?: Prisma.SourceRelationCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionCreateNestedManyWithoutSourceFamilyInput
   versions?: Prisma.LegalSourceVersionCreateNestedManyWithoutSourceFamilyInput
   acquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionCreateNestedManyWithoutSourceFamilyInput
   legacyNormaFonti?: Prisma.NormaFonteCreateNestedManyWithoutLegalSourceInput
 }
 
@@ -3057,6 +3773,9 @@ export type LegalSourceUncheckedCreateWithoutDocumentRequirementProposalsInput =
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -3094,8 +3813,10 @@ export type LegalSourceUncheckedCreateWithoutDocumentRequirementProposalsInput =
   rules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutSourceInput
   outgoingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutFromSourceInput
   incomingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
   versions?: Prisma.LegalSourceVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedCreateNestedManyWithoutSourceFamilyInput
   legacyNormaFonti?: Prisma.NormaFonteUncheckedCreateNestedManyWithoutLegalSourceInput
 }
 
@@ -3120,6 +3841,9 @@ export type LegalSourceUpdateWithoutDocumentRequirementProposalsInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -3157,8 +3881,10 @@ export type LegalSourceUpdateWithoutDocumentRequirementProposalsInput = {
   rules?: Prisma.LegalRuleUpdateManyWithoutSourceNestedInput
   outgoingRelations?: Prisma.SourceRelationUpdateManyWithoutFromSourceNestedInput
   incomingRelations?: Prisma.SourceRelationUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUpdateManyWithoutSourceFamilyNestedInput
   versions?: Prisma.LegalSourceVersionUpdateManyWithoutSourceFamilyNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUpdateManyWithoutSourceFamilyNestedInput
   legacyNormaFonti?: Prisma.NormaFonteUpdateManyWithoutLegalSourceNestedInput
 }
 
@@ -3167,6 +3893,9 @@ export type LegalSourceUncheckedUpdateWithoutDocumentRequirementProposalsInput =
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -3204,8 +3933,10 @@ export type LegalSourceUncheckedUpdateWithoutDocumentRequirementProposalsInput =
   rules?: Prisma.LegalRuleUncheckedUpdateManyWithoutSourceNestedInput
   outgoingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutFromSourceNestedInput
   incomingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   versions?: Prisma.LegalSourceVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   legacyNormaFonti?: Prisma.NormaFonteUncheckedUpdateManyWithoutLegalSourceNestedInput
 }
 
@@ -3214,6 +3945,9 @@ export type LegalSourceCreateWithoutLegacyNormaFontiInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -3252,8 +3986,10 @@ export type LegalSourceCreateWithoutLegacyNormaFontiInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutLegalSourceInput
   outgoingRelations?: Prisma.SourceRelationCreateNestedManyWithoutFromSourceInput
   incomingRelations?: Prisma.SourceRelationCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionCreateNestedManyWithoutSourceFamilyInput
   versions?: Prisma.LegalSourceVersionCreateNestedManyWithoutSourceFamilyInput
   acquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceUncheckedCreateWithoutLegacyNormaFontiInput = {
@@ -3261,6 +3997,9 @@ export type LegalSourceUncheckedCreateWithoutLegacyNormaFontiInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -3299,8 +4038,10 @@ export type LegalSourceUncheckedCreateWithoutLegacyNormaFontiInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutLegalSourceInput
   outgoingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutFromSourceInput
   incomingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
   versions?: Prisma.LegalSourceVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceCreateOrConnectWithoutLegacyNormaFontiInput = {
@@ -3324,6 +4065,9 @@ export type LegalSourceUpdateWithoutLegacyNormaFontiInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -3362,8 +4106,10 @@ export type LegalSourceUpdateWithoutLegacyNormaFontiInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutLegalSourceNestedInput
   outgoingRelations?: Prisma.SourceRelationUpdateManyWithoutFromSourceNestedInput
   incomingRelations?: Prisma.SourceRelationUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUpdateManyWithoutSourceFamilyNestedInput
   versions?: Prisma.LegalSourceVersionUpdateManyWithoutSourceFamilyNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceUncheckedUpdateWithoutLegacyNormaFontiInput = {
@@ -3371,6 +4117,9 @@ export type LegalSourceUncheckedUpdateWithoutLegacyNormaFontiInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -3409,8 +4158,10 @@ export type LegalSourceUncheckedUpdateWithoutLegacyNormaFontiInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutLegalSourceNestedInput
   outgoingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutFromSourceNestedInput
   incomingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   versions?: Prisma.LegalSourceVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceCreateManyEnteInput = {
@@ -3418,6 +4169,9 @@ export type LegalSourceCreateManyEnteInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -3458,6 +4212,9 @@ export type LegalSourceUpdateWithoutEnteInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -3495,8 +4252,10 @@ export type LegalSourceUpdateWithoutEnteInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutLegalSourceNestedInput
   outgoingRelations?: Prisma.SourceRelationUpdateManyWithoutFromSourceNestedInput
   incomingRelations?: Prisma.SourceRelationUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUpdateManyWithoutSourceFamilyNestedInput
   versions?: Prisma.LegalSourceVersionUpdateManyWithoutSourceFamilyNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUpdateManyWithoutSourceFamilyNestedInput
   legacyNormaFonti?: Prisma.NormaFonteUpdateManyWithoutLegalSourceNestedInput
 }
 
@@ -3505,6 +4264,9 @@ export type LegalSourceUncheckedUpdateWithoutEnteInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -3542,8 +4304,10 @@ export type LegalSourceUncheckedUpdateWithoutEnteInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutLegalSourceNestedInput
   outgoingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutFromSourceNestedInput
   incomingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   versions?: Prisma.LegalSourceVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   legacyNormaFonti?: Prisma.NormaFonteUncheckedUpdateManyWithoutLegalSourceNestedInput
 }
 
@@ -3552,6 +4316,9 @@ export type LegalSourceUncheckedUpdateManyWithoutEnteInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -3592,6 +4359,9 @@ export type LegalSourceCreateManyAuthorityInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -3632,6 +4402,9 @@ export type LegalSourceUpdateWithoutAuthorityInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -3669,8 +4442,10 @@ export type LegalSourceUpdateWithoutAuthorityInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutLegalSourceNestedInput
   outgoingRelations?: Prisma.SourceRelationUpdateManyWithoutFromSourceNestedInput
   incomingRelations?: Prisma.SourceRelationUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUpdateManyWithoutSourceFamilyNestedInput
   versions?: Prisma.LegalSourceVersionUpdateManyWithoutSourceFamilyNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUpdateManyWithoutSourceFamilyNestedInput
   legacyNormaFonti?: Prisma.NormaFonteUpdateManyWithoutLegalSourceNestedInput
 }
 
@@ -3679,6 +4454,9 @@ export type LegalSourceUncheckedUpdateWithoutAuthorityInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -3716,8 +4494,10 @@ export type LegalSourceUncheckedUpdateWithoutAuthorityInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutLegalSourceNestedInput
   outgoingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutFromSourceNestedInput
   incomingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   versions?: Prisma.LegalSourceVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   legacyNormaFonti?: Prisma.NormaFonteUncheckedUpdateManyWithoutLegalSourceNestedInput
 }
 
@@ -3726,6 +4506,9 @@ export type LegalSourceUncheckedUpdateManyWithoutAuthorityInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -3766,6 +4549,9 @@ export type LegalSourceCreateManyPortInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -3806,6 +4592,9 @@ export type LegalSourceUpdateWithoutPortInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -3843,8 +4632,10 @@ export type LegalSourceUpdateWithoutPortInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutLegalSourceNestedInput
   outgoingRelations?: Prisma.SourceRelationUpdateManyWithoutFromSourceNestedInput
   incomingRelations?: Prisma.SourceRelationUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUpdateManyWithoutSourceFamilyNestedInput
   versions?: Prisma.LegalSourceVersionUpdateManyWithoutSourceFamilyNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUpdateManyWithoutSourceFamilyNestedInput
   legacyNormaFonti?: Prisma.NormaFonteUpdateManyWithoutLegalSourceNestedInput
 }
 
@@ -3853,6 +4644,9 @@ export type LegalSourceUncheckedUpdateWithoutPortInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -3890,8 +4684,10 @@ export type LegalSourceUncheckedUpdateWithoutPortInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutLegalSourceNestedInput
   outgoingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutFromSourceNestedInput
   incomingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   versions?: Prisma.LegalSourceVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   legacyNormaFonti?: Prisma.NormaFonteUncheckedUpdateManyWithoutLegalSourceNestedInput
 }
 
@@ -3900,6 +4696,9 @@ export type LegalSourceUncheckedUpdateManyWithoutPortInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -3940,6 +4739,9 @@ export type LegalSourceCreateManyImportRunInput = {
   sourceKey: string
   title: string
   sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
   status?: $Enums.LegalSourceStatus
   role?: $Enums.LegalSourceRole
   legalRank?: $Enums.LegalRank
@@ -3980,6 +4782,9 @@ export type LegalSourceUpdateWithoutImportRunInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -4017,8 +4822,10 @@ export type LegalSourceUpdateWithoutImportRunInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutLegalSourceNestedInput
   outgoingRelations?: Prisma.SourceRelationUpdateManyWithoutFromSourceNestedInput
   incomingRelations?: Prisma.SourceRelationUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUpdateManyWithoutSourceFamilyNestedInput
   versions?: Prisma.LegalSourceVersionUpdateManyWithoutSourceFamilyNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUpdateManyWithoutSourceFamilyNestedInput
   legacyNormaFonti?: Prisma.NormaFonteUpdateManyWithoutLegalSourceNestedInput
 }
 
@@ -4027,6 +4834,9 @@ export type LegalSourceUncheckedUpdateWithoutImportRunInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -4064,8 +4874,10 @@ export type LegalSourceUncheckedUpdateWithoutImportRunInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutLegalSourceNestedInput
   outgoingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutFromSourceNestedInput
   incomingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   versions?: Prisma.LegalSourceVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   legacyNormaFonti?: Prisma.NormaFonteUncheckedUpdateManyWithoutLegalSourceNestedInput
 }
 
@@ -4074,6 +4886,9 @@ export type LegalSourceUncheckedUpdateManyWithoutImportRunInput = {
   sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
   status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
   role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
   legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
@@ -4119,8 +4934,10 @@ export type LegalSourceCountOutputType = {
   documentRequirementProposals: number
   outgoingRelations: number
   incomingRelations: number
+  expressions: number
   versions: number
   acquisitions: number
+  identityAssertions: number
   legacyNormaFonti: number
 }
 
@@ -4129,8 +4946,10 @@ export type LegalSourceCountOutputTypeSelect<ExtArgs extends runtime.Types.Exten
   documentRequirementProposals?: boolean | LegalSourceCountOutputTypeCountDocumentRequirementProposalsArgs
   outgoingRelations?: boolean | LegalSourceCountOutputTypeCountOutgoingRelationsArgs
   incomingRelations?: boolean | LegalSourceCountOutputTypeCountIncomingRelationsArgs
+  expressions?: boolean | LegalSourceCountOutputTypeCountExpressionsArgs
   versions?: boolean | LegalSourceCountOutputTypeCountVersionsArgs
   acquisitions?: boolean | LegalSourceCountOutputTypeCountAcquisitionsArgs
+  identityAssertions?: boolean | LegalSourceCountOutputTypeCountIdentityAssertionsArgs
   legacyNormaFonti?: boolean | LegalSourceCountOutputTypeCountLegacyNormaFontiArgs
 }
 
@@ -4175,6 +4994,13 @@ export type LegalSourceCountOutputTypeCountIncomingRelationsArgs<ExtArgs extends
 /**
  * LegalSourceCountOutputType without action
  */
+export type LegalSourceCountOutputTypeCountExpressionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LegalExpressionVersionWhereInput
+}
+
+/**
+ * LegalSourceCountOutputType without action
+ */
 export type LegalSourceCountOutputTypeCountVersionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.LegalSourceVersionWhereInput
 }
@@ -4184,6 +5010,13 @@ export type LegalSourceCountOutputTypeCountVersionsArgs<ExtArgs extends runtime.
  */
 export type LegalSourceCountOutputTypeCountAcquisitionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.LegalSourceAcquisitionWhereInput
+}
+
+/**
+ * LegalSourceCountOutputType without action
+ */
+export type LegalSourceCountOutputTypeCountIdentityAssertionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LegalSourceIdentityAssertionWhereInput
 }
 
 /**
@@ -4199,6 +5032,9 @@ export type LegalSourceSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   sourceKey?: boolean
   title?: boolean
   sourceType?: boolean
+  resourceSemanticType?: boolean
+  legalAuthorityKind?: boolean
+  sourceCharacter?: boolean
   status?: boolean
   role?: boolean
   legalRank?: boolean
@@ -4241,8 +5077,10 @@ export type LegalSourceSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   documentRequirementProposals?: boolean | Prisma.LegalSource$documentRequirementProposalsArgs<ExtArgs>
   outgoingRelations?: boolean | Prisma.LegalSource$outgoingRelationsArgs<ExtArgs>
   incomingRelations?: boolean | Prisma.LegalSource$incomingRelationsArgs<ExtArgs>
+  expressions?: boolean | Prisma.LegalSource$expressionsArgs<ExtArgs>
   versions?: boolean | Prisma.LegalSource$versionsArgs<ExtArgs>
   acquisitions?: boolean | Prisma.LegalSource$acquisitionsArgs<ExtArgs>
+  identityAssertions?: boolean | Prisma.LegalSource$identityAssertionsArgs<ExtArgs>
   legacyNormaFonti?: boolean | Prisma.LegalSource$legacyNormaFontiArgs<ExtArgs>
   _count?: boolean | Prisma.LegalSourceCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["legalSource"]>
@@ -4252,6 +5090,9 @@ export type LegalSourceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   sourceKey?: boolean
   title?: boolean
   sourceType?: boolean
+  resourceSemanticType?: boolean
+  legalAuthorityKind?: boolean
+  sourceCharacter?: boolean
   status?: boolean
   role?: boolean
   legalRank?: boolean
@@ -4297,6 +5138,9 @@ export type LegalSourceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   sourceKey?: boolean
   title?: boolean
   sourceType?: boolean
+  resourceSemanticType?: boolean
+  legalAuthorityKind?: boolean
+  sourceCharacter?: boolean
   status?: boolean
   role?: boolean
   legalRank?: boolean
@@ -4342,6 +5186,9 @@ export type LegalSourceSelectScalar = {
   sourceKey?: boolean
   title?: boolean
   sourceType?: boolean
+  resourceSemanticType?: boolean
+  legalAuthorityKind?: boolean
+  sourceCharacter?: boolean
   status?: boolean
   role?: boolean
   legalRank?: boolean
@@ -4378,7 +5225,7 @@ export type LegalSourceSelectScalar = {
   updatedAt?: boolean
 }
 
-export type LegalSourceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sourceKey" | "title" | "sourceType" | "status" | "role" | "legalRank" | "territorialScope" | "confidence" | "issuingBody" | "sourceNumber" | "sourceDate" | "sourceOrigin" | "portAreaCode" | "tags" | "humanReviewRequired" | "isConformative" | "isExtractable" | "duplicateOfSourceKey" | "publicationDate" | "effectiveFrom" | "effectiveTo" | "notes" | "fileName" | "filePath" | "fileChecksumSha256" | "fileMimeType" | "fileSizeBytes" | "enteId" | "authorityId" | "portId" | "importRunId" | "identityNamespace" | "identityScopeKind" | "identityScopeKey" | "canonicalKey" | "createdAt" | "updatedAt", ExtArgs["result"]["legalSource"]>
+export type LegalSourceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sourceKey" | "title" | "sourceType" | "resourceSemanticType" | "legalAuthorityKind" | "sourceCharacter" | "status" | "role" | "legalRank" | "territorialScope" | "confidence" | "issuingBody" | "sourceNumber" | "sourceDate" | "sourceOrigin" | "portAreaCode" | "tags" | "humanReviewRequired" | "isConformative" | "isExtractable" | "duplicateOfSourceKey" | "publicationDate" | "effectiveFrom" | "effectiveTo" | "notes" | "fileName" | "filePath" | "fileChecksumSha256" | "fileMimeType" | "fileSizeBytes" | "enteId" | "authorityId" | "portId" | "importRunId" | "identityNamespace" | "identityScopeKind" | "identityScopeKey" | "canonicalKey" | "createdAt" | "updatedAt", ExtArgs["result"]["legalSource"]>
 export type LegalSourceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   ente?: boolean | Prisma.LegalSource$enteArgs<ExtArgs>
   authority?: boolean | Prisma.LegalSource$authorityArgs<ExtArgs>
@@ -4388,8 +5235,10 @@ export type LegalSourceInclude<ExtArgs extends runtime.Types.Extensions.Internal
   documentRequirementProposals?: boolean | Prisma.LegalSource$documentRequirementProposalsArgs<ExtArgs>
   outgoingRelations?: boolean | Prisma.LegalSource$outgoingRelationsArgs<ExtArgs>
   incomingRelations?: boolean | Prisma.LegalSource$incomingRelationsArgs<ExtArgs>
+  expressions?: boolean | Prisma.LegalSource$expressionsArgs<ExtArgs>
   versions?: boolean | Prisma.LegalSource$versionsArgs<ExtArgs>
   acquisitions?: boolean | Prisma.LegalSource$acquisitionsArgs<ExtArgs>
+  identityAssertions?: boolean | Prisma.LegalSource$identityAssertionsArgs<ExtArgs>
   legacyNormaFonti?: boolean | Prisma.LegalSource$legacyNormaFontiArgs<ExtArgs>
   _count?: boolean | Prisma.LegalSourceCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -4417,8 +5266,10 @@ export type $LegalSourcePayload<ExtArgs extends runtime.Types.Extensions.Interna
     documentRequirementProposals: Prisma.$FascicoloDocumentRequirementProposalPayload<ExtArgs>[]
     outgoingRelations: Prisma.$SourceRelationPayload<ExtArgs>[]
     incomingRelations: Prisma.$SourceRelationPayload<ExtArgs>[]
+    expressions: Prisma.$LegalExpressionVersionPayload<ExtArgs>[]
     versions: Prisma.$LegalSourceVersionPayload<ExtArgs>[]
     acquisitions: Prisma.$LegalSourceAcquisitionPayload<ExtArgs>[]
+    identityAssertions: Prisma.$LegalSourceIdentityAssertionPayload<ExtArgs>[]
     legacyNormaFonti: Prisma.$NormaFontePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -4426,6 +5277,9 @@ export type $LegalSourcePayload<ExtArgs extends runtime.Types.Extensions.Interna
     sourceKey: string
     title: string
     sourceType: $Enums.LegalSourceType
+    resourceSemanticType: $Enums.ResourceSemanticType | null
+    legalAuthorityKind: $Enums.LegalAuthorityKind | null
+    sourceCharacter: $Enums.SourceCharacter | null
     status: $Enums.LegalSourceStatus
     role: $Enums.LegalSourceRole
     legalRank: $Enums.LegalRank
@@ -4862,8 +5716,10 @@ export interface Prisma__LegalSourceClient<T, Null = never, ExtArgs extends runt
   documentRequirementProposals<T extends Prisma.LegalSource$documentRequirementProposalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalSource$documentRequirementProposalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloDocumentRequirementProposalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   outgoingRelations<T extends Prisma.LegalSource$outgoingRelationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalSource$outgoingRelationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SourceRelationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   incomingRelations<T extends Prisma.LegalSource$incomingRelationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalSource$incomingRelationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SourceRelationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  expressions<T extends Prisma.LegalSource$expressionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalSource$expressionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LegalExpressionVersionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   versions<T extends Prisma.LegalSource$versionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalSource$versionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LegalSourceVersionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   acquisitions<T extends Prisma.LegalSource$acquisitionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalSource$acquisitionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LegalSourceAcquisitionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  identityAssertions<T extends Prisma.LegalSource$identityAssertionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalSource$identityAssertionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LegalSourceIdentityAssertionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   legacyNormaFonti<T extends Prisma.LegalSource$legacyNormaFontiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalSource$legacyNormaFontiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NormaFontePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -4898,6 +5754,9 @@ export interface LegalSourceFieldRefs {
   readonly sourceKey: Prisma.FieldRef<"LegalSource", 'String'>
   readonly title: Prisma.FieldRef<"LegalSource", 'String'>
   readonly sourceType: Prisma.FieldRef<"LegalSource", 'LegalSourceType'>
+  readonly resourceSemanticType: Prisma.FieldRef<"LegalSource", 'ResourceSemanticType'>
+  readonly legalAuthorityKind: Prisma.FieldRef<"LegalSource", 'LegalAuthorityKind'>
+  readonly sourceCharacter: Prisma.FieldRef<"LegalSource", 'SourceCharacter'>
   readonly status: Prisma.FieldRef<"LegalSource", 'LegalSourceStatus'>
   readonly role: Prisma.FieldRef<"LegalSource", 'LegalSourceRole'>
   readonly legalRank: Prisma.FieldRef<"LegalSource", 'LegalRank'>
@@ -5505,6 +6364,30 @@ export type LegalSource$incomingRelationsArgs<ExtArgs extends runtime.Types.Exte
 }
 
 /**
+ * LegalSource.expressions
+ */
+export type LegalSource$expressionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LegalExpressionVersion
+   */
+  select?: Prisma.LegalExpressionVersionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LegalExpressionVersion
+   */
+  omit?: Prisma.LegalExpressionVersionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LegalExpressionVersionInclude<ExtArgs> | null
+  where?: Prisma.LegalExpressionVersionWhereInput
+  orderBy?: Prisma.LegalExpressionVersionOrderByWithRelationInput | Prisma.LegalExpressionVersionOrderByWithRelationInput[]
+  cursor?: Prisma.LegalExpressionVersionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LegalExpressionVersionScalarFieldEnum | Prisma.LegalExpressionVersionScalarFieldEnum[]
+}
+
+/**
  * LegalSource.versions
  */
 export type LegalSource$versionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -5550,6 +6433,30 @@ export type LegalSource$acquisitionsArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.LegalSourceAcquisitionScalarFieldEnum | Prisma.LegalSourceAcquisitionScalarFieldEnum[]
+}
+
+/**
+ * LegalSource.identityAssertions
+ */
+export type LegalSource$identityAssertionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LegalSourceIdentityAssertion
+   */
+  select?: Prisma.LegalSourceIdentityAssertionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LegalSourceIdentityAssertion
+   */
+  omit?: Prisma.LegalSourceIdentityAssertionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LegalSourceIdentityAssertionInclude<ExtArgs> | null
+  where?: Prisma.LegalSourceIdentityAssertionWhereInput
+  orderBy?: Prisma.LegalSourceIdentityAssertionOrderByWithRelationInput | Prisma.LegalSourceIdentityAssertionOrderByWithRelationInput[]
+  cursor?: Prisma.LegalSourceIdentityAssertionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LegalSourceIdentityAssertionScalarFieldEnum | Prisma.LegalSourceIdentityAssertionScalarFieldEnum[]
 }
 
 /**

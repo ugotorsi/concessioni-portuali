@@ -485,6 +485,40 @@ enum LegalSourceIdentityScopeKind {
   TENANT
 }
 
+enum ResourceSemanticType {
+  NORMATIVE_INSTRUMENT
+  JUDICIAL_DECISION
+  ADMINISTRATIVE_ACT
+  CONTRACT
+  CORRESPONDENCE
+  TECHNICAL_DOCUMENT
+  MEDIA_RECORD
+  OTHER
+}
+
+enum LegalAuthorityKind {
+  LEGISLATION
+  CASE_LAW
+  ADMINISTRATIVE_REGULATION
+  ADMINISTRATIVE_ACT
+  AUTHORITY_PRACTICE
+  OTHER_LEGAL_AUTHORITY
+}
+
+enum SourceCharacter {
+  PUBLIC_OFFICIAL
+  PUBLIC_NON_OFFICIAL
+  PRIVATE
+  UNKNOWN
+}
+
+enum LegalSourceIdentityVerificationStatus {
+  UNVERIFIED
+  VERIFIED
+  REJECTED
+  CONFLICTING
+}
+
 enum LegalSourceVersionLifecycleStatus {
   CURRENT
   CURRENT_SUBJECT_TO_REVIEW
@@ -708,6 +742,9 @@ model LegalSource {
   sourceKey            String                @unique
   title                String
   sourceType           LegalSourceType
+  resourceSemanticType ResourceSemanticType?
+  legalAuthorityKind   LegalAuthorityKind?
+  sourceCharacter      SourceCharacter?
   status               LegalSourceStatus     @default(CURRENT_SUBJECT_TO_REVIEW)
   role                 LegalSourceRole       @default(NORMATIVE)
   legalRank            LegalRank             @default(OTHER)
@@ -751,12 +788,17 @@ model LegalSource {
   documentRequirementProposals FascicoloDocumentRequirementProposal[]
   outgoingRelations            SourceRelation[]                       @relation("SourceRelationFrom")
   incomingRelations            SourceRelation[]                       @relation("SourceRelationTo")
+  expressions                  LegalExpressionVersion[]
   versions                     LegalSourceVersion[]
   acquisitions                 LegalSourceAcquisition[]
+  identityAssertions           LegalSourceIdentityAssertion[]
   legacyNormaFonti             NormaFonte[]
 
   @@unique([identityNamespace, identityScopeKey, canonicalKey])
   @@index([sourceType])
+  @@index([resourceSemanticType])
+  @@index([legalAuthorityKind])
+  @@index([sourceCharacter])
   @@index([status])
   @@index([role])
   @@index([legalRank])
@@ -770,9 +812,55 @@ model LegalSource {
   @@index([createdAt])
 }
 
+/// A legal/textual expression within a canonical LegalSource family.
+model LegalExpressionVersion {
+  id                    String   @id @default(cuid())
+  sourceFamilyId        String
+  expressionKey         String
+  publicationDate       DateTime?
+  effectiveFrom         DateTime?
+  effectiveTo           DateTime?
+  expressionStatus      String?
+  correctionMetadata    Json?
+  consolidationMetadata Json?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  sourceFamily   LegalSource          @relation(fields: [sourceFamilyId], references: [id], onDelete: Restrict)
+  representations LegalSourceVersion[]
+
+  @@unique([sourceFamilyId, expressionKey])
+  @@unique([id, sourceFamilyId])
+  @@index([sourceFamilyId, effectiveFrom])
+  @@index([effectiveTo])
+}
+
+/// Provider-independent evidence supporting a canonical family identity.
+model LegalSourceIdentityAssertion {
+  id                   String                                @id @default(cuid())
+  sourceFamilyId       String
+  identifierScheme     String
+  rawValue             String?
+  normalizedValue      String
+  issuingAuthority     String?
+  jurisdiction         String?
+  verificationStatus   LegalSourceIdentityVerificationStatus @default(UNVERIFIED)
+  provenanceReference  String
+  verifiedAt            DateTime?
+  createdAt             DateTime                              @default(now())
+
+  sourceFamily LegalSource @relation(fields: [sourceFamilyId], references: [id], onDelete: Restrict)
+
+  @@index([sourceFamilyId, identifierScheme, normalizedValue])
+  @@index([identifierScheme, normalizedValue])
+  @@index([verificationStatus])
+}
+
+/// An artifact/byte representation; temporal fields remain legacy compatibility metadata.
 model LegalSourceVersion {
   id                   String                            @id @default(cuid())
   sourceFamilyId       String
+  legalExpressionVersionId String?
   observedSha256       String                            @db.Char(64)
   observedSizeBytes    Int
   observedMimeType     String
@@ -784,13 +872,15 @@ model LegalSourceVersion {
   createdAt            DateTime                          @default(now())
   updatedAt            DateTime                          @updatedAt
 
-  sourceFamily        LegalSource                    @relation(fields: [sourceFamilyId], references: [id], onDelete: Restrict)
-  acquisitions        LegalSourceAcquisition[]
-  legacyNormaVersioni NormaVersione[]
+  sourceFamily           LegalSource                    @relation(fields: [sourceFamilyId], references: [id], onDelete: Restrict)
+  legalExpressionVersion LegalExpressionVersion?        @relation(fields: [legalExpressionVersionId, sourceFamilyId], references: [id, sourceFamilyId], onDelete: Restrict)
+  acquisitions           LegalSourceAcquisition[]
+  legacyNormaVersioni    NormaVersione[]
 
   @@unique([sourceFamilyId, observedSha256])
   @@unique([id, sourceFamilyId])
   @@unique([id, sourceFamilyId, observedSha256])
+  @@index([legalExpressionVersionId])
   @@index([sourceFamilyId, legalLifecycleStatus])
   @@index([effectiveFrom])
   @@index([effectiveTo])

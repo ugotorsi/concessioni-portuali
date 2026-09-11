@@ -48,8 +48,18 @@ export type ImportRun = Prisma.ImportRunModel
  */
 export type LegalSource = Prisma.LegalSourceModel
 /**
+ * Model LegalExpressionVersion
+ * A legal/textual expression within a canonical LegalSource family.
+ */
+export type LegalExpressionVersion = Prisma.LegalExpressionVersionModel
+/**
+ * Model LegalSourceIdentityAssertion
+ * Provider-independent evidence supporting a canonical family identity.
+ */
+export type LegalSourceIdentityAssertion = Prisma.LegalSourceIdentityAssertionModel
+/**
  * Model LegalSourceVersion
- * 
+ * An artifact/byte representation; temporal fields remain legacy compatibility metadata.
  */
 export type LegalSourceVersion = Prisma.LegalSourceVersionModel
 /**

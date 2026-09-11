@@ -658,6 +658,52 @@ export const LegalSourceIdentityScopeKind = {
 export type LegalSourceIdentityScopeKind = (typeof LegalSourceIdentityScopeKind)[keyof typeof LegalSourceIdentityScopeKind]
 
 
+export const ResourceSemanticType = {
+  NORMATIVE_INSTRUMENT: 'NORMATIVE_INSTRUMENT',
+  JUDICIAL_DECISION: 'JUDICIAL_DECISION',
+  ADMINISTRATIVE_ACT: 'ADMINISTRATIVE_ACT',
+  CONTRACT: 'CONTRACT',
+  CORRESPONDENCE: 'CORRESPONDENCE',
+  TECHNICAL_DOCUMENT: 'TECHNICAL_DOCUMENT',
+  MEDIA_RECORD: 'MEDIA_RECORD',
+  OTHER: 'OTHER'
+} as const
+
+export type ResourceSemanticType = (typeof ResourceSemanticType)[keyof typeof ResourceSemanticType]
+
+
+export const LegalAuthorityKind = {
+  LEGISLATION: 'LEGISLATION',
+  CASE_LAW: 'CASE_LAW',
+  ADMINISTRATIVE_REGULATION: 'ADMINISTRATIVE_REGULATION',
+  ADMINISTRATIVE_ACT: 'ADMINISTRATIVE_ACT',
+  AUTHORITY_PRACTICE: 'AUTHORITY_PRACTICE',
+  OTHER_LEGAL_AUTHORITY: 'OTHER_LEGAL_AUTHORITY'
+} as const
+
+export type LegalAuthorityKind = (typeof LegalAuthorityKind)[keyof typeof LegalAuthorityKind]
+
+
+export const SourceCharacter = {
+  PUBLIC_OFFICIAL: 'PUBLIC_OFFICIAL',
+  PUBLIC_NON_OFFICIAL: 'PUBLIC_NON_OFFICIAL',
+  PRIVATE: 'PRIVATE',
+  UNKNOWN: 'UNKNOWN'
+} as const
+
+export type SourceCharacter = (typeof SourceCharacter)[keyof typeof SourceCharacter]
+
+
+export const LegalSourceIdentityVerificationStatus = {
+  UNVERIFIED: 'UNVERIFIED',
+  VERIFIED: 'VERIFIED',
+  REJECTED: 'REJECTED',
+  CONFLICTING: 'CONFLICTING'
+} as const
+
+export type LegalSourceIdentityVerificationStatus = (typeof LegalSourceIdentityVerificationStatus)[keyof typeof LegalSourceIdentityVerificationStatus]
+
+
 export const LegalSourceVersionLifecycleStatus = {
   CURRENT: 'CURRENT',
   CURRENT_SUBJECT_TO_REVIEW: 'CURRENT_SUBJECT_TO_REVIEW',

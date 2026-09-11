@@ -57,6 +57,8 @@ export const ModelName = {
   PortArea: 'PortArea',
   ImportRun: 'ImportRun',
   LegalSource: 'LegalSource',
+  LegalExpressionVersion: 'LegalExpressionVersion',
+  LegalSourceIdentityAssertion: 'LegalSourceIdentityAssertion',
   LegalSourceVersion: 'LegalSourceVersion',
   LegalSourceAcquisition: 'LegalSourceAcquisition',
   SourceRelation: 'SourceRelation',
@@ -188,6 +190,9 @@ export const LegalSourceScalarFieldEnum = {
   sourceKey: 'sourceKey',
   title: 'title',
   sourceType: 'sourceType',
+  resourceSemanticType: 'resourceSemanticType',
+  legalAuthorityKind: 'legalAuthorityKind',
+  sourceCharacter: 'sourceCharacter',
   status: 'status',
   role: 'role',
   legalRank: 'legalRank',
@@ -227,9 +232,44 @@ export const LegalSourceScalarFieldEnum = {
 export type LegalSourceScalarFieldEnum = (typeof LegalSourceScalarFieldEnum)[keyof typeof LegalSourceScalarFieldEnum]
 
 
+export const LegalExpressionVersionScalarFieldEnum = {
+  id: 'id',
+  sourceFamilyId: 'sourceFamilyId',
+  expressionKey: 'expressionKey',
+  publicationDate: 'publicationDate',
+  effectiveFrom: 'effectiveFrom',
+  effectiveTo: 'effectiveTo',
+  expressionStatus: 'expressionStatus',
+  correctionMetadata: 'correctionMetadata',
+  consolidationMetadata: 'consolidationMetadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LegalExpressionVersionScalarFieldEnum = (typeof LegalExpressionVersionScalarFieldEnum)[keyof typeof LegalExpressionVersionScalarFieldEnum]
+
+
+export const LegalSourceIdentityAssertionScalarFieldEnum = {
+  id: 'id',
+  sourceFamilyId: 'sourceFamilyId',
+  identifierScheme: 'identifierScheme',
+  rawValue: 'rawValue',
+  normalizedValue: 'normalizedValue',
+  issuingAuthority: 'issuingAuthority',
+  jurisdiction: 'jurisdiction',
+  verificationStatus: 'verificationStatus',
+  provenanceReference: 'provenanceReference',
+  verifiedAt: 'verifiedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type LegalSourceIdentityAssertionScalarFieldEnum = (typeof LegalSourceIdentityAssertionScalarFieldEnum)[keyof typeof LegalSourceIdentityAssertionScalarFieldEnum]
+
+
 export const LegalSourceVersionScalarFieldEnum = {
   id: 'id',
   sourceFamilyId: 'sourceFamilyId',
+  legalExpressionVersionId: 'legalExpressionVersionId',
   observedSha256: 'observedSha256',
   observedSizeBytes: 'observedSizeBytes',
   observedMimeType: 'observedMimeType',

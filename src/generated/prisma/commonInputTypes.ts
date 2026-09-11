@@ -288,6 +288,27 @@ export type EnumLegalSourceTypeFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumLegalSourceTypeFilter<$PrismaModel> | $Enums.LegalSourceType
 }
 
+export type EnumResourceSemanticTypeNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.ResourceSemanticType | Prisma.EnumResourceSemanticTypeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.ResourceSemanticType[] | Prisma.ListEnumResourceSemanticTypeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.ResourceSemanticType[] | Prisma.ListEnumResourceSemanticTypeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumResourceSemanticTypeNullableFilter<$PrismaModel> | $Enums.ResourceSemanticType | null
+}
+
+export type EnumLegalAuthorityKindNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalAuthorityKind | Prisma.EnumLegalAuthorityKindFieldRefInput<$PrismaModel> | null
+  in?: $Enums.LegalAuthorityKind[] | Prisma.ListEnumLegalAuthorityKindFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.LegalAuthorityKind[] | Prisma.ListEnumLegalAuthorityKindFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumLegalAuthorityKindNullableFilter<$PrismaModel> | $Enums.LegalAuthorityKind | null
+}
+
+export type EnumSourceCharacterNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.SourceCharacter | Prisma.EnumSourceCharacterFieldRefInput<$PrismaModel> | null
+  in?: $Enums.SourceCharacter[] | Prisma.ListEnumSourceCharacterFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.SourceCharacter[] | Prisma.ListEnumSourceCharacterFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumSourceCharacterNullableFilter<$PrismaModel> | $Enums.SourceCharacter | null
+}
+
 export type EnumLegalSourceStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.LegalSourceStatus | Prisma.EnumLegalSourceStatusFieldRefInput<$PrismaModel>
   in?: $Enums.LegalSourceStatus[] | Prisma.ListEnumLegalSourceStatusFieldRefInput<$PrismaModel>
@@ -354,6 +375,36 @@ export type EnumLegalSourceTypeWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumLegalSourceTypeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumLegalSourceTypeFilter<$PrismaModel>
+}
+
+export type EnumResourceSemanticTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ResourceSemanticType | Prisma.EnumResourceSemanticTypeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.ResourceSemanticType[] | Prisma.ListEnumResourceSemanticTypeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.ResourceSemanticType[] | Prisma.ListEnumResourceSemanticTypeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumResourceSemanticTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.ResourceSemanticType | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumResourceSemanticTypeNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumResourceSemanticTypeNullableFilter<$PrismaModel>
+}
+
+export type EnumLegalAuthorityKindNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalAuthorityKind | Prisma.EnumLegalAuthorityKindFieldRefInput<$PrismaModel> | null
+  in?: $Enums.LegalAuthorityKind[] | Prisma.ListEnumLegalAuthorityKindFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.LegalAuthorityKind[] | Prisma.ListEnumLegalAuthorityKindFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumLegalAuthorityKindNullableWithAggregatesFilter<$PrismaModel> | $Enums.LegalAuthorityKind | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalAuthorityKindNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalAuthorityKindNullableFilter<$PrismaModel>
+}
+
+export type EnumSourceCharacterNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.SourceCharacter | Prisma.EnumSourceCharacterFieldRefInput<$PrismaModel> | null
+  in?: $Enums.SourceCharacter[] | Prisma.ListEnumSourceCharacterFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.SourceCharacter[] | Prisma.ListEnumSourceCharacterFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumSourceCharacterNullableWithAggregatesFilter<$PrismaModel> | $Enums.SourceCharacter | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumSourceCharacterNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumSourceCharacterNullableFilter<$PrismaModel>
 }
 
 export type EnumLegalSourceStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -438,6 +489,23 @@ export type EnumLegalSourceIdentityScopeKindNullableWithAggregatesFilter<$Prisma
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumLegalSourceIdentityScopeKindNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumLegalSourceIdentityScopeKindNullableFilter<$PrismaModel>
+}
+
+export type EnumLegalSourceIdentityVerificationStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceIdentityVerificationStatus | Prisma.EnumLegalSourceIdentityVerificationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceIdentityVerificationStatus[] | Prisma.ListEnumLegalSourceIdentityVerificationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceIdentityVerificationStatus[] | Prisma.ListEnumLegalSourceIdentityVerificationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceIdentityVerificationStatusFilter<$PrismaModel> | $Enums.LegalSourceIdentityVerificationStatus
+}
+
+export type EnumLegalSourceIdentityVerificationStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceIdentityVerificationStatus | Prisma.EnumLegalSourceIdentityVerificationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceIdentityVerificationStatus[] | Prisma.ListEnumLegalSourceIdentityVerificationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceIdentityVerificationStatus[] | Prisma.ListEnumLegalSourceIdentityVerificationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceIdentityVerificationStatusWithAggregatesFilter<$PrismaModel> | $Enums.LegalSourceIdentityVerificationStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalSourceIdentityVerificationStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalSourceIdentityVerificationStatusFilter<$PrismaModel>
 }
 
 export type EnumLegalSourceVersionLifecycleStatusFilter<$PrismaModel = never> = {
@@ -1923,6 +1991,27 @@ export type NestedEnumLegalSourceTypeFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumLegalSourceTypeFilter<$PrismaModel> | $Enums.LegalSourceType
 }
 
+export type NestedEnumResourceSemanticTypeNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.ResourceSemanticType | Prisma.EnumResourceSemanticTypeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.ResourceSemanticType[] | Prisma.ListEnumResourceSemanticTypeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.ResourceSemanticType[] | Prisma.ListEnumResourceSemanticTypeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumResourceSemanticTypeNullableFilter<$PrismaModel> | $Enums.ResourceSemanticType | null
+}
+
+export type NestedEnumLegalAuthorityKindNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalAuthorityKind | Prisma.EnumLegalAuthorityKindFieldRefInput<$PrismaModel> | null
+  in?: $Enums.LegalAuthorityKind[] | Prisma.ListEnumLegalAuthorityKindFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.LegalAuthorityKind[] | Prisma.ListEnumLegalAuthorityKindFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumLegalAuthorityKindNullableFilter<$PrismaModel> | $Enums.LegalAuthorityKind | null
+}
+
+export type NestedEnumSourceCharacterNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.SourceCharacter | Prisma.EnumSourceCharacterFieldRefInput<$PrismaModel> | null
+  in?: $Enums.SourceCharacter[] | Prisma.ListEnumSourceCharacterFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.SourceCharacter[] | Prisma.ListEnumSourceCharacterFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumSourceCharacterNullableFilter<$PrismaModel> | $Enums.SourceCharacter | null
+}
+
 export type NestedEnumLegalSourceStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.LegalSourceStatus | Prisma.EnumLegalSourceStatusFieldRefInput<$PrismaModel>
   in?: $Enums.LegalSourceStatus[] | Prisma.ListEnumLegalSourceStatusFieldRefInput<$PrismaModel>
@@ -1978,6 +2067,36 @@ export type NestedEnumLegalSourceTypeWithAggregatesFilter<$PrismaModel = never> 
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumLegalSourceTypeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumLegalSourceTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumResourceSemanticTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ResourceSemanticType | Prisma.EnumResourceSemanticTypeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.ResourceSemanticType[] | Prisma.ListEnumResourceSemanticTypeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.ResourceSemanticType[] | Prisma.ListEnumResourceSemanticTypeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumResourceSemanticTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.ResourceSemanticType | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumResourceSemanticTypeNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumResourceSemanticTypeNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumLegalAuthorityKindNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalAuthorityKind | Prisma.EnumLegalAuthorityKindFieldRefInput<$PrismaModel> | null
+  in?: $Enums.LegalAuthorityKind[] | Prisma.ListEnumLegalAuthorityKindFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.LegalAuthorityKind[] | Prisma.ListEnumLegalAuthorityKindFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumLegalAuthorityKindNullableWithAggregatesFilter<$PrismaModel> | $Enums.LegalAuthorityKind | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalAuthorityKindNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalAuthorityKindNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumSourceCharacterNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.SourceCharacter | Prisma.EnumSourceCharacterFieldRefInput<$PrismaModel> | null
+  in?: $Enums.SourceCharacter[] | Prisma.ListEnumSourceCharacterFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.SourceCharacter[] | Prisma.ListEnumSourceCharacterFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumSourceCharacterNullableWithAggregatesFilter<$PrismaModel> | $Enums.SourceCharacter | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumSourceCharacterNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumSourceCharacterNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumLegalSourceStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -2073,6 +2192,23 @@ export type NestedEnumLegalSourceIdentityScopeKindNullableWithAggregatesFilter<$
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumLegalSourceIdentityScopeKindNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumLegalSourceIdentityScopeKindNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumLegalSourceIdentityVerificationStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceIdentityVerificationStatus | Prisma.EnumLegalSourceIdentityVerificationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceIdentityVerificationStatus[] | Prisma.ListEnumLegalSourceIdentityVerificationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceIdentityVerificationStatus[] | Prisma.ListEnumLegalSourceIdentityVerificationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceIdentityVerificationStatusFilter<$PrismaModel> | $Enums.LegalSourceIdentityVerificationStatus
+}
+
+export type NestedEnumLegalSourceIdentityVerificationStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceIdentityVerificationStatus | Prisma.EnumLegalSourceIdentityVerificationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceIdentityVerificationStatus[] | Prisma.ListEnumLegalSourceIdentityVerificationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceIdentityVerificationStatus[] | Prisma.ListEnumLegalSourceIdentityVerificationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceIdentityVerificationStatusWithAggregatesFilter<$PrismaModel> | $Enums.LegalSourceIdentityVerificationStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalSourceIdentityVerificationStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalSourceIdentityVerificationStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumLegalSourceVersionLifecycleStatusFilter<$PrismaModel = never> = {
