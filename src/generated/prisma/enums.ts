@@ -835,3 +835,16 @@ export const ImportRunStatus = {
 } as const
 
 export type ImportRunStatus = (typeof ImportRunStatus)[keyof typeof ImportRunStatus]
+
+
+export const NeutralIntakeStatus = {
+  RECEIVED: 'RECEIVED',
+  EVIDENCE_READY: 'EVIDENCE_READY',
+  REVIEW_REQUIRED: 'REVIEW_REQUIRED',
+  ROUTED: 'ROUTED',
+  FAILED_EXTRACTION: 'FAILED_EXTRACTION',
+  FAILED_CLASSIFICATION: 'FAILED_CLASSIFICATION',
+  FAILED_HANDOFF: 'FAILED_HANDOFF'
+} as const
+
+export type NeutralIntakeStatus = (typeof NeutralIntakeStatus)[keyof typeof NeutralIntakeStatus]

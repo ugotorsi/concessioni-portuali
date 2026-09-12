@@ -215,6 +215,7 @@ export type EnteWhereInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceListRelationFilter
   documentFileVersions?: Prisma.DocumentFileVersionListRelationFilter
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionListRelationFilter
+  neutralIntakes?: Prisma.NeutralIntakeListRelationFilter
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialListRelationFilter
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateListRelationFilter
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventListRelationFilter
@@ -245,6 +246,7 @@ export type EnteOrderByWithRelationInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceOrderByRelationAggregateInput
   documentFileVersions?: Prisma.DocumentFileVersionOrderByRelationAggregateInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionOrderByRelationAggregateInput
+  neutralIntakes?: Prisma.NeutralIntakeOrderByRelationAggregateInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialOrderByRelationAggregateInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateOrderByRelationAggregateInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventOrderByRelationAggregateInput
@@ -278,6 +280,7 @@ export type EnteWhereUniqueInput = Prisma.AtLeast<{
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceListRelationFilter
   documentFileVersions?: Prisma.DocumentFileVersionListRelationFilter
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionListRelationFilter
+  neutralIntakes?: Prisma.NeutralIntakeListRelationFilter
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialListRelationFilter
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateListRelationFilter
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventListRelationFilter
@@ -334,6 +337,7 @@ export type EnteCreateInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -364,6 +368,7 @@ export type EnteUncheckedCreateInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -394,6 +399,7 @@ export type EnteUpdateInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -424,6 +430,7 @@ export type EnteUncheckedUpdateInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -671,6 +678,22 @@ export type EnteUpdateOneRequiredWithoutDocumentFileVersionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.EnteUpdateToOneWithWhereWithoutDocumentFileVersionsInput, Prisma.EnteUpdateWithoutDocumentFileVersionsInput>, Prisma.EnteUncheckedUpdateWithoutDocumentFileVersionsInput>
 }
 
+export type EnteCreateNestedOneWithoutNeutralIntakesInput = {
+  create?: Prisma.XOR<Prisma.EnteCreateWithoutNeutralIntakesInput, Prisma.EnteUncheckedCreateWithoutNeutralIntakesInput>
+  connectOrCreate?: Prisma.EnteCreateOrConnectWithoutNeutralIntakesInput
+  connect?: Prisma.EnteWhereUniqueInput
+}
+
+export type EnteUpdateOneWithoutNeutralIntakesNestedInput = {
+  create?: Prisma.XOR<Prisma.EnteCreateWithoutNeutralIntakesInput, Prisma.EnteUncheckedCreateWithoutNeutralIntakesInput>
+  connectOrCreate?: Prisma.EnteCreateOrConnectWithoutNeutralIntakesInput
+  upsert?: Prisma.EnteUpsertWithoutNeutralIntakesInput
+  disconnect?: Prisma.EnteWhereInput | boolean
+  delete?: Prisma.EnteWhereInput | boolean
+  connect?: Prisma.EnteWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EnteUpdateToOneWithWhereWithoutNeutralIntakesInput, Prisma.EnteUpdateWithoutNeutralIntakesInput>, Prisma.EnteUncheckedUpdateWithoutNeutralIntakesInput>
+}
+
 export type EnteCreateNestedOneWithoutFascicoloObservationsInput = {
   create?: Prisma.XOR<Prisma.EnteCreateWithoutFascicoloObservationsInput, Prisma.EnteUncheckedCreateWithoutFascicoloObservationsInput>
   connectOrCreate?: Prisma.EnteCreateOrConnectWithoutFascicoloObservationsInput
@@ -841,6 +864,7 @@ export type EnteCreateWithoutPortsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -870,6 +894,7 @@ export type EnteUncheckedCreateWithoutPortsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -915,6 +940,7 @@ export type EnteUpdateWithoutPortsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -944,6 +970,7 @@ export type EnteUncheckedUpdateWithoutPortsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -973,6 +1000,7 @@ export type EnteCreateWithoutImportRunsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -1002,6 +1030,7 @@ export type EnteUncheckedCreateWithoutImportRunsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -1047,6 +1076,7 @@ export type EnteUpdateWithoutImportRunsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -1076,6 +1106,7 @@ export type EnteUncheckedUpdateWithoutImportRunsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -1105,6 +1136,7 @@ export type EnteCreateWithoutLegalSourcesInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -1134,6 +1166,7 @@ export type EnteUncheckedCreateWithoutLegalSourcesInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -1179,6 +1212,7 @@ export type EnteUpdateWithoutLegalSourcesInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -1208,6 +1242,7 @@ export type EnteUncheckedUpdateWithoutLegalSourcesInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -1237,6 +1272,7 @@ export type EnteCreateWithoutLegalSourceAcquisitionsInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -1266,6 +1302,7 @@ export type EnteUncheckedCreateWithoutLegalSourceAcquisitionsInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -1311,6 +1348,7 @@ export type EnteUpdateWithoutLegalSourceAcquisitionsInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -1340,6 +1378,7 @@ export type EnteUncheckedUpdateWithoutLegalSourceAcquisitionsInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -1369,6 +1408,7 @@ export type EnteCreateWithoutLegalRulesInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -1398,6 +1438,7 @@ export type EnteUncheckedCreateWithoutLegalRulesInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -1443,6 +1484,7 @@ export type EnteUpdateWithoutLegalRulesInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -1472,6 +1514,7 @@ export type EnteUncheckedUpdateWithoutLegalRulesInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -1501,6 +1544,7 @@ export type EnteCreateWithoutDocumentGapsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -1530,6 +1574,7 @@ export type EnteUncheckedCreateWithoutDocumentGapsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -1575,6 +1620,7 @@ export type EnteUpdateWithoutDocumentGapsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -1604,6 +1650,7 @@ export type EnteUncheckedUpdateWithoutDocumentGapsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -1633,6 +1680,7 @@ export type EnteCreateWithoutMembershipsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -1662,6 +1710,7 @@ export type EnteUncheckedCreateWithoutMembershipsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -1707,6 +1756,7 @@ export type EnteUpdateWithoutMembershipsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -1736,6 +1786,7 @@ export type EnteUncheckedUpdateWithoutMembershipsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -1765,6 +1816,7 @@ export type EnteCreateWithoutConcessioniInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -1794,6 +1846,7 @@ export type EnteUncheckedCreateWithoutConcessioniInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -1839,6 +1892,7 @@ export type EnteUpdateWithoutConcessioniInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -1868,6 +1922,7 @@ export type EnteUncheckedUpdateWithoutConcessioniInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -1897,6 +1952,7 @@ export type EnteCreateWithoutDocumentiInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -1926,6 +1982,7 @@ export type EnteUncheckedCreateWithoutDocumentiInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -1971,6 +2028,7 @@ export type EnteUpdateWithoutDocumentiInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -2000,6 +2058,7 @@ export type EnteUncheckedUpdateWithoutDocumentiInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -2029,6 +2088,7 @@ export type EnteCreateWithoutDocumentFileVersionsInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -2058,6 +2118,7 @@ export type EnteUncheckedCreateWithoutDocumentFileVersionsInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -2103,6 +2164,7 @@ export type EnteUpdateWithoutDocumentFileVersionsInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -2131,6 +2193,143 @@ export type EnteUncheckedUpdateWithoutDocumentFileVersionsInput = {
   checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutEnteNestedInput
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
+}
+
+export type EnteCreateWithoutNeutralIntakesInput = {
+  id?: string
+  nome: string
+  codice: string
+  tipo?: $Enums.EnteTipo
+  stato?: $Enums.EnteStato
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessioni?: Prisma.ConcessioneCreateNestedManyWithoutEnteInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutEnteInput
+  report?: Prisma.ReportCreateNestedManyWithoutEnteInput
+  activityLog?: Prisma.ActivityLogCreateNestedManyWithoutEnteInput
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutEnteInput
+  ports?: Prisma.PortCreateNestedManyWithoutEnteInput
+  legalSources?: Prisma.LegalSourceCreateNestedManyWithoutEnteInput
+  legalRules?: Prisma.LegalRuleCreateNestedManyWithoutEnteInput
+  documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutEnteInput
+  importRuns?: Prisma.ImportRunCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutEnteInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
+  documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
+}
+
+export type EnteUncheckedCreateWithoutNeutralIntakesInput = {
+  id?: string
+  nome: string
+  codice: string
+  tipo?: $Enums.EnteTipo
+  stato?: $Enums.EnteStato
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessioni?: Prisma.ConcessioneUncheckedCreateNestedManyWithoutEnteInput
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutEnteInput
+  report?: Prisma.ReportUncheckedCreateNestedManyWithoutEnteInput
+  activityLog?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutEnteInput
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutEnteInput
+  ports?: Prisma.PortUncheckedCreateNestedManyWithoutEnteInput
+  legalSources?: Prisma.LegalSourceUncheckedCreateNestedManyWithoutEnteInput
+  legalRules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutEnteInput
+  documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutEnteInput
+  importRuns?: Prisma.ImportRunUncheckedCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutEnteInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
+}
+
+export type EnteCreateOrConnectWithoutNeutralIntakesInput = {
+  where: Prisma.EnteWhereUniqueInput
+  create: Prisma.XOR<Prisma.EnteCreateWithoutNeutralIntakesInput, Prisma.EnteUncheckedCreateWithoutNeutralIntakesInput>
+}
+
+export type EnteUpsertWithoutNeutralIntakesInput = {
+  update: Prisma.XOR<Prisma.EnteUpdateWithoutNeutralIntakesInput, Prisma.EnteUncheckedUpdateWithoutNeutralIntakesInput>
+  create: Prisma.XOR<Prisma.EnteCreateWithoutNeutralIntakesInput, Prisma.EnteUncheckedCreateWithoutNeutralIntakesInput>
+  where?: Prisma.EnteWhereInput
+}
+
+export type EnteUpdateToOneWithWhereWithoutNeutralIntakesInput = {
+  where?: Prisma.EnteWhereInput
+  data: Prisma.XOR<Prisma.EnteUpdateWithoutNeutralIntakesInput, Prisma.EnteUncheckedUpdateWithoutNeutralIntakesInput>
+}
+
+export type EnteUpdateWithoutNeutralIntakesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  codice?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.EnumEnteTipoFieldUpdateOperationsInput | $Enums.EnteTipo
+  stato?: Prisma.EnumEnteStatoFieldUpdateOperationsInput | $Enums.EnteStato
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessioni?: Prisma.ConcessioneUpdateManyWithoutEnteNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutEnteNestedInput
+  report?: Prisma.ReportUpdateManyWithoutEnteNestedInput
+  activityLog?: Prisma.ActivityLogUpdateManyWithoutEnteNestedInput
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutEnteNestedInput
+  ports?: Prisma.PortUpdateManyWithoutEnteNestedInput
+  legalSources?: Prisma.LegalSourceUpdateManyWithoutEnteNestedInput
+  legalRules?: Prisma.LegalRuleUpdateManyWithoutEnteNestedInput
+  documentGaps?: Prisma.DocumentGapUpdateManyWithoutEnteNestedInput
+  importRuns?: Prisma.ImportRunUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutEnteNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
+  documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
+}
+
+export type EnteUncheckedUpdateWithoutNeutralIntakesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  codice?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.EnumEnteTipoFieldUpdateOperationsInput | $Enums.EnteTipo
+  stato?: Prisma.EnumEnteStatoFieldUpdateOperationsInput | $Enums.EnteStato
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessioni?: Prisma.ConcessioneUncheckedUpdateManyWithoutEnteNestedInput
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutEnteNestedInput
+  report?: Prisma.ReportUncheckedUpdateManyWithoutEnteNestedInput
+  activityLog?: Prisma.ActivityLogUncheckedUpdateManyWithoutEnteNestedInput
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutEnteNestedInput
+  ports?: Prisma.PortUncheckedUpdateManyWithoutEnteNestedInput
+  legalSources?: Prisma.LegalSourceUncheckedUpdateManyWithoutEnteNestedInput
+  legalRules?: Prisma.LegalRuleUncheckedUpdateManyWithoutEnteNestedInput
+  documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutEnteNestedInput
+  importRuns?: Prisma.ImportRunUncheckedUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutEnteNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
@@ -2161,6 +2360,7 @@ export type EnteCreateWithoutFascicoloObservationsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -2190,6 +2390,7 @@ export type EnteUncheckedCreateWithoutFascicoloObservationsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -2235,6 +2436,7 @@ export type EnteUpdateWithoutFascicoloObservationsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -2264,6 +2466,7 @@ export type EnteUncheckedUpdateWithoutFascicoloObservationsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -2293,6 +2496,7 @@ export type EnteCreateWithoutChecklistEvidenceInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -2322,6 +2526,7 @@ export type EnteUncheckedCreateWithoutChecklistEvidenceInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -2367,6 +2572,7 @@ export type EnteUpdateWithoutChecklistEvidenceInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -2396,6 +2602,7 @@ export type EnteUncheckedUpdateWithoutChecklistEvidenceInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -2425,6 +2632,7 @@ export type EnteCreateWithoutDocumentRequirementProposalsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -2454,6 +2662,7 @@ export type EnteUncheckedCreateWithoutDocumentRequirementProposalsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -2499,6 +2708,7 @@ export type EnteUpdateWithoutDocumentRequirementProposalsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -2528,6 +2738,7 @@ export type EnteUncheckedUpdateWithoutDocumentRequirementProposalsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -2557,6 +2768,7 @@ export type EnteCreateWithoutDocumentRequirementEvidenceInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -2586,6 +2798,7 @@ export type EnteUncheckedCreateWithoutDocumentRequirementEvidenceInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -2631,6 +2844,7 @@ export type EnteUpdateWithoutDocumentRequirementEvidenceInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -2660,6 +2874,7 @@ export type EnteUncheckedUpdateWithoutDocumentRequirementEvidenceInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -2689,6 +2904,7 @@ export type EnteCreateWithoutDecisioniProcedimentoInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -2718,6 +2934,7 @@ export type EnteUncheckedCreateWithoutDecisioniProcedimentoInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -2763,6 +2980,7 @@ export type EnteUpdateWithoutDecisioniProcedimentoInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -2792,6 +3010,7 @@ export type EnteUncheckedUpdateWithoutDecisioniProcedimentoInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -2821,6 +3040,7 @@ export type EnteCreateWithoutReportInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -2850,6 +3070,7 @@ export type EnteUncheckedCreateWithoutReportInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -2895,6 +3116,7 @@ export type EnteUpdateWithoutReportInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -2924,6 +3146,7 @@ export type EnteUncheckedUpdateWithoutReportInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -2953,6 +3176,7 @@ export type EnteCreateWithoutActivityLogInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -2982,6 +3206,7 @@ export type EnteUncheckedCreateWithoutActivityLogInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -3027,6 +3252,7 @@ export type EnteUpdateWithoutActivityLogInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -3056,6 +3282,7 @@ export type EnteUncheckedUpdateWithoutActivityLogInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -3086,6 +3313,7 @@ export type EnteCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
 }
@@ -3115,6 +3343,7 @@ export type EnteUncheckedCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
 }
@@ -3160,6 +3389,7 @@ export type EnteUpdateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
 }
@@ -3189,6 +3419,7 @@ export type EnteUncheckedUpdateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
 }
@@ -3218,6 +3449,7 @@ export type EnteCreateWithoutAiFascicoloHumanReviewStatesInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
 }
@@ -3247,6 +3479,7 @@ export type EnteUncheckedCreateWithoutAiFascicoloHumanReviewStatesInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
 }
@@ -3292,6 +3525,7 @@ export type EnteUpdateWithoutAiFascicoloHumanReviewStatesInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
 }
@@ -3321,6 +3555,7 @@ export type EnteUncheckedUpdateWithoutAiFascicoloHumanReviewStatesInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
 }
@@ -3350,6 +3585,7 @@ export type EnteCreateWithoutAiFascicoloHumanReviewEventsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
 }
@@ -3379,6 +3615,7 @@ export type EnteUncheckedCreateWithoutAiFascicoloHumanReviewEventsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
 }
@@ -3424,6 +3661,7 @@ export type EnteUpdateWithoutAiFascicoloHumanReviewEventsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
 }
@@ -3453,6 +3691,7 @@ export type EnteUncheckedUpdateWithoutAiFascicoloHumanReviewEventsInput = {
   documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
   documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
 }
@@ -3480,6 +3719,7 @@ export type EnteCountOutputType = {
   documentRequirementEvidence: number
   documentFileVersions: number
   legalSourceAcquisitions: number
+  neutralIntakes: number
   aiFascicoloTrustedReviewMaterials: number
   aiFascicoloHumanReviewStates: number
   aiFascicoloHumanReviewEvents: number
@@ -3503,6 +3743,7 @@ export type EnteCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   documentRequirementEvidence?: boolean | EnteCountOutputTypeCountDocumentRequirementEvidenceArgs
   documentFileVersions?: boolean | EnteCountOutputTypeCountDocumentFileVersionsArgs
   legalSourceAcquisitions?: boolean | EnteCountOutputTypeCountLegalSourceAcquisitionsArgs
+  neutralIntakes?: boolean | EnteCountOutputTypeCountNeutralIntakesArgs
   aiFascicoloTrustedReviewMaterials?: boolean | EnteCountOutputTypeCountAiFascicoloTrustedReviewMaterialsArgs
   aiFascicoloHumanReviewStates?: boolean | EnteCountOutputTypeCountAiFascicoloHumanReviewStatesArgs
   aiFascicoloHumanReviewEvents?: boolean | EnteCountOutputTypeCountAiFascicoloHumanReviewEventsArgs
@@ -3640,6 +3881,13 @@ export type EnteCountOutputTypeCountLegalSourceAcquisitionsArgs<ExtArgs extends 
 /**
  * EnteCountOutputType without action
  */
+export type EnteCountOutputTypeCountNeutralIntakesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.NeutralIntakeWhereInput
+}
+
+/**
+ * EnteCountOutputType without action
+ */
 export type EnteCountOutputTypeCountAiFascicoloTrustedReviewMaterialsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.AiFascicoloTrustedReviewMaterialWhereInput
 }
@@ -3684,6 +3932,7 @@ export type EnteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   documentRequirementEvidence?: boolean | Prisma.Ente$documentRequirementEvidenceArgs<ExtArgs>
   documentFileVersions?: boolean | Prisma.Ente$documentFileVersionsArgs<ExtArgs>
   legalSourceAcquisitions?: boolean | Prisma.Ente$legalSourceAcquisitionsArgs<ExtArgs>
+  neutralIntakes?: boolean | Prisma.Ente$neutralIntakesArgs<ExtArgs>
   aiFascicoloTrustedReviewMaterials?: boolean | Prisma.Ente$aiFascicoloTrustedReviewMaterialsArgs<ExtArgs>
   aiFascicoloHumanReviewStates?: boolean | Prisma.Ente$aiFascicoloHumanReviewStatesArgs<ExtArgs>
   aiFascicoloHumanReviewEvents?: boolean | Prisma.Ente$aiFascicoloHumanReviewEventsArgs<ExtArgs>
@@ -3739,6 +3988,7 @@ export type EnteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   documentRequirementEvidence?: boolean | Prisma.Ente$documentRequirementEvidenceArgs<ExtArgs>
   documentFileVersions?: boolean | Prisma.Ente$documentFileVersionsArgs<ExtArgs>
   legalSourceAcquisitions?: boolean | Prisma.Ente$legalSourceAcquisitionsArgs<ExtArgs>
+  neutralIntakes?: boolean | Prisma.Ente$neutralIntakesArgs<ExtArgs>
   aiFascicoloTrustedReviewMaterials?: boolean | Prisma.Ente$aiFascicoloTrustedReviewMaterialsArgs<ExtArgs>
   aiFascicoloHumanReviewStates?: boolean | Prisma.Ente$aiFascicoloHumanReviewStatesArgs<ExtArgs>
   aiFascicoloHumanReviewEvents?: boolean | Prisma.Ente$aiFascicoloHumanReviewEventsArgs<ExtArgs>
@@ -3767,6 +4017,7 @@ export type $EntePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     documentRequirementEvidence: Prisma.$FascicoloDocumentRequirementEvidencePayload<ExtArgs>[]
     documentFileVersions: Prisma.$DocumentFileVersionPayload<ExtArgs>[]
     legalSourceAcquisitions: Prisma.$LegalSourceAcquisitionPayload<ExtArgs>[]
+    neutralIntakes: Prisma.$NeutralIntakePayload<ExtArgs>[]
     aiFascicoloTrustedReviewMaterials: Prisma.$AiFascicoloTrustedReviewMaterialPayload<ExtArgs>[]
     aiFascicoloHumanReviewStates: Prisma.$AiFascicoloHumanReviewStatePayload<ExtArgs>[]
     aiFascicoloHumanReviewEvents: Prisma.$AiFascicoloHumanReviewEventPayload<ExtArgs>[]
@@ -4190,6 +4441,7 @@ export interface Prisma__EnteClient<T, Null = never, ExtArgs extends runtime.Typ
   documentRequirementEvidence<T extends Prisma.Ente$documentRequirementEvidenceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$documentRequirementEvidenceArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloDocumentRequirementEvidencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documentFileVersions<T extends Prisma.Ente$documentFileVersionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$documentFileVersionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentFileVersionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   legalSourceAcquisitions<T extends Prisma.Ente$legalSourceAcquisitionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$legalSourceAcquisitionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LegalSourceAcquisitionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  neutralIntakes<T extends Prisma.Ente$neutralIntakesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$neutralIntakesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NeutralIntakePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   aiFascicoloTrustedReviewMaterials<T extends Prisma.Ente$aiFascicoloTrustedReviewMaterialsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$aiFascicoloTrustedReviewMaterialsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiFascicoloTrustedReviewMaterialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   aiFascicoloHumanReviewStates<T extends Prisma.Ente$aiFascicoloHumanReviewStatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$aiFascicoloHumanReviewStatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiFascicoloHumanReviewStatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   aiFascicoloHumanReviewEvents<T extends Prisma.Ente$aiFascicoloHumanReviewEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$aiFascicoloHumanReviewEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiFascicoloHumanReviewEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -5027,6 +5279,30 @@ export type Ente$legalSourceAcquisitionsArgs<ExtArgs extends runtime.Types.Exten
   take?: number
   skip?: number
   distinct?: Prisma.LegalSourceAcquisitionScalarFieldEnum | Prisma.LegalSourceAcquisitionScalarFieldEnum[]
+}
+
+/**
+ * Ente.neutralIntakes
+ */
+export type Ente$neutralIntakesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the NeutralIntake
+   */
+  select?: Prisma.NeutralIntakeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the NeutralIntake
+   */
+  omit?: Prisma.NeutralIntakeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NeutralIntakeInclude<ExtArgs> | null
+  where?: Prisma.NeutralIntakeWhereInput
+  orderBy?: Prisma.NeutralIntakeOrderByWithRelationInput | Prisma.NeutralIntakeOrderByWithRelationInput[]
+  cursor?: Prisma.NeutralIntakeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.NeutralIntakeScalarFieldEnum | Prisma.NeutralIntakeScalarFieldEnum[]
 }
 
 /**

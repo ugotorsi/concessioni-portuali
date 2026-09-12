@@ -411,6 +411,7 @@ export const ModelName = {
   Pagamento: 'Pagamento',
   Documento: 'Documento',
   DocumentFileVersion: 'DocumentFileVersion',
+  NeutralIntake: 'NeutralIntake',
   FascicoloObservation: 'FascicoloObservation',
   FascicoloChecklistEvidence: 'FascicoloChecklistEvidence',
   FascicoloDocumentRequirementProposal: 'FascicoloDocumentRequirementProposal',
@@ -440,7 +441,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "neutralIntake" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2442,6 +2443,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    NeutralIntake: {
+      payload: Prisma.$NeutralIntakePayload<ExtArgs>
+      fields: Prisma.NeutralIntakeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.NeutralIntakeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.NeutralIntakeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakePayload>
+        }
+        findFirst: {
+          args: Prisma.NeutralIntakeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.NeutralIntakeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakePayload>
+        }
+        findMany: {
+          args: Prisma.NeutralIntakeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakePayload>[]
+        }
+        create: {
+          args: Prisma.NeutralIntakeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakePayload>
+        }
+        createMany: {
+          args: Prisma.NeutralIntakeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.NeutralIntakeCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakePayload>[]
+        }
+        delete: {
+          args: Prisma.NeutralIntakeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakePayload>
+        }
+        update: {
+          args: Prisma.NeutralIntakeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakePayload>
+        }
+        deleteMany: {
+          args: Prisma.NeutralIntakeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.NeutralIntakeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.NeutralIntakeUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakePayload>[]
+        }
+        upsert: {
+          args: Prisma.NeutralIntakeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakePayload>
+        }
+        aggregate: {
+          args: Prisma.NeutralIntakeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateNeutralIntake>
+        }
+        groupBy: {
+          args: Prisma.NeutralIntakeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.NeutralIntakeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.NeutralIntakeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.NeutralIntakeCountAggregateOutputType> | number
+        }
+      }
+    }
     FascicoloObservation: {
       payload: Prisma.$FascicoloObservationPayload<ExtArgs>
       fields: Prisma.FascicoloObservationFieldRefs
@@ -4138,6 +4213,30 @@ export const DocumentFileVersionScalarFieldEnum = {
 export type DocumentFileVersionScalarFieldEnum = (typeof DocumentFileVersionScalarFieldEnum)[keyof typeof DocumentFileVersionScalarFieldEnum]
 
 
+export const NeutralIntakeScalarFieldEnum = {
+  id: 'id',
+  idempotencyKey: 'idempotencyKey',
+  storageProvider: 'storageProvider',
+  storageBucket: 'storageBucket',
+  storageKey: 'storageKey',
+  sha256: 'sha256',
+  mimeType: 'mimeType',
+  sizeBytes: 'sizeBytes',
+  originalName: 'originalName',
+  ingressChannel: 'ingressChannel',
+  originReference: 'originReference',
+  enteId: 'enteId',
+  receivedByUserId: 'receivedByUserId',
+  receivedByActorId: 'receivedByActorId',
+  receivedByRole: 'receivedByRole',
+  receivedAt: 'receivedAt',
+  status: 'status',
+  statusVersion: 'statusVersion'
+} as const
+
+export type NeutralIntakeScalarFieldEnum = (typeof NeutralIntakeScalarFieldEnum)[keyof typeof NeutralIntakeScalarFieldEnum]
+
+
 export const FascicoloObservationScalarFieldEnum = {
   id: 'id',
   enteId: 'enteId',
@@ -5400,6 +5499,20 @@ export type ListEnumDocumentoCanaleFieldRefInput<$PrismaModel> = FieldRefInputTy
 
 
 /**
+ * Reference to a field of type 'NeutralIntakeStatus'
+ */
+export type EnumNeutralIntakeStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NeutralIntakeStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'NeutralIntakeStatus[]'
+ */
+export type ListEnumNeutralIntakeStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NeutralIntakeStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'FascicoloObservationKind'
  */
 export type EnumFascicoloObservationKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FascicoloObservationKind'>
@@ -5731,6 +5844,7 @@ export type GlobalOmitConfig = {
   pagamento?: Prisma.PagamentoOmit
   documento?: Prisma.DocumentoOmit
   documentFileVersion?: Prisma.DocumentFileVersionOmit
+  neutralIntake?: Prisma.NeutralIntakeOmit
   fascicoloObservation?: Prisma.FascicoloObservationOmit
   fascicoloChecklistEvidence?: Prisma.FascicoloChecklistEvidenceOmit
   fascicoloDocumentRequirementProposal?: Prisma.FascicoloDocumentRequirementProposalOmit

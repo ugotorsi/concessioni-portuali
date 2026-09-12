@@ -177,6 +177,11 @@ export type Documento = Prisma.DocumentoModel
  */
 export type DocumentFileVersion = Prisma.DocumentFileVersionModel
 /**
+ * Model NeutralIntake
+ * 
+ */
+export type NeutralIntake = Prisma.NeutralIntakeModel
+/**
  * Model FascicoloObservation
  * 
  */

@@ -619,6 +619,16 @@ enum ImportRunStatus {
   FAILED
 }
 
+enum NeutralIntakeStatus {
+  RECEIVED
+  EVIDENCE_READY
+  REVIEW_REQUIRED
+  ROUTED
+  FAILED_EXTRACTION
+  FAILED_CLASSIFICATION
+  FAILED_HANDOFF
+}
+
 model Ente {
   id                           String                                 @id @default(cuid())
   nome                         String
@@ -644,6 +654,7 @@ model Ente {
   documentRequirementEvidence  FascicoloDocumentRequirementEvidence[]
   documentFileVersions         DocumentFileVersion[]
   legalSourceAcquisitions      LegalSourceAcquisition[]
+  neutralIntakes               NeutralIntake[]
   aiFascicoloTrustedReviewMaterials AiFascicoloTrustedReviewMaterial[]
   aiFascicoloHumanReviewStates      AiFascicoloHumanReviewState[]
   aiFascicoloHumanReviewEvents      AiFascicoloHumanReviewEvent[]
@@ -1070,6 +1081,7 @@ model User {
   documentRequirementEvidenceCreated            FascicoloDocumentRequirementEvidence[]       @relation("DocumentRequirementEvidenceCreatedBy")
   documentRequirementEvidenceRevoked            FascicoloDocumentRequirementEvidence[]       @relation("DocumentRequirementEvidenceRevokedBy")
   documentFileVersionsCreated                    DocumentFileVersion[]                         @relation("DocumentFileVersionCreatedBy")
+  neutralIntakesReceived                         NeutralIntake[]                               @relation("NeutralIntakeReceivedBy")
   documentRequirementEvidenceReviews            FascicoloDocumentRequirementEvidenceReview[] @relation("DocumentRequirementEvidenceReviewedBy")
   aiFascicoloHumanReviewEvents                   AiFascicoloHumanReviewEvent[]
 
@@ -1531,6 +1543,35 @@ model DocumentFileVersion {
   @@unique([id, documentId, canonicalEnteId])
   @@index([canonicalEnteId, documentId, createdAt])
   @@index([createdByUserId])
+}
+
+model NeutralIntake {
+  id                String              @id @default(cuid())
+  idempotencyKey    String              @unique @db.Char(64)
+  storageProvider   String
+  storageBucket     String?
+  storageKey        String
+  sha256            String              @db.Char(64)
+  mimeType          String
+  sizeBytes         Int
+  originalName      String?
+  ingressChannel    String
+  originReference   String?
+  enteId             String?
+  receivedByUserId   String?
+  receivedByActorId  String
+  receivedByRole     String
+  receivedAt         DateTime            @default(now())
+  status             NeutralIntakeStatus @default(RECEIVED)
+  statusVersion      Int                 @default(0)
+
+  ente           Ente? @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  receivedByUser User? @relation("NeutralIntakeReceivedBy", fields: [receivedByUserId], references: [id], onDelete: Restrict)
+
+  @@index([storageProvider, storageKey])
+  @@index([sha256])
+  @@index([enteId, status, receivedAt])
+  @@index([receivedByUserId])
 }
 
 model FascicoloObservation {

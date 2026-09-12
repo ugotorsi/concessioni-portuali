@@ -78,6 +78,7 @@ export const ModelName = {
   Pagamento: 'Pagamento',
   Documento: 'Documento',
   DocumentFileVersion: 'DocumentFileVersion',
+  NeutralIntake: 'NeutralIntake',
   FascicoloObservation: 'FascicoloObservation',
   FascicoloChecklistEvidence: 'FascicoloChecklistEvidence',
   FascicoloDocumentRequirementProposal: 'FascicoloDocumentRequirementProposal',
@@ -729,6 +730,30 @@ export const DocumentFileVersionScalarFieldEnum = {
 } as const
 
 export type DocumentFileVersionScalarFieldEnum = (typeof DocumentFileVersionScalarFieldEnum)[keyof typeof DocumentFileVersionScalarFieldEnum]
+
+
+export const NeutralIntakeScalarFieldEnum = {
+  id: 'id',
+  idempotencyKey: 'idempotencyKey',
+  storageProvider: 'storageProvider',
+  storageBucket: 'storageBucket',
+  storageKey: 'storageKey',
+  sha256: 'sha256',
+  mimeType: 'mimeType',
+  sizeBytes: 'sizeBytes',
+  originalName: 'originalName',
+  ingressChannel: 'ingressChannel',
+  originReference: 'originReference',
+  enteId: 'enteId',
+  receivedByUserId: 'receivedByUserId',
+  receivedByActorId: 'receivedByActorId',
+  receivedByRole: 'receivedByRole',
+  receivedAt: 'receivedAt',
+  status: 'status',
+  statusVersion: 'statusVersion'
+} as const
+
+export type NeutralIntakeScalarFieldEnum = (typeof NeutralIntakeScalarFieldEnum)[keyof typeof NeutralIntakeScalarFieldEnum]
 
 
 export const FascicoloObservationScalarFieldEnum = {

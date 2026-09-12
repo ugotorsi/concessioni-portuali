@@ -1408,6 +1408,23 @@ export type EnumDocumentoCanaleNullableWithAggregatesFilter<$PrismaModel = never
   _max?: Prisma.NestedEnumDocumentoCanaleNullableFilter<$PrismaModel>
 }
 
+export type EnumNeutralIntakeStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeStatus | Prisma.EnumNeutralIntakeStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeStatus[] | Prisma.ListEnumNeutralIntakeStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeStatus[] | Prisma.ListEnumNeutralIntakeStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeStatusFilter<$PrismaModel> | $Enums.NeutralIntakeStatus
+}
+
+export type EnumNeutralIntakeStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeStatus | Prisma.EnumNeutralIntakeStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeStatus[] | Prisma.ListEnumNeutralIntakeStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeStatus[] | Prisma.ListEnumNeutralIntakeStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeStatusWithAggregatesFilter<$PrismaModel> | $Enums.NeutralIntakeStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumNeutralIntakeStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumNeutralIntakeStatusFilter<$PrismaModel>
+}
+
 export type EnumFascicoloObservationKindFilter<$PrismaModel = never> = {
   equals?: $Enums.FascicoloObservationKind | Prisma.EnumFascicoloObservationKindFieldRefInput<$PrismaModel>
   in?: $Enums.FascicoloObservationKind[] | Prisma.ListEnumFascicoloObservationKindFieldRefInput<$PrismaModel>
@@ -3109,6 +3126,23 @@ export type NestedEnumDocumentoCanaleNullableWithAggregatesFilter<$PrismaModel =
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumDocumentoCanaleNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumDocumentoCanaleNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumNeutralIntakeStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeStatus | Prisma.EnumNeutralIntakeStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeStatus[] | Prisma.ListEnumNeutralIntakeStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeStatus[] | Prisma.ListEnumNeutralIntakeStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeStatusFilter<$PrismaModel> | $Enums.NeutralIntakeStatus
+}
+
+export type NestedEnumNeutralIntakeStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeStatus | Prisma.EnumNeutralIntakeStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeStatus[] | Prisma.ListEnumNeutralIntakeStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeStatus[] | Prisma.ListEnumNeutralIntakeStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeStatusWithAggregatesFilter<$PrismaModel> | $Enums.NeutralIntakeStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumNeutralIntakeStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumNeutralIntakeStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumFascicoloObservationKindFilter<$PrismaModel = never> = {
