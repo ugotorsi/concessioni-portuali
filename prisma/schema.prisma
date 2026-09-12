@@ -535,6 +535,7 @@ enum LegalSourceAcquisitionOutcome {
   MISSING
   INTEGRITY_MISMATCH
   FAILED
+  PENDING_IDENTITY
 }
 
 enum LegalSourceRole {
@@ -642,6 +643,7 @@ model Ente {
   documentRequirementProposals FascicoloDocumentRequirementProposal[]
   documentRequirementEvidence  FascicoloDocumentRequirementEvidence[]
   documentFileVersions         DocumentFileVersion[]
+  legalSourceAcquisitions      LegalSourceAcquisition[]
   aiFascicoloTrustedReviewMaterials AiFascicoloTrustedReviewMaterial[]
   aiFascicoloHumanReviewStates      AiFascicoloHumanReviewState[]
   aiFascicoloHumanReviewEvents      AiFascicoloHumanReviewEvent[]
@@ -888,8 +890,10 @@ model LegalSourceVersion {
 
 model LegalSourceAcquisition {
   id                       String                        @id @default(cuid())
-  sourceFamilyId           String
+  sourceFamilyId           String?
   sourceVersionId          String?
+  enteId                   String?
+  idempotencyKey           String                        @unique @db.Char(64)
   outcome                  LegalSourceAcquisitionOutcome
   originClass              String
   providerOrChannel        String
@@ -912,14 +916,16 @@ model LegalSourceAcquisition {
   failureCode              String?
   createdAt                DateTime                      @default(now())
 
-  sourceFamily LegalSource          @relation(fields: [sourceFamilyId], references: [id], onDelete: Restrict)
+  sourceFamily LegalSource?         @relation(fields: [sourceFamilyId], references: [id], onDelete: Restrict)
   sourceVersion LegalSourceVersion? @relation(fields: [sourceVersionId, sourceFamilyId, observedSha256], references: [id, sourceFamilyId, observedSha256], onDelete: Restrict)
+  ente         Ente?                 @relation(fields: [enteId], references: [id], onDelete: Restrict)
   importRun     ImportRun?           @relation(fields: [importRunId], references: [id], onDelete: Restrict)
 
   @@index([sourceFamilyId, acquiredAt])
   @@index([sourceVersionId])
   @@index([importRunId])
   @@index([outcome, acquiredAt])
+  @@index([enteId, outcome, acquiredAt])
 }
 
 model SourceRelation {

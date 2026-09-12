@@ -1,0 +1,1 @@
+ALTER TYPE "LegalSourceAcquisitionOutcome" ADD VALUE 'PENDING_IDENTITY';

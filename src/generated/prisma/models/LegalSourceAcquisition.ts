@@ -40,6 +40,8 @@ export type LegalSourceAcquisitionMinAggregateOutputType = {
   id: string | null
   sourceFamilyId: string | null
   sourceVersionId: string | null
+  enteId: string | null
+  idempotencyKey: string | null
   outcome: $Enums.LegalSourceAcquisitionOutcome | null
   originClass: string | null
   providerOrChannel: string | null
@@ -67,6 +69,8 @@ export type LegalSourceAcquisitionMaxAggregateOutputType = {
   id: string | null
   sourceFamilyId: string | null
   sourceVersionId: string | null
+  enteId: string | null
+  idempotencyKey: string | null
   outcome: $Enums.LegalSourceAcquisitionOutcome | null
   originClass: string | null
   providerOrChannel: string | null
@@ -94,6 +98,8 @@ export type LegalSourceAcquisitionCountAggregateOutputType = {
   id: number
   sourceFamilyId: number
   sourceVersionId: number
+  enteId: number
+  idempotencyKey: number
   outcome: number
   originClass: number
   providerOrChannel: number
@@ -133,6 +139,8 @@ export type LegalSourceAcquisitionMinAggregateInputType = {
   id?: true
   sourceFamilyId?: true
   sourceVersionId?: true
+  enteId?: true
+  idempotencyKey?: true
   outcome?: true
   originClass?: true
   providerOrChannel?: true
@@ -160,6 +168,8 @@ export type LegalSourceAcquisitionMaxAggregateInputType = {
   id?: true
   sourceFamilyId?: true
   sourceVersionId?: true
+  enteId?: true
+  idempotencyKey?: true
   outcome?: true
   originClass?: true
   providerOrChannel?: true
@@ -187,6 +197,8 @@ export type LegalSourceAcquisitionCountAggregateInputType = {
   id?: true
   sourceFamilyId?: true
   sourceVersionId?: true
+  enteId?: true
+  idempotencyKey?: true
   outcome?: true
   originClass?: true
   providerOrChannel?: true
@@ -299,8 +311,10 @@ export type LegalSourceAcquisitionGroupByArgs<ExtArgs extends runtime.Types.Exte
 
 export type LegalSourceAcquisitionGroupByOutputType = {
   id: string
-  sourceFamilyId: string
+  sourceFamilyId: string | null
   sourceVersionId: string | null
+  enteId: string | null
+  idempotencyKey: string
   outcome: $Enums.LegalSourceAcquisitionOutcome
   originClass: string
   providerOrChannel: string
@@ -349,8 +363,10 @@ export type LegalSourceAcquisitionWhereInput = {
   OR?: Prisma.LegalSourceAcquisitionWhereInput[]
   NOT?: Prisma.LegalSourceAcquisitionWhereInput | Prisma.LegalSourceAcquisitionWhereInput[]
   id?: Prisma.StringFilter<"LegalSourceAcquisition"> | string
-  sourceFamilyId?: Prisma.StringFilter<"LegalSourceAcquisition"> | string
+  sourceFamilyId?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
   sourceVersionId?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
+  enteId?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
+  idempotencyKey?: Prisma.StringFilter<"LegalSourceAcquisition"> | string
   outcome?: Prisma.EnumLegalSourceAcquisitionOutcomeFilter<"LegalSourceAcquisition"> | $Enums.LegalSourceAcquisitionOutcome
   originClass?: Prisma.StringFilter<"LegalSourceAcquisition"> | string
   providerOrChannel?: Prisma.StringFilter<"LegalSourceAcquisition"> | string
@@ -372,15 +388,18 @@ export type LegalSourceAcquisitionWhereInput = {
   transformedContentSha256?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
   failureCode?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
   createdAt?: Prisma.DateTimeFilter<"LegalSourceAcquisition"> | Date | string
-  sourceFamily?: Prisma.XOR<Prisma.LegalSourceScalarRelationFilter, Prisma.LegalSourceWhereInput>
+  sourceFamily?: Prisma.XOR<Prisma.LegalSourceNullableScalarRelationFilter, Prisma.LegalSourceWhereInput> | null
   sourceVersion?: Prisma.XOR<Prisma.LegalSourceVersionNullableScalarRelationFilter, Prisma.LegalSourceVersionWhereInput> | null
+  ente?: Prisma.XOR<Prisma.EnteNullableScalarRelationFilter, Prisma.EnteWhereInput> | null
   importRun?: Prisma.XOR<Prisma.ImportRunNullableScalarRelationFilter, Prisma.ImportRunWhereInput> | null
 }
 
 export type LegalSourceAcquisitionOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  sourceFamilyId?: Prisma.SortOrder
+  sourceFamilyId?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceVersionId?: Prisma.SortOrderInput | Prisma.SortOrder
+  enteId?: Prisma.SortOrderInput | Prisma.SortOrder
+  idempotencyKey?: Prisma.SortOrder
   outcome?: Prisma.SortOrder
   originClass?: Prisma.SortOrder
   providerOrChannel?: Prisma.SortOrder
@@ -404,16 +423,19 @@ export type LegalSourceAcquisitionOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   sourceFamily?: Prisma.LegalSourceOrderByWithRelationInput
   sourceVersion?: Prisma.LegalSourceVersionOrderByWithRelationInput
+  ente?: Prisma.EnteOrderByWithRelationInput
   importRun?: Prisma.ImportRunOrderByWithRelationInput
 }
 
 export type LegalSourceAcquisitionWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  idempotencyKey?: string
   AND?: Prisma.LegalSourceAcquisitionWhereInput | Prisma.LegalSourceAcquisitionWhereInput[]
   OR?: Prisma.LegalSourceAcquisitionWhereInput[]
   NOT?: Prisma.LegalSourceAcquisitionWhereInput | Prisma.LegalSourceAcquisitionWhereInput[]
-  sourceFamilyId?: Prisma.StringFilter<"LegalSourceAcquisition"> | string
+  sourceFamilyId?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
   sourceVersionId?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
+  enteId?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
   outcome?: Prisma.EnumLegalSourceAcquisitionOutcomeFilter<"LegalSourceAcquisition"> | $Enums.LegalSourceAcquisitionOutcome
   originClass?: Prisma.StringFilter<"LegalSourceAcquisition"> | string
   providerOrChannel?: Prisma.StringFilter<"LegalSourceAcquisition"> | string
@@ -435,15 +457,18 @@ export type LegalSourceAcquisitionWhereUniqueInput = Prisma.AtLeast<{
   transformedContentSha256?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
   failureCode?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
   createdAt?: Prisma.DateTimeFilter<"LegalSourceAcquisition"> | Date | string
-  sourceFamily?: Prisma.XOR<Prisma.LegalSourceScalarRelationFilter, Prisma.LegalSourceWhereInput>
+  sourceFamily?: Prisma.XOR<Prisma.LegalSourceNullableScalarRelationFilter, Prisma.LegalSourceWhereInput> | null
   sourceVersion?: Prisma.XOR<Prisma.LegalSourceVersionNullableScalarRelationFilter, Prisma.LegalSourceVersionWhereInput> | null
+  ente?: Prisma.XOR<Prisma.EnteNullableScalarRelationFilter, Prisma.EnteWhereInput> | null
   importRun?: Prisma.XOR<Prisma.ImportRunNullableScalarRelationFilter, Prisma.ImportRunWhereInput> | null
-}, "id">
+}, "id" | "idempotencyKey">
 
 export type LegalSourceAcquisitionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  sourceFamilyId?: Prisma.SortOrder
+  sourceFamilyId?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceVersionId?: Prisma.SortOrderInput | Prisma.SortOrder
+  enteId?: Prisma.SortOrderInput | Prisma.SortOrder
+  idempotencyKey?: Prisma.SortOrder
   outcome?: Prisma.SortOrder
   originClass?: Prisma.SortOrder
   providerOrChannel?: Prisma.SortOrder
@@ -477,8 +502,10 @@ export type LegalSourceAcquisitionScalarWhereWithAggregatesInput = {
   OR?: Prisma.LegalSourceAcquisitionScalarWhereWithAggregatesInput[]
   NOT?: Prisma.LegalSourceAcquisitionScalarWhereWithAggregatesInput | Prisma.LegalSourceAcquisitionScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"LegalSourceAcquisition"> | string
-  sourceFamilyId?: Prisma.StringWithAggregatesFilter<"LegalSourceAcquisition"> | string
+  sourceFamilyId?: Prisma.StringNullableWithAggregatesFilter<"LegalSourceAcquisition"> | string | null
   sourceVersionId?: Prisma.StringNullableWithAggregatesFilter<"LegalSourceAcquisition"> | string | null
+  enteId?: Prisma.StringNullableWithAggregatesFilter<"LegalSourceAcquisition"> | string | null
+  idempotencyKey?: Prisma.StringWithAggregatesFilter<"LegalSourceAcquisition"> | string
   outcome?: Prisma.EnumLegalSourceAcquisitionOutcomeWithAggregatesFilter<"LegalSourceAcquisition"> | $Enums.LegalSourceAcquisitionOutcome
   originClass?: Prisma.StringWithAggregatesFilter<"LegalSourceAcquisition"> | string
   providerOrChannel?: Prisma.StringWithAggregatesFilter<"LegalSourceAcquisition"> | string
@@ -504,6 +531,7 @@ export type LegalSourceAcquisitionScalarWhereWithAggregatesInput = {
 
 export type LegalSourceAcquisitionCreateInput = {
   id?: string
+  idempotencyKey: string
   outcome: $Enums.LegalSourceAcquisitionOutcome
   originClass: string
   providerOrChannel: string
@@ -523,15 +551,18 @@ export type LegalSourceAcquisitionCreateInput = {
   transformedContentSha256?: string | null
   failureCode?: string | null
   createdAt?: Date | string
-  sourceFamily: Prisma.LegalSourceCreateNestedOneWithoutAcquisitionsInput
+  sourceFamily?: Prisma.LegalSourceCreateNestedOneWithoutAcquisitionsInput
   sourceVersion?: Prisma.LegalSourceVersionCreateNestedOneWithoutAcquisitionsInput
+  ente?: Prisma.EnteCreateNestedOneWithoutLegalSourceAcquisitionsInput
   importRun?: Prisma.ImportRunCreateNestedOneWithoutLegalSourceAcquisitionsInput
 }
 
 export type LegalSourceAcquisitionUncheckedCreateInput = {
   id?: string
-  sourceFamilyId: string
+  sourceFamilyId?: string | null
   sourceVersionId?: string | null
+  enteId?: string | null
+  idempotencyKey: string
   outcome: $Enums.LegalSourceAcquisitionOutcome
   originClass: string
   providerOrChannel: string
@@ -557,6 +588,7 @@ export type LegalSourceAcquisitionUncheckedCreateInput = {
 
 export type LegalSourceAcquisitionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   outcome?: Prisma.EnumLegalSourceAcquisitionOutcomeFieldUpdateOperationsInput | $Enums.LegalSourceAcquisitionOutcome
   originClass?: Prisma.StringFieldUpdateOperationsInput | string
   providerOrChannel?: Prisma.StringFieldUpdateOperationsInput | string
@@ -576,15 +608,18 @@ export type LegalSourceAcquisitionUpdateInput = {
   transformedContentSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  sourceFamily?: Prisma.LegalSourceUpdateOneRequiredWithoutAcquisitionsNestedInput
+  sourceFamily?: Prisma.LegalSourceUpdateOneWithoutAcquisitionsNestedInput
   sourceVersion?: Prisma.LegalSourceVersionUpdateOneWithoutAcquisitionsNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutLegalSourceAcquisitionsNestedInput
   importRun?: Prisma.ImportRunUpdateOneWithoutLegalSourceAcquisitionsNestedInput
 }
 
 export type LegalSourceAcquisitionUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  sourceFamilyId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceFamilyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   outcome?: Prisma.EnumLegalSourceAcquisitionOutcomeFieldUpdateOperationsInput | $Enums.LegalSourceAcquisitionOutcome
   originClass?: Prisma.StringFieldUpdateOperationsInput | string
   providerOrChannel?: Prisma.StringFieldUpdateOperationsInput | string
@@ -610,8 +645,10 @@ export type LegalSourceAcquisitionUncheckedUpdateInput = {
 
 export type LegalSourceAcquisitionCreateManyInput = {
   id?: string
-  sourceFamilyId: string
+  sourceFamilyId?: string | null
   sourceVersionId?: string | null
+  enteId?: string | null
+  idempotencyKey: string
   outcome: $Enums.LegalSourceAcquisitionOutcome
   originClass: string
   providerOrChannel: string
@@ -637,6 +674,7 @@ export type LegalSourceAcquisitionCreateManyInput = {
 
 export type LegalSourceAcquisitionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   outcome?: Prisma.EnumLegalSourceAcquisitionOutcomeFieldUpdateOperationsInput | $Enums.LegalSourceAcquisitionOutcome
   originClass?: Prisma.StringFieldUpdateOperationsInput | string
   providerOrChannel?: Prisma.StringFieldUpdateOperationsInput | string
@@ -660,8 +698,10 @@ export type LegalSourceAcquisitionUpdateManyMutationInput = {
 
 export type LegalSourceAcquisitionUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  sourceFamilyId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceFamilyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   outcome?: Prisma.EnumLegalSourceAcquisitionOutcomeFieldUpdateOperationsInput | $Enums.LegalSourceAcquisitionOutcome
   originClass?: Prisma.StringFieldUpdateOperationsInput | string
   providerOrChannel?: Prisma.StringFieldUpdateOperationsInput | string
@@ -699,6 +739,8 @@ export type LegalSourceAcquisitionCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   sourceFamilyId?: Prisma.SortOrder
   sourceVersionId?: Prisma.SortOrder
+  enteId?: Prisma.SortOrder
+  idempotencyKey?: Prisma.SortOrder
   outcome?: Prisma.SortOrder
   originClass?: Prisma.SortOrder
   providerOrChannel?: Prisma.SortOrder
@@ -731,6 +773,8 @@ export type LegalSourceAcquisitionMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   sourceFamilyId?: Prisma.SortOrder
   sourceVersionId?: Prisma.SortOrder
+  enteId?: Prisma.SortOrder
+  idempotencyKey?: Prisma.SortOrder
   outcome?: Prisma.SortOrder
   originClass?: Prisma.SortOrder
   providerOrChannel?: Prisma.SortOrder
@@ -758,6 +802,8 @@ export type LegalSourceAcquisitionMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   sourceFamilyId?: Prisma.SortOrder
   sourceVersionId?: Prisma.SortOrder
+  enteId?: Prisma.SortOrder
+  idempotencyKey?: Prisma.SortOrder
   outcome?: Prisma.SortOrder
   originClass?: Prisma.SortOrder
   providerOrChannel?: Prisma.SortOrder
@@ -784,6 +830,48 @@ export type LegalSourceAcquisitionMinOrderByAggregateInput = {
 export type LegalSourceAcquisitionSumOrderByAggregateInput = {
   observedSizeBytes?: Prisma.SortOrder
   declaredSizeBytes?: Prisma.SortOrder
+}
+
+export type LegalSourceAcquisitionCreateNestedManyWithoutEnteInput = {
+  create?: Prisma.XOR<Prisma.LegalSourceAcquisitionCreateWithoutEnteInput, Prisma.LegalSourceAcquisitionUncheckedCreateWithoutEnteInput> | Prisma.LegalSourceAcquisitionCreateWithoutEnteInput[] | Prisma.LegalSourceAcquisitionUncheckedCreateWithoutEnteInput[]
+  connectOrCreate?: Prisma.LegalSourceAcquisitionCreateOrConnectWithoutEnteInput | Prisma.LegalSourceAcquisitionCreateOrConnectWithoutEnteInput[]
+  createMany?: Prisma.LegalSourceAcquisitionCreateManyEnteInputEnvelope
+  connect?: Prisma.LegalSourceAcquisitionWhereUniqueInput | Prisma.LegalSourceAcquisitionWhereUniqueInput[]
+}
+
+export type LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput = {
+  create?: Prisma.XOR<Prisma.LegalSourceAcquisitionCreateWithoutEnteInput, Prisma.LegalSourceAcquisitionUncheckedCreateWithoutEnteInput> | Prisma.LegalSourceAcquisitionCreateWithoutEnteInput[] | Prisma.LegalSourceAcquisitionUncheckedCreateWithoutEnteInput[]
+  connectOrCreate?: Prisma.LegalSourceAcquisitionCreateOrConnectWithoutEnteInput | Prisma.LegalSourceAcquisitionCreateOrConnectWithoutEnteInput[]
+  createMany?: Prisma.LegalSourceAcquisitionCreateManyEnteInputEnvelope
+  connect?: Prisma.LegalSourceAcquisitionWhereUniqueInput | Prisma.LegalSourceAcquisitionWhereUniqueInput[]
+}
+
+export type LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput = {
+  create?: Prisma.XOR<Prisma.LegalSourceAcquisitionCreateWithoutEnteInput, Prisma.LegalSourceAcquisitionUncheckedCreateWithoutEnteInput> | Prisma.LegalSourceAcquisitionCreateWithoutEnteInput[] | Prisma.LegalSourceAcquisitionUncheckedCreateWithoutEnteInput[]
+  connectOrCreate?: Prisma.LegalSourceAcquisitionCreateOrConnectWithoutEnteInput | Prisma.LegalSourceAcquisitionCreateOrConnectWithoutEnteInput[]
+  upsert?: Prisma.LegalSourceAcquisitionUpsertWithWhereUniqueWithoutEnteInput | Prisma.LegalSourceAcquisitionUpsertWithWhereUniqueWithoutEnteInput[]
+  createMany?: Prisma.LegalSourceAcquisitionCreateManyEnteInputEnvelope
+  set?: Prisma.LegalSourceAcquisitionWhereUniqueInput | Prisma.LegalSourceAcquisitionWhereUniqueInput[]
+  disconnect?: Prisma.LegalSourceAcquisitionWhereUniqueInput | Prisma.LegalSourceAcquisitionWhereUniqueInput[]
+  delete?: Prisma.LegalSourceAcquisitionWhereUniqueInput | Prisma.LegalSourceAcquisitionWhereUniqueInput[]
+  connect?: Prisma.LegalSourceAcquisitionWhereUniqueInput | Prisma.LegalSourceAcquisitionWhereUniqueInput[]
+  update?: Prisma.LegalSourceAcquisitionUpdateWithWhereUniqueWithoutEnteInput | Prisma.LegalSourceAcquisitionUpdateWithWhereUniqueWithoutEnteInput[]
+  updateMany?: Prisma.LegalSourceAcquisitionUpdateManyWithWhereWithoutEnteInput | Prisma.LegalSourceAcquisitionUpdateManyWithWhereWithoutEnteInput[]
+  deleteMany?: Prisma.LegalSourceAcquisitionScalarWhereInput | Prisma.LegalSourceAcquisitionScalarWhereInput[]
+}
+
+export type LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput = {
+  create?: Prisma.XOR<Prisma.LegalSourceAcquisitionCreateWithoutEnteInput, Prisma.LegalSourceAcquisitionUncheckedCreateWithoutEnteInput> | Prisma.LegalSourceAcquisitionCreateWithoutEnteInput[] | Prisma.LegalSourceAcquisitionUncheckedCreateWithoutEnteInput[]
+  connectOrCreate?: Prisma.LegalSourceAcquisitionCreateOrConnectWithoutEnteInput | Prisma.LegalSourceAcquisitionCreateOrConnectWithoutEnteInput[]
+  upsert?: Prisma.LegalSourceAcquisitionUpsertWithWhereUniqueWithoutEnteInput | Prisma.LegalSourceAcquisitionUpsertWithWhereUniqueWithoutEnteInput[]
+  createMany?: Prisma.LegalSourceAcquisitionCreateManyEnteInputEnvelope
+  set?: Prisma.LegalSourceAcquisitionWhereUniqueInput | Prisma.LegalSourceAcquisitionWhereUniqueInput[]
+  disconnect?: Prisma.LegalSourceAcquisitionWhereUniqueInput | Prisma.LegalSourceAcquisitionWhereUniqueInput[]
+  delete?: Prisma.LegalSourceAcquisitionWhereUniqueInput | Prisma.LegalSourceAcquisitionWhereUniqueInput[]
+  connect?: Prisma.LegalSourceAcquisitionWhereUniqueInput | Prisma.LegalSourceAcquisitionWhereUniqueInput[]
+  update?: Prisma.LegalSourceAcquisitionUpdateWithWhereUniqueWithoutEnteInput | Prisma.LegalSourceAcquisitionUpdateWithWhereUniqueWithoutEnteInput[]
+  updateMany?: Prisma.LegalSourceAcquisitionUpdateManyWithWhereWithoutEnteInput | Prisma.LegalSourceAcquisitionUpdateManyWithWhereWithoutEnteInput[]
+  deleteMany?: Prisma.LegalSourceAcquisitionScalarWhereInput | Prisma.LegalSourceAcquisitionScalarWhereInput[]
 }
 
 export type LegalSourceAcquisitionCreateNestedManyWithoutImportRunInput = {
@@ -916,8 +1004,9 @@ export type EnumLegalSourceAcquisitionOutcomeFieldUpdateOperationsInput = {
   set?: $Enums.LegalSourceAcquisitionOutcome
 }
 
-export type LegalSourceAcquisitionCreateWithoutImportRunInput = {
+export type LegalSourceAcquisitionCreateWithoutEnteInput = {
   id?: string
+  idempotencyKey: string
   outcome: $Enums.LegalSourceAcquisitionOutcome
   originClass: string
   providerOrChannel: string
@@ -937,14 +1026,130 @@ export type LegalSourceAcquisitionCreateWithoutImportRunInput = {
   transformedContentSha256?: string | null
   failureCode?: string | null
   createdAt?: Date | string
-  sourceFamily: Prisma.LegalSourceCreateNestedOneWithoutAcquisitionsInput
+  sourceFamily?: Prisma.LegalSourceCreateNestedOneWithoutAcquisitionsInput
   sourceVersion?: Prisma.LegalSourceVersionCreateNestedOneWithoutAcquisitionsInput
+  importRun?: Prisma.ImportRunCreateNestedOneWithoutLegalSourceAcquisitionsInput
+}
+
+export type LegalSourceAcquisitionUncheckedCreateWithoutEnteInput = {
+  id?: string
+  sourceFamilyId?: string | null
+  sourceVersionId?: string | null
+  idempotencyKey: string
+  outcome: $Enums.LegalSourceAcquisitionOutcome
+  originClass: string
+  providerOrChannel: string
+  originalUrl?: string | null
+  externalSourceId?: string | null
+  artifactLocator?: string | null
+  originalFilename?: string | null
+  acquiredAt: Date | string
+  observedSha256?: string | null
+  declaredSha256?: string | null
+  observedSizeBytes?: number | null
+  declaredSizeBytes?: number | null
+  observedMimeType?: string | null
+  importRunId?: string | null
+  acquiredByActorId?: string | null
+  acquiredByProcess?: string | null
+  transformationType?: string | null
+  transformationVersion?: string | null
+  transformedContentSha256?: string | null
+  failureCode?: string | null
+  createdAt?: Date | string
+}
+
+export type LegalSourceAcquisitionCreateOrConnectWithoutEnteInput = {
+  where: Prisma.LegalSourceAcquisitionWhereUniqueInput
+  create: Prisma.XOR<Prisma.LegalSourceAcquisitionCreateWithoutEnteInput, Prisma.LegalSourceAcquisitionUncheckedCreateWithoutEnteInput>
+}
+
+export type LegalSourceAcquisitionCreateManyEnteInputEnvelope = {
+  data: Prisma.LegalSourceAcquisitionCreateManyEnteInput | Prisma.LegalSourceAcquisitionCreateManyEnteInput[]
+  skipDuplicates?: boolean
+}
+
+export type LegalSourceAcquisitionUpsertWithWhereUniqueWithoutEnteInput = {
+  where: Prisma.LegalSourceAcquisitionWhereUniqueInput
+  update: Prisma.XOR<Prisma.LegalSourceAcquisitionUpdateWithoutEnteInput, Prisma.LegalSourceAcquisitionUncheckedUpdateWithoutEnteInput>
+  create: Prisma.XOR<Prisma.LegalSourceAcquisitionCreateWithoutEnteInput, Prisma.LegalSourceAcquisitionUncheckedCreateWithoutEnteInput>
+}
+
+export type LegalSourceAcquisitionUpdateWithWhereUniqueWithoutEnteInput = {
+  where: Prisma.LegalSourceAcquisitionWhereUniqueInput
+  data: Prisma.XOR<Prisma.LegalSourceAcquisitionUpdateWithoutEnteInput, Prisma.LegalSourceAcquisitionUncheckedUpdateWithoutEnteInput>
+}
+
+export type LegalSourceAcquisitionUpdateManyWithWhereWithoutEnteInput = {
+  where: Prisma.LegalSourceAcquisitionScalarWhereInput
+  data: Prisma.XOR<Prisma.LegalSourceAcquisitionUpdateManyMutationInput, Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteInput>
+}
+
+export type LegalSourceAcquisitionScalarWhereInput = {
+  AND?: Prisma.LegalSourceAcquisitionScalarWhereInput | Prisma.LegalSourceAcquisitionScalarWhereInput[]
+  OR?: Prisma.LegalSourceAcquisitionScalarWhereInput[]
+  NOT?: Prisma.LegalSourceAcquisitionScalarWhereInput | Prisma.LegalSourceAcquisitionScalarWhereInput[]
+  id?: Prisma.StringFilter<"LegalSourceAcquisition"> | string
+  sourceFamilyId?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
+  sourceVersionId?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
+  enteId?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
+  idempotencyKey?: Prisma.StringFilter<"LegalSourceAcquisition"> | string
+  outcome?: Prisma.EnumLegalSourceAcquisitionOutcomeFilter<"LegalSourceAcquisition"> | $Enums.LegalSourceAcquisitionOutcome
+  originClass?: Prisma.StringFilter<"LegalSourceAcquisition"> | string
+  providerOrChannel?: Prisma.StringFilter<"LegalSourceAcquisition"> | string
+  originalUrl?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
+  externalSourceId?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
+  artifactLocator?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
+  originalFilename?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
+  acquiredAt?: Prisma.DateTimeFilter<"LegalSourceAcquisition"> | Date | string
+  observedSha256?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
+  declaredSha256?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
+  observedSizeBytes?: Prisma.IntNullableFilter<"LegalSourceAcquisition"> | number | null
+  declaredSizeBytes?: Prisma.IntNullableFilter<"LegalSourceAcquisition"> | number | null
+  observedMimeType?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
+  importRunId?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
+  acquiredByActorId?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
+  acquiredByProcess?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
+  transformationType?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
+  transformationVersion?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
+  transformedContentSha256?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
+  failureCode?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"LegalSourceAcquisition"> | Date | string
+}
+
+export type LegalSourceAcquisitionCreateWithoutImportRunInput = {
+  id?: string
+  idempotencyKey: string
+  outcome: $Enums.LegalSourceAcquisitionOutcome
+  originClass: string
+  providerOrChannel: string
+  originalUrl?: string | null
+  externalSourceId?: string | null
+  artifactLocator?: string | null
+  originalFilename?: string | null
+  acquiredAt: Date | string
+  declaredSha256?: string | null
+  observedSizeBytes?: number | null
+  declaredSizeBytes?: number | null
+  observedMimeType?: string | null
+  acquiredByActorId?: string | null
+  acquiredByProcess?: string | null
+  transformationType?: string | null
+  transformationVersion?: string | null
+  transformedContentSha256?: string | null
+  failureCode?: string | null
+  createdAt?: Date | string
+  sourceFamily?: Prisma.LegalSourceCreateNestedOneWithoutAcquisitionsInput
+  sourceVersion?: Prisma.LegalSourceVersionCreateNestedOneWithoutAcquisitionsInput
+  ente?: Prisma.EnteCreateNestedOneWithoutLegalSourceAcquisitionsInput
 }
 
 export type LegalSourceAcquisitionUncheckedCreateWithoutImportRunInput = {
   id?: string
-  sourceFamilyId: string
+  sourceFamilyId?: string | null
   sourceVersionId?: string | null
+  enteId?: string | null
+  idempotencyKey: string
   outcome: $Enums.LegalSourceAcquisitionOutcome
   originClass: string
   providerOrChannel: string
@@ -993,38 +1198,9 @@ export type LegalSourceAcquisitionUpdateManyWithWhereWithoutImportRunInput = {
   data: Prisma.XOR<Prisma.LegalSourceAcquisitionUpdateManyMutationInput, Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutImportRunInput>
 }
 
-export type LegalSourceAcquisitionScalarWhereInput = {
-  AND?: Prisma.LegalSourceAcquisitionScalarWhereInput | Prisma.LegalSourceAcquisitionScalarWhereInput[]
-  OR?: Prisma.LegalSourceAcquisitionScalarWhereInput[]
-  NOT?: Prisma.LegalSourceAcquisitionScalarWhereInput | Prisma.LegalSourceAcquisitionScalarWhereInput[]
-  id?: Prisma.StringFilter<"LegalSourceAcquisition"> | string
-  sourceFamilyId?: Prisma.StringFilter<"LegalSourceAcquisition"> | string
-  sourceVersionId?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
-  outcome?: Prisma.EnumLegalSourceAcquisitionOutcomeFilter<"LegalSourceAcquisition"> | $Enums.LegalSourceAcquisitionOutcome
-  originClass?: Prisma.StringFilter<"LegalSourceAcquisition"> | string
-  providerOrChannel?: Prisma.StringFilter<"LegalSourceAcquisition"> | string
-  originalUrl?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
-  externalSourceId?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
-  artifactLocator?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
-  originalFilename?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
-  acquiredAt?: Prisma.DateTimeFilter<"LegalSourceAcquisition"> | Date | string
-  observedSha256?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
-  declaredSha256?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
-  observedSizeBytes?: Prisma.IntNullableFilter<"LegalSourceAcquisition"> | number | null
-  declaredSizeBytes?: Prisma.IntNullableFilter<"LegalSourceAcquisition"> | number | null
-  observedMimeType?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
-  importRunId?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
-  acquiredByActorId?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
-  acquiredByProcess?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
-  transformationType?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
-  transformationVersion?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
-  transformedContentSha256?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
-  failureCode?: Prisma.StringNullableFilter<"LegalSourceAcquisition"> | string | null
-  createdAt?: Prisma.DateTimeFilter<"LegalSourceAcquisition"> | Date | string
-}
-
 export type LegalSourceAcquisitionCreateWithoutSourceFamilyInput = {
   id?: string
+  idempotencyKey: string
   outcome: $Enums.LegalSourceAcquisitionOutcome
   originClass: string
   providerOrChannel: string
@@ -1045,12 +1221,15 @@ export type LegalSourceAcquisitionCreateWithoutSourceFamilyInput = {
   failureCode?: string | null
   createdAt?: Date | string
   sourceVersion?: Prisma.LegalSourceVersionCreateNestedOneWithoutAcquisitionsInput
+  ente?: Prisma.EnteCreateNestedOneWithoutLegalSourceAcquisitionsInput
   importRun?: Prisma.ImportRunCreateNestedOneWithoutLegalSourceAcquisitionsInput
 }
 
 export type LegalSourceAcquisitionUncheckedCreateWithoutSourceFamilyInput = {
   id?: string
   sourceVersionId?: string | null
+  enteId?: string | null
+  idempotencyKey: string
   outcome: $Enums.LegalSourceAcquisitionOutcome
   originClass: string
   providerOrChannel: string
@@ -1102,6 +1281,7 @@ export type LegalSourceAcquisitionUpdateManyWithWhereWithoutSourceFamilyInput = 
 
 export type LegalSourceAcquisitionCreateWithoutSourceVersionInput = {
   id?: string
+  idempotencyKey: string
   outcome: $Enums.LegalSourceAcquisitionOutcome
   originClass: string
   providerOrChannel: string
@@ -1121,12 +1301,15 @@ export type LegalSourceAcquisitionCreateWithoutSourceVersionInput = {
   transformedContentSha256?: string | null
   failureCode?: string | null
   createdAt?: Date | string
-  sourceFamily: Prisma.LegalSourceCreateNestedOneWithoutAcquisitionsInput
+  sourceFamily?: Prisma.LegalSourceCreateNestedOneWithoutAcquisitionsInput
+  ente?: Prisma.EnteCreateNestedOneWithoutLegalSourceAcquisitionsInput
   importRun?: Prisma.ImportRunCreateNestedOneWithoutLegalSourceAcquisitionsInput
 }
 
 export type LegalSourceAcquisitionUncheckedCreateWithoutSourceVersionInput = {
   id?: string
+  enteId?: string | null
+  idempotencyKey: string
   outcome: $Enums.LegalSourceAcquisitionOutcome
   originClass: string
   providerOrChannel: string
@@ -1175,10 +1358,123 @@ export type LegalSourceAcquisitionUpdateManyWithWhereWithoutSourceVersionInput =
   data: Prisma.XOR<Prisma.LegalSourceAcquisitionUpdateManyMutationInput, Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceVersionInput>
 }
 
+export type LegalSourceAcquisitionCreateManyEnteInput = {
+  id?: string
+  sourceFamilyId?: string | null
+  sourceVersionId?: string | null
+  idempotencyKey: string
+  outcome: $Enums.LegalSourceAcquisitionOutcome
+  originClass: string
+  providerOrChannel: string
+  originalUrl?: string | null
+  externalSourceId?: string | null
+  artifactLocator?: string | null
+  originalFilename?: string | null
+  acquiredAt: Date | string
+  observedSha256?: string | null
+  declaredSha256?: string | null
+  observedSizeBytes?: number | null
+  declaredSizeBytes?: number | null
+  observedMimeType?: string | null
+  importRunId?: string | null
+  acquiredByActorId?: string | null
+  acquiredByProcess?: string | null
+  transformationType?: string | null
+  transformationVersion?: string | null
+  transformedContentSha256?: string | null
+  failureCode?: string | null
+  createdAt?: Date | string
+}
+
+export type LegalSourceAcquisitionUpdateWithoutEnteInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  outcome?: Prisma.EnumLegalSourceAcquisitionOutcomeFieldUpdateOperationsInput | $Enums.LegalSourceAcquisitionOutcome
+  originClass?: Prisma.StringFieldUpdateOperationsInput | string
+  providerOrChannel?: Prisma.StringFieldUpdateOperationsInput | string
+  originalUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSourceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  artifactLocator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acquiredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  declaredSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  observedSizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  declaredSizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  observedMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acquiredByActorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acquiredByProcess?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transformationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transformationVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transformedContentSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sourceFamily?: Prisma.LegalSourceUpdateOneWithoutAcquisitionsNestedInput
+  sourceVersion?: Prisma.LegalSourceVersionUpdateOneWithoutAcquisitionsNestedInput
+  importRun?: Prisma.ImportRunUpdateOneWithoutLegalSourceAcquisitionsNestedInput
+}
+
+export type LegalSourceAcquisitionUncheckedUpdateWithoutEnteInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceFamilyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  outcome?: Prisma.EnumLegalSourceAcquisitionOutcomeFieldUpdateOperationsInput | $Enums.LegalSourceAcquisitionOutcome
+  originClass?: Prisma.StringFieldUpdateOperationsInput | string
+  providerOrChannel?: Prisma.StringFieldUpdateOperationsInput | string
+  originalUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSourceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  artifactLocator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acquiredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  observedSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declaredSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  observedSizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  declaredSizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  observedMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  importRunId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acquiredByActorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acquiredByProcess?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transformationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transformationVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transformedContentSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceFamilyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  outcome?: Prisma.EnumLegalSourceAcquisitionOutcomeFieldUpdateOperationsInput | $Enums.LegalSourceAcquisitionOutcome
+  originClass?: Prisma.StringFieldUpdateOperationsInput | string
+  providerOrChannel?: Prisma.StringFieldUpdateOperationsInput | string
+  originalUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalSourceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  artifactLocator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acquiredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  observedSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declaredSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  observedSizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  declaredSizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  observedMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  importRunId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acquiredByActorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acquiredByProcess?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transformationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transformationVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transformedContentSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type LegalSourceAcquisitionCreateManyImportRunInput = {
   id?: string
-  sourceFamilyId: string
+  sourceFamilyId?: string | null
   sourceVersionId?: string | null
+  enteId?: string | null
+  idempotencyKey: string
   outcome: $Enums.LegalSourceAcquisitionOutcome
   originClass: string
   providerOrChannel: string
@@ -1203,6 +1499,7 @@ export type LegalSourceAcquisitionCreateManyImportRunInput = {
 
 export type LegalSourceAcquisitionUpdateWithoutImportRunInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   outcome?: Prisma.EnumLegalSourceAcquisitionOutcomeFieldUpdateOperationsInput | $Enums.LegalSourceAcquisitionOutcome
   originClass?: Prisma.StringFieldUpdateOperationsInput | string
   providerOrChannel?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1222,14 +1519,17 @@ export type LegalSourceAcquisitionUpdateWithoutImportRunInput = {
   transformedContentSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  sourceFamily?: Prisma.LegalSourceUpdateOneRequiredWithoutAcquisitionsNestedInput
+  sourceFamily?: Prisma.LegalSourceUpdateOneWithoutAcquisitionsNestedInput
   sourceVersion?: Prisma.LegalSourceVersionUpdateOneWithoutAcquisitionsNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutLegalSourceAcquisitionsNestedInput
 }
 
 export type LegalSourceAcquisitionUncheckedUpdateWithoutImportRunInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  sourceFamilyId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceFamilyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   outcome?: Prisma.EnumLegalSourceAcquisitionOutcomeFieldUpdateOperationsInput | $Enums.LegalSourceAcquisitionOutcome
   originClass?: Prisma.StringFieldUpdateOperationsInput | string
   providerOrChannel?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1254,8 +1554,10 @@ export type LegalSourceAcquisitionUncheckedUpdateWithoutImportRunInput = {
 
 export type LegalSourceAcquisitionUncheckedUpdateManyWithoutImportRunInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  sourceFamilyId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceFamilyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   outcome?: Prisma.EnumLegalSourceAcquisitionOutcomeFieldUpdateOperationsInput | $Enums.LegalSourceAcquisitionOutcome
   originClass?: Prisma.StringFieldUpdateOperationsInput | string
   providerOrChannel?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1281,6 +1583,8 @@ export type LegalSourceAcquisitionUncheckedUpdateManyWithoutImportRunInput = {
 export type LegalSourceAcquisitionCreateManySourceFamilyInput = {
   id?: string
   sourceVersionId?: string | null
+  enteId?: string | null
+  idempotencyKey: string
   outcome: $Enums.LegalSourceAcquisitionOutcome
   originClass: string
   providerOrChannel: string
@@ -1306,6 +1610,7 @@ export type LegalSourceAcquisitionCreateManySourceFamilyInput = {
 
 export type LegalSourceAcquisitionUpdateWithoutSourceFamilyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   outcome?: Prisma.EnumLegalSourceAcquisitionOutcomeFieldUpdateOperationsInput | $Enums.LegalSourceAcquisitionOutcome
   originClass?: Prisma.StringFieldUpdateOperationsInput | string
   providerOrChannel?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1326,12 +1631,15 @@ export type LegalSourceAcquisitionUpdateWithoutSourceFamilyInput = {
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sourceVersion?: Prisma.LegalSourceVersionUpdateOneWithoutAcquisitionsNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutLegalSourceAcquisitionsNestedInput
   importRun?: Prisma.ImportRunUpdateOneWithoutLegalSourceAcquisitionsNestedInput
 }
 
 export type LegalSourceAcquisitionUncheckedUpdateWithoutSourceFamilyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   sourceVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   outcome?: Prisma.EnumLegalSourceAcquisitionOutcomeFieldUpdateOperationsInput | $Enums.LegalSourceAcquisitionOutcome
   originClass?: Prisma.StringFieldUpdateOperationsInput | string
   providerOrChannel?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1358,6 +1666,8 @@ export type LegalSourceAcquisitionUncheckedUpdateWithoutSourceFamilyInput = {
 export type LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceFamilyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   sourceVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   outcome?: Prisma.EnumLegalSourceAcquisitionOutcomeFieldUpdateOperationsInput | $Enums.LegalSourceAcquisitionOutcome
   originClass?: Prisma.StringFieldUpdateOperationsInput | string
   providerOrChannel?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1383,6 +1693,8 @@ export type LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceFamilyInput = 
 
 export type LegalSourceAcquisitionCreateManySourceVersionInput = {
   id?: string
+  enteId?: string | null
+  idempotencyKey: string
   outcome: $Enums.LegalSourceAcquisitionOutcome
   originClass: string
   providerOrChannel: string
@@ -1407,6 +1719,7 @@ export type LegalSourceAcquisitionCreateManySourceVersionInput = {
 
 export type LegalSourceAcquisitionUpdateWithoutSourceVersionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   outcome?: Prisma.EnumLegalSourceAcquisitionOutcomeFieldUpdateOperationsInput | $Enums.LegalSourceAcquisitionOutcome
   originClass?: Prisma.StringFieldUpdateOperationsInput | string
   providerOrChannel?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1426,12 +1739,15 @@ export type LegalSourceAcquisitionUpdateWithoutSourceVersionInput = {
   transformedContentSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  sourceFamily?: Prisma.LegalSourceUpdateOneRequiredWithoutAcquisitionsNestedInput
+  sourceFamily?: Prisma.LegalSourceUpdateOneWithoutAcquisitionsNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutLegalSourceAcquisitionsNestedInput
   importRun?: Prisma.ImportRunUpdateOneWithoutLegalSourceAcquisitionsNestedInput
 }
 
 export type LegalSourceAcquisitionUncheckedUpdateWithoutSourceVersionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   outcome?: Prisma.EnumLegalSourceAcquisitionOutcomeFieldUpdateOperationsInput | $Enums.LegalSourceAcquisitionOutcome
   originClass?: Prisma.StringFieldUpdateOperationsInput | string
   providerOrChannel?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1456,6 +1772,8 @@ export type LegalSourceAcquisitionUncheckedUpdateWithoutSourceVersionInput = {
 
 export type LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceVersionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   outcome?: Prisma.EnumLegalSourceAcquisitionOutcomeFieldUpdateOperationsInput | $Enums.LegalSourceAcquisitionOutcome
   originClass?: Prisma.StringFieldUpdateOperationsInput | string
   providerOrChannel?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1484,6 +1802,8 @@ export type LegalSourceAcquisitionSelect<ExtArgs extends runtime.Types.Extension
   id?: boolean
   sourceFamilyId?: boolean
   sourceVersionId?: boolean
+  enteId?: boolean
+  idempotencyKey?: boolean
   outcome?: boolean
   originClass?: boolean
   providerOrChannel?: boolean
@@ -1505,8 +1825,9 @@ export type LegalSourceAcquisitionSelect<ExtArgs extends runtime.Types.Extension
   transformedContentSha256?: boolean
   failureCode?: boolean
   createdAt?: boolean
-  sourceFamily?: boolean | Prisma.LegalSourceDefaultArgs<ExtArgs>
+  sourceFamily?: boolean | Prisma.LegalSourceAcquisition$sourceFamilyArgs<ExtArgs>
   sourceVersion?: boolean | Prisma.LegalSourceAcquisition$sourceVersionArgs<ExtArgs>
+  ente?: boolean | Prisma.LegalSourceAcquisition$enteArgs<ExtArgs>
   importRun?: boolean | Prisma.LegalSourceAcquisition$importRunArgs<ExtArgs>
 }, ExtArgs["result"]["legalSourceAcquisition"]>
 
@@ -1514,6 +1835,8 @@ export type LegalSourceAcquisitionSelectCreateManyAndReturn<ExtArgs extends runt
   id?: boolean
   sourceFamilyId?: boolean
   sourceVersionId?: boolean
+  enteId?: boolean
+  idempotencyKey?: boolean
   outcome?: boolean
   originClass?: boolean
   providerOrChannel?: boolean
@@ -1535,8 +1858,9 @@ export type LegalSourceAcquisitionSelectCreateManyAndReturn<ExtArgs extends runt
   transformedContentSha256?: boolean
   failureCode?: boolean
   createdAt?: boolean
-  sourceFamily?: boolean | Prisma.LegalSourceDefaultArgs<ExtArgs>
+  sourceFamily?: boolean | Prisma.LegalSourceAcquisition$sourceFamilyArgs<ExtArgs>
   sourceVersion?: boolean | Prisma.LegalSourceAcquisition$sourceVersionArgs<ExtArgs>
+  ente?: boolean | Prisma.LegalSourceAcquisition$enteArgs<ExtArgs>
   importRun?: boolean | Prisma.LegalSourceAcquisition$importRunArgs<ExtArgs>
 }, ExtArgs["result"]["legalSourceAcquisition"]>
 
@@ -1544,6 +1868,8 @@ export type LegalSourceAcquisitionSelectUpdateManyAndReturn<ExtArgs extends runt
   id?: boolean
   sourceFamilyId?: boolean
   sourceVersionId?: boolean
+  enteId?: boolean
+  idempotencyKey?: boolean
   outcome?: boolean
   originClass?: boolean
   providerOrChannel?: boolean
@@ -1565,8 +1891,9 @@ export type LegalSourceAcquisitionSelectUpdateManyAndReturn<ExtArgs extends runt
   transformedContentSha256?: boolean
   failureCode?: boolean
   createdAt?: boolean
-  sourceFamily?: boolean | Prisma.LegalSourceDefaultArgs<ExtArgs>
+  sourceFamily?: boolean | Prisma.LegalSourceAcquisition$sourceFamilyArgs<ExtArgs>
   sourceVersion?: boolean | Prisma.LegalSourceAcquisition$sourceVersionArgs<ExtArgs>
+  ente?: boolean | Prisma.LegalSourceAcquisition$enteArgs<ExtArgs>
   importRun?: boolean | Prisma.LegalSourceAcquisition$importRunArgs<ExtArgs>
 }, ExtArgs["result"]["legalSourceAcquisition"]>
 
@@ -1574,6 +1901,8 @@ export type LegalSourceAcquisitionSelectScalar = {
   id?: boolean
   sourceFamilyId?: boolean
   sourceVersionId?: boolean
+  enteId?: boolean
+  idempotencyKey?: boolean
   outcome?: boolean
   originClass?: boolean
   providerOrChannel?: boolean
@@ -1597,34 +1926,40 @@ export type LegalSourceAcquisitionSelectScalar = {
   createdAt?: boolean
 }
 
-export type LegalSourceAcquisitionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sourceFamilyId" | "sourceVersionId" | "outcome" | "originClass" | "providerOrChannel" | "originalUrl" | "externalSourceId" | "artifactLocator" | "originalFilename" | "acquiredAt" | "observedSha256" | "declaredSha256" | "observedSizeBytes" | "declaredSizeBytes" | "observedMimeType" | "importRunId" | "acquiredByActorId" | "acquiredByProcess" | "transformationType" | "transformationVersion" | "transformedContentSha256" | "failureCode" | "createdAt", ExtArgs["result"]["legalSourceAcquisition"]>
+export type LegalSourceAcquisitionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sourceFamilyId" | "sourceVersionId" | "enteId" | "idempotencyKey" | "outcome" | "originClass" | "providerOrChannel" | "originalUrl" | "externalSourceId" | "artifactLocator" | "originalFilename" | "acquiredAt" | "observedSha256" | "declaredSha256" | "observedSizeBytes" | "declaredSizeBytes" | "observedMimeType" | "importRunId" | "acquiredByActorId" | "acquiredByProcess" | "transformationType" | "transformationVersion" | "transformedContentSha256" | "failureCode" | "createdAt", ExtArgs["result"]["legalSourceAcquisition"]>
 export type LegalSourceAcquisitionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  sourceFamily?: boolean | Prisma.LegalSourceDefaultArgs<ExtArgs>
+  sourceFamily?: boolean | Prisma.LegalSourceAcquisition$sourceFamilyArgs<ExtArgs>
   sourceVersion?: boolean | Prisma.LegalSourceAcquisition$sourceVersionArgs<ExtArgs>
+  ente?: boolean | Prisma.LegalSourceAcquisition$enteArgs<ExtArgs>
   importRun?: boolean | Prisma.LegalSourceAcquisition$importRunArgs<ExtArgs>
 }
 export type LegalSourceAcquisitionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  sourceFamily?: boolean | Prisma.LegalSourceDefaultArgs<ExtArgs>
+  sourceFamily?: boolean | Prisma.LegalSourceAcquisition$sourceFamilyArgs<ExtArgs>
   sourceVersion?: boolean | Prisma.LegalSourceAcquisition$sourceVersionArgs<ExtArgs>
+  ente?: boolean | Prisma.LegalSourceAcquisition$enteArgs<ExtArgs>
   importRun?: boolean | Prisma.LegalSourceAcquisition$importRunArgs<ExtArgs>
 }
 export type LegalSourceAcquisitionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  sourceFamily?: boolean | Prisma.LegalSourceDefaultArgs<ExtArgs>
+  sourceFamily?: boolean | Prisma.LegalSourceAcquisition$sourceFamilyArgs<ExtArgs>
   sourceVersion?: boolean | Prisma.LegalSourceAcquisition$sourceVersionArgs<ExtArgs>
+  ente?: boolean | Prisma.LegalSourceAcquisition$enteArgs<ExtArgs>
   importRun?: boolean | Prisma.LegalSourceAcquisition$importRunArgs<ExtArgs>
 }
 
 export type $LegalSourceAcquisitionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "LegalSourceAcquisition"
   objects: {
-    sourceFamily: Prisma.$LegalSourcePayload<ExtArgs>
+    sourceFamily: Prisma.$LegalSourcePayload<ExtArgs> | null
     sourceVersion: Prisma.$LegalSourceVersionPayload<ExtArgs> | null
+    ente: Prisma.$EntePayload<ExtArgs> | null
     importRun: Prisma.$ImportRunPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    sourceFamilyId: string
+    sourceFamilyId: string | null
     sourceVersionId: string | null
+    enteId: string | null
+    idempotencyKey: string
     outcome: $Enums.LegalSourceAcquisitionOutcome
     originClass: string
     providerOrChannel: string
@@ -2040,8 +2375,9 @@ readonly fields: LegalSourceAcquisitionFieldRefs;
  */
 export interface Prisma__LegalSourceAcquisitionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  sourceFamily<T extends Prisma.LegalSourceDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalSourceDefaultArgs<ExtArgs>>): Prisma.Prisma__LegalSourceClient<runtime.Types.Result.GetResult<Prisma.$LegalSourcePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  sourceFamily<T extends Prisma.LegalSourceAcquisition$sourceFamilyArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalSourceAcquisition$sourceFamilyArgs<ExtArgs>>): Prisma.Prisma__LegalSourceClient<runtime.Types.Result.GetResult<Prisma.$LegalSourcePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   sourceVersion<T extends Prisma.LegalSourceAcquisition$sourceVersionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalSourceAcquisition$sourceVersionArgs<ExtArgs>>): Prisma.Prisma__LegalSourceVersionClient<runtime.Types.Result.GetResult<Prisma.$LegalSourceVersionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  ente<T extends Prisma.LegalSourceAcquisition$enteArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalSourceAcquisition$enteArgs<ExtArgs>>): Prisma.Prisma__EnteClient<runtime.Types.Result.GetResult<Prisma.$EntePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   importRun<T extends Prisma.LegalSourceAcquisition$importRunArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalSourceAcquisition$importRunArgs<ExtArgs>>): Prisma.Prisma__ImportRunClient<runtime.Types.Result.GetResult<Prisma.$ImportRunPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2075,6 +2411,8 @@ export interface LegalSourceAcquisitionFieldRefs {
   readonly id: Prisma.FieldRef<"LegalSourceAcquisition", 'String'>
   readonly sourceFamilyId: Prisma.FieldRef<"LegalSourceAcquisition", 'String'>
   readonly sourceVersionId: Prisma.FieldRef<"LegalSourceAcquisition", 'String'>
+  readonly enteId: Prisma.FieldRef<"LegalSourceAcquisition", 'String'>
+  readonly idempotencyKey: Prisma.FieldRef<"LegalSourceAcquisition", 'String'>
   readonly outcome: Prisma.FieldRef<"LegalSourceAcquisition", 'LegalSourceAcquisitionOutcome'>
   readonly originClass: Prisma.FieldRef<"LegalSourceAcquisition", 'String'>
   readonly providerOrChannel: Prisma.FieldRef<"LegalSourceAcquisition", 'String'>
@@ -2497,6 +2835,25 @@ export type LegalSourceAcquisitionDeleteManyArgs<ExtArgs extends runtime.Types.E
 }
 
 /**
+ * LegalSourceAcquisition.sourceFamily
+ */
+export type LegalSourceAcquisition$sourceFamilyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LegalSource
+   */
+  select?: Prisma.LegalSourceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LegalSource
+   */
+  omit?: Prisma.LegalSourceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LegalSourceInclude<ExtArgs> | null
+  where?: Prisma.LegalSourceWhereInput
+}
+
+/**
  * LegalSourceAcquisition.sourceVersion
  */
 export type LegalSourceAcquisition$sourceVersionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2513,6 +2870,25 @@ export type LegalSourceAcquisition$sourceVersionArgs<ExtArgs extends runtime.Typ
    */
   include?: Prisma.LegalSourceVersionInclude<ExtArgs> | null
   where?: Prisma.LegalSourceVersionWhereInput
+}
+
+/**
+ * LegalSourceAcquisition.ente
+ */
+export type LegalSourceAcquisition$enteArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Ente
+   */
+  select?: Prisma.EnteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Ente
+   */
+  omit?: Prisma.EnteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EnteInclude<ExtArgs> | null
+  where?: Prisma.EnteWhereInput
 }
 
 /**

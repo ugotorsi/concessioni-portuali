@@ -722,7 +722,8 @@ export const LegalSourceAcquisitionOutcome = {
   ACQUIRED: 'ACQUIRED',
   MISSING: 'MISSING',
   INTEGRITY_MISMATCH: 'INTEGRITY_MISMATCH',
-  FAILED: 'FAILED'
+  FAILED: 'FAILED',
+  PENDING_IDENTITY: 'PENDING_IDENTITY'
 } as const
 
 export type LegalSourceAcquisitionOutcome = (typeof LegalSourceAcquisitionOutcome)[keyof typeof LegalSourceAcquisitionOutcome]

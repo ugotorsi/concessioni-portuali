@@ -289,6 +289,8 @@ export const LegalSourceAcquisitionScalarFieldEnum = {
   id: 'id',
   sourceFamilyId: 'sourceFamilyId',
   sourceVersionId: 'sourceVersionId',
+  enteId: 'enteId',
+  idempotencyKey: 'idempotencyKey',
   outcome: 'outcome',
   originClass: 'originClass',
   providerOrChannel: 'providerOrChannel',

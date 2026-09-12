@@ -1501,10 +1501,12 @@ export type LegalSourceCreateNestedOneWithoutAcquisitionsInput = {
   connect?: Prisma.LegalSourceWhereUniqueInput
 }
 
-export type LegalSourceUpdateOneRequiredWithoutAcquisitionsNestedInput = {
+export type LegalSourceUpdateOneWithoutAcquisitionsNestedInput = {
   create?: Prisma.XOR<Prisma.LegalSourceCreateWithoutAcquisitionsInput, Prisma.LegalSourceUncheckedCreateWithoutAcquisitionsInput>
   connectOrCreate?: Prisma.LegalSourceCreateOrConnectWithoutAcquisitionsInput
   upsert?: Prisma.LegalSourceUpsertWithoutAcquisitionsInput
+  disconnect?: Prisma.LegalSourceWhereInput | boolean
+  delete?: Prisma.LegalSourceWhereInput | boolean
   connect?: Prisma.LegalSourceWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.LegalSourceUpdateToOneWithWhereWithoutAcquisitionsInput, Prisma.LegalSourceUpdateWithoutAcquisitionsInput>, Prisma.LegalSourceUncheckedUpdateWithoutAcquisitionsInput>
 }
