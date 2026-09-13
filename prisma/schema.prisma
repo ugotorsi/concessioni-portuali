@@ -629,6 +629,16 @@ enum NeutralIntakeStatus {
   FAILED_HANDOFF
 }
 
+enum NeutralIntakeExtractionOutcome {
+  SUCCEEDED
+  FAILED
+}
+
+enum NeutralIntakeExtractionMethod {
+  DIRECT_TEXT
+  OCR
+}
+
 model Ente {
   id                           String                                 @id @default(cuid())
   nome                         String
@@ -1567,11 +1577,62 @@ model NeutralIntake {
 
   ente           Ente? @relation(fields: [enteId], references: [id], onDelete: Restrict)
   receivedByUser User? @relation("NeutralIntakeReceivedBy", fields: [receivedByUserId], references: [id], onDelete: Restrict)
+  extractionAttempts NeutralIntakeExtractionAttempt[]
 
   @@index([storageProvider, storageKey])
   @@index([sha256])
   @@index([enteId, status, receivedAt])
   @@index([receivedByUserId])
+}
+
+model NeutralIntakeExtractionAttempt {
+  id                     String                         @id @default(cuid())
+  neutralIntakeId        String
+  policyVersion          String
+  outcome                NeutralIntakeExtractionOutcome
+  artifactSha256         String                         @db.Char(64)
+  declaredMimeType       String
+  detectedMimeType       String?
+  artifactSizeBytes      Int
+  startedAt              DateTime
+  completedAt            DateTime
+  directExtractorName    String?
+  directExtractorVersion String?
+  ocrExtractorName       String?
+  ocrExtractorVersion    String?
+  rasterizerName         String?
+  rasterizerVersion      String?
+  failureCode            String?
+  failureMessage         String?
+  warnings               Json?
+  technicalMetadata      Json?
+  createdAt              DateTime                       @default(now())
+
+  neutralIntake NeutralIntake                  @relation(fields: [neutralIntakeId], references: [id], onDelete: Restrict)
+  pages         NeutralIntakeExtractionPage[]
+
+  @@index([neutralIntakeId, createdAt])
+  @@index([outcome, createdAt])
+}
+
+model NeutralIntakeExtractionPage {
+  id                       String                          @id @default(cuid())
+  extractionAttemptId      String
+  pageNumber               Int
+  extractionMethod         NeutralIntakeExtractionMethod
+  text                     String
+  normalizedText           String
+  textSha256               String                          @db.Char(64)
+  normalizedCharacterCount Int
+  ocrConfidence            Float?
+  warnings                 Json?
+  technicalMetadata        Json?
+  createdAt                DateTime                        @default(now())
+
+  extractionAttempt NeutralIntakeExtractionAttempt @relation(fields: [extractionAttemptId], references: [id], onDelete: Restrict)
+
+  @@unique([extractionAttemptId, pageNumber])
+  @@index([textSha256])
 }
 
 model FascicoloObservation {

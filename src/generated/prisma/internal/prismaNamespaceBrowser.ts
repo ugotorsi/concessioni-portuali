@@ -79,6 +79,8 @@ export const ModelName = {
   Documento: 'Documento',
   DocumentFileVersion: 'DocumentFileVersion',
   NeutralIntake: 'NeutralIntake',
+  NeutralIntakeExtractionAttempt: 'NeutralIntakeExtractionAttempt',
+  NeutralIntakeExtractionPage: 'NeutralIntakeExtractionPage',
   FascicoloObservation: 'FascicoloObservation',
   FascicoloChecklistEvidence: 'FascicoloChecklistEvidence',
   FascicoloDocumentRequirementProposal: 'FascicoloDocumentRequirementProposal',
@@ -754,6 +756,51 @@ export const NeutralIntakeScalarFieldEnum = {
 } as const
 
 export type NeutralIntakeScalarFieldEnum = (typeof NeutralIntakeScalarFieldEnum)[keyof typeof NeutralIntakeScalarFieldEnum]
+
+
+export const NeutralIntakeExtractionAttemptScalarFieldEnum = {
+  id: 'id',
+  neutralIntakeId: 'neutralIntakeId',
+  policyVersion: 'policyVersion',
+  outcome: 'outcome',
+  artifactSha256: 'artifactSha256',
+  declaredMimeType: 'declaredMimeType',
+  detectedMimeType: 'detectedMimeType',
+  artifactSizeBytes: 'artifactSizeBytes',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  directExtractorName: 'directExtractorName',
+  directExtractorVersion: 'directExtractorVersion',
+  ocrExtractorName: 'ocrExtractorName',
+  ocrExtractorVersion: 'ocrExtractorVersion',
+  rasterizerName: 'rasterizerName',
+  rasterizerVersion: 'rasterizerVersion',
+  failureCode: 'failureCode',
+  failureMessage: 'failureMessage',
+  warnings: 'warnings',
+  technicalMetadata: 'technicalMetadata',
+  createdAt: 'createdAt'
+} as const
+
+export type NeutralIntakeExtractionAttemptScalarFieldEnum = (typeof NeutralIntakeExtractionAttemptScalarFieldEnum)[keyof typeof NeutralIntakeExtractionAttemptScalarFieldEnum]
+
+
+export const NeutralIntakeExtractionPageScalarFieldEnum = {
+  id: 'id',
+  extractionAttemptId: 'extractionAttemptId',
+  pageNumber: 'pageNumber',
+  extractionMethod: 'extractionMethod',
+  text: 'text',
+  normalizedText: 'normalizedText',
+  textSha256: 'textSha256',
+  normalizedCharacterCount: 'normalizedCharacterCount',
+  ocrConfidence: 'ocrConfidence',
+  warnings: 'warnings',
+  technicalMetadata: 'technicalMetadata',
+  createdAt: 'createdAt'
+} as const
+
+export type NeutralIntakeExtractionPageScalarFieldEnum = (typeof NeutralIntakeExtractionPageScalarFieldEnum)[keyof typeof NeutralIntakeExtractionPageScalarFieldEnum]
 
 
 export const FascicoloObservationScalarFieldEnum = {

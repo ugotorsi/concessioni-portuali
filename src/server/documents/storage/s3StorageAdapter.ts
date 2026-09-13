@@ -15,7 +15,7 @@ import type {
   DocumentStorageReadResult,
   StoredDocumentObject,
 } from "./types";
-import { DocumentStorageReadUnavailableError } from "./types";
+import { DocumentStorageReadLimitError, DocumentStorageReadUnavailableError } from "./types";
 
 type StorageOperation = "PUT" | "GET" | "DELETE" | "HEAD";
 
@@ -104,6 +104,40 @@ async function bodyToBuffer(body: unknown): Promise<Buffer> {
   });
 
   return Buffer.concat(chunks);
+}
+
+async function bodyToBoundedBuffer(body: unknown, maxBytes: number): Promise<Buffer> {
+  if (!body) {
+    return Buffer.alloc(0);
+  }
+
+  const nodeStream = body as NodeJS.ReadableStream & { destroy?: (error?: Error) => void };
+  if (typeof nodeStream.on !== "function") {
+    const buffered = await bodyToBuffer(body);
+    if (buffered.length > maxBytes) {
+      throw new DocumentStorageReadLimitError({ maxBytes, observedBytes: buffered.length });
+    }
+    return buffered;
+  }
+
+  const chunks: Buffer[] = [];
+  let consumed = 0;
+  await new Promise<void>((resolve, reject) => {
+    nodeStream.on("data", (chunk) => {
+      const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      consumed += bytes.length;
+      if (consumed > maxBytes) {
+        const error = new DocumentStorageReadLimitError({ maxBytes, observedBytes: consumed });
+        nodeStream.destroy?.(error);
+        reject(error);
+        return;
+      }
+      chunks.push(bytes);
+    });
+    nodeStream.on("error", reject);
+    nodeStream.on("end", () => resolve());
+  });
+  return Buffer.concat(chunks, consumed);
 }
 
 export class S3StorageAdapter implements DocumentStorageAdapter {
@@ -254,6 +288,53 @@ export class S3StorageAdapter implements DocumentStorageAdapter {
         code: "BODY_READ_FAILED",
         cause: error,
       });
+    }
+  }
+
+  async readBounded(storageKey: string, maxBytes: number): Promise<DocumentStorageReadResult> {
+    const safeKey = assertSafeStorageKey(storageKey);
+    if (!Number.isSafeInteger(maxBytes) || maxBytes <= 0) {
+      throw new TypeError("Document storage byte limit must be a positive safe integer.");
+    }
+
+    try {
+      const metadata = await this.client.send(new HeadObjectCommand({
+        Bucket: this.config.bucket,
+        Key: safeKey,
+      }));
+      if (typeof metadata.ContentLength === "number" && metadata.ContentLength > maxBytes) {
+        throw new DocumentStorageReadLimitError({ maxBytes, observedBytes: metadata.ContentLength });
+      }
+    } catch (error) {
+      if (error instanceof DocumentStorageReadLimitError) {
+        throw error;
+      }
+      const code = extractErrorCode(error);
+      const statusCode = extractStatusCode(error);
+      if (isNotFoundLike(code, statusCode)) {
+        return { disposition: "MISSING" };
+      }
+      throw new DocumentStorageReadUnavailableError({ provider: "s3", code, statusCode, cause: error });
+    }
+
+    let response;
+    try {
+      response = await this.client.send(new GetObjectCommand({
+        Bucket: this.config.bucket,
+        Key: safeKey,
+          Range: `bytes=0-${maxBytes - 1}`,
+      }));
+      return { disposition: "FOUND", body: await bodyToBoundedBuffer(response.Body, maxBytes) };
+    } catch (error) {
+      if (error instanceof DocumentStorageReadLimitError) {
+        throw error;
+      }
+      const code = extractErrorCode(error);
+      const statusCode = extractStatusCode(error);
+      if (isNotFoundLike(code, statusCode)) {
+        return { disposition: "MISSING" };
+      }
+      throw new DocumentStorageReadUnavailableError({ provider: "s3", code, statusCode, cause: error });
     }
   }
 

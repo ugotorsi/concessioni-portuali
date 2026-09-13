@@ -326,6 +326,7 @@ export type NeutralIntakeWhereInput = {
   statusVersion?: Prisma.IntFilter<"NeutralIntake"> | number
   ente?: Prisma.XOR<Prisma.EnteNullableScalarRelationFilter, Prisma.EnteWhereInput> | null
   receivedByUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptListRelationFilter
 }
 
 export type NeutralIntakeOrderByWithRelationInput = {
@@ -349,6 +350,7 @@ export type NeutralIntakeOrderByWithRelationInput = {
   statusVersion?: Prisma.SortOrder
   ente?: Prisma.EnteOrderByWithRelationInput
   receivedByUser?: Prisma.UserOrderByWithRelationInput
+  extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptOrderByRelationAggregateInput
 }
 
 export type NeutralIntakeWhereUniqueInput = Prisma.AtLeast<{
@@ -375,6 +377,7 @@ export type NeutralIntakeWhereUniqueInput = Prisma.AtLeast<{
   statusVersion?: Prisma.IntFilter<"NeutralIntake"> | number
   ente?: Prisma.XOR<Prisma.EnteNullableScalarRelationFilter, Prisma.EnteWhereInput> | null
   receivedByUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptListRelationFilter
 }, "id" | "idempotencyKey">
 
 export type NeutralIntakeOrderByWithAggregationInput = {
@@ -446,6 +449,7 @@ export type NeutralIntakeCreateInput = {
   statusVersion?: number
   ente?: Prisma.EnteCreateNestedOneWithoutNeutralIntakesInput
   receivedByUser?: Prisma.UserCreateNestedOneWithoutNeutralIntakesReceivedInput
+  extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptCreateNestedManyWithoutNeutralIntakeInput
 }
 
 export type NeutralIntakeUncheckedCreateInput = {
@@ -467,6 +471,7 @@ export type NeutralIntakeUncheckedCreateInput = {
   receivedAt?: Date | string
   status?: $Enums.NeutralIntakeStatus
   statusVersion?: number
+  extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUncheckedCreateNestedManyWithoutNeutralIntakeInput
 }
 
 export type NeutralIntakeUpdateInput = {
@@ -488,6 +493,7 @@ export type NeutralIntakeUpdateInput = {
   statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
   ente?: Prisma.EnteUpdateOneWithoutNeutralIntakesNestedInput
   receivedByUser?: Prisma.UserUpdateOneWithoutNeutralIntakesReceivedNestedInput
+  extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUpdateManyWithoutNeutralIntakeNestedInput
 }
 
 export type NeutralIntakeUncheckedUpdateInput = {
@@ -509,6 +515,7 @@ export type NeutralIntakeUncheckedUpdateInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumNeutralIntakeStatusFieldUpdateOperationsInput | $Enums.NeutralIntakeStatus
   statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUncheckedUpdateManyWithoutNeutralIntakeNestedInput
 }
 
 export type NeutralIntakeCreateManyInput = {
@@ -655,6 +662,11 @@ export type NeutralIntakeSumOrderByAggregateInput = {
   statusVersion?: Prisma.SortOrder
 }
 
+export type NeutralIntakeScalarRelationFilter = {
+  is?: Prisma.NeutralIntakeWhereInput
+  isNot?: Prisma.NeutralIntakeWhereInput
+}
+
 export type NeutralIntakeCreateNestedManyWithoutEnteInput = {
   create?: Prisma.XOR<Prisma.NeutralIntakeCreateWithoutEnteInput, Prisma.NeutralIntakeUncheckedCreateWithoutEnteInput> | Prisma.NeutralIntakeCreateWithoutEnteInput[] | Prisma.NeutralIntakeUncheckedCreateWithoutEnteInput[]
   connectOrCreate?: Prisma.NeutralIntakeCreateOrConnectWithoutEnteInput | Prisma.NeutralIntakeCreateOrConnectWithoutEnteInput[]
@@ -743,6 +755,20 @@ export type EnumNeutralIntakeStatusFieldUpdateOperationsInput = {
   set?: $Enums.NeutralIntakeStatus
 }
 
+export type NeutralIntakeCreateNestedOneWithoutExtractionAttemptsInput = {
+  create?: Prisma.XOR<Prisma.NeutralIntakeCreateWithoutExtractionAttemptsInput, Prisma.NeutralIntakeUncheckedCreateWithoutExtractionAttemptsInput>
+  connectOrCreate?: Prisma.NeutralIntakeCreateOrConnectWithoutExtractionAttemptsInput
+  connect?: Prisma.NeutralIntakeWhereUniqueInput
+}
+
+export type NeutralIntakeUpdateOneRequiredWithoutExtractionAttemptsNestedInput = {
+  create?: Prisma.XOR<Prisma.NeutralIntakeCreateWithoutExtractionAttemptsInput, Prisma.NeutralIntakeUncheckedCreateWithoutExtractionAttemptsInput>
+  connectOrCreate?: Prisma.NeutralIntakeCreateOrConnectWithoutExtractionAttemptsInput
+  upsert?: Prisma.NeutralIntakeUpsertWithoutExtractionAttemptsInput
+  connect?: Prisma.NeutralIntakeWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.NeutralIntakeUpdateToOneWithWhereWithoutExtractionAttemptsInput, Prisma.NeutralIntakeUpdateWithoutExtractionAttemptsInput>, Prisma.NeutralIntakeUncheckedUpdateWithoutExtractionAttemptsInput>
+}
+
 export type NeutralIntakeCreateWithoutEnteInput = {
   id?: string
   idempotencyKey: string
@@ -761,6 +787,7 @@ export type NeutralIntakeCreateWithoutEnteInput = {
   status?: $Enums.NeutralIntakeStatus
   statusVersion?: number
   receivedByUser?: Prisma.UserCreateNestedOneWithoutNeutralIntakesReceivedInput
+  extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptCreateNestedManyWithoutNeutralIntakeInput
 }
 
 export type NeutralIntakeUncheckedCreateWithoutEnteInput = {
@@ -781,6 +808,7 @@ export type NeutralIntakeUncheckedCreateWithoutEnteInput = {
   receivedAt?: Date | string
   status?: $Enums.NeutralIntakeStatus
   statusVersion?: number
+  extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUncheckedCreateNestedManyWithoutNeutralIntakeInput
 }
 
 export type NeutralIntakeCreateOrConnectWithoutEnteInput = {
@@ -851,6 +879,7 @@ export type NeutralIntakeCreateWithoutReceivedByUserInput = {
   status?: $Enums.NeutralIntakeStatus
   statusVersion?: number
   ente?: Prisma.EnteCreateNestedOneWithoutNeutralIntakesInput
+  extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptCreateNestedManyWithoutNeutralIntakeInput
 }
 
 export type NeutralIntakeUncheckedCreateWithoutReceivedByUserInput = {
@@ -871,6 +900,7 @@ export type NeutralIntakeUncheckedCreateWithoutReceivedByUserInput = {
   receivedAt?: Date | string
   status?: $Enums.NeutralIntakeStatus
   statusVersion?: number
+  extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUncheckedCreateNestedManyWithoutNeutralIntakeInput
 }
 
 export type NeutralIntakeCreateOrConnectWithoutReceivedByUserInput = {
@@ -897,6 +927,106 @@ export type NeutralIntakeUpdateWithWhereUniqueWithoutReceivedByUserInput = {
 export type NeutralIntakeUpdateManyWithWhereWithoutReceivedByUserInput = {
   where: Prisma.NeutralIntakeScalarWhereInput
   data: Prisma.XOR<Prisma.NeutralIntakeUpdateManyMutationInput, Prisma.NeutralIntakeUncheckedUpdateManyWithoutReceivedByUserInput>
+}
+
+export type NeutralIntakeCreateWithoutExtractionAttemptsInput = {
+  id?: string
+  idempotencyKey: string
+  storageProvider: string
+  storageBucket?: string | null
+  storageKey: string
+  sha256: string
+  mimeType: string
+  sizeBytes: number
+  originalName?: string | null
+  ingressChannel: string
+  originReference?: string | null
+  receivedByActorId: string
+  receivedByRole: string
+  receivedAt?: Date | string
+  status?: $Enums.NeutralIntakeStatus
+  statusVersion?: number
+  ente?: Prisma.EnteCreateNestedOneWithoutNeutralIntakesInput
+  receivedByUser?: Prisma.UserCreateNestedOneWithoutNeutralIntakesReceivedInput
+}
+
+export type NeutralIntakeUncheckedCreateWithoutExtractionAttemptsInput = {
+  id?: string
+  idempotencyKey: string
+  storageProvider: string
+  storageBucket?: string | null
+  storageKey: string
+  sha256: string
+  mimeType: string
+  sizeBytes: number
+  originalName?: string | null
+  ingressChannel: string
+  originReference?: string | null
+  enteId?: string | null
+  receivedByUserId?: string | null
+  receivedByActorId: string
+  receivedByRole: string
+  receivedAt?: Date | string
+  status?: $Enums.NeutralIntakeStatus
+  statusVersion?: number
+}
+
+export type NeutralIntakeCreateOrConnectWithoutExtractionAttemptsInput = {
+  where: Prisma.NeutralIntakeWhereUniqueInput
+  create: Prisma.XOR<Prisma.NeutralIntakeCreateWithoutExtractionAttemptsInput, Prisma.NeutralIntakeUncheckedCreateWithoutExtractionAttemptsInput>
+}
+
+export type NeutralIntakeUpsertWithoutExtractionAttemptsInput = {
+  update: Prisma.XOR<Prisma.NeutralIntakeUpdateWithoutExtractionAttemptsInput, Prisma.NeutralIntakeUncheckedUpdateWithoutExtractionAttemptsInput>
+  create: Prisma.XOR<Prisma.NeutralIntakeCreateWithoutExtractionAttemptsInput, Prisma.NeutralIntakeUncheckedCreateWithoutExtractionAttemptsInput>
+  where?: Prisma.NeutralIntakeWhereInput
+}
+
+export type NeutralIntakeUpdateToOneWithWhereWithoutExtractionAttemptsInput = {
+  where?: Prisma.NeutralIntakeWhereInput
+  data: Prisma.XOR<Prisma.NeutralIntakeUpdateWithoutExtractionAttemptsInput, Prisma.NeutralIntakeUncheckedUpdateWithoutExtractionAttemptsInput>
+}
+
+export type NeutralIntakeUpdateWithoutExtractionAttemptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  storageProvider?: Prisma.StringFieldUpdateOperationsInput | string
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.StringFieldUpdateOperationsInput | string
+  sha256?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ingressChannel?: Prisma.StringFieldUpdateOperationsInput | string
+  originReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receivedByActorId?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedByRole?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumNeutralIntakeStatusFieldUpdateOperationsInput | $Enums.NeutralIntakeStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  ente?: Prisma.EnteUpdateOneWithoutNeutralIntakesNestedInput
+  receivedByUser?: Prisma.UserUpdateOneWithoutNeutralIntakesReceivedNestedInput
+}
+
+export type NeutralIntakeUncheckedUpdateWithoutExtractionAttemptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  storageProvider?: Prisma.StringFieldUpdateOperationsInput | string
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.StringFieldUpdateOperationsInput | string
+  sha256?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ingressChannel?: Prisma.StringFieldUpdateOperationsInput | string
+  originReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receivedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receivedByActorId?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedByRole?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumNeutralIntakeStatusFieldUpdateOperationsInput | $Enums.NeutralIntakeStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type NeutralIntakeCreateManyEnteInput = {
@@ -937,6 +1067,7 @@ export type NeutralIntakeUpdateWithoutEnteInput = {
   status?: Prisma.EnumNeutralIntakeStatusFieldUpdateOperationsInput | $Enums.NeutralIntakeStatus
   statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
   receivedByUser?: Prisma.UserUpdateOneWithoutNeutralIntakesReceivedNestedInput
+  extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUpdateManyWithoutNeutralIntakeNestedInput
 }
 
 export type NeutralIntakeUncheckedUpdateWithoutEnteInput = {
@@ -957,6 +1088,7 @@ export type NeutralIntakeUncheckedUpdateWithoutEnteInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumNeutralIntakeStatusFieldUpdateOperationsInput | $Enums.NeutralIntakeStatus
   statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUncheckedUpdateManyWithoutNeutralIntakeNestedInput
 }
 
 export type NeutralIntakeUncheckedUpdateManyWithoutEnteInput = {
@@ -1017,6 +1149,7 @@ export type NeutralIntakeUpdateWithoutReceivedByUserInput = {
   status?: Prisma.EnumNeutralIntakeStatusFieldUpdateOperationsInput | $Enums.NeutralIntakeStatus
   statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
   ente?: Prisma.EnteUpdateOneWithoutNeutralIntakesNestedInput
+  extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUpdateManyWithoutNeutralIntakeNestedInput
 }
 
 export type NeutralIntakeUncheckedUpdateWithoutReceivedByUserInput = {
@@ -1037,6 +1170,7 @@ export type NeutralIntakeUncheckedUpdateWithoutReceivedByUserInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumNeutralIntakeStatusFieldUpdateOperationsInput | $Enums.NeutralIntakeStatus
   statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUncheckedUpdateManyWithoutNeutralIntakeNestedInput
 }
 
 export type NeutralIntakeUncheckedUpdateManyWithoutReceivedByUserInput = {
@@ -1060,6 +1194,35 @@ export type NeutralIntakeUncheckedUpdateManyWithoutReceivedByUserInput = {
 }
 
 
+/**
+ * Count Type NeutralIntakeCountOutputType
+ */
+
+export type NeutralIntakeCountOutputType = {
+  extractionAttempts: number
+}
+
+export type NeutralIntakeCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  extractionAttempts?: boolean | NeutralIntakeCountOutputTypeCountExtractionAttemptsArgs
+}
+
+/**
+ * NeutralIntakeCountOutputType without action
+ */
+export type NeutralIntakeCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the NeutralIntakeCountOutputType
+   */
+  select?: Prisma.NeutralIntakeCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * NeutralIntakeCountOutputType without action
+ */
+export type NeutralIntakeCountOutputTypeCountExtractionAttemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.NeutralIntakeExtractionAttemptWhereInput
+}
+
 
 export type NeutralIntakeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1082,6 +1245,8 @@ export type NeutralIntakeSelect<ExtArgs extends runtime.Types.Extensions.Interna
   statusVersion?: boolean
   ente?: boolean | Prisma.NeutralIntake$enteArgs<ExtArgs>
   receivedByUser?: boolean | Prisma.NeutralIntake$receivedByUserArgs<ExtArgs>
+  extractionAttempts?: boolean | Prisma.NeutralIntake$extractionAttemptsArgs<ExtArgs>
+  _count?: boolean | Prisma.NeutralIntakeCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["neutralIntake"]>
 
 export type NeutralIntakeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1155,6 +1320,8 @@ export type NeutralIntakeOmit<ExtArgs extends runtime.Types.Extensions.InternalA
 export type NeutralIntakeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   ente?: boolean | Prisma.NeutralIntake$enteArgs<ExtArgs>
   receivedByUser?: boolean | Prisma.NeutralIntake$receivedByUserArgs<ExtArgs>
+  extractionAttempts?: boolean | Prisma.NeutralIntake$extractionAttemptsArgs<ExtArgs>
+  _count?: boolean | Prisma.NeutralIntakeCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type NeutralIntakeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   ente?: boolean | Prisma.NeutralIntake$enteArgs<ExtArgs>
@@ -1170,6 +1337,7 @@ export type $NeutralIntakePayload<ExtArgs extends runtime.Types.Extensions.Inter
   objects: {
     ente: Prisma.$EntePayload<ExtArgs> | null
     receivedByUser: Prisma.$UserPayload<ExtArgs> | null
+    extractionAttempts: Prisma.$NeutralIntakeExtractionAttemptPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1586,6 +1754,7 @@ export interface Prisma__NeutralIntakeClient<T, Null = never, ExtArgs extends ru
   readonly [Symbol.toStringTag]: "PrismaPromise"
   ente<T extends Prisma.NeutralIntake$enteArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NeutralIntake$enteArgs<ExtArgs>>): Prisma.Prisma__EnteClient<runtime.Types.Result.GetResult<Prisma.$EntePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   receivedByUser<T extends Prisma.NeutralIntake$receivedByUserArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NeutralIntake$receivedByUserArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  extractionAttempts<T extends Prisma.NeutralIntake$extractionAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NeutralIntake$extractionAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NeutralIntakeExtractionAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2069,6 +2238,30 @@ export type NeutralIntake$receivedByUserArgs<ExtArgs extends runtime.Types.Exten
    */
   include?: Prisma.UserInclude<ExtArgs> | null
   where?: Prisma.UserWhereInput
+}
+
+/**
+ * NeutralIntake.extractionAttempts
+ */
+export type NeutralIntake$extractionAttemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the NeutralIntakeExtractionAttempt
+   */
+  select?: Prisma.NeutralIntakeExtractionAttemptSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the NeutralIntakeExtractionAttempt
+   */
+  omit?: Prisma.NeutralIntakeExtractionAttemptOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NeutralIntakeExtractionAttemptInclude<ExtArgs> | null
+  where?: Prisma.NeutralIntakeExtractionAttemptWhereInput
+  orderBy?: Prisma.NeutralIntakeExtractionAttemptOrderByWithRelationInput | Prisma.NeutralIntakeExtractionAttemptOrderByWithRelationInput[]
+  cursor?: Prisma.NeutralIntakeExtractionAttemptWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.NeutralIntakeExtractionAttemptScalarFieldEnum | Prisma.NeutralIntakeExtractionAttemptScalarFieldEnum[]
 }
 
 /**

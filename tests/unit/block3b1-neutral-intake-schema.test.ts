@@ -138,13 +138,15 @@ describe("B2C9 Block 3B.1 neutral intake schema", () => {
   });
 
   it("is the only Block 3B.1 migration and sorts after both Block 3A migrations", () => {
-    const relevant = readdirSync(resolve("prisma/migrations"))
-      .filter((name) => name.includes("b2c9_block3"))
-      .sort();
-    expect(relevant).toEqual([
+    const migrations = readdirSync(resolve("prisma/migrations")).sort();
+    const block3a = [
       "20260912_b2c9_block3a_01_pending_identity_enum",
       "20260912_b2c9_block3a_02_precanonical_acquisition",
-      "20260912_b2c9_block3b1_neutral_intake_core",
-    ]);
+    ];
+    const block3b1 = migrations.filter((name) => name.includes("b2c9_block3b1"));
+
+    expect(migrations).toEqual(expect.arrayContaining(block3a));
+    expect(block3b1).toEqual(["20260912_b2c9_block3b1_neutral_intake_core"]);
+    expect(block3a.every((name) => name < block3b1[0])).toBe(true);
   });
 });

@@ -412,6 +412,8 @@ export const ModelName = {
   Documento: 'Documento',
   DocumentFileVersion: 'DocumentFileVersion',
   NeutralIntake: 'NeutralIntake',
+  NeutralIntakeExtractionAttempt: 'NeutralIntakeExtractionAttempt',
+  NeutralIntakeExtractionPage: 'NeutralIntakeExtractionPage',
   FascicoloObservation: 'FascicoloObservation',
   FascicoloChecklistEvidence: 'FascicoloChecklistEvidence',
   FascicoloDocumentRequirementProposal: 'FascicoloDocumentRequirementProposal',
@@ -441,7 +443,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "neutralIntake" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2517,6 +2519,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    NeutralIntakeExtractionAttempt: {
+      payload: Prisma.$NeutralIntakeExtractionAttemptPayload<ExtArgs>
+      fields: Prisma.NeutralIntakeExtractionAttemptFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.NeutralIntakeExtractionAttemptFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeExtractionAttemptPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.NeutralIntakeExtractionAttemptFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeExtractionAttemptPayload>
+        }
+        findFirst: {
+          args: Prisma.NeutralIntakeExtractionAttemptFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeExtractionAttemptPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.NeutralIntakeExtractionAttemptFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeExtractionAttemptPayload>
+        }
+        findMany: {
+          args: Prisma.NeutralIntakeExtractionAttemptFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeExtractionAttemptPayload>[]
+        }
+        create: {
+          args: Prisma.NeutralIntakeExtractionAttemptCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeExtractionAttemptPayload>
+        }
+        createMany: {
+          args: Prisma.NeutralIntakeExtractionAttemptCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.NeutralIntakeExtractionAttemptCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeExtractionAttemptPayload>[]
+        }
+        delete: {
+          args: Prisma.NeutralIntakeExtractionAttemptDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeExtractionAttemptPayload>
+        }
+        update: {
+          args: Prisma.NeutralIntakeExtractionAttemptUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeExtractionAttemptPayload>
+        }
+        deleteMany: {
+          args: Prisma.NeutralIntakeExtractionAttemptDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.NeutralIntakeExtractionAttemptUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.NeutralIntakeExtractionAttemptUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeExtractionAttemptPayload>[]
+        }
+        upsert: {
+          args: Prisma.NeutralIntakeExtractionAttemptUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeExtractionAttemptPayload>
+        }
+        aggregate: {
+          args: Prisma.NeutralIntakeExtractionAttemptAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateNeutralIntakeExtractionAttempt>
+        }
+        groupBy: {
+          args: Prisma.NeutralIntakeExtractionAttemptGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.NeutralIntakeExtractionAttemptGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.NeutralIntakeExtractionAttemptCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.NeutralIntakeExtractionAttemptCountAggregateOutputType> | number
+        }
+      }
+    }
+    NeutralIntakeExtractionPage: {
+      payload: Prisma.$NeutralIntakeExtractionPagePayload<ExtArgs>
+      fields: Prisma.NeutralIntakeExtractionPageFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.NeutralIntakeExtractionPageFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeExtractionPagePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.NeutralIntakeExtractionPageFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeExtractionPagePayload>
+        }
+        findFirst: {
+          args: Prisma.NeutralIntakeExtractionPageFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeExtractionPagePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.NeutralIntakeExtractionPageFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeExtractionPagePayload>
+        }
+        findMany: {
+          args: Prisma.NeutralIntakeExtractionPageFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeExtractionPagePayload>[]
+        }
+        create: {
+          args: Prisma.NeutralIntakeExtractionPageCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeExtractionPagePayload>
+        }
+        createMany: {
+          args: Prisma.NeutralIntakeExtractionPageCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.NeutralIntakeExtractionPageCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeExtractionPagePayload>[]
+        }
+        delete: {
+          args: Prisma.NeutralIntakeExtractionPageDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeExtractionPagePayload>
+        }
+        update: {
+          args: Prisma.NeutralIntakeExtractionPageUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeExtractionPagePayload>
+        }
+        deleteMany: {
+          args: Prisma.NeutralIntakeExtractionPageDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.NeutralIntakeExtractionPageUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.NeutralIntakeExtractionPageUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeExtractionPagePayload>[]
+        }
+        upsert: {
+          args: Prisma.NeutralIntakeExtractionPageUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeExtractionPagePayload>
+        }
+        aggregate: {
+          args: Prisma.NeutralIntakeExtractionPageAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateNeutralIntakeExtractionPage>
+        }
+        groupBy: {
+          args: Prisma.NeutralIntakeExtractionPageGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.NeutralIntakeExtractionPageGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.NeutralIntakeExtractionPageCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.NeutralIntakeExtractionPageCountAggregateOutputType> | number
+        }
+      }
+    }
     FascicoloObservation: {
       payload: Prisma.$FascicoloObservationPayload<ExtArgs>
       fields: Prisma.FascicoloObservationFieldRefs
@@ -4237,6 +4387,51 @@ export const NeutralIntakeScalarFieldEnum = {
 export type NeutralIntakeScalarFieldEnum = (typeof NeutralIntakeScalarFieldEnum)[keyof typeof NeutralIntakeScalarFieldEnum]
 
 
+export const NeutralIntakeExtractionAttemptScalarFieldEnum = {
+  id: 'id',
+  neutralIntakeId: 'neutralIntakeId',
+  policyVersion: 'policyVersion',
+  outcome: 'outcome',
+  artifactSha256: 'artifactSha256',
+  declaredMimeType: 'declaredMimeType',
+  detectedMimeType: 'detectedMimeType',
+  artifactSizeBytes: 'artifactSizeBytes',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  directExtractorName: 'directExtractorName',
+  directExtractorVersion: 'directExtractorVersion',
+  ocrExtractorName: 'ocrExtractorName',
+  ocrExtractorVersion: 'ocrExtractorVersion',
+  rasterizerName: 'rasterizerName',
+  rasterizerVersion: 'rasterizerVersion',
+  failureCode: 'failureCode',
+  failureMessage: 'failureMessage',
+  warnings: 'warnings',
+  technicalMetadata: 'technicalMetadata',
+  createdAt: 'createdAt'
+} as const
+
+export type NeutralIntakeExtractionAttemptScalarFieldEnum = (typeof NeutralIntakeExtractionAttemptScalarFieldEnum)[keyof typeof NeutralIntakeExtractionAttemptScalarFieldEnum]
+
+
+export const NeutralIntakeExtractionPageScalarFieldEnum = {
+  id: 'id',
+  extractionAttemptId: 'extractionAttemptId',
+  pageNumber: 'pageNumber',
+  extractionMethod: 'extractionMethod',
+  text: 'text',
+  normalizedText: 'normalizedText',
+  textSha256: 'textSha256',
+  normalizedCharacterCount: 'normalizedCharacterCount',
+  ocrConfidence: 'ocrConfidence',
+  warnings: 'warnings',
+  technicalMetadata: 'technicalMetadata',
+  createdAt: 'createdAt'
+} as const
+
+export type NeutralIntakeExtractionPageScalarFieldEnum = (typeof NeutralIntakeExtractionPageScalarFieldEnum)[keyof typeof NeutralIntakeExtractionPageScalarFieldEnum]
+
+
 export const FascicoloObservationScalarFieldEnum = {
   id: 'id',
   enteId: 'enteId',
@@ -5513,6 +5708,48 @@ export type ListEnumNeutralIntakeStatusFieldRefInput<$PrismaModel> = FieldRefInp
 
 
 /**
+ * Reference to a field of type 'NeutralIntakeExtractionOutcome'
+ */
+export type EnumNeutralIntakeExtractionOutcomeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NeutralIntakeExtractionOutcome'>
+    
+
+
+/**
+ * Reference to a field of type 'NeutralIntakeExtractionOutcome[]'
+ */
+export type ListEnumNeutralIntakeExtractionOutcomeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NeutralIntakeExtractionOutcome[]'>
+    
+
+
+/**
+ * Reference to a field of type 'NeutralIntakeExtractionMethod'
+ */
+export type EnumNeutralIntakeExtractionMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NeutralIntakeExtractionMethod'>
+    
+
+
+/**
+ * Reference to a field of type 'NeutralIntakeExtractionMethod[]'
+ */
+export type ListEnumNeutralIntakeExtractionMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NeutralIntakeExtractionMethod[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Float'
+ */
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+/**
+ * Reference to a field of type 'Float[]'
+ */
+export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+/**
  * Reference to a field of type 'FascicoloObservationKind'
  */
 export type EnumFascicoloObservationKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FascicoloObservationKind'>
@@ -5693,20 +5930,6 @@ export type EnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel> = F
 export type ListEnumAiFascicoloHumanReviewDispositionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AiFascicoloHumanReviewDisposition[]'>
     
 
-
-/**
- * Reference to a field of type 'Float'
- */
-export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
-
-
-/**
- * Reference to a field of type 'Float[]'
- */
-export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
-    
-
 /**
  * Batch Payload for updateMany & deleteMany & createMany
  */
@@ -5845,6 +6068,8 @@ export type GlobalOmitConfig = {
   documento?: Prisma.DocumentoOmit
   documentFileVersion?: Prisma.DocumentFileVersionOmit
   neutralIntake?: Prisma.NeutralIntakeOmit
+  neutralIntakeExtractionAttempt?: Prisma.NeutralIntakeExtractionAttemptOmit
+  neutralIntakeExtractionPage?: Prisma.NeutralIntakeExtractionPageOmit
   fascicoloObservation?: Prisma.FascicoloObservationOmit
   fascicoloChecklistEvidence?: Prisma.FascicoloChecklistEvidenceOmit
   fascicoloDocumentRequirementProposal?: Prisma.FascicoloDocumentRequirementProposalOmit

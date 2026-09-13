@@ -1425,6 +1425,67 @@ export type EnumNeutralIntakeStatusWithAggregatesFilter<$PrismaModel = never> = 
   _max?: Prisma.NestedEnumNeutralIntakeStatusFilter<$PrismaModel>
 }
 
+export type EnumNeutralIntakeExtractionOutcomeFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeExtractionOutcome | Prisma.EnumNeutralIntakeExtractionOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeExtractionOutcome[] | Prisma.ListEnumNeutralIntakeExtractionOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeExtractionOutcome[] | Prisma.ListEnumNeutralIntakeExtractionOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeExtractionOutcomeFilter<$PrismaModel> | $Enums.NeutralIntakeExtractionOutcome
+}
+
+export type EnumNeutralIntakeExtractionOutcomeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeExtractionOutcome | Prisma.EnumNeutralIntakeExtractionOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeExtractionOutcome[] | Prisma.ListEnumNeutralIntakeExtractionOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeExtractionOutcome[] | Prisma.ListEnumNeutralIntakeExtractionOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeExtractionOutcomeWithAggregatesFilter<$PrismaModel> | $Enums.NeutralIntakeExtractionOutcome
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumNeutralIntakeExtractionOutcomeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumNeutralIntakeExtractionOutcomeFilter<$PrismaModel>
+}
+
+export type EnumNeutralIntakeExtractionMethodFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeExtractionMethod | Prisma.EnumNeutralIntakeExtractionMethodFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeExtractionMethod[] | Prisma.ListEnumNeutralIntakeExtractionMethodFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeExtractionMethod[] | Prisma.ListEnumNeutralIntakeExtractionMethodFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeExtractionMethodFilter<$PrismaModel> | $Enums.NeutralIntakeExtractionMethod
+}
+
+export type FloatNullableFilter<$PrismaModel = never> = {
+  equals?: number | Prisma.FloatFieldRefInput<$PrismaModel> | null
+  in?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel> | null
+  notIn?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel> | null
+  lt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  lte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedFloatNullableFilter<$PrismaModel> | number | null
+}
+
+export type EnumNeutralIntakeExtractionMethodWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeExtractionMethod | Prisma.EnumNeutralIntakeExtractionMethodFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeExtractionMethod[] | Prisma.ListEnumNeutralIntakeExtractionMethodFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeExtractionMethod[] | Prisma.ListEnumNeutralIntakeExtractionMethodFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeExtractionMethodWithAggregatesFilter<$PrismaModel> | $Enums.NeutralIntakeExtractionMethod
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumNeutralIntakeExtractionMethodFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumNeutralIntakeExtractionMethodFilter<$PrismaModel>
+}
+
+export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: number | Prisma.FloatFieldRefInput<$PrismaModel> | null
+  in?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel> | null
+  notIn?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel> | null
+  lt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  lte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _avg?: Prisma.NestedFloatNullableFilter<$PrismaModel>
+  _sum?: Prisma.NestedFloatNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedFloatNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedFloatNullableFilter<$PrismaModel>
+}
+
 export type EnumFascicoloObservationKindFilter<$PrismaModel = never> = {
   equals?: $Enums.FascicoloObservationKind | Prisma.EnumFascicoloObservationKindFieldRefInput<$PrismaModel>
   in?: $Enums.FascicoloObservationKind[] | Prisma.ListEnumFascicoloObservationKindFieldRefInput<$PrismaModel>
@@ -3143,6 +3204,56 @@ export type NestedEnumNeutralIntakeStatusWithAggregatesFilter<$PrismaModel = nev
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumNeutralIntakeStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumNeutralIntakeStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumNeutralIntakeExtractionOutcomeFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeExtractionOutcome | Prisma.EnumNeutralIntakeExtractionOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeExtractionOutcome[] | Prisma.ListEnumNeutralIntakeExtractionOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeExtractionOutcome[] | Prisma.ListEnumNeutralIntakeExtractionOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeExtractionOutcomeFilter<$PrismaModel> | $Enums.NeutralIntakeExtractionOutcome
+}
+
+export type NestedEnumNeutralIntakeExtractionOutcomeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeExtractionOutcome | Prisma.EnumNeutralIntakeExtractionOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeExtractionOutcome[] | Prisma.ListEnumNeutralIntakeExtractionOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeExtractionOutcome[] | Prisma.ListEnumNeutralIntakeExtractionOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeExtractionOutcomeWithAggregatesFilter<$PrismaModel> | $Enums.NeutralIntakeExtractionOutcome
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumNeutralIntakeExtractionOutcomeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumNeutralIntakeExtractionOutcomeFilter<$PrismaModel>
+}
+
+export type NestedEnumNeutralIntakeExtractionMethodFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeExtractionMethod | Prisma.EnumNeutralIntakeExtractionMethodFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeExtractionMethod[] | Prisma.ListEnumNeutralIntakeExtractionMethodFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeExtractionMethod[] | Prisma.ListEnumNeutralIntakeExtractionMethodFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeExtractionMethodFilter<$PrismaModel> | $Enums.NeutralIntakeExtractionMethod
+}
+
+export type NestedEnumNeutralIntakeExtractionMethodWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeExtractionMethod | Prisma.EnumNeutralIntakeExtractionMethodFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeExtractionMethod[] | Prisma.ListEnumNeutralIntakeExtractionMethodFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeExtractionMethod[] | Prisma.ListEnumNeutralIntakeExtractionMethodFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeExtractionMethodWithAggregatesFilter<$PrismaModel> | $Enums.NeutralIntakeExtractionMethod
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumNeutralIntakeExtractionMethodFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumNeutralIntakeExtractionMethodFilter<$PrismaModel>
+}
+
+export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: number | Prisma.FloatFieldRefInput<$PrismaModel> | null
+  in?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel> | null
+  notIn?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel> | null
+  lt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  lte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _avg?: Prisma.NestedFloatNullableFilter<$PrismaModel>
+  _sum?: Prisma.NestedFloatNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedFloatNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedFloatNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumFascicoloObservationKindFilter<$PrismaModel = never> = {

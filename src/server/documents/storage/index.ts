@@ -129,6 +129,26 @@ export async function readDocumentFileFromProvider(input: {
   return getDocumentStorageAdapter().read(input.storageKey);
 }
 
+export async function readDocumentFileBoundedFromProvider(input: {
+  storageProvider: DocumentStorageBackend;
+  storageKey: string;
+  storageBucket?: string | null;
+  maxBytes: number;
+}): Promise<DocumentStorageReadResult> {
+  const activeProvider = getDocumentStorageBackend();
+  if (input.storageProvider !== activeProvider) {
+    throw new DocumentStorageReadCoherenceError("PROVIDER_MISMATCH");
+  }
+  if (input.storageProvider === "s3" && input.storageBucket) {
+    const configuredBucket = getS3StorageConfig().bucket;
+    if (input.storageBucket !== configuredBucket) {
+      throw new DocumentStorageReadCoherenceError("BUCKET_MISMATCH");
+    }
+  }
+
+  return getDocumentStorageAdapter().readBounded(input.storageKey, input.maxBytes);
+}
+
 export async function storedDocumentExists(storageKey: string): Promise<boolean> {
   const storage = getDocumentStorageAdapter();
   return storage.exists(storageKey);

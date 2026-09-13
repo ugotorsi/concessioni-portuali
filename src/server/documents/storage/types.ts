@@ -17,6 +17,19 @@ export type DocumentStorageReadResult =
   | { disposition: "FOUND"; body: Buffer }
   | { disposition: "MISSING" };
 
+export class DocumentStorageReadLimitError extends Error {
+  readonly code = "BYTE_LIMIT_EXCEEDED" as const;
+  readonly maxBytes: number;
+  readonly observedBytes?: number;
+
+  constructor(input: { maxBytes: number; observedBytes?: number }) {
+    super("Document storage bounded read exceeded its byte limit.");
+    this.name = "DocumentStorageReadLimitError";
+    this.maxBytes = input.maxBytes;
+    this.observedBytes = input.observedBytes;
+  }
+}
+
 export class DocumentStorageReadUnavailableError extends Error {
   readonly provider: DocumentStorageBackend;
   readonly code: string;
@@ -74,6 +87,7 @@ export interface DocumentStorageAdapter {
   put(input: DocumentStoragePutInput): Promise<StoredDocumentObject>;
   createIfAbsent(input: DocumentStoragePutInput): Promise<DocumentStorageCreateResult>;
   read(storageKey: string): Promise<DocumentStorageReadResult>;
+  readBounded(storageKey: string, maxBytes: number): Promise<DocumentStorageReadResult>;
   get(storageKey: string): Promise<DocumentStorageGetOutput>;
   delete(storageKey: string): Promise<void>;
   exists(storageKey: string): Promise<boolean>;

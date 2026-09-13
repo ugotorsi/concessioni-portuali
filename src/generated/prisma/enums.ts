@@ -848,3 +848,19 @@ export const NeutralIntakeStatus = {
 } as const
 
 export type NeutralIntakeStatus = (typeof NeutralIntakeStatus)[keyof typeof NeutralIntakeStatus]
+
+
+export const NeutralIntakeExtractionOutcome = {
+  SUCCEEDED: 'SUCCEEDED',
+  FAILED: 'FAILED'
+} as const
+
+export type NeutralIntakeExtractionOutcome = (typeof NeutralIntakeExtractionOutcome)[keyof typeof NeutralIntakeExtractionOutcome]
+
+
+export const NeutralIntakeExtractionMethod = {
+  DIRECT_TEXT: 'DIRECT_TEXT',
+  OCR: 'OCR'
+} as const
+
+export type NeutralIntakeExtractionMethod = (typeof NeutralIntakeExtractionMethod)[keyof typeof NeutralIntakeExtractionMethod]
