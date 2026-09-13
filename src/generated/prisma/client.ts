@@ -192,6 +192,11 @@ export type NeutralIntakeExtractionAttempt = Prisma.NeutralIntakeExtractionAttem
  */
 export type NeutralIntakeExtractionPage = Prisma.NeutralIntakeExtractionPageModel
 /**
+ * Model AsyncJob
+ * 
+ */
+export type AsyncJob = Prisma.AsyncJobModel
+/**
  * Model FascicoloObservation
  * 
  */

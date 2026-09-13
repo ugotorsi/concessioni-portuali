@@ -414,6 +414,7 @@ export const ModelName = {
   NeutralIntake: 'NeutralIntake',
   NeutralIntakeExtractionAttempt: 'NeutralIntakeExtractionAttempt',
   NeutralIntakeExtractionPage: 'NeutralIntakeExtractionPage',
+  AsyncJob: 'AsyncJob',
   FascicoloObservation: 'FascicoloObservation',
   FascicoloChecklistEvidence: 'FascicoloChecklistEvidence',
   FascicoloDocumentRequirementProposal: 'FascicoloDocumentRequirementProposal',
@@ -443,7 +444,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "asyncJob" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2667,6 +2668,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AsyncJob: {
+      payload: Prisma.$AsyncJobPayload<ExtArgs>
+      fields: Prisma.AsyncJobFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AsyncJobFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AsyncJobPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AsyncJobFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AsyncJobPayload>
+        }
+        findFirst: {
+          args: Prisma.AsyncJobFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AsyncJobPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AsyncJobFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AsyncJobPayload>
+        }
+        findMany: {
+          args: Prisma.AsyncJobFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AsyncJobPayload>[]
+        }
+        create: {
+          args: Prisma.AsyncJobCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AsyncJobPayload>
+        }
+        createMany: {
+          args: Prisma.AsyncJobCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AsyncJobCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AsyncJobPayload>[]
+        }
+        delete: {
+          args: Prisma.AsyncJobDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AsyncJobPayload>
+        }
+        update: {
+          args: Prisma.AsyncJobUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AsyncJobPayload>
+        }
+        deleteMany: {
+          args: Prisma.AsyncJobDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AsyncJobUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AsyncJobUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AsyncJobPayload>[]
+        }
+        upsert: {
+          args: Prisma.AsyncJobUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AsyncJobPayload>
+        }
+        aggregate: {
+          args: Prisma.AsyncJobAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAsyncJob>
+        }
+        groupBy: {
+          args: Prisma.AsyncJobGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AsyncJobGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AsyncJobCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AsyncJobCountAggregateOutputType> | number
+        }
+      }
+    }
     FascicoloObservation: {
       payload: Prisma.$FascicoloObservationPayload<ExtArgs>
       fields: Prisma.FascicoloObservationFieldRefs
@@ -4432,6 +4507,44 @@ export const NeutralIntakeExtractionPageScalarFieldEnum = {
 export type NeutralIntakeExtractionPageScalarFieldEnum = (typeof NeutralIntakeExtractionPageScalarFieldEnum)[keyof typeof NeutralIntakeExtractionPageScalarFieldEnum]
 
 
+export const AsyncJobScalarFieldEnum = {
+  id: 'id',
+  idempotencyKey: 'idempotencyKey',
+  requestFingerprint: 'requestFingerprint',
+  operation: 'operation',
+  logicalOperationId: 'logicalOperationId',
+  purpose: 'purpose',
+  correlationId: 'correlationId',
+  policyDecisionRef: 'policyDecisionRef',
+  inputReference: 'inputReference',
+  admissionType: 'admissionType',
+  tenantId: 'tenantId',
+  initiatingUserId: 'initiatingUserId',
+  actorId: 'actorId',
+  actorEmail: 'actorEmail',
+  actorRole: 'actorRole',
+  status: 'status',
+  stateVersion: 'stateVersion',
+  maxAttempts: 'maxAttempts',
+  attemptCount: 'attemptCount',
+  availableAt: 'availableAt',
+  leaseOwner: 'leaseOwner',
+  leaseToken: 'leaseToken',
+  leaseExpiresAt: 'leaseExpiresAt',
+  lastHeartbeatAt: 'lastHeartbeatAt',
+  cancellationRequestedAt: 'cancellationRequestedAt',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  failureCategory: 'failureCategory',
+  failureCode: 'failureCode',
+  resultReference: 'resultReference',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AsyncJobScalarFieldEnum = (typeof AsyncJobScalarFieldEnum)[keyof typeof AsyncJobScalarFieldEnum]
+
+
 export const FascicoloObservationScalarFieldEnum = {
   id: 'id',
   enteId: 'enteId',
@@ -5750,6 +5863,34 @@ export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMode
 
 
 /**
+ * Reference to a field of type 'AsyncJobAdmissionType'
+ */
+export type EnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AsyncJobAdmissionType'>
+    
+
+
+/**
+ * Reference to a field of type 'AsyncJobAdmissionType[]'
+ */
+export type ListEnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AsyncJobAdmissionType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'AsyncJobStatus'
+ */
+export type EnumAsyncJobStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AsyncJobStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'AsyncJobStatus[]'
+ */
+export type ListEnumAsyncJobStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AsyncJobStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'FascicoloObservationKind'
  */
 export type EnumFascicoloObservationKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FascicoloObservationKind'>
@@ -6070,6 +6211,7 @@ export type GlobalOmitConfig = {
   neutralIntake?: Prisma.NeutralIntakeOmit
   neutralIntakeExtractionAttempt?: Prisma.NeutralIntakeExtractionAttemptOmit
   neutralIntakeExtractionPage?: Prisma.NeutralIntakeExtractionPageOmit
+  asyncJob?: Prisma.AsyncJobOmit
   fascicoloObservation?: Prisma.FascicoloObservationOmit
   fascicoloChecklistEvidence?: Prisma.FascicoloChecklistEvidenceOmit
   fascicoloDocumentRequirementProposal?: Prisma.FascicoloDocumentRequirementProposalOmit

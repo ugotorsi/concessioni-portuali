@@ -1486,13 +1486,6 @@ export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedFloatNullableFilter<$PrismaModel>
 }
 
-export type EnumFascicoloObservationKindFilter<$PrismaModel = never> = {
-  equals?: $Enums.FascicoloObservationKind | Prisma.EnumFascicoloObservationKindFieldRefInput<$PrismaModel>
-  in?: $Enums.FascicoloObservationKind[] | Prisma.ListEnumFascicoloObservationKindFieldRefInput<$PrismaModel>
-  notIn?: $Enums.FascicoloObservationKind[] | Prisma.ListEnumFascicoloObservationKindFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumFascicoloObservationKindFilter<$PrismaModel> | $Enums.FascicoloObservationKind
-}
-
 export type JsonFilter<$PrismaModel = never> =
 | Prisma.PatchUndefined<
     Prisma.Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
@@ -1517,21 +1510,18 @@ export type JsonFilterBase<$PrismaModel = never> = {
   not?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | Prisma.JsonNullValueFilter
 }
 
-export type EnumFascicoloObservationStatusFilter<$PrismaModel = never> = {
-  equals?: $Enums.FascicoloObservationStatus | Prisma.EnumFascicoloObservationStatusFieldRefInput<$PrismaModel>
-  in?: $Enums.FascicoloObservationStatus[] | Prisma.ListEnumFascicoloObservationStatusFieldRefInput<$PrismaModel>
-  notIn?: $Enums.FascicoloObservationStatus[] | Prisma.ListEnumFascicoloObservationStatusFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumFascicoloObservationStatusFilter<$PrismaModel> | $Enums.FascicoloObservationStatus
+export type EnumAsyncJobAdmissionTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.AsyncJobAdmissionType | Prisma.EnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.AsyncJobAdmissionType[] | Prisma.ListEnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AsyncJobAdmissionType[] | Prisma.ListEnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAsyncJobAdmissionTypeFilter<$PrismaModel> | $Enums.AsyncJobAdmissionType
 }
 
-export type EnumFascicoloObservationKindWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.FascicoloObservationKind | Prisma.EnumFascicoloObservationKindFieldRefInput<$PrismaModel>
-  in?: $Enums.FascicoloObservationKind[] | Prisma.ListEnumFascicoloObservationKindFieldRefInput<$PrismaModel>
-  notIn?: $Enums.FascicoloObservationKind[] | Prisma.ListEnumFascicoloObservationKindFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumFascicoloObservationKindWithAggregatesFilter<$PrismaModel> | $Enums.FascicoloObservationKind
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumFascicoloObservationKindFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumFascicoloObservationKindFilter<$PrismaModel>
+export type EnumAsyncJobStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.AsyncJobStatus | Prisma.EnumAsyncJobStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.AsyncJobStatus[] | Prisma.ListEnumAsyncJobStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AsyncJobStatus[] | Prisma.ListEnumAsyncJobStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAsyncJobStatusFilter<$PrismaModel> | $Enums.AsyncJobStatus
 }
 
 export type JsonWithAggregatesFilter<$PrismaModel = never> =
@@ -1559,6 +1549,50 @@ export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedJsonFilter<$PrismaModel>
   _max?: Prisma.NestedJsonFilter<$PrismaModel>
+}
+
+export type EnumAsyncJobAdmissionTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AsyncJobAdmissionType | Prisma.EnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.AsyncJobAdmissionType[] | Prisma.ListEnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AsyncJobAdmissionType[] | Prisma.ListEnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAsyncJobAdmissionTypeWithAggregatesFilter<$PrismaModel> | $Enums.AsyncJobAdmissionType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAsyncJobAdmissionTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAsyncJobAdmissionTypeFilter<$PrismaModel>
+}
+
+export type EnumAsyncJobStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AsyncJobStatus | Prisma.EnumAsyncJobStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.AsyncJobStatus[] | Prisma.ListEnumAsyncJobStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AsyncJobStatus[] | Prisma.ListEnumAsyncJobStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAsyncJobStatusWithAggregatesFilter<$PrismaModel> | $Enums.AsyncJobStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAsyncJobStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAsyncJobStatusFilter<$PrismaModel>
+}
+
+export type EnumFascicoloObservationKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloObservationKind | Prisma.EnumFascicoloObservationKindFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloObservationKind[] | Prisma.ListEnumFascicoloObservationKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloObservationKind[] | Prisma.ListEnumFascicoloObservationKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloObservationKindFilter<$PrismaModel> | $Enums.FascicoloObservationKind
+}
+
+export type EnumFascicoloObservationStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloObservationStatus | Prisma.EnumFascicoloObservationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloObservationStatus[] | Prisma.ListEnumFascicoloObservationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloObservationStatus[] | Prisma.ListEnumFascicoloObservationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloObservationStatusFilter<$PrismaModel> | $Enums.FascicoloObservationStatus
+}
+
+export type EnumFascicoloObservationKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloObservationKind | Prisma.EnumFascicoloObservationKindFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloObservationKind[] | Prisma.ListEnumFascicoloObservationKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloObservationKind[] | Prisma.ListEnumFascicoloObservationKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloObservationKindWithAggregatesFilter<$PrismaModel> | $Enums.FascicoloObservationKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFascicoloObservationKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFascicoloObservationKindFilter<$PrismaModel>
 }
 
 export type EnumFascicoloObservationStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -3256,28 +3290,18 @@ export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedFloatNullableFilter<$PrismaModel>
 }
 
-export type NestedEnumFascicoloObservationKindFilter<$PrismaModel = never> = {
-  equals?: $Enums.FascicoloObservationKind | Prisma.EnumFascicoloObservationKindFieldRefInput<$PrismaModel>
-  in?: $Enums.FascicoloObservationKind[] | Prisma.ListEnumFascicoloObservationKindFieldRefInput<$PrismaModel>
-  notIn?: $Enums.FascicoloObservationKind[] | Prisma.ListEnumFascicoloObservationKindFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumFascicoloObservationKindFilter<$PrismaModel> | $Enums.FascicoloObservationKind
+export type NestedEnumAsyncJobAdmissionTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.AsyncJobAdmissionType | Prisma.EnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.AsyncJobAdmissionType[] | Prisma.ListEnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AsyncJobAdmissionType[] | Prisma.ListEnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAsyncJobAdmissionTypeFilter<$PrismaModel> | $Enums.AsyncJobAdmissionType
 }
 
-export type NestedEnumFascicoloObservationStatusFilter<$PrismaModel = never> = {
-  equals?: $Enums.FascicoloObservationStatus | Prisma.EnumFascicoloObservationStatusFieldRefInput<$PrismaModel>
-  in?: $Enums.FascicoloObservationStatus[] | Prisma.ListEnumFascicoloObservationStatusFieldRefInput<$PrismaModel>
-  notIn?: $Enums.FascicoloObservationStatus[] | Prisma.ListEnumFascicoloObservationStatusFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumFascicoloObservationStatusFilter<$PrismaModel> | $Enums.FascicoloObservationStatus
-}
-
-export type NestedEnumFascicoloObservationKindWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.FascicoloObservationKind | Prisma.EnumFascicoloObservationKindFieldRefInput<$PrismaModel>
-  in?: $Enums.FascicoloObservationKind[] | Prisma.ListEnumFascicoloObservationKindFieldRefInput<$PrismaModel>
-  notIn?: $Enums.FascicoloObservationKind[] | Prisma.ListEnumFascicoloObservationKindFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumFascicoloObservationKindWithAggregatesFilter<$PrismaModel> | $Enums.FascicoloObservationKind
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumFascicoloObservationKindFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumFascicoloObservationKindFilter<$PrismaModel>
+export type NestedEnumAsyncJobStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.AsyncJobStatus | Prisma.EnumAsyncJobStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.AsyncJobStatus[] | Prisma.ListEnumAsyncJobStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AsyncJobStatus[] | Prisma.ListEnumAsyncJobStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAsyncJobStatusFilter<$PrismaModel> | $Enums.AsyncJobStatus
 }
 
 export type NestedJsonFilter<$PrismaModel = never> =
@@ -3302,6 +3326,50 @@ export type NestedJsonFilterBase<$PrismaModel = never> = {
   gt?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   gte?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   not?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | Prisma.JsonNullValueFilter
+}
+
+export type NestedEnumAsyncJobAdmissionTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AsyncJobAdmissionType | Prisma.EnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.AsyncJobAdmissionType[] | Prisma.ListEnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AsyncJobAdmissionType[] | Prisma.ListEnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAsyncJobAdmissionTypeWithAggregatesFilter<$PrismaModel> | $Enums.AsyncJobAdmissionType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAsyncJobAdmissionTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAsyncJobAdmissionTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumAsyncJobStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AsyncJobStatus | Prisma.EnumAsyncJobStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.AsyncJobStatus[] | Prisma.ListEnumAsyncJobStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AsyncJobStatus[] | Prisma.ListEnumAsyncJobStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAsyncJobStatusWithAggregatesFilter<$PrismaModel> | $Enums.AsyncJobStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAsyncJobStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAsyncJobStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumFascicoloObservationKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloObservationKind | Prisma.EnumFascicoloObservationKindFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloObservationKind[] | Prisma.ListEnumFascicoloObservationKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloObservationKind[] | Prisma.ListEnumFascicoloObservationKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloObservationKindFilter<$PrismaModel> | $Enums.FascicoloObservationKind
+}
+
+export type NestedEnumFascicoloObservationStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloObservationStatus | Prisma.EnumFascicoloObservationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloObservationStatus[] | Prisma.ListEnumFascicoloObservationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloObservationStatus[] | Prisma.ListEnumFascicoloObservationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloObservationStatusFilter<$PrismaModel> | $Enums.FascicoloObservationStatus
+}
+
+export type NestedEnumFascicoloObservationKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloObservationKind | Prisma.EnumFascicoloObservationKindFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloObservationKind[] | Prisma.ListEnumFascicoloObservationKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloObservationKind[] | Prisma.ListEnumFascicoloObservationKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloObservationKindWithAggregatesFilter<$PrismaModel> | $Enums.FascicoloObservationKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFascicoloObservationKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFascicoloObservationKindFilter<$PrismaModel>
 }
 
 export type NestedEnumFascicoloObservationStatusWithAggregatesFilter<$PrismaModel = never> = {

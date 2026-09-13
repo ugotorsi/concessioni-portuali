@@ -81,6 +81,7 @@ export const ModelName = {
   NeutralIntake: 'NeutralIntake',
   NeutralIntakeExtractionAttempt: 'NeutralIntakeExtractionAttempt',
   NeutralIntakeExtractionPage: 'NeutralIntakeExtractionPage',
+  AsyncJob: 'AsyncJob',
   FascicoloObservation: 'FascicoloObservation',
   FascicoloChecklistEvidence: 'FascicoloChecklistEvidence',
   FascicoloDocumentRequirementProposal: 'FascicoloDocumentRequirementProposal',
@@ -801,6 +802,44 @@ export const NeutralIntakeExtractionPageScalarFieldEnum = {
 } as const
 
 export type NeutralIntakeExtractionPageScalarFieldEnum = (typeof NeutralIntakeExtractionPageScalarFieldEnum)[keyof typeof NeutralIntakeExtractionPageScalarFieldEnum]
+
+
+export const AsyncJobScalarFieldEnum = {
+  id: 'id',
+  idempotencyKey: 'idempotencyKey',
+  requestFingerprint: 'requestFingerprint',
+  operation: 'operation',
+  logicalOperationId: 'logicalOperationId',
+  purpose: 'purpose',
+  correlationId: 'correlationId',
+  policyDecisionRef: 'policyDecisionRef',
+  inputReference: 'inputReference',
+  admissionType: 'admissionType',
+  tenantId: 'tenantId',
+  initiatingUserId: 'initiatingUserId',
+  actorId: 'actorId',
+  actorEmail: 'actorEmail',
+  actorRole: 'actorRole',
+  status: 'status',
+  stateVersion: 'stateVersion',
+  maxAttempts: 'maxAttempts',
+  attemptCount: 'attemptCount',
+  availableAt: 'availableAt',
+  leaseOwner: 'leaseOwner',
+  leaseToken: 'leaseToken',
+  leaseExpiresAt: 'leaseExpiresAt',
+  lastHeartbeatAt: 'lastHeartbeatAt',
+  cancellationRequestedAt: 'cancellationRequestedAt',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  failureCategory: 'failureCategory',
+  failureCode: 'failureCode',
+  resultReference: 'resultReference',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AsyncJobScalarFieldEnum = (typeof AsyncJobScalarFieldEnum)[keyof typeof AsyncJobScalarFieldEnum]
 
 
 export const FascicoloObservationScalarFieldEnum = {

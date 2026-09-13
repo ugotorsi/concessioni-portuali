@@ -639,6 +639,21 @@ enum NeutralIntakeExtractionMethod {
   OCR
 }
 
+enum AsyncJobStatus {
+  QUEUED
+  RUNNING
+  RETRY_WAIT
+  CANCELLATION_REQUESTED
+  SUCCEEDED
+  TERMINAL_FAILED
+  CANCELLED
+}
+
+enum AsyncJobAdmissionType {
+  AUTHENTICATED_USER
+  AUTHORIZED_SYSTEM
+}
+
 model Ente {
   id                           String                                 @id @default(cuid())
   nome                         String
@@ -665,6 +680,7 @@ model Ente {
   documentFileVersions         DocumentFileVersion[]
   legalSourceAcquisitions      LegalSourceAcquisition[]
   neutralIntakes               NeutralIntake[]
+  asyncJobs                    AsyncJob[]
   aiFascicoloTrustedReviewMaterials AiFascicoloTrustedReviewMaterial[]
   aiFascicoloHumanReviewStates      AiFascicoloHumanReviewState[]
   aiFascicoloHumanReviewEvents      AiFascicoloHumanReviewEvent[]
@@ -1092,6 +1108,7 @@ model User {
   documentRequirementEvidenceRevoked            FascicoloDocumentRequirementEvidence[]       @relation("DocumentRequirementEvidenceRevokedBy")
   documentFileVersionsCreated                    DocumentFileVersion[]                         @relation("DocumentFileVersionCreatedBy")
   neutralIntakesReceived                         NeutralIntake[]                               @relation("NeutralIntakeReceivedBy")
+  asyncJobsInitiated                             AsyncJob[]                                    @relation("AsyncJobInitiatedBy")
   documentRequirementEvidenceReviews            FascicoloDocumentRequirementEvidenceReview[] @relation("DocumentRequirementEvidenceReviewedBy")
   aiFascicoloHumanReviewEvents                   AiFascicoloHumanReviewEvent[]
 
@@ -1633,6 +1650,51 @@ model NeutralIntakeExtractionPage {
 
   @@unique([extractionAttemptId, pageNumber])
   @@index([textSha256])
+}
+
+model AsyncJob {
+  id                      String                @id @default(cuid())
+  idempotencyKey          String                @unique @db.Char(64)
+  requestFingerprint      String                @db.Char(64)
+  operation               String
+  logicalOperationId      String
+  purpose                 String
+  correlationId           String
+  policyDecisionRef       String?
+  inputReference          Json
+  admissionType           AsyncJobAdmissionType
+  tenantId                String?
+  initiatingUserId        String?
+  actorId                 String
+  actorEmail              String?
+  actorRole               String
+  status                  AsyncJobStatus        @default(QUEUED)
+  stateVersion            Int                   @default(0)
+  maxAttempts             Int
+  attemptCount            Int                   @default(0)
+  availableAt             DateTime
+  leaseOwner              String?
+  leaseToken              String?               @db.Char(64)
+  leaseExpiresAt          DateTime?
+  lastHeartbeatAt         DateTime?
+  cancellationRequestedAt DateTime?
+  startedAt               DateTime?
+  completedAt             DateTime?
+  failureCategory         String?
+  failureCode             String?
+  resultReference         Json?
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+
+  tenant           Ente? @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  initiatingUser   User? @relation("AsyncJobInitiatedBy", fields: [initiatingUserId], references: [id], onDelete: Restrict)
+
+  @@index([status, availableAt, createdAt])
+  @@index([status, leaseExpiresAt])
+  @@index([tenantId, createdAt])
+  @@index([initiatingUserId])
+  @@index([correlationId])
+  @@index([operation, createdAt])
 }
 
 model FascicoloObservation {

@@ -864,3 +864,24 @@ export const NeutralIntakeExtractionMethod = {
 } as const
 
 export type NeutralIntakeExtractionMethod = (typeof NeutralIntakeExtractionMethod)[keyof typeof NeutralIntakeExtractionMethod]
+
+
+export const AsyncJobStatus = {
+  QUEUED: 'QUEUED',
+  RUNNING: 'RUNNING',
+  RETRY_WAIT: 'RETRY_WAIT',
+  CANCELLATION_REQUESTED: 'CANCELLATION_REQUESTED',
+  SUCCEEDED: 'SUCCEEDED',
+  TERMINAL_FAILED: 'TERMINAL_FAILED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type AsyncJobStatus = (typeof AsyncJobStatus)[keyof typeof AsyncJobStatus]
+
+
+export const AsyncJobAdmissionType = {
+  AUTHENTICATED_USER: 'AUTHENTICATED_USER',
+  AUTHORIZED_SYSTEM: 'AUTHORIZED_SYSTEM'
+} as const
+
+export type AsyncJobAdmissionType = (typeof AsyncJobAdmissionType)[keyof typeof AsyncJobAdmissionType]
