@@ -156,7 +156,7 @@ describe("B2C9 Block 3B.1 neutral intake service", () => {
         referenceVersion: "V1",
         metadata: {},
       },
-      maxAttempts: 1,
+      maxAttempts: 2,
       admission: {
         admissionType: "AUTHENTICATED_USER",
         tenantId: "ente-1",

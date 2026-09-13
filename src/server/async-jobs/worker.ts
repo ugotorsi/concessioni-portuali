@@ -37,6 +37,9 @@ export async function drainOneAsyncJob(input: DrainOneAsyncJobInput): Promise<Dr
   const claimed = await claimNextAsyncJob({
     workerId: input.workerId,
     leaseDurationMs: input.leaseDurationMs,
+    resolveTerminalFailureHook: registry.hasTerminalFailureHooks()
+      ? (operation) => registry.resolve(operation)?.beforeTerminalFailureInTransaction
+      : undefined,
   });
   if (!claimed) return { outcome: "IDLE" };
   const lease = () => ({
@@ -44,18 +47,23 @@ export async function drainOneAsyncJob(input: DrainOneAsyncJobInput): Promise<Dr
     workerId: input.workerId,
     leaseToken: claimed.leaseToken!,
   });
-  const failDispatch = async (category: string, code: string): Promise<DrainOneAsyncJobOutcome> => {
+  const failDispatch = async (
+    category: string,
+    code: string,
+    beforeTerminalFailureInTransaction = registry.resolve(claimed.operation)?.beforeTerminalFailureInTransaction,
+  ): Promise<DrainOneAsyncJobOutcome> => {
     try {
       if (await isAsyncJobCancellationRequested(lease())) {
         await finalizeAsyncJobCancellation(lease());
         return { outcome: "CANCELLED", jobId: claimed.id };
       }
-      await failAsyncJob({
+      const failed = await failAsyncJob({
         ...lease(),
         failure: { retryable: false, category, code },
         retryDelayMs: input.retryDelayMs,
+        beforeTerminalFailureInTransaction,
       });
-      return { outcome: "TERMINAL_FAILED", jobId: claimed.id };
+      return { outcome: failed.outcome, jobId: claimed.id };
     } catch (error) {
       if (
         error instanceof AsyncJobLeaseConflictError
@@ -77,20 +85,15 @@ export async function drainOneAsyncJob(input: DrainOneAsyncJobInput): Promise<Dr
   } catch {
     return failDispatch("VALIDATION", "INVALID_HANDLER_INPUT");
   }
+  let result: unknown;
   try {
-    const result = await handler.execute(parsedInput, {
+    result = await handler.execute(parsedInput, {
       jobId: claimed.id,
       correlationId: claimed.correlationId,
       attempt: claimed.attemptCount,
       isCancellationRequested: () => isAsyncJobCancellationRequested(lease()),
       heartbeat: () => heartbeatAsyncJob({ ...lease(), leaseDurationMs: input.leaseDurationMs }),
     });
-    if (await isAsyncJobCancellationRequested(lease())) {
-      await finalizeAsyncJobCancellation(lease());
-      return { outcome: "CANCELLED", jobId: claimed.id };
-    }
-    await succeedAsyncJob({ ...lease(), resultReference: result ?? {} });
-    return { outcome: "SUCCEEDED", jobId: claimed.id };
   } catch (error) {
     if (await isAsyncJobCancellationRequested(lease())) {
       await finalizeAsyncJobCancellation(lease());
@@ -104,6 +107,7 @@ export async function drainOneAsyncJob(input: DrainOneAsyncJobInput): Promise<Dr
         ...lease(),
         failure: { retryable: failure.retryable, category: failure.category, code: failure.code },
         retryDelayMs: input.retryDelayMs,
+        beforeTerminalFailureInTransaction: handler.beforeTerminalFailureInTransaction,
       });
       return { outcome: failed.outcome, jobId: claimed.id };
     } catch (failurePersistenceError) {
@@ -131,4 +135,10 @@ export async function drainOneAsyncJob(input: DrainOneAsyncJobInput): Promise<Dr
       return { outcome: "CANCELLED", jobId: claimed.id };
     }
   }
+  if (await isAsyncJobCancellationRequested(lease())) {
+    await finalizeAsyncJobCancellation(lease());
+    return { outcome: "CANCELLED", jobId: claimed.id };
+  }
+  await succeedAsyncJob({ ...lease(), resultReference: result ?? {} });
+  return { outcome: "SUCCEEDED", jobId: claimed.id };
 }

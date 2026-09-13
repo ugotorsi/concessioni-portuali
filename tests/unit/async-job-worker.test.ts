@@ -86,6 +86,36 @@ describe("B2C9 generic async job worker", () => {
     }));
   });
 
+  it("leaves a successful workload recoverable when success persistence fails", async () => {
+    const persistenceFailure = new Error("SUCCESS_PERSISTENCE_UNAVAILABLE");
+    persistence.succeedAsyncJob.mockRejectedValueOnce(persistenceFailure);
+    const registry = new AsyncJobHandlerRegistry([{
+      operation: "GENERIC.TEST",
+      parseInput: (value) => value,
+      execute: async () => ({ referenceType: "FIXTURE_RESULT", referenceId: "result-1" }),
+    }]);
+    await expect(drainOneAsyncJob({
+      workerId: "worker-1", leaseDurationMs: 60_000, retryDelayMs: 1_000, registry,
+    })).rejects.toBe(persistenceFailure);
+    expect(persistence.failAsyncJob).not.toHaveBeenCalled();
+  });
+
+  it("forwards an operation terminal hook only to terminal failure persistence", async () => {
+    const hook = vi.fn();
+    const registry = new AsyncJobHandlerRegistry([{
+      operation: "GENERIC.TEST",
+      parseInput: (value) => value,
+      execute: async () => { throw new AsyncJobExecutionError("DEPENDENCY", "FAILURE", false); },
+      beforeTerminalFailureInTransaction: hook,
+    }]);
+    await drainOneAsyncJob({
+      workerId: "worker-1", leaseDurationMs: 60_000, retryDelayMs: 1_000, registry,
+    });
+    expect(persistence.failAsyncJob).toHaveBeenCalledWith(expect.objectContaining({
+      beforeTerminalFailureInTransaction: hook,
+    }));
+  });
+
   it("maps explicit retryable handler failures without persisting exception text", async () => {
     persistence.failAsyncJob.mockResolvedValue({ outcome: "RETRY_SCHEDULED" });
     const registry = new AsyncJobHandlerRegistry([{

@@ -54,6 +54,7 @@ function dependencies(overrides: Partial<NeutralIntakeExtractionHandlerDependenc
       outcome: "SUCCEEDED" as const,
       attempt: { id: "attempt-1" },
     })),
+    ensureClassification: vi.fn(async () => ({ outcome: "CREATED" as const, job: { id: "classification-job-1" } })),
     ...overrides,
   } as NeutralIntakeExtractionHandlerDependencies;
 }
@@ -140,6 +141,11 @@ describe("B2C9 Block 3B.2C NeutralIntake async extraction wiring", () => {
       .execute(reference, handlerContext);
     expect(deps.extract).toHaveBeenCalledOnce();
     expect(deps.extract).toHaveBeenCalledWith("intake-1");
+    expect(deps.ensureClassification).toHaveBeenCalledWith({
+      sourceJobId: "job-1",
+      neutralIntakeId: "intake-1",
+      extractionAttemptId: "attempt-1",
+    });
     expect(handlerContext.heartbeat).toHaveBeenCalledTimes(2);
     expect(result).toEqual({
       referenceType: "NEUTRAL_INTAKE_EXTRACTION",
@@ -160,6 +166,26 @@ describe("B2C9 Block 3B.2C NeutralIntake async extraction wiring", () => {
     await expect(createNeutralIntakeExtractionHandler(deps).execute(reference, context()))
       .resolves.toMatchObject({ metadata: { statusCode: "EVIDENCE_READY" } });
     expect(deps.extract).not.toHaveBeenCalled();
+    expect(deps.ensureClassification).toHaveBeenCalledWith({
+      sourceJobId: "job-1",
+      neutralIntakeId: "intake-1",
+    });
+  });
+
+  it("makes classification admission failure retryable for crash-window recovery", async () => {
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        job: { operation: NEUTRAL_INTAKE_EXTRACTION_OPERATION, tenantId: "ente-1" },
+        intake: { id: "intake-1", enteId: "ente-1", status: "EVIDENCE_READY" },
+      })),
+      ensureClassification: vi.fn(async () => { throw new Error("transient persistence failure"); }),
+    });
+    await expect(createNeutralIntakeExtractionHandler(deps).execute(reference, context()))
+      .rejects.toEqual(new AsyncJobExecutionError(
+        "CLASSIFICATION_ADMISSION",
+        "CLASSIFICATION_ADMISSION_FAILED",
+        true,
+      ));
   });
 
   it("maps persisted extraction failures to terminal async failures", async () => {

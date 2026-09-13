@@ -6,6 +6,7 @@ import type { AsyncJobHandler, AsyncJobHandlerContext } from "@/server/async-job
 import { AsyncJobExecutionError } from "@/server/async-jobs/worker";
 
 import { extractNeutralIntake } from "./extractNeutralIntake";
+import { ensureNeutralIntakeClassificationJob } from "./neutralIntakeClassificationJob";
 
 export const NEUTRAL_INTAKE_EXTRACTION_OPERATION = "NEUTRAL_INTAKE_EXTRACTION_V1" as const;
 export const NEUTRAL_INTAKE_EXTRACTION_PURPOSE = "NEUTRAL_INTAKE_EXTRACTION" as const;
@@ -20,6 +21,9 @@ const referenceSchema = z.object({
     receivedActorRoleCode: z.string().trim().min(1).max(512).optional(),
   }).strict(),
 }).strict();
+const persistedAttemptReferenceSchema = z.object({
+  id: z.string().trim().min(1).max(256),
+}).passthrough();
 
 type ExtractionReference = z.output<typeof referenceSchema>;
 
@@ -68,7 +72,7 @@ export function buildNeutralIntakeExtractionAdmission(
       referenceVersion: "V1",
       metadata: distinctReceiptActor,
     },
-    maxAttempts: 1,
+    maxAttempts: 2,
     availableAt: intake.receivedAt,
     admission: authenticated
       ? {
@@ -100,6 +104,11 @@ export interface NeutralIntakeExtractionHandlerDependencies {
     intake: { id: string; enteId: string | null; status: string } | null;
   }>;
   extract(neutralIntakeId: string): ReturnType<typeof extractNeutralIntake>;
+  ensureClassification(input: {
+    sourceJobId: string;
+    neutralIntakeId: string;
+    extractionAttemptId?: string;
+  }): ReturnType<typeof ensureNeutralIntakeClassificationJob>;
 }
 
 const defaultDependencies: NeutralIntakeExtractionHandlerDependencies = {
@@ -117,7 +126,20 @@ const defaultDependencies: NeutralIntakeExtractionHandlerDependencies = {
     return { job, intake };
   },
   extract: (neutralIntakeId) => extractNeutralIntake(neutralIntakeId),
+  ensureClassification: (input) => ensureNeutralIntakeClassificationJob(input),
 };
+
+async function ensureClassificationAdmission(
+  dependencies: NeutralIntakeExtractionHandlerDependencies,
+  input: { sourceJobId: string; neutralIntakeId: string; extractionAttemptId?: string },
+) {
+  try {
+    await dependencies.ensureClassification(input);
+  } catch (error) {
+    if (error instanceof AsyncJobExecutionError) throw error;
+    throw new AsyncJobExecutionError("CLASSIFICATION_ADMISSION", "CLASSIFICATION_ADMISSION_FAILED", true);
+  }
+}
 
 async function executeExtraction(
   input: ExtractionReference,
@@ -136,13 +158,22 @@ async function executeExtraction(
   ) {
     throw new AsyncJobExecutionError("AUTHORIZATION", "NEUTRAL_INTAKE_AUTHORITY_MISMATCH", false);
   }
-  if (authority.intake.status !== "RECEIVED" && authority.intake.status !== "EVIDENCE_READY") {
+  if (![
+    "RECEIVED",
+    "EVIDENCE_READY",
+    "REVIEW_REQUIRED",
+    "FAILED_CLASSIFICATION",
+  ].includes(authority.intake.status)) {
     throw new AsyncJobExecutionError("EXTRACTION", "NEUTRAL_INTAKE_NOT_EXTRACTABLE", false);
   }
   if (await context.isCancellationRequested()) {
     throw new AsyncJobExecutionError("CANCELLATION", "CANCELLATION_REQUESTED", false);
   }
-  if (authority.intake.status === "EVIDENCE_READY") {
+  if (authority.intake.status !== "RECEIVED") {
+    await ensureClassificationAdmission(dependencies, {
+      sourceJobId: context.jobId,
+      neutralIntakeId: input.referenceId,
+    });
     return evidenceReadyResult(input.referenceId);
   }
 
@@ -176,6 +207,12 @@ async function executeExtraction(
   if (!completed.intake || completed.intake.status !== "EVIDENCE_READY") {
     throw new AsyncJobExecutionError("EXTRACTION", "EVIDENCE_READY_NOT_CONFIRMED", false);
   }
+  const persistedAttempt = persistedAttemptReferenceSchema.parse(result.attempt);
+  await ensureClassificationAdmission(dependencies, {
+    sourceJobId: context.jobId,
+    neutralIntakeId: input.referenceId,
+    extractionAttemptId: persistedAttempt.id,
+  });
   return evidenceReadyResult(input.referenceId);
 }
 

@@ -141,16 +141,19 @@ describe("B2C9 generic async job persistence", () => {
   });
 
   it("schedules retry with sanitized failure metadata before exhaustion", async () => {
+    const hook = vi.fn();
     harness.tx.$queryRaw.mockResolvedValue([{ attemptCount: 1, maxAttempts: 3 }]);
     harness.tx.$executeRaw.mockResolvedValue(1);
     const result = await failAsyncJob({
       jobId: "job-1", workerId: "worker-1", leaseToken: "c".repeat(64),
       failure: { retryable: true, category: "TRANSIENT", code: "DEPENDENCY_TIMEOUT" },
       retryDelayMs: 5_000,
+      beforeTerminalFailureInTransaction: hook,
     });
     expect(result.outcome).toBe("RETRY_SCHEDULED");
     expect(harness.tx.$queryRaw).toHaveBeenCalledOnce();
     expect(harness.tx.$executeRaw).toHaveBeenCalledOnce();
+    expect(hook).not.toHaveBeenCalled();
   });
 
   it("terminally fails when retry attempts are exhausted", async () => {
@@ -162,6 +165,80 @@ describe("B2C9 generic async job persistence", () => {
       retryDelayMs: 5_000,
     });
     expect(result.outcome).toBe("TERMINAL_FAILED");
+  });
+
+  it("runs an optional terminal hook in the failure transaction", async () => {
+    const job = running({ attemptCount: 2, maxAttempts: 2 });
+    const hook = vi.fn(async (tx) => {
+      expect(tx).toBe(harness.tx);
+      return { outcome: "TERMINAL_FAILED" as const };
+    });
+    harness.tx.$queryRaw.mockResolvedValue([job]);
+    harness.tx.$executeRaw.mockResolvedValue(1);
+    await expect(failAsyncJob({
+      jobId: job.id,
+      workerId: "worker-1",
+      leaseToken: job.leaseToken,
+      failure: { retryable: true, category: "TRANSIENT", code: "DEPENDENCY_TIMEOUT" },
+      retryDelayMs: 5_000,
+      beforeTerminalFailureInTransaction: hook,
+    })).resolves.toEqual({ outcome: "TERMINAL_FAILED" });
+    expect(hook).toHaveBeenCalledOnce();
+  });
+
+  it("does not write terminal state when the terminal hook fails", async () => {
+    const job = running({ attemptCount: 2, maxAttempts: 2 });
+    const hookFailure = new Error("DOMAIN_TERMINALIZATION_UNAVAILABLE");
+    harness.tx.$queryRaw.mockResolvedValue([job]);
+    await expect(failAsyncJob({
+      jobId: job.id,
+      workerId: "worker-1",
+      leaseToken: job.leaseToken,
+      failure: { retryable: true, category: "TRANSIENT", code: "DEPENDENCY_TIMEOUT" },
+      retryDelayMs: 5_000,
+      beforeTerminalFailureInTransaction: vi.fn(async () => { throw hookFailure; }),
+    })).rejects.toBe(hookFailure);
+    expect(harness.tx.$executeRaw).not.toHaveBeenCalled();
+  });
+
+  it("recovers an already-persisted domain success instead of terminal failure", async () => {
+    const job = running({ attemptCount: 2, maxAttempts: 2 });
+    harness.tx.$queryRaw.mockResolvedValue([job]);
+    harness.tx.$executeRaw.mockResolvedValue(1);
+    await expect(failAsyncJob({
+      jobId: job.id,
+      workerId: "worker-1",
+      leaseToken: job.leaseToken,
+      failure: { retryable: true, category: "TRANSIENT", code: "DEPENDENCY_TIMEOUT" },
+      retryDelayMs: 5_000,
+      beforeTerminalFailureInTransaction: vi.fn(async () => ({
+        outcome: "SUCCEEDED" as const,
+        resultReference: {
+          referenceType: "FIXTURE_RESULT",
+          referenceId: "result-1",
+          metadata: { outcomeCode: "DONE" },
+        },
+      })),
+    })).resolves.toEqual({ outcome: "SUCCEEDED" });
+  });
+
+  it("rolls back guarded expired-lease terminalization and continues claiming", async () => {
+    const expired = running({ operation: "GUARDED.TEST", attemptCount: 2, maxAttempts: 2 });
+    const next = running({ id: "job-2", operation: "GENERIC.TEST" });
+    const hook = vi.fn(async () => { throw new Error("DOMAIN_HOOK_UNAVAILABLE"); });
+    harness.prisma.$queryRaw.mockResolvedValue([{ id: expired.id, operation: expired.operation }]);
+    harness.tx.$queryRaw
+      .mockResolvedValueOnce([expired])
+      .mockResolvedValueOnce([expired])
+      .mockResolvedValueOnce([next]);
+    harness.tx.$executeRaw.mockResolvedValue(1);
+    await expect(claimNextAsyncJob({
+      workerId: "worker-1",
+      leaseDurationMs: 60_000,
+      resolveTerminalFailureHook: (operation) => operation === expired.operation ? hook : undefined,
+    })).resolves.toBe(next);
+    expect(hook).toHaveBeenCalledOnce();
+    expect(harness.tx.$executeRaw).toHaveBeenCalledOnce();
   });
 
   it.each([

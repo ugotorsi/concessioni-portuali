@@ -14,6 +14,10 @@ import {
   normalizeAsyncJobFailure,
   normalizeAsyncJobResultMetadata,
 } from "./domain";
+import type {
+  AsyncJobTerminalFailureHook,
+  AsyncJobTerminalFailureResolution,
+} from "./registry";
 
 const identifier = z.string().trim().min(1).max(256);
 const jobId = identifier;
@@ -125,6 +129,89 @@ export async function admitAsyncJob(input: AsyncJobAdmissionInput) {
 export interface AsyncJobClaimInput {
   workerId: string;
   leaseDurationMs: number;
+  resolveTerminalFailureHook?: (operation: string) => AsyncJobTerminalFailureHook | undefined;
+}
+
+async function resolveTerminalFailureInTransaction(
+  tx: Prisma.TransactionClient,
+  job: AsyncJob,
+  failure: AsyncJobFailure,
+  hook?: AsyncJobTerminalFailureHook,
+): Promise<AsyncJobTerminalFailureResolution> {
+  if (!hook) return { outcome: "TERMINAL_FAILED" };
+  return hook(tx, {
+    jobId: job.id,
+    operation: job.operation,
+    tenantId: job.tenantId,
+    correlationId: job.correlationId,
+    inputReference: job.inputReference,
+    attempt: job.attemptCount,
+    maxAttempts: job.maxAttempts,
+    failure,
+  });
+}
+
+async function finalizeExpiredJobInTransaction(
+  tx: Prisma.TransactionClient,
+  job: AsyncJob,
+  failure: AsyncJobFailure,
+  hook?: AsyncJobTerminalFailureHook,
+) {
+  const resolution = await resolveTerminalFailureInTransaction(tx, job, failure, hook);
+  const resultReference = resolution.outcome === "SUCCEEDED"
+    ? JSON.stringify(normalizeAsyncJobResultMetadata(resolution.resultReference))
+    : null;
+  const count = await tx.$executeRaw(Prisma.sql`
+    UPDATE "AsyncJob"
+    SET "status" = ${resolution.outcome}::"AsyncJobStatus",
+        "completedAt" = CURRENT_TIMESTAMP,
+        "leaseOwner" = NULL, "leaseToken" = NULL, "leaseExpiresAt" = NULL,
+        "lastHeartbeatAt" = NULL,
+        "failureCategory" = ${resolution.outcome === "TERMINAL_FAILED" ? failure.category : null},
+        "failureCode" = ${resolution.outcome === "TERMINAL_FAILED" ? failure.code : null},
+        "resultReference" = ${resultReference}::jsonb,
+        "stateVersion" = "stateVersion" + 1, "updatedAt" = CURRENT_TIMESTAMP
+    WHERE "id" = ${job.id} AND "status" = 'RUNNING'
+      AND "leaseExpiresAt" <= CURRENT_TIMESTAMP
+      AND "attemptCount" >= "maxAttempts"
+  `);
+  requireTransition(count);
+}
+
+async function reconcileGuardedExpiredJobs(input: AsyncJobClaimInput): Promise<void> {
+  if (!input.resolveTerminalFailureHook) return;
+  const candidates = await prisma.$queryRaw<Array<Pick<AsyncJob, "id" | "operation">>>(Prisma.sql`
+    SELECT "id", "operation" FROM "AsyncJob"
+    WHERE "status" = 'RUNNING'
+      AND "leaseExpiresAt" <= CURRENT_TIMESTAMP
+      AND "attemptCount" >= "maxAttempts"
+    ORDER BY "createdAt" ASC, "id" ASC
+  `);
+  for (const candidate of candidates) {
+    const hook = input.resolveTerminalFailureHook(candidate.operation);
+    if (!hook) continue;
+    try {
+      await runSerializableTransactionWithRetry(async (tx) => {
+        const rows = await tx.$queryRaw<AsyncJob[]>(Prisma.sql`
+          SELECT * FROM "AsyncJob"
+          WHERE "id" = ${candidate.id}
+            AND "status" = 'RUNNING'
+            AND "leaseExpiresAt" <= CURRENT_TIMESTAMP
+            AND "attemptCount" >= "maxAttempts"
+          FOR UPDATE
+        `);
+        const job = rows[0];
+        if (!job) return;
+        await finalizeExpiredJobInTransaction(tx, job, {
+          retryable: true,
+          category: "CRASH_RECOVERY",
+          code: "RETRY_EXHAUSTED",
+        }, hook);
+      });
+    } catch {
+      // The guarded transaction rolled back; a later drain retries this recovery.
+    }
+  }
 }
 
 export async function claimNextAsyncJob(input: AsyncJobClaimInput): Promise<AsyncJob | null> {
@@ -132,6 +219,7 @@ export async function claimNextAsyncJob(input: AsyncJobClaimInput): Promise<Asyn
   const leaseMs = durationMs.parse(input.leaseDurationMs);
   const token = randomBytes(32).toString("hex");
 
+  await reconcileGuardedExpiredJobs(input);
   return runSerializableTransactionWithRetry(async (tx) => {
     await tx.$executeRaw(Prisma.sql`
       UPDATE "AsyncJob"
@@ -142,17 +230,35 @@ export async function claimNextAsyncJob(input: AsyncJobClaimInput): Promise<Asyn
       WHERE "status" = 'CANCELLATION_REQUESTED'
         AND "leaseExpiresAt" <= CURRENT_TIMESTAMP
     `);
-    await tx.$executeRaw(Prisma.sql`
-      UPDATE "AsyncJob"
-      SET "status" = 'TERMINAL_FAILED', "completedAt" = CURRENT_TIMESTAMP,
-          "leaseOwner" = NULL, "leaseToken" = NULL, "leaseExpiresAt" = NULL,
-          "lastHeartbeatAt" = NULL, "failureCategory" = 'CRASH_RECOVERY',
-          "failureCode" = 'RETRY_EXHAUSTED', "stateVersion" = "stateVersion" + 1,
-          "updatedAt" = CURRENT_TIMESTAMP
-      WHERE "status" = 'RUNNING'
-        AND "leaseExpiresAt" <= CURRENT_TIMESTAMP
-        AND "attemptCount" >= "maxAttempts"
-    `);
+    if (!input.resolveTerminalFailureHook) {
+      await tx.$executeRaw(Prisma.sql`
+        UPDATE "AsyncJob"
+        SET "status" = 'TERMINAL_FAILED', "completedAt" = CURRENT_TIMESTAMP,
+            "leaseOwner" = NULL, "leaseToken" = NULL, "leaseExpiresAt" = NULL,
+            "lastHeartbeatAt" = NULL, "failureCategory" = 'CRASH_RECOVERY',
+            "failureCode" = 'RETRY_EXHAUSTED', "stateVersion" = "stateVersion" + 1,
+            "updatedAt" = CURRENT_TIMESTAMP
+        WHERE "status" = 'RUNNING'
+          AND "leaseExpiresAt" <= CURRENT_TIMESTAMP
+          AND "attemptCount" >= "maxAttempts"
+      `);
+    } else {
+      const exhausted = await tx.$queryRaw<AsyncJob[]>(Prisma.sql`
+        SELECT * FROM "AsyncJob"
+        WHERE "status" = 'RUNNING'
+          AND "leaseExpiresAt" <= CURRENT_TIMESTAMP
+          AND "attemptCount" >= "maxAttempts"
+        FOR UPDATE
+      `);
+      for (const job of exhausted) {
+        if (input.resolveTerminalFailureHook(job.operation)) continue;
+        await finalizeExpiredJobInTransaction(tx, job, {
+          retryable: true,
+          category: "CRASH_RECOVERY",
+          code: "RETRY_EXHAUSTED",
+        });
+      }
+    }
     const claimed = await tx.$queryRaw<AsyncJob[]>(Prisma.sql`
       WITH candidate AS (
         SELECT "id"
@@ -242,13 +348,17 @@ export async function succeedAsyncJob(input: LeaseInput & { resultReference: unk
   requireTransition(count);
 }
 
-export async function failAsyncJob(input: LeaseInput & { failure: AsyncJobFailure; retryDelayMs: number }) {
+export async function failAsyncJob(input: LeaseInput & {
+  failure: AsyncJobFailure;
+  retryDelayMs: number;
+  beforeTerminalFailureInTransaction?: AsyncJobTerminalFailureHook;
+}) {
   const lease = parseLease(input);
   const failure = normalizeAsyncJobFailure(input.failure);
   const delay = retryDelayMs.parse(input.retryDelayMs);
   return runSerializableTransactionWithRetry(async (tx) => {
-    const rows = await tx.$queryRaw<Array<Pick<AsyncJob, "attemptCount" | "maxAttempts">>>(Prisma.sql`
-      SELECT "attemptCount", "maxAttempts"
+    const rows = await tx.$queryRaw<AsyncJob[]>(Prisma.sql`
+      SELECT *
       FROM "AsyncJob"
       WHERE "id" = ${lease.jobId} AND "status" = 'RUNNING'
         AND "leaseOwner" = ${lease.workerId} AND "leaseToken" = ${lease.leaseToken}
@@ -258,6 +368,18 @@ export async function failAsyncJob(input: LeaseInput & { failure: AsyncJobFailur
     const current = rows[0];
     if (!current) throw new AsyncJobLeaseConflictError();
     const willRetry = failure.retryable && current.attemptCount < current.maxAttempts;
+    let terminalResolution: AsyncJobTerminalFailureResolution = { outcome: "TERMINAL_FAILED" };
+    if (!willRetry) {
+      terminalResolution = await resolveTerminalFailureInTransaction(
+        tx,
+        current,
+        failure,
+        input.beforeTerminalFailureInTransaction,
+      );
+    }
+    const resultReference = terminalResolution.outcome === "SUCCEEDED"
+      ? JSON.stringify(normalizeAsyncJobResultMetadata(terminalResolution.resultReference))
+      : null;
     const transition = willRetry
       ? await tx.$executeRaw(Prisma.sql`
           UPDATE "AsyncJob"
@@ -273,8 +395,11 @@ export async function failAsyncJob(input: LeaseInput & { failure: AsyncJobFailur
         `)
       : await tx.$executeRaw(Prisma.sql`
           UPDATE "AsyncJob"
-          SET "status" = 'TERMINAL_FAILED', "completedAt" = CURRENT_TIMESTAMP,
-              "failureCategory" = ${failure.category}, "failureCode" = ${failure.code},
+            SET "status" = ${terminalResolution.outcome}::"AsyncJobStatus",
+              "completedAt" = CURRENT_TIMESTAMP,
+              "failureCategory" = ${terminalResolution.outcome === "TERMINAL_FAILED" ? failure.category : null},
+              "failureCode" = ${terminalResolution.outcome === "TERMINAL_FAILED" ? failure.code : null},
+              "resultReference" = ${resultReference}::jsonb,
               "leaseOwner" = NULL, "leaseToken" = NULL, "leaseExpiresAt" = NULL,
               "lastHeartbeatAt" = NULL, "stateVersion" = "stateVersion" + 1,
               "updatedAt" = CURRENT_TIMESTAMP
@@ -283,7 +408,7 @@ export async function failAsyncJob(input: LeaseInput & { failure: AsyncJobFailur
             AND "leaseExpiresAt" > CURRENT_TIMESTAMP
         `);
     requireTransition(transition);
-    return { outcome: willRetry ? "RETRY_SCHEDULED" as const : "TERMINAL_FAILED" as const };
+    return { outcome: willRetry ? "RETRY_SCHEDULED" as const : terminalResolution.outcome };
   });
 }
 
