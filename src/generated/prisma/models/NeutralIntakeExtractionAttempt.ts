@@ -338,6 +338,7 @@ export type NeutralIntakeExtractionAttemptWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"NeutralIntakeExtractionAttempt"> | Date | string
   neutralIntake?: Prisma.XOR<Prisma.NeutralIntakeScalarRelationFilter, Prisma.NeutralIntakeWhereInput>
   pages?: Prisma.NeutralIntakeExtractionPageListRelationFilter
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptListRelationFilter
 }
 
 export type NeutralIntakeExtractionAttemptOrderByWithRelationInput = {
@@ -364,10 +365,12 @@ export type NeutralIntakeExtractionAttemptOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   neutralIntake?: Prisma.NeutralIntakeOrderByWithRelationInput
   pages?: Prisma.NeutralIntakeExtractionPageOrderByRelationAggregateInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptOrderByRelationAggregateInput
 }
 
 export type NeutralIntakeExtractionAttemptWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  id_neutralIntakeId?: Prisma.NeutralIntakeExtractionAttemptIdNeutralIntakeIdCompoundUniqueInput
   AND?: Prisma.NeutralIntakeExtractionAttemptWhereInput | Prisma.NeutralIntakeExtractionAttemptWhereInput[]
   OR?: Prisma.NeutralIntakeExtractionAttemptWhereInput[]
   NOT?: Prisma.NeutralIntakeExtractionAttemptWhereInput | Prisma.NeutralIntakeExtractionAttemptWhereInput[]
@@ -393,7 +396,8 @@ export type NeutralIntakeExtractionAttemptWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"NeutralIntakeExtractionAttempt"> | Date | string
   neutralIntake?: Prisma.XOR<Prisma.NeutralIntakeScalarRelationFilter, Prisma.NeutralIntakeWhereInput>
   pages?: Prisma.NeutralIntakeExtractionPageListRelationFilter
-}, "id">
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptListRelationFilter
+}, "id" | "id_neutralIntakeId">
 
 export type NeutralIntakeExtractionAttemptOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -474,6 +478,7 @@ export type NeutralIntakeExtractionAttemptCreateInput = {
   createdAt?: Date | string
   neutralIntake: Prisma.NeutralIntakeCreateNestedOneWithoutExtractionAttemptsInput
   pages?: Prisma.NeutralIntakeExtractionPageCreateNestedManyWithoutExtractionAttemptInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptCreateNestedManyWithoutExtractionAttemptInput
 }
 
 export type NeutralIntakeExtractionAttemptUncheckedCreateInput = {
@@ -499,6 +504,7 @@ export type NeutralIntakeExtractionAttemptUncheckedCreateInput = {
   technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   pages?: Prisma.NeutralIntakeExtractionPageUncheckedCreateNestedManyWithoutExtractionAttemptInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedCreateNestedManyWithoutExtractionAttemptInput
 }
 
 export type NeutralIntakeExtractionAttemptUpdateInput = {
@@ -524,6 +530,7 @@ export type NeutralIntakeExtractionAttemptUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   neutralIntake?: Prisma.NeutralIntakeUpdateOneRequiredWithoutExtractionAttemptsNestedInput
   pages?: Prisma.NeutralIntakeExtractionPageUpdateManyWithoutExtractionAttemptNestedInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUpdateManyWithoutExtractionAttemptNestedInput
 }
 
 export type NeutralIntakeExtractionAttemptUncheckedUpdateInput = {
@@ -549,6 +556,7 @@ export type NeutralIntakeExtractionAttemptUncheckedUpdateInput = {
   technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pages?: Prisma.NeutralIntakeExtractionPageUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedUpdateManyWithoutExtractionAttemptNestedInput
 }
 
 export type NeutralIntakeExtractionAttemptCreateManyInput = {
@@ -630,6 +638,11 @@ export type NeutralIntakeExtractionAttemptListRelationFilter = {
 
 export type NeutralIntakeExtractionAttemptOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type NeutralIntakeExtractionAttemptIdNeutralIntakeIdCompoundUniqueInput = {
+  id: string
+  neutralIntakeId: string
 }
 
 export type NeutralIntakeExtractionAttemptCountOrderByAggregateInput = {
@@ -773,6 +786,20 @@ export type NeutralIntakeExtractionAttemptUpdateOneRequiredWithoutPagesNestedInp
   update?: Prisma.XOR<Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptUpdateToOneWithWhereWithoutPagesInput, Prisma.NeutralIntakeExtractionAttemptUpdateWithoutPagesInput>, Prisma.NeutralIntakeExtractionAttemptUncheckedUpdateWithoutPagesInput>
 }
 
+export type NeutralIntakeExtractionAttemptCreateNestedOneWithoutClassificationAttemptsInput = {
+  create?: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptCreateWithoutClassificationAttemptsInput, Prisma.NeutralIntakeExtractionAttemptUncheckedCreateWithoutClassificationAttemptsInput>
+  connectOrCreate?: Prisma.NeutralIntakeExtractionAttemptCreateOrConnectWithoutClassificationAttemptsInput
+  connect?: Prisma.NeutralIntakeExtractionAttemptWhereUniqueInput
+}
+
+export type NeutralIntakeExtractionAttemptUpdateOneRequiredWithoutClassificationAttemptsNestedInput = {
+  create?: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptCreateWithoutClassificationAttemptsInput, Prisma.NeutralIntakeExtractionAttemptUncheckedCreateWithoutClassificationAttemptsInput>
+  connectOrCreate?: Prisma.NeutralIntakeExtractionAttemptCreateOrConnectWithoutClassificationAttemptsInput
+  upsert?: Prisma.NeutralIntakeExtractionAttemptUpsertWithoutClassificationAttemptsInput
+  connect?: Prisma.NeutralIntakeExtractionAttemptWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptUpdateToOneWithWhereWithoutClassificationAttemptsInput, Prisma.NeutralIntakeExtractionAttemptUpdateWithoutClassificationAttemptsInput>, Prisma.NeutralIntakeExtractionAttemptUncheckedUpdateWithoutClassificationAttemptsInput>
+}
+
 export type NeutralIntakeExtractionAttemptCreateWithoutNeutralIntakeInput = {
   id?: string
   policyVersion: string
@@ -795,6 +822,7 @@ export type NeutralIntakeExtractionAttemptCreateWithoutNeutralIntakeInput = {
   technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   pages?: Prisma.NeutralIntakeExtractionPageCreateNestedManyWithoutExtractionAttemptInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptCreateNestedManyWithoutExtractionAttemptInput
 }
 
 export type NeutralIntakeExtractionAttemptUncheckedCreateWithoutNeutralIntakeInput = {
@@ -819,6 +847,7 @@ export type NeutralIntakeExtractionAttemptUncheckedCreateWithoutNeutralIntakeInp
   technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   pages?: Prisma.NeutralIntakeExtractionPageUncheckedCreateNestedManyWithoutExtractionAttemptInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedCreateNestedManyWithoutExtractionAttemptInput
 }
 
 export type NeutralIntakeExtractionAttemptCreateOrConnectWithoutNeutralIntakeInput = {
@@ -896,6 +925,7 @@ export type NeutralIntakeExtractionAttemptCreateWithoutPagesInput = {
   technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   neutralIntake: Prisma.NeutralIntakeCreateNestedOneWithoutExtractionAttemptsInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptCreateNestedManyWithoutExtractionAttemptInput
 }
 
 export type NeutralIntakeExtractionAttemptUncheckedCreateWithoutPagesInput = {
@@ -920,6 +950,7 @@ export type NeutralIntakeExtractionAttemptUncheckedCreateWithoutPagesInput = {
   warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedCreateNestedManyWithoutExtractionAttemptInput
 }
 
 export type NeutralIntakeExtractionAttemptCreateOrConnectWithoutPagesInput = {
@@ -960,6 +991,7 @@ export type NeutralIntakeExtractionAttemptUpdateWithoutPagesInput = {
   technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   neutralIntake?: Prisma.NeutralIntakeUpdateOneRequiredWithoutExtractionAttemptsNestedInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUpdateManyWithoutExtractionAttemptNestedInput
 }
 
 export type NeutralIntakeExtractionAttemptUncheckedUpdateWithoutPagesInput = {
@@ -984,6 +1016,123 @@ export type NeutralIntakeExtractionAttemptUncheckedUpdateWithoutPagesInput = {
   warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+}
+
+export type NeutralIntakeExtractionAttemptCreateWithoutClassificationAttemptsInput = {
+  id?: string
+  policyVersion: string
+  outcome: $Enums.NeutralIntakeExtractionOutcome
+  artifactSha256: string
+  declaredMimeType: string
+  detectedMimeType?: string | null
+  artifactSizeBytes: number
+  startedAt: Date | string
+  completedAt: Date | string
+  directExtractorName?: string | null
+  directExtractorVersion?: string | null
+  ocrExtractorName?: string | null
+  ocrExtractorVersion?: string | null
+  rasterizerName?: string | null
+  rasterizerVersion?: string | null
+  failureCode?: string | null
+  failureMessage?: string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  neutralIntake: Prisma.NeutralIntakeCreateNestedOneWithoutExtractionAttemptsInput
+  pages?: Prisma.NeutralIntakeExtractionPageCreateNestedManyWithoutExtractionAttemptInput
+}
+
+export type NeutralIntakeExtractionAttemptUncheckedCreateWithoutClassificationAttemptsInput = {
+  id?: string
+  neutralIntakeId: string
+  policyVersion: string
+  outcome: $Enums.NeutralIntakeExtractionOutcome
+  artifactSha256: string
+  declaredMimeType: string
+  detectedMimeType?: string | null
+  artifactSizeBytes: number
+  startedAt: Date | string
+  completedAt: Date | string
+  directExtractorName?: string | null
+  directExtractorVersion?: string | null
+  ocrExtractorName?: string | null
+  ocrExtractorVersion?: string | null
+  rasterizerName?: string | null
+  rasterizerVersion?: string | null
+  failureCode?: string | null
+  failureMessage?: string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  pages?: Prisma.NeutralIntakeExtractionPageUncheckedCreateNestedManyWithoutExtractionAttemptInput
+}
+
+export type NeutralIntakeExtractionAttemptCreateOrConnectWithoutClassificationAttemptsInput = {
+  where: Prisma.NeutralIntakeExtractionAttemptWhereUniqueInput
+  create: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptCreateWithoutClassificationAttemptsInput, Prisma.NeutralIntakeExtractionAttemptUncheckedCreateWithoutClassificationAttemptsInput>
+}
+
+export type NeutralIntakeExtractionAttemptUpsertWithoutClassificationAttemptsInput = {
+  update: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptUpdateWithoutClassificationAttemptsInput, Prisma.NeutralIntakeExtractionAttemptUncheckedUpdateWithoutClassificationAttemptsInput>
+  create: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptCreateWithoutClassificationAttemptsInput, Prisma.NeutralIntakeExtractionAttemptUncheckedCreateWithoutClassificationAttemptsInput>
+  where?: Prisma.NeutralIntakeExtractionAttemptWhereInput
+}
+
+export type NeutralIntakeExtractionAttemptUpdateToOneWithWhereWithoutClassificationAttemptsInput = {
+  where?: Prisma.NeutralIntakeExtractionAttemptWhereInput
+  data: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptUpdateWithoutClassificationAttemptsInput, Prisma.NeutralIntakeExtractionAttemptUncheckedUpdateWithoutClassificationAttemptsInput>
+}
+
+export type NeutralIntakeExtractionAttemptUpdateWithoutClassificationAttemptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  policyVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  outcome?: Prisma.EnumNeutralIntakeExtractionOutcomeFieldUpdateOperationsInput | $Enums.NeutralIntakeExtractionOutcome
+  artifactSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  declaredMimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  detectedMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  artifactSizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  directExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  directExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  neutralIntake?: Prisma.NeutralIntakeUpdateOneRequiredWithoutExtractionAttemptsNestedInput
+  pages?: Prisma.NeutralIntakeExtractionPageUpdateManyWithoutExtractionAttemptNestedInput
+}
+
+export type NeutralIntakeExtractionAttemptUncheckedUpdateWithoutClassificationAttemptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  neutralIntakeId?: Prisma.StringFieldUpdateOperationsInput | string
+  policyVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  outcome?: Prisma.EnumNeutralIntakeExtractionOutcomeFieldUpdateOperationsInput | $Enums.NeutralIntakeExtractionOutcome
+  artifactSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  declaredMimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  detectedMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  artifactSizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  directExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  directExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  pages?: Prisma.NeutralIntakeExtractionPageUncheckedUpdateManyWithoutExtractionAttemptNestedInput
 }
 
 export type NeutralIntakeExtractionAttemptCreateManyNeutralIntakeInput = {
@@ -1031,6 +1180,7 @@ export type NeutralIntakeExtractionAttemptUpdateWithoutNeutralIntakeInput = {
   technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pages?: Prisma.NeutralIntakeExtractionPageUpdateManyWithoutExtractionAttemptNestedInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUpdateManyWithoutExtractionAttemptNestedInput
 }
 
 export type NeutralIntakeExtractionAttemptUncheckedUpdateWithoutNeutralIntakeInput = {
@@ -1055,6 +1205,7 @@ export type NeutralIntakeExtractionAttemptUncheckedUpdateWithoutNeutralIntakeInp
   technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pages?: Prisma.NeutralIntakeExtractionPageUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedUpdateManyWithoutExtractionAttemptNestedInput
 }
 
 export type NeutralIntakeExtractionAttemptUncheckedUpdateManyWithoutNeutralIntakeInput = {
@@ -1087,10 +1238,12 @@ export type NeutralIntakeExtractionAttemptUncheckedUpdateManyWithoutNeutralIntak
 
 export type NeutralIntakeExtractionAttemptCountOutputType = {
   pages: number
+  classificationAttempts: number
 }
 
 export type NeutralIntakeExtractionAttemptCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   pages?: boolean | NeutralIntakeExtractionAttemptCountOutputTypeCountPagesArgs
+  classificationAttempts?: boolean | NeutralIntakeExtractionAttemptCountOutputTypeCountClassificationAttemptsArgs
 }
 
 /**
@@ -1108,6 +1261,13 @@ export type NeutralIntakeExtractionAttemptCountOutputTypeDefaultArgs<ExtArgs ext
  */
 export type NeutralIntakeExtractionAttemptCountOutputTypeCountPagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.NeutralIntakeExtractionPageWhereInput
+}
+
+/**
+ * NeutralIntakeExtractionAttemptCountOutputType without action
+ */
+export type NeutralIntakeExtractionAttemptCountOutputTypeCountClassificationAttemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.NeutralIntakeClassificationAttemptWhereInput
 }
 
 
@@ -1135,6 +1295,7 @@ export type NeutralIntakeExtractionAttemptSelect<ExtArgs extends runtime.Types.E
   createdAt?: boolean
   neutralIntake?: boolean | Prisma.NeutralIntakeDefaultArgs<ExtArgs>
   pages?: boolean | Prisma.NeutralIntakeExtractionAttempt$pagesArgs<ExtArgs>
+  classificationAttempts?: boolean | Prisma.NeutralIntakeExtractionAttempt$classificationAttemptsArgs<ExtArgs>
   _count?: boolean | Prisma.NeutralIntakeExtractionAttemptCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["neutralIntakeExtractionAttempt"]>
 
@@ -1216,6 +1377,7 @@ export type NeutralIntakeExtractionAttemptOmit<ExtArgs extends runtime.Types.Ext
 export type NeutralIntakeExtractionAttemptInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   neutralIntake?: boolean | Prisma.NeutralIntakeDefaultArgs<ExtArgs>
   pages?: boolean | Prisma.NeutralIntakeExtractionAttempt$pagesArgs<ExtArgs>
+  classificationAttempts?: boolean | Prisma.NeutralIntakeExtractionAttempt$classificationAttemptsArgs<ExtArgs>
   _count?: boolean | Prisma.NeutralIntakeExtractionAttemptCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type NeutralIntakeExtractionAttemptIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1230,6 +1392,7 @@ export type $NeutralIntakeExtractionAttemptPayload<ExtArgs extends runtime.Types
   objects: {
     neutralIntake: Prisma.$NeutralIntakePayload<ExtArgs>
     pages: Prisma.$NeutralIntakeExtractionPagePayload<ExtArgs>[]
+    classificationAttempts: Prisma.$NeutralIntakeClassificationAttemptPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1649,6 +1812,7 @@ export interface Prisma__NeutralIntakeExtractionAttemptClient<T, Null = never, E
   readonly [Symbol.toStringTag]: "PrismaPromise"
   neutralIntake<T extends Prisma.NeutralIntakeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NeutralIntakeDefaultArgs<ExtArgs>>): Prisma.Prisma__NeutralIntakeClient<runtime.Types.Result.GetResult<Prisma.$NeutralIntakePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   pages<T extends Prisma.NeutralIntakeExtractionAttempt$pagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NeutralIntakeExtractionAttempt$pagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NeutralIntakeExtractionPagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  classificationAttempts<T extends Prisma.NeutralIntakeExtractionAttempt$classificationAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NeutralIntakeExtractionAttempt$classificationAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NeutralIntakeClassificationAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2121,6 +2285,30 @@ export type NeutralIntakeExtractionAttempt$pagesArgs<ExtArgs extends runtime.Typ
   take?: number
   skip?: number
   distinct?: Prisma.NeutralIntakeExtractionPageScalarFieldEnum | Prisma.NeutralIntakeExtractionPageScalarFieldEnum[]
+}
+
+/**
+ * NeutralIntakeExtractionAttempt.classificationAttempts
+ */
+export type NeutralIntakeExtractionAttempt$classificationAttemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the NeutralIntakeClassificationAttempt
+   */
+  select?: Prisma.NeutralIntakeClassificationAttemptSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the NeutralIntakeClassificationAttempt
+   */
+  omit?: Prisma.NeutralIntakeClassificationAttemptOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NeutralIntakeClassificationAttemptInclude<ExtArgs> | null
+  where?: Prisma.NeutralIntakeClassificationAttemptWhereInput
+  orderBy?: Prisma.NeutralIntakeClassificationAttemptOrderByWithRelationInput | Prisma.NeutralIntakeClassificationAttemptOrderByWithRelationInput[]
+  cursor?: Prisma.NeutralIntakeClassificationAttemptWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.NeutralIntakeClassificationAttemptScalarFieldEnum | Prisma.NeutralIntakeClassificationAttemptScalarFieldEnum[]
 }
 
 /**

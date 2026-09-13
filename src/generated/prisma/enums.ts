@@ -866,6 +866,25 @@ export const NeutralIntakeExtractionMethod = {
 export type NeutralIntakeExtractionMethod = (typeof NeutralIntakeExtractionMethod)[keyof typeof NeutralIntakeExtractionMethod]
 
 
+export const NeutralIntakeClassificationOutcome = {
+  LEGAL_SOURCE_CANDIDATE: 'LEGAL_SOURCE_CANDIDATE',
+  CASE_DOCUMENT: 'CASE_DOCUMENT',
+  UNCERTAIN_REVIEW_REQUIRED: 'UNCERTAIN_REVIEW_REQUIRED'
+} as const
+
+export type NeutralIntakeClassificationOutcome = (typeof NeutralIntakeClassificationOutcome)[keyof typeof NeutralIntakeClassificationOutcome]
+
+
+export const NeutralIntakeClassificationConfidence = {
+  HIGH: 'HIGH',
+  MEDIUM: 'MEDIUM',
+  LOW: 'LOW',
+  INSUFFICIENT: 'INSUFFICIENT'
+} as const
+
+export type NeutralIntakeClassificationConfidence = (typeof NeutralIntakeClassificationConfidence)[keyof typeof NeutralIntakeClassificationConfidence]
+
+
 export const AsyncJobStatus = {
   QUEUED: 'QUEUED',
   RUNNING: 'RUNNING',

@@ -192,6 +192,11 @@ export type NeutralIntakeExtractionAttempt = Prisma.NeutralIntakeExtractionAttem
  */
 export type NeutralIntakeExtractionPage = Prisma.NeutralIntakeExtractionPageModel
 /**
+ * Model NeutralIntakeClassificationAttempt
+ * 
+ */
+export type NeutralIntakeClassificationAttempt = Prisma.NeutralIntakeClassificationAttemptModel
+/**
  * Model AsyncJob
  * 
  */

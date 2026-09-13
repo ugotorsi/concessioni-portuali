@@ -414,6 +414,7 @@ export const ModelName = {
   NeutralIntake: 'NeutralIntake',
   NeutralIntakeExtractionAttempt: 'NeutralIntakeExtractionAttempt',
   NeutralIntakeExtractionPage: 'NeutralIntakeExtractionPage',
+  NeutralIntakeClassificationAttempt: 'NeutralIntakeClassificationAttempt',
   AsyncJob: 'AsyncJob',
   FascicoloObservation: 'FascicoloObservation',
   FascicoloChecklistEvidence: 'FascicoloChecklistEvidence',
@@ -444,7 +445,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "asyncJob" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "neutralIntakeClassificationAttempt" | "asyncJob" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2668,6 +2669,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    NeutralIntakeClassificationAttempt: {
+      payload: Prisma.$NeutralIntakeClassificationAttemptPayload<ExtArgs>
+      fields: Prisma.NeutralIntakeClassificationAttemptFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.NeutralIntakeClassificationAttemptFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeClassificationAttemptPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.NeutralIntakeClassificationAttemptFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeClassificationAttemptPayload>
+        }
+        findFirst: {
+          args: Prisma.NeutralIntakeClassificationAttemptFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeClassificationAttemptPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.NeutralIntakeClassificationAttemptFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeClassificationAttemptPayload>
+        }
+        findMany: {
+          args: Prisma.NeutralIntakeClassificationAttemptFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeClassificationAttemptPayload>[]
+        }
+        create: {
+          args: Prisma.NeutralIntakeClassificationAttemptCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeClassificationAttemptPayload>
+        }
+        createMany: {
+          args: Prisma.NeutralIntakeClassificationAttemptCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.NeutralIntakeClassificationAttemptCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeClassificationAttemptPayload>[]
+        }
+        delete: {
+          args: Prisma.NeutralIntakeClassificationAttemptDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeClassificationAttemptPayload>
+        }
+        update: {
+          args: Prisma.NeutralIntakeClassificationAttemptUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeClassificationAttemptPayload>
+        }
+        deleteMany: {
+          args: Prisma.NeutralIntakeClassificationAttemptDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.NeutralIntakeClassificationAttemptUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.NeutralIntakeClassificationAttemptUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeClassificationAttemptPayload>[]
+        }
+        upsert: {
+          args: Prisma.NeutralIntakeClassificationAttemptUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeClassificationAttemptPayload>
+        }
+        aggregate: {
+          args: Prisma.NeutralIntakeClassificationAttemptAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateNeutralIntakeClassificationAttempt>
+        }
+        groupBy: {
+          args: Prisma.NeutralIntakeClassificationAttemptGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.NeutralIntakeClassificationAttemptGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.NeutralIntakeClassificationAttemptCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.NeutralIntakeClassificationAttemptCountAggregateOutputType> | number
+        }
+      }
+    }
     AsyncJob: {
       payload: Prisma.$AsyncJobPayload<ExtArgs>
       fields: Prisma.AsyncJobFieldRefs
@@ -4507,6 +4582,24 @@ export const NeutralIntakeExtractionPageScalarFieldEnum = {
 export type NeutralIntakeExtractionPageScalarFieldEnum = (typeof NeutralIntakeExtractionPageScalarFieldEnum)[keyof typeof NeutralIntakeExtractionPageScalarFieldEnum]
 
 
+export const NeutralIntakeClassificationAttemptScalarFieldEnum = {
+  id: 'id',
+  neutralIntakeId: 'neutralIntakeId',
+  extractionAttemptId: 'extractionAttemptId',
+  idempotencyKey: 'idempotencyKey',
+  classifierVersion: 'classifierVersion',
+  evidenceHash: 'evidenceHash',
+  outcome: 'outcome',
+  confidence: 'confidence',
+  reasonCodes: 'reasonCodes',
+  evidenceMarkers: 'evidenceMarkers',
+  reviewRequired: 'reviewRequired',
+  classifiedAt: 'classifiedAt'
+} as const
+
+export type NeutralIntakeClassificationAttemptScalarFieldEnum = (typeof NeutralIntakeClassificationAttemptScalarFieldEnum)[keyof typeof NeutralIntakeClassificationAttemptScalarFieldEnum]
+
+
 export const AsyncJobScalarFieldEnum = {
   id: 'id',
   idempotencyKey: 'idempotencyKey',
@@ -5863,6 +5956,34 @@ export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMode
 
 
 /**
+ * Reference to a field of type 'NeutralIntakeClassificationOutcome'
+ */
+export type EnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NeutralIntakeClassificationOutcome'>
+    
+
+
+/**
+ * Reference to a field of type 'NeutralIntakeClassificationOutcome[]'
+ */
+export type ListEnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NeutralIntakeClassificationOutcome[]'>
+    
+
+
+/**
+ * Reference to a field of type 'NeutralIntakeClassificationConfidence'
+ */
+export type EnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NeutralIntakeClassificationConfidence'>
+    
+
+
+/**
+ * Reference to a field of type 'NeutralIntakeClassificationConfidence[]'
+ */
+export type ListEnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NeutralIntakeClassificationConfidence[]'>
+    
+
+
+/**
  * Reference to a field of type 'AsyncJobAdmissionType'
  */
 export type EnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AsyncJobAdmissionType'>
@@ -6211,6 +6332,7 @@ export type GlobalOmitConfig = {
   neutralIntake?: Prisma.NeutralIntakeOmit
   neutralIntakeExtractionAttempt?: Prisma.NeutralIntakeExtractionAttemptOmit
   neutralIntakeExtractionPage?: Prisma.NeutralIntakeExtractionPageOmit
+  neutralIntakeClassificationAttempt?: Prisma.NeutralIntakeClassificationAttemptOmit
   asyncJob?: Prisma.AsyncJobOmit
   fascicoloObservation?: Prisma.FascicoloObservationOmit
   fascicoloChecklistEvidence?: Prisma.FascicoloChecklistEvidenceOmit

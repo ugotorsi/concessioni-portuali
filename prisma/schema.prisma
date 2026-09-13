@@ -639,6 +639,19 @@ enum NeutralIntakeExtractionMethod {
   OCR
 }
 
+enum NeutralIntakeClassificationOutcome {
+  LEGAL_SOURCE_CANDIDATE
+  CASE_DOCUMENT
+  UNCERTAIN_REVIEW_REQUIRED
+}
+
+enum NeutralIntakeClassificationConfidence {
+  HIGH
+  MEDIUM
+  LOW
+  INSUFFICIENT
+}
+
 enum AsyncJobStatus {
   QUEUED
   RUNNING
@@ -1592,9 +1605,10 @@ model NeutralIntake {
   status             NeutralIntakeStatus @default(RECEIVED)
   statusVersion      Int                 @default(0)
 
-  ente           Ente? @relation(fields: [enteId], references: [id], onDelete: Restrict)
-  receivedByUser User? @relation("NeutralIntakeReceivedBy", fields: [receivedByUserId], references: [id], onDelete: Restrict)
-  extractionAttempts NeutralIntakeExtractionAttempt[]
+  ente                   Ente?                                @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  receivedByUser         User?                                @relation("NeutralIntakeReceivedBy", fields: [receivedByUserId], references: [id], onDelete: Restrict)
+  extractionAttempts     NeutralIntakeExtractionAttempt[]
+  classificationAttempts NeutralIntakeClassificationAttempt[]
 
   @@index([storageProvider, storageKey])
   @@index([sha256])
@@ -1625,9 +1639,11 @@ model NeutralIntakeExtractionAttempt {
   technicalMetadata      Json?
   createdAt              DateTime                       @default(now())
 
-  neutralIntake NeutralIntake                  @relation(fields: [neutralIntakeId], references: [id], onDelete: Restrict)
-  pages         NeutralIntakeExtractionPage[]
+  neutralIntake          NeutralIntake                         @relation(fields: [neutralIntakeId], references: [id], onDelete: Restrict)
+  pages                  NeutralIntakeExtractionPage[]
+  classificationAttempts NeutralIntakeClassificationAttempt[]
 
+  @@unique([id, neutralIntakeId])
   @@index([neutralIntakeId, createdAt])
   @@index([outcome, createdAt])
 }
@@ -1650,6 +1666,29 @@ model NeutralIntakeExtractionPage {
 
   @@unique([extractionAttemptId, pageNumber])
   @@index([textSha256])
+}
+
+model NeutralIntakeClassificationAttempt {
+  id                  String                                @id @default(cuid())
+  neutralIntakeId     String
+  extractionAttemptId String
+  idempotencyKey      String                                @unique @db.Char(64)
+  classifierVersion   String
+  evidenceHash        String                                @db.Char(64)
+  outcome             NeutralIntakeClassificationOutcome
+  confidence          NeutralIntakeClassificationConfidence
+  reasonCodes         Json
+  evidenceMarkers     Json
+  reviewRequired      Boolean
+  classifiedAt        DateTime                              @default(now())
+
+  neutralIntake     NeutralIntake                  @relation(fields: [neutralIntakeId], references: [id], onDelete: Restrict)
+  extractionAttempt NeutralIntakeExtractionAttempt @relation(fields: [extractionAttemptId, neutralIntakeId], references: [id, neutralIntakeId], onDelete: Restrict)
+
+  @@unique([neutralIntakeId, evidenceHash, classifierVersion])
+  @@index([neutralIntakeId, classifiedAt])
+  @@index([extractionAttemptId])
+  @@index([outcome, reviewRequired])
 }
 
 model AsyncJob {

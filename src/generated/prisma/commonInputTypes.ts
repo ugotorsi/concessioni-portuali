@@ -1486,6 +1486,20 @@ export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedFloatNullableFilter<$PrismaModel>
 }
 
+export type EnumNeutralIntakeClassificationOutcomeFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeClassificationOutcome | Prisma.EnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeClassificationOutcome[] | Prisma.ListEnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeClassificationOutcome[] | Prisma.ListEnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeClassificationOutcomeFilter<$PrismaModel> | $Enums.NeutralIntakeClassificationOutcome
+}
+
+export type EnumNeutralIntakeClassificationConfidenceFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeClassificationConfidence | Prisma.EnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeClassificationConfidence[] | Prisma.ListEnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeClassificationConfidence[] | Prisma.ListEnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeClassificationConfidenceFilter<$PrismaModel> | $Enums.NeutralIntakeClassificationConfidence
+}
+
 export type JsonFilter<$PrismaModel = never> =
 | Prisma.PatchUndefined<
     Prisma.Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
@@ -1510,18 +1524,24 @@ export type JsonFilterBase<$PrismaModel = never> = {
   not?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | Prisma.JsonNullValueFilter
 }
 
-export type EnumAsyncJobAdmissionTypeFilter<$PrismaModel = never> = {
-  equals?: $Enums.AsyncJobAdmissionType | Prisma.EnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
-  in?: $Enums.AsyncJobAdmissionType[] | Prisma.ListEnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
-  notIn?: $Enums.AsyncJobAdmissionType[] | Prisma.ListEnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumAsyncJobAdmissionTypeFilter<$PrismaModel> | $Enums.AsyncJobAdmissionType
+export type EnumNeutralIntakeClassificationOutcomeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeClassificationOutcome | Prisma.EnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeClassificationOutcome[] | Prisma.ListEnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeClassificationOutcome[] | Prisma.ListEnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeClassificationOutcomeWithAggregatesFilter<$PrismaModel> | $Enums.NeutralIntakeClassificationOutcome
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumNeutralIntakeClassificationOutcomeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumNeutralIntakeClassificationOutcomeFilter<$PrismaModel>
 }
 
-export type EnumAsyncJobStatusFilter<$PrismaModel = never> = {
-  equals?: $Enums.AsyncJobStatus | Prisma.EnumAsyncJobStatusFieldRefInput<$PrismaModel>
-  in?: $Enums.AsyncJobStatus[] | Prisma.ListEnumAsyncJobStatusFieldRefInput<$PrismaModel>
-  notIn?: $Enums.AsyncJobStatus[] | Prisma.ListEnumAsyncJobStatusFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumAsyncJobStatusFilter<$PrismaModel> | $Enums.AsyncJobStatus
+export type EnumNeutralIntakeClassificationConfidenceWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeClassificationConfidence | Prisma.EnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeClassificationConfidence[] | Prisma.ListEnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeClassificationConfidence[] | Prisma.ListEnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeClassificationConfidenceWithAggregatesFilter<$PrismaModel> | $Enums.NeutralIntakeClassificationConfidence
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumNeutralIntakeClassificationConfidenceFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumNeutralIntakeClassificationConfidenceFilter<$PrismaModel>
 }
 
 export type JsonWithAggregatesFilter<$PrismaModel = never> =
@@ -1549,6 +1569,20 @@ export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedJsonFilter<$PrismaModel>
   _max?: Prisma.NestedJsonFilter<$PrismaModel>
+}
+
+export type EnumAsyncJobAdmissionTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.AsyncJobAdmissionType | Prisma.EnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.AsyncJobAdmissionType[] | Prisma.ListEnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AsyncJobAdmissionType[] | Prisma.ListEnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAsyncJobAdmissionTypeFilter<$PrismaModel> | $Enums.AsyncJobAdmissionType
+}
+
+export type EnumAsyncJobStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.AsyncJobStatus | Prisma.EnumAsyncJobStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.AsyncJobStatus[] | Prisma.ListEnumAsyncJobStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AsyncJobStatus[] | Prisma.ListEnumAsyncJobStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAsyncJobStatusFilter<$PrismaModel> | $Enums.AsyncJobStatus
 }
 
 export type EnumAsyncJobAdmissionTypeWithAggregatesFilter<$PrismaModel = never> = {
@@ -3290,18 +3324,38 @@ export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedFloatNullableFilter<$PrismaModel>
 }
 
-export type NestedEnumAsyncJobAdmissionTypeFilter<$PrismaModel = never> = {
-  equals?: $Enums.AsyncJobAdmissionType | Prisma.EnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
-  in?: $Enums.AsyncJobAdmissionType[] | Prisma.ListEnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
-  notIn?: $Enums.AsyncJobAdmissionType[] | Prisma.ListEnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumAsyncJobAdmissionTypeFilter<$PrismaModel> | $Enums.AsyncJobAdmissionType
+export type NestedEnumNeutralIntakeClassificationOutcomeFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeClassificationOutcome | Prisma.EnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeClassificationOutcome[] | Prisma.ListEnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeClassificationOutcome[] | Prisma.ListEnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeClassificationOutcomeFilter<$PrismaModel> | $Enums.NeutralIntakeClassificationOutcome
 }
 
-export type NestedEnumAsyncJobStatusFilter<$PrismaModel = never> = {
-  equals?: $Enums.AsyncJobStatus | Prisma.EnumAsyncJobStatusFieldRefInput<$PrismaModel>
-  in?: $Enums.AsyncJobStatus[] | Prisma.ListEnumAsyncJobStatusFieldRefInput<$PrismaModel>
-  notIn?: $Enums.AsyncJobStatus[] | Prisma.ListEnumAsyncJobStatusFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumAsyncJobStatusFilter<$PrismaModel> | $Enums.AsyncJobStatus
+export type NestedEnumNeutralIntakeClassificationConfidenceFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeClassificationConfidence | Prisma.EnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeClassificationConfidence[] | Prisma.ListEnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeClassificationConfidence[] | Prisma.ListEnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeClassificationConfidenceFilter<$PrismaModel> | $Enums.NeutralIntakeClassificationConfidence
+}
+
+export type NestedEnumNeutralIntakeClassificationOutcomeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeClassificationOutcome | Prisma.EnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeClassificationOutcome[] | Prisma.ListEnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeClassificationOutcome[] | Prisma.ListEnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeClassificationOutcomeWithAggregatesFilter<$PrismaModel> | $Enums.NeutralIntakeClassificationOutcome
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumNeutralIntakeClassificationOutcomeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumNeutralIntakeClassificationOutcomeFilter<$PrismaModel>
+}
+
+export type NestedEnumNeutralIntakeClassificationConfidenceWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeClassificationConfidence | Prisma.EnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeClassificationConfidence[] | Prisma.ListEnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeClassificationConfidence[] | Prisma.ListEnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeClassificationConfidenceWithAggregatesFilter<$PrismaModel> | $Enums.NeutralIntakeClassificationConfidence
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumNeutralIntakeClassificationConfidenceFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumNeutralIntakeClassificationConfidenceFilter<$PrismaModel>
 }
 
 export type NestedJsonFilter<$PrismaModel = never> =
@@ -3326,6 +3380,20 @@ export type NestedJsonFilterBase<$PrismaModel = never> = {
   gt?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   gte?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   not?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | Prisma.JsonNullValueFilter
+}
+
+export type NestedEnumAsyncJobAdmissionTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.AsyncJobAdmissionType | Prisma.EnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.AsyncJobAdmissionType[] | Prisma.ListEnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AsyncJobAdmissionType[] | Prisma.ListEnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAsyncJobAdmissionTypeFilter<$PrismaModel> | $Enums.AsyncJobAdmissionType
+}
+
+export type NestedEnumAsyncJobStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.AsyncJobStatus | Prisma.EnumAsyncJobStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.AsyncJobStatus[] | Prisma.ListEnumAsyncJobStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AsyncJobStatus[] | Prisma.ListEnumAsyncJobStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAsyncJobStatusFilter<$PrismaModel> | $Enums.AsyncJobStatus
 }
 
 export type NestedEnumAsyncJobAdmissionTypeWithAggregatesFilter<$PrismaModel = never> = {

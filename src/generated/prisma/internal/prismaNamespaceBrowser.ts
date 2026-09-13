@@ -81,6 +81,7 @@ export const ModelName = {
   NeutralIntake: 'NeutralIntake',
   NeutralIntakeExtractionAttempt: 'NeutralIntakeExtractionAttempt',
   NeutralIntakeExtractionPage: 'NeutralIntakeExtractionPage',
+  NeutralIntakeClassificationAttempt: 'NeutralIntakeClassificationAttempt',
   AsyncJob: 'AsyncJob',
   FascicoloObservation: 'FascicoloObservation',
   FascicoloChecklistEvidence: 'FascicoloChecklistEvidence',
@@ -802,6 +803,24 @@ export const NeutralIntakeExtractionPageScalarFieldEnum = {
 } as const
 
 export type NeutralIntakeExtractionPageScalarFieldEnum = (typeof NeutralIntakeExtractionPageScalarFieldEnum)[keyof typeof NeutralIntakeExtractionPageScalarFieldEnum]
+
+
+export const NeutralIntakeClassificationAttemptScalarFieldEnum = {
+  id: 'id',
+  neutralIntakeId: 'neutralIntakeId',
+  extractionAttemptId: 'extractionAttemptId',
+  idempotencyKey: 'idempotencyKey',
+  classifierVersion: 'classifierVersion',
+  evidenceHash: 'evidenceHash',
+  outcome: 'outcome',
+  confidence: 'confidence',
+  reasonCodes: 'reasonCodes',
+  evidenceMarkers: 'evidenceMarkers',
+  reviewRequired: 'reviewRequired',
+  classifiedAt: 'classifiedAt'
+} as const
+
+export type NeutralIntakeClassificationAttemptScalarFieldEnum = (typeof NeutralIntakeClassificationAttemptScalarFieldEnum)[keyof typeof NeutralIntakeClassificationAttemptScalarFieldEnum]
 
 
 export const AsyncJobScalarFieldEnum = {
