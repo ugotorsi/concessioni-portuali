@@ -6,9 +6,11 @@ import { Prisma } from "@/generated/prisma/client";
 
 const mocks = vi.hoisted(() => ({
   findUnique: vi.fn(),
+  findUser: vi.fn(),
   create: vi.fn(),
   createFile: vi.fn(),
   readFile: vi.fn(),
+  admitAsyncJobInTransaction: vi.fn(),
 }));
 
 vi.mock("@/lib/prisma", () => ({
@@ -18,12 +20,17 @@ vi.mock("@/lib/prisma", () => ({
 vi.mock("@/server/db/serializableTransaction", () => ({
   runSerializableTransactionWithRetry: (callback: (tx: unknown) => unknown) => callback({
     neutralIntake: { findUnique: mocks.findUnique, create: mocks.create },
+    user: { findUnique: mocks.findUser },
   }),
 }));
 
 vi.mock("@/server/documents/storage", () => ({
   createDocumentFileIfAbsent: mocks.createFile,
   readDocumentFileFromProvider: mocks.readFile,
+}));
+
+vi.mock("@/server/async-jobs/persistence", () => ({
+  admitAsyncJobInTransaction: mocks.admitAsyncJobInTransaction,
 }));
 
 import {
@@ -105,8 +112,13 @@ describe("B2C9 Block 3B.1 neutral intake service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.findUnique.mockResolvedValue(null);
+    mocks.findUser.mockResolvedValue({ ruolo: "ADMIN" });
     mocks.create.mockImplementation(async ({ data }) => record(data));
     mocks.createFile.mockResolvedValue(stored());
+    mocks.admitAsyncJobInTransaction.mockImplementation(async (_tx, admission) => ({
+      outcome: "CREATED",
+      job: { id: "job-1", inputReference: admission.inputReference },
+    }));
   });
 
   it("creates RECEIVED version zero at a deterministic content-addressed key", async () => {
@@ -122,6 +134,40 @@ describe("B2C9 Block 3B.1 neutral intake service", () => {
     expect(`intake/sha256/${sha256}`).not.toMatch(/ente|document|legal/i);
   });
 
+  it("atomically admits one reference-only extraction job with preserved provenance", async () => {
+    const result = await createNeutralIntake(input({ enteId: "ente-1", receivedByUserId: "actor-1" }));
+    const correlationId = buildNeutralIntakeIdempotencyKeyV1({
+      ingressChannel: "FUTURE_PROVIDER",
+      anchor: { type: "ORIGIN_REFERENCE", value: "provider/item-1" },
+    });
+    expect(result).toMatchObject({ outcome: "CREATED", extractionJob: { id: "job-1" } });
+    expect(mocks.admitAsyncJobInTransaction).toHaveBeenCalledOnce();
+    expect(mocks.admitAsyncJobInTransaction.mock.calls[0][0]).toEqual(expect.objectContaining({
+      neutralIntake: expect.any(Object),
+    }));
+    expect(mocks.admitAsyncJobInTransaction.mock.calls[0][1]).toMatchObject({
+      operation: "NEUTRAL_INTAKE_EXTRACTION_V1",
+      logicalOperationId: "intake-1",
+      purpose: "NEUTRAL_INTAKE_EXTRACTION",
+      correlationId,
+      inputReference: {
+        referenceType: "NEUTRAL_INTAKE",
+        referenceId: "intake-1",
+        referenceVersion: "V1",
+        metadata: {},
+      },
+      maxAttempts: 1,
+      admission: {
+        admissionType: "AUTHENTICATED_USER",
+        tenantId: "ente-1",
+        initiatingUserId: "actor-1",
+        actor: { actorId: "actor-1", actorEmail: null, actorRole: "ADMIN" },
+      },
+    });
+    expect(JSON.stringify(mocks.admitAsyncJobInTransaction.mock.calls[0][1].inputReference))
+      .not.toMatch(/text|body|bytes|filename|storage|ocr/i);
+  });
+
   it("accepts provider-neutral channels and nullable tenant/user", async () => {
     await createNeutralIntake(input({ ingressChannel: "ARBITRARY_FUTURE_API" }));
     expect(mocks.create).toHaveBeenCalledWith({ data: expect.objectContaining({
@@ -132,11 +178,41 @@ describe("B2C9 Block 3B.1 neutral intake service", () => {
   });
 
   it("accepts tenant and optional user provenance", async () => {
+    mocks.findUser.mockResolvedValueOnce({ ruolo: "TECNICO" });
     await createNeutralIntake(input({ enteId: "ente-1", receivedByUserId: "user-1" }));
     expect(mocks.create).toHaveBeenCalledWith({ data: expect.objectContaining({
       enteId: "ente-1",
       receivedByUserId: "user-1",
     }) });
+    expect(mocks.admitAsyncJobInTransaction).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        inputReference: expect.objectContaining({
+          metadata: { receivedActorId: "actor-1", receivedActorRoleCode: "ADMIN" },
+        }),
+        admission: expect.objectContaining({
+          admissionType: "AUTHENTICATED_USER",
+          initiatingUserId: "user-1",
+          actor: expect.objectContaining({ actorId: "user-1", actorRole: "TECNICO" }),
+        }),
+      }),
+    );
+  });
+
+  it("preserves system receipt actor identity and role without loading a user", async () => {
+    await createNeutralIntake(input());
+    expect(mocks.findUser).not.toHaveBeenCalled();
+    expect(mocks.admitAsyncJobInTransaction).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        inputReference: expect.objectContaining({ metadata: {} }),
+        admission: expect.objectContaining({
+          admissionType: "AUTHORIZED_SYSTEM",
+          initiatingUserId: null,
+          actor: expect.objectContaining({ actorId: "actor-1", actorRole: "ADMIN" }),
+        }),
+      }),
+    );
   });
 
   it("reuses an exact retry without creating a second row", async () => {
@@ -145,6 +221,11 @@ describe("B2C9 Block 3B.1 neutral intake service", () => {
     mocks.findUnique.mockResolvedValue(record());
     await expect(createNeutralIntake(input())).resolves.toMatchObject({ outcome: "REUSED" });
     expect(mocks.create).not.toHaveBeenCalled();
+    expect(mocks.admitAsyncJobInTransaction).toHaveBeenCalledOnce();
+    expect(mocks.admitAsyncJobInTransaction).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ logicalOperationId: "intake-1", availableAt: record().receivedAt }),
+    );
   });
 
   it("keeps event identity stable and fails when the same event changes artifact", async () => {
@@ -197,12 +278,19 @@ describe("B2C9 Block 3B.1 neutral intake service", () => {
     await expect(createNeutralIntake(input())).rejects.toThrow("storage unavailable");
     expect(mocks.findUnique).not.toHaveBeenCalled();
     expect(mocks.create).not.toHaveBeenCalled();
+    expect(mocks.admitAsyncJobInTransaction).not.toHaveBeenCalled();
   });
 
   it("does not attempt an unsafe delete when persistence fails", async () => {
     mocks.create.mockRejectedValueOnce(new Error("database unavailable"));
     await expect(createNeutralIntake(input())).rejects.toThrow("database unavailable");
     expect(mocks.createFile).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not return a committed intake when extraction-job admission fails", async () => {
+    mocks.admitAsyncJobInTransaction.mockRejectedValueOnce(new Error("job admission unavailable"));
+    await expect(createNeutralIntake(input())).rejects.toThrow("job admission unavailable");
+    expect(mocks.create).toHaveBeenCalledOnce();
   });
 
   it("verifies reused object bytes without rewriting them", async () => {

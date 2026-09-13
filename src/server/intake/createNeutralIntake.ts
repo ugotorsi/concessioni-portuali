@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import { admitAsyncJobInTransaction } from "@/server/async-jobs/persistence";
 import { runSerializableTransactionWithRetry } from "@/server/db/serializableTransaction";
 import {
   createDocumentFileIfAbsent,
@@ -16,6 +17,7 @@ import {
   normalizeNeutralIntakeManifest,
   type NeutralIntakeImmutableManifest,
 } from "@/server/intake/neutralIntakeIdentity";
+import { buildNeutralIntakeExtractionAdmission } from "@/server/intake/neutralIntakeExtractionJob";
 
 const nonBlank = z.string().trim().min(1);
 const optionalNonBlank = nonBlank.nullable().optional().transform((value) => value ?? null);
@@ -102,6 +104,18 @@ function isIdempotencyP2002(error: unknown): boolean {
   return Array.isArray(target) && target.length === 1 && target[0] === "idempotencyKey";
 }
 
+function isAsyncJobIdempotencyP2002(error: unknown): boolean {
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
+    return false;
+  }
+  const meta = error.meta as { modelName?: unknown; target?: unknown } | undefined;
+  if (meta?.modelName !== "AsyncJob") return false;
+  const target = meta.target;
+  return target === "AsyncJob_idempotencyKey_key"
+    || target === "idempotencyKey"
+    || (Array.isArray(target) && target.length === 1 && target[0] === "idempotencyKey");
+}
+
 async function findByIdempotencyKey(client: NeutralIntakeClient, idempotencyKey: string) {
   return client.neutralIntake.findUnique({ where: { idempotencyKey } });
 }
@@ -137,6 +151,27 @@ export async function createNeutralIntakeRecordInTransaction(
     },
   });
   return { outcome: "CREATED" as const, intake };
+}
+
+async function createNeutralIntakeWithExtractionJobInTransaction(
+  tx: Prisma.TransactionClient,
+  input: { idempotencyKey: string; manifest: NeutralIntakeImmutableManifest },
+) {
+  const intakeResult = await createNeutralIntakeRecordInTransaction(tx, input);
+  const initiatingUser = intakeResult.intake.receivedByUserId === null
+    ? null
+    : await tx.user.findUnique({
+        where: { id: intakeResult.intake.receivedByUserId },
+        select: { ruolo: true },
+      });
+  const extractionJob = await admitAsyncJobInTransaction(
+    tx,
+    buildNeutralIntakeExtractionAdmission({
+      ...intakeResult.intake,
+      initiatingUserRole: initiatingUser?.ruolo ?? null,
+    }),
+  );
+  return { ...intakeResult, extractionJob: extractionJob.job };
 }
 
 export async function createNeutralIntake(rawInput: CreateNeutralIntakeInput) {
@@ -187,16 +222,13 @@ export async function createNeutralIntake(rawInput: CreateNeutralIntakeInput) {
 
   try {
     return await runSerializableTransactionWithRetry((tx) =>
-      createNeutralIntakeRecordInTransaction(tx, { idempotencyKey, manifest }));
+      createNeutralIntakeWithExtractionJobInTransaction(tx, { idempotencyKey, manifest }));
   } catch (error) {
-    if (!isIdempotencyP2002(error)) {
+    if (!isIdempotencyP2002(error) && !isAsyncJobIdempotencyP2002(error)) {
       throw error;
     }
-    const existing = await findByIdempotencyKey(prisma, idempotencyKey);
-    if (!existing) {
-      throw error;
-    }
-    return reuseOrConflict(existing, manifest);
+    return runSerializableTransactionWithRetry((tx) =>
+      createNeutralIntakeWithExtractionJobInTransaction(tx, { idempotencyKey, manifest }));
   }
 }
 
