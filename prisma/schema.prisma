@@ -657,6 +657,12 @@ enum LegalSourceCandidateResolutionOutcome {
   NO_MATCH
 }
 
+enum LegalReferenceKind {
+  LEGISLATION
+  CODE
+  CASE_LAW
+}
+
 enum AsyncJobStatus {
   QUEUED
   RUNNING
@@ -1654,6 +1660,7 @@ model NeutralIntakeExtractionAttempt {
   neutralIntake          NeutralIntake                         @relation(fields: [neutralIntakeId], references: [id], onDelete: Restrict)
   pages                  NeutralIntakeExtractionPage[]
   classificationAttempts NeutralIntakeClassificationAttempt[]
+  legalReferenceMentions LegalReferenceMention[]
 
   @@unique([id, neutralIntakeId])
   @@index([neutralIntakeId, createdAt])
@@ -1674,10 +1681,39 @@ model NeutralIntakeExtractionPage {
   technicalMetadata        Json?
   createdAt                DateTime                        @default(now())
 
-  extractionAttempt NeutralIntakeExtractionAttempt @relation(fields: [extractionAttemptId], references: [id], onDelete: Restrict)
+  extractionAttempt     NeutralIntakeExtractionAttempt @relation(fields: [extractionAttemptId], references: [id], onDelete: Restrict)
+  legalReferenceMentions LegalReferenceMention[]
 
   @@unique([extractionAttemptId, pageNumber])
+  @@unique([id, extractionAttemptId])
   @@index([textSha256])
+}
+
+model LegalReferenceMention {
+  id                  String             @id @default(cuid())
+  extractionAttemptId String
+  extractionPageId    String
+  discoveryVersion    String
+  kind                LegalReferenceKind
+  observedText        String             @db.VarChar(500)
+  normalizedKey       String             @db.VarChar(500)
+  authorityHint       String?            @db.VarChar(200)
+  actType             String?            @db.VarChar(100)
+  actNumber           String?            @db.VarChar(100)
+  year                Int?
+  article             String?            @db.VarChar(100)
+  subArticle          String?            @db.VarChar(50)
+  chamberSection      String?            @db.VarChar(100)
+  characterStart      Int
+  characterEnd        Int
+  discoveredAt        DateTime           @default(now())
+
+  extractionAttempt NeutralIntakeExtractionAttempt @relation(fields: [extractionAttemptId], references: [id], onDelete: Restrict)
+  extractionPage    NeutralIntakeExtractionPage    @relation(fields: [extractionPageId, extractionAttemptId], references: [id, extractionAttemptId], onDelete: Restrict)
+
+  @@unique([extractionPageId, discoveryVersion, characterStart, characterEnd, normalizedKey])
+  @@index([extractionAttemptId, discoveryVersion])
+  @@index([kind, normalizedKey])
 }
 
 model NeutralIntakeClassificationAttempt {

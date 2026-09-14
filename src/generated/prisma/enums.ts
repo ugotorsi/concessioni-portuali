@@ -893,6 +893,15 @@ export const LegalSourceCandidateResolutionOutcome = {
 export type LegalSourceCandidateResolutionOutcome = (typeof LegalSourceCandidateResolutionOutcome)[keyof typeof LegalSourceCandidateResolutionOutcome]
 
 
+export const LegalReferenceKind = {
+  LEGISLATION: 'LEGISLATION',
+  CODE: 'CODE',
+  CASE_LAW: 'CASE_LAW'
+} as const
+
+export type LegalReferenceKind = (typeof LegalReferenceKind)[keyof typeof LegalReferenceKind]
+
+
 export const AsyncJobStatus = {
   QUEUED: 'QUEUED',
   RUNNING: 'RUNNING',

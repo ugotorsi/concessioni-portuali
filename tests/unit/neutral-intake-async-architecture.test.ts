@@ -8,6 +8,7 @@ const wiring = [
   "src/server/intake/createNeutralIntake.ts",
   "src/server/intake/neutralIntakeExtractionJob.ts",
   "src/server/intake/neutralIntakeClassificationJob.ts",
+  "src/server/intake/neutralIntakeLegalReferenceDiscoveryJob.ts",
   "src/server/async-jobs/applicationWorker.ts",
 ].map((file) => readFileSync(resolve(root, file), "utf8")).join("\n");
 const genericCore = ["domain.ts", "persistence.ts", "registry.ts", "worker.ts"]
@@ -28,8 +29,9 @@ describe("B2C9 Block 3B.2C async extraction architecture", () => {
     expect(wiring).not.toMatch(/tesseract|pdfjs|recognize\(|renderPage\(/i);
   });
 
-  it("wires only local classification after extraction without handoff or routing", () => {
+  it("coexists with local classification on the same post-extraction worker", () => {
     expect(wiring).toContain("NEUTRAL_INTAKE_CLASSIFICATION_V1");
+    expect(wiring).toContain("LEGAL_REFERENCE_DISCOVERY_V1");
     expect(wiring).toContain("classifyNeutralIntakeInTransaction");
     expect(wiring).not.toMatch(/openai|AiOutboundAnalysisProvider|fascicoloOutboundProjection|simpliciter/i);
     expect(wiring).not.toMatch(/LegalSource|Case Guardian|CaseGuardian/);

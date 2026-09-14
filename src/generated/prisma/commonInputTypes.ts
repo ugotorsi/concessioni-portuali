@@ -1486,6 +1486,23 @@ export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedFloatNullableFilter<$PrismaModel>
 }
 
+export type EnumLegalReferenceKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalReferenceKind | Prisma.EnumLegalReferenceKindFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalReferenceKind[] | Prisma.ListEnumLegalReferenceKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalReferenceKind[] | Prisma.ListEnumLegalReferenceKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalReferenceKindFilter<$PrismaModel> | $Enums.LegalReferenceKind
+}
+
+export type EnumLegalReferenceKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalReferenceKind | Prisma.EnumLegalReferenceKindFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalReferenceKind[] | Prisma.ListEnumLegalReferenceKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalReferenceKind[] | Prisma.ListEnumLegalReferenceKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalReferenceKindWithAggregatesFilter<$PrismaModel> | $Enums.LegalReferenceKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalReferenceKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalReferenceKindFilter<$PrismaModel>
+}
+
 export type EnumNeutralIntakeClassificationOutcomeFilter<$PrismaModel = never> = {
   equals?: $Enums.NeutralIntakeClassificationOutcome | Prisma.EnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
   in?: $Enums.NeutralIntakeClassificationOutcome[] | Prisma.ListEnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
@@ -3339,6 +3356,23 @@ export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
   _sum?: Prisma.NestedFloatNullableFilter<$PrismaModel>
   _min?: Prisma.NestedFloatNullableFilter<$PrismaModel>
   _max?: Prisma.NestedFloatNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumLegalReferenceKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalReferenceKind | Prisma.EnumLegalReferenceKindFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalReferenceKind[] | Prisma.ListEnumLegalReferenceKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalReferenceKind[] | Prisma.ListEnumLegalReferenceKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalReferenceKindFilter<$PrismaModel> | $Enums.LegalReferenceKind
+}
+
+export type NestedEnumLegalReferenceKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalReferenceKind | Prisma.EnumLegalReferenceKindFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalReferenceKind[] | Prisma.ListEnumLegalReferenceKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalReferenceKind[] | Prisma.ListEnumLegalReferenceKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalReferenceKindWithAggregatesFilter<$PrismaModel> | $Enums.LegalReferenceKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalReferenceKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalReferenceKindFilter<$PrismaModel>
 }
 
 export type NestedEnumNeutralIntakeClassificationOutcomeFilter<$PrismaModel = never> = {

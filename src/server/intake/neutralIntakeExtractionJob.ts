@@ -6,6 +6,7 @@ import { AsyncJobExecutionError } from "@/server/async-jobs/worker";
 
 import { extractNeutralIntake } from "./extractNeutralIntake";
 import { ensureNeutralIntakeClassificationJob } from "./neutralIntakeClassificationJob";
+import { ensureLegalReferenceDiscoveryJob } from "./neutralIntakeLegalReferenceDiscoveryJob";
 
 export {
   buildNeutralIntakeExtractionAdmission,
@@ -50,6 +51,11 @@ export interface NeutralIntakeExtractionHandlerDependencies {
     neutralIntakeId: string;
     extractionAttemptId?: string;
   }): ReturnType<typeof ensureNeutralIntakeClassificationJob>;
+  ensureLegalReferenceDiscovery(input: {
+    sourceJobId: string;
+    neutralIntakeId: string;
+    extractionAttemptId?: string;
+  }): ReturnType<typeof ensureLegalReferenceDiscoveryJob>;
 }
 
 const defaultDependencies: NeutralIntakeExtractionHandlerDependencies = {
@@ -68,6 +74,7 @@ const defaultDependencies: NeutralIntakeExtractionHandlerDependencies = {
   },
   extract: (neutralIntakeId) => extractNeutralIntake(neutralIntakeId),
   ensureClassification: (input) => ensureNeutralIntakeClassificationJob(input),
+  ensureLegalReferenceDiscovery: (input) => ensureLegalReferenceDiscoveryJob(input),
 };
 
 async function ensureClassificationAdmission(
@@ -80,6 +87,28 @@ async function ensureClassificationAdmission(
     if (error instanceof AsyncJobExecutionError) throw error;
     throw new AsyncJobExecutionError("CLASSIFICATION_ADMISSION", "CLASSIFICATION_ADMISSION_FAILED", true);
   }
+}
+
+async function ensureDiscoveryAdmission(
+  dependencies: NeutralIntakeExtractionHandlerDependencies,
+  input: { sourceJobId: string; neutralIntakeId: string; extractionAttemptId?: string },
+) {
+  try {
+    await dependencies.ensureLegalReferenceDiscovery(input);
+  } catch (error) {
+    if (error instanceof AsyncJobExecutionError) throw error;
+    throw new AsyncJobExecutionError("LEGAL_REFERENCE_DISCOVERY_ADMISSION", "DISCOVERY_ADMISSION_FAILED", true);
+  }
+}
+
+function ensurePostExtractionAdmissions(
+  dependencies: NeutralIntakeExtractionHandlerDependencies,
+  input: { sourceJobId: string; neutralIntakeId: string; extractionAttemptId?: string },
+) {
+  return Promise.all([
+    ensureClassificationAdmission(dependencies, input),
+    ensureDiscoveryAdmission(dependencies, input),
+  ]);
 }
 
 async function executeExtraction(
@@ -111,7 +140,7 @@ async function executeExtraction(
     throw new AsyncJobExecutionError("CANCELLATION", "CANCELLATION_REQUESTED", false);
   }
   if (authority.intake.status !== "RECEIVED") {
-    await ensureClassificationAdmission(dependencies, {
+    await ensurePostExtractionAdmissions(dependencies, {
       sourceJobId: context.jobId,
       neutralIntakeId: input.referenceId,
     });
@@ -149,7 +178,7 @@ async function executeExtraction(
     throw new AsyncJobExecutionError("EXTRACTION", "EVIDENCE_READY_NOT_CONFIRMED", false);
   }
   const persistedAttempt = persistedAttemptReferenceSchema.parse(result.attempt);
-  await ensureClassificationAdmission(dependencies, {
+  await ensurePostExtractionAdmissions(dependencies, {
     sourceJobId: context.jobId,
     neutralIntakeId: input.referenceId,
     extractionAttemptId: persistedAttempt.id,

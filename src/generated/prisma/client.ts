@@ -192,6 +192,11 @@ export type NeutralIntakeExtractionAttempt = Prisma.NeutralIntakeExtractionAttem
  */
 export type NeutralIntakeExtractionPage = Prisma.NeutralIntakeExtractionPageModel
 /**
+ * Model LegalReferenceMention
+ * 
+ */
+export type LegalReferenceMention = Prisma.LegalReferenceMentionModel
+/**
  * Model NeutralIntakeClassificationAttempt
  * 
  */

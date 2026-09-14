@@ -273,6 +273,7 @@ export type NeutralIntakeExtractionPageWhereInput = {
   technicalMetadata?: Prisma.JsonNullableFilter<"NeutralIntakeExtractionPage">
   createdAt?: Prisma.DateTimeFilter<"NeutralIntakeExtractionPage"> | Date | string
   extractionAttempt?: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptScalarRelationFilter, Prisma.NeutralIntakeExtractionAttemptWhereInput>
+  legalReferenceMentions?: Prisma.LegalReferenceMentionListRelationFilter
 }
 
 export type NeutralIntakeExtractionPageOrderByWithRelationInput = {
@@ -289,11 +290,13 @@ export type NeutralIntakeExtractionPageOrderByWithRelationInput = {
   technicalMetadata?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptOrderByWithRelationInput
+  legalReferenceMentions?: Prisma.LegalReferenceMentionOrderByRelationAggregateInput
 }
 
 export type NeutralIntakeExtractionPageWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   extractionAttemptId_pageNumber?: Prisma.NeutralIntakeExtractionPageExtractionAttemptIdPageNumberCompoundUniqueInput
+  id_extractionAttemptId?: Prisma.NeutralIntakeExtractionPageIdExtractionAttemptIdCompoundUniqueInput
   AND?: Prisma.NeutralIntakeExtractionPageWhereInput | Prisma.NeutralIntakeExtractionPageWhereInput[]
   OR?: Prisma.NeutralIntakeExtractionPageWhereInput[]
   NOT?: Prisma.NeutralIntakeExtractionPageWhereInput | Prisma.NeutralIntakeExtractionPageWhereInput[]
@@ -309,7 +312,8 @@ export type NeutralIntakeExtractionPageWhereUniqueInput = Prisma.AtLeast<{
   technicalMetadata?: Prisma.JsonNullableFilter<"NeutralIntakeExtractionPage">
   createdAt?: Prisma.DateTimeFilter<"NeutralIntakeExtractionPage"> | Date | string
   extractionAttempt?: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptScalarRelationFilter, Prisma.NeutralIntakeExtractionAttemptWhereInput>
-}, "id" | "extractionAttemptId_pageNumber">
+  legalReferenceMentions?: Prisma.LegalReferenceMentionListRelationFilter
+}, "id" | "extractionAttemptId_pageNumber" | "id_extractionAttemptId">
 
 export type NeutralIntakeExtractionPageOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -362,6 +366,7 @@ export type NeutralIntakeExtractionPageCreateInput = {
   technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   extractionAttempt: Prisma.NeutralIntakeExtractionAttemptCreateNestedOneWithoutPagesInput
+  legalReferenceMentions?: Prisma.LegalReferenceMentionCreateNestedManyWithoutExtractionPageInput
 }
 
 export type NeutralIntakeExtractionPageUncheckedCreateInput = {
@@ -377,6 +382,7 @@ export type NeutralIntakeExtractionPageUncheckedCreateInput = {
   warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
+  legalReferenceMentions?: Prisma.LegalReferenceMentionUncheckedCreateNestedManyWithoutExtractionPageInput
 }
 
 export type NeutralIntakeExtractionPageUpdateInput = {
@@ -392,6 +398,7 @@ export type NeutralIntakeExtractionPageUpdateInput = {
   technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptUpdateOneRequiredWithoutPagesNestedInput
+  legalReferenceMentions?: Prisma.LegalReferenceMentionUpdateManyWithoutExtractionPageNestedInput
 }
 
 export type NeutralIntakeExtractionPageUncheckedUpdateInput = {
@@ -407,6 +414,7 @@ export type NeutralIntakeExtractionPageUncheckedUpdateInput = {
   warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  legalReferenceMentions?: Prisma.LegalReferenceMentionUncheckedUpdateManyWithoutExtractionPageNestedInput
 }
 
 export type NeutralIntakeExtractionPageCreateManyInput = {
@@ -468,6 +476,11 @@ export type NeutralIntakeExtractionPageExtractionAttemptIdPageNumberCompoundUniq
   pageNumber: number
 }
 
+export type NeutralIntakeExtractionPageIdExtractionAttemptIdCompoundUniqueInput = {
+  id: string
+  extractionAttemptId: string
+}
+
 export type NeutralIntakeExtractionPageCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   extractionAttemptId?: Prisma.SortOrder
@@ -519,6 +532,11 @@ export type NeutralIntakeExtractionPageSumOrderByAggregateInput = {
   pageNumber?: Prisma.SortOrder
   normalizedCharacterCount?: Prisma.SortOrder
   ocrConfidence?: Prisma.SortOrder
+}
+
+export type NeutralIntakeExtractionPageScalarRelationFilter = {
+  is?: Prisma.NeutralIntakeExtractionPageWhereInput
+  isNot?: Prisma.NeutralIntakeExtractionPageWhereInput
 }
 
 export type NeutralIntakeExtractionPageCreateNestedManyWithoutExtractionAttemptInput = {
@@ -575,6 +593,20 @@ export type NullableFloatFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type NeutralIntakeExtractionPageCreateNestedOneWithoutLegalReferenceMentionsInput = {
+  create?: Prisma.XOR<Prisma.NeutralIntakeExtractionPageCreateWithoutLegalReferenceMentionsInput, Prisma.NeutralIntakeExtractionPageUncheckedCreateWithoutLegalReferenceMentionsInput>
+  connectOrCreate?: Prisma.NeutralIntakeExtractionPageCreateOrConnectWithoutLegalReferenceMentionsInput
+  connect?: Prisma.NeutralIntakeExtractionPageWhereUniqueInput
+}
+
+export type NeutralIntakeExtractionPageUpdateOneRequiredWithoutLegalReferenceMentionsNestedInput = {
+  create?: Prisma.XOR<Prisma.NeutralIntakeExtractionPageCreateWithoutLegalReferenceMentionsInput, Prisma.NeutralIntakeExtractionPageUncheckedCreateWithoutLegalReferenceMentionsInput>
+  connectOrCreate?: Prisma.NeutralIntakeExtractionPageCreateOrConnectWithoutLegalReferenceMentionsInput
+  upsert?: Prisma.NeutralIntakeExtractionPageUpsertWithoutLegalReferenceMentionsInput
+  connect?: Prisma.NeutralIntakeExtractionPageWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.NeutralIntakeExtractionPageUpdateToOneWithWhereWithoutLegalReferenceMentionsInput, Prisma.NeutralIntakeExtractionPageUpdateWithoutLegalReferenceMentionsInput>, Prisma.NeutralIntakeExtractionPageUncheckedUpdateWithoutLegalReferenceMentionsInput>
+}
+
 export type NeutralIntakeExtractionPageCreateWithoutExtractionAttemptInput = {
   id?: string
   pageNumber: number
@@ -587,6 +619,7 @@ export type NeutralIntakeExtractionPageCreateWithoutExtractionAttemptInput = {
   warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
+  legalReferenceMentions?: Prisma.LegalReferenceMentionCreateNestedManyWithoutExtractionPageInput
 }
 
 export type NeutralIntakeExtractionPageUncheckedCreateWithoutExtractionAttemptInput = {
@@ -601,6 +634,7 @@ export type NeutralIntakeExtractionPageUncheckedCreateWithoutExtractionAttemptIn
   warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
+  legalReferenceMentions?: Prisma.LegalReferenceMentionUncheckedCreateNestedManyWithoutExtractionPageInput
 }
 
 export type NeutralIntakeExtractionPageCreateOrConnectWithoutExtractionAttemptInput = {
@@ -647,6 +681,82 @@ export type NeutralIntakeExtractionPageScalarWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"NeutralIntakeExtractionPage"> | Date | string
 }
 
+export type NeutralIntakeExtractionPageCreateWithoutLegalReferenceMentionsInput = {
+  id?: string
+  pageNumber: number
+  extractionMethod: $Enums.NeutralIntakeExtractionMethod
+  text: string
+  normalizedText: string
+  textSha256: string
+  normalizedCharacterCount: number
+  ocrConfidence?: number | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  extractionAttempt: Prisma.NeutralIntakeExtractionAttemptCreateNestedOneWithoutPagesInput
+}
+
+export type NeutralIntakeExtractionPageUncheckedCreateWithoutLegalReferenceMentionsInput = {
+  id?: string
+  extractionAttemptId: string
+  pageNumber: number
+  extractionMethod: $Enums.NeutralIntakeExtractionMethod
+  text: string
+  normalizedText: string
+  textSha256: string
+  normalizedCharacterCount: number
+  ocrConfidence?: number | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+}
+
+export type NeutralIntakeExtractionPageCreateOrConnectWithoutLegalReferenceMentionsInput = {
+  where: Prisma.NeutralIntakeExtractionPageWhereUniqueInput
+  create: Prisma.XOR<Prisma.NeutralIntakeExtractionPageCreateWithoutLegalReferenceMentionsInput, Prisma.NeutralIntakeExtractionPageUncheckedCreateWithoutLegalReferenceMentionsInput>
+}
+
+export type NeutralIntakeExtractionPageUpsertWithoutLegalReferenceMentionsInput = {
+  update: Prisma.XOR<Prisma.NeutralIntakeExtractionPageUpdateWithoutLegalReferenceMentionsInput, Prisma.NeutralIntakeExtractionPageUncheckedUpdateWithoutLegalReferenceMentionsInput>
+  create: Prisma.XOR<Prisma.NeutralIntakeExtractionPageCreateWithoutLegalReferenceMentionsInput, Prisma.NeutralIntakeExtractionPageUncheckedCreateWithoutLegalReferenceMentionsInput>
+  where?: Prisma.NeutralIntakeExtractionPageWhereInput
+}
+
+export type NeutralIntakeExtractionPageUpdateToOneWithWhereWithoutLegalReferenceMentionsInput = {
+  where?: Prisma.NeutralIntakeExtractionPageWhereInput
+  data: Prisma.XOR<Prisma.NeutralIntakeExtractionPageUpdateWithoutLegalReferenceMentionsInput, Prisma.NeutralIntakeExtractionPageUncheckedUpdateWithoutLegalReferenceMentionsInput>
+}
+
+export type NeutralIntakeExtractionPageUpdateWithoutLegalReferenceMentionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  pageNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  extractionMethod?: Prisma.EnumNeutralIntakeExtractionMethodFieldUpdateOperationsInput | $Enums.NeutralIntakeExtractionMethod
+  text?: Prisma.StringFieldUpdateOperationsInput | string
+  normalizedText?: Prisma.StringFieldUpdateOperationsInput | string
+  textSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  normalizedCharacterCount?: Prisma.IntFieldUpdateOperationsInput | number
+  ocrConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptUpdateOneRequiredWithoutPagesNestedInput
+}
+
+export type NeutralIntakeExtractionPageUncheckedUpdateWithoutLegalReferenceMentionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  extractionAttemptId?: Prisma.StringFieldUpdateOperationsInput | string
+  pageNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  extractionMethod?: Prisma.EnumNeutralIntakeExtractionMethodFieldUpdateOperationsInput | $Enums.NeutralIntakeExtractionMethod
+  text?: Prisma.StringFieldUpdateOperationsInput | string
+  normalizedText?: Prisma.StringFieldUpdateOperationsInput | string
+  textSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  normalizedCharacterCount?: Prisma.IntFieldUpdateOperationsInput | number
+  ocrConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type NeutralIntakeExtractionPageCreateManyExtractionAttemptInput = {
   id?: string
   pageNumber: number
@@ -673,6 +783,7 @@ export type NeutralIntakeExtractionPageUpdateWithoutExtractionAttemptInput = {
   warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  legalReferenceMentions?: Prisma.LegalReferenceMentionUpdateManyWithoutExtractionPageNestedInput
 }
 
 export type NeutralIntakeExtractionPageUncheckedUpdateWithoutExtractionAttemptInput = {
@@ -687,6 +798,7 @@ export type NeutralIntakeExtractionPageUncheckedUpdateWithoutExtractionAttemptIn
   warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  legalReferenceMentions?: Prisma.LegalReferenceMentionUncheckedUpdateManyWithoutExtractionPageNestedInput
 }
 
 export type NeutralIntakeExtractionPageUncheckedUpdateManyWithoutExtractionAttemptInput = {
@@ -704,6 +816,35 @@ export type NeutralIntakeExtractionPageUncheckedUpdateManyWithoutExtractionAttem
 }
 
 
+/**
+ * Count Type NeutralIntakeExtractionPageCountOutputType
+ */
+
+export type NeutralIntakeExtractionPageCountOutputType = {
+  legalReferenceMentions: number
+}
+
+export type NeutralIntakeExtractionPageCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  legalReferenceMentions?: boolean | NeutralIntakeExtractionPageCountOutputTypeCountLegalReferenceMentionsArgs
+}
+
+/**
+ * NeutralIntakeExtractionPageCountOutputType without action
+ */
+export type NeutralIntakeExtractionPageCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the NeutralIntakeExtractionPageCountOutputType
+   */
+  select?: Prisma.NeutralIntakeExtractionPageCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * NeutralIntakeExtractionPageCountOutputType without action
+ */
+export type NeutralIntakeExtractionPageCountOutputTypeCountLegalReferenceMentionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LegalReferenceMentionWhereInput
+}
+
 
 export type NeutralIntakeExtractionPageSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -719,6 +860,8 @@ export type NeutralIntakeExtractionPageSelect<ExtArgs extends runtime.Types.Exte
   technicalMetadata?: boolean
   createdAt?: boolean
   extractionAttempt?: boolean | Prisma.NeutralIntakeExtractionAttemptDefaultArgs<ExtArgs>
+  legalReferenceMentions?: boolean | Prisma.NeutralIntakeExtractionPage$legalReferenceMentionsArgs<ExtArgs>
+  _count?: boolean | Prisma.NeutralIntakeExtractionPageCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["neutralIntakeExtractionPage"]>
 
 export type NeutralIntakeExtractionPageSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -771,6 +914,8 @@ export type NeutralIntakeExtractionPageSelectScalar = {
 export type NeutralIntakeExtractionPageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "extractionAttemptId" | "pageNumber" | "extractionMethod" | "text" | "normalizedText" | "textSha256" | "normalizedCharacterCount" | "ocrConfidence" | "warnings" | "technicalMetadata" | "createdAt", ExtArgs["result"]["neutralIntakeExtractionPage"]>
 export type NeutralIntakeExtractionPageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   extractionAttempt?: boolean | Prisma.NeutralIntakeExtractionAttemptDefaultArgs<ExtArgs>
+  legalReferenceMentions?: boolean | Prisma.NeutralIntakeExtractionPage$legalReferenceMentionsArgs<ExtArgs>
+  _count?: boolean | Prisma.NeutralIntakeExtractionPageCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type NeutralIntakeExtractionPageIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   extractionAttempt?: boolean | Prisma.NeutralIntakeExtractionAttemptDefaultArgs<ExtArgs>
@@ -783,6 +928,7 @@ export type $NeutralIntakeExtractionPagePayload<ExtArgs extends runtime.Types.Ex
   name: "NeutralIntakeExtractionPage"
   objects: {
     extractionAttempt: Prisma.$NeutralIntakeExtractionAttemptPayload<ExtArgs>
+    legalReferenceMentions: Prisma.$LegalReferenceMentionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1192,6 +1338,7 @@ readonly fields: NeutralIntakeExtractionPageFieldRefs;
 export interface Prisma__NeutralIntakeExtractionPageClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   extractionAttempt<T extends Prisma.NeutralIntakeExtractionAttemptDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NeutralIntakeExtractionAttemptDefaultArgs<ExtArgs>>): Prisma.Prisma__NeutralIntakeExtractionAttemptClient<runtime.Types.Result.GetResult<Prisma.$NeutralIntakeExtractionAttemptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  legalReferenceMentions<T extends Prisma.NeutralIntakeExtractionPage$legalReferenceMentionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NeutralIntakeExtractionPage$legalReferenceMentionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LegalReferenceMentionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1631,6 +1778,30 @@ export type NeutralIntakeExtractionPageDeleteManyArgs<ExtArgs extends runtime.Ty
    * Limit how many NeutralIntakeExtractionPages to delete.
    */
   limit?: number
+}
+
+/**
+ * NeutralIntakeExtractionPage.legalReferenceMentions
+ */
+export type NeutralIntakeExtractionPage$legalReferenceMentionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LegalReferenceMention
+   */
+  select?: Prisma.LegalReferenceMentionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LegalReferenceMention
+   */
+  omit?: Prisma.LegalReferenceMentionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LegalReferenceMentionInclude<ExtArgs> | null
+  where?: Prisma.LegalReferenceMentionWhereInput
+  orderBy?: Prisma.LegalReferenceMentionOrderByWithRelationInput | Prisma.LegalReferenceMentionOrderByWithRelationInput[]
+  cursor?: Prisma.LegalReferenceMentionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LegalReferenceMentionScalarFieldEnum | Prisma.LegalReferenceMentionScalarFieldEnum[]
 }
 
 /**
