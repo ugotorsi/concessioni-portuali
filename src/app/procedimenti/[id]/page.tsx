@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { SubmitButtonPending } from "@/components/forms/SubmitButtonPending";
 import { GravitaBadge, StatoBadge as CriticitaStatoBadge } from "@/components/criticita/CriticitaBadges";
 import { EntityDocumentsPanel } from "@/components/documents/EntityDocumentsPanel";
+import { NeutralIntakeProcessingPanel } from "@/components/documents/NeutralIntakeProcessingPanel";
 import { AppShell } from "@/components/layout/AppShell";
 import {
   AiFascicoloTrustedReviewPanel,
@@ -59,6 +60,7 @@ import { getFascicoloDocumentRequirementEvidenceData } from "@/server/queries/fa
 import { getFascicoloDocumentRequirementProposals } from "@/server/queries/fascicolo-document-requirements";
 import { getFascicoloObservations } from "@/server/queries/fascicolo-observations";
 import { getNormeForProcedimento } from "@/server/queries/normativa";
+import { getFascicoloProcessingItems } from "@/server/queries/neutral-intake-processing";
 import { getAiFascicoloHumanReviewReadModel } from "@/server/queries/ai-fascicolo-human-review";
 import { getAiFascicoloTrustedReviewMaterialsReadModel } from "@/server/queries/ai-fascicolo-trusted-review-materials";
 
@@ -148,6 +150,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
     notFound();
   }
 
+  const processingItems = await getFascicoloProcessingItems(detail.procedimento.id);
   const fascicoloObservations = await getFascicoloObservations(detail.procedimento.id);
   const fascicoloDocumentRequirements = await getFascicoloDocumentRequirementProposals(detail.procedimento.id);
   const fascicoloDocumentRequirementEvidence = await getFascicoloDocumentRequirementEvidenceData(detail.procedimento.id);
@@ -267,6 +270,8 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           documents={detail.documentiPrincipali}
           canUpload={canWriteChecklist}
         />
+
+        <NeutralIntakeProcessingPanel items={processingItems} />
 
         <section className="grid gap-4 xl:grid-cols-2">
           <Card>
