@@ -885,6 +885,14 @@ export const NeutralIntakeClassificationConfidence = {
 export type NeutralIntakeClassificationConfidence = (typeof NeutralIntakeClassificationConfidence)[keyof typeof NeutralIntakeClassificationConfidence]
 
 
+export const LegalSourceCandidateResolutionOutcome = {
+  LINKED: 'LINKED',
+  NO_MATCH: 'NO_MATCH'
+} as const
+
+export type LegalSourceCandidateResolutionOutcome = (typeof LegalSourceCandidateResolutionOutcome)[keyof typeof LegalSourceCandidateResolutionOutcome]
+
+
 export const AsyncJobStatus = {
   QUEUED: 'QUEUED',
   RUNNING: 'RUNNING',

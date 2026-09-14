@@ -1571,6 +1571,23 @@ export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
   _max?: Prisma.NestedJsonFilter<$PrismaModel>
 }
 
+export type EnumLegalSourceCandidateResolutionOutcomeFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceCandidateResolutionOutcome | Prisma.EnumLegalSourceCandidateResolutionOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceCandidateResolutionOutcome[] | Prisma.ListEnumLegalSourceCandidateResolutionOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceCandidateResolutionOutcome[] | Prisma.ListEnumLegalSourceCandidateResolutionOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceCandidateResolutionOutcomeFilter<$PrismaModel> | $Enums.LegalSourceCandidateResolutionOutcome
+}
+
+export type EnumLegalSourceCandidateResolutionOutcomeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceCandidateResolutionOutcome | Prisma.EnumLegalSourceCandidateResolutionOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceCandidateResolutionOutcome[] | Prisma.ListEnumLegalSourceCandidateResolutionOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceCandidateResolutionOutcome[] | Prisma.ListEnumLegalSourceCandidateResolutionOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceCandidateResolutionOutcomeWithAggregatesFilter<$PrismaModel> | $Enums.LegalSourceCandidateResolutionOutcome
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalSourceCandidateResolutionOutcomeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalSourceCandidateResolutionOutcomeFilter<$PrismaModel>
+}
+
 export type EnumAsyncJobAdmissionTypeFilter<$PrismaModel = never> = {
   equals?: $Enums.AsyncJobAdmissionType | Prisma.EnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
   in?: $Enums.AsyncJobAdmissionType[] | Prisma.ListEnumAsyncJobAdmissionTypeFieldRefInput<$PrismaModel>
@@ -3380,6 +3397,23 @@ export type NestedJsonFilterBase<$PrismaModel = never> = {
   gt?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   gte?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   not?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | Prisma.JsonNullValueFilter
+}
+
+export type NestedEnumLegalSourceCandidateResolutionOutcomeFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceCandidateResolutionOutcome | Prisma.EnumLegalSourceCandidateResolutionOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceCandidateResolutionOutcome[] | Prisma.ListEnumLegalSourceCandidateResolutionOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceCandidateResolutionOutcome[] | Prisma.ListEnumLegalSourceCandidateResolutionOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceCandidateResolutionOutcomeFilter<$PrismaModel> | $Enums.LegalSourceCandidateResolutionOutcome
+}
+
+export type NestedEnumLegalSourceCandidateResolutionOutcomeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalSourceCandidateResolutionOutcome | Prisma.EnumLegalSourceCandidateResolutionOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalSourceCandidateResolutionOutcome[] | Prisma.ListEnumLegalSourceCandidateResolutionOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalSourceCandidateResolutionOutcome[] | Prisma.ListEnumLegalSourceCandidateResolutionOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalSourceCandidateResolutionOutcomeWithAggregatesFilter<$PrismaModel> | $Enums.LegalSourceCandidateResolutionOutcome
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalSourceCandidateResolutionOutcomeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalSourceCandidateResolutionOutcomeFilter<$PrismaModel>
 }
 
 export type NestedEnumAsyncJobAdmissionTypeFilter<$PrismaModel = never> = {

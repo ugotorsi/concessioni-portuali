@@ -84,6 +84,7 @@ export const ModelName = {
   NeutralIntakeClassificationAttempt: 'NeutralIntakeClassificationAttempt',
   NeutralIntakeDestination: 'NeutralIntakeDestination',
   LegalSourceCandidateAdmission: 'LegalSourceCandidateAdmission',
+  LegalSourceCandidateResolution: 'LegalSourceCandidateResolution',
   AsyncJob: 'AsyncJob',
   FascicoloObservation: 'FascicoloObservation',
   FascicoloChecklistEvidence: 'FascicoloChecklistEvidence',
@@ -857,6 +858,22 @@ export const LegalSourceCandidateAdmissionScalarFieldEnum = {
 } as const
 
 export type LegalSourceCandidateAdmissionScalarFieldEnum = (typeof LegalSourceCandidateAdmissionScalarFieldEnum)[keyof typeof LegalSourceCandidateAdmissionScalarFieldEnum]
+
+
+export const LegalSourceCandidateResolutionScalarFieldEnum = {
+  id: 'id',
+  admissionId: 'admissionId',
+  outcome: 'outcome',
+  legalSourceId: 'legalSourceId',
+  reviewedByUserId: 'reviewedByUserId',
+  reviewedByActorId: 'reviewedByActorId',
+  reviewedByEmail: 'reviewedByEmail',
+  reviewedByRole: 'reviewedByRole',
+  resolvedAt: 'resolvedAt',
+  reviewNote: 'reviewNote'
+} as const
+
+export type LegalSourceCandidateResolutionScalarFieldEnum = (typeof LegalSourceCandidateResolutionScalarFieldEnum)[keyof typeof LegalSourceCandidateResolutionScalarFieldEnum]
 
 
 export const AsyncJobScalarFieldEnum = {

@@ -652,6 +652,11 @@ enum NeutralIntakeClassificationConfidence {
   INSUFFICIENT
 }
 
+enum LegalSourceCandidateResolutionOutcome {
+  LINKED
+  NO_MATCH
+}
+
 enum AsyncJobStatus {
   QUEUED
   RUNNING
@@ -846,6 +851,7 @@ model LegalSource {
   acquisitions                 LegalSourceAcquisition[]
   identityAssertions           LegalSourceIdentityAssertion[]
   legacyNormaFonti             NormaFonte[]
+  candidateResolutions         LegalSourceCandidateResolution[]
 
   @@unique([identityNamespace, identityScopeKey, canonicalKey])
   @@index([sourceType])
@@ -1123,6 +1129,7 @@ model User {
   documentFileVersionsCreated                    DocumentFileVersion[]                         @relation("DocumentFileVersionCreatedBy")
   neutralIntakesReceived                         NeutralIntake[]                               @relation("NeutralIntakeReceivedBy")
   neutralIntakeDestinationsEstablished           NeutralIntakeDestination[]                   @relation("NeutralIntakeDestinationEstablishedBy")
+  legalSourceCandidateResolutionsReviewed        LegalSourceCandidateResolution[]             @relation("LegalSourceCandidateResolutionReviewedBy")
   asyncJobsInitiated                             AsyncJob[]                                    @relation("AsyncJobInitiatedBy")
   documentRequirementEvidenceReviews            FascicoloDocumentRequirementEvidenceReview[] @relation("DocumentRequirementEvidenceReviewedBy")
   aiFascicoloHumanReviewEvents                   AiFascicoloHumanReviewEvent[]
@@ -1735,10 +1742,32 @@ model LegalSourceCandidateAdmission {
   ente                  Ente?                               @relation(fields: [enteId], references: [id], onDelete: Restrict)
   neutralIntake         NeutralIntake                       @relation(fields: [neutralIntakeId], references: [id], onDelete: Restrict)
   classificationAttempt NeutralIntakeClassificationAttempt @relation(fields: [classificationAttemptId, neutralIntakeId, extractionAttemptId, evidenceHash, classifierVersion, classificationOutcome], references: [id, neutralIntakeId, extractionAttemptId, evidenceHash, classifierVersion, outcome], onDelete: Restrict)
+  resolution            LegalSourceCandidateResolution?
 
   @@unique([neutralIntakeId, classificationAttemptId, evidenceHash, contractVersion])
   @@index([enteId, admittedAt])
   @@index([classificationAttemptId])
+}
+
+model LegalSourceCandidateResolution {
+  id                  String                                @id @default(cuid())
+  admissionId         String                                @unique
+  outcome             LegalSourceCandidateResolutionOutcome
+  legalSourceId       String?
+  reviewedByUserId    String?
+  reviewedByActorId   String
+  reviewedByEmail     String
+  reviewedByRole      String
+  resolvedAt          DateTime                              @default(now())
+  reviewNote          String?                               @db.VarChar(2000)
+
+  admission       LegalSourceCandidateAdmission @relation(fields: [admissionId], references: [id], onDelete: Restrict)
+  legalSource     LegalSource?                  @relation(fields: [legalSourceId], references: [id], onDelete: Restrict)
+  reviewedByUser User?                         @relation("LegalSourceCandidateResolutionReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([legalSourceId])
+  @@index([reviewedByUserId])
+  @@index([outcome, resolvedAt])
 }
 
 model AsyncJob {
