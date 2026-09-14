@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { SubmitButtonPending } from "@/components/forms/SubmitButtonPending";
 import { GravitaBadge, StatoBadge as CriticitaStatoBadge } from "@/components/criticita/CriticitaBadges";
 import { EntityDocumentsPanel } from "@/components/documents/EntityDocumentsPanel";
+import { LegalSourceCandidatesPanel } from "@/components/documents/LegalSourceCandidatesPanel";
 import { NeutralIntakeProcessingPanel } from "@/components/documents/NeutralIntakeProcessingPanel";
 import { AppShell } from "@/components/layout/AppShell";
 import {
@@ -58,6 +59,7 @@ import { getLetturaProcedimentale, getProcedimentoDetail } from "@/server/querie
 import { getChecklistEvidenceData } from "@/server/queries/checklist-evidence";
 import { getFascicoloDocumentRequirementEvidenceData } from "@/server/queries/fascicolo-document-requirement-evidence";
 import { getFascicoloDocumentRequirementProposals } from "@/server/queries/fascicolo-document-requirements";
+import { getFascicoloLegalSourceCandidates } from "@/server/queries/fascicolo-legal-source-candidates";
 import { getFascicoloObservations } from "@/server/queries/fascicolo-observations";
 import { getNormeForProcedimento } from "@/server/queries/normativa";
 import { getFascicoloProcessingItems } from "@/server/queries/neutral-intake-processing";
@@ -151,6 +153,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   }
 
   const processingItems = await getFascicoloProcessingItems(detail.procedimento.id);
+  const legalSourceCandidates = await getFascicoloLegalSourceCandidates(detail.procedimento.id);
   const fascicoloObservations = await getFascicoloObservations(detail.procedimento.id);
   const fascicoloDocumentRequirements = await getFascicoloDocumentRequirementProposals(detail.procedimento.id);
   const fascicoloDocumentRequirementEvidence = await getFascicoloDocumentRequirementEvidenceData(detail.procedimento.id);
@@ -272,6 +275,8 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
         />
 
         <NeutralIntakeProcessingPanel items={processingItems} />
+
+  <LegalSourceCandidatesPanel items={legalSourceCandidates} />
 
         <section className="grid gap-4 xl:grid-cols-2">
           <Card>
