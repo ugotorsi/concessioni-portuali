@@ -186,17 +186,17 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
 
   return (
     <AppShell
-      title={`Procedimento ${formatEnumLabel(detail.procedimento.tipologia)}`}
-      subtitle="Scheda procedimentale read-only orientata a checklist e lettura istruttoria"
+      title={`Fascicolo ${formatEnumLabel(detail.procedimento.tipologia)}`}
+      subtitle="Copertina, documenti e attività istruttorie del fascicolo"
     >
       <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-slate-900">Dettaglio procedimento</h1>
+            <h1 className="text-2xl font-semibold text-slate-900">Fascicolo</h1>
             <p className="mt-1 text-sm text-slate-600">Quadro istruttorio con collegamenti a criticità, pagamenti, sopralluoghi e scadenze.</p>
           </div>
           <Link href="/procedimenti" className="text-sm font-medium text-slate-700 underline underline-offset-4">
-            Torna ai procedimenti
+            Torna ai fascicoli
           </Link>
         </div>
 
@@ -208,7 +208,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
 
         <Card>
           <CardHeader>
-            <CardTitle>Header procedimento</CardTitle>
+            <CardTitle>Copertina del Fascicolo</CardTitle>
           </CardHeader>
           <CardContent className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-4">
             <div className="min-w-0">
@@ -260,10 +260,18 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           </CardContent>
         </Card>
 
+        <EntityDocumentsPanel
+          title="Documenti del Fascicolo"
+          entityType="procedimento"
+          entityId={detail.procedimento.id}
+          documents={detail.documentiPrincipali}
+          canUpload={canWriteChecklist}
+        />
+
         <section className="grid gap-4 xl:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>1. Dati procedimento</CardTitle>
+              <CardTitle>1. Dati del Fascicolo</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm text-slate-700">
               <div>
@@ -1135,14 +1143,6 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
         </section>
 
         <section className="grid gap-4 xl:grid-cols-2">
-          <EntityDocumentsPanel
-            title="10. Documenti principali"
-            entityType="procedimento"
-            entityId={detail.procedimento.id}
-            documents={detail.documentiPrincipali}
-            canUpload={canWriteChecklist}
-          />
-
           <Card>
             <CardHeader>
               <CardTitle>11. Report collegati</CardTitle>

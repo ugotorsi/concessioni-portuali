@@ -64,6 +64,7 @@ export function EntityDocumentsPanel({
   canUpload,
 }: EntityDocumentsPanelProps) {
   const hiddenFieldName = getHiddenFieldName(entityType);
+  const isProcedimento = entityType === "procedimento";
 
   return (
     <Card>
@@ -143,7 +144,7 @@ export function EntityDocumentsPanel({
             {documents.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={canUpload ? 8 : 7} className="text-center text-slate-500">
-                  Nessun documento collegato.
+                  {isProcedimento ? "Nessun documento presente nel fascicolo." : "Nessun documento collegato."}
                 </TableCell>
               </TableRow>
             ) : null}
@@ -251,7 +252,7 @@ export function EntityDocumentsPanel({
               </Select>
             </label>
             <div className="flex items-end">
-              <Button type="submit">Carica documento</Button>
+              <Button type="submit">{isProcedimento ? "Allega documento" : "Carica documento"}</Button>
             </div>
           </form>
         ) : null}

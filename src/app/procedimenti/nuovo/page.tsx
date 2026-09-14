@@ -42,11 +42,11 @@ export default async function NuovoProcedimentoPage({ searchParams }: NuovoProce
   const filtersData = await getProcedimentiFilters();
 
   return (
-    <AppShell title="Nuovo procedimento" subtitle="Avvio procedura istruttoria in workflow demo">
+    <AppShell title="Nuovo Fascicolo" subtitle="Crea la copertina del fascicolo istruttorio">
       <div className="mx-auto w-full max-w-3xl">
         <Card>
           <CardHeader>
-            <CardTitle>Nuovo procedimento</CardTitle>
+            <CardTitle>Dati del Fascicolo</CardTitle>
           </CardHeader>
           <CardContent>
             <form action={createProcedimentoAction} className="space-y-4">
@@ -378,7 +378,7 @@ export default async function NuovoProcedimentoPage({ searchParams }: NuovoProce
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <Button type="submit">Salva procedimento</Button>
+                <Button type="submit">Crea e apri Fascicolo</Button>
                 <Link
                   href="/procedimenti"
                   className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"

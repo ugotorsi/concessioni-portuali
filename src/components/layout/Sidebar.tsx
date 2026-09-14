@@ -9,6 +9,7 @@ import {
   ClipboardList,
   DoorOpen,
   FileText,
+  FolderOpen,
   Layers,
   LayoutDashboard,
   Lightbulb,
@@ -19,7 +20,6 @@ import {
   Shield,
   Users,
   Wallet,
-  Wrench,
   ScrollText,
 } from "lucide-react";
 
@@ -44,7 +44,7 @@ const backofficeNavItems: NavItem[] = [
   { href: "/scadenze", label: "Scadenze", icon: CalendarClock, matchMode: "section" },
   { href: "/pagamenti", label: "Pagamenti", icon: Wallet, matchMode: "section" },
   { href: "/sopralluoghi", label: "Sopralluoghi", icon: ClipboardList, matchMode: "section" },
-  { href: "/procedimenti", label: "Procedimenti", icon: Wrench, matchMode: "section" },
+  { href: "/procedimenti", label: "Fascicoli", icon: FolderOpen, matchMode: "section" },
   { href: "/report", label: "Report", icon: FileText, matchMode: "section" },
   { href: "/documenti", label: "Documenti", icon: FileText, matchMode: "section" },
   { href: "/normativa", label: "Normativa", icon: Library, matchMode: "section" },

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Plus } from "lucide-react";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { BACKOFFICE_ROLES, canExportOperationalData, canManageProcedimenti, requireRole } from "@/lib/auth";
@@ -165,13 +166,13 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
 
   return (
     <AppShell
-      title="Procedimenti"
-      subtitle="Monitoraggio istruttorio di diffide, contestazioni, recuperi, revoche, decadenze e nuove procedure"
+      title="Fascicoli"
+      subtitle="Gestione dei fascicoli istruttori e dei procedimenti collegati"
     >
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-7">
         <Card>
           <CardHeader>
-            <CardTitle>Totale procedimenti</CardTitle>
+            <CardTitle>Totale fascicoli</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-semibold text-slate-900">{totale}</p>
@@ -242,7 +243,8 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
               href="/procedimenti/nuovo"
               className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
             >
-              Nuovo procedimento
+              <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
+              Nuovo Fascicolo
             </Link>
           </div>
         ) : canExport ? (
@@ -261,8 +263,8 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
       <section className="mt-4">
         <Card>
           <CardHeader>
-            <CardTitle>Registro procedimenti</CardTitle>
-            <CardDescription>Vista read-only con focus su priorità, contraddittorio e collegamenti inter-modulo.</CardDescription>
+            <CardTitle>Registro fascicoli</CardTitle>
+            <CardDescription>Vista operativa con focus su priorità, contraddittorio e collegamenti inter-modulo.</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -382,7 +384,18 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
                 {listData.items.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={14} className="text-center text-slate-500">
-                      Nessun procedimento trovato con i filtri correnti.
+                      <div className="flex flex-col items-center gap-3 py-4">
+                        <p>Nessun fascicolo presente.</p>
+                        {canWrite ? (
+                          <Link
+                            href="/procedimenti/nuovo"
+                            className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                          >
+                            <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
+                            Crea il primo fascicolo
+                          </Link>
+                        ) : null}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ) : null}

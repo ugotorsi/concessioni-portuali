@@ -332,7 +332,7 @@ export async function createDocumentoUploadAction(formData: FormData) {
       },
     });
     revalidateLinkedPaths({ procedimentoId: payload.procedimentoId });
-    return redirect("/documenti");
+    return redirect(`/procedimenti/${payload.procedimentoId}`);
   }
 
   const uploaded = await uploadDocument({

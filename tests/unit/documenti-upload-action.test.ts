@@ -236,7 +236,7 @@ describe("createDocumentoUploadAction", () => {
     }));
   });
 
-  it("preserves null email and redirects after a successful upload", async () => {
+  it("preserves null email and returns a successful upload to the current fascicolo", async () => {
     getCurrentUserMock.mockResolvedValue({ id: "user-1", email: null });
 
     await createDocumentoUploadAction(uploadFormData());
@@ -244,7 +244,7 @@ describe("createDocumentoUploadAction", () => {
     expect(auditSuccessMock).toHaveBeenCalledWith(expect.objectContaining({
       actor: { userId: "user-1", userEmail: null, userRole: "ADMIN" },
     }));
-    expect(redirectMock).toHaveBeenCalledWith("/documenti");
+    expect(redirectMock).toHaveBeenCalledWith("/procedimenti/procedimento-1");
   });
 
   it("rejects a cross-tenant procedure upload before intake admission", async () => {
