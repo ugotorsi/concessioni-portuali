@@ -276,7 +276,11 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
 
         <NeutralIntakeProcessingPanel items={processingItems} />
 
-  <LegalSourceCandidatesPanel items={legalSourceCandidates} />
+        <LegalSourceCandidatesPanel
+          items={legalSourceCandidates}
+          procedimentoId={detail.procedimento.id}
+          canVerify={canReview && hasCanonicalTenant}
+        />
 
         <section className="grid gap-4 xl:grid-cols-2">
           <Card>

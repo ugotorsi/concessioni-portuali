@@ -42,6 +42,7 @@ describe("Fascicolo legal-source candidates", () => {
       classificationAttempt: {
         reviewRequired: true,
       },
+      resolution: null,
     }]);
   });
 
@@ -53,6 +54,7 @@ describe("Fascicolo legal-source candidates", () => {
       admittedAt: new Date("2026-09-14T10:02:00.000Z"),
       classificationOutcome: "LEGAL_SOURCE_CANDIDATE",
       reviewRequired: true,
+      resolution: null,
     }]);
     expect(admissionFindManyMock).toHaveBeenCalledWith(expect.objectContaining({
       where: {
@@ -99,10 +101,93 @@ describe("Fascicolo legal-source candidates", () => {
       classificationOutcome: true,
       neutralIntake: { select: { originalName: true, mimeType: true } },
       classificationAttempt: { select: { reviewRequired: true } },
+      resolution: {
+        select: {
+          outcome: true,
+          resolvedAt: true,
+          reviewNote: true,
+          reviewedByEmail: true,
+          reviewedByRole: true,
+          legalSource: {
+            select: {
+              id: true,
+              enteId: true,
+              sourceKey: true,
+              title: true,
+              issuingBody: true,
+              sourceNumber: true,
+            },
+          },
+        },
+      },
     });
     expect(JSON.stringify(query)).not.toMatch(
       /pages|text|normalizedText|provider|storage|failureMessage|technicalMetadata|warnings|reasonCodes|evidenceMarkers/i,
     );
+  });
+
+  it("returns a bounded linked-source verification receipt", async () => {
+    admissionFindManyMock.mockResolvedValueOnce([{
+      id: "admission-1",
+      admittedAt: new Date("2026-09-14T10:02:00.000Z"),
+      classificationOutcome: "LEGAL_SOURCE_CANDIDATE",
+      neutralIntake: { originalName: "ordinanza.pdf", mimeType: "application/pdf" },
+      classificationAttempt: { reviewRequired: true },
+      resolution: {
+        outcome: "LINKED",
+        resolvedAt: new Date("2026-09-14T14:00:00.000Z"),
+        reviewNote: "Identita verificata",
+        reviewedByEmail: "lawyer@example.test",
+        reviewedByRole: "GIURIDICO",
+        legalSource: {
+          id: "source-1",
+          enteId: null,
+          sourceKey: "source-key-1",
+          title: "Ordinanza 1/2026",
+          issuingBody: "Autorita portuale",
+          sourceNumber: "1/2026",
+        },
+      },
+    }]);
+
+    const [candidate] = await getFascicoloLegalSourceCandidates("procedimento-1");
+    expect(candidate.resolution).toMatchObject({
+      outcome: "LINKED",
+      legalSource: {
+        id: "source-1",
+        stableKey: "source-key-1",
+        title: "Ordinanza 1/2026",
+      },
+    });
+  });
+
+  it("redacts linked-source identity when persisted data is inconsistent with the candidate tenant", async () => {
+    admissionFindManyMock.mockResolvedValueOnce([{
+      id: "admission-1",
+      admittedAt: new Date("2026-09-14T10:02:00.000Z"),
+      classificationOutcome: "LEGAL_SOURCE_CANDIDATE",
+      neutralIntake: { originalName: "ordinanza.pdf", mimeType: "application/pdf" },
+      classificationAttempt: { reviewRequired: true },
+      resolution: {
+        outcome: "LINKED",
+        resolvedAt: new Date("2026-09-14T14:00:00.000Z"),
+        reviewNote: null,
+        reviewedByEmail: "lawyer@example.test",
+        reviewedByRole: "GIURIDICO",
+        legalSource: {
+          id: "source-other",
+          enteId: "ente-2",
+          sourceKey: "private-other-tenant",
+          title: "Fonte riservata",
+          issuingBody: null,
+          sourceNumber: null,
+        },
+      },
+    }]);
+
+    const [candidate] = await getFascicoloLegalSourceCandidates("procedimento-1");
+    expect(candidate.resolution?.legalSource).toBeNull();
+    expect(JSON.stringify(candidate)).not.toContain("Fonte riservata");
   });
 
   it("omits the section when no candidate admission exists", () => {
@@ -116,6 +201,42 @@ describe("Fascicolo legal-source candidates", () => {
     expect(panelSource).toContain("Possibile fonte giuridica");
     expect(panelSource).toContain("Da verificare");
     expect(panelSource).not.toMatch(/fonte canonica|autorità stabilita|applicabile|vincolante|giurisdizione/i);
+  });
+
+  it("offers only explicit catalog-link and no-match identity decisions", () => {
+    const panelSource = readFileSync("src/components/documents/LegalSourceCandidatesPanel.tsx", "utf8");
+    const actionSource = readFileSync("src/server/actions/legal-source-candidate-resolution.ts", "utf8");
+
+    expect(panelSource).toContain("Verifica fonte");
+    expect(panelSource).toContain("/api/legal-sources?search=");
+    expect(panelSource).toContain("Collega fonte");
+    expect(panelSource).toContain("Nessuna fonte esistente trovata");
+    expect(panelSource).toContain('submitResolution("LINKED")');
+    expect(panelSource).toContain('submitResolution("NO_MATCH")');
+    expect(actionSource).not.toMatch(/legalSource\.(create|upsert)/);
+    expect(actionSource).not.toMatch(/provider|openai|anthropic|generateText/i);
+  });
+
+  it("presents immutable LINKED and NO_MATCH verification receipts", () => {
+    const panelSource = readFileSync("src/components/documents/LegalSourceCandidatesPanel.tsx", "utf8");
+
+    expect(panelSource).toContain("Fonte collegata");
+    expect(panelSource).toContain("Nessuna corrispondenza");
+    expect(panelSource).toContain("Verificata da");
+    expect(panelSource).toContain("resolution.reviewNote");
+    expect(panelSource).toContain("!item.resolution && activeAdmissionId === item.id");
+  });
+
+  it("presents a redacted LINKED resolution as requiring verification without implying NO_MATCH", () => {
+    const panelSource = readFileSync("src/components/documents/LegalSourceCandidatesPanel.tsx", "utf8");
+
+    expect(panelSource).toContain(
+      'const linkedSourceUnavailable = resolution.outcome === "LINKED" && resolution.legalSource === null',
+    );
+    expect(panelSource).toMatch(/linkedSourceUnavailable\s*\?\s*"Verifica richiesta"/);
+    expect(panelSource).toContain("Collegamento non disponibile.");
+    expect(panelSource).toContain("non è disponibile nel contesto autorizzato corrente");
+    expect(panelSource).not.toContain('resolution.outcome === "LINKED" ? "Fonte collegata"');
   });
 
   it("keeps routed candidates out of processing without fabricating a Documento", () => {
@@ -133,7 +254,10 @@ describe("Fascicolo legal-source candidates", () => {
 
     expect(detailSource).toContain('title="Documenti del Fascicolo"');
     expect(detailSource).toContain("<NeutralIntakeProcessingPanel items={processingItems} />");
-    expect(detailSource).toContain("<LegalSourceCandidatesPanel items={legalSourceCandidates} />");
+    expect(detailSource).toContain("<LegalSourceCandidatesPanel");
+    expect(detailSource).toContain("items={legalSourceCandidates}");
+    expect(detailSource).toContain("procedimentoId={detail.procedimento.id}");
+    expect(detailSource).toContain("canVerify={canReview && hasCanonicalTenant}");
     expect(detailSource).toContain("getFascicoloLegalSourceCandidates(detail.procedimento.id)");
   });
 });
