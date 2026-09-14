@@ -17,7 +17,8 @@ import {
   normalizeNeutralIntakeManifest,
   type NeutralIntakeImmutableManifest,
 } from "@/server/intake/neutralIntakeIdentity";
-import { buildNeutralIntakeExtractionAdmission } from "@/server/intake/neutralIntakeExtractionJob";
+import { buildNeutralIntakeExtractionAdmission } from "@/server/intake/neutralIntakeExtractionAdmission";
+import { establishNeutralIntakeDestinationInTransaction } from "@/server/intake/neutralIntakeDestination";
 
 const nonBlank = z.string().trim().min(1);
 const optionalNonBlank = nonBlank.nullable().optional().transform((value) => value ?? null);
@@ -32,6 +33,10 @@ const createNeutralIntakeSchema = z.object({
   receivedByUserId: optionalNonBlank,
   receivedByActorId: nonBlank,
   receivedByRole: nonBlank,
+  destination: z.object({
+    procedimentoId: nonBlank,
+    authoritySource: nonBlank,
+  }).strict().optional(),
   idempotencyAnchor: neutralIntakeIdempotencyAnchorSchema,
 }).strict().superRefine((input, context) => {
   if (
@@ -51,6 +56,7 @@ export type CreateNeutralIntakeInput = z.input<typeof createNeutralIntakeSchema>
 type NeutralIntakeRecord = Prisma.NeutralIntakeGetPayload<object>;
 
 type NeutralIntakeClient = Pick<Prisma.TransactionClient, "neutralIntake">;
+type ExactDuplicateClient = Pick<Prisma.TransactionClient, "neutralIntakeDestination" | "documento">;
 
 export class NeutralIntakeIdempotencyConflictError extends Error {
   readonly code = "NEUTRAL_INTAKE_IDEMPOTENCY_CONFLICT" as const;
@@ -130,16 +136,69 @@ function reuseOrConflict(
   return { outcome: "REUSED" as const, intake: existing };
 }
 
+async function hasExactDuplicateInProcedimento(
+  client: ExactDuplicateClient,
+  input: { enteId: string | null; procedimentoId: string; sha256: string },
+) {
+  if (!input.enteId) return false;
+  const [intake, document] = await Promise.all([
+    client.neutralIntakeDestination.findFirst({
+      where: {
+        procedimentoId: input.procedimentoId,
+        neutralIntake: {
+          is: {
+            enteId: input.enteId,
+            sha256: input.sha256,
+            status: { not: "FAILED_EXTRACTION" },
+          },
+        },
+      },
+      select: { neutralIntakeId: true },
+    }),
+    client.documento.findFirst({
+      where: {
+        enteId: input.enteId,
+        procedimentoId: input.procedimentoId,
+        OR: [
+          { sha256: input.sha256 },
+          { checksumSha256: input.sha256 },
+          {
+            fileVersions: {
+              some: {
+                canonicalEnteId: input.enteId,
+                sha256: input.sha256,
+              },
+            },
+          },
+        ],
+      },
+      select: { id: true },
+    }),
+  ]);
+  return intake !== null || document !== null;
+}
+
 export async function createNeutralIntakeRecordInTransaction(
   tx: Prisma.TransactionClient,
   input: {
     idempotencyKey: string;
     manifest: NeutralIntakeImmutableManifest;
+    duplicateScope?: { procedimentoId: string };
   },
 ) {
   const existing = await findByIdempotencyKey(tx, input.idempotencyKey);
   if (existing) {
     return reuseOrConflict(existing, input.manifest);
+  }
+  if (
+    input.duplicateScope
+    && await hasExactDuplicateInProcedimento(tx, {
+      enteId: input.manifest.enteId,
+      procedimentoId: input.duplicateScope.procedimentoId,
+      sha256: input.manifest.sha256,
+    })
+  ) {
+    return { outcome: "DUPLICATE_DOCUMENT_IN_FASCICOLO" as const };
   }
 
   const intake = await tx.neutralIntake.create({
@@ -155,9 +214,28 @@ export async function createNeutralIntakeRecordInTransaction(
 
 async function createNeutralIntakeWithExtractionJobInTransaction(
   tx: Prisma.TransactionClient,
-  input: { idempotencyKey: string; manifest: NeutralIntakeImmutableManifest },
+  input: {
+    idempotencyKey: string;
+    manifest: NeutralIntakeImmutableManifest;
+    destination?: { procedimentoId: string; authoritySource: string };
+  },
 ) {
-  const intakeResult = await createNeutralIntakeRecordInTransaction(tx, input);
+  const intakeResult = await createNeutralIntakeRecordInTransaction(tx, {
+    idempotencyKey: input.idempotencyKey,
+    manifest: input.manifest,
+    duplicateScope: input.destination,
+  });
+  if (intakeResult.outcome === "DUPLICATE_DOCUMENT_IN_FASCICOLO") return intakeResult;
+  const destinationResult = input.destination
+    ? await establishNeutralIntakeDestinationInTransaction(tx, {
+        neutralIntakeId: intakeResult.intake.id,
+        procedimentoId: input.destination.procedimentoId,
+        authoritySource: input.destination.authoritySource,
+        establishedByUserId: intakeResult.intake.receivedByUserId,
+        establishedByActorId: intakeResult.intake.receivedByActorId,
+        establishedByRole: intakeResult.intake.receivedByRole,
+      })
+    : null;
   const initiatingUser = intakeResult.intake.receivedByUserId === null
     ? null
     : await tx.user.findUnique({
@@ -171,7 +249,7 @@ async function createNeutralIntakeWithExtractionJobInTransaction(
       initiatingUserRole: initiatingUser?.ruolo ?? null,
     }),
   );
-  return { ...intakeResult, extractionJob: extractionJob.job };
+  return { ...intakeResult, destination: destinationResult?.destination ?? null, extractionJob: extractionJob.job };
 }
 
 export async function createNeutralIntake(rawInput: CreateNeutralIntakeInput) {
@@ -182,6 +260,18 @@ export async function createNeutralIntake(rawInput: CreateNeutralIntakeInput) {
     ingressChannel: input.ingressChannel,
     anchor: input.idempotencyAnchor,
   });
+  const existingOperation = await findByIdempotencyKey(prisma, idempotencyKey);
+  if (
+    !existingOperation
+    && input.destination
+    && await hasExactDuplicateInProcedimento(prisma, {
+      enteId: input.enteId,
+      procedimentoId: input.destination.procedimentoId,
+      sha256,
+    })
+  ) {
+    return { outcome: "DUPLICATE_DOCUMENT_IN_FASCICOLO" as const };
+  }
   const storage = await createDocumentFileIfAbsent({
     storageKey,
     body: input.body,
@@ -222,13 +312,21 @@ export async function createNeutralIntake(rawInput: CreateNeutralIntakeInput) {
 
   try {
     return await runSerializableTransactionWithRetry((tx) =>
-      createNeutralIntakeWithExtractionJobInTransaction(tx, { idempotencyKey, manifest }));
+      createNeutralIntakeWithExtractionJobInTransaction(tx, {
+        idempotencyKey,
+        manifest,
+        destination: input.destination,
+      }));
   } catch (error) {
     if (!isIdempotencyP2002(error) && !isAsyncJobIdempotencyP2002(error)) {
       throw error;
     }
     return runSerializableTransactionWithRetry((tx) =>
-      createNeutralIntakeWithExtractionJobInTransaction(tx, { idempotencyKey, manifest }));
+      createNeutralIntakeWithExtractionJobInTransaction(tx, {
+        idempotencyKey,
+        manifest,
+        destination: input.destination,
+      }));
   }
 }
 

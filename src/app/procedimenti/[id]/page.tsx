@@ -68,6 +68,7 @@ interface ProcedimentoDetailPageProps {
   params: Promise<{ id: string }>;
   searchParams: Promise<{
     screening?: string | string[];
+    documentUpload?: string | string[];
     materialId?: string | string[];
     statementPath?: string | string[];
   }>;
@@ -138,8 +139,9 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   const canWriteChecklist = canReview;
   const canRegisterDecision = canRegisterProcedimentoDecision(role);
   const { id } = await params;
-  const { screening, materialId, statementPath } = await searchParams;
+  const { screening, documentUpload, materialId, statementPath } = await searchParams;
   const screeningDone = screening === "done";
+  const duplicateDocumentUpload = documentUpload === "duplicate";
   const detail = await getProcedimentoDetail(id);
 
   if (!detail) {
@@ -197,6 +199,12 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
             Torna ai procedimenti
           </Link>
         </div>
+
+        {duplicateDocumentUpload ? (
+          <div role="alert" className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+            Documento già presente nel fascicolo.
+          </div>
+        ) : null}
 
         <Card>
           <CardHeader>

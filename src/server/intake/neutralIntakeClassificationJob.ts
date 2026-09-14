@@ -24,6 +24,10 @@ import {
   markClassificationExecutionFailedInTransaction,
   NeutralIntakeClassificationExecutionError,
 } from "./classification/service";
+import {
+  ensureClassificationHandoffInTransaction,
+  NeutralIntakeHandoffConflictError,
+} from "./classification/handoff";
 
 export const NEUTRAL_INTAKE_CLASSIFICATION_OPERATION = "NEUTRAL_INTAKE_CLASSIFICATION_V1" as const;
 export const NEUTRAL_INTAKE_CLASSIFICATION_PURPOSE = "NEUTRAL_INTAKE_CLASSIFICATION" as const;
@@ -56,13 +60,23 @@ type ClassificationEvidenceSnapshot = ClassificationExtractionEvidence & {
   neutralIntakeId: string;
 };
 
-function logicalOperationId(input: ClassificationEvidenceSnapshot): string {
+export function neutralIntakeClassificationLogicalOperationId(
+  neutralIntakeId: string,
+  evidenceHash: string,
+): string {
   return createHash("sha256").update([
     NEUTRAL_INTAKE_CLASSIFICATION_OPERATION,
-    input.neutralIntakeId,
-    hashNeutralIntakeClassificationEvidence(input),
+    neutralIntakeId,
+    evidenceHash,
     NEUTRAL_INTAKE_CLASSIFIER_VERSION,
   ].join("\n"), "utf8").digest("hex");
+}
+
+function logicalOperationId(input: ClassificationEvidenceSnapshot): string {
+  return neutralIntakeClassificationLogicalOperationId(
+    input.neutralIntakeId,
+    hashNeutralIntakeClassificationEvidence(input),
+  );
 }
 
 export function buildNeutralIntakeClassificationAdmission(
@@ -270,6 +284,20 @@ export async function executeBoundClassification(input: ClassificationReference,
   if ("executionFailure" in transactionResult) {
     throw new AsyncJobExecutionError("CLASSIFICATION", "CLASSIFICATION_EXECUTION_FAILED", false);
   }
+  try {
+    await runSerializableTransactionWithRetry((tx) => ensureClassificationHandoffInTransaction(tx, {
+      jobId: context.jobId,
+      neutralIntakeId: input.referenceId,
+      classificationAttemptId: transactionResult.decision.id,
+      evidenceHash: input.metadata.evidenceHash,
+      classifierVersion: input.metadata.classifierVersion,
+    }));
+  } catch (error) {
+    if (error instanceof NeutralIntakeHandoffConflictError) {
+      throw new AsyncJobExecutionError("HANDOFF", "CLASSIFICATION_HANDOFF_BINDING_MISMATCH", false);
+    }
+    throw new AsyncJobExecutionError("HANDOFF_INFRASTRUCTURE", "CLASSIFICATION_HANDOFF_FAILED", true);
+  }
   return classificationResultReference(transactionResult.decision);
 }
 
@@ -319,9 +347,6 @@ async function resolveClassificationTerminalFailure(
   if (!intake || intake.enteId !== context.tenantId) {
     throw new AsyncJobExecutionError("AUTHORIZATION", "CLASSIFICATION_TERMINAL_AUTHORITY_MISMATCH", false);
   }
-  if (expectedDecision) {
-    return { outcome: "SUCCEEDED", resultReference: classificationResultReference(expectedDecision) };
-  }
   if (intake.status === "FAILED_CLASSIFICATION") return { outcome: "TERMINAL_FAILED" };
   if (!latestAttempt) {
     throw new AsyncJobExecutionError("CLASSIFICATION", "CLASSIFICATION_TERMINAL_EVIDENCE_MISMATCH", false);
@@ -337,6 +362,16 @@ async function resolveClassificationTerminalFailure(
     });
     if (newerDecision) return { outcome: "TERMINAL_FAILED" };
     throw new AsyncJobExecutionError("CLASSIFICATION", "CLASSIFICATION_TERMINAL_EVIDENCE_MISMATCH", false);
+  }
+  if (expectedDecision) {
+    await ensureClassificationHandoffInTransaction(tx, {
+      jobId: context.jobId,
+      neutralIntakeId: input.referenceId,
+      classificationAttemptId: expectedDecision.id,
+      evidenceHash: input.metadata.evidenceHash,
+      classifierVersion: input.metadata.classifierVersion,
+    });
+    return { outcome: "SUCCEEDED", resultReference: classificationResultReference(expectedDecision) };
   }
   if (intake.status !== "EVIDENCE_READY") {
     throw new AsyncJobExecutionError("CLASSIFICATION", "CLASSIFICATION_TERMINAL_STATE_MISMATCH", false);

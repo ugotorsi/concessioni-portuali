@@ -6,21 +6,40 @@ import { Prisma } from "@/generated/prisma/client";
 
 const mocks = vi.hoisted(() => ({
   findUnique: vi.fn(),
+  findPreflightIdempotency: vi.fn(),
+  findPreflightDuplicateIntake: vi.fn(),
+  findPreflightDuplicateDocument: vi.fn(),
   findUser: vi.fn(),
   create: vi.fn(),
   createFile: vi.fn(),
   readFile: vi.fn(),
   admitAsyncJobInTransaction: vi.fn(),
+  findProcedimento: vi.fn(),
+  findDestination: vi.fn(),
+  findDuplicateIntake: vi.fn(),
+  findDuplicateDocument: vi.fn(),
+  createDestination: vi.fn(),
 }));
 
 vi.mock("@/lib/prisma", () => ({
-  prisma: { neutralIntake: { findUnique: mocks.findUnique, create: mocks.create } },
+  prisma: {
+    neutralIntake: { findUnique: mocks.findPreflightIdempotency, create: mocks.create },
+    neutralIntakeDestination: { findFirst: mocks.findPreflightDuplicateIntake },
+    documento: { findFirst: mocks.findPreflightDuplicateDocument },
+  },
 }));
 
 vi.mock("@/server/db/serializableTransaction", () => ({
   runSerializableTransactionWithRetry: (callback: (tx: unknown) => unknown) => callback({
     neutralIntake: { findUnique: mocks.findUnique, create: mocks.create },
     user: { findUnique: mocks.findUser },
+    procedimento: { findUnique: mocks.findProcedimento },
+    neutralIntakeDestination: {
+      findUnique: mocks.findDestination,
+      findFirst: mocks.findDuplicateIntake,
+      createMany: mocks.createDestination,
+    },
+    documento: { findFirst: mocks.findDuplicateDocument },
   }),
 }));
 
@@ -42,6 +61,38 @@ import { buildNeutralIntakeIdempotencyKeyV1 } from "@/server/intake/neutralIntak
 
 const body = Buffer.from("neutral-intake-content");
 const sha256 = createHash("sha256").update(body).digest("hex");
+
+type RoutedDocumentWhere = {
+  enteId: string;
+  procedimentoId: string;
+  OR: Array<{
+    sha256?: string;
+    checksumSha256?: string;
+    fileVersions?: { some: { canonicalEnteId: string; sha256: string } };
+  }>;
+};
+
+function matchesRoutedDocumentHash(
+  where: RoutedDocumentWhere,
+  document: {
+    enteId: string;
+    procedimentoId: string;
+    sha256: string | null;
+    checksumSha256: string | null;
+    fileVersionSha256s: string[];
+  },
+) {
+  return where.enteId === document.enteId
+    && where.procedimentoId === document.procedimentoId
+    && where.OR.some((candidate) => (
+      candidate.sha256 === document.sha256
+      || candidate.checksumSha256 === document.checksumSha256
+      || (
+        candidate.fileVersions?.some.canonicalEnteId === document.enteId
+        && document.fileVersionSha256s.includes(candidate.fileVersions.some.sha256)
+      )
+    ));
+}
 
 function input(overrides: Record<string, unknown> = {}) {
   return {
@@ -112,7 +163,18 @@ describe("B2C9 Block 3B.1 neutral intake service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.findUnique.mockResolvedValue(null);
+    mocks.findPreflightIdempotency.mockResolvedValue(null);
+    mocks.findPreflightDuplicateIntake.mockResolvedValue(null);
+    mocks.findPreflightDuplicateDocument.mockResolvedValue(null);
     mocks.findUser.mockResolvedValue({ ruolo: "ADMIN" });
+    mocks.findProcedimento.mockResolvedValue({ id: "procedimento-1", concessione: { enteId: "ente-1" } });
+    mocks.findDestination.mockResolvedValue(null);
+    mocks.findDuplicateIntake.mockResolvedValue(null);
+    mocks.findDuplicateDocument.mockResolvedValue(null);
+    mocks.createDestination.mockImplementation(async ({ data }) => {
+      mocks.findDestination.mockResolvedValue({ ...data[0], establishedAt: new Date() });
+      return { count: 1 };
+    });
     mocks.create.mockImplementation(async ({ data }) => record(data));
     mocks.createFile.mockResolvedValue(stored());
     mocks.admitAsyncJobInTransaction.mockImplementation(async (_tx, admission) => ({
@@ -132,6 +194,276 @@ describe("B2C9 Block 3B.1 neutral intake service", () => {
       data: expect.objectContaining({ status: "RECEIVED", statusVersion: 0 }),
     });
     expect(`intake/sha256/${sha256}`).not.toMatch(/ente|document|legal/i);
+  });
+
+  it("rejects an exact-content duplicate in the same procedimento before intake and job creation", async () => {
+    mocks.findPreflightDuplicateIntake.mockResolvedValue({ neutralIntakeId: "intake-existing" });
+
+    await expect(createNeutralIntake(input({
+      enteId: "ente-1",
+      destination: { procedimentoId: "procedimento-1", authoritySource: "CASE_FOLDER_UPLOAD" },
+      idempotencyAnchor: { type: "OPERATION_ID", value: "2e1bf47e-9b2f-4ee8-a41a-4ea6ca4e4619" },
+    }))).resolves.toEqual({ outcome: "DUPLICATE_DOCUMENT_IN_FASCICOLO" });
+
+    expect(mocks.create).not.toHaveBeenCalled();
+    expect(mocks.createFile).not.toHaveBeenCalled();
+    expect(mocks.createDestination).not.toHaveBeenCalled();
+    expect(mocks.admitAsyncJobInTransaction).not.toHaveBeenCalled();
+    expect(mocks.findPreflightDuplicateIntake).toHaveBeenCalledWith({
+      where: {
+        procedimentoId: "procedimento-1",
+        neutralIntake: {
+          is: {
+            enteId: "ente-1",
+            sha256,
+            status: { not: "FAILED_EXTRACTION" },
+          },
+        },
+      },
+      select: { neutralIntakeId: true },
+    });
+  });
+
+  it("rejects renamed exact bytes because filename is not part of duplicate identity", async () => {
+    mocks.findPreflightDuplicateIntake.mockResolvedValue({ neutralIntakeId: "intake-existing" });
+
+    await expect(createNeutralIntake(input({
+      originalName: "renamed-copy.pdf",
+      enteId: "ente-1",
+      destination: { procedimentoId: "procedimento-1", authoritySource: "CASE_FOLDER_UPLOAD" },
+      idempotencyAnchor: { type: "OPERATION_ID", value: "34aa0288-feba-4757-b2e4-afd9edaa8c75" },
+    }))).resolves.toEqual({ outcome: "DUPLICATE_DOCUMENT_IN_FASCICOLO" });
+
+    expect(mocks.findPreflightDuplicateIntake.mock.calls[0][0].where).not.toHaveProperty("originalName");
+    expect(mocks.create).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["same-name-different-content", "source.pdf"],
+    ["similar-concession-different-date-and-content", "concessione.pdf"],
+  ])("allows %s when the exact content hash differs", async (content, originalName) => {
+    const changedBody = Buffer.from(content);
+    const changedSha256 = createHash("sha256").update(changedBody).digest("hex");
+    mocks.createFile.mockResolvedValueOnce({
+      ...stored(),
+      object: {
+        ...stored().object,
+        storageKey: `intake/sha256/${changedSha256}`,
+        fileName: changedSha256,
+        sizeBytes: changedBody.length,
+        sha256: changedSha256,
+        originalName,
+      },
+    });
+    mocks.findUnique
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(record({ enteId: "ente-1" }));
+
+    await expect(createNeutralIntake(input({
+      body: changedBody,
+      originalName,
+      enteId: "ente-1",
+      destination: { procedimentoId: "procedimento-1", authoritySource: "CASE_FOLDER_UPLOAD" },
+      idempotencyAnchor: { type: "OPERATION_ID", value: "dce1b95b-cc34-49f2-9729-532fe44841bc" },
+    }))).resolves.toMatchObject({ outcome: "CREATED" });
+
+    expect(mocks.findDuplicateIntake).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({
+        procedimentoId: "procedimento-1",
+        neutralIntake: { is: expect.objectContaining({ sha256: changedSha256 }) },
+      }),
+    }));
+  });
+
+  it("allows the same exact bytes in another procedimento", async () => {
+    mocks.findPreflightDuplicateIntake.mockImplementation(async ({ where }) => (
+      where.procedimentoId === "procedimento-1" ? { neutralIntakeId: "intake-existing" } : null
+    ));
+    mocks.findProcedimento.mockResolvedValue({ id: "procedimento-2", concessione: { enteId: "ente-1" } });
+    mocks.findUnique
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(record({ enteId: "ente-1" }));
+
+    await expect(createNeutralIntake(input({
+      enteId: "ente-1",
+      destination: { procedimentoId: "procedimento-2", authoritySource: "CASE_FOLDER_UPLOAD" },
+      idempotencyAnchor: { type: "OPERATION_ID", value: "fe5d4817-800d-4500-990d-93320105e769" },
+    }))).resolves.toMatchObject({ outcome: "CREATED" });
+
+    expect(mocks.create).toHaveBeenCalledOnce();
+    expect(mocks.admitAsyncJobInTransaction).toHaveBeenCalledOnce();
+  });
+
+  it("rejects an exact hash already materialized as a routed Documento", async () => {
+    mocks.findPreflightDuplicateDocument.mockImplementation(async ({ where }: { where: RoutedDocumentWhere }) => (
+      matchesRoutedDocumentHash(where, {
+        enteId: "ente-1",
+        procedimentoId: "procedimento-1",
+        sha256,
+        checksumSha256: null,
+        fileVersionSha256s: [],
+      }) ? { id: "documento-existing" } : null
+    ));
+
+    await expect(createNeutralIntake(input({
+      enteId: "ente-1",
+      destination: { procedimentoId: "procedimento-1", authoritySource: "CASE_FOLDER_UPLOAD" },
+      idempotencyAnchor: { type: "OPERATION_ID", value: "341f318a-a86a-4bb4-985b-209590605714" },
+    }))).resolves.toEqual({ outcome: "DUPLICATE_DOCUMENT_IN_FASCICOLO" });
+
+    expect(mocks.create).not.toHaveBeenCalled();
+    expect(mocks.createFile).not.toHaveBeenCalled();
+    expect(mocks.admitAsyncJobInTransaction).not.toHaveBeenCalled();
+  });
+
+  it("rejects a legacy checksum-only routed Documento before storage", async () => {
+    mocks.findPreflightDuplicateDocument.mockImplementation(async ({ where }: { where: RoutedDocumentWhere }) => (
+      matchesRoutedDocumentHash(where, {
+        enteId: "ente-1",
+        procedimentoId: "procedimento-1",
+        sha256: null,
+        checksumSha256: sha256,
+        fileVersionSha256s: [],
+      }) ? { id: "documento-legacy-checksum" } : null
+    ));
+
+    await expect(createNeutralIntake(input({
+      enteId: "ente-1",
+      destination: { procedimentoId: "procedimento-1", authoritySource: "CASE_FOLDER_UPLOAD" },
+      idempotencyAnchor: { type: "OPERATION_ID", value: "1853a30d-35c9-42e9-bf58-3fc750946da4" },
+    }))).resolves.toEqual({ outcome: "DUPLICATE_DOCUMENT_IN_FASCICOLO" });
+
+    expect(mocks.createFile).not.toHaveBeenCalled();
+    expect(mocks.create).not.toHaveBeenCalled();
+    expect(mocks.createDestination).not.toHaveBeenCalled();
+    expect(mocks.admitAsyncJobInTransaction).not.toHaveBeenCalled();
+  });
+
+  it("rejects renamed bytes found only in a legacy file version before storage", async () => {
+    mocks.findPreflightDuplicateDocument.mockImplementation(async ({ where }: { where: RoutedDocumentWhere }) => (
+      matchesRoutedDocumentHash(where, {
+        enteId: "ente-1",
+        procedimentoId: "procedimento-1",
+        sha256: null,
+        checksumSha256: null,
+        fileVersionSha256s: [sha256],
+      }) ? { id: "documento-legacy-version" } : null
+    ));
+
+    await expect(createNeutralIntake(input({
+      originalName: "renamed-legacy-copy.pdf",
+      enteId: "ente-1",
+      destination: { procedimentoId: "procedimento-1", authoritySource: "CASE_FOLDER_UPLOAD" },
+      idempotencyAnchor: { type: "OPERATION_ID", value: "17525d71-72da-4814-908e-39973cafb174" },
+    }))).resolves.toEqual({ outcome: "DUPLICATE_DOCUMENT_IN_FASCICOLO" });
+
+    expect(mocks.createFile).not.toHaveBeenCalled();
+    expect(mocks.create).not.toHaveBeenCalled();
+    expect(mocks.createDestination).not.toHaveBeenCalled();
+    expect(mocks.admitAsyncJobInTransaction).not.toHaveBeenCalled();
+    expect(mocks.findPreflightDuplicateDocument.mock.calls[0][0].where).not.toHaveProperty("originalName");
+  });
+
+  it("allows a routed Documento when all persisted exact hashes differ", async () => {
+    const otherSha256 = createHash("sha256").update("other-routed-bytes").digest("hex");
+    mocks.findPreflightDuplicateDocument.mockImplementation(async ({ where }: { where: RoutedDocumentWhere }) => (
+      matchesRoutedDocumentHash(where, {
+        enteId: "ente-1",
+        procedimentoId: "procedimento-1",
+        sha256: otherSha256,
+        checksumSha256: otherSha256,
+        fileVersionSha256s: [otherSha256],
+      }) ? { id: "documento-other" } : null
+    ));
+    mocks.findUnique
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(record({ enteId: "ente-1" }));
+
+    await expect(createNeutralIntake(input({
+      enteId: "ente-1",
+      destination: { procedimentoId: "procedimento-1", authoritySource: "CASE_FOLDER_UPLOAD" },
+      idempotencyAnchor: { type: "OPERATION_ID", value: "ac3d03bc-42be-4490-ad06-d31f536ffb72" },
+    }))).resolves.toMatchObject({ outcome: "CREATED" });
+
+    expect(mocks.create).toHaveBeenCalledOnce();
+    expect(mocks.admitAsyncJobInTransaction).toHaveBeenCalledOnce();
+  });
+
+  it("allows a legacy matching file version in another procedimento", async () => {
+    const legacyDocument = {
+      enteId: "ente-1",
+      procedimentoId: "procedimento-1",
+      sha256: null,
+      checksumSha256: null,
+      fileVersionSha256s: [sha256],
+    };
+    mocks.findPreflightDuplicateDocument.mockImplementation(async ({ where }: { where: RoutedDocumentWhere }) => (
+      matchesRoutedDocumentHash(where, legacyDocument) ? { id: "documento-other-fascicolo" } : null
+    ));
+    mocks.findDuplicateDocument.mockImplementation(async ({ where }: { where: RoutedDocumentWhere }) => (
+      matchesRoutedDocumentHash(where, legacyDocument) ? { id: "documento-other-fascicolo" } : null
+    ));
+    mocks.findProcedimento.mockResolvedValue({ id: "procedimento-2", concessione: { enteId: "ente-1" } });
+    mocks.findUnique
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(record({ enteId: "ente-1" }));
+
+    await expect(createNeutralIntake(input({
+      enteId: "ente-1",
+      destination: { procedimentoId: "procedimento-2", authoritySource: "CASE_FOLDER_UPLOAD" },
+      idempotencyAnchor: { type: "OPERATION_ID", value: "266b723a-e754-4055-a625-6f00dd37cac8" },
+    }))).resolves.toMatchObject({ outcome: "CREATED" });
+
+    expect(mocks.create).toHaveBeenCalledOnce();
+    expect(mocks.admitAsyncJobInTransaction).toHaveBeenCalledOnce();
+  });
+
+  it("rejects a legacy file-version winner during the transactional recheck", async () => {
+    mocks.createFile.mockResolvedValueOnce(stored("ALREADY_EXISTS"));
+    mocks.readFile.mockResolvedValueOnce({ disposition: "FOUND", body });
+    mocks.findDuplicateDocument.mockImplementation(async ({ where }: { where: RoutedDocumentWhere }) => (
+      matchesRoutedDocumentHash(where, {
+        enteId: "ente-1",
+        procedimentoId: "procedimento-1",
+        sha256: null,
+        checksumSha256: null,
+        fileVersionSha256s: [sha256],
+      }) ? { id: "documento-race-winner" } : null
+    ));
+
+    await expect(createNeutralIntake(input({
+      enteId: "ente-1",
+      destination: { procedimentoId: "procedimento-1", authoritySource: "CASE_FOLDER_UPLOAD" },
+      idempotencyAnchor: { type: "OPERATION_ID", value: "db5a5149-124a-4f18-910b-4a00baac6afd" },
+    }))).resolves.toEqual({ outcome: "DUPLICATE_DOCUMENT_IN_FASCICOLO" });
+
+    expect(mocks.createFile).toHaveBeenCalledOnce();
+    expect(mocks.create).not.toHaveBeenCalled();
+    expect(mocks.createDestination).not.toHaveBeenCalled();
+    expect(mocks.admitAsyncJobInTransaction).not.toHaveBeenCalled();
+  });
+
+  it("allows a new operation after terminal FAILED_EXTRACTION with no usable Documento", async () => {
+    mocks.findUnique
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(record({ enteId: "ente-1" }));
+
+    await expect(createNeutralIntake(input({
+      enteId: "ente-1",
+      destination: { procedimentoId: "procedimento-1", authoritySource: "CASE_FOLDER_UPLOAD" },
+      idempotencyAnchor: { type: "OPERATION_ID", value: "69954c84-e2e8-4a2b-944a-91e90cb25534" },
+    }))).resolves.toMatchObject({ outcome: "CREATED" });
+
+    expect(mocks.findPreflightDuplicateIntake).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({
+        neutralIntake: { is: expect.objectContaining({ status: { not: "FAILED_EXTRACTION" } }) },
+      }),
+    }));
+    expect(mocks.findDuplicateIntake).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({
+        neutralIntake: { is: expect.objectContaining({ status: { not: "FAILED_EXTRACTION" } }) },
+      }),
+    }));
   });
 
   it("atomically admits one reference-only extraction job with preserved provenance", async () => {
@@ -199,6 +531,30 @@ describe("B2C9 Block 3B.1 neutral intake service", () => {
     );
   });
 
+  it("atomically preserves an explicit typed case destination", async () => {
+    mocks.findUnique
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(record({ enteId: "ente-1", receivedByUserId: "user-1" }));
+    await expect(createNeutralIntake(input({
+      enteId: "ente-1",
+      receivedByUserId: "user-1",
+      destination: {
+        procedimentoId: "procedimento-1",
+        authoritySource: "CASE_FOLDER_UPLOAD",
+      },
+    }))).resolves.toMatchObject({
+      destination: { procedimentoId: "procedimento-1" },
+    });
+    expect(mocks.createDestination).toHaveBeenCalledWith({
+      data: [expect.objectContaining({
+        neutralIntakeId: "intake-1",
+        procedimentoId: "procedimento-1",
+        authoritySource: "CASE_FOLDER_UPLOAD",
+      })],
+      skipDuplicates: true,
+    });
+  });
+
   it("preserves system receipt actor identity and role without loading a user", async () => {
     await createNeutralIntake(input());
     expect(mocks.findUser).not.toHaveBeenCalled();
@@ -219,13 +575,40 @@ describe("B2C9 Block 3B.1 neutral intake service", () => {
     mocks.createFile.mockResolvedValueOnce(stored("ALREADY_EXISTS"));
     mocks.readFile.mockResolvedValueOnce({ disposition: "FOUND", body });
     mocks.findUnique.mockResolvedValue(record());
+    mocks.findPreflightIdempotency.mockResolvedValue(record());
     await expect(createNeutralIntake(input())).resolves.toMatchObject({ outcome: "REUSED" });
     expect(mocks.create).not.toHaveBeenCalled();
+    expect(mocks.findDuplicateIntake).not.toHaveBeenCalled();
+    expect(mocks.findDuplicateDocument).not.toHaveBeenCalled();
     expect(mocks.admitAsyncJobInTransaction).toHaveBeenCalledOnce();
     expect(mocks.admitAsyncJobInTransaction).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ logicalOperationId: "intake-1", availableAt: record().receivedAt }),
     );
+  });
+
+  it("keeps a destination-bound same-operation retry distinct from a new content duplicate", async () => {
+    const existing = record({ enteId: "ente-1", receivedByUserId: "actor-1" });
+    mocks.createFile.mockResolvedValueOnce(stored("ALREADY_EXISTS"));
+    mocks.readFile.mockResolvedValueOnce({ disposition: "FOUND", body });
+    mocks.findPreflightIdempotency.mockResolvedValue(existing);
+    mocks.findUnique.mockResolvedValue(existing);
+    mocks.findDestination.mockResolvedValue({
+      neutralIntakeId: existing.id,
+      procedimentoId: "procedimento-1",
+      contractVersion: "B2C9_NEUTRAL_INTAKE_DESTINATION_V1",
+    });
+
+    await expect(createNeutralIntake(input({
+      enteId: "ente-1",
+      receivedByUserId: "actor-1",
+      destination: { procedimentoId: "procedimento-1", authoritySource: "CASE_FOLDER_UPLOAD" },
+      idempotencyAnchor: { type: "OPERATION_ID", value: "2e1bf47e-9b2f-4ee8-a41a-4ea6ca4e4619" },
+    }))).resolves.toMatchObject({ outcome: "REUSED" });
+
+    expect(mocks.findPreflightDuplicateIntake).not.toHaveBeenCalled();
+    expect(mocks.findDuplicateIntake).not.toHaveBeenCalled();
+    expect(mocks.create).not.toHaveBeenCalled();
   });
 
   it("keeps event identity stable and fails when the same event changes artifact", async () => {

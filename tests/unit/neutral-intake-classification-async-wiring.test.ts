@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   audit: vi.fn(),
   classify: vi.fn(),
+  handoff: vi.fn(),
   markFailed: vi.fn(),
   runTransaction: vi.fn(),
   prisma: {
@@ -39,6 +40,11 @@ vi.mock("@/server/intake/classification/service", async (importOriginal) => {
     classifyNeutralIntakeInTransaction: mocks.classify,
     markClassificationExecutionFailedInTransaction: mocks.markFailed,
   };
+});
+
+vi.mock("@/server/intake/classification/handoff", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/server/intake/classification/handoff")>();
+  return { ...actual, ensureClassificationHandoffInTransaction: mocks.handoff };
 });
 
 import { applicationAsyncJobRegistry } from "@/server/async-jobs/applicationWorker";
@@ -137,6 +143,7 @@ describe("B2C9 Block 3B.3B async classification wiring", () => {
     });
     mocks.tx.neutralIntakeClassificationAttempt.findFirst.mockResolvedValue(null);
     mocks.markFailed.mockResolvedValue(undefined);
+    mocks.handoff.mockResolvedValue({ outcome: "ROUTED" });
   });
 
   it("registers the closed classification operation in the existing application registry", () => {
@@ -226,6 +233,13 @@ describe("B2C9 Block 3B.3B async classification wiring", () => {
     expect(result).not.toHaveProperty("metadata.reviewRequired");
     expect(JSON.stringify(result)).not.toMatch(/normalizedText|pageText|ocrBytes/);
     expect(mocks.classify).toHaveBeenCalledWith(mocks.tx, "intake-1");
+    expect(mocks.handoff).toHaveBeenCalledWith(mocks.tx, {
+      jobId: "classification-job-1",
+      neutralIntakeId: "intake-1",
+      classificationAttemptId: "classification-1",
+      evidenceHash: parsedReference().metadata.evidenceHash,
+      classifierVersion: NEUTRAL_INTAKE_CLASSIFIER_VERSION,
+    });
     expect(reviewRequired).toBe(outcome === "UNCERTAIN_REVIEW_REQUIRED");
   });
 
@@ -326,6 +340,18 @@ describe("B2C9 Block 3B.3B async classification wiring", () => {
       ));
   });
 
+  it("keeps a persisted classification valid when downstream handoff fails", async () => {
+    mocks.classify.mockResolvedValueOnce(decision("LEGAL_SOURCE_CANDIDATE"));
+    mocks.handoff.mockRejectedValueOnce(new Error("HANDOFF_STORAGE_UNAVAILABLE"));
+    await expect(executeBoundClassification(parsedReference(), context()))
+      .rejects.toEqual(new AsyncJobExecutionError(
+        "HANDOFF_INFRASTRUCTURE",
+        "CLASSIFICATION_HANDOFF_FAILED",
+        true,
+      ));
+    expect(mocks.markFailed).not.toHaveBeenCalled();
+  });
+
   it("commits FAILED_CLASSIFICATION and reports genuine execution failure as terminal", async () => {
     mocks.classify.mockRejectedValueOnce(
       new NeutralIntakeClassificationExecutionError("intake-1", 4),
@@ -403,6 +429,27 @@ describe("B2C9 Block 3B.3B async classification wiring", () => {
         failure: { retryable: true, category: "CRASH_RECOVERY", code: "RETRY_EXHAUSTED" },
       });
     expect(resolution).toMatchObject({ outcome: "SUCCEEDED", resultReference: { referenceId: existing.id } });
+    expect(mocks.markFailed).not.toHaveBeenCalled();
+  });
+
+  it("does not terminalize a persisted decision while its handoff is still failing", async () => {
+    const existing = decision("CASE_DOCUMENT");
+    mocks.tx.neutralIntake.findUnique.mockResolvedValueOnce({
+      id: "intake-1", enteId: "ente-1", status: "EVIDENCE_READY", statusVersion: 5,
+    });
+    mocks.tx.neutralIntakeClassificationAttempt.findFirst.mockResolvedValueOnce(existing);
+    mocks.handoff.mockRejectedValueOnce(new Error("HANDOFF_STORAGE_UNAVAILABLE"));
+    await expect(createNeutralIntakeClassificationHandler()
+      .beforeTerminalFailureInTransaction!(mocks.tx as never, {
+        jobId: "classification-job-1",
+        operation: NEUTRAL_INTAKE_CLASSIFICATION_OPERATION,
+        tenantId: "ente-1",
+        correlationId: provenance.correlationId,
+        inputReference: parsedReference(),
+        attempt: 2,
+        maxAttempts: 2,
+        failure: { retryable: true, category: "HANDOFF_INFRASTRUCTURE", code: "CLASSIFICATION_HANDOFF_FAILED" },
+      })).rejects.toThrow("HANDOFF_STORAGE_UNAVAILABLE");
     expect(mocks.markFailed).not.toHaveBeenCalled();
   });
 

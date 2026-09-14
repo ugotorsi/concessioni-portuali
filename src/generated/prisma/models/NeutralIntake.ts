@@ -326,8 +326,10 @@ export type NeutralIntakeWhereInput = {
   statusVersion?: Prisma.IntFilter<"NeutralIntake"> | number
   ente?: Prisma.XOR<Prisma.EnteNullableScalarRelationFilter, Prisma.EnteWhereInput> | null
   receivedByUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  destination?: Prisma.XOR<Prisma.NeutralIntakeDestinationNullableScalarRelationFilter, Prisma.NeutralIntakeDestinationWhereInput> | null
   extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptListRelationFilter
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptListRelationFilter
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionListRelationFilter
 }
 
 export type NeutralIntakeOrderByWithRelationInput = {
@@ -351,8 +353,10 @@ export type NeutralIntakeOrderByWithRelationInput = {
   statusVersion?: Prisma.SortOrder
   ente?: Prisma.EnteOrderByWithRelationInput
   receivedByUser?: Prisma.UserOrderByWithRelationInput
+  destination?: Prisma.NeutralIntakeDestinationOrderByWithRelationInput
   extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptOrderByRelationAggregateInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptOrderByRelationAggregateInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionOrderByRelationAggregateInput
 }
 
 export type NeutralIntakeWhereUniqueInput = Prisma.AtLeast<{
@@ -379,8 +383,10 @@ export type NeutralIntakeWhereUniqueInput = Prisma.AtLeast<{
   statusVersion?: Prisma.IntFilter<"NeutralIntake"> | number
   ente?: Prisma.XOR<Prisma.EnteNullableScalarRelationFilter, Prisma.EnteWhereInput> | null
   receivedByUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  destination?: Prisma.XOR<Prisma.NeutralIntakeDestinationNullableScalarRelationFilter, Prisma.NeutralIntakeDestinationWhereInput> | null
   extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptListRelationFilter
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptListRelationFilter
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionListRelationFilter
 }, "id" | "idempotencyKey">
 
 export type NeutralIntakeOrderByWithAggregationInput = {
@@ -452,8 +458,10 @@ export type NeutralIntakeCreateInput = {
   statusVersion?: number
   ente?: Prisma.EnteCreateNestedOneWithoutNeutralIntakesInput
   receivedByUser?: Prisma.UserCreateNestedOneWithoutNeutralIntakesReceivedInput
+  destination?: Prisma.NeutralIntakeDestinationCreateNestedOneWithoutNeutralIntakeInput
   extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptCreateNestedManyWithoutNeutralIntakeInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptCreateNestedManyWithoutNeutralIntakeInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutNeutralIntakeInput
 }
 
 export type NeutralIntakeUncheckedCreateInput = {
@@ -475,8 +483,10 @@ export type NeutralIntakeUncheckedCreateInput = {
   receivedAt?: Date | string
   status?: $Enums.NeutralIntakeStatus
   statusVersion?: number
+  destination?: Prisma.NeutralIntakeDestinationUncheckedCreateNestedOneWithoutNeutralIntakeInput
   extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUncheckedCreateNestedManyWithoutNeutralIntakeInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedCreateNestedManyWithoutNeutralIntakeInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutNeutralIntakeInput
 }
 
 export type NeutralIntakeUpdateInput = {
@@ -498,8 +508,10 @@ export type NeutralIntakeUpdateInput = {
   statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
   ente?: Prisma.EnteUpdateOneWithoutNeutralIntakesNestedInput
   receivedByUser?: Prisma.UserUpdateOneWithoutNeutralIntakesReceivedNestedInput
+  destination?: Prisma.NeutralIntakeDestinationUpdateOneWithoutNeutralIntakeNestedInput
   extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUpdateManyWithoutNeutralIntakeNestedInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUpdateManyWithoutNeutralIntakeNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutNeutralIntakeNestedInput
 }
 
 export type NeutralIntakeUncheckedUpdateInput = {
@@ -521,8 +533,10 @@ export type NeutralIntakeUncheckedUpdateInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumNeutralIntakeStatusFieldUpdateOperationsInput | $Enums.NeutralIntakeStatus
   statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  destination?: Prisma.NeutralIntakeDestinationUncheckedUpdateOneWithoutNeutralIntakeNestedInput
   extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUncheckedUpdateManyWithoutNeutralIntakeNestedInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedUpdateManyWithoutNeutralIntakeNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutNeutralIntakeNestedInput
 }
 
 export type NeutralIntakeCreateManyInput = {
@@ -790,6 +804,34 @@ export type NeutralIntakeUpdateOneRequiredWithoutClassificationAttemptsNestedInp
   update?: Prisma.XOR<Prisma.XOR<Prisma.NeutralIntakeUpdateToOneWithWhereWithoutClassificationAttemptsInput, Prisma.NeutralIntakeUpdateWithoutClassificationAttemptsInput>, Prisma.NeutralIntakeUncheckedUpdateWithoutClassificationAttemptsInput>
 }
 
+export type NeutralIntakeCreateNestedOneWithoutDestinationInput = {
+  create?: Prisma.XOR<Prisma.NeutralIntakeCreateWithoutDestinationInput, Prisma.NeutralIntakeUncheckedCreateWithoutDestinationInput>
+  connectOrCreate?: Prisma.NeutralIntakeCreateOrConnectWithoutDestinationInput
+  connect?: Prisma.NeutralIntakeWhereUniqueInput
+}
+
+export type NeutralIntakeUpdateOneRequiredWithoutDestinationNestedInput = {
+  create?: Prisma.XOR<Prisma.NeutralIntakeCreateWithoutDestinationInput, Prisma.NeutralIntakeUncheckedCreateWithoutDestinationInput>
+  connectOrCreate?: Prisma.NeutralIntakeCreateOrConnectWithoutDestinationInput
+  upsert?: Prisma.NeutralIntakeUpsertWithoutDestinationInput
+  connect?: Prisma.NeutralIntakeWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.NeutralIntakeUpdateToOneWithWhereWithoutDestinationInput, Prisma.NeutralIntakeUpdateWithoutDestinationInput>, Prisma.NeutralIntakeUncheckedUpdateWithoutDestinationInput>
+}
+
+export type NeutralIntakeCreateNestedOneWithoutLegalSourceCandidateAdmissionsInput = {
+  create?: Prisma.XOR<Prisma.NeutralIntakeCreateWithoutLegalSourceCandidateAdmissionsInput, Prisma.NeutralIntakeUncheckedCreateWithoutLegalSourceCandidateAdmissionsInput>
+  connectOrCreate?: Prisma.NeutralIntakeCreateOrConnectWithoutLegalSourceCandidateAdmissionsInput
+  connect?: Prisma.NeutralIntakeWhereUniqueInput
+}
+
+export type NeutralIntakeUpdateOneRequiredWithoutLegalSourceCandidateAdmissionsNestedInput = {
+  create?: Prisma.XOR<Prisma.NeutralIntakeCreateWithoutLegalSourceCandidateAdmissionsInput, Prisma.NeutralIntakeUncheckedCreateWithoutLegalSourceCandidateAdmissionsInput>
+  connectOrCreate?: Prisma.NeutralIntakeCreateOrConnectWithoutLegalSourceCandidateAdmissionsInput
+  upsert?: Prisma.NeutralIntakeUpsertWithoutLegalSourceCandidateAdmissionsInput
+  connect?: Prisma.NeutralIntakeWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.NeutralIntakeUpdateToOneWithWhereWithoutLegalSourceCandidateAdmissionsInput, Prisma.NeutralIntakeUpdateWithoutLegalSourceCandidateAdmissionsInput>, Prisma.NeutralIntakeUncheckedUpdateWithoutLegalSourceCandidateAdmissionsInput>
+}
+
 export type NeutralIntakeCreateWithoutEnteInput = {
   id?: string
   idempotencyKey: string
@@ -808,8 +850,10 @@ export type NeutralIntakeCreateWithoutEnteInput = {
   status?: $Enums.NeutralIntakeStatus
   statusVersion?: number
   receivedByUser?: Prisma.UserCreateNestedOneWithoutNeutralIntakesReceivedInput
+  destination?: Prisma.NeutralIntakeDestinationCreateNestedOneWithoutNeutralIntakeInput
   extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptCreateNestedManyWithoutNeutralIntakeInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptCreateNestedManyWithoutNeutralIntakeInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutNeutralIntakeInput
 }
 
 export type NeutralIntakeUncheckedCreateWithoutEnteInput = {
@@ -830,8 +874,10 @@ export type NeutralIntakeUncheckedCreateWithoutEnteInput = {
   receivedAt?: Date | string
   status?: $Enums.NeutralIntakeStatus
   statusVersion?: number
+  destination?: Prisma.NeutralIntakeDestinationUncheckedCreateNestedOneWithoutNeutralIntakeInput
   extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUncheckedCreateNestedManyWithoutNeutralIntakeInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedCreateNestedManyWithoutNeutralIntakeInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutNeutralIntakeInput
 }
 
 export type NeutralIntakeCreateOrConnectWithoutEnteInput = {
@@ -902,8 +948,10 @@ export type NeutralIntakeCreateWithoutReceivedByUserInput = {
   status?: $Enums.NeutralIntakeStatus
   statusVersion?: number
   ente?: Prisma.EnteCreateNestedOneWithoutNeutralIntakesInput
+  destination?: Prisma.NeutralIntakeDestinationCreateNestedOneWithoutNeutralIntakeInput
   extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptCreateNestedManyWithoutNeutralIntakeInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptCreateNestedManyWithoutNeutralIntakeInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutNeutralIntakeInput
 }
 
 export type NeutralIntakeUncheckedCreateWithoutReceivedByUserInput = {
@@ -924,8 +972,10 @@ export type NeutralIntakeUncheckedCreateWithoutReceivedByUserInput = {
   receivedAt?: Date | string
   status?: $Enums.NeutralIntakeStatus
   statusVersion?: number
+  destination?: Prisma.NeutralIntakeDestinationUncheckedCreateNestedOneWithoutNeutralIntakeInput
   extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUncheckedCreateNestedManyWithoutNeutralIntakeInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedCreateNestedManyWithoutNeutralIntakeInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutNeutralIntakeInput
 }
 
 export type NeutralIntakeCreateOrConnectWithoutReceivedByUserInput = {
@@ -973,7 +1023,9 @@ export type NeutralIntakeCreateWithoutExtractionAttemptsInput = {
   statusVersion?: number
   ente?: Prisma.EnteCreateNestedOneWithoutNeutralIntakesInput
   receivedByUser?: Prisma.UserCreateNestedOneWithoutNeutralIntakesReceivedInput
+  destination?: Prisma.NeutralIntakeDestinationCreateNestedOneWithoutNeutralIntakeInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptCreateNestedManyWithoutNeutralIntakeInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutNeutralIntakeInput
 }
 
 export type NeutralIntakeUncheckedCreateWithoutExtractionAttemptsInput = {
@@ -995,7 +1047,9 @@ export type NeutralIntakeUncheckedCreateWithoutExtractionAttemptsInput = {
   receivedAt?: Date | string
   status?: $Enums.NeutralIntakeStatus
   statusVersion?: number
+  destination?: Prisma.NeutralIntakeDestinationUncheckedCreateNestedOneWithoutNeutralIntakeInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedCreateNestedManyWithoutNeutralIntakeInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutNeutralIntakeInput
 }
 
 export type NeutralIntakeCreateOrConnectWithoutExtractionAttemptsInput = {
@@ -1033,7 +1087,9 @@ export type NeutralIntakeUpdateWithoutExtractionAttemptsInput = {
   statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
   ente?: Prisma.EnteUpdateOneWithoutNeutralIntakesNestedInput
   receivedByUser?: Prisma.UserUpdateOneWithoutNeutralIntakesReceivedNestedInput
+  destination?: Prisma.NeutralIntakeDestinationUpdateOneWithoutNeutralIntakeNestedInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUpdateManyWithoutNeutralIntakeNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutNeutralIntakeNestedInput
 }
 
 export type NeutralIntakeUncheckedUpdateWithoutExtractionAttemptsInput = {
@@ -1055,7 +1111,9 @@ export type NeutralIntakeUncheckedUpdateWithoutExtractionAttemptsInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumNeutralIntakeStatusFieldUpdateOperationsInput | $Enums.NeutralIntakeStatus
   statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  destination?: Prisma.NeutralIntakeDestinationUncheckedUpdateOneWithoutNeutralIntakeNestedInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedUpdateManyWithoutNeutralIntakeNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutNeutralIntakeNestedInput
 }
 
 export type NeutralIntakeCreateWithoutClassificationAttemptsInput = {
@@ -1077,7 +1135,9 @@ export type NeutralIntakeCreateWithoutClassificationAttemptsInput = {
   statusVersion?: number
   ente?: Prisma.EnteCreateNestedOneWithoutNeutralIntakesInput
   receivedByUser?: Prisma.UserCreateNestedOneWithoutNeutralIntakesReceivedInput
+  destination?: Prisma.NeutralIntakeDestinationCreateNestedOneWithoutNeutralIntakeInput
   extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptCreateNestedManyWithoutNeutralIntakeInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutNeutralIntakeInput
 }
 
 export type NeutralIntakeUncheckedCreateWithoutClassificationAttemptsInput = {
@@ -1099,7 +1159,9 @@ export type NeutralIntakeUncheckedCreateWithoutClassificationAttemptsInput = {
   receivedAt?: Date | string
   status?: $Enums.NeutralIntakeStatus
   statusVersion?: number
+  destination?: Prisma.NeutralIntakeDestinationUncheckedCreateNestedOneWithoutNeutralIntakeInput
   extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUncheckedCreateNestedManyWithoutNeutralIntakeInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutNeutralIntakeInput
 }
 
 export type NeutralIntakeCreateOrConnectWithoutClassificationAttemptsInput = {
@@ -1137,7 +1199,9 @@ export type NeutralIntakeUpdateWithoutClassificationAttemptsInput = {
   statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
   ente?: Prisma.EnteUpdateOneWithoutNeutralIntakesNestedInput
   receivedByUser?: Prisma.UserUpdateOneWithoutNeutralIntakesReceivedNestedInput
+  destination?: Prisma.NeutralIntakeDestinationUpdateOneWithoutNeutralIntakeNestedInput
   extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUpdateManyWithoutNeutralIntakeNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutNeutralIntakeNestedInput
 }
 
 export type NeutralIntakeUncheckedUpdateWithoutClassificationAttemptsInput = {
@@ -1159,7 +1223,233 @@ export type NeutralIntakeUncheckedUpdateWithoutClassificationAttemptsInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumNeutralIntakeStatusFieldUpdateOperationsInput | $Enums.NeutralIntakeStatus
   statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  destination?: Prisma.NeutralIntakeDestinationUncheckedUpdateOneWithoutNeutralIntakeNestedInput
   extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUncheckedUpdateManyWithoutNeutralIntakeNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutNeutralIntakeNestedInput
+}
+
+export type NeutralIntakeCreateWithoutDestinationInput = {
+  id?: string
+  idempotencyKey: string
+  storageProvider: string
+  storageBucket?: string | null
+  storageKey: string
+  sha256: string
+  mimeType: string
+  sizeBytes: number
+  originalName?: string | null
+  ingressChannel: string
+  originReference?: string | null
+  receivedByActorId: string
+  receivedByRole: string
+  receivedAt?: Date | string
+  status?: $Enums.NeutralIntakeStatus
+  statusVersion?: number
+  ente?: Prisma.EnteCreateNestedOneWithoutNeutralIntakesInput
+  receivedByUser?: Prisma.UserCreateNestedOneWithoutNeutralIntakesReceivedInput
+  extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptCreateNestedManyWithoutNeutralIntakeInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptCreateNestedManyWithoutNeutralIntakeInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutNeutralIntakeInput
+}
+
+export type NeutralIntakeUncheckedCreateWithoutDestinationInput = {
+  id?: string
+  idempotencyKey: string
+  storageProvider: string
+  storageBucket?: string | null
+  storageKey: string
+  sha256: string
+  mimeType: string
+  sizeBytes: number
+  originalName?: string | null
+  ingressChannel: string
+  originReference?: string | null
+  enteId?: string | null
+  receivedByUserId?: string | null
+  receivedByActorId: string
+  receivedByRole: string
+  receivedAt?: Date | string
+  status?: $Enums.NeutralIntakeStatus
+  statusVersion?: number
+  extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUncheckedCreateNestedManyWithoutNeutralIntakeInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedCreateNestedManyWithoutNeutralIntakeInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutNeutralIntakeInput
+}
+
+export type NeutralIntakeCreateOrConnectWithoutDestinationInput = {
+  where: Prisma.NeutralIntakeWhereUniqueInput
+  create: Prisma.XOR<Prisma.NeutralIntakeCreateWithoutDestinationInput, Prisma.NeutralIntakeUncheckedCreateWithoutDestinationInput>
+}
+
+export type NeutralIntakeUpsertWithoutDestinationInput = {
+  update: Prisma.XOR<Prisma.NeutralIntakeUpdateWithoutDestinationInput, Prisma.NeutralIntakeUncheckedUpdateWithoutDestinationInput>
+  create: Prisma.XOR<Prisma.NeutralIntakeCreateWithoutDestinationInput, Prisma.NeutralIntakeUncheckedCreateWithoutDestinationInput>
+  where?: Prisma.NeutralIntakeWhereInput
+}
+
+export type NeutralIntakeUpdateToOneWithWhereWithoutDestinationInput = {
+  where?: Prisma.NeutralIntakeWhereInput
+  data: Prisma.XOR<Prisma.NeutralIntakeUpdateWithoutDestinationInput, Prisma.NeutralIntakeUncheckedUpdateWithoutDestinationInput>
+}
+
+export type NeutralIntakeUpdateWithoutDestinationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  storageProvider?: Prisma.StringFieldUpdateOperationsInput | string
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.StringFieldUpdateOperationsInput | string
+  sha256?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ingressChannel?: Prisma.StringFieldUpdateOperationsInput | string
+  originReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receivedByActorId?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedByRole?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumNeutralIntakeStatusFieldUpdateOperationsInput | $Enums.NeutralIntakeStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  ente?: Prisma.EnteUpdateOneWithoutNeutralIntakesNestedInput
+  receivedByUser?: Prisma.UserUpdateOneWithoutNeutralIntakesReceivedNestedInput
+  extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUpdateManyWithoutNeutralIntakeNestedInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUpdateManyWithoutNeutralIntakeNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutNeutralIntakeNestedInput
+}
+
+export type NeutralIntakeUncheckedUpdateWithoutDestinationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  storageProvider?: Prisma.StringFieldUpdateOperationsInput | string
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.StringFieldUpdateOperationsInput | string
+  sha256?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ingressChannel?: Prisma.StringFieldUpdateOperationsInput | string
+  originReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receivedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receivedByActorId?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedByRole?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumNeutralIntakeStatusFieldUpdateOperationsInput | $Enums.NeutralIntakeStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUncheckedUpdateManyWithoutNeutralIntakeNestedInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedUpdateManyWithoutNeutralIntakeNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutNeutralIntakeNestedInput
+}
+
+export type NeutralIntakeCreateWithoutLegalSourceCandidateAdmissionsInput = {
+  id?: string
+  idempotencyKey: string
+  storageProvider: string
+  storageBucket?: string | null
+  storageKey: string
+  sha256: string
+  mimeType: string
+  sizeBytes: number
+  originalName?: string | null
+  ingressChannel: string
+  originReference?: string | null
+  receivedByActorId: string
+  receivedByRole: string
+  receivedAt?: Date | string
+  status?: $Enums.NeutralIntakeStatus
+  statusVersion?: number
+  ente?: Prisma.EnteCreateNestedOneWithoutNeutralIntakesInput
+  receivedByUser?: Prisma.UserCreateNestedOneWithoutNeutralIntakesReceivedInput
+  destination?: Prisma.NeutralIntakeDestinationCreateNestedOneWithoutNeutralIntakeInput
+  extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptCreateNestedManyWithoutNeutralIntakeInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptCreateNestedManyWithoutNeutralIntakeInput
+}
+
+export type NeutralIntakeUncheckedCreateWithoutLegalSourceCandidateAdmissionsInput = {
+  id?: string
+  idempotencyKey: string
+  storageProvider: string
+  storageBucket?: string | null
+  storageKey: string
+  sha256: string
+  mimeType: string
+  sizeBytes: number
+  originalName?: string | null
+  ingressChannel: string
+  originReference?: string | null
+  enteId?: string | null
+  receivedByUserId?: string | null
+  receivedByActorId: string
+  receivedByRole: string
+  receivedAt?: Date | string
+  status?: $Enums.NeutralIntakeStatus
+  statusVersion?: number
+  destination?: Prisma.NeutralIntakeDestinationUncheckedCreateNestedOneWithoutNeutralIntakeInput
+  extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUncheckedCreateNestedManyWithoutNeutralIntakeInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedCreateNestedManyWithoutNeutralIntakeInput
+}
+
+export type NeutralIntakeCreateOrConnectWithoutLegalSourceCandidateAdmissionsInput = {
+  where: Prisma.NeutralIntakeWhereUniqueInput
+  create: Prisma.XOR<Prisma.NeutralIntakeCreateWithoutLegalSourceCandidateAdmissionsInput, Prisma.NeutralIntakeUncheckedCreateWithoutLegalSourceCandidateAdmissionsInput>
+}
+
+export type NeutralIntakeUpsertWithoutLegalSourceCandidateAdmissionsInput = {
+  update: Prisma.XOR<Prisma.NeutralIntakeUpdateWithoutLegalSourceCandidateAdmissionsInput, Prisma.NeutralIntakeUncheckedUpdateWithoutLegalSourceCandidateAdmissionsInput>
+  create: Prisma.XOR<Prisma.NeutralIntakeCreateWithoutLegalSourceCandidateAdmissionsInput, Prisma.NeutralIntakeUncheckedCreateWithoutLegalSourceCandidateAdmissionsInput>
+  where?: Prisma.NeutralIntakeWhereInput
+}
+
+export type NeutralIntakeUpdateToOneWithWhereWithoutLegalSourceCandidateAdmissionsInput = {
+  where?: Prisma.NeutralIntakeWhereInput
+  data: Prisma.XOR<Prisma.NeutralIntakeUpdateWithoutLegalSourceCandidateAdmissionsInput, Prisma.NeutralIntakeUncheckedUpdateWithoutLegalSourceCandidateAdmissionsInput>
+}
+
+export type NeutralIntakeUpdateWithoutLegalSourceCandidateAdmissionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  storageProvider?: Prisma.StringFieldUpdateOperationsInput | string
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.StringFieldUpdateOperationsInput | string
+  sha256?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ingressChannel?: Prisma.StringFieldUpdateOperationsInput | string
+  originReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receivedByActorId?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedByRole?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumNeutralIntakeStatusFieldUpdateOperationsInput | $Enums.NeutralIntakeStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  ente?: Prisma.EnteUpdateOneWithoutNeutralIntakesNestedInput
+  receivedByUser?: Prisma.UserUpdateOneWithoutNeutralIntakesReceivedNestedInput
+  destination?: Prisma.NeutralIntakeDestinationUpdateOneWithoutNeutralIntakeNestedInput
+  extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUpdateManyWithoutNeutralIntakeNestedInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUpdateManyWithoutNeutralIntakeNestedInput
+}
+
+export type NeutralIntakeUncheckedUpdateWithoutLegalSourceCandidateAdmissionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  storageProvider?: Prisma.StringFieldUpdateOperationsInput | string
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.StringFieldUpdateOperationsInput | string
+  sha256?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  originalName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ingressChannel?: Prisma.StringFieldUpdateOperationsInput | string
+  originReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receivedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receivedByActorId?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedByRole?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumNeutralIntakeStatusFieldUpdateOperationsInput | $Enums.NeutralIntakeStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  destination?: Prisma.NeutralIntakeDestinationUncheckedUpdateOneWithoutNeutralIntakeNestedInput
+  extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUncheckedUpdateManyWithoutNeutralIntakeNestedInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedUpdateManyWithoutNeutralIntakeNestedInput
 }
 
 export type NeutralIntakeCreateManyEnteInput = {
@@ -1200,8 +1490,10 @@ export type NeutralIntakeUpdateWithoutEnteInput = {
   status?: Prisma.EnumNeutralIntakeStatusFieldUpdateOperationsInput | $Enums.NeutralIntakeStatus
   statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
   receivedByUser?: Prisma.UserUpdateOneWithoutNeutralIntakesReceivedNestedInput
+  destination?: Prisma.NeutralIntakeDestinationUpdateOneWithoutNeutralIntakeNestedInput
   extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUpdateManyWithoutNeutralIntakeNestedInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUpdateManyWithoutNeutralIntakeNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutNeutralIntakeNestedInput
 }
 
 export type NeutralIntakeUncheckedUpdateWithoutEnteInput = {
@@ -1222,8 +1514,10 @@ export type NeutralIntakeUncheckedUpdateWithoutEnteInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumNeutralIntakeStatusFieldUpdateOperationsInput | $Enums.NeutralIntakeStatus
   statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  destination?: Prisma.NeutralIntakeDestinationUncheckedUpdateOneWithoutNeutralIntakeNestedInput
   extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUncheckedUpdateManyWithoutNeutralIntakeNestedInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedUpdateManyWithoutNeutralIntakeNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutNeutralIntakeNestedInput
 }
 
 export type NeutralIntakeUncheckedUpdateManyWithoutEnteInput = {
@@ -1284,8 +1578,10 @@ export type NeutralIntakeUpdateWithoutReceivedByUserInput = {
   status?: Prisma.EnumNeutralIntakeStatusFieldUpdateOperationsInput | $Enums.NeutralIntakeStatus
   statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
   ente?: Prisma.EnteUpdateOneWithoutNeutralIntakesNestedInput
+  destination?: Prisma.NeutralIntakeDestinationUpdateOneWithoutNeutralIntakeNestedInput
   extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUpdateManyWithoutNeutralIntakeNestedInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUpdateManyWithoutNeutralIntakeNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutNeutralIntakeNestedInput
 }
 
 export type NeutralIntakeUncheckedUpdateWithoutReceivedByUserInput = {
@@ -1306,8 +1602,10 @@ export type NeutralIntakeUncheckedUpdateWithoutReceivedByUserInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumNeutralIntakeStatusFieldUpdateOperationsInput | $Enums.NeutralIntakeStatus
   statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  destination?: Prisma.NeutralIntakeDestinationUncheckedUpdateOneWithoutNeutralIntakeNestedInput
   extractionAttempts?: Prisma.NeutralIntakeExtractionAttemptUncheckedUpdateManyWithoutNeutralIntakeNestedInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedUpdateManyWithoutNeutralIntakeNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutNeutralIntakeNestedInput
 }
 
 export type NeutralIntakeUncheckedUpdateManyWithoutReceivedByUserInput = {
@@ -1338,11 +1636,13 @@ export type NeutralIntakeUncheckedUpdateManyWithoutReceivedByUserInput = {
 export type NeutralIntakeCountOutputType = {
   extractionAttempts: number
   classificationAttempts: number
+  legalSourceCandidateAdmissions: number
 }
 
 export type NeutralIntakeCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   extractionAttempts?: boolean | NeutralIntakeCountOutputTypeCountExtractionAttemptsArgs
   classificationAttempts?: boolean | NeutralIntakeCountOutputTypeCountClassificationAttemptsArgs
+  legalSourceCandidateAdmissions?: boolean | NeutralIntakeCountOutputTypeCountLegalSourceCandidateAdmissionsArgs
 }
 
 /**
@@ -1369,6 +1669,13 @@ export type NeutralIntakeCountOutputTypeCountClassificationAttemptsArgs<ExtArgs 
   where?: Prisma.NeutralIntakeClassificationAttemptWhereInput
 }
 
+/**
+ * NeutralIntakeCountOutputType without action
+ */
+export type NeutralIntakeCountOutputTypeCountLegalSourceCandidateAdmissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LegalSourceCandidateAdmissionWhereInput
+}
+
 
 export type NeutralIntakeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1391,8 +1698,10 @@ export type NeutralIntakeSelect<ExtArgs extends runtime.Types.Extensions.Interna
   statusVersion?: boolean
   ente?: boolean | Prisma.NeutralIntake$enteArgs<ExtArgs>
   receivedByUser?: boolean | Prisma.NeutralIntake$receivedByUserArgs<ExtArgs>
+  destination?: boolean | Prisma.NeutralIntake$destinationArgs<ExtArgs>
   extractionAttempts?: boolean | Prisma.NeutralIntake$extractionAttemptsArgs<ExtArgs>
   classificationAttempts?: boolean | Prisma.NeutralIntake$classificationAttemptsArgs<ExtArgs>
+  legalSourceCandidateAdmissions?: boolean | Prisma.NeutralIntake$legalSourceCandidateAdmissionsArgs<ExtArgs>
   _count?: boolean | Prisma.NeutralIntakeCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["neutralIntake"]>
 
@@ -1467,8 +1776,10 @@ export type NeutralIntakeOmit<ExtArgs extends runtime.Types.Extensions.InternalA
 export type NeutralIntakeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   ente?: boolean | Prisma.NeutralIntake$enteArgs<ExtArgs>
   receivedByUser?: boolean | Prisma.NeutralIntake$receivedByUserArgs<ExtArgs>
+  destination?: boolean | Prisma.NeutralIntake$destinationArgs<ExtArgs>
   extractionAttempts?: boolean | Prisma.NeutralIntake$extractionAttemptsArgs<ExtArgs>
   classificationAttempts?: boolean | Prisma.NeutralIntake$classificationAttemptsArgs<ExtArgs>
+  legalSourceCandidateAdmissions?: boolean | Prisma.NeutralIntake$legalSourceCandidateAdmissionsArgs<ExtArgs>
   _count?: boolean | Prisma.NeutralIntakeCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type NeutralIntakeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1485,8 +1796,10 @@ export type $NeutralIntakePayload<ExtArgs extends runtime.Types.Extensions.Inter
   objects: {
     ente: Prisma.$EntePayload<ExtArgs> | null
     receivedByUser: Prisma.$UserPayload<ExtArgs> | null
+    destination: Prisma.$NeutralIntakeDestinationPayload<ExtArgs> | null
     extractionAttempts: Prisma.$NeutralIntakeExtractionAttemptPayload<ExtArgs>[]
     classificationAttempts: Prisma.$NeutralIntakeClassificationAttemptPayload<ExtArgs>[]
+    legalSourceCandidateAdmissions: Prisma.$LegalSourceCandidateAdmissionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1903,8 +2216,10 @@ export interface Prisma__NeutralIntakeClient<T, Null = never, ExtArgs extends ru
   readonly [Symbol.toStringTag]: "PrismaPromise"
   ente<T extends Prisma.NeutralIntake$enteArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NeutralIntake$enteArgs<ExtArgs>>): Prisma.Prisma__EnteClient<runtime.Types.Result.GetResult<Prisma.$EntePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   receivedByUser<T extends Prisma.NeutralIntake$receivedByUserArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NeutralIntake$receivedByUserArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  destination<T extends Prisma.NeutralIntake$destinationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NeutralIntake$destinationArgs<ExtArgs>>): Prisma.Prisma__NeutralIntakeDestinationClient<runtime.Types.Result.GetResult<Prisma.$NeutralIntakeDestinationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   extractionAttempts<T extends Prisma.NeutralIntake$extractionAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NeutralIntake$extractionAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NeutralIntakeExtractionAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   classificationAttempts<T extends Prisma.NeutralIntake$classificationAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NeutralIntake$classificationAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NeutralIntakeClassificationAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  legalSourceCandidateAdmissions<T extends Prisma.NeutralIntake$legalSourceCandidateAdmissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NeutralIntake$legalSourceCandidateAdmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LegalSourceCandidateAdmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2391,6 +2706,25 @@ export type NeutralIntake$receivedByUserArgs<ExtArgs extends runtime.Types.Exten
 }
 
 /**
+ * NeutralIntake.destination
+ */
+export type NeutralIntake$destinationArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the NeutralIntakeDestination
+   */
+  select?: Prisma.NeutralIntakeDestinationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the NeutralIntakeDestination
+   */
+  omit?: Prisma.NeutralIntakeDestinationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NeutralIntakeDestinationInclude<ExtArgs> | null
+  where?: Prisma.NeutralIntakeDestinationWhereInput
+}
+
+/**
  * NeutralIntake.extractionAttempts
  */
 export type NeutralIntake$extractionAttemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2436,6 +2770,30 @@ export type NeutralIntake$classificationAttemptsArgs<ExtArgs extends runtime.Typ
   take?: number
   skip?: number
   distinct?: Prisma.NeutralIntakeClassificationAttemptScalarFieldEnum | Prisma.NeutralIntakeClassificationAttemptScalarFieldEnum[]
+}
+
+/**
+ * NeutralIntake.legalSourceCandidateAdmissions
+ */
+export type NeutralIntake$legalSourceCandidateAdmissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LegalSourceCandidateAdmission
+   */
+  select?: Prisma.LegalSourceCandidateAdmissionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LegalSourceCandidateAdmission
+   */
+  omit?: Prisma.LegalSourceCandidateAdmissionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LegalSourceCandidateAdmissionInclude<ExtArgs> | null
+  where?: Prisma.LegalSourceCandidateAdmissionWhereInput
+  orderBy?: Prisma.LegalSourceCandidateAdmissionOrderByWithRelationInput | Prisma.LegalSourceCandidateAdmissionOrderByWithRelationInput[]
+  cursor?: Prisma.LegalSourceCandidateAdmissionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LegalSourceCandidateAdmissionScalarFieldEnum | Prisma.LegalSourceCandidateAdmissionScalarFieldEnum[]
 }
 
 /**

@@ -415,6 +415,8 @@ export const ModelName = {
   NeutralIntakeExtractionAttempt: 'NeutralIntakeExtractionAttempt',
   NeutralIntakeExtractionPage: 'NeutralIntakeExtractionPage',
   NeutralIntakeClassificationAttempt: 'NeutralIntakeClassificationAttempt',
+  NeutralIntakeDestination: 'NeutralIntakeDestination',
+  LegalSourceCandidateAdmission: 'LegalSourceCandidateAdmission',
   AsyncJob: 'AsyncJob',
   FascicoloObservation: 'FascicoloObservation',
   FascicoloChecklistEvidence: 'FascicoloChecklistEvidence',
@@ -445,7 +447,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "neutralIntakeClassificationAttempt" | "asyncJob" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "asyncJob" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2743,6 +2745,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    NeutralIntakeDestination: {
+      payload: Prisma.$NeutralIntakeDestinationPayload<ExtArgs>
+      fields: Prisma.NeutralIntakeDestinationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.NeutralIntakeDestinationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeDestinationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.NeutralIntakeDestinationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeDestinationPayload>
+        }
+        findFirst: {
+          args: Prisma.NeutralIntakeDestinationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeDestinationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.NeutralIntakeDestinationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeDestinationPayload>
+        }
+        findMany: {
+          args: Prisma.NeutralIntakeDestinationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeDestinationPayload>[]
+        }
+        create: {
+          args: Prisma.NeutralIntakeDestinationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeDestinationPayload>
+        }
+        createMany: {
+          args: Prisma.NeutralIntakeDestinationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.NeutralIntakeDestinationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeDestinationPayload>[]
+        }
+        delete: {
+          args: Prisma.NeutralIntakeDestinationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeDestinationPayload>
+        }
+        update: {
+          args: Prisma.NeutralIntakeDestinationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeDestinationPayload>
+        }
+        deleteMany: {
+          args: Prisma.NeutralIntakeDestinationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.NeutralIntakeDestinationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.NeutralIntakeDestinationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeDestinationPayload>[]
+        }
+        upsert: {
+          args: Prisma.NeutralIntakeDestinationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NeutralIntakeDestinationPayload>
+        }
+        aggregate: {
+          args: Prisma.NeutralIntakeDestinationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateNeutralIntakeDestination>
+        }
+        groupBy: {
+          args: Prisma.NeutralIntakeDestinationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.NeutralIntakeDestinationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.NeutralIntakeDestinationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.NeutralIntakeDestinationCountAggregateOutputType> | number
+        }
+      }
+    }
+    LegalSourceCandidateAdmission: {
+      payload: Prisma.$LegalSourceCandidateAdmissionPayload<ExtArgs>
+      fields: Prisma.LegalSourceCandidateAdmissionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LegalSourceCandidateAdmissionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceCandidateAdmissionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LegalSourceCandidateAdmissionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceCandidateAdmissionPayload>
+        }
+        findFirst: {
+          args: Prisma.LegalSourceCandidateAdmissionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceCandidateAdmissionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LegalSourceCandidateAdmissionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceCandidateAdmissionPayload>
+        }
+        findMany: {
+          args: Prisma.LegalSourceCandidateAdmissionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceCandidateAdmissionPayload>[]
+        }
+        create: {
+          args: Prisma.LegalSourceCandidateAdmissionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceCandidateAdmissionPayload>
+        }
+        createMany: {
+          args: Prisma.LegalSourceCandidateAdmissionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LegalSourceCandidateAdmissionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceCandidateAdmissionPayload>[]
+        }
+        delete: {
+          args: Prisma.LegalSourceCandidateAdmissionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceCandidateAdmissionPayload>
+        }
+        update: {
+          args: Prisma.LegalSourceCandidateAdmissionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceCandidateAdmissionPayload>
+        }
+        deleteMany: {
+          args: Prisma.LegalSourceCandidateAdmissionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LegalSourceCandidateAdmissionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LegalSourceCandidateAdmissionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceCandidateAdmissionPayload>[]
+        }
+        upsert: {
+          args: Prisma.LegalSourceCandidateAdmissionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceCandidateAdmissionPayload>
+        }
+        aggregate: {
+          args: Prisma.LegalSourceCandidateAdmissionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLegalSourceCandidateAdmission>
+        }
+        groupBy: {
+          args: Prisma.LegalSourceCandidateAdmissionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LegalSourceCandidateAdmissionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LegalSourceCandidateAdmissionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LegalSourceCandidateAdmissionCountAggregateOutputType> | number
+        }
+      }
+    }
     AsyncJob: {
       payload: Prisma.$AsyncJobPayload<ExtArgs>
       fields: Prisma.AsyncJobFieldRefs
@@ -4600,6 +4750,40 @@ export const NeutralIntakeClassificationAttemptScalarFieldEnum = {
 export type NeutralIntakeClassificationAttemptScalarFieldEnum = (typeof NeutralIntakeClassificationAttemptScalarFieldEnum)[keyof typeof NeutralIntakeClassificationAttemptScalarFieldEnum]
 
 
+export const NeutralIntakeDestinationScalarFieldEnum = {
+  neutralIntakeId: 'neutralIntakeId',
+  procedimentoId: 'procedimentoId',
+  contractVersion: 'contractVersion',
+  authoritySource: 'authoritySource',
+  establishedByUserId: 'establishedByUserId',
+  establishedByActorId: 'establishedByActorId',
+  establishedByRole: 'establishedByRole',
+  establishedAt: 'establishedAt'
+} as const
+
+export type NeutralIntakeDestinationScalarFieldEnum = (typeof NeutralIntakeDestinationScalarFieldEnum)[keyof typeof NeutralIntakeDestinationScalarFieldEnum]
+
+
+export const LegalSourceCandidateAdmissionScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  neutralIntakeId: 'neutralIntakeId',
+  classificationAttemptId: 'classificationAttemptId',
+  extractionAttemptId: 'extractionAttemptId',
+  evidenceHash: 'evidenceHash',
+  classifierVersion: 'classifierVersion',
+  classificationOutcome: 'classificationOutcome',
+  contractVersion: 'contractVersion',
+  actorId: 'actorId',
+  actorEmail: 'actorEmail',
+  actorRole: 'actorRole',
+  purpose: 'purpose',
+  admittedAt: 'admittedAt'
+} as const
+
+export type LegalSourceCandidateAdmissionScalarFieldEnum = (typeof LegalSourceCandidateAdmissionScalarFieldEnum)[keyof typeof LegalSourceCandidateAdmissionScalarFieldEnum]
+
+
 export const AsyncJobScalarFieldEnum = {
   id: 'id',
   idempotencyKey: 'idempotencyKey',
@@ -6333,6 +6517,8 @@ export type GlobalOmitConfig = {
   neutralIntakeExtractionAttempt?: Prisma.NeutralIntakeExtractionAttemptOmit
   neutralIntakeExtractionPage?: Prisma.NeutralIntakeExtractionPageOmit
   neutralIntakeClassificationAttempt?: Prisma.NeutralIntakeClassificationAttemptOmit
+  neutralIntakeDestination?: Prisma.NeutralIntakeDestinationOmit
+  legalSourceCandidateAdmission?: Prisma.LegalSourceCandidateAdmissionOmit
   asyncJob?: Prisma.AsyncJobOmit
   fascicoloObservation?: Prisma.FascicoloObservationOmit
   fascicoloChecklistEvidence?: Prisma.FascicoloChecklistEvidenceOmit

@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { AppShell } from "@/components/layout/AppShell";
 import { ResumeDemoBanner } from "@/components/demo-guidata/ResumeDemoBanner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -137,6 +139,7 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
             </CardHeader>
             <CardContent>
               <form action={createDocumentoUploadAction} className="grid gap-3 md:grid-cols-3">
+                <input type="hidden" name="intakeOperationId" value={randomUUID()} />
                 <label className="text-sm text-slate-700 md:col-span-3">
                   File
                   <Input name="file" type="file" required />

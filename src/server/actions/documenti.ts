@@ -6,15 +6,17 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
-import { BACKOFFICE_ROLES, getCurrentUser, requireRole } from "@/lib/auth";
+import { BACKOFFICE_ROLES, canManageProcedimenti, getCurrentUser, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 import { parseUploadDocumentFormData, DOCUMENT_TIPOLOGIA_VALUES } from "@/server/documents/validation";
 import { DOCUMENT_CANALE_VALUES, DOCUMENT_DIREZIONE_VALUES, normalizeProtocolloMetadata } from "@/server/documents/protocollo";
 import { uploadDocument } from "@/server/documents/uploadService";
+import { createNeutralIntake } from "@/server/intake/createNeutralIntake";
 
 const STAGING_PREVIEW_ADMIN_ID = "staging-preview-admin";
+const intakeOperationIdSchema = z.string().uuid();
 
 function resolveDocumentoUploadedByUserId(currentUserId: string | null | undefined): string | null {
   if (!currentUserId || currentUserId === STAGING_PREVIEW_ADMIN_ID) {
@@ -217,6 +219,9 @@ export async function createDocumentoUploadAction(formData: FormData) {
   let payload;
   try {
     payload = parseUploadDocumentFormData(formData);
+    if (payload.procedimentoId && !canManageProcedimenti(role)) {
+      throw new Error("Profilo non autorizzato al caricamento nel procedimento.");
+    }
     await assertLinkedEntitiesExist(payload);
   } catch (error) {
     await auditFailure({
@@ -249,6 +254,17 @@ export async function createDocumentoUploadAction(formData: FormData) {
   }
   const canonicalEnteId = linkedTenant.enteId;
 
+  if (payload.procedimentoId && (!currentUser || !tenantContext)) {
+    await auditFailure({
+      azione: "AUTHZ_DENIED",
+      entita: "NeutralIntake",
+      enteId: canonicalEnteId,
+      actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
+      metadata: { actionType: "PROCEDIMENTO_INTAKE_UPLOAD", reason: "TENANT_CONTEXT_REQUIRED" },
+    });
+    throw new Error("Contesto tenant autenticato richiesto.");
+  }
+
   if (tenantContext) {
     try {
       requireTenantAccess(tenantContext, canonicalEnteId, {
@@ -269,6 +285,54 @@ export async function createDocumentoUploadAction(formData: FormData) {
       });
       throw new Error("Accesso tenant non consentito.");
     }
+  }
+
+  if (payload.procedimentoId) {
+    const operationId = intakeOperationIdSchema.parse(formData.get("intakeOperationId"));
+    const actorId = currentUser?.id ?? STAGING_PREVIEW_ADMIN_ID;
+    const result = await createNeutralIntake({
+      body: Buffer.from(await payload.file.arrayBuffer()),
+      mimeType: payload.file.type,
+      originalName: payload.file.name,
+      ingressChannel: "FASCICOLO_PROCEDIMENTO_UPLOAD",
+      enteId: canonicalEnteId,
+      receivedByUserId: persistedUserId,
+      receivedByActorId: actorId,
+      receivedByRole: role,
+      destination: {
+        procedimentoId: payload.procedimentoId,
+        authoritySource: "CASE_FOLDER_UPLOAD",
+      },
+      idempotencyAnchor: { type: "OPERATION_ID", value: operationId },
+    });
+    if (result.outcome === "DUPLICATE_DOCUMENT_IN_FASCICOLO") {
+      await auditFailure({
+        azione: "NEUTRAL_INTAKE_PROCEDIMENTO_DUPLICATE_REJECTED",
+        entita: "NeutralIntake",
+        enteId: canonicalEnteId,
+        actor: { userId: persistedUserId, userEmail: currentUser.email, userRole: role },
+        metadata: {
+          procedimentoId: payload.procedimentoId,
+          reason: "DUPLICATE_DOCUMENT_IN_FASCICOLO",
+        },
+      });
+      revalidatePath(`/procedimenti/${payload.procedimentoId}`);
+      return redirect(`/procedimenti/${payload.procedimentoId}?documentUpload=duplicate`);
+    }
+    await auditSuccess({
+      azione: "NEUTRAL_INTAKE_PROCEDIMENTO_UPLOAD",
+      entita: "NeutralIntake",
+      entitaId: result.intake.id,
+      enteId: canonicalEnteId,
+      actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
+      metadata: {
+        procedimentoId: payload.procedimentoId,
+        intakeOutcome: result.outcome,
+        destinationAuthoritySource: "CASE_FOLDER_UPLOAD",
+      },
+    });
+    revalidateLinkedPaths({ procedimentoId: payload.procedimentoId });
+    return redirect("/documenti");
   }
 
   const uploaded = await uploadDocument({

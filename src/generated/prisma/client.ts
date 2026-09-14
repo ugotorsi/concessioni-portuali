@@ -197,6 +197,16 @@ export type NeutralIntakeExtractionPage = Prisma.NeutralIntakeExtractionPageMode
  */
 export type NeutralIntakeClassificationAttempt = Prisma.NeutralIntakeClassificationAttemptModel
 /**
+ * Model NeutralIntakeDestination
+ *
+ */
+export type NeutralIntakeDestination = Prisma.NeutralIntakeDestinationModel
+/**
+ * Model LegalSourceCandidateAdmission
+ *
+ */
+export type LegalSourceCandidateAdmission = Prisma.LegalSourceCandidateAdmissionModel
+/**
  * Model AsyncJob
  * 
  */

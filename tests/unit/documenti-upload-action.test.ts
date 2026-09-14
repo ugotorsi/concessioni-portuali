@@ -1,8 +1,10 @@
 import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const requireRoleMock = vi.hoisted(() => vi.fn());
+const canManageProcedimentiMock = vi.hoisted(() => vi.fn());
 const getCurrentUserMock = vi.hoisted(() => vi.fn());
 const getCurrentTenantContextMock = vi.hoisted(() => vi.fn());
 const requireTenantAccessMock = vi.hoisted(() => vi.fn());
@@ -10,6 +12,7 @@ const auditFailureMock = vi.hoisted(() => vi.fn());
 const auditSuccessMock = vi.hoisted(() => vi.fn());
 const auditInTxMock = vi.hoisted(() => vi.fn());
 const uploadDocumentMock = vi.hoisted(() => vi.fn());
+const createNeutralIntakeMock = vi.hoisted(() => vi.fn());
 const createDocumentFileMock = vi.hoisted(() => vi.fn());
 const createVersionMock = vi.hoisted(() => vi.fn());
 const reconcileVersionMock = vi.hoisted(() => vi.fn());
@@ -27,6 +30,7 @@ const prismaMock = vi.hoisted(() => ({
 
 vi.mock("@/lib/auth", () => ({
   BACKOFFICE_ROLES: ["ADMIN"],
+  canManageProcedimenti: canManageProcedimentiMock,
   getCurrentUser: getCurrentUserMock,
   requireRole: requireRoleMock,
 }));
@@ -83,6 +87,7 @@ vi.mock("@/server/documents/protocollo", () => ({
   })),
 }));
 vi.mock("@/server/documents/uploadService", () => ({ uploadDocument: uploadDocumentMock }));
+vi.mock("@/server/intake/createNeutralIntake", () => ({ createNeutralIntake: createNeutralIntakeMock }));
 vi.mock("next/cache", () => ({ revalidatePath: revalidatePathMock }));
 vi.mock("next/navigation", () => ({ redirect: redirectMock }));
 
@@ -96,6 +101,12 @@ import { DocumentStorageS3Error } from "@/server/documents/storage/s3StorageAdap
 function archiveFormData() {
   const formData = new FormData();
   formData.set("id", "documento-1");
+  return formData;
+}
+
+function uploadFormData() {
+  const formData = new FormData();
+  formData.set("intakeOperationId", "2e1bf47e-9b2f-4ee8-a41a-4ea6ca4e4619");
   return formData;
 }
 
@@ -115,7 +126,8 @@ describe("createDocumentoUploadAction", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     requireRoleMock.mockResolvedValue("ADMIN");
-    getCurrentTenantContextMock.mockResolvedValue(null);
+    canManageProcedimentiMock.mockReturnValue(true);
+    getCurrentTenantContextMock.mockResolvedValue({});
     getCurrentUserMock.mockResolvedValue({ id: "user-1", email: "admin@example.test" });
     requireTenantAccessMock.mockImplementation(() => undefined);
     prismaMock.documento.findUnique.mockResolvedValue({
@@ -156,48 +168,112 @@ describe("createDocumentoUploadAction", () => {
         reportId: null,
       },
     });
+    createNeutralIntakeMock.mockResolvedValue({
+      outcome: "CREATED",
+      intake: { id: "intake-1" },
+      destination: { procedimentoId: "procedimento-1" },
+      extractionJob: { id: "job-1" },
+    });
     auditSuccessMock.mockResolvedValue(undefined);
     auditFailureMock.mockResolvedValue(undefined);
   });
 
-  it("writes null User FKs for the technical Preview actor while preserving document linkage and storage metadata", async () => {
+  it("admits a procedure upload once with its authoritative destination and no eager Documento", async () => {
     getCurrentUserMock.mockResolvedValue({ id: "staging-preview-admin", email: "preview@example.test" });
 
-    await createDocumentoUploadAction(new FormData());
+    await createDocumentoUploadAction(uploadFormData());
 
-    expect(uploadDocumentMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        actor: { id: "staging-preview-admin", email: "preview@example.test", role: "ADMIN" },
-        procedimentoId: "procedimento-1",
-        nome: "verbale.txt",
-        tipologia: "VERBALE",
-        source: "UPLOAD_UTENTE",
-        status: "ATTIVO",
-        descrizione: "Verbale istruttorio",
-        numeroProtocollo: "PG/2026/001",
-      }),
-    );
+    expect(createNeutralIntakeMock).toHaveBeenCalledWith({
+      body: Buffer.from("contenuto"),
+      mimeType: "text/plain",
+      originalName: "verbale.txt",
+      ingressChannel: "FASCICOLO_PROCEDIMENTO_UPLOAD",
+      enteId: "ente-1",
+      receivedByUserId: null,
+      receivedByActorId: "staging-preview-admin",
+      receivedByRole: "ADMIN",
+      destination: { procedimentoId: "procedimento-1", authoritySource: "CASE_FOLDER_UPLOAD" },
+      idempotencyAnchor: {
+        type: "OPERATION_ID",
+        value: "2e1bf47e-9b2f-4ee8-a41a-4ea6ca4e4619",
+      },
+    });
+    expect(uploadDocumentMock).not.toHaveBeenCalled();
+    expect(txMock.documento.create).not.toHaveBeenCalled();
   });
 
-  it("writes persisted User FKs for a persisted actor", async () => {
+  it("returns an exact duplicate to the current fascicolo without admitting another pipeline", async () => {
+    createNeutralIntakeMock.mockResolvedValueOnce({ outcome: "DUPLICATE_DOCUMENT_IN_FASCICOLO" });
+
+    await createDocumentoUploadAction(uploadFormData());
+
+    expect(redirectMock).toHaveBeenCalledWith("/procedimenti/procedimento-1?documentUpload=duplicate");
+    expect(auditFailureMock).toHaveBeenCalledWith(expect.objectContaining({
+      azione: "NEUTRAL_INTAKE_PROCEDIMENTO_DUPLICATE_REJECTED",
+      metadata: expect.objectContaining({ reason: "DUPLICATE_DOCUMENT_IN_FASCICOLO" }),
+    }));
+    expect(uploadDocumentMock).not.toHaveBeenCalled();
+    expect(txMock.documento.create).not.toHaveBeenCalled();
+  });
+
+  it("renders the bounded duplicate notice from the redirected Fascicolo query state", () => {
+    const source = readFileSync("src/app/procedimenti/[id]/page.tsx", "utf8");
+
+    expect(source).toContain('documentUpload === "duplicate"');
+    expect(source).toContain("Documento già presente nel fascicolo.");
+    expect(source).not.toMatch(/documentUpload.*storageKey|documentUpload.*storageBucket/);
+  });
+
+  it("derives persisted intake actor provenance from the authenticated user", async () => {
     getCurrentUserMock.mockResolvedValue({ id: "user-1", email: "admin@example.test" });
 
-    await createDocumentoUploadAction(new FormData());
+    await createDocumentoUploadAction(uploadFormData());
 
-    expect(uploadDocumentMock).toHaveBeenCalledWith(
-      expect.objectContaining({ actor: { id: "user-1", email: "admin@example.test", role: "ADMIN" } }),
-    );
+    expect(createNeutralIntakeMock).toHaveBeenCalledWith(expect.objectContaining({
+      receivedByUserId: "user-1",
+      receivedByActorId: "user-1",
+      receivedByRole: "ADMIN",
+    }));
   });
 
   it("preserves null email and redirects after a successful upload", async () => {
     getCurrentUserMock.mockResolvedValue({ id: "user-1", email: null });
 
-    await createDocumentoUploadAction(new FormData());
+    await createDocumentoUploadAction(uploadFormData());
 
-    expect(uploadDocumentMock).toHaveBeenCalledWith(
-      expect.objectContaining({ actor: { id: "user-1", email: null, role: "ADMIN" } }),
-    );
+    expect(auditSuccessMock).toHaveBeenCalledWith(expect.objectContaining({
+      actor: { userId: "user-1", userEmail: null, userRole: "ADMIN" },
+    }));
     expect(redirectMock).toHaveBeenCalledWith("/documenti");
+  });
+
+  it("rejects a cross-tenant procedure upload before intake admission", async () => {
+    getCurrentTenantContextMock.mockResolvedValue({});
+    requireTenantAccessMock.mockImplementationOnce(() => { throw new Error("tenant denied"); });
+
+    await expect(createDocumentoUploadAction(uploadFormData())).rejects.toThrow("Accesso tenant non consentito");
+
+    expect(createNeutralIntakeMock).not.toHaveBeenCalled();
+    expect(uploadDocumentMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects a procedure upload without authenticated tenant context before intake admission", async () => {
+    getCurrentUserMock.mockResolvedValue(null);
+    getCurrentTenantContextMock.mockResolvedValue(null);
+
+    await expect(createDocumentoUploadAction(uploadFormData())).rejects.toThrow("Contesto tenant autenticato richiesto");
+
+    expect(createNeutralIntakeMock).not.toHaveBeenCalled();
+    expect(uploadDocumentMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects a role without procedure-management authority before intake admission", async () => {
+    canManageProcedimentiMock.mockReturnValue(false);
+
+    await expect(createDocumentoUploadAction(uploadFormData())).rejects.toThrow("Profilo non autorizzato");
+
+    expect(createNeutralIntakeMock).not.toHaveBeenCalled();
+    expect(uploadDocumentMock).not.toHaveBeenCalled();
   });
 
   it("preserves S3 storage diagnostics and the user-facing failure through the shared service", async () => {
@@ -254,7 +330,8 @@ describe("createDocumentoUploadAction", () => {
       concessione: { enteId: null },
     });
 
-    await expect(createDocumentoUploadAction(new FormData())).rejects.toThrow("Tenant canonico non derivabile");
+    await expect(createDocumentoUploadAction(uploadFormData())).rejects.toThrow("Tenant canonico non derivabile");
+    expect(createNeutralIntakeMock).not.toHaveBeenCalled();
     expect(uploadDocumentMock).not.toHaveBeenCalled();
     expect(auditFailureMock).toHaveBeenCalledWith(expect.objectContaining({
       metadata: expect.objectContaining({ reason: "CANONICAL_TENANT_REQUIRED" }),

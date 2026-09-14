@@ -82,6 +82,8 @@ export const ModelName = {
   NeutralIntakeExtractionAttempt: 'NeutralIntakeExtractionAttempt',
   NeutralIntakeExtractionPage: 'NeutralIntakeExtractionPage',
   NeutralIntakeClassificationAttempt: 'NeutralIntakeClassificationAttempt',
+  NeutralIntakeDestination: 'NeutralIntakeDestination',
+  LegalSourceCandidateAdmission: 'LegalSourceCandidateAdmission',
   AsyncJob: 'AsyncJob',
   FascicoloObservation: 'FascicoloObservation',
   FascicoloChecklistEvidence: 'FascicoloChecklistEvidence',
@@ -821,6 +823,40 @@ export const NeutralIntakeClassificationAttemptScalarFieldEnum = {
 } as const
 
 export type NeutralIntakeClassificationAttemptScalarFieldEnum = (typeof NeutralIntakeClassificationAttemptScalarFieldEnum)[keyof typeof NeutralIntakeClassificationAttemptScalarFieldEnum]
+
+
+export const NeutralIntakeDestinationScalarFieldEnum = {
+  neutralIntakeId: 'neutralIntakeId',
+  procedimentoId: 'procedimentoId',
+  contractVersion: 'contractVersion',
+  authoritySource: 'authoritySource',
+  establishedByUserId: 'establishedByUserId',
+  establishedByActorId: 'establishedByActorId',
+  establishedByRole: 'establishedByRole',
+  establishedAt: 'establishedAt'
+} as const
+
+export type NeutralIntakeDestinationScalarFieldEnum = (typeof NeutralIntakeDestinationScalarFieldEnum)[keyof typeof NeutralIntakeDestinationScalarFieldEnum]
+
+
+export const LegalSourceCandidateAdmissionScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  neutralIntakeId: 'neutralIntakeId',
+  classificationAttemptId: 'classificationAttemptId',
+  extractionAttemptId: 'extractionAttemptId',
+  evidenceHash: 'evidenceHash',
+  classifierVersion: 'classifierVersion',
+  classificationOutcome: 'classificationOutcome',
+  contractVersion: 'contractVersion',
+  actorId: 'actorId',
+  actorEmail: 'actorEmail',
+  actorRole: 'actorRole',
+  purpose: 'purpose',
+  admittedAt: 'admittedAt'
+} as const
+
+export type LegalSourceCandidateAdmissionScalarFieldEnum = (typeof LegalSourceCandidateAdmissionScalarFieldEnum)[keyof typeof LegalSourceCandidateAdmissionScalarFieldEnum]
 
 
 export const AsyncJobScalarFieldEnum = {

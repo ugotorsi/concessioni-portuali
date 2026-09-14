@@ -693,6 +693,7 @@ model Ente {
   documentFileVersions         DocumentFileVersion[]
   legalSourceAcquisitions      LegalSourceAcquisition[]
   neutralIntakes               NeutralIntake[]
+  legalSourceCandidateAdmissions LegalSourceCandidateAdmission[]
   asyncJobs                    AsyncJob[]
   aiFascicoloTrustedReviewMaterials AiFascicoloTrustedReviewMaterial[]
   aiFascicoloHumanReviewStates      AiFascicoloHumanReviewState[]
@@ -1121,6 +1122,7 @@ model User {
   documentRequirementEvidenceRevoked            FascicoloDocumentRequirementEvidence[]       @relation("DocumentRequirementEvidenceRevokedBy")
   documentFileVersionsCreated                    DocumentFileVersion[]                         @relation("DocumentFileVersionCreatedBy")
   neutralIntakesReceived                         NeutralIntake[]                               @relation("NeutralIntakeReceivedBy")
+  neutralIntakeDestinationsEstablished           NeutralIntakeDestination[]                   @relation("NeutralIntakeDestinationEstablishedBy")
   asyncJobsInitiated                             AsyncJob[]                                    @relation("AsyncJobInitiatedBy")
   documentRequirementEvidenceReviews            FascicoloDocumentRequirementEvidenceReview[] @relation("DocumentRequirementEvidenceReviewedBy")
   aiFascicoloHumanReviewEvents                   AiFascicoloHumanReviewEvent[]
@@ -1383,6 +1385,7 @@ model Procedimento {
   aiFascicoloTrustedReviewMaterials AiFascicoloTrustedReviewMaterial[]
   aiFascicoloHumanReviewStates      AiFascicoloHumanReviewState[]
   aiFascicoloHumanReviewEvents      AiFascicoloHumanReviewEvent[]
+  neutralIntakeDestinations         NeutralIntakeDestination[]
 
   @@index([concessioneId])
   @@index([criticitaId])
@@ -1605,10 +1608,12 @@ model NeutralIntake {
   status             NeutralIntakeStatus @default(RECEIVED)
   statusVersion      Int                 @default(0)
 
-  ente                   Ente?                                @relation(fields: [enteId], references: [id], onDelete: Restrict)
-  receivedByUser         User?                                @relation("NeutralIntakeReceivedBy", fields: [receivedByUserId], references: [id], onDelete: Restrict)
+  ente           Ente? @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  receivedByUser User? @relation("NeutralIntakeReceivedBy", fields: [receivedByUserId], references: [id], onDelete: Restrict)
+  destination            NeutralIntakeDestination?
   extractionAttempts     NeutralIntakeExtractionAttempt[]
   classificationAttempts NeutralIntakeClassificationAttempt[]
+  legalSourceCandidateAdmissions LegalSourceCandidateAdmission[]
 
   @@index([storageProvider, storageKey])
   @@index([sha256])
@@ -1684,11 +1689,56 @@ model NeutralIntakeClassificationAttempt {
 
   neutralIntake     NeutralIntake                  @relation(fields: [neutralIntakeId], references: [id], onDelete: Restrict)
   extractionAttempt NeutralIntakeExtractionAttempt @relation(fields: [extractionAttemptId, neutralIntakeId], references: [id, neutralIntakeId], onDelete: Restrict)
+  legalSourceCandidateAdmissions LegalSourceCandidateAdmission[]
 
   @@unique([neutralIntakeId, evidenceHash, classifierVersion])
+  @@unique([id, neutralIntakeId, extractionAttemptId, evidenceHash, classifierVersion, outcome])
   @@index([neutralIntakeId, classifiedAt])
   @@index([extractionAttemptId])
   @@index([outcome, reviewRequired])
+}
+
+model NeutralIntakeDestination {
+  neutralIntakeId       String   @id
+  procedimentoId        String
+  contractVersion       String
+  authoritySource       String
+  establishedByUserId   String?
+  establishedByActorId  String
+  establishedByRole     String
+  establishedAt         DateTime @default(now())
+
+  neutralIntake     NeutralIntake @relation(fields: [neutralIntakeId], references: [id], onDelete: Restrict)
+  procedimento      Procedimento  @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  establishedByUser User?         @relation("NeutralIntakeDestinationEstablishedBy", fields: [establishedByUserId], references: [id], onDelete: Restrict)
+
+  @@index([procedimentoId])
+  @@index([establishedByUserId])
+}
+
+model LegalSourceCandidateAdmission {
+  id                      String   @id @default(cuid())
+  enteId                  String?
+  neutralIntakeId         String
+  classificationAttemptId String
+  extractionAttemptId     String
+  evidenceHash            String   @db.Char(64)
+  classifierVersion       String
+  classificationOutcome   NeutralIntakeClassificationOutcome
+  contractVersion         String
+  actorId                 String
+  actorEmail              String?
+  actorRole               String
+  purpose                 String
+  admittedAt              DateTime @default(now())
+
+  ente                  Ente?                               @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  neutralIntake         NeutralIntake                       @relation(fields: [neutralIntakeId], references: [id], onDelete: Restrict)
+  classificationAttempt NeutralIntakeClassificationAttempt @relation(fields: [classificationAttemptId, neutralIntakeId, extractionAttemptId, evidenceHash, classifierVersion, classificationOutcome], references: [id, neutralIntakeId, extractionAttemptId, evidenceHash, classifierVersion, outcome], onDelete: Restrict)
+
+  @@unique([neutralIntakeId, classificationAttemptId, evidenceHash, contractVersion])
+  @@index([enteId, admittedAt])
+  @@index([classificationAttemptId])
 }
 
 model AsyncJob {
