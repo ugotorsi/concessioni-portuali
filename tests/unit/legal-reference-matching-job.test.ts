@@ -23,14 +23,17 @@ vi.mock("@/server/db/serializableTransaction", () => ({
 import { applicationAsyncJobRegistry } from "@/server/async-jobs/applicationWorker";
 import { normalizeAsyncJobAdmission } from "@/server/async-jobs/domain";
 import {
-  LEGAL_REFERENCE_IDENTITY_NAMESPACE,
   buildLegalReferenceMatchingAdmission,
   ensureLegalReferenceMatchingJobInTransaction,
   LEGAL_REFERENCE_MATCHING_OPERATION,
   MAX_LOCAL_LEGAL_SOURCES_PER_MATCHING_JOB,
   matchLegalReferencesInTransaction,
 } from "@/server/intake/neutralIntakeLegalReferenceMatchingJob";
-import { LEGAL_REFERENCE_MATCHING_VERSION } from "@/server/intake/legal-reference-matching/matcher";
+import {
+  LEGAL_REFERENCE_IDENTITY_NAMESPACE,
+  LEGAL_REFERENCE_MATCHING_VERSION,
+} from "@/server/intake/legal-reference-matching/matcher";
+import { NORMATTIVA_LOOKUP_VERSION, NORMATTIVA_PROVIDER } from "@/server/intake/official-source-lookup/normattiva";
 
 const provenance = {
   tenantId: "ente-1",
@@ -45,6 +48,10 @@ const provenance = {
 
 function sourceJob() {
   return { operation: "LEGAL_REFERENCE_DISCOVERY_V1", ...provenance };
+}
+
+function matchingJob() {
+  return { operation: LEGAL_REFERENCE_MATCHING_OPERATION, ...provenance };
 }
 
 function attempt(mentions: Array<Record<string, unknown>> = []) {
@@ -72,6 +79,24 @@ function legislationMention(matches: Array<{ id: string }> = []) {
     year: 1990,
     chamberSection: null,
     matches,
+  };
+}
+
+function source(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "source-1",
+    enteId: null,
+    sourceType: "LEGGE",
+    legalAuthorityKind: "LEGISLATION",
+    issuingBody: "PARLAMENTO",
+    sourceNumber: "241",
+    sourceDate: new Date("1990-08-07T00:00:00.000Z"),
+    identityNamespace: null,
+    identityScopeKind: null,
+    identityScopeKey: null,
+    canonicalKey: null,
+    identityAssertions: [],
+    ...overrides,
   };
 }
 
@@ -120,7 +145,7 @@ describe("B2C11 Block 3B.6B async local catalog matching", () => {
   });
 
   it("treats zero mentions as a successful no-op", async () => {
-    mocks.tx.asyncJob.findUnique.mockResolvedValue({ operation: LEGAL_REFERENCE_MATCHING_OPERATION, tenantId: "ente-1" });
+    mocks.tx.asyncJob.findUnique.mockResolvedValue(matchingJob());
     await expect(matchLegalReferencesInTransaction(mocks.tx as never, {
       jobId: "matching-job-1",
       neutralIntakeId: "intake-1",
@@ -131,7 +156,7 @@ describe("B2C11 Block 3B.6B async local catalog matching", () => {
   });
 
   it("uses only tenant-visible or global sources and persists a bounded machine result", async () => {
-    mocks.tx.asyncJob.findUnique.mockResolvedValue({ operation: LEGAL_REFERENCE_MATCHING_OPERATION, tenantId: "ente-1" });
+    mocks.tx.asyncJob.findUnique.mockResolvedValue(matchingJob());
     mocks.tx.neutralIntakeExtractionAttempt.findUnique.mockResolvedValue(attempt([legislationMention()]));
     mocks.tx.legalSource.findMany.mockResolvedValue([{
       id: "source-1",
@@ -183,7 +208,7 @@ describe("B2C11 Block 3B.6B async local catalog matching", () => {
   });
 
   it("persists no match when a canonical collision has an incompatible namespace", async () => {
-    mocks.tx.asyncJob.findUnique.mockResolvedValue({ operation: LEGAL_REFERENCE_MATCHING_OPERATION, tenantId: "ente-1" });
+    mocks.tx.asyncJob.findUnique.mockResolvedValue(matchingJob());
     mocks.tx.neutralIntakeExtractionAttempt.findUnique.mockResolvedValue(attempt([{
       ...legislationMention(),
       actType: "DECRETO_LEGISLATIVO",
@@ -205,20 +230,86 @@ describe("B2C11 Block 3B.6B async local catalog matching", () => {
       identityAssertions: [],
     }]);
 
+    const admitOfficialLookup = vi.fn();
     await matchLegalReferencesInTransaction(mocks.tx as never, {
       jobId: "matching-job-1",
       neutralIntakeId: "intake-1",
       extractionAttemptId: "extraction-1",
-    });
+    }, admitOfficialLookup);
 
     expect(mocks.tx.legalReferenceMatch.createMany).toHaveBeenCalledWith({
       data: [expect.objectContaining({ status: "NO_MATCH", legalSourceId: null })],
       skipDuplicates: true,
     });
+    expect(admitOfficialLookup).toHaveBeenCalledOnce();
+    expect(admitOfficialLookup).toHaveBeenCalledWith(
+      mocks.tx,
+      "mention-1",
+      { providerKey: NORMATTIVA_PROVIDER, lookupVersion: NORMATTIVA_LOOKUP_VERSION },
+      expect.objectContaining({ tenantId: "ente-1", correlationId: "correlation-1" }),
+    );
+  });
+
+  it("fans out only supported national NO_MATCH results with sufficient identity", async () => {
+    mocks.tx.asyncJob.findUnique.mockResolvedValue(matchingJob());
+    mocks.tx.neutralIntakeExtractionAttempt.findUnique.mockResolvedValue(attempt([
+      legislationMention(),
+      legislationMention([{ id: "existing-match" }]),
+      { ...legislationMention(), id: "regional", actType: "LEGGE_REGIONALE" },
+      { ...legislationMention(), id: "case-law", kind: "CASE_LAW", actType: null, authorityHint: "CASSAZIONE" },
+      { ...legislationMention(), id: "insufficient", actNumber: null },
+    ]));
+    const admitOfficialLookup = vi.fn();
+
+    await expect(matchLegalReferencesInTransaction(mocks.tx as never, {
+      jobId: "matching-job-1",
+      neutralIntakeId: "intake-1",
+      extractionAttemptId: "extraction-1",
+    }, admitOfficialLookup)).resolves.toMatchObject({ officialLookupAdmissionCount: 1 });
+
+    expect(admitOfficialLookup).toHaveBeenCalledOnce();
+    expect(admitOfficialLookup).toHaveBeenCalledWith(
+      mocks.tx,
+      "mention-1",
+      { providerKey: NORMATTIVA_PROVIDER, lookupVersion: NORMATTIVA_LOOKUP_VERSION },
+      expect.any(Object),
+    );
+  });
+
+  it.each([
+    ["MATCHED", legislationMention(), [source({ id: "source-1" })]],
+    ["AMBIGUOUS", legislationMention(), [source({ id: "source-1" }), source({ id: "source-2" })]],
+    ["insufficient identity", { ...legislationMention(), actNumber: null }, []],
+    ["case law", {
+      ...legislationMention(),
+      kind: "CASE_LAW",
+      actType: null,
+      authorityHint: "CASSAZIONE",
+      normalizedKey: "CASSAZIONE:1:2020",
+    }, []],
+    ["regional law", {
+      ...legislationMention(),
+      actType: "LEGGE_REGIONALE",
+      normalizedKey: "LEGGE_REGIONALE:CAMPANIA:5:2021",
+      actNumber: "5",
+      year: 2021,
+    }, []],
+  ])("does not admit official lookup for %s", async (_label, candidate, sources) => {
+    mocks.tx.asyncJob.findUnique.mockResolvedValue(matchingJob());
+    mocks.tx.neutralIntakeExtractionAttempt.findUnique.mockResolvedValue(attempt([candidate]));
+    mocks.tx.legalSource.findMany.mockResolvedValue(sources);
+    const admitOfficialLookup = vi.fn();
+
+    await expect(matchLegalReferencesInTransaction(mocks.tx as never, {
+      jobId: "matching-job-1",
+      neutralIntakeId: "intake-1",
+      extractionAttemptId: "extraction-1",
+    }, admitOfficialLookup)).resolves.toMatchObject({ officialLookupAdmissionCount: 0 });
+    expect(admitOfficialLookup).not.toHaveBeenCalled();
   });
 
   it("does not recompute or duplicate a persisted matching-version result", async () => {
-    mocks.tx.asyncJob.findUnique.mockResolvedValue({ operation: LEGAL_REFERENCE_MATCHING_OPERATION, tenantId: "ente-1" });
+    mocks.tx.asyncJob.findUnique.mockResolvedValue(matchingJob());
     mocks.tx.neutralIntakeExtractionAttempt.findUnique.mockResolvedValue(
       attempt([legislationMention([{ id: "existing-match" }])]),
     );
@@ -232,7 +323,7 @@ describe("B2C11 Block 3B.6B async local catalog matching", () => {
   });
 
   it("fails closed before persistence when the local catalog exceeds the matching bound", async () => {
-    mocks.tx.asyncJob.findUnique.mockResolvedValue({ operation: LEGAL_REFERENCE_MATCHING_OPERATION, tenantId: "ente-1" });
+    mocks.tx.asyncJob.findUnique.mockResolvedValue(matchingJob());
     mocks.tx.neutralIntakeExtractionAttempt.findUnique.mockResolvedValue(attempt([legislationMention()]));
     mocks.tx.legalSource.findMany.mockResolvedValue(
       Array.from({ length: MAX_LOCAL_LEGAL_SOURCES_PER_MATCHING_JOB + 1 }, (_, index) => ({ id: `source-${index}` })),

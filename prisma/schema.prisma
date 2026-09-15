@@ -676,6 +676,12 @@ enum LegalReferenceMatchReason {
   INSUFFICIENT_IDENTITY
 }
 
+enum LegalReferenceOfficialLookupStatus {
+  NOT_FOUND
+  FOUND_UNIQUE
+  AMBIGUOUS
+}
+
 enum AsyncJobStatus {
   QUEUED
   RUNNING
@@ -1725,6 +1731,7 @@ model LegalReferenceMention {
   extractionAttempt NeutralIntakeExtractionAttempt @relation(fields: [extractionAttemptId], references: [id], onDelete: Restrict)
   extractionPage    NeutralIntakeExtractionPage    @relation(fields: [extractionPageId, extractionAttemptId], references: [id, extractionAttemptId], onDelete: Restrict)
   matches           LegalReferenceMatch[]
+  officialLookups   LegalReferenceOfficialLookup[]
 
   @@unique([extractionPageId, discoveryVersion, characterStart, characterEnd, normalizedKey])
   @@index([extractionAttemptId, discoveryVersion])
@@ -1747,6 +1754,41 @@ model LegalReferenceMatch {
   @@unique([mentionId, matchingVersion])
   @@index([legalSourceId])
   @@index([status, matchedAt])
+}
+
+model LegalReferenceOfficialLookup {
+  id            String                             @id @default(cuid())
+  mentionId     String
+  provider      String                             @db.VarChar(100)
+  lookupVersion String                             @db.VarChar(100)
+  status        LegalReferenceOfficialLookupStatus
+  resultCount   Int
+  completedAt   DateTime                           @default(now())
+
+  mention LegalReferenceMention       @relation(fields: [mentionId], references: [id], onDelete: Restrict)
+  hits    LegalReferenceOfficialHit[]
+
+  @@unique([mentionId, provider, lookupVersion])
+  @@index([status, completedAt])
+}
+
+model LegalReferenceOfficialHit {
+  id                    String   @id @default(cuid())
+  lookupId              String
+  providerRecordId      String   @db.VarChar(200)
+  denominazioneAtto     String   @db.VarChar(200)
+  numeroProvvedimento   String   @db.VarChar(100)
+  annoProvvedimento     Int
+  dataEmanazione        DateTime?
+  descrizioneAtto       String?  @db.VarChar(500)
+  titoloAtto            String?  @db.VarChar(500)
+  numeroGU              String?  @db.VarChar(100)
+  dataGU                DateTime?
+
+  lookup LegalReferenceOfficialLookup @relation(fields: [lookupId], references: [id], onDelete: Restrict)
+
+  @@unique([lookupId, providerRecordId])
+  @@index([providerRecordId])
 }
 
 model NeutralIntakeClassificationAttempt {

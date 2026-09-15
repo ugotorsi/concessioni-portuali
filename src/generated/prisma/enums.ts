@@ -921,6 +921,15 @@ export const LegalReferenceMatchReason = {
 export type LegalReferenceMatchReason = (typeof LegalReferenceMatchReason)[keyof typeof LegalReferenceMatchReason]
 
 
+export const LegalReferenceOfficialLookupStatus = {
+  NOT_FOUND: 'NOT_FOUND',
+  FOUND_UNIQUE: 'FOUND_UNIQUE',
+  AMBIGUOUS: 'AMBIGUOUS'
+} as const
+
+export type LegalReferenceOfficialLookupStatus = (typeof LegalReferenceOfficialLookupStatus)[keyof typeof LegalReferenceOfficialLookupStatus]
+
+
 export const AsyncJobStatus = {
   QUEUED: 'QUEUED',
   RUNNING: 'RUNNING',

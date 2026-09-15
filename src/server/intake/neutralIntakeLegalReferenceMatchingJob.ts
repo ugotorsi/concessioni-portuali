@@ -13,6 +13,11 @@ import {
   LEGAL_REFERENCE_MATCHING_VERSION,
   matchLegalReferenceMention,
 } from "./legal-reference-matching/matcher";
+import {
+  admitLegalReferenceOfficialLookupInTransaction,
+  officialLegalReferenceProviderRegistry,
+  type OfficialLookupSourceJob,
+} from "./neutralIntakeLegalReferenceOfficialLookupJob";
 
 export const LEGAL_REFERENCE_MATCHING_OPERATION = "LEGAL_REFERENCE_MATCHING_V1" as const;
 export const LEGAL_REFERENCE_MATCHING_PURPOSE = "LEGAL_REFERENCE_MATCHING" as const;
@@ -162,9 +167,24 @@ export function ensureLegalReferenceMatchingJob(input: {
 export async function matchLegalReferencesInTransaction(
   tx: Prisma.TransactionClient,
   input: { jobId: string; neutralIntakeId: string; extractionAttemptId: string },
+  admitOfficialLookup: typeof admitLegalReferenceOfficialLookupInTransaction =
+    admitLegalReferenceOfficialLookupInTransaction,
 ) {
   const [job, attempt] = await Promise.all([
-    tx.asyncJob.findUnique({ where: { id: input.jobId }, select: { operation: true, tenantId: true } }),
+    tx.asyncJob.findUnique({
+      where: { id: input.jobId },
+      select: {
+        operation: true,
+        tenantId: true,
+        admissionType: true,
+        initiatingUserId: true,
+        actorId: true,
+        actorEmail: true,
+        actorRole: true,
+        policyDecisionRef: true,
+        correlationId: true,
+      },
+    }),
     tx.neutralIntakeExtractionAttempt.findUnique({
       where: { id: input.extractionAttemptId },
       select: {
@@ -261,7 +281,31 @@ export async function matchLegalReferencesInTransaction(
     ...matchLegalReferenceMention(mention, sources),
   }));
   await tx.legalReferenceMatch.createMany({ data, skipDuplicates: true });
-  return { mentionCount: attempt.legalReferenceMentions.length, persistedCount: data.length };
+  const provenance: OfficialLookupSourceJob = {
+    tenantId: job.tenantId,
+    admissionType: job.admissionType,
+    initiatingUserId: job.initiatingUserId,
+    actorId: job.actorId,
+    actorEmail: job.actorEmail,
+    actorRole: job.actorRole,
+    policyDecisionRef: job.policyDecisionRef,
+    correlationId: job.correlationId,
+  };
+  const eligibleLookups = data.flatMap((decision, index) =>
+    decision.status === "NO_MATCH" && decision.reason === "NO_CATALOG_MATCH"
+      ? officialLegalReferenceProviderRegistry.route(pendingMentions[index]).map((provider) => ({
+          mentionId: decision.mentionId,
+          provider,
+        }))
+      : []);
+  for (const lookup of eligibleLookups) {
+    await admitOfficialLookup(tx, lookup.mentionId, lookup.provider, provenance);
+  }
+  return {
+    mentionCount: attempt.legalReferenceMentions.length,
+    persistedCount: data.length,
+    officialLookupAdmissionCount: eligibleLookups.length,
+  };
 }
 
 async function executeMatching(input: MatchingReference, context: AsyncJobHandlerContext) {

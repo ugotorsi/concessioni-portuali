@@ -83,6 +83,8 @@ export const ModelName = {
   NeutralIntakeExtractionPage: 'NeutralIntakeExtractionPage',
   LegalReferenceMention: 'LegalReferenceMention',
   LegalReferenceMatch: 'LegalReferenceMatch',
+  LegalReferenceOfficialLookup: 'LegalReferenceOfficialLookup',
+  LegalReferenceOfficialHit: 'LegalReferenceOfficialHit',
   NeutralIntakeClassificationAttempt: 'NeutralIntakeClassificationAttempt',
   NeutralIntakeDestination: 'NeutralIntakeDestination',
   LegalSourceCandidateAdmission: 'LegalSourceCandidateAdmission',
@@ -845,6 +847,36 @@ export const LegalReferenceMatchScalarFieldEnum = {
 } as const
 
 export type LegalReferenceMatchScalarFieldEnum = (typeof LegalReferenceMatchScalarFieldEnum)[keyof typeof LegalReferenceMatchScalarFieldEnum]
+
+
+export const LegalReferenceOfficialLookupScalarFieldEnum = {
+  id: 'id',
+  mentionId: 'mentionId',
+  provider: 'provider',
+  lookupVersion: 'lookupVersion',
+  status: 'status',
+  resultCount: 'resultCount',
+  completedAt: 'completedAt'
+} as const
+
+export type LegalReferenceOfficialLookupScalarFieldEnum = (typeof LegalReferenceOfficialLookupScalarFieldEnum)[keyof typeof LegalReferenceOfficialLookupScalarFieldEnum]
+
+
+export const LegalReferenceOfficialHitScalarFieldEnum = {
+  id: 'id',
+  lookupId: 'lookupId',
+  providerRecordId: 'providerRecordId',
+  denominazioneAtto: 'denominazioneAtto',
+  numeroProvvedimento: 'numeroProvvedimento',
+  annoProvvedimento: 'annoProvvedimento',
+  dataEmanazione: 'dataEmanazione',
+  descrizioneAtto: 'descrizioneAtto',
+  titoloAtto: 'titoloAtto',
+  numeroGU: 'numeroGU',
+  dataGU: 'dataGU'
+} as const
+
+export type LegalReferenceOfficialHitScalarFieldEnum = (typeof LegalReferenceOfficialHitScalarFieldEnum)[keyof typeof LegalReferenceOfficialHitScalarFieldEnum]
 
 
 export const NeutralIntakeClassificationAttemptScalarFieldEnum = {

@@ -202,6 +202,16 @@ export type LegalReferenceMention = Prisma.LegalReferenceMentionModel
  */
 export type LegalReferenceMatch = Prisma.LegalReferenceMatchModel
 /**
+ * Model LegalReferenceOfficialLookup
+ * 
+ */
+export type LegalReferenceOfficialLookup = Prisma.LegalReferenceOfficialLookupModel
+/**
+ * Model LegalReferenceOfficialHit
+ * 
+ */
+export type LegalReferenceOfficialHit = Prisma.LegalReferenceOfficialHitModel
+/**
  * Model NeutralIntakeClassificationAttempt
  * 
  */

@@ -4,6 +4,7 @@ import { createNeutralIntakeClassificationHandler } from "../intake/neutralIntak
 import { createNeutralIntakeExtractionHandler } from "../intake/neutralIntakeExtractionJob";
 import { createLegalReferenceDiscoveryHandler } from "../intake/neutralIntakeLegalReferenceDiscoveryJob";
 import { createLegalReferenceMatchingHandler } from "../intake/neutralIntakeLegalReferenceMatchingJob";
+import { createLegalReferenceOfficialLookupHandler } from "../intake/neutralIntakeLegalReferenceOfficialLookupJob";
 
 const APPLICATION_ASYNC_JOB_LEASE_MS = 5 * 60 * 1_000;
 
@@ -12,6 +13,7 @@ export const applicationAsyncJobRegistry = new AsyncJobHandlerRegistry([
   createNeutralIntakeClassificationHandler(),
   createLegalReferenceDiscoveryHandler(),
   createLegalReferenceMatchingHandler(),
+  createLegalReferenceOfficialLookupHandler(),
 ]);
 
 export function drainOneApplicationAsyncJob(input: {

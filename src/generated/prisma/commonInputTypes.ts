@@ -1537,6 +1537,23 @@ export type EnumLegalReferenceMatchReasonWithAggregatesFilter<$PrismaModel = nev
   _max?: Prisma.NestedEnumLegalReferenceMatchReasonFilter<$PrismaModel>
 }
 
+export type EnumLegalReferenceOfficialLookupStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalReferenceOfficialLookupStatus | Prisma.EnumLegalReferenceOfficialLookupStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalReferenceOfficialLookupStatus[] | Prisma.ListEnumLegalReferenceOfficialLookupStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalReferenceOfficialLookupStatus[] | Prisma.ListEnumLegalReferenceOfficialLookupStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalReferenceOfficialLookupStatusFilter<$PrismaModel> | $Enums.LegalReferenceOfficialLookupStatus
+}
+
+export type EnumLegalReferenceOfficialLookupStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalReferenceOfficialLookupStatus | Prisma.EnumLegalReferenceOfficialLookupStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalReferenceOfficialLookupStatus[] | Prisma.ListEnumLegalReferenceOfficialLookupStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalReferenceOfficialLookupStatus[] | Prisma.ListEnumLegalReferenceOfficialLookupStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalReferenceOfficialLookupStatusWithAggregatesFilter<$PrismaModel> | $Enums.LegalReferenceOfficialLookupStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalReferenceOfficialLookupStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalReferenceOfficialLookupStatusFilter<$PrismaModel>
+}
+
 export type EnumNeutralIntakeClassificationOutcomeFilter<$PrismaModel = never> = {
   equals?: $Enums.NeutralIntakeClassificationOutcome | Prisma.EnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
   in?: $Enums.NeutralIntakeClassificationOutcome[] | Prisma.ListEnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
@@ -3441,6 +3458,23 @@ export type NestedEnumLegalReferenceMatchReasonWithAggregatesFilter<$PrismaModel
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumLegalReferenceMatchReasonFilter<$PrismaModel>
   _max?: Prisma.NestedEnumLegalReferenceMatchReasonFilter<$PrismaModel>
+}
+
+export type NestedEnumLegalReferenceOfficialLookupStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalReferenceOfficialLookupStatus | Prisma.EnumLegalReferenceOfficialLookupStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalReferenceOfficialLookupStatus[] | Prisma.ListEnumLegalReferenceOfficialLookupStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalReferenceOfficialLookupStatus[] | Prisma.ListEnumLegalReferenceOfficialLookupStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalReferenceOfficialLookupStatusFilter<$PrismaModel> | $Enums.LegalReferenceOfficialLookupStatus
+}
+
+export type NestedEnumLegalReferenceOfficialLookupStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalReferenceOfficialLookupStatus | Prisma.EnumLegalReferenceOfficialLookupStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalReferenceOfficialLookupStatus[] | Prisma.ListEnumLegalReferenceOfficialLookupStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalReferenceOfficialLookupStatus[] | Prisma.ListEnumLegalReferenceOfficialLookupStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalReferenceOfficialLookupStatusWithAggregatesFilter<$PrismaModel> | $Enums.LegalReferenceOfficialLookupStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalReferenceOfficialLookupStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalReferenceOfficialLookupStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumNeutralIntakeClassificationOutcomeFilter<$PrismaModel = never> = {
