@@ -1773,21 +1773,31 @@ model LegalReferenceOfficialLookup {
 }
 
 model LegalReferenceOfficialHit {
-  id                    String   @id @default(cuid())
+  id                    String    @id @default(cuid())
   lookupId              String
-  providerRecordId      String   @db.VarChar(200)
-  denominazioneAtto     String   @db.VarChar(200)
-  numeroProvvedimento   String   @db.VarChar(100)
-  annoProvvedimento     Int
+  documentKind          String    @db.VarChar(20)
+  providerSourceId      String    @db.VarChar(200)
+  providerRecordId      String    @db.VarChar(200)
+  denominazioneAtto     String?   @db.VarChar(200)
+  numeroProvvedimento   String?   @db.VarChar(100)
+  annoProvvedimento     Int?
   dataEmanazione        DateTime?
-  descrizioneAtto       String?  @db.VarChar(500)
-  titoloAtto            String?  @db.VarChar(500)
-  numeroGU              String?  @db.VarChar(100)
+  descrizioneAtto       String?   @db.VarChar(500)
+  titoloAtto            String?   @db.VarChar(500)
+  numeroGU              String?   @db.VarChar(100)
   dataGU                DateTime?
+  authority             String?   @db.VarChar(200)
+  court                 String?   @db.VarChar(200)
+  decisionNumber        String?   @db.VarChar(100)
+  decisionYear          Int?
+  decisionDate          DateTime?
+  chamberSection        String?   @db.VarChar(100)
+  decisionType          String?   @db.VarChar(100)
+  sourceUrl             String?   @db.VarChar(2000)
 
   lookup LegalReferenceOfficialLookup @relation(fields: [lookupId], references: [id], onDelete: Restrict)
 
-  @@unique([lookupId, providerRecordId])
+  @@unique([lookupId, providerSourceId, providerRecordId])
   @@index([providerRecordId])
 }
 

@@ -18,6 +18,7 @@ import {
   officialLegalReferenceProviderRegistry,
   type OfficialLookupSourceJob,
 } from "./neutralIntakeLegalReferenceOfficialLookupJob";
+import type { OfficialLegalReferenceProviderRegistry } from "./official-source-lookup/providers";
 
 export const LEGAL_REFERENCE_MATCHING_OPERATION = "LEGAL_REFERENCE_MATCHING_V1" as const;
 export const LEGAL_REFERENCE_MATCHING_PURPOSE = "LEGAL_REFERENCE_MATCHING" as const;
@@ -169,6 +170,7 @@ export async function matchLegalReferencesInTransaction(
   input: { jobId: string; neutralIntakeId: string; extractionAttemptId: string },
   admitOfficialLookup: typeof admitLegalReferenceOfficialLookupInTransaction =
     admitLegalReferenceOfficialLookupInTransaction,
+  providerRegistry: OfficialLegalReferenceProviderRegistry = officialLegalReferenceProviderRegistry,
 ) {
   const [job, attempt] = await Promise.all([
     tx.asyncJob.findUnique({
@@ -293,7 +295,7 @@ export async function matchLegalReferencesInTransaction(
   };
   const eligibleLookups = data.flatMap((decision, index) =>
     decision.status === "NO_MATCH" && decision.reason === "NO_CATALOG_MATCH"
-      ? officialLegalReferenceProviderRegistry.route(pendingMentions[index]).map((provider) => ({
+      ? providerRegistry.route(pendingMentions[index]).map((provider) => ({
           mentionId: decision.mentionId,
           provider,
         }))

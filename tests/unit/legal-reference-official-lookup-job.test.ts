@@ -31,6 +31,10 @@ import {
   NORMATTIVA_PROVIDER,
 } from "@/server/intake/official-source-lookup/normattiva";
 import {
+  LEGAL_DATA_HUNTER_LOOKUP_VERSION,
+  LEGAL_DATA_HUNTER_PROVIDER,
+} from "@/server/intake/official-source-lookup/legalDataHunter";
+import {
   OfficialLegalReferenceProviderError,
   OfficialLegalReferenceProviderRegistry,
 } from "@/server/intake/official-source-lookup/providers";
@@ -116,7 +120,9 @@ describe("B2C12 Block 3B.6C official lookup job", () => {
       status: "FOUND_UNIQUE" as const,
       resultCount: 1 as const,
       hits: [{
+        documentKind: "LEGISLATION" as const,
         providerRecordId: "090G0291",
+        providerSourceId: NORMATTIVA_PROVIDER,
         sourceType: "LEGGE",
         actNumber: "241",
         actYear: 1990,
@@ -142,6 +148,73 @@ describe("B2C12 Block 3B.6C official lookup job", () => {
     expect(mocks.tx.legalSource.upsert).not.toHaveBeenCalled();
     expect(mocks.tx.legalSourceIdentityAssertion.create).not.toHaveBeenCalled();
     expect(mocks.tx.legalSourceCandidateResolution.create).not.toHaveBeenCalled();
+  });
+
+  it("persists provider-neutral case-law identity in the existing hit family", async () => {
+    const identity = {
+      providerKey: LEGAL_DATA_HUNTER_PROVIDER,
+      lookupVersion: LEGAL_DATA_HUNTER_LOOKUP_VERSION,
+    };
+    mocks.tx.asyncJob.findUnique.mockResolvedValue({
+      operation: LEGAL_REFERENCE_OFFICIAL_LOOKUP_OPERATION,
+      logicalOperationId: officialLookupLogicalOperationId("mention-1", identity),
+      tenantId: "ente-1",
+    });
+    mocks.tx.legalReferenceMention.findUnique.mockResolvedValue(mention({
+      kind: "CASE_LAW",
+      authorityHint: "CASSAZIONE",
+      actType: null,
+      actNumber: "1234",
+      year: 2024,
+      chamberSection: "III",
+    }));
+    const lookup = vi.fn(async () => ({
+      status: "FOUND_UNIQUE" as const,
+      resultCount: 1 as const,
+      hits: [{
+        documentKind: "CASE_LAW" as const,
+        providerRecordId: "decision-1234",
+        providerSourceId: "IT/Cassazione",
+        authority: "CASSAZIONE",
+        court: "Corte Suprema di Cassazione",
+        decisionNumber: "1234",
+        decisionYear: 2024,
+        decidedAt: new Date("2024-03-15"),
+        chamberSection: "III",
+        decisionType: "SENTENZA",
+        title: "Cassazione n. 1234/2024",
+        sourceUrl: "https://example.test/decision-1234",
+      }] as const,
+    }));
+    const registry = new OfficialLegalReferenceProviderRegistry([{
+      ...identity,
+      supports: (reference) => reference.kind === "CASE_LAW",
+      lookup,
+    }]);
+    const handler = createLegalReferenceOfficialLookupHandler(registry);
+
+    await expect(handler.execute(handler.parseInput(
+      buildLegalReferenceOfficialLookupAdmission("mention-1", identity, provenance).inputReference,
+    ), context)).resolves.toMatchObject({ metadata: { status: "FOUND_UNIQUE", resultCount: 1 } });
+
+    expect(mocks.tx.legalReferenceOfficialLookup.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        provider: LEGAL_DATA_HUNTER_PROVIDER,
+        hits: { create: [expect.objectContaining({
+          documentKind: "CASE_LAW",
+          providerSourceId: "IT/Cassazione",
+          providerRecordId: "decision-1234",
+          authority: "CASSAZIONE",
+          decisionNumber: "1234",
+          decisionYear: 2024,
+          chamberSection: "III",
+        })] },
+      }),
+    }));
+    const persistedHit = mocks.tx.legalReferenceOfficialLookup.create.mock.calls.at(-1)?.[0].data.hits.create[0];
+    expect(persistedHit).not.toHaveProperty("denominazioneAtto");
+    expect(persistedHit).not.toHaveProperty("numeroProvvedimento");
+    expect(persistedHit).not.toHaveProperty("annoProvvedimento");
   });
 
   it.each([

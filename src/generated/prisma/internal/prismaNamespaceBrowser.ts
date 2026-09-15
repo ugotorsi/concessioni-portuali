@@ -865,6 +865,8 @@ export type LegalReferenceOfficialLookupScalarFieldEnum = (typeof LegalReference
 export const LegalReferenceOfficialHitScalarFieldEnum = {
   id: 'id',
   lookupId: 'lookupId',
+  documentKind: 'documentKind',
+  providerSourceId: 'providerSourceId',
   providerRecordId: 'providerRecordId',
   denominazioneAtto: 'denominazioneAtto',
   numeroProvvedimento: 'numeroProvvedimento',
@@ -873,7 +875,15 @@ export const LegalReferenceOfficialHitScalarFieldEnum = {
   descrizioneAtto: 'descrizioneAtto',
   titoloAtto: 'titoloAtto',
   numeroGU: 'numeroGU',
-  dataGU: 'dataGU'
+  dataGU: 'dataGU',
+  authority: 'authority',
+  court: 'court',
+  decisionNumber: 'decisionNumber',
+  decisionYear: 'decisionYear',
+  decisionDate: 'decisionDate',
+  chamberSection: 'chamberSection',
+  decisionType: 'decisionType',
+  sourceUrl: 'sourceUrl'
 } as const
 
 export type LegalReferenceOfficialHitScalarFieldEnum = (typeof LegalReferenceOfficialHitScalarFieldEnum)[keyof typeof LegalReferenceOfficialHitScalarFieldEnum]

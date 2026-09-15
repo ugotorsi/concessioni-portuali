@@ -12,6 +12,7 @@ import { runSerializableTransactionWithRetry } from "@/server/db/serializableTra
 import {
   createNormattivaOfficialProvider,
 } from "./official-source-lookup/normattiva";
+import { createLegalDataHunterProvider } from "./official-source-lookup/legalDataHunter";
 import {
   OfficialLegalReferenceProviderError,
   OfficialLegalReferenceProviderRegistry,
@@ -23,6 +24,7 @@ export const LEGAL_REFERENCE_OFFICIAL_LOOKUP_OPERATION = "LEGAL_REFERENCE_OFFICI
 export const LEGAL_REFERENCE_OFFICIAL_LOOKUP_PURPOSE = "LEGAL_REFERENCE_OFFICIAL_LOOKUP" as const;
 export const officialLegalReferenceProviderRegistry = new OfficialLegalReferenceProviderRegistry([
   createNormattivaOfficialProvider(),
+  createLegalDataHunterProvider(),
 ]);
 
 const referenceSchema = z.object({
@@ -135,6 +137,8 @@ async function prepareLookup(
         actType: true,
         actNumber: true,
         year: true,
+        authorityHint: true,
+        chamberSection: true,
         extractionAttempt: { select: { neutralIntake: { select: { enteId: true } } } },
         matches: {
           where: { matchingVersion: "LEGAL_REFERENCE_MATCHING_V1" },
@@ -197,17 +201,34 @@ async function persistLookup(
       status: result.status,
       resultCount: result.resultCount,
       hits: {
-        create: result.hits.map((hit) => ({
-          providerRecordId: hit.providerRecordId,
-          denominazioneAtto: hit.sourceType,
-          numeroProvvedimento: hit.actNumber,
-          annoProvvedimento: hit.actYear,
-          dataEmanazione: hit.issuedAt,
-          descrizioneAtto: hit.description,
-          titoloAtto: hit.title,
-          numeroGU: hit.publicationNumber,
-          dataGU: hit.publishedAt,
-        })),
+        create: result.hits.map((hit) => hit.documentKind === "LEGISLATION"
+          ? {
+              documentKind: hit.documentKind,
+              providerRecordId: hit.providerRecordId,
+              providerSourceId: hit.providerSourceId,
+              denominazioneAtto: hit.sourceType,
+              numeroProvvedimento: hit.actNumber,
+              annoProvvedimento: hit.actYear,
+              dataEmanazione: hit.issuedAt,
+              descrizioneAtto: hit.description,
+              titoloAtto: hit.title,
+              numeroGU: hit.publicationNumber,
+              dataGU: hit.publishedAt,
+            }
+          : {
+              documentKind: hit.documentKind,
+              providerRecordId: hit.providerRecordId,
+              providerSourceId: hit.providerSourceId,
+              authority: hit.authority,
+              court: hit.court,
+              decisionNumber: hit.decisionNumber,
+              decisionYear: hit.decisionYear,
+              decisionDate: hit.decidedAt,
+              chamberSection: hit.chamberSection,
+              decisionType: hit.decisionType,
+              titoloAtto: hit.title,
+              sourceUrl: hit.sourceUrl,
+            }),
       },
     },
     select: { id: true, status: true, resultCount: true },

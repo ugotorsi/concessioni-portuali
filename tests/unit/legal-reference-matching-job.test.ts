@@ -34,6 +34,13 @@ import {
   LEGAL_REFERENCE_MATCHING_VERSION,
 } from "@/server/intake/legal-reference-matching/matcher";
 import { NORMATTIVA_LOOKUP_VERSION, NORMATTIVA_PROVIDER } from "@/server/intake/official-source-lookup/normattiva";
+import {
+  OfficialLegalReferenceProviderRegistry,
+} from "@/server/intake/official-source-lookup/providers";
+import {
+  LEGAL_DATA_HUNTER_LOOKUP_VERSION,
+  LEGAL_DATA_HUNTER_PROVIDER,
+} from "@/server/intake/official-source-lookup/legalDataHunter";
 
 const provenance = {
   tenantId: "ente-1",
@@ -273,6 +280,40 @@ describe("B2C11 Block 3B.6B async local catalog matching", () => {
       "mention-1",
       { providerKey: NORMATTIVA_PROVIDER, lookupVersion: NORMATTIVA_LOOKUP_VERSION },
       expect.any(Object),
+    );
+  });
+
+  it("routes a structured case-law NO_MATCH through the same generic lookup admission", async () => {
+    mocks.tx.asyncJob.findUnique.mockResolvedValue(matchingJob());
+    mocks.tx.neutralIntakeExtractionAttempt.findUnique.mockResolvedValue(attempt([{
+      ...legislationMention(),
+      kind: "CASE_LAW",
+      actType: null,
+      authorityHint: "CASSAZIONE",
+      actNumber: "1234",
+      year: 2024,
+      chamberSection: "III",
+      normalizedKey: "CASSAZIONE:1234:2024:III",
+    }]));
+    const admitOfficialLookup = vi.fn();
+    const registry = new OfficialLegalReferenceProviderRegistry([{
+      providerKey: LEGAL_DATA_HUNTER_PROVIDER,
+      lookupVersion: LEGAL_DATA_HUNTER_LOOKUP_VERSION,
+      supports: (candidate) => candidate.kind === "CASE_LAW",
+      lookup: vi.fn(),
+    }]);
+
+    await expect(matchLegalReferencesInTransaction(mocks.tx as never, {
+      jobId: "matching-job-1",
+      neutralIntakeId: "intake-1",
+      extractionAttemptId: "extraction-1",
+    }, admitOfficialLookup, registry)).resolves.toMatchObject({ officialLookupAdmissionCount: 1 });
+
+    expect(admitOfficialLookup).toHaveBeenCalledWith(
+      mocks.tx,
+      "mention-1",
+      { providerKey: LEGAL_DATA_HUNTER_PROVIDER, lookupVersion: LEGAL_DATA_HUNTER_LOOKUP_VERSION },
+      expect.objectContaining({ tenantId: "ente-1", correlationId: "correlation-1" }),
     );
   });
 

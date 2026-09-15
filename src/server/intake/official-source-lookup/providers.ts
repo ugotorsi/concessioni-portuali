@@ -1,12 +1,16 @@
 export interface OfficialLegalReference {
   kind: string;
+  authorityHint: string | null;
   actType: string | null;
   actNumber: string | null;
   year: number | null;
+  chamberSection: string | null;
 }
 
-export interface OfficialLegalReferenceHit {
+export interface OfficialLegalReferenceLegislationHit {
+  documentKind: "LEGISLATION";
   providerRecordId: string;
+  providerSourceId: string;
   sourceType: string;
   actNumber: string;
   actYear: number;
@@ -16,6 +20,25 @@ export interface OfficialLegalReferenceHit {
   publicationNumber: string | null;
   publishedAt: Date | null;
 }
+
+export interface OfficialLegalReferenceCaseLawHit {
+  documentKind: "CASE_LAW";
+  providerRecordId: string;
+  providerSourceId: string;
+  authority: string;
+  court: string | null;
+  decisionNumber: string;
+  decisionYear: number;
+  decidedAt: Date | null;
+  chamberSection: string | null;
+  decisionType: string | null;
+  title: string | null;
+  sourceUrl: string | null;
+}
+
+export type OfficialLegalReferenceHit =
+  | OfficialLegalReferenceLegislationHit
+  | OfficialLegalReferenceCaseLawHit;
 
 export type OfficialLegalReferenceLookupResult =
   | { status: "NOT_FOUND"; resultCount: 0; hits: [] }

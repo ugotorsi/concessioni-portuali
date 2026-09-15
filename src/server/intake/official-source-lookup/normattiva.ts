@@ -283,7 +283,9 @@ export function createNormattivaOfficialProvider(config: {
       try {
         const result = await provider.lookup(query);
         const mapHit = (hit: NormattivaHit) => ({
+          documentKind: "LEGISLATION" as const,
           providerRecordId: hit.providerRecordId,
+          providerSourceId: NORMATTIVA_PROVIDER,
           sourceType: hit.denominazioneAtto,
           actNumber: hit.numeroProvvedimento,
           actYear: hit.annoProvvedimento,
