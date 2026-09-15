@@ -341,7 +341,8 @@ describe("B2C10 Block 3B.6A async legal reference discovery", () => {
       neutralIntakeId: "intake-1",
       extractionAttemptId: "extraction-1",
     }, provenance);
-    const handler = createLegalReferenceDiscoveryHandler();
+    const ensureMatching = vi.fn(async () => ({ outcome: "CREATED" as const, job: {} as never }));
+    const handler = createLegalReferenceDiscoveryHandler(ensureMatching as never);
 
     await expect(handler.execute(handler.parseInput(admission.inputReference), {
       jobId: "discovery-job-1",
@@ -355,6 +356,35 @@ describe("B2C10 Block 3B.6A async legal reference discovery", () => {
       referenceVersion: LEGAL_REFERENCE_DISCOVERY_VERSION,
       metadata: { mentionCount: 1 },
     });
+    expect(ensureMatching).toHaveBeenCalledWith({
+      sourceJobId: "discovery-job-1",
+      neutralIntakeId: "intake-1",
+      extractionAttemptId: "extraction-1",
+    });
+  });
+
+  it("makes matching admission failure retry the successful idempotent discovery", async () => {
+    mocks.tx.asyncJob.findUnique.mockResolvedValue({
+      operation: LEGAL_REFERENCE_DISCOVERY_OPERATION,
+      tenantId: "ente-1",
+    });
+    mocks.tx.neutralIntakeExtractionAttempt.findUnique.mockResolvedValue(
+      persistedAttempt("L. 241/1990"),
+    );
+    const ensureMatching = vi.fn(async () => { throw new Error("temporarily unavailable"); });
+    const handler = createLegalReferenceDiscoveryHandler(ensureMatching as never);
+    const admission = buildLegalReferenceDiscoveryAdmission({
+      neutralIntakeId: "intake-1",
+      extractionAttemptId: "extraction-1",
+    }, provenance);
+
+    await expect(handler.execute(handler.parseInput(admission.inputReference), {
+      jobId: "discovery-job-1",
+      correlationId: "correlation-1",
+      attempt: 1,
+      isCancellationRequested: vi.fn(async () => false),
+      heartbeat: vi.fn(async () => undefined),
+    })).rejects.toMatchObject({ code: "MATCHING_ADMISSION_FAILED", retryable: true });
   });
 
   it("contains no AI, provider, external network, or canonical source mutation path", () => {

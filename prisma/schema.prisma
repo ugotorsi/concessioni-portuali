@@ -663,6 +663,19 @@ enum LegalReferenceKind {
   CASE_LAW
 }
 
+enum LegalReferenceMatchStatus {
+  MATCHED
+  AMBIGUOUS
+  NO_MATCH
+}
+
+enum LegalReferenceMatchReason {
+  EXACT_IDENTITY
+  MULTIPLE_EXACT_MATCHES
+  NO_CATALOG_MATCH
+  INSUFFICIENT_IDENTITY
+}
+
 enum AsyncJobStatus {
   QUEUED
   RUNNING
@@ -858,6 +871,7 @@ model LegalSource {
   identityAssertions           LegalSourceIdentityAssertion[]
   legacyNormaFonti             NormaFonte[]
   candidateResolutions         LegalSourceCandidateResolution[]
+  legalReferenceMatches        LegalReferenceMatch[]
 
   @@unique([identityNamespace, identityScopeKey, canonicalKey])
   @@index([sourceType])
@@ -1710,10 +1724,29 @@ model LegalReferenceMention {
 
   extractionAttempt NeutralIntakeExtractionAttempt @relation(fields: [extractionAttemptId], references: [id], onDelete: Restrict)
   extractionPage    NeutralIntakeExtractionPage    @relation(fields: [extractionPageId, extractionAttemptId], references: [id, extractionAttemptId], onDelete: Restrict)
+  matches           LegalReferenceMatch[]
 
   @@unique([extractionPageId, discoveryVersion, characterStart, characterEnd, normalizedKey])
   @@index([extractionAttemptId, discoveryVersion])
   @@index([kind, normalizedKey])
+}
+
+model LegalReferenceMatch {
+  id               String                    @id @default(cuid())
+  mentionId        String
+  matchingVersion  String
+  status           LegalReferenceMatchStatus
+  reason           LegalReferenceMatchReason
+  legalSourceId    String?
+  candidateCount   Int
+  matchedAt        DateTime                  @default(now())
+
+  mention     LegalReferenceMention @relation(fields: [mentionId], references: [id], onDelete: Restrict)
+  legalSource LegalSource?          @relation(fields: [legalSourceId], references: [id], onDelete: Restrict)
+
+  @@unique([mentionId, matchingVersion])
+  @@index([legalSourceId])
+  @@index([status, matchedAt])
 }
 
 model NeutralIntakeClassificationAttempt {

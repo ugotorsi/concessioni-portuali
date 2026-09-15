@@ -415,6 +415,7 @@ export const ModelName = {
   NeutralIntakeExtractionAttempt: 'NeutralIntakeExtractionAttempt',
   NeutralIntakeExtractionPage: 'NeutralIntakeExtractionPage',
   LegalReferenceMention: 'LegalReferenceMention',
+  LegalReferenceMatch: 'LegalReferenceMatch',
   NeutralIntakeClassificationAttempt: 'NeutralIntakeClassificationAttempt',
   NeutralIntakeDestination: 'NeutralIntakeDestination',
   LegalSourceCandidateAdmission: 'LegalSourceCandidateAdmission',
@@ -449,7 +450,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "legalReferenceMatch" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2747,6 +2748,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    LegalReferenceMatch: {
+      payload: Prisma.$LegalReferenceMatchPayload<ExtArgs>
+      fields: Prisma.LegalReferenceMatchFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LegalReferenceMatchFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceMatchPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LegalReferenceMatchFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceMatchPayload>
+        }
+        findFirst: {
+          args: Prisma.LegalReferenceMatchFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceMatchPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LegalReferenceMatchFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceMatchPayload>
+        }
+        findMany: {
+          args: Prisma.LegalReferenceMatchFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceMatchPayload>[]
+        }
+        create: {
+          args: Prisma.LegalReferenceMatchCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceMatchPayload>
+        }
+        createMany: {
+          args: Prisma.LegalReferenceMatchCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LegalReferenceMatchCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceMatchPayload>[]
+        }
+        delete: {
+          args: Prisma.LegalReferenceMatchDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceMatchPayload>
+        }
+        update: {
+          args: Prisma.LegalReferenceMatchUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceMatchPayload>
+        }
+        deleteMany: {
+          args: Prisma.LegalReferenceMatchDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LegalReferenceMatchUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LegalReferenceMatchUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceMatchPayload>[]
+        }
+        upsert: {
+          args: Prisma.LegalReferenceMatchUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceMatchPayload>
+        }
+        aggregate: {
+          args: Prisma.LegalReferenceMatchAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLegalReferenceMatch>
+        }
+        groupBy: {
+          args: Prisma.LegalReferenceMatchGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LegalReferenceMatchGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LegalReferenceMatchCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LegalReferenceMatchCountAggregateOutputType> | number
+        }
+      }
+    }
     NeutralIntakeClassificationAttempt: {
       payload: Prisma.$NeutralIntakeClassificationAttemptPayload<ExtArgs>
       fields: Prisma.NeutralIntakeClassificationAttemptFieldRefs
@@ -4905,6 +4980,20 @@ export const LegalReferenceMentionScalarFieldEnum = {
 export type LegalReferenceMentionScalarFieldEnum = (typeof LegalReferenceMentionScalarFieldEnum)[keyof typeof LegalReferenceMentionScalarFieldEnum]
 
 
+export const LegalReferenceMatchScalarFieldEnum = {
+  id: 'id',
+  mentionId: 'mentionId',
+  matchingVersion: 'matchingVersion',
+  status: 'status',
+  reason: 'reason',
+  legalSourceId: 'legalSourceId',
+  candidateCount: 'candidateCount',
+  matchedAt: 'matchedAt'
+} as const
+
+export type LegalReferenceMatchScalarFieldEnum = (typeof LegalReferenceMatchScalarFieldEnum)[keyof typeof LegalReferenceMatchScalarFieldEnum]
+
+
 export const NeutralIntakeClassificationAttemptScalarFieldEnum = {
   id: 'id',
   neutralIntakeId: 'neutralIntakeId',
@@ -6343,6 +6432,34 @@ export type ListEnumLegalReferenceKindFieldRefInput<$PrismaModel> = FieldRefInpu
 
 
 /**
+ * Reference to a field of type 'LegalReferenceMatchStatus'
+ */
+export type EnumLegalReferenceMatchStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalReferenceMatchStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'LegalReferenceMatchStatus[]'
+ */
+export type ListEnumLegalReferenceMatchStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalReferenceMatchStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'LegalReferenceMatchReason'
+ */
+export type EnumLegalReferenceMatchReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalReferenceMatchReason'>
+    
+
+
+/**
+ * Reference to a field of type 'LegalReferenceMatchReason[]'
+ */
+export type ListEnumLegalReferenceMatchReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalReferenceMatchReason[]'>
+    
+
+
+/**
  * Reference to a field of type 'NeutralIntakeClassificationOutcome'
  */
 export type EnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NeutralIntakeClassificationOutcome'>
@@ -6734,6 +6851,7 @@ export type GlobalOmitConfig = {
   neutralIntakeExtractionAttempt?: Prisma.NeutralIntakeExtractionAttemptOmit
   neutralIntakeExtractionPage?: Prisma.NeutralIntakeExtractionPageOmit
   legalReferenceMention?: Prisma.LegalReferenceMentionOmit
+  legalReferenceMatch?: Prisma.LegalReferenceMatchOmit
   neutralIntakeClassificationAttempt?: Prisma.NeutralIntakeClassificationAttemptOmit
   neutralIntakeDestination?: Prisma.NeutralIntakeDestinationOmit
   legalSourceCandidateAdmission?: Prisma.LegalSourceCandidateAdmissionOmit

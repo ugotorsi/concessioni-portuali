@@ -322,6 +322,7 @@ export type LegalReferenceMentionWhereInput = {
   discoveredAt?: Prisma.DateTimeFilter<"LegalReferenceMention"> | Date | string
   extractionAttempt?: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptScalarRelationFilter, Prisma.NeutralIntakeExtractionAttemptWhereInput>
   extractionPage?: Prisma.XOR<Prisma.NeutralIntakeExtractionPageScalarRelationFilter, Prisma.NeutralIntakeExtractionPageWhereInput>
+  matches?: Prisma.LegalReferenceMatchListRelationFilter
 }
 
 export type LegalReferenceMentionOrderByWithRelationInput = {
@@ -344,6 +345,7 @@ export type LegalReferenceMentionOrderByWithRelationInput = {
   discoveredAt?: Prisma.SortOrder
   extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptOrderByWithRelationInput
   extractionPage?: Prisma.NeutralIntakeExtractionPageOrderByWithRelationInput
+  matches?: Prisma.LegalReferenceMatchOrderByRelationAggregateInput
 }
 
 export type LegalReferenceMentionWhereUniqueInput = Prisma.AtLeast<{
@@ -370,6 +372,7 @@ export type LegalReferenceMentionWhereUniqueInput = Prisma.AtLeast<{
   discoveredAt?: Prisma.DateTimeFilter<"LegalReferenceMention"> | Date | string
   extractionAttempt?: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptScalarRelationFilter, Prisma.NeutralIntakeExtractionAttemptWhereInput>
   extractionPage?: Prisma.XOR<Prisma.NeutralIntakeExtractionPageScalarRelationFilter, Prisma.NeutralIntakeExtractionPageWhereInput>
+  matches?: Prisma.LegalReferenceMatchListRelationFilter
 }, "id" | "extractionPageId_discoveryVersion_characterStart_characterEnd_normalizedKey">
 
 export type LegalReferenceMentionOrderByWithAggregationInput = {
@@ -438,6 +441,7 @@ export type LegalReferenceMentionCreateInput = {
   discoveredAt?: Date | string
   extractionAttempt: Prisma.NeutralIntakeExtractionAttemptCreateNestedOneWithoutLegalReferenceMentionsInput
   extractionPage: Prisma.NeutralIntakeExtractionPageCreateNestedOneWithoutLegalReferenceMentionsInput
+  matches?: Prisma.LegalReferenceMatchCreateNestedManyWithoutMentionInput
 }
 
 export type LegalReferenceMentionUncheckedCreateInput = {
@@ -458,6 +462,7 @@ export type LegalReferenceMentionUncheckedCreateInput = {
   characterStart: number
   characterEnd: number
   discoveredAt?: Date | string
+  matches?: Prisma.LegalReferenceMatchUncheckedCreateNestedManyWithoutMentionInput
 }
 
 export type LegalReferenceMentionUpdateInput = {
@@ -478,6 +483,7 @@ export type LegalReferenceMentionUpdateInput = {
   discoveredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptUpdateOneRequiredWithoutLegalReferenceMentionsNestedInput
   extractionPage?: Prisma.NeutralIntakeExtractionPageUpdateOneRequiredWithoutLegalReferenceMentionsNestedInput
+  matches?: Prisma.LegalReferenceMatchUpdateManyWithoutMentionNestedInput
 }
 
 export type LegalReferenceMentionUncheckedUpdateInput = {
@@ -498,6 +504,7 @@ export type LegalReferenceMentionUncheckedUpdateInput = {
   characterStart?: Prisma.IntFieldUpdateOperationsInput | number
   characterEnd?: Prisma.IntFieldUpdateOperationsInput | number
   discoveredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  matches?: Prisma.LegalReferenceMatchUncheckedUpdateManyWithoutMentionNestedInput
 }
 
 export type LegalReferenceMentionCreateManyInput = {
@@ -648,6 +655,11 @@ export type LegalReferenceMentionSumOrderByAggregateInput = {
   characterEnd?: Prisma.SortOrder
 }
 
+export type LegalReferenceMentionScalarRelationFilter = {
+  is?: Prisma.LegalReferenceMentionWhereInput
+  isNot?: Prisma.LegalReferenceMentionWhereInput
+}
+
 export type LegalReferenceMentionCreateNestedManyWithoutExtractionAttemptInput = {
   create?: Prisma.XOR<Prisma.LegalReferenceMentionCreateWithoutExtractionAttemptInput, Prisma.LegalReferenceMentionUncheckedCreateWithoutExtractionAttemptInput> | Prisma.LegalReferenceMentionCreateWithoutExtractionAttemptInput[] | Prisma.LegalReferenceMentionUncheckedCreateWithoutExtractionAttemptInput[]
   connectOrCreate?: Prisma.LegalReferenceMentionCreateOrConnectWithoutExtractionAttemptInput | Prisma.LegalReferenceMentionCreateOrConnectWithoutExtractionAttemptInput[]
@@ -736,6 +748,20 @@ export type EnumLegalReferenceKindFieldUpdateOperationsInput = {
   set?: $Enums.LegalReferenceKind
 }
 
+export type LegalReferenceMentionCreateNestedOneWithoutMatchesInput = {
+  create?: Prisma.XOR<Prisma.LegalReferenceMentionCreateWithoutMatchesInput, Prisma.LegalReferenceMentionUncheckedCreateWithoutMatchesInput>
+  connectOrCreate?: Prisma.LegalReferenceMentionCreateOrConnectWithoutMatchesInput
+  connect?: Prisma.LegalReferenceMentionWhereUniqueInput
+}
+
+export type LegalReferenceMentionUpdateOneRequiredWithoutMatchesNestedInput = {
+  create?: Prisma.XOR<Prisma.LegalReferenceMentionCreateWithoutMatchesInput, Prisma.LegalReferenceMentionUncheckedCreateWithoutMatchesInput>
+  connectOrCreate?: Prisma.LegalReferenceMentionCreateOrConnectWithoutMatchesInput
+  upsert?: Prisma.LegalReferenceMentionUpsertWithoutMatchesInput
+  connect?: Prisma.LegalReferenceMentionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LegalReferenceMentionUpdateToOneWithWhereWithoutMatchesInput, Prisma.LegalReferenceMentionUpdateWithoutMatchesInput>, Prisma.LegalReferenceMentionUncheckedUpdateWithoutMatchesInput>
+}
+
 export type LegalReferenceMentionCreateWithoutExtractionAttemptInput = {
   id?: string
   discoveryVersion: string
@@ -753,6 +779,7 @@ export type LegalReferenceMentionCreateWithoutExtractionAttemptInput = {
   characterEnd: number
   discoveredAt?: Date | string
   extractionPage: Prisma.NeutralIntakeExtractionPageCreateNestedOneWithoutLegalReferenceMentionsInput
+  matches?: Prisma.LegalReferenceMatchCreateNestedManyWithoutMentionInput
 }
 
 export type LegalReferenceMentionUncheckedCreateWithoutExtractionAttemptInput = {
@@ -772,6 +799,7 @@ export type LegalReferenceMentionUncheckedCreateWithoutExtractionAttemptInput = 
   characterStart: number
   characterEnd: number
   discoveredAt?: Date | string
+  matches?: Prisma.LegalReferenceMatchUncheckedCreateNestedManyWithoutMentionInput
 }
 
 export type LegalReferenceMentionCreateOrConnectWithoutExtractionAttemptInput = {
@@ -840,6 +868,7 @@ export type LegalReferenceMentionCreateWithoutExtractionPageInput = {
   characterEnd: number
   discoveredAt?: Date | string
   extractionAttempt: Prisma.NeutralIntakeExtractionAttemptCreateNestedOneWithoutLegalReferenceMentionsInput
+  matches?: Prisma.LegalReferenceMatchCreateNestedManyWithoutMentionInput
 }
 
 export type LegalReferenceMentionUncheckedCreateWithoutExtractionPageInput = {
@@ -858,6 +887,7 @@ export type LegalReferenceMentionUncheckedCreateWithoutExtractionPageInput = {
   characterStart: number
   characterEnd: number
   discoveredAt?: Date | string
+  matches?: Prisma.LegalReferenceMatchUncheckedCreateNestedManyWithoutMentionInput
 }
 
 export type LegalReferenceMentionCreateOrConnectWithoutExtractionPageInput = {
@@ -884,6 +914,102 @@ export type LegalReferenceMentionUpdateWithWhereUniqueWithoutExtractionPageInput
 export type LegalReferenceMentionUpdateManyWithWhereWithoutExtractionPageInput = {
   where: Prisma.LegalReferenceMentionScalarWhereInput
   data: Prisma.XOR<Prisma.LegalReferenceMentionUpdateManyMutationInput, Prisma.LegalReferenceMentionUncheckedUpdateManyWithoutExtractionPageInput>
+}
+
+export type LegalReferenceMentionCreateWithoutMatchesInput = {
+  id?: string
+  discoveryVersion: string
+  kind: $Enums.LegalReferenceKind
+  observedText: string
+  normalizedKey: string
+  authorityHint?: string | null
+  actType?: string | null
+  actNumber?: string | null
+  year?: number | null
+  article?: string | null
+  subArticle?: string | null
+  chamberSection?: string | null
+  characterStart: number
+  characterEnd: number
+  discoveredAt?: Date | string
+  extractionAttempt: Prisma.NeutralIntakeExtractionAttemptCreateNestedOneWithoutLegalReferenceMentionsInput
+  extractionPage: Prisma.NeutralIntakeExtractionPageCreateNestedOneWithoutLegalReferenceMentionsInput
+}
+
+export type LegalReferenceMentionUncheckedCreateWithoutMatchesInput = {
+  id?: string
+  extractionAttemptId: string
+  extractionPageId: string
+  discoveryVersion: string
+  kind: $Enums.LegalReferenceKind
+  observedText: string
+  normalizedKey: string
+  authorityHint?: string | null
+  actType?: string | null
+  actNumber?: string | null
+  year?: number | null
+  article?: string | null
+  subArticle?: string | null
+  chamberSection?: string | null
+  characterStart: number
+  characterEnd: number
+  discoveredAt?: Date | string
+}
+
+export type LegalReferenceMentionCreateOrConnectWithoutMatchesInput = {
+  where: Prisma.LegalReferenceMentionWhereUniqueInput
+  create: Prisma.XOR<Prisma.LegalReferenceMentionCreateWithoutMatchesInput, Prisma.LegalReferenceMentionUncheckedCreateWithoutMatchesInput>
+}
+
+export type LegalReferenceMentionUpsertWithoutMatchesInput = {
+  update: Prisma.XOR<Prisma.LegalReferenceMentionUpdateWithoutMatchesInput, Prisma.LegalReferenceMentionUncheckedUpdateWithoutMatchesInput>
+  create: Prisma.XOR<Prisma.LegalReferenceMentionCreateWithoutMatchesInput, Prisma.LegalReferenceMentionUncheckedCreateWithoutMatchesInput>
+  where?: Prisma.LegalReferenceMentionWhereInput
+}
+
+export type LegalReferenceMentionUpdateToOneWithWhereWithoutMatchesInput = {
+  where?: Prisma.LegalReferenceMentionWhereInput
+  data: Prisma.XOR<Prisma.LegalReferenceMentionUpdateWithoutMatchesInput, Prisma.LegalReferenceMentionUncheckedUpdateWithoutMatchesInput>
+}
+
+export type LegalReferenceMentionUpdateWithoutMatchesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  discoveryVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.EnumLegalReferenceKindFieldUpdateOperationsInput | $Enums.LegalReferenceKind
+  observedText?: Prisma.StringFieldUpdateOperationsInput | string
+  normalizedKey?: Prisma.StringFieldUpdateOperationsInput | string
+  authorityHint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  year?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  article?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subArticle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chamberSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  characterStart?: Prisma.IntFieldUpdateOperationsInput | number
+  characterEnd?: Prisma.IntFieldUpdateOperationsInput | number
+  discoveredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptUpdateOneRequiredWithoutLegalReferenceMentionsNestedInput
+  extractionPage?: Prisma.NeutralIntakeExtractionPageUpdateOneRequiredWithoutLegalReferenceMentionsNestedInput
+}
+
+export type LegalReferenceMentionUncheckedUpdateWithoutMatchesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  extractionAttemptId?: Prisma.StringFieldUpdateOperationsInput | string
+  extractionPageId?: Prisma.StringFieldUpdateOperationsInput | string
+  discoveryVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.EnumLegalReferenceKindFieldUpdateOperationsInput | $Enums.LegalReferenceKind
+  observedText?: Prisma.StringFieldUpdateOperationsInput | string
+  normalizedKey?: Prisma.StringFieldUpdateOperationsInput | string
+  authorityHint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  year?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  article?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subArticle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chamberSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  characterStart?: Prisma.IntFieldUpdateOperationsInput | number
+  characterEnd?: Prisma.IntFieldUpdateOperationsInput | number
+  discoveredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LegalReferenceMentionCreateManyExtractionAttemptInput = {
@@ -922,6 +1048,7 @@ export type LegalReferenceMentionUpdateWithoutExtractionAttemptInput = {
   characterEnd?: Prisma.IntFieldUpdateOperationsInput | number
   discoveredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   extractionPage?: Prisma.NeutralIntakeExtractionPageUpdateOneRequiredWithoutLegalReferenceMentionsNestedInput
+  matches?: Prisma.LegalReferenceMatchUpdateManyWithoutMentionNestedInput
 }
 
 export type LegalReferenceMentionUncheckedUpdateWithoutExtractionAttemptInput = {
@@ -941,6 +1068,7 @@ export type LegalReferenceMentionUncheckedUpdateWithoutExtractionAttemptInput = 
   characterStart?: Prisma.IntFieldUpdateOperationsInput | number
   characterEnd?: Prisma.IntFieldUpdateOperationsInput | number
   discoveredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  matches?: Prisma.LegalReferenceMatchUncheckedUpdateManyWithoutMentionNestedInput
 }
 
 export type LegalReferenceMentionUncheckedUpdateManyWithoutExtractionAttemptInput = {
@@ -997,6 +1125,7 @@ export type LegalReferenceMentionUpdateWithoutExtractionPageInput = {
   characterEnd?: Prisma.IntFieldUpdateOperationsInput | number
   discoveredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptUpdateOneRequiredWithoutLegalReferenceMentionsNestedInput
+  matches?: Prisma.LegalReferenceMatchUpdateManyWithoutMentionNestedInput
 }
 
 export type LegalReferenceMentionUncheckedUpdateWithoutExtractionPageInput = {
@@ -1015,6 +1144,7 @@ export type LegalReferenceMentionUncheckedUpdateWithoutExtractionPageInput = {
   characterStart?: Prisma.IntFieldUpdateOperationsInput | number
   characterEnd?: Prisma.IntFieldUpdateOperationsInput | number
   discoveredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  matches?: Prisma.LegalReferenceMatchUncheckedUpdateManyWithoutMentionNestedInput
 }
 
 export type LegalReferenceMentionUncheckedUpdateManyWithoutExtractionPageInput = {
@@ -1035,6 +1165,35 @@ export type LegalReferenceMentionUncheckedUpdateManyWithoutExtractionPageInput =
   discoveredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+
+/**
+ * Count Type LegalReferenceMentionCountOutputType
+ */
+
+export type LegalReferenceMentionCountOutputType = {
+  matches: number
+}
+
+export type LegalReferenceMentionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  matches?: boolean | LegalReferenceMentionCountOutputTypeCountMatchesArgs
+}
+
+/**
+ * LegalReferenceMentionCountOutputType without action
+ */
+export type LegalReferenceMentionCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LegalReferenceMentionCountOutputType
+   */
+  select?: Prisma.LegalReferenceMentionCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * LegalReferenceMentionCountOutputType without action
+ */
+export type LegalReferenceMentionCountOutputTypeCountMatchesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LegalReferenceMatchWhereInput
+}
 
 
 export type LegalReferenceMentionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1057,6 +1216,8 @@ export type LegalReferenceMentionSelect<ExtArgs extends runtime.Types.Extensions
   discoveredAt?: boolean
   extractionAttempt?: boolean | Prisma.NeutralIntakeExtractionAttemptDefaultArgs<ExtArgs>
   extractionPage?: boolean | Prisma.NeutralIntakeExtractionPageDefaultArgs<ExtArgs>
+  matches?: boolean | Prisma.LegalReferenceMention$matchesArgs<ExtArgs>
+  _count?: boolean | Prisma.LegalReferenceMentionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["legalReferenceMention"]>
 
 export type LegalReferenceMentionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1127,6 +1288,8 @@ export type LegalReferenceMentionOmit<ExtArgs extends runtime.Types.Extensions.I
 export type LegalReferenceMentionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   extractionAttempt?: boolean | Prisma.NeutralIntakeExtractionAttemptDefaultArgs<ExtArgs>
   extractionPage?: boolean | Prisma.NeutralIntakeExtractionPageDefaultArgs<ExtArgs>
+  matches?: boolean | Prisma.LegalReferenceMention$matchesArgs<ExtArgs>
+  _count?: boolean | Prisma.LegalReferenceMentionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type LegalReferenceMentionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   extractionAttempt?: boolean | Prisma.NeutralIntakeExtractionAttemptDefaultArgs<ExtArgs>
@@ -1142,6 +1305,7 @@ export type $LegalReferenceMentionPayload<ExtArgs extends runtime.Types.Extensio
   objects: {
     extractionAttempt: Prisma.$NeutralIntakeExtractionAttemptPayload<ExtArgs>
     extractionPage: Prisma.$NeutralIntakeExtractionPagePayload<ExtArgs>
+    matches: Prisma.$LegalReferenceMatchPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1557,6 +1721,7 @@ export interface Prisma__LegalReferenceMentionClient<T, Null = never, ExtArgs ex
   readonly [Symbol.toStringTag]: "PrismaPromise"
   extractionAttempt<T extends Prisma.NeutralIntakeExtractionAttemptDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NeutralIntakeExtractionAttemptDefaultArgs<ExtArgs>>): Prisma.Prisma__NeutralIntakeExtractionAttemptClient<runtime.Types.Result.GetResult<Prisma.$NeutralIntakeExtractionAttemptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   extractionPage<T extends Prisma.NeutralIntakeExtractionPageDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NeutralIntakeExtractionPageDefaultArgs<ExtArgs>>): Prisma.Prisma__NeutralIntakeExtractionPageClient<runtime.Types.Result.GetResult<Prisma.$NeutralIntakeExtractionPagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  matches<T extends Prisma.LegalReferenceMention$matchesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalReferenceMention$matchesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LegalReferenceMatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2001,6 +2166,30 @@ export type LegalReferenceMentionDeleteManyArgs<ExtArgs extends runtime.Types.Ex
    * Limit how many LegalReferenceMentions to delete.
    */
   limit?: number
+}
+
+/**
+ * LegalReferenceMention.matches
+ */
+export type LegalReferenceMention$matchesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LegalReferenceMatch
+   */
+  select?: Prisma.LegalReferenceMatchSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LegalReferenceMatch
+   */
+  omit?: Prisma.LegalReferenceMatchOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LegalReferenceMatchInclude<ExtArgs> | null
+  where?: Prisma.LegalReferenceMatchWhereInput
+  orderBy?: Prisma.LegalReferenceMatchOrderByWithRelationInput | Prisma.LegalReferenceMatchOrderByWithRelationInput[]
+  cursor?: Prisma.LegalReferenceMatchWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LegalReferenceMatchScalarFieldEnum | Prisma.LegalReferenceMatchScalarFieldEnum[]
 }
 
 /**

@@ -82,6 +82,7 @@ export const ModelName = {
   NeutralIntakeExtractionAttempt: 'NeutralIntakeExtractionAttempt',
   NeutralIntakeExtractionPage: 'NeutralIntakeExtractionPage',
   LegalReferenceMention: 'LegalReferenceMention',
+  LegalReferenceMatch: 'LegalReferenceMatch',
   NeutralIntakeClassificationAttempt: 'NeutralIntakeClassificationAttempt',
   NeutralIntakeDestination: 'NeutralIntakeDestination',
   LegalSourceCandidateAdmission: 'LegalSourceCandidateAdmission',
@@ -830,6 +831,20 @@ export const LegalReferenceMentionScalarFieldEnum = {
 } as const
 
 export type LegalReferenceMentionScalarFieldEnum = (typeof LegalReferenceMentionScalarFieldEnum)[keyof typeof LegalReferenceMentionScalarFieldEnum]
+
+
+export const LegalReferenceMatchScalarFieldEnum = {
+  id: 'id',
+  mentionId: 'mentionId',
+  matchingVersion: 'matchingVersion',
+  status: 'status',
+  reason: 'reason',
+  legalSourceId: 'legalSourceId',
+  candidateCount: 'candidateCount',
+  matchedAt: 'matchedAt'
+} as const
+
+export type LegalReferenceMatchScalarFieldEnum = (typeof LegalReferenceMatchScalarFieldEnum)[keyof typeof LegalReferenceMatchScalarFieldEnum]
 
 
 export const NeutralIntakeClassificationAttemptScalarFieldEnum = {

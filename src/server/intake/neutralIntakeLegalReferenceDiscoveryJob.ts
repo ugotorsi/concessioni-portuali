@@ -13,6 +13,7 @@ import {
   discoverItalianLegalReferences,
   LEGAL_REFERENCE_DISCOVERY_VERSION,
 } from "./legal-reference-discovery/parser";
+import { ensureLegalReferenceMatchingJob } from "./neutralIntakeLegalReferenceMatchingJob";
 
 export const LEGAL_REFERENCE_DISCOVERY_OPERATION = "LEGAL_REFERENCE_DISCOVERY_V1" as const;
 export const LEGAL_REFERENCE_DISCOVERY_PURPOSE = "LEGAL_REFERENCE_DISCOVERY" as const;
@@ -224,6 +225,7 @@ export async function discoverLegalReferencesInTransaction(
 async function executeDiscovery(
   input: DiscoveryReference,
   context: AsyncJobHandlerContext,
+  ensureMatching: typeof ensureLegalReferenceMatchingJob,
 ) {
   if (await context.isCancellationRequested()) {
     throw new AsyncJobExecutionError("CANCELLATION", "CANCELLATION_REQUESTED", false);
@@ -234,6 +236,16 @@ async function executeDiscovery(
       neutralIntakeId: input.referenceId,
       extractionAttemptId: input.metadata.extractionAttemptId,
     }));
+  try {
+    await ensureMatching({
+      sourceJobId: context.jobId,
+      neutralIntakeId: input.referenceId,
+      extractionAttemptId: input.metadata.extractionAttemptId,
+    });
+  } catch (error) {
+    if (error instanceof AsyncJobExecutionError) throw error;
+    throw new AsyncJobExecutionError("LEGAL_REFERENCE_MATCHING_ADMISSION", "MATCHING_ADMISSION_FAILED", true);
+  }
   return {
     referenceType: "LEGAL_REFERENCE_DISCOVERY_RESULT",
     referenceId: input.referenceId,
@@ -242,10 +254,12 @@ async function executeDiscovery(
   };
 }
 
-export function createLegalReferenceDiscoveryHandler(): AsyncJobHandler<DiscoveryReference> {
+export function createLegalReferenceDiscoveryHandler(
+  ensureMatching: typeof ensureLegalReferenceMatchingJob = ensureLegalReferenceMatchingJob,
+): AsyncJobHandler<DiscoveryReference> {
   return {
     operation: LEGAL_REFERENCE_DISCOVERY_OPERATION,
     parseInput: (input) => referenceSchema.parse(input),
-    execute: executeDiscovery,
+    execute: (input, context) => executeDiscovery(input, context, ensureMatching),
   };
 }

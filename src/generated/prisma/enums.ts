@@ -902,6 +902,25 @@ export const LegalReferenceKind = {
 export type LegalReferenceKind = (typeof LegalReferenceKind)[keyof typeof LegalReferenceKind]
 
 
+export const LegalReferenceMatchStatus = {
+  MATCHED: 'MATCHED',
+  AMBIGUOUS: 'AMBIGUOUS',
+  NO_MATCH: 'NO_MATCH'
+} as const
+
+export type LegalReferenceMatchStatus = (typeof LegalReferenceMatchStatus)[keyof typeof LegalReferenceMatchStatus]
+
+
+export const LegalReferenceMatchReason = {
+  EXACT_IDENTITY: 'EXACT_IDENTITY',
+  MULTIPLE_EXACT_MATCHES: 'MULTIPLE_EXACT_MATCHES',
+  NO_CATALOG_MATCH: 'NO_CATALOG_MATCH',
+  INSUFFICIENT_IDENTITY: 'INSUFFICIENT_IDENTITY'
+} as const
+
+export type LegalReferenceMatchReason = (typeof LegalReferenceMatchReason)[keyof typeof LegalReferenceMatchReason]
+
+
 export const AsyncJobStatus = {
   QUEUED: 'QUEUED',
   RUNNING: 'RUNNING',
