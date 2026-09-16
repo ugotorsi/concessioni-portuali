@@ -53,7 +53,7 @@ function canonicalKey(identity: NormalizedOfficialIdentity): string {
 function legalSourceType(identity: NormalizedOfficialIdentity) {
   if (identity.kind === "CASE_LAW") return "ALTRO" as const;
   if (identity.actType === "LEGGE") return "LEGGE" as const;
-  if (identity.actType.startsWith("DECRETO")) return "DECRETO" as const;
+  if (identity.actType?.startsWith("DECRETO")) return "DECRETO" as const;
   return "ALTRO" as const;
 }
 

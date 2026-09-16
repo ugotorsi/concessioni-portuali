@@ -170,6 +170,9 @@ export async function resolveLegalSourceCandidate(
         where: { id: parsed.admissionId },
         select: admissionContextSelect,
       });
+      if (!lockedAdmission) {
+        throw new Error("Candidato non disponibile o non coerente con il Fascicolo.");
+      }
       const lockedContext = getCanonicalContext(lockedAdmission, parsed.procedimentoId);
       if (
         lockedContext.canonicalEnteId !== canonicalEnteId

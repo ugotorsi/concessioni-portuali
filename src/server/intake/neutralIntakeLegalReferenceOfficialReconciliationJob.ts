@@ -467,11 +467,24 @@ export async function reconcileOfficialLookupInTransaction(
     },
   });
   const mergedIdentity = mergeClassifiedIdentityEvidence([
-    ...priorEvidence.map((item) => ({
-      classification: item.classification,
-      evidenceFingerprint: item.evidenceFingerprint,
-      identity: buildOfficialHitIdentityV1(item.officialHit).normalizedIdentity as unknown as Record<string, unknown>,
-    })),
+    ...priorEvidence.map((item) => {
+      const documentKind = item.officialHit.documentKind;
+      if (documentKind !== "LEGISLATION" && documentKind !== "CASE_LAW") {
+        throw new AsyncJobExecutionError(
+          "LEGAL_REFERENCE_OFFICIAL_RECONCILIATION",
+          "UNSUPPORTED_DOCUMENT_KIND",
+          false,
+        );
+      }
+      return {
+        classification: item.classification,
+        evidenceFingerprint: item.evidenceFingerprint,
+        identity: buildOfficialHitIdentityV1({
+          ...item.officialHit,
+          documentKind,
+        }).normalizedIdentity as unknown as Record<string, unknown>,
+      };
+    }),
     {
       classification,
       evidenceFingerprint,

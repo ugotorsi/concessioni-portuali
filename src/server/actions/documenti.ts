@@ -310,7 +310,7 @@ export async function createDocumentoUploadAction(formData: FormData) {
         azione: "NEUTRAL_INTAKE_PROCEDIMENTO_DUPLICATE_REJECTED",
         entita: "NeutralIntake",
         enteId: canonicalEnteId,
-        actor: { userId: persistedUserId, userEmail: currentUser.email, userRole: role },
+        actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
         metadata: {
           procedimentoId: payload.procedimentoId,
           reason: "DUPLICATE_DOCUMENT_IN_FASCICOLO",
