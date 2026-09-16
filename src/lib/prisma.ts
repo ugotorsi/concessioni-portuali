@@ -15,7 +15,10 @@ const globalForPrisma = globalThis as unknown as {
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    adapter: new PrismaPg(new Pool({ connectionString: databaseUrl })),
+    adapter: new PrismaPg(
+      new Pool({ connectionString: databaseUrl }),
+      { disposeExternalPool: true },
+    ),
   });
 
 if (process.env.NODE_ENV !== "production") {
