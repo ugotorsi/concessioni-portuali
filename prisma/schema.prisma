@@ -959,9 +959,9 @@ model LegalSourceIdentityAssertion {
 
   sourceFamily LegalSource @relation(fields: [sourceFamilyId], references: [id], onDelete: Restrict)
 
-  @@index([sourceFamilyId, identifierScheme, normalizedValue])
-  @@unique([sourceFamilyId, identifierScheme, normalizedValue])
-  @@index([identifierScheme, normalizedValue])
+  @@index([sourceFamilyId, identifierScheme, normalizedValue], map: "LegalSourceIdentityAssertion_sourceFamilyId_identifierScheme_no")
+  @@unique([sourceFamilyId, identifierScheme, normalizedValue], map: "legal_source_identity_assertion_identity_uq")
+  @@index([identifierScheme, normalizedValue], map: "LegalSourceIdentityAssertion_identifierScheme_normalizedValue_i")
   @@index([verificationStatus])
 }
 
@@ -1024,7 +1024,7 @@ model LegalSourceAcquisition {
   createdAt                DateTime                      @default(now())
 
   sourceFamily LegalSource?         @relation(fields: [sourceFamilyId], references: [id], onDelete: Restrict)
-  sourceVersion LegalSourceVersion? @relation(fields: [sourceVersionId, sourceFamilyId, observedSha256], references: [id, sourceFamilyId, observedSha256], onDelete: Restrict)
+  sourceVersion LegalSourceVersion? @relation(fields: [sourceVersionId, sourceFamilyId, observedSha256], references: [id, sourceFamilyId, observedSha256], onDelete: Restrict, map: "LegalSourceAcquisition_sourceVersionId_sourceFamilyId_observedS")
   ente         Ente?                 @relation(fields: [enteId], references: [id], onDelete: Restrict)
   importRun     ImportRun?           @relation(fields: [importRunId], references: [id], onDelete: Restrict)
 
@@ -1597,7 +1597,7 @@ model Documento {
   checklistEvidence     FascicoloChecklistEvidence[]
   requirementEvidence   FascicoloDocumentRequirementEvidence[]
   fileVersions          DocumentFileVersion[] @relation("DocumentFileVersions")
-  currentFileVersion    DocumentFileVersion?  @relation("CurrentDocumentFileVersion", fields: [currentFileVersionId, id, enteId], references: [id, documentId, canonicalEnteId], onDelete: Restrict, onUpdate: NoAction)
+  currentFileVersion    DocumentFileVersion?  @relation("CurrentDocumentFileVersion", fields: [currentFileVersionId, id, enteId], references: [id, documentId, canonicalEnteId], onDelete: Restrict, onUpdate: NoAction, map: "Documento_currentFileVersion_fkey")
 
   @@index([uploadedByUserId])
   @@index([statoDocumento])
@@ -1754,12 +1754,12 @@ model LegalReferenceMention {
   discoveredAt        DateTime           @default(now())
 
   extractionAttempt NeutralIntakeExtractionAttempt @relation(fields: [extractionAttemptId], references: [id], onDelete: Restrict)
-  extractionPage    NeutralIntakeExtractionPage    @relation(fields: [extractionPageId, extractionAttemptId], references: [id, extractionAttemptId], onDelete: Restrict)
+  extractionPage    NeutralIntakeExtractionPage    @relation(fields: [extractionPageId, extractionAttemptId], references: [id, extractionAttemptId], onDelete: Restrict, map: "LegalReferenceMention_extractionPage_binding_fkey")
   matches           LegalReferenceMatch[]
   officialLookups   LegalReferenceOfficialLookup[]
   officialReconciliations LegalReferenceOfficialReconciliation[]
 
-  @@unique([extractionPageId, discoveryVersion, characterStart, characterEnd, normalizedKey])
+  @@unique([extractionPageId, discoveryVersion, characterStart, characterEnd, normalizedKey], map: "LegalReferenceMention_occurrence_key")
   @@index([extractionAttemptId, discoveryVersion])
   @@index([kind, normalizedKey])
 }
@@ -1794,7 +1794,7 @@ model LegalReferenceOfficialLookup {
   mention LegalReferenceMention       @relation(fields: [mentionId], references: [id], onDelete: Restrict)
   hits    LegalReferenceOfficialHit[]
 
-  @@unique([mentionId, provider, lookupVersion])
+  @@unique([mentionId, provider, lookupVersion], map: "LegalReferenceOfficialLookup_mentionId_provider_lookupVersion_k")
   @@index([status, completedAt])
 }
 
@@ -1828,7 +1828,7 @@ model LegalReferenceOfficialHit {
   lookup                  LegalReferenceOfficialLookup                 @relation(fields: [lookupId], references: [id], onDelete: Restrict)
   reconciliationEvidence LegalReferenceOfficialReconciliationEvidence[]
 
-  @@unique([lookupId, providerSourceId, providerRecordId])
+  @@unique([lookupId, providerSourceId, providerRecordId], map: "LegalReferenceOfficialHit_lookupId_providerSourceId_providerRec")
   @@index([providerRecordId])
 }
 
@@ -1868,9 +1868,9 @@ model LegalReferenceOfficialReconciliation {
   reviewedByUser User?                                             @relation("LegalReferenceOfficialReconciliationReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
   evidence      LegalReferenceOfficialReconciliationEvidence[]
 
-  @@unique([mentionId, identityVersion])
+  @@unique([mentionId, identityVersion], map: "LegalReferenceOfficialReconciliation_mentionId_identityVersion_")
   @@unique([id, identityVersion])
-  @@index([identityVersion, identityFingerprint])
+  @@index([identityVersion, identityFingerprint], map: "LegalReferenceOfficialReconciliation_identityVersion_identityFi")
   @@index([state, updatedAt])
   @@index([legalSourceId])
   @@index([reviewedByUserId])
@@ -1887,12 +1887,12 @@ model LegalReferenceOfficialReconciliationEvidence {
   observedAt             DateTime
   createdAt              DateTime                                       @default(now())
 
-  reconciliation LegalReferenceOfficialReconciliation @relation(fields: [reconciliationId, identityVersion], references: [id, identityVersion], onDelete: Restrict)
+  reconciliation LegalReferenceOfficialReconciliation @relation(fields: [reconciliationId, identityVersion], references: [id, identityVersion], onDelete: Restrict, map: "LegalReferenceOfficialReconciliationEvidence_reconciliationId_f")
   officialHit    LegalReferenceOfficialHit              @relation(fields: [officialHitId], references: [id], onDelete: Restrict)
 
-  @@unique([officialHitId, identityVersion])
-  @@index([reconciliationId, createdAt])
-  @@index([classification, disposition])
+  @@unique([officialHitId, identityVersion], map: "LegalReferenceOfficialReconciliationEvidence_officialHitId_iden")
+  @@index([reconciliationId, createdAt], map: "LegalReferenceOfficialReconciliationEvidence_reconciliationId_c")
+  @@index([classification, disposition], map: "LegalReferenceOfficialReconciliationEvidence_classification_dis")
 }
 
 model NeutralIntakeClassificationAttempt {
@@ -1910,12 +1910,12 @@ model NeutralIntakeClassificationAttempt {
   classifiedAt        DateTime                              @default(now())
 
   neutralIntake     NeutralIntake                  @relation(fields: [neutralIntakeId], references: [id], onDelete: Restrict)
-  extractionAttempt NeutralIntakeExtractionAttempt @relation(fields: [extractionAttemptId, neutralIntakeId], references: [id, neutralIntakeId], onDelete: Restrict)
+  extractionAttempt NeutralIntakeExtractionAttempt @relation(fields: [extractionAttemptId, neutralIntakeId], references: [id, neutralIntakeId], onDelete: Restrict, map: "NeutralIntakeClassificationAttempt_extractionAttemptId_fkey")
   legalSourceCandidateAdmissions LegalSourceCandidateAdmission[]
 
-  @@unique([neutralIntakeId, evidenceHash, classifierVersion])
-  @@unique([id, neutralIntakeId, extractionAttemptId, evidenceHash, classifierVersion, outcome])
-  @@index([neutralIntakeId, classifiedAt])
+  @@unique([neutralIntakeId, evidenceHash, classifierVersion], map: "NeutralIntakeClassificationAttempt_neutralIntakeId_evidenceHash")
+  @@unique([id, neutralIntakeId, extractionAttemptId, evidenceHash, classifierVersion, outcome], map: "NeutralIntakeClassificationAttempt_handoff_binding_key")
+  @@index([neutralIntakeId, classifiedAt], map: "NeutralIntakeClassificationAttempt_neutralIntakeId_classifiedAt")
   @@index([extractionAttemptId])
   @@index([outcome, reviewRequired])
 }
@@ -1956,10 +1956,10 @@ model LegalSourceCandidateAdmission {
 
   ente                  Ente?                               @relation(fields: [enteId], references: [id], onDelete: Restrict)
   neutralIntake         NeutralIntake                       @relation(fields: [neutralIntakeId], references: [id], onDelete: Restrict)
-  classificationAttempt NeutralIntakeClassificationAttempt @relation(fields: [classificationAttemptId, neutralIntakeId, extractionAttemptId, evidenceHash, classifierVersion, classificationOutcome], references: [id, neutralIntakeId, extractionAttemptId, evidenceHash, classifierVersion, outcome], onDelete: Restrict)
+  classificationAttempt NeutralIntakeClassificationAttempt @relation(fields: [classificationAttemptId, neutralIntakeId, extractionAttemptId, evidenceHash, classifierVersion, classificationOutcome], references: [id, neutralIntakeId, extractionAttemptId, evidenceHash, classifierVersion, outcome], onDelete: Restrict, map: "LegalSourceCandidateAdmission_classification_binding_fkey")
   resolution            LegalSourceCandidateResolution?
 
-  @@unique([neutralIntakeId, classificationAttemptId, evidenceHash, contractVersion])
+  @@unique([neutralIntakeId, classificationAttemptId, evidenceHash, contractVersion], map: "LegalSourceCandidateAdmission_identity_key")
   @@index([enteId, admittedAt])
   @@index([classificationAttemptId])
 }
@@ -2055,7 +2055,7 @@ model FascicoloObservation {
   documento      Documento    @relation(fields: [documentoId], references: [id], onDelete: Restrict)
   reviewedByUser User?        @relation("FascicoloObservationReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
 
-  @@unique([enteId, procedimentoId, documentoId, ruleCode, ruleVersion])
+  @@unique([enteId, procedimentoId, documentoId, ruleCode, ruleVersion], map: "FascicoloObservation_enteId_procedimentoId_documentoId_ruleCode")
   @@index([enteId, status])
   @@index([procedimentoId, status])
   @@index([documentoId])
@@ -2088,8 +2088,8 @@ model FascicoloChecklistEvidence {
   createdByUser  User?        @relation("ChecklistEvidenceCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
   reviewedByUser User?        @relation("ChecklistEvidenceReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
 
-  @@unique([enteId, procedimentoId, documentoId, checklistItemCode])
-  @@index([enteId, procedimentoId, checklistItemCode])
+  @@unique([enteId, procedimentoId, documentoId, checklistItemCode], map: "FascicoloChecklistEvidence_enteId_procedimentoId_documentoId_ch")
+  @@index([enteId, procedimentoId, checklistItemCode], map: "FascicoloChecklistEvidence_enteId_procedimentoId_checklistItemC")
   @@index([documentoId])
   @@index([createdByUserId])
   @@index([reviewedByUserId])
@@ -2141,8 +2141,8 @@ model FascicoloDocumentRequirementProposal {
   reviewedByUser User?                                  @relation("DocumentRequirementProposalReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
   evidence       FascicoloDocumentRequirementEvidence[]
 
-  @@unique([enteId, procedimentoId, screeningFingerprint])
-  @@index([enteId, procedimentoId, status])
+  @@unique([enteId, procedimentoId, screeningFingerprint], map: "FascicoloDocumentRequirementProposal_enteId_procedimentoId_scre")
+  @@index([enteId, procedimentoId, status], map: "FascicoloDocumentRequirementProposal_enteId_procedimentoId_stat")
   @@index([legalSourceId])
   @@index([legalRuleId])
   @@index([documentGapId])
@@ -2175,7 +2175,7 @@ model FascicoloDocumentRequirementEvidence {
   revokedByUser User?                                       @relation("DocumentRequirementEvidenceRevokedBy", fields: [revokedByUserId], references: [id], onDelete: SetNull)
   review        FascicoloDocumentRequirementEvidenceReview?
 
-  @@unique([enteId, proposalId, documentoId])
+  @@unique([enteId, proposalId, documentoId], map: "FascicoloDocumentRequirementEvidence_enteId_proposalId_document")
   @@index([enteId, proposalId])
   @@index([documentoId])
   @@index([createdByUserId])
@@ -2194,7 +2194,7 @@ model FascicoloDocumentRequirementEvidenceReview {
   reviewNote        String?
 
   evidence       FascicoloDocumentRequirementEvidence @relation(fields: [evidenceId], references: [id], onDelete: Restrict)
-  reviewedByUser User?                                @relation("DocumentRequirementEvidenceReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+  reviewedByUser User?                                @relation("DocumentRequirementEvidenceReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull, map: "FascicoloDocumentRequirementEvidenceReview_reviewedByUserId_fke")
 
   @@index([reviewedByUserId])
   @@index([createdAt])

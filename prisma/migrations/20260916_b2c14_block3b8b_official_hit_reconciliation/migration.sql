@@ -6,7 +6,7 @@ ADD COLUMN "publicationDate" TIMESTAMP(3),
 ADD COLUMN "subject" VARCHAR(500),
 ADD COLUMN "outcome" VARCHAR(500);
 
-CREATE UNIQUE INDEX "LegalSourceIdentityAssertion_sourceFamilyId_identifierScheme_normalizedValue_key"
+CREATE UNIQUE INDEX "legal_source_identity_assertion_identity_uq"
 ON "LegalSourceIdentityAssertion"("sourceFamilyId", "identifierScheme", "normalizedValue");
 
 CREATE TYPE "LegalReferenceOfficialReconciliationState" AS ENUM (

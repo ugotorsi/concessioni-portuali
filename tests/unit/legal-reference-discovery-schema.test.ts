@@ -27,7 +27,9 @@ describe("B2C10 Block 3B.6A legal reference persistence", () => {
   });
 
   it("uses occurrence-preserving deterministic uniqueness for retry deduplication", () => {
-    expect(model).toContain("@@unique([extractionPageId, discoveryVersion, characterStart, characterEnd, normalizedKey])");
+    expect(model).toContain(
+      '@@unique([extractionPageId, discoveryVersion, characterStart, characterEnd, normalizedKey], map: "LegalReferenceMention_occurrence_key")',
+    );
     expect(migration).toContain('CREATE UNIQUE INDEX "LegalReferenceMention_occurrence_key"');
     expect(migration).toContain('"characterEnd" > "characterStart"');
   });

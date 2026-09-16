@@ -24,7 +24,9 @@ describe("B2C9 Block 3B.4A-R1 handoff schema", () => {
     expect(candidate).toContain("extractionAttemptId     String");
     expect(candidate).toContain("evidenceHash            String   @db.Char(64)");
     expect(candidate).toContain("classificationOutcome   NeutralIntakeClassificationOutcome");
-    expect(candidate).toContain("@@unique([neutralIntakeId, classificationAttemptId, evidenceHash, contractVersion])");
+    expect(candidate).toContain(
+      '@@unique([neutralIntakeId, classificationAttemptId, evidenceHash, contractVersion], map: "LegalSourceCandidateAdmission_identity_key")',
+    );
     expect(migration).toContain('CONSTRAINT "legal_source_candidate_outcome_ck"');
     expect(migration).toContain('FOREIGN KEY ("classificationAttemptId", "neutralIntakeId", "extractionAttemptId", "evidenceHash", "classifierVersion", "classificationOutcome")');
   });

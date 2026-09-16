@@ -25,8 +25,12 @@ describe("B2C14 Block 3B.8B official hit reconciliation schema", () => {
   it("scopes reconciliation by mention and permits null fingerprints only in valid states", () => {
     const reconciliation = schemaBlock("model", "LegalReferenceOfficialReconciliation");
     expect(reconciliation).toContain("identityFingerprint   String?");
-    expect(reconciliation).toContain("@@unique([mentionId, identityVersion])");
-    expect(reconciliation).toContain("@@index([identityVersion, identityFingerprint])");
+    expect(reconciliation).toContain(
+      '@@unique([mentionId, identityVersion], map: "LegalReferenceOfficialReconciliation_mentionId_identityVersion_")',
+    );
+    expect(reconciliation).toContain(
+      '@@index([identityVersion, identityFingerprint], map: "LegalReferenceOfficialReconciliation_identityVersion_identityFi")',
+    );
     expect(migration).toContain("legal_reference_official_reconciliation_identity_ck");
     expect(migration).toContain("\"state\" = 'INCOMPLETE' AND \"identityFingerprint\" IS NULL");
     expect(migration).toContain("\"state\" IN ('CONFLICTED', 'REJECTED')");
@@ -35,7 +39,9 @@ describe("B2C14 Block 3B.8B official hit reconciliation schema", () => {
   it("admits each hit once per identity version", () => {
     const evidence = schemaBlock("model", "LegalReferenceOfficialReconciliationEvidence");
     expect(evidence).toContain("officialHitId");
-    expect(evidence).toContain("@@unique([officialHitId, identityVersion])");
+    expect(evidence).toContain(
+      '@@unique([officialHitId, identityVersion], map: "LegalReferenceOfficialReconciliationEvidence_officialHitId_iden")',
+    );
     expect(evidence).toContain("officialHit    LegalReferenceOfficialHit");
     expect(schemaBlock("model", "LegalReferenceOfficialReconciliation"))
       .toContain("@@unique([id, identityVersion])");

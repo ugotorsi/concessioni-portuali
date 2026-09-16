@@ -25,7 +25,9 @@ describe("B2C12 Block 3B.6C official lookup persistence", () => {
     expect(lookup).toContain("mentionId");
     expect(lookup).toContain("provider");
     expect(lookup).toContain("lookupVersion");
-    expect(lookup).toContain("@@unique([mentionId, provider, lookupVersion])");
+    expect(lookup).toContain(
+      '@@unique([mentionId, provider, lookupVersion], map: "LegalReferenceOfficialLookup_mentionId_provider_lookupVersion_k")',
+    );
     expect(lookup).not.toMatch(/fascicoloId|procedimentoId|enteId|tenantId/);
   });
 
