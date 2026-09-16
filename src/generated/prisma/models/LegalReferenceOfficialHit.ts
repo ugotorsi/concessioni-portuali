@@ -57,6 +57,10 @@ export type LegalReferenceOfficialHitMinAggregateOutputType = {
   decisionDate: Date | null
   chamberSection: string | null
   decisionType: string | null
+  ecli: string | null
+  publicationDate: Date | null
+  subject: string | null
+  outcome: string | null
   sourceUrl: string | null
 }
 
@@ -81,6 +85,10 @@ export type LegalReferenceOfficialHitMaxAggregateOutputType = {
   decisionDate: Date | null
   chamberSection: string | null
   decisionType: string | null
+  ecli: string | null
+  publicationDate: Date | null
+  subject: string | null
+  outcome: string | null
   sourceUrl: string | null
 }
 
@@ -105,6 +113,10 @@ export type LegalReferenceOfficialHitCountAggregateOutputType = {
   decisionDate: number
   chamberSection: number
   decisionType: number
+  ecli: number
+  publicationDate: number
+  subject: number
+  outcome: number
   sourceUrl: number
   _all: number
 }
@@ -141,6 +153,10 @@ export type LegalReferenceOfficialHitMinAggregateInputType = {
   decisionDate?: true
   chamberSection?: true
   decisionType?: true
+  ecli?: true
+  publicationDate?: true
+  subject?: true
+  outcome?: true
   sourceUrl?: true
 }
 
@@ -165,6 +181,10 @@ export type LegalReferenceOfficialHitMaxAggregateInputType = {
   decisionDate?: true
   chamberSection?: true
   decisionType?: true
+  ecli?: true
+  publicationDate?: true
+  subject?: true
+  outcome?: true
   sourceUrl?: true
 }
 
@@ -189,6 +209,10 @@ export type LegalReferenceOfficialHitCountAggregateInputType = {
   decisionDate?: true
   chamberSection?: true
   decisionType?: true
+  ecli?: true
+  publicationDate?: true
+  subject?: true
+  outcome?: true
   sourceUrl?: true
   _all?: true
 }
@@ -300,6 +324,10 @@ export type LegalReferenceOfficialHitGroupByOutputType = {
   decisionDate: Date | null
   chamberSection: string | null
   decisionType: string | null
+  ecli: string | null
+  publicationDate: Date | null
+  subject: string | null
+  outcome: string | null
   sourceUrl: string | null
   _count: LegalReferenceOfficialHitCountAggregateOutputType | null
   _avg: LegalReferenceOfficialHitAvgAggregateOutputType | null
@@ -347,8 +375,13 @@ export type LegalReferenceOfficialHitWhereInput = {
   decisionDate?: Prisma.DateTimeNullableFilter<"LegalReferenceOfficialHit"> | Date | string | null
   chamberSection?: Prisma.StringNullableFilter<"LegalReferenceOfficialHit"> | string | null
   decisionType?: Prisma.StringNullableFilter<"LegalReferenceOfficialHit"> | string | null
+  ecli?: Prisma.StringNullableFilter<"LegalReferenceOfficialHit"> | string | null
+  publicationDate?: Prisma.DateTimeNullableFilter<"LegalReferenceOfficialHit"> | Date | string | null
+  subject?: Prisma.StringNullableFilter<"LegalReferenceOfficialHit"> | string | null
+  outcome?: Prisma.StringNullableFilter<"LegalReferenceOfficialHit"> | string | null
   sourceUrl?: Prisma.StringNullableFilter<"LegalReferenceOfficialHit"> | string | null
   lookup?: Prisma.XOR<Prisma.LegalReferenceOfficialLookupScalarRelationFilter, Prisma.LegalReferenceOfficialLookupWhereInput>
+  reconciliationEvidence?: Prisma.LegalReferenceOfficialReconciliationEvidenceListRelationFilter
 }
 
 export type LegalReferenceOfficialHitOrderByWithRelationInput = {
@@ -372,8 +405,13 @@ export type LegalReferenceOfficialHitOrderByWithRelationInput = {
   decisionDate?: Prisma.SortOrderInput | Prisma.SortOrder
   chamberSection?: Prisma.SortOrderInput | Prisma.SortOrder
   decisionType?: Prisma.SortOrderInput | Prisma.SortOrder
+  ecli?: Prisma.SortOrderInput | Prisma.SortOrder
+  publicationDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  subject?: Prisma.SortOrderInput | Prisma.SortOrder
+  outcome?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   lookup?: Prisma.LegalReferenceOfficialLookupOrderByWithRelationInput
+  reconciliationEvidence?: Prisma.LegalReferenceOfficialReconciliationEvidenceOrderByRelationAggregateInput
 }
 
 export type LegalReferenceOfficialHitWhereUniqueInput = Prisma.AtLeast<{
@@ -401,8 +439,13 @@ export type LegalReferenceOfficialHitWhereUniqueInput = Prisma.AtLeast<{
   decisionDate?: Prisma.DateTimeNullableFilter<"LegalReferenceOfficialHit"> | Date | string | null
   chamberSection?: Prisma.StringNullableFilter<"LegalReferenceOfficialHit"> | string | null
   decisionType?: Prisma.StringNullableFilter<"LegalReferenceOfficialHit"> | string | null
+  ecli?: Prisma.StringNullableFilter<"LegalReferenceOfficialHit"> | string | null
+  publicationDate?: Prisma.DateTimeNullableFilter<"LegalReferenceOfficialHit"> | Date | string | null
+  subject?: Prisma.StringNullableFilter<"LegalReferenceOfficialHit"> | string | null
+  outcome?: Prisma.StringNullableFilter<"LegalReferenceOfficialHit"> | string | null
   sourceUrl?: Prisma.StringNullableFilter<"LegalReferenceOfficialHit"> | string | null
   lookup?: Prisma.XOR<Prisma.LegalReferenceOfficialLookupScalarRelationFilter, Prisma.LegalReferenceOfficialLookupWhereInput>
+  reconciliationEvidence?: Prisma.LegalReferenceOfficialReconciliationEvidenceListRelationFilter
 }, "id" | "lookupId_providerSourceId_providerRecordId">
 
 export type LegalReferenceOfficialHitOrderByWithAggregationInput = {
@@ -426,6 +469,10 @@ export type LegalReferenceOfficialHitOrderByWithAggregationInput = {
   decisionDate?: Prisma.SortOrderInput | Prisma.SortOrder
   chamberSection?: Prisma.SortOrderInput | Prisma.SortOrder
   decisionType?: Prisma.SortOrderInput | Prisma.SortOrder
+  ecli?: Prisma.SortOrderInput | Prisma.SortOrder
+  publicationDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  subject?: Prisma.SortOrderInput | Prisma.SortOrder
+  outcome?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.LegalReferenceOfficialHitCountOrderByAggregateInput
   _avg?: Prisma.LegalReferenceOfficialHitAvgOrderByAggregateInput
@@ -458,6 +505,10 @@ export type LegalReferenceOfficialHitScalarWhereWithAggregatesInput = {
   decisionDate?: Prisma.DateTimeNullableWithAggregatesFilter<"LegalReferenceOfficialHit"> | Date | string | null
   chamberSection?: Prisma.StringNullableWithAggregatesFilter<"LegalReferenceOfficialHit"> | string | null
   decisionType?: Prisma.StringNullableWithAggregatesFilter<"LegalReferenceOfficialHit"> | string | null
+  ecli?: Prisma.StringNullableWithAggregatesFilter<"LegalReferenceOfficialHit"> | string | null
+  publicationDate?: Prisma.DateTimeNullableWithAggregatesFilter<"LegalReferenceOfficialHit"> | Date | string | null
+  subject?: Prisma.StringNullableWithAggregatesFilter<"LegalReferenceOfficialHit"> | string | null
+  outcome?: Prisma.StringNullableWithAggregatesFilter<"LegalReferenceOfficialHit"> | string | null
   sourceUrl?: Prisma.StringNullableWithAggregatesFilter<"LegalReferenceOfficialHit"> | string | null
 }
 
@@ -481,8 +532,13 @@ export type LegalReferenceOfficialHitCreateInput = {
   decisionDate?: Date | string | null
   chamberSection?: string | null
   decisionType?: string | null
+  ecli?: string | null
+  publicationDate?: Date | string | null
+  subject?: string | null
+  outcome?: string | null
   sourceUrl?: string | null
   lookup: Prisma.LegalReferenceOfficialLookupCreateNestedOneWithoutHitsInput
+  reconciliationEvidence?: Prisma.LegalReferenceOfficialReconciliationEvidenceCreateNestedManyWithoutOfficialHitInput
 }
 
 export type LegalReferenceOfficialHitUncheckedCreateInput = {
@@ -506,7 +562,12 @@ export type LegalReferenceOfficialHitUncheckedCreateInput = {
   decisionDate?: Date | string | null
   chamberSection?: string | null
   decisionType?: string | null
+  ecli?: string | null
+  publicationDate?: Date | string | null
+  subject?: string | null
+  outcome?: string | null
   sourceUrl?: string | null
+  reconciliationEvidence?: Prisma.LegalReferenceOfficialReconciliationEvidenceUncheckedCreateNestedManyWithoutOfficialHitInput
 }
 
 export type LegalReferenceOfficialHitUpdateInput = {
@@ -529,8 +590,13 @@ export type LegalReferenceOfficialHitUpdateInput = {
   decisionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chamberSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   decisionType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ecli?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lookup?: Prisma.LegalReferenceOfficialLookupUpdateOneRequiredWithoutHitsNestedInput
+  reconciliationEvidence?: Prisma.LegalReferenceOfficialReconciliationEvidenceUpdateManyWithoutOfficialHitNestedInput
 }
 
 export type LegalReferenceOfficialHitUncheckedUpdateInput = {
@@ -554,7 +620,12 @@ export type LegalReferenceOfficialHitUncheckedUpdateInput = {
   decisionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chamberSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   decisionType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ecli?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reconciliationEvidence?: Prisma.LegalReferenceOfficialReconciliationEvidenceUncheckedUpdateManyWithoutOfficialHitNestedInput
 }
 
 export type LegalReferenceOfficialHitCreateManyInput = {
@@ -578,6 +649,10 @@ export type LegalReferenceOfficialHitCreateManyInput = {
   decisionDate?: Date | string | null
   chamberSection?: string | null
   decisionType?: string | null
+  ecli?: string | null
+  publicationDate?: Date | string | null
+  subject?: string | null
+  outcome?: string | null
   sourceUrl?: string | null
 }
 
@@ -601,6 +676,10 @@ export type LegalReferenceOfficialHitUpdateManyMutationInput = {
   decisionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chamberSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   decisionType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ecli?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -625,6 +704,10 @@ export type LegalReferenceOfficialHitUncheckedUpdateManyInput = {
   decisionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chamberSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   decisionType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ecli?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -665,6 +748,10 @@ export type LegalReferenceOfficialHitCountOrderByAggregateInput = {
   decisionDate?: Prisma.SortOrder
   chamberSection?: Prisma.SortOrder
   decisionType?: Prisma.SortOrder
+  ecli?: Prisma.SortOrder
+  publicationDate?: Prisma.SortOrder
+  subject?: Prisma.SortOrder
+  outcome?: Prisma.SortOrder
   sourceUrl?: Prisma.SortOrder
 }
 
@@ -694,6 +781,10 @@ export type LegalReferenceOfficialHitMaxOrderByAggregateInput = {
   decisionDate?: Prisma.SortOrder
   chamberSection?: Prisma.SortOrder
   decisionType?: Prisma.SortOrder
+  ecli?: Prisma.SortOrder
+  publicationDate?: Prisma.SortOrder
+  subject?: Prisma.SortOrder
+  outcome?: Prisma.SortOrder
   sourceUrl?: Prisma.SortOrder
 }
 
@@ -718,12 +809,21 @@ export type LegalReferenceOfficialHitMinOrderByAggregateInput = {
   decisionDate?: Prisma.SortOrder
   chamberSection?: Prisma.SortOrder
   decisionType?: Prisma.SortOrder
+  ecli?: Prisma.SortOrder
+  publicationDate?: Prisma.SortOrder
+  subject?: Prisma.SortOrder
+  outcome?: Prisma.SortOrder
   sourceUrl?: Prisma.SortOrder
 }
 
 export type LegalReferenceOfficialHitSumOrderByAggregateInput = {
   annoProvvedimento?: Prisma.SortOrder
   decisionYear?: Prisma.SortOrder
+}
+
+export type LegalReferenceOfficialHitScalarRelationFilter = {
+  is?: Prisma.LegalReferenceOfficialHitWhereInput
+  isNot?: Prisma.LegalReferenceOfficialHitWhereInput
 }
 
 export type LegalReferenceOfficialHitCreateNestedManyWithoutLookupInput = {
@@ -768,6 +868,20 @@ export type LegalReferenceOfficialHitUncheckedUpdateManyWithoutLookupNestedInput
   deleteMany?: Prisma.LegalReferenceOfficialHitScalarWhereInput | Prisma.LegalReferenceOfficialHitScalarWhereInput[]
 }
 
+export type LegalReferenceOfficialHitCreateNestedOneWithoutReconciliationEvidenceInput = {
+  create?: Prisma.XOR<Prisma.LegalReferenceOfficialHitCreateWithoutReconciliationEvidenceInput, Prisma.LegalReferenceOfficialHitUncheckedCreateWithoutReconciliationEvidenceInput>
+  connectOrCreate?: Prisma.LegalReferenceOfficialHitCreateOrConnectWithoutReconciliationEvidenceInput
+  connect?: Prisma.LegalReferenceOfficialHitWhereUniqueInput
+}
+
+export type LegalReferenceOfficialHitUpdateOneRequiredWithoutReconciliationEvidenceNestedInput = {
+  create?: Prisma.XOR<Prisma.LegalReferenceOfficialHitCreateWithoutReconciliationEvidenceInput, Prisma.LegalReferenceOfficialHitUncheckedCreateWithoutReconciliationEvidenceInput>
+  connectOrCreate?: Prisma.LegalReferenceOfficialHitCreateOrConnectWithoutReconciliationEvidenceInput
+  upsert?: Prisma.LegalReferenceOfficialHitUpsertWithoutReconciliationEvidenceInput
+  connect?: Prisma.LegalReferenceOfficialHitWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LegalReferenceOfficialHitUpdateToOneWithWhereWithoutReconciliationEvidenceInput, Prisma.LegalReferenceOfficialHitUpdateWithoutReconciliationEvidenceInput>, Prisma.LegalReferenceOfficialHitUncheckedUpdateWithoutReconciliationEvidenceInput>
+}
+
 export type LegalReferenceOfficialHitCreateWithoutLookupInput = {
   id?: string
   documentKind: string
@@ -788,7 +902,12 @@ export type LegalReferenceOfficialHitCreateWithoutLookupInput = {
   decisionDate?: Date | string | null
   chamberSection?: string | null
   decisionType?: string | null
+  ecli?: string | null
+  publicationDate?: Date | string | null
+  subject?: string | null
+  outcome?: string | null
   sourceUrl?: string | null
+  reconciliationEvidence?: Prisma.LegalReferenceOfficialReconciliationEvidenceCreateNestedManyWithoutOfficialHitInput
 }
 
 export type LegalReferenceOfficialHitUncheckedCreateWithoutLookupInput = {
@@ -811,7 +930,12 @@ export type LegalReferenceOfficialHitUncheckedCreateWithoutLookupInput = {
   decisionDate?: Date | string | null
   chamberSection?: string | null
   decisionType?: string | null
+  ecli?: string | null
+  publicationDate?: Date | string | null
+  subject?: string | null
+  outcome?: string | null
   sourceUrl?: string | null
+  reconciliationEvidence?: Prisma.LegalReferenceOfficialReconciliationEvidenceUncheckedCreateNestedManyWithoutOfficialHitInput
 }
 
 export type LegalReferenceOfficialHitCreateOrConnectWithoutLookupInput = {
@@ -864,7 +988,139 @@ export type LegalReferenceOfficialHitScalarWhereInput = {
   decisionDate?: Prisma.DateTimeNullableFilter<"LegalReferenceOfficialHit"> | Date | string | null
   chamberSection?: Prisma.StringNullableFilter<"LegalReferenceOfficialHit"> | string | null
   decisionType?: Prisma.StringNullableFilter<"LegalReferenceOfficialHit"> | string | null
+  ecli?: Prisma.StringNullableFilter<"LegalReferenceOfficialHit"> | string | null
+  publicationDate?: Prisma.DateTimeNullableFilter<"LegalReferenceOfficialHit"> | Date | string | null
+  subject?: Prisma.StringNullableFilter<"LegalReferenceOfficialHit"> | string | null
+  outcome?: Prisma.StringNullableFilter<"LegalReferenceOfficialHit"> | string | null
   sourceUrl?: Prisma.StringNullableFilter<"LegalReferenceOfficialHit"> | string | null
+}
+
+export type LegalReferenceOfficialHitCreateWithoutReconciliationEvidenceInput = {
+  id?: string
+  documentKind: string
+  providerSourceId: string
+  providerRecordId: string
+  denominazioneAtto?: string | null
+  numeroProvvedimento?: string | null
+  annoProvvedimento?: number | null
+  dataEmanazione?: Date | string | null
+  descrizioneAtto?: string | null
+  titoloAtto?: string | null
+  numeroGU?: string | null
+  dataGU?: Date | string | null
+  authority?: string | null
+  court?: string | null
+  decisionNumber?: string | null
+  decisionYear?: number | null
+  decisionDate?: Date | string | null
+  chamberSection?: string | null
+  decisionType?: string | null
+  ecli?: string | null
+  publicationDate?: Date | string | null
+  subject?: string | null
+  outcome?: string | null
+  sourceUrl?: string | null
+  lookup: Prisma.LegalReferenceOfficialLookupCreateNestedOneWithoutHitsInput
+}
+
+export type LegalReferenceOfficialHitUncheckedCreateWithoutReconciliationEvidenceInput = {
+  id?: string
+  lookupId: string
+  documentKind: string
+  providerSourceId: string
+  providerRecordId: string
+  denominazioneAtto?: string | null
+  numeroProvvedimento?: string | null
+  annoProvvedimento?: number | null
+  dataEmanazione?: Date | string | null
+  descrizioneAtto?: string | null
+  titoloAtto?: string | null
+  numeroGU?: string | null
+  dataGU?: Date | string | null
+  authority?: string | null
+  court?: string | null
+  decisionNumber?: string | null
+  decisionYear?: number | null
+  decisionDate?: Date | string | null
+  chamberSection?: string | null
+  decisionType?: string | null
+  ecli?: string | null
+  publicationDate?: Date | string | null
+  subject?: string | null
+  outcome?: string | null
+  sourceUrl?: string | null
+}
+
+export type LegalReferenceOfficialHitCreateOrConnectWithoutReconciliationEvidenceInput = {
+  where: Prisma.LegalReferenceOfficialHitWhereUniqueInput
+  create: Prisma.XOR<Prisma.LegalReferenceOfficialHitCreateWithoutReconciliationEvidenceInput, Prisma.LegalReferenceOfficialHitUncheckedCreateWithoutReconciliationEvidenceInput>
+}
+
+export type LegalReferenceOfficialHitUpsertWithoutReconciliationEvidenceInput = {
+  update: Prisma.XOR<Prisma.LegalReferenceOfficialHitUpdateWithoutReconciliationEvidenceInput, Prisma.LegalReferenceOfficialHitUncheckedUpdateWithoutReconciliationEvidenceInput>
+  create: Prisma.XOR<Prisma.LegalReferenceOfficialHitCreateWithoutReconciliationEvidenceInput, Prisma.LegalReferenceOfficialHitUncheckedCreateWithoutReconciliationEvidenceInput>
+  where?: Prisma.LegalReferenceOfficialHitWhereInput
+}
+
+export type LegalReferenceOfficialHitUpdateToOneWithWhereWithoutReconciliationEvidenceInput = {
+  where?: Prisma.LegalReferenceOfficialHitWhereInput
+  data: Prisma.XOR<Prisma.LegalReferenceOfficialHitUpdateWithoutReconciliationEvidenceInput, Prisma.LegalReferenceOfficialHitUncheckedUpdateWithoutReconciliationEvidenceInput>
+}
+
+export type LegalReferenceOfficialHitUpdateWithoutReconciliationEvidenceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  documentKind?: Prisma.StringFieldUpdateOperationsInput | string
+  providerSourceId?: Prisma.StringFieldUpdateOperationsInput | string
+  providerRecordId?: Prisma.StringFieldUpdateOperationsInput | string
+  denominazioneAtto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  numeroProvvedimento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  annoProvvedimento?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  dataEmanazione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  descrizioneAtto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  titoloAtto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  numeroGU?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataGU?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  authority?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  court?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  decisionNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  decisionYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  decisionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  chamberSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  decisionType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ecli?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lookup?: Prisma.LegalReferenceOfficialLookupUpdateOneRequiredWithoutHitsNestedInput
+}
+
+export type LegalReferenceOfficialHitUncheckedUpdateWithoutReconciliationEvidenceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  lookupId?: Prisma.StringFieldUpdateOperationsInput | string
+  documentKind?: Prisma.StringFieldUpdateOperationsInput | string
+  providerSourceId?: Prisma.StringFieldUpdateOperationsInput | string
+  providerRecordId?: Prisma.StringFieldUpdateOperationsInput | string
+  denominazioneAtto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  numeroProvvedimento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  annoProvvedimento?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  dataEmanazione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  descrizioneAtto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  titoloAtto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  numeroGU?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataGU?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  authority?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  court?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  decisionNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  decisionYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  decisionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  chamberSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  decisionType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ecli?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type LegalReferenceOfficialHitCreateManyLookupInput = {
@@ -887,6 +1143,10 @@ export type LegalReferenceOfficialHitCreateManyLookupInput = {
   decisionDate?: Date | string | null
   chamberSection?: string | null
   decisionType?: string | null
+  ecli?: string | null
+  publicationDate?: Date | string | null
+  subject?: string | null
+  outcome?: string | null
   sourceUrl?: string | null
 }
 
@@ -910,7 +1170,12 @@ export type LegalReferenceOfficialHitUpdateWithoutLookupInput = {
   decisionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chamberSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   decisionType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ecli?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reconciliationEvidence?: Prisma.LegalReferenceOfficialReconciliationEvidenceUpdateManyWithoutOfficialHitNestedInput
 }
 
 export type LegalReferenceOfficialHitUncheckedUpdateWithoutLookupInput = {
@@ -933,7 +1198,12 @@ export type LegalReferenceOfficialHitUncheckedUpdateWithoutLookupInput = {
   decisionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chamberSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   decisionType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ecli?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reconciliationEvidence?: Prisma.LegalReferenceOfficialReconciliationEvidenceUncheckedUpdateManyWithoutOfficialHitNestedInput
 }
 
 export type LegalReferenceOfficialHitUncheckedUpdateManyWithoutLookupInput = {
@@ -956,9 +1226,42 @@ export type LegalReferenceOfficialHitUncheckedUpdateManyWithoutLookupInput = {
   decisionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chamberSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   decisionType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ecli?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  subject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
+
+/**
+ * Count Type LegalReferenceOfficialHitCountOutputType
+ */
+
+export type LegalReferenceOfficialHitCountOutputType = {
+  reconciliationEvidence: number
+}
+
+export type LegalReferenceOfficialHitCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  reconciliationEvidence?: boolean | LegalReferenceOfficialHitCountOutputTypeCountReconciliationEvidenceArgs
+}
+
+/**
+ * LegalReferenceOfficialHitCountOutputType without action
+ */
+export type LegalReferenceOfficialHitCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LegalReferenceOfficialHitCountOutputType
+   */
+  select?: Prisma.LegalReferenceOfficialHitCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * LegalReferenceOfficialHitCountOutputType without action
+ */
+export type LegalReferenceOfficialHitCountOutputTypeCountReconciliationEvidenceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LegalReferenceOfficialReconciliationEvidenceWhereInput
+}
 
 
 export type LegalReferenceOfficialHitSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -982,8 +1285,14 @@ export type LegalReferenceOfficialHitSelect<ExtArgs extends runtime.Types.Extens
   decisionDate?: boolean
   chamberSection?: boolean
   decisionType?: boolean
+  ecli?: boolean
+  publicationDate?: boolean
+  subject?: boolean
+  outcome?: boolean
   sourceUrl?: boolean
   lookup?: boolean | Prisma.LegalReferenceOfficialLookupDefaultArgs<ExtArgs>
+  reconciliationEvidence?: boolean | Prisma.LegalReferenceOfficialHit$reconciliationEvidenceArgs<ExtArgs>
+  _count?: boolean | Prisma.LegalReferenceOfficialHitCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["legalReferenceOfficialHit"]>
 
 export type LegalReferenceOfficialHitSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1007,6 +1316,10 @@ export type LegalReferenceOfficialHitSelectCreateManyAndReturn<ExtArgs extends r
   decisionDate?: boolean
   chamberSection?: boolean
   decisionType?: boolean
+  ecli?: boolean
+  publicationDate?: boolean
+  subject?: boolean
+  outcome?: boolean
   sourceUrl?: boolean
   lookup?: boolean | Prisma.LegalReferenceOfficialLookupDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["legalReferenceOfficialHit"]>
@@ -1032,6 +1345,10 @@ export type LegalReferenceOfficialHitSelectUpdateManyAndReturn<ExtArgs extends r
   decisionDate?: boolean
   chamberSection?: boolean
   decisionType?: boolean
+  ecli?: boolean
+  publicationDate?: boolean
+  subject?: boolean
+  outcome?: boolean
   sourceUrl?: boolean
   lookup?: boolean | Prisma.LegalReferenceOfficialLookupDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["legalReferenceOfficialHit"]>
@@ -1057,12 +1374,18 @@ export type LegalReferenceOfficialHitSelectScalar = {
   decisionDate?: boolean
   chamberSection?: boolean
   decisionType?: boolean
+  ecli?: boolean
+  publicationDate?: boolean
+  subject?: boolean
+  outcome?: boolean
   sourceUrl?: boolean
 }
 
-export type LegalReferenceOfficialHitOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "lookupId" | "documentKind" | "providerSourceId" | "providerRecordId" | "denominazioneAtto" | "numeroProvvedimento" | "annoProvvedimento" | "dataEmanazione" | "descrizioneAtto" | "titoloAtto" | "numeroGU" | "dataGU" | "authority" | "court" | "decisionNumber" | "decisionYear" | "decisionDate" | "chamberSection" | "decisionType" | "sourceUrl", ExtArgs["result"]["legalReferenceOfficialHit"]>
+export type LegalReferenceOfficialHitOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "lookupId" | "documentKind" | "providerSourceId" | "providerRecordId" | "denominazioneAtto" | "numeroProvvedimento" | "annoProvvedimento" | "dataEmanazione" | "descrizioneAtto" | "titoloAtto" | "numeroGU" | "dataGU" | "authority" | "court" | "decisionNumber" | "decisionYear" | "decisionDate" | "chamberSection" | "decisionType" | "ecli" | "publicationDate" | "subject" | "outcome" | "sourceUrl", ExtArgs["result"]["legalReferenceOfficialHit"]>
 export type LegalReferenceOfficialHitInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   lookup?: boolean | Prisma.LegalReferenceOfficialLookupDefaultArgs<ExtArgs>
+  reconciliationEvidence?: boolean | Prisma.LegalReferenceOfficialHit$reconciliationEvidenceArgs<ExtArgs>
+  _count?: boolean | Prisma.LegalReferenceOfficialHitCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type LegalReferenceOfficialHitIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   lookup?: boolean | Prisma.LegalReferenceOfficialLookupDefaultArgs<ExtArgs>
@@ -1075,6 +1398,7 @@ export type $LegalReferenceOfficialHitPayload<ExtArgs extends runtime.Types.Exte
   name: "LegalReferenceOfficialHit"
   objects: {
     lookup: Prisma.$LegalReferenceOfficialLookupPayload<ExtArgs>
+    reconciliationEvidence: Prisma.$LegalReferenceOfficialReconciliationEvidencePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1097,6 +1421,10 @@ export type $LegalReferenceOfficialHitPayload<ExtArgs extends runtime.Types.Exte
     decisionDate: Date | null
     chamberSection: string | null
     decisionType: string | null
+    ecli: string | null
+    publicationDate: Date | null
+    subject: string | null
+    outcome: string | null
     sourceUrl: string | null
   }, ExtArgs["result"]["legalReferenceOfficialHit"]>
   composites: {}
@@ -1493,6 +1821,7 @@ readonly fields: LegalReferenceOfficialHitFieldRefs;
 export interface Prisma__LegalReferenceOfficialHitClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   lookup<T extends Prisma.LegalReferenceOfficialLookupDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalReferenceOfficialLookupDefaultArgs<ExtArgs>>): Prisma.Prisma__LegalReferenceOfficialLookupClient<runtime.Types.Result.GetResult<Prisma.$LegalReferenceOfficialLookupPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  reconciliationEvidence<T extends Prisma.LegalReferenceOfficialHit$reconciliationEvidenceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalReferenceOfficialHit$reconciliationEvidenceArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LegalReferenceOfficialReconciliationEvidencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1542,6 +1871,10 @@ export interface LegalReferenceOfficialHitFieldRefs {
   readonly decisionDate: Prisma.FieldRef<"LegalReferenceOfficialHit", 'DateTime'>
   readonly chamberSection: Prisma.FieldRef<"LegalReferenceOfficialHit", 'String'>
   readonly decisionType: Prisma.FieldRef<"LegalReferenceOfficialHit", 'String'>
+  readonly ecli: Prisma.FieldRef<"LegalReferenceOfficialHit", 'String'>
+  readonly publicationDate: Prisma.FieldRef<"LegalReferenceOfficialHit", 'DateTime'>
+  readonly subject: Prisma.FieldRef<"LegalReferenceOfficialHit", 'String'>
+  readonly outcome: Prisma.FieldRef<"LegalReferenceOfficialHit", 'String'>
   readonly sourceUrl: Prisma.FieldRef<"LegalReferenceOfficialHit", 'String'>
 }
     
@@ -1941,6 +2274,30 @@ export type LegalReferenceOfficialHitDeleteManyArgs<ExtArgs extends runtime.Type
    * Limit how many LegalReferenceOfficialHits to delete.
    */
   limit?: number
+}
+
+/**
+ * LegalReferenceOfficialHit.reconciliationEvidence
+ */
+export type LegalReferenceOfficialHit$reconciliationEvidenceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LegalReferenceOfficialReconciliationEvidence
+   */
+  select?: Prisma.LegalReferenceOfficialReconciliationEvidenceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LegalReferenceOfficialReconciliationEvidence
+   */
+  omit?: Prisma.LegalReferenceOfficialReconciliationEvidenceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LegalReferenceOfficialReconciliationEvidenceInclude<ExtArgs> | null
+  where?: Prisma.LegalReferenceOfficialReconciliationEvidenceWhereInput
+  orderBy?: Prisma.LegalReferenceOfficialReconciliationEvidenceOrderByWithRelationInput | Prisma.LegalReferenceOfficialReconciliationEvidenceOrderByWithRelationInput[]
+  cursor?: Prisma.LegalReferenceOfficialReconciliationEvidenceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LegalReferenceOfficialReconciliationEvidenceScalarFieldEnum | Prisma.LegalReferenceOfficialReconciliationEvidenceScalarFieldEnum[]
 }
 
 /**

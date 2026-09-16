@@ -3,8 +3,13 @@ import { prisma } from "@/lib/prisma";
 
 const MAX_ATTEMPTS = 3;
 
+export interface SerializableTransactionRetryOptions {
+  isRetryableError?: (error: unknown) => boolean;
+}
+
 export async function runSerializableTransactionWithRetry<T>(
   callback: (tx: Prisma.TransactionClient) => Promise<T>,
+  options: SerializableTransactionRetryOptions = {},
 ): Promise<T> {
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
     try {
@@ -13,7 +18,8 @@ export async function runSerializableTransactionWithRetry<T>(
       });
     } catch (error) {
       const retryable =
-        error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034";
+        (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034")
+        || options.isRetryableError?.(error) === true;
       if (!retryable || attempt === MAX_ATTEMPTS) {
         throw error;
       }

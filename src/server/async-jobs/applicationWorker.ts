@@ -5,6 +5,7 @@ import { createNeutralIntakeExtractionHandler } from "../intake/neutralIntakeExt
 import { createLegalReferenceDiscoveryHandler } from "../intake/neutralIntakeLegalReferenceDiscoveryJob";
 import { createLegalReferenceMatchingHandler } from "../intake/neutralIntakeLegalReferenceMatchingJob";
 import { createLegalReferenceOfficialLookupHandler } from "../intake/neutralIntakeLegalReferenceOfficialLookupJob";
+import { createLegalReferenceOfficialReconciliationHandler } from "../intake/neutralIntakeLegalReferenceOfficialReconciliationJob";
 
 const APPLICATION_ASYNC_JOB_LEASE_MS = 5 * 60 * 1_000;
 
@@ -14,6 +15,7 @@ export const applicationAsyncJobRegistry = new AsyncJobHandlerRegistry([
   createLegalReferenceDiscoveryHandler(),
   createLegalReferenceMatchingHandler(),
   createLegalReferenceOfficialLookupHandler(),
+  createLegalReferenceOfficialReconciliationHandler(),
 ]);
 
 export function drainOneApplicationAsyncJob(input: {

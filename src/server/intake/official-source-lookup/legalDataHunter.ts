@@ -5,6 +5,7 @@ import {
   type OfficialLegalReferenceLookupResult,
   type OfficialLegalReferenceProvider,
 } from "./providers";
+import { buildOfficialHitIdentityV1 } from "../official-hit-reconciliation/identity";
 
 export const LEGAL_DATA_HUNTER_PROVIDER = "LEGAL_DATA_HUNTER_V1" as const;
 export const LEGAL_DATA_HUNTER_LOOKUP_VERSION = "LEGAL_DATA_HUNTER_LOOKUP_V1" as const;
@@ -38,6 +39,8 @@ type ParsedCaseLawRecord = {
   normalizedDecisionNumber: string;
   normalizedSection: string | null;
   normalizedDecisionType: string | null;
+  normalizedEcli: string | null;
+  identityConflict: boolean;
 };
 
 export class LegalDataHunterProviderError extends OfficialLegalReferenceProviderError {
@@ -80,7 +83,10 @@ function authorityCompatible(expected: string, candidate: string): boolean {
   const candidateCompact = compactIdentity(candidate);
   if (expectedCompact.includes("CIVILE")) return candidateCompact.includes("CIVILE");
   if (expectedCompact.includes("PENALE")) return candidateCompact.includes("PENALE");
-  if (authorityFamily(expected) === "TAR") return candidateCompact === expectedCompact;
+  if (authorityFamily(expected) === "TAR") {
+    const expectedLocality = territorialAuthorityLocality(expected);
+    return expectedLocality === null || candidateCompact === expectedCompact;
+  }
   return true;
 }
 
@@ -151,6 +157,24 @@ function parseProviderRecord(value: unknown): ParsedCaseLawRecord | null {
   const explicitYear = typeof value.year === "number" && Number.isInteger(value.year) ? value.year : null;
   const decisionYear = decidedAt?.getUTCFullYear() ?? explicitYear;
   if (!source || !sourceId || !authority || !decisionNumber || decisionYear === null) return null;
+  const decisionType = boundedString(value.decision_type, 100);
+  const ecli = boundedString(value.ecli, 200);
+  const normalizedIdentity = buildOfficialHitIdentityV1({
+    documentKind: "CASE_LAW",
+    denominazioneAtto: null,
+    numeroProvvedimento: null,
+    annoProvvedimento: null,
+    authority,
+    court,
+    decisionNumber,
+    decisionYear,
+    chamberSection: chamber,
+    decisionType,
+    ecli,
+  });
+  const normalizedCaseLaw = normalizedIdentity.normalizedIdentity.kind === "CASE_LAW"
+    ? normalizedIdentity.normalizedIdentity
+    : null;
   return {
     hit: {
       documentKind: "CASE_LAW",
@@ -162,20 +186,26 @@ function parseProviderRecord(value: unknown): ParsedCaseLawRecord | null {
       decisionYear,
       decidedAt,
       chamberSection: chamber,
-      decisionType: boundedString(value.decision_type, 100),
+      decisionType,
+      ecli,
+      publicationDate: parseDate(value.publication_date),
+      subject: boundedString(value.subject, 500) ?? boundedString(value.object, 500),
+      outcome: boundedString(value.outcome, 500),
       title: boundedString(value.title, 500),
       sourceUrl: parseUrl(value.url),
     },
     authorityFamily: comparableAuthorityFamily(authority),
     authorityLocality: territorialAuthorityLocality(authority),
-    branch: authorityBranch(authority),
-    courtFamily: court ? comparableAuthorityFamily(court) : null,
-    courtLocality: court ? territorialAuthorityLocality(court) : null,
+    branch: normalizedCaseLaw?.courtBranch ?? authorityBranch(authority),
+    courtFamily: court ? normalizedCaseLaw?.courtFamily ?? comparableAuthorityFamily(court) : null,
+    courtLocality: court ? normalizedCaseLaw?.courtLocality ?? territorialAuthorityLocality(court) : null,
     normalizedDecisionNumber: normalizedNumber(decisionNumber),
     normalizedSection: chamber ? normalizedSection(chamber) : null,
-    normalizedDecisionType: boundedString(value.decision_type, 100)
-      ? compactIdentity(String(value.decision_type))
+    normalizedDecisionType: decisionType
+      ? compactIdentity(decisionType)
       : null,
+    normalizedEcli: normalizedCaseLaw?.ecli ?? null,
+    identityConflict: normalizedIdentity.identityConflict,
   };
 }
 
@@ -193,7 +223,8 @@ function reconcileProviderRecords(values: unknown[], allowedSources: Set<string>
   }
 
   return [...groups.values()].map((records) => {
-    const conflicting = hasMultipleComparableValues(records.map((record) => record.authorityFamily))
+    const conflicting = records.some((record) => record.identityConflict)
+      || hasMultipleComparableValues(records.map((record) => record.authorityFamily))
       || hasMultipleComparableValues(records.map((record) => record.authorityLocality))
       || hasMultipleComparableValues(records.map((record) => record.branch))
       || hasMultipleComparableValues(records.map((record) => record.courtFamily))
@@ -201,7 +232,8 @@ function reconcileProviderRecords(values: unknown[], allowedSources: Set<string>
       || hasMultipleComparableValues(records.map((record) => record.normalizedDecisionNumber))
       || hasMultipleComparableValues(records.map((record) => record.hit.decisionYear))
       || hasMultipleComparableValues(records.map((record) => record.normalizedSection))
-      || hasMultipleComparableValues(records.map((record) => record.normalizedDecisionType));
+      || hasMultipleComparableValues(records.map((record) => record.normalizedDecisionType))
+      || hasMultipleComparableValues(records.map((record) => record.normalizedEcli));
     if (conflicting) {
       throw new LegalDataHunterProviderError("PROVIDER_IDENTITY_CONFLICT", false);
     }
@@ -212,7 +244,10 @@ function reconcileProviderRecords(values: unknown[], allowedSources: Set<string>
 
 function matchesReference(record: ParsedCaseLawRecord, reference: OfficialLegalReference): boolean {
   if (!reference.authorityHint || !reference.actNumber || reference.year === null) return false;
-  if (!authorityCompatible(reference.authorityHint, record.hit.authority)) return false;
+  if (
+    !authorityCompatible(reference.authorityHint, record.hit.authority)
+    && (!record.hit.court || !authorityCompatible(reference.authorityHint, record.hit.court))
+  ) return false;
   if (record.normalizedDecisionNumber !== normalizedNumber(reference.actNumber)) return false;
   if (record.hit.decisionYear !== reference.year) return false;
   return reference.chamberSection === null
@@ -227,7 +262,7 @@ function classify(
 ): OfficialLegalReferenceLookupResult {
   const hits = reconcileProviderRecords(values, allowedSources)
     .filter((record) => matchesReference(record, reference))
-    .map((record) => ({ ...record.hit, authority: reference.authorityHint! }));
+    .map((record) => record.hit);
   if (hits.length === 0) return { status: "NOT_FOUND", resultCount: 0, hits: [] };
   if (hits.length === 1) return { status: "FOUND_UNIQUE", resultCount: 1, hits: [hits[0]] };
   return { status: "AMBIGUOUS", resultCount: hits.length, hits };

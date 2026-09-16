@@ -212,6 +212,16 @@ export type LegalReferenceOfficialLookup = Prisma.LegalReferenceOfficialLookupMo
  */
 export type LegalReferenceOfficialHit = Prisma.LegalReferenceOfficialHitModel
 /**
+ * Model LegalReferenceOfficialReconciliation
+ * 
+ */
+export type LegalReferenceOfficialReconciliation = Prisma.LegalReferenceOfficialReconciliationModel
+/**
+ * Model LegalReferenceOfficialReconciliationEvidence
+ * 
+ */
+export type LegalReferenceOfficialReconciliationEvidence = Prisma.LegalReferenceOfficialReconciliationEvidenceModel
+/**
  * Model NeutralIntakeClassificationAttempt
  * 
  */

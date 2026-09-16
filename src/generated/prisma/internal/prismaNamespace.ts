@@ -418,6 +418,8 @@ export const ModelName = {
   LegalReferenceMatch: 'LegalReferenceMatch',
   LegalReferenceOfficialLookup: 'LegalReferenceOfficialLookup',
   LegalReferenceOfficialHit: 'LegalReferenceOfficialHit',
+  LegalReferenceOfficialReconciliation: 'LegalReferenceOfficialReconciliation',
+  LegalReferenceOfficialReconciliationEvidence: 'LegalReferenceOfficialReconciliationEvidence',
   NeutralIntakeClassificationAttempt: 'NeutralIntakeClassificationAttempt',
   NeutralIntakeDestination: 'NeutralIntakeDestination',
   LegalSourceCandidateAdmission: 'LegalSourceCandidateAdmission',
@@ -452,7 +454,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "legalReferenceMatch" | "legalReferenceOfficialLookup" | "legalReferenceOfficialHit" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "legalReferenceMatch" | "legalReferenceOfficialLookup" | "legalReferenceOfficialHit" | "legalReferenceOfficialReconciliation" | "legalReferenceOfficialReconciliationEvidence" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2972,6 +2974,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    LegalReferenceOfficialReconciliation: {
+      payload: Prisma.$LegalReferenceOfficialReconciliationPayload<ExtArgs>
+      fields: Prisma.LegalReferenceOfficialReconciliationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LegalReferenceOfficialReconciliationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceOfficialReconciliationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LegalReferenceOfficialReconciliationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceOfficialReconciliationPayload>
+        }
+        findFirst: {
+          args: Prisma.LegalReferenceOfficialReconciliationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceOfficialReconciliationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LegalReferenceOfficialReconciliationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceOfficialReconciliationPayload>
+        }
+        findMany: {
+          args: Prisma.LegalReferenceOfficialReconciliationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceOfficialReconciliationPayload>[]
+        }
+        create: {
+          args: Prisma.LegalReferenceOfficialReconciliationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceOfficialReconciliationPayload>
+        }
+        createMany: {
+          args: Prisma.LegalReferenceOfficialReconciliationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LegalReferenceOfficialReconciliationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceOfficialReconciliationPayload>[]
+        }
+        delete: {
+          args: Prisma.LegalReferenceOfficialReconciliationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceOfficialReconciliationPayload>
+        }
+        update: {
+          args: Prisma.LegalReferenceOfficialReconciliationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceOfficialReconciliationPayload>
+        }
+        deleteMany: {
+          args: Prisma.LegalReferenceOfficialReconciliationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LegalReferenceOfficialReconciliationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LegalReferenceOfficialReconciliationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceOfficialReconciliationPayload>[]
+        }
+        upsert: {
+          args: Prisma.LegalReferenceOfficialReconciliationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceOfficialReconciliationPayload>
+        }
+        aggregate: {
+          args: Prisma.LegalReferenceOfficialReconciliationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLegalReferenceOfficialReconciliation>
+        }
+        groupBy: {
+          args: Prisma.LegalReferenceOfficialReconciliationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LegalReferenceOfficialReconciliationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LegalReferenceOfficialReconciliationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LegalReferenceOfficialReconciliationCountAggregateOutputType> | number
+        }
+      }
+    }
+    LegalReferenceOfficialReconciliationEvidence: {
+      payload: Prisma.$LegalReferenceOfficialReconciliationEvidencePayload<ExtArgs>
+      fields: Prisma.LegalReferenceOfficialReconciliationEvidenceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LegalReferenceOfficialReconciliationEvidenceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceOfficialReconciliationEvidencePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LegalReferenceOfficialReconciliationEvidenceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceOfficialReconciliationEvidencePayload>
+        }
+        findFirst: {
+          args: Prisma.LegalReferenceOfficialReconciliationEvidenceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceOfficialReconciliationEvidencePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LegalReferenceOfficialReconciliationEvidenceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceOfficialReconciliationEvidencePayload>
+        }
+        findMany: {
+          args: Prisma.LegalReferenceOfficialReconciliationEvidenceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceOfficialReconciliationEvidencePayload>[]
+        }
+        create: {
+          args: Prisma.LegalReferenceOfficialReconciliationEvidenceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceOfficialReconciliationEvidencePayload>
+        }
+        createMany: {
+          args: Prisma.LegalReferenceOfficialReconciliationEvidenceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LegalReferenceOfficialReconciliationEvidenceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceOfficialReconciliationEvidencePayload>[]
+        }
+        delete: {
+          args: Prisma.LegalReferenceOfficialReconciliationEvidenceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceOfficialReconciliationEvidencePayload>
+        }
+        update: {
+          args: Prisma.LegalReferenceOfficialReconciliationEvidenceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceOfficialReconciliationEvidencePayload>
+        }
+        deleteMany: {
+          args: Prisma.LegalReferenceOfficialReconciliationEvidenceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LegalReferenceOfficialReconciliationEvidenceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LegalReferenceOfficialReconciliationEvidenceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceOfficialReconciliationEvidencePayload>[]
+        }
+        upsert: {
+          args: Prisma.LegalReferenceOfficialReconciliationEvidenceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalReferenceOfficialReconciliationEvidencePayload>
+        }
+        aggregate: {
+          args: Prisma.LegalReferenceOfficialReconciliationEvidenceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLegalReferenceOfficialReconciliationEvidence>
+        }
+        groupBy: {
+          args: Prisma.LegalReferenceOfficialReconciliationEvidenceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LegalReferenceOfficialReconciliationEvidenceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LegalReferenceOfficialReconciliationEvidenceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LegalReferenceOfficialReconciliationEvidenceCountAggregateOutputType> | number
+        }
+      }
+    }
     NeutralIntakeClassificationAttempt: {
       payload: Prisma.$NeutralIntakeClassificationAttemptPayload<ExtArgs>
       fields: Prisma.NeutralIntakeClassificationAttemptFieldRefs
@@ -5178,10 +5328,64 @@ export const LegalReferenceOfficialHitScalarFieldEnum = {
   decisionDate: 'decisionDate',
   chamberSection: 'chamberSection',
   decisionType: 'decisionType',
+  ecli: 'ecli',
+  publicationDate: 'publicationDate',
+  subject: 'subject',
+  outcome: 'outcome',
   sourceUrl: 'sourceUrl'
 } as const
 
 export type LegalReferenceOfficialHitScalarFieldEnum = (typeof LegalReferenceOfficialHitScalarFieldEnum)[keyof typeof LegalReferenceOfficialHitScalarFieldEnum]
+
+
+export const LegalReferenceOfficialReconciliationScalarFieldEnum = {
+  id: 'id',
+  mentionId: 'mentionId',
+  kind: 'kind',
+  jurisdiction: 'jurisdiction',
+  courtFamily: 'courtFamily',
+  courtLocality: 'courtLocality',
+  courtBranch: 'courtBranch',
+  decisionType: 'decisionType',
+  decisionNumber: 'decisionNumber',
+  decisionYear: 'decisionYear',
+  section: 'section',
+  ecli: 'ecli',
+  decisionDate: 'decisionDate',
+  publicationDate: 'publicationDate',
+  identityVersion: 'identityVersion',
+  normalizedIdentity: 'normalizedIdentity',
+  identityFingerprint: 'identityFingerprint',
+  policyVersion: 'policyVersion',
+  state: 'state',
+  revision: 'revision',
+  legalSourceId: 'legalSourceId',
+  reviewedAt: 'reviewedAt',
+  reviewedByUserId: 'reviewedByUserId',
+  reviewedByActorId: 'reviewedByActorId',
+  reviewedByEmail: 'reviewedByEmail',
+  reviewedByRole: 'reviewedByRole',
+  reviewNote: 'reviewNote',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LegalReferenceOfficialReconciliationScalarFieldEnum = (typeof LegalReferenceOfficialReconciliationScalarFieldEnum)[keyof typeof LegalReferenceOfficialReconciliationScalarFieldEnum]
+
+
+export const LegalReferenceOfficialReconciliationEvidenceScalarFieldEnum = {
+  id: 'id',
+  reconciliationId: 'reconciliationId',
+  officialHitId: 'officialHitId',
+  identityVersion: 'identityVersion',
+  evidenceFingerprint: 'evidenceFingerprint',
+  classification: 'classification',
+  disposition: 'disposition',
+  observedAt: 'observedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type LegalReferenceOfficialReconciliationEvidenceScalarFieldEnum = (typeof LegalReferenceOfficialReconciliationEvidenceScalarFieldEnum)[keyof typeof LegalReferenceOfficialReconciliationEvidenceScalarFieldEnum]
 
 
 export const NeutralIntakeClassificationAttemptScalarFieldEnum = {
@@ -6664,6 +6868,48 @@ export type ListEnumLegalReferenceOfficialLookupStatusFieldRefInput<$PrismaModel
 
 
 /**
+ * Reference to a field of type 'LegalReferenceOfficialReconciliationState'
+ */
+export type EnumLegalReferenceOfficialReconciliationStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalReferenceOfficialReconciliationState'>
+    
+
+
+/**
+ * Reference to a field of type 'LegalReferenceOfficialReconciliationState[]'
+ */
+export type ListEnumLegalReferenceOfficialReconciliationStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalReferenceOfficialReconciliationState[]'>
+    
+
+
+/**
+ * Reference to a field of type 'LegalReferenceOfficialEvidenceClassification'
+ */
+export type EnumLegalReferenceOfficialEvidenceClassificationFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalReferenceOfficialEvidenceClassification'>
+    
+
+
+/**
+ * Reference to a field of type 'LegalReferenceOfficialEvidenceClassification[]'
+ */
+export type ListEnumLegalReferenceOfficialEvidenceClassificationFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalReferenceOfficialEvidenceClassification[]'>
+    
+
+
+/**
+ * Reference to a field of type 'LegalReferenceOfficialEvidenceDisposition'
+ */
+export type EnumLegalReferenceOfficialEvidenceDispositionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalReferenceOfficialEvidenceDisposition'>
+    
+
+
+/**
+ * Reference to a field of type 'LegalReferenceOfficialEvidenceDisposition[]'
+ */
+export type ListEnumLegalReferenceOfficialEvidenceDispositionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalReferenceOfficialEvidenceDisposition[]'>
+    
+
+
+/**
  * Reference to a field of type 'NeutralIntakeClassificationOutcome'
  */
 export type EnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NeutralIntakeClassificationOutcome'>
@@ -7058,6 +7304,8 @@ export type GlobalOmitConfig = {
   legalReferenceMatch?: Prisma.LegalReferenceMatchOmit
   legalReferenceOfficialLookup?: Prisma.LegalReferenceOfficialLookupOmit
   legalReferenceOfficialHit?: Prisma.LegalReferenceOfficialHitOmit
+  legalReferenceOfficialReconciliation?: Prisma.LegalReferenceOfficialReconciliationOmit
+  legalReferenceOfficialReconciliationEvidence?: Prisma.LegalReferenceOfficialReconciliationEvidenceOmit
   neutralIntakeClassificationAttempt?: Prisma.NeutralIntakeClassificationAttemptOmit
   neutralIntakeDestination?: Prisma.NeutralIntakeDestinationOmit
   legalSourceCandidateAdmission?: Prisma.LegalSourceCandidateAdmissionOmit

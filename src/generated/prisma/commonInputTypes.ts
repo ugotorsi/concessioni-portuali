@@ -1554,20 +1554,6 @@ export type EnumLegalReferenceOfficialLookupStatusWithAggregatesFilter<$PrismaMo
   _max?: Prisma.NestedEnumLegalReferenceOfficialLookupStatusFilter<$PrismaModel>
 }
 
-export type EnumNeutralIntakeClassificationOutcomeFilter<$PrismaModel = never> = {
-  equals?: $Enums.NeutralIntakeClassificationOutcome | Prisma.EnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
-  in?: $Enums.NeutralIntakeClassificationOutcome[] | Prisma.ListEnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
-  notIn?: $Enums.NeutralIntakeClassificationOutcome[] | Prisma.ListEnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumNeutralIntakeClassificationOutcomeFilter<$PrismaModel> | $Enums.NeutralIntakeClassificationOutcome
-}
-
-export type EnumNeutralIntakeClassificationConfidenceFilter<$PrismaModel = never> = {
-  equals?: $Enums.NeutralIntakeClassificationConfidence | Prisma.EnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
-  in?: $Enums.NeutralIntakeClassificationConfidence[] | Prisma.ListEnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
-  notIn?: $Enums.NeutralIntakeClassificationConfidence[] | Prisma.ListEnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumNeutralIntakeClassificationConfidenceFilter<$PrismaModel> | $Enums.NeutralIntakeClassificationConfidence
-}
-
 export type JsonFilter<$PrismaModel = never> =
 | Prisma.PatchUndefined<
     Prisma.Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
@@ -1592,24 +1578,11 @@ export type JsonFilterBase<$PrismaModel = never> = {
   not?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | Prisma.JsonNullValueFilter
 }
 
-export type EnumNeutralIntakeClassificationOutcomeWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.NeutralIntakeClassificationOutcome | Prisma.EnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
-  in?: $Enums.NeutralIntakeClassificationOutcome[] | Prisma.ListEnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
-  notIn?: $Enums.NeutralIntakeClassificationOutcome[] | Prisma.ListEnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumNeutralIntakeClassificationOutcomeWithAggregatesFilter<$PrismaModel> | $Enums.NeutralIntakeClassificationOutcome
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumNeutralIntakeClassificationOutcomeFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumNeutralIntakeClassificationOutcomeFilter<$PrismaModel>
-}
-
-export type EnumNeutralIntakeClassificationConfidenceWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.NeutralIntakeClassificationConfidence | Prisma.EnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
-  in?: $Enums.NeutralIntakeClassificationConfidence[] | Prisma.ListEnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
-  notIn?: $Enums.NeutralIntakeClassificationConfidence[] | Prisma.ListEnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumNeutralIntakeClassificationConfidenceWithAggregatesFilter<$PrismaModel> | $Enums.NeutralIntakeClassificationConfidence
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumNeutralIntakeClassificationConfidenceFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumNeutralIntakeClassificationConfidenceFilter<$PrismaModel>
+export type EnumLegalReferenceOfficialReconciliationStateFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalReferenceOfficialReconciliationState | Prisma.EnumLegalReferenceOfficialReconciliationStateFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalReferenceOfficialReconciliationState[] | Prisma.ListEnumLegalReferenceOfficialReconciliationStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalReferenceOfficialReconciliationState[] | Prisma.ListEnumLegalReferenceOfficialReconciliationStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalReferenceOfficialReconciliationStateFilter<$PrismaModel> | $Enums.LegalReferenceOfficialReconciliationState
 }
 
 export type JsonWithAggregatesFilter<$PrismaModel = never> =
@@ -1637,6 +1610,84 @@ export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedJsonFilter<$PrismaModel>
   _max?: Prisma.NestedJsonFilter<$PrismaModel>
+}
+
+export type EnumLegalReferenceOfficialReconciliationStateWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalReferenceOfficialReconciliationState | Prisma.EnumLegalReferenceOfficialReconciliationStateFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalReferenceOfficialReconciliationState[] | Prisma.ListEnumLegalReferenceOfficialReconciliationStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalReferenceOfficialReconciliationState[] | Prisma.ListEnumLegalReferenceOfficialReconciliationStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalReferenceOfficialReconciliationStateWithAggregatesFilter<$PrismaModel> | $Enums.LegalReferenceOfficialReconciliationState
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalReferenceOfficialReconciliationStateFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalReferenceOfficialReconciliationStateFilter<$PrismaModel>
+}
+
+export type EnumLegalReferenceOfficialEvidenceClassificationFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalReferenceOfficialEvidenceClassification | Prisma.EnumLegalReferenceOfficialEvidenceClassificationFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalReferenceOfficialEvidenceClassification[] | Prisma.ListEnumLegalReferenceOfficialEvidenceClassificationFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalReferenceOfficialEvidenceClassification[] | Prisma.ListEnumLegalReferenceOfficialEvidenceClassificationFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalReferenceOfficialEvidenceClassificationFilter<$PrismaModel> | $Enums.LegalReferenceOfficialEvidenceClassification
+}
+
+export type EnumLegalReferenceOfficialEvidenceDispositionFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalReferenceOfficialEvidenceDisposition | Prisma.EnumLegalReferenceOfficialEvidenceDispositionFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalReferenceOfficialEvidenceDisposition[] | Prisma.ListEnumLegalReferenceOfficialEvidenceDispositionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalReferenceOfficialEvidenceDisposition[] | Prisma.ListEnumLegalReferenceOfficialEvidenceDispositionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalReferenceOfficialEvidenceDispositionFilter<$PrismaModel> | $Enums.LegalReferenceOfficialEvidenceDisposition
+}
+
+export type EnumLegalReferenceOfficialEvidenceClassificationWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalReferenceOfficialEvidenceClassification | Prisma.EnumLegalReferenceOfficialEvidenceClassificationFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalReferenceOfficialEvidenceClassification[] | Prisma.ListEnumLegalReferenceOfficialEvidenceClassificationFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalReferenceOfficialEvidenceClassification[] | Prisma.ListEnumLegalReferenceOfficialEvidenceClassificationFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalReferenceOfficialEvidenceClassificationWithAggregatesFilter<$PrismaModel> | $Enums.LegalReferenceOfficialEvidenceClassification
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalReferenceOfficialEvidenceClassificationFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalReferenceOfficialEvidenceClassificationFilter<$PrismaModel>
+}
+
+export type EnumLegalReferenceOfficialEvidenceDispositionWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalReferenceOfficialEvidenceDisposition | Prisma.EnumLegalReferenceOfficialEvidenceDispositionFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalReferenceOfficialEvidenceDisposition[] | Prisma.ListEnumLegalReferenceOfficialEvidenceDispositionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalReferenceOfficialEvidenceDisposition[] | Prisma.ListEnumLegalReferenceOfficialEvidenceDispositionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalReferenceOfficialEvidenceDispositionWithAggregatesFilter<$PrismaModel> | $Enums.LegalReferenceOfficialEvidenceDisposition
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalReferenceOfficialEvidenceDispositionFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalReferenceOfficialEvidenceDispositionFilter<$PrismaModel>
+}
+
+export type EnumNeutralIntakeClassificationOutcomeFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeClassificationOutcome | Prisma.EnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeClassificationOutcome[] | Prisma.ListEnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeClassificationOutcome[] | Prisma.ListEnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeClassificationOutcomeFilter<$PrismaModel> | $Enums.NeutralIntakeClassificationOutcome
+}
+
+export type EnumNeutralIntakeClassificationConfidenceFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeClassificationConfidence | Prisma.EnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeClassificationConfidence[] | Prisma.ListEnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeClassificationConfidence[] | Prisma.ListEnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeClassificationConfidenceFilter<$PrismaModel> | $Enums.NeutralIntakeClassificationConfidence
+}
+
+export type EnumNeutralIntakeClassificationOutcomeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeClassificationOutcome | Prisma.EnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeClassificationOutcome[] | Prisma.ListEnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeClassificationOutcome[] | Prisma.ListEnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeClassificationOutcomeWithAggregatesFilter<$PrismaModel> | $Enums.NeutralIntakeClassificationOutcome
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumNeutralIntakeClassificationOutcomeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumNeutralIntakeClassificationOutcomeFilter<$PrismaModel>
+}
+
+export type EnumNeutralIntakeClassificationConfidenceWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.NeutralIntakeClassificationConfidence | Prisma.EnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
+  in?: $Enums.NeutralIntakeClassificationConfidence[] | Prisma.ListEnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NeutralIntakeClassificationConfidence[] | Prisma.ListEnumNeutralIntakeClassificationConfidenceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNeutralIntakeClassificationConfidenceWithAggregatesFilter<$PrismaModel> | $Enums.NeutralIntakeClassificationConfidence
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumNeutralIntakeClassificationConfidenceFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumNeutralIntakeClassificationConfidenceFilter<$PrismaModel>
 }
 
 export type EnumLegalSourceCandidateResolutionOutcomeFilter<$PrismaModel = never> = {
@@ -3477,6 +3528,81 @@ export type NestedEnumLegalReferenceOfficialLookupStatusWithAggregatesFilter<$Pr
   _max?: Prisma.NestedEnumLegalReferenceOfficialLookupStatusFilter<$PrismaModel>
 }
 
+export type NestedEnumLegalReferenceOfficialReconciliationStateFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalReferenceOfficialReconciliationState | Prisma.EnumLegalReferenceOfficialReconciliationStateFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalReferenceOfficialReconciliationState[] | Prisma.ListEnumLegalReferenceOfficialReconciliationStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalReferenceOfficialReconciliationState[] | Prisma.ListEnumLegalReferenceOfficialReconciliationStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalReferenceOfficialReconciliationStateFilter<$PrismaModel> | $Enums.LegalReferenceOfficialReconciliationState
+}
+
+export type NestedJsonFilter<$PrismaModel = never> =
+| Prisma.PatchUndefined<
+    Prisma.Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
+    Required<NestedJsonFilterBase<$PrismaModel>>
+  >
+| Prisma.OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
+
+export type NestedJsonFilterBase<$PrismaModel = never> = {
+  equals?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | Prisma.JsonNullValueFilter
+  path?: string[]
+  mode?: Prisma.QueryMode | Prisma.EnumQueryModeFieldRefInput<$PrismaModel>
+  string_contains?: string | Prisma.StringFieldRefInput<$PrismaModel>
+  string_starts_with?: string | Prisma.StringFieldRefInput<$PrismaModel>
+  string_ends_with?: string | Prisma.StringFieldRefInput<$PrismaModel>
+  array_starts_with?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | null
+  array_ends_with?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | null
+  array_contains?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | null
+  lt?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
+  lte?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
+  gt?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
+  gte?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
+  not?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | Prisma.JsonNullValueFilter
+}
+
+export type NestedEnumLegalReferenceOfficialReconciliationStateWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalReferenceOfficialReconciliationState | Prisma.EnumLegalReferenceOfficialReconciliationStateFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalReferenceOfficialReconciliationState[] | Prisma.ListEnumLegalReferenceOfficialReconciliationStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalReferenceOfficialReconciliationState[] | Prisma.ListEnumLegalReferenceOfficialReconciliationStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalReferenceOfficialReconciliationStateWithAggregatesFilter<$PrismaModel> | $Enums.LegalReferenceOfficialReconciliationState
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalReferenceOfficialReconciliationStateFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalReferenceOfficialReconciliationStateFilter<$PrismaModel>
+}
+
+export type NestedEnumLegalReferenceOfficialEvidenceClassificationFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalReferenceOfficialEvidenceClassification | Prisma.EnumLegalReferenceOfficialEvidenceClassificationFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalReferenceOfficialEvidenceClassification[] | Prisma.ListEnumLegalReferenceOfficialEvidenceClassificationFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalReferenceOfficialEvidenceClassification[] | Prisma.ListEnumLegalReferenceOfficialEvidenceClassificationFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalReferenceOfficialEvidenceClassificationFilter<$PrismaModel> | $Enums.LegalReferenceOfficialEvidenceClassification
+}
+
+export type NestedEnumLegalReferenceOfficialEvidenceDispositionFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalReferenceOfficialEvidenceDisposition | Prisma.EnumLegalReferenceOfficialEvidenceDispositionFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalReferenceOfficialEvidenceDisposition[] | Prisma.ListEnumLegalReferenceOfficialEvidenceDispositionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalReferenceOfficialEvidenceDisposition[] | Prisma.ListEnumLegalReferenceOfficialEvidenceDispositionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalReferenceOfficialEvidenceDispositionFilter<$PrismaModel> | $Enums.LegalReferenceOfficialEvidenceDisposition
+}
+
+export type NestedEnumLegalReferenceOfficialEvidenceClassificationWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalReferenceOfficialEvidenceClassification | Prisma.EnumLegalReferenceOfficialEvidenceClassificationFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalReferenceOfficialEvidenceClassification[] | Prisma.ListEnumLegalReferenceOfficialEvidenceClassificationFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalReferenceOfficialEvidenceClassification[] | Prisma.ListEnumLegalReferenceOfficialEvidenceClassificationFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalReferenceOfficialEvidenceClassificationWithAggregatesFilter<$PrismaModel> | $Enums.LegalReferenceOfficialEvidenceClassification
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalReferenceOfficialEvidenceClassificationFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalReferenceOfficialEvidenceClassificationFilter<$PrismaModel>
+}
+
+export type NestedEnumLegalReferenceOfficialEvidenceDispositionWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.LegalReferenceOfficialEvidenceDisposition | Prisma.EnumLegalReferenceOfficialEvidenceDispositionFieldRefInput<$PrismaModel>
+  in?: $Enums.LegalReferenceOfficialEvidenceDisposition[] | Prisma.ListEnumLegalReferenceOfficialEvidenceDispositionFieldRefInput<$PrismaModel>
+  notIn?: $Enums.LegalReferenceOfficialEvidenceDisposition[] | Prisma.ListEnumLegalReferenceOfficialEvidenceDispositionFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumLegalReferenceOfficialEvidenceDispositionWithAggregatesFilter<$PrismaModel> | $Enums.LegalReferenceOfficialEvidenceDisposition
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumLegalReferenceOfficialEvidenceDispositionFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumLegalReferenceOfficialEvidenceDispositionFilter<$PrismaModel>
+}
+
 export type NestedEnumNeutralIntakeClassificationOutcomeFilter<$PrismaModel = never> = {
   equals?: $Enums.NeutralIntakeClassificationOutcome | Prisma.EnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
   in?: $Enums.NeutralIntakeClassificationOutcome[] | Prisma.ListEnumNeutralIntakeClassificationOutcomeFieldRefInput<$PrismaModel>
@@ -3509,30 +3635,6 @@ export type NestedEnumNeutralIntakeClassificationConfidenceWithAggregatesFilter<
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumNeutralIntakeClassificationConfidenceFilter<$PrismaModel>
   _max?: Prisma.NestedEnumNeutralIntakeClassificationConfidenceFilter<$PrismaModel>
-}
-
-export type NestedJsonFilter<$PrismaModel = never> =
-| Prisma.PatchUndefined<
-    Prisma.Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
-    Required<NestedJsonFilterBase<$PrismaModel>>
-  >
-| Prisma.OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
-
-export type NestedJsonFilterBase<$PrismaModel = never> = {
-  equals?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | Prisma.JsonNullValueFilter
-  path?: string[]
-  mode?: Prisma.QueryMode | Prisma.EnumQueryModeFieldRefInput<$PrismaModel>
-  string_contains?: string | Prisma.StringFieldRefInput<$PrismaModel>
-  string_starts_with?: string | Prisma.StringFieldRefInput<$PrismaModel>
-  string_ends_with?: string | Prisma.StringFieldRefInput<$PrismaModel>
-  array_starts_with?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | null
-  array_ends_with?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | null
-  array_contains?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | null
-  lt?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
-  lte?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
-  gt?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
-  gte?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
-  not?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | Prisma.JsonNullValueFilter
 }
 
 export type NestedEnumLegalSourceCandidateResolutionOutcomeFilter<$PrismaModel = never> = {

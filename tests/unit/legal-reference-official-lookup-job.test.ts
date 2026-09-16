@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   runTransaction: vi.fn(),
+  admitReconciliation: vi.fn(),
   tx: {
     asyncJob: { findUnique: vi.fn(), create: vi.fn() },
     legalReferenceMention: { findUnique: vi.fn() },
@@ -10,6 +11,9 @@ const mocks = vi.hoisted(() => ({
     legalSource: { create: vi.fn(), upsert: vi.fn() },
     legalSourceIdentityAssertion: { create: vi.fn(), upsert: vi.fn() },
     legalSourceCandidateResolution: { create: vi.fn(), upsert: vi.fn() },
+    legalExpressionVersion: { create: vi.fn() },
+    legalSourceVersion: { create: vi.fn() },
+    legalSourceAcquisition: { create: vi.fn() },
   },
 }));
 
@@ -31,6 +35,7 @@ import {
   NORMATTIVA_PROVIDER,
 } from "@/server/intake/official-source-lookup/normattiva";
 import {
+  createLegalDataHunterProvider,
   LEGAL_DATA_HUNTER_LOOKUP_VERSION,
   LEGAL_DATA_HUNTER_PROVIDER,
 } from "@/server/intake/official-source-lookup/legalDataHunter";
@@ -51,6 +56,33 @@ function testRegistry(lookup: ReturnType<typeof vi.fn>) {
     lookup,
   }]);
 }
+
+async function lookupLdhDuplicates(documents: Record<string, unknown>[]) {
+  const responses = [
+    new Response(JSON.stringify({ country: "IT", sources: [{
+      source_id: "IT/TAR-Campania", data_types: ["case_law"],
+      court_name: "TAR Campania Napoli", document_count: documents.length,
+    }] }), { headers: { "Content-Type": "application/json" } }),
+    new Response(JSON.stringify({ match_type: "exact", documents }), {
+      headers: { "Content-Type": "application/json" },
+    }),
+  ];
+  const provider = createLegalDataHunterProvider({
+    apiKey: "test-key",
+    transport: vi.fn(async () => responses.shift() ?? new Response(null, { status: 500 })),
+  });
+  return provider.lookup({
+    kind: "CASE_LAW", authorityHint: "TAR CAMPANIA NAPOLI", actType: null,
+    actNumber: "500", year: 2025, chamberSection: null,
+  });
+}
+
+const ldhDuplicate = {
+  source: "IT/TAR-Campania", source_id: "tar-500", authority: "TAR",
+  court: "TAR Campania Napoli", decision_number: "500", year: 2025,
+  decision_type: "SENTENZA", chamber: "I", ecli: "ECLI:IT:TARNA:2025:500",
+  title: "TAR Campania Napoli n. 500/2025",
+};
 
 const provenance = {
   tenantId: "ente-1",
@@ -91,7 +123,7 @@ describe("B2C12 Block 3B.6C official lookup job", () => {
     mocks.tx.asyncJob.findUnique.mockResolvedValue({
       operation: LEGAL_REFERENCE_OFFICIAL_LOOKUP_OPERATION,
       logicalOperationId: officialLookupLogicalOperationId("mention-1", providerIdentity),
-      tenantId: "ente-1",
+      ...provenance,
     });
     mocks.tx.legalReferenceMention.findUnique.mockResolvedValue(mention());
     mocks.tx.legalReferenceOfficialLookup.findUnique.mockResolvedValue(null);
@@ -100,6 +132,7 @@ describe("B2C12 Block 3B.6C official lookup job", () => {
       status: data.status,
       resultCount: data.resultCount,
     }));
+    mocks.admitReconciliation.mockResolvedValue({ outcome: "CREATED" });
   });
 
   it("registers on the existing async core and builds deterministic admission", () => {
@@ -133,7 +166,7 @@ describe("B2C12 Block 3B.6C official lookup job", () => {
         publishedAt: null,
       }] as const,
     }));
-    const handler = createLegalReferenceOfficialLookupHandler(testRegistry(lookup));
+    const handler = createLegalReferenceOfficialLookupHandler(testRegistry(lookup), mocks.admitReconciliation);
     await expect(handler.execute(handler.parseInput(buildLegalReferenceOfficialLookupAdmission("mention-1", providerIdentity, provenance).inputReference), context))
       .resolves.toMatchObject({ metadata: { status: "FOUND_UNIQUE", resultCount: 1, reused: false } });
     expect(lookup).toHaveBeenCalledWith(expect.objectContaining({
@@ -142,6 +175,11 @@ describe("B2C12 Block 3B.6C official lookup job", () => {
     expect(mocks.tx.legalReferenceOfficialLookup.create).toHaveBeenCalledWith(expect.objectContaining({
       data: expect.objectContaining({ mentionId: "mention-1", status: "FOUND_UNIQUE", resultCount: 1 }),
     }));
+    expect(mocks.admitReconciliation).toHaveBeenCalledWith(
+      mocks.tx,
+      "lookup-1",
+      provenance,
+    );
     expect(mocks.tx.legalReferenceMatch.update).not.toHaveBeenCalled();
     expect(mocks.tx.legalReferenceMatch.updateMany).not.toHaveBeenCalled();
     expect(mocks.tx.legalSource.create).not.toHaveBeenCalled();
@@ -158,7 +196,7 @@ describe("B2C12 Block 3B.6C official lookup job", () => {
     mocks.tx.asyncJob.findUnique.mockResolvedValue({
       operation: LEGAL_REFERENCE_OFFICIAL_LOOKUP_OPERATION,
       logicalOperationId: officialLookupLogicalOperationId("mention-1", identity),
-      tenantId: "ente-1",
+      ...provenance,
     });
     mocks.tx.legalReferenceMention.findUnique.mockResolvedValue(mention({
       kind: "CASE_LAW",
@@ -182,6 +220,10 @@ describe("B2C12 Block 3B.6C official lookup job", () => {
         decidedAt: new Date("2024-03-15"),
         chamberSection: "III",
         decisionType: "SENTENZA",
+        ecli: "ECLI:IT:CASS:2024:1234",
+        publicationDate: new Date("2024-03-16"),
+        subject: "Concessione portuale",
+        outcome: "Rigetto",
         title: "Cassazione n. 1234/2024",
         sourceUrl: "https://example.test/decision-1234",
       }] as const,
@@ -191,7 +233,7 @@ describe("B2C12 Block 3B.6C official lookup job", () => {
       supports: (reference) => reference.kind === "CASE_LAW",
       lookup,
     }]);
-    const handler = createLegalReferenceOfficialLookupHandler(registry);
+    const handler = createLegalReferenceOfficialLookupHandler(registry, mocks.admitReconciliation);
 
     await expect(handler.execute(handler.parseInput(
       buildLegalReferenceOfficialLookupAdmission("mention-1", identity, provenance).inputReference,
@@ -205,9 +247,14 @@ describe("B2C12 Block 3B.6C official lookup job", () => {
           providerSourceId: "IT/Cassazione",
           providerRecordId: "decision-1234",
           authority: "CASSAZIONE",
+          court: "Corte Suprema di Cassazione",
           decisionNumber: "1234",
           decisionYear: 2024,
           chamberSection: "III",
+          ecli: "ECLI:IT:CASS:2024:1234",
+          publicationDate: new Date("2024-03-16"),
+          subject: "Concessione portuale",
+          outcome: "Rigetto",
         })] },
       }),
     }));
@@ -215,6 +262,68 @@ describe("B2C12 Block 3B.6C official lookup job", () => {
     expect(persistedHit).not.toHaveProperty("denominazioneAtto");
     expect(persistedHit).not.toHaveProperty("numeroProvvedimento");
     expect(persistedHit).not.toHaveProperty("annoProvvedimento");
+    expect(mocks.tx.legalExpressionVersion.create).not.toHaveBeenCalled();
+    expect(mocks.tx.legalSourceVersion.create).not.toHaveBeenCalled();
+    expect(mocks.tx.legalSourceAcquisition.create).not.toHaveBeenCalled();
+  });
+
+  it("matches a precise provider court even when provider authority is generic TAR", async () => {
+    const responses = [
+      new Response(JSON.stringify({ country: "IT", sources: [{
+        source_id: "IT/TAR-Lazio", data_types: ["case_law"],
+        court_name: "TAR Lazio Roma", document_count: 1,
+      }] }), { headers: { "Content-Type": "application/json" } }),
+      new Response(JSON.stringify({ match_type: "exact", documents: [{
+        source: "IT/TAR-Lazio", source_id: "tar-500", authority: "TAR",
+        court: "TAR Lazio Roma", decision_number: "500", year: 2025,
+        decision_type: "SENTENZA", title: "TAR Lazio Roma n. 500/2025",
+      }] }), { headers: { "Content-Type": "application/json" } }),
+    ];
+    const provider = createLegalDataHunterProvider({
+      apiKey: "test-key",
+      transport: vi.fn(async () => responses.shift() ?? new Response(null, { status: 500 })),
+    });
+    await expect(provider.lookup({
+      kind: "CASE_LAW", authorityHint: "TAR LAZIO ROMA", actType: null,
+      actNumber: "500", year: 2025, chamberSection: null,
+    })).resolves.toMatchObject({
+      status: "FOUND_UNIQUE",
+      hits: [{ authority: "TAR", court: "TAR Lazio Roma" }],
+    });
+  });
+
+  it.each([
+    ["ECLI", { ecli: "ECLI:IT:TARSA:2025:500" }],
+    ["court locality", { court: "TAR Campania Salerno" }],
+    ["decision type", { decision_type: "ORDINANZA" }],
+    ["section", { chamber: "II" }],
+  ])("fails closed for duplicate LDH records with contradictory %s", async (_label, conflicting) => {
+    await expect(lookupLdhDuplicates([
+      ldhDuplicate,
+      { ...ldhDuplicate, ...conflicting },
+    ])).rejects.toMatchObject({ code: "PROVIDER_IDENTITY_CONFLICT", retryable: false });
+    await expect(lookupLdhDuplicates([
+      { ...ldhDuplicate, ...conflicting },
+      ldhDuplicate,
+    ])).rejects.toMatchObject({ code: "PROVIDER_IDENTITY_CONFLICT", retryable: false });
+  });
+
+  it("collapses compatible LDH duplicates independently of non-identity metadata and ordering", async () => {
+    const variants = [
+      ldhDuplicate,
+      { ...ldhDuplicate, title: "Alternate title", outcome: "Accoglimento" },
+    ];
+    const forward = await lookupLdhDuplicates(variants);
+    const reverse = await lookupLdhDuplicates([...variants].reverse());
+    expect(forward).toMatchObject({ status: "FOUND_UNIQUE", resultCount: 1 });
+    expect(reverse).toEqual(forward);
+  });
+
+  it("collapses an identical LDH duplicate with the same ECLI and branch", async () => {
+    await expect(lookupLdhDuplicates([ldhDuplicate, { ...ldhDuplicate }])).resolves.toMatchObject({
+      status: "FOUND_UNIQUE", resultCount: 1,
+      hits: [{ ecli: "ECLI:IT:TARNA:2025:500", court: "TAR Campania Napoli" }],
+    });
   });
 
   it.each([
@@ -226,7 +335,7 @@ describe("B2C12 Block 3B.6C official lookup job", () => {
   ])("fails closed before provider access for %s", async (overrides) => {
     mocks.tx.legalReferenceMention.findUnique.mockResolvedValue(mention(overrides));
     const lookup = vi.fn();
-    const handler = createLegalReferenceOfficialLookupHandler(testRegistry(lookup));
+    const handler = createLegalReferenceOfficialLookupHandler(testRegistry(lookup), mocks.admitReconciliation);
     await expect(handler.execute(handler.parseInput(buildLegalReferenceOfficialLookupAdmission("mention-1", providerIdentity, provenance).inputReference), context))
       .rejects.toMatchObject({ retryable: false });
     expect(lookup).not.toHaveBeenCalled();
@@ -239,7 +348,7 @@ describe("B2C12 Block 3B.6C official lookup job", () => {
       resultCount: 0,
     });
     const lookup = vi.fn();
-    const handler = createLegalReferenceOfficialLookupHandler(testRegistry(lookup));
+    const handler = createLegalReferenceOfficialLookupHandler(testRegistry(lookup), mocks.admitReconciliation);
     await expect(handler.execute(handler.parseInput(buildLegalReferenceOfficialLookupAdmission("mention-1", providerIdentity, provenance).inputReference), context))
       .resolves.toMatchObject({ metadata: { reused: true, status: "NOT_FOUND" } });
     expect(lookup).not.toHaveBeenCalled();
@@ -250,18 +359,19 @@ describe("B2C12 Block 3B.6C official lookup job", () => {
     ["cross-tenant", () => mocks.tx.asyncJob.findUnique.mockResolvedValue({
       operation: LEGAL_REFERENCE_OFFICIAL_LOOKUP_OPERATION,
       logicalOperationId: officialLookupLogicalOperationId("mention-1", providerIdentity),
+      ...provenance,
       tenantId: "ente-2",
     })],
     ["mismatched mention/job", () => mocks.tx.asyncJob.findUnique.mockResolvedValue({
       operation: LEGAL_REFERENCE_OFFICIAL_LOOKUP_OPERATION,
       logicalOperationId: officialLookupLogicalOperationId("mention-2", providerIdentity),
-      tenantId: "ente-1",
+      ...provenance,
     })],
   ])("denies %s authority before existing-result reuse", async (_label, arrange) => {
     mocks.tx.legalReferenceOfficialLookup.findUnique.mockResolvedValue({ id: "lookup-1", status: "NOT_FOUND", resultCount: 0 });
     arrange();
     const lookup = vi.fn();
-    const handler = createLegalReferenceOfficialLookupHandler(testRegistry(lookup));
+    const handler = createLegalReferenceOfficialLookupHandler(testRegistry(lookup), mocks.admitReconciliation);
     await expect(handler.execute(handler.parseInput(
       buildLegalReferenceOfficialLookupAdmission("mention-1", providerIdentity, provenance).inputReference,
     ), context)).rejects.toMatchObject({ code: "OFFICIAL_LOOKUP_AUTHORITY_MISMATCH", retryable: false });
@@ -275,10 +385,10 @@ describe("B2C12 Block 3B.6C official lookup job", () => {
     mocks.tx.asyncJob.findUnique.mockResolvedValue({
       operation: LEGAL_REFERENCE_OFFICIAL_LOOKUP_OPERATION,
       logicalOperationId: officialLookupLogicalOperationId("mention-1", unknownIdentity),
-      tenantId: "ente-1",
+      ...provenance,
     });
     const lookup = vi.fn();
-    const handler = createLegalReferenceOfficialLookupHandler(testRegistry(lookup));
+    const handler = createLegalReferenceOfficialLookupHandler(testRegistry(lookup), mocks.admitReconciliation);
     await expect(handler.execute(handler.parseInput(
       buildLegalReferenceOfficialLookupAdmission("mention-1", unknownIdentity, provenance).inputReference,
     ), context)).rejects.toMatchObject({ code: "OFFICIAL_LOOKUP_AUTHORITY_MISMATCH", retryable: false });
@@ -290,7 +400,7 @@ describe("B2C12 Block 3B.6C official lookup job", () => {
     const lookup = vi.fn(async () => {
       throw new OfficialLegalReferenceProviderError(NORMATTIVA_PROVIDER, "RATE_LIMITED", true);
     });
-    const handler = createLegalReferenceOfficialLookupHandler(testRegistry(lookup));
+    const handler = createLegalReferenceOfficialLookupHandler(testRegistry(lookup), mocks.admitReconciliation);
     await expect(handler.execute(handler.parseInput(buildLegalReferenceOfficialLookupAdmission("mention-1", providerIdentity, provenance).inputReference), context))
       .rejects.toMatchObject({ code: `${NORMATTIVA_PROVIDER}_RATE_LIMITED`, retryable: true });
   });

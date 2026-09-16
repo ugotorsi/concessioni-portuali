@@ -471,6 +471,7 @@ enum LegalSourceType {
 enum LegalSourceStatus {
   CURRENT
   CURRENT_SUBJECT_TO_REVIEW
+  IDENTITY_VERIFIED_PENDING_VALIDITY
   PENDING_VALIDITY_CHECK
   HISTORICAL
   SUPERSEDED
@@ -682,6 +683,27 @@ enum LegalReferenceOfficialLookupStatus {
   AMBIGUOUS
 }
 
+enum LegalReferenceOfficialReconciliationState {
+  INCOMPLETE
+  PENDING_REVIEW
+  CONFLICTED
+  LINKED_EXISTING
+  ACCEPTED_NEW
+  REJECTED
+}
+
+enum LegalReferenceOfficialEvidenceClassification {
+  OFFICIAL_AUTHORITY
+  COMMERCIAL_CORROBORATION
+}
+
+enum LegalReferenceOfficialEvidenceDisposition {
+  COMPATIBLE
+  CONFLICTING
+  INCOMPLETE
+  RECORDED_AFTER_TERMINAL
+}
+
 enum AsyncJobStatus {
   QUEUED
   RUNNING
@@ -878,6 +900,7 @@ model LegalSource {
   legacyNormaFonti             NormaFonte[]
   candidateResolutions         LegalSourceCandidateResolution[]
   legalReferenceMatches        LegalReferenceMatch[]
+  officialReconciliations      LegalReferenceOfficialReconciliation[]
 
   @@unique([identityNamespace, identityScopeKey, canonicalKey])
   @@index([sourceType])
@@ -937,6 +960,7 @@ model LegalSourceIdentityAssertion {
   sourceFamily LegalSource @relation(fields: [sourceFamilyId], references: [id], onDelete: Restrict)
 
   @@index([sourceFamilyId, identifierScheme, normalizedValue])
+  @@unique([sourceFamilyId, identifierScheme, normalizedValue])
   @@index([identifierScheme, normalizedValue])
   @@index([verificationStatus])
 }
@@ -1156,6 +1180,7 @@ model User {
   neutralIntakesReceived                         NeutralIntake[]                               @relation("NeutralIntakeReceivedBy")
   neutralIntakeDestinationsEstablished           NeutralIntakeDestination[]                   @relation("NeutralIntakeDestinationEstablishedBy")
   legalSourceCandidateResolutionsReviewed        LegalSourceCandidateResolution[]             @relation("LegalSourceCandidateResolutionReviewedBy")
+  legalReferenceOfficialReconciliationsReviewed  LegalReferenceOfficialReconciliation[]        @relation("LegalReferenceOfficialReconciliationReviewedBy")
   asyncJobsInitiated                             AsyncJob[]                                    @relation("AsyncJobInitiatedBy")
   documentRequirementEvidenceReviews            FascicoloDocumentRequirementEvidenceReview[] @relation("DocumentRequirementEvidenceReviewedBy")
   aiFascicoloHumanReviewEvents                   AiFascicoloHumanReviewEvent[]
@@ -1732,6 +1757,7 @@ model LegalReferenceMention {
   extractionPage    NeutralIntakeExtractionPage    @relation(fields: [extractionPageId, extractionAttemptId], references: [id, extractionAttemptId], onDelete: Restrict)
   matches           LegalReferenceMatch[]
   officialLookups   LegalReferenceOfficialLookup[]
+  officialReconciliations LegalReferenceOfficialReconciliation[]
 
   @@unique([extractionPageId, discoveryVersion, characterStart, characterEnd, normalizedKey])
   @@index([extractionAttemptId, discoveryVersion])
@@ -1793,12 +1819,80 @@ model LegalReferenceOfficialHit {
   decisionDate          DateTime?
   chamberSection        String?   @db.VarChar(100)
   decisionType          String?   @db.VarChar(100)
+  ecli                  String?   @db.VarChar(200)
+  publicationDate       DateTime?
+  subject               String?   @db.VarChar(500)
+  outcome               String?   @db.VarChar(500)
   sourceUrl             String?   @db.VarChar(2000)
 
-  lookup LegalReferenceOfficialLookup @relation(fields: [lookupId], references: [id], onDelete: Restrict)
+  lookup                  LegalReferenceOfficialLookup                 @relation(fields: [lookupId], references: [id], onDelete: Restrict)
+  reconciliationEvidence LegalReferenceOfficialReconciliationEvidence[]
 
   @@unique([lookupId, providerSourceId, providerRecordId])
   @@index([providerRecordId])
+}
+
+model LegalReferenceOfficialReconciliation {
+  id                    String                                    @id @default(cuid())
+  mentionId             String
+  kind                  LegalReferenceKind
+  jurisdiction          String?                                   @db.VarChar(100)
+  courtFamily           String?                                   @db.VarChar(200)
+  courtLocality         String?                                   @db.VarChar(200)
+  courtBranch           String?                                   @db.VarChar(100)
+  decisionType          String?                                   @db.VarChar(100)
+  decisionNumber        String?                                   @db.VarChar(100)
+  decisionYear          Int?
+  section               String?                                   @db.VarChar(100)
+  ecli                  String?                                   @db.VarChar(200)
+  decisionDate          DateTime?
+  publicationDate       DateTime?
+  identityVersion       String                                    @db.VarChar(100)
+  normalizedIdentity    Json
+  identityFingerprint   String?                                   @db.Char(64)
+  policyVersion         String                                    @db.VarChar(100)
+  state                 LegalReferenceOfficialReconciliationState
+  revision              Int                                       @default(0)
+  legalSourceId         String?
+  reviewedAt            DateTime?
+  reviewedByUserId      String?
+  reviewedByActorId     String?                                   @db.VarChar(256)
+  reviewedByEmail       String?                                   @db.VarChar(320)
+  reviewedByRole        String?                                   @db.VarChar(100)
+  reviewNote            String?                                   @db.VarChar(2000)
+  createdAt             DateTime                                  @default(now())
+  updatedAt             DateTime                                  @updatedAt
+
+  legalSource   LegalSource?                                      @relation(fields: [legalSourceId], references: [id], onDelete: Restrict)
+  mention       LegalReferenceMention                             @relation(fields: [mentionId], references: [id], onDelete: Restrict)
+  reviewedByUser User?                                             @relation("LegalReferenceOfficialReconciliationReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+  evidence      LegalReferenceOfficialReconciliationEvidence[]
+
+  @@unique([mentionId, identityVersion])
+  @@unique([id, identityVersion])
+  @@index([identityVersion, identityFingerprint])
+  @@index([state, updatedAt])
+  @@index([legalSourceId])
+  @@index([reviewedByUserId])
+}
+
+model LegalReferenceOfficialReconciliationEvidence {
+  id                     String                                         @id @default(cuid())
+  reconciliationId       String
+  officialHitId          String
+  identityVersion        String                                         @db.VarChar(100)
+  evidenceFingerprint    String                                         @db.Char(64)
+  classification         LegalReferenceOfficialEvidenceClassification
+  disposition            LegalReferenceOfficialEvidenceDisposition
+  observedAt             DateTime
+  createdAt              DateTime                                       @default(now())
+
+  reconciliation LegalReferenceOfficialReconciliation @relation(fields: [reconciliationId, identityVersion], references: [id, identityVersion], onDelete: Restrict)
+  officialHit    LegalReferenceOfficialHit              @relation(fields: [officialHitId], references: [id], onDelete: Restrict)
+
+  @@unique([officialHitId, identityVersion])
+  @@index([reconciliationId, createdAt])
+  @@index([classification, disposition])
 }
 
 model NeutralIntakeClassificationAttempt {

@@ -638,6 +638,7 @@ export type LegalSourceType = (typeof LegalSourceType)[keyof typeof LegalSourceT
 export const LegalSourceStatus = {
   CURRENT: 'CURRENT',
   CURRENT_SUBJECT_TO_REVIEW: 'CURRENT_SUBJECT_TO_REVIEW',
+  IDENTITY_VERIFIED_PENDING_VALIDITY: 'IDENTITY_VERIFIED_PENDING_VALIDITY',
   PENDING_VALIDITY_CHECK: 'PENDING_VALIDITY_CHECK',
   HISTORICAL: 'HISTORICAL',
   SUPERSEDED: 'SUPERSEDED',
@@ -928,6 +929,36 @@ export const LegalReferenceOfficialLookupStatus = {
 } as const
 
 export type LegalReferenceOfficialLookupStatus = (typeof LegalReferenceOfficialLookupStatus)[keyof typeof LegalReferenceOfficialLookupStatus]
+
+
+export const LegalReferenceOfficialReconciliationState = {
+  INCOMPLETE: 'INCOMPLETE',
+  PENDING_REVIEW: 'PENDING_REVIEW',
+  CONFLICTED: 'CONFLICTED',
+  LINKED_EXISTING: 'LINKED_EXISTING',
+  ACCEPTED_NEW: 'ACCEPTED_NEW',
+  REJECTED: 'REJECTED'
+} as const
+
+export type LegalReferenceOfficialReconciliationState = (typeof LegalReferenceOfficialReconciliationState)[keyof typeof LegalReferenceOfficialReconciliationState]
+
+
+export const LegalReferenceOfficialEvidenceClassification = {
+  OFFICIAL_AUTHORITY: 'OFFICIAL_AUTHORITY',
+  COMMERCIAL_CORROBORATION: 'COMMERCIAL_CORROBORATION'
+} as const
+
+export type LegalReferenceOfficialEvidenceClassification = (typeof LegalReferenceOfficialEvidenceClassification)[keyof typeof LegalReferenceOfficialEvidenceClassification]
+
+
+export const LegalReferenceOfficialEvidenceDisposition = {
+  COMPATIBLE: 'COMPATIBLE',
+  CONFLICTING: 'CONFLICTING',
+  INCOMPLETE: 'INCOMPLETE',
+  RECORDED_AFTER_TERMINAL: 'RECORDED_AFTER_TERMINAL'
+} as const
+
+export type LegalReferenceOfficialEvidenceDisposition = (typeof LegalReferenceOfficialEvidenceDisposition)[keyof typeof LegalReferenceOfficialEvidenceDisposition]
 
 
 export const AsyncJobStatus = {

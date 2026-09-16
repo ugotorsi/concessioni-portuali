@@ -101,6 +101,14 @@ export default async function NormativaPage({ searchParams }: NormativaPageProps
 
       <section className="mt-4">
         <div className="mb-4 flex flex-wrap justify-end gap-2">
+          {["ADMIN", "GIURIDICO"].includes(role) ? (
+            <Link
+              href="/normativa/riconciliazione"
+              className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-900 hover:bg-slate-50"
+            >
+              Riconciliazione fonti
+            </Link>
+          ) : null}
           <Link
             href="/normativa/orchestrazione"
             className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-900 hover:bg-slate-50"

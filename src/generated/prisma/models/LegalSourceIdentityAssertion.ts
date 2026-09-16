@@ -250,6 +250,7 @@ export type LegalSourceIdentityAssertionOrderByWithRelationInput = {
 
 export type LegalSourceIdentityAssertionWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  sourceFamilyId_identifierScheme_normalizedValue?: Prisma.LegalSourceIdentityAssertionSourceFamilyIdIdentifierSchemeNormalizedValueCompoundUniqueInput
   AND?: Prisma.LegalSourceIdentityAssertionWhereInput | Prisma.LegalSourceIdentityAssertionWhereInput[]
   OR?: Prisma.LegalSourceIdentityAssertionWhereInput[]
   NOT?: Prisma.LegalSourceIdentityAssertionWhereInput | Prisma.LegalSourceIdentityAssertionWhereInput[]
@@ -264,7 +265,7 @@ export type LegalSourceIdentityAssertionWhereUniqueInput = Prisma.AtLeast<{
   verifiedAt?: Prisma.DateTimeNullableFilter<"LegalSourceIdentityAssertion"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"LegalSourceIdentityAssertion"> | Date | string
   sourceFamily?: Prisma.XOR<Prisma.LegalSourceScalarRelationFilter, Prisma.LegalSourceWhereInput>
-}, "id">
+}, "id" | "sourceFamilyId_identifierScheme_normalizedValue">
 
 export type LegalSourceIdentityAssertionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -405,6 +406,12 @@ export type LegalSourceIdentityAssertionListRelationFilter = {
 
 export type LegalSourceIdentityAssertionOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type LegalSourceIdentityAssertionSourceFamilyIdIdentifierSchemeNormalizedValueCompoundUniqueInput = {
+  sourceFamilyId: string
+  identifierScheme: string
+  normalizedValue: string
 }
 
 export type LegalSourceIdentityAssertionCountOrderByAggregateInput = {

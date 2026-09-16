@@ -32,6 +32,10 @@ export interface OfficialLegalReferenceCaseLawHit {
   decidedAt: Date | null;
   chamberSection: string | null;
   decisionType: string | null;
+  ecli?: string | null;
+  publicationDate?: Date | null;
+  subject?: string | null;
+  outcome?: string | null;
   title: string | null;
   sourceUrl: string | null;
 }

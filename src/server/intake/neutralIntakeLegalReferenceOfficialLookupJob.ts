@@ -9,6 +9,8 @@ import type { AsyncJobHandler, AsyncJobHandlerContext } from "@/server/async-job
 import { AsyncJobExecutionError } from "@/server/async-jobs/worker";
 import { runSerializableTransactionWithRetry } from "@/server/db/serializableTransaction";
 
+import { admitLegalReferenceOfficialReconciliationInTransaction } from "./neutralIntakeLegalReferenceOfficialReconciliationJob";
+
 import {
   createNormattivaOfficialProvider,
 } from "./official-source-lookup/normattiva";
@@ -127,7 +129,18 @@ async function prepareLookup(
   const [job, mention] = await Promise.all([
     tx.asyncJob.findUnique({
       where: { id: jobId },
-      select: { operation: true, logicalOperationId: true, tenantId: true },
+      select: {
+        operation: true,
+        logicalOperationId: true,
+        tenantId: true,
+        admissionType: true,
+        initiatingUserId: true,
+        actorId: true,
+        actorEmail: true,
+        actorRole: true,
+        policyDecisionRef: true,
+        correlationId: true,
+      },
     }),
     tx.legalReferenceMention.findUnique({
       where: { id: mentionId },
@@ -172,8 +185,18 @@ async function prepareLookup(
     },
     select: { id: true, status: true, resultCount: true },
   });
-  if (existing) return { outcome: "EXISTING", existing } as const;
-  return { outcome: "READY", mentionId: mention.id, mention, provider } as const;
+  const provenance: OfficialLookupSourceJob = {
+    tenantId: job.tenantId,
+    admissionType: job.admissionType,
+    initiatingUserId: job.initiatingUserId,
+    actorId: job.actorId,
+    actorEmail: job.actorEmail,
+    actorRole: job.actorRole,
+    policyDecisionRef: job.policyDecisionRef,
+    correlationId: job.correlationId,
+  };
+  if (existing) return { outcome: "EXISTING", existing, provenance } as const;
+  return { outcome: "READY", mentionId: mention.id, mention, provider, provenance } as const;
 }
 
 async function persistLookup(
@@ -226,6 +249,10 @@ async function persistLookup(
               decisionDate: hit.decidedAt,
               chamberSection: hit.chamberSection,
               decisionType: hit.decisionType,
+              ecli: hit.ecli,
+              publicationDate: hit.publicationDate,
+              subject: hit.subject,
+              outcome: hit.outcome,
               titoloAtto: hit.title,
               sourceUrl: hit.sourceUrl,
             }),
@@ -244,6 +271,8 @@ function providerFailure(error: unknown): AsyncJobExecutionError {
 
 export function createLegalReferenceOfficialLookupHandler(
   registry: OfficialLegalReferenceProviderRegistry = officialLegalReferenceProviderRegistry,
+  admitReconciliation: typeof admitLegalReferenceOfficialReconciliationInTransaction =
+    admitLegalReferenceOfficialReconciliationInTransaction,
 ): AsyncJobHandler<LookupReference> {
   return {
     operation: LEGAL_REFERENCE_OFFICIAL_LOOKUP_OPERATION,
@@ -259,6 +288,14 @@ export function createLegalReferenceOfficialLookupHandler(
       const prepared = await runSerializableTransactionWithRetry((tx) =>
         prepareLookup(tx, context.jobId, input.referenceId, providerIdentity, registry));
       if (prepared.outcome === "EXISTING") {
+        if (prepared.existing.status === "FOUND_UNIQUE") {
+          await runSerializableTransactionWithRetry((tx) =>
+            admitReconciliation(
+              tx,
+              prepared.existing.id,
+              prepared.provenance,
+            ));
+        }
         return {
           referenceType: "LEGAL_REFERENCE_OFFICIAL_LOOKUP_RESULT",
           referenceId: prepared.existing.id,
@@ -272,8 +309,17 @@ export function createLegalReferenceOfficialLookupHandler(
       } catch (error) {
         throw providerFailure(error);
       }
-      const persisted = await runSerializableTransactionWithRetry((tx) =>
-        persistLookup(tx, prepared.mentionId, providerIdentity, result));
+      const persisted = await runSerializableTransactionWithRetry(async (tx) => {
+        const lookup = await persistLookup(tx, prepared.mentionId, providerIdentity, result);
+        if (lookup.status === "FOUND_UNIQUE") {
+          await admitReconciliation(
+            tx,
+            lookup.id,
+            prepared.provenance,
+          );
+        }
+        return lookup;
+      });
       return {
         referenceType: "LEGAL_REFERENCE_OFFICIAL_LOOKUP_RESULT",
         referenceId: persisted.id,

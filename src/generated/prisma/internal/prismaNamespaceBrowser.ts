@@ -85,6 +85,8 @@ export const ModelName = {
   LegalReferenceMatch: 'LegalReferenceMatch',
   LegalReferenceOfficialLookup: 'LegalReferenceOfficialLookup',
   LegalReferenceOfficialHit: 'LegalReferenceOfficialHit',
+  LegalReferenceOfficialReconciliation: 'LegalReferenceOfficialReconciliation',
+  LegalReferenceOfficialReconciliationEvidence: 'LegalReferenceOfficialReconciliationEvidence',
   NeutralIntakeClassificationAttempt: 'NeutralIntakeClassificationAttempt',
   NeutralIntakeDestination: 'NeutralIntakeDestination',
   LegalSourceCandidateAdmission: 'LegalSourceCandidateAdmission',
@@ -883,10 +885,64 @@ export const LegalReferenceOfficialHitScalarFieldEnum = {
   decisionDate: 'decisionDate',
   chamberSection: 'chamberSection',
   decisionType: 'decisionType',
+  ecli: 'ecli',
+  publicationDate: 'publicationDate',
+  subject: 'subject',
+  outcome: 'outcome',
   sourceUrl: 'sourceUrl'
 } as const
 
 export type LegalReferenceOfficialHitScalarFieldEnum = (typeof LegalReferenceOfficialHitScalarFieldEnum)[keyof typeof LegalReferenceOfficialHitScalarFieldEnum]
+
+
+export const LegalReferenceOfficialReconciliationScalarFieldEnum = {
+  id: 'id',
+  mentionId: 'mentionId',
+  kind: 'kind',
+  jurisdiction: 'jurisdiction',
+  courtFamily: 'courtFamily',
+  courtLocality: 'courtLocality',
+  courtBranch: 'courtBranch',
+  decisionType: 'decisionType',
+  decisionNumber: 'decisionNumber',
+  decisionYear: 'decisionYear',
+  section: 'section',
+  ecli: 'ecli',
+  decisionDate: 'decisionDate',
+  publicationDate: 'publicationDate',
+  identityVersion: 'identityVersion',
+  normalizedIdentity: 'normalizedIdentity',
+  identityFingerprint: 'identityFingerprint',
+  policyVersion: 'policyVersion',
+  state: 'state',
+  revision: 'revision',
+  legalSourceId: 'legalSourceId',
+  reviewedAt: 'reviewedAt',
+  reviewedByUserId: 'reviewedByUserId',
+  reviewedByActorId: 'reviewedByActorId',
+  reviewedByEmail: 'reviewedByEmail',
+  reviewedByRole: 'reviewedByRole',
+  reviewNote: 'reviewNote',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LegalReferenceOfficialReconciliationScalarFieldEnum = (typeof LegalReferenceOfficialReconciliationScalarFieldEnum)[keyof typeof LegalReferenceOfficialReconciliationScalarFieldEnum]
+
+
+export const LegalReferenceOfficialReconciliationEvidenceScalarFieldEnum = {
+  id: 'id',
+  reconciliationId: 'reconciliationId',
+  officialHitId: 'officialHitId',
+  identityVersion: 'identityVersion',
+  evidenceFingerprint: 'evidenceFingerprint',
+  classification: 'classification',
+  disposition: 'disposition',
+  observedAt: 'observedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type LegalReferenceOfficialReconciliationEvidenceScalarFieldEnum = (typeof LegalReferenceOfficialReconciliationEvidenceScalarFieldEnum)[keyof typeof LegalReferenceOfficialReconciliationEvidenceScalarFieldEnum]
 
 
 export const NeutralIntakeClassificationAttemptScalarFieldEnum = {
