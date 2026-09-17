@@ -12,6 +12,7 @@ import {
 } from "@/server/intake/official-hit-reconciliation/policy";
 import { LEGAL_DATA_HUNTER_PROVIDER } from "@/server/intake/official-source-lookup/legalDataHunter";
 import { NORMATTIVA_PROVIDER } from "@/server/intake/official-source-lookup/normattiva";
+import { OPENGA_PROVIDER } from "@/server/intake/official-source-lookup/openga";
 
 describe("Block 3B.8B official hit identity", () => {
   it("matches the legislation golden vector across formatting variants", () => {
@@ -130,6 +131,7 @@ describe("Block 3B.8B official hit identity", () => {
 
   it("classifies allowlisted providers and fails closed for unknown providers", () => {
     expect(classifyOfficialEvidenceProvider(NORMATTIVA_PROVIDER)).toBe("OFFICIAL_AUTHORITY");
+    expect(classifyOfficialEvidenceProvider(OPENGA_PROVIDER)).toBe("OFFICIAL_AUTHORITY");
     expect(classifyOfficialEvidenceProvider(LEGAL_DATA_HUNTER_PROVIDER)).toBe("COMMERCIAL_CORROBORATION");
     expect(() => classifyOfficialEvidenceProvider("UNKNOWN"))
       .toThrow(UnsupportedOfficialEvidenceProviderError);

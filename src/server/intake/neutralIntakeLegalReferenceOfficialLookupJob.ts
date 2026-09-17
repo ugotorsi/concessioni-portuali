@@ -15,6 +15,7 @@ import {
   createNormattivaOfficialProvider,
 } from "./official-source-lookup/normattiva";
 import { createLegalDataHunterProvider } from "./official-source-lookup/legalDataHunter";
+import { createOpenGaProvider } from "./official-source-lookup/openga";
 import {
   OfficialLegalReferenceProviderError,
   OfficialLegalReferenceProviderRegistry,
@@ -27,6 +28,7 @@ export const LEGAL_REFERENCE_OFFICIAL_LOOKUP_PURPOSE = "LEGAL_REFERENCE_OFFICIAL
 export const officialLegalReferenceProviderRegistry = new OfficialLegalReferenceProviderRegistry([
   createNormattivaOfficialProvider(),
   createLegalDataHunterProvider(),
+  createOpenGaProvider(),
 ]);
 
 const referenceSchema = z.object({

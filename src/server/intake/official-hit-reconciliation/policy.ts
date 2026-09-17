@@ -1,5 +1,6 @@
 import { LEGAL_DATA_HUNTER_PROVIDER } from "../official-source-lookup/legalDataHunter";
 import { NORMATTIVA_PROVIDER } from "../official-source-lookup/normattiva";
+import { OPENGA_PROVIDER } from "../official-source-lookup/openga";
 
 export type OfficialEvidenceClassification =
   | "OFFICIAL_AUTHORITY"
@@ -18,6 +19,7 @@ export function classifyOfficialEvidenceProvider(
   provider: string,
 ): OfficialEvidenceClassification {
   if (provider === NORMATTIVA_PROVIDER) return "OFFICIAL_AUTHORITY";
+  if (provider === OPENGA_PROVIDER) return "OFFICIAL_AUTHORITY";
   if (provider === LEGAL_DATA_HUNTER_PROVIDER) return "COMMERCIAL_CORROBORATION";
   throw new UnsupportedOfficialEvidenceProviderError();
 }

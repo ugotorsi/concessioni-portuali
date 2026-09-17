@@ -40,8 +40,15 @@ import {
   LEGAL_DATA_HUNTER_PROVIDER,
 } from "@/server/intake/official-source-lookup/legalDataHunter";
 import {
+  createOpenGaProvider,
+  OPENGA_BASE_URL,
+  OPENGA_LOOKUP_VERSION,
+  OPENGA_PROVIDER,
+} from "@/server/intake/official-source-lookup/openga";
+import {
   OfficialLegalReferenceProviderError,
   OfficialLegalReferenceProviderRegistry,
+  type OfficialLegalReferenceProvider,
 } from "@/server/intake/official-source-lookup/providers";
 
 const providerIdentity = {
@@ -49,7 +56,7 @@ const providerIdentity = {
   lookupVersion: NORMATTIVA_LOOKUP_VERSION,
 };
 
-function testRegistry(lookup: ReturnType<typeof vi.fn>) {
+function testRegistry(lookup: OfficialLegalReferenceProvider["lookup"]) {
   return new OfficialLegalReferenceProviderRegistry([{
     ...providerIdentity,
     supports: (reference) => buildNormattivaQuery(reference) !== null,
@@ -149,7 +156,7 @@ describe("B2C12 Block 3B.6C official lookup job", () => {
   });
 
   it("persists one bounded unique result without mutating local matching or sources", async () => {
-    const lookup = vi.fn(async () => ({
+    const lookup = vi.fn<OfficialLegalReferenceProvider["lookup"]>(async () => ({
       status: "FOUND_UNIQUE" as const,
       resultCount: 1 as const,
       hits: [{
@@ -164,7 +171,7 @@ describe("B2C12 Block 3B.6C official lookup job", () => {
         title: "Procedimento amministrativo",
         publicationNumber: null,
         publishedAt: null,
-      }] as const,
+      }],
     }));
     const handler = createLegalReferenceOfficialLookupHandler(testRegistry(lookup), mocks.admitReconciliation);
     await expect(handler.execute(handler.parseInput(buildLegalReferenceOfficialLookupAdmission("mention-1", providerIdentity, provenance).inputReference), context))
@@ -206,7 +213,7 @@ describe("B2C12 Block 3B.6C official lookup job", () => {
       year: 2024,
       chamberSection: "III",
     }));
-    const lookup = vi.fn(async () => ({
+    const lookup = vi.fn<OfficialLegalReferenceProvider["lookup"]>(async () => ({
       status: "FOUND_UNIQUE" as const,
       resultCount: 1 as const,
       hits: [{
@@ -226,7 +233,7 @@ describe("B2C12 Block 3B.6C official lookup job", () => {
         outcome: "Rigetto",
         title: "Cassazione n. 1234/2024",
         sourceUrl: "https://example.test/decision-1234",
-      }] as const,
+      }],
     }));
     const registry = new OfficialLegalReferenceProviderRegistry([{
       ...identity,
@@ -267,6 +274,89 @@ describe("B2C12 Block 3B.6C official lookup job", () => {
     expect(mocks.tx.legalSourceAcquisition.create).not.toHaveBeenCalled();
   });
 
+  it("routes an OpenGA result through the existing lookup and OfficialHit persistence path", async () => {
+    const identity = { providerKey: OPENGA_PROVIDER, lookupVersion: OPENGA_LOOKUP_VERSION };
+    mocks.tx.asyncJob.findUnique.mockResolvedValue({
+      operation: LEGAL_REFERENCE_OFFICIAL_LOOKUP_OPERATION,
+      logicalOperationId: officialLookupLogicalOperationId("mention-1", identity),
+      ...provenance,
+    });
+    mocks.tx.legalReferenceMention.findUnique.mockResolvedValue(mention({
+      kind: "CASE_LAW",
+      authorityHint: "Consiglio di Stato",
+      actType: "SENTENZA",
+      actNumber: "471",
+      year: 2025,
+      chamberSection: "III",
+    }));
+    const responses = [
+      new Response(JSON.stringify({
+        success: true,
+        result: {
+          name: "sentenze-consiglio-di-stato",
+          resources: [{
+            id: "cds-2025",
+            name: "Sentenze 2025",
+            format: "JSON",
+            datastore_active: true,
+          }],
+        },
+      }), { headers: { "Content-Type": "application/json" } }),
+      new Response(JSON.stringify({
+        success: true,
+        result: { records: [{
+          _id: 10,
+          organo: "Consiglio di Stato",
+          sezione: "III",
+          tipo_provvedimento: "Sentenza",
+          numero: "202500471",
+          anno: 2025,
+          data_pubblicazione: "2025-01-16",
+          oggetto: "Concessione demaniale",
+          esito: "Respinge",
+        }] },
+      }), { headers: { "Content-Type": "application/json" } }),
+    ];
+    const transport = vi.fn(async (url: string) => {
+      expect(url.startsWith(OPENGA_BASE_URL)).toBe(true);
+      return responses.shift() ?? new Response(null, { status: 500 });
+    });
+    const registry = new OfficialLegalReferenceProviderRegistry([
+      createOpenGaProvider({ transport }),
+    ]);
+    expect(registry.route({
+      kind: "CASE_LAW", authorityHint: "CDS", actType: "SENTENZA",
+      actNumber: "471", year: 2025, chamberSection: "III",
+    })).toEqual([identity]);
+
+    const handler = createLegalReferenceOfficialLookupHandler(registry, mocks.admitReconciliation);
+    await expect(handler.execute(handler.parseInput(
+      buildLegalReferenceOfficialLookupAdmission("mention-1", identity, provenance).inputReference,
+    ), context)).resolves.toMatchObject({ metadata: { status: "FOUND_UNIQUE", resultCount: 1 } });
+
+    expect(mocks.tx.legalReferenceOfficialLookup.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        provider: OPENGA_PROVIDER,
+        lookupVersion: OPENGA_LOOKUP_VERSION,
+        hits: { create: [expect.objectContaining({
+          documentKind: "CASE_LAW",
+          providerSourceId: "sentenze-consiglio-di-stato:cds-2025",
+          decisionNumber: "471",
+          decisionYear: 2025,
+          publicationDate: new Date("2025-01-16"),
+          subject: "Concessione demaniale",
+          outcome: "Respinge",
+          ecli: null,
+          sourceUrl: null,
+        })] },
+      }),
+    }));
+    expect(mocks.admitReconciliation).toHaveBeenCalledWith(mocks.tx, "lookup-1", provenance);
+    expect(mocks.tx.legalSource.create).not.toHaveBeenCalled();
+    expect(mocks.tx.legalSource.upsert).not.toHaveBeenCalled();
+    expect(mocks.tx.legalExpressionVersion.create).not.toHaveBeenCalled();
+  });
+
   it("matches a precise provider court even when provider authority is generic TAR", async () => {
     const responses = [
       new Response(JSON.stringify({ country: "IT", sources: [{
@@ -292,7 +382,7 @@ describe("B2C12 Block 3B.6C official lookup job", () => {
     });
   });
 
-  it.each([
+  it.each<[string, Record<string, unknown>]>([
     ["ECLI", { ecli: "ECLI:IT:TARSA:2025:500" }],
     ["court locality", { court: "TAR Campania Salerno" }],
     ["decision type", { decision_type: "ORDINANZA" }],
@@ -332,9 +422,9 @@ describe("B2C12 Block 3B.6C official lookup job", () => {
     [{ matches: [{ status: "NO_MATCH", reason: "INSUFFICIENT_IDENTITY" }] }, "insufficient"],
     [{ kind: "CASE_LAW", actType: null }, "case law"],
     [{ actType: "LEGGE_REGIONALE" }, "regional law"],
-  ])("fails closed before provider access for %s", async (overrides) => {
+  ])("fails closed before provider access for %s", async (overrides, _label) => {
     mocks.tx.legalReferenceMention.findUnique.mockResolvedValue(mention(overrides));
-    const lookup = vi.fn();
+    const lookup = vi.fn<OfficialLegalReferenceProvider["lookup"]>();
     const handler = createLegalReferenceOfficialLookupHandler(testRegistry(lookup), mocks.admitReconciliation);
     await expect(handler.execute(handler.parseInput(buildLegalReferenceOfficialLookupAdmission("mention-1", providerIdentity, provenance).inputReference), context))
       .rejects.toMatchObject({ retryable: false });
