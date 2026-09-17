@@ -77,6 +77,11 @@ export type LegalSource = Prisma.LegalSourceModel
  */
 export type LegalExpressionVersion = Prisma.LegalExpressionVersionModel
 /**
+ * Model LegalSourceTemporalAssessment
+ * An immutable evaluation event produced by the versioned temporal evaluator.
+ */
+export type LegalSourceTemporalAssessment = Prisma.LegalSourceTemporalAssessmentModel
+/**
  * Model LegalSourceIdentityAssertion
  * Provider-independent evidence supporting a canonical family identity.
  */

@@ -58,6 +58,7 @@ export const ModelName = {
   ImportRun: 'ImportRun',
   LegalSource: 'LegalSource',
   LegalExpressionVersion: 'LegalExpressionVersion',
+  LegalSourceTemporalAssessment: 'LegalSourceTemporalAssessment',
   LegalSourceIdentityAssertion: 'LegalSourceIdentityAssertion',
   LegalSourceVersion: 'LegalSourceVersion',
   LegalSourceAcquisition: 'LegalSourceAcquisition',
@@ -261,6 +262,27 @@ export const LegalExpressionVersionScalarFieldEnum = {
 } as const
 
 export type LegalExpressionVersionScalarFieldEnum = (typeof LegalExpressionVersionScalarFieldEnum)[keyof typeof LegalExpressionVersionScalarFieldEnum]
+
+
+export const LegalSourceTemporalAssessmentScalarFieldEnum = {
+  id: 'id',
+  sourceFamilyId: 'sourceFamilyId',
+  legalExpressionVersionId: 'legalExpressionVersionId',
+  assessmentVersion: 'assessmentVersion',
+  referenceDate: 'referenceDate',
+  validityState: 'validityState',
+  temporalWindowState: 'temporalWindowState',
+  applicabilityState: 'applicabilityState',
+  reasonCodes: 'reasonCodes',
+  effectiveFromSnapshot: 'effectiveFromSnapshot',
+  effectiveToSnapshot: 'effectiveToSnapshot',
+  humanReviewRequired: 'humanReviewRequired',
+  confidence: 'confidence',
+  inputFingerprint: 'inputFingerprint',
+  createdAt: 'createdAt'
+} as const
+
+export type LegalSourceTemporalAssessmentScalarFieldEnum = (typeof LegalSourceTemporalAssessmentScalarFieldEnum)[keyof typeof LegalSourceTemporalAssessmentScalarFieldEnum]
 
 
 export const LegalSourceIdentityAssertionScalarFieldEnum = {

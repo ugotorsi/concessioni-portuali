@@ -901,6 +901,7 @@ model LegalSource {
   candidateResolutions         LegalSourceCandidateResolution[]
   legalReferenceMatches        LegalReferenceMatch[]
   officialReconciliations      LegalReferenceOfficialReconciliation[]
+  temporalAssessments          LegalSourceTemporalAssessment[]
 
   @@unique([identityNamespace, identityScopeKey, canonicalKey])
   @@index([sourceType])
@@ -936,11 +937,38 @@ model LegalExpressionVersion {
 
   sourceFamily   LegalSource          @relation(fields: [sourceFamilyId], references: [id], onDelete: Restrict)
   representations LegalSourceVersion[]
+  temporalAssessments LegalSourceTemporalAssessment[]
 
   @@unique([sourceFamilyId, expressionKey])
   @@unique([id, sourceFamilyId])
   @@index([sourceFamilyId, effectiveFrom])
   @@index([effectiveTo])
+}
+
+/// An immutable evaluation event produced by the versioned temporal evaluator.
+model LegalSourceTemporalAssessment {
+  id                       String   @id @default(cuid())
+  sourceFamilyId           String
+  legalExpressionVersionId String
+  assessmentVersion        String   @db.VarChar(100)
+  referenceDate            DateTime
+  validityState            String   @db.VarChar(50)
+  temporalWindowState      String   @db.VarChar(50)
+  applicabilityState       String   @db.VarChar(50)
+  reasonCodes              Json
+  effectiveFromSnapshot    DateTime?
+  effectiveToSnapshot      DateTime?
+  humanReviewRequired      Boolean
+  confidence               String   @db.VarChar(20)
+  inputFingerprint         String   @db.Char(64)
+  createdAt                DateTime @default(now())
+
+  sourceFamily          LegalSource            @relation(fields: [sourceFamilyId], references: [id], onDelete: Restrict)
+  legalExpressionVersion LegalExpressionVersion @relation(fields: [legalExpressionVersionId, sourceFamilyId], references: [id, sourceFamilyId], onDelete: Restrict)
+
+  @@unique([inputFingerprint], map: "temporal_assessment_identity_uq")
+  @@index([legalExpressionVersionId, referenceDate, createdAt], map: "temporal_assessment_latest_idx")
+  @@index([sourceFamilyId], map: "temporal_assessment_family_idx")
 }
 
 /// Provider-independent evidence supporting a canonical family identity.

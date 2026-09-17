@@ -516,6 +516,7 @@ export type LegalSourceWhereInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionListRelationFilter
   legalReferenceMatches?: Prisma.LegalReferenceMatchListRelationFilter
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationListRelationFilter
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentListRelationFilter
 }
 
 export type LegalSourceOrderByWithRelationInput = {
@@ -576,6 +577,7 @@ export type LegalSourceOrderByWithRelationInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionOrderByRelationAggregateInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchOrderByRelationAggregateInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationOrderByRelationAggregateInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentOrderByRelationAggregateInput
 }
 
 export type LegalSourceWhereUniqueInput = Prisma.AtLeast<{
@@ -640,6 +642,7 @@ export type LegalSourceWhereUniqueInput = Prisma.AtLeast<{
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionListRelationFilter
   legalReferenceMatches?: Prisma.LegalReferenceMatchListRelationFilter
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationListRelationFilter
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentListRelationFilter
 }, "id" | "sourceKey" | "identityNamespace_identityScopeKey_canonicalKey">
 
 export type LegalSourceOrderByWithAggregationInput = {
@@ -792,6 +795,7 @@ export type LegalSourceCreateInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceUncheckedCreateInput = {
@@ -848,6 +852,7 @@ export type LegalSourceUncheckedCreateInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceUpdateInput = {
@@ -904,6 +909,7 @@ export type LegalSourceUpdateInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceUncheckedUpdateInput = {
@@ -960,6 +966,7 @@ export type LegalSourceUncheckedUpdateInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceCreateManyInput = {
@@ -1488,6 +1495,20 @@ export type LegalSourceUpdateOneRequiredWithoutExpressionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.LegalSourceUpdateToOneWithWhereWithoutExpressionsInput, Prisma.LegalSourceUpdateWithoutExpressionsInput>, Prisma.LegalSourceUncheckedUpdateWithoutExpressionsInput>
 }
 
+export type LegalSourceCreateNestedOneWithoutTemporalAssessmentsInput = {
+  create?: Prisma.XOR<Prisma.LegalSourceCreateWithoutTemporalAssessmentsInput, Prisma.LegalSourceUncheckedCreateWithoutTemporalAssessmentsInput>
+  connectOrCreate?: Prisma.LegalSourceCreateOrConnectWithoutTemporalAssessmentsInput
+  connect?: Prisma.LegalSourceWhereUniqueInput
+}
+
+export type LegalSourceUpdateOneRequiredWithoutTemporalAssessmentsNestedInput = {
+  create?: Prisma.XOR<Prisma.LegalSourceCreateWithoutTemporalAssessmentsInput, Prisma.LegalSourceUncheckedCreateWithoutTemporalAssessmentsInput>
+  connectOrCreate?: Prisma.LegalSourceCreateOrConnectWithoutTemporalAssessmentsInput
+  upsert?: Prisma.LegalSourceUpsertWithoutTemporalAssessmentsInput
+  connect?: Prisma.LegalSourceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LegalSourceUpdateToOneWithWhereWithoutTemporalAssessmentsInput, Prisma.LegalSourceUpdateWithoutTemporalAssessmentsInput>, Prisma.LegalSourceUncheckedUpdateWithoutTemporalAssessmentsInput>
+}
+
 export type LegalSourceCreateNestedOneWithoutIdentityAssertionsInput = {
   create?: Prisma.XOR<Prisma.LegalSourceCreateWithoutIdentityAssertionsInput, Prisma.LegalSourceUncheckedCreateWithoutIdentityAssertionsInput>
   connectOrCreate?: Prisma.LegalSourceCreateOrConnectWithoutIdentityAssertionsInput
@@ -1705,6 +1726,7 @@ export type LegalSourceCreateWithoutEnteInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceUncheckedCreateWithoutEnteInput = {
@@ -1760,6 +1782,7 @@ export type LegalSourceUncheckedCreateWithoutEnteInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceCreateOrConnectWithoutEnteInput = {
@@ -1888,6 +1911,7 @@ export type LegalSourceCreateWithoutAuthorityInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceUncheckedCreateWithoutAuthorityInput = {
@@ -1943,6 +1967,7 @@ export type LegalSourceUncheckedCreateWithoutAuthorityInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceCreateOrConnectWithoutAuthorityInput = {
@@ -2024,6 +2049,7 @@ export type LegalSourceCreateWithoutPortInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceUncheckedCreateWithoutPortInput = {
@@ -2079,6 +2105,7 @@ export type LegalSourceUncheckedCreateWithoutPortInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceCreateOrConnectWithoutPortInput = {
@@ -2160,6 +2187,7 @@ export type LegalSourceCreateWithoutImportRunInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceUncheckedCreateWithoutImportRunInput = {
@@ -2215,6 +2243,7 @@ export type LegalSourceUncheckedCreateWithoutImportRunInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceCreateOrConnectWithoutImportRunInput = {
@@ -2296,6 +2325,7 @@ export type LegalSourceCreateWithoutExpressionsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceUncheckedCreateWithoutExpressionsInput = {
@@ -2351,6 +2381,7 @@ export type LegalSourceUncheckedCreateWithoutExpressionsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceCreateOrConnectWithoutExpressionsInput = {
@@ -2422,6 +2453,7 @@ export type LegalSourceUpdateWithoutExpressionsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceUncheckedUpdateWithoutExpressionsInput = {
@@ -2470,6 +2502,247 @@ export type LegalSourceUncheckedUpdateWithoutExpressionsInput = {
   documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutLegalSourceNestedInput
   outgoingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutFromSourceNestedInput
   incomingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutToSourceNestedInput
+  versions?: Prisma.LegalSourceVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
+  acquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedUpdateManyWithoutSourceFamilyNestedInput
+  legacyNormaFonti?: Prisma.NormaFonteUncheckedUpdateManyWithoutLegalSourceNestedInput
+  candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedUpdateManyWithoutLegalSourceNestedInput
+  legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedUpdateManyWithoutLegalSourceNestedInput
+  officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedUpdateManyWithoutSourceFamilyNestedInput
+}
+
+export type LegalSourceCreateWithoutTemporalAssessmentsInput = {
+  id?: string
+  sourceKey: string
+  title: string
+  sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
+  status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
+  publicationDate?: Date | string | null
+  effectiveFrom?: Date | string | null
+  effectiveTo?: Date | string | null
+  notes?: string | null
+  fileName?: string | null
+  filePath?: string | null
+  fileChecksumSha256?: string | null
+  fileMimeType?: string | null
+  fileSizeBytes?: number | null
+  identityNamespace?: string | null
+  identityScopeKind?: $Enums.LegalSourceIdentityScopeKind | null
+  identityScopeKey?: string | null
+  canonicalKey?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  ente?: Prisma.EnteCreateNestedOneWithoutLegalSourcesInput
+  authority?: Prisma.AuthorityCreateNestedOneWithoutLegalSourcesInput
+  port?: Prisma.PortCreateNestedOneWithoutLegalSourcesInput
+  importRun?: Prisma.ImportRunCreateNestedOneWithoutLegalSourcesInput
+  rules?: Prisma.LegalRuleCreateNestedManyWithoutSourceInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutLegalSourceInput
+  outgoingRelations?: Prisma.SourceRelationCreateNestedManyWithoutFromSourceInput
+  incomingRelations?: Prisma.SourceRelationCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionCreateNestedManyWithoutSourceFamilyInput
+  versions?: Prisma.LegalSourceVersionCreateNestedManyWithoutSourceFamilyInput
+  acquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionCreateNestedManyWithoutSourceFamilyInput
+  legacyNormaFonti?: Prisma.NormaFonteCreateNestedManyWithoutLegalSourceInput
+  candidateResolutions?: Prisma.LegalSourceCandidateResolutionCreateNestedManyWithoutLegalSourceInput
+  legalReferenceMatches?: Prisma.LegalReferenceMatchCreateNestedManyWithoutLegalSourceInput
+  officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationCreateNestedManyWithoutLegalSourceInput
+}
+
+export type LegalSourceUncheckedCreateWithoutTemporalAssessmentsInput = {
+  id?: string
+  sourceKey: string
+  title: string
+  sourceType: $Enums.LegalSourceType
+  resourceSemanticType?: $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: $Enums.LegalAuthorityKind | null
+  sourceCharacter?: $Enums.SourceCharacter | null
+  status?: $Enums.LegalSourceStatus
+  role?: $Enums.LegalSourceRole
+  legalRank?: $Enums.LegalRank
+  territorialScope?: $Enums.LegalTerritorialScope
+  confidence?: $Enums.LegalSourceConfidence
+  issuingBody?: string | null
+  sourceNumber?: string | null
+  sourceDate?: Date | string | null
+  sourceOrigin?: string | null
+  portAreaCode?: string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: boolean
+  isConformative?: boolean
+  isExtractable?: boolean
+  duplicateOfSourceKey?: string | null
+  publicationDate?: Date | string | null
+  effectiveFrom?: Date | string | null
+  effectiveTo?: Date | string | null
+  notes?: string | null
+  fileName?: string | null
+  filePath?: string | null
+  fileChecksumSha256?: string | null
+  fileMimeType?: string | null
+  fileSizeBytes?: number | null
+  enteId?: string | null
+  authorityId?: string | null
+  portId?: string | null
+  importRunId?: string | null
+  identityNamespace?: string | null
+  identityScopeKind?: $Enums.LegalSourceIdentityScopeKind | null
+  identityScopeKey?: string | null
+  canonicalKey?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  rules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutSourceInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutLegalSourceInput
+  outgoingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutFromSourceInput
+  incomingRelations?: Prisma.SourceRelationUncheckedCreateNestedManyWithoutToSourceInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
+  versions?: Prisma.LegalSourceVersionUncheckedCreateNestedManyWithoutSourceFamilyInput
+  acquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutSourceFamilyInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedCreateNestedManyWithoutSourceFamilyInput
+  legacyNormaFonti?: Prisma.NormaFonteUncheckedCreateNestedManyWithoutLegalSourceInput
+  candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedCreateNestedManyWithoutLegalSourceInput
+  legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedCreateNestedManyWithoutLegalSourceInput
+  officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedCreateNestedManyWithoutLegalSourceInput
+}
+
+export type LegalSourceCreateOrConnectWithoutTemporalAssessmentsInput = {
+  where: Prisma.LegalSourceWhereUniqueInput
+  create: Prisma.XOR<Prisma.LegalSourceCreateWithoutTemporalAssessmentsInput, Prisma.LegalSourceUncheckedCreateWithoutTemporalAssessmentsInput>
+}
+
+export type LegalSourceUpsertWithoutTemporalAssessmentsInput = {
+  update: Prisma.XOR<Prisma.LegalSourceUpdateWithoutTemporalAssessmentsInput, Prisma.LegalSourceUncheckedUpdateWithoutTemporalAssessmentsInput>
+  create: Prisma.XOR<Prisma.LegalSourceCreateWithoutTemporalAssessmentsInput, Prisma.LegalSourceUncheckedCreateWithoutTemporalAssessmentsInput>
+  where?: Prisma.LegalSourceWhereInput
+}
+
+export type LegalSourceUpdateToOneWithWhereWithoutTemporalAssessmentsInput = {
+  where?: Prisma.LegalSourceWhereInput
+  data: Prisma.XOR<Prisma.LegalSourceUpdateWithoutTemporalAssessmentsInput, Prisma.LegalSourceUncheckedUpdateWithoutTemporalAssessmentsInput>
+}
+
+export type LegalSourceUpdateWithoutTemporalAssessmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
+  status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileChecksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  identityNamespace?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityScopeKind?: Prisma.NullableEnumLegalSourceIdentityScopeKindFieldUpdateOperationsInput | $Enums.LegalSourceIdentityScopeKind | null
+  identityScopeKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  canonicalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ente?: Prisma.EnteUpdateOneWithoutLegalSourcesNestedInput
+  authority?: Prisma.AuthorityUpdateOneWithoutLegalSourcesNestedInput
+  port?: Prisma.PortUpdateOneWithoutLegalSourcesNestedInput
+  importRun?: Prisma.ImportRunUpdateOneWithoutLegalSourcesNestedInput
+  rules?: Prisma.LegalRuleUpdateManyWithoutSourceNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutLegalSourceNestedInput
+  outgoingRelations?: Prisma.SourceRelationUpdateManyWithoutFromSourceNestedInput
+  incomingRelations?: Prisma.SourceRelationUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUpdateManyWithoutSourceFamilyNestedInput
+  versions?: Prisma.LegalSourceVersionUpdateManyWithoutSourceFamilyNestedInput
+  acquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutSourceFamilyNestedInput
+  identityAssertions?: Prisma.LegalSourceIdentityAssertionUpdateManyWithoutSourceFamilyNestedInput
+  legacyNormaFonti?: Prisma.NormaFonteUpdateManyWithoutLegalSourceNestedInput
+  candidateResolutions?: Prisma.LegalSourceCandidateResolutionUpdateManyWithoutLegalSourceNestedInput
+  legalReferenceMatches?: Prisma.LegalReferenceMatchUpdateManyWithoutLegalSourceNestedInput
+  officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUpdateManyWithoutLegalSourceNestedInput
+}
+
+export type LegalSourceUncheckedUpdateWithoutTemporalAssessmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceKey?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceType?: Prisma.EnumLegalSourceTypeFieldUpdateOperationsInput | $Enums.LegalSourceType
+  resourceSemanticType?: Prisma.NullableEnumResourceSemanticTypeFieldUpdateOperationsInput | $Enums.ResourceSemanticType | null
+  legalAuthorityKind?: Prisma.NullableEnumLegalAuthorityKindFieldUpdateOperationsInput | $Enums.LegalAuthorityKind | null
+  sourceCharacter?: Prisma.NullableEnumSourceCharacterFieldUpdateOperationsInput | $Enums.SourceCharacter | null
+  status?: Prisma.EnumLegalSourceStatusFieldUpdateOperationsInput | $Enums.LegalSourceStatus
+  role?: Prisma.EnumLegalSourceRoleFieldUpdateOperationsInput | $Enums.LegalSourceRole
+  legalRank?: Prisma.EnumLegalRankFieldUpdateOperationsInput | $Enums.LegalRank
+  territorialScope?: Prisma.EnumLegalTerritorialScopeFieldUpdateOperationsInput | $Enums.LegalTerritorialScope
+  confidence?: Prisma.EnumLegalSourceConfidenceFieldUpdateOperationsInput | $Enums.LegalSourceConfidence
+  issuingBody?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portAreaCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isConformative?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isExtractable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  duplicateOfSourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileChecksumSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  importRunId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityNamespace?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityScopeKind?: Prisma.NullableEnumLegalSourceIdentityScopeKindFieldUpdateOperationsInput | $Enums.LegalSourceIdentityScopeKind | null
+  identityScopeKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  canonicalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rules?: Prisma.LegalRuleUncheckedUpdateManyWithoutSourceNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutLegalSourceNestedInput
+  outgoingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutFromSourceNestedInput
+  incomingRelations?: Prisma.SourceRelationUncheckedUpdateManyWithoutToSourceNestedInput
+  expressions?: Prisma.LegalExpressionVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   versions?: Prisma.LegalSourceVersionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceFamilyNestedInput
   identityAssertions?: Prisma.LegalSourceIdentityAssertionUncheckedUpdateManyWithoutSourceFamilyNestedInput
@@ -2532,6 +2805,7 @@ export type LegalSourceCreateWithoutIdentityAssertionsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceUncheckedCreateWithoutIdentityAssertionsInput = {
@@ -2587,6 +2861,7 @@ export type LegalSourceUncheckedCreateWithoutIdentityAssertionsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceCreateOrConnectWithoutIdentityAssertionsInput = {
@@ -2658,6 +2933,7 @@ export type LegalSourceUpdateWithoutIdentityAssertionsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceUncheckedUpdateWithoutIdentityAssertionsInput = {
@@ -2713,6 +2989,7 @@ export type LegalSourceUncheckedUpdateWithoutIdentityAssertionsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceCreateWithoutVersionsInput = {
@@ -2768,6 +3045,7 @@ export type LegalSourceCreateWithoutVersionsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceUncheckedCreateWithoutVersionsInput = {
@@ -2823,6 +3101,7 @@ export type LegalSourceUncheckedCreateWithoutVersionsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceCreateOrConnectWithoutVersionsInput = {
@@ -2894,6 +3173,7 @@ export type LegalSourceUpdateWithoutVersionsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceUncheckedUpdateWithoutVersionsInput = {
@@ -2949,6 +3229,7 @@ export type LegalSourceUncheckedUpdateWithoutVersionsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceCreateWithoutAcquisitionsInput = {
@@ -3004,6 +3285,7 @@ export type LegalSourceCreateWithoutAcquisitionsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceUncheckedCreateWithoutAcquisitionsInput = {
@@ -3059,6 +3341,7 @@ export type LegalSourceUncheckedCreateWithoutAcquisitionsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceCreateOrConnectWithoutAcquisitionsInput = {
@@ -3130,6 +3413,7 @@ export type LegalSourceUpdateWithoutAcquisitionsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceUncheckedUpdateWithoutAcquisitionsInput = {
@@ -3185,6 +3469,7 @@ export type LegalSourceUncheckedUpdateWithoutAcquisitionsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceCreateWithoutOutgoingRelationsInput = {
@@ -3240,6 +3525,7 @@ export type LegalSourceCreateWithoutOutgoingRelationsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceUncheckedCreateWithoutOutgoingRelationsInput = {
@@ -3295,6 +3581,7 @@ export type LegalSourceUncheckedCreateWithoutOutgoingRelationsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceCreateOrConnectWithoutOutgoingRelationsInput = {
@@ -3355,6 +3642,7 @@ export type LegalSourceCreateWithoutIncomingRelationsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceUncheckedCreateWithoutIncomingRelationsInput = {
@@ -3410,6 +3698,7 @@ export type LegalSourceUncheckedCreateWithoutIncomingRelationsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceCreateOrConnectWithoutIncomingRelationsInput = {
@@ -3481,6 +3770,7 @@ export type LegalSourceUpdateWithoutOutgoingRelationsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceUncheckedUpdateWithoutOutgoingRelationsInput = {
@@ -3536,6 +3826,7 @@ export type LegalSourceUncheckedUpdateWithoutOutgoingRelationsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceUpsertWithoutIncomingRelationsInput = {
@@ -3602,6 +3893,7 @@ export type LegalSourceUpdateWithoutIncomingRelationsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceUncheckedUpdateWithoutIncomingRelationsInput = {
@@ -3657,6 +3949,7 @@ export type LegalSourceUncheckedUpdateWithoutIncomingRelationsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceCreateWithoutRulesInput = {
@@ -3712,6 +4005,7 @@ export type LegalSourceCreateWithoutRulesInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceUncheckedCreateWithoutRulesInput = {
@@ -3767,6 +4061,7 @@ export type LegalSourceUncheckedCreateWithoutRulesInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceCreateOrConnectWithoutRulesInput = {
@@ -3838,6 +4133,7 @@ export type LegalSourceUpdateWithoutRulesInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceUncheckedUpdateWithoutRulesInput = {
@@ -3893,6 +4189,7 @@ export type LegalSourceUncheckedUpdateWithoutRulesInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceCreateWithoutLegalReferenceMatchesInput = {
@@ -3948,6 +4245,7 @@ export type LegalSourceCreateWithoutLegalReferenceMatchesInput = {
   legacyNormaFonti?: Prisma.NormaFonteCreateNestedManyWithoutLegalSourceInput
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceUncheckedCreateWithoutLegalReferenceMatchesInput = {
@@ -4003,6 +4301,7 @@ export type LegalSourceUncheckedCreateWithoutLegalReferenceMatchesInput = {
   legacyNormaFonti?: Prisma.NormaFonteUncheckedCreateNestedManyWithoutLegalSourceInput
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceCreateOrConnectWithoutLegalReferenceMatchesInput = {
@@ -4074,6 +4373,7 @@ export type LegalSourceUpdateWithoutLegalReferenceMatchesInput = {
   legacyNormaFonti?: Prisma.NormaFonteUpdateManyWithoutLegalSourceNestedInput
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceUncheckedUpdateWithoutLegalReferenceMatchesInput = {
@@ -4129,6 +4429,7 @@ export type LegalSourceUncheckedUpdateWithoutLegalReferenceMatchesInput = {
   legacyNormaFonti?: Prisma.NormaFonteUncheckedUpdateManyWithoutLegalSourceNestedInput
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceCreateWithoutOfficialReconciliationsInput = {
@@ -4184,6 +4485,7 @@ export type LegalSourceCreateWithoutOfficialReconciliationsInput = {
   legacyNormaFonti?: Prisma.NormaFonteCreateNestedManyWithoutLegalSourceInput
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceUncheckedCreateWithoutOfficialReconciliationsInput = {
@@ -4239,6 +4541,7 @@ export type LegalSourceUncheckedCreateWithoutOfficialReconciliationsInput = {
   legacyNormaFonti?: Prisma.NormaFonteUncheckedCreateNestedManyWithoutLegalSourceInput
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceCreateOrConnectWithoutOfficialReconciliationsInput = {
@@ -4310,6 +4613,7 @@ export type LegalSourceUpdateWithoutOfficialReconciliationsInput = {
   legacyNormaFonti?: Prisma.NormaFonteUpdateManyWithoutLegalSourceNestedInput
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceUncheckedUpdateWithoutOfficialReconciliationsInput = {
@@ -4365,6 +4669,7 @@ export type LegalSourceUncheckedUpdateWithoutOfficialReconciliationsInput = {
   legacyNormaFonti?: Prisma.NormaFonteUncheckedUpdateManyWithoutLegalSourceNestedInput
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceCreateWithoutCandidateResolutionsInput = {
@@ -4420,6 +4725,7 @@ export type LegalSourceCreateWithoutCandidateResolutionsInput = {
   legacyNormaFonti?: Prisma.NormaFonteCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceUncheckedCreateWithoutCandidateResolutionsInput = {
@@ -4475,6 +4781,7 @@ export type LegalSourceUncheckedCreateWithoutCandidateResolutionsInput = {
   legacyNormaFonti?: Prisma.NormaFonteUncheckedCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceCreateOrConnectWithoutCandidateResolutionsInput = {
@@ -4546,6 +4853,7 @@ export type LegalSourceUpdateWithoutCandidateResolutionsInput = {
   legacyNormaFonti?: Prisma.NormaFonteUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceUncheckedUpdateWithoutCandidateResolutionsInput = {
@@ -4601,6 +4909,7 @@ export type LegalSourceUncheckedUpdateWithoutCandidateResolutionsInput = {
   legacyNormaFonti?: Prisma.NormaFonteUncheckedUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceCreateWithoutDocumentRequirementProposalsInput = {
@@ -4656,6 +4965,7 @@ export type LegalSourceCreateWithoutDocumentRequirementProposalsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceUncheckedCreateWithoutDocumentRequirementProposalsInput = {
@@ -4711,6 +5021,7 @@ export type LegalSourceUncheckedCreateWithoutDocumentRequirementProposalsInput =
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceCreateOrConnectWithoutDocumentRequirementProposalsInput = {
@@ -4782,6 +5093,7 @@ export type LegalSourceUpdateWithoutDocumentRequirementProposalsInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceUncheckedUpdateWithoutDocumentRequirementProposalsInput = {
@@ -4837,6 +5149,7 @@ export type LegalSourceUncheckedUpdateWithoutDocumentRequirementProposalsInput =
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceCreateWithoutLegacyNormaFontiInput = {
@@ -4892,6 +5205,7 @@ export type LegalSourceCreateWithoutLegacyNormaFontiInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceUncheckedCreateWithoutLegacyNormaFontiInput = {
@@ -4947,6 +5261,7 @@ export type LegalSourceUncheckedCreateWithoutLegacyNormaFontiInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedCreateNestedManyWithoutLegalSourceInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedCreateNestedManyWithoutLegalSourceInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedCreateNestedManyWithoutLegalSourceInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedCreateNestedManyWithoutSourceFamilyInput
 }
 
 export type LegalSourceCreateOrConnectWithoutLegacyNormaFontiInput = {
@@ -5018,6 +5333,7 @@ export type LegalSourceUpdateWithoutLegacyNormaFontiInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceUncheckedUpdateWithoutLegacyNormaFontiInput = {
@@ -5073,6 +5389,7 @@ export type LegalSourceUncheckedUpdateWithoutLegacyNormaFontiInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceCreateManyEnteInput = {
@@ -5171,6 +5488,7 @@ export type LegalSourceUpdateWithoutEnteInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceUncheckedUpdateWithoutEnteInput = {
@@ -5226,6 +5544,7 @@ export type LegalSourceUncheckedUpdateWithoutEnteInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceUncheckedUpdateManyWithoutEnteInput = {
@@ -5367,6 +5686,7 @@ export type LegalSourceUpdateWithoutAuthorityInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceUncheckedUpdateWithoutAuthorityInput = {
@@ -5422,6 +5742,7 @@ export type LegalSourceUncheckedUpdateWithoutAuthorityInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceUncheckedUpdateManyWithoutAuthorityInput = {
@@ -5563,6 +5884,7 @@ export type LegalSourceUpdateWithoutPortInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceUncheckedUpdateWithoutPortInput = {
@@ -5618,6 +5940,7 @@ export type LegalSourceUncheckedUpdateWithoutPortInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceUncheckedUpdateManyWithoutPortInput = {
@@ -5759,6 +6082,7 @@ export type LegalSourceUpdateWithoutImportRunInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceUncheckedUpdateWithoutImportRunInput = {
@@ -5814,6 +6138,7 @@ export type LegalSourceUncheckedUpdateWithoutImportRunInput = {
   candidateResolutions?: Prisma.LegalSourceCandidateResolutionUncheckedUpdateManyWithoutLegalSourceNestedInput
   legalReferenceMatches?: Prisma.LegalReferenceMatchUncheckedUpdateManyWithoutLegalSourceNestedInput
   officialReconciliations?: Prisma.LegalReferenceOfficialReconciliationUncheckedUpdateManyWithoutLegalSourceNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedUpdateManyWithoutSourceFamilyNestedInput
 }
 
 export type LegalSourceUncheckedUpdateManyWithoutImportRunInput = {
@@ -5877,6 +6202,7 @@ export type LegalSourceCountOutputType = {
   candidateResolutions: number
   legalReferenceMatches: number
   officialReconciliations: number
+  temporalAssessments: number
 }
 
 export type LegalSourceCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -5892,6 +6218,7 @@ export type LegalSourceCountOutputTypeSelect<ExtArgs extends runtime.Types.Exten
   candidateResolutions?: boolean | LegalSourceCountOutputTypeCountCandidateResolutionsArgs
   legalReferenceMatches?: boolean | LegalSourceCountOutputTypeCountLegalReferenceMatchesArgs
   officialReconciliations?: boolean | LegalSourceCountOutputTypeCountOfficialReconciliationsArgs
+  temporalAssessments?: boolean | LegalSourceCountOutputTypeCountTemporalAssessmentsArgs
 }
 
 /**
@@ -5988,6 +6315,13 @@ export type LegalSourceCountOutputTypeCountOfficialReconciliationsArgs<ExtArgs e
   where?: Prisma.LegalReferenceOfficialReconciliationWhereInput
 }
 
+/**
+ * LegalSourceCountOutputType without action
+ */
+export type LegalSourceCountOutputTypeCountTemporalAssessmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LegalSourceTemporalAssessmentWhereInput
+}
+
 
 export type LegalSourceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -6047,6 +6381,7 @@ export type LegalSourceSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   candidateResolutions?: boolean | Prisma.LegalSource$candidateResolutionsArgs<ExtArgs>
   legalReferenceMatches?: boolean | Prisma.LegalSource$legalReferenceMatchesArgs<ExtArgs>
   officialReconciliations?: boolean | Prisma.LegalSource$officialReconciliationsArgs<ExtArgs>
+  temporalAssessments?: boolean | Prisma.LegalSource$temporalAssessmentsArgs<ExtArgs>
   _count?: boolean | Prisma.LegalSourceCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["legalSource"]>
 
@@ -6208,6 +6543,7 @@ export type LegalSourceInclude<ExtArgs extends runtime.Types.Extensions.Internal
   candidateResolutions?: boolean | Prisma.LegalSource$candidateResolutionsArgs<ExtArgs>
   legalReferenceMatches?: boolean | Prisma.LegalSource$legalReferenceMatchesArgs<ExtArgs>
   officialReconciliations?: boolean | Prisma.LegalSource$officialReconciliationsArgs<ExtArgs>
+  temporalAssessments?: boolean | Prisma.LegalSource$temporalAssessmentsArgs<ExtArgs>
   _count?: boolean | Prisma.LegalSourceCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type LegalSourceIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -6242,6 +6578,7 @@ export type $LegalSourcePayload<ExtArgs extends runtime.Types.Extensions.Interna
     candidateResolutions: Prisma.$LegalSourceCandidateResolutionPayload<ExtArgs>[]
     legalReferenceMatches: Prisma.$LegalReferenceMatchPayload<ExtArgs>[]
     officialReconciliations: Prisma.$LegalReferenceOfficialReconciliationPayload<ExtArgs>[]
+    temporalAssessments: Prisma.$LegalSourceTemporalAssessmentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -6695,6 +7032,7 @@ export interface Prisma__LegalSourceClient<T, Null = never, ExtArgs extends runt
   candidateResolutions<T extends Prisma.LegalSource$candidateResolutionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalSource$candidateResolutionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LegalSourceCandidateResolutionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   legalReferenceMatches<T extends Prisma.LegalSource$legalReferenceMatchesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalSource$legalReferenceMatchesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LegalReferenceMatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   officialReconciliations<T extends Prisma.LegalSource$officialReconciliationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalSource$officialReconciliationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LegalReferenceOfficialReconciliationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  temporalAssessments<T extends Prisma.LegalSource$temporalAssessmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalSource$temporalAssessmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LegalSourceTemporalAssessmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7527,6 +7865,30 @@ export type LegalSource$officialReconciliationsArgs<ExtArgs extends runtime.Type
   take?: number
   skip?: number
   distinct?: Prisma.LegalReferenceOfficialReconciliationScalarFieldEnum | Prisma.LegalReferenceOfficialReconciliationScalarFieldEnum[]
+}
+
+/**
+ * LegalSource.temporalAssessments
+ */
+export type LegalSource$temporalAssessmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LegalSourceTemporalAssessment
+   */
+  select?: Prisma.LegalSourceTemporalAssessmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LegalSourceTemporalAssessment
+   */
+  omit?: Prisma.LegalSourceTemporalAssessmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LegalSourceTemporalAssessmentInclude<ExtArgs> | null
+  where?: Prisma.LegalSourceTemporalAssessmentWhereInput
+  orderBy?: Prisma.LegalSourceTemporalAssessmentOrderByWithRelationInput | Prisma.LegalSourceTemporalAssessmentOrderByWithRelationInput[]
+  cursor?: Prisma.LegalSourceTemporalAssessmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LegalSourceTemporalAssessmentScalarFieldEnum | Prisma.LegalSourceTemporalAssessmentScalarFieldEnum[]
 }
 
 /**

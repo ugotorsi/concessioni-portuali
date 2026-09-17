@@ -391,6 +391,7 @@ export const ModelName = {
   ImportRun: 'ImportRun',
   LegalSource: 'LegalSource',
   LegalExpressionVersion: 'LegalExpressionVersion',
+  LegalSourceTemporalAssessment: 'LegalSourceTemporalAssessment',
   LegalSourceIdentityAssertion: 'LegalSourceIdentityAssertion',
   LegalSourceVersion: 'LegalSourceVersion',
   LegalSourceAcquisition: 'LegalSourceAcquisition',
@@ -454,7 +455,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "legalReferenceMatch" | "legalReferenceOfficialLookup" | "legalReferenceOfficialHit" | "legalReferenceOfficialReconciliation" | "legalReferenceOfficialReconciliationEvidence" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceTemporalAssessment" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "legalReferenceMatch" | "legalReferenceOfficialLookup" | "legalReferenceOfficialHit" | "legalReferenceOfficialReconciliation" | "legalReferenceOfficialReconciliationEvidence" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -973,6 +974,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.LegalExpressionVersionCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.LegalExpressionVersionCountAggregateOutputType> | number
+        }
+      }
+    }
+    LegalSourceTemporalAssessment: {
+      payload: Prisma.$LegalSourceTemporalAssessmentPayload<ExtArgs>
+      fields: Prisma.LegalSourceTemporalAssessmentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LegalSourceTemporalAssessmentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceTemporalAssessmentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LegalSourceTemporalAssessmentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceTemporalAssessmentPayload>
+        }
+        findFirst: {
+          args: Prisma.LegalSourceTemporalAssessmentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceTemporalAssessmentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LegalSourceTemporalAssessmentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceTemporalAssessmentPayload>
+        }
+        findMany: {
+          args: Prisma.LegalSourceTemporalAssessmentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceTemporalAssessmentPayload>[]
+        }
+        create: {
+          args: Prisma.LegalSourceTemporalAssessmentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceTemporalAssessmentPayload>
+        }
+        createMany: {
+          args: Prisma.LegalSourceTemporalAssessmentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LegalSourceTemporalAssessmentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceTemporalAssessmentPayload>[]
+        }
+        delete: {
+          args: Prisma.LegalSourceTemporalAssessmentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceTemporalAssessmentPayload>
+        }
+        update: {
+          args: Prisma.LegalSourceTemporalAssessmentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceTemporalAssessmentPayload>
+        }
+        deleteMany: {
+          args: Prisma.LegalSourceTemporalAssessmentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LegalSourceTemporalAssessmentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LegalSourceTemporalAssessmentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceTemporalAssessmentPayload>[]
+        }
+        upsert: {
+          args: Prisma.LegalSourceTemporalAssessmentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LegalSourceTemporalAssessmentPayload>
+        }
+        aggregate: {
+          args: Prisma.LegalSourceTemporalAssessmentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLegalSourceTemporalAssessment>
+        }
+        groupBy: {
+          args: Prisma.LegalSourceTemporalAssessmentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LegalSourceTemporalAssessmentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LegalSourceTemporalAssessmentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LegalSourceTemporalAssessmentCountAggregateOutputType> | number
         }
       }
     }
@@ -4706,6 +4781,27 @@ export const LegalExpressionVersionScalarFieldEnum = {
 export type LegalExpressionVersionScalarFieldEnum = (typeof LegalExpressionVersionScalarFieldEnum)[keyof typeof LegalExpressionVersionScalarFieldEnum]
 
 
+export const LegalSourceTemporalAssessmentScalarFieldEnum = {
+  id: 'id',
+  sourceFamilyId: 'sourceFamilyId',
+  legalExpressionVersionId: 'legalExpressionVersionId',
+  assessmentVersion: 'assessmentVersion',
+  referenceDate: 'referenceDate',
+  validityState: 'validityState',
+  temporalWindowState: 'temporalWindowState',
+  applicabilityState: 'applicabilityState',
+  reasonCodes: 'reasonCodes',
+  effectiveFromSnapshot: 'effectiveFromSnapshot',
+  effectiveToSnapshot: 'effectiveToSnapshot',
+  humanReviewRequired: 'humanReviewRequired',
+  confidence: 'confidence',
+  inputFingerprint: 'inputFingerprint',
+  createdAt: 'createdAt'
+} as const
+
+export type LegalSourceTemporalAssessmentScalarFieldEnum = (typeof LegalSourceTemporalAssessmentScalarFieldEnum)[keyof typeof LegalSourceTemporalAssessmentScalarFieldEnum]
+
+
 export const LegalSourceIdentityAssertionScalarFieldEnum = {
   id: 'id',
   sourceFamilyId: 'sourceFamilyId',
@@ -7277,6 +7373,7 @@ export type GlobalOmitConfig = {
   importRun?: Prisma.ImportRunOmit
   legalSource?: Prisma.LegalSourceOmit
   legalExpressionVersion?: Prisma.LegalExpressionVersionOmit
+  legalSourceTemporalAssessment?: Prisma.LegalSourceTemporalAssessmentOmit
   legalSourceIdentityAssertion?: Prisma.LegalSourceIdentityAssertionOmit
   legalSourceVersion?: Prisma.LegalSourceVersionOmit
   legalSourceAcquisition?: Prisma.LegalSourceAcquisitionOmit

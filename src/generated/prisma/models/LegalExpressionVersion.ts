@@ -224,6 +224,7 @@ export type LegalExpressionVersionWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"LegalExpressionVersion"> | Date | string
   sourceFamily?: Prisma.XOR<Prisma.LegalSourceScalarRelationFilter, Prisma.LegalSourceWhereInput>
   representations?: Prisma.LegalSourceVersionListRelationFilter
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentListRelationFilter
 }
 
 export type LegalExpressionVersionOrderByWithRelationInput = {
@@ -240,6 +241,7 @@ export type LegalExpressionVersionOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   sourceFamily?: Prisma.LegalSourceOrderByWithRelationInput
   representations?: Prisma.LegalSourceVersionOrderByRelationAggregateInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentOrderByRelationAggregateInput
 }
 
 export type LegalExpressionVersionWhereUniqueInput = Prisma.AtLeast<{
@@ -261,6 +263,7 @@ export type LegalExpressionVersionWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"LegalExpressionVersion"> | Date | string
   sourceFamily?: Prisma.XOR<Prisma.LegalSourceScalarRelationFilter, Prisma.LegalSourceWhereInput>
   representations?: Prisma.LegalSourceVersionListRelationFilter
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentListRelationFilter
 }, "id" | "sourceFamilyId_expressionKey" | "id_sourceFamilyId">
 
 export type LegalExpressionVersionOrderByWithAggregationInput = {
@@ -310,6 +313,7 @@ export type LegalExpressionVersionCreateInput = {
   updatedAt?: Date | string
   sourceFamily: Prisma.LegalSourceCreateNestedOneWithoutExpressionsInput
   representations?: Prisma.LegalSourceVersionCreateNestedManyWithoutLegalExpressionVersionInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentCreateNestedManyWithoutLegalExpressionVersionInput
 }
 
 export type LegalExpressionVersionUncheckedCreateInput = {
@@ -325,6 +329,7 @@ export type LegalExpressionVersionUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   representations?: Prisma.LegalSourceVersionUncheckedCreateNestedManyWithoutLegalExpressionVersionInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedCreateNestedManyWithoutLegalExpressionVersionInput
 }
 
 export type LegalExpressionVersionUpdateInput = {
@@ -340,6 +345,7 @@ export type LegalExpressionVersionUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sourceFamily?: Prisma.LegalSourceUpdateOneRequiredWithoutExpressionsNestedInput
   representations?: Prisma.LegalSourceVersionUpdateManyWithoutLegalExpressionVersionNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUpdateManyWithoutLegalExpressionVersionNestedInput
 }
 
 export type LegalExpressionVersionUncheckedUpdateInput = {
@@ -355,6 +361,7 @@ export type LegalExpressionVersionUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   representations?: Prisma.LegalSourceVersionUncheckedUpdateManyWithoutLegalExpressionVersionNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedUpdateManyWithoutLegalExpressionVersionNestedInput
 }
 
 export type LegalExpressionVersionCreateManyInput = {
@@ -456,6 +463,11 @@ export type LegalExpressionVersionMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
+export type LegalExpressionVersionScalarRelationFilter = {
+  is?: Prisma.LegalExpressionVersionWhereInput
+  isNot?: Prisma.LegalExpressionVersionWhereInput
+}
+
 export type LegalExpressionVersionNullableScalarRelationFilter = {
   is?: Prisma.LegalExpressionVersionWhereInput | null
   isNot?: Prisma.LegalExpressionVersionWhereInput | null
@@ -503,6 +515,20 @@ export type LegalExpressionVersionUncheckedUpdateManyWithoutSourceFamilyNestedIn
   deleteMany?: Prisma.LegalExpressionVersionScalarWhereInput | Prisma.LegalExpressionVersionScalarWhereInput[]
 }
 
+export type LegalExpressionVersionCreateNestedOneWithoutTemporalAssessmentsInput = {
+  create?: Prisma.XOR<Prisma.LegalExpressionVersionCreateWithoutTemporalAssessmentsInput, Prisma.LegalExpressionVersionUncheckedCreateWithoutTemporalAssessmentsInput>
+  connectOrCreate?: Prisma.LegalExpressionVersionCreateOrConnectWithoutTemporalAssessmentsInput
+  connect?: Prisma.LegalExpressionVersionWhereUniqueInput
+}
+
+export type LegalExpressionVersionUpdateOneRequiredWithoutTemporalAssessmentsNestedInput = {
+  create?: Prisma.XOR<Prisma.LegalExpressionVersionCreateWithoutTemporalAssessmentsInput, Prisma.LegalExpressionVersionUncheckedCreateWithoutTemporalAssessmentsInput>
+  connectOrCreate?: Prisma.LegalExpressionVersionCreateOrConnectWithoutTemporalAssessmentsInput
+  upsert?: Prisma.LegalExpressionVersionUpsertWithoutTemporalAssessmentsInput
+  connect?: Prisma.LegalExpressionVersionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LegalExpressionVersionUpdateToOneWithWhereWithoutTemporalAssessmentsInput, Prisma.LegalExpressionVersionUpdateWithoutTemporalAssessmentsInput>, Prisma.LegalExpressionVersionUncheckedUpdateWithoutTemporalAssessmentsInput>
+}
+
 export type LegalExpressionVersionCreateNestedOneWithoutRepresentationsInput = {
   create?: Prisma.XOR<Prisma.LegalExpressionVersionCreateWithoutRepresentationsInput, Prisma.LegalExpressionVersionUncheckedCreateWithoutRepresentationsInput>
   connectOrCreate?: Prisma.LegalExpressionVersionCreateOrConnectWithoutRepresentationsInput
@@ -531,6 +557,7 @@ export type LegalExpressionVersionCreateWithoutSourceFamilyInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   representations?: Prisma.LegalSourceVersionCreateNestedManyWithoutLegalExpressionVersionInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentCreateNestedManyWithoutLegalExpressionVersionInput
 }
 
 export type LegalExpressionVersionUncheckedCreateWithoutSourceFamilyInput = {
@@ -545,6 +572,7 @@ export type LegalExpressionVersionUncheckedCreateWithoutSourceFamilyInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   representations?: Prisma.LegalSourceVersionUncheckedCreateNestedManyWithoutLegalExpressionVersionInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedCreateNestedManyWithoutLegalExpressionVersionInput
 }
 
 export type LegalExpressionVersionCreateOrConnectWithoutSourceFamilyInput = {
@@ -590,6 +618,82 @@ export type LegalExpressionVersionScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"LegalExpressionVersion"> | Date | string
 }
 
+export type LegalExpressionVersionCreateWithoutTemporalAssessmentsInput = {
+  id?: string
+  expressionKey: string
+  publicationDate?: Date | string | null
+  effectiveFrom?: Date | string | null
+  effectiveTo?: Date | string | null
+  expressionStatus?: string | null
+  correctionMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  consolidationMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sourceFamily: Prisma.LegalSourceCreateNestedOneWithoutExpressionsInput
+  representations?: Prisma.LegalSourceVersionCreateNestedManyWithoutLegalExpressionVersionInput
+}
+
+export type LegalExpressionVersionUncheckedCreateWithoutTemporalAssessmentsInput = {
+  id?: string
+  sourceFamilyId: string
+  expressionKey: string
+  publicationDate?: Date | string | null
+  effectiveFrom?: Date | string | null
+  effectiveTo?: Date | string | null
+  expressionStatus?: string | null
+  correctionMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  consolidationMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  representations?: Prisma.LegalSourceVersionUncheckedCreateNestedManyWithoutLegalExpressionVersionInput
+}
+
+export type LegalExpressionVersionCreateOrConnectWithoutTemporalAssessmentsInput = {
+  where: Prisma.LegalExpressionVersionWhereUniqueInput
+  create: Prisma.XOR<Prisma.LegalExpressionVersionCreateWithoutTemporalAssessmentsInput, Prisma.LegalExpressionVersionUncheckedCreateWithoutTemporalAssessmentsInput>
+}
+
+export type LegalExpressionVersionUpsertWithoutTemporalAssessmentsInput = {
+  update: Prisma.XOR<Prisma.LegalExpressionVersionUpdateWithoutTemporalAssessmentsInput, Prisma.LegalExpressionVersionUncheckedUpdateWithoutTemporalAssessmentsInput>
+  create: Prisma.XOR<Prisma.LegalExpressionVersionCreateWithoutTemporalAssessmentsInput, Prisma.LegalExpressionVersionUncheckedCreateWithoutTemporalAssessmentsInput>
+  where?: Prisma.LegalExpressionVersionWhereInput
+}
+
+export type LegalExpressionVersionUpdateToOneWithWhereWithoutTemporalAssessmentsInput = {
+  where?: Prisma.LegalExpressionVersionWhereInput
+  data: Prisma.XOR<Prisma.LegalExpressionVersionUpdateWithoutTemporalAssessmentsInput, Prisma.LegalExpressionVersionUncheckedUpdateWithoutTemporalAssessmentsInput>
+}
+
+export type LegalExpressionVersionUpdateWithoutTemporalAssessmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  expressionKey?: Prisma.StringFieldUpdateOperationsInput | string
+  publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expressionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  correctionMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  consolidationMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sourceFamily?: Prisma.LegalSourceUpdateOneRequiredWithoutExpressionsNestedInput
+  representations?: Prisma.LegalSourceVersionUpdateManyWithoutLegalExpressionVersionNestedInput
+}
+
+export type LegalExpressionVersionUncheckedUpdateWithoutTemporalAssessmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceFamilyId?: Prisma.StringFieldUpdateOperationsInput | string
+  expressionKey?: Prisma.StringFieldUpdateOperationsInput | string
+  publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expressionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  correctionMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  consolidationMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  representations?: Prisma.LegalSourceVersionUncheckedUpdateManyWithoutLegalExpressionVersionNestedInput
+}
+
 export type LegalExpressionVersionCreateWithoutRepresentationsInput = {
   id?: string
   expressionKey: string
@@ -602,6 +706,7 @@ export type LegalExpressionVersionCreateWithoutRepresentationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sourceFamily: Prisma.LegalSourceCreateNestedOneWithoutExpressionsInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentCreateNestedManyWithoutLegalExpressionVersionInput
 }
 
 export type LegalExpressionVersionUncheckedCreateWithoutRepresentationsInput = {
@@ -616,6 +721,7 @@ export type LegalExpressionVersionUncheckedCreateWithoutRepresentationsInput = {
   consolidationMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedCreateNestedManyWithoutLegalExpressionVersionInput
 }
 
 export type LegalExpressionVersionCreateOrConnectWithoutRepresentationsInput = {
@@ -646,6 +752,7 @@ export type LegalExpressionVersionUpdateWithoutRepresentationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sourceFamily?: Prisma.LegalSourceUpdateOneRequiredWithoutExpressionsNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUpdateManyWithoutLegalExpressionVersionNestedInput
 }
 
 export type LegalExpressionVersionUncheckedUpdateWithoutRepresentationsInput = {
@@ -660,6 +767,7 @@ export type LegalExpressionVersionUncheckedUpdateWithoutRepresentationsInput = {
   consolidationMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedUpdateManyWithoutLegalExpressionVersionNestedInput
 }
 
 export type LegalExpressionVersionCreateManySourceFamilyInput = {
@@ -687,6 +795,7 @@ export type LegalExpressionVersionUpdateWithoutSourceFamilyInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   representations?: Prisma.LegalSourceVersionUpdateManyWithoutLegalExpressionVersionNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUpdateManyWithoutLegalExpressionVersionNestedInput
 }
 
 export type LegalExpressionVersionUncheckedUpdateWithoutSourceFamilyInput = {
@@ -701,6 +810,7 @@ export type LegalExpressionVersionUncheckedUpdateWithoutSourceFamilyInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   representations?: Prisma.LegalSourceVersionUncheckedUpdateManyWithoutLegalExpressionVersionNestedInput
+  temporalAssessments?: Prisma.LegalSourceTemporalAssessmentUncheckedUpdateManyWithoutLegalExpressionVersionNestedInput
 }
 
 export type LegalExpressionVersionUncheckedUpdateManyWithoutSourceFamilyInput = {
@@ -723,10 +833,12 @@ export type LegalExpressionVersionUncheckedUpdateManyWithoutSourceFamilyInput = 
 
 export type LegalExpressionVersionCountOutputType = {
   representations: number
+  temporalAssessments: number
 }
 
 export type LegalExpressionVersionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   representations?: boolean | LegalExpressionVersionCountOutputTypeCountRepresentationsArgs
+  temporalAssessments?: boolean | LegalExpressionVersionCountOutputTypeCountTemporalAssessmentsArgs
 }
 
 /**
@@ -746,6 +858,13 @@ export type LegalExpressionVersionCountOutputTypeCountRepresentationsArgs<ExtArg
   where?: Prisma.LegalSourceVersionWhereInput
 }
 
+/**
+ * LegalExpressionVersionCountOutputType without action
+ */
+export type LegalExpressionVersionCountOutputTypeCountTemporalAssessmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LegalSourceTemporalAssessmentWhereInput
+}
+
 
 export type LegalExpressionVersionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -761,6 +880,7 @@ export type LegalExpressionVersionSelect<ExtArgs extends runtime.Types.Extension
   updatedAt?: boolean
   sourceFamily?: boolean | Prisma.LegalSourceDefaultArgs<ExtArgs>
   representations?: boolean | Prisma.LegalExpressionVersion$representationsArgs<ExtArgs>
+  temporalAssessments?: boolean | Prisma.LegalExpressionVersion$temporalAssessmentsArgs<ExtArgs>
   _count?: boolean | Prisma.LegalExpressionVersionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["legalExpressionVersion"]>
 
@@ -812,6 +932,7 @@ export type LegalExpressionVersionOmit<ExtArgs extends runtime.Types.Extensions.
 export type LegalExpressionVersionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sourceFamily?: boolean | Prisma.LegalSourceDefaultArgs<ExtArgs>
   representations?: boolean | Prisma.LegalExpressionVersion$representationsArgs<ExtArgs>
+  temporalAssessments?: boolean | Prisma.LegalExpressionVersion$temporalAssessmentsArgs<ExtArgs>
   _count?: boolean | Prisma.LegalExpressionVersionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type LegalExpressionVersionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -826,6 +947,7 @@ export type $LegalExpressionVersionPayload<ExtArgs extends runtime.Types.Extensi
   objects: {
     sourceFamily: Prisma.$LegalSourcePayload<ExtArgs>
     representations: Prisma.$LegalSourceVersionPayload<ExtArgs>[]
+    temporalAssessments: Prisma.$LegalSourceTemporalAssessmentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1235,6 +1357,7 @@ export interface Prisma__LegalExpressionVersionClient<T, Null = never, ExtArgs e
   readonly [Symbol.toStringTag]: "PrismaPromise"
   sourceFamily<T extends Prisma.LegalSourceDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalSourceDefaultArgs<ExtArgs>>): Prisma.Prisma__LegalSourceClient<runtime.Types.Result.GetResult<Prisma.$LegalSourcePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   representations<T extends Prisma.LegalExpressionVersion$representationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalExpressionVersion$representationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LegalSourceVersionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  temporalAssessments<T extends Prisma.LegalExpressionVersion$temporalAssessmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalExpressionVersion$temporalAssessmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LegalSourceTemporalAssessmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1697,6 +1820,30 @@ export type LegalExpressionVersion$representationsArgs<ExtArgs extends runtime.T
   take?: number
   skip?: number
   distinct?: Prisma.LegalSourceVersionScalarFieldEnum | Prisma.LegalSourceVersionScalarFieldEnum[]
+}
+
+/**
+ * LegalExpressionVersion.temporalAssessments
+ */
+export type LegalExpressionVersion$temporalAssessmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LegalSourceTemporalAssessment
+   */
+  select?: Prisma.LegalSourceTemporalAssessmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LegalSourceTemporalAssessment
+   */
+  omit?: Prisma.LegalSourceTemporalAssessmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LegalSourceTemporalAssessmentInclude<ExtArgs> | null
+  where?: Prisma.LegalSourceTemporalAssessmentWhereInput
+  orderBy?: Prisma.LegalSourceTemporalAssessmentOrderByWithRelationInput | Prisma.LegalSourceTemporalAssessmentOrderByWithRelationInput[]
+  cursor?: Prisma.LegalSourceTemporalAssessmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LegalSourceTemporalAssessmentScalarFieldEnum | Prisma.LegalSourceTemporalAssessmentScalarFieldEnum[]
 }
 
 /**
