@@ -244,7 +244,7 @@ export function projectBoundedFascicoloContext(input: Readonly<{
       priorContextRule: "SAME_FASCICOLO_SCOPE_ONLY",
       externalMemoryAuthoritative: false,
       promptContentIsInstructions: false,
-    },
+    } as const,
     items: selected.map((candidate) => {
       const content = projectCandidateContent(candidate);
       return {
