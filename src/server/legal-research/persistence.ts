@@ -20,6 +20,15 @@ import {
   type ResearchMission,
   type ResearchMissionStatus,
 } from "./bridge";
+import {
+  deriveFascicoloContextScope,
+  projectBoundedFascicoloContext,
+  projectResearchEvidenceBundleForContext,
+  projectResearchMissionForMcp,
+  researchPurposeReferences,
+  type BoundedFascicoloContext,
+  type FascicoloContextCandidate,
+} from "./fascicolo-context";
 
 export const RESEARCH_MISSION_EXECUTION_OPERATION = "LEGAL_RESEARCH.EXECUTE_V1" as const;
 export const RESEARCH_MISSION_EXECUTION_PURPOSE = "LEGAL_RESEARCH_EXECUTION" as const;
@@ -155,6 +164,10 @@ function missionFrom(record: ResearchMissionRecord): ResearchMission {
     ...(record.payload as unknown as ResearchMission),
     missionId: record.id,
     status: record.status,
+    caseReference: {
+      caseId: record.caseId,
+      ...(record.fascicoloReference ? { fascicoloReference: record.fascicoloReference } : {}),
+    },
   };
 }
 
@@ -268,6 +281,84 @@ export async function getResearchMission(
   if (!record) return null;
   authorize(record, actor);
   return storedMission(record);
+}
+
+export async function getResearchFascicoloContext(
+  missionId: string,
+  actor: ResearchServiceActor,
+  overrides?: Partial<ResearchPersistenceContext>,
+): Promise<BoundedFascicoloContext> {
+  const ctx = context(overrides);
+  const current = await ctx.client.researchMissionRecord.findUnique({
+    where: { id: identifier(missionId) },
+  });
+  if (!current) throw new ResearchPersistenceError("MISSION_NOT_FOUND");
+  authorize(current, actor);
+  if (!current.tenantId) throw new ResearchPersistenceError("AUTHORIZATION_REQUIRED");
+  const mission = missionFrom(current);
+  const scope = deriveFascicoloContextScope({
+    tenantId: current.tenantId,
+    caseReference: mission.caseReference,
+  });
+  const priorRecords = await ctx.client.researchMissionRecord.findMany({
+    where: {
+      tenantId: current.tenantId,
+      caseId: current.caseId,
+      fascicoloReference: current.fascicoloReference,
+      status: { in: ["COMPLETED", "BUDGET_EXHAUSTED"] },
+    },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    take: 20,
+  });
+  const priorMissions = priorRecords.filter((record) => record.id !== current.id);
+  const bundleRecords = priorMissions.length > 0
+    ? await ctx.client.researchEvidenceBundleRecord.findMany({
+        where: { missionId: { in: priorMissions.map((record) => record.id) } },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: 20,
+      })
+    : [];
+  const missionById = new Map(priorMissions.map((record) => [record.id, missionFrom(record)]));
+  const candidates: FascicoloContextCandidate[] = priorMissions.map((record) => {
+    const priorMission = missionFrom(record);
+    return {
+      sourceType: "SAME_FASCICOLO_PRIOR_MISSION",
+      sourceId: record.id,
+      missionId: record.id,
+      tenantId: record.tenantId!,
+      caseReference: priorMission.caseReference,
+      createdAt: record.createdAt.toISOString(),
+      version: record.contractVersion,
+      contentHash: record.payloadFingerprint,
+      purposeReferences: researchPurposeReferences(priorMission),
+      content: { mission: projectResearchMissionForMcp(priorMission) },
+    };
+  });
+  for (const record of bundleRecords) {
+    const priorMission = missionById.get(record.missionId);
+    if (!priorMission) continue;
+    candidates.push({
+      sourceType: "SAME_FASCICOLO_ACCEPTED_BUNDLE",
+      sourceId: record.id,
+      missionId: record.missionId,
+      tenantId: current.tenantId,
+      caseReference: priorMission.caseReference,
+      createdAt: record.createdAt.toISOString(),
+      version: record.contractVersion,
+      contentHash: record.fingerprint,
+      purposeReferences: researchPurposeReferences(priorMission),
+      content: {
+        evidenceBundle: projectResearchEvidenceBundleForContext(
+          record.payload as unknown as ResearchEvidenceBundle,
+        ),
+      },
+    });
+  }
+  return projectBoundedFascicoloContext({
+    scope,
+    purposeReferences: researchPurposeReferences(mission),
+    candidates,
+  });
 }
 
 export async function listPendingResearchMissions(

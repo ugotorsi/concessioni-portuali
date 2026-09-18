@@ -12,6 +12,7 @@ import {
 } from "@/server/legal-research/mcp";
 import type { ResearchMcpPrincipal } from "@/server/legal-research/mcp-auth";
 import { ResearchPersistenceError } from "@/server/legal-research/persistence";
+import { deriveFascicoloContextScope } from "@/server/legal-research/fascicolo-context";
 
 const claimToken = "a".repeat(64);
 const principal: ResearchMcpPrincipal = {
@@ -291,6 +292,45 @@ describe("Block 3B.13C legal research MCP", () => {
     }));
     expect(fetched.mission.referenceDate).toBe(mission.referenceDate);
     expect(fetched.mission.researchQuestion).toContain("hidden_admin_tool");
+  });
+
+  it("strictly projects mission egress and ignores client-supplied scope selectors", async () => {
+    const mockService = service();
+    vi.mocked(mockService.getMission).mockResolvedValue({
+      ...storedMission,
+      mission: {
+        ...mission,
+        clientProfile: {
+          restrictedInference: "SYNTHETIC_RESTRICTED_CATEGORY",
+        },
+      },
+    } as never);
+    const { client } = await protocolHarness(mockService);
+    const fetched = structured(await client.callTool({
+      name: "research_get_mission",
+      arguments: {
+        missionId: mission.missionId,
+        caseId: "case-b",
+        tenantId: "tenant-b",
+        scopeId: "fascicolo-scope:attacker",
+        conversationId: "conversation-b",
+      },
+    }));
+    const serialized = JSON.stringify(fetched);
+    expect(vi.mocked(mockService.getMission)).toHaveBeenCalledWith(
+      mission.missionId,
+      { actorId: principal.actorId, tenantId: principal.tenantId },
+    );
+    expect(serialized).not.toContain("clientProfile");
+    expect(serialized).not.toContain("restrictedInference");
+    expect(serialized).not.toContain("SYNTHETIC_RESTRICTED_CATEGORY");
+    expect(serialized).not.toContain("payloadFingerprint");
+    expect(fetched.fascicoloContext.scope.scopeId).toBe(deriveFascicoloContextScope({
+      tenantId: principal.tenantId,
+      caseReference: mission.caseReference,
+    }).scopeId);
+    expect(fetched.fascicoloContext.scope.allowCrossFascicolo).toBe(false);
+    expect(fetched.fascicoloContext.scope.allowAccountWideMemory).toBe(false);
   });
 
   it("derives claimant and tenant identity only from the authenticated principal", async () => {

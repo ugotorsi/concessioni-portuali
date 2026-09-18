@@ -7,16 +7,24 @@ import {
   CONFIRMED_RESEARCH_TOOL_ROLES,
   RESEARCH_BRIDGE_VERSION,
   type ResearchEvidenceBundle,
+  type ResearchMission,
 } from "@/server/legal-research/bridge";
 import {
   ResearchPersistenceError,
   claimResearchMission,
   completeResearchMission,
   getResearchMission,
+  getResearchFascicoloContext,
   listPendingResearchMissions,
   releaseOrDeferResearchMission,
   submitResearchEvidenceBundle,
 } from "@/server/legal-research/persistence";
+import {
+  deriveFascicoloContextScope,
+  projectBoundedFascicoloContext,
+  projectResearchMissionForMcp,
+  researchPurposeReferences,
+} from "@/server/legal-research/fascicolo-context";
 import {
   RESEARCH_MCP_READ_SCOPE,
   RESEARCH_MCP_WRITE_SCOPE,
@@ -26,7 +34,7 @@ import {
   type ResearchMcpScope,
 } from "@/server/legal-research/mcp-auth";
 
-export const RESEARCH_MCP_SERVER_VERSION = "3B.13C-1" as const;
+export const RESEARCH_MCP_SERVER_VERSION = "3B.14D-1" as const;
 export const RESEARCH_MCP_ROUTE = "/api/mcp" as const;
 export const RESEARCH_MCP_MAX_PENDING_LIMIT = 50;
 export const RESEARCH_MCP_DEFAULT_PENDING_LIMIT = 20;
@@ -70,6 +78,7 @@ export type ResearchMcpErrorCode =
 export type ResearchMcpService = Readonly<{
   listPending: typeof listPendingResearchMissions;
   getMission: typeof getResearchMission;
+  getFascicoloContext?: typeof getResearchFascicoloContext;
   claimMission: typeof claimResearchMission;
   submitEvidenceBundle: typeof submitResearchEvidenceBundle;
   deferMission: typeof releaseOrDeferResearchMission;
@@ -97,6 +106,7 @@ export type ResearchMcpServerOptions = Readonly<{
 const defaultService: ResearchMcpService = {
   listPending: listPendingResearchMissions,
   getMission: getResearchMission,
+  getFascicoloContext: getResearchFascicoloContext,
   claimMission: claimResearchMission,
   submitEvidenceBundle: submitResearchEvidenceBundle,
   deferMission: releaseOrDeferResearchMission,
@@ -206,7 +216,7 @@ function securityMetadata(scope: ResearchMcpScope) {
 function operationalMission(stored: Awaited<ReturnType<typeof getResearchMission>>) {
   if (!stored) return null;
   return {
-    mission: stored.mission,
+    mission: projectResearchMissionForMcp(stored.mission),
     operational: {
       status: stored.operational.status,
       stateVersion: stored.operational.stateVersion,
@@ -216,6 +226,13 @@ function operationalMission(stored: Awaited<ReturnType<typeof getResearchMission
       deferredAt: stored.operational.deferredAt,
     },
   };
+}
+
+function scopeFor(principal: ResearchMcpPrincipal, mission: ResearchMission) {
+  return deriveFascicoloContextScope({
+    tenantId: principal.tenantId,
+    caseReference: mission.caseReference,
+  });
 }
 
 export function createResearchMcpServer(
@@ -312,11 +329,12 @@ export function createResearchMcpServer(
     return {
       missions: missions.slice(0, limit).map((stored) => ({
         missionId: stored.mission.missionId,
+        fascicoloScopeId: scopeFor(principal, stored.mission).scopeId,
         status: stored.operational.status,
         referenceDate: stored.mission.referenceDate,
         mode: stored.mission.mode,
         researchQuestion: stored.mission.researchQuestion,
-        caseReference: stored.mission.caseReference,
+        caseReference: projectResearchMissionForMcp(stored.mission).caseReference,
       })),
       limit,
       truncated: missions.length > limit,
@@ -332,7 +350,19 @@ export function createResearchMcpServer(
   }, async ({ missionId }) => invoke("research_get_mission", RESEARCH_MCP_READ_SCOPE, { missionId }, async () => {
     const stored = await service.getMission(missionId, actor(principal));
     if (!stored) throw new ResearchPersistenceError("MISSION_NOT_FOUND");
-    return operationalMission(stored) as unknown as Record<string, unknown>;
+    const scope = scopeFor(principal, stored.mission);
+    const context = service.getFascicoloContext
+      ? await service.getFascicoloContext(missionId, actor(principal))
+      : projectBoundedFascicoloContext({
+          scope,
+          purposeReferences: researchPurposeReferences(stored.mission),
+          candidates: [],
+        });
+    if (context.scope.scopeId !== scope.scopeId) throw new ResearchPersistenceError("AUTHORIZATION_REQUIRED");
+    return {
+      ...operationalMission(stored),
+      fascicoloContext: context,
+    } as unknown as Record<string, unknown>;
   }));
 
   server.registerTool("research_claim_mission", {
@@ -360,6 +390,7 @@ export function createResearchMcpServer(
       return {
         outcome: claimed.outcome,
         missionId,
+        fascicoloScopeId: scopeFor(principal, claimed.claim.mission.mission).scopeId,
         executionId: claimed.claim.execution.id,
         leaseExpiresAt: claimed.claim.execution.leaseExpiresAt,
         claimToken: claimed.claim.claimToken,
@@ -381,6 +412,9 @@ export function createResearchMcpServer(
     RESEARCH_MCP_WRITE_SCOPE,
     { missionId: bundle.missionId, executionId: bundle.executionId },
     async () => {
+      const stored = await service.getMission(bundle.missionId, actor(principal));
+      if (!stored) throw new ResearchPersistenceError("MISSION_NOT_FOUND");
+      const scope = scopeFor(principal, stored.mission);
       const submitted = await service.submitEvidenceBundle({
         bundle: bundle as ResearchEvidenceBundle,
         claimantId: principal.claimantId,
@@ -391,6 +425,7 @@ export function createResearchMcpServer(
         outcome: submitted.outcome === "REUSED" ? "DUPLICATE_OR_IDEMPOTENT_SUCCESS" : "CREATED",
         bundleId: submitted.bundle.id,
         missionId: submitted.bundle.missionId,
+        fascicoloScopeId: scope.scopeId,
         executionId: submitted.bundle.executionId,
         completionState: submitted.bundle.completionState,
       };
@@ -425,6 +460,7 @@ export function createResearchMcpServer(
       });
       return {
         missionId: stored.mission.missionId,
+        fascicoloScopeId: scopeFor(principal, stored.mission).scopeId,
         status: stored.operational.status,
         stateVersion: stored.operational.stateVersion,
       };
@@ -458,6 +494,7 @@ export function createResearchMcpServer(
       return {
         outcome: completed.outcome,
         missionId: completed.mission.mission.missionId,
+        fascicoloScopeId: scopeFor(principal, completed.mission.mission).scopeId,
         status: completed.mission.operational.status,
         stateVersion: completed.mission.operational.stateVersion,
       };

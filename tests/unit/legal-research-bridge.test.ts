@@ -460,6 +460,33 @@ describe("Block 3B.13A chat legal research bridge", () => {
       .toContain("CREDENTIAL_FIELD_FORBIDDEN");
   });
 
+  it("rejects profile enrichment fields but quarantines synthetic inference as evidence text", () => {
+    const unsafeMission = {
+      ...mission(),
+      clientProfile: { restrictedInference: "SYNTHETIC_RESTRICTED_CATEGORY" },
+    } as ResearchMission;
+    expect(validateResearchMission(unsafeMission).map((item) => item.code))
+      .toContain("PROFILE_FIELD_FORBIDDEN");
+
+    const researchMission = mission();
+    const unsafeBundle = {
+      ...bundle(researchMission),
+      metadata: { userProfile: { inferredAttribute: "SYNTHETIC_RESTRICTED_CATEGORY" } },
+    } as ResearchEvidenceBundle;
+    expect(codes(validateResearchEvidenceBundle(researchMission, unsafeBundle)))
+      .toContain("PROFILE_FIELD_FORBIDDEN");
+
+    const quarantined = bundle(researchMission, {
+      legalResearchSuggestions: [{
+        suggestionId: "synthetic-sensitive-review",
+        kind: "HUMAN_LEGAL_JUDGMENT_QUESTION",
+        description: "Person likely belongs to SYNTHETIC_RESTRICTED_CATEGORY; human review required.",
+      }],
+      completionState: "HUMAN_DECISION_REQUIRED",
+    });
+    expect(validateResearchEvidenceBundle(researchMission, quarantined)).toEqual([]);
+  });
+
   it("validates the same evidence bundle deterministically", () => {
     const researchMission = mission();
     const value = bundle(researchMission);

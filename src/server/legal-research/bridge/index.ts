@@ -285,6 +285,7 @@ export type ResearchBridgeValidationErrorCode =
   | "INVALID_ID"
   | "INVALID_MISSION_REFERENCE"
   | "INVALID_RESEARCH_QUESTION"
+  | "PROFILE_FIELD_FORBIDDEN"
   | "UNKNOWN_EXECUTION_REFERENCE";
 
 export type ResearchBridgeValidationError = Readonly<{
@@ -316,6 +317,18 @@ const canonicalCandidateFields = new Set([
   "legalExpressionVersionId",
   "legalSourceId",
   "temporalAssessment",
+]);
+const profileFieldNames = new Set([
+  "accountprofile",
+  "clientprofile",
+  "inferredattribute",
+  "inferredattributes",
+  "personalprofile",
+  "profileattribute",
+  "profileattributes",
+  "restrictedinference",
+  "sensitiveinference",
+  "userprofile",
 ]);
 
 function canonicalize(value: unknown): unknown {
@@ -353,15 +366,19 @@ function duplicateValues(values: readonly string[]): string[] {
   return [...duplicates].sort();
 }
 
-function unsafePaths(value: unknown, basePath = ""): Array<{ path: string; canonical: boolean }> {
+function unsafePaths(
+  value: unknown,
+  basePath = "",
+): Array<{ path: string; kind: "CANONICAL" | "CREDENTIAL" | "PROFILE" }> {
   if (!value || typeof value !== "object") return [];
-  const output: Array<{ path: string; canonical: boolean }> = [];
+  const output: Array<{ path: string; kind: "CANONICAL" | "CREDENTIAL" | "PROFILE" }> = [];
   for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
     const path = basePath ? `${basePath}.${key}` : key;
     const normalizedKey = key.replace(/[^a-z0-9]/gi, "").toLowerCase();
-    if (credentialFieldNames.has(normalizedKey)) output.push({ path, canonical: false });
+    if (credentialFieldNames.has(normalizedKey)) output.push({ path, kind: "CREDENTIAL" });
+    if (profileFieldNames.has(normalizedKey)) output.push({ path, kind: "PROFILE" });
     if (basePath.startsWith("authorityCandidates") && canonicalCandidateFields.has(key)) {
-      output.push({ path, canonical: true });
+      output.push({ path, kind: "CANONICAL" });
     }
     output.push(...unsafePaths(item, path));
   }
@@ -472,7 +489,11 @@ export function validateResearchMission(mission: ResearchMission): readonly Rese
     errors.push(error("INVALID_BUDGET", "budget", mission.missionId));
   }
   for (const unsafe of unsafePaths(mission)) {
-    errors.push(error("CREDENTIAL_FIELD_FORBIDDEN", unsafe.path, mission.missionId));
+    errors.push(error(
+      unsafe.kind === "PROFILE" ? "PROFILE_FIELD_FORBIDDEN" : "CREDENTIAL_FIELD_FORBIDDEN",
+      unsafe.path,
+      mission.missionId,
+    ));
   }
   return sortErrors(errors);
 }
@@ -669,7 +690,11 @@ export function validateResearchEvidenceBundle(
   }
   for (const unsafe of unsafePaths(bundle)) {
     errors.push(error(
-      unsafe.canonical ? "CANONICAL_AUTHORITY_FIELD_FORBIDDEN" : "CREDENTIAL_FIELD_FORBIDDEN",
+      unsafe.kind === "CANONICAL"
+        ? "CANONICAL_AUTHORITY_FIELD_FORBIDDEN"
+        : unsafe.kind === "PROFILE"
+          ? "PROFILE_FIELD_FORBIDDEN"
+          : "CREDENTIAL_FIELD_FORBIDDEN",
       unsafe.path,
       bundle.executionId,
     ));

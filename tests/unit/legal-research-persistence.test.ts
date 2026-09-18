@@ -17,6 +17,7 @@ import {
   claimResearchMission,
   completeResearchMission,
   createResearchMissionRecord,
+  getResearchFascicoloContext,
   getResearchMission,
   listPendingResearchMissions,
   rejectOrDeferResearchMission,
@@ -149,11 +150,21 @@ function createHarness() {
       if (!value) throw new Error("NOT_FOUND");
       return value;
     }),
-    findMany: vi.fn(async ({ where }: any) => [...missions.values()]
-      .filter((item) => item.tenantId === where.tenantId)
-      .filter((item) => ["PENDING", "DEFERRED"].includes(item.status)
-        || (item.status === "IN_PROGRESS" && item.claimExpiresAt <= where.OR[1].claimExpiresAt.lte))
-      .sort((left, right) => left.createdAt.getTime() - right.createdAt.getTime())),
+    findMany: vi.fn(async ({ where, take }: any) => {
+      let values = [...missions.values()].filter((item) => item.tenantId === where.tenantId);
+      if (where.caseId !== undefined) values = values.filter((item) => item.caseId === where.caseId);
+      if (where.fascicoloReference !== undefined) {
+        values = values.filter((item) => item.fascicoloReference === where.fascicoloReference);
+      }
+      if (where.status?.in) values = values.filter((item) => where.status.in.includes(item.status));
+      if (where.OR) {
+        values = values.filter((item) => ["PENDING", "DEFERRED"].includes(item.status)
+          || (item.status === "IN_PROGRESS" && item.claimExpiresAt <= where.OR[1].claimExpiresAt.lte));
+      }
+      return values
+        .sort((left, right) => left.createdAt.getTime() - right.createdAt.getTime())
+        .slice(0, take);
+    }),
     create: vi.fn(async ({ data }: any) => {
       if (missions.has(data.id)) throw p2002("ResearchMissionRecord", "id");
       const value = {
@@ -225,6 +236,10 @@ function createHarness() {
       if (where.id) return bundles.get(where.id) ?? null;
       return [...bundles.values()].find((item) => item.fingerprint === where.fingerprint) ?? null;
     }),
+    findMany: vi.fn(async ({ where, take }: any) => [...bundles.values()]
+      .filter((item) => where.missionId.in.includes(item.missionId))
+      .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
+      .slice(0, take)),
     create: vi.fn(async ({ data }: any) => {
       if (bundles.has(data.id)
         || [...bundles.values()].some((item) => item.fingerprint === data.fingerprint)) {
@@ -332,6 +347,66 @@ describe("Block 3B.13B research mission persistence", () => {
     await createResearchMissionRecord({ mission, actor }, harness.context);
     await expect(getResearchMission(mission.missionId, { actorId: "other", tenantId: "ente-2" }, harness.context))
       .rejects.toMatchObject({ code: "AUTHORIZATION_REQUIRED" });
+  });
+
+  it("returns only purpose-relevant prior missions and bundles from the same fascicolo scope", async () => {
+    const harness = createHarness();
+    const current = researchMission({ researchQuestion: "Current FASCICOLO_A question" });
+    const priorA = researchMission({ researchQuestion: "FACT_ALPHA", status: "PENDING" });
+    const priorB = researchMission({
+      caseReference: { caseId: "case-b", fascicoloReference: "fascicolo-b" },
+      researchQuestion: "FACT_BETA",
+    });
+    const otherTenant = researchMission({ researchQuestion: "OTHER_TENANT_FACT" });
+    await createResearchMissionRecord({ mission: current, actor }, harness.context);
+    await createResearchMissionRecord({ mission: priorA, actor }, harness.context);
+    await createResearchMissionRecord({ mission: priorB, actor }, harness.context);
+    await createResearchMissionRecord({
+      mission: otherTenant,
+      actor: { actorId: "user-2", tenantId: "ente-2" },
+    }, harness.context);
+    for (const item of [priorA, priorB, otherTenant]) {
+      const record = harness.missions.get(item.missionId)!;
+      record.status = "COMPLETED";
+    }
+    const bundleA = evidenceBundle(priorA, "execution-alpha", "PARTIAL", []);
+    harness.bundles.set("bundle-alpha", {
+      id: "bundle-alpha",
+      missionId: priorA.missionId,
+      executionId: "execution-alpha",
+      contractVersion: RESEARCH_BRIDGE_VERSION,
+      fingerprint: "a".repeat(64),
+      payload: {
+        ...bundleA,
+        unresolvedQuestions: ["ALPHA_BUNDLE_RESULT"],
+      },
+      completionState: "PARTIAL",
+      totalCalls: 0,
+      moonlitCalls: 0,
+      simpliciterCalls: 0,
+      legalDataHunterCalls: 0,
+      submittedByActorId: actor.actorId,
+      createdAt: now,
+    });
+    harness.bundles.set("bundle-beta", {
+      ...harness.bundles.get("bundle-alpha")!,
+      id: "bundle-beta",
+      missionId: priorB.missionId,
+      fingerprint: "b".repeat(64),
+      payload: {
+        ...evidenceBundle(priorB, "execution-beta", "PARTIAL", []),
+        unresolvedQuestions: ["BETA_BUNDLE_RESULT"],
+      },
+    });
+
+    const context = await getResearchFascicoloContext(current.missionId, actor, harness.context);
+    const serialized = JSON.stringify(context);
+    expect(serialized).toContain("FACT_ALPHA");
+    expect(serialized).toContain("ALPHA_BUNDLE_RESULT");
+    expect(serialized).not.toContain("FACT_BETA");
+    expect(serialized).not.toContain("BETA_BUNDLE_RESULT");
+    expect(serialized).not.toContain("OTHER_TENANT_FACT");
+    expect(context.items.every((item) => item.fascicoloScopeId === context.scope.scopeId)).toBe(true);
   });
 
   it("claims a mission with CHATGPT as audit origin", async () => {
@@ -740,6 +815,26 @@ describe("Block 3B.13B research mission persistence", () => {
     const unsafe = {
       ...evidenceBundle(mission, "execution-1"),
       metadata: { oauthToken: "never-store" },
+    } as ResearchEvidenceBundle;
+    await expect(submitResearchEvidenceBundle({
+      bundle: unsafe,
+      claimantId: "chat-session-1",
+      claimToken: claimed.claim.claimToken,
+      actor,
+    }, harness.context)).rejects.toMatchObject({ code: "INVALID_BUNDLE" });
+    expect(harness.bundleDelegate.create).not.toHaveBeenCalled();
+  });
+
+  it("rejects profile enrichment fields before evidence persistence", async () => {
+    const harness = createHarness();
+    const { mission, claimed } = await createAndClaim(harness);
+    const unsafe = {
+      ...evidenceBundle(mission, "execution-1"),
+      metadata: {
+        personalProfile: {
+          sensitiveInference: "SYNTHETIC_RESTRICTED_CATEGORY",
+        },
+      },
     } as ResearchEvidenceBundle;
     await expect(submitResearchEvidenceBundle({
       bundle: unsafe,
