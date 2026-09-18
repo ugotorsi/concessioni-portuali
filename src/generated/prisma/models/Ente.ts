@@ -218,6 +218,7 @@ export type EnteWhereInput = {
   neutralIntakes?: Prisma.NeutralIntakeListRelationFilter
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionListRelationFilter
   asyncJobs?: Prisma.AsyncJobListRelationFilter
+  researchMissions?: Prisma.ResearchMissionRecordListRelationFilter
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialListRelationFilter
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateListRelationFilter
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventListRelationFilter
@@ -251,6 +252,7 @@ export type EnteOrderByWithRelationInput = {
   neutralIntakes?: Prisma.NeutralIntakeOrderByRelationAggregateInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionOrderByRelationAggregateInput
   asyncJobs?: Prisma.AsyncJobOrderByRelationAggregateInput
+  researchMissions?: Prisma.ResearchMissionRecordOrderByRelationAggregateInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialOrderByRelationAggregateInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateOrderByRelationAggregateInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventOrderByRelationAggregateInput
@@ -287,6 +289,7 @@ export type EnteWhereUniqueInput = Prisma.AtLeast<{
   neutralIntakes?: Prisma.NeutralIntakeListRelationFilter
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionListRelationFilter
   asyncJobs?: Prisma.AsyncJobListRelationFilter
+  researchMissions?: Prisma.ResearchMissionRecordListRelationFilter
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialListRelationFilter
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateListRelationFilter
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventListRelationFilter
@@ -346,6 +349,7 @@ export type EnteCreateInput = {
   neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -379,6 +383,7 @@ export type EnteUncheckedCreateInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -412,6 +417,7 @@ export type EnteUpdateInput = {
   neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -445,6 +451,7 @@ export type EnteUncheckedUpdateInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -740,6 +747,22 @@ export type EnteUpdateOneWithoutAsyncJobsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.EnteUpdateToOneWithWhereWithoutAsyncJobsInput, Prisma.EnteUpdateWithoutAsyncJobsInput>, Prisma.EnteUncheckedUpdateWithoutAsyncJobsInput>
 }
 
+export type EnteCreateNestedOneWithoutResearchMissionsInput = {
+  create?: Prisma.XOR<Prisma.EnteCreateWithoutResearchMissionsInput, Prisma.EnteUncheckedCreateWithoutResearchMissionsInput>
+  connectOrCreate?: Prisma.EnteCreateOrConnectWithoutResearchMissionsInput
+  connect?: Prisma.EnteWhereUniqueInput
+}
+
+export type EnteUpdateOneWithoutResearchMissionsNestedInput = {
+  create?: Prisma.XOR<Prisma.EnteCreateWithoutResearchMissionsInput, Prisma.EnteUncheckedCreateWithoutResearchMissionsInput>
+  connectOrCreate?: Prisma.EnteCreateOrConnectWithoutResearchMissionsInput
+  upsert?: Prisma.EnteUpsertWithoutResearchMissionsInput
+  disconnect?: Prisma.EnteWhereInput | boolean
+  delete?: Prisma.EnteWhereInput | boolean
+  connect?: Prisma.EnteWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EnteUpdateToOneWithWhereWithoutResearchMissionsInput, Prisma.EnteUpdateWithoutResearchMissionsInput>, Prisma.EnteUncheckedUpdateWithoutResearchMissionsInput>
+}
+
 export type EnteCreateNestedOneWithoutFascicoloObservationsInput = {
   create?: Prisma.XOR<Prisma.EnteCreateWithoutFascicoloObservationsInput, Prisma.EnteUncheckedCreateWithoutFascicoloObservationsInput>
   connectOrCreate?: Prisma.EnteCreateOrConnectWithoutFascicoloObservationsInput
@@ -913,6 +936,7 @@ export type EnteCreateWithoutPortsInput = {
   neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -945,6 +969,7 @@ export type EnteUncheckedCreateWithoutPortsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -993,6 +1018,7 @@ export type EnteUpdateWithoutPortsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -1025,6 +1051,7 @@ export type EnteUncheckedUpdateWithoutPortsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -1057,6 +1084,7 @@ export type EnteCreateWithoutImportRunsInput = {
   neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -1089,6 +1117,7 @@ export type EnteUncheckedCreateWithoutImportRunsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -1137,6 +1166,7 @@ export type EnteUpdateWithoutImportRunsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -1169,6 +1199,7 @@ export type EnteUncheckedUpdateWithoutImportRunsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -1201,6 +1232,7 @@ export type EnteCreateWithoutLegalSourcesInput = {
   neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -1233,6 +1265,7 @@ export type EnteUncheckedCreateWithoutLegalSourcesInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -1281,6 +1314,7 @@ export type EnteUpdateWithoutLegalSourcesInput = {
   neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -1313,6 +1347,7 @@ export type EnteUncheckedUpdateWithoutLegalSourcesInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -1345,6 +1380,7 @@ export type EnteCreateWithoutLegalSourceAcquisitionsInput = {
   neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -1377,6 +1413,7 @@ export type EnteUncheckedCreateWithoutLegalSourceAcquisitionsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -1425,6 +1462,7 @@ export type EnteUpdateWithoutLegalSourceAcquisitionsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -1457,6 +1495,7 @@ export type EnteUncheckedUpdateWithoutLegalSourceAcquisitionsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -1489,6 +1528,7 @@ export type EnteCreateWithoutLegalRulesInput = {
   neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -1521,6 +1561,7 @@ export type EnteUncheckedCreateWithoutLegalRulesInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -1569,6 +1610,7 @@ export type EnteUpdateWithoutLegalRulesInput = {
   neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -1601,6 +1643,7 @@ export type EnteUncheckedUpdateWithoutLegalRulesInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -1633,6 +1676,7 @@ export type EnteCreateWithoutDocumentGapsInput = {
   neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -1665,6 +1709,7 @@ export type EnteUncheckedCreateWithoutDocumentGapsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -1713,6 +1758,7 @@ export type EnteUpdateWithoutDocumentGapsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -1745,6 +1791,7 @@ export type EnteUncheckedUpdateWithoutDocumentGapsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -1777,6 +1824,7 @@ export type EnteCreateWithoutMembershipsInput = {
   neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -1809,6 +1857,7 @@ export type EnteUncheckedCreateWithoutMembershipsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -1857,6 +1906,7 @@ export type EnteUpdateWithoutMembershipsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -1889,6 +1939,7 @@ export type EnteUncheckedUpdateWithoutMembershipsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -1921,6 +1972,7 @@ export type EnteCreateWithoutConcessioniInput = {
   neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -1953,6 +2005,7 @@ export type EnteUncheckedCreateWithoutConcessioniInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -2001,6 +2054,7 @@ export type EnteUpdateWithoutConcessioniInput = {
   neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -2033,6 +2087,7 @@ export type EnteUncheckedUpdateWithoutConcessioniInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -2065,6 +2120,7 @@ export type EnteCreateWithoutDocumentiInput = {
   neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -2097,6 +2153,7 @@ export type EnteUncheckedCreateWithoutDocumentiInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -2145,6 +2202,7 @@ export type EnteUpdateWithoutDocumentiInput = {
   neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -2177,6 +2235,7 @@ export type EnteUncheckedUpdateWithoutDocumentiInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -2209,6 +2268,7 @@ export type EnteCreateWithoutDocumentFileVersionsInput = {
   neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -2241,6 +2301,7 @@ export type EnteUncheckedCreateWithoutDocumentFileVersionsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -2289,6 +2350,7 @@ export type EnteUpdateWithoutDocumentFileVersionsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -2321,6 +2383,7 @@ export type EnteUncheckedUpdateWithoutDocumentFileVersionsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -2353,6 +2416,7 @@ export type EnteCreateWithoutNeutralIntakesInput = {
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -2385,6 +2449,7 @@ export type EnteUncheckedCreateWithoutNeutralIntakesInput = {
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -2433,6 +2498,7 @@ export type EnteUpdateWithoutNeutralIntakesInput = {
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -2465,6 +2531,7 @@ export type EnteUncheckedUpdateWithoutNeutralIntakesInput = {
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -2497,6 +2564,7 @@ export type EnteCreateWithoutLegalSourceCandidateAdmissionsInput = {
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
   neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -2529,6 +2597,7 @@ export type EnteUncheckedCreateWithoutLegalSourceCandidateAdmissionsInput = {
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
   neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -2577,6 +2646,7 @@ export type EnteUpdateWithoutLegalSourceCandidateAdmissionsInput = {
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
   neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -2609,6 +2679,7 @@ export type EnteUncheckedUpdateWithoutLegalSourceCandidateAdmissionsInput = {
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
   neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -2641,6 +2712,7 @@ export type EnteCreateWithoutAsyncJobsInput = {
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
   neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -2673,6 +2745,7 @@ export type EnteUncheckedCreateWithoutAsyncJobsInput = {
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
   neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -2721,6 +2794,7 @@ export type EnteUpdateWithoutAsyncJobsInput = {
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
   neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -2753,6 +2827,155 @@ export type EnteUncheckedUpdateWithoutAsyncJobsInput = {
   legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
   neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
+}
+
+export type EnteCreateWithoutResearchMissionsInput = {
+  id?: string
+  nome: string
+  codice: string
+  tipo?: $Enums.EnteTipo
+  stato?: $Enums.EnteStato
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessioni?: Prisma.ConcessioneCreateNestedManyWithoutEnteInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutEnteInput
+  report?: Prisma.ReportCreateNestedManyWithoutEnteInput
+  activityLog?: Prisma.ActivityLogCreateNestedManyWithoutEnteInput
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutEnteInput
+  ports?: Prisma.PortCreateNestedManyWithoutEnteInput
+  legalSources?: Prisma.LegalSourceCreateNestedManyWithoutEnteInput
+  legalRules?: Prisma.LegalRuleCreateNestedManyWithoutEnteInput
+  documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutEnteInput
+  importRuns?: Prisma.ImportRunCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutEnteInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
+  documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
+  asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
+}
+
+export type EnteUncheckedCreateWithoutResearchMissionsInput = {
+  id?: string
+  nome: string
+  codice: string
+  tipo?: $Enums.EnteTipo
+  stato?: $Enums.EnteStato
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessioni?: Prisma.ConcessioneUncheckedCreateNestedManyWithoutEnteInput
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutEnteInput
+  report?: Prisma.ReportUncheckedCreateNestedManyWithoutEnteInput
+  activityLog?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutEnteInput
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutEnteInput
+  ports?: Prisma.PortUncheckedCreateNestedManyWithoutEnteInput
+  legalSources?: Prisma.LegalSourceUncheckedCreateNestedManyWithoutEnteInput
+  legalRules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutEnteInput
+  documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutEnteInput
+  importRuns?: Prisma.ImportRunUncheckedCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutEnteInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
+  asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
+}
+
+export type EnteCreateOrConnectWithoutResearchMissionsInput = {
+  where: Prisma.EnteWhereUniqueInput
+  create: Prisma.XOR<Prisma.EnteCreateWithoutResearchMissionsInput, Prisma.EnteUncheckedCreateWithoutResearchMissionsInput>
+}
+
+export type EnteUpsertWithoutResearchMissionsInput = {
+  update: Prisma.XOR<Prisma.EnteUpdateWithoutResearchMissionsInput, Prisma.EnteUncheckedUpdateWithoutResearchMissionsInput>
+  create: Prisma.XOR<Prisma.EnteCreateWithoutResearchMissionsInput, Prisma.EnteUncheckedCreateWithoutResearchMissionsInput>
+  where?: Prisma.EnteWhereInput
+}
+
+export type EnteUpdateToOneWithWhereWithoutResearchMissionsInput = {
+  where?: Prisma.EnteWhereInput
+  data: Prisma.XOR<Prisma.EnteUpdateWithoutResearchMissionsInput, Prisma.EnteUncheckedUpdateWithoutResearchMissionsInput>
+}
+
+export type EnteUpdateWithoutResearchMissionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  codice?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.EnumEnteTipoFieldUpdateOperationsInput | $Enums.EnteTipo
+  stato?: Prisma.EnumEnteStatoFieldUpdateOperationsInput | $Enums.EnteStato
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessioni?: Prisma.ConcessioneUpdateManyWithoutEnteNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutEnteNestedInput
+  report?: Prisma.ReportUpdateManyWithoutEnteNestedInput
+  activityLog?: Prisma.ActivityLogUpdateManyWithoutEnteNestedInput
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutEnteNestedInput
+  ports?: Prisma.PortUpdateManyWithoutEnteNestedInput
+  legalSources?: Prisma.LegalSourceUpdateManyWithoutEnteNestedInput
+  legalRules?: Prisma.LegalRuleUpdateManyWithoutEnteNestedInput
+  documentGaps?: Prisma.DocumentGapUpdateManyWithoutEnteNestedInput
+  importRuns?: Prisma.ImportRunUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutEnteNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
+  documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
+  asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
+}
+
+export type EnteUncheckedUpdateWithoutResearchMissionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  codice?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.EnumEnteTipoFieldUpdateOperationsInput | $Enums.EnteTipo
+  stato?: Prisma.EnumEnteStatoFieldUpdateOperationsInput | $Enums.EnteStato
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessioni?: Prisma.ConcessioneUncheckedUpdateManyWithoutEnteNestedInput
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutEnteNestedInput
+  report?: Prisma.ReportUncheckedUpdateManyWithoutEnteNestedInput
+  activityLog?: Prisma.ActivityLogUncheckedUpdateManyWithoutEnteNestedInput
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutEnteNestedInput
+  ports?: Prisma.PortUncheckedUpdateManyWithoutEnteNestedInput
+  legalSources?: Prisma.LegalSourceUncheckedUpdateManyWithoutEnteNestedInput
+  legalRules?: Prisma.LegalRuleUncheckedUpdateManyWithoutEnteNestedInput
+  documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutEnteNestedInput
+  importRuns?: Prisma.ImportRunUncheckedUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutEnteNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
+  asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -2785,6 +3008,7 @@ export type EnteCreateWithoutFascicoloObservationsInput = {
   neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -2817,6 +3041,7 @@ export type EnteUncheckedCreateWithoutFascicoloObservationsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -2865,6 +3090,7 @@ export type EnteUpdateWithoutFascicoloObservationsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -2897,6 +3123,7 @@ export type EnteUncheckedUpdateWithoutFascicoloObservationsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -2929,6 +3156,7 @@ export type EnteCreateWithoutChecklistEvidenceInput = {
   neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -2961,6 +3189,7 @@ export type EnteUncheckedCreateWithoutChecklistEvidenceInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -3009,6 +3238,7 @@ export type EnteUpdateWithoutChecklistEvidenceInput = {
   neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -3041,6 +3271,7 @@ export type EnteUncheckedUpdateWithoutChecklistEvidenceInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -3073,6 +3304,7 @@ export type EnteCreateWithoutDocumentRequirementProposalsInput = {
   neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -3105,6 +3337,7 @@ export type EnteUncheckedCreateWithoutDocumentRequirementProposalsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -3153,6 +3386,7 @@ export type EnteUpdateWithoutDocumentRequirementProposalsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -3185,6 +3419,7 @@ export type EnteUncheckedUpdateWithoutDocumentRequirementProposalsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -3217,6 +3452,7 @@ export type EnteCreateWithoutDocumentRequirementEvidenceInput = {
   neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -3249,6 +3485,7 @@ export type EnteUncheckedCreateWithoutDocumentRequirementEvidenceInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -3297,6 +3534,7 @@ export type EnteUpdateWithoutDocumentRequirementEvidenceInput = {
   neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -3329,6 +3567,7 @@ export type EnteUncheckedUpdateWithoutDocumentRequirementEvidenceInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -3361,6 +3600,7 @@ export type EnteCreateWithoutDecisioniProcedimentoInput = {
   neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -3393,6 +3633,7 @@ export type EnteUncheckedCreateWithoutDecisioniProcedimentoInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -3441,6 +3682,7 @@ export type EnteUpdateWithoutDecisioniProcedimentoInput = {
   neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -3473,6 +3715,7 @@ export type EnteUncheckedUpdateWithoutDecisioniProcedimentoInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -3505,6 +3748,7 @@ export type EnteCreateWithoutReportInput = {
   neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -3537,6 +3781,7 @@ export type EnteUncheckedCreateWithoutReportInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -3585,6 +3830,7 @@ export type EnteUpdateWithoutReportInput = {
   neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -3617,6 +3863,7 @@ export type EnteUncheckedUpdateWithoutReportInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -3649,6 +3896,7 @@ export type EnteCreateWithoutActivityLogInput = {
   neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
@@ -3681,6 +3929,7 @@ export type EnteUncheckedCreateWithoutActivityLogInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
@@ -3729,6 +3978,7 @@ export type EnteUpdateWithoutActivityLogInput = {
   neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
@@ -3761,6 +4011,7 @@ export type EnteUncheckedUpdateWithoutActivityLogInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
@@ -3794,6 +4045,7 @@ export type EnteCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
 }
@@ -3826,6 +4078,7 @@ export type EnteUncheckedCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
 }
@@ -3874,6 +4127,7 @@ export type EnteUpdateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
 }
@@ -3906,6 +4160,7 @@ export type EnteUncheckedUpdateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
 }
@@ -3938,6 +4193,7 @@ export type EnteCreateWithoutAiFascicoloHumanReviewStatesInput = {
   neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
 }
@@ -3970,6 +4226,7 @@ export type EnteUncheckedCreateWithoutAiFascicoloHumanReviewStatesInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
 }
@@ -4018,6 +4275,7 @@ export type EnteUpdateWithoutAiFascicoloHumanReviewStatesInput = {
   neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
 }
@@ -4050,6 +4308,7 @@ export type EnteUncheckedUpdateWithoutAiFascicoloHumanReviewStatesInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
 }
@@ -4082,6 +4341,7 @@ export type EnteCreateWithoutAiFascicoloHumanReviewEventsInput = {
   neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
 }
@@ -4114,6 +4374,7 @@ export type EnteUncheckedCreateWithoutAiFascicoloHumanReviewEventsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
 }
@@ -4162,6 +4423,7 @@ export type EnteUpdateWithoutAiFascicoloHumanReviewEventsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
 }
@@ -4194,6 +4456,7 @@ export type EnteUncheckedUpdateWithoutAiFascicoloHumanReviewEventsInput = {
   neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
   legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
 }
@@ -4224,6 +4487,7 @@ export type EnteCountOutputType = {
   neutralIntakes: number
   legalSourceCandidateAdmissions: number
   asyncJobs: number
+  researchMissions: number
   aiFascicoloTrustedReviewMaterials: number
   aiFascicoloHumanReviewStates: number
   aiFascicoloHumanReviewEvents: number
@@ -4250,6 +4514,7 @@ export type EnteCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   neutralIntakes?: boolean | EnteCountOutputTypeCountNeutralIntakesArgs
   legalSourceCandidateAdmissions?: boolean | EnteCountOutputTypeCountLegalSourceCandidateAdmissionsArgs
   asyncJobs?: boolean | EnteCountOutputTypeCountAsyncJobsArgs
+  researchMissions?: boolean | EnteCountOutputTypeCountResearchMissionsArgs
   aiFascicoloTrustedReviewMaterials?: boolean | EnteCountOutputTypeCountAiFascicoloTrustedReviewMaterialsArgs
   aiFascicoloHumanReviewStates?: boolean | EnteCountOutputTypeCountAiFascicoloHumanReviewStatesArgs
   aiFascicoloHumanReviewEvents?: boolean | EnteCountOutputTypeCountAiFascicoloHumanReviewEventsArgs
@@ -4408,6 +4673,13 @@ export type EnteCountOutputTypeCountAsyncJobsArgs<ExtArgs extends runtime.Types.
 /**
  * EnteCountOutputType without action
  */
+export type EnteCountOutputTypeCountResearchMissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ResearchMissionRecordWhereInput
+}
+
+/**
+ * EnteCountOutputType without action
+ */
 export type EnteCountOutputTypeCountAiFascicoloTrustedReviewMaterialsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.AiFascicoloTrustedReviewMaterialWhereInput
 }
@@ -4455,6 +4727,7 @@ export type EnteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   neutralIntakes?: boolean | Prisma.Ente$neutralIntakesArgs<ExtArgs>
   legalSourceCandidateAdmissions?: boolean | Prisma.Ente$legalSourceCandidateAdmissionsArgs<ExtArgs>
   asyncJobs?: boolean | Prisma.Ente$asyncJobsArgs<ExtArgs>
+  researchMissions?: boolean | Prisma.Ente$researchMissionsArgs<ExtArgs>
   aiFascicoloTrustedReviewMaterials?: boolean | Prisma.Ente$aiFascicoloTrustedReviewMaterialsArgs<ExtArgs>
   aiFascicoloHumanReviewStates?: boolean | Prisma.Ente$aiFascicoloHumanReviewStatesArgs<ExtArgs>
   aiFascicoloHumanReviewEvents?: boolean | Prisma.Ente$aiFascicoloHumanReviewEventsArgs<ExtArgs>
@@ -4513,6 +4786,7 @@ export type EnteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   neutralIntakes?: boolean | Prisma.Ente$neutralIntakesArgs<ExtArgs>
   legalSourceCandidateAdmissions?: boolean | Prisma.Ente$legalSourceCandidateAdmissionsArgs<ExtArgs>
   asyncJobs?: boolean | Prisma.Ente$asyncJobsArgs<ExtArgs>
+  researchMissions?: boolean | Prisma.Ente$researchMissionsArgs<ExtArgs>
   aiFascicoloTrustedReviewMaterials?: boolean | Prisma.Ente$aiFascicoloTrustedReviewMaterialsArgs<ExtArgs>
   aiFascicoloHumanReviewStates?: boolean | Prisma.Ente$aiFascicoloHumanReviewStatesArgs<ExtArgs>
   aiFascicoloHumanReviewEvents?: boolean | Prisma.Ente$aiFascicoloHumanReviewEventsArgs<ExtArgs>
@@ -4544,6 +4818,7 @@ export type $EntePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     neutralIntakes: Prisma.$NeutralIntakePayload<ExtArgs>[]
     legalSourceCandidateAdmissions: Prisma.$LegalSourceCandidateAdmissionPayload<ExtArgs>[]
     asyncJobs: Prisma.$AsyncJobPayload<ExtArgs>[]
+    researchMissions: Prisma.$ResearchMissionRecordPayload<ExtArgs>[]
     aiFascicoloTrustedReviewMaterials: Prisma.$AiFascicoloTrustedReviewMaterialPayload<ExtArgs>[]
     aiFascicoloHumanReviewStates: Prisma.$AiFascicoloHumanReviewStatePayload<ExtArgs>[]
     aiFascicoloHumanReviewEvents: Prisma.$AiFascicoloHumanReviewEventPayload<ExtArgs>[]
@@ -4970,6 +5245,7 @@ export interface Prisma__EnteClient<T, Null = never, ExtArgs extends runtime.Typ
   neutralIntakes<T extends Prisma.Ente$neutralIntakesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$neutralIntakesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NeutralIntakePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   legalSourceCandidateAdmissions<T extends Prisma.Ente$legalSourceCandidateAdmissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$legalSourceCandidateAdmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LegalSourceCandidateAdmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   asyncJobs<T extends Prisma.Ente$asyncJobsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$asyncJobsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AsyncJobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  researchMissions<T extends Prisma.Ente$researchMissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$researchMissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResearchMissionRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   aiFascicoloTrustedReviewMaterials<T extends Prisma.Ente$aiFascicoloTrustedReviewMaterialsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$aiFascicoloTrustedReviewMaterialsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiFascicoloTrustedReviewMaterialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   aiFascicoloHumanReviewStates<T extends Prisma.Ente$aiFascicoloHumanReviewStatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$aiFascicoloHumanReviewStatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiFascicoloHumanReviewStatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   aiFascicoloHumanReviewEvents<T extends Prisma.Ente$aiFascicoloHumanReviewEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$aiFascicoloHumanReviewEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiFascicoloHumanReviewEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -5879,6 +6155,30 @@ export type Ente$asyncJobsArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.AsyncJobScalarFieldEnum | Prisma.AsyncJobScalarFieldEnum[]
+}
+
+/**
+ * Ente.researchMissions
+ */
+export type Ente$researchMissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ResearchMissionRecord
+   */
+  select?: Prisma.ResearchMissionRecordSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ResearchMissionRecord
+   */
+  omit?: Prisma.ResearchMissionRecordOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ResearchMissionRecordInclude<ExtArgs> | null
+  where?: Prisma.ResearchMissionRecordWhereInput
+  orderBy?: Prisma.ResearchMissionRecordOrderByWithRelationInput | Prisma.ResearchMissionRecordOrderByWithRelationInput[]
+  cursor?: Prisma.ResearchMissionRecordWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ResearchMissionRecordScalarFieldEnum | Prisma.ResearchMissionRecordScalarFieldEnum[]
 }
 
 /**

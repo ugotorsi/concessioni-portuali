@@ -719,6 +719,32 @@ enum AsyncJobAdmissionType {
   AUTHORIZED_SYSTEM
 }
 
+enum ResearchMissionStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  BUDGET_EXHAUSTED
+  DEFERRED
+  REJECTED
+}
+
+enum ResearchExecutionState {
+  COMPLETE
+  PARTIAL
+  BUDGET_EXHAUSTED
+  DEFERRED
+  FAILED
+  HUMAN_DECISION_REQUIRED
+}
+
+enum ResearchCompletionState {
+  COMPLETE
+  PARTIAL
+  BUDGET_EXHAUSTED
+  FAILED
+  HUMAN_DECISION_REQUIRED
+}
+
 model Ente {
   id                           String                                 @id @default(cuid())
   nome                         String
@@ -747,6 +773,7 @@ model Ente {
   neutralIntakes               NeutralIntake[]
   legalSourceCandidateAdmissions LegalSourceCandidateAdmission[]
   asyncJobs                    AsyncJob[]
+  researchMissions             ResearchMissionRecord[]
   aiFascicoloTrustedReviewMaterials AiFascicoloTrustedReviewMaterial[]
   aiFascicoloHumanReviewStates      AiFascicoloHumanReviewState[]
   aiFascicoloHumanReviewEvents      AiFascicoloHumanReviewEvent[]
@@ -2056,6 +2083,85 @@ model AsyncJob {
   @@index([initiatingUserId])
   @@index([correlationId])
   @@index([operation, createdAt])
+}
+
+model ResearchMissionRecord {
+  id                  String                @id @db.VarChar(96)
+  tenantId            String?
+  contractVersion     String                @db.VarChar(64)
+  caseId              String                @db.VarChar(256)
+  fascicoloReference  String?               @db.VarChar(256)
+  referenceDate       DateTime
+  mode                String                @db.VarChar(64)
+  payload             Json
+  payloadFingerprint  String                @unique(map: "research_mission_payload_uq") @db.Char(64)
+  status              ResearchMissionStatus @default(PENDING)
+  stateVersion        Int                   @default(0)
+  claimantId          String?               @db.VarChar(256)
+  claimToken          String?               @db.Char(64)
+  claimExpiresAt      DateTime?
+  activeExecutionId   String?               @unique(map: "research_mission_active_exec_uq") @db.VarChar(256)
+  completedAt         DateTime?
+  deferredAt          DateTime?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+
+  tenant              Ente?                      @relation(fields: [tenantId], references: [id], onDelete: Restrict, map: "research_mission_tenant_fk")
+  executionAttempts   ResearchExecutionAttempt[]
+
+  @@index([tenantId, status, createdAt], map: "research_mission_tenant_status_idx")
+  @@index([status, claimExpiresAt, createdAt], map: "research_mission_claim_queue_idx")
+  @@index([caseId, createdAt], map: "research_mission_case_idx")
+}
+
+model ResearchExecutionAttempt {
+  id                   String                  @id @db.VarChar(256)
+  missionId            String                  @db.VarChar(96)
+  executorKind         String                  @db.VarChar(64)
+  claimantId           String                  @db.VarChar(256)
+  claimToken           String                  @db.Char(64)
+  startedAt            DateTime
+  leaseExpiresAt       DateTime
+  completedAt          DateTime?
+  completionState      ResearchExecutionState?
+  totalCalls           Int                     @default(0)
+  moonlitCalls         Int                     @default(0)
+  simpliciterCalls     Int                     @default(0)
+  legalDataHunterCalls Int                     @default(0)
+  errorCode            String?                 @db.VarChar(128)
+  deferReason          String?                 @db.VarChar(512)
+  finalBundleId        String?                 @db.VarChar(96)
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+
+  mission              ResearchMissionRecord          @relation(fields: [missionId], references: [id], onDelete: Restrict, map: "research_attempt_mission_fk")
+  evidenceBundles      ResearchEvidenceBundleRecord[]
+
+  @@unique([id, missionId], map: "research_attempt_mission_uq")
+  @@index([missionId, startedAt], map: "research_attempt_mission_idx")
+  @@index([claimantId, startedAt], map: "research_attempt_claimant_idx")
+  @@index([finalBundleId], map: "research_attempt_final_bundle_idx")
+}
+
+model ResearchEvidenceBundleRecord {
+  id                   String                  @id @db.VarChar(96)
+  missionId            String                  @db.VarChar(96)
+  executionId          String                  @db.VarChar(256)
+  contractVersion      String                  @db.VarChar(64)
+  fingerprint          String                  @unique(map: "research_bundle_fingerprint_uq") @db.Char(64)
+  payload              Json
+  completionState      ResearchCompletionState
+  totalCalls           Int
+  moonlitCalls         Int
+  simpliciterCalls     Int
+  legalDataHunterCalls Int
+  submittedByActorId   String                  @db.VarChar(256)
+  createdAt            DateTime                @default(now())
+
+  executionAttempt ResearchExecutionAttempt @relation(fields: [executionId, missionId], references: [id, missionId], onDelete: Restrict, map: "research_bundle_attempt_fk")
+
+  @@index([missionId, createdAt], map: "research_bundle_mission_idx")
+  @@index([executionId, createdAt], map: "research_bundle_execution_idx")
 }
 
 model FascicoloObservation {

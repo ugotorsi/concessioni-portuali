@@ -93,6 +93,9 @@ export const ModelName = {
   LegalSourceCandidateAdmission: 'LegalSourceCandidateAdmission',
   LegalSourceCandidateResolution: 'LegalSourceCandidateResolution',
   AsyncJob: 'AsyncJob',
+  ResearchMissionRecord: 'ResearchMissionRecord',
+  ResearchExecutionAttempt: 'ResearchExecutionAttempt',
+  ResearchEvidenceBundleRecord: 'ResearchEvidenceBundleRecord',
   FascicoloObservation: 'FascicoloObservation',
   FascicoloChecklistEvidence: 'FascicoloChecklistEvidence',
   FascicoloDocumentRequirementProposal: 'FascicoloDocumentRequirementProposal',
@@ -1071,6 +1074,74 @@ export const AsyncJobScalarFieldEnum = {
 } as const
 
 export type AsyncJobScalarFieldEnum = (typeof AsyncJobScalarFieldEnum)[keyof typeof AsyncJobScalarFieldEnum]
+
+
+export const ResearchMissionRecordScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  contractVersion: 'contractVersion',
+  caseId: 'caseId',
+  fascicoloReference: 'fascicoloReference',
+  referenceDate: 'referenceDate',
+  mode: 'mode',
+  payload: 'payload',
+  payloadFingerprint: 'payloadFingerprint',
+  status: 'status',
+  stateVersion: 'stateVersion',
+  claimantId: 'claimantId',
+  claimToken: 'claimToken',
+  claimExpiresAt: 'claimExpiresAt',
+  activeExecutionId: 'activeExecutionId',
+  completedAt: 'completedAt',
+  deferredAt: 'deferredAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ResearchMissionRecordScalarFieldEnum = (typeof ResearchMissionRecordScalarFieldEnum)[keyof typeof ResearchMissionRecordScalarFieldEnum]
+
+
+export const ResearchExecutionAttemptScalarFieldEnum = {
+  id: 'id',
+  missionId: 'missionId',
+  executorKind: 'executorKind',
+  claimantId: 'claimantId',
+  claimToken: 'claimToken',
+  startedAt: 'startedAt',
+  leaseExpiresAt: 'leaseExpiresAt',
+  completedAt: 'completedAt',
+  completionState: 'completionState',
+  totalCalls: 'totalCalls',
+  moonlitCalls: 'moonlitCalls',
+  simpliciterCalls: 'simpliciterCalls',
+  legalDataHunterCalls: 'legalDataHunterCalls',
+  errorCode: 'errorCode',
+  deferReason: 'deferReason',
+  finalBundleId: 'finalBundleId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ResearchExecutionAttemptScalarFieldEnum = (typeof ResearchExecutionAttemptScalarFieldEnum)[keyof typeof ResearchExecutionAttemptScalarFieldEnum]
+
+
+export const ResearchEvidenceBundleRecordScalarFieldEnum = {
+  id: 'id',
+  missionId: 'missionId',
+  executionId: 'executionId',
+  contractVersion: 'contractVersion',
+  fingerprint: 'fingerprint',
+  payload: 'payload',
+  completionState: 'completionState',
+  totalCalls: 'totalCalls',
+  moonlitCalls: 'moonlitCalls',
+  simpliciterCalls: 'simpliciterCalls',
+  legalDataHunterCalls: 'legalDataHunterCalls',
+  submittedByActorId: 'submittedByActorId',
+  createdAt: 'createdAt'
+} as const
+
+export type ResearchEvidenceBundleRecordScalarFieldEnum = (typeof ResearchEvidenceBundleRecordScalarFieldEnum)[keyof typeof ResearchEvidenceBundleRecordScalarFieldEnum]
 
 
 export const FascicoloObservationScalarFieldEnum = {

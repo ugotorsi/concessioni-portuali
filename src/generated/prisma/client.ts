@@ -252,6 +252,21 @@ export type LegalSourceCandidateResolution = Prisma.LegalSourceCandidateResoluti
  */
 export type AsyncJob = Prisma.AsyncJobModel
 /**
+ * Model ResearchMissionRecord
+ * 
+ */
+export type ResearchMissionRecord = Prisma.ResearchMissionRecordModel
+/**
+ * Model ResearchExecutionAttempt
+ * 
+ */
+export type ResearchExecutionAttempt = Prisma.ResearchExecutionAttemptModel
+/**
+ * Model ResearchEvidenceBundleRecord
+ * 
+ */
+export type ResearchEvidenceBundleRecord = Prisma.ResearchEvidenceBundleRecordModel
+/**
  * Model FascicoloObservation
  * 
  */

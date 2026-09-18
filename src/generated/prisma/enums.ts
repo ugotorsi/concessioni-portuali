@@ -980,3 +980,38 @@ export const AsyncJobAdmissionType = {
 } as const
 
 export type AsyncJobAdmissionType = (typeof AsyncJobAdmissionType)[keyof typeof AsyncJobAdmissionType]
+
+
+export const ResearchMissionStatus = {
+  PENDING: 'PENDING',
+  IN_PROGRESS: 'IN_PROGRESS',
+  COMPLETED: 'COMPLETED',
+  BUDGET_EXHAUSTED: 'BUDGET_EXHAUSTED',
+  DEFERRED: 'DEFERRED',
+  REJECTED: 'REJECTED'
+} as const
+
+export type ResearchMissionStatus = (typeof ResearchMissionStatus)[keyof typeof ResearchMissionStatus]
+
+
+export const ResearchExecutionState = {
+  COMPLETE: 'COMPLETE',
+  PARTIAL: 'PARTIAL',
+  BUDGET_EXHAUSTED: 'BUDGET_EXHAUSTED',
+  DEFERRED: 'DEFERRED',
+  FAILED: 'FAILED',
+  HUMAN_DECISION_REQUIRED: 'HUMAN_DECISION_REQUIRED'
+} as const
+
+export type ResearchExecutionState = (typeof ResearchExecutionState)[keyof typeof ResearchExecutionState]
+
+
+export const ResearchCompletionState = {
+  COMPLETE: 'COMPLETE',
+  PARTIAL: 'PARTIAL',
+  BUDGET_EXHAUSTED: 'BUDGET_EXHAUSTED',
+  FAILED: 'FAILED',
+  HUMAN_DECISION_REQUIRED: 'HUMAN_DECISION_REQUIRED'
+} as const
+
+export type ResearchCompletionState = (typeof ResearchCompletionState)[keyof typeof ResearchCompletionState]

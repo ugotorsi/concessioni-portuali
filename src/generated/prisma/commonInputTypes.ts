@@ -1741,6 +1741,57 @@ export type EnumAsyncJobStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumAsyncJobStatusFilter<$PrismaModel>
 }
 
+export type EnumResearchMissionStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.ResearchMissionStatus | Prisma.EnumResearchMissionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ResearchMissionStatus[] | Prisma.ListEnumResearchMissionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ResearchMissionStatus[] | Prisma.ListEnumResearchMissionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumResearchMissionStatusFilter<$PrismaModel> | $Enums.ResearchMissionStatus
+}
+
+export type EnumResearchMissionStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ResearchMissionStatus | Prisma.EnumResearchMissionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ResearchMissionStatus[] | Prisma.ListEnumResearchMissionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ResearchMissionStatus[] | Prisma.ListEnumResearchMissionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumResearchMissionStatusWithAggregatesFilter<$PrismaModel> | $Enums.ResearchMissionStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumResearchMissionStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumResearchMissionStatusFilter<$PrismaModel>
+}
+
+export type EnumResearchExecutionStateNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.ResearchExecutionState | Prisma.EnumResearchExecutionStateFieldRefInput<$PrismaModel> | null
+  in?: $Enums.ResearchExecutionState[] | Prisma.ListEnumResearchExecutionStateFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.ResearchExecutionState[] | Prisma.ListEnumResearchExecutionStateFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumResearchExecutionStateNullableFilter<$PrismaModel> | $Enums.ResearchExecutionState | null
+}
+
+export type EnumResearchExecutionStateNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ResearchExecutionState | Prisma.EnumResearchExecutionStateFieldRefInput<$PrismaModel> | null
+  in?: $Enums.ResearchExecutionState[] | Prisma.ListEnumResearchExecutionStateFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.ResearchExecutionState[] | Prisma.ListEnumResearchExecutionStateFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumResearchExecutionStateNullableWithAggregatesFilter<$PrismaModel> | $Enums.ResearchExecutionState | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumResearchExecutionStateNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumResearchExecutionStateNullableFilter<$PrismaModel>
+}
+
+export type EnumResearchCompletionStateFilter<$PrismaModel = never> = {
+  equals?: $Enums.ResearchCompletionState | Prisma.EnumResearchCompletionStateFieldRefInput<$PrismaModel>
+  in?: $Enums.ResearchCompletionState[] | Prisma.ListEnumResearchCompletionStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ResearchCompletionState[] | Prisma.ListEnumResearchCompletionStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumResearchCompletionStateFilter<$PrismaModel> | $Enums.ResearchCompletionState
+}
+
+export type EnumResearchCompletionStateWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ResearchCompletionState | Prisma.EnumResearchCompletionStateFieldRefInput<$PrismaModel>
+  in?: $Enums.ResearchCompletionState[] | Prisma.ListEnumResearchCompletionStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ResearchCompletionState[] | Prisma.ListEnumResearchCompletionStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumResearchCompletionStateWithAggregatesFilter<$PrismaModel> | $Enums.ResearchCompletionState
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumResearchCompletionStateFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumResearchCompletionStateFilter<$PrismaModel>
+}
+
 export type EnumFascicoloObservationKindFilter<$PrismaModel = never> = {
   equals?: $Enums.FascicoloObservationKind | Prisma.EnumFascicoloObservationKindFieldRefInput<$PrismaModel>
   in?: $Enums.FascicoloObservationKind[] | Prisma.ListEnumFascicoloObservationKindFieldRefInput<$PrismaModel>
@@ -3686,6 +3737,57 @@ export type NestedEnumAsyncJobStatusWithAggregatesFilter<$PrismaModel = never> =
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumAsyncJobStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumAsyncJobStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumResearchMissionStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.ResearchMissionStatus | Prisma.EnumResearchMissionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ResearchMissionStatus[] | Prisma.ListEnumResearchMissionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ResearchMissionStatus[] | Prisma.ListEnumResearchMissionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumResearchMissionStatusFilter<$PrismaModel> | $Enums.ResearchMissionStatus
+}
+
+export type NestedEnumResearchMissionStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ResearchMissionStatus | Prisma.EnumResearchMissionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ResearchMissionStatus[] | Prisma.ListEnumResearchMissionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ResearchMissionStatus[] | Prisma.ListEnumResearchMissionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumResearchMissionStatusWithAggregatesFilter<$PrismaModel> | $Enums.ResearchMissionStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumResearchMissionStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumResearchMissionStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumResearchExecutionStateNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.ResearchExecutionState | Prisma.EnumResearchExecutionStateFieldRefInput<$PrismaModel> | null
+  in?: $Enums.ResearchExecutionState[] | Prisma.ListEnumResearchExecutionStateFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.ResearchExecutionState[] | Prisma.ListEnumResearchExecutionStateFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumResearchExecutionStateNullableFilter<$PrismaModel> | $Enums.ResearchExecutionState | null
+}
+
+export type NestedEnumResearchExecutionStateNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ResearchExecutionState | Prisma.EnumResearchExecutionStateFieldRefInput<$PrismaModel> | null
+  in?: $Enums.ResearchExecutionState[] | Prisma.ListEnumResearchExecutionStateFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.ResearchExecutionState[] | Prisma.ListEnumResearchExecutionStateFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumResearchExecutionStateNullableWithAggregatesFilter<$PrismaModel> | $Enums.ResearchExecutionState | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumResearchExecutionStateNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumResearchExecutionStateNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumResearchCompletionStateFilter<$PrismaModel = never> = {
+  equals?: $Enums.ResearchCompletionState | Prisma.EnumResearchCompletionStateFieldRefInput<$PrismaModel>
+  in?: $Enums.ResearchCompletionState[] | Prisma.ListEnumResearchCompletionStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ResearchCompletionState[] | Prisma.ListEnumResearchCompletionStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumResearchCompletionStateFilter<$PrismaModel> | $Enums.ResearchCompletionState
+}
+
+export type NestedEnumResearchCompletionStateWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ResearchCompletionState | Prisma.EnumResearchCompletionStateFieldRefInput<$PrismaModel>
+  in?: $Enums.ResearchCompletionState[] | Prisma.ListEnumResearchCompletionStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ResearchCompletionState[] | Prisma.ListEnumResearchCompletionStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumResearchCompletionStateWithAggregatesFilter<$PrismaModel> | $Enums.ResearchCompletionState
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumResearchCompletionStateFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumResearchCompletionStateFilter<$PrismaModel>
 }
 
 export type NestedEnumFascicoloObservationKindFilter<$PrismaModel = never> = {
