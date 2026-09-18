@@ -20,6 +20,8 @@ import {
 import {
   RESEARCH_MCP_READ_SCOPE,
   RESEARCH_MCP_WRITE_SCOPE,
+  getResearchMcpAuthConfig,
+  researchMcpWwwAuthenticate,
   type ResearchMcpPrincipal,
   type ResearchMcpScope,
 } from "@/server/legal-research/mcp-auth";
@@ -135,12 +137,21 @@ function success(data: Record<string, unknown>): CallToolResult {
   };
 }
 
-function failure(code: ResearchMcpErrorCode): CallToolResult {
+function failure(code: ResearchMcpErrorCode, requiredScope?: ResearchMcpScope): CallToolResult {
   const data = { error: code };
+  const authConfig = requiredScope ? getResearchMcpAuthConfig() : null;
   return {
     isError: true,
     content: [{ type: "text", text: JSON.stringify(data) }],
     structuredContent: data,
+    ...(authConfig && requiredScope ? {
+      _meta: {
+        "mcp/www_authenticate": [researchMcpWwwAuthenticate(authConfig, {
+          error: "insufficient_scope",
+          scopes: [requiredScope],
+        })],
+      },
+    } : {}),
   };
 }
 
@@ -187,8 +198,9 @@ function annotations(readOnly: boolean, idempotent: boolean) {
   } as const;
 }
 
-function securityMeta(scope: ResearchMcpScope) {
-  return { securitySchemes: [{ type: "oauth2", scopes: [scope] }] };
+function securityMetadata(scope: ResearchMcpScope) {
+  const securitySchemes = [{ type: "oauth2" as const, scopes: [scope] }];
+  return { securitySchemes, _meta: { securitySchemes } };
 }
 
 function operationalMission(stored: Awaited<ReturnType<typeof getResearchMission>>) {
@@ -237,7 +249,7 @@ export function createResearchMcpServer(
         errorCode: "FORBIDDEN",
         durationMs: Date.now() - startedAt,
       });
-      return failure("FORBIDDEN");
+      return failure("FORBIDDEN", scope);
     }
     try {
       const data = await operation();
@@ -270,7 +282,7 @@ export function createResearchMcpServer(
     description: "Return the bounded legal-research bridge contract supported by this server.",
     inputSchema: {},
     annotations: annotations(true, true),
-    _meta: securityMeta(RESEARCH_MCP_READ_SCOPE),
+    ...securityMetadata(RESEARCH_MCP_READ_SCOPE),
   }, async () => invoke("research_capabilities", RESEARCH_MCP_READ_SCOPE, {}, async () => ({
     bridgeContractVersion: RESEARCH_BRIDGE_VERSION,
     supportedResearchModes: RESEARCH_MODES,
@@ -294,7 +306,7 @@ export function createResearchMcpServer(
         .default(RESEARCH_MCP_DEFAULT_PENDING_LIMIT),
     },
     annotations: annotations(true, true),
-    _meta: securityMeta(RESEARCH_MCP_READ_SCOPE),
+    ...securityMetadata(RESEARCH_MCP_READ_SCOPE),
   }, async ({ limit }) => invoke("research_list_pending", RESEARCH_MCP_READ_SCOPE, {}, async () => {
     const missions = await service.listPending(actor(principal));
     return {
@@ -316,7 +328,7 @@ export function createResearchMcpServer(
     description: "Return an immutable mission snapshot and its bounded operational state.",
     inputSchema: { missionId: z.string().min(1).max(96) },
     annotations: annotations(true, true),
-    _meta: securityMeta(RESEARCH_MCP_READ_SCOPE),
+    ...securityMetadata(RESEARCH_MCP_READ_SCOPE),
   }, async ({ missionId }) => invoke("research_get_mission", RESEARCH_MCP_READ_SCOPE, { missionId }, async () => {
     const stored = await service.getMission(missionId, actor(principal));
     if (!stored) throw new ResearchPersistenceError("MISSION_NOT_FOUND");
@@ -332,7 +344,7 @@ export function createResearchMcpServer(
       leaseDurationMs: z.number().int().min(1_000).max(86_400_000),
     },
     annotations: annotations(false, true),
-    _meta: securityMeta(RESEARCH_MCP_WRITE_SCOPE),
+    ...securityMetadata(RESEARCH_MCP_WRITE_SCOPE),
   }, async ({ missionId, executionId, leaseDurationMs }) => invoke(
     "research_claim_mission",
     RESEARCH_MCP_WRITE_SCOPE,
@@ -363,7 +375,7 @@ export function createResearchMcpServer(
       claimToken: z.string().regex(/^[0-9a-f]{64}$/),
     },
     annotations: annotations(false, true),
-    _meta: securityMeta(RESEARCH_MCP_WRITE_SCOPE),
+    ...securityMetadata(RESEARCH_MCP_WRITE_SCOPE),
   }, async ({ bundle, claimToken }) => invoke(
     "research_submit_evidence_bundle",
     RESEARCH_MCP_WRITE_SCOPE,
@@ -396,7 +408,7 @@ export function createResearchMcpServer(
       reasonCode: z.string().min(1).max(256),
     },
     annotations: annotations(false, false),
-    _meta: securityMeta(RESEARCH_MCP_WRITE_SCOPE),
+    ...securityMetadata(RESEARCH_MCP_WRITE_SCOPE),
   }, async ({ missionId, executionId, claimToken, disposition, reasonCode }) => invoke(
     "research_defer_mission",
     RESEARCH_MCP_WRITE_SCOPE,
@@ -429,7 +441,7 @@ export function createResearchMcpServer(
       claimToken: z.string().regex(/^[0-9a-f]{64}$/),
     },
     annotations: annotations(false, true),
-    _meta: securityMeta(RESEARCH_MCP_WRITE_SCOPE),
+    ...securityMetadata(RESEARCH_MCP_WRITE_SCOPE),
   }, async ({ missionId, executionId, bundleId, claimToken }) => invoke(
     "research_complete_mission",
     RESEARCH_MCP_WRITE_SCOPE,
@@ -477,5 +489,22 @@ export async function handleAuthenticatedResearchMcpRequest(
   });
   const server = createResearchMcpServer(principal, options);
   await server.connect(transport);
-  return transport.handleRequest(request);
+  const response = await transport.handleRequest(request);
+  if (!response.headers.get("content-type")?.includes("application/json")) return response;
+
+  const payload = await response.clone().json() as {
+    result?: { tools?: Array<{ _meta?: { securitySchemes?: unknown }; securitySchemes?: unknown }> };
+  };
+  if (!payload.result?.tools) return response;
+
+  for (const tool of payload.result.tools) {
+    if (tool._meta?.securitySchemes) tool.securitySchemes = tool._meta.securitySchemes;
+  }
+  const headers = new Headers(response.headers);
+  headers.delete("content-length");
+  return new Response(JSON.stringify(payload), {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
 }

@@ -187,6 +187,9 @@ describe("Block 3B.13C legal research MCP", () => {
     expect(tools.tools.slice(0, 3).every((tool) => tool.annotations?.readOnlyHint)).toBe(true);
     expect(tools.tools.slice(3).every((tool) => tool.annotations?.readOnlyHint === false)).toBe(true);
     expect(tools.tools.every((tool) => tool.annotations?.destructiveHint === false)).toBe(true);
+    expect(tools.tools.every((tool) => (
+      (tool._meta as { securitySchemes?: unknown[] } | undefined)?.securitySchemes?.[0]
+    ))).toBe(true);
   });
 
   it("initializes through stateless Streamable HTTP and rejects an untrusted Origin", async () => {
@@ -218,6 +221,25 @@ describe("Block 3B.13C legal research MCP", () => {
       id: 1,
       result: { serverInfo: { name: "concessioni-portuali-legal-research" } },
     });
+
+    const listResponse = await handleAuthenticatedResearchMcpRequest(
+      new Request("https://example.test/api/mcp", {
+        method: "POST",
+        headers: {
+          Accept: "application/json, text/event-stream",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 2, method: "tools/list", params: {} }),
+      }),
+      principal,
+      { service: service(), logger: vi.fn() },
+    );
+    const listPayload = await listResponse.json() as {
+      result: { tools: Array<{ securitySchemes?: unknown[]; _meta?: { securitySchemes?: unknown[] } }> };
+    };
+    expect(listPayload.result.tools.every((tool) => (
+      tool.securitySchemes?.[0] && tool._meta?.securitySchemes?.[0]
+    ))).toBe(true);
 
     const forbidden = await handleAuthenticatedResearchMcpRequest(
       new Request("https://example.test/api/mcp", {
@@ -363,14 +385,28 @@ describe("Block 3B.13C legal research MCP", () => {
   });
 
   it("enforces read/write scopes before invoking the service", async () => {
+    const previousIssuer = process.env.WORKOS_AUTHKIT_ISSUER;
+    const previousResource = process.env.MCP_RESOURCE_URI;
+    process.env.WORKOS_AUTHKIT_ISSUER = "https://auth.example.workos.com";
+    process.env.MCP_RESOURCE_URI = "https://mcp.example.test/api/mcp";
     const mockService = service();
-    const { client } = await protocolHarness(mockService, { ...principal, scopes: ["research:read"] });
-    const result = await client.callTool({
-      name: "research_claim_mission",
-      arguments: { missionId: mission.missionId, executionId: "execution-a", leaseDurationMs: 900_000 },
-    });
-    expect(structured(result).error).toBe("FORBIDDEN");
-    expect(mockService.claimMission).not.toHaveBeenCalled();
+    try {
+      const { client } = await protocolHarness(mockService, { ...principal, scopes: ["research:read"] });
+      const result = await client.callTool({
+        name: "research_claim_mission",
+        arguments: { missionId: mission.missionId, executionId: "execution-a", leaseDurationMs: 900_000 },
+      });
+      expect(structured(result).error).toBe("FORBIDDEN");
+      expect(result._meta?.["mcp/www_authenticate"]).toEqual([
+        expect.stringContaining('error="insufficient_scope"'),
+      ]);
+      expect(mockService.claimMission).not.toHaveBeenCalled();
+    } finally {
+      if (previousIssuer === undefined) delete process.env.WORKOS_AUTHKIT_ISSUER;
+      else process.env.WORKOS_AUTHKIT_ISSUER = previousIssuer;
+      if (previousResource === undefined) delete process.env.MCP_RESOURCE_URI;
+      else process.env.MCP_RESOURCE_URI = previousResource;
+    }
   });
 
   it("uses the principal tenant for every mission operation", async () => {
@@ -457,13 +493,13 @@ describe("Block 3B.13C legal research MCP", () => {
     expect(Object.keys(mockService)).not.toContain("hidden_admin_tool");
   });
 
-  it("rejects the production route without OAuth bearer infrastructure", async () => {
+  it("reports unavailable auth when production OAuth configuration is missing", async () => {
     const response = await POST(new Request("https://example.test/api/mcp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "initialize", params: {} }),
     }));
-    expect(response.status).toBe(401);
-    expect(await response.json()).toEqual(expect.objectContaining({ error: "AUTH_REQUIRED" }));
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual(expect.objectContaining({ error: "AUTH_UNAVAILABLE" }));
   });
 });

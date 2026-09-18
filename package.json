@@ -46,6 +46,7 @@
     "class-variance-authority": "latest",
     "clsx": "latest",
     "date-fns": "latest",
+    "jose": "6.2.12",
     "lucide-react": "latest",
     "next": "latest",
     "next-auth": "^4.24.14",
