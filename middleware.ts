@@ -5,6 +5,7 @@ import { buildRateLimitKey, checkRateLimit, getRateLimitHeaders } from "@/lib/ra
 
 const PUBLIC_PATHS = new Set(["/", "/login", "/logout"]);
 const DB_RECON_PREVIEW_TEMP_PATH = "/api/admin/db-recon-preview-temp";
+const MCP_PATH = "/api/mcp";
 const PROTECTED_PREFIXES = [
   "/dashboard",
   "/mappa",
@@ -92,6 +93,11 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith("/api/auth")) {
+    return withSecurityHeaders(NextResponse.next());
+  }
+
+  // MCP performs bearer authentication at the route boundary, not through browser sessions.
+  if (pathname === MCP_PATH) {
     return withSecurityHeaders(NextResponse.next());
   }
 
