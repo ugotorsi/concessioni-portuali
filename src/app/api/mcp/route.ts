@@ -21,7 +21,6 @@ async function handle(request: Request): Promise<Response> {
     if (!principal) {
       return researchMcpAuthResponse(config, {
         invalidToken: request.headers.has("authorization"),
-        scopes: ["research:read"],
       });
     }
     try {
@@ -43,7 +42,6 @@ async function handle(request: Request): Promise<Response> {
       return researchMcpAuthResponse(config, {
         status: error.status,
         error: error.code,
-        scopes: error.requiredScopes,
       });
     }
     return researchMcpAuthResponse(config, { status: 503, error: "AUTH_UNAVAILABLE" });

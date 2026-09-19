@@ -29,8 +29,11 @@ const config: ResearchMcpAuthConfig = {
 
 const activeIdentity: ResearchMcpLocalIdentity = {
   active: true,
+  role: "GIURIDICO",
+  isAdmin: false,
   defaultTenantId: "tenant-a",
   tenantIds: ["tenant-a", "tenant-b"],
+  accessibleTenantIds: ["tenant-a", "tenant-b"],
 };
 
 let firstPrivateKey: KeyLike;
@@ -53,13 +56,14 @@ async function token(options: Readonly<{
   issuer?: string;
   audience?: string;
   expiresAt?: string;
-  scopes?: string;
+  scope?: string;
+  permissions?: string[];
   actorId?: string | null;
   tenantId?: string | null;
 }> = {}): Promise<string> {
-  const claims: Record<string, string> = {
-    scope: options.scopes ?? "research:read research:write",
-  };
+  const claims: Record<string, unknown> = {};
+  if (options.scope !== undefined) claims.scope = options.scope;
+  if (options.permissions !== undefined) claims.permissions = options.permissions;
   if (options.actorId !== null) claims[RESEARCH_MCP_ACTOR_ID_CLAIM] = options.actorId ?? "actor-a";
   if (options.tenantId !== null) claims[RESEARCH_MCP_TENANT_ID_CLAIM] = options.tenantId ?? "tenant-a";
 
@@ -98,7 +102,7 @@ describe("Block 3B.13D WorkOS MCP auth", () => {
       expect(principal).toMatchObject({
         actorId: "actor-a",
         claimantId: "workos:user_workos_a",
-        scopes: ["research:read", "research:write"],
+        permissions: ["research:read", "research:write"],
       });
       expect(activeIdentity.tenantIds).toContain(principal?.tenantId);
     }
@@ -121,15 +125,24 @@ describe("Block 3B.13D WorkOS MCP auth", () => {
     expect(await verifier().verify(request(accessToken))).toBeNull();
   });
 
-  it("rejects missing required scope with a 403-class auth error", async () => {
-    await expect(verifier().verify(request(await token({ scopes: "research:write" }))))
-      .rejects.toMatchObject({ code: "FORBIDDEN", status: 403, requiredScopes: ["research:read"] });
+  it.each([
+    ["scope", { scope: "research:write" }],
+    ["permissions", { permissions: ["research:write"] }],
+  ] as const)("does not derive local permissions from the JWT %s claim", async (_label, claims) => {
+    const identity = { ...activeIdentity, accessibleTenantIds: [] };
+    const principal = await verifier(undefined, identity).verify(request(await token(claims)));
+    expect(principal?.permissions).toEqual([]);
   });
 
   it.each([
     ["disabled local user", { ...activeIdentity, active: false }, "tenant-a"],
     ["cross-tenant claim", activeIdentity, "tenant-c"],
-    ["no local membership", { active: true, defaultTenantId: null, tenantIds: [] }, null],
+    ["no local membership", {
+      ...activeIdentity,
+      defaultTenantId: null,
+      tenantIds: [],
+      accessibleTenantIds: [],
+    }, null],
   ] as const)("rejects %s", async (_label, identity, tenantId) => {
     await expect(verifier(undefined, identity).verify(request(await token({ tenantId }))))
       .rejects.toMatchObject({ code: "FORBIDDEN", status: 403 });
@@ -159,7 +172,6 @@ describe("Block 3B.13D WorkOS MCP auth", () => {
         resource: config.resource,
         authorization_servers: [config.issuer],
         bearer_methods_supported: ["header"],
-        scopes_supported: ["research:read", "research:write"],
       });
     } finally {
       if (previousIssuer === undefined) delete process.env.WORKOS_AUTHKIT_ISSUER;
@@ -169,18 +181,21 @@ describe("Block 3B.13D WorkOS MCP auth", () => {
     }
   });
 
-  it("emits standards-aligned 401 and 403 bearer challenges", () => {
-    const unauthorized = researchMcpAuthResponse(config, { scopes: ["research:read"] });
+  it("emits authentication-only bearer challenges", () => {
+    const unauthorized = researchMcpAuthResponse(config);
     expect(unauthorized.status).toBe(401);
     expect(unauthorized.headers.get("WWW-Authenticate")).toContain("resource_metadata=");
+    expect(unauthorized.headers.get("WWW-Authenticate")).not.toContain("research:");
+
+    const invalid = researchMcpAuthResponse(config, { invalidToken: true });
+    expect(invalid.headers.get("WWW-Authenticate")).toContain('error="invalid_token"');
+    expect(invalid.headers.get("WWW-Authenticate")).not.toContain("research:");
 
     const forbidden = researchMcpAuthResponse(config, {
       status: 403,
       error: "FORBIDDEN",
-      scopes: ["research:write"],
     });
-    expect(forbidden.headers.get("WWW-Authenticate")).toContain('error="insufficient_scope"');
-    expect(forbidden.headers.get("WWW-Authenticate")).toContain('scope="research:write"');
+    expect(forbidden.headers.get("WWW-Authenticate")).toBeNull();
   });
 
   it("accepts only complete HTTPS provider configuration", () => {

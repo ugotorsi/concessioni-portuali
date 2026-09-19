@@ -21,7 +21,7 @@ const principal: ResearchMcpPrincipal = {
   actorId: "actor-a",
   tenantId: "tenant-a",
   claimantId: "chatgpt:actor-a",
-  scopes: ["research:read", "research:write"],
+  permissions: ["research:read", "research:write"],
 };
 
 const mission = {
@@ -216,6 +216,11 @@ describe("Block 3B.13C legal research MCP", () => {
     expect(tools.tools.every((tool) => (
       (tool._meta as { securitySchemes?: unknown[] } | undefined)?.securitySchemes?.[0]
     ))).toBe(true);
+    expect(tools.tools.every((tool) => (
+      (tool._meta as { securitySchemes?: Array<{ scopes?: string[] }> } | undefined)
+        ?.securitySchemes?.[0]?.scopes?.length === 0
+    ))).toBe(true);
+    expect(JSON.stringify(tools.tools)).not.toMatch(/research:(read|write)/);
   });
 
   it("initializes through stateless Streamable HTTP and rejects an untrusted Origin", async () => {
@@ -508,29 +513,29 @@ describe("Block 3B.13C legal research MCP", () => {
     expect(JSON.stringify(result)).not.toMatch(/DATABASE_URL|secret|stack detail/i);
   });
 
-  it("enforces read/write scopes before invoking the service", async () => {
-    const previousIssuer = process.env.WORKOS_AUTHKIT_ISSUER;
-    const previousResource = process.env.MCP_RESOURCE_URI;
-    process.env.WORKOS_AUTHKIT_ISSUER = "https://auth.example.workos.com";
-    process.env.MCP_RESOURCE_URI = "https://mcp.example.test/api/mcp";
+  it("enforces local permissions without OAuth scope escalation", async () => {
     const mockService = service();
-    try {
-      const { client } = await protocolHarness(mockService, { ...principal, scopes: ["research:read"] });
-      const result = await client.callTool({
-        name: "research_claim_mission",
-        arguments: { missionId: mission.missionId, executionId: "execution-a", leaseDurationMs: 900_000 },
-      });
-      expect(structured(result).error).toBe("FORBIDDEN");
-      expect(result._meta?.["mcp/www_authenticate"]).toEqual([
-        expect.stringContaining('error="insufficient_scope"'),
-      ]);
-      expect(mockService.claimMission).not.toHaveBeenCalled();
-    } finally {
-      if (previousIssuer === undefined) delete process.env.WORKOS_AUTHKIT_ISSUER;
-      else process.env.WORKOS_AUTHKIT_ISSUER = previousIssuer;
-      if (previousResource === undefined) delete process.env.MCP_RESOURCE_URI;
-      else process.env.MCP_RESOURCE_URI = previousResource;
-    }
+    const { client } = await protocolHarness(mockService, {
+      ...principal,
+      permissions: ["research:read"],
+    });
+    const result = await client.callTool({
+      name: "research_claim_mission",
+      arguments: { missionId: mission.missionId, executionId: "execution-a", leaseDurationMs: 900_000 },
+    });
+    expect(structured(result).error).toBe("FORBIDDEN");
+    expect(result._meta?.["mcp/www_authenticate"]).toBeUndefined();
+    expect(JSON.stringify(result)).not.toContain("insufficient_scope");
+    expect(mockService.claimMission).not.toHaveBeenCalled();
+  });
+
+  it("denies capabilities without the local read permission", async () => {
+    const mockService = service();
+    const { client } = await protocolHarness(mockService, { ...principal, permissions: [] });
+    const result = await client.callTool({ name: "research_capabilities", arguments: {} });
+    expect(structured(result).error).toBe("FORBIDDEN");
+    expect(result._meta?.["mcp/www_authenticate"]).toBeUndefined();
+    expect(Object.values(mockService).every((operation) => !vi.mocked(operation).mock.calls.length)).toBe(true);
   });
 
   it("uses the principal tenant for every mission operation", async () => {

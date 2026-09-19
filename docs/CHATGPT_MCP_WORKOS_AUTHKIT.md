@@ -6,6 +6,12 @@ Questa integrazione espone `https://<app-host>/api/mcp` come risorsa MCP remota 
 
 WorkOS AuthKit opera in modalita Standalone Connect. Non sostituisce NextAuth e non decide l'accesso ai dati locali.
 
+L'autorizzazione e composta da tre layer distinti:
+
+- OAuth autentica il token WorkOS verificando RS256, issuer, audience/resource, scadenza, subject e claim identita/tenant. Gli scope OAuth standard gestiti dal flusso sono `openid`, `profile`, `email` e `offline_access`.
+- L'applicazione risolve actor, ruolo e membership dal database locale e deriva i permessi interni `research:read` e `research:write` tramite la policy tenant esistente. I claim JWT `scope`, `scp` e `permissions` non concedono permessi applicativi.
+- Il `ResearchFascicoloAccessGrant` autorizza lo specifico fascicolo per tutti i tool case-specific.
+
 ## Contratto di identita
 
 - L'endpoint di completamento Standalone riceve l'utente autenticato da NextAuth.
@@ -71,11 +77,7 @@ Non e attualmente implementato un mapping trusted tra `fascicoloScopeId` e conve
 
    `https://<app-host>/api/mcp`
 
-7. Creare gli scope OAuth personalizzati:
-
-   - `research:read`
-   - `research:write`
-
+7. Non configurare `research:read` o `research:write` come scope OAuth: sono permessi applicativi derivati esclusivamente dalla policy locale.
 8. Configurare un JWT template per gli access token con almeno:
 
 ```json
@@ -89,7 +91,7 @@ Non e attualmente implementato un mapping trusted tra `fascicoloScopeId` e conve
    `urn:concessioni-portuali:tenant_id`
 
    Le scelte vengono fornite dall'applicazione usando esclusivamente le membership locali dell'utente.
-10. Abilitare refresh token e `offline_access` per consentire a ChatGPT di rinnovare l'accesso senza una nuova autorizzazione interattiva. Gli access token devono essere RS256 e includere issuer, audience/resource, scadenza e scope.
+10. Abilitare refresh token e `offline_access` per consentire a ChatGPT di rinnovare l'accesso senza una nuova autorizzazione interattiva. Gli access token devono essere RS256 e includere issuer, audience/resource e scadenza.
 11. Copiare dalla pagina di gestione del connettore ChatGPT il redirect URI esatto e registrarlo in WorkOS. Non ricostruirlo manualmente.
 
 ## Configurazione ChatGPT
@@ -103,9 +105,8 @@ Non e attualmente implementato un mapping trusted tra `fascicoloScopeId` e conve
 
    - protected resource metadata: `https://<app-host>/.well-known/oauth-protected-resource`
    - authorization server: valore di `WORKOS_AUTHKIT_ISSUER`
-   - scope disponibili: `research:read research:write`
 
-4. Richiedere `offline_access` insieme agli scope necessari.
+4. Usare soltanto gli scope OAuth standard supportati da WorkOS (`openid profile email offline_access`).
 5. Registrare in WorkOS il redirect URI mostrato da ChatGPT.
 
 Il server pubblica `securitySchemes` sia nel campo MCP corrente sia nel mirror `_meta.securitySchemes` per compatibilita client.
@@ -117,9 +118,9 @@ Il server pubblica `securitySchemes` sia nel campo MCP corrente sia nel mirror `
 3. Se non esiste una sessione NextAuth, l'applicazione reindirizza a `/login` conservando la callback.
 4. L'applicazione ricarica utente e membership locali, quindi completa il flusso WorkOS con identita immutabile e scelte tenant consentite.
 5. WorkOS torna al redirect URI ChatGPT e rilascia token per la risorsa MCP.
-6. `/api/mcp` verifica firma JWKS, RS256, issuer, audience, validita temporale, claim identita, scope e autorizzazione locale.
+6. `/api/mcp` verifica firma JWKS, RS256, issuer, audience, validita temporale e claim identita/tenant, poi deriva l'autorizzazione read/write dalla policy locale.
 
-Non esiste fallback anonimo. Configurazione provider assente produce `503 AUTH_UNAVAILABLE`; credenziali assenti o non valide producono `401`; scope o autorizzazione locale insufficienti producono `403`.
+Non esiste fallback anonimo. Configurazione provider assente produce `503 AUTH_UNAVAILABLE`; credenziali assenti o non valide producono `401`; autorizzazione locale insufficiente produce `403 FORBIDDEN` senza challenge `insufficient_scope`.
 
 ## Verifica offline
 
@@ -129,7 +130,7 @@ La suite non usa login provider, database di produzione o chiamate WorkOS reali:
 npx vitest run tests/unit/legal-research-mcp-auth.test.ts tests/unit/legal-research-mcp.test.ts tests/unit/workos-complete-route.test.ts
 ```
 
-Copre JWT RS256/JWKS, rotazione `kid`, issuer, audience, scadenza, scope, utenti e tenant locali, challenge OAuth, metadata MCP e completamento Standalone mockato.
+Copre JWT RS256/JWKS, rotazione `kid`, issuer, audience, scadenza, utenti e tenant locali, permessi applicativi, challenge OAuth, metadata MCP e completamento Standalone mockato.
 
 ## Verifica controllata prima del rilascio
 

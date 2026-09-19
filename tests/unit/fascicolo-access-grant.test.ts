@@ -14,7 +14,7 @@ const principal: ResearchMcpPrincipal = {
   actorId: "user-a",
   tenantId: "tenant-a",
   claimantId: "workos:subject-a",
-  scopes: ["research:read", "research:write"],
+  permissions: ["research:read", "research:write"],
 };
 
 const missionContext = {

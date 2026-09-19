@@ -98,8 +98,8 @@ Rollback strategy: delete the temporary Neon validation branch. Do not reverse D
 | MCP resource indicator | DERIVED_PUBLIC_URL, WORKOS_DASHBOARD, SERVER_ENV, CHATGPT_CONNECTION | Exact `https://<preview-host>/api/mcp`; stored as `MCP_RESOURCE_URI` |
 | Protected resource metadata | DERIVED_PUBLIC_URL | `https://<preview-host>/.well-known/oauth-protected-resource` |
 | Allowed browser/client origins | CHATGPT_CONNECTION, SERVER_ENV | Exact observed/documented origins only, comma-separated in `MCP_ALLOWED_ORIGINS` when an Origin header is sent |
-| Read scope | WORKOS_DASHBOARD, CHATGPT_CONNECTION | `research:read` |
-| Write scope | WORKOS_DASHBOARD, CHATGPT_CONNECTION | `research:write` |
+| OAuth scopes | WORKOS_DASHBOARD, CHATGPT_CONNECTION | Only WorkOS-supported standard scopes: `openid profile email offline_access` |
+| Research permissions | APPLICATION_LOCAL | `research:read` and `research:write`, derived from local actor role and tenant membership; never requested from WorkOS |
 | Authorization flow | WORKOS_DASHBOARD, CHATGPT_CONNECTION | Authorization code with PKCE S256 |
 | Offline access | WORKOS_DASHBOARD, CHATGPT_CONNECTION | Request and permit `offline_access` only for refresh-token use |
 | Refresh tokens | WORKOS_DASHBOARD | Enabled for the non-production client; rotation/revocation behavior confirmed before use |
@@ -107,13 +107,13 @@ Rollback strategy: delete the temporary Neon validation branch. Do not reverse D
 | DCR | WORKOS_DASHBOARD, CHATGPT_CONNECTION | Enable only as the documented fallback when CIMD is unavailable |
 | JWKS | DERIVED_PUBLIC_URL | Issuer JWKS at `<issuer>/oauth2/jwks`; HTTPS and reachable by Preview runtime |
 | Token algorithm | WORKOS_DASHBOARD | RS256 only |
-| Token claims | WORKOS_DASHBOARD | Valid `iss`, `aud` equal to resource, `exp`/`nbf`, `sub`, scopes |
+| Token claims | WORKOS_DASHBOARD | Valid `iss`, `aud` equal to resource, `exp`/`nbf`, `sub`, actor and tenant claims; JWT scope/permission claims do not grant application permissions |
 | Local actor claim | WORKOS_DASHBOARD | `urn:concessioni-portuali:actor_id` populated from `user.external_id` |
 | Tenant consent claim | WORKOS_DASHBOARD | `urn:concessioni-portuali:tenant_id`, constrained to locally supplied memberships |
 | Identity mapping | WORKOS_DASHBOARD, SERVER_ENV | Local immutable `User.id` stored as WorkOS `user.external_id`; no email matching and no Prisma mapping table |
 | WorkOS API credential | SERVER_ENV | Secret `WORKOS_API_KEY`; Preview only, server-only |
 
-JWT acceptance requires a matching `kid` from JWKS, RS256 signature, exact issuer and audience/resource, valid time window, signed local actor claim, WorkOS `sub`, required scope, active local user, and current local tenant membership.
+JWT acceptance requires a matching `kid` from JWKS, RS256 signature, exact issuer and audience/resource, valid time window, signed local actor claim, WorkOS `sub`, active local user, and current local tenant membership. Read/write permissions are derived afterward from local policy.
 
 ## VERCEL_PREVIEW_ENV_MANIFEST
 
@@ -143,13 +143,13 @@ Expected URLs:
 Pre-ChatGPT checks, in order:
 
 1. Preview TLS certificate is valid and all URLs remain HTTPS with no redirect to another host.
-2. Protected-resource metadata returns 200, exact resource URI, one expected authorization server, bearer header support, and both research scopes.
+2. Protected-resource metadata returns 200, exact resource URI, one expected authorization server, and bearer header support, without research permissions advertised as OAuth scopes.
 3. Issuer metadata and JWKS are reachable; keys are RSA signing keys and include usable `kid` values.
 4. Unauthenticated MCP request returns 401 with `WWW-Authenticate` containing the exact resource metadata URL.
 5. Invalid bearer token returns 401 and leaks no verification detail.
-6. A read-only token can initialize MCP and list tools, but write invocation returns 403 with `insufficient_scope`.
-7. A valid read/write token can initialize and list exactly the seven bounded research tools.
-8. `securitySchemes` and `_meta.securitySchemes` advertise the correct scope per tool.
+6. A locally read-authorized actor can initialize MCP and list tools; a local write denial returns `FORBIDDEN` without an OAuth challenge.
+7. A valid token for an actor with local read/write permission can initialize and list exactly the seven bounded research tools.
+8. `securitySchemes` and `_meta.securitySchemes` advertise OAuth with an empty scope list; tool permissions remain application-local.
 9. A disallowed Origin returns 403; the accepted ChatGPT Origin succeeds if an Origin header is present.
 10. No response or log includes tokens, API keys, database URLs, claim tokens, or stack traces.
 
@@ -159,9 +159,9 @@ Pre-ChatGPT checks, in order:
 2. Enter only `https://<preview-host>/api/mcp` as the remote MCP URL.
 3. Select OAuth/discovery. Do not paste tokens or credentials.
 4. Capture the exact ChatGPT redirect URI and register that URI in non-production WorkOS.
-5. Confirm discovery resolves the protected-resource metadata, issuer, scopes, and PKCE S256 flow.
+5. Confirm discovery resolves the protected-resource metadata, issuer, and PKCE S256 flow without requesting custom research scopes.
 6. Authenticate through WorkOS. If redirected, complete the existing NextAuth login and choose only an authorized local tenant.
-7. Approve `research:read` and `research:write`; include `offline_access` only for the refresh-token test.
+7. Approve only WorkOS-supported OAuth scopes; include `offline_access` only for the refresh-token test.
 8. Refresh tools and require exactly:
 
    - `research_capabilities`
@@ -172,8 +172,8 @@ Pre-ChatGPT checks, in order:
    - `research_defer_mission`
    - `research_complete_mission`
 
-9. Verify read-only and write tools display their respective OAuth scope declarations.
-10. Do not begin provider testing until identity, tenant isolation, tool count, and scope behavior pass.
+9. Verify all tools advertise OAuth with no custom research scope and enforce local read/write permissions.
+10. Do not begin provider testing until identity, tenant isolation, tool count, and local permission behavior pass.
 
 ## LEGAL_DATA_ACCEPTANCE_QUESTION
 
@@ -287,7 +287,7 @@ Current prerequisite: no public/UI mission-creation route exists. Before live ex
 | Expired claim | MCP returns bounded stale/expired claim error; no write occurs; reclaim only through normal lease path |
 | OAuth access token expiry | Refresh through WorkOS when `offline_access` is authorized; otherwise 401 and reauthorization, never anonymous fallback |
 | Refresh token revoked/invalid | 401 and interactive reauthorization; token details never logged |
-| Insufficient MCP scope | 403 with `insufficient_scope`; target service is not invoked |
+| Insufficient local MCP permission | `FORBIDDEN` without OAuth challenge; target service is not invoked |
 | Cross-tenant claim | 403 based on current local membership |
 | Disabled local user | 403 even when WorkOS token is otherwise valid |
 

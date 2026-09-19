@@ -1,6 +1,4 @@
 import {
-  RESEARCH_MCP_READ_SCOPE,
-  RESEARCH_MCP_WRITE_SCOPE,
   getResearchMcpAuthConfig,
   researchMcpAuthResponse,
 } from "@/server/legal-research/mcp-auth";
@@ -16,7 +14,6 @@ export async function GET(): Promise<Response> {
     resource: config.resource,
     authorization_servers: [config.issuer],
     bearer_methods_supported: ["header"],
-    scopes_supported: [RESEARCH_MCP_READ_SCOPE, RESEARCH_MCP_WRITE_SCOPE],
   }, {
     headers: { "Cache-Control": "public, max-age=300" },
   });

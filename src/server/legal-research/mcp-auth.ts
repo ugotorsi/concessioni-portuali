@@ -1,21 +1,27 @@
 import { createRemoteJWKSet, jwtVerify, type JWTPayload, type JWTVerifyGetKey } from "jose";
 
+import type { DemoRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import {
+  canReadTenantResource,
+  canWriteTenantResource,
+  resolveAccessibleTenantIds,
+} from "@/lib/tenant-auth";
 
-export const RESEARCH_MCP_READ_SCOPE = "research:read" as const;
-export const RESEARCH_MCP_WRITE_SCOPE = "research:write" as const;
+export const RESEARCH_MCP_READ_PERMISSION = "research:read" as const;
+export const RESEARCH_MCP_WRITE_PERMISSION = "research:write" as const;
 export const RESEARCH_MCP_ACTOR_ID_CLAIM = "urn:concessioni-portuali:actor_id" as const;
 export const RESEARCH_MCP_TENANT_ID_CLAIM = "urn:concessioni-portuali:tenant_id" as const;
 
-export type ResearchMcpScope =
-  | typeof RESEARCH_MCP_READ_SCOPE
-  | typeof RESEARCH_MCP_WRITE_SCOPE;
+export type ResearchMcpPermission =
+  | typeof RESEARCH_MCP_READ_PERMISSION
+  | typeof RESEARCH_MCP_WRITE_PERMISSION;
 
 export type ResearchMcpPrincipal = Readonly<{
   actorId: string;
   tenantId: string;
   claimantId: string;
-  scopes: readonly ResearchMcpScope[];
+  permissions: readonly ResearchMcpPermission[];
 }>;
 
 export type ResearchMcpAuthConfig = Readonly<{
@@ -26,8 +32,11 @@ export type ResearchMcpAuthConfig = Readonly<{
 
 export type ResearchMcpLocalIdentity = Readonly<{
   active: boolean;
+  role: DemoRole;
+  isAdmin: boolean;
   defaultTenantId: string | null;
   tenantIds: readonly string[];
+  accessibleTenantIds: readonly string[];
 }>;
 
 export type ResearchMcpJwtVerifier = (
@@ -47,7 +56,6 @@ export class ResearchMcpAuthError extends Error {
   constructor(
     readonly code: "AUTH_UNAVAILABLE" | "FORBIDDEN",
     readonly status: 503 | 403,
-    readonly requiredScopes: readonly ResearchMcpScope[] = [],
   ) {
     super(code);
     this.name = "ResearchMcpAuthError";
@@ -83,14 +91,6 @@ function bearerToken(request: Request): string | null {
   return match?.[1] ?? null;
 }
 
-function tokenScopes(payload: JWTPayload): ResearchMcpScope[] {
-  const raw = payload.scope ?? payload.scp ?? payload.permissions;
-  const values = typeof raw === "string"
-    ? raw.split(/\s+/)
-    : Array.isArray(raw) ? raw.filter((value): value is string => typeof value === "string") : [];
-  return [RESEARCH_MCP_READ_SCOPE, RESEARCH_MCP_WRITE_SCOPE].filter((scope) => values.includes(scope));
-}
-
 export function createJoseResearchMcpJwtVerifier(jwks: JWTVerifyGetKey): ResearchMcpJwtVerifier {
   return async (token, config) => {
     const { payload } = await jwtVerify(token, jwks, {
@@ -107,6 +107,7 @@ async function resolveLocalIdentity(actorId: string): Promise<ResearchMcpLocalId
     where: { id: actorId },
     select: {
       attivo: true,
+      role: true,
       tenantMemberships: {
         orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
         select: { enteId: true, isDefault: true },
@@ -114,12 +115,16 @@ async function resolveLocalIdentity(actorId: string): Promise<ResearchMcpLocalId
     },
   });
   if (!user) return null;
+  const role = user.role as DemoRole;
   return {
     active: user.attivo,
+    role,
+    isAdmin: role === "ADMIN",
     defaultTenantId: user.tenantMemberships.find((membership) => membership.isDefault)?.enteId
       ?? user.tenantMemberships[0]?.enteId
       ?? null,
     tenantIds: user.tenantMemberships.map((membership) => membership.enteId),
+    accessibleTenantIds: resolveAccessibleTenantIds({ role, memberships: user.tenantMemberships }),
   };
 }
 
@@ -127,13 +132,11 @@ export function createWorkosResearchMcpPrincipalVerifier(options: Readonly<{
   config?: ResearchMcpAuthConfig | null;
   verifyJwt?: ResearchMcpJwtVerifier;
   resolveIdentity?: ResearchMcpIdentityResolver;
-  requiredScopes?: readonly ResearchMcpScope[];
 }> = {}): ResearchMcpPrincipalVerifier {
   const config = options.config === undefined ? getResearchMcpAuthConfig() : options.config;
   const verifyJwt = options.verifyJwt
     ?? (config ? createJoseResearchMcpJwtVerifier(createRemoteJWKSet(new URL(config.jwksUri))) : null);
   const resolveIdentity = options.resolveIdentity ?? resolveLocalIdentity;
-  const requiredScopes = options.requiredScopes ?? [RESEARCH_MCP_READ_SCOPE];
 
   return {
     async verify(request) {
@@ -152,12 +155,6 @@ export function createWorkosResearchMcpPrincipalVerifier(options: Readonly<{
       const subject = payload.sub;
       if (typeof actorId !== "string" || !actorId || typeof subject !== "string" || !subject) return null;
 
-      const scopes = tokenScopes(payload);
-      const missingScopes = requiredScopes.filter((scope) => !scopes.includes(scope));
-      if (missingScopes.length > 0) {
-        throw new ResearchMcpAuthError("FORBIDDEN", 403, missingScopes);
-      }
-
       const identity = await resolveIdentity(actorId);
       if (!identity?.active) throw new ResearchMcpAuthError("FORBIDDEN", 403);
 
@@ -168,25 +165,35 @@ export function createWorkosResearchMcpPrincipalVerifier(options: Readonly<{
       if (!tenantId || !identity.tenantIds.includes(tenantId)) {
         throw new ResearchMcpAuthError("FORBIDDEN", 403);
       }
+      const localContext = {
+        role: identity.role,
+        isAdmin: identity.isAdmin,
+        accessibleTenantIds: [...identity.accessibleTenantIds],
+      };
+      const permissions: ResearchMcpPermission[] = [];
+      if (canReadTenantResource(localContext, tenantId, { allowWhenEnteMissing: false })) {
+        permissions.push(RESEARCH_MCP_READ_PERMISSION);
+      }
+      if (canWriteTenantResource(localContext, tenantId, { allowWhenEnteMissing: false })) {
+        permissions.push(RESEARCH_MCP_WRITE_PERMISSION);
+      }
 
       return {
         actorId,
         tenantId,
         claimantId: `workos:${subject}`,
-        scopes,
+        permissions,
       };
     },
   };
 }
 
 export function researchMcpWwwAuthenticate(config: ResearchMcpAuthConfig, options: Readonly<{
-  error?: "invalid_token" | "insufficient_scope";
-  scopes?: readonly ResearchMcpScope[];
+  error?: "invalid_token";
 }> = {}): string {
   const fields = [
     `resource_metadata="${researchMcpProtectedResourceMetadataUrl(config.resource)}"`,
     ...(options.error ? [`error="${options.error}"`] : []),
-    ...(options.scopes?.length ? [`scope="${options.scopes.join(" ")}"`] : []),
   ];
   return `Bearer ${fields.join(", ")}`;
 }
@@ -197,15 +204,13 @@ export function researchMcpAuthResponse(
     status?: 401 | 403 | 503;
     error?: "AUTH_REQUIRED" | "FORBIDDEN" | "AUTH_UNAVAILABLE";
     invalidToken?: boolean;
-    scopes?: readonly ResearchMcpScope[];
   }> = {},
 ): Response {
   const status = options.status ?? 401;
   const headers = new Headers({ "Cache-Control": "no-store" });
-  if (config && status !== 503) {
+  if (config && status === 401) {
     headers.set("WWW-Authenticate", researchMcpWwwAuthenticate(config, {
-      error: status === 403 ? "insufficient_scope" : options.invalidToken ? "invalid_token" : undefined,
-      scopes: options.scopes,
+      error: options.invalidToken ? "invalid_token" : undefined,
     }));
   }
   return Response.json(
