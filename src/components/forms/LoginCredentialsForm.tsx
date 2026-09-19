@@ -5,9 +5,10 @@ import { signIn } from "next-auth/react";
 
 interface LoginCredentialsFormProps {
   initialErrorMessage: string | null;
+  callbackUrl?: string;
 }
 
-export function LoginCredentialsForm({ initialErrorMessage }: LoginCredentialsFormProps) {
+export function LoginCredentialsForm({ initialErrorMessage, callbackUrl }: LoginCredentialsFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(initialErrorMessage);
 
@@ -29,13 +30,18 @@ export function LoginCredentialsForm({ initialErrorMessage }: LoginCredentialsFo
     const result = await signIn("credentials", {
       email,
       password,
-      callbackUrl: "/dashboard",
+      callbackUrl: callbackUrl ?? "/dashboard",
       redirect: false,
     });
 
     if (!result || result.error) {
       setErrorMessage("Credenziali non valide o account temporaneamente bloccato.");
       setIsSubmitting(false);
+      return;
+    }
+
+    if (callbackUrl) {
+      window.location.assign(callbackUrl);
       return;
     }
 

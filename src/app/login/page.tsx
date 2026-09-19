@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { LoginCredentialsForm } from "@/components/forms/LoginCredentialsForm";
 import { StagingAdminLoginForm } from "@/components/forms/StagingAdminLoginForm";
 import { getCurrentRole, type DemoRole } from "@/lib/auth";
+import { resolveWorkosLoginCallback } from "@/server/auth/workos-login-callback";
 
 function getPostLoginPath(role: DemoRole): string {
   return role === "VIEWER_ADSP" ? "/adsp" : "/dashboard";
@@ -11,9 +12,11 @@ function getPostLoginPath(role: DemoRole): string {
 type LoginPageSearchParams =
   | {
       error?: string | string[];
+      callbackUrl?: string | string[];
     }
   | Promise<{
       error?: string | string[];
+      callbackUrl?: string | string[];
     }>;
 
 interface LoginPageProps {
@@ -46,16 +49,17 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       ? await searchParams
       : searchParams
     : undefined;
+  const trustedWorkosCallback = resolveWorkosLoginCallback(resolvedParams?.callbackUrl);
   const currentRole = await getCurrentRole();
 
-  if (currentRole) {
+  if (currentRole && !trustedWorkosCallback) {
     redirect(getPostLoginPath(currentRole));
   }
 
   const errorParam = Array.isArray(resolvedParams?.error)
     ? resolvedParams?.error[0]
     : resolvedParams?.error;
-  const useStagingAdminBypass = isStagingAdminBypassEnabled();
+  const useStagingAdminBypass = isStagingAdminBypassEnabled() && !trustedWorkosCallback;
   const errorMessage = getErrorMessage(errorParam);
 
   return (
@@ -80,7 +84,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           {useStagingAdminBypass ? (
             <StagingAdminLoginForm initialErrorMessage={errorMessage} />
           ) : (
-            <LoginCredentialsForm initialErrorMessage={errorMessage} />
+            <LoginCredentialsForm
+              initialErrorMessage={errorMessage}
+              callbackUrl={trustedWorkosCallback ?? undefined}
+            />
           )}
         </section>
       </div>
