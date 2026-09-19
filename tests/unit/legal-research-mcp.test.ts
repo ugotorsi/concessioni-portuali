@@ -202,6 +202,10 @@ describe("Block 3B.13C legal research MCP", () => {
   it("initializes and discovers only the bounded tool surface with accurate annotations", async () => {
     const { client } = await protocolHarness();
     const tools = await client.listTools();
+    const expectedSecuritySchemes = [{
+      type: "oauth2",
+      scopes: ["openid", "profile", "email", "offline_access"],
+    }];
     expect(tools.tools.map((tool) => tool.name)).toEqual([
       "research_capabilities",
       "research_list_pending",
@@ -214,9 +218,10 @@ describe("Block 3B.13C legal research MCP", () => {
     expect(tools.tools.slice(0, 3).every((tool) => tool.annotations?.readOnlyHint)).toBe(true);
     expect(tools.tools.slice(3).every((tool) => tool.annotations?.readOnlyHint === false)).toBe(true);
     expect(tools.tools.every((tool) => tool.annotations?.destructiveHint === false)).toBe(true);
-    expect(tools.tools.every((tool) => (
-      (tool._meta as { securitySchemes?: unknown[] } | undefined)?.securitySchemes?.[0]
-    ))).toBe(true);
+    for (const tool of tools.tools) {
+      expect((tool._meta as { securitySchemes?: unknown[] } | undefined)?.securitySchemes)
+        .toEqual(expectedSecuritySchemes);
+    }
     expect(tools.tools.every((tool) => tool.outputSchema !== undefined)).toBe(true);
     expect(tools.tools.find((tool) => tool.name === "research_capabilities")?.outputSchema)
       .toMatchObject({
@@ -230,10 +235,6 @@ describe("Block 3B.13C legal research MCP", () => {
           maximums: expect.any(Object),
         },
       });
-    expect(tools.tools.every((tool) => (
-      (tool._meta as { securitySchemes?: Array<{ scopes?: string[] }> } | undefined)
-        ?.securitySchemes?.[0]?.scopes?.length === 0
-    ))).toBe(true);
     expect(JSON.stringify(tools.tools)).not.toMatch(/research:(read|write)/);
   });
 
@@ -280,11 +281,25 @@ describe("Block 3B.13C legal research MCP", () => {
       { service: service(), logger: vi.fn() },
     );
     const listPayload = await listResponse.json() as {
-      result: { tools: Array<{ securitySchemes?: unknown[]; _meta?: { securitySchemes?: unknown[] } }> };
+      result: {
+        tools: Array<{
+          securitySchemes?: unknown[];
+          _meta?: { securitySchemes?: unknown[] };
+          outputSchema?: unknown;
+        }>;
+      };
     };
-    expect(listPayload.result.tools.every((tool) => (
-      tool.securitySchemes?.[0] && tool._meta?.securitySchemes?.[0]
-    ))).toBe(true);
+    const expectedSecuritySchemes = [{
+      type: "oauth2",
+      scopes: ["openid", "profile", "email", "offline_access"],
+    }];
+    expect(listPayload.result.tools).toHaveLength(7);
+    for (const tool of listPayload.result.tools) {
+      expect(tool.securitySchemes).toEqual(expectedSecuritySchemes);
+      expect(tool._meta?.securitySchemes).toEqual(tool.securitySchemes);
+      expect(tool.outputSchema).toBeDefined();
+    }
+    expect(JSON.stringify(listPayload.result.tools)).not.toMatch(/research:(read|write)/);
 
     const forbidden = await handleAuthenticatedResearchMcpRequest(
       new Request("https://example.test/api/mcp", {

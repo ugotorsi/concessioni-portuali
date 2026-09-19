@@ -435,7 +435,10 @@ function annotations(readOnly: boolean, idempotent: boolean) {
 }
 
 function securityMetadata() {
-  const securitySchemes = [{ type: "oauth2" as const, scopes: [] }];
+  const securitySchemes = [{
+    type: "oauth2" as const,
+    scopes: ["openid", "profile", "email", "offline_access"],
+  }];
   return { securitySchemes, _meta: { securitySchemes } };
 }
 
