@@ -6,7 +6,13 @@ import {
   type JWK,
   type KeyLike,
 } from "jose";
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
+
+const findUserMock = vi.hoisted(() => vi.fn());
+
+vi.mock("@/lib/prisma", () => ({
+  prisma: { user: { findUnique: findUserMock } },
+}));
 
 import { GET as protectedResourceMetadata } from "@/app/.well-known/oauth-protected-resource/route";
 import {
@@ -92,6 +98,41 @@ function verifier(jwks: JWK[] = [firstJwk, secondJwk], identity = activeIdentity
 }
 
 describe("Block 3B.13D WorkOS MCP auth", () => {
+  it("derives permissions through the default local identity resolver using User.ruolo", async () => {
+    findUserMock.mockResolvedValueOnce({
+      attivo: true,
+      ruolo: "GIURIDICO",
+      tenantMemberships: [{ enteId: "tenant-a", isDefault: true }],
+    });
+    const auth = createWorkosResearchMcpPrincipalVerifier({
+      config,
+      verifyJwt: async () => ({
+        sub: "user_workos_a",
+        [RESEARCH_MCP_ACTOR_ID_CLAIM]: "actor-a",
+        [RESEARCH_MCP_TENANT_ID_CLAIM]: "tenant-a",
+      }),
+    });
+
+    const principal = await auth.verify(request("signed-token"));
+    expect(findUserMock).toHaveBeenCalledWith({
+      where: { id: "actor-a" },
+      select: {
+        attivo: true,
+        ruolo: true,
+        tenantMemberships: {
+          orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
+          select: { enteId: true, isDefault: true },
+        },
+      },
+    });
+    expect(findUserMock.mock.calls[0]?.[0]?.select).not.toHaveProperty("role");
+    expect(principal).toMatchObject({
+      actorId: "actor-a",
+      tenantId: "tenant-a",
+      permissions: ["research:read", "research:write"],
+    });
+  });
+
   it("accepts valid tokens across JWKS key rotation and maps immutable local identity", async () => {
     const auth = verifier();
     for (const accessToken of [

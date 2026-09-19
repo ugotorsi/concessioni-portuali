@@ -107,7 +107,7 @@ async function resolveLocalIdentity(actorId: string): Promise<ResearchMcpLocalId
     where: { id: actorId },
     select: {
       attivo: true,
-      role: true,
+      ruolo: true,
       tenantMemberships: {
         orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
         select: { enteId: true, isDefault: true },
@@ -115,7 +115,7 @@ async function resolveLocalIdentity(actorId: string): Promise<ResearchMcpLocalId
     },
   });
   if (!user) return null;
-  const role = user.role as DemoRole;
+  const role = user.ruolo as DemoRole;
   return {
     active: user.attivo,
     role,
