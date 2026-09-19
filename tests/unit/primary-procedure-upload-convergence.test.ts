@@ -179,6 +179,9 @@ function prepareHandoff(outcome: "CASE_DOCUMENT" | "LEGAL_SOURCE_CANDIDATE" | "U
     actorEmail: "user@example.test",
     actorRole: "GIURIDICO",
     purpose: "NEUTRAL_INTAKE_CLASSIFICATION",
+    admissionType: "AUTHENTICATED_USER",
+    correlationId: "correlation-1",
+    policyDecisionRef: null,
   });
   txMock.neutralIntakeClassificationAttempt.findUnique.mockResolvedValue(decision);
   txMock.legalSourceCandidateAdmission.createMany.mockImplementation(async ({ data }) => {
@@ -267,6 +270,18 @@ describe("primary Procedimento upload convergence", () => {
     expect(txMock.documentFileVersion.createMany).toHaveBeenCalledWith({
       data: [expect.objectContaining({ storageKey: storageObject.storageKey, sha256 })],
       skipDuplicates: true,
+    });
+    const reevaluationAdmissions = admitJobMock.mock.calls.filter(
+      ([, admission]) => admission.operation === "FASCICOLO_REEVALUATE_V1",
+    );
+    expect(reevaluationAdmissions).toHaveLength(1);
+    expect(reevaluationAdmissions[0][0]).toBe(txMock);
+    expect(reevaluationAdmissions[0][1]).toMatchObject({
+      operation: "FASCICOLO_REEVALUATE_V1",
+      inputReference: {
+        referenceType: "FASCICOLO_REEVALUATION",
+        referenceId: "procedimento-1",
+      },
     });
   });
 

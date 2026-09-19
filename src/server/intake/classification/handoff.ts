@@ -1,6 +1,8 @@
 import { createHash } from "node:crypto";
 
 import { Prisma } from "@/generated/prisma/client";
+import { admitAsyncJobInTransaction } from "@/server/async-jobs/persistence";
+import { buildFascicoloReevaluationAdmission } from "@/server/fascicolo-lifecycle/fascicoloReevaluationJob";
 
 export const NEUTRAL_INTAKE_HANDOFF_CONTRACT_VERSION =
   "B2C9_NEUTRAL_INTAKE_HANDOFF_V1" as const;
@@ -68,6 +70,9 @@ export async function ensureClassificationHandoffInTransaction(
         actorEmail: true,
         actorRole: true,
         purpose: true,
+        admissionType: true,
+        correlationId: true,
+        policyDecisionRef: true,
       },
     }),
     tx.neutralIntakeClassificationAttempt.findUnique({
@@ -225,6 +230,35 @@ export async function ensureClassificationHandoffInTransaction(
     throw new NeutralIntakeHandoffConflictError();
   }
   await markRouted(tx, intake.id);
+  await admitAsyncJobInTransaction(tx, buildFascicoloReevaluationAdmission({
+    procedimentoId: destination.procedimentoId,
+    change: {
+      kind: "DOCUMENT_CHANGED",
+      triggeredAt: intake.receivedAt.toISOString(),
+      origin: "WORKER",
+      stateFingerprint: deterministicId("DOCUMENT_STATE", [
+        documentId,
+        fileVersionId,
+        version.sha256,
+        "ATTIVO",
+      ]),
+      legalAssessmentTarget: { kind: "UNDETERMINED" },
+      procedimentoId: destination.procedimentoId,
+      documentId,
+      documentVersionId: fileVersionId,
+      changeType: "CREATED",
+      legalEvidenceKind: "NONE",
+    },
+  }, {
+    tenantId: job.tenantId,
+    admissionType: job.admissionType,
+    initiatingUserId: job.initiatingUserId,
+    actorId: job.actorId,
+    actorEmail: job.actorEmail,
+    actorRole: job.actorRole,
+    policyDecisionRef: job.policyDecisionRef,
+    correlationId: job.correlationId,
+  }));
   return { outcome: "CASE_DOCUMENT_ROUTED" as const, documentId };
 }
 

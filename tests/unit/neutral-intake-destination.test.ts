@@ -1,9 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
 const runTransaction = vi.hoisted(() => vi.fn());
+const admitAsyncJobInTransaction = vi.hoisted(() => vi.fn());
 vi.mock("@/server/db/serializableTransaction", () => ({
   runSerializableTransactionWithRetry: runTransaction,
 }));
+vi.mock("@/server/async-jobs/persistence", () => ({ admitAsyncJobInTransaction }));
 
 import {
   establishNeutralIntakeDestination,
@@ -130,6 +132,9 @@ function resumeTransaction(outcome: "CASE_DOCUMENT" | "UNCERTAIN_REVIEW_REQUIRED
         actorEmail: "user@example.test",
         actorRole: "GIURIDICO",
         purpose: "NEUTRAL_INTAKE_CLASSIFICATION",
+        admissionType: "AUTHENTICATED_USER",
+        correlationId: "correlation-1",
+        policyDecisionRef: null,
       })),
     },
     legalSourceCandidateAdmission: { createMany: vi.fn(), findFirst: vi.fn() },
