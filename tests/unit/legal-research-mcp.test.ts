@@ -8,8 +8,10 @@ import {
   createResearchMcpServer,
   handleAuthenticatedResearchMcpRequest,
   mapResearchMcpError,
+  type ResearchMcpServerOptions,
   type ResearchMcpService,
 } from "@/server/legal-research/mcp";
+import type { ResearchFascicoloAccessGrantPayload } from "@/server/legal-research/fascicolo-access-grant";
 import type { ResearchMcpPrincipal } from "@/server/legal-research/mcp-auth";
 import { ResearchPersistenceError } from "@/server/legal-research/persistence";
 import { deriveFascicoloContextScope } from "@/server/legal-research/fascicolo-context";
@@ -74,6 +76,23 @@ const storedMission = {
     updatedAt: new Date("2026-09-18T08:00:00.000Z"),
   },
 } as const;
+
+function fascicoloGrant(actor = principal): ResearchFascicoloAccessGrantPayload {
+  return {
+    version: "fg1",
+    purpose: "RESEARCH_FASCICOLO_ACCESS",
+    actorId: actor.actorId,
+    tenantId: actor.tenantId,
+    fascicoloScopeId: deriveFascicoloContextScope({
+      tenantId: actor.tenantId,
+      caseReference: mission.caseReference,
+    }).scopeId,
+    originMissionId: mission.missionId,
+    issuedAt: 1_775_037_600,
+    expiresAt: 1_775_039_400,
+    nonce: "test_nonce_123456789",
+  };
+}
 
 function evidenceBundle(completionState: ResearchEvidenceBundle["completionState"] = "PARTIAL") {
   return {
@@ -157,8 +176,14 @@ function service(): ResearchMcpService {
   } as ResearchMcpService;
 }
 
-async function protocolHarness(mockService = service(), actor = principal) {
-  const server = createResearchMcpServer(actor, { service: mockService, logger: vi.fn() });
+async function protocolHarness(
+  mockService = service(),
+  actor = principal,
+  options: Pick<ResearchMcpServerOptions, "fascicoloGrant" | "fascicoloGrantError"> = {
+    fascicoloGrant: fascicoloGrant(actor),
+  },
+) {
+  const server = createResearchMcpServer(actor, { service: mockService, logger: vi.fn(), ...options });
   const client = new Client({ name: "research-mcp-test", version: "1.0.0" });
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
   await server.connect(serverTransport);
@@ -267,6 +292,65 @@ describe("Block 3B.13C legal research MCP", () => {
     expect(result.researchProviderRoles).toHaveProperty("MOONLIT.role");
     expect(JSON.stringify(result)).not.toMatch(/password|apiKey|accessToken|DATABASE_URL/i);
     expect(Object.values(mockService).every((operation) => !vi.mocked(operation).mock.calls.length)).toBe(true);
+  });
+
+  it("keeps capabilities available but rejects case tools without a trusted binding", async () => {
+    const mockService = service();
+    const { client } = await protocolHarness(mockService, principal, {});
+    expect(structured(await client.callTool({
+      name: "research_capabilities",
+      arguments: {},
+    })).bridgeContractVersion).toBe(RESEARCH_BRIDGE_VERSION);
+
+    const result = structured(await client.callTool({
+      name: "research_get_mission",
+      arguments: { missionId: mission.missionId },
+    }));
+    expect(result.error).toBe("FASCICOLO_BINDING_REQUIRED");
+  });
+
+  it("isolates two fascicoli in the same tenant before every case mutation", async () => {
+    const mockService = service();
+    const missionB = {
+      ...mission,
+      missionId: "mission-b",
+      caseReference: { caseId: "case-b", fascicoloReference: "fascicolo-b" },
+      researchQuestion: "Question visible only in fascicolo B",
+    };
+    const storedMissionB = { ...storedMission, mission: missionB };
+    vi.mocked(mockService.listPending).mockResolvedValue([storedMission, storedMissionB] as never);
+    vi.mocked(mockService.getMission).mockResolvedValue(storedMissionB as never);
+    const { client } = await protocolHarness(mockService);
+
+    const listed = structured(await client.callTool({ name: "research_list_pending", arguments: {} }));
+    expect(listed.missions).toHaveLength(1);
+    expect(listed.missions[0].missionId).toBe("mission-a");
+    expect(JSON.stringify(listed)).not.toContain("mission-b");
+    expect(JSON.stringify(listed)).not.toContain("Question visible only in fascicolo B");
+    expect(JSON.stringify(listed)).not.toContain("fascicolo-b");
+    const calls = [
+      { name: "research_get_mission", arguments: { missionId: missionB.missionId } },
+      { name: "research_claim_mission", arguments: {
+        missionId: missionB.missionId, executionId: "execution-b", leaseDurationMs: 900_000,
+      } },
+      { name: "research_submit_evidence_bundle", arguments: {
+        bundle: { ...evidenceBundle(), missionId: missionB.missionId, executionId: "execution-b" }, claimToken,
+      } },
+      { name: "research_defer_mission", arguments: {
+        missionId: missionB.missionId, executionId: "execution-b", claimToken,
+        disposition: "DEFER", reasonCode: "RESEARCH_INCOMPLETE",
+      } },
+      { name: "research_complete_mission", arguments: {
+        missionId: missionB.missionId, executionId: "execution-b", bundleId: "bundle-b", claimToken,
+      } },
+    ];
+    for (const call of calls) {
+      expect(structured(await client.callTool(call)).error).toBe("FASCICOLO_SCOPE_MISMATCH");
+    }
+    expect(mockService.claimMission).not.toHaveBeenCalled();
+    expect(mockService.submitEvidenceBundle).not.toHaveBeenCalled();
+    expect(mockService.deferMission).not.toHaveBeenCalled();
+    expect(mockService.completeMission).not.toHaveBeenCalled();
   });
 
   it("lists bounded tenant-scoped metadata and preserves referenceDate on get", async () => {
@@ -509,7 +593,11 @@ describe("Block 3B.13C legal research MCP", () => {
   it("logs only bounded metadata and never claim tokens or mission content", async () => {
     const logger = vi.fn();
     const mockService = service();
-    const server = createResearchMcpServer(principal, { service: mockService, logger });
+    const server = createResearchMcpServer(principal, {
+      service: mockService,
+      logger,
+      fascicoloGrant: fascicoloGrant(),
+    });
     const client = new Client({ name: "research-mcp-log-test", version: "1.0.0" });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     await server.connect(serverTransport);

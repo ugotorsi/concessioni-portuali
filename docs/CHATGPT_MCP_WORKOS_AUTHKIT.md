@@ -25,13 +25,37 @@ Configurare nell'ambiente applicativo:
 WORKOS_AUTHKIT_ISSUER="https://<authkit-domain>"
 WORKOS_API_KEY="<secret>"
 MCP_RESOURCE_URI="https://<app-host>/api/mcp"
+MCP_FASCICOLO_GRANT_SECRET="<at-least-32-random-bytes>"
+MCP_FASCICOLO_GRANT_TTL_SECONDS="1800"
 ```
 
 Requisiti:
 
 - `WORKOS_AUTHKIT_ISSUER` e `MCP_RESOURCE_URI` devono essere URL HTTPS senza query, frammenti o credenziali.
 - `MCP_RESOURCE_URI` deve coincidere esattamente con il resource indicator configurato in WorkOS e richiesto da ChatGPT.
+- `MCP_FASCICOLO_GRANT_SECRET` deve essere un segreto server-side di almeno 32 byte, distinto dalle chiavi OAuth e ruotato tramite la gestione segreti dell'ambiente.
+- `MCP_FASCICOLO_GRANT_TTL_SECONDS` e opzionale, vale 1800 per default ed e accettato solo tra 300 e 3600 secondi.
 - Non committare valori reali.
+
+## Trusted fascicolo access grant
+
+OAuth identifica l'attore e il tenant; non autorizza da solo un fascicolo. Tutti i tool case-specific richiedono anche un grant applicativo firmato e a breve durata nell'header:
+
+```http
+X-Concessioni-Fascicolo-Grant: fg1.<payload-base64url>.<hmac-base64url>
+```
+
+Il backend Concessioni Portuali emette il grant esclusivamente nel processo server trusted chiamando direttamente `mintResearchFascicoloAccessGrant(...)`, usando la missione memorizzata e la policy tenant locale. Non esiste un endpoint HTTP di mint esposto al browser. Il payload lega versione, purpose, attore, tenant, scope fascicolo derivato, missione origine, emissione, scadenza e nonce. Il grant non e un argomento tool, non viene persistito o loggato e non deve entrare nel model context.
+
+`research_capabilities` resta disponibile con il solo OAuth. `research_list_pending` e tutti i tool che leggono o mutano missioni richiedono il grant; la lista viene filtrata allo scope firmato e ogni operazione verifica la missione memorizzata prima di procedere. Grant assente, invalido, scaduto, riferito a un altro attore/tenant o a un altro fascicolo fallisce chiuso.
+
+Il percorso produttivo e: backend Concessioni Portuali -> esecuzione programmatica OpenAI -> MCP. Il backend conserva il raw grant server-side e lo inoltra soltanto nell'header `X-Concessioni-Fascicolo-Grant`, fuori dal contesto del modello, tramite un client Streamable HTTP oppure tramite gli header del server MCP nell'OpenAI Agents SDK. Il grant non e nel prompt, non e scelto dal modello, non e copiato dall'utente e non dipende da ChatGPT Project Memory.
+
+Il client ChatGPT configurato manualmente puo autenticarsi via OAuth e usare `research_capabilities`, ma non puo presentare questo header applicativo custom e quindi non puo usare i tool case-specific:
+
+`MANUAL_CHATGPT_CASE_TOOLS_REQUIRE_TRUSTED_FASCICOLO_BINDING`
+
+Non e attualmente implementato un mapping trusted tra `fascicoloScopeId` e conversation, thread o session OpenAI. Il grant garantisce il boundary di autorizzazione dati/tool, non l'isolamento dello storico conversazionale; tale binding resta un hardening necessario prima dell'end-to-end finale.
 
 ## Configurazione WorkOS
 
