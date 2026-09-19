@@ -7,9 +7,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const applicationWorker = vi.hoisted(() => ({
   drainOneApplicationAsyncJob: vi.fn(),
 }));
+const timeWatchBootstrap = vi.hoisted(() => ({
+  bootstrapConcessioneTimeWatches: vi.fn(),
+}));
 
 vi.mock("@/server/async-jobs/applicationWorker", () => ({
   drainOneApplicationAsyncJob: applicationWorker.drainOneApplicationAsyncJob,
+}));
+vi.mock("@/server/fascicolo-lifecycle/concessioneTimeWatchBootstrap", () => ({
+  bootstrapConcessioneTimeWatches: timeWatchBootstrap.bootstrapConcessioneTimeWatches,
 }));
 
 import {
@@ -45,7 +51,14 @@ function harness() {
 }
 
 describe("Block 3B.7 application async worker runtime", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    timeWatchBootstrap.bootstrapConcessioneTimeWatches.mockResolvedValue({
+      scannedCount: 0,
+      admittedCount: 0,
+      reusedCount: 0,
+    });
+  });
 
   it("uses a single bounded idle backoff without busy-looping or noisy repeated idle reports", async () => {
     applicationWorker.drainOneApplicationAsyncJob.mockResolvedValue({ outcome: "IDLE" });
@@ -140,6 +153,49 @@ describe("Block 3B.7 application async worker runtime", () => {
     expect(order).toEqual(["run-start", "run-end", "remove-handlers", "disconnect"]);
     expect(removeSignalHandlers).toHaveBeenCalledOnce();
     expect(disconnect).toHaveBeenCalledOnce();
+  });
+
+  it("completes the time-watch bootstrap before starting the normal drain runtime", async () => {
+    const order: string[] = [];
+    const runtime = {
+      requestShutdown: vi.fn(),
+      run: vi.fn(async () => { order.push("runtime"); }),
+    };
+
+    await runApplicationAsyncWorkerProcess({
+      parseConfig: () => config,
+      createRuntime: () => runtime,
+      installSignalHandlers: () => vi.fn(),
+      bootstrap: vi.fn(async () => { order.push("bootstrap"); }),
+      disconnect: vi.fn(async () => undefined),
+      reportFatal: vi.fn(),
+      markFailure: vi.fn(),
+    });
+
+    expect(order).toEqual(["bootstrap", "runtime"]);
+  });
+
+  it("does not start the worker when the time-watch bootstrap fails", async () => {
+    const runtime = { requestShutdown: vi.fn(), run: vi.fn() };
+    const disconnect = vi.fn(async () => undefined);
+    const reportFatal = vi.fn();
+    const markFailure = vi.fn();
+    const failure = new Error("bootstrap unavailable");
+
+    await runApplicationAsyncWorkerProcess({
+      parseConfig: () => config,
+      createRuntime: () => runtime,
+      installSignalHandlers: () => vi.fn(),
+      bootstrap: vi.fn(async () => { throw failure; }),
+      disconnect,
+      reportFatal,
+      markFailure,
+    });
+
+    expect(runtime.run).not.toHaveBeenCalled();
+    expect(disconnect).toHaveBeenCalledOnce();
+    expect(reportFatal).toHaveBeenCalledWith(failure);
+    expect(markFailure).toHaveBeenCalledOnce();
   });
 
   it("cleans up after a fatal runtime exit and reports failure without another drain", async () => {

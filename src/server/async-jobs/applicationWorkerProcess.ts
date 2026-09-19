@@ -28,6 +28,7 @@ interface ApplicationAsyncWorkerProcessDependencies {
   readonly parseConfig?: typeof parseApplicationAsyncWorkerConfig;
   readonly createRuntime?: typeof createApplicationAsyncWorkerRuntime;
   readonly installSignalHandlers?: typeof installApplicationAsyncWorkerSignalHandlers;
+  readonly bootstrap?: () => Promise<unknown>;
   readonly disconnect?: () => Promise<void>;
   readonly report?: (event: ApplicationAsyncWorkerEvent) => void;
   readonly reportFatal?: (error: unknown) => void;
@@ -51,6 +52,13 @@ export async function runApplicationAsyncWorkerProcess(
     const runtime = createRuntime(config, { report: dependencies.report ?? report });
     const removeSignalHandlers = installSignalHandlers(runtime);
     try {
+      const bootstrap = dependencies.bootstrap ?? (async () => {
+        const { bootstrapConcessioneTimeWatches } = await import(
+          "../fascicolo-lifecycle/concessioneTimeWatchBootstrap"
+        );
+        return bootstrapConcessioneTimeWatches();
+      });
+      await bootstrap();
       await runtime.run();
     } finally {
       let teardownError: unknown;

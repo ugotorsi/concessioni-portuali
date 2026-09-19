@@ -129,6 +129,19 @@ describe("B2C9 generic async job persistence", () => {
     expect(harness.tx.$queryRaw).toHaveBeenCalledTimes(1);
   });
 
+  it("does not make a queued job claimable before availableAt", async () => {
+    harness.tx.$executeRaw.mockResolvedValue(0);
+    harness.tx.$queryRaw.mockResolvedValue([]);
+
+    await expect(claimNextAsyncJob({ workerId: "worker-1", leaseDurationMs: 60_000 }))
+      .resolves.toBeNull();
+
+    const claimQuery = harness.tx.$queryRaw.mock.calls.at(-1)?.[0] as { strings: readonly string[] };
+    expect(claimQuery.strings.join(" ")).toContain(
+      `"status" IN ('QUEUED', 'RETRY_WAIT') AND "availableAt" <= CURRENT_TIMESTAMP`,
+    );
+  });
+
   it("rejects stale lease tokens for heartbeat and success", async () => {
     harness.prisma.$executeRaw.mockResolvedValue(0);
     const lease = { jobId: "job-1", workerId: "worker-1", leaseToken: "c".repeat(64) };

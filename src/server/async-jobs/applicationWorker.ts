@@ -7,6 +7,7 @@ import { createLegalReferenceMatchingHandler } from "../intake/neutralIntakeLega
 import { createLegalReferenceOfficialLookupHandler } from "../intake/neutralIntakeLegalReferenceOfficialLookupJob";
 import { createLegalReferenceOfficialReconciliationHandler } from "../intake/neutralIntakeLegalReferenceOfficialReconciliationJob";
 import { createFascicoloReevaluationHandler } from "../fascicolo-lifecycle/fascicoloReevaluationJob";
+import { createConcessioneTimeWatchHandler } from "../fascicolo-lifecycle/concessioneTimeWatchJob";
 
 const APPLICATION_ASYNC_JOB_LEASE_MS = 5 * 60 * 1_000;
 
@@ -18,6 +19,7 @@ export const applicationAsyncJobRegistry = new AsyncJobHandlerRegistry([
   createLegalReferenceOfficialLookupHandler(),
   createLegalReferenceOfficialReconciliationHandler(),
   createFascicoloReevaluationHandler(),
+  createConcessioneTimeWatchHandler(),
 ]);
 
 export function drainOneApplicationAsyncJob(input: {
