@@ -8,6 +8,7 @@ import {
   createResearchMcpServer,
   handleAuthenticatedResearchMcpRequest,
   mapResearchMcpError,
+  RESEARCH_MCP_OUTPUT_SCHEMAS,
   type ResearchMcpServerOptions,
   type ResearchMcpService,
 } from "@/server/legal-research/mcp";
@@ -216,6 +217,19 @@ describe("Block 3B.13C legal research MCP", () => {
     expect(tools.tools.every((tool) => (
       (tool._meta as { securitySchemes?: unknown[] } | undefined)?.securitySchemes?.[0]
     ))).toBe(true);
+    expect(tools.tools.every((tool) => tool.outputSchema !== undefined)).toBe(true);
+    expect(tools.tools.find((tool) => tool.name === "research_capabilities")?.outputSchema)
+      .toMatchObject({
+        properties: {
+          bridgeContractVersion: expect.any(Object),
+          supportedResearchModes: expect.any(Object),
+          supportedCompletionStates: expect.any(Object),
+          researchProviderRoles: expect.any(Object),
+          supportedEvidenceBundleVersion: expect.any(Object),
+          serverMcpVersion: expect.any(Object),
+          maximums: expect.any(Object),
+        },
+      });
     expect(tools.tools.every((tool) => (
       (tool._meta as { securitySchemes?: Array<{ scopes?: string[] }> } | undefined)
         ?.securitySchemes?.[0]?.scopes?.length === 0
@@ -297,6 +311,33 @@ describe("Block 3B.13C legal research MCP", () => {
     expect(result.researchProviderRoles).toHaveProperty("MOONLIT.role");
     expect(JSON.stringify(result)).not.toMatch(/password|apiKey|accessToken|DATABASE_URL/i);
     expect(Object.values(mockService).every((operation) => !vi.mocked(operation).mock.calls.length)).toBe(true);
+  });
+
+  it("validates every successful structured result against its declared output schema", async () => {
+    const { client } = await protocolHarness();
+    const calls = {
+      research_capabilities: {},
+      research_list_pending: {},
+      research_get_mission: { missionId: mission.missionId },
+      research_claim_mission: {
+        missionId: mission.missionId, executionId: "execution-a", leaseDurationMs: 900_000,
+      },
+      research_submit_evidence_bundle: { bundle: evidenceBundle(), claimToken },
+      research_defer_mission: {
+        missionId: mission.missionId, executionId: "execution-a", claimToken,
+        disposition: "DEFER", reasonCode: "RESEARCH_INCOMPLETE",
+      },
+      research_complete_mission: {
+        missionId: mission.missionId, executionId: "execution-a", bundleId: "bundle-a", claimToken,
+      },
+    } as const;
+
+    for (const [name, args] of Object.entries(calls)) {
+      const result = await client.callTool({ name, arguments: args });
+      expect(result.isError).not.toBe(true);
+      expect(RESEARCH_MCP_OUTPUT_SCHEMAS[name as keyof typeof RESEARCH_MCP_OUTPUT_SCHEMAS]
+        .safeParse(result.structuredContent).success).toBe(true);
+    }
   });
 
   it("keeps capabilities available but rejects case tools without a trusted binding", async () => {

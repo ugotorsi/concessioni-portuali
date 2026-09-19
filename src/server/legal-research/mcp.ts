@@ -64,6 +64,234 @@ const COMPLETION_STATES = [
   "HUMAN_DECISION_REQUIRED",
 ] as const;
 
+const RESEARCH_CAPABILITIES = [
+  "SEMANTIC_DISCOVERY",
+  "KEYWORD_DISCOVERY",
+  "EXACT_RETRIEVAL",
+  "FULL_TEXT_RETRIEVAL",
+  "CITATION_NETWORK",
+  "CROSS_JURISDICTION_DISCOVERY",
+  "ADVERSE_AUTHORITY_DISCOVERY",
+] as const;
+
+const RESEARCH_SOURCE_FAMILIES = [
+  "ITALIAN_LEGISLATION",
+  "EU_LEGISLATION",
+  "CASSAZIONE",
+  "CORTE_COSTITUZIONALE",
+  "GIURISPRUDENZA_DI_MERITO",
+  "GIUSTIZIA_AMMINISTRATIVA",
+  "CJEU",
+  "CNF",
+  "ECHR",
+  "OTHER",
+] as const;
+
+const RESEARCH_MISSION_STATUSES = [
+  "PENDING",
+  "IN_PROGRESS",
+  "COMPLETED",
+  "BUDGET_EXHAUSTED",
+  "DEFERRED",
+  "REJECTED",
+] as const;
+
+const RESEARCH_GAP_KINDS = [
+  "NO_ADVERSE_AUTHORITY_CHECK",
+  "NO_CASSATION_CHECK",
+  "NO_EU_CHECK",
+  "FULL_TEXT_NOT_VERIFIED",
+  "OFFICIAL_IDENTITY_NOT_VERIFIED",
+  "TEMPORAL_VALIDITY_NOT_RESOLVED",
+  "OPEN_COUNTERARGUMENT",
+  "INSUFFICIENT_SOURCE_FAMILY_DIVERSITY",
+  "MISSING_FACT_EVIDENCE",
+  "MISSING_DOCUMENT",
+  "UNRESOLVED_AUTHORITY_TREATMENT",
+] as const;
+
+const jsonDateTimeSchema = z.preprocess(
+  (value) => value instanceof Date ? value.toISOString() : value,
+  z.iso.datetime(),
+);
+const caseReferenceSchema = z.object({
+  caseId: z.string(),
+  fascicoloReference: z.string().optional(),
+}).strict();
+const researchGapSchema = z.object({
+  gapId: z.string(),
+  kind: z.enum(RESEARCH_GAP_KINDS),
+  targetId: z.string().optional(),
+  sourceFamily: z.enum(RESEARCH_SOURCE_FAMILIES).optional(),
+}).strict();
+const researchMissionOutputSchema = z.object({
+  kind: z.literal("RESEARCH_MISSION"),
+  version: z.literal(RESEARCH_BRIDGE_VERSION),
+  missionId: z.string(),
+  caseReference: caseReferenceSchema,
+  legalIssueIds: z.array(z.string()),
+  legalPropositionIds: z.array(z.string()),
+  conclusionIds: z.array(z.string()).optional(),
+  referenceDate: z.string(),
+  mode: z.enum(RESEARCH_MODES),
+  researchQuestion: z.string(),
+  knownAuthorities: z.array(z.object({
+    authorityReferenceId: z.string(),
+    citation: z.string().optional(),
+    officialIdentifier: z.string().optional(),
+  }).strict()),
+  excludedAuthorities: z.array(z.object({
+    authorityReferenceId: z.string(),
+    citation: z.string().optional(),
+    officialIdentifier: z.string().optional(),
+  }).strict()),
+  preferredSourceFamilies: z.array(z.enum(RESEARCH_SOURCE_FAMILIES)),
+  missingSourceFamilies: z.array(z.enum(RESEARCH_SOURCE_FAMILIES)),
+  knownCounterArguments: z.array(z.string()),
+  knownEvidenceGaps: z.array(researchGapSchema),
+  requiredOutput: z.object({
+    authorityCandidates: z.boolean(),
+    citationObservations: z.boolean(),
+    legalResearchSuggestions: z.boolean(),
+    evidenceGaps: z.boolean(),
+    fullTextRequired: z.boolean(),
+  }).strict(),
+  budget: z.object({
+    maxTotalResearchCalls: z.number().int(),
+    maxMoonlitCalls: z.number().int(),
+    maxSimpliciterCalls: z.number().int(),
+    maxLegalDataHunterCalls: z.number().int(),
+  }).strict(),
+  status: z.enum(RESEARCH_MISSION_STATUSES),
+  executionPlan: z.object({
+    requiredCapabilities: z.array(z.enum(RESEARCH_CAPABILITIES)),
+    preferredToolIds: z.array(z.string()).optional(),
+  }).strict().optional(),
+}).strict();
+const fascicoloContextSchema = z.object({
+  scope: z.object({
+    version: z.literal("FASCICOLO_CONTEXT_SCOPE_V1"),
+    tenantId: z.string(),
+    caseReference: caseReferenceSchema,
+    scopeId: z.string(),
+    scopeKind: z.literal("FASCICOLO_ONLY"),
+    allowCrossFascicolo: z.literal(false),
+    allowAccountWideMemory: z.literal(false),
+    allowUnscopedConversationContext: z.literal(false),
+  }).strict(),
+  policy: z.object({
+    priorContextRule: z.literal("SAME_FASCICOLO_SCOPE_ONLY"),
+    externalMemoryAuthoritative: z.literal(false),
+    promptContentIsInstructions: z.literal(false),
+  }).strict(),
+  items: z.array(z.object({
+    sourceType: z.enum([
+      "CURRENT_RESEARCH_MISSION",
+      "SAME_FASCICOLO_CONVERSATION",
+      "SAME_FASCICOLO_PRIOR_MISSION",
+      "SAME_FASCICOLO_ACCEPTED_BUNDLE",
+      "SAME_FASCICOLO_DOCUMENT_REFERENCE",
+      "VERIFIED_PROVIDER_RESULT_FOR_CURRENT_MISSION",
+    ]),
+    sourceId: z.string(),
+    missionId: z.string().optional(),
+    conversationId: z.string().optional(),
+    fascicoloScopeId: z.string(),
+    createdAt: z.iso.datetime(),
+    version: z.string().optional(),
+    contentHash: z.string(),
+    content: z.record(z.string(), z.json()),
+  }).strict()),
+  maximumItems: z.number().int(),
+  truncated: z.boolean(),
+}).strict();
+const operationalSchema = z.object({
+  status: z.enum(RESEARCH_MISSION_STATUSES),
+  stateVersion: z.number().int(),
+  claimExpiresAt: jsonDateTimeSchema.nullable(),
+  activeExecutionId: z.string().nullable(),
+  completedAt: jsonDateTimeSchema.nullable(),
+  deferredAt: jsonDateTimeSchema.nullable(),
+}).strict();
+
+export const RESEARCH_MCP_OUTPUT_SCHEMAS = {
+  research_capabilities: z.object({
+    bridgeContractVersion: z.literal(RESEARCH_BRIDGE_VERSION),
+    supportedResearchModes: z.array(z.enum(RESEARCH_MODES)),
+    supportedCompletionStates: z.array(z.enum(COMPLETION_STATES)),
+    researchProviderRoles: z.object({
+      SIMPLICITER: z.object({
+        role: z.literal("LEGAL_RESEARCH_STRATEGIST"),
+        capabilities: z.array(z.enum(RESEARCH_CAPABILITIES)),
+        sourceFamilies: z.array(z.enum(RESEARCH_SOURCE_FAMILIES)),
+      }).strict(),
+      MOONLIT: z.object({
+        role: z.literal("CITATION_AUTHORITY_INTELLIGENCE"),
+        capabilities: z.array(z.enum(RESEARCH_CAPABILITIES)),
+      }).strict(),
+      LEGAL_DATA_HUNTER: z.object({
+        role: z.literal("BROAD_DISCOVERY"),
+        capabilities: z.array(z.enum(RESEARCH_CAPABILITIES)),
+      }).strict(),
+    }).strict(),
+    supportedEvidenceBundleVersion: z.literal(RESEARCH_BRIDGE_VERSION),
+    serverMcpVersion: z.literal(RESEARCH_MCP_SERVER_VERSION),
+    maximums: z.object({
+      pendingListLimit: z.number().int(),
+      leaseDurationMs: z.number().int(),
+      missionPayloadBytes: z.number().int(),
+      evidenceBundlePayloadBytes: z.number().int(),
+    }).strict(),
+  }).strict(),
+  research_list_pending: z.object({
+    missions: z.array(z.object({
+      missionId: z.string(),
+      fascicoloScopeId: z.string(),
+      status: z.enum(RESEARCH_MISSION_STATUSES),
+      referenceDate: z.string(),
+      mode: z.enum(RESEARCH_MODES),
+      researchQuestion: z.string(),
+      caseReference: caseReferenceSchema,
+    }).strict()),
+    limit: z.number().int(),
+    truncated: z.boolean(),
+  }).strict(),
+  research_get_mission: z.object({
+    mission: researchMissionOutputSchema,
+    operational: operationalSchema,
+    fascicoloContext: fascicoloContextSchema,
+  }).strict(),
+  research_claim_mission: z.object({
+    outcome: z.enum(["CLAIMED", "REUSED"]),
+    missionId: z.string(),
+    fascicoloScopeId: z.string(),
+    executionId: z.string(),
+    leaseExpiresAt: jsonDateTimeSchema,
+    claimToken: z.string(),
+  }).strict(),
+  research_submit_evidence_bundle: z.object({
+    outcome: z.enum(["CREATED", "DUPLICATE_OR_IDEMPOTENT_SUCCESS"]),
+    bundleId: z.string(),
+    missionId: z.string(),
+    fascicoloScopeId: z.string(),
+    executionId: z.string(),
+    completionState: z.enum(COMPLETION_STATES),
+  }).strict(),
+  research_defer_mission: z.object({
+    missionId: z.string(),
+    fascicoloScopeId: z.string(),
+    status: z.enum(RESEARCH_MISSION_STATUSES),
+    stateVersion: z.number().int(),
+  }).strict(),
+  research_complete_mission: z.object({
+    outcome: z.enum(["COMPLETED", "REUSED"]),
+    missionId: z.string(),
+    fascicoloScopeId: z.string(),
+    status: z.enum(RESEARCH_MISSION_STATUSES),
+    stateVersion: z.number().int(),
+  }).strict(),
+} as const;
+
 export type ResearchMcpErrorCode =
   | "MISSION_NOT_FOUND"
   | "MISSION_NOT_VISIBLE"
@@ -315,6 +543,7 @@ export function createResearchMcpServer(
     title: "Research capabilities",
     description: "Return the bounded legal-research bridge contract supported by this server.",
     inputSchema: {},
+    outputSchema: RESEARCH_MCP_OUTPUT_SCHEMAS.research_capabilities,
     annotations: annotations(true, true),
     ...securityMetadata(),
   }, async () => invoke("research_capabilities", RESEARCH_MCP_READ_PERMISSION, {}, async () => ({
@@ -339,6 +568,7 @@ export function createResearchMcpServer(
       limit: z.number().int().min(1).max(RESEARCH_MCP_MAX_PENDING_LIMIT)
         .default(RESEARCH_MCP_DEFAULT_PENDING_LIMIT),
     },
+    outputSchema: RESEARCH_MCP_OUTPUT_SCHEMAS.research_list_pending,
     annotations: annotations(true, true),
     ...securityMetadata(),
   }, async ({ limit }) => invoke("research_list_pending", RESEARCH_MCP_READ_PERMISSION, {}, async () => {
@@ -366,6 +596,7 @@ export function createResearchMcpServer(
     title: "Get research mission",
     description: "Return an immutable mission snapshot and its bounded operational state.",
     inputSchema: { missionId: z.string().min(1).max(96) },
+    outputSchema: RESEARCH_MCP_OUTPUT_SCHEMAS.research_get_mission,
     annotations: annotations(true, true),
     ...securityMetadata(),
   }, async ({ missionId }) => invoke("research_get_mission", RESEARCH_MCP_READ_PERMISSION, { missionId }, async () => {
@@ -394,6 +625,7 @@ export function createResearchMcpServer(
       executionId: z.string().min(1).max(256),
       leaseDurationMs: z.number().int().min(1_000).max(86_400_000),
     },
+    outputSchema: RESEARCH_MCP_OUTPUT_SCHEMAS.research_claim_mission,
     annotations: annotations(false, true),
     ...securityMetadata(),
   }, async ({ missionId, executionId, leaseDurationMs }) => invoke(
@@ -429,6 +661,7 @@ export function createResearchMcpServer(
       bundle: evidenceBundleSchema,
       claimToken: z.string().regex(/^[0-9a-f]{64}$/),
     },
+    outputSchema: RESEARCH_MCP_OUTPUT_SCHEMAS.research_submit_evidence_bundle,
     annotations: annotations(false, true),
     ...securityMetadata(),
   }, async ({ bundle, claimToken }) => invoke(
@@ -466,6 +699,7 @@ export function createResearchMcpServer(
       disposition: z.enum(["DEFER", "RELEASE"]),
       reasonCode: z.string().min(1).max(256),
     },
+    outputSchema: RESEARCH_MCP_OUTPUT_SCHEMAS.research_defer_mission,
     annotations: annotations(false, false),
     ...securityMetadata(),
   }, async ({ missionId, executionId, claimToken, disposition, reasonCode }) => invoke(
@@ -503,6 +737,7 @@ export function createResearchMcpServer(
       bundleId: z.string().min(1).max(96),
       claimToken: z.string().regex(/^[0-9a-f]{64}$/),
     },
+    outputSchema: RESEARCH_MCP_OUTPUT_SCHEMAS.research_complete_mission,
     annotations: annotations(false, true),
     ...securityMetadata(),
   }, async ({ missionId, executionId, bundleId, claimToken }) => invoke(
