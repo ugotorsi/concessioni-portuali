@@ -41,6 +41,22 @@ enum FascicoloDocumentRequirementProposalStatus {
   RIFIUTATO
 }
 
+enum FascicoloSignalStatus {
+  OPEN
+  SUPERSEDED
+}
+
+enum FascicoloSignalAttentionLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum FascicoloSignalKind {
+  CONCESSION_EXPIRY
+}
+
 enum AiFascicoloHumanReviewDisposition {
   COMPANY_ACCEPTED
   COMPANY_REJECTED
@@ -773,6 +789,7 @@ model Ente {
   neutralIntakes               NeutralIntake[]
   legalSourceCandidateAdmissions LegalSourceCandidateAdmission[]
   asyncJobs                    AsyncJob[]
+  fascicoloSignals             FascicoloSignal[]
   researchMissions             ResearchMissionRecord[]
   aiFascicoloTrustedReviewMaterials AiFascicoloTrustedReviewMaterial[]
   aiFascicoloHumanReviewStates      AiFascicoloHumanReviewState[]
@@ -1316,6 +1333,7 @@ model Concessione {
   legalFrameworks       ConcessioneLegalFramework[]
   normaImpatti          NormaImpatto[]
   activityLogs          ActivityLog[]
+  fascicoloSignals      FascicoloSignal[]
 
   @@index([stato])
   @@index([dataScadenza])
@@ -1499,6 +1517,7 @@ model Procedimento {
   aiFascicoloHumanReviewStates      AiFascicoloHumanReviewState[]
   aiFascicoloHumanReviewEvents      AiFascicoloHumanReviewEvent[]
   neutralIntakeDestinations         NeutralIntakeDestination[]
+  fascicoloSignals                  FascicoloSignal[]
 
   @@index([concessioneId])
   @@index([criticitaId])
@@ -2083,6 +2102,41 @@ model AsyncJob {
   @@index([initiatingUserId])
   @@index([correlationId])
   @@index([operation, createdAt])
+}
+
+model FascicoloSignal {
+  id                    String                         @id @default(cuid())
+  enteId                String
+  concessioneId         String
+  procedimentoId        String
+  kind                  FascicoloSignalKind
+  sourceOperation       String
+  ruleCode              String
+  ruleVersion           Int
+  subjectType           String
+  subjectId             String
+  semanticKey           String                         @db.Char(64)
+  generationFingerprint String                         @db.Char(64)
+  identityKey           String                         @unique @db.Char(64)
+  currentThreshold      String
+  attentionLevel        FascicoloSignalAttentionLevel
+  factsSnapshot         Json
+  status                FascicoloSignalStatus          @default(OPEN)
+  detectedAt            DateTime
+  lastObservedAt        DateTime
+  supersededAt          DateTime?
+  createdAt             DateTime                       @default(now())
+  updatedAt             DateTime                       @updatedAt
+
+  ente          Ente          @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  concessione   Concessione   @relation(fields: [concessioneId], references: [id], onDelete: Restrict)
+  procedimento Procedimento @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+
+  @@index([enteId, status])
+  @@index([procedimentoId, status])
+  @@index([concessioneId, status])
+  @@index([semanticKey, status])
+  @@index([attentionLevel])
 }
 
 model ResearchMissionRecord {

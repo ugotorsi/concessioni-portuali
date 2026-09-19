@@ -58,6 +58,31 @@ export const FascicoloDocumentRequirementProposalStatus = {
 export type FascicoloDocumentRequirementProposalStatus = (typeof FascicoloDocumentRequirementProposalStatus)[keyof typeof FascicoloDocumentRequirementProposalStatus]
 
 
+export const FascicoloSignalStatus = {
+  OPEN: 'OPEN',
+  SUPERSEDED: 'SUPERSEDED'
+} as const
+
+export type FascicoloSignalStatus = (typeof FascicoloSignalStatus)[keyof typeof FascicoloSignalStatus]
+
+
+export const FascicoloSignalAttentionLevel = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  CRITICAL: 'CRITICAL'
+} as const
+
+export type FascicoloSignalAttentionLevel = (typeof FascicoloSignalAttentionLevel)[keyof typeof FascicoloSignalAttentionLevel]
+
+
+export const FascicoloSignalKind = {
+  CONCESSION_EXPIRY: 'CONCESSION_EXPIRY'
+} as const
+
+export type FascicoloSignalKind = (typeof FascicoloSignalKind)[keyof typeof FascicoloSignalKind]
+
+
 export const AiFascicoloHumanReviewDisposition = {
   COMPANY_ACCEPTED: 'COMPANY_ACCEPTED',
   COMPANY_REJECTED: 'COMPANY_REJECTED',

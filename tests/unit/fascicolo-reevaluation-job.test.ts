@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { applicationAsyncJobRegistry } from "@/server/async-jobs/applicationWorker";
 import { normalizeAsyncJobAdmission } from "@/server/async-jobs/domain";
@@ -114,12 +114,18 @@ describe("Fase 2B Patch B fascicolo reevaluation job", () => {
   });
 
   it("invokes the pure planner and emits only bounded technical result metadata", async () => {
-    const handler = createFascicoloReevaluationHandler();
+    const observedAt = new Date("2026-03-03T10:00:00.000Z");
+    const projectSignal = vi.fn().mockResolvedValue({ outcome: "NOT_APPLICABLE", signalId: null });
+    const handler = createFascicoloReevaluationHandler({
+      projectSignal,
+      now: () => observedAt,
+    });
     const admission = normalizedDocumentAdmission();
     const parsed = handler.parseInput(admission.inputReference);
     const result = await handler.execute(parsed, {} as never);
 
     expect(parsed.change.triggeredAt).toBe(new Date(0).toISOString());
+    expect(projectSignal).toHaveBeenCalledWith(parsed.change, observedAt);
     expect(result).toEqual({
       referenceType: "FASCICOLO_REEVALUATION_PLAN",
       referenceId: "procedimento-1",

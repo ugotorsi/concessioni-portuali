@@ -1741,6 +1741,57 @@ export type EnumAsyncJobStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumAsyncJobStatusFilter<$PrismaModel>
 }
 
+export type EnumFascicoloSignalKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloSignalKind | Prisma.EnumFascicoloSignalKindFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloSignalKind[] | Prisma.ListEnumFascicoloSignalKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloSignalKind[] | Prisma.ListEnumFascicoloSignalKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloSignalKindFilter<$PrismaModel> | $Enums.FascicoloSignalKind
+}
+
+export type EnumFascicoloSignalAttentionLevelFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloSignalAttentionLevel | Prisma.EnumFascicoloSignalAttentionLevelFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloSignalAttentionLevel[] | Prisma.ListEnumFascicoloSignalAttentionLevelFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloSignalAttentionLevel[] | Prisma.ListEnumFascicoloSignalAttentionLevelFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloSignalAttentionLevelFilter<$PrismaModel> | $Enums.FascicoloSignalAttentionLevel
+}
+
+export type EnumFascicoloSignalStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloSignalStatus | Prisma.EnumFascicoloSignalStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloSignalStatus[] | Prisma.ListEnumFascicoloSignalStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloSignalStatus[] | Prisma.ListEnumFascicoloSignalStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloSignalStatusFilter<$PrismaModel> | $Enums.FascicoloSignalStatus
+}
+
+export type EnumFascicoloSignalKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloSignalKind | Prisma.EnumFascicoloSignalKindFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloSignalKind[] | Prisma.ListEnumFascicoloSignalKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloSignalKind[] | Prisma.ListEnumFascicoloSignalKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloSignalKindWithAggregatesFilter<$PrismaModel> | $Enums.FascicoloSignalKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFascicoloSignalKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFascicoloSignalKindFilter<$PrismaModel>
+}
+
+export type EnumFascicoloSignalAttentionLevelWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloSignalAttentionLevel | Prisma.EnumFascicoloSignalAttentionLevelFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloSignalAttentionLevel[] | Prisma.ListEnumFascicoloSignalAttentionLevelFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloSignalAttentionLevel[] | Prisma.ListEnumFascicoloSignalAttentionLevelFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloSignalAttentionLevelWithAggregatesFilter<$PrismaModel> | $Enums.FascicoloSignalAttentionLevel
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFascicoloSignalAttentionLevelFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFascicoloSignalAttentionLevelFilter<$PrismaModel>
+}
+
+export type EnumFascicoloSignalStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloSignalStatus | Prisma.EnumFascicoloSignalStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloSignalStatus[] | Prisma.ListEnumFascicoloSignalStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloSignalStatus[] | Prisma.ListEnumFascicoloSignalStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloSignalStatusWithAggregatesFilter<$PrismaModel> | $Enums.FascicoloSignalStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFascicoloSignalStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFascicoloSignalStatusFilter<$PrismaModel>
+}
+
 export type EnumResearchMissionStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.ResearchMissionStatus | Prisma.EnumResearchMissionStatusFieldRefInput<$PrismaModel>
   in?: $Enums.ResearchMissionStatus[] | Prisma.ListEnumResearchMissionStatusFieldRefInput<$PrismaModel>
@@ -3737,6 +3788,57 @@ export type NestedEnumAsyncJobStatusWithAggregatesFilter<$PrismaModel = never> =
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumAsyncJobStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumAsyncJobStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumFascicoloSignalKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloSignalKind | Prisma.EnumFascicoloSignalKindFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloSignalKind[] | Prisma.ListEnumFascicoloSignalKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloSignalKind[] | Prisma.ListEnumFascicoloSignalKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloSignalKindFilter<$PrismaModel> | $Enums.FascicoloSignalKind
+}
+
+export type NestedEnumFascicoloSignalAttentionLevelFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloSignalAttentionLevel | Prisma.EnumFascicoloSignalAttentionLevelFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloSignalAttentionLevel[] | Prisma.ListEnumFascicoloSignalAttentionLevelFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloSignalAttentionLevel[] | Prisma.ListEnumFascicoloSignalAttentionLevelFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloSignalAttentionLevelFilter<$PrismaModel> | $Enums.FascicoloSignalAttentionLevel
+}
+
+export type NestedEnumFascicoloSignalStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloSignalStatus | Prisma.EnumFascicoloSignalStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloSignalStatus[] | Prisma.ListEnumFascicoloSignalStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloSignalStatus[] | Prisma.ListEnumFascicoloSignalStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloSignalStatusFilter<$PrismaModel> | $Enums.FascicoloSignalStatus
+}
+
+export type NestedEnumFascicoloSignalKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloSignalKind | Prisma.EnumFascicoloSignalKindFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloSignalKind[] | Prisma.ListEnumFascicoloSignalKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloSignalKind[] | Prisma.ListEnumFascicoloSignalKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloSignalKindWithAggregatesFilter<$PrismaModel> | $Enums.FascicoloSignalKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFascicoloSignalKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFascicoloSignalKindFilter<$PrismaModel>
+}
+
+export type NestedEnumFascicoloSignalAttentionLevelWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloSignalAttentionLevel | Prisma.EnumFascicoloSignalAttentionLevelFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloSignalAttentionLevel[] | Prisma.ListEnumFascicoloSignalAttentionLevelFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloSignalAttentionLevel[] | Prisma.ListEnumFascicoloSignalAttentionLevelFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloSignalAttentionLevelWithAggregatesFilter<$PrismaModel> | $Enums.FascicoloSignalAttentionLevel
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFascicoloSignalAttentionLevelFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFascicoloSignalAttentionLevelFilter<$PrismaModel>
+}
+
+export type NestedEnumFascicoloSignalStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloSignalStatus | Prisma.EnumFascicoloSignalStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FascicoloSignalStatus[] | Prisma.ListEnumFascicoloSignalStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FascicoloSignalStatus[] | Prisma.ListEnumFascicoloSignalStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFascicoloSignalStatusWithAggregatesFilter<$PrismaModel> | $Enums.FascicoloSignalStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFascicoloSignalStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFascicoloSignalStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumResearchMissionStatusFilter<$PrismaModel = never> = {

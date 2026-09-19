@@ -15,6 +15,7 @@ import {
   parseFascicoloChange,
   type FascicoloChange,
 } from "./change";
+import { projectFascicoloSignal } from "./fascicoloSignal";
 import { planFascicoloReevaluation } from "./planner";
 
 export const FASCICOLO_REEVALUATE_OPERATION = "FASCICOLO_REEVALUATE_V1" as const;
@@ -201,11 +202,20 @@ export function parseFascicoloReevaluationReference(input: unknown): FascicoloRe
   return Object.freeze({ procedimentoId: parsed.data.referenceId, change });
 }
 
-export function createFascicoloReevaluationHandler(): AsyncJobHandler<FascicoloReevaluationInput> {
+export function createFascicoloReevaluationHandler(
+  dependencies: {
+    projectSignal?: typeof projectFascicoloSignal;
+    now?: () => Date;
+  } = {},
+): AsyncJobHandler<FascicoloReevaluationInput> {
   return {
     operation: FASCICOLO_REEVALUATE_OPERATION,
     parseInput: parseFascicoloReevaluationReference,
     async execute(input) {
+      await (dependencies.projectSignal ?? projectFascicoloSignal)(
+        input.change,
+        (dependencies.now ?? (() => new Date()))(),
+      );
       const plan = planFascicoloReevaluation(input.change);
       const familyCodes = plan.items.map((item) => item.family).join(",");
       const planHash = createHash("sha256").update(stableStringify(plan), "utf8").digest("hex");

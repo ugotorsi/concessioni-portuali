@@ -93,6 +93,7 @@ export const ModelName = {
   LegalSourceCandidateAdmission: 'LegalSourceCandidateAdmission',
   LegalSourceCandidateResolution: 'LegalSourceCandidateResolution',
   AsyncJob: 'AsyncJob',
+  FascicoloSignal: 'FascicoloSignal',
   ResearchMissionRecord: 'ResearchMissionRecord',
   ResearchExecutionAttempt: 'ResearchExecutionAttempt',
   ResearchEvidenceBundleRecord: 'ResearchEvidenceBundleRecord',
@@ -1074,6 +1075,34 @@ export const AsyncJobScalarFieldEnum = {
 } as const
 
 export type AsyncJobScalarFieldEnum = (typeof AsyncJobScalarFieldEnum)[keyof typeof AsyncJobScalarFieldEnum]
+
+
+export const FascicoloSignalScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  concessioneId: 'concessioneId',
+  procedimentoId: 'procedimentoId',
+  kind: 'kind',
+  sourceOperation: 'sourceOperation',
+  ruleCode: 'ruleCode',
+  ruleVersion: 'ruleVersion',
+  subjectType: 'subjectType',
+  subjectId: 'subjectId',
+  semanticKey: 'semanticKey',
+  generationFingerprint: 'generationFingerprint',
+  identityKey: 'identityKey',
+  currentThreshold: 'currentThreshold',
+  attentionLevel: 'attentionLevel',
+  factsSnapshot: 'factsSnapshot',
+  status: 'status',
+  detectedAt: 'detectedAt',
+  lastObservedAt: 'lastObservedAt',
+  supersededAt: 'supersededAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FascicoloSignalScalarFieldEnum = (typeof FascicoloSignalScalarFieldEnum)[keyof typeof FascicoloSignalScalarFieldEnum]
 
 
 export const ResearchMissionRecordScalarFieldEnum = {

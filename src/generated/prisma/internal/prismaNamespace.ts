@@ -426,6 +426,7 @@ export const ModelName = {
   LegalSourceCandidateAdmission: 'LegalSourceCandidateAdmission',
   LegalSourceCandidateResolution: 'LegalSourceCandidateResolution',
   AsyncJob: 'AsyncJob',
+  FascicoloSignal: 'FascicoloSignal',
   ResearchMissionRecord: 'ResearchMissionRecord',
   ResearchExecutionAttempt: 'ResearchExecutionAttempt',
   ResearchEvidenceBundleRecord: 'ResearchEvidenceBundleRecord',
@@ -458,7 +459,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceTemporalAssessment" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "legalReferenceMatch" | "legalReferenceOfficialLookup" | "legalReferenceOfficialHit" | "legalReferenceOfficialReconciliation" | "legalReferenceOfficialReconciliationEvidence" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "researchMissionRecord" | "researchExecutionAttempt" | "researchEvidenceBundleRecord" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceTemporalAssessment" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "legalReferenceMatch" | "legalReferenceOfficialLookup" | "legalReferenceOfficialHit" | "legalReferenceOfficialReconciliation" | "legalReferenceOfficialReconciliationEvidence" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "fascicoloSignal" | "researchMissionRecord" | "researchExecutionAttempt" | "researchEvidenceBundleRecord" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3570,6 +3571,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    FascicoloSignal: {
+      payload: Prisma.$FascicoloSignalPayload<ExtArgs>
+      fields: Prisma.FascicoloSignalFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FascicoloSignalFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloSignalPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FascicoloSignalFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloSignalPayload>
+        }
+        findFirst: {
+          args: Prisma.FascicoloSignalFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloSignalPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FascicoloSignalFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloSignalPayload>
+        }
+        findMany: {
+          args: Prisma.FascicoloSignalFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloSignalPayload>[]
+        }
+        create: {
+          args: Prisma.FascicoloSignalCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloSignalPayload>
+        }
+        createMany: {
+          args: Prisma.FascicoloSignalCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FascicoloSignalCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloSignalPayload>[]
+        }
+        delete: {
+          args: Prisma.FascicoloSignalDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloSignalPayload>
+        }
+        update: {
+          args: Prisma.FascicoloSignalUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloSignalPayload>
+        }
+        deleteMany: {
+          args: Prisma.FascicoloSignalDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FascicoloSignalUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FascicoloSignalUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloSignalPayload>[]
+        }
+        upsert: {
+          args: Prisma.FascicoloSignalUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloSignalPayload>
+        }
+        aggregate: {
+          args: Prisma.FascicoloSignalAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFascicoloSignal>
+        }
+        groupBy: {
+          args: Prisma.FascicoloSignalGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FascicoloSignalGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FascicoloSignalCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FascicoloSignalCountAggregateOutputType> | number
+        }
+      }
+    }
     ResearchMissionRecord: {
       payload: Prisma.$ResearchMissionRecordPayload<ExtArgs>
       fields: Prisma.ResearchMissionRecordFieldRefs
@@ -5815,6 +5890,34 @@ export const AsyncJobScalarFieldEnum = {
 export type AsyncJobScalarFieldEnum = (typeof AsyncJobScalarFieldEnum)[keyof typeof AsyncJobScalarFieldEnum]
 
 
+export const FascicoloSignalScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  concessioneId: 'concessioneId',
+  procedimentoId: 'procedimentoId',
+  kind: 'kind',
+  sourceOperation: 'sourceOperation',
+  ruleCode: 'ruleCode',
+  ruleVersion: 'ruleVersion',
+  subjectType: 'subjectType',
+  subjectId: 'subjectId',
+  semanticKey: 'semanticKey',
+  generationFingerprint: 'generationFingerprint',
+  identityKey: 'identityKey',
+  currentThreshold: 'currentThreshold',
+  attentionLevel: 'attentionLevel',
+  factsSnapshot: 'factsSnapshot',
+  status: 'status',
+  detectedAt: 'detectedAt',
+  lastObservedAt: 'lastObservedAt',
+  supersededAt: 'supersededAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FascicoloSignalScalarFieldEnum = (typeof FascicoloSignalScalarFieldEnum)[keyof typeof FascicoloSignalScalarFieldEnum]
+
+
 export const ResearchMissionRecordScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
@@ -7369,6 +7472,48 @@ export type ListEnumAsyncJobStatusFieldRefInput<$PrismaModel> = FieldRefInputTyp
 
 
 /**
+ * Reference to a field of type 'FascicoloSignalKind'
+ */
+export type EnumFascicoloSignalKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FascicoloSignalKind'>
+
+
+
+/**
+ * Reference to a field of type 'FascicoloSignalKind[]'
+ */
+export type ListEnumFascicoloSignalKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FascicoloSignalKind[]'>
+
+
+
+/**
+ * Reference to a field of type 'FascicoloSignalAttentionLevel'
+ */
+export type EnumFascicoloSignalAttentionLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FascicoloSignalAttentionLevel'>
+
+
+
+/**
+ * Reference to a field of type 'FascicoloSignalAttentionLevel[]'
+ */
+export type ListEnumFascicoloSignalAttentionLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FascicoloSignalAttentionLevel[]'>
+
+
+
+/**
+ * Reference to a field of type 'FascicoloSignalStatus'
+ */
+export type EnumFascicoloSignalStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FascicoloSignalStatus'>
+
+
+
+/**
+ * Reference to a field of type 'FascicoloSignalStatus[]'
+ */
+export type ListEnumFascicoloSignalStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FascicoloSignalStatus[]'>
+
+
+
+/**
  * Reference to a field of type 'ResearchMissionStatus'
  */
 export type EnumResearchMissionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ResearchMissionStatus'>
@@ -7743,6 +7888,7 @@ export type GlobalOmitConfig = {
   legalSourceCandidateAdmission?: Prisma.LegalSourceCandidateAdmissionOmit
   legalSourceCandidateResolution?: Prisma.LegalSourceCandidateResolutionOmit
   asyncJob?: Prisma.AsyncJobOmit
+  fascicoloSignal?: Prisma.FascicoloSignalOmit
   researchMissionRecord?: Prisma.ResearchMissionRecordOmit
   researchExecutionAttempt?: Prisma.ResearchExecutionAttemptOmit
   researchEvidenceBundleRecord?: Prisma.ResearchEvidenceBundleRecordOmit
