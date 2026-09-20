@@ -69,7 +69,7 @@ function deriveCandidate(change: FascicoloChange): SignalCandidate | null {
   });
 }
 
-function temporalFingerprint(input: {
+export function fascicoloSignalTemporalFingerprint(input: {
   id: string;
   enteId: string;
   dataScadenza: Date;
@@ -123,7 +123,11 @@ function identityKey(signalSemanticKey: string, generationFingerprint: string): 
 async function auditSignal(
   tx: Prisma.TransactionClient,
   input: {
-    action: "FASCICOLO_SIGNAL_CREATED" | "FASCICOLO_SIGNAL_ESCALATED" | "FASCICOLO_SIGNAL_SUPERSEDED";
+    action:
+      | "FASCICOLO_SIGNAL_CREATED"
+      | "FASCICOLO_SIGNAL_ESCALATED"
+      | "FASCICOLO_SIGNAL_REOPENED_ON_ESCALATION"
+      | "FASCICOLO_SIGNAL_SUPERSEDED";
     signalId: string;
     enteId: string;
     concessioneId: string;
@@ -172,7 +176,7 @@ export async function projectFascicoloSignalInTransaction(
   if (!procedimento || !concessione?.enteId) {
     return { outcome: "NO_OP_SUBJECT_NOT_FOUND_OR_SCOPE_MISMATCH", signalId: null };
   }
-  if (temporalFingerprint({ ...concessione, enteId: concessione.enteId }) !== candidate.generationFingerprint) {
+  if (fascicoloSignalTemporalFingerprint({ ...concessione, enteId: concessione.enteId }) !== candidate.generationFingerprint) {
     return { outcome: "NO_OP_STALE_GENERATION", signalId: null };
   }
   if (expectedThresholdAt(concessione.dataScadenza, candidate.threshold).getTime() !== candidate.thresholdAt.getTime()) {
@@ -200,6 +204,12 @@ export async function projectFascicoloSignalInTransaction(
       });
       return { outcome: "REPLAYED", signalId: existingGeneration.id };
     }
+    const previousDisposition = existingGeneration.humanDisposition;
+    const dispositionThreshold = existingGeneration.dispositionThreshold as SupportedThreshold | null;
+    const shouldReopen = (
+      previousDisposition === "ACKNOWLEDGED" || previousDisposition === "DISMISSED"
+    ) && dispositionThreshold !== null
+      && supportedThresholds[candidate.threshold].rank > supportedThresholds[dispositionThreshold].rank;
     const escalated = await tx.fascicoloSignal.update({
       where: { id: existingGeneration.id },
       data: {
@@ -207,6 +217,18 @@ export async function projectFascicoloSignalInTransaction(
         attentionLevel: candidate.attentionLevel,
         factsSnapshot: factsSnapshot(candidate, concessione.dataScadenza),
         lastObservedAt,
+        ...(shouldReopen
+          ? {
+              humanDisposition: "UNREVIEWED" as const,
+              dispositionThreshold: null,
+              reviewedAt: null,
+              reviewedByUserId: null,
+              reviewedByActorId: null,
+              reviewedByEmail: null,
+              reviewedByRole: null,
+              reviewNote: null,
+            }
+          : {}),
       },
     });
     await auditSignal(tx, {
@@ -220,6 +242,20 @@ export async function projectFascicoloSignalInTransaction(
         generationFingerprint: candidate.generationFingerprint,
       },
     });
+    if (shouldReopen) {
+      await auditSignal(tx, {
+        action: "FASCICOLO_SIGNAL_REOPENED_ON_ESCALATION",
+        signalId: escalated.id,
+        enteId: concessione.enteId,
+        concessioneId: concessione.id,
+        metadata: {
+          previousDisposition,
+          previousDispositionThreshold: dispositionThreshold,
+          fromThreshold: existingGeneration.currentThreshold,
+          toThreshold: candidate.threshold,
+        },
+      });
+    }
     return { outcome: "ESCALATED", signalId: escalated.id };
   }
 

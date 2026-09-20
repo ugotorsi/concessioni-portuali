@@ -46,6 +46,13 @@ enum FascicoloSignalStatus {
   SUPERSEDED
 }
 
+enum FascicoloSignalHumanDisposition {
+  UNREVIEWED
+  ACKNOWLEDGED
+  DISMISSED
+  PROMOTED
+}
+
 enum FascicoloSignalAttentionLevel {
   LOW
   MEDIUM
@@ -1242,6 +1249,7 @@ model User {
   decisioniProcedimentoRegistrate               DecisioneProcedimento[]                      @relation("DecisioneProcedimentoRegisteredBy")
   procedimentoResponsabileAssignmentsRegistrate ProcedimentoResponsabileAssignment[]         @relation("ProcedimentoResponsabileAssignmentRegisteredBy")
   fascicoloObservationsReviewed                 FascicoloObservation[]                       @relation("FascicoloObservationReviewedBy")
+  fascicoloSignalsReviewed                      FascicoloSignal[]                            @relation("FascicoloSignalReviewedBy")
   checklistEvidenceCreated                      FascicoloChecklistEvidence[]                 @relation("ChecklistEvidenceCreatedBy")
   checklistEvidenceReviewed                     FascicoloChecklistEvidence[]                 @relation("ChecklistEvidenceReviewedBy")
   documentRequirementProposalsCreated           FascicoloDocumentRequirementProposal[]       @relation("DocumentRequirementProposalCreatedBy")
@@ -1441,6 +1449,7 @@ model Criticita {
   procedimenti Procedimento[]
   documenti    Documento[]
   normaImpatti NormaImpatto[]
+  fascicoloSignal FascicoloSignal?
 
   @@index([concessioneId])
   @@index([stato])
@@ -2105,7 +2114,7 @@ model AsyncJob {
 }
 
 model FascicoloSignal {
-  id                    String                         @id @default(cuid())
+  id                    String                           @id @default(cuid())
   enteId                String
   concessioneId         String
   procedimentoId        String
@@ -2115,25 +2124,38 @@ model FascicoloSignal {
   ruleVersion           Int
   subjectType           String
   subjectId             String
-  semanticKey           String                         @db.Char(64)
-  generationFingerprint String                         @db.Char(64)
-  identityKey           String                         @unique @db.Char(64)
+  semanticKey           String                           @db.Char(64)
+  generationFingerprint String                           @db.Char(64)
+  identityKey           String                           @unique @db.Char(64)
   currentThreshold      String
   attentionLevel        FascicoloSignalAttentionLevel
   factsSnapshot         Json
-  status                FascicoloSignalStatus          @default(OPEN)
+  status                FascicoloSignalStatus            @default(OPEN)
+  humanDisposition      FascicoloSignalHumanDisposition  @default(UNREVIEWED)
+  dispositionThreshold  String?
+  reviewedAt            DateTime?
+  reviewedByUserId      String?
+  reviewedByActorId     String?
+  reviewedByEmail       String?
+  reviewedByRole        String?
+  reviewNote            String?
+  criticitaId           String?                          @unique
   detectedAt            DateTime
   lastObservedAt        DateTime
   supersededAt          DateTime?
-  createdAt             DateTime                       @default(now())
-  updatedAt             DateTime                       @updatedAt
+  createdAt             DateTime                         @default(now())
+  updatedAt             DateTime                         @updatedAt
 
-  ente          Ente          @relation(fields: [enteId], references: [id], onDelete: Restrict)
-  concessione   Concessione   @relation(fields: [concessioneId], references: [id], onDelete: Restrict)
-  procedimento Procedimento @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  ente           Ente          @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  concessione    Concessione   @relation(fields: [concessioneId], references: [id], onDelete: Restrict)
+  procedimento  Procedimento  @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  reviewedByUser User?         @relation("FascicoloSignalReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+  criticita      Criticita?    @relation(fields: [criticitaId], references: [id], onDelete: Restrict)
 
   @@index([enteId, status])
+  @@index([enteId, status, humanDisposition])
   @@index([procedimentoId, status])
+  @@index([procedimentoId, status, humanDisposition])
   @@index([concessioneId, status])
   @@index([semanticKey, status])
   @@index([attentionLevel])

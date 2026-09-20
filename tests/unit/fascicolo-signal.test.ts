@@ -80,6 +80,15 @@ function signal(overrides: Record<string, unknown> = {}) {
     attentionLevel: "LOW",
     factsSnapshot: {},
     status: "OPEN",
+    humanDisposition: "UNREVIEWED",
+    dispositionThreshold: null,
+    reviewedAt: null,
+    reviewedByUserId: null,
+    reviewedByActorId: null,
+    reviewedByEmail: null,
+    reviewedByRole: null,
+    reviewNote: null,
+    criticitaId: null,
     detectedAt: new Date("2026-10-03T00:00:00.000Z"),
     lastObservedAt: new Date("2026-10-03T01:00:00.000Z"),
     supersededAt: null,
@@ -289,6 +298,76 @@ describe("Patch F1 persistent concession expiry signal", () => {
     }));
   });
 
+  it.each([
+    ["ACKNOWLEDGED", "CONCESSION_90_DAYS", "CONCESSION_60_DAYS"],
+    ["DISMISSED", "CONCESSION_60_DAYS", "CONCESSION_30_DAYS"],
+  ] as const)("reopens %s when a higher threshold arrives", async (humanDisposition, fromThreshold, toThreshold) => {
+    const tx = transaction();
+    tx.fascicoloSignal.findUnique.mockResolvedValue(signal({
+      currentThreshold: fromThreshold,
+      humanDisposition,
+      dispositionThreshold: fromThreshold,
+      reviewedAt: new Date("2026-10-03T02:00:00.000Z"),
+      reviewedByUserId: "user-1",
+      reviewedByActorId: "user-1",
+      reviewedByEmail: "user@example.test",
+      reviewedByRole: "GIURIDICO",
+      reviewNote: humanDisposition === "DISMISSED" ? "Nessuna azione richiesta" : null,
+    }));
+
+    await project(tx, change(toThreshold));
+
+    expect(tx.fascicoloSignal.update).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        humanDisposition: "UNREVIEWED",
+        dispositionThreshold: null,
+        reviewedAt: null,
+        reviewedByUserId: null,
+        reviewedByActorId: null,
+        reviewedByEmail: null,
+        reviewedByRole: null,
+        reviewNote: null,
+      }),
+    }));
+    expect(auditMock.mock.calls.map(([, input]) => input.azione)).toEqual([
+      "FASCICOLO_SIGNAL_ESCALATED",
+      "FASCICOLO_SIGNAL_REOPENED_ON_ESCALATION",
+    ]);
+  });
+
+  it("keeps an unreviewed escalation unreviewed without a reopening audit", async () => {
+    const tx = transaction();
+    tx.fascicoloSignal.findUnique.mockResolvedValue(signal());
+
+    await project(tx, change("CONCESSION_60_DAYS"));
+
+    expect(tx.fascicoloSignal.update.mock.calls[0][0].data).not.toHaveProperty("humanDisposition");
+    expect(auditMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("preserves promotion metadata and linked Criticita during later escalation", async () => {
+    const tx = transaction();
+    tx.fascicoloSignal.findUnique.mockResolvedValue(signal({
+      currentThreshold: "CONCESSION_30_DAYS",
+      attentionLevel: "HIGH",
+      humanDisposition: "PROMOTED",
+      dispositionThreshold: "CONCESSION_30_DAYS",
+      reviewedAt: new Date("2026-12-02T01:00:00.000Z"),
+      reviewedByActorId: "user-1",
+      reviewedByEmail: "user@example.test",
+      reviewedByRole: "GIURIDICO",
+      criticitaId: "criticita-1",
+    }));
+
+    await project(tx, change("DEADLINE_DUE"));
+
+    const updateData = tx.fascicoloSignal.update.mock.calls[0][0].data;
+    expect(updateData).toMatchObject({ currentThreshold: "DEADLINE_DUE", attentionLevel: "CRITICAL" });
+    expect(updateData).not.toHaveProperty("humanDisposition");
+    expect(updateData).not.toHaveProperty("criticitaId");
+    expect(auditMock).toHaveBeenCalledTimes(1);
+  });
+
   it("supersedes the open generation before creating a changed generation", async () => {
     const tx = transaction();
     const previous = signal({ generationFingerprint: "c".repeat(64) });
@@ -366,5 +445,16 @@ describe("Patch F1 persistent concession expiry signal", () => {
       'CREATE UNIQUE INDEX "fascicolo_signal_open_semantic_uq" ON "FascicoloSignal"("semanticKey") WHERE "status" = \'OPEN\';',
     );
     expect(migration).toContain('CONSTRAINT "fascicolo_signal_threshold_attention_ck" CHECK');
+  });
+
+  it("adds UNREVIEWED as the database default with bounded review invariants", () => {
+    const migration = readFileSync(resolve(
+      process.cwd(),
+      "prisma/migrations/20260920_patch_f2_fascicolo_signal_review/migration.sql",
+    ), "utf8");
+
+    expect(migration).toContain('NOT NULL DEFAULT \'UNREVIEWED\'');
+    expect(migration).toContain('CONSTRAINT "fascicolo_signal_human_disposition_ck" CHECK');
+    expect(migration).toContain('CREATE UNIQUE INDEX "FascicoloSignal_criticitaId_key"');
   });
 });
