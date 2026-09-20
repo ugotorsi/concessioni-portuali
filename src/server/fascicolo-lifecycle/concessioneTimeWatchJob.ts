@@ -153,6 +153,37 @@ function occurrenceFingerprint(occurrence: ConcessioneTimeWatchOccurrence): stri
   }), "utf8").digest("hex");
 }
 
+export function buildConcessioneTimeWatchReevaluationAdmission(input: {
+  occurrence: ConcessioneTimeWatchOccurrence;
+  procedimentoId: string;
+  triggeredAt: Date;
+}): AsyncJobAdmissionInput {
+  const logicalOperationId = occurrenceFingerprint(input.occurrence);
+  return buildFascicoloReevaluationAdmission({
+    procedimentoId: input.procedimentoId,
+    change: {
+      kind: "TIME_THRESHOLD_REACHED",
+      origin: "WATCHDOG",
+      triggeredAt: input.triggeredAt.toISOString(),
+      stateFingerprint: input.occurrence.expectedTemporalFingerprint,
+      subjectType: input.occurrence.subjectType,
+      subjectId: input.occurrence.subjectId,
+      procedimentoId: input.procedimentoId,
+      threshold: input.occurrence.threshold,
+      thresholdAt: input.occurrence.thresholdAt.toISOString(),
+    },
+  }, {
+    tenantId: input.occurrence.tenantId,
+    admissionType: "AUTHORIZED_SYSTEM",
+    initiatingUserId: null,
+    actorId: "system:fascicolo-time-watch",
+    actorEmail: null,
+    actorRole: "SYSTEM",
+    policyDecisionRef: FASCICOLO_TIME_WATCH_POLICY_DECISION_REF,
+    correlationId: `fascicolo-time-watch:${logicalOperationId}`,
+  });
+}
+
 export function buildConcessioneTimeWatchAdmission(
   occurrence: ConcessioneTimeWatchOccurrence,
 ): AsyncJobAdmissionInput {
@@ -268,28 +299,17 @@ export function createConcessioneTimeWatchHandler(
           return result(input.subjectId, "NO_OP_NO_ACTIVE_PROCEDIMENTO", input.threshold, input.thresholdAt);
         }
         for (const procedimento of procedimenti) {
-          await admitAsyncJobInTransaction(tx, buildFascicoloReevaluationAdmission({
-            procedimentoId: procedimento.id,
-            change: {
-              kind: "TIME_THRESHOLD_REACHED",
-              origin: "WATCHDOG",
-              triggeredAt: triggeredAt.toISOString(),
-              stateFingerprint: currentFingerprint,
+          await admitAsyncJobInTransaction(tx, buildConcessioneTimeWatchReevaluationAdmission({
+            occurrence: {
               subjectType: "CONCESSIONE",
               subjectId: concessione.id,
-              procedimentoId: procedimento.id,
+              tenantId: input.tenantId,
               threshold: input.threshold,
-              thresholdAt: input.thresholdAt,
+              thresholdAt: new Date(input.thresholdAt),
+              expectedTemporalFingerprint: currentFingerprint,
             },
-          }, {
-            tenantId: input.tenantId,
-            admissionType: "AUTHORIZED_SYSTEM",
-            initiatingUserId: null,
-            actorId: "system:fascicolo-time-watch",
-            actorEmail: null,
-            actorRole: "SYSTEM",
-            policyDecisionRef: FASCICOLO_TIME_WATCH_POLICY_DECISION_REF,
-            correlationId: context.correlationId,
+            procedimentoId: procedimento.id,
+            triggeredAt,
           }));
         }
         return result(input.subjectId, "THRESHOLD_REACHED", input.threshold, input.thresholdAt, procedimenti.length);

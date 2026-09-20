@@ -11,9 +11,16 @@ import { Prisma } from "@/generated/prisma/client";
 import { isContraddittorioCompleto } from "@/lib/procedimento-checklist";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireConcessioneTenantAccess } from "@/lib/tenant-auth";
+import { admitAsyncJobInTransaction } from "@/server/async-jobs/persistence";
 import { computeAuditHash, sanitizeMetadata } from "@/server/audit/hash";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 import { getAuditRequestContext } from "@/server/audit/requestContext";
+import { runSerializableTransactionWithRetry } from "@/server/db/serializableTransaction";
+import {
+  buildConcessioneTimeWatchReevaluationAdmission,
+  deriveConcessioneTimeWatchOccurrences,
+  isConcessioneTimeWatchApplicable,
+} from "@/server/fascicolo-lifecycle/concessioneTimeWatchJob";
 import {
   applyRegisteredDecisionEffect,
   auditAlreadyAppliedDecisionEffect,
@@ -591,7 +598,8 @@ export async function createProcedimentoAction(formData: FormData) {
   const createInitialAssignment = Boolean(responsabileNome && unitaOrganizzativa && responsabileAssegnatoAt);
   const registeredByUserId = resolveAssignmentRegisteredByUserId(currentUser?.id);
 
-  const created = await prisma.$transaction(async (tx) => {
+  const catchUpObservedAt = new Date();
+  const created = await runSerializableTransactionWithRetry(async (tx) => {
     const createdProcedimento = await tx.procedimento.create({
       data: {
         concessioneId: parsed.data.concessioneId,
@@ -611,6 +619,7 @@ export async function createProcedimentoAction(formData: FormData) {
       select: {
         id: true,
         concessioneId: true,
+        stato: true,
       },
     });
 
@@ -625,6 +634,36 @@ export async function createProcedimentoAction(formData: FormData) {
           registeredByUserId,
         },
       });
+    }
+
+    const concessione = await tx.concessione.findUnique({
+      where: { id: createdProcedimento.concessioneId },
+      select: { id: true, enteId: true, dataScadenza: true, stato: true },
+    });
+    if (!concessione || concessione.id !== parsed.data.concessioneId) {
+      throw new Error("Concessione canonica non coerente con il procedimento creato.");
+    }
+    if (
+      tenantContext
+      && !tenantContext.isAdmin
+      && (!concessione.enteId || !tenantContext.accessibleTenantIds.includes(concessione.enteId))
+    ) {
+      throw new Error("Tenant della concessione non coerente con il contesto autorizzato.");
+    }
+
+    if (
+      ["DA_AVVIARE", "IN_CORSO"].includes(createdProcedimento.stato)
+      && isConcessioneTimeWatchApplicable(concessione.stato)
+    ) {
+      const maturedOccurrence = deriveConcessioneTimeWatchOccurrences(concessione, catchUpObservedAt)
+        .find((occurrence) => occurrence.thresholdAt.getTime() <= catchUpObservedAt.getTime());
+      if (maturedOccurrence) {
+        await admitAsyncJobInTransaction(tx, buildConcessioneTimeWatchReevaluationAdmission({
+          occurrence: maturedOccurrence,
+          procedimentoId: createdProcedimento.id,
+          triggeredAt: catchUpObservedAt,
+        }));
+      }
     }
 
     return createdProcedimento;

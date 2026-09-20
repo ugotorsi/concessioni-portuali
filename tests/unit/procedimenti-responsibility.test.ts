@@ -7,8 +7,12 @@ const getCurrentTenantContextMock = vi.hoisted(() => vi.fn());
 const requireConcessioneTenantAccessMock = vi.hoisted(() => vi.fn());
 const auditSuccessMock = vi.hoisted(() => vi.fn());
 const redirectMock = vi.hoisted(() => vi.fn());
+const admitAsyncJobInTransactionMock = vi.hoisted(() => vi.fn());
 
 const txMock = vi.hoisted(() => ({
+  concessione: {
+    findUnique: vi.fn(),
+  },
   procedimento: {
     create: vi.fn(),
     findUnique: vi.fn(),
@@ -46,6 +50,9 @@ vi.mock("@/lib/tenant-auth", async () => {
 });
 vi.mock("@/server/audit/auditLog", () => ({ auditFailure: vi.fn(), auditSuccess: auditSuccessMock }));
 vi.mock("@/server/audit/requestContext", () => ({ getAuditRequestContext: vi.fn(async () => ({ ipAddress: null, userAgent: null })) }));
+vi.mock("@/server/async-jobs/persistence", () => ({
+  admitAsyncJobInTransaction: admitAsyncJobInTransactionMock,
+}));
 vi.mock("@/server/procedimenti/applyRegisteredDecisionEffect", () => ({
   applyRegisteredDecisionEffect: vi.fn(),
   auditAlreadyAppliedDecisionEffect: vi.fn(),
@@ -112,13 +119,20 @@ describe("procedimento responsibility assignments", () => {
     redirectMock.mockImplementation((path: string) => {
       throw new Error(`REDIRECT:${path}`);
     });
-    txMock.procedimento.create.mockResolvedValue({ id: "proc-1", concessioneId: "con-1" });
+    txMock.concessione.findUnique.mockResolvedValue({
+      id: "con-1",
+      enteId: "ente-a",
+      dataScadenza: new Date("2027-01-01T00:00:00.000Z"),
+      stato: "ATTIVA",
+    });
+    txMock.procedimento.create.mockResolvedValue({ id: "proc-1", concessioneId: "con-1", stato: "DA_AVVIARE" });
     txMock.procedimento.findUnique.mockResolvedValue({ id: "proc-1", concessioneId: "con-1" });
     txMock.procedimento.update.mockResolvedValue({ id: "proc-1" });
     txMock.procedimentoResponsabileAssignment.create.mockResolvedValue({ id: "assignment-new" });
     txMock.procedimentoResponsabileAssignment.findFirst.mockResolvedValue(currentAssignment());
     txMock.procedimentoResponsabileAssignment.updateMany.mockResolvedValue({ count: 1 });
     prismaMock.procedimento.findUnique.mockResolvedValue({ id: "proc-1", concessioneId: "con-1" });
+    admitAsyncJobInTransactionMock.mockResolvedValue({ outcome: "CREATED", job: { id: "job-1" } });
   });
 
   it("create procedimento genera la prima assegnazione storica senza derivare il responsabile dal currentUser", async () => {
@@ -146,6 +160,109 @@ describe("procedimento responsibility assignments", () => {
 
     const assignmentInput = txMock.procedimentoResponsabileAssignment.create.mock.calls[0]?.[0]?.data;
     expect(assignmentInput).toMatchObject({ registeredByUserId: null });
+  });
+
+  it("non ammette catch-up quando nessuna soglia e maturata", async () => {
+    txMock.concessione.findUnique.mockResolvedValueOnce({
+      id: "con-1",
+      enteId: "ente-a",
+      dataScadenza: new Date(Date.now() + 100 * 24 * 60 * 60 * 1_000),
+      stato: "ATTIVA",
+    });
+
+    await expect(createProcedimentoAction(createFormData())).rejects.toThrow("REDIRECT:/procedimenti/proc-1");
+
+    expect(admitAsyncJobInTransactionMock).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["CONCESSION_90_DAYS", 75],
+    ["CONCESSION_60_DAYS", 45],
+    ["CONCESSION_30_DAYS", 15],
+    ["DEADLINE_DUE", -1],
+  ])("ammette soltanto l ultima soglia maturata %s", async (expectedThreshold, daysUntilExpiry) => {
+    txMock.concessione.findUnique.mockResolvedValueOnce({
+      id: "con-1",
+      enteId: "ente-a",
+      dataScadenza: new Date(Date.now() + daysUntilExpiry * 24 * 60 * 60 * 1_000),
+      stato: "ATTIVA",
+    });
+
+    await expect(createProcedimentoAction(createFormData())).rejects.toThrow("REDIRECT:/procedimenti/proc-1");
+
+    expect(admitAsyncJobInTransactionMock).toHaveBeenCalledTimes(1);
+    const admission = admitAsyncJobInTransactionMock.mock.calls[0]?.[1];
+    expect(admission.inputReference.metadata.changeChunk000Ref).toContain(`\"threshold\":\"${expectedThreshold}\"`);
+  });
+
+  it.each([
+    ["procedimento non attivo", "CONCLUSO", "ATTIVA"],
+    ["concessione non eleggibile", "DA_AVVIARE", "SCADUTA"],
+  ])("non ammette catch-up per %s", async (_case, procedimentoStato, concessioneStato) => {
+    txMock.procedimento.create.mockResolvedValueOnce({
+      id: "proc-1",
+      concessioneId: "con-1",
+      stato: procedimentoStato,
+    });
+    txMock.concessione.findUnique.mockResolvedValueOnce({
+      id: "con-1",
+      enteId: "ente-a",
+      dataScadenza: new Date(Date.now() - 24 * 60 * 60 * 1_000),
+      stato: concessioneStato,
+    });
+
+    await expect(createProcedimentoAction(createFormData())).rejects.toThrow("REDIRECT:/procedimenti/proc-1");
+
+    expect(admitAsyncJobInTransactionMock).not.toHaveBeenCalled();
+  });
+
+  it("annulla il percorso create per tenant canonico non coerente", async () => {
+    txMock.concessione.findUnique.mockResolvedValueOnce({
+      id: "con-1",
+      enteId: "ente-b",
+      dataScadenza: new Date(Date.now() - 24 * 60 * 60 * 1_000),
+      stato: "ATTIVA",
+    });
+
+    await expect(createProcedimentoAction(createFormData())).rejects.toThrow(
+      "Tenant della concessione non coerente con il contesto autorizzato.",
+    );
+
+    expect(admitAsyncJobInTransactionMock).not.toHaveBeenCalled();
+    expect(auditSuccessMock).not.toHaveBeenCalled();
+  });
+
+  it("annulla il percorso create per collegamento canonico non coerente", async () => {
+    txMock.concessione.findUnique.mockResolvedValueOnce({
+      id: "con-diversa",
+      enteId: "ente-a",
+      dataScadenza: new Date(Date.now() - 24 * 60 * 60 * 1_000),
+      stato: "ATTIVA",
+    });
+
+    await expect(createProcedimentoAction(createFormData())).rejects.toThrow(
+      "Concessione canonica non coerente con il procedimento creato.",
+    );
+
+    expect(admitAsyncJobInTransactionMock).not.toHaveBeenCalled();
+    expect(auditSuccessMock).not.toHaveBeenCalled();
+  });
+
+  it("propaga il fallimento admission per il rollback atomico di procedimento e assegnazione", async () => {
+    txMock.concessione.findUnique.mockResolvedValueOnce({
+      id: "con-1",
+      enteId: "ente-a",
+      dataScadenza: new Date(Date.now() - 24 * 60 * 60 * 1_000),
+      stato: "ATTIVA",
+    });
+    admitAsyncJobInTransactionMock.mockRejectedValueOnce(new Error("ADMISSION_FAILED"));
+
+    await expect(createProcedimentoAction(createFormData())).rejects.toThrow("ADMISSION_FAILED");
+
+    expect(txMock.procedimento.create).toHaveBeenCalledOnce();
+    expect(txMock.procedimentoResponsabileAssignment.create).toHaveBeenCalledOnce();
+    expect(auditSuccessMock).not.toHaveBeenCalled();
+    expect(redirectMock).not.toHaveBeenCalled();
   });
 
   it("riassegnazione chiude solo la precedente, crea il nuovo snapshot e aggiorna Procedimento", async () => {

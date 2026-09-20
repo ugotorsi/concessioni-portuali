@@ -22,6 +22,7 @@ import { applicationAsyncJobRegistry } from "@/server/async-jobs/applicationWork
 import { normalizeAsyncJobAdmission } from "@/server/async-jobs/domain";
 import {
   buildConcessioneTimeWatchAdmission,
+  buildConcessioneTimeWatchReevaluationAdmission,
   createConcessioneTimeWatchHandler,
   deriveConcessioneTimeWatchOccurrences,
   FASCICOLO_TIME_WATCH_OPERATION,
@@ -182,6 +183,30 @@ describe("Fase 2B Patch E concession time watch", () => {
     const retry = normalizeAsyncJobAdmission(harness.admit.mock.calls[1][1]);
     expect(first.idempotencyKey).toBe(retry.idempotencyKey);
     expect(first.requestFingerprint).toBe(retry.requestFingerprint);
+  });
+
+  it("keeps watch and create catch-up reevaluation identity exactly equivalent", async () => {
+    const selected = occurrence("CONCESSION_30_DAYS");
+    const watchAdmission = normalizeAsyncJobAdmission(buildConcessioneTimeWatchAdmission(selected));
+    harness.tx.concessione.findFirst.mockResolvedValue(concessione);
+    harness.tx.procedimento.findMany.mockResolvedValue([{ id: "procedimento-1" }]);
+    const handler = createConcessioneTimeWatchHandler({
+      now: () => new Date("2026-12-02T12:00:00.000Z"),
+    });
+
+    await handler.execute(handler.parseInput(watchAdmission.inputReference), {
+      correlationId: watchAdmission.correlationId,
+    } as never);
+
+    const fromWatch = normalizeAsyncJobAdmission(harness.admit.mock.calls[0][1]);
+    const fromCreateCatchUp = normalizeAsyncJobAdmission(buildConcessioneTimeWatchReevaluationAdmission({
+      occurrence: selected,
+      procedimentoId: "procedimento-1",
+      triggeredAt: new Date("2026-12-03T08:30:00.000Z"),
+    }));
+    expect(fromCreateCatchUp.idempotencyKey).toBe(fromWatch.idempotencyKey);
+    expect(fromCreateCatchUp.requestFingerprint).toBe(fromWatch.requestFingerprint);
+    expect(fromCreateCatchUp.correlationId).toBe(watchAdmission.correlationId);
   });
 
   it.each([
