@@ -65,13 +65,30 @@ function reviewForm(disposition: "ACKNOWLEDGED" | "DISMISSED", note?: string) {
   return formData;
 }
 
+function tenantContext(role = "GIURIDICO", membershipRole = role) {
+  return {
+    userId: "user-1",
+    role,
+    isAdmin: role === "ADMIN",
+    accessibleTenantIds: role === "ADMIN" ? [] : ["ente-1"],
+    defaultTenantId: role === "ADMIN" ? null : "ente-1",
+    tenantMemberships: role === "ADMIN" ? [] : [{
+      id: "membership-1",
+      userId: "user-1",
+      enteId: "ente-1",
+      role: membershipRole,
+      isDefault: true,
+    }],
+  };
+}
+
 describe("FascicoloSignal human review", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     requireRoleMock.mockResolvedValue("GIURIDICO");
     getCurrentUserMock.mockResolvedValue({ id: "user-1", email: "user@example.test", role: "GIURIDICO" });
-    getCurrentTenantContextMock.mockResolvedValue({ role: "GIURIDICO" });
-    requireTenantAccessMock.mockReturnValue("GIURIDICO");
+    getCurrentTenantContextMock.mockResolvedValue(tenantContext());
+    requireTenantAccessMock.mockReturnValue(undefined);
     txMock.fascicoloSignal.findUnique.mockResolvedValue(signal());
     txMock.fascicoloSignal.updateMany.mockResolvedValue({ count: 1 });
     auditMock.mockResolvedValue({});
@@ -95,6 +112,46 @@ describe("FascicoloSignal human review", () => {
     }));
     expect(txMock.criticita.create).not.toHaveBeenCalled();
     expect(auditMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses ADMIN as the effective role for an authorized admin", async () => {
+    requireRoleMock.mockResolvedValue("ADMIN");
+    getCurrentUserMock.mockResolvedValue({ id: "admin-1", email: "admin@example.test", role: "ADMIN" });
+    getCurrentTenantContextMock.mockResolvedValue(tenantContext("ADMIN"));
+
+    await reviewFascicoloSignalAction(reviewForm("ACKNOWLEDGED"));
+
+    expect(txMock.fascicoloSignal.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ reviewedByRole: "ADMIN" }),
+    }));
+    expect(auditMock).toHaveBeenCalledWith(txMock, expect.objectContaining({
+      actor: expect.objectContaining({ userRole: "ADMIN" }),
+    }));
+  });
+
+  it("allows a GIURIDICO tenant membership and persists the effective role", async () => {
+    await reviewFascicoloSignalAction(reviewForm("ACKNOWLEDGED"));
+
+    expect(txMock.fascicoloSignal.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ reviewedByRole: "GIURIDICO" }),
+    }));
+    expect(auditMock).toHaveBeenCalledWith(txMock, expect.objectContaining({
+      actor: expect.objectContaining({ userRole: "GIURIDICO" }),
+    }));
+  });
+
+  it("denies review when the tenant membership role is TECNICO", async () => {
+    getCurrentTenantContextMock.mockResolvedValue(tenantContext("GIURIDICO", "TECNICO"));
+
+    await expect(reviewFascicoloSignalAction(reviewForm("ACKNOWLEDGED"))).rejects.toThrow("Tenant access denied");
+    expect(txMock.fascicoloSignal.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when the canonical tenant membership is absent", async () => {
+    getCurrentTenantContextMock.mockResolvedValue({ ...tenantContext(), tenantMemberships: [] });
+
+    await expect(reviewFascicoloSignalAction(reviewForm("ACKNOWLEDGED"))).rejects.toThrow("Tenant access denied");
+    expect(txMock.fascicoloSignal.updateMany).not.toHaveBeenCalled();
   });
 
   it("returns an idempotent no-op for a repeated acknowledge", async () => {

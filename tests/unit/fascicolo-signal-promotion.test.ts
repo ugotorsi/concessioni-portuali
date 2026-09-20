@@ -72,13 +72,30 @@ function promotionForm(overrides: Record<string, string> = {}) {
   return formData;
 }
 
+function tenantContext(role = "GIURIDICO", membershipRole = role) {
+  return {
+    userId: "user-1",
+    role,
+    isAdmin: role === "ADMIN",
+    accessibleTenantIds: role === "ADMIN" ? [] : ["ente-1"],
+    defaultTenantId: role === "ADMIN" ? null : "ente-1",
+    tenantMemberships: role === "ADMIN" ? [] : [{
+      id: "membership-1",
+      userId: "user-1",
+      enteId: "ente-1",
+      role: membershipRole,
+      isDefault: true,
+    }],
+  };
+}
+
 describe("FascicoloSignal controlled promotion", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     requireRoleMock.mockResolvedValue("GIURIDICO");
     getCurrentUserMock.mockResolvedValue({ id: "user-1", email: "user@example.test", role: "GIURIDICO" });
-    getCurrentTenantContextMock.mockResolvedValue({ role: "GIURIDICO" });
-    requireTenantAccessMock.mockReturnValue("GIURIDICO");
+    getCurrentTenantContextMock.mockResolvedValue(tenantContext());
+    requireTenantAccessMock.mockReturnValue(undefined);
     txMock.fascicoloSignal.findUnique.mockResolvedValue(signal());
     txMock.fascicoloSignal.updateMany.mockResolvedValue({ count: 1 });
     txMock.criticita.create.mockResolvedValue({ id: "criticita-1" });
@@ -190,11 +207,47 @@ describe("FascicoloSignal controlled promotion", () => {
     expect(txMock.criticita.create).toHaveBeenCalledTimes(1);
   });
 
+  it("allows a TECNICO tenant membership to promote a technical Criticita", async () => {
+    requireRoleMock.mockResolvedValue("OPERATORE_SOCIETA");
+    getCurrentTenantContextMock.mockResolvedValue(tenantContext("OPERATORE_SOCIETA", "TECNICO"));
+
+    await promoteFascicoloSignalAction(promotionForm({ tipologia: "TECNICA" }));
+
+    expect(txMock.fascicoloSignal.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ reviewedByRole: "TECNICO" }),
+    }));
+    expect(auditMock).toHaveBeenCalledWith(txMock, expect.objectContaining({
+      actor: expect.objectContaining({ userRole: "TECNICO" }),
+    }));
+  });
+
   it("applies tipologia restrictions from the canonical tenant role", async () => {
-    requireTenantAccessMock.mockReturnValue("TECNICO");
+    requireRoleMock.mockResolvedValue("OPERATORE_SOCIETA");
+    getCurrentTenantContextMock.mockResolvedValue(tenantContext("OPERATORE_SOCIETA", "TECNICO"));
     await expect(promoteFascicoloSignalAction(promotionForm({ tipologia: "GIURIDICA" }))).rejects.toThrow(
       "solo criticità tecniche",
     );
+    expect(txMock.criticita.create).not.toHaveBeenCalled();
+  });
+
+  it("allows an ECONOMICO tenant membership to promote MOROSITA", async () => {
+    requireRoleMock.mockResolvedValue("OPERATORE_SOCIETA");
+    getCurrentTenantContextMock.mockResolvedValue(tenantContext("OPERATORE_SOCIETA", "ECONOMICO"));
+
+    await promoteFascicoloSignalAction(promotionForm({ tipologia: "MOROSITA" }));
+
+    expect(txMock.criticita.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ tipologia: "MOROSITA" }),
+    }));
+    expect(auditMock).toHaveBeenCalledWith(txMock, expect.objectContaining({
+      actor: expect.objectContaining({ userRole: "ECONOMICO" }),
+    }));
+  });
+
+  it("fails closed when the canonical tenant membership is absent", async () => {
+    getCurrentTenantContextMock.mockResolvedValue({ ...tenantContext(), tenantMemberships: [] });
+
+    await expect(promoteFascicoloSignalAction(promotionForm())).rejects.toThrow("Tenant access denied");
     expect(txMock.criticita.create).not.toHaveBeenCalled();
   });
 

@@ -4,7 +4,13 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import type { Prisma } from "@/generated/prisma/client";
-import { canManageCriticita, canManageProcedimenti, getCurrentUser, requireRole } from "@/lib/auth";
+import {
+  canManageCriticita,
+  canManageProcedimenti,
+  getCurrentUser,
+  requireRole,
+  type DemoRole,
+} from "@/lib/auth";
 import { getCurrentTenantContext, requireTenantAccess, type CurrentTenantContext } from "@/lib/tenant-auth";
 import { createAuditLogInTransaction } from "@/server/audit/auditLog";
 import {
@@ -39,6 +45,25 @@ const STAGING_PREVIEW_ADMIN_ID = "staging-preview-admin";
 
 function persistedUserId(userId: string): string | null {
   return userId === STAGING_PREVIEW_ADMIN_ID ? null : userId;
+}
+
+function resolveAuthorizedTenantRole(
+  context: CurrentTenantContext,
+  enteId: string,
+  authorizeRole: (role: DemoRole) => boolean,
+): DemoRole {
+  requireTenantAccess(context, enteId, {
+    mode: "write",
+    allowWhenEnteMissing: false,
+  });
+
+  const effectiveRole = context.isAdmin
+    ? context.role
+    : context.tenantMemberships.find((membership) => membership.enteId === enteId)?.role;
+  if (!effectiveRole || !authorizeRole(effectiveRole)) {
+    throw new Error("Tenant access denied.");
+  }
+  return effectiveRole;
 }
 
 async function loadCanonicalCurrentSignal(
@@ -101,11 +126,11 @@ async function loadCanonicalCurrentSignal(
     throw new Error("FASCICOLO_SIGNAL_STALE_GENERATION");
   }
 
-  const effectiveRole = requireTenantAccess(input.tenantContext, concessione.enteId, {
-    mode: "write",
-    allowWhenEnteMissing: false,
-    authorizeRole: input.authorizeRole,
-  });
+  const effectiveRole = resolveAuthorizedTenantRole(
+    input.tenantContext,
+    concessione.enteId,
+    input.authorizeRole,
+  );
   return { signal, concessione, effectiveRole };
 }
 

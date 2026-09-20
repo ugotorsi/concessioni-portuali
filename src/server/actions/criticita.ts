@@ -27,7 +27,7 @@ import {
 
 const updateCriticitaSchema = criticitaInstructionSchema.extend({
   id: z.string().min(1),
-  gravita: z.enum(CRITICITA_GRAVITA_VALUES, { message: "Gravit… non valida." }),
+  gravita: z.enum(CRITICITA_GRAVITA_VALUES, { message: "GravitÃ  non valida." }),
   stato: z.enum(CRITICITA_STATO_VALUES, { message: "Stato non valido." }),
 });
 async function ensureCanWriteCriticita(role: DemoRole, actionType: string) {
@@ -54,7 +54,7 @@ async function ensureCanWriteCriticita(role: DemoRole, actionType: string) {
         reason: "ROLE_NOT_ALLOWED",
       },
     });
-    throw new Error("Profilo non autorizzato alla gestione delle criticit….");
+    throw new Error("Profilo non autorizzato alla gestione delle criticitÃ .");
   }
 }
 
@@ -226,7 +226,7 @@ export async function updateCriticitaAction(formData: FormData) {
         reason: "NOT_FOUND",
       },
     });
-    throw new Error("Criticit… non trovata.");
+    throw new Error("CriticitÃ  non trovata.");
   }
 
   try {
