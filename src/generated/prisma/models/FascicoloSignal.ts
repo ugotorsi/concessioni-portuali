@@ -28,10 +28,12 @@ export type AggregateFascicoloSignal = {
 
 export type FascicoloSignalAvgAggregateOutputType = {
   ruleVersion: number | null
+  expiryGeneration: number | null
 }
 
 export type FascicoloSignalSumAggregateOutputType = {
   ruleVersion: number | null
+  expiryGeneration: number | null
 }
 
 export type FascicoloSignalMinAggregateOutputType = {
@@ -47,6 +49,7 @@ export type FascicoloSignalMinAggregateOutputType = {
   subjectId: string | null
   semanticKey: string | null
   generationFingerprint: string | null
+  expiryGeneration: number | null
   identityKey: string | null
   currentThreshold: string | null
   attentionLevel: $Enums.FascicoloSignalAttentionLevel | null
@@ -80,6 +83,7 @@ export type FascicoloSignalMaxAggregateOutputType = {
   subjectId: string | null
   semanticKey: string | null
   generationFingerprint: string | null
+  expiryGeneration: number | null
   identityKey: string | null
   currentThreshold: string | null
   attentionLevel: $Enums.FascicoloSignalAttentionLevel | null
@@ -113,6 +117,7 @@ export type FascicoloSignalCountAggregateOutputType = {
   subjectId: number
   semanticKey: number
   generationFingerprint: number
+  expiryGeneration: number
   identityKey: number
   currentThreshold: number
   attentionLevel: number
@@ -138,10 +143,12 @@ export type FascicoloSignalCountAggregateOutputType = {
 
 export type FascicoloSignalAvgAggregateInputType = {
   ruleVersion?: true
+  expiryGeneration?: true
 }
 
 export type FascicoloSignalSumAggregateInputType = {
   ruleVersion?: true
+  expiryGeneration?: true
 }
 
 export type FascicoloSignalMinAggregateInputType = {
@@ -157,6 +164,7 @@ export type FascicoloSignalMinAggregateInputType = {
   subjectId?: true
   semanticKey?: true
   generationFingerprint?: true
+  expiryGeneration?: true
   identityKey?: true
   currentThreshold?: true
   attentionLevel?: true
@@ -190,6 +198,7 @@ export type FascicoloSignalMaxAggregateInputType = {
   subjectId?: true
   semanticKey?: true
   generationFingerprint?: true
+  expiryGeneration?: true
   identityKey?: true
   currentThreshold?: true
   attentionLevel?: true
@@ -223,6 +232,7 @@ export type FascicoloSignalCountAggregateInputType = {
   subjectId?: true
   semanticKey?: true
   generationFingerprint?: true
+  expiryGeneration?: true
   identityKey?: true
   currentThreshold?: true
   attentionLevel?: true
@@ -344,6 +354,7 @@ export type FascicoloSignalGroupByOutputType = {
   subjectId: string
   semanticKey: string
   generationFingerprint: string
+  expiryGeneration: number | null
   identityKey: string
   currentThreshold: string
   attentionLevel: $Enums.FascicoloSignalAttentionLevel
@@ -401,6 +412,7 @@ export type FascicoloSignalWhereInput = {
   subjectId?: Prisma.StringFilter<"FascicoloSignal"> | string
   semanticKey?: Prisma.StringFilter<"FascicoloSignal"> | string
   generationFingerprint?: Prisma.StringFilter<"FascicoloSignal"> | string
+  expiryGeneration?: Prisma.IntNullableFilter<"FascicoloSignal"> | number | null
   identityKey?: Prisma.StringFilter<"FascicoloSignal"> | string
   currentThreshold?: Prisma.StringFilter<"FascicoloSignal"> | string
   attentionLevel?: Prisma.EnumFascicoloSignalAttentionLevelFilter<"FascicoloSignal"> | $Enums.FascicoloSignalAttentionLevel
@@ -440,6 +452,7 @@ export type FascicoloSignalOrderByWithRelationInput = {
   subjectId?: Prisma.SortOrder
   semanticKey?: Prisma.SortOrder
   generationFingerprint?: Prisma.SortOrder
+  expiryGeneration?: Prisma.SortOrderInput | Prisma.SortOrder
   identityKey?: Prisma.SortOrder
   currentThreshold?: Prisma.SortOrder
   attentionLevel?: Prisma.SortOrder
@@ -484,6 +497,7 @@ export type FascicoloSignalWhereUniqueInput = Prisma.AtLeast<{
   subjectId?: Prisma.StringFilter<"FascicoloSignal"> | string
   semanticKey?: Prisma.StringFilter<"FascicoloSignal"> | string
   generationFingerprint?: Prisma.StringFilter<"FascicoloSignal"> | string
+  expiryGeneration?: Prisma.IntNullableFilter<"FascicoloSignal"> | number | null
   currentThreshold?: Prisma.StringFilter<"FascicoloSignal"> | string
   attentionLevel?: Prisma.EnumFascicoloSignalAttentionLevelFilter<"FascicoloSignal"> | $Enums.FascicoloSignalAttentionLevel
   factsSnapshot?: Prisma.JsonFilter<"FascicoloSignal">
@@ -521,6 +535,7 @@ export type FascicoloSignalOrderByWithAggregationInput = {
   subjectId?: Prisma.SortOrder
   semanticKey?: Prisma.SortOrder
   generationFingerprint?: Prisma.SortOrder
+  expiryGeneration?: Prisma.SortOrderInput | Prisma.SortOrder
   identityKey?: Prisma.SortOrder
   currentThreshold?: Prisma.SortOrder
   attentionLevel?: Prisma.SortOrder
@@ -563,6 +578,7 @@ export type FascicoloSignalScalarWhereWithAggregatesInput = {
   subjectId?: Prisma.StringWithAggregatesFilter<"FascicoloSignal"> | string
   semanticKey?: Prisma.StringWithAggregatesFilter<"FascicoloSignal"> | string
   generationFingerprint?: Prisma.StringWithAggregatesFilter<"FascicoloSignal"> | string
+  expiryGeneration?: Prisma.IntNullableWithAggregatesFilter<"FascicoloSignal"> | number | null
   identityKey?: Prisma.StringWithAggregatesFilter<"FascicoloSignal"> | string
   currentThreshold?: Prisma.StringWithAggregatesFilter<"FascicoloSignal"> | string
   attentionLevel?: Prisma.EnumFascicoloSignalAttentionLevelWithAggregatesFilter<"FascicoloSignal"> | $Enums.FascicoloSignalAttentionLevel
@@ -594,6 +610,7 @@ export type FascicoloSignalCreateInput = {
   subjectId: string
   semanticKey: string
   generationFingerprint: string
+  expiryGeneration?: number | null
   identityKey: string
   currentThreshold: string
   attentionLevel: $Enums.FascicoloSignalAttentionLevel
@@ -631,6 +648,7 @@ export type FascicoloSignalUncheckedCreateInput = {
   subjectId: string
   semanticKey: string
   generationFingerprint: string
+  expiryGeneration?: number | null
   identityKey: string
   currentThreshold: string
   attentionLevel: $Enums.FascicoloSignalAttentionLevel
@@ -662,6 +680,7 @@ export type FascicoloSignalUpdateInput = {
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   generationFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  expiryGeneration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   identityKey?: Prisma.StringFieldUpdateOperationsInput | string
   currentThreshold?: Prisma.StringFieldUpdateOperationsInput | string
   attentionLevel?: Prisma.EnumFascicoloSignalAttentionLevelFieldUpdateOperationsInput | $Enums.FascicoloSignalAttentionLevel
@@ -699,6 +718,7 @@ export type FascicoloSignalUncheckedUpdateInput = {
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   generationFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  expiryGeneration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   identityKey?: Prisma.StringFieldUpdateOperationsInput | string
   currentThreshold?: Prisma.StringFieldUpdateOperationsInput | string
   attentionLevel?: Prisma.EnumFascicoloSignalAttentionLevelFieldUpdateOperationsInput | $Enums.FascicoloSignalAttentionLevel
@@ -733,6 +753,7 @@ export type FascicoloSignalCreateManyInput = {
   subjectId: string
   semanticKey: string
   generationFingerprint: string
+  expiryGeneration?: number | null
   identityKey: string
   currentThreshold: string
   attentionLevel: $Enums.FascicoloSignalAttentionLevel
@@ -764,6 +785,7 @@ export type FascicoloSignalUpdateManyMutationInput = {
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   generationFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  expiryGeneration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   identityKey?: Prisma.StringFieldUpdateOperationsInput | string
   currentThreshold?: Prisma.StringFieldUpdateOperationsInput | string
   attentionLevel?: Prisma.EnumFascicoloSignalAttentionLevelFieldUpdateOperationsInput | $Enums.FascicoloSignalAttentionLevel
@@ -796,6 +818,7 @@ export type FascicoloSignalUncheckedUpdateManyInput = {
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   generationFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  expiryGeneration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   identityKey?: Prisma.StringFieldUpdateOperationsInput | string
   currentThreshold?: Prisma.StringFieldUpdateOperationsInput | string
   attentionLevel?: Prisma.EnumFascicoloSignalAttentionLevelFieldUpdateOperationsInput | $Enums.FascicoloSignalAttentionLevel
@@ -845,6 +868,7 @@ export type FascicoloSignalCountOrderByAggregateInput = {
   subjectId?: Prisma.SortOrder
   semanticKey?: Prisma.SortOrder
   generationFingerprint?: Prisma.SortOrder
+  expiryGeneration?: Prisma.SortOrder
   identityKey?: Prisma.SortOrder
   currentThreshold?: Prisma.SortOrder
   attentionLevel?: Prisma.SortOrder
@@ -868,6 +892,7 @@ export type FascicoloSignalCountOrderByAggregateInput = {
 
 export type FascicoloSignalAvgOrderByAggregateInput = {
   ruleVersion?: Prisma.SortOrder
+  expiryGeneration?: Prisma.SortOrder
 }
 
 export type FascicoloSignalMaxOrderByAggregateInput = {
@@ -883,6 +908,7 @@ export type FascicoloSignalMaxOrderByAggregateInput = {
   subjectId?: Prisma.SortOrder
   semanticKey?: Prisma.SortOrder
   generationFingerprint?: Prisma.SortOrder
+  expiryGeneration?: Prisma.SortOrder
   identityKey?: Prisma.SortOrder
   currentThreshold?: Prisma.SortOrder
   attentionLevel?: Prisma.SortOrder
@@ -916,6 +942,7 @@ export type FascicoloSignalMinOrderByAggregateInput = {
   subjectId?: Prisma.SortOrder
   semanticKey?: Prisma.SortOrder
   generationFingerprint?: Prisma.SortOrder
+  expiryGeneration?: Prisma.SortOrder
   identityKey?: Prisma.SortOrder
   currentThreshold?: Prisma.SortOrder
   attentionLevel?: Prisma.SortOrder
@@ -938,6 +965,7 @@ export type FascicoloSignalMinOrderByAggregateInput = {
 
 export type FascicoloSignalSumOrderByAggregateInput = {
   ruleVersion?: Prisma.SortOrder
+  expiryGeneration?: Prisma.SortOrder
 }
 
 export type FascicoloSignalCreateNestedManyWithoutEnteInput = {
@@ -1166,6 +1194,7 @@ export type FascicoloSignalCreateWithoutEnteInput = {
   subjectId: string
   semanticKey: string
   generationFingerprint: string
+  expiryGeneration?: number | null
   identityKey: string
   currentThreshold: string
   attentionLevel: $Enums.FascicoloSignalAttentionLevel
@@ -1201,6 +1230,7 @@ export type FascicoloSignalUncheckedCreateWithoutEnteInput = {
   subjectId: string
   semanticKey: string
   generationFingerprint: string
+  expiryGeneration?: number | null
   identityKey: string
   currentThreshold: string
   attentionLevel: $Enums.FascicoloSignalAttentionLevel
@@ -1264,6 +1294,7 @@ export type FascicoloSignalScalarWhereInput = {
   subjectId?: Prisma.StringFilter<"FascicoloSignal"> | string
   semanticKey?: Prisma.StringFilter<"FascicoloSignal"> | string
   generationFingerprint?: Prisma.StringFilter<"FascicoloSignal"> | string
+  expiryGeneration?: Prisma.IntNullableFilter<"FascicoloSignal"> | number | null
   identityKey?: Prisma.StringFilter<"FascicoloSignal"> | string
   currentThreshold?: Prisma.StringFilter<"FascicoloSignal"> | string
   attentionLevel?: Prisma.EnumFascicoloSignalAttentionLevelFilter<"FascicoloSignal"> | $Enums.FascicoloSignalAttentionLevel
@@ -1295,6 +1326,7 @@ export type FascicoloSignalCreateWithoutReviewedByUserInput = {
   subjectId: string
   semanticKey: string
   generationFingerprint: string
+  expiryGeneration?: number | null
   identityKey: string
   currentThreshold: string
   attentionLevel: $Enums.FascicoloSignalAttentionLevel
@@ -1331,6 +1363,7 @@ export type FascicoloSignalUncheckedCreateWithoutReviewedByUserInput = {
   subjectId: string
   semanticKey: string
   generationFingerprint: string
+  expiryGeneration?: number | null
   identityKey: string
   currentThreshold: string
   attentionLevel: $Enums.FascicoloSignalAttentionLevel
@@ -1387,6 +1420,7 @@ export type FascicoloSignalCreateWithoutConcessioneInput = {
   subjectId: string
   semanticKey: string
   generationFingerprint: string
+  expiryGeneration?: number | null
   identityKey: string
   currentThreshold: string
   attentionLevel: $Enums.FascicoloSignalAttentionLevel
@@ -1422,6 +1456,7 @@ export type FascicoloSignalUncheckedCreateWithoutConcessioneInput = {
   subjectId: string
   semanticKey: string
   generationFingerprint: string
+  expiryGeneration?: number | null
   identityKey: string
   currentThreshold: string
   attentionLevel: $Enums.FascicoloSignalAttentionLevel
@@ -1479,6 +1514,7 @@ export type FascicoloSignalCreateWithoutCriticitaInput = {
   subjectId: string
   semanticKey: string
   generationFingerprint: string
+  expiryGeneration?: number | null
   identityKey: string
   currentThreshold: string
   attentionLevel: $Enums.FascicoloSignalAttentionLevel
@@ -1515,6 +1551,7 @@ export type FascicoloSignalUncheckedCreateWithoutCriticitaInput = {
   subjectId: string
   semanticKey: string
   generationFingerprint: string
+  expiryGeneration?: number | null
   identityKey: string
   currentThreshold: string
   attentionLevel: $Enums.FascicoloSignalAttentionLevel
@@ -1561,6 +1598,7 @@ export type FascicoloSignalUpdateWithoutCriticitaInput = {
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   generationFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  expiryGeneration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   identityKey?: Prisma.StringFieldUpdateOperationsInput | string
   currentThreshold?: Prisma.StringFieldUpdateOperationsInput | string
   attentionLevel?: Prisma.EnumFascicoloSignalAttentionLevelFieldUpdateOperationsInput | $Enums.FascicoloSignalAttentionLevel
@@ -1597,6 +1635,7 @@ export type FascicoloSignalUncheckedUpdateWithoutCriticitaInput = {
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   generationFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  expiryGeneration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   identityKey?: Prisma.StringFieldUpdateOperationsInput | string
   currentThreshold?: Prisma.StringFieldUpdateOperationsInput | string
   attentionLevel?: Prisma.EnumFascicoloSignalAttentionLevelFieldUpdateOperationsInput | $Enums.FascicoloSignalAttentionLevel
@@ -1627,6 +1666,7 @@ export type FascicoloSignalCreateWithoutProcedimentoInput = {
   subjectId: string
   semanticKey: string
   generationFingerprint: string
+  expiryGeneration?: number | null
   identityKey: string
   currentThreshold: string
   attentionLevel: $Enums.FascicoloSignalAttentionLevel
@@ -1662,6 +1702,7 @@ export type FascicoloSignalUncheckedCreateWithoutProcedimentoInput = {
   subjectId: string
   semanticKey: string
   generationFingerprint: string
+  expiryGeneration?: number | null
   identityKey: string
   currentThreshold: string
   attentionLevel: $Enums.FascicoloSignalAttentionLevel
@@ -1721,6 +1762,7 @@ export type FascicoloSignalCreateManyEnteInput = {
   subjectId: string
   semanticKey: string
   generationFingerprint: string
+  expiryGeneration?: number | null
   identityKey: string
   currentThreshold: string
   attentionLevel: $Enums.FascicoloSignalAttentionLevel
@@ -1752,6 +1794,7 @@ export type FascicoloSignalUpdateWithoutEnteInput = {
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   generationFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  expiryGeneration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   identityKey?: Prisma.StringFieldUpdateOperationsInput | string
   currentThreshold?: Prisma.StringFieldUpdateOperationsInput | string
   attentionLevel?: Prisma.EnumFascicoloSignalAttentionLevelFieldUpdateOperationsInput | $Enums.FascicoloSignalAttentionLevel
@@ -1787,6 +1830,7 @@ export type FascicoloSignalUncheckedUpdateWithoutEnteInput = {
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   generationFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  expiryGeneration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   identityKey?: Prisma.StringFieldUpdateOperationsInput | string
   currentThreshold?: Prisma.StringFieldUpdateOperationsInput | string
   attentionLevel?: Prisma.EnumFascicoloSignalAttentionLevelFieldUpdateOperationsInput | $Enums.FascicoloSignalAttentionLevel
@@ -1820,6 +1864,7 @@ export type FascicoloSignalUncheckedUpdateManyWithoutEnteInput = {
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   generationFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  expiryGeneration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   identityKey?: Prisma.StringFieldUpdateOperationsInput | string
   currentThreshold?: Prisma.StringFieldUpdateOperationsInput | string
   attentionLevel?: Prisma.EnumFascicoloSignalAttentionLevelFieldUpdateOperationsInput | $Enums.FascicoloSignalAttentionLevel
@@ -1854,6 +1899,7 @@ export type FascicoloSignalCreateManyReviewedByUserInput = {
   subjectId: string
   semanticKey: string
   generationFingerprint: string
+  expiryGeneration?: number | null
   identityKey: string
   currentThreshold: string
   attentionLevel: $Enums.FascicoloSignalAttentionLevel
@@ -1884,6 +1930,7 @@ export type FascicoloSignalUpdateWithoutReviewedByUserInput = {
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   generationFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  expiryGeneration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   identityKey?: Prisma.StringFieldUpdateOperationsInput | string
   currentThreshold?: Prisma.StringFieldUpdateOperationsInput | string
   attentionLevel?: Prisma.EnumFascicoloSignalAttentionLevelFieldUpdateOperationsInput | $Enums.FascicoloSignalAttentionLevel
@@ -1920,6 +1967,7 @@ export type FascicoloSignalUncheckedUpdateWithoutReviewedByUserInput = {
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   generationFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  expiryGeneration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   identityKey?: Prisma.StringFieldUpdateOperationsInput | string
   currentThreshold?: Prisma.StringFieldUpdateOperationsInput | string
   attentionLevel?: Prisma.EnumFascicoloSignalAttentionLevelFieldUpdateOperationsInput | $Enums.FascicoloSignalAttentionLevel
@@ -1953,6 +2001,7 @@ export type FascicoloSignalUncheckedUpdateManyWithoutReviewedByUserInput = {
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   generationFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  expiryGeneration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   identityKey?: Prisma.StringFieldUpdateOperationsInput | string
   currentThreshold?: Prisma.StringFieldUpdateOperationsInput | string
   attentionLevel?: Prisma.EnumFascicoloSignalAttentionLevelFieldUpdateOperationsInput | $Enums.FascicoloSignalAttentionLevel
@@ -1985,6 +2034,7 @@ export type FascicoloSignalCreateManyConcessioneInput = {
   subjectId: string
   semanticKey: string
   generationFingerprint: string
+  expiryGeneration?: number | null
   identityKey: string
   currentThreshold: string
   attentionLevel: $Enums.FascicoloSignalAttentionLevel
@@ -2016,6 +2066,7 @@ export type FascicoloSignalUpdateWithoutConcessioneInput = {
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   generationFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  expiryGeneration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   identityKey?: Prisma.StringFieldUpdateOperationsInput | string
   currentThreshold?: Prisma.StringFieldUpdateOperationsInput | string
   attentionLevel?: Prisma.EnumFascicoloSignalAttentionLevelFieldUpdateOperationsInput | $Enums.FascicoloSignalAttentionLevel
@@ -2051,6 +2102,7 @@ export type FascicoloSignalUncheckedUpdateWithoutConcessioneInput = {
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   generationFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  expiryGeneration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   identityKey?: Prisma.StringFieldUpdateOperationsInput | string
   currentThreshold?: Prisma.StringFieldUpdateOperationsInput | string
   attentionLevel?: Prisma.EnumFascicoloSignalAttentionLevelFieldUpdateOperationsInput | $Enums.FascicoloSignalAttentionLevel
@@ -2084,6 +2136,7 @@ export type FascicoloSignalUncheckedUpdateManyWithoutConcessioneInput = {
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   generationFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  expiryGeneration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   identityKey?: Prisma.StringFieldUpdateOperationsInput | string
   currentThreshold?: Prisma.StringFieldUpdateOperationsInput | string
   attentionLevel?: Prisma.EnumFascicoloSignalAttentionLevelFieldUpdateOperationsInput | $Enums.FascicoloSignalAttentionLevel
@@ -2117,6 +2170,7 @@ export type FascicoloSignalCreateManyProcedimentoInput = {
   subjectId: string
   semanticKey: string
   generationFingerprint: string
+  expiryGeneration?: number | null
   identityKey: string
   currentThreshold: string
   attentionLevel: $Enums.FascicoloSignalAttentionLevel
@@ -2148,6 +2202,7 @@ export type FascicoloSignalUpdateWithoutProcedimentoInput = {
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   generationFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  expiryGeneration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   identityKey?: Prisma.StringFieldUpdateOperationsInput | string
   currentThreshold?: Prisma.StringFieldUpdateOperationsInput | string
   attentionLevel?: Prisma.EnumFascicoloSignalAttentionLevelFieldUpdateOperationsInput | $Enums.FascicoloSignalAttentionLevel
@@ -2183,6 +2238,7 @@ export type FascicoloSignalUncheckedUpdateWithoutProcedimentoInput = {
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   generationFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  expiryGeneration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   identityKey?: Prisma.StringFieldUpdateOperationsInput | string
   currentThreshold?: Prisma.StringFieldUpdateOperationsInput | string
   attentionLevel?: Prisma.EnumFascicoloSignalAttentionLevelFieldUpdateOperationsInput | $Enums.FascicoloSignalAttentionLevel
@@ -2216,6 +2272,7 @@ export type FascicoloSignalUncheckedUpdateManyWithoutProcedimentoInput = {
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   generationFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  expiryGeneration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   identityKey?: Prisma.StringFieldUpdateOperationsInput | string
   currentThreshold?: Prisma.StringFieldUpdateOperationsInput | string
   attentionLevel?: Prisma.EnumFascicoloSignalAttentionLevelFieldUpdateOperationsInput | $Enums.FascicoloSignalAttentionLevel
@@ -2252,6 +2309,7 @@ export type FascicoloSignalSelect<ExtArgs extends runtime.Types.Extensions.Inter
   subjectId?: boolean
   semanticKey?: boolean
   generationFingerprint?: boolean
+  expiryGeneration?: boolean
   identityKey?: boolean
   currentThreshold?: boolean
   attentionLevel?: boolean
@@ -2291,6 +2349,7 @@ export type FascicoloSignalSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   subjectId?: boolean
   semanticKey?: boolean
   generationFingerprint?: boolean
+  expiryGeneration?: boolean
   identityKey?: boolean
   currentThreshold?: boolean
   attentionLevel?: boolean
@@ -2330,6 +2389,7 @@ export type FascicoloSignalSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   subjectId?: boolean
   semanticKey?: boolean
   generationFingerprint?: boolean
+  expiryGeneration?: boolean
   identityKey?: boolean
   currentThreshold?: boolean
   attentionLevel?: boolean
@@ -2369,6 +2429,7 @@ export type FascicoloSignalSelectScalar = {
   subjectId?: boolean
   semanticKey?: boolean
   generationFingerprint?: boolean
+  expiryGeneration?: boolean
   identityKey?: boolean
   currentThreshold?: boolean
   attentionLevel?: boolean
@@ -2390,7 +2451,7 @@ export type FascicoloSignalSelectScalar = {
   updatedAt?: boolean
 }
 
-export type FascicoloSignalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "enteId" | "concessioneId" | "procedimentoId" | "kind" | "sourceOperation" | "ruleCode" | "ruleVersion" | "subjectType" | "subjectId" | "semanticKey" | "generationFingerprint" | "identityKey" | "currentThreshold" | "attentionLevel" | "factsSnapshot" | "status" | "humanDisposition" | "dispositionThreshold" | "reviewedAt" | "reviewedByUserId" | "reviewedByActorId" | "reviewedByEmail" | "reviewedByRole" | "reviewNote" | "criticitaId" | "detectedAt" | "lastObservedAt" | "supersededAt" | "createdAt" | "updatedAt", ExtArgs["result"]["fascicoloSignal"]>
+export type FascicoloSignalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "enteId" | "concessioneId" | "procedimentoId" | "kind" | "sourceOperation" | "ruleCode" | "ruleVersion" | "subjectType" | "subjectId" | "semanticKey" | "generationFingerprint" | "expiryGeneration" | "identityKey" | "currentThreshold" | "attentionLevel" | "factsSnapshot" | "status" | "humanDisposition" | "dispositionThreshold" | "reviewedAt" | "reviewedByUserId" | "reviewedByActorId" | "reviewedByEmail" | "reviewedByRole" | "reviewNote" | "criticitaId" | "detectedAt" | "lastObservedAt" | "supersededAt" | "createdAt" | "updatedAt", ExtArgs["result"]["fascicoloSignal"]>
 export type FascicoloSignalInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   ente?: boolean | Prisma.EnteDefaultArgs<ExtArgs>
   concessione?: boolean | Prisma.ConcessioneDefaultArgs<ExtArgs>
@@ -2435,6 +2496,7 @@ export type $FascicoloSignalPayload<ExtArgs extends runtime.Types.Extensions.Int
     subjectId: string
     semanticKey: string
     generationFingerprint: string
+    expiryGeneration: number | null
     identityKey: string
     currentThreshold: string
     attentionLevel: $Enums.FascicoloSignalAttentionLevel
@@ -2894,6 +2956,7 @@ export interface FascicoloSignalFieldRefs {
   readonly subjectId: Prisma.FieldRef<"FascicoloSignal", 'String'>
   readonly semanticKey: Prisma.FieldRef<"FascicoloSignal", 'String'>
   readonly generationFingerprint: Prisma.FieldRef<"FascicoloSignal", 'String'>
+  readonly expiryGeneration: Prisma.FieldRef<"FascicoloSignal", 'Int'>
   readonly identityKey: Prisma.FieldRef<"FascicoloSignal", 'String'>
   readonly currentThreshold: Prisma.FieldRef<"FascicoloSignal", 'String'>
   readonly attentionLevel: Prisma.FieldRef<"FascicoloSignal", 'FascicoloSignalAttentionLevel'>

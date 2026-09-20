@@ -3,15 +3,17 @@ import { admitAsyncJob } from "@/server/async-jobs/persistence";
 
 import {
   buildConcessioneTimeWatchAdmission,
+  buildConcessioneTimeWatchAdmissionV2,
   deriveConcessioneTimeWatchOccurrences,
-  type ConcessioneTemporalState,
+  deriveConcessioneTimeWatchOccurrencesV2,
+  type ConcessioneTemporalStateV2,
 } from "./concessioneTimeWatchJob";
 
 export const CONCESSIONE_TIME_WATCH_BOOTSTRAP_PAGE_SIZE = 100;
 
 interface BootstrapDependencies {
   readonly now?: () => Date;
-  readonly listPage?: (cursor: string | undefined) => Promise<readonly ConcessioneTemporalState[]>;
+  readonly listPage?: (cursor: string | undefined) => Promise<readonly ConcessioneTemporalStateV2[]>;
   readonly admit?: typeof admitAsyncJob;
 }
 
@@ -27,7 +29,7 @@ export async function bootstrapConcessioneTimeWatches(
     orderBy: { id: "asc" },
     take: CONCESSIONE_TIME_WATCH_BOOTSTRAP_PAGE_SIZE,
     ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
-    select: { id: true, enteId: true, dataScadenza: true, stato: true },
+    select: { id: true, enteId: true, dataScadenza: true, stato: true, expiryGeneration: true },
   }));
   const admit = dependencies.admit ?? admitAsyncJob;
   let cursor: string | undefined;
@@ -40,8 +42,11 @@ export async function bootstrapConcessioneTimeWatches(
     if (page.length === 0) break;
     for (const concessione of page) {
       scannedCount += 1;
-      for (const occurrence of deriveConcessioneTimeWatchOccurrences(concessione, now)) {
-        const admission = await admit(buildConcessioneTimeWatchAdmission(occurrence));
+      const admissions = concessione.expiryGeneration === 0
+        ? deriveConcessioneTimeWatchOccurrences(concessione, now).map(buildConcessioneTimeWatchAdmission)
+        : deriveConcessioneTimeWatchOccurrencesV2(concessione, now).map(buildConcessioneTimeWatchAdmissionV2);
+      for (const input of admissions) {
+        const admission = await admit(input);
         if (admission.outcome === "CREATED") admittedCount += 1;
         else reusedCount += 1;
       }

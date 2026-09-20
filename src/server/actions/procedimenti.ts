@@ -18,7 +18,9 @@ import { getAuditRequestContext } from "@/server/audit/requestContext";
 import { runSerializableTransactionWithRetry } from "@/server/db/serializableTransaction";
 import {
   buildConcessioneTimeWatchReevaluationAdmission,
+  buildConcessioneTimeWatchReevaluationAdmissionV2,
   deriveConcessioneTimeWatchOccurrences,
+  deriveConcessioneTimeWatchOccurrencesV2,
   isConcessioneTimeWatchApplicable,
 } from "@/server/fascicolo-lifecycle/concessioneTimeWatchJob";
 import {
@@ -638,7 +640,7 @@ export async function createProcedimentoAction(formData: FormData) {
 
     const concessione = await tx.concessione.findUnique({
       where: { id: createdProcedimento.concessioneId },
-      select: { id: true, enteId: true, dataScadenza: true, stato: true },
+      select: { id: true, enteId: true, dataScadenza: true, stato: true, expiryGeneration: true },
     });
     if (!concessione || concessione.id !== parsed.data.concessioneId) {
       throw new Error("Concessione canonica non coerente con il procedimento creato.");
@@ -655,14 +657,23 @@ export async function createProcedimentoAction(formData: FormData) {
       ["DA_AVVIARE", "IN_CORSO"].includes(createdProcedimento.stato)
       && isConcessioneTimeWatchApplicable(concessione.stato)
     ) {
-      const maturedOccurrence = deriveConcessioneTimeWatchOccurrences(concessione, catchUpObservedAt)
-        .find((occurrence) => occurrence.thresholdAt.getTime() <= catchUpObservedAt.getTime());
-      if (maturedOccurrence) {
-        await admitAsyncJobInTransaction(tx, buildConcessioneTimeWatchReevaluationAdmission({
-          occurrence: maturedOccurrence,
-          procedimentoId: createdProcedimento.id,
-          triggeredAt: catchUpObservedAt,
-        }));
+      const catchUpAdmission = concessione.expiryGeneration === 0
+        ? deriveConcessioneTimeWatchOccurrences(concessione, catchUpObservedAt)
+            .filter((occurrence) => occurrence.thresholdAt.getTime() <= catchUpObservedAt.getTime())
+            .map((occurrence) => buildConcessioneTimeWatchReevaluationAdmission({
+              occurrence,
+              procedimentoId: createdProcedimento.id,
+              triggeredAt: catchUpObservedAt,
+            }))[0]
+        : deriveConcessioneTimeWatchOccurrencesV2(concessione, catchUpObservedAt)
+            .filter((occurrence) => occurrence.thresholdAt.getTime() <= catchUpObservedAt.getTime())
+            .map((occurrence) => buildConcessioneTimeWatchReevaluationAdmissionV2({
+              occurrence,
+              procedimentoId: createdProcedimento.id,
+              triggeredAt: catchUpObservedAt,
+            }))[0];
+      if (catchUpAdmission) {
+        await admitAsyncJobInTransaction(tx, catchUpAdmission);
       }
     }
 

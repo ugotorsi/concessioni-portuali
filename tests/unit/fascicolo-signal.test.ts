@@ -75,6 +75,7 @@ function signal(overrides: Record<string, unknown> = {}) {
     subjectId: "concessione-1",
     semanticKey: "a".repeat(64),
     generationFingerprint: generationFingerprint(),
+    expiryGeneration: null,
     identityKey: "b".repeat(64),
     currentThreshold: "CONCESSION_90_DAYS",
     attentionLevel: "LOW",
@@ -103,7 +104,7 @@ function transaction() {
     procedimento: {
       findFirst: vi.fn().mockResolvedValue({
         id: "procedimento-1",
-        concessione: { id: "concessione-1", enteId: "ente-1", dataScadenza },
+        concessione: { id: "concessione-1", enteId: "ente-1", dataScadenza, expiryGeneration: 0 },
       }),
     },
     fascicoloSignal: {
@@ -423,7 +424,7 @@ describe("Patch F1 persistent concession expiry signal", () => {
     const second = transaction();
     second.procedimento.findFirst.mockResolvedValue({
       id: "procedimento-1",
-      concessione: { id: "concessione-1", enteId: "ente-1", dataScadenza: extendedExpiry },
+      concessione: { id: "concessione-1", enteId: "ente-1", dataScadenza: extendedExpiry, expiryGeneration: 0 },
     });
     await project(second, change("CONCESSION_90_DAYS", {
       stateFingerprint: generationFingerprint(extendedExpiry),

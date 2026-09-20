@@ -22,11 +22,16 @@ import { applicationAsyncJobRegistry } from "@/server/async-jobs/applicationWork
 import { normalizeAsyncJobAdmission } from "@/server/async-jobs/domain";
 import {
   buildConcessioneTimeWatchAdmission,
+  buildConcessioneTimeWatchAdmissionV2,
   buildConcessioneTimeWatchReevaluationAdmission,
   createConcessioneTimeWatchHandler,
+  createConcessioneTimeWatchV2Handler,
   deriveConcessioneTimeWatchOccurrences,
+  deriveConcessioneTimeWatchOccurrencesV2,
   FASCICOLO_TIME_WATCH_OPERATION,
+  FASCICOLO_TIME_WATCH_V2_OPERATION,
   parseConcessioneTimeWatchReference,
+  parseConcessioneTimeWatchReferenceV2,
 } from "@/server/fascicolo-lifecycle/concessioneTimeWatchJob";
 import { parseFascicoloReevaluationReference } from "@/server/fascicolo-lifecycle/fascicoloReevaluationJob";
 
@@ -35,6 +40,7 @@ const concessione = {
   id: "concessione-1",
   enteId: "ente-1",
   dataScadenza: expiry,
+  expiryGeneration: 0,
   stato: "ATTIVA",
 };
 
@@ -90,6 +96,43 @@ describe("Fase 2B Patch E concession time watch", () => {
       initiatingUserId: null,
       actor: { actorId: "system:fascicolo-time-watch", actorRole: "SYSTEM" },
     });
+  });
+
+  it("preserves the literal pre-G2 V1 reference and fixed fingerprints", () => {
+    const legacyAdmission = normalizeAsyncJobAdmission({
+      operation: "FASCICOLO_TIME_WATCH_V1",
+      logicalOperationId: "3f3ade05bca006c1402d29527dbd3c6ede23cb2375f273d7fe92651b58474387",
+      purpose: "FASCICOLO_TIME_THRESHOLD_REVALIDATION",
+      correlationId: "fascicolo-time-watch:3f3ade05bca006c1402d29527dbd3c6ede23cb2375f273d7fe92651b58474387",
+      policyDecisionRef: "FASCICOLO_TIME_WATCH_SYSTEM_ADMISSION_V1",
+      inputReference: {
+        referenceType: "FASCICOLO_TIME_WATCH",
+        referenceId: "concessione-1",
+        referenceVersion: "V1",
+        metadata: {
+          contractVersion: "CONCESSIONE_TIME_WATCH_V1",
+          expectedTemporalFingerprintHash: "f480e73dc7ca84c53a7381b7f3ebe721cb2ca0bb8b15f56fac63f9e342afc65e",
+          subjectType: "CONCESSIONE",
+          tenantId: "ente-1",
+          thresholdAt: "2026-12-02T00:00:00.000Z",
+          thresholdCode: "CONCESSION_30_DAYS",
+          watchFingerprintHash: "3f3ade05bca006c1402d29527dbd3c6ede23cb2375f273d7fe92651b58474387",
+        },
+      },
+      maxAttempts: 3,
+      availableAt: new Date("2026-12-02T00:00:00.000Z"),
+      admission: {
+        admissionType: "AUTHORIZED_SYSTEM",
+        tenantId: "ente-1",
+        initiatingUserId: null,
+        actor: { actorId: "system:fascicolo-time-watch", actorEmail: null, actorRole: "SYSTEM" },
+      },
+    });
+
+    expect(legacyAdmission.idempotencyKey).toBe("5800b183c778907c6e22d595c470de2ae3bb9e344f324112d95fe1cc8b3443b3");
+    expect(legacyAdmission.requestFingerprint).toBe("24c13ad1e3555869574da76fbda93aa4fecad167da7f1eb31ce01a91cca87905");
+    expect(parseConcessioneTimeWatchReference(legacyAdmission.inputReference).expectedTemporalFingerprint)
+      .toBe("f480e73dc7ca84c53a7381b7f3ebe721cb2ca0bb8b15f56fac63f9e342afc65e");
   });
 
   it("changes identity for a changed expiry but not for a status-only change", () => {
@@ -243,6 +286,42 @@ describe("Fase 2B Patch E concession time watch", () => {
     await expect(handler.execute(handler.parseInput(admission.inputReference), {
       correlationId: admission.correlationId,
     } as never)).resolves.toMatchObject({ metadata: { outcomeCode: "NO_OP_NO_ACTIVE_PROCEDIMENTO" } });
+    expect(harness.admit).not.toHaveBeenCalled();
+  });
+
+  it("rejects a legacy V1 event after the concession moved to a positive generation", async () => {
+    const admission = normalizeAsyncJobAdmission(buildConcessioneTimeWatchAdmission(
+      occurrence("CONCESSION_30_DAYS"),
+    ));
+    harness.tx.concessione.findFirst.mockResolvedValue({ ...concessione, expiryGeneration: 1 });
+    const handler = createConcessioneTimeWatchHandler({
+      now: () => new Date("2026-12-02T12:00:00.000Z"),
+    });
+
+    await expect(handler.execute(handler.parseInput(admission.inputReference), {
+      correlationId: admission.correlationId,
+    } as never)).resolves.toMatchObject({ metadata: { outcomeCode: "NO_OP_STALE_LEGACY_GENERATION" } });
+    expect(harness.tx.procedimento.findMany).not.toHaveBeenCalled();
+    expect(harness.admit).not.toHaveBeenCalled();
+  });
+
+  it("uses V2 only for a positive exact generation and rejects stale generations", async () => {
+    const current = { ...concessione, expiryGeneration: 2 };
+    const selected = deriveConcessioneTimeWatchOccurrencesV2(
+      current,
+      new Date("2026-01-01T00:00:00.000Z"),
+    ).find((item) => item.threshold === "CONCESSION_30_DAYS")!;
+    const admission = normalizeAsyncJobAdmission(buildConcessioneTimeWatchAdmissionV2(selected));
+    const parsed = parseConcessioneTimeWatchReferenceV2(admission.inputReference);
+    expect(admission.operation).toBe(FASCICOLO_TIME_WATCH_V2_OPERATION);
+    expect(parsed.expiryGeneration).toBe(2);
+
+    harness.tx.concessione.findFirst.mockResolvedValue({ ...current, expiryGeneration: 3 });
+    const handler = createConcessioneTimeWatchV2Handler({
+      now: () => new Date("2026-12-02T12:00:00.000Z"),
+    });
+    await expect(handler.execute(parsed, { correlationId: admission.correlationId } as never))
+      .resolves.toMatchObject({ metadata: { outcomeCode: "NO_OP_STALE_OCCURRENCE" } });
     expect(harness.admit).not.toHaveBeenCalled();
   });
 

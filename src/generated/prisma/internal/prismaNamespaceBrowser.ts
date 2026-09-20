@@ -94,6 +94,7 @@ export const ModelName = {
   LegalSourceCandidateResolution: 'LegalSourceCandidateResolution',
   AsyncJob: 'AsyncJob',
   FascicoloSignal: 'FascicoloSignal',
+  ConcessioneExpiryChangeCommand: 'ConcessioneExpiryChangeCommand',
   ResearchMissionRecord: 'ResearchMissionRecord',
   ResearchExecutionAttempt: 'ResearchExecutionAttempt',
   ResearchEvidenceBundleRecord: 'ResearchEvidenceBundleRecord',
@@ -482,6 +483,7 @@ export const ConcessioneScalarFieldEnum = {
   numeroAtto: 'numeroAtto',
   dataRilascio: 'dataRilascio',
   dataScadenza: 'dataScadenza',
+  expiryGeneration: 'expiryGeneration',
   normaRiferimento: 'normaRiferimento',
   tipologiaBene: 'tipologiaBene',
   attivita: 'attivita',
@@ -1090,6 +1092,7 @@ export const FascicoloSignalScalarFieldEnum = {
   subjectId: 'subjectId',
   semanticKey: 'semanticKey',
   generationFingerprint: 'generationFingerprint',
+  expiryGeneration: 'expiryGeneration',
   identityKey: 'identityKey',
   currentThreshold: 'currentThreshold',
   attentionLevel: 'attentionLevel',
@@ -1112,6 +1115,28 @@ export const FascicoloSignalScalarFieldEnum = {
 } as const
 
 export type FascicoloSignalScalarFieldEnum = (typeof FascicoloSignalScalarFieldEnum)[keyof typeof FascicoloSignalScalarFieldEnum]
+
+
+export const ConcessioneExpiryChangeCommandScalarFieldEnum = {
+  id: 'id',
+  requestId: 'requestId',
+  payloadFingerprint: 'payloadFingerprint',
+  concessioneId: 'concessioneId',
+  enteId: 'enteId',
+  expectedGeneration: 'expectedGeneration',
+  resultingGeneration: 'resultingGeneration',
+  previousDataScadenza: 'previousDataScadenza',
+  newDataScadenza: 'newDataScadenza',
+  motivation: 'motivation',
+  reference: 'reference',
+  actorUserId: 'actorUserId',
+  actorId: 'actorId',
+  actorEmail: 'actorEmail',
+  actorRole: 'actorRole',
+  createdAt: 'createdAt'
+} as const
+
+export type ConcessioneExpiryChangeCommandScalarFieldEnum = (typeof ConcessioneExpiryChangeCommandScalarFieldEnum)[keyof typeof ConcessioneExpiryChangeCommandScalarFieldEnum]
 
 
 export const ResearchMissionRecordScalarFieldEnum = {

@@ -12,6 +12,7 @@ import { PORT_ACTIVITY_LEGAL_TYPE_VALUES } from "@/lib/port-activity-legal-type"
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireConcessioneTenantAccess } from "@/lib/tenant-auth";
 import { createAuditLogInTransaction } from "@/server/audit/auditLog";
+import { changeConcessioneExpiry } from "@/server/fascicolo-lifecycle/concessioneExpiryChange";
 
 const STAGING_PREVIEW_ADMIN_ID = "staging-preview-admin";
 
@@ -20,6 +21,37 @@ const updatePortActivityLegalTypeSchema = z.object({
   portActivityLegalType: z.union([z.enum(PORT_ACTIVITY_LEGAL_TYPE_VALUES), z.literal("")])
     .transform((value) => value || null),
 });
+
+const changeConcessioneExpirySchema = z.object({
+  requestId: z.string().trim().min(1).max(128),
+  concessioneId: z.string().trim().min(1),
+  expectedGeneration: z.coerce.number().int().nonnegative(),
+  expectedDataScadenza: z.string().datetime({ offset: true }),
+  newDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  motivation: z.string().trim().min(1).max(2000),
+  reference: z.string().trim().max(1000).optional().transform((value) => value || null),
+});
+
+export async function changeConcessioneExpiryAction(formData: FormData) {
+  await requireRole();
+  const [currentUser, tenantContext] = await Promise.all([getCurrentUser(), getCurrentTenantContext()]);
+  if (!currentUser || !tenantContext) throw new Error("Utente o tenant non disponibile.");
+  const command = changeConcessioneExpirySchema.parse({
+    requestId: formData.get("requestId"),
+    concessioneId: formData.get("concessioneId"),
+    expectedGeneration: formData.get("expectedGeneration"),
+    expectedDataScadenza: formData.get("expectedDataScadenza"),
+    newDate: formData.get("newDate"),
+    motivation: formData.get("motivation"),
+    reference: formData.get("reference")?.toString(),
+  });
+
+  const result = await changeConcessioneExpiry({ command, actor: currentUser, tenantContext });
+  if (result.outcome === "CONFLICT") {
+    throw new Error("Scadenza modificata da un altro operatore. Ricaricare e riprovare.");
+  }
+  revalidatePath(`/concessioni/${result.concessioneId}`);
+}
 
 export async function updateConcessionePortActivityLegalType(formData: FormData) {
   const role = await requireRole();

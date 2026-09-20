@@ -5,6 +5,7 @@ import { z } from "zod";
 import { stableStringify } from "@/server/audit/hash";
 
 export const FASCICOLO_CHANGE_CONTRACT_VERSION = "FASCICOLO_CHANGE_V1" as const;
+export const FASCICOLO_CHANGE_V2_CONTRACT_VERSION = "FASCICOLO_CHANGE_V2" as const;
 export const FASCICOLO_CHANGE_FINGERPRINT_ALGORITHM = "sha256" as const;
 
 const identifier = z.string().trim().min(1).max(256);
@@ -121,8 +122,26 @@ export const fascicoloChangeSchema = z.discriminatedUnion("kind", [
   }).strict(),
 ]);
 
+export const fascicoloTimeThresholdChangeV2Schema = z.object({
+  kind: z.literal("TIME_THRESHOLD_REACHED"),
+  ...commonShape,
+  subjectType: z.literal("CONCESSIONE"),
+  subjectId: identifier,
+  procedimentoId: identifier,
+  threshold: z.enum([
+    "CONCESSION_90_DAYS",
+    "CONCESSION_60_DAYS",
+    "CONCESSION_30_DAYS",
+    "DEADLINE_DUE",
+  ]),
+  thresholdAt: instant,
+  expiryGeneration: z.number().int().positive(),
+}).strict();
+
 export type FascicoloChange = z.output<typeof fascicoloChangeSchema>;
 export type FascicoloChangeInput = z.input<typeof fascicoloChangeSchema>;
+export type FascicoloTimeThresholdChangeV2 = z.output<typeof fascicoloTimeThresholdChangeV2Schema>;
+export type AnyFascicoloChange = FascicoloChange | FascicoloTimeThresholdChangeV2;
 export type LegalAssessmentTarget = FascicoloChange["legalAssessmentTarget"];
 
 export class FascicoloChangeValidationError extends Error {
@@ -146,6 +165,23 @@ export function fingerprintFascicoloChange(input: unknown): string {
   return createHash(FASCICOLO_CHANGE_FINGERPRINT_ALGORITHM)
     .update(stableStringify({
       contractVersion: FASCICOLO_CHANGE_CONTRACT_VERSION,
+      change: causalState,
+    }), "utf8")
+    .digest("hex");
+}
+
+export function parseFascicoloTimeThresholdChangeV2(input: unknown): FascicoloTimeThresholdChangeV2 {
+  const parsed = fascicoloTimeThresholdChangeV2Schema.safeParse(input);
+  if (!parsed.success) throw new FascicoloChangeValidationError();
+  return Object.freeze(parsed.data);
+}
+
+export function fingerprintFascicoloTimeThresholdChangeV2(input: unknown): string {
+  const change = parseFascicoloTimeThresholdChangeV2(input);
+  const { triggeredAt: _triggeredAt, ...causalState } = change;
+  return createHash(FASCICOLO_CHANGE_FINGERPRINT_ALGORITHM)
+    .update(stableStringify({
+      contractVersion: FASCICOLO_CHANGE_V2_CONTRACT_VERSION,
       change: causalState,
     }), "utf8")
     .digest("hex");

@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import Link from "next/link";
 import { addDays, startOfDay } from "date-fns";
 import { notFound } from "next/navigation";
@@ -8,7 +10,9 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import { Textarea } from "@/components/ui/Textarea";
 import {
   Table,
   TableBody,
@@ -17,14 +21,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/Table";
-import { BACKOFFICE_ROLES, canManageConcessioneLegalClassification, requireRole } from "@/lib/auth";
+import {
+  BACKOFFICE_ROLES,
+  canManageConcessioneExpiry,
+  canManageConcessioneLegalClassification,
+  requireRole,
+} from "@/lib/auth";
 import { getConcessionVerticalLabel, getLegalFrameworkLabel } from "@/lib/concession-vertical-labels";
 import {
   getPortActivityLegalTypeLabel,
   PORT_ACTIVITY_LEGAL_TYPE_VALUES,
 } from "@/lib/port-activity-legal-type";
 import { formatCurrencyEUR, formatDateIT, formatEnumLabel } from "@/lib/utils";
-import { updateConcessionePortActivityLegalType } from "@/server/actions/concessioni";
+import { getCurrentTenantContext } from "@/lib/tenant-auth";
+import {
+  changeConcessioneExpiryAction,
+  updateConcessionePortActivityLegalType,
+} from "@/server/actions/concessioni";
+import { isConcessioneExpiryChangeEnabled } from "@/server/fascicolo-lifecycle/concessioneExpiryChange";
 import { getConcessioneDetail } from "@/server/queries/concessioni";
 
 interface ConcessioneDetailPageProps {
@@ -42,11 +56,21 @@ export default async function ConcessioneDetailPage({ params }: ConcessioneDetai
   const canUploadDocumenti = BACKOFFICE_ROLES.includes(role);
   const canManageLegalClassification = canManageConcessioneLegalClassification(role);
   const { id } = await params;
-  const concessione = await getConcessioneDetail(id);
+  const [concessione, tenantContext] = await Promise.all([
+    getConcessioneDetail(id),
+    getCurrentTenantContext(),
+  ]);
 
   if (!concessione) {
     notFound();
   }
+
+  const effectiveExpiryRole = role === "ADMIN" && tenantContext?.isAdmin
+    ? "ADMIN"
+    : tenantContext?.tenantMemberships.find((membership) => membership.enteId === concessione.enteId)?.role;
+  const canChangeExpiry = isConcessioneExpiryChangeEnabled()
+    && effectiveExpiryRole !== undefined
+    && canManageConcessioneExpiry(effectiveExpiryRole);
 
   const today = startOfDay(new Date());
   const in90 = addDays(today, 90);
@@ -230,6 +254,24 @@ export default async function ConcessioneDetailPage({ params }: ConcessioneDetai
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-500">Data scadenza</p>
                 <p className="mt-1 text-slate-900">{formatDateIT(concessione.dataScadenza)}</p>
+                {canChangeExpiry ? (
+                  <form action={changeConcessioneExpiryAction} className="mt-3 grid gap-2">
+                    <input type="hidden" name="requestId" value={randomUUID()} />
+                    <input type="hidden" name="concessioneId" value={concessione.id} />
+                    <input type="hidden" name="expectedGeneration" value={concessione.expiryGeneration} />
+                    <input type="hidden" name="expectedDataScadenza" value={concessione.dataScadenza.toISOString()} />
+                    <Input
+                      aria-label="Nuova data scadenza"
+                      name="newDate"
+                      type="date"
+                      defaultValue={concessione.dataScadenza.toISOString().slice(0, 10)}
+                      required
+                    />
+                    <Textarea aria-label="Motivazione cambio scadenza" name="motivation" required maxLength={2000} />
+                    <Input aria-label="Riferimento atto" name="reference" maxLength={1000} />
+                    <Button type="submit" size="sm">Aggiorna scadenza</Button>
+                  </form>
+                ) : null}
               </div>
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-500">Coordinate GIS</p>

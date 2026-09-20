@@ -20,7 +20,10 @@ import {
   toOptional,
 } from "@/server/criticita/criticitaDomain";
 import { runSerializableTransactionWithRetry } from "@/server/db/serializableTransaction";
-import { fascicoloSignalTemporalFingerprint } from "@/server/fascicolo-lifecycle/fascicoloSignal";
+import {
+  fascicoloSignalTemporalFingerprint,
+  fascicoloSignalTemporalFingerprintV2,
+} from "@/server/fascicolo-lifecycle/fascicoloSignal";
 
 const thresholdSchema = z.enum([
   "CONCESSION_90_DAYS",
@@ -85,6 +88,7 @@ async function loadCanonicalCurrentSignal(
       subjectType: true,
       subjectId: true,
       generationFingerprint: true,
+      expiryGeneration: true,
       currentThreshold: true,
       status: true,
       humanDisposition: true,
@@ -95,7 +99,7 @@ async function loadCanonicalCurrentSignal(
         select: {
           id: true,
           concessioneId: true,
-          concessione: { select: { id: true, enteId: true, dataScadenza: true } },
+          concessione: { select: { id: true, enteId: true, dataScadenza: true, expiryGeneration: true } },
         },
       },
     },
@@ -116,12 +120,22 @@ async function loadCanonicalCurrentSignal(
   }
   if (signal.status !== "OPEN") throw new Error("FASCICOLO_SIGNAL_NOT_OPEN");
   if (signal.currentThreshold !== input.expectedThreshold) throw new Error("FASCICOLO_SIGNAL_THRESHOLD_CHANGED");
+  const currentFingerprint = signal.expiryGeneration === null
+    ? fascicoloSignalTemporalFingerprint({
+        id: concessione.id,
+        enteId: concessione.enteId,
+        dataScadenza: concessione.dataScadenza,
+      })
+    : fascicoloSignalTemporalFingerprintV2({
+        id: concessione.id,
+        enteId: concessione.enteId,
+        dataScadenza: concessione.dataScadenza,
+        expiryGeneration: concessione.expiryGeneration,
+      });
   if (
-    signal.generationFingerprint !== fascicoloSignalTemporalFingerprint({
-      id: concessione.id,
-      enteId: concessione.enteId,
-      dataScadenza: concessione.dataScadenza,
-    })
+    (signal.expiryGeneration === null && concessione.expiryGeneration !== 0)
+    || (signal.expiryGeneration !== null && signal.expiryGeneration !== concessione.expiryGeneration)
+    || signal.generationFingerprint !== currentFingerprint
   ) {
     throw new Error("FASCICOLO_SIGNAL_STALE_GENERATION");
   }

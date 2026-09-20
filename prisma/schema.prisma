@@ -797,6 +797,7 @@ model Ente {
   legalSourceCandidateAdmissions LegalSourceCandidateAdmission[]
   asyncJobs                    AsyncJob[]
   fascicoloSignals             FascicoloSignal[]
+  concessioneExpiryChangeCommands ConcessioneExpiryChangeCommand[]
   researchMissions             ResearchMissionRecord[]
   aiFascicoloTrustedReviewMaterials AiFascicoloTrustedReviewMaterial[]
   aiFascicoloHumanReviewStates      AiFascicoloHumanReviewState[]
@@ -1262,6 +1263,7 @@ model User {
   legalSourceCandidateResolutionsReviewed        LegalSourceCandidateResolution[]             @relation("LegalSourceCandidateResolutionReviewedBy")
   legalReferenceOfficialReconciliationsReviewed  LegalReferenceOfficialReconciliation[]        @relation("LegalReferenceOfficialReconciliationReviewedBy")
   asyncJobsInitiated                             AsyncJob[]                                    @relation("AsyncJobInitiatedBy")
+  concessioneExpiryChangeCommands                ConcessioneExpiryChangeCommand[]              @relation("ConcessioneExpiryChangeActor")
   documentRequirementEvidenceReviews            FascicoloDocumentRequirementEvidenceReview[] @relation("DocumentRequirementEvidenceReviewedBy")
   aiFascicoloHumanReviewEvents                   AiFascicoloHumanReviewEvent[]
 
@@ -1297,6 +1299,7 @@ model Concessione {
   numeroAtto                 String
   dataRilascio               DateTime
   dataScadenza               DateTime
+  expiryGeneration           Int                        @default(1)
   normaRiferimento           NormaRiferimento
   tipologiaBene              TipologiaBene
   attivita                   AttivitaConcessione
@@ -1342,6 +1345,7 @@ model Concessione {
   normaImpatti          NormaImpatto[]
   activityLogs          ActivityLog[]
   fascicoloSignals      FascicoloSignal[]
+  expiryChangeCommands  ConcessioneExpiryChangeCommand[]
 
   @@index([stato])
   @@index([dataScadenza])
@@ -2126,6 +2130,7 @@ model FascicoloSignal {
   subjectId             String
   semanticKey           String                           @db.Char(64)
   generationFingerprint String                           @db.Char(64)
+  expiryGeneration      Int?
   identityKey           String                           @unique @db.Char(64)
   currentThreshold      String
   attentionLevel        FascicoloSignalAttentionLevel
@@ -2159,6 +2164,34 @@ model FascicoloSignal {
   @@index([concessioneId, status])
   @@index([semanticKey, status])
   @@index([attentionLevel])
+}
+
+model ConcessioneExpiryChangeCommand {
+  id                       String   @id @default(cuid())
+  requestId                String   @unique @db.VarChar(128)
+  payloadFingerprint       String   @db.Char(64)
+  concessioneId            String
+  enteId                    String
+  expectedGeneration       Int
+  resultingGeneration      Int
+  previousDataScadenza     DateTime
+  newDataScadenza          DateTime
+  motivation               String   @db.VarChar(2000)
+  reference                String?  @db.VarChar(1000)
+  actorUserId              String?
+  actorId                  String   @db.VarChar(256)
+  actorEmail               String?
+  actorRole                String   @db.VarChar(64)
+  createdAt                DateTime @default(now())
+
+  concessione Concessione @relation(fields: [concessioneId], references: [id], onDelete: Restrict)
+  ente         Ente        @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  actorUser    User?       @relation("ConcessioneExpiryChangeActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@unique([concessioneId, resultingGeneration])
+  @@index([enteId, createdAt])
+  @@index([concessioneId, createdAt])
+  @@index([actorUserId])
 }
 
 model ResearchMissionRecord {

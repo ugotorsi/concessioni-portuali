@@ -5,14 +5,16 @@ import { createAuditLogInTransaction } from "@/server/audit/auditLog";
 import { stableStringify } from "@/server/audit/hash";
 import { runSerializableTransactionWithRetry } from "@/server/db/serializableTransaction";
 
-import type { FascicoloChange } from "./change";
+import type { AnyFascicoloChange } from "./change";
 
 export const FASCICOLO_SIGNAL_KIND = "CONCESSION_EXPIRY" as const;
 export const FASCICOLO_SIGNAL_RULE_CODE = "CONCESSION_EXPIRY_WINDOW" as const;
 export const FASCICOLO_SIGNAL_RULE_VERSION = 1 as const;
 export const FASCICOLO_SIGNAL_SOURCE_OPERATION = "FASCICOLO_TIME_WATCH_V1" as const;
+export const FASCICOLO_SIGNAL_SOURCE_OPERATION_V2 = "FASCICOLO_TIME_WATCH_V2" as const;
 
 const CONCESSIONE_TIME_WATCH_CONTRACT_VERSION = "CONCESSIONE_TIME_WATCH_V1";
+const CONCESSIONE_TIME_WATCH_V2_CONTRACT_VERSION = "CONCESSIONE_TIME_WATCH_V2";
 const supportedThresholds = {
   CONCESSION_90_DAYS: { attentionLevel: "LOW", rank: 1, daysBeforeExpiry: 90 },
   CONCESSION_60_DAYS: { attentionLevel: "MEDIUM", rank: 2, daysBeforeExpiry: 60 },
@@ -30,6 +32,7 @@ type SignalCandidate = Readonly<{
   threshold: SupportedThreshold;
   thresholdAt: Date;
   attentionLevel: AttentionLevel;
+  expiryGeneration: number | null;
 }>;
 
 export type FascicoloSignalProjectionResult = Readonly<{
@@ -49,7 +52,7 @@ function sha256(value: unknown): string {
   return createHash("sha256").update(stableStringify(value), "utf8").digest("hex");
 }
 
-function deriveCandidate(change: FascicoloChange): SignalCandidate | null {
+function deriveCandidate(change: AnyFascicoloChange): SignalCandidate | null {
   if (
     change.kind !== "TIME_THRESHOLD_REACHED"
     || change.subjectType !== "CONCESSIONE"
@@ -66,6 +69,7 @@ function deriveCandidate(change: FascicoloChange): SignalCandidate | null {
     threshold,
     thresholdAt: new Date(change.thresholdAt),
     attentionLevel: supportedThresholds[threshold].attentionLevel,
+    expiryGeneration: "expiryGeneration" in change ? change.expiryGeneration : null,
   });
 }
 
@@ -80,6 +84,22 @@ export function fascicoloSignalTemporalFingerprint(input: {
     subjectId: input.id,
     tenantId: input.enteId,
     dataScadenza: input.dataScadenza.toISOString(),
+  });
+}
+
+export function fascicoloSignalTemporalFingerprintV2(input: {
+  id: string;
+  enteId: string;
+  dataScadenza: Date;
+  expiryGeneration: number;
+}): string {
+  return sha256({
+    contractVersion: CONCESSIONE_TIME_WATCH_V2_CONTRACT_VERSION,
+    subjectType: "CONCESSIONE",
+    subjectId: input.id,
+    tenantId: input.enteId,
+    dataScadenza: input.dataScadenza.toISOString(),
+    expiryGeneration: input.expiryGeneration,
   });
 }
 
@@ -101,6 +121,7 @@ function factsSnapshot(candidate: SignalCandidate, dataScadenza: Date) {
     threshold: candidate.threshold,
     thresholdAt: candidate.thresholdAt.toISOString(),
     dataScadenza: dataScadenza.toISOString(),
+    ...(candidate.expiryGeneration === null ? {} : { expiryGeneration: candidate.expiryGeneration }),
   } as const;
 }
 
@@ -152,7 +173,7 @@ async function auditSignal(
 
 export async function projectFascicoloSignalInTransaction(
   tx: Prisma.TransactionClient,
-  change: FascicoloChange,
+  change: AnyFascicoloChange,
   observedAt: Date,
 ): Promise<FascicoloSignalProjectionResult> {
   const candidate = deriveCandidate(change);
@@ -168,7 +189,7 @@ export async function projectFascicoloSignalInTransaction(
     select: {
       id: true,
       concessione: {
-        select: { id: true, enteId: true, dataScadenza: true },
+        select: { id: true, enteId: true, dataScadenza: true, expiryGeneration: true },
       },
     },
   });
@@ -176,7 +197,14 @@ export async function projectFascicoloSignalInTransaction(
   if (!procedimento || !concessione?.enteId) {
     return { outcome: "NO_OP_SUBJECT_NOT_FOUND_OR_SCOPE_MISMATCH", signalId: null };
   }
-  if (fascicoloSignalTemporalFingerprint({ ...concessione, enteId: concessione.enteId }) !== candidate.generationFingerprint) {
+  const currentFingerprint = candidate.expiryGeneration === null
+    ? fascicoloSignalTemporalFingerprint({ ...concessione, enteId: concessione.enteId })
+    : fascicoloSignalTemporalFingerprintV2({ ...concessione, enteId: concessione.enteId });
+  if (
+    (candidate.expiryGeneration === null && concessione.expiryGeneration !== 0)
+    || (candidate.expiryGeneration !== null && concessione.expiryGeneration !== candidate.expiryGeneration)
+    || currentFingerprint !== candidate.generationFingerprint
+  ) {
     return { outcome: "NO_OP_STALE_GENERATION", signalId: null };
   }
   if (expectedThresholdAt(concessione.dataScadenza, candidate.threshold).getTime() !== candidate.thresholdAt.getTime()) {
@@ -285,13 +313,16 @@ export async function projectFascicoloSignalInTransaction(
       concessioneId: concessione.id,
       procedimentoId: procedimento.id,
       kind: FASCICOLO_SIGNAL_KIND,
-      sourceOperation: FASCICOLO_SIGNAL_SOURCE_OPERATION,
+      sourceOperation: candidate.expiryGeneration === null
+        ? FASCICOLO_SIGNAL_SOURCE_OPERATION
+        : FASCICOLO_SIGNAL_SOURCE_OPERATION_V2,
       ruleCode: FASCICOLO_SIGNAL_RULE_CODE,
       ruleVersion: FASCICOLO_SIGNAL_RULE_VERSION,
       subjectType: "CONCESSIONE",
       subjectId: concessione.id,
       semanticKey: signalSemanticKey,
       generationFingerprint: candidate.generationFingerprint,
+      expiryGeneration: candidate.expiryGeneration,
       identityKey: signalIdentityKey,
       currentThreshold: candidate.threshold,
       attentionLevel: candidate.attentionLevel,
@@ -320,7 +351,7 @@ export async function projectFascicoloSignalInTransaction(
 }
 
 export async function projectFascicoloSignal(
-  change: FascicoloChange,
+  change: AnyFascicoloChange,
   observedAt = new Date(),
 ): Promise<FascicoloSignalProjectionResult> {
   if (deriveCandidate(change) === null) return { outcome: "NOT_APPLICABLE", signalId: null };

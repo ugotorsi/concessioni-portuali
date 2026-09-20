@@ -427,6 +427,7 @@ export const ModelName = {
   LegalSourceCandidateResolution: 'LegalSourceCandidateResolution',
   AsyncJob: 'AsyncJob',
   FascicoloSignal: 'FascicoloSignal',
+  ConcessioneExpiryChangeCommand: 'ConcessioneExpiryChangeCommand',
   ResearchMissionRecord: 'ResearchMissionRecord',
   ResearchExecutionAttempt: 'ResearchExecutionAttempt',
   ResearchEvidenceBundleRecord: 'ResearchEvidenceBundleRecord',
@@ -459,7 +460,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceTemporalAssessment" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "legalReferenceMatch" | "legalReferenceOfficialLookup" | "legalReferenceOfficialHit" | "legalReferenceOfficialReconciliation" | "legalReferenceOfficialReconciliationEvidence" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "fascicoloSignal" | "researchMissionRecord" | "researchExecutionAttempt" | "researchEvidenceBundleRecord" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceTemporalAssessment" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "legalReferenceMatch" | "legalReferenceOfficialLookup" | "legalReferenceOfficialHit" | "legalReferenceOfficialReconciliation" | "legalReferenceOfficialReconciliationEvidence" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "fascicoloSignal" | "concessioneExpiryChangeCommand" | "researchMissionRecord" | "researchExecutionAttempt" | "researchEvidenceBundleRecord" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3645,6 +3646,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ConcessioneExpiryChangeCommand: {
+      payload: Prisma.$ConcessioneExpiryChangeCommandPayload<ExtArgs>
+      fields: Prisma.ConcessioneExpiryChangeCommandFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ConcessioneExpiryChangeCommandFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConcessioneExpiryChangeCommandPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ConcessioneExpiryChangeCommandFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConcessioneExpiryChangeCommandPayload>
+        }
+        findFirst: {
+          args: Prisma.ConcessioneExpiryChangeCommandFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConcessioneExpiryChangeCommandPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ConcessioneExpiryChangeCommandFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConcessioneExpiryChangeCommandPayload>
+        }
+        findMany: {
+          args: Prisma.ConcessioneExpiryChangeCommandFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConcessioneExpiryChangeCommandPayload>[]
+        }
+        create: {
+          args: Prisma.ConcessioneExpiryChangeCommandCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConcessioneExpiryChangeCommandPayload>
+        }
+        createMany: {
+          args: Prisma.ConcessioneExpiryChangeCommandCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ConcessioneExpiryChangeCommandCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConcessioneExpiryChangeCommandPayload>[]
+        }
+        delete: {
+          args: Prisma.ConcessioneExpiryChangeCommandDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConcessioneExpiryChangeCommandPayload>
+        }
+        update: {
+          args: Prisma.ConcessioneExpiryChangeCommandUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConcessioneExpiryChangeCommandPayload>
+        }
+        deleteMany: {
+          args: Prisma.ConcessioneExpiryChangeCommandDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ConcessioneExpiryChangeCommandUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ConcessioneExpiryChangeCommandUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConcessioneExpiryChangeCommandPayload>[]
+        }
+        upsert: {
+          args: Prisma.ConcessioneExpiryChangeCommandUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConcessioneExpiryChangeCommandPayload>
+        }
+        aggregate: {
+          args: Prisma.ConcessioneExpiryChangeCommandAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConcessioneExpiryChangeCommand>
+        }
+        groupBy: {
+          args: Prisma.ConcessioneExpiryChangeCommandGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConcessioneExpiryChangeCommandGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ConcessioneExpiryChangeCommandCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConcessioneExpiryChangeCommandCountAggregateOutputType> | number
+        }
+      }
+    }
     ResearchMissionRecord: {
       payload: Prisma.$ResearchMissionRecordPayload<ExtArgs>
       fields: Prisma.ResearchMissionRecordFieldRefs
@@ -5295,6 +5370,7 @@ export const ConcessioneScalarFieldEnum = {
   numeroAtto: 'numeroAtto',
   dataRilascio: 'dataRilascio',
   dataScadenza: 'dataScadenza',
+  expiryGeneration: 'expiryGeneration',
   normaRiferimento: 'normaRiferimento',
   tipologiaBene: 'tipologiaBene',
   attivita: 'attivita',
@@ -5903,6 +5979,7 @@ export const FascicoloSignalScalarFieldEnum = {
   subjectId: 'subjectId',
   semanticKey: 'semanticKey',
   generationFingerprint: 'generationFingerprint',
+  expiryGeneration: 'expiryGeneration',
   identityKey: 'identityKey',
   currentThreshold: 'currentThreshold',
   attentionLevel: 'attentionLevel',
@@ -5925,6 +6002,28 @@ export const FascicoloSignalScalarFieldEnum = {
 } as const
 
 export type FascicoloSignalScalarFieldEnum = (typeof FascicoloSignalScalarFieldEnum)[keyof typeof FascicoloSignalScalarFieldEnum]
+
+
+export const ConcessioneExpiryChangeCommandScalarFieldEnum = {
+  id: 'id',
+  requestId: 'requestId',
+  payloadFingerprint: 'payloadFingerprint',
+  concessioneId: 'concessioneId',
+  enteId: 'enteId',
+  expectedGeneration: 'expectedGeneration',
+  resultingGeneration: 'resultingGeneration',
+  previousDataScadenza: 'previousDataScadenza',
+  newDataScadenza: 'newDataScadenza',
+  motivation: 'motivation',
+  reference: 'reference',
+  actorUserId: 'actorUserId',
+  actorId: 'actorId',
+  actorEmail: 'actorEmail',
+  actorRole: 'actorRole',
+  createdAt: 'createdAt'
+} as const
+
+export type ConcessioneExpiryChangeCommandScalarFieldEnum = (typeof ConcessioneExpiryChangeCommandScalarFieldEnum)[keyof typeof ConcessioneExpiryChangeCommandScalarFieldEnum]
 
 
 export const ResearchMissionRecordScalarFieldEnum = {
@@ -7912,6 +8011,7 @@ export type GlobalOmitConfig = {
   legalSourceCandidateResolution?: Prisma.LegalSourceCandidateResolutionOmit
   asyncJob?: Prisma.AsyncJobOmit
   fascicoloSignal?: Prisma.FascicoloSignalOmit
+  concessioneExpiryChangeCommand?: Prisma.ConcessioneExpiryChangeCommandOmit
   researchMissionRecord?: Prisma.ResearchMissionRecordOmit
   researchExecutionAttempt?: Prisma.ResearchExecutionAttemptOmit
   researchEvidenceBundleRecord?: Prisma.ResearchEvidenceBundleRecordOmit

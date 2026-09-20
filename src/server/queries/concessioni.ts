@@ -94,9 +94,11 @@ export interface GetConcessioniListResult {
 
 export interface ConcessioneDetail {
   id: string;
+  enteId: string | null;
   numeroAtto: string;
   dataRilascio: Date;
   dataScadenza: Date;
+  expiryGeneration: number;
   normaRiferimento: string;
   tipologiaBene: string;
   attivita: string;
@@ -575,9 +577,11 @@ export async function getConcessioneDetail(id: string): Promise<ConcessioneDetai
 
   return {
     id: concessione.id,
+    enteId: concessione.enteId,
     numeroAtto: concessione.numeroAtto,
     dataRilascio: concessione.dataRilascio,
     dataScadenza: concessione.dataScadenza,
+    expiryGeneration: concessione.expiryGeneration,
     normaRiferimento: concessione.normaRiferimento,
     tipologiaBene: concessione.tipologiaBene,
     attivita: concessione.attivita,

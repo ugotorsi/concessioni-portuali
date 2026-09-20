@@ -41,6 +41,7 @@ function signal(overrides: Record<string, unknown> = {}) {
     subjectType: "CONCESSIONE",
     subjectId: "concessione-1",
     generationFingerprint: "current-fingerprint",
+    expiryGeneration: null,
     currentThreshold: "CONCESSION_90_DAYS",
     status: "OPEN",
     humanDisposition: "UNREVIEWED",
@@ -50,7 +51,12 @@ function signal(overrides: Record<string, unknown> = {}) {
     procedimento: {
       id: "procedimento-1",
       concessioneId: "concessione-1",
-      concessione: { id: "concessione-1", enteId: "ente-1", dataScadenza: new Date("2027-01-01") },
+      concessione: {
+        id: "concessione-1",
+        enteId: "ente-1",
+        dataScadenza: new Date("2027-01-01"),
+        expiryGeneration: 0,
+      },
     },
     ...overrides,
   };

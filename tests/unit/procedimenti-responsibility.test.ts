@@ -123,6 +123,7 @@ describe("procedimento responsibility assignments", () => {
       id: "con-1",
       enteId: "ente-a",
       dataScadenza: new Date("2027-01-01T00:00:00.000Z"),
+      expiryGeneration: 0,
       stato: "ATTIVA",
     });
     txMock.procedimento.create.mockResolvedValue({ id: "proc-1", concessioneId: "con-1", stato: "DA_AVVIARE" });
@@ -167,6 +168,7 @@ describe("procedimento responsibility assignments", () => {
       id: "con-1",
       enteId: "ente-a",
       dataScadenza: new Date(Date.now() + 100 * 24 * 60 * 60 * 1_000),
+      expiryGeneration: 0,
       stato: "ATTIVA",
     });
 
@@ -185,6 +187,7 @@ describe("procedimento responsibility assignments", () => {
       id: "con-1",
       enteId: "ente-a",
       dataScadenza: new Date(Date.now() + daysUntilExpiry * 24 * 60 * 60 * 1_000),
+      expiryGeneration: 0,
       stato: "ATTIVA",
     });
 
@@ -193,6 +196,22 @@ describe("procedimento responsibility assignments", () => {
     expect(admitAsyncJobInTransactionMock).toHaveBeenCalledTimes(1);
     const admission = admitAsyncJobInTransactionMock.mock.calls[0]?.[1];
     expect(admission.inputReference.metadata.changeChunk000Ref).toContain(`\"threshold\":\"${expectedThreshold}\"`);
+  });
+
+  it("usa il contratto V2 per il catch-up di una concessione a generazione positiva", async () => {
+    txMock.concessione.findUnique.mockResolvedValueOnce({
+      id: "con-1",
+      enteId: "ente-a",
+      dataScadenza: new Date(Date.now() + 15 * 24 * 60 * 60 * 1_000),
+      expiryGeneration: 2,
+      stato: "ATTIVA",
+    });
+
+    await expect(createProcedimentoAction(createFormData())).rejects.toThrow("REDIRECT:/procedimenti/proc-1");
+
+    const admission = admitAsyncJobInTransactionMock.mock.calls[0]?.[1];
+    expect(admission.inputReference.referenceVersion).toBe("V2");
+    expect(admission.inputReference.metadata.changeChunk000Ref).toContain(`\"expiryGeneration\":2`);
   });
 
   it.each([
@@ -208,6 +227,7 @@ describe("procedimento responsibility assignments", () => {
       id: "con-1",
       enteId: "ente-a",
       dataScadenza: new Date(Date.now() - 24 * 60 * 60 * 1_000),
+      expiryGeneration: 0,
       stato: concessioneStato,
     });
 
@@ -221,6 +241,7 @@ describe("procedimento responsibility assignments", () => {
       id: "con-1",
       enteId: "ente-b",
       dataScadenza: new Date(Date.now() - 24 * 60 * 60 * 1_000),
+      expiryGeneration: 0,
       stato: "ATTIVA",
     });
 
@@ -237,6 +258,7 @@ describe("procedimento responsibility assignments", () => {
       id: "con-diversa",
       enteId: "ente-a",
       dataScadenza: new Date(Date.now() - 24 * 60 * 60 * 1_000),
+      expiryGeneration: 0,
       stato: "ATTIVA",
     });
 
@@ -253,6 +275,7 @@ describe("procedimento responsibility assignments", () => {
       id: "con-1",
       enteId: "ente-a",
       dataScadenza: new Date(Date.now() - 24 * 60 * 60 * 1_000),
+      expiryGeneration: 0,
       stato: "ATTIVA",
     });
     admitAsyncJobInTransactionMock.mockRejectedValueOnce(new Error("ADMISSION_FAILED"));

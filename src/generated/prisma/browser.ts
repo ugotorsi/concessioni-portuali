@@ -233,6 +233,11 @@ export type AsyncJob = Prisma.AsyncJobModel
  */
 export type FascicoloSignal = Prisma.FascicoloSignalModel
 /**
+ * Model ConcessioneExpiryChangeCommand
+ *
+ */
+export type ConcessioneExpiryChangeCommand = Prisma.ConcessioneExpiryChangeCommandModel
+/**
  * Model ResearchMissionRecord
  *
  */

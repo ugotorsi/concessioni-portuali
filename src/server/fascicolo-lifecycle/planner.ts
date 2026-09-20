@@ -1,6 +1,9 @@
 import {
   fingerprintFascicoloChange,
+  fingerprintFascicoloTimeThresholdChangeV2,
   parseFascicoloChange,
+  parseFascicoloTimeThresholdChangeV2,
+  type AnyFascicoloChange,
   type FascicoloChange,
   type LegalAssessmentTarget,
 } from "./change";
@@ -45,7 +48,7 @@ function add(
   if (!items.has(family)) items.set(family, { family, reason });
 }
 
-function linkedProcedimentoIds(change: FascicoloChange): readonly string[] {
+function linkedProcedimentoIds(change: AnyFascicoloChange): readonly string[] {
   switch (change.kind) {
     case "DOCUMENT_CHANGED":
     case "FASCICOLO_DATA_CHANGED":
@@ -61,7 +64,7 @@ function linkedProcedimentoIds(change: FascicoloChange): readonly string[] {
   }
 }
 
-function planItems(change: FascicoloChange): readonly FascicoloReevaluationPlanItem[] {
+function planItems(change: AnyFascicoloChange): readonly FascicoloReevaluationPlanItem[] {
   const items = new Map<ReevaluationFamily, FascicoloReevaluationPlanItem>();
   const includeDerivedFascicoloOutputs = () => {
     add(items, "TRUSTED_REVIEW_FRESHNESS", "The authoritative fascicolo state may have changed.");
@@ -154,6 +157,25 @@ export function planFascicoloReevaluation(input: unknown): FascicoloReevaluation
   return Object.freeze({
     changeKind: change.kind,
     changeFingerprint: fingerprintFascicoloChange(change),
+    triggeredAt: change.triggeredAt,
+    legalAssessment: Object.freeze({
+      target: change.legalAssessmentTarget,
+      requiresTargetResolution,
+    }),
+    linkedProcedimentoIds: Object.freeze([...linkedProcedimentoIds(change)]),
+    items: Object.freeze(items.map((item) => Object.freeze(item))),
+  });
+}
+
+export function planFascicoloReevaluationV2(input: unknown): FascicoloReevaluationPlan {
+  const change = parseFascicoloTimeThresholdChangeV2(input);
+  const items = planItems(change);
+  const requiresTargetResolution = items.some((item) => item.family === "TEMPORAL_ASSESSMENT")
+    && change.legalAssessmentTarget.kind === "UNDETERMINED";
+
+  return Object.freeze({
+    changeKind: change.kind,
+    changeFingerprint: fingerprintFascicoloTimeThresholdChangeV2(change),
     triggeredAt: change.triggeredAt,
     legalAssessment: Object.freeze({
       target: change.legalAssessmentTarget,

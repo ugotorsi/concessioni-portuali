@@ -10,6 +10,7 @@ const futureConcessione = (id: string) => ({
   id,
   enteId: "ente-1",
   dataScadenza: new Date("2027-12-31T00:00:00.000Z"),
+  expiryGeneration: 0,
   stato: "ATTIVA",
 });
 

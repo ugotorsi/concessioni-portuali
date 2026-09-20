@@ -12,7 +12,7 @@ const boundedIdentifier = nonBlank.max(256);
 const operation = z.string().trim().min(3).max(128).regex(/^[A-Z][A-Z0-9_.:-]*$/);
 const sha256 = z.string().regex(/^[0-9a-f]{64}$/);
 const forbiddenReferenceKey = /text|content|body|bytes|prompt|response|payload|message|output|data|credential|password|secret|token|authorization|api.?key|bearer|jwt|cookie|private.?key/i;
-const allowedReferenceMetadataKey = /^[a-z][A-Za-z0-9]*(?:Id|Ref|Version|Kind|Type|Code|Count|Hash|At|Enabled)$/;
+const allowedReferenceMetadataKey = /^[a-z][A-Za-z0-9]*(?:Id|Ref|Version|Generation|Kind|Type|Code|Count|Hash|At|Enabled)$/;
 
 const referenceMetadataValue = z.union([
   z.string().max(512),
