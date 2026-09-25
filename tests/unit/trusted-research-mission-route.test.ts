@@ -111,6 +111,18 @@ describe("POST /api/legal-research/trusted/mission", () => {
     expect(callTrustedResearchMcpMock).not.toHaveBeenCalled();
   });
 
+  it("rejects a missing bearer before calling trusted MCP", async () => {
+    const incoming = new Request("https://staging.example.test/api/legal-research/trusted/mission", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ missionId }),
+    });
+    const response = await POST(incoming);
+
+    expect(response.status).toBe(401);
+    expect(callTrustedResearchMcpMock).not.toHaveBeenCalled();
+  });
+
   it("rejects a tenant denied by the verified local identity", async () => {
     verifyMock.mockRejectedValue(new ResearchMcpAuthError("FORBIDDEN", 403));
     const response = await POST(request());
