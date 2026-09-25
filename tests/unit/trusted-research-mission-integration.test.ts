@@ -103,7 +103,6 @@ describe("trusted mission route integration", () => {
     userFindUniqueMock.mockResolvedValue({
       attivo: true,
       ruolo: "ADMIN",
-      role: "ADMIN",
       tenantMemberships: [{ enteId: tenantId, isDefault: true }],
     });
     missionFindUniqueMock.mockResolvedValue(missionRecord);

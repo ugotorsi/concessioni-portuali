@@ -1,4 +1,16 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const prismaMocks = vi.hoisted(() => ({
+  missionFindUnique: vi.fn(),
+  userFindUnique: vi.fn(),
+}));
+
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    researchMissionRecord: { findUnique: prismaMocks.missionFindUnique },
+    user: { findUnique: prismaMocks.userFindUnique },
+  },
+}));
 
 import {
   mintResearchFascicoloAccessGrant,
@@ -57,6 +69,43 @@ function errorCode(operation: () => unknown): string | undefined {
 }
 
 describe("trusted fascicolo access grants", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("loads the mission and actor through the default Prisma loader", async () => {
+    prismaMocks.missionFindUnique.mockResolvedValue({
+      id: "mission-a",
+      tenantId: "tenant-a",
+      caseId: "case-a",
+      fascicoloReference: "FASC-2026-001",
+    });
+    prismaMocks.userFindUnique.mockResolvedValue({
+      attivo: true,
+      ruolo: "GIURIDICO",
+      tenantMemberships: [{ enteId: "tenant-a" }],
+    });
+
+    const minted = await mintResearchFascicoloAccessGrant(
+      { missionId: "mission-a", principal },
+      { env, now: () => NOW, nonce: () => "deterministic_nonce_12345" },
+    );
+
+    expect(minted.grant).toMatch(/^fg1\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);
+    expect(prismaMocks.missionFindUnique).toHaveBeenCalledWith({
+      where: { id: "mission-a" },
+      select: { id: true, tenantId: true, caseId: true, fascicoloReference: true },
+    });
+    expect(prismaMocks.userFindUnique).toHaveBeenCalledWith({
+      where: { id: "user-a" },
+      select: {
+        attivo: true,
+        ruolo: true,
+        tenantMemberships: { select: { enteId: true } },
+      },
+    });
+  });
+
   it("mints and verifies a deterministic actor, tenant, mission, and scope binding", async () => {
     const minted = await mint();
     expect(minted.grant).toMatch(/^fg1\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);

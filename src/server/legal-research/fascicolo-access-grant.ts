@@ -125,7 +125,7 @@ async function loadMissionContext(missionId: string, actorId: string): Promise<G
       where: { id: actorId },
       select: {
         attivo: true,
-        role: true,
+        ruolo: true,
         tenantMemberships: { select: { enteId: true } },
       },
     }),
@@ -142,7 +142,7 @@ async function loadMissionContext(missionId: string, actorId: string): Promise<G
       "TRUSTED_READ_USER_ABSENT_OR_INACTIVE",
     );
   }
-  const role = user.role as DemoRole;
+  const role = user.ruolo as DemoRole;
   return {
     missionId: mission.id,
     tenantId: mission.tenantId,
