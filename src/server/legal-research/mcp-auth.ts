@@ -52,10 +52,15 @@ export interface ResearchMcpPrincipalVerifier {
   verify(request: Request): Promise<ResearchMcpPrincipal | null>;
 }
 
+export type ResearchMcpAuthDiagnosticCode =
+  | "TRUSTED_READ_USER_ABSENT_OR_INACTIVE"
+  | "TRUSTED_READ_TENANT_ABSENT_OR_MEMBERSHIP_DENIED";
+
 export class ResearchMcpAuthError extends Error {
   constructor(
     readonly code: "AUTH_UNAVAILABLE" | "FORBIDDEN",
     readonly status: 503 | 403,
+    readonly diagnosticCode?: ResearchMcpAuthDiagnosticCode,
   ) {
     super(code);
     this.name = "ResearchMcpAuthError";
@@ -156,14 +161,24 @@ export function createWorkosResearchMcpPrincipalVerifier(options: Readonly<{
       if (typeof actorId !== "string" || !actorId || typeof subject !== "string" || !subject) return null;
 
       const identity = await resolveIdentity(actorId);
-      if (!identity?.active) throw new ResearchMcpAuthError("FORBIDDEN", 403);
+      if (!identity?.active) {
+        throw new ResearchMcpAuthError(
+          "FORBIDDEN",
+          403,
+          "TRUSTED_READ_USER_ABSENT_OR_INACTIVE",
+        );
+      }
 
       const requestedTenantId = payload[RESEARCH_MCP_TENANT_ID_CLAIM];
       const tenantId = typeof requestedTenantId === "string"
         ? requestedTenantId
         : identity.defaultTenantId;
       if (!tenantId || !identity.tenantIds.includes(tenantId)) {
-        throw new ResearchMcpAuthError("FORBIDDEN", 403);
+        throw new ResearchMcpAuthError(
+          "FORBIDDEN",
+          403,
+          "TRUSTED_READ_TENANT_ABSENT_OR_MEMBERSHIP_DENIED",
+        );
       }
       const localContext = {
         role: identity.role,

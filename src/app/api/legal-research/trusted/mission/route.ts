@@ -15,6 +15,8 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const UPSTREAM_FORBIDDEN_DIAGNOSTIC = "TRUSTED_READ_UPSTREAM_FORBIDDEN";
+
 const inputSchema = z.object({
   missionId: z.string().min(1).max(96),
 }).strict();
@@ -30,6 +32,7 @@ export async function POST(request: Request): Promise<Response> {
     principal = await createWorkosResearchMcpPrincipalVerifier({ config }).verify(request);
   } catch (error) {
     if (error instanceof ResearchMcpAuthError) {
+      if (error.diagnosticCode) console.warn(error.diagnosticCode);
       return researchMcpAuthResponse(config, { status: error.status, error: error.code });
     }
     return researchMcpAuthResponse(config, { status: 503, error: "AUTH_UNAVAILABLE" });
@@ -74,6 +77,7 @@ export async function POST(request: Request): Promise<Response> {
         },
       },
     });
+    if (response.status === 403) console.warn(UPSTREAM_FORBIDDEN_DIAGNOSTIC);
     return new Response(response.body, {
       status: response.status,
       statusText: response.statusText,
@@ -84,6 +88,7 @@ export async function POST(request: Request): Promise<Response> {
     });
   } catch (error) {
     if (error instanceof ResearchFascicoloAccessGrantError) {
+      if (error.diagnosticCode) console.warn(error.diagnosticCode);
       return Response.json({ error: "FORBIDDEN" }, {
         status: 403,
         headers: { "Cache-Control": "no-store" },

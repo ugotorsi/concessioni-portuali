@@ -104,24 +104,46 @@ describe("trusted fascicolo access grants", () => {
   });
 
   it("fails closed for inactive actors, cross-tenant missions, and missing membership", async () => {
-    await expect(mint({ actorActive: false })).rejects.toMatchObject({ code: "FASCICOLO_BINDING_FORBIDDEN" });
-    await expect(mint({ tenantId: "tenant-b" })).rejects.toMatchObject({ code: "FASCICOLO_BINDING_FORBIDDEN" });
+    await expect(mint({ actorActive: false })).rejects.toMatchObject({
+      code: "FASCICOLO_BINDING_FORBIDDEN",
+      diagnosticCode: "TRUSTED_READ_USER_ABSENT_OR_INACTIVE",
+    });
+    await expect(mint({ tenantId: "tenant-b" })).rejects.toMatchObject({
+      code: "FASCICOLO_BINDING_FORBIDDEN",
+      diagnosticCode: "TRUSTED_READ_MISSION_TENANT_MISMATCH_OR_ACCESS_DENIED",
+    });
     await expect(mint({
       tenantContext: { role: "GIURIDICO", isAdmin: false, accessibleTenantIds: [] },
-    })).rejects.toMatchObject({ code: "FASCICOLO_BINDING_FORBIDDEN" });
+    })).rejects.toMatchObject({
+      code: "FASCICOLO_BINDING_FORBIDDEN",
+      diagnosticCode: "TRUSTED_READ_MISSION_TENANT_MISMATCH_OR_ACCESS_DENIED",
+    });
+    await expect(mintResearchFascicoloAccessGrant(
+      { missionId: "missing-mission", principal },
+      { env, loadMissionContext: async () => null },
+    )).rejects.toMatchObject({
+      code: "FASCICOLO_BINDING_FORBIDDEN",
+      diagnosticCode: "TRUSTED_READ_MISSION_ABSENT",
+    });
   });
 
   it("requires a secret of at least 32 bytes and a bounded TTL", async () => {
     await expect(mintResearchFascicoloAccessGrant(
       { missionId: "mission-a", principal },
       { env: { MCP_FASCICOLO_GRANT_SECRET: "too-short" }, loadMissionContext: async () => missionContext },
-    )).rejects.toMatchObject({ code: "FASCICOLO_BINDING_INVALID" });
+    )).rejects.toMatchObject({
+      code: "FASCICOLO_BINDING_INVALID",
+      diagnosticCode: "TRUSTED_READ_GRANT_SECRET_INVALID",
+    });
     await expect(mintResearchFascicoloAccessGrant(
       { missionId: "mission-a", principal },
       {
         env: { ...env, MCP_FASCICOLO_GRANT_TTL_SECONDS: "3601" },
         loadMissionContext: async () => missionContext,
       },
-    )).rejects.toMatchObject({ code: "FASCICOLO_BINDING_INVALID" });
+    )).rejects.toMatchObject({
+      code: "FASCICOLO_BINDING_INVALID",
+      diagnosticCode: "TRUSTED_READ_GRANT_TTL_INVALID",
+    });
   });
 });

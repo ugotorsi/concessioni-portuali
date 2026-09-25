@@ -33,10 +33,20 @@ export type ResearchFascicoloAccessGrantErrorCode =
   | "FASCICOLO_BINDING_FORBIDDEN"
   | "FASCICOLO_SCOPE_MISMATCH";
 
+export type ResearchFascicoloAccessGrantDiagnosticCode =
+  | "TRUSTED_READ_USER_ABSENT_OR_INACTIVE"
+  | "TRUSTED_READ_MISSION_ABSENT"
+  | "TRUSTED_READ_MISSION_TENANT_MISMATCH_OR_ACCESS_DENIED"
+  | "TRUSTED_READ_GRANT_SECRET_INVALID"
+  | "TRUSTED_READ_GRANT_TTL_INVALID";
+
 export class ResearchFascicoloAccessGrantError extends Error {
   readonly status = 403 as const;
 
-  constructor(readonly code: ResearchFascicoloAccessGrantErrorCode) {
+  constructor(
+    readonly code: ResearchFascicoloAccessGrantErrorCode,
+    readonly diagnosticCode?: ResearchFascicoloAccessGrantDiagnosticCode,
+  ) {
     super(code);
     this.name = "ResearchFascicoloAccessGrantError";
   }
@@ -64,7 +74,10 @@ type MintOptions = GrantOptions & Readonly<{
 function grantSecret(env: NodeJS.ProcessEnv): Buffer {
   const secret = env.MCP_FASCICOLO_GRANT_SECRET;
   if (!secret || Buffer.byteLength(secret, "utf8") < 32) {
-    throw new ResearchFascicoloAccessGrantError("FASCICOLO_BINDING_INVALID");
+    throw new ResearchFascicoloAccessGrantError(
+      "FASCICOLO_BINDING_INVALID",
+      "TRUSTED_READ_GRANT_SECRET_INVALID",
+    );
   }
   return Buffer.from(secret, "utf8");
 }
@@ -76,7 +89,10 @@ function grantTtlSeconds(env: NodeJS.ProcessEnv): number {
   if (!Number.isInteger(ttl)
     || ttl < RESEARCH_FASCICOLO_ACCESS_GRANT_MIN_TTL_SECONDS
     || ttl > RESEARCH_FASCICOLO_ACCESS_GRANT_MAX_TTL_SECONDS) {
-    throw new ResearchFascicoloAccessGrantError("FASCICOLO_BINDING_INVALID");
+    throw new ResearchFascicoloAccessGrantError(
+      "FASCICOLO_BINDING_INVALID",
+      "TRUSTED_READ_GRANT_TTL_INVALID",
+    );
   }
   return ttl;
 }
@@ -114,7 +130,18 @@ async function loadMissionContext(missionId: string, actorId: string): Promise<G
       },
     }),
   ]);
-  if (!mission || !user) return null;
+  if (!mission) {
+    throw new ResearchFascicoloAccessGrantError(
+      "FASCICOLO_BINDING_FORBIDDEN",
+      "TRUSTED_READ_MISSION_ABSENT",
+    );
+  }
+  if (!user || !user.attivo) {
+    throw new ResearchFascicoloAccessGrantError(
+      "FASCICOLO_BINDING_FORBIDDEN",
+      "TRUSTED_READ_USER_ABSENT_OR_INACTIVE",
+    );
+  }
   const role = user.role as DemoRole;
   return {
     missionId: mission.id,
@@ -147,10 +174,24 @@ export async function mintResearchFascicoloAccessGrant(
     input.missionId,
     input.principal.actorId,
   );
-  if (!context?.actorActive || !context.tenantId
-    || context.tenantId !== input.principal.tenantId
+  if (!context) {
+    throw new ResearchFascicoloAccessGrantError(
+      "FASCICOLO_BINDING_FORBIDDEN",
+      "TRUSTED_READ_MISSION_ABSENT",
+    );
+  }
+  if (!context.actorActive) {
+    throw new ResearchFascicoloAccessGrantError(
+      "FASCICOLO_BINDING_FORBIDDEN",
+      "TRUSTED_READ_USER_ABSENT_OR_INACTIVE",
+    );
+  }
+  if (!context.tenantId || context.tenantId !== input.principal.tenantId
     || !canReadTenantResource(context.tenantContext, context.tenantId, { allowWhenEnteMissing: false })) {
-    throw new ResearchFascicoloAccessGrantError("FASCICOLO_BINDING_FORBIDDEN");
+    throw new ResearchFascicoloAccessGrantError(
+      "FASCICOLO_BINDING_FORBIDDEN",
+      "TRUSTED_READ_MISSION_TENANT_MISMATCH_OR_ACCESS_DENIED",
+    );
   }
   const scope = deriveFascicoloContextScope({
     tenantId: context.tenantId,

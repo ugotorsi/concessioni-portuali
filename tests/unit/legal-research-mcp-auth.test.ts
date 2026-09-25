@@ -176,17 +176,27 @@ describe("Block 3B.13D WorkOS MCP auth", () => {
   });
 
   it.each([
-    ["disabled local user", { ...activeIdentity, active: false }, "tenant-a"],
-    ["cross-tenant claim", activeIdentity, "tenant-c"],
+    [
+      "disabled local user",
+      { ...activeIdentity, active: false },
+      "tenant-a",
+      "TRUSTED_READ_USER_ABSENT_OR_INACTIVE",
+    ],
+    [
+      "cross-tenant claim",
+      activeIdentity,
+      "tenant-c",
+      "TRUSTED_READ_TENANT_ABSENT_OR_MEMBERSHIP_DENIED",
+    ],
     ["no local membership", {
       ...activeIdentity,
       defaultTenantId: null,
       tenantIds: [],
       accessibleTenantIds: [],
-    }, null],
-  ] as const)("rejects %s", async (_label, identity, tenantId) => {
+    }, null, "TRUSTED_READ_TENANT_ABSENT_OR_MEMBERSHIP_DENIED"],
+  ] as const)("rejects %s", async (_label, identity, tenantId, diagnosticCode) => {
     await expect(verifier(undefined, identity).verify(request(await token({ tenantId }))))
-      .rejects.toMatchObject({ code: "FORBIDDEN", status: 403 });
+      .rejects.toMatchObject({ code: "FORBIDDEN", status: 403, diagnosticCode });
   });
 
   it("uses the local default tenant when the signed tenant claim is absent", async () => {

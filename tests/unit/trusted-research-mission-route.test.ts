@@ -1,11 +1,15 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const verifyMock = vi.hoisted(() => vi.fn());
 const callTrustedResearchMcpMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/server/legal-research/mcp-auth", () => {
   class ResearchMcpAuthError extends Error {
-    constructor(readonly code: "AUTH_UNAVAILABLE" | "FORBIDDEN", readonly status: 503 | 403) {
+    constructor(
+      readonly code: "AUTH_UNAVAILABLE" | "FORBIDDEN",
+      readonly status: 503 | 403,
+      readonly diagnosticCode?: string,
+    ) {
       super(code);
     }
   }
@@ -35,7 +39,7 @@ vi.mock("@/server/legal-research/mcp-auth", () => {
 
 vi.mock("@/server/legal-research/fascicolo-access-grant", () => ({
   ResearchFascicoloAccessGrantError: class ResearchFascicoloAccessGrantError extends Error {
-    constructor(readonly code: string) {
+    constructor(readonly code: string, readonly diagnosticCode?: string) {
       super(code);
     }
   },
@@ -72,6 +76,8 @@ function request(body: unknown = { missionId }, token = accessToken): Request {
 }
 
 describe("POST /api/legal-research/trusted/mission", () => {
+  let warnSpy: ReturnType<typeof vi.spyOn>;
+
   beforeEach(() => {
     vi.clearAllMocks();
     verifyMock.mockResolvedValue(principal);
@@ -80,7 +86,10 @@ describe("POST /api/legal-research/trusted/mission", () => {
       id: "trusted-research-get-mission",
       result: { structuredContent: { missionId, status: "PENDING" } },
     }));
+    warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
   });
+
+  afterEach(() => warnSpy.mockRestore());
 
   it("derives the principal from the verifier and invokes only research_get_mission", async () => {
     const incoming = request();
@@ -124,22 +133,41 @@ describe("POST /api/legal-research/trusted/mission", () => {
   });
 
   it("rejects a tenant denied by the verified local identity", async () => {
-    verifyMock.mockRejectedValue(new ResearchMcpAuthError("FORBIDDEN", 403));
+    verifyMock.mockRejectedValue(new ResearchMcpAuthError(
+      "FORBIDDEN",
+      403,
+      "TRUSTED_READ_TENANT_ABSENT_OR_MEMBERSHIP_DENIED",
+    ));
     const response = await POST(request());
 
     expect(response.status).toBe(403);
     await expect(response.json()).resolves.toEqual({ error: "FORBIDDEN" });
     expect(callTrustedResearchMcpMock).not.toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalledWith("TRUSTED_READ_TENANT_ABSENT_OR_MEMBERSHIP_DENIED");
   });
 
   it("rejects a mission outside the principal fascicolo scope", async () => {
     callTrustedResearchMcpMock.mockRejectedValue(
-      new ResearchFascicoloAccessGrantError("FASCICOLO_BINDING_FORBIDDEN"),
+      new ResearchFascicoloAccessGrantError(
+        "FASCICOLO_BINDING_FORBIDDEN",
+        "TRUSTED_READ_MISSION_TENANT_MISMATCH_OR_ACCESS_DENIED",
+      ),
     );
     const response = await POST(request());
 
     expect(response.status).toBe(403);
     await expect(response.json()).resolves.toEqual({ error: "FORBIDDEN" });
+    expect(warnSpy).toHaveBeenCalledWith("TRUSTED_READ_MISSION_TENANT_MISMATCH_OR_ACCESS_DENIED");
+  });
+
+  it("logs a constant code for an upstream 403 without changing the response", async () => {
+    callTrustedResearchMcpMock.mockResolvedValue(Response.json({ error: "FORBIDDEN" }, { status: 403 }));
+
+    const response = await POST(request());
+
+    expect(response.status).toBe(403);
+    await expect(response.json()).resolves.toEqual({ error: "FORBIDDEN" });
+    expect(warnSpy).toHaveBeenCalledWith("TRUSTED_READ_UPSTREAM_FORBIDDEN");
   });
 
   it("rejects actor, tenant, destination, or tool fields supplied by the client", async () => {
