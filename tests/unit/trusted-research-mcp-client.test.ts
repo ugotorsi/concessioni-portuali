@@ -5,6 +5,8 @@ import type { ResearchMcpPrincipal } from "@/server/legal-research/mcp-auth";
 import {
   callTrustedResearchMcp,
   TrustedResearchMcpClientError,
+  TrustedResearchMcpRequestError,
+  trustedResearchMcpTechnicalCode,
 } from "@/server/legal-research/trusted-mcp-client";
 
 const principal: ResearchMcpPrincipal = {
@@ -95,5 +97,63 @@ describe("trusted research MCP client", () => {
     await expect(callTrustedResearchMcp(call, { env, mintGrant, transport }))
       .rejects.toEqual(expect.objectContaining({ code: "FASCICOLO_BINDING_FORBIDDEN" }));
     expect(transport).not.toHaveBeenCalled();
+  });
+
+  it("classifies unexpected mint failures without exposing their message", async () => {
+    const mintGrant = vi.fn(async () => { throw new Error("sensitive mint detail"); });
+    const transport = vi.fn();
+
+    await expect(callTrustedResearchMcp(call, { env, mintGrant, transport }))
+      .rejects.toMatchObject<Partial<TrustedResearchMcpRequestError>>({
+        phase: "MINT_GRANT",
+        technicalCode: "UNKNOWN",
+      });
+    expect(transport).not.toHaveBeenCalled();
+  });
+
+  it("classifies request serialization failures", async () => {
+    const circular: Record<string, unknown> = {};
+    circular.self = circular;
+
+    await expect(callTrustedResearchMcp({ ...call, payload: circular }, {
+      env,
+      mintGrant: vi.fn(async () => ({
+        grant: "fg1.signed.payload",
+        expiresAt: "2026-09-23T10:30:00.000Z",
+        fascicoloScopeId: "fascicolo-scope:a",
+      })),
+      transport: vi.fn(),
+    })).rejects.toMatchObject({ phase: "SERIALIZE_REQUEST", technicalCode: "TYPE_ERROR" });
+  });
+
+  it("whitelists transport error codes", async () => {
+    const transport = vi.fn(async () => {
+      throw new TypeError("sensitive transport detail", { cause: { code: "ENOTFOUND" } });
+    });
+
+    await expect(callTrustedResearchMcp(call, {
+      env,
+      mintGrant: vi.fn(async () => ({
+        grant: "fg1.signed.payload",
+        expiresAt: "2026-09-23T10:30:00.000Z",
+        fascicoloScopeId: "fascicolo-scope:a",
+      })),
+      transport,
+    })).rejects.toMatchObject({ phase: "INTERNAL_FETCH", technicalCode: "DNS_NOT_FOUND" });
+  });
+
+  it("checks a whitelisted cause when the direct code is unknown", () => {
+    const error = Object.assign(new TypeError("sensitive transport detail", {
+      cause: { code: "ECONNRESET" },
+    }), { code: "NOT_WHITELISTED" });
+
+    expect(trustedResearchMcpTechnicalCode(error)).toBe("CONNECTION_RESET");
+  });
+
+  it("recognizes only the locally verified redirect signature", () => {
+    expect(trustedResearchMcpTechnicalCode(
+      new TypeError("fetch failed", { cause: new Error("unexpected redirect") }),
+    )).toBe("REDIRECT_REJECTED");
+    expect(trustedResearchMcpTechnicalCode(new TypeError("different failure"))).toBe("TYPE_ERROR");
   });
 });

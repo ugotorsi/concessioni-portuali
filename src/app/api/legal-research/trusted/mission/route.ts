@@ -9,13 +9,16 @@ import {
 import { ResearchFascicoloAccessGrantError } from "@/server/legal-research/fascicolo-access-grant";
 import {
   TrustedResearchMcpClientError,
+  TrustedResearchMcpRequestError,
   callTrustedResearchMcp,
+  trustedResearchMcpTechnicalCode,
 } from "@/server/legal-research/trusted-mcp-client";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const UPSTREAM_FORBIDDEN_DIAGNOSTIC = "TRUSTED_READ_UPSTREAM_FORBIDDEN";
+const REQUEST_FAILED_DIAGNOSTIC = "TRUSTED_READ_REQUEST_FAILED";
 
 const inputSchema = z.object({
   missionId: z.string().min(1).max(96),
@@ -62,6 +65,7 @@ export async function POST(request: Request): Promise<Response> {
     });
   }
 
+  let requestPhase: "CALL_SETUP" | "BUILD_RESPONSE" = "CALL_SETUP";
   try {
     const response = await callTrustedResearchMcp({
       missionId: input.data.missionId,
@@ -78,6 +82,7 @@ export async function POST(request: Request): Promise<Response> {
       },
     });
     if (response.status === 403) console.warn(UPSTREAM_FORBIDDEN_DIAGNOSTIC);
+    requestPhase = "BUILD_RESPONSE";
     return new Response(response.body, {
       status: response.status,
       statusText: response.statusText,
@@ -99,6 +104,11 @@ export async function POST(request: Request): Promise<Response> {
         status: 503,
         headers: { "Cache-Control": "no-store" },
       });
+    }
+    if (error instanceof TrustedResearchMcpRequestError) {
+      console.warn(REQUEST_FAILED_DIAGNOSTIC, error.phase, error.technicalCode);
+    } else {
+      console.warn(REQUEST_FAILED_DIAGNOSTIC, requestPhase, trustedResearchMcpTechnicalCode(error));
     }
     return Response.json({ error: "TRUSTED_MCP_REQUEST_FAILED" }, {
       status: 502,

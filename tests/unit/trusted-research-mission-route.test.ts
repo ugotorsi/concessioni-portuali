@@ -51,12 +51,19 @@ vi.mock("@/server/legal-research/trusted-mcp-client", () => ({
       super(code);
     }
   },
+  TrustedResearchMcpRequestError: class TrustedResearchMcpRequestError extends Error {
+    constructor(readonly phase: string, readonly technicalCode: string) {
+      super(`${phase}:${technicalCode}`);
+    }
+  },
+  trustedResearchMcpTechnicalCode: () => "TYPE_ERROR",
   callTrustedResearchMcp: callTrustedResearchMcpMock,
 }));
 
 import { POST } from "@/app/api/legal-research/trusted/mission/route";
 import { ResearchFascicoloAccessGrantError } from "@/server/legal-research/fascicolo-access-grant";
 import { ResearchMcpAuthError } from "@/server/legal-research/mcp-auth";
+import { TrustedResearchMcpRequestError } from "@/server/legal-research/trusted-mcp-client";
 
 const missionId = "research-mission:7cd3faa5f4294068fc30558e65b4229ff46359463fa0039c61717b5da30e0b63";
 const accessToken = "secret-workos-bearer";
@@ -184,7 +191,9 @@ describe("POST /api/legal-research/trusted/mission", () => {
   });
 
   it("never exposes bearer, grant, or internal error details", async () => {
-    callTrustedResearchMcpMock.mockRejectedValue(new Error(`upstream ${accessToken} fg1.secret-grant`));
+    callTrustedResearchMcpMock.mockRejectedValue(
+      new TrustedResearchMcpRequestError("INTERNAL_FETCH", "DNS_NOT_FOUND"),
+    );
     const response = await POST(request());
     const serialized = await response.text();
 
@@ -192,5 +201,26 @@ describe("POST /api/legal-research/trusted/mission", () => {
     expect(serialized).toBe('{"error":"TRUSTED_MCP_REQUEST_FAILED"}');
     expect(serialized).not.toContain(accessToken);
     expect(serialized).not.toContain("fg1.secret-grant");
+    expect(warnSpy).toHaveBeenCalledWith(
+      "TRUSTED_READ_REQUEST_FAILED",
+      "INTERNAL_FETCH",
+      "DNS_NOT_FOUND",
+    );
+  });
+
+  it("classifies response construction failures without changing the client response", async () => {
+    const upstream = Response.json({ ok: true });
+    await upstream.text();
+    callTrustedResearchMcpMock.mockResolvedValue(upstream);
+
+    const response = await POST(request());
+
+    expect(response.status).toBe(502);
+    await expect(response.json()).resolves.toEqual({ error: "TRUSTED_MCP_REQUEST_FAILED" });
+    expect(warnSpy).toHaveBeenCalledWith(
+      "TRUSTED_READ_REQUEST_FAILED",
+      "BUILD_RESPONSE",
+      "TYPE_ERROR",
+    );
   });
 });
