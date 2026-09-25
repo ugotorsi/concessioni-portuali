@@ -53,8 +53,19 @@ describe("middleware DB recon temporary endpoint bypass", () => {
     expect(getTokenMock).not.toHaveBeenCalled();
   });
 
+  it("allows only the exact trusted mission action route to perform bearer authentication", async () => {
+    const response = await middleware(makeRequest("/api/legal-research/trusted/mission/action"));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("location")).toBeNull();
+    expect(response.headers.get("x-frame-options")).toBe("DENY");
+    expect(getTokenMock).not.toHaveBeenCalled();
+  });
+
   it.each([
     "/api/legal-research/trusted/mission/extra",
+    "/api/legal-research/trusted/mission/action/extra",
+    "/api/legal-research/trusted/mission/actionx",
     "/api/legal-research/trusted/other",
   ])("keeps non-exact trusted paths protected: %s", async (path) => {
     const response = await middleware(makeRequest(path));

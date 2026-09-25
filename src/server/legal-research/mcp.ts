@@ -36,6 +36,7 @@ import {
   type ResearchFascicoloAccessGrantErrorCode,
   type ResearchFascicoloAccessGrantPayload,
 } from "@/server/legal-research/fascicolo-access-grant";
+import { RESEARCH_MCP_WRITE_ARGUMENT_SCHEMAS } from "@/server/legal-research/mcp-write-contracts";
 
 export const RESEARCH_MCP_SERVER_VERSION = "3B.14F-1" as const;
 export const RESEARCH_MCP_ROUTE = "/api/mcp" as const;
@@ -351,25 +352,6 @@ const defaultLogger: ResearchMcpLogger = (event) => {
   console.info(JSON.stringify({ event: "research_mcp_tool", ...event }));
 };
 
-const evidenceBundleSchema = z.object({
-  kind: z.literal("RESEARCH_EVIDENCE_BUNDLE"),
-  version: z.literal(RESEARCH_BRIDGE_VERSION),
-  missionId: z.string().min(1).max(96),
-  executionId: z.string().min(1).max(256),
-  startedAt: z.string().optional(),
-  completedAt: z.string().optional(),
-  researchToolExecutions: z.array(z.unknown()),
-  authorityCandidates: z.array(z.unknown()),
-  citationObservations: z.array(z.unknown()),
-  legalResearchSuggestions: z.array(z.unknown()),
-  evidenceGaps: z.array(z.unknown()),
-  conflicts: z.array(z.string()),
-  unresolvedQuestions: z.array(z.string()),
-  suggestedFollowUpMissions: z.array(z.unknown()),
-  humanDecisionEscalations: z.array(z.unknown()),
-  completionState: z.enum(COMPLETION_STATES),
-}).strict();
-
 function actor(principal: ResearchMcpPrincipal) {
   return { actorId: principal.actorId, tenantId: principal.tenantId };
 }
@@ -623,11 +605,7 @@ export function createResearchMcpServer(
   server.registerTool("research_claim_mission", {
     title: "Claim research mission",
     description: "Claim a visible mission for the authenticated executor principal.",
-    inputSchema: {
-      missionId: z.string().min(1).max(96),
-      executionId: z.string().min(1).max(256),
-      leaseDurationMs: z.number().int().min(1_000).max(86_400_000),
-    },
+    inputSchema: RESEARCH_MCP_WRITE_ARGUMENT_SCHEMAS.research_claim_mission.shape,
     outputSchema: RESEARCH_MCP_OUTPUT_SCHEMAS.research_claim_mission,
     annotations: annotations(false, true),
     ...securityMetadata(),
@@ -660,10 +638,7 @@ export function createResearchMcpServer(
   server.registerTool("research_submit_evidence_bundle", {
     title: "Submit research evidence bundle",
     description: "Validate and append an evidence bundle for the authenticated executor's active claim.",
-    inputSchema: {
-      bundle: evidenceBundleSchema,
-      claimToken: z.string().regex(/^[0-9a-f]{64}$/),
-    },
+    inputSchema: RESEARCH_MCP_WRITE_ARGUMENT_SCHEMAS.research_submit_evidence_bundle.shape,
     outputSchema: RESEARCH_MCP_OUTPUT_SCHEMAS.research_submit_evidence_bundle,
     annotations: annotations(false, true),
     ...securityMetadata(),
@@ -695,13 +670,7 @@ export function createResearchMcpServer(
   server.registerTool("research_defer_mission", {
     title: "Defer research mission",
     description: "Defer or release an active claim while preserving its attempt and evidence history.",
-    inputSchema: {
-      missionId: z.string().min(1).max(96),
-      executionId: z.string().min(1).max(256),
-      claimToken: z.string().regex(/^[0-9a-f]{64}$/),
-      disposition: z.enum(["DEFER", "RELEASE"]),
-      reasonCode: z.string().min(1).max(256),
-    },
+    inputSchema: RESEARCH_MCP_WRITE_ARGUMENT_SCHEMAS.research_defer_mission.shape,
     outputSchema: RESEARCH_MCP_OUTPUT_SCHEMAS.research_defer_mission,
     annotations: annotations(false, false),
     ...securityMetadata(),
@@ -734,12 +703,7 @@ export function createResearchMcpServer(
   server.registerTool("research_complete_mission", {
     title: "Complete research mission",
     description: "Complete an active mission through the accepted persistence state transition.",
-    inputSchema: {
-      missionId: z.string().min(1).max(96),
-      executionId: z.string().min(1).max(256),
-      bundleId: z.string().min(1).max(96),
-      claimToken: z.string().regex(/^[0-9a-f]{64}$/),
-    },
+    inputSchema: RESEARCH_MCP_WRITE_ARGUMENT_SCHEMAS.research_complete_mission.shape,
     outputSchema: RESEARCH_MCP_OUTPUT_SCHEMAS.research_complete_mission,
     annotations: annotations(false, true),
     ...securityMetadata(),

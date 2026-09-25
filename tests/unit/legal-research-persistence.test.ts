@@ -349,6 +349,25 @@ describe("Block 3B.13B research mission persistence", () => {
       .rejects.toMatchObject({ code: "AUTHORIZATION_REQUIRED" });
   });
 
+  it("does not mutate a mission when another tenant tries to claim it", async () => {
+    const harness = createHarness();
+    const mission = researchMission();
+    await createResearchMissionRecord({ mission, actor }, harness.context);
+    await expect(claimResearchMission({
+      missionId: mission.missionId,
+      executionId: "execution-other-tenant",
+      executor: { kind: "CHATGPT", claimantId: "other-session" },
+      actor: { actorId: "other", tenantId: "ente-2" },
+      leaseDurationMs: 60_000,
+    }, harness.context)).rejects.toMatchObject({ code: "AUTHORIZATION_REQUIRED" });
+    expect(harness.missions.get(mission.missionId)).toMatchObject({
+      status: "PENDING",
+      claimantId: null,
+      activeExecutionId: null,
+    });
+    expect(harness.attempts).toHaveLength(0);
+  });
+
   it("returns only purpose-relevant prior missions and bundles from the same fascicolo scope", async () => {
     const harness = createHarness();
     const current = researchMission({ researchQuestion: "Current FASCICOLO_A question" });
@@ -750,6 +769,11 @@ describe("Block 3B.13B research mission persistence", () => {
       claimToken: claimed.claim.claimToken,
       actor,
     }, harness.context)).rejects.toMatchObject({ code: "STALE_CLAIM" });
+    expect(harness.bundles).toHaveLength(0);
+    expect(harness.missions.get(mission.missionId)).toMatchObject({
+      status: "IN_PROGRESS",
+      activeExecutionId: "execution-1",
+    });
   });
 
   it("rejects invalid lifecycle transition from completed to claimed", async () => {
@@ -919,5 +943,11 @@ describe("Block 3B.13B research mission persistence", () => {
       disposition: "DEFER",
       reasonCode: "PAUSED",
     }, harness.context)).rejects.toBeInstanceOf(ResearchPersistenceError);
+    expect(harness.missions.get(mission.missionId)).toMatchObject({
+      status: "IN_PROGRESS",
+      claimantId: "chat-session-1",
+      activeExecutionId: "execution-1",
+    });
+    expect(harness.attempts.get("execution-1")).toMatchObject({ completionState: null });
   });
 });
