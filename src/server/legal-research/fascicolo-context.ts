@@ -297,6 +297,11 @@ export function projectResearchEvidenceBundleForContext(bundle: ResearchEvidence
       ...(candidate.title ? { title: candidate.title } : {}),
       ...(candidate.sourceUrl ? { sourceUrl: candidate.sourceUrl } : {}),
       ...(candidate.providerDocumentId ? { providerDocumentId: candidate.providerDocumentId } : {}),
+      ...(candidate.providerReceivedText ? { providerReceivedText: candidate.providerReceivedText } : {}),
+      ...(candidate.providerDates ? { providerDates: candidate.providerDates } : {}),
+      ...(candidate.exactReferenceMatch !== undefined
+        ? { exactReferenceMatch: candidate.exactReferenceMatch }
+        : {}),
       ...(candidate.relevantPassage ? { relevantPassage: candidate.relevantPassage } : {}),
       ...(candidate.summary ? { summary: candidate.summary } : {}),
       ...(candidate.legalPropositionId ? { legalPropositionId: candidate.legalPropositionId } : {}),

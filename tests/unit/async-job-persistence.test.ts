@@ -13,10 +13,13 @@ const harness = vi.hoisted(() => ({
     $executeRaw: vi.fn(),
     $queryRaw: vi.fn(),
   },
+  createAuditLogInTransaction: vi.fn(),
 }));
 
 vi.mock("@/lib/prisma", () => ({ prisma: harness.prisma }));
-vi.mock("@/server/audit/auditLog", () => ({ createAuditLogInTransaction: vi.fn() }));
+vi.mock("@/server/audit/auditLog", () => ({
+  createAuditLogInTransaction: harness.createAuditLogInTransaction,
+}));
 vi.mock("@/server/db/serializableTransaction", () => ({
   runSerializableTransactionWithRetry: vi.fn((callback: (tx: typeof harness.tx) => unknown) => callback(harness.tx)),
 }));
@@ -31,6 +34,7 @@ import {
   heartbeatAsyncJob,
   reconcileAsyncJobCancellationAfterLeaseConflict,
   requestAsyncJobCancellation,
+  retryTerminalAsyncJob,
   succeedAsyncJob,
 } from "@/server/async-jobs/persistence";
 import { normalizeAsyncJobAdmission } from "@/server/async-jobs/domain";
@@ -125,8 +129,14 @@ describe("B2C9 generic async job persistence", () => {
     harness.tx.$executeRaw.mockResolvedValue(1);
     harness.tx.$queryRaw.mockResolvedValue([job]);
     await expect(claimNextAsyncJob({ workerId: "worker-1", leaseDurationMs: 60_000 })).resolves.toBe(job);
-    expect(harness.tx.$executeRaw).toHaveBeenCalledTimes(2);
+    expect(harness.tx.$executeRaw).toHaveBeenCalledTimes(3);
     expect(harness.tx.$queryRaw).toHaveBeenCalledTimes(1);
+    const claimQuery = harness.tx.$queryRaw.mock.calls.at(-1)?.[0] as { strings: readonly string[] };
+    const sql = claimQuery.strings.join(" ");
+    expect(sql).toContain('dependency."status" = \'SUCCEEDED\'');
+    expect(sql).toContain('active_scope."procedimentoId" = "AsyncJob"."procedimentoId"');
+    expect(sql).toContain('CASE "priority" WHEN \'HIGH\'');
+    expect(sql).toContain("FLOOR(EXTRACT(EPOCH");
   });
 
   it("does not make a queued job claimable before availableAt", async () => {
@@ -140,6 +150,37 @@ describe("B2C9 generic async job persistence", () => {
     expect(claimQuery.strings.join(" ")).toContain(
       `"status" IN ('QUEUED', 'RETRY_WAIT') AND "availableAt" <= CURRENT_TIMESTAMP`,
     );
+  });
+
+  it("applies operation and procedimento canary scopes before claiming", async () => {
+    harness.tx.$executeRaw.mockResolvedValue(0);
+    harness.tx.$queryRaw.mockResolvedValue([]);
+
+    await claimNextAsyncJob({
+      workerId: "worker-1",
+      leaseDurationMs: 60_000,
+      operationAllowlist: ["NEUTRAL_INTAKE_EXTRACTION_V1", "FASCICOLO.AUTOMATIC_ANALYSIS_V1"],
+      procedimentoAllowlist: ["procedure-canary"],
+    });
+
+    const claimQuery = harness.tx.$queryRaw.mock.calls.at(-1)?.[0] as { strings: readonly string[] };
+    const sql = claimQuery.strings.join(" ");
+    expect(sql).toContain('"operation" IN (');
+    expect(sql).toContain('FROM "NeutralIntakeDestination"');
+    expect(sql).toContain('"inputReference"#>>\'{metadata,procedimentoId}\'');
+    expect(sql).toContain('FROM "AutomaticFascicoloReportMission"');
+  });
+
+  it("leaves provider-backed jobs queued when provider execution is disabled", async () => {
+    harness.tx.$executeRaw.mockResolvedValue(0);
+    harness.tx.$queryRaw.mockResolvedValue([]);
+    await claimNextAsyncJob({
+      workerId: "worker-1",
+      leaseDurationMs: 60_000,
+      operationBlocklist: ["FASCICOLO.AUTOMATIC_ANALYSIS_V1", "LEGAL_RESEARCH.EXECUTE_V1"],
+    });
+    const query = harness.tx.$queryRaw.mock.calls.at(-1)?.[0] as { strings: readonly string[] };
+    expect(query.strings.join(" ")).toContain('AND "operation" NOT IN (');
   });
 
   it("rejects stale lease tokens for heartbeat and success", async () => {
@@ -166,7 +207,27 @@ describe("B2C9 generic async job persistence", () => {
     expect(result.outcome).toBe("RETRY_SCHEDULED");
     expect(harness.tx.$queryRaw).toHaveBeenCalledOnce();
     expect(harness.tx.$executeRaw).toHaveBeenCalledOnce();
+    const retryQuery = harness.tx.$executeRaw.mock.calls[0][0] as { strings: readonly string[] };
+    expect(retryQuery.strings.join(" ")).toContain("POWER(2, GREATEST");
+    expect(retryQuery.strings.join(" ")).toContain("86400000");
     expect(hook).not.toHaveBeenCalled();
+  });
+
+  it("manually requeues a terminal failure without erasing attempt history", async () => {
+    harness.tx.$queryRaw.mockResolvedValue([running({ status: "TERMINAL_FAILED", attemptCount: 3 })]);
+    harness.tx.$executeRaw.mockResolvedValue(1);
+    await expect(retryTerminalAsyncJob({
+      jobId: "job-1",
+      actor: { userId: "operator-1", userEmail: "operator@example.test", userRole: "ADMIN" },
+    })).resolves.toEqual({ outcome: "REQUEUED" });
+    const retryQuery = harness.tx.$executeRaw.mock.calls[0][0] as { strings: readonly string[] };
+    const sql = retryQuery.strings.join(" ");
+    expect(sql).toContain('"maxAttempts"=GREATEST("maxAttempts", "attemptCount" + 1)');
+    expect(sql).not.toContain('"attemptCount"=0');
+    expect(harness.createAuditLogInTransaction).toHaveBeenCalledWith(harness.tx, expect.objectContaining({
+      azione: "ASYNC_JOB_MANUAL_RETRY",
+      entitaId: "job-1",
+    }));
   });
 
   it("terminally fails when retry attempts are exhausted", async () => {
@@ -251,7 +312,7 @@ describe("B2C9 generic async job persistence", () => {
       resolveTerminalFailureHook: (operation) => operation === expired.operation ? hook : undefined,
     })).resolves.toBe(next);
     expect(hook).toHaveBeenCalledOnce();
-    expect(harness.tx.$executeRaw).toHaveBeenCalledOnce();
+    expect(harness.tx.$executeRaw).toHaveBeenCalledTimes(2);
   });
 
   it.each([

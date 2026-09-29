@@ -43,9 +43,10 @@ const missionContext = {
 };
 
 const env = {
+  ...process.env,
   MCP_FASCICOLO_GRANT_SECRET: SECRET,
   MCP_FASCICOLO_GRANT_TTL_SECONDS: "1800",
-} as NodeJS.ProcessEnv;
+};
 
 async function mint(overrides: Record<string, unknown> = {}) {
   return mintResearchFascicoloAccessGrant(
@@ -179,7 +180,10 @@ describe("trusted fascicolo access grants", () => {
   it("requires a secret of at least 32 bytes and a bounded TTL", async () => {
     await expect(mintResearchFascicoloAccessGrant(
       { missionId: "mission-a", principal },
-      { env: { MCP_FASCICOLO_GRANT_SECRET: "too-short" }, loadMissionContext: async () => missionContext },
+      {
+        env: { ...process.env, MCP_FASCICOLO_GRANT_SECRET: "too-short" },
+        loadMissionContext: async () => missionContext,
+      },
     )).rejects.toMatchObject({
       code: "FASCICOLO_BINDING_INVALID",
       diagnosticCode: "TRUSTED_READ_GRANT_SECRET_INVALID",

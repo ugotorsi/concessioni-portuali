@@ -75,6 +75,13 @@ export type TreatmentScope = Readonly<{
   id: string;
 }>;
 
+export type HumanAuthorityTreatmentReview = Readonly<{
+  reviewedByActorId: string;
+  reviewedAt: string;
+  evidenceSourceId: string;
+  rationale: string;
+}>;
+
 export type AuthorityTreatmentAssessment = Readonly<{
   kind: "AUTHORITY_TREATMENT_ASSESSMENT";
   id: string;
@@ -86,6 +93,7 @@ export type AuthorityTreatmentAssessment = Readonly<{
   reviewState: TreatmentReviewState;
   scope?: TreatmentScope;
   rationale?: string;
+  humanReview?: HumanAuthorityTreatmentReview;
 }>;
 
 export type AuthorityTreatmentAssessmentInput = Omit<AuthorityTreatmentAssessment, "id">;
@@ -139,6 +147,7 @@ export function createAuthorityTreatmentAssessment(
 export type AuthorityTreatmentValidationErrorCode =
   | "ASSESSMENT_AUTHORITY_PAIR_MISMATCH"
   | "CANONICAL_AUTHORITY_REFERENCE_INCOMPLETE"
+  | "CONFIRMED_ADVERSE_REVIEW_REQUIRED"
   | "DANGLING_APPLICATION_SCOPE"
   | "DANGLING_AUTHORITY"
   | "DANGLING_ISSUE_SCOPE"
@@ -175,6 +184,11 @@ function validLocator(locator: EvidenceLocator | undefined): boolean {
   return true;
 }
 
+function validDate(value: string): boolean {
+  const parsed = new Date(value);
+  return Boolean(value.trim()) && Number.isFinite(parsed.getTime()) && parsed.toISOString() === value;
+}
+
 function observationInput(observation: CitationObservation): CitationObservationInput {
   return {
     kind: observation.kind,
@@ -198,6 +212,7 @@ function assessmentInput(
     reviewState: assessment.reviewState,
     ...(assessment.scope ? { scope: assessment.scope } : {}),
     ...(assessment.rationale !== undefined ? { rationale: assessment.rationale } : {}),
+    ...(assessment.humanReview ? { humanReview: assessment.humanReview } : {}),
   };
 }
 
@@ -378,6 +393,27 @@ export function validateAuthorityTreatmentGraph(
         entityId: assessment.id,
         path: "sourceAuthorityId,targetAuthorityId",
       });
+    }
+    if (assessment.treatment === "ADVERSE" && assessment.reviewState === "CONFIRMED") {
+      const review = assessment.humanReview;
+      if (
+        assessment.origin !== "HUMAN"
+        || assessment.scope?.kind !== "LEGAL_PROPOSITION"
+        || !assessment.rationale?.trim()
+        || !review?.reviewedByActorId.trim()
+        || !review.evidenceSourceId.trim()
+        || !review.rationale.trim()
+        || !validDate(review.reviewedAt)
+        || review.evidenceSourceId !== observation?.provenance.evidenceSourceId
+      ) {
+        errors.push({
+          code: "CONFIRMED_ADVERSE_REVIEW_REQUIRED",
+          entityKind: assessment.kind,
+          entityId: assessment.id,
+          path: "humanReview",
+          referencedId: assessment.observationId,
+        });
+      }
     }
     if (assessment.scope) {
       if (!propositionGraph) {

@@ -158,8 +158,8 @@ describe("AI-01C2B4A trusted local rehydration", () => {
     const input = structuredClone(completeGraph()) as ReturnType<
       typeof buildAiFascicoloTrustedReviewV1
     >;
-    input.providerAnalysis.content.summary.text = "  Provider text preserved  ";
-    input.statements[0].providerStatement.content.text = "  Provider text preserved  ";
+    Reflect.set(input.providerAnalysis.content.summary, "text", "  Provider text preserved  ");
+    Reflect.set(input.statements[0].providerStatement.content, "text", "  Provider text preserved  ");
 
     const parsed = parseAiFascicoloTrustedReviewV1(input);
 
@@ -215,7 +215,7 @@ describe("AI-01C2B4A trusted local rehydration", () => {
     const invalidLocalValue = structuredClone(completeGraph()) as ReturnType<
       typeof buildAiFascicoloTrustedReviewV1
     >;
-    invalidLocalValue.statements[0].evidence[0].local!.value = new Date() as never;
+    Reflect.set(invalidLocalValue.statements[0].evidence[0].local!, "value", new Date());
 
     class ReviewClass {
       schemaVersion = "ai-fascicolo-trusted-review/v1";
@@ -231,7 +231,7 @@ describe("AI-01C2B4A trusted local rehydration", () => {
     for (const value of [invalidArrayMember, invalidLocalValue, new ReviewClass(), accessor]) {
       expectInvalid(value);
     }
-    expectInvalid({ ...structuredClone(completeGraph()) as object, extra: 1n });
+    expectInvalid({ ...structuredClone(completeGraph()) as object, extra: BigInt(1) });
     expect(getterCalls).toBe(0);
   });
 
@@ -259,10 +259,10 @@ describe("AI-01C2B4A trusted local rehydration", () => {
     ["field path", { validatedFieldPath: "createdAt" }],
   ])("does not resolve an entity with the wrong %s", (_name, replacement) => {
     const authoritativeEvidence = authoritativeEvidenceFixture();
-    authoritativeEvidence.entities = [{
+    Reflect.set(authoritativeEvidence, "entities", [{
       ...authoritativeEvidence.entities[0],
       ...replacement,
-    }] as typeof authoritativeEvidence.entities;
+    }]);
 
     const result = buildAiFascicoloTrustedReviewV1({
       trustedResult: trustedResultFixture(),
@@ -281,10 +281,10 @@ describe("AI-01C2B4A trusted local rehydration", () => {
     const originalText = trustedResult.analysis.summary.text;
     const originalBasisRefs = [...trustedResult.analysis.summary.basisRefs];
     const authoritativeEvidence = authoritativeEvidenceFixture();
-    authoritativeEvidence.entities = [{
+    Reflect.set(authoritativeEvidence, "entities", [{
       ...authoritativeEvidence.entities[0],
       canonicalId: "DOC_1",
-    }];
+    }]);
 
     const result = buildAiFascicoloTrustedReviewV1({ trustedResult, authoritativeEvidence });
     const summary = result.statements[0];
@@ -313,10 +313,10 @@ describe("AI-01C2B4A trusted local rehydration", () => {
     expect(JSON.stringify(authoritativeEvidence)).toBe(authoritativeBefore);
     assertCompleteGraphFrozen(result);
 
-    trustedResult.analysis.summary.text = "mutated input";
-    trustedResult.analysis.summary.basisRefs.push("DOC_99");
+    Reflect.set(trustedResult.analysis.summary, "text", "mutated input");
+    Reflect.apply(Array.prototype.push, trustedResult.analysis.summary.basisRefs, ["DOC_99"]);
     (trustedResult.resolvedBasisRefs[0] as { providerRef: string }).providerRef = "DOC_99";
-    authoritativeEvidence.entities[0].local.value = "mutated local input";
+    Reflect.set(authoritativeEvidence.entities[0].local, "value", "mutated local input");
 
     expect(result.providerAnalysis.content.summary.text).toBe(
       "Il documento DOC_1 risulta registrato.",
@@ -391,11 +391,11 @@ describe("AI-01C2B4A trusted local rehydration", () => {
     });
 
     const unapproved = authoritativeEvidenceFixture();
-    unapproved.nonEntities = [{
+    Reflect.set(unapproved, "nonEntities", [{
       ...unapproved.nonEntities[0],
       contextId: "other-context",
       validatedFieldPath: "checklist.percentage",
-    }];
+    }]);
     const missing = buildAiFascicoloTrustedReviewV1({
       trustedResult: trustedResultFixture(),
       authoritativeEvidence: unapproved,
@@ -442,10 +442,10 @@ describe("AI-01C2B4A trusted local rehydration", () => {
 
   it("does not select duplicate exact local evidence", () => {
     const authoritativeEvidence = authoritativeEvidenceFixture();
-    authoritativeEvidence.entities = [
+    Reflect.set(authoritativeEvidence, "entities", [
       authoritativeEvidence.entities[0],
       authoritativeEvidence.entities[0],
-    ];
+    ]);
 
     const result = buildAiFascicoloTrustedReviewV1({
       trustedResult: trustedResultFixture(),

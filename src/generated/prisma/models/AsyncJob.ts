@@ -49,11 +49,14 @@ export type AsyncJobMinAggregateOutputType = {
   policyDecisionRef: string | null
   admissionType: $Enums.AsyncJobAdmissionType | null
   tenantId: string | null
+  procedimentoId: string | null
+  dependsOnJobId: string | null
   initiatingUserId: string | null
   actorId: string | null
   actorEmail: string | null
   actorRole: string | null
   status: $Enums.AsyncJobStatus | null
+  priority: $Enums.AsyncJobPriority | null
   stateVersion: number | null
   maxAttempts: number | null
   attemptCount: number | null
@@ -67,6 +70,7 @@ export type AsyncJobMinAggregateOutputType = {
   completedAt: Date | null
   failureCategory: string | null
   failureCode: string | null
+  blockedReason: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -82,11 +86,14 @@ export type AsyncJobMaxAggregateOutputType = {
   policyDecisionRef: string | null
   admissionType: $Enums.AsyncJobAdmissionType | null
   tenantId: string | null
+  procedimentoId: string | null
+  dependsOnJobId: string | null
   initiatingUserId: string | null
   actorId: string | null
   actorEmail: string | null
   actorRole: string | null
   status: $Enums.AsyncJobStatus | null
+  priority: $Enums.AsyncJobPriority | null
   stateVersion: number | null
   maxAttempts: number | null
   attemptCount: number | null
@@ -100,6 +107,7 @@ export type AsyncJobMaxAggregateOutputType = {
   completedAt: Date | null
   failureCategory: string | null
   failureCode: string | null
+  blockedReason: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -116,11 +124,14 @@ export type AsyncJobCountAggregateOutputType = {
   inputReference: number
   admissionType: number
   tenantId: number
+  procedimentoId: number
+  dependsOnJobId: number
   initiatingUserId: number
   actorId: number
   actorEmail: number
   actorRole: number
   status: number
+  priority: number
   stateVersion: number
   maxAttempts: number
   attemptCount: number
@@ -134,6 +145,7 @@ export type AsyncJobCountAggregateOutputType = {
   completedAt: number
   failureCategory: number
   failureCode: number
+  blockedReason: number
   resultReference: number
   createdAt: number
   updatedAt: number
@@ -164,11 +176,14 @@ export type AsyncJobMinAggregateInputType = {
   policyDecisionRef?: true
   admissionType?: true
   tenantId?: true
+  procedimentoId?: true
+  dependsOnJobId?: true
   initiatingUserId?: true
   actorId?: true
   actorEmail?: true
   actorRole?: true
   status?: true
+  priority?: true
   stateVersion?: true
   maxAttempts?: true
   attemptCount?: true
@@ -182,6 +197,7 @@ export type AsyncJobMinAggregateInputType = {
   completedAt?: true
   failureCategory?: true
   failureCode?: true
+  blockedReason?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -197,11 +213,14 @@ export type AsyncJobMaxAggregateInputType = {
   policyDecisionRef?: true
   admissionType?: true
   tenantId?: true
+  procedimentoId?: true
+  dependsOnJobId?: true
   initiatingUserId?: true
   actorId?: true
   actorEmail?: true
   actorRole?: true
   status?: true
+  priority?: true
   stateVersion?: true
   maxAttempts?: true
   attemptCount?: true
@@ -215,6 +234,7 @@ export type AsyncJobMaxAggregateInputType = {
   completedAt?: true
   failureCategory?: true
   failureCode?: true
+  blockedReason?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -231,11 +251,14 @@ export type AsyncJobCountAggregateInputType = {
   inputReference?: true
   admissionType?: true
   tenantId?: true
+  procedimentoId?: true
+  dependsOnJobId?: true
   initiatingUserId?: true
   actorId?: true
   actorEmail?: true
   actorRole?: true
   status?: true
+  priority?: true
   stateVersion?: true
   maxAttempts?: true
   attemptCount?: true
@@ -249,6 +272,7 @@ export type AsyncJobCountAggregateInputType = {
   completedAt?: true
   failureCategory?: true
   failureCode?: true
+  blockedReason?: true
   resultReference?: true
   createdAt?: true
   updatedAt?: true
@@ -353,11 +377,14 @@ export type AsyncJobGroupByOutputType = {
   inputReference: runtime.JsonValue
   admissionType: $Enums.AsyncJobAdmissionType
   tenantId: string | null
+  procedimentoId: string | null
+  dependsOnJobId: string | null
   initiatingUserId: string | null
   actorId: string
   actorEmail: string | null
   actorRole: string
   status: $Enums.AsyncJobStatus
+  priority: $Enums.AsyncJobPriority
   stateVersion: number
   maxAttempts: number
   attemptCount: number
@@ -371,6 +398,7 @@ export type AsyncJobGroupByOutputType = {
   completedAt: Date | null
   failureCategory: string | null
   failureCode: string | null
+  blockedReason: string | null
   resultReference: runtime.JsonValue | null
   createdAt: Date
   updatedAt: Date
@@ -411,11 +439,14 @@ export type AsyncJobWhereInput = {
   inputReference?: Prisma.JsonFilter<"AsyncJob">
   admissionType?: Prisma.EnumAsyncJobAdmissionTypeFilter<"AsyncJob"> | $Enums.AsyncJobAdmissionType
   tenantId?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
+  procedimentoId?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
+  dependsOnJobId?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
   initiatingUserId?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
   actorId?: Prisma.StringFilter<"AsyncJob"> | string
   actorEmail?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
   actorRole?: Prisma.StringFilter<"AsyncJob"> | string
   status?: Prisma.EnumAsyncJobStatusFilter<"AsyncJob"> | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFilter<"AsyncJob"> | $Enums.AsyncJobPriority
   stateVersion?: Prisma.IntFilter<"AsyncJob"> | number
   maxAttempts?: Prisma.IntFilter<"AsyncJob"> | number
   attemptCount?: Prisma.IntFilter<"AsyncJob"> | number
@@ -429,11 +460,16 @@ export type AsyncJobWhereInput = {
   completedAt?: Prisma.DateTimeNullableFilter<"AsyncJob"> | Date | string | null
   failureCategory?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
   failureCode?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
+  blockedReason?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
   resultReference?: Prisma.JsonNullableFilter<"AsyncJob">
   createdAt?: Prisma.DateTimeFilter<"AsyncJob"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AsyncJob"> | Date | string
   tenant?: Prisma.XOR<Prisma.EnteNullableScalarRelationFilter, Prisma.EnteWhereInput> | null
+  procedimento?: Prisma.XOR<Prisma.ProcedimentoNullableScalarRelationFilter, Prisma.ProcedimentoWhereInput> | null
+  dependsOnJob?: Prisma.XOR<Prisma.AsyncJobNullableScalarRelationFilter, Prisma.AsyncJobWhereInput> | null
+  dependentJobs?: Prisma.AsyncJobListRelationFilter
   initiatingUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  costReservations?: Prisma.RuntimeCostReservationListRelationFilter
 }
 
 export type AsyncJobOrderByWithRelationInput = {
@@ -448,11 +484,14 @@ export type AsyncJobOrderByWithRelationInput = {
   inputReference?: Prisma.SortOrder
   admissionType?: Prisma.SortOrder
   tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
+  procedimentoId?: Prisma.SortOrderInput | Prisma.SortOrder
+  dependsOnJobId?: Prisma.SortOrderInput | Prisma.SortOrder
   initiatingUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   actorId?: Prisma.SortOrder
   actorEmail?: Prisma.SortOrderInput | Prisma.SortOrder
   actorRole?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  priority?: Prisma.SortOrder
   stateVersion?: Prisma.SortOrder
   maxAttempts?: Prisma.SortOrder
   attemptCount?: Prisma.SortOrder
@@ -466,11 +505,16 @@ export type AsyncJobOrderByWithRelationInput = {
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   failureCategory?: Prisma.SortOrderInput | Prisma.SortOrder
   failureCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  blockedReason?: Prisma.SortOrderInput | Prisma.SortOrder
   resultReference?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   tenant?: Prisma.EnteOrderByWithRelationInput
+  procedimento?: Prisma.ProcedimentoOrderByWithRelationInput
+  dependsOnJob?: Prisma.AsyncJobOrderByWithRelationInput
+  dependentJobs?: Prisma.AsyncJobOrderByRelationAggregateInput
   initiatingUser?: Prisma.UserOrderByWithRelationInput
+  costReservations?: Prisma.RuntimeCostReservationOrderByRelationAggregateInput
 }
 
 export type AsyncJobWhereUniqueInput = Prisma.AtLeast<{
@@ -488,11 +532,14 @@ export type AsyncJobWhereUniqueInput = Prisma.AtLeast<{
   inputReference?: Prisma.JsonFilter<"AsyncJob">
   admissionType?: Prisma.EnumAsyncJobAdmissionTypeFilter<"AsyncJob"> | $Enums.AsyncJobAdmissionType
   tenantId?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
+  procedimentoId?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
+  dependsOnJobId?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
   initiatingUserId?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
   actorId?: Prisma.StringFilter<"AsyncJob"> | string
   actorEmail?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
   actorRole?: Prisma.StringFilter<"AsyncJob"> | string
   status?: Prisma.EnumAsyncJobStatusFilter<"AsyncJob"> | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFilter<"AsyncJob"> | $Enums.AsyncJobPriority
   stateVersion?: Prisma.IntFilter<"AsyncJob"> | number
   maxAttempts?: Prisma.IntFilter<"AsyncJob"> | number
   attemptCount?: Prisma.IntFilter<"AsyncJob"> | number
@@ -506,11 +553,16 @@ export type AsyncJobWhereUniqueInput = Prisma.AtLeast<{
   completedAt?: Prisma.DateTimeNullableFilter<"AsyncJob"> | Date | string | null
   failureCategory?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
   failureCode?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
+  blockedReason?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
   resultReference?: Prisma.JsonNullableFilter<"AsyncJob">
   createdAt?: Prisma.DateTimeFilter<"AsyncJob"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AsyncJob"> | Date | string
   tenant?: Prisma.XOR<Prisma.EnteNullableScalarRelationFilter, Prisma.EnteWhereInput> | null
+  procedimento?: Prisma.XOR<Prisma.ProcedimentoNullableScalarRelationFilter, Prisma.ProcedimentoWhereInput> | null
+  dependsOnJob?: Prisma.XOR<Prisma.AsyncJobNullableScalarRelationFilter, Prisma.AsyncJobWhereInput> | null
+  dependentJobs?: Prisma.AsyncJobListRelationFilter
   initiatingUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  costReservations?: Prisma.RuntimeCostReservationListRelationFilter
 }, "id" | "idempotencyKey">
 
 export type AsyncJobOrderByWithAggregationInput = {
@@ -525,11 +577,14 @@ export type AsyncJobOrderByWithAggregationInput = {
   inputReference?: Prisma.SortOrder
   admissionType?: Prisma.SortOrder
   tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
+  procedimentoId?: Prisma.SortOrderInput | Prisma.SortOrder
+  dependsOnJobId?: Prisma.SortOrderInput | Prisma.SortOrder
   initiatingUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   actorId?: Prisma.SortOrder
   actorEmail?: Prisma.SortOrderInput | Prisma.SortOrder
   actorRole?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  priority?: Prisma.SortOrder
   stateVersion?: Prisma.SortOrder
   maxAttempts?: Prisma.SortOrder
   attemptCount?: Prisma.SortOrder
@@ -543,6 +598,7 @@ export type AsyncJobOrderByWithAggregationInput = {
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   failureCategory?: Prisma.SortOrderInput | Prisma.SortOrder
   failureCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  blockedReason?: Prisma.SortOrderInput | Prisma.SortOrder
   resultReference?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -568,11 +624,14 @@ export type AsyncJobScalarWhereWithAggregatesInput = {
   inputReference?: Prisma.JsonWithAggregatesFilter<"AsyncJob">
   admissionType?: Prisma.EnumAsyncJobAdmissionTypeWithAggregatesFilter<"AsyncJob"> | $Enums.AsyncJobAdmissionType
   tenantId?: Prisma.StringNullableWithAggregatesFilter<"AsyncJob"> | string | null
+  procedimentoId?: Prisma.StringNullableWithAggregatesFilter<"AsyncJob"> | string | null
+  dependsOnJobId?: Prisma.StringNullableWithAggregatesFilter<"AsyncJob"> | string | null
   initiatingUserId?: Prisma.StringNullableWithAggregatesFilter<"AsyncJob"> | string | null
   actorId?: Prisma.StringWithAggregatesFilter<"AsyncJob"> | string
   actorEmail?: Prisma.StringNullableWithAggregatesFilter<"AsyncJob"> | string | null
   actorRole?: Prisma.StringWithAggregatesFilter<"AsyncJob"> | string
   status?: Prisma.EnumAsyncJobStatusWithAggregatesFilter<"AsyncJob"> | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityWithAggregatesFilter<"AsyncJob"> | $Enums.AsyncJobPriority
   stateVersion?: Prisma.IntWithAggregatesFilter<"AsyncJob"> | number
   maxAttempts?: Prisma.IntWithAggregatesFilter<"AsyncJob"> | number
   attemptCount?: Prisma.IntWithAggregatesFilter<"AsyncJob"> | number
@@ -586,6 +645,7 @@ export type AsyncJobScalarWhereWithAggregatesInput = {
   completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"AsyncJob"> | Date | string | null
   failureCategory?: Prisma.StringNullableWithAggregatesFilter<"AsyncJob"> | string | null
   failureCode?: Prisma.StringNullableWithAggregatesFilter<"AsyncJob"> | string | null
+  blockedReason?: Prisma.StringNullableWithAggregatesFilter<"AsyncJob"> | string | null
   resultReference?: Prisma.JsonNullableWithAggregatesFilter<"AsyncJob">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AsyncJob"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AsyncJob"> | Date | string
@@ -606,6 +666,7 @@ export type AsyncJobCreateInput = {
   actorEmail?: string | null
   actorRole: string
   status?: $Enums.AsyncJobStatus
+  priority?: $Enums.AsyncJobPriority
   stateVersion?: number
   maxAttempts: number
   attemptCount?: number
@@ -619,11 +680,16 @@ export type AsyncJobCreateInput = {
   completedAt?: Date | string | null
   failureCategory?: string | null
   failureCode?: string | null
+  blockedReason?: string | null
   resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant?: Prisma.EnteCreateNestedOneWithoutAsyncJobsInput
+  procedimento?: Prisma.ProcedimentoCreateNestedOneWithoutAsyncJobsInput
+  dependsOnJob?: Prisma.AsyncJobCreateNestedOneWithoutDependentJobsInput
+  dependentJobs?: Prisma.AsyncJobCreateNestedManyWithoutDependsOnJobInput
   initiatingUser?: Prisma.UserCreateNestedOneWithoutAsyncJobsInitiatedInput
+  costReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutJobInput
 }
 
 export type AsyncJobUncheckedCreateInput = {
@@ -638,11 +704,14 @@ export type AsyncJobUncheckedCreateInput = {
   inputReference: Prisma.JsonNullValueInput | runtime.InputJsonValue
   admissionType: $Enums.AsyncJobAdmissionType
   tenantId?: string | null
+  procedimentoId?: string | null
+  dependsOnJobId?: string | null
   initiatingUserId?: string | null
   actorId: string
   actorEmail?: string | null
   actorRole: string
   status?: $Enums.AsyncJobStatus
+  priority?: $Enums.AsyncJobPriority
   stateVersion?: number
   maxAttempts: number
   attemptCount?: number
@@ -656,9 +725,12 @@ export type AsyncJobUncheckedCreateInput = {
   completedAt?: Date | string | null
   failureCategory?: string | null
   failureCode?: string | null
+  blockedReason?: string | null
   resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
+  dependentJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutDependsOnJobInput
+  costReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutJobInput
 }
 
 export type AsyncJobUpdateInput = {
@@ -676,6 +748,7 @@ export type AsyncJobUpdateInput = {
   actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actorRole?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
   stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
   maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -689,11 +762,16 @@ export type AsyncJobUpdateInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.EnteUpdateOneWithoutAsyncJobsNestedInput
+  procedimento?: Prisma.ProcedimentoUpdateOneWithoutAsyncJobsNestedInput
+  dependsOnJob?: Prisma.AsyncJobUpdateOneWithoutDependentJobsNestedInput
+  dependentJobs?: Prisma.AsyncJobUpdateManyWithoutDependsOnJobNestedInput
   initiatingUser?: Prisma.UserUpdateOneWithoutAsyncJobsInitiatedNestedInput
+  costReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutJobNestedInput
 }
 
 export type AsyncJobUncheckedUpdateInput = {
@@ -708,11 +786,14 @@ export type AsyncJobUncheckedUpdateInput = {
   inputReference?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   admissionType?: Prisma.EnumAsyncJobAdmissionTypeFieldUpdateOperationsInput | $Enums.AsyncJobAdmissionType
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dependsOnJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   initiatingUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actorId?: Prisma.StringFieldUpdateOperationsInput | string
   actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actorRole?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
   stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
   maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -726,9 +807,12 @@ export type AsyncJobUncheckedUpdateInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dependentJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutDependsOnJobNestedInput
+  costReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutJobNestedInput
 }
 
 export type AsyncJobCreateManyInput = {
@@ -743,11 +827,14 @@ export type AsyncJobCreateManyInput = {
   inputReference: Prisma.JsonNullValueInput | runtime.InputJsonValue
   admissionType: $Enums.AsyncJobAdmissionType
   tenantId?: string | null
+  procedimentoId?: string | null
+  dependsOnJobId?: string | null
   initiatingUserId?: string | null
   actorId: string
   actorEmail?: string | null
   actorRole: string
   status?: $Enums.AsyncJobStatus
+  priority?: $Enums.AsyncJobPriority
   stateVersion?: number
   maxAttempts: number
   attemptCount?: number
@@ -761,6 +848,7 @@ export type AsyncJobCreateManyInput = {
   completedAt?: Date | string | null
   failureCategory?: string | null
   failureCode?: string | null
+  blockedReason?: string | null
   resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -781,6 +869,7 @@ export type AsyncJobUpdateManyMutationInput = {
   actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actorRole?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
   stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
   maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -794,6 +883,7 @@ export type AsyncJobUpdateManyMutationInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -811,11 +901,14 @@ export type AsyncJobUncheckedUpdateManyInput = {
   inputReference?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   admissionType?: Prisma.EnumAsyncJobAdmissionTypeFieldUpdateOperationsInput | $Enums.AsyncJobAdmissionType
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dependsOnJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   initiatingUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actorId?: Prisma.StringFieldUpdateOperationsInput | string
   actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actorRole?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
   stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
   maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -829,6 +922,7 @@ export type AsyncJobUncheckedUpdateManyInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -844,6 +938,11 @@ export type AsyncJobOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type AsyncJobNullableScalarRelationFilter = {
+  is?: Prisma.AsyncJobWhereInput | null
+  isNot?: Prisma.AsyncJobWhereInput | null
+}
+
 export type AsyncJobCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
@@ -856,11 +955,14 @@ export type AsyncJobCountOrderByAggregateInput = {
   inputReference?: Prisma.SortOrder
   admissionType?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
+  procedimentoId?: Prisma.SortOrder
+  dependsOnJobId?: Prisma.SortOrder
   initiatingUserId?: Prisma.SortOrder
   actorId?: Prisma.SortOrder
   actorEmail?: Prisma.SortOrder
   actorRole?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  priority?: Prisma.SortOrder
   stateVersion?: Prisma.SortOrder
   maxAttempts?: Prisma.SortOrder
   attemptCount?: Prisma.SortOrder
@@ -874,6 +976,7 @@ export type AsyncJobCountOrderByAggregateInput = {
   completedAt?: Prisma.SortOrder
   failureCategory?: Prisma.SortOrder
   failureCode?: Prisma.SortOrder
+  blockedReason?: Prisma.SortOrder
   resultReference?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -896,11 +999,14 @@ export type AsyncJobMaxOrderByAggregateInput = {
   policyDecisionRef?: Prisma.SortOrder
   admissionType?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
+  procedimentoId?: Prisma.SortOrder
+  dependsOnJobId?: Prisma.SortOrder
   initiatingUserId?: Prisma.SortOrder
   actorId?: Prisma.SortOrder
   actorEmail?: Prisma.SortOrder
   actorRole?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  priority?: Prisma.SortOrder
   stateVersion?: Prisma.SortOrder
   maxAttempts?: Prisma.SortOrder
   attemptCount?: Prisma.SortOrder
@@ -914,6 +1020,7 @@ export type AsyncJobMaxOrderByAggregateInput = {
   completedAt?: Prisma.SortOrder
   failureCategory?: Prisma.SortOrder
   failureCode?: Prisma.SortOrder
+  blockedReason?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -929,11 +1036,14 @@ export type AsyncJobMinOrderByAggregateInput = {
   policyDecisionRef?: Prisma.SortOrder
   admissionType?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
+  procedimentoId?: Prisma.SortOrder
+  dependsOnJobId?: Prisma.SortOrder
   initiatingUserId?: Prisma.SortOrder
   actorId?: Prisma.SortOrder
   actorEmail?: Prisma.SortOrder
   actorRole?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  priority?: Prisma.SortOrder
   stateVersion?: Prisma.SortOrder
   maxAttempts?: Prisma.SortOrder
   attemptCount?: Prisma.SortOrder
@@ -947,6 +1057,7 @@ export type AsyncJobMinOrderByAggregateInput = {
   completedAt?: Prisma.SortOrder
   failureCategory?: Prisma.SortOrder
   failureCode?: Prisma.SortOrder
+  blockedReason?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -1041,12 +1152,132 @@ export type AsyncJobUncheckedUpdateManyWithoutInitiatingUserNestedInput = {
   deleteMany?: Prisma.AsyncJobScalarWhereInput | Prisma.AsyncJobScalarWhereInput[]
 }
 
+export type AsyncJobCreateNestedManyWithoutProcedimentoInput = {
+  create?: Prisma.XOR<Prisma.AsyncJobCreateWithoutProcedimentoInput, Prisma.AsyncJobUncheckedCreateWithoutProcedimentoInput> | Prisma.AsyncJobCreateWithoutProcedimentoInput[] | Prisma.AsyncJobUncheckedCreateWithoutProcedimentoInput[]
+  connectOrCreate?: Prisma.AsyncJobCreateOrConnectWithoutProcedimentoInput | Prisma.AsyncJobCreateOrConnectWithoutProcedimentoInput[]
+  createMany?: Prisma.AsyncJobCreateManyProcedimentoInputEnvelope
+  connect?: Prisma.AsyncJobWhereUniqueInput | Prisma.AsyncJobWhereUniqueInput[]
+}
+
+export type AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput = {
+  create?: Prisma.XOR<Prisma.AsyncJobCreateWithoutProcedimentoInput, Prisma.AsyncJobUncheckedCreateWithoutProcedimentoInput> | Prisma.AsyncJobCreateWithoutProcedimentoInput[] | Prisma.AsyncJobUncheckedCreateWithoutProcedimentoInput[]
+  connectOrCreate?: Prisma.AsyncJobCreateOrConnectWithoutProcedimentoInput | Prisma.AsyncJobCreateOrConnectWithoutProcedimentoInput[]
+  createMany?: Prisma.AsyncJobCreateManyProcedimentoInputEnvelope
+  connect?: Prisma.AsyncJobWhereUniqueInput | Prisma.AsyncJobWhereUniqueInput[]
+}
+
+export type AsyncJobUpdateManyWithoutProcedimentoNestedInput = {
+  create?: Prisma.XOR<Prisma.AsyncJobCreateWithoutProcedimentoInput, Prisma.AsyncJobUncheckedCreateWithoutProcedimentoInput> | Prisma.AsyncJobCreateWithoutProcedimentoInput[] | Prisma.AsyncJobUncheckedCreateWithoutProcedimentoInput[]
+  connectOrCreate?: Prisma.AsyncJobCreateOrConnectWithoutProcedimentoInput | Prisma.AsyncJobCreateOrConnectWithoutProcedimentoInput[]
+  upsert?: Prisma.AsyncJobUpsertWithWhereUniqueWithoutProcedimentoInput | Prisma.AsyncJobUpsertWithWhereUniqueWithoutProcedimentoInput[]
+  createMany?: Prisma.AsyncJobCreateManyProcedimentoInputEnvelope
+  set?: Prisma.AsyncJobWhereUniqueInput | Prisma.AsyncJobWhereUniqueInput[]
+  disconnect?: Prisma.AsyncJobWhereUniqueInput | Prisma.AsyncJobWhereUniqueInput[]
+  delete?: Prisma.AsyncJobWhereUniqueInput | Prisma.AsyncJobWhereUniqueInput[]
+  connect?: Prisma.AsyncJobWhereUniqueInput | Prisma.AsyncJobWhereUniqueInput[]
+  update?: Prisma.AsyncJobUpdateWithWhereUniqueWithoutProcedimentoInput | Prisma.AsyncJobUpdateWithWhereUniqueWithoutProcedimentoInput[]
+  updateMany?: Prisma.AsyncJobUpdateManyWithWhereWithoutProcedimentoInput | Prisma.AsyncJobUpdateManyWithWhereWithoutProcedimentoInput[]
+  deleteMany?: Prisma.AsyncJobScalarWhereInput | Prisma.AsyncJobScalarWhereInput[]
+}
+
+export type AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput = {
+  create?: Prisma.XOR<Prisma.AsyncJobCreateWithoutProcedimentoInput, Prisma.AsyncJobUncheckedCreateWithoutProcedimentoInput> | Prisma.AsyncJobCreateWithoutProcedimentoInput[] | Prisma.AsyncJobUncheckedCreateWithoutProcedimentoInput[]
+  connectOrCreate?: Prisma.AsyncJobCreateOrConnectWithoutProcedimentoInput | Prisma.AsyncJobCreateOrConnectWithoutProcedimentoInput[]
+  upsert?: Prisma.AsyncJobUpsertWithWhereUniqueWithoutProcedimentoInput | Prisma.AsyncJobUpsertWithWhereUniqueWithoutProcedimentoInput[]
+  createMany?: Prisma.AsyncJobCreateManyProcedimentoInputEnvelope
+  set?: Prisma.AsyncJobWhereUniqueInput | Prisma.AsyncJobWhereUniqueInput[]
+  disconnect?: Prisma.AsyncJobWhereUniqueInput | Prisma.AsyncJobWhereUniqueInput[]
+  delete?: Prisma.AsyncJobWhereUniqueInput | Prisma.AsyncJobWhereUniqueInput[]
+  connect?: Prisma.AsyncJobWhereUniqueInput | Prisma.AsyncJobWhereUniqueInput[]
+  update?: Prisma.AsyncJobUpdateWithWhereUniqueWithoutProcedimentoInput | Prisma.AsyncJobUpdateWithWhereUniqueWithoutProcedimentoInput[]
+  updateMany?: Prisma.AsyncJobUpdateManyWithWhereWithoutProcedimentoInput | Prisma.AsyncJobUpdateManyWithWhereWithoutProcedimentoInput[]
+  deleteMany?: Prisma.AsyncJobScalarWhereInput | Prisma.AsyncJobScalarWhereInput[]
+}
+
+export type AsyncJobCreateNestedOneWithoutDependentJobsInput = {
+  create?: Prisma.XOR<Prisma.AsyncJobCreateWithoutDependentJobsInput, Prisma.AsyncJobUncheckedCreateWithoutDependentJobsInput>
+  connectOrCreate?: Prisma.AsyncJobCreateOrConnectWithoutDependentJobsInput
+  connect?: Prisma.AsyncJobWhereUniqueInput
+}
+
+export type AsyncJobCreateNestedManyWithoutDependsOnJobInput = {
+  create?: Prisma.XOR<Prisma.AsyncJobCreateWithoutDependsOnJobInput, Prisma.AsyncJobUncheckedCreateWithoutDependsOnJobInput> | Prisma.AsyncJobCreateWithoutDependsOnJobInput[] | Prisma.AsyncJobUncheckedCreateWithoutDependsOnJobInput[]
+  connectOrCreate?: Prisma.AsyncJobCreateOrConnectWithoutDependsOnJobInput | Prisma.AsyncJobCreateOrConnectWithoutDependsOnJobInput[]
+  createMany?: Prisma.AsyncJobCreateManyDependsOnJobInputEnvelope
+  connect?: Prisma.AsyncJobWhereUniqueInput | Prisma.AsyncJobWhereUniqueInput[]
+}
+
+export type AsyncJobUncheckedCreateNestedManyWithoutDependsOnJobInput = {
+  create?: Prisma.XOR<Prisma.AsyncJobCreateWithoutDependsOnJobInput, Prisma.AsyncJobUncheckedCreateWithoutDependsOnJobInput> | Prisma.AsyncJobCreateWithoutDependsOnJobInput[] | Prisma.AsyncJobUncheckedCreateWithoutDependsOnJobInput[]
+  connectOrCreate?: Prisma.AsyncJobCreateOrConnectWithoutDependsOnJobInput | Prisma.AsyncJobCreateOrConnectWithoutDependsOnJobInput[]
+  createMany?: Prisma.AsyncJobCreateManyDependsOnJobInputEnvelope
+  connect?: Prisma.AsyncJobWhereUniqueInput | Prisma.AsyncJobWhereUniqueInput[]
+}
+
 export type EnumAsyncJobAdmissionTypeFieldUpdateOperationsInput = {
   set?: $Enums.AsyncJobAdmissionType
 }
 
 export type EnumAsyncJobStatusFieldUpdateOperationsInput = {
   set?: $Enums.AsyncJobStatus
+}
+
+export type EnumAsyncJobPriorityFieldUpdateOperationsInput = {
+  set?: $Enums.AsyncJobPriority
+}
+
+export type AsyncJobUpdateOneWithoutDependentJobsNestedInput = {
+  create?: Prisma.XOR<Prisma.AsyncJobCreateWithoutDependentJobsInput, Prisma.AsyncJobUncheckedCreateWithoutDependentJobsInput>
+  connectOrCreate?: Prisma.AsyncJobCreateOrConnectWithoutDependentJobsInput
+  upsert?: Prisma.AsyncJobUpsertWithoutDependentJobsInput
+  disconnect?: Prisma.AsyncJobWhereInput | boolean
+  delete?: Prisma.AsyncJobWhereInput | boolean
+  connect?: Prisma.AsyncJobWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AsyncJobUpdateToOneWithWhereWithoutDependentJobsInput, Prisma.AsyncJobUpdateWithoutDependentJobsInput>, Prisma.AsyncJobUncheckedUpdateWithoutDependentJobsInput>
+}
+
+export type AsyncJobUpdateManyWithoutDependsOnJobNestedInput = {
+  create?: Prisma.XOR<Prisma.AsyncJobCreateWithoutDependsOnJobInput, Prisma.AsyncJobUncheckedCreateWithoutDependsOnJobInput> | Prisma.AsyncJobCreateWithoutDependsOnJobInput[] | Prisma.AsyncJobUncheckedCreateWithoutDependsOnJobInput[]
+  connectOrCreate?: Prisma.AsyncJobCreateOrConnectWithoutDependsOnJobInput | Prisma.AsyncJobCreateOrConnectWithoutDependsOnJobInput[]
+  upsert?: Prisma.AsyncJobUpsertWithWhereUniqueWithoutDependsOnJobInput | Prisma.AsyncJobUpsertWithWhereUniqueWithoutDependsOnJobInput[]
+  createMany?: Prisma.AsyncJobCreateManyDependsOnJobInputEnvelope
+  set?: Prisma.AsyncJobWhereUniqueInput | Prisma.AsyncJobWhereUniqueInput[]
+  disconnect?: Prisma.AsyncJobWhereUniqueInput | Prisma.AsyncJobWhereUniqueInput[]
+  delete?: Prisma.AsyncJobWhereUniqueInput | Prisma.AsyncJobWhereUniqueInput[]
+  connect?: Prisma.AsyncJobWhereUniqueInput | Prisma.AsyncJobWhereUniqueInput[]
+  update?: Prisma.AsyncJobUpdateWithWhereUniqueWithoutDependsOnJobInput | Prisma.AsyncJobUpdateWithWhereUniqueWithoutDependsOnJobInput[]
+  updateMany?: Prisma.AsyncJobUpdateManyWithWhereWithoutDependsOnJobInput | Prisma.AsyncJobUpdateManyWithWhereWithoutDependsOnJobInput[]
+  deleteMany?: Prisma.AsyncJobScalarWhereInput | Prisma.AsyncJobScalarWhereInput[]
+}
+
+export type AsyncJobUncheckedUpdateManyWithoutDependsOnJobNestedInput = {
+  create?: Prisma.XOR<Prisma.AsyncJobCreateWithoutDependsOnJobInput, Prisma.AsyncJobUncheckedCreateWithoutDependsOnJobInput> | Prisma.AsyncJobCreateWithoutDependsOnJobInput[] | Prisma.AsyncJobUncheckedCreateWithoutDependsOnJobInput[]
+  connectOrCreate?: Prisma.AsyncJobCreateOrConnectWithoutDependsOnJobInput | Prisma.AsyncJobCreateOrConnectWithoutDependsOnJobInput[]
+  upsert?: Prisma.AsyncJobUpsertWithWhereUniqueWithoutDependsOnJobInput | Prisma.AsyncJobUpsertWithWhereUniqueWithoutDependsOnJobInput[]
+  createMany?: Prisma.AsyncJobCreateManyDependsOnJobInputEnvelope
+  set?: Prisma.AsyncJobWhereUniqueInput | Prisma.AsyncJobWhereUniqueInput[]
+  disconnect?: Prisma.AsyncJobWhereUniqueInput | Prisma.AsyncJobWhereUniqueInput[]
+  delete?: Prisma.AsyncJobWhereUniqueInput | Prisma.AsyncJobWhereUniqueInput[]
+  connect?: Prisma.AsyncJobWhereUniqueInput | Prisma.AsyncJobWhereUniqueInput[]
+  update?: Prisma.AsyncJobUpdateWithWhereUniqueWithoutDependsOnJobInput | Prisma.AsyncJobUpdateWithWhereUniqueWithoutDependsOnJobInput[]
+  updateMany?: Prisma.AsyncJobUpdateManyWithWhereWithoutDependsOnJobInput | Prisma.AsyncJobUpdateManyWithWhereWithoutDependsOnJobInput[]
+  deleteMany?: Prisma.AsyncJobScalarWhereInput | Prisma.AsyncJobScalarWhereInput[]
+}
+
+export type AsyncJobCreateNestedOneWithoutCostReservationsInput = {
+  create?: Prisma.XOR<Prisma.AsyncJobCreateWithoutCostReservationsInput, Prisma.AsyncJobUncheckedCreateWithoutCostReservationsInput>
+  connectOrCreate?: Prisma.AsyncJobCreateOrConnectWithoutCostReservationsInput
+  connect?: Prisma.AsyncJobWhereUniqueInput
+}
+
+export type AsyncJobUpdateOneWithoutCostReservationsNestedInput = {
+  create?: Prisma.XOR<Prisma.AsyncJobCreateWithoutCostReservationsInput, Prisma.AsyncJobUncheckedCreateWithoutCostReservationsInput>
+  connectOrCreate?: Prisma.AsyncJobCreateOrConnectWithoutCostReservationsInput
+  upsert?: Prisma.AsyncJobUpsertWithoutCostReservationsInput
+  disconnect?: Prisma.AsyncJobWhereInput | boolean
+  delete?: Prisma.AsyncJobWhereInput | boolean
+  connect?: Prisma.AsyncJobWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AsyncJobUpdateToOneWithWhereWithoutCostReservationsInput, Prisma.AsyncJobUpdateWithoutCostReservationsInput>, Prisma.AsyncJobUncheckedUpdateWithoutCostReservationsInput>
 }
 
 export type AsyncJobCreateWithoutTenantInput = {
@@ -1064,6 +1295,7 @@ export type AsyncJobCreateWithoutTenantInput = {
   actorEmail?: string | null
   actorRole: string
   status?: $Enums.AsyncJobStatus
+  priority?: $Enums.AsyncJobPriority
   stateVersion?: number
   maxAttempts: number
   attemptCount?: number
@@ -1077,10 +1309,15 @@ export type AsyncJobCreateWithoutTenantInput = {
   completedAt?: Date | string | null
   failureCategory?: string | null
   failureCode?: string | null
+  blockedReason?: string | null
   resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
+  procedimento?: Prisma.ProcedimentoCreateNestedOneWithoutAsyncJobsInput
+  dependsOnJob?: Prisma.AsyncJobCreateNestedOneWithoutDependentJobsInput
+  dependentJobs?: Prisma.AsyncJobCreateNestedManyWithoutDependsOnJobInput
   initiatingUser?: Prisma.UserCreateNestedOneWithoutAsyncJobsInitiatedInput
+  costReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutJobInput
 }
 
 export type AsyncJobUncheckedCreateWithoutTenantInput = {
@@ -1094,11 +1331,14 @@ export type AsyncJobUncheckedCreateWithoutTenantInput = {
   policyDecisionRef?: string | null
   inputReference: Prisma.JsonNullValueInput | runtime.InputJsonValue
   admissionType: $Enums.AsyncJobAdmissionType
+  procedimentoId?: string | null
+  dependsOnJobId?: string | null
   initiatingUserId?: string | null
   actorId: string
   actorEmail?: string | null
   actorRole: string
   status?: $Enums.AsyncJobStatus
+  priority?: $Enums.AsyncJobPriority
   stateVersion?: number
   maxAttempts: number
   attemptCount?: number
@@ -1112,9 +1352,12 @@ export type AsyncJobUncheckedCreateWithoutTenantInput = {
   completedAt?: Date | string | null
   failureCategory?: string | null
   failureCode?: string | null
+  blockedReason?: string | null
   resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
+  dependentJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutDependsOnJobInput
+  costReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutJobInput
 }
 
 export type AsyncJobCreateOrConnectWithoutTenantInput = {
@@ -1158,11 +1401,14 @@ export type AsyncJobScalarWhereInput = {
   inputReference?: Prisma.JsonFilter<"AsyncJob">
   admissionType?: Prisma.EnumAsyncJobAdmissionTypeFilter<"AsyncJob"> | $Enums.AsyncJobAdmissionType
   tenantId?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
+  procedimentoId?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
+  dependsOnJobId?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
   initiatingUserId?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
   actorId?: Prisma.StringFilter<"AsyncJob"> | string
   actorEmail?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
   actorRole?: Prisma.StringFilter<"AsyncJob"> | string
   status?: Prisma.EnumAsyncJobStatusFilter<"AsyncJob"> | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFilter<"AsyncJob"> | $Enums.AsyncJobPriority
   stateVersion?: Prisma.IntFilter<"AsyncJob"> | number
   maxAttempts?: Prisma.IntFilter<"AsyncJob"> | number
   attemptCount?: Prisma.IntFilter<"AsyncJob"> | number
@@ -1176,6 +1422,7 @@ export type AsyncJobScalarWhereInput = {
   completedAt?: Prisma.DateTimeNullableFilter<"AsyncJob"> | Date | string | null
   failureCategory?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
   failureCode?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
+  blockedReason?: Prisma.StringNullableFilter<"AsyncJob"> | string | null
   resultReference?: Prisma.JsonNullableFilter<"AsyncJob">
   createdAt?: Prisma.DateTimeFilter<"AsyncJob"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AsyncJob"> | Date | string
@@ -1196,6 +1443,7 @@ export type AsyncJobCreateWithoutInitiatingUserInput = {
   actorEmail?: string | null
   actorRole: string
   status?: $Enums.AsyncJobStatus
+  priority?: $Enums.AsyncJobPriority
   stateVersion?: number
   maxAttempts: number
   attemptCount?: number
@@ -1209,10 +1457,15 @@ export type AsyncJobCreateWithoutInitiatingUserInput = {
   completedAt?: Date | string | null
   failureCategory?: string | null
   failureCode?: string | null
+  blockedReason?: string | null
   resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant?: Prisma.EnteCreateNestedOneWithoutAsyncJobsInput
+  procedimento?: Prisma.ProcedimentoCreateNestedOneWithoutAsyncJobsInput
+  dependsOnJob?: Prisma.AsyncJobCreateNestedOneWithoutDependentJobsInput
+  dependentJobs?: Prisma.AsyncJobCreateNestedManyWithoutDependsOnJobInput
+  costReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutJobInput
 }
 
 export type AsyncJobUncheckedCreateWithoutInitiatingUserInput = {
@@ -1227,10 +1480,13 @@ export type AsyncJobUncheckedCreateWithoutInitiatingUserInput = {
   inputReference: Prisma.JsonNullValueInput | runtime.InputJsonValue
   admissionType: $Enums.AsyncJobAdmissionType
   tenantId?: string | null
+  procedimentoId?: string | null
+  dependsOnJobId?: string | null
   actorId: string
   actorEmail?: string | null
   actorRole: string
   status?: $Enums.AsyncJobStatus
+  priority?: $Enums.AsyncJobPriority
   stateVersion?: number
   maxAttempts: number
   attemptCount?: number
@@ -1244,9 +1500,12 @@ export type AsyncJobUncheckedCreateWithoutInitiatingUserInput = {
   completedAt?: Date | string | null
   failureCategory?: string | null
   failureCode?: string | null
+  blockedReason?: string | null
   resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
+  dependentJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutDependsOnJobInput
+  costReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutJobInput
 }
 
 export type AsyncJobCreateOrConnectWithoutInitiatingUserInput = {
@@ -1275,7 +1534,7 @@ export type AsyncJobUpdateManyWithWhereWithoutInitiatingUserInput = {
   data: Prisma.XOR<Prisma.AsyncJobUpdateManyMutationInput, Prisma.AsyncJobUncheckedUpdateManyWithoutInitiatingUserInput>
 }
 
-export type AsyncJobCreateManyTenantInput = {
+export type AsyncJobCreateWithoutProcedimentoInput = {
   id?: string
   idempotencyKey: string
   requestFingerprint: string
@@ -1286,11 +1545,11 @@ export type AsyncJobCreateManyTenantInput = {
   policyDecisionRef?: string | null
   inputReference: Prisma.JsonNullValueInput | runtime.InputJsonValue
   admissionType: $Enums.AsyncJobAdmissionType
-  initiatingUserId?: string | null
   actorId: string
   actorEmail?: string | null
   actorRole: string
   status?: $Enums.AsyncJobStatus
+  priority?: $Enums.AsyncJobPriority
   stateVersion?: number
   maxAttempts: number
   attemptCount?: number
@@ -1304,6 +1563,574 @@ export type AsyncJobCreateManyTenantInput = {
   completedAt?: Date | string | null
   failureCategory?: string | null
   failureCode?: string | null
+  blockedReason?: string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant?: Prisma.EnteCreateNestedOneWithoutAsyncJobsInput
+  dependsOnJob?: Prisma.AsyncJobCreateNestedOneWithoutDependentJobsInput
+  dependentJobs?: Prisma.AsyncJobCreateNestedManyWithoutDependsOnJobInput
+  initiatingUser?: Prisma.UserCreateNestedOneWithoutAsyncJobsInitiatedInput
+  costReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutJobInput
+}
+
+export type AsyncJobUncheckedCreateWithoutProcedimentoInput = {
+  id?: string
+  idempotencyKey: string
+  requestFingerprint: string
+  operation: string
+  logicalOperationId: string
+  purpose: string
+  correlationId: string
+  policyDecisionRef?: string | null
+  inputReference: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType: $Enums.AsyncJobAdmissionType
+  tenantId?: string | null
+  dependsOnJobId?: string | null
+  initiatingUserId?: string | null
+  actorId: string
+  actorEmail?: string | null
+  actorRole: string
+  status?: $Enums.AsyncJobStatus
+  priority?: $Enums.AsyncJobPriority
+  stateVersion?: number
+  maxAttempts: number
+  attemptCount?: number
+  availableAt: Date | string
+  leaseOwner?: string | null
+  leaseToken?: string | null
+  leaseExpiresAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
+  cancellationRequestedAt?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  failureCategory?: string | null
+  failureCode?: string | null
+  blockedReason?: string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  dependentJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutDependsOnJobInput
+  costReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutJobInput
+}
+
+export type AsyncJobCreateOrConnectWithoutProcedimentoInput = {
+  where: Prisma.AsyncJobWhereUniqueInput
+  create: Prisma.XOR<Prisma.AsyncJobCreateWithoutProcedimentoInput, Prisma.AsyncJobUncheckedCreateWithoutProcedimentoInput>
+}
+
+export type AsyncJobCreateManyProcedimentoInputEnvelope = {
+  data: Prisma.AsyncJobCreateManyProcedimentoInput | Prisma.AsyncJobCreateManyProcedimentoInput[]
+  skipDuplicates?: boolean
+}
+
+export type AsyncJobUpsertWithWhereUniqueWithoutProcedimentoInput = {
+  where: Prisma.AsyncJobWhereUniqueInput
+  update: Prisma.XOR<Prisma.AsyncJobUpdateWithoutProcedimentoInput, Prisma.AsyncJobUncheckedUpdateWithoutProcedimentoInput>
+  create: Prisma.XOR<Prisma.AsyncJobCreateWithoutProcedimentoInput, Prisma.AsyncJobUncheckedCreateWithoutProcedimentoInput>
+}
+
+export type AsyncJobUpdateWithWhereUniqueWithoutProcedimentoInput = {
+  where: Prisma.AsyncJobWhereUniqueInput
+  data: Prisma.XOR<Prisma.AsyncJobUpdateWithoutProcedimentoInput, Prisma.AsyncJobUncheckedUpdateWithoutProcedimentoInput>
+}
+
+export type AsyncJobUpdateManyWithWhereWithoutProcedimentoInput = {
+  where: Prisma.AsyncJobScalarWhereInput
+  data: Prisma.XOR<Prisma.AsyncJobUpdateManyMutationInput, Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoInput>
+}
+
+export type AsyncJobCreateWithoutDependentJobsInput = {
+  id?: string
+  idempotencyKey: string
+  requestFingerprint: string
+  operation: string
+  logicalOperationId: string
+  purpose: string
+  correlationId: string
+  policyDecisionRef?: string | null
+  inputReference: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType: $Enums.AsyncJobAdmissionType
+  actorId: string
+  actorEmail?: string | null
+  actorRole: string
+  status?: $Enums.AsyncJobStatus
+  priority?: $Enums.AsyncJobPriority
+  stateVersion?: number
+  maxAttempts: number
+  attemptCount?: number
+  availableAt: Date | string
+  leaseOwner?: string | null
+  leaseToken?: string | null
+  leaseExpiresAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
+  cancellationRequestedAt?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  failureCategory?: string | null
+  failureCode?: string | null
+  blockedReason?: string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant?: Prisma.EnteCreateNestedOneWithoutAsyncJobsInput
+  procedimento?: Prisma.ProcedimentoCreateNestedOneWithoutAsyncJobsInput
+  dependsOnJob?: Prisma.AsyncJobCreateNestedOneWithoutDependentJobsInput
+  initiatingUser?: Prisma.UserCreateNestedOneWithoutAsyncJobsInitiatedInput
+  costReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutJobInput
+}
+
+export type AsyncJobUncheckedCreateWithoutDependentJobsInput = {
+  id?: string
+  idempotencyKey: string
+  requestFingerprint: string
+  operation: string
+  logicalOperationId: string
+  purpose: string
+  correlationId: string
+  policyDecisionRef?: string | null
+  inputReference: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType: $Enums.AsyncJobAdmissionType
+  tenantId?: string | null
+  procedimentoId?: string | null
+  dependsOnJobId?: string | null
+  initiatingUserId?: string | null
+  actorId: string
+  actorEmail?: string | null
+  actorRole: string
+  status?: $Enums.AsyncJobStatus
+  priority?: $Enums.AsyncJobPriority
+  stateVersion?: number
+  maxAttempts: number
+  attemptCount?: number
+  availableAt: Date | string
+  leaseOwner?: string | null
+  leaseToken?: string | null
+  leaseExpiresAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
+  cancellationRequestedAt?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  failureCategory?: string | null
+  failureCode?: string | null
+  blockedReason?: string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  costReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutJobInput
+}
+
+export type AsyncJobCreateOrConnectWithoutDependentJobsInput = {
+  where: Prisma.AsyncJobWhereUniqueInput
+  create: Prisma.XOR<Prisma.AsyncJobCreateWithoutDependentJobsInput, Prisma.AsyncJobUncheckedCreateWithoutDependentJobsInput>
+}
+
+export type AsyncJobCreateWithoutDependsOnJobInput = {
+  id?: string
+  idempotencyKey: string
+  requestFingerprint: string
+  operation: string
+  logicalOperationId: string
+  purpose: string
+  correlationId: string
+  policyDecisionRef?: string | null
+  inputReference: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType: $Enums.AsyncJobAdmissionType
+  actorId: string
+  actorEmail?: string | null
+  actorRole: string
+  status?: $Enums.AsyncJobStatus
+  priority?: $Enums.AsyncJobPriority
+  stateVersion?: number
+  maxAttempts: number
+  attemptCount?: number
+  availableAt: Date | string
+  leaseOwner?: string | null
+  leaseToken?: string | null
+  leaseExpiresAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
+  cancellationRequestedAt?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  failureCategory?: string | null
+  failureCode?: string | null
+  blockedReason?: string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant?: Prisma.EnteCreateNestedOneWithoutAsyncJobsInput
+  procedimento?: Prisma.ProcedimentoCreateNestedOneWithoutAsyncJobsInput
+  dependentJobs?: Prisma.AsyncJobCreateNestedManyWithoutDependsOnJobInput
+  initiatingUser?: Prisma.UserCreateNestedOneWithoutAsyncJobsInitiatedInput
+  costReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutJobInput
+}
+
+export type AsyncJobUncheckedCreateWithoutDependsOnJobInput = {
+  id?: string
+  idempotencyKey: string
+  requestFingerprint: string
+  operation: string
+  logicalOperationId: string
+  purpose: string
+  correlationId: string
+  policyDecisionRef?: string | null
+  inputReference: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType: $Enums.AsyncJobAdmissionType
+  tenantId?: string | null
+  procedimentoId?: string | null
+  initiatingUserId?: string | null
+  actorId: string
+  actorEmail?: string | null
+  actorRole: string
+  status?: $Enums.AsyncJobStatus
+  priority?: $Enums.AsyncJobPriority
+  stateVersion?: number
+  maxAttempts: number
+  attemptCount?: number
+  availableAt: Date | string
+  leaseOwner?: string | null
+  leaseToken?: string | null
+  leaseExpiresAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
+  cancellationRequestedAt?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  failureCategory?: string | null
+  failureCode?: string | null
+  blockedReason?: string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  dependentJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutDependsOnJobInput
+  costReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutJobInput
+}
+
+export type AsyncJobCreateOrConnectWithoutDependsOnJobInput = {
+  where: Prisma.AsyncJobWhereUniqueInput
+  create: Prisma.XOR<Prisma.AsyncJobCreateWithoutDependsOnJobInput, Prisma.AsyncJobUncheckedCreateWithoutDependsOnJobInput>
+}
+
+export type AsyncJobCreateManyDependsOnJobInputEnvelope = {
+  data: Prisma.AsyncJobCreateManyDependsOnJobInput | Prisma.AsyncJobCreateManyDependsOnJobInput[]
+  skipDuplicates?: boolean
+}
+
+export type AsyncJobUpsertWithoutDependentJobsInput = {
+  update: Prisma.XOR<Prisma.AsyncJobUpdateWithoutDependentJobsInput, Prisma.AsyncJobUncheckedUpdateWithoutDependentJobsInput>
+  create: Prisma.XOR<Prisma.AsyncJobCreateWithoutDependentJobsInput, Prisma.AsyncJobUncheckedCreateWithoutDependentJobsInput>
+  where?: Prisma.AsyncJobWhereInput
+}
+
+export type AsyncJobUpdateToOneWithWhereWithoutDependentJobsInput = {
+  where?: Prisma.AsyncJobWhereInput
+  data: Prisma.XOR<Prisma.AsyncJobUpdateWithoutDependentJobsInput, Prisma.AsyncJobUncheckedUpdateWithoutDependentJobsInput>
+}
+
+export type AsyncJobUpdateWithoutDependentJobsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  requestFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  operation?: Prisma.StringFieldUpdateOperationsInput | string
+  logicalOperationId?: Prisma.StringFieldUpdateOperationsInput | string
+  purpose?: Prisma.StringFieldUpdateOperationsInput | string
+  correlationId?: Prisma.StringFieldUpdateOperationsInput | string
+  policyDecisionRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inputReference?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType?: Prisma.EnumAsyncJobAdmissionTypeFieldUpdateOperationsInput | $Enums.AsyncJobAdmissionType
+  actorId?: Prisma.StringFieldUpdateOperationsInput | string
+  actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorRole?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
+  stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  leaseOwner?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.EnteUpdateOneWithoutAsyncJobsNestedInput
+  procedimento?: Prisma.ProcedimentoUpdateOneWithoutAsyncJobsNestedInput
+  dependsOnJob?: Prisma.AsyncJobUpdateOneWithoutDependentJobsNestedInput
+  initiatingUser?: Prisma.UserUpdateOneWithoutAsyncJobsInitiatedNestedInput
+  costReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutJobNestedInput
+}
+
+export type AsyncJobUncheckedUpdateWithoutDependentJobsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  requestFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  operation?: Prisma.StringFieldUpdateOperationsInput | string
+  logicalOperationId?: Prisma.StringFieldUpdateOperationsInput | string
+  purpose?: Prisma.StringFieldUpdateOperationsInput | string
+  correlationId?: Prisma.StringFieldUpdateOperationsInput | string
+  policyDecisionRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inputReference?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType?: Prisma.EnumAsyncJobAdmissionTypeFieldUpdateOperationsInput | $Enums.AsyncJobAdmissionType
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dependsOnJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  initiatingUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorId?: Prisma.StringFieldUpdateOperationsInput | string
+  actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorRole?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
+  stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  leaseOwner?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  costReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutJobNestedInput
+}
+
+export type AsyncJobUpsertWithWhereUniqueWithoutDependsOnJobInput = {
+  where: Prisma.AsyncJobWhereUniqueInput
+  update: Prisma.XOR<Prisma.AsyncJobUpdateWithoutDependsOnJobInput, Prisma.AsyncJobUncheckedUpdateWithoutDependsOnJobInput>
+  create: Prisma.XOR<Prisma.AsyncJobCreateWithoutDependsOnJobInput, Prisma.AsyncJobUncheckedCreateWithoutDependsOnJobInput>
+}
+
+export type AsyncJobUpdateWithWhereUniqueWithoutDependsOnJobInput = {
+  where: Prisma.AsyncJobWhereUniqueInput
+  data: Prisma.XOR<Prisma.AsyncJobUpdateWithoutDependsOnJobInput, Prisma.AsyncJobUncheckedUpdateWithoutDependsOnJobInput>
+}
+
+export type AsyncJobUpdateManyWithWhereWithoutDependsOnJobInput = {
+  where: Prisma.AsyncJobScalarWhereInput
+  data: Prisma.XOR<Prisma.AsyncJobUpdateManyMutationInput, Prisma.AsyncJobUncheckedUpdateManyWithoutDependsOnJobInput>
+}
+
+export type AsyncJobCreateWithoutCostReservationsInput = {
+  id?: string
+  idempotencyKey: string
+  requestFingerprint: string
+  operation: string
+  logicalOperationId: string
+  purpose: string
+  correlationId: string
+  policyDecisionRef?: string | null
+  inputReference: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType: $Enums.AsyncJobAdmissionType
+  actorId: string
+  actorEmail?: string | null
+  actorRole: string
+  status?: $Enums.AsyncJobStatus
+  priority?: $Enums.AsyncJobPriority
+  stateVersion?: number
+  maxAttempts: number
+  attemptCount?: number
+  availableAt: Date | string
+  leaseOwner?: string | null
+  leaseToken?: string | null
+  leaseExpiresAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
+  cancellationRequestedAt?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  failureCategory?: string | null
+  failureCode?: string | null
+  blockedReason?: string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant?: Prisma.EnteCreateNestedOneWithoutAsyncJobsInput
+  procedimento?: Prisma.ProcedimentoCreateNestedOneWithoutAsyncJobsInput
+  dependsOnJob?: Prisma.AsyncJobCreateNestedOneWithoutDependentJobsInput
+  dependentJobs?: Prisma.AsyncJobCreateNestedManyWithoutDependsOnJobInput
+  initiatingUser?: Prisma.UserCreateNestedOneWithoutAsyncJobsInitiatedInput
+}
+
+export type AsyncJobUncheckedCreateWithoutCostReservationsInput = {
+  id?: string
+  idempotencyKey: string
+  requestFingerprint: string
+  operation: string
+  logicalOperationId: string
+  purpose: string
+  correlationId: string
+  policyDecisionRef?: string | null
+  inputReference: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType: $Enums.AsyncJobAdmissionType
+  tenantId?: string | null
+  procedimentoId?: string | null
+  dependsOnJobId?: string | null
+  initiatingUserId?: string | null
+  actorId: string
+  actorEmail?: string | null
+  actorRole: string
+  status?: $Enums.AsyncJobStatus
+  priority?: $Enums.AsyncJobPriority
+  stateVersion?: number
+  maxAttempts: number
+  attemptCount?: number
+  availableAt: Date | string
+  leaseOwner?: string | null
+  leaseToken?: string | null
+  leaseExpiresAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
+  cancellationRequestedAt?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  failureCategory?: string | null
+  failureCode?: string | null
+  blockedReason?: string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  dependentJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutDependsOnJobInput
+}
+
+export type AsyncJobCreateOrConnectWithoutCostReservationsInput = {
+  where: Prisma.AsyncJobWhereUniqueInput
+  create: Prisma.XOR<Prisma.AsyncJobCreateWithoutCostReservationsInput, Prisma.AsyncJobUncheckedCreateWithoutCostReservationsInput>
+}
+
+export type AsyncJobUpsertWithoutCostReservationsInput = {
+  update: Prisma.XOR<Prisma.AsyncJobUpdateWithoutCostReservationsInput, Prisma.AsyncJobUncheckedUpdateWithoutCostReservationsInput>
+  create: Prisma.XOR<Prisma.AsyncJobCreateWithoutCostReservationsInput, Prisma.AsyncJobUncheckedCreateWithoutCostReservationsInput>
+  where?: Prisma.AsyncJobWhereInput
+}
+
+export type AsyncJobUpdateToOneWithWhereWithoutCostReservationsInput = {
+  where?: Prisma.AsyncJobWhereInput
+  data: Prisma.XOR<Prisma.AsyncJobUpdateWithoutCostReservationsInput, Prisma.AsyncJobUncheckedUpdateWithoutCostReservationsInput>
+}
+
+export type AsyncJobUpdateWithoutCostReservationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  requestFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  operation?: Prisma.StringFieldUpdateOperationsInput | string
+  logicalOperationId?: Prisma.StringFieldUpdateOperationsInput | string
+  purpose?: Prisma.StringFieldUpdateOperationsInput | string
+  correlationId?: Prisma.StringFieldUpdateOperationsInput | string
+  policyDecisionRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inputReference?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType?: Prisma.EnumAsyncJobAdmissionTypeFieldUpdateOperationsInput | $Enums.AsyncJobAdmissionType
+  actorId?: Prisma.StringFieldUpdateOperationsInput | string
+  actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorRole?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
+  stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  leaseOwner?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.EnteUpdateOneWithoutAsyncJobsNestedInput
+  procedimento?: Prisma.ProcedimentoUpdateOneWithoutAsyncJobsNestedInput
+  dependsOnJob?: Prisma.AsyncJobUpdateOneWithoutDependentJobsNestedInput
+  dependentJobs?: Prisma.AsyncJobUpdateManyWithoutDependsOnJobNestedInput
+  initiatingUser?: Prisma.UserUpdateOneWithoutAsyncJobsInitiatedNestedInput
+}
+
+export type AsyncJobUncheckedUpdateWithoutCostReservationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  requestFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  operation?: Prisma.StringFieldUpdateOperationsInput | string
+  logicalOperationId?: Prisma.StringFieldUpdateOperationsInput | string
+  purpose?: Prisma.StringFieldUpdateOperationsInput | string
+  correlationId?: Prisma.StringFieldUpdateOperationsInput | string
+  policyDecisionRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inputReference?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType?: Prisma.EnumAsyncJobAdmissionTypeFieldUpdateOperationsInput | $Enums.AsyncJobAdmissionType
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dependsOnJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  initiatingUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorId?: Prisma.StringFieldUpdateOperationsInput | string
+  actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorRole?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
+  stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  leaseOwner?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dependentJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutDependsOnJobNestedInput
+}
+
+export type AsyncJobCreateManyTenantInput = {
+  id?: string
+  idempotencyKey: string
+  requestFingerprint: string
+  operation: string
+  logicalOperationId: string
+  purpose: string
+  correlationId: string
+  policyDecisionRef?: string | null
+  inputReference: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType: $Enums.AsyncJobAdmissionType
+  procedimentoId?: string | null
+  dependsOnJobId?: string | null
+  initiatingUserId?: string | null
+  actorId: string
+  actorEmail?: string | null
+  actorRole: string
+  status?: $Enums.AsyncJobStatus
+  priority?: $Enums.AsyncJobPriority
+  stateVersion?: number
+  maxAttempts: number
+  attemptCount?: number
+  availableAt: Date | string
+  leaseOwner?: string | null
+  leaseToken?: string | null
+  leaseExpiresAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
+  cancellationRequestedAt?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  failureCategory?: string | null
+  failureCode?: string | null
+  blockedReason?: string | null
   resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1324,6 +2151,7 @@ export type AsyncJobUpdateWithoutTenantInput = {
   actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actorRole?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
   stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
   maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1337,10 +2165,15 @@ export type AsyncJobUpdateWithoutTenantInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  procedimento?: Prisma.ProcedimentoUpdateOneWithoutAsyncJobsNestedInput
+  dependsOnJob?: Prisma.AsyncJobUpdateOneWithoutDependentJobsNestedInput
+  dependentJobs?: Prisma.AsyncJobUpdateManyWithoutDependsOnJobNestedInput
   initiatingUser?: Prisma.UserUpdateOneWithoutAsyncJobsInitiatedNestedInput
+  costReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutJobNestedInput
 }
 
 export type AsyncJobUncheckedUpdateWithoutTenantInput = {
@@ -1354,11 +2187,14 @@ export type AsyncJobUncheckedUpdateWithoutTenantInput = {
   policyDecisionRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inputReference?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   admissionType?: Prisma.EnumAsyncJobAdmissionTypeFieldUpdateOperationsInput | $Enums.AsyncJobAdmissionType
+  procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dependsOnJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   initiatingUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actorId?: Prisma.StringFieldUpdateOperationsInput | string
   actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actorRole?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
   stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
   maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1372,9 +2208,12 @@ export type AsyncJobUncheckedUpdateWithoutTenantInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dependentJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutDependsOnJobNestedInput
+  costReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutJobNestedInput
 }
 
 export type AsyncJobUncheckedUpdateManyWithoutTenantInput = {
@@ -1388,11 +2227,14 @@ export type AsyncJobUncheckedUpdateManyWithoutTenantInput = {
   policyDecisionRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inputReference?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   admissionType?: Prisma.EnumAsyncJobAdmissionTypeFieldUpdateOperationsInput | $Enums.AsyncJobAdmissionType
+  procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dependsOnJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   initiatingUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actorId?: Prisma.StringFieldUpdateOperationsInput | string
   actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actorRole?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
   stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
   maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1406,6 +2248,7 @@ export type AsyncJobUncheckedUpdateManyWithoutTenantInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1423,10 +2266,13 @@ export type AsyncJobCreateManyInitiatingUserInput = {
   inputReference: Prisma.JsonNullValueInput | runtime.InputJsonValue
   admissionType: $Enums.AsyncJobAdmissionType
   tenantId?: string | null
+  procedimentoId?: string | null
+  dependsOnJobId?: string | null
   actorId: string
   actorEmail?: string | null
   actorRole: string
   status?: $Enums.AsyncJobStatus
+  priority?: $Enums.AsyncJobPriority
   stateVersion?: number
   maxAttempts: number
   attemptCount?: number
@@ -1440,6 +2286,7 @@ export type AsyncJobCreateManyInitiatingUserInput = {
   completedAt?: Date | string | null
   failureCategory?: string | null
   failureCode?: string | null
+  blockedReason?: string | null
   resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1460,6 +2307,7 @@ export type AsyncJobUpdateWithoutInitiatingUserInput = {
   actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actorRole?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
   stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
   maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1473,10 +2321,15 @@ export type AsyncJobUpdateWithoutInitiatingUserInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.EnteUpdateOneWithoutAsyncJobsNestedInput
+  procedimento?: Prisma.ProcedimentoUpdateOneWithoutAsyncJobsNestedInput
+  dependsOnJob?: Prisma.AsyncJobUpdateOneWithoutDependentJobsNestedInput
+  dependentJobs?: Prisma.AsyncJobUpdateManyWithoutDependsOnJobNestedInput
+  costReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutJobNestedInput
 }
 
 export type AsyncJobUncheckedUpdateWithoutInitiatingUserInput = {
@@ -1491,10 +2344,13 @@ export type AsyncJobUncheckedUpdateWithoutInitiatingUserInput = {
   inputReference?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   admissionType?: Prisma.EnumAsyncJobAdmissionTypeFieldUpdateOperationsInput | $Enums.AsyncJobAdmissionType
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dependsOnJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actorId?: Prisma.StringFieldUpdateOperationsInput | string
   actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actorRole?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
   stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
   maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1508,9 +2364,12 @@ export type AsyncJobUncheckedUpdateWithoutInitiatingUserInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dependentJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutDependsOnJobNestedInput
+  costReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutJobNestedInput
 }
 
 export type AsyncJobUncheckedUpdateManyWithoutInitiatingUserInput = {
@@ -1525,10 +2384,13 @@ export type AsyncJobUncheckedUpdateManyWithoutInitiatingUserInput = {
   inputReference?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   admissionType?: Prisma.EnumAsyncJobAdmissionTypeFieldUpdateOperationsInput | $Enums.AsyncJobAdmissionType
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dependsOnJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actorId?: Prisma.StringFieldUpdateOperationsInput | string
   actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actorRole?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
   stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
   maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1542,11 +2404,362 @@ export type AsyncJobUncheckedUpdateManyWithoutInitiatingUserInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+export type AsyncJobCreateManyProcedimentoInput = {
+  id?: string
+  idempotencyKey: string
+  requestFingerprint: string
+  operation: string
+  logicalOperationId: string
+  purpose: string
+  correlationId: string
+  policyDecisionRef?: string | null
+  inputReference: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType: $Enums.AsyncJobAdmissionType
+  tenantId?: string | null
+  dependsOnJobId?: string | null
+  initiatingUserId?: string | null
+  actorId: string
+  actorEmail?: string | null
+  actorRole: string
+  status?: $Enums.AsyncJobStatus
+  priority?: $Enums.AsyncJobPriority
+  stateVersion?: number
+  maxAttempts: number
+  attemptCount?: number
+  availableAt: Date | string
+  leaseOwner?: string | null
+  leaseToken?: string | null
+  leaseExpiresAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
+  cancellationRequestedAt?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  failureCategory?: string | null
+  failureCode?: string | null
+  blockedReason?: string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type AsyncJobUpdateWithoutProcedimentoInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  requestFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  operation?: Prisma.StringFieldUpdateOperationsInput | string
+  logicalOperationId?: Prisma.StringFieldUpdateOperationsInput | string
+  purpose?: Prisma.StringFieldUpdateOperationsInput | string
+  correlationId?: Prisma.StringFieldUpdateOperationsInput | string
+  policyDecisionRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inputReference?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType?: Prisma.EnumAsyncJobAdmissionTypeFieldUpdateOperationsInput | $Enums.AsyncJobAdmissionType
+  actorId?: Prisma.StringFieldUpdateOperationsInput | string
+  actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorRole?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
+  stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  leaseOwner?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.EnteUpdateOneWithoutAsyncJobsNestedInput
+  dependsOnJob?: Prisma.AsyncJobUpdateOneWithoutDependentJobsNestedInput
+  dependentJobs?: Prisma.AsyncJobUpdateManyWithoutDependsOnJobNestedInput
+  initiatingUser?: Prisma.UserUpdateOneWithoutAsyncJobsInitiatedNestedInput
+  costReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutJobNestedInput
+}
+
+export type AsyncJobUncheckedUpdateWithoutProcedimentoInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  requestFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  operation?: Prisma.StringFieldUpdateOperationsInput | string
+  logicalOperationId?: Prisma.StringFieldUpdateOperationsInput | string
+  purpose?: Prisma.StringFieldUpdateOperationsInput | string
+  correlationId?: Prisma.StringFieldUpdateOperationsInput | string
+  policyDecisionRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inputReference?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType?: Prisma.EnumAsyncJobAdmissionTypeFieldUpdateOperationsInput | $Enums.AsyncJobAdmissionType
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dependsOnJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  initiatingUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorId?: Prisma.StringFieldUpdateOperationsInput | string
+  actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorRole?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
+  stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  leaseOwner?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dependentJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutDependsOnJobNestedInput
+  costReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutJobNestedInput
+}
+
+export type AsyncJobUncheckedUpdateManyWithoutProcedimentoInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  requestFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  operation?: Prisma.StringFieldUpdateOperationsInput | string
+  logicalOperationId?: Prisma.StringFieldUpdateOperationsInput | string
+  purpose?: Prisma.StringFieldUpdateOperationsInput | string
+  correlationId?: Prisma.StringFieldUpdateOperationsInput | string
+  policyDecisionRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inputReference?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType?: Prisma.EnumAsyncJobAdmissionTypeFieldUpdateOperationsInput | $Enums.AsyncJobAdmissionType
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dependsOnJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  initiatingUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorId?: Prisma.StringFieldUpdateOperationsInput | string
+  actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorRole?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
+  stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  leaseOwner?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type AsyncJobCreateManyDependsOnJobInput = {
+  id?: string
+  idempotencyKey: string
+  requestFingerprint: string
+  operation: string
+  logicalOperationId: string
+  purpose: string
+  correlationId: string
+  policyDecisionRef?: string | null
+  inputReference: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType: $Enums.AsyncJobAdmissionType
+  tenantId?: string | null
+  procedimentoId?: string | null
+  initiatingUserId?: string | null
+  actorId: string
+  actorEmail?: string | null
+  actorRole: string
+  status?: $Enums.AsyncJobStatus
+  priority?: $Enums.AsyncJobPriority
+  stateVersion?: number
+  maxAttempts: number
+  attemptCount?: number
+  availableAt: Date | string
+  leaseOwner?: string | null
+  leaseToken?: string | null
+  leaseExpiresAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
+  cancellationRequestedAt?: Date | string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  failureCategory?: string | null
+  failureCode?: string | null
+  blockedReason?: string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type AsyncJobUpdateWithoutDependsOnJobInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  requestFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  operation?: Prisma.StringFieldUpdateOperationsInput | string
+  logicalOperationId?: Prisma.StringFieldUpdateOperationsInput | string
+  purpose?: Prisma.StringFieldUpdateOperationsInput | string
+  correlationId?: Prisma.StringFieldUpdateOperationsInput | string
+  policyDecisionRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inputReference?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType?: Prisma.EnumAsyncJobAdmissionTypeFieldUpdateOperationsInput | $Enums.AsyncJobAdmissionType
+  actorId?: Prisma.StringFieldUpdateOperationsInput | string
+  actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorRole?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
+  stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  leaseOwner?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.EnteUpdateOneWithoutAsyncJobsNestedInput
+  procedimento?: Prisma.ProcedimentoUpdateOneWithoutAsyncJobsNestedInput
+  dependentJobs?: Prisma.AsyncJobUpdateManyWithoutDependsOnJobNestedInput
+  initiatingUser?: Prisma.UserUpdateOneWithoutAsyncJobsInitiatedNestedInput
+  costReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutJobNestedInput
+}
+
+export type AsyncJobUncheckedUpdateWithoutDependsOnJobInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  requestFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  operation?: Prisma.StringFieldUpdateOperationsInput | string
+  logicalOperationId?: Prisma.StringFieldUpdateOperationsInput | string
+  purpose?: Prisma.StringFieldUpdateOperationsInput | string
+  correlationId?: Prisma.StringFieldUpdateOperationsInput | string
+  policyDecisionRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inputReference?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType?: Prisma.EnumAsyncJobAdmissionTypeFieldUpdateOperationsInput | $Enums.AsyncJobAdmissionType
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  initiatingUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorId?: Prisma.StringFieldUpdateOperationsInput | string
+  actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorRole?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
+  stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  leaseOwner?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dependentJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutDependsOnJobNestedInput
+  costReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutJobNestedInput
+}
+
+export type AsyncJobUncheckedUpdateManyWithoutDependsOnJobInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  requestFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  operation?: Prisma.StringFieldUpdateOperationsInput | string
+  logicalOperationId?: Prisma.StringFieldUpdateOperationsInput | string
+  purpose?: Prisma.StringFieldUpdateOperationsInput | string
+  correlationId?: Prisma.StringFieldUpdateOperationsInput | string
+  policyDecisionRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inputReference?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  admissionType?: Prisma.EnumAsyncJobAdmissionTypeFieldUpdateOperationsInput | $Enums.AsyncJobAdmissionType
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  initiatingUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorId?: Prisma.StringFieldUpdateOperationsInput | string
+  actorEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actorRole?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAsyncJobStatusFieldUpdateOperationsInput | $Enums.AsyncJobStatus
+  priority?: Prisma.EnumAsyncJobPriorityFieldUpdateOperationsInput | $Enums.AsyncJobPriority
+  stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  leaseOwner?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancellationRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failureCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultReference?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type AsyncJobCountOutputType
+ */
+
+export type AsyncJobCountOutputType = {
+  dependentJobs: number
+  costReservations: number
+}
+
+export type AsyncJobCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  dependentJobs?: boolean | AsyncJobCountOutputTypeCountDependentJobsArgs
+  costReservations?: boolean | AsyncJobCountOutputTypeCountCostReservationsArgs
+}
+
+/**
+ * AsyncJobCountOutputType without action
+ */
+export type AsyncJobCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AsyncJobCountOutputType
+   */
+  select?: Prisma.AsyncJobCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * AsyncJobCountOutputType without action
+ */
+export type AsyncJobCountOutputTypeCountDependentJobsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AsyncJobWhereInput
+}
+
+/**
+ * AsyncJobCountOutputType without action
+ */
+export type AsyncJobCountOutputTypeCountCostReservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RuntimeCostReservationWhereInput
+}
 
 
 export type AsyncJobSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1561,11 +2774,14 @@ export type AsyncJobSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   inputReference?: boolean
   admissionType?: boolean
   tenantId?: boolean
+  procedimentoId?: boolean
+  dependsOnJobId?: boolean
   initiatingUserId?: boolean
   actorId?: boolean
   actorEmail?: boolean
   actorRole?: boolean
   status?: boolean
+  priority?: boolean
   stateVersion?: boolean
   maxAttempts?: boolean
   attemptCount?: boolean
@@ -1579,11 +2795,17 @@ export type AsyncJobSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   completedAt?: boolean
   failureCategory?: boolean
   failureCode?: boolean
+  blockedReason?: boolean
   resultReference?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.AsyncJob$tenantArgs<ExtArgs>
+  procedimento?: boolean | Prisma.AsyncJob$procedimentoArgs<ExtArgs>
+  dependsOnJob?: boolean | Prisma.AsyncJob$dependsOnJobArgs<ExtArgs>
+  dependentJobs?: boolean | Prisma.AsyncJob$dependentJobsArgs<ExtArgs>
   initiatingUser?: boolean | Prisma.AsyncJob$initiatingUserArgs<ExtArgs>
+  costReservations?: boolean | Prisma.AsyncJob$costReservationsArgs<ExtArgs>
+  _count?: boolean | Prisma.AsyncJobCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["asyncJob"]>
 
 export type AsyncJobSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1598,11 +2820,14 @@ export type AsyncJobSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   inputReference?: boolean
   admissionType?: boolean
   tenantId?: boolean
+  procedimentoId?: boolean
+  dependsOnJobId?: boolean
   initiatingUserId?: boolean
   actorId?: boolean
   actorEmail?: boolean
   actorRole?: boolean
   status?: boolean
+  priority?: boolean
   stateVersion?: boolean
   maxAttempts?: boolean
   attemptCount?: boolean
@@ -1616,10 +2841,13 @@ export type AsyncJobSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   completedAt?: boolean
   failureCategory?: boolean
   failureCode?: boolean
+  blockedReason?: boolean
   resultReference?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.AsyncJob$tenantArgs<ExtArgs>
+  procedimento?: boolean | Prisma.AsyncJob$procedimentoArgs<ExtArgs>
+  dependsOnJob?: boolean | Prisma.AsyncJob$dependsOnJobArgs<ExtArgs>
   initiatingUser?: boolean | Prisma.AsyncJob$initiatingUserArgs<ExtArgs>
 }, ExtArgs["result"]["asyncJob"]>
 
@@ -1635,11 +2863,14 @@ export type AsyncJobSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   inputReference?: boolean
   admissionType?: boolean
   tenantId?: boolean
+  procedimentoId?: boolean
+  dependsOnJobId?: boolean
   initiatingUserId?: boolean
   actorId?: boolean
   actorEmail?: boolean
   actorRole?: boolean
   status?: boolean
+  priority?: boolean
   stateVersion?: boolean
   maxAttempts?: boolean
   attemptCount?: boolean
@@ -1653,10 +2884,13 @@ export type AsyncJobSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   completedAt?: boolean
   failureCategory?: boolean
   failureCode?: boolean
+  blockedReason?: boolean
   resultReference?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.AsyncJob$tenantArgs<ExtArgs>
+  procedimento?: boolean | Prisma.AsyncJob$procedimentoArgs<ExtArgs>
+  dependsOnJob?: boolean | Prisma.AsyncJob$dependsOnJobArgs<ExtArgs>
   initiatingUser?: boolean | Prisma.AsyncJob$initiatingUserArgs<ExtArgs>
 }, ExtArgs["result"]["asyncJob"]>
 
@@ -1672,11 +2906,14 @@ export type AsyncJobSelectScalar = {
   inputReference?: boolean
   admissionType?: boolean
   tenantId?: boolean
+  procedimentoId?: boolean
+  dependsOnJobId?: boolean
   initiatingUserId?: boolean
   actorId?: boolean
   actorEmail?: boolean
   actorRole?: boolean
   status?: boolean
+  priority?: boolean
   stateVersion?: boolean
   maxAttempts?: boolean
   attemptCount?: boolean
@@ -1690,22 +2927,32 @@ export type AsyncJobSelectScalar = {
   completedAt?: boolean
   failureCategory?: boolean
   failureCode?: boolean
+  blockedReason?: boolean
   resultReference?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AsyncJobOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "idempotencyKey" | "requestFingerprint" | "operation" | "logicalOperationId" | "purpose" | "correlationId" | "policyDecisionRef" | "inputReference" | "admissionType" | "tenantId" | "initiatingUserId" | "actorId" | "actorEmail" | "actorRole" | "status" | "stateVersion" | "maxAttempts" | "attemptCount" | "availableAt" | "leaseOwner" | "leaseToken" | "leaseExpiresAt" | "lastHeartbeatAt" | "cancellationRequestedAt" | "startedAt" | "completedAt" | "failureCategory" | "failureCode" | "resultReference" | "createdAt" | "updatedAt", ExtArgs["result"]["asyncJob"]>
+export type AsyncJobOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "idempotencyKey" | "requestFingerprint" | "operation" | "logicalOperationId" | "purpose" | "correlationId" | "policyDecisionRef" | "inputReference" | "admissionType" | "tenantId" | "procedimentoId" | "dependsOnJobId" | "initiatingUserId" | "actorId" | "actorEmail" | "actorRole" | "status" | "priority" | "stateVersion" | "maxAttempts" | "attemptCount" | "availableAt" | "leaseOwner" | "leaseToken" | "leaseExpiresAt" | "lastHeartbeatAt" | "cancellationRequestedAt" | "startedAt" | "completedAt" | "failureCategory" | "failureCode" | "blockedReason" | "resultReference" | "createdAt" | "updatedAt", ExtArgs["result"]["asyncJob"]>
 export type AsyncJobInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.AsyncJob$tenantArgs<ExtArgs>
+  procedimento?: boolean | Prisma.AsyncJob$procedimentoArgs<ExtArgs>
+  dependsOnJob?: boolean | Prisma.AsyncJob$dependsOnJobArgs<ExtArgs>
+  dependentJobs?: boolean | Prisma.AsyncJob$dependentJobsArgs<ExtArgs>
   initiatingUser?: boolean | Prisma.AsyncJob$initiatingUserArgs<ExtArgs>
+  costReservations?: boolean | Prisma.AsyncJob$costReservationsArgs<ExtArgs>
+  _count?: boolean | Prisma.AsyncJobCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AsyncJobIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.AsyncJob$tenantArgs<ExtArgs>
+  procedimento?: boolean | Prisma.AsyncJob$procedimentoArgs<ExtArgs>
+  dependsOnJob?: boolean | Prisma.AsyncJob$dependsOnJobArgs<ExtArgs>
   initiatingUser?: boolean | Prisma.AsyncJob$initiatingUserArgs<ExtArgs>
 }
 export type AsyncJobIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.AsyncJob$tenantArgs<ExtArgs>
+  procedimento?: boolean | Prisma.AsyncJob$procedimentoArgs<ExtArgs>
+  dependsOnJob?: boolean | Prisma.AsyncJob$dependsOnJobArgs<ExtArgs>
   initiatingUser?: boolean | Prisma.AsyncJob$initiatingUserArgs<ExtArgs>
 }
 
@@ -1713,7 +2960,11 @@ export type $AsyncJobPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   name: "AsyncJob"
   objects: {
     tenant: Prisma.$EntePayload<ExtArgs> | null
+    procedimento: Prisma.$ProcedimentoPayload<ExtArgs> | null
+    dependsOnJob: Prisma.$AsyncJobPayload<ExtArgs> | null
+    dependentJobs: Prisma.$AsyncJobPayload<ExtArgs>[]
     initiatingUser: Prisma.$UserPayload<ExtArgs> | null
+    costReservations: Prisma.$RuntimeCostReservationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1727,11 +2978,14 @@ export type $AsyncJobPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     inputReference: runtime.JsonValue
     admissionType: $Enums.AsyncJobAdmissionType
     tenantId: string | null
+    procedimentoId: string | null
+    dependsOnJobId: string | null
     initiatingUserId: string | null
     actorId: string
     actorEmail: string | null
     actorRole: string
     status: $Enums.AsyncJobStatus
+    priority: $Enums.AsyncJobPriority
     stateVersion: number
     maxAttempts: number
     attemptCount: number
@@ -1745,6 +2999,7 @@ export type $AsyncJobPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     completedAt: Date | null
     failureCategory: string | null
     failureCode: string | null
+    blockedReason: string | null
     resultReference: runtime.JsonValue | null
     createdAt: Date
     updatedAt: Date
@@ -2143,7 +3398,11 @@ readonly fields: AsyncJobFieldRefs;
 export interface Prisma__AsyncJobClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   tenant<T extends Prisma.AsyncJob$tenantArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AsyncJob$tenantArgs<ExtArgs>>): Prisma.Prisma__EnteClient<runtime.Types.Result.GetResult<Prisma.$EntePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  procedimento<T extends Prisma.AsyncJob$procedimentoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AsyncJob$procedimentoArgs<ExtArgs>>): Prisma.Prisma__ProcedimentoClient<runtime.Types.Result.GetResult<Prisma.$ProcedimentoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  dependsOnJob<T extends Prisma.AsyncJob$dependsOnJobArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AsyncJob$dependsOnJobArgs<ExtArgs>>): Prisma.Prisma__AsyncJobClient<runtime.Types.Result.GetResult<Prisma.$AsyncJobPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  dependentJobs<T extends Prisma.AsyncJob$dependentJobsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AsyncJob$dependentJobsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AsyncJobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   initiatingUser<T extends Prisma.AsyncJob$initiatingUserArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AsyncJob$initiatingUserArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  costReservations<T extends Prisma.AsyncJob$costReservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AsyncJob$costReservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RuntimeCostReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2184,11 +3443,14 @@ export interface AsyncJobFieldRefs {
   readonly inputReference: Prisma.FieldRef<"AsyncJob", 'Json'>
   readonly admissionType: Prisma.FieldRef<"AsyncJob", 'AsyncJobAdmissionType'>
   readonly tenantId: Prisma.FieldRef<"AsyncJob", 'String'>
+  readonly procedimentoId: Prisma.FieldRef<"AsyncJob", 'String'>
+  readonly dependsOnJobId: Prisma.FieldRef<"AsyncJob", 'String'>
   readonly initiatingUserId: Prisma.FieldRef<"AsyncJob", 'String'>
   readonly actorId: Prisma.FieldRef<"AsyncJob", 'String'>
   readonly actorEmail: Prisma.FieldRef<"AsyncJob", 'String'>
   readonly actorRole: Prisma.FieldRef<"AsyncJob", 'String'>
   readonly status: Prisma.FieldRef<"AsyncJob", 'AsyncJobStatus'>
+  readonly priority: Prisma.FieldRef<"AsyncJob", 'AsyncJobPriority'>
   readonly stateVersion: Prisma.FieldRef<"AsyncJob", 'Int'>
   readonly maxAttempts: Prisma.FieldRef<"AsyncJob", 'Int'>
   readonly attemptCount: Prisma.FieldRef<"AsyncJob", 'Int'>
@@ -2202,6 +3464,7 @@ export interface AsyncJobFieldRefs {
   readonly completedAt: Prisma.FieldRef<"AsyncJob", 'DateTime'>
   readonly failureCategory: Prisma.FieldRef<"AsyncJob", 'String'>
   readonly failureCode: Prisma.FieldRef<"AsyncJob", 'String'>
+  readonly blockedReason: Prisma.FieldRef<"AsyncJob", 'String'>
   readonly resultReference: Prisma.FieldRef<"AsyncJob", 'Json'>
   readonly createdAt: Prisma.FieldRef<"AsyncJob", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"AsyncJob", 'DateTime'>
@@ -2625,6 +3888,68 @@ export type AsyncJob$tenantArgs<ExtArgs extends runtime.Types.Extensions.Interna
 }
 
 /**
+ * AsyncJob.procedimento
+ */
+export type AsyncJob$procedimentoArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Procedimento
+   */
+  select?: Prisma.ProcedimentoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Procedimento
+   */
+  omit?: Prisma.ProcedimentoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProcedimentoInclude<ExtArgs> | null
+  where?: Prisma.ProcedimentoWhereInput
+}
+
+/**
+ * AsyncJob.dependsOnJob
+ */
+export type AsyncJob$dependsOnJobArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AsyncJob
+   */
+  select?: Prisma.AsyncJobSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AsyncJob
+   */
+  omit?: Prisma.AsyncJobOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AsyncJobInclude<ExtArgs> | null
+  where?: Prisma.AsyncJobWhereInput
+}
+
+/**
+ * AsyncJob.dependentJobs
+ */
+export type AsyncJob$dependentJobsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AsyncJob
+   */
+  select?: Prisma.AsyncJobSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AsyncJob
+   */
+  omit?: Prisma.AsyncJobOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AsyncJobInclude<ExtArgs> | null
+  where?: Prisma.AsyncJobWhereInput
+  orderBy?: Prisma.AsyncJobOrderByWithRelationInput | Prisma.AsyncJobOrderByWithRelationInput[]
+  cursor?: Prisma.AsyncJobWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AsyncJobScalarFieldEnum | Prisma.AsyncJobScalarFieldEnum[]
+}
+
+/**
  * AsyncJob.initiatingUser
  */
 export type AsyncJob$initiatingUserArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2641,6 +3966,30 @@ export type AsyncJob$initiatingUserArgs<ExtArgs extends runtime.Types.Extensions
    */
   include?: Prisma.UserInclude<ExtArgs> | null
   where?: Prisma.UserWhereInput
+}
+
+/**
+ * AsyncJob.costReservations
+ */
+export type AsyncJob$costReservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RuntimeCostReservation
+   */
+  select?: Prisma.RuntimeCostReservationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RuntimeCostReservation
+   */
+  omit?: Prisma.RuntimeCostReservationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RuntimeCostReservationInclude<ExtArgs> | null
+  where?: Prisma.RuntimeCostReservationWhereInput
+  orderBy?: Prisma.RuntimeCostReservationOrderByWithRelationInput | Prisma.RuntimeCostReservationOrderByWithRelationInput[]
+  cursor?: Prisma.RuntimeCostReservationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RuntimeCostReservationScalarFieldEnum | Prisma.RuntimeCostReservationScalarFieldEnum[]
 }
 
 /**

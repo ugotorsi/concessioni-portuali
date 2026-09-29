@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { RESEARCH_BRIDGE_VERSION, type ResearchMission } from "@/server/legal-research/bridge";
+import {
+  RESEARCH_BRIDGE_VERSION,
+  type ResearchEvidenceBundle,
+  type ResearchMission,
+} from "@/server/legal-research/bridge";
 import {
   deriveFascicoloContextScope,
   projectBoundedFascicoloContext,
+  projectResearchEvidenceBundleForContext,
   projectResearchMissionForMcp,
   type FascicoloContextCandidate,
 } from "@/server/legal-research/fascicolo-context";
@@ -169,5 +174,49 @@ describe("Block 3B.14D fascicolo context isolation", () => {
     expect(JSON.stringify(projected)).not.toContain("SYNTHETIC_RESTRICTED_CATEGORY");
     expect(JSON.stringify(projected)).toContain("SYNTHETIC_NECESSARY_FASCICOLO_FACT");
     expect(projected.researchQuestion).toBe(stored.researchQuestion);
+  });
+
+  it("preserves received provider text and categorized dates without asserting full text", () => {
+    const projected = projectResearchEvidenceBundleForContext({
+      kind: "RESEARCH_EVIDENCE_BUNDLE",
+      version: RESEARCH_BRIDGE_VERSION,
+      missionId: "mission-a",
+      executionId: "execution-a",
+      researchToolExecutions: [],
+      authorityCandidates: [{
+        kind: "AUTHORITY_CANDIDATE",
+        candidateId: "candidate-a",
+        executionRecordId: "execution-record-a",
+        toolId: "SIMPLICITER",
+        providerId: "it.legislation.normativa-italiana",
+        officialIdentifier: "art. 18 legge n. 84 del 28 gennaio 1994",
+        sourceUrl: "https://simpliciter.ai/app/normativa/it/legge/1994/84/18/",
+        providerReceivedText: "Art. 18\n(Concessione di aree e banchine).",
+        providerDates: { actDate: "1994-01-28" },
+        exactReferenceMatch: true,
+        supportDirection: "UNKNOWN",
+        sourceFamily: "ITALIAN_LEGISLATION",
+        retrievalMethod: "EXACT_RETRIEVAL",
+        fullTextAvailable: false,
+        verificationState: "OFFICIAL_VERIFICATION_REQUIRED",
+      }],
+      citationObservations: [],
+      legalResearchSuggestions: [],
+      evidenceGaps: [],
+      conflicts: [],
+      unresolvedQuestions: [],
+      suggestedFollowUpMissions: [],
+      humanDecisionEscalations: [],
+      completionState: "COMPLETE",
+    } satisfies ResearchEvidenceBundle);
+
+    expect(projected.authorityCandidates[0]).toMatchObject({
+      providerReceivedText: "Art. 18\n(Concessione di aree e banchine).",
+      providerDates: { actDate: "1994-01-28" },
+      exactReferenceMatch: true,
+      fullTextAvailable: false,
+      verificationState: "OFFICIAL_VERIFICATION_REQUIRED",
+    });
+    expect(projected.authorityCandidates[0]).not.toHaveProperty("documentDate");
   });
 });

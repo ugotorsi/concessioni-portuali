@@ -2,6 +2,10 @@ import { AsyncJobHandlerRegistry } from "./registry";
 import { drainOneAsyncJob } from "./worker";
 import { createNeutralIntakeClassificationHandler } from "../intake/neutralIntakeClassificationJob";
 import { createNeutralIntakeExtractionHandler } from "../intake/neutralIntakeExtractionJob";
+import {
+  createFascicoloAutomaticAnalysisHandler,
+  type FascicoloAutomaticAnalysisDependencies,
+} from "../ai/fascicoloAutomaticAnalysisJob";
 import { createLegalReferenceDiscoveryHandler } from "../intake/neutralIntakeLegalReferenceDiscoveryJob";
 import { createLegalReferenceMatchingHandler } from "../intake/neutralIntakeLegalReferenceMatchingJob";
 import { createLegalReferenceOfficialLookupHandler } from "../intake/neutralIntakeLegalReferenceOfficialLookupJob";
@@ -11,27 +15,50 @@ import {
   createConcessioneTimeWatchHandler,
   createConcessioneTimeWatchV2Handler,
 } from "../fascicolo-lifecycle/concessioneTimeWatchJob";
+import {
+  createAutomaticResearchExecutionHandler,
+  reconcilePendingAutomaticResearchExecutions,
+  type AutomaticResearchExecutionDependencies,
+} from "../legal-research/automatic-research-job";
 
 const APPLICATION_ASYNC_JOB_LEASE_MS = 5 * 60 * 1_000;
+const PROVIDER_BACKED_OPERATIONS = [
+  "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+  "LEGAL_RESEARCH.EXECUTE_V1",
+] as const;
 
-export const applicationAsyncJobRegistry = new AsyncJobHandlerRegistry([
-  createNeutralIntakeExtractionHandler(),
-  createNeutralIntakeClassificationHandler(),
-  createLegalReferenceDiscoveryHandler(),
-  createLegalReferenceMatchingHandler(),
-  createLegalReferenceOfficialLookupHandler(),
-  createLegalReferenceOfficialReconciliationHandler(),
-  createFascicoloReevaluationHandler(),
-  createConcessioneTimeWatchHandler(),
-  createConcessioneTimeWatchV2Handler(),
-]);
+export function createApplicationAsyncJobRegistry(input: {
+  automaticAnalysisDependencies?: FascicoloAutomaticAnalysisDependencies;
+  automaticResearchDependencies?: Partial<AutomaticResearchExecutionDependencies>;
+} = {}) {
+  return new AsyncJobHandlerRegistry([
+    createNeutralIntakeExtractionHandler(),
+    createFascicoloAutomaticAnalysisHandler(input.automaticAnalysisDependencies),
+    createAutomaticResearchExecutionHandler(input.automaticResearchDependencies),
+    createNeutralIntakeClassificationHandler(),
+    createLegalReferenceDiscoveryHandler(),
+    createLegalReferenceMatchingHandler(),
+    createLegalReferenceOfficialLookupHandler(),
+    createLegalReferenceOfficialReconciliationHandler(),
+    createFascicoloReevaluationHandler(),
+    createConcessioneTimeWatchHandler(),
+    createConcessioneTimeWatchV2Handler(),
+  ]);
+}
 
-export function drainOneApplicationAsyncJob(input: {
+export const applicationAsyncJobRegistry = createApplicationAsyncJobRegistry();
+
+export async function drainOneApplicationAsyncJob(input: {
   workerId: string;
   retryDelayMs: number;
+  operationAllowlist?: readonly string[];
+  procedimentoAllowlist?: readonly string[];
+  providerExecutionEnabled?: boolean;
 }) {
+  await reconcilePendingAutomaticResearchExecutions();
   return drainOneAsyncJob({
     ...input,
+    operationBlocklist: input.providerExecutionEnabled === false ? PROVIDER_BACKED_OPERATIONS : undefined,
     leaseDurationMs: APPLICATION_ASYNC_JOB_LEASE_MS,
     registry: applicationAsyncJobRegistry,
   });

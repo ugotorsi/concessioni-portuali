@@ -16,6 +16,7 @@ import {
   Library,
   Map,
   Presentation,
+  Scale,
   Ship,
   Shield,
   Users,
@@ -48,6 +49,7 @@ const backofficeNavItems: NavItem[] = [
   { href: "/report", label: "Report", icon: FileText, matchMode: "section" },
   { href: "/documenti", label: "Documenti", icon: FileText, matchMode: "section" },
   { href: "/normativa", label: "Normativa", icon: Library, matchMode: "section" },
+  { href: "/legal-research/assisted-verification", label: "Verifica giuridica", icon: Scale, matchMode: "section" },
   { href: "/normativa/orchestrazione", label: "Orchestrazione", icon: Library, matchMode: "exact" },
   { href: "/audit", label: "Audit", icon: ScrollText },
   { href: "/ai", label: "Assistente AI", icon: Lightbulb },
@@ -75,7 +77,13 @@ interface SidebarProps {
 
 export function Sidebar({ role, roleLabel }: SidebarProps) {
   const pathname = usePathname();
-  const navItems = role === "VIEWER_ADSP" ? adspNavItems : backofficeNavItems;
+  const navItems = role === "VIEWER_ADSP"
+    ? adspNavItems
+    : backofficeNavItems.filter((item) => (
+      item.href !== "/legal-research/assisted-verification"
+      || role === "ADMIN"
+      || role === "GIURIDICO"
+    ));
 
   return (
     <aside className="border-r border-slate-200 bg-slate-900 text-slate-100">

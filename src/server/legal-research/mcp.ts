@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
+import { trustedAssistedEvidenceSchema } from "./assisted-verification";
 
 import {
   CONFIRMED_RESEARCH_TOOL_ROLES,
@@ -14,6 +15,7 @@ import {
   claimResearchMission,
   completeResearchMission,
   getResearchMission,
+  getLatestAssistedVerification,
   getResearchFascicoloContext,
   listPendingResearchMissions,
   releaseOrDeferResearchMission,
@@ -261,6 +263,7 @@ export const RESEARCH_MCP_OUTPUT_SCHEMAS = {
     mission: researchMissionOutputSchema,
     operational: operationalSchema,
     fascicoloContext: fascicoloContextSchema,
+    assistedVerification: trustedAssistedEvidenceSchema.nullable().optional(),
   }).strict(),
   research_claim_mission: z.object({
     outcome: z.enum(["CLAIMED", "REUSED"]),
@@ -312,6 +315,7 @@ export type ResearchMcpService = Readonly<{
   listPending: typeof listPendingResearchMissions;
   getMission: typeof getResearchMission;
   getFascicoloContext?: typeof getResearchFascicoloContext;
+  getAssistedVerification?: typeof getLatestAssistedVerification;
   claimMission: typeof claimResearchMission;
   submitEvidenceBundle: typeof submitResearchEvidenceBundle;
   deferMission: typeof releaseOrDeferResearchMission;
@@ -342,6 +346,7 @@ const defaultService: ResearchMcpService = {
   listPending: listPendingResearchMissions,
   getMission: getResearchMission,
   getFascicoloContext: getResearchFascicoloContext,
+  getAssistedVerification: getLatestAssistedVerification,
   claimMission: claimResearchMission,
   submitEvidenceBundle: submitResearchEvidenceBundle,
   deferMission: releaseOrDeferResearchMission,
@@ -596,9 +601,25 @@ export function createResearchMcpServer(
           candidates: [],
         });
     if (context.scope.scopeId !== scope.scopeId) throw new ResearchPersistenceError("AUTHORIZATION_REQUIRED");
+    const verification = service.getAssistedVerification
+      ? await service.getAssistedVerification(missionId, actor(principal)) : null;
+    if (verification && verification.snapshot.missionId !== missionId) throw new ResearchPersistenceError("AUTHORIZATION_REQUIRED");
     return {
       ...operationalMission(stored),
       fascicoloContext: context,
+      assistedVerification: verification ? {
+        recordId: verification.recordId,
+        snapshot: verification.snapshot,
+        verifiedDocuments: verification.snapshot.sources.flatMap((source) => {
+          const verified = verification.result.verifiedFullTexts.find((item) => item.evidenceSourceId === source.evidenceSourceId);
+          return verified && source.fullText.documentId && source.fullText.fileVersionId ? [{
+            evidenceSourceId: source.evidenceSourceId,
+            documentId: source.fullText.documentId,
+            fileVersionId: source.fullText.fileVersionId,
+            contentSha256: verified.contentSha256,
+          }] : [];
+        }),
+      } : null,
     } as unknown as Record<string, unknown>;
   }));
 

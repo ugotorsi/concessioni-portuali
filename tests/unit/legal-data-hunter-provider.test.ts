@@ -49,11 +49,13 @@ function hit(overrides: Record<string, unknown> = {}) {
 }
 
 function sequencedTransport(responses: Response[]) {
-  return vi.fn(async () => {
+  return vi.fn<NonNullable<NonNullable<Parameters<typeof createLegalDataHunterProvider>[0]>["transport"]>>(
+    async () => {
     const response = responses.shift();
     if (!response) throw new Error("unexpected request");
     return response;
-  });
+    },
+  );
 }
 
 describe("B2C13 Block 3B.6D Legal Data Hunter provider", () => {
@@ -263,6 +265,22 @@ describe("B2C13 Block 3B.6D Legal Data Hunter provider", () => {
       alpha: 0,
       result_detail: "snippet",
     });
+  });
+
+  it("uses the source id to filter discovered sources without a court name", async () => {
+    const transport = sequencedTransport([
+      json({ country: "IT", sources: [
+        { source_id: "IT/ConsiglioStatoOrdinanze", data_types: ["case_law"], court_name: null },
+        { source_id: "IT/GarantePrivacy", data_types: ["case_law"], court_name: null },
+      ] }),
+      json({ resolved: false, match_type: "none", documents: [] }),
+      json({ query: "structured", hits: [], total_hits: 0, alpha: 0, namespace: "case_law", elapsed_ms: 1 }),
+    ]);
+    const provider = createLegalDataHunterProvider({ apiKey: "key", transport });
+    await provider.lookup({ ...reference, authorityHint: "CONSIGLIO DI STATO" });
+    expect(JSON.parse(String(transport.mock.calls[2][1]?.body)).source).toEqual([
+      "IT/ConsiglioStatoOrdinanze",
+    ]);
   });
 
   it("rejects a criminal Cassation hit for a civil Cassation reference", async () => {

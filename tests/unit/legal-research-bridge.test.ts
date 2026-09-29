@@ -284,6 +284,38 @@ describe("Block 3B.13A chat legal research bridge", () => {
     })))).toContain("CANONICAL_AUTHORITY_FIELD_FORBIDDEN");
   });
 
+  it("accepts documentary references only in the verified evidence envelope", () => {
+    const researchMission = mission();
+    const verified = candidate({
+      toolId: "ASSISTED_VERIFICATION", verificationState: "OFFICIALLY_VERIFIED",
+      verifiedEvidence: {
+        evidenceSourceId: "evidence-a", legalSourceId: "source-a", legalExpressionVersionId: "expression-a",
+        contentSha256: "a".repeat(64), locator: { paragraph: "42" },
+        termsOfUseBasis: "Synthetic public-access terms", termsCheckedAt: "2026-09-26T09:00:00.000Z",
+        reviewedByActorId: "reviewer-a", reviewedAt: "2026-09-26T10:00:00.000Z", reviewRationale: "Synthetic document reviewed.",
+      },
+    });
+    const withCandidate = (value: AuthorityCandidate) => validateResearchEvidenceBundle(researchMission, bundle(researchMission, { authorityCandidates: [value] }));
+    expect(withCandidate(verified)).toEqual([]);
+    for (const field of ["legalSourceId", "legalExpressionVersionId", "canonicalKey", "temporalAssessment"]) {
+      expect(codes(withCandidate({ ...verified, [field]: "injected" }))).toContain("CANONICAL_AUTHORITY_FIELD_FORBIDDEN");
+      expect(codes(withCandidate({ ...verified, verifiedEvidence: { ...verified.verifiedEvidence!, nested: { [field]: "injected" } } } as AuthorityCandidate)))
+        .toContain("CANONICAL_AUTHORITY_FIELD_FORBIDDEN");
+    }
+    for (const field of ["canonicalKey", "temporalAssessment"]) {
+      expect(codes(withCandidate({ ...verified, verifiedEvidence: { ...verified.verifiedEvidence!, [field]: "injected" } })))
+        .toContain("CANONICAL_AUTHORITY_FIELD_FORBIDDEN");
+    }
+    for (const field of ["legalSourceId", "legalExpressionVersionId"]) {
+      expect(codes(withCandidate({ ...verified, verifiedEvidence: { ...verified.verifiedEvidence!, [field]: "" } })))
+        .toContain("CANDIDATE_VERIFIED_EVIDENCE_INVALID");
+    }
+    expect(codes(withCandidate({ ...verified, verifiedEvidence: { ...verified.verifiedEvidence!, token: "injected" } } as AuthorityCandidate)))
+      .toContain("CREDENTIAL_FIELD_FORBIDDEN");
+    expect(codes(withCandidate({ ...verified, verifiedEvidence: { ...verified.verifiedEvidence!, userProfile: "injected" } } as AuthorityCandidate)))
+      .toContain("PROFILE_FIELD_FORBIDDEN");
+  });
+
   it("requires enough candidate identity evidence", () => {
     const researchMission = mission();
     const weak = candidate({

@@ -9,6 +9,8 @@ import {
   resolveOpenGaCourt,
 } from "@/server/intake/official-source-lookup/openga";
 
+type OpenGaTransport = NonNullable<NonNullable<Parameters<typeof createOpenGaProvider>[0]>["transport"]>;
+
 const cdsReference = {
   kind: "CASE_LAW",
   authorityHint: "Consiglio di Stato",
@@ -55,7 +57,7 @@ function row(overrides: Record<string, unknown> = {}) {
 }
 
 function transport(rows: unknown[], metadata = packageMetadata()) {
-  return vi.fn(async (url: string) => url.includes("package_show")
+  return vi.fn<OpenGaTransport>(async (url) => String(url).includes("package_show")
     ? metadata
     : json({ success: true, result: { records: rows } }));
 }
@@ -199,11 +201,11 @@ describe("Block 3B.10A OpenGA official provider", () => {
   });
 
   it.each([
-    ["malformed metadata", vi.fn(async () => json({ success: true, result: {} })), "INVALID_RESPONSE", false],
+    ["malformed metadata", vi.fn<OpenGaTransport>(async () => json({ success: true, result: {} })), "INVALID_RESPONSE", false],
     ["malformed rows", transport([], packageMetadata()), "INVALID_RESPONSE", false],
-    ["rate limit", vi.fn(async () => new Response(null, { status: 429 })), "RATE_LIMITED", true],
-    ["provider outage", vi.fn(async () => new Response(null, { status: 503 })), "UPSTREAM_UNAVAILABLE", true],
-    ["network error", vi.fn(async () => { throw new Error("offline"); }), "NETWORK_ERROR", true],
+    ["rate limit", vi.fn<OpenGaTransport>(async () => new Response(null, { status: 429 })), "RATE_LIMITED", true],
+    ["provider outage", vi.fn<OpenGaTransport>(async () => new Response(null, { status: 503 })), "UPSTREAM_UNAVAILABLE", true],
+    ["network error", vi.fn<OpenGaTransport>(async () => { throw new Error("offline"); }), "NETWORK_ERROR", true],
   ])("classifies %s", async (_label, request, code, retryable) => {
     if (_label === "malformed rows") {
       request.mockImplementationOnce(async () => packageMetadata()).mockImplementationOnce(async () => json({ wrong: [] }));
@@ -215,7 +217,7 @@ describe("Block 3B.10A OpenGA official provider", () => {
   it("enforces timeout and does not expose unexpected response bodies", async () => {
     const timeout = createOpenGaProvider({
       timeoutMs: 5,
-      transport: vi.fn(async (_url, init) => new Promise((_resolve, reject) =>
+      transport: vi.fn<OpenGaTransport>(async (_url, init) => new Promise<Response>((_resolve, reject) =>
         init?.signal?.addEventListener("abort", () => reject(new DOMException("aborted", "AbortError"))))),
     });
     await expect(timeout.lookup(cdsReference)).rejects.toMatchObject({ code: "TIMEOUT", retryable: true });

@@ -314,22 +314,22 @@ describe("AI-01A fascicolo analysis contract", () => {
       expect(Object.isFrozen(request.requestedOutputContract)).toBe(true);
       expect(Object.isFrozen(request.requestedOutputContract.allowedSections)).toBe(true);
       try {
-        (request.systemPolicy as any).toolsAllowed = true;
+        Reflect.set(request.systemPolicy, "toolsAllowed", true);
       } catch {
         // A frozen request may reject mutation immediately.
       }
       try {
-        (request.systemPolicy.instructions as any[]).push("Poisoned policy");
+        Reflect.apply(Array.prototype.push, request.systemPolicy.instructions, ["Poisoned policy"]);
       } catch {
         // A frozen request may reject mutation immediately.
       }
       try {
-        (request.requestedOutputContract as any).outputMode = "FREE_TEXT";
+        Reflect.set(request.requestedOutputContract, "outputMode", "FREE_TEXT");
       } catch {
         // A frozen request may reject mutation immediately.
       }
       try {
-        (request.requestedOutputContract.allowedSections as any[]).splice(0);
+        Reflect.apply(Array.prototype.splice, request.requestedOutputContract.allowedSections, [0]);
       } catch {
         // A frozen request may reject mutation immediately.
       }
@@ -353,12 +353,12 @@ describe("AI-01A fascicolo analysis contract", () => {
     expect(Object.isFrozen(first.limitations)).toBe(true);
     expect(Object.isFrozen(first.limitations[0])).toBe(true);
     try {
-      (first.limitations as any[]).push({ code: "POISONED", text: "Poisoned" });
+      Reflect.apply(Array.prototype.push, first.limitations, [{ code: "POISONED", text: "Poisoned" }]);
     } catch {
       // A frozen result may reject mutation immediately.
     }
     try {
-      (first.limitations[0] as any).text = "Poisoned";
+      Reflect.set(first.limitations[0], "text", "Poisoned");
     } catch {
       // A frozen result may reject mutation immediately.
     }

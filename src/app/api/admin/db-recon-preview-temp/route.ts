@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createHash, timingSafeEqual } from "node:crypto";
+import { constantTimeTokenMatch } from "@/server/db-recon-preview-temp-token";
 
 import { getAuthSession } from "@/lib/next-auth";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
@@ -65,14 +65,6 @@ async function auditRouteFailure(
     },
     metadata: getAuditMetadata(authMethod),
   }).catch(() => undefined);
-}
-
-function digestToken(value: string): Buffer {
-  return createHash("sha256").update(value, "utf8").digest();
-}
-
-export function constantTimeTokenMatch(provided: string, expected: string): boolean {
-  return timingSafeEqual(digestToken(provided), digestToken(expected));
 }
 
 export async function GET(request: Request) {

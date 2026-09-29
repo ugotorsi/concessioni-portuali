@@ -104,7 +104,7 @@ describe("trusted research MCP client", () => {
     const transport = vi.fn();
 
     await expect(callTrustedResearchMcp(call, { env, mintGrant, transport }))
-      .rejects.toMatchObject<Partial<TrustedResearchMcpRequestError>>({
+      .rejects.toMatchObject({
         phase: "MINT_GRANT",
         technicalCode: "UNKNOWN",
       });

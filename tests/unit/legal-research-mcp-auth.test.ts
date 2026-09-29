@@ -4,7 +4,6 @@ import {
   exportJWK,
   generateKeyPair,
   type JWK,
-  type KeyLike,
 } from "jose";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
@@ -42,8 +41,10 @@ const activeIdentity: ResearchMcpLocalIdentity = {
   accessibleTenantIds: ["tenant-a", "tenant-b"],
 };
 
-let firstPrivateKey: KeyLike;
-let secondPrivateKey: KeyLike;
+type SigningKey = Awaited<ReturnType<typeof generateKeyPair>>["privateKey"];
+
+let firstPrivateKey: SigningKey;
+let secondPrivateKey: SigningKey;
 let firstJwk: JWK;
 let secondJwk: JWK;
 
@@ -57,13 +58,13 @@ beforeAll(async () => {
 });
 
 async function token(options: Readonly<{
-  key?: KeyLike;
+  key?: SigningKey;
   kid?: string;
   issuer?: string;
   audience?: string;
   expiresAt?: string;
   scope?: string;
-  permissions?: string[];
+  permissions?: readonly string[];
   actorId?: string | null;
   tenantId?: string | null;
 }> = {}): Promise<string> {
@@ -251,12 +252,14 @@ describe("Block 3B.13D WorkOS MCP auth", () => {
 
   it("accepts only complete HTTPS provider configuration", () => {
     expect(getResearchMcpAuthConfig({
+      ...process.env,
       WORKOS_AUTHKIT_ISSUER: config.issuer,
       MCP_RESOURCE_URI: config.resource,
-    } as NodeJS.ProcessEnv)).toEqual(config);
+    })).toEqual(config);
     expect(getResearchMcpAuthConfig({
+      ...process.env,
       WORKOS_AUTHKIT_ISSUER: "http://auth.example.test",
       MCP_RESOURCE_URI: config.resource,
-    } as NodeJS.ProcessEnv)).toBeNull();
+    })).toBeNull();
   });
 });

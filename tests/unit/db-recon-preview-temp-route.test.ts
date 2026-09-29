@@ -6,8 +6,11 @@ const auditSuccessMock = vi.hoisted(() => vi.fn());
 const auditFailureMock = vi.hoisted(() => vi.fn());
 const timingSafeEqualMock = vi.hoisted(() => vi.fn());
 
-const ReconConfigErrorRef = vi.hoisted(() => ({ value: class ReconConfigError extends Error {} }));
-const ReconTimeoutErrorRef = vi.hoisted(() => ({ value: class ReconTimeoutError extends Error {} }));
+const createReconConfigErrorMock = vi.hoisted(() => vi.fn<(
+  message: string,
+  diagnosticCode: "DIRECT_URL_MISSING" | "DIRECT_URL_INVALID",
+) => Error>());
+const createReconTimeoutErrorMock = vi.hoisted(() => vi.fn<(message: string) => Error>());
 
 vi.mock("node:crypto", async () => {
   const actual = await vi.importActual<typeof import("node:crypto")>("node:crypto");
@@ -44,8 +47,10 @@ vi.mock("@/server/db-recon-preview-temp", async () => {
       this.name = "ReconTimeoutError";
     }
   }
-  ReconConfigErrorRef.value = ReconConfigError;
-  ReconTimeoutErrorRef.value = ReconTimeoutError;
+  createReconConfigErrorMock.mockImplementation((message, diagnosticCode) => (
+    new ReconConfigError(message, diagnosticCode)
+  ));
+  createReconTimeoutErrorMock.mockImplementation((message) => new ReconTimeoutError(message));
 
   return {
     ...actual,
@@ -55,7 +60,8 @@ vi.mock("@/server/db-recon-preview-temp", async () => {
   };
 });
 
-import { GET, constantTimeTokenMatch } from "@/app/api/admin/db-recon-preview-temp/route";
+import { GET } from "@/app/api/admin/db-recon-preview-temp/route";
+import { constantTimeTokenMatch } from "@/server/db-recon-preview-temp-token";
 
 const ORIGINAL_ENV = { ...process.env };
 const TEMP_TOKEN = "temporary-preview-token-123";
@@ -359,7 +365,7 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
 
   it("classifies DIRECT_URL missing", async () => {
     runDbReconPreviewTempMock.mockRejectedValue(
-      new ReconConfigErrorRef.value("DIRECT_URL is missing.", "DIRECT_URL_MISSING"),
+      createReconConfigErrorMock("DIRECT_URL is missing.", "DIRECT_URL_MISSING"),
     );
 
     const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
@@ -372,7 +378,7 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
 
   it("classifies DIRECT_URL invalid", async () => {
     runDbReconPreviewTempMock.mockRejectedValue(
-      new ReconConfigErrorRef.value("DIRECT_URL is malformed.", "DIRECT_URL_INVALID"),
+      createReconConfigErrorMock("DIRECT_URL is malformed.", "DIRECT_URL_INVALID"),
     );
 
     const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
@@ -450,7 +456,7 @@ describe("GET /api/admin/db-recon-preview-temp", () => {
   });
 
   it("classifies application timeout as DB_TIMEOUT", async () => {
-    runDbReconPreviewTempMock.mockRejectedValue(new ReconTimeoutErrorRef.value("DB recon timeout."));
+    runDbReconPreviewTempMock.mockRejectedValue(createReconTimeoutErrorMock("DB recon timeout."));
 
     const response = await GET(makeRequest({ tokenHeader: TEMP_TOKEN }));
     const payload = await response.json();

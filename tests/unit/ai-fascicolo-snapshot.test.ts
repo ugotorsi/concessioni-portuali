@@ -536,7 +536,7 @@ describe("AI-00B deterministic fascicolo snapshot", () => {
 
   it("preserves explicit null for nullable dates", async () => {
     const explicitNull = detailFixture();
-    explicitNull.procedimento.dataAvvio = null;
+    Reflect.set(explicitNull.procedimento, "dataAvvio", null);
     getProcedimentoDetailMock.mockResolvedValue(explicitNull);
     const snapshot = await buildAiFascicoloSnapshotV1("proc-1");
     expect(snapshot.content.procedimento.dataAvvio).toBeNull();
@@ -564,7 +564,7 @@ describe("AI-00B deterministic fascicolo snapshot", () => {
 
   it("preserves explicit null for nullable text", async () => {
     const explicitNull = detailFixture();
-    explicitNull.procedimento.noteIstruttorie = null;
+    Reflect.set(explicitNull.procedimento, "noteIstruttorie", null);
     getProcedimentoDetailMock.mockResolvedValue(explicitNull);
     const snapshot = await buildAiFascicoloSnapshotV1("proc-1");
     expect(snapshot.content.procedimento.noteIstruttorie).toBeNull();
@@ -582,7 +582,7 @@ describe("AI-00B deterministic fascicolo snapshot", () => {
 
   it("accepts explicit canonical absence of the final act", async () => {
     const explicitNull = detailFixture();
-    explicitNull.procedimento.decisioneConclusiva = null;
+    Reflect.set(explicitNull.procedimento, "decisioneConclusiva", null);
     getProcedimentoDetailMock.mockResolvedValue(explicitNull);
     const snapshot = await buildAiFascicoloSnapshotV1("proc-1");
     expect(snapshot.content.finalActContext).toBeNull();
@@ -797,7 +797,7 @@ describe("AI-00B deterministic fascicolo snapshot", () => {
 
   it("keeps empty selected collections explicitly non-exhaustive", async () => {
     const empty = detailFixture();
-    empty.criticitaCollegata = null;
+    Reflect.set(empty, "criticitaCollegata", null);
     empty.altreCriticitaAperte = [];
     empty.pagamentiCritici = [];
     empty.scadenzeRilevanti = [];

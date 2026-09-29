@@ -252,16 +252,16 @@ describe("db recon preview temp service", () => {
     vi.useFakeTimers();
 
     let rejectQuery: ((error: Error) => void) | null = null;
-    const queryMock = vi.fn(
+    const queryMock = vi.fn<(sql: string) => Promise<{ rows: Array<Record<string, unknown>> }>>(
       () =>
-        new Promise((_, reject) => {
+        new Promise<{ rows: Array<Record<string, unknown>> }>((_, reject) => {
           rejectQuery = reject;
         }),
     );
     const destroyMock = vi.fn(() => {
       rejectQuery?.(new Error("socket closed"));
     });
-    const clientFactory = vi.fn(() => ({
+    const clientFactory = vi.fn<NonNullable<NonNullable<Parameters<typeof runDbReconPreviewTemp>[1]>["clientFactory"]>>(() => ({
       connect: vi.fn().mockResolvedValue(undefined),
       query: queryMock,
       end: vi.fn().mockResolvedValue(undefined),

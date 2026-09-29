@@ -299,7 +299,12 @@ describe("B2C10 Block 3B.6A async legal reference discovery", () => {
     expect(mocks.tx.legalReferenceMention.createMany).not.toHaveBeenCalled();
   });
 
-  it.each([
+  type ExecutionOverride = {
+    job?: { operation?: string; tenantId?: string };
+    attempt?: { outcome?: string; neutralIntakeId?: string };
+    intake?: ReturnType<typeof intake>;
+  };
+  it.each<readonly [string, ExecutionOverride]>([
     ["wrong operation", { job: { operation: "OTHER_OPERATION", tenantId: "ente-1" } }],
     ["unsuccessful extraction", { attempt: { outcome: "FAILED" } }],
     ["missing destination", { intake: intake(false) }],

@@ -90,6 +90,7 @@ export type ResearchMissionInput = Readonly<{
   referenceDate: string;
   mode: ResearchMode;
   researchQuestion: string;
+  assumptionsFingerprint?: string;
   knownAuthorities: readonly ResearchAuthorityReference[];
   excludedAuthorities: readonly ResearchAuthorityReference[];
   preferredSourceFamilies: readonly ResearchSourceFamily[];
@@ -164,7 +165,8 @@ export type AuthoritySupportDirection = "SUPPORT" | "AGAINST" | "QUALIFIES" | "U
 export type CandidateVerificationState =
   | "OFFICIAL_VERIFICATION_REQUIRED"
   | "OFFICIAL_VERIFICATION_PENDING"
-  | "OFFICIAL_VERIFICATION_FAILED";
+  | "OFFICIAL_VERIFICATION_FAILED"
+  | "OFFICIALLY_VERIFIED";
 
 export type AuthorityCandidateInput = Readonly<{
   kind: "AUTHORITY_CANDIDATE";
@@ -182,6 +184,16 @@ export type AuthorityCandidateInput = Readonly<{
   title?: string;
   sourceUrl?: string;
   providerDocumentId?: string;
+  providerReceivedText?: string;
+  providerDates?: Readonly<{
+    actDate?: string;
+    decisionDate?: string;
+    filingDate?: string;
+    publicationDate?: string;
+    acquisitionDate?: string;
+    normativeVersionDate?: string;
+  }>;
+  exactReferenceMatch?: boolean;
   relevantPassage?: string;
   summary?: string;
   legalPropositionId?: string;
@@ -190,6 +202,18 @@ export type AuthorityCandidateInput = Readonly<{
   retrievalMethod: ResearchOperationType;
   fullTextAvailable: boolean;
   verificationState: CandidateVerificationState;
+  verifiedEvidence?: Readonly<{
+    evidenceSourceId: string;
+    legalSourceId: string;
+    legalExpressionVersionId: string;
+    contentSha256: string;
+    locator: NonNullable<CitationObservation["provenance"]["locator"]>;
+    termsOfUseBasis: string;
+    termsCheckedAt: string;
+    reviewedByActorId: string;
+    reviewedAt: string;
+    reviewRationale: string;
+  }>;
 }>;
 
 export type AuthorityCandidate = AuthorityCandidateInput & Readonly<{ candidateId: string }>;
@@ -248,6 +272,7 @@ export type ResearchEvidenceBundle = Readonly<{
   version: typeof RESEARCH_BRIDGE_VERSION;
   missionId: string;
   executionId: string;
+  assistedVerificationFingerprint?: string;
   startedAt?: string;
   completedAt?: string;
   researchToolExecutions: readonly ResearchToolExecution[];
@@ -267,6 +292,7 @@ export type ResearchBridgeValidationErrorCode =
   | "BUDGET_EXHAUSTION_NOT_DECLARED"
   | "CANDIDATE_IDENTITY_INSUFFICIENT"
   | "CANDIDATE_IDENTITY_MISMATCH"
+  | "CANDIDATE_VERIFIED_EVIDENCE_INVALID"
   | "CANONICAL_AUTHORITY_FIELD_FORBIDDEN"
   | "CITATION_IDENTITY_MISMATCH"
   | "CITATION_SHAPE_INVALID"
@@ -377,7 +403,10 @@ function unsafePaths(
     const normalizedKey = key.replace(/[^a-z0-9]/gi, "").toLowerCase();
     if (credentialFieldNames.has(normalizedKey)) output.push({ path, kind: "CREDENTIAL" });
     if (profileFieldNames.has(normalizedKey)) output.push({ path, kind: "PROFILE" });
-    if (basePath.startsWith("authorityCandidates") && canonicalCandidateFields.has(key)) {
+    const documentaryReference = /^authorityCandidates\.\d+\.verifiedEvidence$/.test(basePath)
+      && (key === "legalSourceId" || key === "legalExpressionVersionId")
+      && typeof item === "string" && validId(item);
+    if (basePath.startsWith("authorityCandidates") && canonicalCandidateFields.has(key) && !documentaryReference) {
       output.push({ path, kind: "CANONICAL" });
     }
     output.push(...unsafePaths(item, path));
@@ -449,6 +478,9 @@ export function validateResearchMission(mission: ResearchMission): readonly Rese
   }
   if (!mission.researchQuestion.trim()) {
     errors.push(error("INVALID_RESEARCH_QUESTION", "researchQuestion", mission.missionId));
+  }
+  if (mission.assumptionsFingerprint !== undefined && !/^[a-f0-9]{64}$/.test(mission.assumptionsFingerprint)) {
+    errors.push(error("INVALID_ID", "assumptionsFingerprint", mission.missionId));
   }
   const idLists: Array<[string, readonly string[]]> = [
     ["legalIssueIds", mission.legalIssueIds],
@@ -572,6 +604,28 @@ function validCandidateIdentity(candidate: AuthorityCandidate): boolean {
   );
 }
 
+function validVerifiedCandidateEvidence(candidate: AuthorityCandidate): boolean {
+  if (candidate.verificationState !== "OFFICIALLY_VERIFIED") return true;
+  const evidence = candidate.verifiedEvidence;
+  if (!evidence || !candidate.sourceUrl?.startsWith("https://")) return false;
+  const locator = evidence.locator;
+  return Boolean(
+    validId(evidence.evidenceSourceId)
+    && validId(evidence.legalSourceId)
+    && validId(evidence.legalExpressionVersionId)
+    && /^[a-f0-9]{64}$/i.test(evidence.contentSha256)
+    && evidence.termsOfUseBasis.trim()
+    && validDate(evidence.termsCheckedAt)
+    && validId(evidence.reviewedByActorId)
+    && validDate(evidence.reviewedAt)
+    && evidence.reviewRationale.trim()
+    && (locator.page !== undefined
+      || locator.section?.trim()
+      || locator.paragraph?.trim()
+      || locator.span !== undefined)
+  );
+}
+
 function validCitationObservation(observation: CitationObservation): boolean {
   const locator = observation.provenance.locator;
   const validLocator = !locator || (
@@ -644,6 +698,9 @@ export function validateResearchEvidenceBundle(
     }
     if (!validCandidateIdentity(candidate)) {
       errors.push(error("CANDIDATE_IDENTITY_INSUFFICIENT", "authorityCandidates", candidate.candidateId));
+    }
+    if (!validVerifiedCandidateEvidence(candidate)) {
+      errors.push(error("CANDIDATE_VERIFIED_EVIDENCE_INVALID", "authorityCandidates", candidate.candidateId));
     }
     if (!executionIds.has(candidate.executionRecordId)) {
       errors.push(error("UNKNOWN_EXECUTION_REFERENCE", "authorityCandidates.executionRecordId", candidate.candidateId, candidate.executionRecordId));

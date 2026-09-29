@@ -25,6 +25,9 @@ export interface DrainOneAsyncJobInput {
   workerId: string;
   leaseDurationMs: number;
   retryDelayMs: number;
+  operationAllowlist?: readonly string[];
+  operationBlocklist?: readonly string[];
+  procedimentoAllowlist?: readonly string[];
   registry?: AsyncJobHandlerRegistry;
 }
 
@@ -37,6 +40,9 @@ export async function drainOneAsyncJob(input: DrainOneAsyncJobInput): Promise<Dr
   const claimed = await claimNextAsyncJob({
     workerId: input.workerId,
     leaseDurationMs: input.leaseDurationMs,
+    operationAllowlist: input.operationAllowlist,
+    operationBlocklist: input.operationBlocklist,
+    procedimentoAllowlist: input.procedimentoAllowlist,
     resolveTerminalFailureHook: registry.hasTerminalFailureHooks()
       ? (operation) => registry.resolve(operation)?.beforeTerminalFailureInTransaction
       : undefined,

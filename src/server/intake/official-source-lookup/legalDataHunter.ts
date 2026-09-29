@@ -71,7 +71,9 @@ function normalizedNumber(value: string): string {
 function authorityFamily(value: string): string | null {
   const compact = compactIdentity(value);
   if (compact.includes("CASSAZIONE") || compact.includes("CORTESUPREMADICASSAZIONE")) return "CASSAZIONE";
-  if (compact.includes("CONSIGLIODISTATO")) return "CONSIGLIO DI STATO";
+  if (compact.includes("CONSIGLIODISTATO") || compact.includes("CONSIGLIOSTATO")) {
+    return "CONSIGLIO DI STATO";
+  }
   if (compact.includes("CORTECOSTITUZIONALE")) return "CORTE COSTITUZIONALE";
   if (compact.startsWith("TAR") || compact.includes("TRIBUNALEAMMINISTRATIVOREGIONALE")) return "TAR";
   return null;
@@ -368,7 +370,7 @@ export function createLegalDataHunterProvider(config: {
       discoveryCache = { expiresAt: now() + discoveryTtlMs, sources };
     }
     const family = authorityFamily(reference.authorityHint!);
-    return sources.filter((source) => source.courtName === null || authorityFamily(source.courtName) === family);
+    return sources.filter((source) => authorityFamily(source.courtName ?? source.sourceId) === family);
   }
 
   async function lookup(reference: OfficialLegalReference): Promise<OfficialLegalReferenceLookupResult> {

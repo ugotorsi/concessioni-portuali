@@ -7,6 +7,10 @@ import {
   type FascicoloTrustedReviewProductionService,
 } from "@/server/ai/fascicoloTrustedReviewProduction";
 import {
+  createFascicoloDocumentAnalysisService,
+  type FascicoloDocumentAnalysisProvider,
+} from "@/server/ai/fascicoloDocumentAnalysis";
+import {
   createOpenAiAnalysisProvider,
   type OpenAiFetch,
   type OpenAiRegion,
@@ -100,7 +104,7 @@ function parseRuntimeConfig(env: OpenAiRuntimeEnv): ParsedOpenAiRuntimeConfig {
 function createOpenAiFascicoloServiceConfig(
   env: OpenAiRuntimeEnv,
   dependencies: { transport?: OpenAiFetch },
-): Parameters<typeof createFascicoloLiveAnalysisService>[0] {
+) {
   const realDataActivation = createRealDataActivationPolicy(env);
   assertRealDataActivation(realDataActivation);
   const config = parseRuntimeConfig(env);
@@ -137,4 +141,16 @@ export function createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv(
   return createFascicoloTrustedReviewProductionService(
     createOpenAiFascicoloServiceConfig(env, dependencies),
   );
+}
+
+export function createOpenAiFascicoloDocumentRuntimeFromEnv(
+  env: OpenAiRuntimeEnv = defaultOpenAiRuntimeEnv(),
+  dependencies: { transport?: OpenAiFetch } = {},
+) {
+  const config = createOpenAiFascicoloServiceConfig(env, dependencies);
+  return createFascicoloDocumentAnalysisService({
+    provider: config.provider as typeof config.provider & FascicoloDocumentAnalysisProvider,
+    maxInputBytes: config.maxInputBytes,
+    realDataActivation: config.realDataActivation,
+  });
 }

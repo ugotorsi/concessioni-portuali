@@ -5,7 +5,7 @@ import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
-const schema = readFileSync(path.join(root, "prisma", "schema.prisma"), "utf8");
+const schema = readFileSync(path.join(root, "prisma", "schema.prisma"), "utf8").replace(/\r\n/g, "\n");
 const migrationPath = path.join(
   root,
   "prisma",

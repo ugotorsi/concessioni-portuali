@@ -158,7 +158,7 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
   it("exposes no direct provider or authority override in the normal trusted-review runtime contract", () => {
     expect(createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv.length).toBe(0);
     expect(sourceText()).not.toMatch(
-      /createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv\s*\([^)]*(?:provider|model|activation|maxInputBytes|preparation|tenant|actor)/s,
+      /createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv\s*\([^)]*(?:provider|model|activation|maxInputBytes|preparation|tenant|actor)/,
     );
   });
 
@@ -319,7 +319,7 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
     expect(source).toMatch(
       /function defaultOpenAiRuntimeEnv\(\): OpenAiRuntimeEnv \{\s*return process\.env as unknown as OpenAiRuntimeEnv;\s*\}/,
     );
-    expect(source.match(/env: OpenAiRuntimeEnv = defaultOpenAiRuntimeEnv\(\)/g)).toHaveLength(2);
+    expect(source.match(/env: OpenAiRuntimeEnv = defaultOpenAiRuntimeEnv\(\)/g)).toHaveLength(3);
     expect(source).not.toMatch(/(?<!AI_)OPENAI_API_KEY/);
     for (const forbidden of [
       "NEXT_PUBLIC_",

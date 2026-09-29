@@ -55,7 +55,9 @@ describe("B2C12 Block 3B.6C Normattiva provider", () => {
   });
 
   it("sends only the explicit structured allowlist to the fixed endpoint", async () => {
-    const transport = vi.fn(async () => jsonResponse({ risultati: [] }));
+    const transport = vi.fn<NonNullable<NonNullable<Parameters<typeof createNormattivaProvider>[0]>["transport"]>>(
+      async () => jsonResponse({ risultati: [] }),
+    );
     const provider = createNormattivaProvider({ transport });
     const query = buildNormattivaQuery({ kind: "LEGISLATION", actType: "LEGGE", actNumber: "241", year: 1990 })!;
     await provider.lookup(query);

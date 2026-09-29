@@ -11,6 +11,7 @@ vi.mock("@/lib/prisma", () => ({
   prisma: {
     asyncJob: { findUnique: vi.fn() },
     neutralIntake: { findUnique: vi.fn() },
+    automaticFascicoloReportMission: { findMany: vi.fn(async () => []) },
   },
 }));
 
@@ -56,6 +57,7 @@ function dependencies(overrides: Partial<NeutralIntakeExtractionHandlerDependenc
     })),
     ensureClassification: vi.fn(async () => ({ outcome: "CREATED" as const, job: { id: "classification-job-1" } })),
     ensureLegalReferenceDiscovery: vi.fn(async () => ({ outcome: "CREATED" as const, job: { id: "discovery-job-1" } })),
+    ensureFascicoloAnalysis: vi.fn(async () => ({ outcome: "CREATED" as const, job: { id: "analysis-job-1" } })),
     ...overrides,
   } as NeutralIntakeExtractionHandlerDependencies;
 }
@@ -152,6 +154,11 @@ describe("B2C9 Block 3B.2C NeutralIntake async extraction wiring", () => {
       neutralIntakeId: "intake-1",
       extractionAttemptId: "attempt-1",
     });
+    expect(deps.ensureFascicoloAnalysis).toHaveBeenCalledWith({
+      sourceJobId: "job-1",
+      neutralIntakeId: "intake-1",
+      extractionAttemptId: "attempt-1",
+    });
     expect(handlerContext.heartbeat).toHaveBeenCalledTimes(2);
     expect(result).toEqual({
       referenceType: "NEUTRAL_INTAKE_EXTRACTION",
@@ -177,6 +184,10 @@ describe("B2C9 Block 3B.2C NeutralIntake async extraction wiring", () => {
       neutralIntakeId: "intake-1",
     });
     expect(deps.ensureLegalReferenceDiscovery).toHaveBeenCalledWith({
+      sourceJobId: "job-1",
+      neutralIntakeId: "intake-1",
+    });
+    expect(deps.ensureFascicoloAnalysis).toHaveBeenCalledWith({
       sourceJobId: "job-1",
       neutralIntakeId: "intake-1",
     });

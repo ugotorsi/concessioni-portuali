@@ -19,6 +19,7 @@ export const researchEvidenceBundleInputSchema = z.object({
   version: z.literal(RESEARCH_BRIDGE_VERSION),
   missionId: researchMissionIdSchema,
   executionId: researchExecutionIdSchema,
+  assistedVerificationFingerprint: z.string().regex(/^assisted-evidence:[0-9a-f]{64}$/).optional(),
   startedAt: z.string().optional(),
   completedAt: z.string().optional(),
   researchToolExecutions: z.array(z.unknown()),

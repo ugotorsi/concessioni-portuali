@@ -15,10 +15,15 @@ import * as outboundProjectionModule from "@/server/ai/fascicoloOutboundProjecti
 
 type Snapshot = Parameters<typeof projectAiFascicoloOutboundV1>[0];
 type Projection = AiFascicoloOutboundProjectionResultV1;
+type Mutable<T> = T extends readonly (infer Item)[]
+  ? Mutable<Item>[]
+  : T extends object
+    ? { -readonly [Key in keyof T]: Mutable<T[Key]> }
+    : T;
 
 const SOURCE_HASH = "a".repeat(64);
 
-function snapshotFixture(): Snapshot {
+function snapshotFixture(): Mutable<Snapshot> {
   return {
     metadata: {
       schemaVersion: "ai-fascicolo-snapshot/v1",
@@ -234,10 +239,10 @@ function snapshotFixture(): Snapshot {
   } as unknown as Snapshot;
 }
 
-function projectionClone(projection: Projection): Projection {
+function projectionClone(projection: Projection): Mutable<Projection> {
   return {
-    providerBound: structuredClone(projection.providerBound),
-    localOnly: structuredClone(projection.localOnly),
+    providerBound: structuredClone(projection.providerBound) as Mutable<Projection["providerBound"]>,
+    localOnly: structuredClone(projection.localOnly) as Mutable<Projection["localOnly"]>,
   };
 }
 

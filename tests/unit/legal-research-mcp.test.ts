@@ -611,7 +611,14 @@ describe("Block 3B.13C legal research MCP", () => {
     await client.callTool({ name: "research_complete_mission", arguments: {
       missionId: mission.missionId, executionId: "execution-a", bundleId: "bundle-a", claimToken,
     } });
-    const serializedCalls = JSON.stringify(Object.values(mockService).flatMap((operation) => vi.mocked(operation).mock.calls));
+    const serializedCalls = JSON.stringify([
+      ...vi.mocked(mockService.listPending).mock.calls,
+      ...vi.mocked(mockService.getMission).mock.calls,
+      ...vi.mocked(mockService.claimMission).mock.calls,
+      ...vi.mocked(mockService.submitEvidenceBundle).mock.calls,
+      ...vi.mocked(mockService.deferMission).mock.calls,
+      ...vi.mocked(mockService.completeMission).mock.calls,
+    ]);
     expect(serializedCalls).toContain('"tenantId":"tenant-a"');
     expect(serializedCalls).not.toContain("tenant-b");
   });

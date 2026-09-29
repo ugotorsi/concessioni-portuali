@@ -9,6 +9,7 @@ const queryMocks = vi.hoisted(() => ({
   getMaterials: vi.fn(),
   getHumanReview: vi.fn(),
   getProcedimentoDetail: vi.fn(),
+  getAutomaticWorkflow: vi.fn(),
 }));
 
 vi.mock("@/server/queries/ai-fascicolo-trusted-review-materials", () => ({
@@ -73,6 +74,18 @@ vi.mock("@/server/queries/normativa", () => ({
   getNormeForProcedimento: vi.fn().mockResolvedValue([]),
 }));
 
+vi.mock("@/server/queries/neutral-intake-processing", () => ({
+  getFascicoloProcessingItems: vi.fn().mockResolvedValue([]),
+}));
+
+vi.mock("@/server/queries/fascicolo-legal-source-candidates", () => ({
+  getFascicoloLegalSourceCandidates: vi.fn().mockResolvedValue([]),
+}));
+
+vi.mock("@/server/queries/fascicolo-automatic-workflow", () => ({
+  getFascicoloAutomaticWorkflowReadModel: queryMocks.getAutomaticWorkflow,
+}));
+
 import {
   AiFascicoloTrustedReviewPanel,
   resolveAiFascicoloTrustedReviewSelection,
@@ -102,6 +115,12 @@ const materials: readonly AiFascicoloTrustedReviewMaterialDiscoveryItemV1[] = [
     statementPaths: ["signals[0]"],
   },
 ];
+
+function mutableQueryValue(
+  value: string | readonly string[] | undefined,
+): string | string[] | undefined {
+  return typeof value === "string" || value === undefined ? value : [...value];
+}
 
 const humanReview: AiFascicoloHumanReviewReadModelV1 = {
   material: {
@@ -240,6 +259,12 @@ describe("B2C9A Trusted Review read consumer panel V1", () => {
       procedimentoId: "procedimento-1",
       materials,
     });
+    queryMocks.getAutomaticWorkflow.mockResolvedValue({
+      automaticResearch: { authorized: false, requirementCode: "AUTOMATIC_RESEARCH_POLICY_DISABLED" },
+      jobs: [],
+      reports: [],
+      missions: [],
+    });
   });
 
   it("renders the empty history without a generation control", () => {
@@ -280,8 +305,8 @@ describe("B2C9A Trusted Review read consumer panel V1", () => {
     ["statement array", "material-older", ["summary"]],
   ] as const)("page orchestration keeps B2C3 at zero for %s", async (_label, materialId, statementPath) => {
     await executePage({
-      materialId,
-      statementPath,
+      materialId: mutableQueryValue(materialId),
+      statementPath: mutableQueryValue(statementPath),
     });
     expect(queryMocks.getMaterials).toHaveBeenCalledWith({ procedimentoId: "procedimento-1" });
     expect(queryMocks.getHumanReview).not.toHaveBeenCalled();

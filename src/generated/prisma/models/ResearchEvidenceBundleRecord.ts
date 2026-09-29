@@ -289,6 +289,7 @@ export type ResearchEvidenceBundleRecordWhereInput = {
   submittedByActorId?: Prisma.StringFilter<"ResearchEvidenceBundleRecord"> | string
   createdAt?: Prisma.DateTimeFilter<"ResearchEvidenceBundleRecord"> | Date | string
   executionAttempt?: Prisma.XOR<Prisma.ResearchExecutionAttemptScalarRelationFilter, Prisma.ResearchExecutionAttemptWhereInput>
+  questionResults?: Prisma.ResearchQuestionResultRecordListRelationFilter
 }
 
 export type ResearchEvidenceBundleRecordOrderByWithRelationInput = {
@@ -306,11 +307,13 @@ export type ResearchEvidenceBundleRecordOrderByWithRelationInput = {
   submittedByActorId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   executionAttempt?: Prisma.ResearchExecutionAttemptOrderByWithRelationInput
+  questionResults?: Prisma.ResearchQuestionResultRecordOrderByRelationAggregateInput
 }
 
 export type ResearchEvidenceBundleRecordWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   fingerprint?: string
+  id_missionId?: Prisma.ResearchEvidenceBundleRecordIdMissionIdCompoundUniqueInput
   AND?: Prisma.ResearchEvidenceBundleRecordWhereInput | Prisma.ResearchEvidenceBundleRecordWhereInput[]
   OR?: Prisma.ResearchEvidenceBundleRecordWhereInput[]
   NOT?: Prisma.ResearchEvidenceBundleRecordWhereInput | Prisma.ResearchEvidenceBundleRecordWhereInput[]
@@ -326,7 +329,8 @@ export type ResearchEvidenceBundleRecordWhereUniqueInput = Prisma.AtLeast<{
   submittedByActorId?: Prisma.StringFilter<"ResearchEvidenceBundleRecord"> | string
   createdAt?: Prisma.DateTimeFilter<"ResearchEvidenceBundleRecord"> | Date | string
   executionAttempt?: Prisma.XOR<Prisma.ResearchExecutionAttemptScalarRelationFilter, Prisma.ResearchExecutionAttemptWhereInput>
-}, "id" | "fingerprint">
+  questionResults?: Prisma.ResearchQuestionResultRecordListRelationFilter
+}, "id" | "fingerprint" | "id_missionId">
 
 export type ResearchEvidenceBundleRecordOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -381,6 +385,7 @@ export type ResearchEvidenceBundleRecordCreateInput = {
   submittedByActorId: string
   createdAt?: Date | string
   executionAttempt: Prisma.ResearchExecutionAttemptCreateNestedOneWithoutEvidenceBundlesInput
+  questionResults?: Prisma.ResearchQuestionResultRecordCreateNestedManyWithoutBundleInput
 }
 
 export type ResearchEvidenceBundleRecordUncheckedCreateInput = {
@@ -397,6 +402,7 @@ export type ResearchEvidenceBundleRecordUncheckedCreateInput = {
   legalDataHunterCalls: number
   submittedByActorId: string
   createdAt?: Date | string
+  questionResults?: Prisma.ResearchQuestionResultRecordUncheckedCreateNestedManyWithoutBundleInput
 }
 
 export type ResearchEvidenceBundleRecordUpdateInput = {
@@ -412,6 +418,7 @@ export type ResearchEvidenceBundleRecordUpdateInput = {
   submittedByActorId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   executionAttempt?: Prisma.ResearchExecutionAttemptUpdateOneRequiredWithoutEvidenceBundlesNestedInput
+  questionResults?: Prisma.ResearchQuestionResultRecordUpdateManyWithoutBundleNestedInput
 }
 
 export type ResearchEvidenceBundleRecordUncheckedUpdateInput = {
@@ -428,6 +435,7 @@ export type ResearchEvidenceBundleRecordUncheckedUpdateInput = {
   legalDataHunterCalls?: Prisma.IntFieldUpdateOperationsInput | number
   submittedByActorId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  questionResults?: Prisma.ResearchQuestionResultRecordUncheckedUpdateManyWithoutBundleNestedInput
 }
 
 export type ResearchEvidenceBundleRecordCreateManyInput = {
@@ -484,6 +492,11 @@ export type ResearchEvidenceBundleRecordListRelationFilter = {
 
 export type ResearchEvidenceBundleRecordOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type ResearchEvidenceBundleRecordIdMissionIdCompoundUniqueInput = {
+  id: string
+  missionId: string
 }
 
 export type ResearchEvidenceBundleRecordCountOrderByAggregateInput = {
@@ -546,6 +559,11 @@ export type ResearchEvidenceBundleRecordSumOrderByAggregateInput = {
   legalDataHunterCalls?: Prisma.SortOrder
 }
 
+export type ResearchEvidenceBundleRecordScalarRelationFilter = {
+  is?: Prisma.ResearchEvidenceBundleRecordWhereInput
+  isNot?: Prisma.ResearchEvidenceBundleRecordWhereInput
+}
+
 export type ResearchEvidenceBundleRecordCreateNestedManyWithoutExecutionAttemptInput = {
   create?: Prisma.XOR<Prisma.ResearchEvidenceBundleRecordCreateWithoutExecutionAttemptInput, Prisma.ResearchEvidenceBundleRecordUncheckedCreateWithoutExecutionAttemptInput> | Prisma.ResearchEvidenceBundleRecordCreateWithoutExecutionAttemptInput[] | Prisma.ResearchEvidenceBundleRecordUncheckedCreateWithoutExecutionAttemptInput[]
   connectOrCreate?: Prisma.ResearchEvidenceBundleRecordCreateOrConnectWithoutExecutionAttemptInput | Prisma.ResearchEvidenceBundleRecordCreateOrConnectWithoutExecutionAttemptInput[]
@@ -592,6 +610,20 @@ export type EnumResearchCompletionStateFieldUpdateOperationsInput = {
   set?: $Enums.ResearchCompletionState
 }
 
+export type ResearchEvidenceBundleRecordCreateNestedOneWithoutQuestionResultsInput = {
+  create?: Prisma.XOR<Prisma.ResearchEvidenceBundleRecordCreateWithoutQuestionResultsInput, Prisma.ResearchEvidenceBundleRecordUncheckedCreateWithoutQuestionResultsInput>
+  connectOrCreate?: Prisma.ResearchEvidenceBundleRecordCreateOrConnectWithoutQuestionResultsInput
+  connect?: Prisma.ResearchEvidenceBundleRecordWhereUniqueInput
+}
+
+export type ResearchEvidenceBundleRecordUpdateOneRequiredWithoutQuestionResultsNestedInput = {
+  create?: Prisma.XOR<Prisma.ResearchEvidenceBundleRecordCreateWithoutQuestionResultsInput, Prisma.ResearchEvidenceBundleRecordUncheckedCreateWithoutQuestionResultsInput>
+  connectOrCreate?: Prisma.ResearchEvidenceBundleRecordCreateOrConnectWithoutQuestionResultsInput
+  upsert?: Prisma.ResearchEvidenceBundleRecordUpsertWithoutQuestionResultsInput
+  connect?: Prisma.ResearchEvidenceBundleRecordWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ResearchEvidenceBundleRecordUpdateToOneWithWhereWithoutQuestionResultsInput, Prisma.ResearchEvidenceBundleRecordUpdateWithoutQuestionResultsInput>, Prisma.ResearchEvidenceBundleRecordUncheckedUpdateWithoutQuestionResultsInput>
+}
+
 export type ResearchEvidenceBundleRecordCreateWithoutExecutionAttemptInput = {
   id: string
   contractVersion: string
@@ -604,6 +636,7 @@ export type ResearchEvidenceBundleRecordCreateWithoutExecutionAttemptInput = {
   legalDataHunterCalls: number
   submittedByActorId: string
   createdAt?: Date | string
+  questionResults?: Prisma.ResearchQuestionResultRecordCreateNestedManyWithoutBundleInput
 }
 
 export type ResearchEvidenceBundleRecordUncheckedCreateWithoutExecutionAttemptInput = {
@@ -618,6 +651,7 @@ export type ResearchEvidenceBundleRecordUncheckedCreateWithoutExecutionAttemptIn
   legalDataHunterCalls: number
   submittedByActorId: string
   createdAt?: Date | string
+  questionResults?: Prisma.ResearchQuestionResultRecordUncheckedCreateNestedManyWithoutBundleInput
 }
 
 export type ResearchEvidenceBundleRecordCreateOrConnectWithoutExecutionAttemptInput = {
@@ -665,6 +699,84 @@ export type ResearchEvidenceBundleRecordScalarWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"ResearchEvidenceBundleRecord"> | Date | string
 }
 
+export type ResearchEvidenceBundleRecordCreateWithoutQuestionResultsInput = {
+  id: string
+  contractVersion: string
+  fingerprint: string
+  payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  completionState: $Enums.ResearchCompletionState
+  totalCalls: number
+  moonlitCalls: number
+  simpliciterCalls: number
+  legalDataHunterCalls: number
+  submittedByActorId: string
+  createdAt?: Date | string
+  executionAttempt: Prisma.ResearchExecutionAttemptCreateNestedOneWithoutEvidenceBundlesInput
+}
+
+export type ResearchEvidenceBundleRecordUncheckedCreateWithoutQuestionResultsInput = {
+  id: string
+  missionId: string
+  executionId: string
+  contractVersion: string
+  fingerprint: string
+  payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  completionState: $Enums.ResearchCompletionState
+  totalCalls: number
+  moonlitCalls: number
+  simpliciterCalls: number
+  legalDataHunterCalls: number
+  submittedByActorId: string
+  createdAt?: Date | string
+}
+
+export type ResearchEvidenceBundleRecordCreateOrConnectWithoutQuestionResultsInput = {
+  where: Prisma.ResearchEvidenceBundleRecordWhereUniqueInput
+  create: Prisma.XOR<Prisma.ResearchEvidenceBundleRecordCreateWithoutQuestionResultsInput, Prisma.ResearchEvidenceBundleRecordUncheckedCreateWithoutQuestionResultsInput>
+}
+
+export type ResearchEvidenceBundleRecordUpsertWithoutQuestionResultsInput = {
+  update: Prisma.XOR<Prisma.ResearchEvidenceBundleRecordUpdateWithoutQuestionResultsInput, Prisma.ResearchEvidenceBundleRecordUncheckedUpdateWithoutQuestionResultsInput>
+  create: Prisma.XOR<Prisma.ResearchEvidenceBundleRecordCreateWithoutQuestionResultsInput, Prisma.ResearchEvidenceBundleRecordUncheckedCreateWithoutQuestionResultsInput>
+  where?: Prisma.ResearchEvidenceBundleRecordWhereInput
+}
+
+export type ResearchEvidenceBundleRecordUpdateToOneWithWhereWithoutQuestionResultsInput = {
+  where?: Prisma.ResearchEvidenceBundleRecordWhereInput
+  data: Prisma.XOR<Prisma.ResearchEvidenceBundleRecordUpdateWithoutQuestionResultsInput, Prisma.ResearchEvidenceBundleRecordUncheckedUpdateWithoutQuestionResultsInput>
+}
+
+export type ResearchEvidenceBundleRecordUpdateWithoutQuestionResultsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  fingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  completionState?: Prisma.EnumResearchCompletionStateFieldUpdateOperationsInput | $Enums.ResearchCompletionState
+  totalCalls?: Prisma.IntFieldUpdateOperationsInput | number
+  moonlitCalls?: Prisma.IntFieldUpdateOperationsInput | number
+  simpliciterCalls?: Prisma.IntFieldUpdateOperationsInput | number
+  legalDataHunterCalls?: Prisma.IntFieldUpdateOperationsInput | number
+  submittedByActorId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  executionAttempt?: Prisma.ResearchExecutionAttemptUpdateOneRequiredWithoutEvidenceBundlesNestedInput
+}
+
+export type ResearchEvidenceBundleRecordUncheckedUpdateWithoutQuestionResultsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  missionId?: Prisma.StringFieldUpdateOperationsInput | string
+  executionId?: Prisma.StringFieldUpdateOperationsInput | string
+  contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  fingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  completionState?: Prisma.EnumResearchCompletionStateFieldUpdateOperationsInput | $Enums.ResearchCompletionState
+  totalCalls?: Prisma.IntFieldUpdateOperationsInput | number
+  moonlitCalls?: Prisma.IntFieldUpdateOperationsInput | number
+  simpliciterCalls?: Prisma.IntFieldUpdateOperationsInput | number
+  legalDataHunterCalls?: Prisma.IntFieldUpdateOperationsInput | number
+  submittedByActorId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type ResearchEvidenceBundleRecordCreateManyExecutionAttemptInput = {
   id: string
   contractVersion: string
@@ -691,6 +803,7 @@ export type ResearchEvidenceBundleRecordUpdateWithoutExecutionAttemptInput = {
   legalDataHunterCalls?: Prisma.IntFieldUpdateOperationsInput | number
   submittedByActorId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  questionResults?: Prisma.ResearchQuestionResultRecordUpdateManyWithoutBundleNestedInput
 }
 
 export type ResearchEvidenceBundleRecordUncheckedUpdateWithoutExecutionAttemptInput = {
@@ -705,6 +818,7 @@ export type ResearchEvidenceBundleRecordUncheckedUpdateWithoutExecutionAttemptIn
   legalDataHunterCalls?: Prisma.IntFieldUpdateOperationsInput | number
   submittedByActorId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  questionResults?: Prisma.ResearchQuestionResultRecordUncheckedUpdateManyWithoutBundleNestedInput
 }
 
 export type ResearchEvidenceBundleRecordUncheckedUpdateManyWithoutExecutionAttemptInput = {
@@ -722,6 +836,35 @@ export type ResearchEvidenceBundleRecordUncheckedUpdateManyWithoutExecutionAttem
 }
 
 
+/**
+ * Count Type ResearchEvidenceBundleRecordCountOutputType
+ */
+
+export type ResearchEvidenceBundleRecordCountOutputType = {
+  questionResults: number
+}
+
+export type ResearchEvidenceBundleRecordCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  questionResults?: boolean | ResearchEvidenceBundleRecordCountOutputTypeCountQuestionResultsArgs
+}
+
+/**
+ * ResearchEvidenceBundleRecordCountOutputType without action
+ */
+export type ResearchEvidenceBundleRecordCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ResearchEvidenceBundleRecordCountOutputType
+   */
+  select?: Prisma.ResearchEvidenceBundleRecordCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * ResearchEvidenceBundleRecordCountOutputType without action
+ */
+export type ResearchEvidenceBundleRecordCountOutputTypeCountQuestionResultsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ResearchQuestionResultRecordWhereInput
+}
+
 
 export type ResearchEvidenceBundleRecordSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -738,6 +881,8 @@ export type ResearchEvidenceBundleRecordSelect<ExtArgs extends runtime.Types.Ext
   submittedByActorId?: boolean
   createdAt?: boolean
   executionAttempt?: boolean | Prisma.ResearchExecutionAttemptDefaultArgs<ExtArgs>
+  questionResults?: boolean | Prisma.ResearchEvidenceBundleRecord$questionResultsArgs<ExtArgs>
+  _count?: boolean | Prisma.ResearchEvidenceBundleRecordCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["researchEvidenceBundleRecord"]>
 
 export type ResearchEvidenceBundleRecordSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -793,6 +938,8 @@ export type ResearchEvidenceBundleRecordSelectScalar = {
 export type ResearchEvidenceBundleRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "missionId" | "executionId" | "contractVersion" | "fingerprint" | "payload" | "completionState" | "totalCalls" | "moonlitCalls" | "simpliciterCalls" | "legalDataHunterCalls" | "submittedByActorId" | "createdAt", ExtArgs["result"]["researchEvidenceBundleRecord"]>
 export type ResearchEvidenceBundleRecordInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   executionAttempt?: boolean | Prisma.ResearchExecutionAttemptDefaultArgs<ExtArgs>
+  questionResults?: boolean | Prisma.ResearchEvidenceBundleRecord$questionResultsArgs<ExtArgs>
+  _count?: boolean | Prisma.ResearchEvidenceBundleRecordCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ResearchEvidenceBundleRecordIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   executionAttempt?: boolean | Prisma.ResearchExecutionAttemptDefaultArgs<ExtArgs>
@@ -805,6 +952,7 @@ export type $ResearchEvidenceBundleRecordPayload<ExtArgs extends runtime.Types.E
   name: "ResearchEvidenceBundleRecord"
   objects: {
     executionAttempt: Prisma.$ResearchExecutionAttemptPayload<ExtArgs>
+    questionResults: Prisma.$ResearchQuestionResultRecordPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1215,6 +1363,7 @@ readonly fields: ResearchEvidenceBundleRecordFieldRefs;
 export interface Prisma__ResearchEvidenceBundleRecordClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   executionAttempt<T extends Prisma.ResearchExecutionAttemptDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResearchExecutionAttemptDefaultArgs<ExtArgs>>): Prisma.Prisma__ResearchExecutionAttemptClient<runtime.Types.Result.GetResult<Prisma.$ResearchExecutionAttemptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  questionResults<T extends Prisma.ResearchEvidenceBundleRecord$questionResultsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResearchEvidenceBundleRecord$questionResultsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResearchQuestionResultRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1655,6 +1804,30 @@ export type ResearchEvidenceBundleRecordDeleteManyArgs<ExtArgs extends runtime.T
    * Limit how many ResearchEvidenceBundleRecords to delete.
    */
   limit?: number
+}
+
+/**
+ * ResearchEvidenceBundleRecord.questionResults
+ */
+export type ResearchEvidenceBundleRecord$questionResultsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ResearchQuestionResultRecord
+   */
+  select?: Prisma.ResearchQuestionResultRecordSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ResearchQuestionResultRecord
+   */
+  omit?: Prisma.ResearchQuestionResultRecordOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ResearchQuestionResultRecordInclude<ExtArgs> | null
+  where?: Prisma.ResearchQuestionResultRecordWhereInput
+  orderBy?: Prisma.ResearchQuestionResultRecordOrderByWithRelationInput | Prisma.ResearchQuestionResultRecordOrderByWithRelationInput[]
+  cursor?: Prisma.ResearchQuestionResultRecordWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ResearchQuestionResultRecordScalarFieldEnum | Prisma.ResearchQuestionResultRecordScalarFieldEnum[]
 }
 
 /**

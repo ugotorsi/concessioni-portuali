@@ -122,13 +122,13 @@ const trustedReview = {
 };
 
 const lineage = {
-  analysisSchemaVersion: "analysis/v1",
-  snapshotSchemaVersion: "snapshot/v1",
-  outboundSchemaVersion: "outbound/v1",
+  analysisSchemaVersion: "ai-fascicolo-analysis/v1",
+  snapshotSchemaVersion: "ai-fascicolo-snapshot/v1",
+  outboundSchemaVersion: "ai-fascicolo-outbound/v1",
   sourceSnapshotContentHash: "source-hash",
   outboundProjectionHash: "outbound-hash",
   outboundProjectionHashAlgorithm: "sha256",
-};
+} satisfies Parameters<typeof buildAiFascicoloTrustedReviewMaterialIdentityV1>[0]["lineage"];
 
 function materialFixture() {
   const identity = buildAiFascicoloTrustedReviewMaterialIdentityV1({ trustedReview, lineage });

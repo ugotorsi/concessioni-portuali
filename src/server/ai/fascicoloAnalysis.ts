@@ -16,6 +16,7 @@ import type {
 } from "@/server/ai/fascicoloOutboundProjection";
 import { AI_FASCICOLO_SNAPSHOT_V1_SCHEMA_VERSION } from "@/server/ai/fascicoloSnapshotContract";
 import type { buildAiFascicoloSnapshotV1 } from "@/server/ai/fascicoloSnapshot";
+import { fascicoloStructuredKnowledgeSchema } from "@/server/fascicolo-knowledge/structuredContracts";
 
 export const AI_FASCICOLO_ANALYSIS_V1_SCHEMA_VERSION = "ai-fascicolo-analysis/v1" as const;
 
@@ -209,6 +210,7 @@ export const providerAnalysisPayloadV1Schema = z.object({
   investigativeQuestions: z.array(optionalGroundingStatementSchema).max(100),
   suggestedActivities: z.array(optionalGroundingStatementSchema).max(100),
   legalResearchQuestions: z.array(optionalGroundingStatementSchema).max(100),
+  structuredKnowledge: fascicoloStructuredKnowledgeSchema.optional(),
 }).strict();
 
 export type ProviderAnalysisPayloadV1 = z.infer<typeof providerAnalysisPayloadV1Schema>;

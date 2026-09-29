@@ -56,7 +56,7 @@ function proposal(status: Proposal["status"] = "PROPOSTO", overrides: Partial<Pr
     sourceTitleSnapshot: "Legge 28 gennaio 1994, n. 84",
     sourceRelevantProvisionsSnapshot: ["art. 16", "art. 18"],
     ruleCodeSnapshot: "P1C_ART18_ART16_AUTH_REQUIREMENT",
-    ruleContractVersionSnapshot: "1",
+    ruleContractVersionSnapshot: 1,
     legalRuleDefinitionSnapshot: { humanReviewRequired: true },
     gapKeySnapshot: "REQ-AUTORIZZAZIONE-ART16",
     gapLabelSnapshot: "Autorizzazione per operazioni portuali ex art. 16",
@@ -95,7 +95,7 @@ const activeAssociation: Association = {
   documento: {
     id: "documento-1",
     nome: "Titolo autorizzatorio.pdf",
-    tipologia: "ATTO",
+    tipologia: "DETERMINA",
     statoDocumento: "ATTIVO",
     dataDocumento: new Date("2026-08-01T00:00:00.000Z"),
     createdAt: new Date("2026-08-01T08:00:00.000Z"),
@@ -468,7 +468,7 @@ describe("P1-C1 document requirement proposal UI", () => {
           "proposal-1": [{
             id: "documento-3",
             nome: "Documento candidato.pdf",
-            tipologia: "ATTO",
+            tipologia: "DETERMINA",
             dataDocumento: null,
             createdAt: new Date("2026-08-02T08:00:00.000Z"),
           }],
@@ -483,7 +483,7 @@ describe("P1-C1 document requirement proposal UI", () => {
   it("50. calls create with proposalId and documentoId only", () => {
     const source = evidenceSectionSource();
     expect(source).toContain("createFascicoloDocumentRequirementEvidence({ proposalId, documentoId })");
-    expect(source).not.toMatch(/createFascicoloDocumentRequirementEvidence\(\{[^}]+(?:enteId|procedimentoId|tenant|status|ruleCode|gapKey)/s);
+    expect(source).not.toMatch(/createFascicoloDocumentRequirementEvidence\(\{[^}]+(?:enteId|procedimentoId|tenant|status|ruleCode|gapKey)/);
   });
 
   it("51. requires a bounded revocation note", () => {
@@ -500,7 +500,7 @@ describe("P1-C1 document requirement proposal UI", () => {
   it("52. calls revoke with evidenceId and revocationNote only", () => {
     const source = evidenceSectionSource();
     expect(source).toContain("revokeFascicoloDocumentRequirementEvidence({ evidenceId, revocationNote })");
-    expect(source).not.toMatch(/revokeFascicoloDocumentRequirementEvidence\(\{[^}]+(?:enteId|procedimentoId|tenant|status|ruleCode|gapKey)/s);
+    expect(source).not.toMatch(/revokeFascicoloDocumentRequirementEvidence\(\{[^}]+(?:enteId|procedimentoId|tenant|status|ruleCode|gapKey)/);
   });
 
   it("53. keeps unauthorized evidence display read-only", () => {
@@ -513,7 +513,7 @@ describe("P1-C1 document requirement proposal UI", () => {
           "proposal-1": [{
             id: "documento-3",
             nome: "Documento candidato.pdf",
-            tipologia: "ATTO",
+            tipologia: "DETERMINA",
             dataDocumento: null,
             createdAt: new Date("2026-08-02T08:00:00.000Z"),
           }],
@@ -664,7 +664,7 @@ describe("P1-C1 document requirement proposal UI", () => {
           "proposal-1": [{
             id: "documento-3",
             nome: "Documento candidato.pdf",
-            tipologia: "ATTO",
+            tipologia: "DETERMINA",
             dataDocumento: null,
             createdAt: new Date("2026-08-02T08:00:00.000Z"),
           }],

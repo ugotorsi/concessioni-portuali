@@ -63,6 +63,7 @@ vi.mock("@/server/legal-research/trusted-mcp-client", () => ({
 import { POST } from "@/app/api/legal-research/trusted/mission/action/route";
 import { RESEARCH_BRIDGE_VERSION } from "@/server/legal-research/bridge";
 import { ResearchFascicoloAccessGrantError } from "@/server/legal-research/fascicolo-access-grant";
+import { researchEvidenceBundleInputSchema } from "@/server/legal-research/mcp-write-contracts";
 
 const missionId = "research-mission:7cd3faa5f4294068fc30558e65b4229ff46359463fa0039c61717b5da30e0b63";
 const accessToken = "secret-workos-bearer";
@@ -112,6 +113,36 @@ describe("POST /api/legal-research/trusted/mission/action", () => {
   });
 
   afterEach(() => warnSpy.mockRestore());
+
+  it.each([undefined, `assisted-evidence:${"a".repeat(64)}`])(
+    "preserves the optional assisted fingerprint through the shared contract and trusted route: %s",
+    async (assistedVerificationFingerprint) => {
+      const bundle = { ...evidenceBundle(), ...(assistedVerificationFingerprint ? { assistedVerificationFingerprint } : {}) };
+      expect(researchEvidenceBundleInputSchema.parse(bundle)).toEqual(bundle);
+      const response = await POST(request({ action: "research_submit_evidence_bundle", missionId, bundle, claimToken }));
+      expect(response.status).toBe(200);
+      expect(callTrustedResearchMcpMock).toHaveBeenCalledWith(expect.objectContaining({
+        payload: expect.objectContaining({ params: { name: "research_submit_evidence_bundle", arguments: { bundle, claimToken } } }),
+      }));
+    },
+  );
+
+  it.each(["", "a".repeat(64), `assisted-evidence:${"a".repeat(63)}`, `assisted-evidence:${"a".repeat(65)}`, `assisted-evidence:${"A".repeat(64)}`, null, {}])(
+    "rejects a malformed assisted fingerprint before MCP: %s", async (assistedVerificationFingerprint) => {
+      const bundle = { ...evidenceBundle(), assistedVerificationFingerprint };
+      expect(researchEvidenceBundleInputSchema.safeParse(bundle).success).toBe(false);
+      const response = await POST(request({ action: "research_submit_evidence_bundle", missionId, bundle, claimToken }));
+      expect(response.status).toBe(400);
+      expect(callTrustedResearchMcpMock).not.toHaveBeenCalled();
+    },
+  );
+
+  it("keeps the bundle schema strict when an assisted fingerprint is present", async () => {
+    const bundle = { ...evidenceBundle(), assistedVerificationFingerprint: `assisted-evidence:${"a".repeat(64)}`, callerVerified: true };
+    expect(researchEvidenceBundleInputSchema.safeParse(bundle).success).toBe(false);
+    expect((await POST(request({ action: "research_submit_evidence_bundle", missionId, bundle, claimToken }))).status).toBe(400);
+    expect(callTrustedResearchMcpMock).not.toHaveBeenCalled();
+  });
 
   it.each([
     {
@@ -204,7 +235,7 @@ describe("POST /api/legal-research/trusted/mission/action", () => {
   it("preserves fascicolo denial without exposing bearer or grant details", async () => {
     callTrustedResearchMcpMock.mockRejectedValue(new ResearchFascicoloAccessGrantError(
       "FASCICOLO_BINDING_FORBIDDEN",
-      "TRUSTED_ACTION_MISSION_TENANT_MISMATCH_OR_ACCESS_DENIED",
+      "TRUSTED_READ_MISSION_TENANT_MISMATCH_OR_ACCESS_DENIED",
     ));
     const response = await POST(request({
       action: "research_claim_mission",
@@ -218,6 +249,6 @@ describe("POST /api/legal-research/trusted/mission/action", () => {
     expect(serialized).toBe('{"error":"FORBIDDEN"}');
     expect(serialized).not.toContain(accessToken);
     expect(serialized).not.toContain("fg1.secret-grant");
-    expect(warnSpy).toHaveBeenCalledWith("TRUSTED_ACTION_MISSION_TENANT_MISMATCH_OR_ACCESS_DENIED");
+    expect(warnSpy).toHaveBeenCalledWith("TRUSTED_READ_MISSION_TENANT_MISMATCH_OR_ACCESS_DENIED");
   });
 });

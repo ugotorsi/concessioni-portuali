@@ -284,6 +284,7 @@ export type LegalSourceVersionWhereInput = {
   legalExpressionVersion?: Prisma.XOR<Prisma.LegalExpressionVersionNullableScalarRelationFilter, Prisma.LegalExpressionVersionWhereInput> | null
   acquisitions?: Prisma.LegalSourceAcquisitionListRelationFilter
   legacyNormaVersioni?: Prisma.NormaVersioneListRelationFilter
+  researchSourceAssessments?: Prisma.ResearchSourceAssessmentRecordListRelationFilter
 }
 
 export type LegalSourceVersionOrderByWithRelationInput = {
@@ -304,6 +305,7 @@ export type LegalSourceVersionOrderByWithRelationInput = {
   legalExpressionVersion?: Prisma.LegalExpressionVersionOrderByWithRelationInput
   acquisitions?: Prisma.LegalSourceAcquisitionOrderByRelationAggregateInput
   legacyNormaVersioni?: Prisma.NormaVersioneOrderByRelationAggregateInput
+  researchSourceAssessments?: Prisma.ResearchSourceAssessmentRecordOrderByRelationAggregateInput
 }
 
 export type LegalSourceVersionWhereUniqueInput = Prisma.AtLeast<{
@@ -330,6 +332,7 @@ export type LegalSourceVersionWhereUniqueInput = Prisma.AtLeast<{
   legalExpressionVersion?: Prisma.XOR<Prisma.LegalExpressionVersionNullableScalarRelationFilter, Prisma.LegalExpressionVersionWhereInput> | null
   acquisitions?: Prisma.LegalSourceAcquisitionListRelationFilter
   legacyNormaVersioni?: Prisma.NormaVersioneListRelationFilter
+  researchSourceAssessments?: Prisma.ResearchSourceAssessmentRecordListRelationFilter
 }, "id" | "sourceFamilyId_observedSha256" | "id_sourceFamilyId" | "id_sourceFamilyId_observedSha256">
 
 export type LegalSourceVersionOrderByWithAggregationInput = {
@@ -388,6 +391,7 @@ export type LegalSourceVersionCreateInput = {
   legalExpressionVersion?: Prisma.LegalExpressionVersionCreateNestedOneWithoutRepresentationsInput
   acquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutSourceVersionInput
   legacyNormaVersioni?: Prisma.NormaVersioneCreateNestedManyWithoutLegalSourceVersionInput
+  researchSourceAssessments?: Prisma.ResearchSourceAssessmentRecordCreateNestedManyWithoutSourceVersionInput
 }
 
 export type LegalSourceVersionUncheckedCreateInput = {
@@ -406,6 +410,7 @@ export type LegalSourceVersionUncheckedCreateInput = {
   updatedAt?: Date | string
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutSourceVersionInput
   legacyNormaVersioni?: Prisma.NormaVersioneUncheckedCreateNestedManyWithoutLegalSourceVersionInput
+  researchSourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedCreateNestedManyWithoutSourceVersionInput
 }
 
 export type LegalSourceVersionUpdateInput = {
@@ -424,6 +429,7 @@ export type LegalSourceVersionUpdateInput = {
   legalExpressionVersion?: Prisma.LegalExpressionVersionUpdateOneWithoutRepresentationsNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutSourceVersionNestedInput
   legacyNormaVersioni?: Prisma.NormaVersioneUpdateManyWithoutLegalSourceVersionNestedInput
+  researchSourceAssessments?: Prisma.ResearchSourceAssessmentRecordUpdateManyWithoutSourceVersionNestedInput
 }
 
 export type LegalSourceVersionUncheckedUpdateInput = {
@@ -442,6 +448,7 @@ export type LegalSourceVersionUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceVersionNestedInput
   legacyNormaVersioni?: Prisma.NormaVersioneUncheckedUpdateManyWithoutLegalSourceVersionNestedInput
+  researchSourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedUpdateManyWithoutSourceVersionNestedInput
 }
 
 export type LegalSourceVersionCreateManyInput = {
@@ -681,6 +688,22 @@ export type LegalSourceVersionUpdateOneWithoutAcquisitionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.LegalSourceVersionUpdateToOneWithWhereWithoutAcquisitionsInput, Prisma.LegalSourceVersionUpdateWithoutAcquisitionsInput>, Prisma.LegalSourceVersionUncheckedUpdateWithoutAcquisitionsInput>
 }
 
+export type LegalSourceVersionCreateNestedOneWithoutResearchSourceAssessmentsInput = {
+  create?: Prisma.XOR<Prisma.LegalSourceVersionCreateWithoutResearchSourceAssessmentsInput, Prisma.LegalSourceVersionUncheckedCreateWithoutResearchSourceAssessmentsInput>
+  connectOrCreate?: Prisma.LegalSourceVersionCreateOrConnectWithoutResearchSourceAssessmentsInput
+  connect?: Prisma.LegalSourceVersionWhereUniqueInput
+}
+
+export type LegalSourceVersionUpdateOneWithoutResearchSourceAssessmentsNestedInput = {
+  create?: Prisma.XOR<Prisma.LegalSourceVersionCreateWithoutResearchSourceAssessmentsInput, Prisma.LegalSourceVersionUncheckedCreateWithoutResearchSourceAssessmentsInput>
+  connectOrCreate?: Prisma.LegalSourceVersionCreateOrConnectWithoutResearchSourceAssessmentsInput
+  upsert?: Prisma.LegalSourceVersionUpsertWithoutResearchSourceAssessmentsInput
+  disconnect?: Prisma.LegalSourceVersionWhereInput | boolean
+  delete?: Prisma.LegalSourceVersionWhereInput | boolean
+  connect?: Prisma.LegalSourceVersionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LegalSourceVersionUpdateToOneWithWhereWithoutResearchSourceAssessmentsInput, Prisma.LegalSourceVersionUpdateWithoutResearchSourceAssessmentsInput>, Prisma.LegalSourceVersionUncheckedUpdateWithoutResearchSourceAssessmentsInput>
+}
+
 export type LegalSourceVersionCreateNestedOneWithoutLegacyNormaVersioniInput = {
   create?: Prisma.XOR<Prisma.LegalSourceVersionCreateWithoutLegacyNormaVersioniInput, Prisma.LegalSourceVersionUncheckedCreateWithoutLegacyNormaVersioniInput>
   connectOrCreate?: Prisma.LegalSourceVersionCreateOrConnectWithoutLegacyNormaVersioniInput
@@ -712,6 +735,7 @@ export type LegalSourceVersionCreateWithoutSourceFamilyInput = {
   legalExpressionVersion?: Prisma.LegalExpressionVersionCreateNestedOneWithoutRepresentationsInput
   acquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutSourceVersionInput
   legacyNormaVersioni?: Prisma.NormaVersioneCreateNestedManyWithoutLegalSourceVersionInput
+  researchSourceAssessments?: Prisma.ResearchSourceAssessmentRecordCreateNestedManyWithoutSourceVersionInput
 }
 
 export type LegalSourceVersionUncheckedCreateWithoutSourceFamilyInput = {
@@ -729,6 +753,7 @@ export type LegalSourceVersionUncheckedCreateWithoutSourceFamilyInput = {
   updatedAt?: Date | string
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutSourceVersionInput
   legacyNormaVersioni?: Prisma.NormaVersioneUncheckedCreateNestedManyWithoutLegalSourceVersionInput
+  researchSourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedCreateNestedManyWithoutSourceVersionInput
 }
 
 export type LegalSourceVersionCreateOrConnectWithoutSourceFamilyInput = {
@@ -791,6 +816,7 @@ export type LegalSourceVersionCreateWithoutLegalExpressionVersionInput = {
   sourceFamily: Prisma.LegalSourceCreateNestedOneWithoutVersionsInput
   acquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutSourceVersionInput
   legacyNormaVersioni?: Prisma.NormaVersioneCreateNestedManyWithoutLegalSourceVersionInput
+  researchSourceAssessments?: Prisma.ResearchSourceAssessmentRecordCreateNestedManyWithoutSourceVersionInput
 }
 
 export type LegalSourceVersionUncheckedCreateWithoutLegalExpressionVersionInput = {
@@ -807,6 +833,7 @@ export type LegalSourceVersionUncheckedCreateWithoutLegalExpressionVersionInput 
   updatedAt?: Date | string
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutSourceVersionInput
   legacyNormaVersioni?: Prisma.NormaVersioneUncheckedCreateNestedManyWithoutLegalSourceVersionInput
+  researchSourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedCreateNestedManyWithoutSourceVersionInput
 }
 
 export type LegalSourceVersionCreateOrConnectWithoutLegalExpressionVersionInput = {
@@ -850,6 +877,7 @@ export type LegalSourceVersionCreateWithoutAcquisitionsInput = {
   sourceFamily: Prisma.LegalSourceCreateNestedOneWithoutVersionsInput
   legalExpressionVersion?: Prisma.LegalExpressionVersionCreateNestedOneWithoutRepresentationsInput
   legacyNormaVersioni?: Prisma.NormaVersioneCreateNestedManyWithoutLegalSourceVersionInput
+  researchSourceAssessments?: Prisma.ResearchSourceAssessmentRecordCreateNestedManyWithoutSourceVersionInput
 }
 
 export type LegalSourceVersionUncheckedCreateWithoutAcquisitionsInput = {
@@ -867,6 +895,7 @@ export type LegalSourceVersionUncheckedCreateWithoutAcquisitionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   legacyNormaVersioni?: Prisma.NormaVersioneUncheckedCreateNestedManyWithoutLegalSourceVersionInput
+  researchSourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedCreateNestedManyWithoutSourceVersionInput
 }
 
 export type LegalSourceVersionCreateOrConnectWithoutAcquisitionsInput = {
@@ -900,6 +929,7 @@ export type LegalSourceVersionUpdateWithoutAcquisitionsInput = {
   sourceFamily?: Prisma.LegalSourceUpdateOneRequiredWithoutVersionsNestedInput
   legalExpressionVersion?: Prisma.LegalExpressionVersionUpdateOneWithoutRepresentationsNestedInput
   legacyNormaVersioni?: Prisma.NormaVersioneUpdateManyWithoutLegalSourceVersionNestedInput
+  researchSourceAssessments?: Prisma.ResearchSourceAssessmentRecordUpdateManyWithoutSourceVersionNestedInput
 }
 
 export type LegalSourceVersionUncheckedUpdateWithoutAcquisitionsInput = {
@@ -916,6 +946,95 @@ export type LegalSourceVersionUncheckedUpdateWithoutAcquisitionsInput = {
   legalLifecycleStatus?: Prisma.EnumLegalSourceVersionLifecycleStatusFieldUpdateOperationsInput | $Enums.LegalSourceVersionLifecycleStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  legacyNormaVersioni?: Prisma.NormaVersioneUncheckedUpdateManyWithoutLegalSourceVersionNestedInput
+  researchSourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedUpdateManyWithoutSourceVersionNestedInput
+}
+
+export type LegalSourceVersionCreateWithoutResearchSourceAssessmentsInput = {
+  id?: string
+  observedSha256: string
+  observedSizeBytes: number
+  observedMimeType: string
+  versionLabel?: string | null
+  publicationDate?: Date | string | null
+  effectiveFrom?: Date | string | null
+  effectiveTo?: Date | string | null
+  legalLifecycleStatus: $Enums.LegalSourceVersionLifecycleStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sourceFamily: Prisma.LegalSourceCreateNestedOneWithoutVersionsInput
+  legalExpressionVersion?: Prisma.LegalExpressionVersionCreateNestedOneWithoutRepresentationsInput
+  acquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutSourceVersionInput
+  legacyNormaVersioni?: Prisma.NormaVersioneCreateNestedManyWithoutLegalSourceVersionInput
+}
+
+export type LegalSourceVersionUncheckedCreateWithoutResearchSourceAssessmentsInput = {
+  id?: string
+  sourceFamilyId: string
+  legalExpressionVersionId?: string | null
+  observedSha256: string
+  observedSizeBytes: number
+  observedMimeType: string
+  versionLabel?: string | null
+  publicationDate?: Date | string | null
+  effectiveFrom?: Date | string | null
+  effectiveTo?: Date | string | null
+  legalLifecycleStatus: $Enums.LegalSourceVersionLifecycleStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  acquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutSourceVersionInput
+  legacyNormaVersioni?: Prisma.NormaVersioneUncheckedCreateNestedManyWithoutLegalSourceVersionInput
+}
+
+export type LegalSourceVersionCreateOrConnectWithoutResearchSourceAssessmentsInput = {
+  where: Prisma.LegalSourceVersionWhereUniqueInput
+  create: Prisma.XOR<Prisma.LegalSourceVersionCreateWithoutResearchSourceAssessmentsInput, Prisma.LegalSourceVersionUncheckedCreateWithoutResearchSourceAssessmentsInput>
+}
+
+export type LegalSourceVersionUpsertWithoutResearchSourceAssessmentsInput = {
+  update: Prisma.XOR<Prisma.LegalSourceVersionUpdateWithoutResearchSourceAssessmentsInput, Prisma.LegalSourceVersionUncheckedUpdateWithoutResearchSourceAssessmentsInput>
+  create: Prisma.XOR<Prisma.LegalSourceVersionCreateWithoutResearchSourceAssessmentsInput, Prisma.LegalSourceVersionUncheckedCreateWithoutResearchSourceAssessmentsInput>
+  where?: Prisma.LegalSourceVersionWhereInput
+}
+
+export type LegalSourceVersionUpdateToOneWithWhereWithoutResearchSourceAssessmentsInput = {
+  where?: Prisma.LegalSourceVersionWhereInput
+  data: Prisma.XOR<Prisma.LegalSourceVersionUpdateWithoutResearchSourceAssessmentsInput, Prisma.LegalSourceVersionUncheckedUpdateWithoutResearchSourceAssessmentsInput>
+}
+
+export type LegalSourceVersionUpdateWithoutResearchSourceAssessmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  observedSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  observedSizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  observedMimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  versionLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  legalLifecycleStatus?: Prisma.EnumLegalSourceVersionLifecycleStatusFieldUpdateOperationsInput | $Enums.LegalSourceVersionLifecycleStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sourceFamily?: Prisma.LegalSourceUpdateOneRequiredWithoutVersionsNestedInput
+  legalExpressionVersion?: Prisma.LegalExpressionVersionUpdateOneWithoutRepresentationsNestedInput
+  acquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutSourceVersionNestedInput
+  legacyNormaVersioni?: Prisma.NormaVersioneUpdateManyWithoutLegalSourceVersionNestedInput
+}
+
+export type LegalSourceVersionUncheckedUpdateWithoutResearchSourceAssessmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceFamilyId?: Prisma.StringFieldUpdateOperationsInput | string
+  legalExpressionVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  observedSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  observedSizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  observedMimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  versionLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  effectiveFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  effectiveTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  legalLifecycleStatus?: Prisma.EnumLegalSourceVersionLifecycleStatusFieldUpdateOperationsInput | $Enums.LegalSourceVersionLifecycleStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  acquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceVersionNestedInput
   legacyNormaVersioni?: Prisma.NormaVersioneUncheckedUpdateManyWithoutLegalSourceVersionNestedInput
 }
 
@@ -934,6 +1053,7 @@ export type LegalSourceVersionCreateWithoutLegacyNormaVersioniInput = {
   sourceFamily: Prisma.LegalSourceCreateNestedOneWithoutVersionsInput
   legalExpressionVersion?: Prisma.LegalExpressionVersionCreateNestedOneWithoutRepresentationsInput
   acquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutSourceVersionInput
+  researchSourceAssessments?: Prisma.ResearchSourceAssessmentRecordCreateNestedManyWithoutSourceVersionInput
 }
 
 export type LegalSourceVersionUncheckedCreateWithoutLegacyNormaVersioniInput = {
@@ -951,6 +1071,7 @@ export type LegalSourceVersionUncheckedCreateWithoutLegacyNormaVersioniInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutSourceVersionInput
+  researchSourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedCreateNestedManyWithoutSourceVersionInput
 }
 
 export type LegalSourceVersionCreateOrConnectWithoutLegacyNormaVersioniInput = {
@@ -984,6 +1105,7 @@ export type LegalSourceVersionUpdateWithoutLegacyNormaVersioniInput = {
   sourceFamily?: Prisma.LegalSourceUpdateOneRequiredWithoutVersionsNestedInput
   legalExpressionVersion?: Prisma.LegalExpressionVersionUpdateOneWithoutRepresentationsNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutSourceVersionNestedInput
+  researchSourceAssessments?: Prisma.ResearchSourceAssessmentRecordUpdateManyWithoutSourceVersionNestedInput
 }
 
 export type LegalSourceVersionUncheckedUpdateWithoutLegacyNormaVersioniInput = {
@@ -1001,6 +1123,7 @@ export type LegalSourceVersionUncheckedUpdateWithoutLegacyNormaVersioniInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceVersionNestedInput
+  researchSourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedUpdateManyWithoutSourceVersionNestedInput
 }
 
 export type LegalSourceVersionCreateManySourceFamilyInput = {
@@ -1033,6 +1156,7 @@ export type LegalSourceVersionUpdateWithoutSourceFamilyInput = {
   legalExpressionVersion?: Prisma.LegalExpressionVersionUpdateOneWithoutRepresentationsNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutSourceVersionNestedInput
   legacyNormaVersioni?: Prisma.NormaVersioneUpdateManyWithoutLegalSourceVersionNestedInput
+  researchSourceAssessments?: Prisma.ResearchSourceAssessmentRecordUpdateManyWithoutSourceVersionNestedInput
 }
 
 export type LegalSourceVersionUncheckedUpdateWithoutSourceFamilyInput = {
@@ -1050,6 +1174,7 @@ export type LegalSourceVersionUncheckedUpdateWithoutSourceFamilyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceVersionNestedInput
   legacyNormaVersioni?: Prisma.NormaVersioneUncheckedUpdateManyWithoutLegalSourceVersionNestedInput
+  researchSourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedUpdateManyWithoutSourceVersionNestedInput
 }
 
 export type LegalSourceVersionUncheckedUpdateManyWithoutSourceFamilyInput = {
@@ -1096,6 +1221,7 @@ export type LegalSourceVersionUpdateWithoutLegalExpressionVersionInput = {
   sourceFamily?: Prisma.LegalSourceUpdateOneRequiredWithoutVersionsNestedInput
   acquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutSourceVersionNestedInput
   legacyNormaVersioni?: Prisma.NormaVersioneUpdateManyWithoutLegalSourceVersionNestedInput
+  researchSourceAssessments?: Prisma.ResearchSourceAssessmentRecordUpdateManyWithoutSourceVersionNestedInput
 }
 
 export type LegalSourceVersionUncheckedUpdateWithoutLegalExpressionVersionInput = {
@@ -1112,6 +1238,7 @@ export type LegalSourceVersionUncheckedUpdateWithoutLegalExpressionVersionInput 
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   acquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutSourceVersionNestedInput
   legacyNormaVersioni?: Prisma.NormaVersioneUncheckedUpdateManyWithoutLegalSourceVersionNestedInput
+  researchSourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedUpdateManyWithoutSourceVersionNestedInput
 }
 
 export type LegalSourceVersionUncheckedUpdateManyWithoutLegalExpressionVersionInput = {
@@ -1136,11 +1263,13 @@ export type LegalSourceVersionUncheckedUpdateManyWithoutLegalExpressionVersionIn
 export type LegalSourceVersionCountOutputType = {
   acquisitions: number
   legacyNormaVersioni: number
+  researchSourceAssessments: number
 }
 
 export type LegalSourceVersionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   acquisitions?: boolean | LegalSourceVersionCountOutputTypeCountAcquisitionsArgs
   legacyNormaVersioni?: boolean | LegalSourceVersionCountOutputTypeCountLegacyNormaVersioniArgs
+  researchSourceAssessments?: boolean | LegalSourceVersionCountOutputTypeCountResearchSourceAssessmentsArgs
 }
 
 /**
@@ -1167,6 +1296,13 @@ export type LegalSourceVersionCountOutputTypeCountLegacyNormaVersioniArgs<ExtArg
   where?: Prisma.NormaVersioneWhereInput
 }
 
+/**
+ * LegalSourceVersionCountOutputType without action
+ */
+export type LegalSourceVersionCountOutputTypeCountResearchSourceAssessmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ResearchSourceAssessmentRecordWhereInput
+}
+
 
 export type LegalSourceVersionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1186,6 +1322,7 @@ export type LegalSourceVersionSelect<ExtArgs extends runtime.Types.Extensions.In
   legalExpressionVersion?: boolean | Prisma.LegalSourceVersion$legalExpressionVersionArgs<ExtArgs>
   acquisitions?: boolean | Prisma.LegalSourceVersion$acquisitionsArgs<ExtArgs>
   legacyNormaVersioni?: boolean | Prisma.LegalSourceVersion$legacyNormaVersioniArgs<ExtArgs>
+  researchSourceAssessments?: boolean | Prisma.LegalSourceVersion$researchSourceAssessmentsArgs<ExtArgs>
   _count?: boolean | Prisma.LegalSourceVersionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["legalSourceVersion"]>
 
@@ -1247,6 +1384,7 @@ export type LegalSourceVersionInclude<ExtArgs extends runtime.Types.Extensions.I
   legalExpressionVersion?: boolean | Prisma.LegalSourceVersion$legalExpressionVersionArgs<ExtArgs>
   acquisitions?: boolean | Prisma.LegalSourceVersion$acquisitionsArgs<ExtArgs>
   legacyNormaVersioni?: boolean | Prisma.LegalSourceVersion$legacyNormaVersioniArgs<ExtArgs>
+  researchSourceAssessments?: boolean | Prisma.LegalSourceVersion$researchSourceAssessmentsArgs<ExtArgs>
   _count?: boolean | Prisma.LegalSourceVersionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type LegalSourceVersionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1265,6 +1403,7 @@ export type $LegalSourceVersionPayload<ExtArgs extends runtime.Types.Extensions.
     legalExpressionVersion: Prisma.$LegalExpressionVersionPayload<ExtArgs> | null
     acquisitions: Prisma.$LegalSourceAcquisitionPayload<ExtArgs>[]
     legacyNormaVersioni: Prisma.$NormaVersionePayload<ExtArgs>[]
+    researchSourceAssessments: Prisma.$ResearchSourceAssessmentRecordPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1678,6 +1817,7 @@ export interface Prisma__LegalSourceVersionClient<T, Null = never, ExtArgs exten
   legalExpressionVersion<T extends Prisma.LegalSourceVersion$legalExpressionVersionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalSourceVersion$legalExpressionVersionArgs<ExtArgs>>): Prisma.Prisma__LegalExpressionVersionClient<runtime.Types.Result.GetResult<Prisma.$LegalExpressionVersionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   acquisitions<T extends Prisma.LegalSourceVersion$acquisitionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalSourceVersion$acquisitionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LegalSourceAcquisitionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   legacyNormaVersioni<T extends Prisma.LegalSourceVersion$legacyNormaVersioniArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalSourceVersion$legacyNormaVersioniArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NormaVersionePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  researchSourceAssessments<T extends Prisma.LegalSourceVersion$researchSourceAssessmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalSourceVersion$researchSourceAssessmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResearchSourceAssessmentRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2185,6 +2325,30 @@ export type LegalSourceVersion$legacyNormaVersioniArgs<ExtArgs extends runtime.T
   take?: number
   skip?: number
   distinct?: Prisma.NormaVersioneScalarFieldEnum | Prisma.NormaVersioneScalarFieldEnum[]
+}
+
+/**
+ * LegalSourceVersion.researchSourceAssessments
+ */
+export type LegalSourceVersion$researchSourceAssessmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ResearchSourceAssessmentRecord
+   */
+  select?: Prisma.ResearchSourceAssessmentRecordSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ResearchSourceAssessmentRecord
+   */
+  omit?: Prisma.ResearchSourceAssessmentRecordOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ResearchSourceAssessmentRecordInclude<ExtArgs> | null
+  where?: Prisma.ResearchSourceAssessmentRecordWhereInput
+  orderBy?: Prisma.ResearchSourceAssessmentRecordOrderByWithRelationInput | Prisma.ResearchSourceAssessmentRecordOrderByWithRelationInput[]
+  cursor?: Prisma.ResearchSourceAssessmentRecordWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ResearchSourceAssessmentRecordScalarFieldEnum | Prisma.ResearchSourceAssessmentRecordScalarFieldEnum[]
 }
 
 /**

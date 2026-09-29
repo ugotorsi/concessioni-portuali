@@ -18,7 +18,7 @@ const requestContext = { ipAddress: "127.0.0.1", userAgent: "vitest" };
 
 function createTransaction(trace: string[]) {
   return {
-    $queryRaw: vi.fn(async () => {
+    $queryRaw: vi.fn<(...query: [TemplateStringsArray, ...unknown[]]) => Promise<unknown>>(async () => {
       trace.push("lock");
       return [{ acquired: true }];
     }),

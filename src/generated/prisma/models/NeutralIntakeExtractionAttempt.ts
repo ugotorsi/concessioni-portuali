@@ -340,6 +340,9 @@ export type NeutralIntakeExtractionAttemptWhereInput = {
   pages?: Prisma.NeutralIntakeExtractionPageListRelationFilter
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptListRelationFilter
   legalReferenceMentions?: Prisma.LegalReferenceMentionListRelationFilter
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportListRelationFilter
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentListRelationFilter
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceListRelationFilter
 }
 
 export type NeutralIntakeExtractionAttemptOrderByWithRelationInput = {
@@ -368,6 +371,9 @@ export type NeutralIntakeExtractionAttemptOrderByWithRelationInput = {
   pages?: Prisma.NeutralIntakeExtractionPageOrderByRelationAggregateInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptOrderByRelationAggregateInput
   legalReferenceMentions?: Prisma.LegalReferenceMentionOrderByRelationAggregateInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportOrderByRelationAggregateInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentOrderByRelationAggregateInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceOrderByRelationAggregateInput
 }
 
 export type NeutralIntakeExtractionAttemptWhereUniqueInput = Prisma.AtLeast<{
@@ -400,6 +406,9 @@ export type NeutralIntakeExtractionAttemptWhereUniqueInput = Prisma.AtLeast<{
   pages?: Prisma.NeutralIntakeExtractionPageListRelationFilter
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptListRelationFilter
   legalReferenceMentions?: Prisma.LegalReferenceMentionListRelationFilter
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportListRelationFilter
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentListRelationFilter
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceListRelationFilter
 }, "id" | "id_neutralIntakeId">
 
 export type NeutralIntakeExtractionAttemptOrderByWithAggregationInput = {
@@ -483,6 +492,9 @@ export type NeutralIntakeExtractionAttemptCreateInput = {
   pages?: Prisma.NeutralIntakeExtractionPageCreateNestedManyWithoutExtractionAttemptInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptCreateNestedManyWithoutExtractionAttemptInput
   legalReferenceMentions?: Prisma.LegalReferenceMentionCreateNestedManyWithoutExtractionAttemptInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutDocumentVersionInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentCreateNestedManyWithoutDocumentVersionInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutExtractionAttemptInput
 }
 
 export type NeutralIntakeExtractionAttemptUncheckedCreateInput = {
@@ -510,6 +522,9 @@ export type NeutralIntakeExtractionAttemptUncheckedCreateInput = {
   pages?: Prisma.NeutralIntakeExtractionPageUncheckedCreateNestedManyWithoutExtractionAttemptInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedCreateNestedManyWithoutExtractionAttemptInput
   legalReferenceMentions?: Prisma.LegalReferenceMentionUncheckedCreateNestedManyWithoutExtractionAttemptInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutDocumentVersionInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentUncheckedCreateNestedManyWithoutDocumentVersionInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutExtractionAttemptInput
 }
 
 export type NeutralIntakeExtractionAttemptUpdateInput = {
@@ -537,6 +552,9 @@ export type NeutralIntakeExtractionAttemptUpdateInput = {
   pages?: Prisma.NeutralIntakeExtractionPageUpdateManyWithoutExtractionAttemptNestedInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUpdateManyWithoutExtractionAttemptNestedInput
   legalReferenceMentions?: Prisma.LegalReferenceMentionUpdateManyWithoutExtractionAttemptNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutDocumentVersionNestedInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentUpdateManyWithoutDocumentVersionNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutExtractionAttemptNestedInput
 }
 
 export type NeutralIntakeExtractionAttemptUncheckedUpdateInput = {
@@ -564,6 +582,9 @@ export type NeutralIntakeExtractionAttemptUncheckedUpdateInput = {
   pages?: Prisma.NeutralIntakeExtractionPageUncheckedUpdateManyWithoutExtractionAttemptNestedInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedUpdateManyWithoutExtractionAttemptNestedInput
   legalReferenceMentions?: Prisma.LegalReferenceMentionUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutDocumentVersionNestedInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentUncheckedUpdateManyWithoutDocumentVersionNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutExtractionAttemptNestedInput
 }
 
 export type NeutralIntakeExtractionAttemptCreateManyInput = {
@@ -733,6 +754,11 @@ export type NeutralIntakeExtractionAttemptScalarRelationFilter = {
   isNot?: Prisma.NeutralIntakeExtractionAttemptWhereInput
 }
 
+export type NeutralIntakeExtractionAttemptNullableScalarRelationFilter = {
+  is?: Prisma.NeutralIntakeExtractionAttemptWhereInput | null
+  isNot?: Prisma.NeutralIntakeExtractionAttemptWhereInput | null
+}
+
 export type NeutralIntakeExtractionAttemptCreateNestedManyWithoutNeutralIntakeInput = {
   create?: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptCreateWithoutNeutralIntakeInput, Prisma.NeutralIntakeExtractionAttemptUncheckedCreateWithoutNeutralIntakeInput> | Prisma.NeutralIntakeExtractionAttemptCreateWithoutNeutralIntakeInput[] | Prisma.NeutralIntakeExtractionAttemptUncheckedCreateWithoutNeutralIntakeInput[]
   connectOrCreate?: Prisma.NeutralIntakeExtractionAttemptCreateOrConnectWithoutNeutralIntakeInput | Prisma.NeutralIntakeExtractionAttemptCreateOrConnectWithoutNeutralIntakeInput[]
@@ -821,6 +847,50 @@ export type NeutralIntakeExtractionAttemptUpdateOneRequiredWithoutClassification
   update?: Prisma.XOR<Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptUpdateToOneWithWhereWithoutClassificationAttemptsInput, Prisma.NeutralIntakeExtractionAttemptUpdateWithoutClassificationAttemptsInput>, Prisma.NeutralIntakeExtractionAttemptUncheckedUpdateWithoutClassificationAttemptsInput>
 }
 
+export type NeutralIntakeExtractionAttemptCreateNestedOneWithoutAutomaticFascicoloReportsInput = {
+  create?: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptCreateWithoutAutomaticFascicoloReportsInput, Prisma.NeutralIntakeExtractionAttemptUncheckedCreateWithoutAutomaticFascicoloReportsInput>
+  connectOrCreate?: Prisma.NeutralIntakeExtractionAttemptCreateOrConnectWithoutAutomaticFascicoloReportsInput
+  connect?: Prisma.NeutralIntakeExtractionAttemptWhereUniqueInput
+}
+
+export type NeutralIntakeExtractionAttemptUpdateOneRequiredWithoutAutomaticFascicoloReportsNestedInput = {
+  create?: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptCreateWithoutAutomaticFascicoloReportsInput, Prisma.NeutralIntakeExtractionAttemptUncheckedCreateWithoutAutomaticFascicoloReportsInput>
+  connectOrCreate?: Prisma.NeutralIntakeExtractionAttemptCreateOrConnectWithoutAutomaticFascicoloReportsInput
+  upsert?: Prisma.NeutralIntakeExtractionAttemptUpsertWithoutAutomaticFascicoloReportsInput
+  connect?: Prisma.NeutralIntakeExtractionAttemptWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptUpdateToOneWithWhereWithoutAutomaticFascicoloReportsInput, Prisma.NeutralIntakeExtractionAttemptUpdateWithoutAutomaticFascicoloReportsInput>, Prisma.NeutralIntakeExtractionAttemptUncheckedUpdateWithoutAutomaticFascicoloReportsInput>
+}
+
+export type NeutralIntakeExtractionAttemptCreateNestedOneWithoutAutomaticFascicoloReportDocumentsInput = {
+  create?: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptCreateWithoutAutomaticFascicoloReportDocumentsInput, Prisma.NeutralIntakeExtractionAttemptUncheckedCreateWithoutAutomaticFascicoloReportDocumentsInput>
+  connectOrCreate?: Prisma.NeutralIntakeExtractionAttemptCreateOrConnectWithoutAutomaticFascicoloReportDocumentsInput
+  connect?: Prisma.NeutralIntakeExtractionAttemptWhereUniqueInput
+}
+
+export type NeutralIntakeExtractionAttemptUpdateOneRequiredWithoutAutomaticFascicoloReportDocumentsNestedInput = {
+  create?: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptCreateWithoutAutomaticFascicoloReportDocumentsInput, Prisma.NeutralIntakeExtractionAttemptUncheckedCreateWithoutAutomaticFascicoloReportDocumentsInput>
+  connectOrCreate?: Prisma.NeutralIntakeExtractionAttemptCreateOrConnectWithoutAutomaticFascicoloReportDocumentsInput
+  upsert?: Prisma.NeutralIntakeExtractionAttemptUpsertWithoutAutomaticFascicoloReportDocumentsInput
+  connect?: Prisma.NeutralIntakeExtractionAttemptWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptUpdateToOneWithWhereWithoutAutomaticFascicoloReportDocumentsInput, Prisma.NeutralIntakeExtractionAttemptUpdateWithoutAutomaticFascicoloReportDocumentsInput>, Prisma.NeutralIntakeExtractionAttemptUncheckedUpdateWithoutAutomaticFascicoloReportDocumentsInput>
+}
+
+export type NeutralIntakeExtractionAttemptCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput = {
+  create?: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptCreateWithoutFascicoloKnowledgeEvidenceInput, Prisma.NeutralIntakeExtractionAttemptUncheckedCreateWithoutFascicoloKnowledgeEvidenceInput>
+  connectOrCreate?: Prisma.NeutralIntakeExtractionAttemptCreateOrConnectWithoutFascicoloKnowledgeEvidenceInput
+  connect?: Prisma.NeutralIntakeExtractionAttemptWhereUniqueInput
+}
+
+export type NeutralIntakeExtractionAttemptUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput = {
+  create?: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptCreateWithoutFascicoloKnowledgeEvidenceInput, Prisma.NeutralIntakeExtractionAttemptUncheckedCreateWithoutFascicoloKnowledgeEvidenceInput>
+  connectOrCreate?: Prisma.NeutralIntakeExtractionAttemptCreateOrConnectWithoutFascicoloKnowledgeEvidenceInput
+  upsert?: Prisma.NeutralIntakeExtractionAttemptUpsertWithoutFascicoloKnowledgeEvidenceInput
+  disconnect?: Prisma.NeutralIntakeExtractionAttemptWhereInput | boolean
+  delete?: Prisma.NeutralIntakeExtractionAttemptWhereInput | boolean
+  connect?: Prisma.NeutralIntakeExtractionAttemptWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptUpdateToOneWithWhereWithoutFascicoloKnowledgeEvidenceInput, Prisma.NeutralIntakeExtractionAttemptUpdateWithoutFascicoloKnowledgeEvidenceInput>, Prisma.NeutralIntakeExtractionAttemptUncheckedUpdateWithoutFascicoloKnowledgeEvidenceInput>
+}
+
 export type NeutralIntakeExtractionAttemptCreateWithoutNeutralIntakeInput = {
   id?: string
   policyVersion: string
@@ -845,6 +915,9 @@ export type NeutralIntakeExtractionAttemptCreateWithoutNeutralIntakeInput = {
   pages?: Prisma.NeutralIntakeExtractionPageCreateNestedManyWithoutExtractionAttemptInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptCreateNestedManyWithoutExtractionAttemptInput
   legalReferenceMentions?: Prisma.LegalReferenceMentionCreateNestedManyWithoutExtractionAttemptInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutDocumentVersionInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentCreateNestedManyWithoutDocumentVersionInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutExtractionAttemptInput
 }
 
 export type NeutralIntakeExtractionAttemptUncheckedCreateWithoutNeutralIntakeInput = {
@@ -871,6 +944,9 @@ export type NeutralIntakeExtractionAttemptUncheckedCreateWithoutNeutralIntakeInp
   pages?: Prisma.NeutralIntakeExtractionPageUncheckedCreateNestedManyWithoutExtractionAttemptInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedCreateNestedManyWithoutExtractionAttemptInput
   legalReferenceMentions?: Prisma.LegalReferenceMentionUncheckedCreateNestedManyWithoutExtractionAttemptInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutDocumentVersionInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentUncheckedCreateNestedManyWithoutDocumentVersionInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutExtractionAttemptInput
 }
 
 export type NeutralIntakeExtractionAttemptCreateOrConnectWithoutNeutralIntakeInput = {
@@ -950,6 +1026,9 @@ export type NeutralIntakeExtractionAttemptCreateWithoutPagesInput = {
   neutralIntake: Prisma.NeutralIntakeCreateNestedOneWithoutExtractionAttemptsInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptCreateNestedManyWithoutExtractionAttemptInput
   legalReferenceMentions?: Prisma.LegalReferenceMentionCreateNestedManyWithoutExtractionAttemptInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutDocumentVersionInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentCreateNestedManyWithoutDocumentVersionInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutExtractionAttemptInput
 }
 
 export type NeutralIntakeExtractionAttemptUncheckedCreateWithoutPagesInput = {
@@ -976,6 +1055,9 @@ export type NeutralIntakeExtractionAttemptUncheckedCreateWithoutPagesInput = {
   createdAt?: Date | string
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedCreateNestedManyWithoutExtractionAttemptInput
   legalReferenceMentions?: Prisma.LegalReferenceMentionUncheckedCreateNestedManyWithoutExtractionAttemptInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutDocumentVersionInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentUncheckedCreateNestedManyWithoutDocumentVersionInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutExtractionAttemptInput
 }
 
 export type NeutralIntakeExtractionAttemptCreateOrConnectWithoutPagesInput = {
@@ -1018,6 +1100,9 @@ export type NeutralIntakeExtractionAttemptUpdateWithoutPagesInput = {
   neutralIntake?: Prisma.NeutralIntakeUpdateOneRequiredWithoutExtractionAttemptsNestedInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUpdateManyWithoutExtractionAttemptNestedInput
   legalReferenceMentions?: Prisma.LegalReferenceMentionUpdateManyWithoutExtractionAttemptNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutDocumentVersionNestedInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentUpdateManyWithoutDocumentVersionNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutExtractionAttemptNestedInput
 }
 
 export type NeutralIntakeExtractionAttemptUncheckedUpdateWithoutPagesInput = {
@@ -1044,6 +1129,9 @@ export type NeutralIntakeExtractionAttemptUncheckedUpdateWithoutPagesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedUpdateManyWithoutExtractionAttemptNestedInput
   legalReferenceMentions?: Prisma.LegalReferenceMentionUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutDocumentVersionNestedInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentUncheckedUpdateManyWithoutDocumentVersionNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutExtractionAttemptNestedInput
 }
 
 export type NeutralIntakeExtractionAttemptCreateWithoutLegalReferenceMentionsInput = {
@@ -1070,6 +1158,9 @@ export type NeutralIntakeExtractionAttemptCreateWithoutLegalReferenceMentionsInp
   neutralIntake: Prisma.NeutralIntakeCreateNestedOneWithoutExtractionAttemptsInput
   pages?: Prisma.NeutralIntakeExtractionPageCreateNestedManyWithoutExtractionAttemptInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptCreateNestedManyWithoutExtractionAttemptInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutDocumentVersionInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentCreateNestedManyWithoutDocumentVersionInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutExtractionAttemptInput
 }
 
 export type NeutralIntakeExtractionAttemptUncheckedCreateWithoutLegalReferenceMentionsInput = {
@@ -1096,6 +1187,9 @@ export type NeutralIntakeExtractionAttemptUncheckedCreateWithoutLegalReferenceMe
   createdAt?: Date | string
   pages?: Prisma.NeutralIntakeExtractionPageUncheckedCreateNestedManyWithoutExtractionAttemptInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedCreateNestedManyWithoutExtractionAttemptInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutDocumentVersionInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentUncheckedCreateNestedManyWithoutDocumentVersionInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutExtractionAttemptInput
 }
 
 export type NeutralIntakeExtractionAttemptCreateOrConnectWithoutLegalReferenceMentionsInput = {
@@ -1138,6 +1232,9 @@ export type NeutralIntakeExtractionAttemptUpdateWithoutLegalReferenceMentionsInp
   neutralIntake?: Prisma.NeutralIntakeUpdateOneRequiredWithoutExtractionAttemptsNestedInput
   pages?: Prisma.NeutralIntakeExtractionPageUpdateManyWithoutExtractionAttemptNestedInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUpdateManyWithoutExtractionAttemptNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutDocumentVersionNestedInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentUpdateManyWithoutDocumentVersionNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutExtractionAttemptNestedInput
 }
 
 export type NeutralIntakeExtractionAttemptUncheckedUpdateWithoutLegalReferenceMentionsInput = {
@@ -1164,6 +1261,9 @@ export type NeutralIntakeExtractionAttemptUncheckedUpdateWithoutLegalReferenceMe
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pages?: Prisma.NeutralIntakeExtractionPageUncheckedUpdateManyWithoutExtractionAttemptNestedInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutDocumentVersionNestedInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentUncheckedUpdateManyWithoutDocumentVersionNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutExtractionAttemptNestedInput
 }
 
 export type NeutralIntakeExtractionAttemptCreateWithoutClassificationAttemptsInput = {
@@ -1190,6 +1290,9 @@ export type NeutralIntakeExtractionAttemptCreateWithoutClassificationAttemptsInp
   neutralIntake: Prisma.NeutralIntakeCreateNestedOneWithoutExtractionAttemptsInput
   pages?: Prisma.NeutralIntakeExtractionPageCreateNestedManyWithoutExtractionAttemptInput
   legalReferenceMentions?: Prisma.LegalReferenceMentionCreateNestedManyWithoutExtractionAttemptInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutDocumentVersionInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentCreateNestedManyWithoutDocumentVersionInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutExtractionAttemptInput
 }
 
 export type NeutralIntakeExtractionAttemptUncheckedCreateWithoutClassificationAttemptsInput = {
@@ -1216,6 +1319,9 @@ export type NeutralIntakeExtractionAttemptUncheckedCreateWithoutClassificationAt
   createdAt?: Date | string
   pages?: Prisma.NeutralIntakeExtractionPageUncheckedCreateNestedManyWithoutExtractionAttemptInput
   legalReferenceMentions?: Prisma.LegalReferenceMentionUncheckedCreateNestedManyWithoutExtractionAttemptInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutDocumentVersionInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentUncheckedCreateNestedManyWithoutDocumentVersionInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutExtractionAttemptInput
 }
 
 export type NeutralIntakeExtractionAttemptCreateOrConnectWithoutClassificationAttemptsInput = {
@@ -1258,6 +1364,9 @@ export type NeutralIntakeExtractionAttemptUpdateWithoutClassificationAttemptsInp
   neutralIntake?: Prisma.NeutralIntakeUpdateOneRequiredWithoutExtractionAttemptsNestedInput
   pages?: Prisma.NeutralIntakeExtractionPageUpdateManyWithoutExtractionAttemptNestedInput
   legalReferenceMentions?: Prisma.LegalReferenceMentionUpdateManyWithoutExtractionAttemptNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutDocumentVersionNestedInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentUpdateManyWithoutDocumentVersionNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutExtractionAttemptNestedInput
 }
 
 export type NeutralIntakeExtractionAttemptUncheckedUpdateWithoutClassificationAttemptsInput = {
@@ -1284,6 +1393,405 @@ export type NeutralIntakeExtractionAttemptUncheckedUpdateWithoutClassificationAt
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pages?: Prisma.NeutralIntakeExtractionPageUncheckedUpdateManyWithoutExtractionAttemptNestedInput
   legalReferenceMentions?: Prisma.LegalReferenceMentionUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutDocumentVersionNestedInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentUncheckedUpdateManyWithoutDocumentVersionNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+}
+
+export type NeutralIntakeExtractionAttemptCreateWithoutAutomaticFascicoloReportsInput = {
+  id?: string
+  policyVersion: string
+  outcome: $Enums.NeutralIntakeExtractionOutcome
+  artifactSha256: string
+  declaredMimeType: string
+  detectedMimeType?: string | null
+  artifactSizeBytes: number
+  startedAt: Date | string
+  completedAt: Date | string
+  directExtractorName?: string | null
+  directExtractorVersion?: string | null
+  ocrExtractorName?: string | null
+  ocrExtractorVersion?: string | null
+  rasterizerName?: string | null
+  rasterizerVersion?: string | null
+  failureCode?: string | null
+  failureMessage?: string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  neutralIntake: Prisma.NeutralIntakeCreateNestedOneWithoutExtractionAttemptsInput
+  pages?: Prisma.NeutralIntakeExtractionPageCreateNestedManyWithoutExtractionAttemptInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptCreateNestedManyWithoutExtractionAttemptInput
+  legalReferenceMentions?: Prisma.LegalReferenceMentionCreateNestedManyWithoutExtractionAttemptInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentCreateNestedManyWithoutDocumentVersionInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutExtractionAttemptInput
+}
+
+export type NeutralIntakeExtractionAttemptUncheckedCreateWithoutAutomaticFascicoloReportsInput = {
+  id?: string
+  neutralIntakeId: string
+  policyVersion: string
+  outcome: $Enums.NeutralIntakeExtractionOutcome
+  artifactSha256: string
+  declaredMimeType: string
+  detectedMimeType?: string | null
+  artifactSizeBytes: number
+  startedAt: Date | string
+  completedAt: Date | string
+  directExtractorName?: string | null
+  directExtractorVersion?: string | null
+  ocrExtractorName?: string | null
+  ocrExtractorVersion?: string | null
+  rasterizerName?: string | null
+  rasterizerVersion?: string | null
+  failureCode?: string | null
+  failureMessage?: string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  pages?: Prisma.NeutralIntakeExtractionPageUncheckedCreateNestedManyWithoutExtractionAttemptInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedCreateNestedManyWithoutExtractionAttemptInput
+  legalReferenceMentions?: Prisma.LegalReferenceMentionUncheckedCreateNestedManyWithoutExtractionAttemptInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentUncheckedCreateNestedManyWithoutDocumentVersionInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutExtractionAttemptInput
+}
+
+export type NeutralIntakeExtractionAttemptCreateOrConnectWithoutAutomaticFascicoloReportsInput = {
+  where: Prisma.NeutralIntakeExtractionAttemptWhereUniqueInput
+  create: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptCreateWithoutAutomaticFascicoloReportsInput, Prisma.NeutralIntakeExtractionAttemptUncheckedCreateWithoutAutomaticFascicoloReportsInput>
+}
+
+export type NeutralIntakeExtractionAttemptUpsertWithoutAutomaticFascicoloReportsInput = {
+  update: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptUpdateWithoutAutomaticFascicoloReportsInput, Prisma.NeutralIntakeExtractionAttemptUncheckedUpdateWithoutAutomaticFascicoloReportsInput>
+  create: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptCreateWithoutAutomaticFascicoloReportsInput, Prisma.NeutralIntakeExtractionAttemptUncheckedCreateWithoutAutomaticFascicoloReportsInput>
+  where?: Prisma.NeutralIntakeExtractionAttemptWhereInput
+}
+
+export type NeutralIntakeExtractionAttemptUpdateToOneWithWhereWithoutAutomaticFascicoloReportsInput = {
+  where?: Prisma.NeutralIntakeExtractionAttemptWhereInput
+  data: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptUpdateWithoutAutomaticFascicoloReportsInput, Prisma.NeutralIntakeExtractionAttemptUncheckedUpdateWithoutAutomaticFascicoloReportsInput>
+}
+
+export type NeutralIntakeExtractionAttemptUpdateWithoutAutomaticFascicoloReportsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  policyVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  outcome?: Prisma.EnumNeutralIntakeExtractionOutcomeFieldUpdateOperationsInput | $Enums.NeutralIntakeExtractionOutcome
+  artifactSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  declaredMimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  detectedMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  artifactSizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  directExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  directExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  neutralIntake?: Prisma.NeutralIntakeUpdateOneRequiredWithoutExtractionAttemptsNestedInput
+  pages?: Prisma.NeutralIntakeExtractionPageUpdateManyWithoutExtractionAttemptNestedInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUpdateManyWithoutExtractionAttemptNestedInput
+  legalReferenceMentions?: Prisma.LegalReferenceMentionUpdateManyWithoutExtractionAttemptNestedInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentUpdateManyWithoutDocumentVersionNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutExtractionAttemptNestedInput
+}
+
+export type NeutralIntakeExtractionAttemptUncheckedUpdateWithoutAutomaticFascicoloReportsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  neutralIntakeId?: Prisma.StringFieldUpdateOperationsInput | string
+  policyVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  outcome?: Prisma.EnumNeutralIntakeExtractionOutcomeFieldUpdateOperationsInput | $Enums.NeutralIntakeExtractionOutcome
+  artifactSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  declaredMimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  detectedMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  artifactSizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  directExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  directExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  pages?: Prisma.NeutralIntakeExtractionPageUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+  legalReferenceMentions?: Prisma.LegalReferenceMentionUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentUncheckedUpdateManyWithoutDocumentVersionNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+}
+
+export type NeutralIntakeExtractionAttemptCreateWithoutAutomaticFascicoloReportDocumentsInput = {
+  id?: string
+  policyVersion: string
+  outcome: $Enums.NeutralIntakeExtractionOutcome
+  artifactSha256: string
+  declaredMimeType: string
+  detectedMimeType?: string | null
+  artifactSizeBytes: number
+  startedAt: Date | string
+  completedAt: Date | string
+  directExtractorName?: string | null
+  directExtractorVersion?: string | null
+  ocrExtractorName?: string | null
+  ocrExtractorVersion?: string | null
+  rasterizerName?: string | null
+  rasterizerVersion?: string | null
+  failureCode?: string | null
+  failureMessage?: string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  neutralIntake: Prisma.NeutralIntakeCreateNestedOneWithoutExtractionAttemptsInput
+  pages?: Prisma.NeutralIntakeExtractionPageCreateNestedManyWithoutExtractionAttemptInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptCreateNestedManyWithoutExtractionAttemptInput
+  legalReferenceMentions?: Prisma.LegalReferenceMentionCreateNestedManyWithoutExtractionAttemptInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutDocumentVersionInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutExtractionAttemptInput
+}
+
+export type NeutralIntakeExtractionAttemptUncheckedCreateWithoutAutomaticFascicoloReportDocumentsInput = {
+  id?: string
+  neutralIntakeId: string
+  policyVersion: string
+  outcome: $Enums.NeutralIntakeExtractionOutcome
+  artifactSha256: string
+  declaredMimeType: string
+  detectedMimeType?: string | null
+  artifactSizeBytes: number
+  startedAt: Date | string
+  completedAt: Date | string
+  directExtractorName?: string | null
+  directExtractorVersion?: string | null
+  ocrExtractorName?: string | null
+  ocrExtractorVersion?: string | null
+  rasterizerName?: string | null
+  rasterizerVersion?: string | null
+  failureCode?: string | null
+  failureMessage?: string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  pages?: Prisma.NeutralIntakeExtractionPageUncheckedCreateNestedManyWithoutExtractionAttemptInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedCreateNestedManyWithoutExtractionAttemptInput
+  legalReferenceMentions?: Prisma.LegalReferenceMentionUncheckedCreateNestedManyWithoutExtractionAttemptInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutDocumentVersionInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutExtractionAttemptInput
+}
+
+export type NeutralIntakeExtractionAttemptCreateOrConnectWithoutAutomaticFascicoloReportDocumentsInput = {
+  where: Prisma.NeutralIntakeExtractionAttemptWhereUniqueInput
+  create: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptCreateWithoutAutomaticFascicoloReportDocumentsInput, Prisma.NeutralIntakeExtractionAttemptUncheckedCreateWithoutAutomaticFascicoloReportDocumentsInput>
+}
+
+export type NeutralIntakeExtractionAttemptUpsertWithoutAutomaticFascicoloReportDocumentsInput = {
+  update: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptUpdateWithoutAutomaticFascicoloReportDocumentsInput, Prisma.NeutralIntakeExtractionAttemptUncheckedUpdateWithoutAutomaticFascicoloReportDocumentsInput>
+  create: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptCreateWithoutAutomaticFascicoloReportDocumentsInput, Prisma.NeutralIntakeExtractionAttemptUncheckedCreateWithoutAutomaticFascicoloReportDocumentsInput>
+  where?: Prisma.NeutralIntakeExtractionAttemptWhereInput
+}
+
+export type NeutralIntakeExtractionAttemptUpdateToOneWithWhereWithoutAutomaticFascicoloReportDocumentsInput = {
+  where?: Prisma.NeutralIntakeExtractionAttemptWhereInput
+  data: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptUpdateWithoutAutomaticFascicoloReportDocumentsInput, Prisma.NeutralIntakeExtractionAttemptUncheckedUpdateWithoutAutomaticFascicoloReportDocumentsInput>
+}
+
+export type NeutralIntakeExtractionAttemptUpdateWithoutAutomaticFascicoloReportDocumentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  policyVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  outcome?: Prisma.EnumNeutralIntakeExtractionOutcomeFieldUpdateOperationsInput | $Enums.NeutralIntakeExtractionOutcome
+  artifactSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  declaredMimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  detectedMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  artifactSizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  directExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  directExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  neutralIntake?: Prisma.NeutralIntakeUpdateOneRequiredWithoutExtractionAttemptsNestedInput
+  pages?: Prisma.NeutralIntakeExtractionPageUpdateManyWithoutExtractionAttemptNestedInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUpdateManyWithoutExtractionAttemptNestedInput
+  legalReferenceMentions?: Prisma.LegalReferenceMentionUpdateManyWithoutExtractionAttemptNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutDocumentVersionNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutExtractionAttemptNestedInput
+}
+
+export type NeutralIntakeExtractionAttemptUncheckedUpdateWithoutAutomaticFascicoloReportDocumentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  neutralIntakeId?: Prisma.StringFieldUpdateOperationsInput | string
+  policyVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  outcome?: Prisma.EnumNeutralIntakeExtractionOutcomeFieldUpdateOperationsInput | $Enums.NeutralIntakeExtractionOutcome
+  artifactSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  declaredMimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  detectedMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  artifactSizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  directExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  directExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  pages?: Prisma.NeutralIntakeExtractionPageUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+  legalReferenceMentions?: Prisma.LegalReferenceMentionUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutDocumentVersionNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+}
+
+export type NeutralIntakeExtractionAttemptCreateWithoutFascicoloKnowledgeEvidenceInput = {
+  id?: string
+  policyVersion: string
+  outcome: $Enums.NeutralIntakeExtractionOutcome
+  artifactSha256: string
+  declaredMimeType: string
+  detectedMimeType?: string | null
+  artifactSizeBytes: number
+  startedAt: Date | string
+  completedAt: Date | string
+  directExtractorName?: string | null
+  directExtractorVersion?: string | null
+  ocrExtractorName?: string | null
+  ocrExtractorVersion?: string | null
+  rasterizerName?: string | null
+  rasterizerVersion?: string | null
+  failureCode?: string | null
+  failureMessage?: string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  neutralIntake: Prisma.NeutralIntakeCreateNestedOneWithoutExtractionAttemptsInput
+  pages?: Prisma.NeutralIntakeExtractionPageCreateNestedManyWithoutExtractionAttemptInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptCreateNestedManyWithoutExtractionAttemptInput
+  legalReferenceMentions?: Prisma.LegalReferenceMentionCreateNestedManyWithoutExtractionAttemptInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutDocumentVersionInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentCreateNestedManyWithoutDocumentVersionInput
+}
+
+export type NeutralIntakeExtractionAttemptUncheckedCreateWithoutFascicoloKnowledgeEvidenceInput = {
+  id?: string
+  neutralIntakeId: string
+  policyVersion: string
+  outcome: $Enums.NeutralIntakeExtractionOutcome
+  artifactSha256: string
+  declaredMimeType: string
+  detectedMimeType?: string | null
+  artifactSizeBytes: number
+  startedAt: Date | string
+  completedAt: Date | string
+  directExtractorName?: string | null
+  directExtractorVersion?: string | null
+  ocrExtractorName?: string | null
+  ocrExtractorVersion?: string | null
+  rasterizerName?: string | null
+  rasterizerVersion?: string | null
+  failureCode?: string | null
+  failureMessage?: string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  pages?: Prisma.NeutralIntakeExtractionPageUncheckedCreateNestedManyWithoutExtractionAttemptInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedCreateNestedManyWithoutExtractionAttemptInput
+  legalReferenceMentions?: Prisma.LegalReferenceMentionUncheckedCreateNestedManyWithoutExtractionAttemptInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutDocumentVersionInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentUncheckedCreateNestedManyWithoutDocumentVersionInput
+}
+
+export type NeutralIntakeExtractionAttemptCreateOrConnectWithoutFascicoloKnowledgeEvidenceInput = {
+  where: Prisma.NeutralIntakeExtractionAttemptWhereUniqueInput
+  create: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptCreateWithoutFascicoloKnowledgeEvidenceInput, Prisma.NeutralIntakeExtractionAttemptUncheckedCreateWithoutFascicoloKnowledgeEvidenceInput>
+}
+
+export type NeutralIntakeExtractionAttemptUpsertWithoutFascicoloKnowledgeEvidenceInput = {
+  update: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptUpdateWithoutFascicoloKnowledgeEvidenceInput, Prisma.NeutralIntakeExtractionAttemptUncheckedUpdateWithoutFascicoloKnowledgeEvidenceInput>
+  create: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptCreateWithoutFascicoloKnowledgeEvidenceInput, Prisma.NeutralIntakeExtractionAttemptUncheckedCreateWithoutFascicoloKnowledgeEvidenceInput>
+  where?: Prisma.NeutralIntakeExtractionAttemptWhereInput
+}
+
+export type NeutralIntakeExtractionAttemptUpdateToOneWithWhereWithoutFascicoloKnowledgeEvidenceInput = {
+  where?: Prisma.NeutralIntakeExtractionAttemptWhereInput
+  data: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptUpdateWithoutFascicoloKnowledgeEvidenceInput, Prisma.NeutralIntakeExtractionAttemptUncheckedUpdateWithoutFascicoloKnowledgeEvidenceInput>
+}
+
+export type NeutralIntakeExtractionAttemptUpdateWithoutFascicoloKnowledgeEvidenceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  policyVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  outcome?: Prisma.EnumNeutralIntakeExtractionOutcomeFieldUpdateOperationsInput | $Enums.NeutralIntakeExtractionOutcome
+  artifactSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  declaredMimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  detectedMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  artifactSizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  directExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  directExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  neutralIntake?: Prisma.NeutralIntakeUpdateOneRequiredWithoutExtractionAttemptsNestedInput
+  pages?: Prisma.NeutralIntakeExtractionPageUpdateManyWithoutExtractionAttemptNestedInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUpdateManyWithoutExtractionAttemptNestedInput
+  legalReferenceMentions?: Prisma.LegalReferenceMentionUpdateManyWithoutExtractionAttemptNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutDocumentVersionNestedInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentUpdateManyWithoutDocumentVersionNestedInput
+}
+
+export type NeutralIntakeExtractionAttemptUncheckedUpdateWithoutFascicoloKnowledgeEvidenceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  neutralIntakeId?: Prisma.StringFieldUpdateOperationsInput | string
+  policyVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  outcome?: Prisma.EnumNeutralIntakeExtractionOutcomeFieldUpdateOperationsInput | $Enums.NeutralIntakeExtractionOutcome
+  artifactSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  declaredMimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  detectedMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  artifactSizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  directExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  directExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  pages?: Prisma.NeutralIntakeExtractionPageUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+  classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+  legalReferenceMentions?: Prisma.LegalReferenceMentionUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutDocumentVersionNestedInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentUncheckedUpdateManyWithoutDocumentVersionNestedInput
 }
 
 export type NeutralIntakeExtractionAttemptCreateManyNeutralIntakeInput = {
@@ -1333,6 +1841,9 @@ export type NeutralIntakeExtractionAttemptUpdateWithoutNeutralIntakeInput = {
   pages?: Prisma.NeutralIntakeExtractionPageUpdateManyWithoutExtractionAttemptNestedInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUpdateManyWithoutExtractionAttemptNestedInput
   legalReferenceMentions?: Prisma.LegalReferenceMentionUpdateManyWithoutExtractionAttemptNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutDocumentVersionNestedInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentUpdateManyWithoutDocumentVersionNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutExtractionAttemptNestedInput
 }
 
 export type NeutralIntakeExtractionAttemptUncheckedUpdateWithoutNeutralIntakeInput = {
@@ -1359,6 +1870,9 @@ export type NeutralIntakeExtractionAttemptUncheckedUpdateWithoutNeutralIntakeInp
   pages?: Prisma.NeutralIntakeExtractionPageUncheckedUpdateManyWithoutExtractionAttemptNestedInput
   classificationAttempts?: Prisma.NeutralIntakeClassificationAttemptUncheckedUpdateManyWithoutExtractionAttemptNestedInput
   legalReferenceMentions?: Prisma.LegalReferenceMentionUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutDocumentVersionNestedInput
+  automaticFascicoloReportDocuments?: Prisma.AutomaticFascicoloReportDocumentUncheckedUpdateManyWithoutDocumentVersionNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutExtractionAttemptNestedInput
 }
 
 export type NeutralIntakeExtractionAttemptUncheckedUpdateManyWithoutNeutralIntakeInput = {
@@ -1393,12 +1907,18 @@ export type NeutralIntakeExtractionAttemptCountOutputType = {
   pages: number
   classificationAttempts: number
   legalReferenceMentions: number
+  automaticFascicoloReports: number
+  automaticFascicoloReportDocuments: number
+  fascicoloKnowledgeEvidence: number
 }
 
 export type NeutralIntakeExtractionAttemptCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   pages?: boolean | NeutralIntakeExtractionAttemptCountOutputTypeCountPagesArgs
   classificationAttempts?: boolean | NeutralIntakeExtractionAttemptCountOutputTypeCountClassificationAttemptsArgs
   legalReferenceMentions?: boolean | NeutralIntakeExtractionAttemptCountOutputTypeCountLegalReferenceMentionsArgs
+  automaticFascicoloReports?: boolean | NeutralIntakeExtractionAttemptCountOutputTypeCountAutomaticFascicoloReportsArgs
+  automaticFascicoloReportDocuments?: boolean | NeutralIntakeExtractionAttemptCountOutputTypeCountAutomaticFascicoloReportDocumentsArgs
+  fascicoloKnowledgeEvidence?: boolean | NeutralIntakeExtractionAttemptCountOutputTypeCountFascicoloKnowledgeEvidenceArgs
 }
 
 /**
@@ -1432,6 +1952,27 @@ export type NeutralIntakeExtractionAttemptCountOutputTypeCountLegalReferenceMent
   where?: Prisma.LegalReferenceMentionWhereInput
 }
 
+/**
+ * NeutralIntakeExtractionAttemptCountOutputType without action
+ */
+export type NeutralIntakeExtractionAttemptCountOutputTypeCountAutomaticFascicoloReportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AutomaticFascicoloReportWhereInput
+}
+
+/**
+ * NeutralIntakeExtractionAttemptCountOutputType without action
+ */
+export type NeutralIntakeExtractionAttemptCountOutputTypeCountAutomaticFascicoloReportDocumentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AutomaticFascicoloReportDocumentWhereInput
+}
+
+/**
+ * NeutralIntakeExtractionAttemptCountOutputType without action
+ */
+export type NeutralIntakeExtractionAttemptCountOutputTypeCountFascicoloKnowledgeEvidenceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FascicoloKnowledgeEvidenceWhereInput
+}
+
 
 export type NeutralIntakeExtractionAttemptSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1459,6 +2000,9 @@ export type NeutralIntakeExtractionAttemptSelect<ExtArgs extends runtime.Types.E
   pages?: boolean | Prisma.NeutralIntakeExtractionAttempt$pagesArgs<ExtArgs>
   classificationAttempts?: boolean | Prisma.NeutralIntakeExtractionAttempt$classificationAttemptsArgs<ExtArgs>
   legalReferenceMentions?: boolean | Prisma.NeutralIntakeExtractionAttempt$legalReferenceMentionsArgs<ExtArgs>
+  automaticFascicoloReports?: boolean | Prisma.NeutralIntakeExtractionAttempt$automaticFascicoloReportsArgs<ExtArgs>
+  automaticFascicoloReportDocuments?: boolean | Prisma.NeutralIntakeExtractionAttempt$automaticFascicoloReportDocumentsArgs<ExtArgs>
+  fascicoloKnowledgeEvidence?: boolean | Prisma.NeutralIntakeExtractionAttempt$fascicoloKnowledgeEvidenceArgs<ExtArgs>
   _count?: boolean | Prisma.NeutralIntakeExtractionAttemptCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["neutralIntakeExtractionAttempt"]>
 
@@ -1542,6 +2086,9 @@ export type NeutralIntakeExtractionAttemptInclude<ExtArgs extends runtime.Types.
   pages?: boolean | Prisma.NeutralIntakeExtractionAttempt$pagesArgs<ExtArgs>
   classificationAttempts?: boolean | Prisma.NeutralIntakeExtractionAttempt$classificationAttemptsArgs<ExtArgs>
   legalReferenceMentions?: boolean | Prisma.NeutralIntakeExtractionAttempt$legalReferenceMentionsArgs<ExtArgs>
+  automaticFascicoloReports?: boolean | Prisma.NeutralIntakeExtractionAttempt$automaticFascicoloReportsArgs<ExtArgs>
+  automaticFascicoloReportDocuments?: boolean | Prisma.NeutralIntakeExtractionAttempt$automaticFascicoloReportDocumentsArgs<ExtArgs>
+  fascicoloKnowledgeEvidence?: boolean | Prisma.NeutralIntakeExtractionAttempt$fascicoloKnowledgeEvidenceArgs<ExtArgs>
   _count?: boolean | Prisma.NeutralIntakeExtractionAttemptCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type NeutralIntakeExtractionAttemptIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1558,6 +2105,9 @@ export type $NeutralIntakeExtractionAttemptPayload<ExtArgs extends runtime.Types
     pages: Prisma.$NeutralIntakeExtractionPagePayload<ExtArgs>[]
     classificationAttempts: Prisma.$NeutralIntakeClassificationAttemptPayload<ExtArgs>[]
     legalReferenceMentions: Prisma.$LegalReferenceMentionPayload<ExtArgs>[]
+    automaticFascicoloReports: Prisma.$AutomaticFascicoloReportPayload<ExtArgs>[]
+    automaticFascicoloReportDocuments: Prisma.$AutomaticFascicoloReportDocumentPayload<ExtArgs>[]
+    fascicoloKnowledgeEvidence: Prisma.$FascicoloKnowledgeEvidencePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1979,6 +2529,9 @@ export interface Prisma__NeutralIntakeExtractionAttemptClient<T, Null = never, E
   pages<T extends Prisma.NeutralIntakeExtractionAttempt$pagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NeutralIntakeExtractionAttempt$pagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NeutralIntakeExtractionPagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   classificationAttempts<T extends Prisma.NeutralIntakeExtractionAttempt$classificationAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NeutralIntakeExtractionAttempt$classificationAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NeutralIntakeClassificationAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   legalReferenceMentions<T extends Prisma.NeutralIntakeExtractionAttempt$legalReferenceMentionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NeutralIntakeExtractionAttempt$legalReferenceMentionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LegalReferenceMentionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  automaticFascicoloReports<T extends Prisma.NeutralIntakeExtractionAttempt$automaticFascicoloReportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NeutralIntakeExtractionAttempt$automaticFascicoloReportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AutomaticFascicoloReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  automaticFascicoloReportDocuments<T extends Prisma.NeutralIntakeExtractionAttempt$automaticFascicoloReportDocumentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NeutralIntakeExtractionAttempt$automaticFascicoloReportDocumentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AutomaticFascicoloReportDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  fascicoloKnowledgeEvidence<T extends Prisma.NeutralIntakeExtractionAttempt$fascicoloKnowledgeEvidenceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NeutralIntakeExtractionAttempt$fascicoloKnowledgeEvidenceArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloKnowledgeEvidencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2499,6 +3052,78 @@ export type NeutralIntakeExtractionAttempt$legalReferenceMentionsArgs<ExtArgs ex
   take?: number
   skip?: number
   distinct?: Prisma.LegalReferenceMentionScalarFieldEnum | Prisma.LegalReferenceMentionScalarFieldEnum[]
+}
+
+/**
+ * NeutralIntakeExtractionAttempt.automaticFascicoloReports
+ */
+export type NeutralIntakeExtractionAttempt$automaticFascicoloReportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AutomaticFascicoloReport
+   */
+  select?: Prisma.AutomaticFascicoloReportSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AutomaticFascicoloReport
+   */
+  omit?: Prisma.AutomaticFascicoloReportOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AutomaticFascicoloReportInclude<ExtArgs> | null
+  where?: Prisma.AutomaticFascicoloReportWhereInput
+  orderBy?: Prisma.AutomaticFascicoloReportOrderByWithRelationInput | Prisma.AutomaticFascicoloReportOrderByWithRelationInput[]
+  cursor?: Prisma.AutomaticFascicoloReportWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AutomaticFascicoloReportScalarFieldEnum | Prisma.AutomaticFascicoloReportScalarFieldEnum[]
+}
+
+/**
+ * NeutralIntakeExtractionAttempt.automaticFascicoloReportDocuments
+ */
+export type NeutralIntakeExtractionAttempt$automaticFascicoloReportDocumentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AutomaticFascicoloReportDocument
+   */
+  select?: Prisma.AutomaticFascicoloReportDocumentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AutomaticFascicoloReportDocument
+   */
+  omit?: Prisma.AutomaticFascicoloReportDocumentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AutomaticFascicoloReportDocumentInclude<ExtArgs> | null
+  where?: Prisma.AutomaticFascicoloReportDocumentWhereInput
+  orderBy?: Prisma.AutomaticFascicoloReportDocumentOrderByWithRelationInput | Prisma.AutomaticFascicoloReportDocumentOrderByWithRelationInput[]
+  cursor?: Prisma.AutomaticFascicoloReportDocumentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AutomaticFascicoloReportDocumentScalarFieldEnum | Prisma.AutomaticFascicoloReportDocumentScalarFieldEnum[]
+}
+
+/**
+ * NeutralIntakeExtractionAttempt.fascicoloKnowledgeEvidence
+ */
+export type NeutralIntakeExtractionAttempt$fascicoloKnowledgeEvidenceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FascicoloKnowledgeEvidence
+   */
+  select?: Prisma.FascicoloKnowledgeEvidenceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FascicoloKnowledgeEvidence
+   */
+  omit?: Prisma.FascicoloKnowledgeEvidenceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FascicoloKnowledgeEvidenceInclude<ExtArgs> | null
+  where?: Prisma.FascicoloKnowledgeEvidenceWhereInput
+  orderBy?: Prisma.FascicoloKnowledgeEvidenceOrderByWithRelationInput | Prisma.FascicoloKnowledgeEvidenceOrderByWithRelationInput[]
+  cursor?: Prisma.FascicoloKnowledgeEvidenceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FascicoloKnowledgeEvidenceScalarFieldEnum | Prisma.FascicoloKnowledgeEvidenceScalarFieldEnum[]
 }
 
 /**

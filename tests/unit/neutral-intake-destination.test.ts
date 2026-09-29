@@ -64,6 +64,7 @@ function transaction(options: {
 
 function resumeTransaction(outcome: "CASE_DOCUMENT" | "UNCERTAIN_REVIEW_REQUIRED" = "CASE_DOCUMENT") {
   const extractionAttempt = {
+    attemptId: "extraction-1",
     id: "extraction-1",
     neutralIntakeId: "intake-1",
     policyVersion: "B2C9_EXTRACTION_POLICY_V1",
@@ -119,7 +120,7 @@ function resumeTransaction(outcome: "CASE_DOCUMENT" | "UNCERTAIN_REVIEW_REQUIRED
     },
     neutralIntakeExtractionAttempt: { findFirst: vi.fn(async () => extractionAttempt) },
     neutralIntakeClassificationAttempt: {
-      findUnique: vi.fn(async () => persistedDecision),
+      findUnique: vi.fn(async (_args: unknown) => persistedDecision),
       create: vi.fn(),
     },
     asyncJob: {

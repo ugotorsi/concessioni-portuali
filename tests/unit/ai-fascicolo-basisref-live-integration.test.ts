@@ -403,12 +403,10 @@ describe("AI-01C2B3B1 outbound basisRef grounding integration", () => {
     await expectGroundingError(schemaCase.operation);
     expect(schemaCase.fake.calls).toBe(0);
 
-    const algorithmRegistryProviderBound = providerBoundFixture() as AiFascicoloOutboundProviderBoundV1 & {
-      outboundProjectionHashAlgorithm: string;
-    };
-    algorithmRegistryProviderBound.outboundProjectionHashAlgorithm = "sha512";
+    const algorithmRegistryProviderBound = providerBoundFixture();
+    Reflect.set(algorithmRegistryProviderBound, "outboundProjectionHashAlgorithm", "sha512");
     const algorithmRegistry = registryFixture(
-      algorithmRegistryProviderBound as AiFascicoloOutboundProviderBoundV1,
+      algorithmRegistryProviderBound,
     );
     const algorithmCase = analyzeWith(allSectionsPayload(), {
       basisRefRegistry: algorithmRegistry,

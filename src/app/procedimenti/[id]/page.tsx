@@ -16,6 +16,7 @@ import { ChecklistItemEvidence } from "@/components/procedimenti/ChecklistItemEv
 import { FascicoloDocumentRequirementProposalsPanel } from "@/components/procedimenti/FascicoloDocumentRequirementProposalsPanel";
 import { FascicoloDocumentRequirementScreeningTrigger } from "@/components/procedimenti/FascicoloDocumentRequirementScreeningTrigger";
 import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloObservationsPanel";
+import { FascicoloAutomaticWorkflowPanel } from "@/components/procedimenti/FascicoloAutomaticWorkflowPanel";
 import {
   ProcedimentoGiorniBadge,
   ProcedimentoChecklistBadge,
@@ -61,6 +62,7 @@ import { getFascicoloDocumentRequirementEvidenceData } from "@/server/queries/fa
 import { getFascicoloDocumentRequirementProposals } from "@/server/queries/fascicolo-document-requirements";
 import { getFascicoloLegalSourceCandidates } from "@/server/queries/fascicolo-legal-source-candidates";
 import { getFascicoloObservations } from "@/server/queries/fascicolo-observations";
+import { getFascicoloAutomaticWorkflowReadModel } from "@/server/queries/fascicolo-automatic-workflow";
 import { getNormeForProcedimento } from "@/server/queries/normativa";
 import { getFascicoloProcessingItems } from "@/server/queries/neutral-intake-processing";
 import { getAiFascicoloHumanReviewReadModel } from "@/server/queries/ai-fascicolo-human-review";
@@ -153,6 +155,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   }
 
   const processingItems = await getFascicoloProcessingItems(detail.procedimento.id);
+  const automaticWorkflow = await getFascicoloAutomaticWorkflowReadModel(detail.procedimento.id);
   const legalSourceCandidates = await getFascicoloLegalSourceCandidates(detail.procedimento.id);
   const fascicoloObservations = await getFascicoloObservations(detail.procedimento.id);
   const fascicoloDocumentRequirements = await getFascicoloDocumentRequirementProposals(detail.procedimento.id);
@@ -275,6 +278,8 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
         />
 
         <NeutralIntakeProcessingPanel items={processingItems} />
+
+        <FascicoloAutomaticWorkflowPanel model={automaticWorkflow} />
 
         <LegalSourceCandidatesPanel
           items={legalSourceCandidates}

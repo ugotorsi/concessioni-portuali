@@ -9,6 +9,12 @@ import {
   type AiFascicoloTrustedReviewLineageV1,
 } from "@/server/ai/fascicoloTrustedReviewIdentity";
 
+type Mutable<T> = T extends readonly (infer Item)[]
+  ? Mutable<Item>[]
+  : T extends object
+    ? { -readonly [Key in keyof T]: Mutable<T[Key]> }
+    : T;
+
 function lineageFixture(): AiFascicoloTrustedReviewLineageV1 {
   return {
     analysisSchemaVersion: "ai-fascicolo-analysis/v1",
@@ -90,8 +96,8 @@ function identityWithRuntimeLineage(lineage: unknown) {
   });
 }
 
-function cloneReview(): AiFascicoloTrustedReviewV1 {
-  return structuredClone(trustedReviewFixture());
+function cloneReview(): Mutable<AiFascicoloTrustedReviewV1> {
+  return structuredClone(trustedReviewFixture()) as Mutable<AiFascicoloTrustedReviewV1>;
 }
 
 function expectRejected(value: unknown): void {
@@ -185,7 +191,7 @@ describe("AI-01C2B4B2A trusted review material identity", () => {
 
   it("is deterministic and independent of object insertion order", () => {
     const first = identity();
-    const lineage = lineageFixture();
+    const lineage = structuredClone(lineageFixture()) as Mutable<AiFascicoloTrustedReviewLineageV1>;
     const reorderedLineage = {
       outboundProjectionHashAlgorithm: lineage.outboundProjectionHashAlgorithm,
       outboundProjectionHash: lineage.outboundProjectionHash,
@@ -245,7 +251,7 @@ describe("AI-01C2B4B2A trusted review material identity", () => {
   });
 
   it("accepts exactly the six required lineage fields deterministically", () => {
-    const lineage = lineageFixture();
+    const lineage = structuredClone(lineageFixture()) as Mutable<AiFascicoloTrustedReviewLineageV1>;
 
     expect(identity({ lineage })).toEqual(identity({ lineage: { ...lineage } }));
     expect(identity({ lineage }).canonicalPayload).not.toContain("generatedAt");
@@ -337,7 +343,7 @@ describe("AI-01C2B4B2A trusted review material identity", () => {
   });
 
   it("rejects undefined, non-finite numbers, bigint, functions, and symbols", () => {
-    for (const value of [undefined, NaN, Infinity, -Infinity, 1n, () => undefined, Symbol("x")]) {
+    for (const value of [undefined, NaN, Infinity, -Infinity, BigInt(1), () => undefined, Symbol("x")]) {
       expectRejected(value);
     }
     expectRejected({ value: undefined });
@@ -438,7 +444,7 @@ describe("AI-01C2B4B2A trusted review material identity", () => {
 
   it("does not retain aliases, mutate inputs, or change after caller mutation", () => {
     const trustedReview = cloneReview();
-    const lineage = lineageFixture();
+    const lineage = structuredClone(lineageFixture()) as Mutable<AiFascicoloTrustedReviewLineageV1>;
     const reviewBefore = structuredClone(trustedReview);
     const lineageBefore = structuredClone(lineage);
     const result = identity({ trustedReview, lineage });

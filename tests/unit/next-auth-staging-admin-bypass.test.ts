@@ -157,8 +157,8 @@ describe("next-auth staging admin bypass", () => {
       } as never,
     );
 
-    expect(session.user?.role).toBe("ADMIN");
-    expect(session.user?.id).toBe("staging-preview-admin");
+    expect(session.user && "role" in session.user ? session.user.role : undefined).toBe("ADMIN");
+    expect(session.user && "id" in session.user ? session.user.id : undefined).toBe("staging-preview-admin");
     expect(session.user?.name).toBe("Amministratore staging");
     expect(session.user?.email).toBe("staging-admin@preview.invalid");
   });

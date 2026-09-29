@@ -195,17 +195,12 @@ describe("AI-01C2B1 outbound provider input contract", () => {
   });
 
   it("owns outbound schema and hash-algorithm metadata instead of copying conflicting extras", () => {
-    const conflicting = providerBoundFixture() as unknown as ProviderBound & {
-      outboundProjection: ProviderBound["outboundProjection"] & {
-        sourceSnapshotContentHash: string;
-      };
-      outboundProjectionHashAlgorithm: "sha512";
-    };
-    conflicting.outboundProjection.schemaVersion = "provider-version" as "ai-fascicolo-outbound/v1";
-    conflicting.outboundProjection.sourceSnapshotContentHash = SOURCE_HASH_SENTINEL;
-    conflicting.outboundProjectionHashAlgorithm = "sha512";
+    const conflicting = structuredClone(providerBoundFixture());
+    Reflect.set(conflicting.outboundProjection, "schemaVersion", "provider-version");
+    Reflect.set(conflicting.outboundProjection, "sourceSnapshotContentHash", SOURCE_HASH_SENTINEL);
+    Reflect.set(conflicting, "outboundProjectionHashAlgorithm", "sha512");
 
-    const request = buildOutboundProviderRequest(conflicting as unknown as ProviderBound);
+    const request = buildOutboundProviderRequest(conflicting);
     const serialized = JSON.stringify(request);
 
     expect(request.outboundData.schemaVersion).toBe("ai-fascicolo-outbound/v1");

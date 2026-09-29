@@ -39,6 +39,24 @@ describe("B2C9 generic async job domain", () => {
     expect(first.idempotencyKey).not.toBe(otherTenant.idempotencyKey);
   });
 
+  it("binds explicit Lotto 8 scheduling fields without changing legacy admissions", () => {
+    const legacy = normalizeAsyncJobAdmission(userAdmission());
+    const procedureScoped = normalizeAsyncJobAdmission({
+      ...userAdmission(),
+      procedimentoId: "procedure-1",
+    });
+    const dependent = normalizeAsyncJobAdmission({
+      ...userAdmission(),
+      procedimentoId: "procedure-1",
+      dependsOnJobId: "parent-job-1",
+      priority: "HIGH",
+    });
+
+    expect(procedureScoped.idempotencyKey).toBe(legacy.idempotencyKey);
+    expect(procedureScoped.requestFingerprint).not.toBe(legacy.requestFingerprint);
+    expect(dependent.requestFingerprint).not.toBe(procedureScoped.requestFingerprint);
+  });
+
   it("preserves immutable authenticated actor and tenant snapshots", () => {
     const normalized = normalizeAsyncJobAdmission(userAdmission());
     expect(normalized.admission).toEqual({

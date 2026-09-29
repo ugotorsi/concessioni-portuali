@@ -29,7 +29,9 @@ describe("concessione port activity legal type", () => {
 
   it.each(["RESPONSABILE_AREA", "TECNICO", "ECONOMICO", "SEGRETERIA", "AUTORITA_GIUDIZIARIA"] as const)(
     "rejects role %s",
-    (role) => expect(canManageConcessioneLegalClassification(role)).toBe(false),
+    (role) => expect(canManageConcessioneLegalClassification(
+      role as Parameters<typeof canManageConcessioneLegalClassification>[0],
+    )).toBe(false),
   );
 
   it("uses a nullable additive migration with no default, update, or backfill", () => {

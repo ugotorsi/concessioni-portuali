@@ -40,10 +40,11 @@ vi.mock("@/server/ai/fascicoloReviewPersistence", async (importOriginal) => {
   return { ...original, persistAiFascicoloTrustedReviewMaterial: mocks.persist };
 });
 
-import type {
-  AiFascicoloOutboundAnalysisV1,
-  AiOutboundAnalysisProvider,
-  ProviderAnalysisPayloadV1,
+import {
+  AI_FASCICOLO_OUTBOUND_ANALYSIS_V1_LIMITATIONS,
+  type AiFascicoloOutboundAnalysisV1,
+  type AiOutboundAnalysisProvider,
+  type ProviderAnalysisPayloadV1,
 } from "@/server/ai/fascicoloAnalysis";
 import {
   type AiFascicoloLiveAnalysisPreparedContext,
@@ -149,25 +150,7 @@ function analysisFixture(): AiFascicoloOutboundAnalysisV1 {
     generatedAt: "2026-09-01T10:01:00.000Z",
     analysis: providerPayload(),
     resolvedBasisRefs: [],
-    limitations: {
-      generatedByAI: true,
-      decisionAuthority: "NONE",
-      administrativeEffect: "NONE",
-      humanReviewRequired: true,
-      legalResearchNotSubstituted: true,
-      allowedSignalTypes: ["INFO", "VERIFY"],
-      allowedSections: [
-        "summary",
-        "timeline",
-        "recordedState",
-        "signals",
-        "investigativeQuestions",
-        "suggestedActivities",
-        "legalResearchQuestions",
-      ],
-      signalTypes: ["INFO", "VERIFY"],
-      basisRefsMeaning: "TECHNICAL_SNAPSHOT_GROUNDING_ONLY",
-    },
+    limitations: AI_FASCICOLO_OUTBOUND_ANALYSIS_V1_LIMITATIONS,
   };
 }
 
@@ -200,7 +183,7 @@ function serviceWithPreparation(prepared = preparation()) {
 }
 
 function expectInvalid(operation: Promise<unknown>): Promise<void> {
-  return operation.catch((error) => {
+  return operation.then(() => undefined, (error) => {
     expect(error).toBeInstanceOf(AiFascicoloTrustedReviewProductionError);
     expect(error).toMatchObject({ code: "INVALID_INPUT", message: "INVALID_INPUT" });
   });
@@ -265,7 +248,7 @@ describe("B2C6 trusted review production service", () => {
     const factory = source.slice(source.indexOf("export function createFascicoloTrustedReviewProductionService"));
 
     expect(factory).toContain("createFascicoloLiveAnalysisPreparationService(config)");
-    expect(factory).not.toMatch(/config\s*:\s*\{[^}]*\bpreparation\s*:/s);
+    expect(factory).not.toMatch(/config\s*:\s*\{[^}]*\bpreparation\s*:/);
     expect(factory).not.toContain("config.preparation");
   });
 
@@ -382,7 +365,7 @@ describe("B2C6 trusted review production service", () => {
       provider: { analyze: providerAnalyze },
       maxInputBytes: 100_000,
       realDataActivation: approvedActivation,
-      logger: { log: (event) => events.push(event) },
+      logger: { log: (event: unknown) => events.push(event) },
     };
     const service = createFascicoloTrustedReviewProductionService(config);
 

@@ -5,6 +5,7 @@ const userFindUniqueMock = vi.hoisted(() => vi.fn());
 const missionFindUniqueMock = vi.hoisted(() => vi.fn());
 const missionFindManyMock = vi.hoisted(() => vi.fn());
 const bundleFindManyMock = vi.hoisted(() => vi.fn());
+const assistedFindFirstMock = vi.hoisted(() => vi.fn());
 
 vi.mock("jose", () => ({
   createRemoteJWKSet: () => vi.fn(),
@@ -19,6 +20,7 @@ vi.mock("@/lib/prisma", () => ({
       findMany: missionFindManyMock,
     },
     researchEvidenceBundleRecord: { findMany: bundleFindManyMock },
+    researchAssistedVerificationRecord: { findFirst: assistedFindFirstMock },
   },
 }));
 
@@ -108,6 +110,7 @@ describe("trusted mission route integration", () => {
     missionFindUniqueMock.mockResolvedValue(missionRecord);
     missionFindManyMock.mockResolvedValue([]);
     bundleFindManyMock.mockResolvedValue([]);
+    assistedFindFirstMock.mockResolvedValue(null);
 
     vi.stubGlobal("fetch", vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
       const target = input instanceof Request ? input.url : String(input);
@@ -144,6 +147,10 @@ describe("trusted mission route integration", () => {
     }));
     expect(jwtVerifyMock).toHaveBeenCalledTimes(2);
     expect(missionFindUniqueMock).toHaveBeenCalled();
+    expect(assistedFindFirstMock).toHaveBeenCalledWith({
+      where: { missionId, tenantId }, orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    });
+    expect(payload.result?.structuredContent?.assistedVerification).toBeNull();
     expect(JSON.stringify(payload)).not.toContain(bearer);
     expect(JSON.stringify(payload)).not.toContain("fg1.");
   });

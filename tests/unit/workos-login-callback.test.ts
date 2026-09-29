@@ -32,14 +32,14 @@ describe("WorkOS login continuation", () => {
   afterEach(() => vi.unstubAllEnvs());
 
   it("preserves the normal database-free Preview bypass", async () => {
-    const page = await LoginPage({ searchParams: {} });
+    const page = await LoginPage({ searchParams: Promise.resolve({}) });
     expect(findElement(page, StagingAdminLoginForm)).not.toBeNull();
     expect(findElement(page, LoginCredentialsForm)).toBeNull();
   });
 
   it("forces credentials and passes the canonical callback in Preview", async () => {
     const callbackUrl = "/api/auth/workos/complete?external_auth_id=external_auth_abc";
-    const page = await LoginPage({ searchParams: { callbackUrl } });
+    const page = await LoginPage({ searchParams: Promise.resolve({ callbackUrl }) });
     const credentials = findElement(page, LoginCredentialsForm);
 
     expect(findElement(page, StagingAdminLoginForm)).toBeNull();
@@ -49,9 +49,27 @@ describe("WorkOS login continuation", () => {
   it("does not redirect a synthetic admin session away from a valid continuation", async () => {
     getCurrentRoleMock.mockResolvedValue("ADMIN");
     const callbackUrl = "/api/auth/workos/complete?external_auth_id=external_auth_abc";
-    const page = await LoginPage({ searchParams: { callbackUrl } });
+    const page = await LoginPage({ searchParams: Promise.resolve({ callbackUrl }) });
 
     expect(redirectMock).not.toHaveBeenCalled();
     expect(findElement(page, LoginCredentialsForm)?.props).toMatchObject({ callbackUrl });
+  });
+
+  it.each([["ADMIN", "/dashboard"], ["VIEWER_ADSP", "/adsp"]])(
+    "preserves the authenticated %s redirect", async (role, destination) => {
+      getCurrentRoleMock.mockResolvedValue(role);
+      await LoginPage({ searchParams: Promise.resolve({ callbackUrl: "https://untrusted.example.test" }) });
+      expect(redirectMock).toHaveBeenCalledWith(destination);
+    },
+  );
+
+  it("keeps production login on credentials and handles asynchronous error parameters", async () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    const page = await LoginPage({ searchParams: Promise.resolve({ error: ["missing"], callbackUrl: "https://untrusted.example.test" }) });
+    expect(findElement(page, StagingAdminLoginForm)).toBeNull();
+    expect(findElement(page, LoginCredentialsForm)?.props).toMatchObject({
+      callbackUrl: undefined, initialErrorMessage: "Inserisci email e password per accedere.",
+    });
+    expect(redirectMock).not.toHaveBeenCalled();
   });
 });

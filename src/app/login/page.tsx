@@ -9,15 +9,10 @@ function getPostLoginPath(role: DemoRole): string {
   return role === "VIEWER_ADSP" ? "/adsp" : "/dashboard";
 }
 
-type LoginPageSearchParams =
-  | {
-      error?: string | string[];
-      callbackUrl?: string | string[];
-    }
-  | Promise<{
-      error?: string | string[];
-      callbackUrl?: string | string[];
-    }>;
+type LoginPageSearchParams = Promise<{
+  error?: string | string[];
+  callbackUrl?: string | string[];
+}>;
 
 interface LoginPageProps {
   searchParams?: LoginPageSearchParams;
@@ -44,11 +39,7 @@ function isStagingAdminBypassEnabled(): boolean {
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const resolvedParams = searchParams
-    ? "then" in searchParams
-      ? await searchParams
-      : searchParams
-    : undefined;
+  const resolvedParams = await searchParams;
   const trustedWorkosCallback = resolveWorkosLoginCallback(resolvedParams?.callbackUrl);
   const currentRole = await getCurrentRole();
 

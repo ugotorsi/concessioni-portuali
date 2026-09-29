@@ -10,6 +10,11 @@ const applicationWorker = vi.hoisted(() => ({
 const timeWatchBootstrap = vi.hoisted(() => ({
   bootstrapConcessioneTimeWatches: vi.fn(),
 }));
+const runtimeHealth = vi.hoisted(() => ({
+  registerRuntimeWorker: vi.fn().mockResolvedValue(undefined),
+  heartbeatRuntimeWorker: vi.fn().mockResolvedValue(undefined),
+  setRuntimeWorkerStatus: vi.fn().mockResolvedValue(undefined),
+}));
 
 vi.mock("@/server/async-jobs/applicationWorker", () => ({
   drainOneApplicationAsyncJob: applicationWorker.drainOneApplicationAsyncJob,
@@ -17,9 +22,10 @@ vi.mock("@/server/async-jobs/applicationWorker", () => ({
 vi.mock("@/server/fascicolo-lifecycle/concessioneTimeWatchBootstrap", () => ({
   bootstrapConcessioneTimeWatches: timeWatchBootstrap.bootstrapConcessioneTimeWatches,
 }));
+vi.mock("@/server/runtime/health", () => runtimeHealth);
 
 import {
-  APPLICATION_ASYNC_WORKER_CONCURRENCY,
+  DEFAULT_APPLICATION_ASYNC_WORKER_CONCURRENCY,
   ApplicationAsyncWorkerConfigurationError,
   createApplicationAsyncWorkerRuntime,
   installApplicationAsyncWorkerSignalHandlers,
@@ -30,9 +36,12 @@ import { runApplicationAsyncWorkerProcess } from "@/server/async-jobs/applicatio
 
 const config = {
   workerId: "worker-process-1",
+  concurrency: 1,
   retryDelayMs: 5_000,
   idleBackoffMs: 1_000,
   errorBackoffMs: 2_000,
+  operationAllowlist: [],
+  procedimentoAllowlist: [],
 };
 
 function harness() {
@@ -333,14 +342,18 @@ describe("Block 3B.7 application async worker runtime", () => {
 
     await runtime.run();
 
-    expect(APPLICATION_ASYNC_WORKER_CONCURRENCY).toBe(1);
+    expect(DEFAULT_APPLICATION_ASYNC_WORKER_CONCURRENCY).toBe(1);
     expect(applicationWorker.drainOneApplicationAsyncJob).toHaveBeenNthCalledWith(1, {
       workerId: config.workerId,
       retryDelayMs: config.retryDelayMs,
+      operationAllowlist: [],
+      procedimentoAllowlist: [],
     });
     expect(applicationWorker.drainOneApplicationAsyncJob).toHaveBeenNthCalledWith(2, {
       workerId: config.workerId,
       retryDelayMs: config.retryDelayMs,
+      operationAllowlist: [],
+      procedimentoAllowlist: [],
     });
     expect(events[0]).toEqual(expect.objectContaining({
       event: "ASYNC_WORKER_STARTED",
@@ -356,18 +369,66 @@ describe("Block 3B.7 application async worker runtime", () => {
       ASYNC_WORKER_IDLE_BACKOFF_MS: "250",
       ASYNC_WORKER_ERROR_BACKOFF_MS: "750",
       ASYNC_WORKER_RETRY_DELAY_MS: "1500",
+      ASYNC_WORKER_OPERATION_ALLOWLIST: "NEUTRAL_INTAKE_EXTRACTION_V1,FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+      ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST: "procedure-canary",
     });
 
     expect(parsed).toEqual({
       workerId: "configured-worker",
+      concurrency: 1,
       idleBackoffMs: 250,
       errorBackoffMs: 750,
       retryDelayMs: 1_500,
+      operationAllowlist: ["NEUTRAL_INTAKE_EXTRACTION_V1", "FASCICOLO.AUTOMATIC_ANALYSIS_V1"],
+      procedimentoAllowlist: ["procedure-canary"],
+      providerExecutionEnabled: false,
     });
     expect(() => parseApplicationAsyncWorkerConfig({}))
       .toThrowError(expect.objectContaining<Partial<ApplicationAsyncWorkerConfigurationError>>({
         code: "DATABASE_URL_REQUIRED",
       }));
+  });
+
+  it("requires monetary estimates before provider execution can be enabled", () => {
+    expect(() => parseApplicationAsyncWorkerConfig({
+      DATABASE_URL: "postgresql://server/database",
+      ASYNC_PROVIDER_EXECUTION_ENABLED: "true",
+    })).toThrowError(expect.objectContaining<Partial<ApplicationAsyncWorkerConfigurationError>>({
+      code: "INVALID_CONFIGURATION",
+    }));
+    expect(parseApplicationAsyncWorkerConfig({
+      DATABASE_URL: "postgresql://server/database",
+      ASYNC_PROVIDER_EXECUTION_ENABLED: "true",
+      ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR: "0.250000",
+      ASYNC_COST_RESEARCH_CALL_ESTIMATE_EUR: "0.050000",
+    }).providerExecutionEnabled).toBe(true);
+  });
+
+  it("runs the configured number of independent claim lanes and drains them on shutdown", async () => {
+    const releases: Array<() => void> = [];
+    const drain = vi.fn((_input: { workerId: string }) =>
+      new Promise<{ outcome: "SUCCEEDED"; jobId: string }>((resolve) => {
+        const callNumber = drain.mock.calls.length;
+        releases.push(() => resolve({ outcome: "SUCCEEDED", jobId: `job-${callNumber}` }));
+      }));
+    const events: ApplicationAsyncWorkerEvent[] = [];
+    const runtime = createApplicationAsyncWorkerRuntime({ ...config, concurrency: 3 }, {
+      drain,
+      report: (event) => events.push(event),
+    });
+
+    const running = runtime.run();
+    await vi.waitFor(() => expect(drain).toHaveBeenCalledTimes(3));
+    expect(drain.mock.calls.map(([input]) => input.workerId))
+      .toEqual(["worker-process-1:1", "worker-process-1:2", "worker-process-1:3"]);
+
+    runtime.requestShutdown("DRAIN");
+    releases.forEach((release) => release());
+    await running;
+
+    expect(drain).toHaveBeenCalledTimes(3);
+    expect(events[0]).toEqual(expect.objectContaining({ event: "ASYNC_WORKER_STARTED", concurrency: 3 }));
+    expect(events.at(-1)).toEqual(expect.objectContaining({ event: "ASYNC_WORKER_STOPPED" }));
   });
 
   it("delegates to the existing application drain without a parallel job engine", () => {

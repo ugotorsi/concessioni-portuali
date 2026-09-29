@@ -110,6 +110,9 @@ export const asyncJobAdmissionSchema = z.object({
   logicalOperationId: boundedIdentifier,
   purpose: boundedIdentifier,
   correlationId: boundedIdentifier,
+  procedimentoId: boundedIdentifier.nullable().optional().transform((value) => value ?? null),
+  dependsOnJobId: boundedIdentifier.nullable().optional().transform((value) => value ?? null),
+  priority: z.enum(["HIGH", "NORMAL", "LOW"]).optional().default("NORMAL"),
   policyDecisionRef: boundedIdentifier.nullable().optional().transform((value) => value ?? null),
   inputReference: z.unknown(),
   maxAttempts: z.number().int().min(1).max(ASYNC_JOB_MAX_ATTEMPTS),
@@ -128,6 +131,9 @@ export interface NormalizedAsyncJobAdmission {
   readonly logicalOperationId: string;
   readonly purpose: string;
   readonly correlationId: string;
+  readonly procedimentoId: string | null;
+  readonly dependsOnJobId: string | null;
+  readonly priority: "HIGH" | "NORMAL" | "LOW";
   readonly policyDecisionRef: string | null;
   readonly inputReference: AsyncJobReferenceEnvelope;
   readonly maxAttempts: number;
@@ -140,6 +146,8 @@ export interface NormalizedAsyncJobAdmission {
 export function normalizeAsyncJobAdmission(input: unknown): NormalizedAsyncJobAdmission {
   const parsed = asyncJobAdmissionSchema.safeParse(input);
   if (!parsed.success) throw new AsyncJobInputError("INVALID_ADMISSION");
+  const hasSchedulingExtension = ["procedimentoId", "dependsOnJobId", "priority"]
+    .some((field) => Object.prototype.hasOwnProperty.call(input, field));
   const inputReference = boundedReference(parsed.data.inputReference);
   const scope = parsed.data.admission.tenantId === null
     ? "GLOBAL"
@@ -155,6 +163,11 @@ export function normalizeAsyncJobAdmission(input: unknown): NormalizedAsyncJobAd
     idempotencyKey,
     parsed.data.purpose,
     parsed.data.correlationId,
+    ...(hasSchedulingExtension ? [
+      nullable(parsed.data.procedimentoId),
+      nullable(parsed.data.dependsOnJobId),
+      parsed.data.priority,
+    ] : []),
     nullable(parsed.data.policyDecisionRef),
     parsed.data.admission.admissionType,
     nullable(parsed.data.admission.tenantId),

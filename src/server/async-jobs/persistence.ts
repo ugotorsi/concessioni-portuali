@@ -79,6 +79,9 @@ export async function admitAsyncJobInTransaction(
       logicalOperationId: input.logicalOperationId,
       purpose: input.purpose,
       correlationId: input.correlationId,
+      procedimentoId: input.procedimentoId,
+      dependsOnJobId: input.dependsOnJobId,
+      priority: input.priority,
       policyDecisionRef: input.policyDecisionRef,
       inputReference: json(input.inputReference),
       admissionType: input.admission.admissionType,
@@ -129,6 +132,9 @@ export async function admitAsyncJob(input: AsyncJobAdmissionInput) {
 export interface AsyncJobClaimInput {
   workerId: string;
   leaseDurationMs: number;
+  operationAllowlist?: readonly string[];
+  operationBlocklist?: readonly string[];
+  procedimentoAllowlist?: readonly string[];
   resolveTerminalFailureHook?: (operation: string) => AsyncJobTerminalFailureHook | undefined;
 }
 
@@ -217,7 +223,45 @@ async function reconcileGuardedExpiredJobs(input: AsyncJobClaimInput): Promise<v
 export async function claimNextAsyncJob(input: AsyncJobClaimInput): Promise<AsyncJob | null> {
   const workerId = identifier.parse(input.workerId);
   const leaseMs = durationMs.parse(input.leaseDurationMs);
+  const operationAllowlist = input.operationAllowlist?.map((operation) => identifier.parse(operation)) ?? [];
+  const operationBlocklist = input.operationBlocklist?.map((operation) => identifier.parse(operation)) ?? [];
+  const procedimentoAllowlist = input.procedimentoAllowlist?.map((id) => identifier.parse(id)) ?? [];
   const token = randomBytes(32).toString("hex");
+  const operationScope = operationAllowlist.length > 0
+    ? Prisma.sql`AND "operation" IN (${Prisma.join(operationAllowlist)})`
+    : Prisma.empty;
+  const operationExclusion = operationBlocklist.length > 0
+    ? Prisma.sql`AND "operation" NOT IN (${Prisma.join(operationBlocklist)})`
+    : Prisma.empty;
+  const procedimentoScope = procedimentoAllowlist.length > 0
+    ? Prisma.sql`AND (
+        "procedimentoId" IN (${Prisma.join(procedimentoAllowlist)})
+        OR
+        (
+          "operation" = 'NEUTRAL_INTAKE_EXTRACTION_V1'
+          AND EXISTS (
+            SELECT 1 FROM "NeutralIntakeDestination" AS destination
+            WHERE destination."neutralIntakeId" = "inputReference"->>'referenceId'
+              AND destination."procedimentoId" IN (${Prisma.join(procedimentoAllowlist)})
+          )
+        )
+        OR (
+          "operation" = 'FASCICOLO.AUTOMATIC_ANALYSIS_V1'
+          AND "inputReference"#>>'{metadata,procedimentoId}' IN (${Prisma.join(procedimentoAllowlist)})
+        )
+        OR (
+          "operation" = 'LEGAL_RESEARCH.EXECUTE_V1'
+          AND EXISTS (
+            SELECT 1
+            FROM "AutomaticFascicoloReportMission" AS report_mission
+            JOIN "AutomaticFascicoloReport" AS report
+              ON report."id" = report_mission."reportId"
+            WHERE report_mission."missionId" = "inputReference"->>'referenceId'
+              AND report."procedimentoId" IN (${Prisma.join(procedimentoAllowlist)})
+          )
+        )
+      )`
+    : Prisma.empty;
 
   await reconcileGuardedExpiredJobs(input);
   return runSerializableTransactionWithRetry(async (tx) => {
@@ -259,16 +303,42 @@ export async function claimNextAsyncJob(input: AsyncJobClaimInput): Promise<Asyn
         });
       }
     }
+    await tx.$executeRaw(Prisma.sql`
+      UPDATE "AsyncJob" AS child
+      SET "blockedReason" = 'DEPENDENCY_TERMINAL_FAILURE', "updatedAt" = CURRENT_TIMESTAMP
+      FROM "AsyncJob" AS parent
+      WHERE child."dependsOnJobId" = parent."id"
+        AND child."status" IN ('QUEUED', 'RETRY_WAIT')
+        AND parent."status" IN ('TERMINAL_FAILED', 'CANCELLED')
+        AND child."blockedReason" IS DISTINCT FROM 'DEPENDENCY_TERMINAL_FAILURE'
+    `);
     const claimed = await tx.$queryRaw<AsyncJob[]>(Prisma.sql`
       WITH candidate AS (
         SELECT "id"
         FROM "AsyncJob"
         WHERE "attemptCount" < "maxAttempts"
+          AND ("procedimentoId" IS NULL OR NOT EXISTS (
+            SELECT 1 FROM "AsyncJob" AS active_scope
+            WHERE active_scope."procedimentoId" = "AsyncJob"."procedimentoId"
+              AND active_scope."status" IN ('RUNNING', 'CANCELLATION_REQUESTED')
+              AND active_scope."leaseExpiresAt" > CURRENT_TIMESTAMP
+          ))
+          AND ("dependsOnJobId" IS NULL OR EXISTS (
+            SELECT 1 FROM "AsyncJob" AS dependency
+            WHERE dependency."id" = "AsyncJob"."dependsOnJobId"
+              AND dependency."status" = 'SUCCEEDED'
+          ))
+          ${operationScope}
+          ${operationExclusion}
+          ${procedimentoScope}
           AND (
             ("status" IN ('QUEUED', 'RETRY_WAIT') AND "availableAt" <= CURRENT_TIMESTAMP)
             OR ("status" = 'RUNNING' AND "leaseExpiresAt" <= CURRENT_TIMESTAMP)
           )
-        ORDER BY "availableAt" ASC, "createdAt" ASC, "id" ASC
+        ORDER BY
+          (CASE "priority" WHEN 'HIGH' THEN 0 WHEN 'NORMAL' THEN 1 ELSE 2 END
+            - FLOOR(EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - "createdAt")) / 300)) ASC,
+          "availableAt" ASC, "createdAt" ASC, "id" ASC
         FOR UPDATE SKIP LOCKED
         LIMIT 1
       )
@@ -384,7 +454,10 @@ export async function failAsyncJob(input: LeaseInput & {
       ? await tx.$executeRaw(Prisma.sql`
           UPDATE "AsyncJob"
           SET "status" = 'RETRY_WAIT',
-              "availableAt" = CURRENT_TIMESTAMP + (${delay} * INTERVAL '1 millisecond'),
+              "availableAt" = CURRENT_TIMESTAMP + (
+                LEAST(${delay} * POWER(2, GREATEST("attemptCount" - 1, 0)), 86400000)
+                * INTERVAL '1 millisecond'
+              ),
               "failureCategory" = ${failure.category}, "failureCode" = ${failure.code},
               "leaseOwner" = NULL, "leaseToken" = NULL, "leaseExpiresAt" = NULL,
               "lastHeartbeatAt" = NULL, "stateVersion" = "stateVersion" + 1,
@@ -499,4 +572,44 @@ export async function reconcileAsyncJobCancellationAfterLeaseConflict(
   return job.status === "CANCELLATION_REQUESTED"
     ? "CURRENT_LEASE_CANCELLATION_REQUESTED"
     : "NOT_RECONCILABLE";
+}
+
+export async function retryTerminalAsyncJob(input: {
+  jobId: string;
+  actor: { userId: string | null; userEmail: string | null; userRole: string };
+}) {
+  const parsedId = jobId.parse(input.jobId);
+  return runSerializableTransactionWithRetry(async (tx) => {
+    const rows = await tx.$queryRaw<AsyncJob[]>(Prisma.sql`
+      SELECT * FROM "AsyncJob" WHERE "id"=${parsedId} FOR UPDATE
+    `);
+    const current = rows[0];
+    if (!current) return { outcome: "NOT_FOUND" as const };
+    if (current.status !== "TERMINAL_FAILED") {
+      return { outcome: "NOT_RETRYABLE" as const, job: current };
+    }
+    const count = await tx.$executeRaw(Prisma.sql`
+      UPDATE "AsyncJob"
+      SET "status"='QUEUED', "maxAttempts"=GREATEST("maxAttempts", "attemptCount" + 1),
+          "availableAt"=CURRENT_TIMESTAMP, "completedAt"=NULL,
+          "failureCategory"=NULL, "failureCode"=NULL, "blockedReason"=NULL,
+          "stateVersion"="stateVersion" + 1, "updatedAt"=CURRENT_TIMESTAMP
+      WHERE "id"=${parsedId} AND "status"='TERMINAL_FAILED'
+    `);
+    requireTransition(count);
+    await createAuditLogInTransaction(tx, {
+      azione: "ASYNC_JOB_MANUAL_RETRY",
+      entita: "AsyncJob",
+      entitaId: current.id,
+      enteId: current.tenantId,
+      esito: "SUCCESS",
+      actor: input.actor,
+      metadata: {
+        operation: current.operation,
+        previousAttemptCount: current.attemptCount,
+        correlationId: current.correlationId,
+      },
+    });
+    return { outcome: "REQUEUED" as const };
+  });
 }

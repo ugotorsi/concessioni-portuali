@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { prisma } from "@/lib/prisma";
+import { ensureFascicoloAutomaticAnalysisJob } from "@/server/ai/fascicoloAutomaticAnalysisJob";
 import type { AsyncJobHandler, AsyncJobHandlerContext } from "@/server/async-jobs/registry";
 import { AsyncJobExecutionError } from "@/server/async-jobs/worker";
 
@@ -56,6 +57,11 @@ export interface NeutralIntakeExtractionHandlerDependencies {
     neutralIntakeId: string;
     extractionAttemptId?: string;
   }): ReturnType<typeof ensureLegalReferenceDiscoveryJob>;
+  ensureFascicoloAnalysis(input: {
+    sourceJobId: string;
+    neutralIntakeId: string;
+    extractionAttemptId?: string;
+  }): ReturnType<typeof ensureFascicoloAutomaticAnalysisJob>;
 }
 
 const defaultDependencies: NeutralIntakeExtractionHandlerDependencies = {
@@ -75,6 +81,7 @@ const defaultDependencies: NeutralIntakeExtractionHandlerDependencies = {
   extract: (neutralIntakeId) => extractNeutralIntake(neutralIntakeId),
   ensureClassification: (input) => ensureNeutralIntakeClassificationJob(input),
   ensureLegalReferenceDiscovery: (input) => ensureLegalReferenceDiscoveryJob(input),
+  ensureFascicoloAnalysis: (input) => ensureFascicoloAutomaticAnalysisJob(input),
 };
 
 async function ensureClassificationAdmission(
@@ -101,14 +108,25 @@ async function ensureDiscoveryAdmission(
   }
 }
 
-function ensurePostExtractionAdmissions(
+async function ensureFascicoloAnalysisAdmission(
   dependencies: NeutralIntakeExtractionHandlerDependencies,
   input: { sourceJobId: string; neutralIntakeId: string; extractionAttemptId?: string },
 ) {
-  return Promise.all([
-    ensureClassificationAdmission(dependencies, input),
-    ensureDiscoveryAdmission(dependencies, input),
-  ]);
+  try {
+    await dependencies.ensureFascicoloAnalysis(input);
+  } catch (error) {
+    if (error instanceof AsyncJobExecutionError) throw error;
+    throw new AsyncJobExecutionError("FASCICOLO_ANALYSIS_ADMISSION", "FASCICOLO_ANALYSIS_ADMISSION_FAILED", true);
+  }
+}
+
+async function ensurePostExtractionAdmissions(
+  dependencies: NeutralIntakeExtractionHandlerDependencies,
+  input: { sourceJobId: string; neutralIntakeId: string; extractionAttemptId?: string },
+) {
+  await ensureClassificationAdmission(dependencies, input);
+  await ensureDiscoveryAdmission(dependencies, input);
+  await ensureFascicoloAnalysisAdmission(dependencies, input);
 }
 
 async function executeExtraction(

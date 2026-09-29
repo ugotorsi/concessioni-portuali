@@ -5,6 +5,10 @@ import type {
   AiOutboundAnalysisProviderRequestV1,
 } from "@/server/ai/fascicoloAnalysis";
 import { AiProviderAdapterError } from "@/server/ai/providerErrors";
+import type {
+  FascicoloDocumentAnalysisProvider,
+  FascicoloDocumentProviderRequestV1,
+} from "@/server/ai/fascicoloDocumentAnalysis";
 
 export const OPENAI_ANALYSIS_MODEL = "gpt-5.6-terra" as const;
 export const OPENAI_RESPONSES_ENDPOINTS = {
@@ -17,7 +21,8 @@ export type OpenAiFetch = (input: string | URL, init?: RequestInit) => Promise<R
 
 type OpenAiAnalysisProviderRequest =
   | AiAnalysisProviderRequestV1
-  | AiOutboundAnalysisProviderRequestV1;
+  | AiOutboundAnalysisProviderRequestV1
+  | FascicoloDocumentProviderRequestV1;
 
 const basisRefSchema = {
   type: "string",
@@ -166,18 +171,27 @@ function buildOutboundInput(request: AiOutboundAnalysisProviderRequestV1): strin
   ].join("\n");
 }
 
+function buildDocumentInput(request: FascicoloDocumentProviderRequestV1): string {
+  return [
+    "BEGIN_UNTRUSTED_DOCUMENT_DATA",
+    JSON.stringify(request.documentData),
+    "END_UNTRUSTED_DOCUMENT_DATA",
+  ].join("\n");
+}
+
 function buildProviderInput(request: OpenAiAnalysisProviderRequest): string {
   if (typeof request !== "object" || request === null) {
     throw configurationError();
   }
   const hasSnapshotData = "snapshotData" in request;
   const hasOutboundData = "outboundData" in request;
-  if (hasSnapshotData === hasOutboundData) {
+  const hasDocumentData = "documentData" in request;
+  if ([hasSnapshotData, hasOutboundData, hasDocumentData].filter(Boolean).length !== 1) {
     throw configurationError();
   }
-  return hasSnapshotData
-    ? buildSnapshotInput(request)
-    : buildOutboundInput(request);
+  if (hasSnapshotData) return buildSnapshotInput(request);
+  if (hasOutboundData) return buildOutboundInput(request);
+  return buildDocumentInput(request);
 }
 
 function buildRequestBody(request: OpenAiAnalysisProviderRequest, maxOutputTokens: number) {
@@ -356,13 +370,14 @@ export function createOpenAiAnalysisProvider(config: {
   maxOutputTokens: number;
   region: OpenAiRegion;
   transport?: OpenAiFetch;
-}): AiAnalysisProvider & AiOutboundAnalysisProvider {
+}): AiAnalysisProvider & AiOutboundAnalysisProvider & FascicoloDocumentAnalysisProvider {
   assertConfig(config);
   const endpoint = OPENAI_RESPONSES_ENDPOINTS[config.region];
   const transport = config.transport ?? globalThis.fetch.bind(globalThis);
 
   function analyze(request: AiAnalysisProviderRequestV1): Promise<unknown>;
   function analyze(request: AiOutboundAnalysisProviderRequestV1): Promise<unknown>;
+  function analyze(request: FascicoloDocumentProviderRequestV1): Promise<unknown>;
   async function analyze(request: OpenAiAnalysisProviderRequest): Promise<unknown> {
     const controller = new AbortController();
     let timedOut = false;
@@ -419,5 +434,5 @@ export function createOpenAiAnalysisProvider(config: {
     }
   }
 
-  return { analyze };
+  return { analyze } as AiAnalysisProvider & AiOutboundAnalysisProvider & FascicoloDocumentAnalysisProvider;
 }

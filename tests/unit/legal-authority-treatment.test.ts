@@ -259,6 +259,40 @@ describe("Block 3B.11B authority relation and treatment core", () => {
     },
   );
 
+  it("rejects confirmed adverse treatment without a complete human review", () => {
+    const observation = graph().observations[0];
+    const assessment = createAuthorityTreatmentAssessment(assessmentInput(observation.id, {
+      treatment: "ADVERSE",
+      origin: "HUMAN",
+      reviewState: "CONFIRMED",
+      scope: { kind: "LEGAL_PROPOSITION", id: "proposition-1" },
+      rationale: "Reasoned legal assessment.",
+    }));
+    expect(codes(graph({ observations: [observation], assessments: [assessment] })))
+      .toContain("CONFIRMED_ADVERSE_REVIEW_REQUIRED");
+  });
+
+  it("accepts confirmed adverse treatment with reviewer, source, date, and rationale", () => {
+    const observation = graph().observations[0];
+    const assessment = createAuthorityTreatmentAssessment(assessmentInput(observation.id, {
+      treatment: "ADVERSE",
+      origin: "HUMAN",
+      reviewState: "CONFIRMED",
+      scope: { kind: "LEGAL_PROPOSITION", id: "proposition-1" },
+      rationale: "Reasoned legal assessment.",
+      humanReview: {
+        reviewedByActorId: "legal-reviewer-a",
+        reviewedAt: "2026-09-26T10:00:00.000Z",
+        evidenceSourceId: observation.provenance.evidenceSourceId,
+        rationale: "Reviewed against the identified proposition and official source.",
+      },
+    }));
+    expect(validateAuthorityTreatmentGraph(
+      graph({ observations: [observation], assessments: [assessment] }),
+      propositionGraph,
+    )).toEqual([]);
+  });
+
   it("preserves chronology without interpreting it", () => {
     const explanation = explainAuthorityPair(graph(), "authority-b", "authority-a");
     expect(explanation.sourceAuthority?.decisionDate).toBe("2025-04-20");
