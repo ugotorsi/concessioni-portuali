@@ -1,8 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import { AppShell } from "@/components/layout/AppShell";
-import { ResumeDemoBanner } from "@/components/demo-guidata/ResumeDemoBanner";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
@@ -61,44 +60,41 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
   return (
     <AppShell
       title="Fascicolo documentale"
-      subtitle="Upload, consultazione e download documenti istruttori"
+      subtitle="Consulta e gestisci i documenti collegati alle attività istruttorie"
     >
       <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-4">
-        <ResumeDemoBanner />
-
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Fascicolo documentale</h1>
-          <p className="mt-1 text-sm text-slate-600">
-            Baseline locale demo: metadati in database e file su storage locale configurabile.
-          </p>
-          <p className="mt-1 text-xs text-slate-500">
-            Metadato registrato a fini istruttori: non sostituisce protocollazione o conservazione a norma.
-          </p>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Filtri documenti</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form className="grid gap-3 md:grid-cols-6" method="GET">
-              <Input name="search" placeholder="Ricerca per nome o descrizione" defaultValue={params.search ?? ""} />
-              <Select name="tipologia" defaultValue={params.tipologia ?? ""}>
+        <form className="rounded-md border border-slate-200 bg-white p-4" method="GET">
+          <div className="grid gap-3 md:grid-cols-3">
+              <label>
+                <span className="mb-1 block text-xs font-medium text-slate-600">Cerca documento</span>
+                <Input name="search" placeholder="Nome o descrizione" defaultValue={params.search ?? ""} />
+              </label>
+              <label>
+                <span className="mb-1 block text-xs font-medium text-slate-600">Tipologia</span>
+                <Select name="tipologia" defaultValue={params.tipologia ?? ""}>
                 <option value="">Tutte le tipologie</option>
                 {filters.tipologie.map((item) => (
                   <option key={item.value} value={item.value}>
                     {item.label}
                   </option>
                 ))}
-              </Select>
-              <Select name="stato" defaultValue={params.stato ?? "TUTTI"}>
+                </Select>
+              </label>
+              <label>
+                <span className="mb-1 block text-xs font-medium text-slate-600">Stato</span>
+                <Select name="stato" defaultValue={params.stato ?? "TUTTI"}>
                 {DOCUMENT_STATO_VALUES.map((value) => (
                   <option key={value} value={value}>
                     {formatEnumLabel(value)}
                   </option>
                 ))}
-              </Select>
-              <Select name="direzione" defaultValue={params.direzione ?? ""}>
+                </Select>
+              </label>
+          </div>
+          <details className="mt-4 border-t border-slate-200 pt-3">
+            <summary className="cursor-pointer text-sm font-semibold text-[#173d4f]">Filtri avanzati</summary>
+            <div className="mt-3 grid gap-3 md:grid-cols-3">
+              <Select aria-label="Direzione documento" name="direzione" defaultValue={params.direzione ?? ""}>
                 <option value="">Tutte le direzioni</option>
                 {filters.direzioni.map((item) => (
                   <option key={item.value} value={item.value}>
@@ -106,7 +102,7 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
                   </option>
                 ))}
               </Select>
-              <Select name="canale" defaultValue={params.canale ?? ""}>
+              <Select aria-label="Canale documento" name="canale" defaultValue={params.canale ?? ""}>
                 <option value="">Tutti i canali</option>
                 {filters.canali.map((item) => (
                   <option key={item.value} value={item.value}>
@@ -114,30 +110,23 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
                   </option>
                 ))}
               </Select>
-              <Select name="pecWarning" defaultValue={params.pecWarning ?? ""}>
-                <option value="">Warning PEC: tutti</option>
-                <option value="SI">Con warning PEC</option>
-                <option value="NO">Senza warning PEC</option>
+              <Select aria-label="Verifica ricevuta PEC" name="pecWarning" defaultValue={params.pecWarning ?? ""}>
+                <option value="">Ricevuta PEC: tutte</option>
+                <option value="SI">Da verificare</option>
+                <option value="NO">Verificata</option>
               </Select>
-              <div className="flex items-center gap-2">
-                <Button type="submit">Applica</Button>
-                <a href="/documenti" className="text-sm underline underline-offset-4">
-                  Reset
-                </a>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+            </div>
+          </details>
+          <div className="mt-4 flex items-center gap-2">
+            <Button type="submit">Applica filtri</Button>
+            <a href="/documenti" className="rounded-md px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">Reset</a>
+          </div>
+        </form>
 
         {canUpload ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>Carica documento</CardTitle>
-              <CardDescription>
-                Collega il file ad almeno un'entità tra concessione, criticità, procedimento, sopralluogo, pagamento o report.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+          <details className="rounded-md border border-slate-200 bg-white">
+            <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-[#173d4f]">Carica documento</summary>
+            <div className="border-t border-slate-200 p-4">
               <form action={createDocumentoUploadAction} className="grid gap-3 md:grid-cols-3">
                 <input type="hidden" name="intakeOperationId" value={randomUUID()} />
                 <label className="text-sm text-slate-700 md:col-span-3">
@@ -303,11 +292,11 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
                   </Select>
                 </label>
                 <div className="md:col-span-3">
-                  <Button type="submit">Carica documento</Button>
+                  <Button type="submit">Conferma caricamento</Button>
                 </div>
               </form>
-            </CardContent>
-          </Card>
+            </div>
+          </details>
         ) : null}
 
         <Card>
@@ -321,12 +310,9 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
                   <TableHead>Nome</TableHead>
                   <TableHead>Tipologia</TableHead>
                   <TableHead>Stato</TableHead>
-                  <TableHead>Dimensione</TableHead>
-                  <TableHead>Storage</TableHead>
-                  <TableHead>Protocollo/PEC</TableHead>
+                  <TableHead>Informazioni</TableHead>
                   <TableHead>Data</TableHead>
-                  <TableHead>Download</TableHead>
-                  {canUpload ? <TableHead>Aggiorna</TableHead> : null}
+                  <TableHead>Documento</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -335,40 +321,44 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
                     <TableCell className="max-w-80 truncate">{item.nome}</TableCell>
                     <TableCell>{formatEnumLabel(item.tipologia)}</TableCell>
                     <TableCell>{formatEnumLabel(item.statoDocumento)}</TableCell>
-                    <TableCell>{(item.sizeBytes ?? item.dimensioneBytes) !== null ? `${item.sizeBytes ?? item.dimensioneBytes} bytes` : "-"}</TableCell>
-                    <TableCell className="text-xs text-slate-700">
-                      <div>{item.storageProvider ? formatEnumLabel(item.storageProvider) : "-"}</div>
-                      <div>{item.source ? `Fonte: ${formatEnumLabel(item.source)}` : "Fonte: -"}</div>
-                      <div>{item.status ? `Status: ${formatEnumLabel(item.status)}` : "Status: -"}</div>
-                      <div>{item.checksumSha256 ? `Hash: ${item.checksumSha256.slice(0, 12)}...` : "Hash: -"}</div>
-                    </TableCell>
-                    <TableCell className="text-xs text-slate-700">
-                      <div>{item.direzione ? formatEnumLabel(item.direzione) : "-"} / {item.canale ? formatEnumLabel(item.canale) : "-"}</div>
-                      <div>{item.numeroProtocollo ?? "Nessun protocollo"}</div>
+                    <TableCell className="text-xs text-slate-600">
+                      <div>{item.direzione ? formatEnumLabel(item.direzione) : "Direzione non indicata"}</div>
+                      <div>{item.canale ? formatEnumLabel(item.canale) : "Canale non indicato"}</div>
+                      <div>{item.numeroProtocollo ?? "Protocollo non indicato"}</div>
                       {item.dataProtocollo ? <div>{formatDateIT(item.dataProtocollo)}</div> : null}
-                      {item.pecWarningMancataRicevuta ? <div className="font-semibold text-amber-700">Warning PEC</div> : null}
+                      {item.pecWarningMancataRicevuta ? <div className="font-semibold text-amber-700">Ricevuta PEC da verificare</div> : null}
+                      <details className="mt-1">
+                        <summary className="cursor-pointer font-medium text-slate-500">Dettagli tecnici</summary>
+                        <div className="mt-1 space-y-0.5 break-all font-mono text-[11px]">
+                          <div>Dimensione: {(item.sizeBytes ?? item.dimensioneBytes) !== null ? `${item.sizeBytes ?? item.dimensioneBytes} byte` : "-"}</div>
+                          <div>Storage: {item.storageProvider ? formatEnumLabel(item.storageProvider) : "-"}</div>
+                          <div>Fonte: {item.source ? formatEnumLabel(item.source) : "-"}</div>
+                          <div>Stato: {item.status ? formatEnumLabel(item.status) : "-"}</div>
+                          <div>Hash: {item.checksumSha256 ?? "-"}</div>
+                        </div>
+                      </details>
                     </TableCell>
                     <TableCell>{item.dataDocumento ? formatDateIT(item.dataDocumento) : formatDateIT(item.createdAt)}</TableCell>
                     <TableCell>
-                      <div className="flex flex-col gap-1">
-                        <a href={item.downloadUrl} className="text-sm underline underline-offset-4">
-                          Scarica
+                      <div className="flex min-w-40 flex-col items-start gap-2">
+                        <a
+                          href={(item.mimeType?.startsWith("application/pdf") || item.mimeType?.startsWith("image/")) ? `${item.downloadUrl}?preview=1` : item.downloadUrl}
+                          target={(item.mimeType?.startsWith("application/pdf") || item.mimeType?.startsWith("image/")) ? "_blank" : undefined}
+                          rel={(item.mimeType?.startsWith("application/pdf") || item.mimeType?.startsWith("image/")) ? "noreferrer" : undefined}
+                          className="text-sm font-semibold text-[#173d4f] underline decoration-slate-300 underline-offset-4 hover:decoration-[#173d4f]"
+                        >
+                          Apri documento
                         </a>
-                        {item.mimeType?.startsWith("application/pdf") || item.mimeType?.startsWith("image/") ? (
-                          <a
-                            href={`${item.downloadUrl}?preview=1`}
-                            className="text-xs underline underline-offset-4"
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            Preview
-                          </a>
-                        ) : null}
-                      </div>
-                    </TableCell>
-                    {canUpload ? (
-                      <TableCell>
-                        <div className="flex flex-col gap-2">
+                        {(canUpload || item.mimeType?.startsWith("application/pdf") || item.mimeType?.startsWith("image/")) ? (
+                          <details className="w-full">
+                            <summary className="cursor-pointer text-xs font-medium text-slate-500 hover:text-slate-900">Altro</summary>
+                            <div className="mt-2 grid min-w-72 gap-3 border-l border-slate-200 pl-3">
+                              {item.mimeType?.startsWith("application/pdf") || item.mimeType?.startsWith("image/") ? (
+                                <a href={item.downloadUrl} className="text-xs text-slate-600 underline underline-offset-4">Scarica originale</a>
+                              ) : null}
+                          {canUpload ? (
+                            <details>
+                              <summary className="cursor-pointer text-xs font-medium text-slate-600">Modifica informazioni</summary>
                           <form action={updateDocumentoMetadataAction} className="flex flex-col gap-2">
                             <input type="hidden" name="id" value={item.id} />
                             <Input name="nome" defaultValue={item.nome} />
@@ -404,25 +394,29 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
                             <Input name="pecRicevutaAccettazioneId" defaultValue={item.pecRicevutaAccettazioneId ?? ""} placeholder="ID ricevuta accettazione" />
                             <Input name="pecRicevutaConsegnaId" defaultValue={item.pecRicevutaConsegnaId ?? ""} placeholder="ID ricevuta consegna" />
                             <Button type="submit" variant="outline">
-                              Salva metadati
+                              Salva modifiche
                             </Button>
                           </form>
-                          {item.statoDocumento !== "ARCHIVIATO" ? (
+                            </details>
+                          ) : null}
+                          {canUpload && item.statoDocumento !== "ARCHIVIATO" ? (
                             <form action={archiveDocumentoAction}>
                               <input type="hidden" name="id" value={item.id} />
-                              <Button type="submit" variant="outline">
+                              <Button type="submit" variant="danger">
                                 Archivia
                               </Button>
                             </form>
                           ) : null}
-                        </div>
-                      </TableCell>
-                    ) : null}
+                            </div>
+                          </details>
+                        ) : null}
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))}
                 {items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={canUpload ? 9 : 8} className="text-center text-slate-500">
+                    <TableCell colSpan={6} className="text-center text-slate-500">
                       Nessun documento trovato.
                     </TableCell>
                   </TableRow>

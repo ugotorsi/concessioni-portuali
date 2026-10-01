@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ExternalLink, Plus, SearchX } from "lucide-react";
+import { Plus, SearchX } from "lucide-react";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { buttonVariants } from "@/components/ui/Button";
@@ -16,6 +16,7 @@ import {
 import { ProcedimentiFiltersBar } from "@/components/procedimenti/ProcedimentiFiltersBar";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { ClickableTableRow } from "@/components/ui/ClickableTableRow";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SectionHeader } from "@/components/ui/PageHeader";
 import {
@@ -252,7 +253,6 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
                   <TableHead>Termine memorie</TableHead>
                   <TableHead>Termine contraddittorio</TableHead>
                   <TableHead>Giorni</TableHead>
-                  <TableHead>Azioni</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -271,9 +271,16 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
                       : "";
 
                   return (
-                    <TableRow key={item.id} className={rowClassName}>
+                    <ClickableTableRow
+                      key={item.id}
+                      href={`/procedimenti/${item.id}`}
+                      label={`Apri fascicolo ${formatEnumLabel(item.tipologia)} - ${item.concessione.numeroAtto}`}
+                      className={rowClassName}
+                    >
                       <TableCell>
-                        <ProcedimentoTipologiaBadge value={item.tipologia} />
+                        <Link href={`/procedimenti/${item.id}`} className="rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7285]">
+                          <ProcedimentoTipologiaBadge value={item.tipologia} />
+                        </Link>
                       </TableCell>
                       <TableCell>
                         <ProcedimentoStatoBadge value={item.stato} />
@@ -288,20 +295,23 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
                         <ProcedimentoOrigineBadge value={item.origineProcedimento} />
                       </TableCell>
                       <TableCell>
-                        <div className="space-y-1">
-                          <ProcedimentoPreavvisoBadge
-                            applicabile={item.preavvisoRigettoApplicabile}
-                            stato={item.statoPreavvisoRigetto}
-                          />
-                          <p className="text-xs text-slate-500">{formatEnumLabel(item.statoPreavvisoRigetto)}</p>
-                        </div>
+                        <ProcedimentoPreavvisoBadge
+                          applicabile={item.preavvisoRigettoApplicabile}
+                          stato={item.statoPreavvisoRigetto}
+                        />
                       </TableCell>
-                      <TableCell>{item.concessione.numeroAtto}</TableCell>
+                      <TableCell>
+                        <Link href={`/concessioni/${item.concessione.id}`} className="font-medium text-[#173d4f] underline decoration-slate-300 underline-offset-4 hover:decoration-[#173d4f]">
+                          {item.concessione.numeroAtto}
+                        </Link>
+                      </TableCell>
                       <TableCell>{item.concessione.concessionario.denominazione}</TableCell>
                       <TableCell>
                         {item.criticita ? (
                           <div className="space-y-1">
-                            <p>{formatEnumLabel(item.criticita.tipologia)}</p>
+                            <Link href={`/criticita/${item.criticita.id}`} className="font-medium text-[#173d4f] underline decoration-slate-300 underline-offset-4 hover:decoration-[#173d4f]">
+                              {formatEnumLabel(item.criticita.tipologia)}
+                            </Link>
                             <Badge variant={item.criticita.stato === "APERTA" ? "danger" : "warning"}>
                               {formatEnumLabel(item.criticita.gravita)}
                             </Badge>
@@ -323,37 +333,12 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
                           giorniRitardoContraddittorio={item.giorniRitardoContraddittorio}
                         />
                       </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col gap-1">
-                          <Link
-                            href={`/procedimenti/${item.id}`}
-                            className={cn(buttonVariants({ variant: "secondary", size: "sm" }), "w-full justify-start")}
-                          >
-                            <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-                            Apri scheda
-                          </Link>
-                          <Link
-                            href={`/concessioni/${item.concessione.id}`}
-                            className="text-xs text-slate-600 underline underline-offset-4"
-                          >
-                            Concessione
-                          </Link>
-                          {item.criticita ? (
-                            <Link
-                              href={`/criticita/${item.criticita.id}`}
-                              className="text-xs text-slate-600 underline underline-offset-4"
-                            >
-                              Criticità
-                            </Link>
-                          ) : null}
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                    </ClickableTableRow>
                   );
                 })}
                 {listData.items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={14}>
+                    <TableCell colSpan={13}>
                       <EmptyState
                         icon={SearchX}
                         title="Nessun fascicolo trovato"

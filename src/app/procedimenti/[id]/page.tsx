@@ -363,9 +363,10 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
             </CardHeader>
             <CardContent className="space-y-4">
               {canWriteChecklist ? (
-                <form action={reassignProcedimentoResponsabileAction} className="space-y-3 rounded-md border border-slate-200 bg-slate-50 p-3">
+                <details className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                  <summary className="cursor-pointer text-sm font-medium text-slate-900">Riassegna responsabile</summary>
+                <form action={reassignProcedimentoResponsabileAction} className="mt-3 space-y-3">
                   <input type="hidden" name="procedimentoId" value={detail.procedimento.id} />
-                  <p className="text-sm font-medium text-slate-900">Riassegna responsabile</p>
                   <div className="grid gap-3 md:grid-cols-2">
                     <label className="text-sm text-slate-700">
                       Responsabile
@@ -388,8 +389,9 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                       <Textarea name="motivoAssegnazione" rows={2} />
                     </label>
                   </div>
-                  <Button type="submit">Riassegna responsabile</Button>
+                  <Button type="submit">Conferma riassegnazione</Button>
                 </form>
+                </details>
               ) : null}
 
               <div className="space-y-3">

@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { AppShell } from "@/components/layout/AppShell";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { Badge } from "@/components/ui/Badge";
@@ -16,7 +14,6 @@ import {
 import { formatCurrencyEUR, formatDateIT, formatEnumLabel } from "@/lib/utils";
 import { BACKOFFICE_ROLES, requireRole } from "@/lib/auth";
 import { getDashboardData } from "@/server/queries/dashboard";
-import { getVerticaliDashboardSummary } from "@/server/queries/verticali";
 
 export const dynamic = "force-dynamic";
 
@@ -57,7 +54,7 @@ function formatDeltaLabel(giorniDelta: number): string {
 
 export default async function DashboardPage() {
   await requireRole(BACKOFFICE_ROLES);
-  const [data, verticaliSummary] = await Promise.all([getDashboardData(), getVerticaliDashboardSummary()]);
+  const data = await getDashboardData();
 
   return (
     <AppShell
@@ -119,102 +116,7 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      <section className="mt-6 grid gap-4 xl:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Verticali</CardTitle>
-            <CardDescription>
-              Dati disponibili nel perimetro corrente per i workspace verticali configurati.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3" data-testid="dashboard-verticali-operative">
-            <p className="text-sm text-slate-700">
-              Verticali configurate: <span className="font-semibold">{verticaliSummary.totalVerticaliConfigurate}</span>
-            </p>
-            <p className="text-sm text-slate-700">
-              Verticali con concessioni nel perimetro: <span className="font-semibold">{verticaliSummary.verticaliConConcessioniNelPerimetro}</span>
-            </p>
-
-            <div className="grid gap-2 sm:grid-cols-2">
-              {verticaliSummary.items.map((item) => (
-                <Link
-                  key={item.slug}
-                  href={`/verticali/${item.slug}`}
-                  className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 hover:bg-slate-100"
-                >
-                  <p className="font-medium">{item.label}</p>
-                  <p className="text-xs text-slate-600">Concessioni per verticale: {item.concessioniCount}</p>
-                </Link>
-              ))}
-            </div>
-
-            <div>
-              <Link
-                href="/verticali"
-                className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
-              >
-                Apri area verticali
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Scenari demo istituzionali</CardTitle>
-            <CardDescription>
-              Percorsi guidati su morosità Art. 47, occupazione difforme, regolarizzazione e art. 10-bis.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              <Link
-                href="/demo-scenari"
-                className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
-              >
-                Apri scenari demo
-              </Link>
-              <Link
-                href="/documenti"
-                className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"
-              >
-                Apri fascicolo documentale
-              </Link>
-              <Link
-                href="/mappa"
-                className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"
-              >
-                Apri mappa demo
-              </Link>
-              <Link
-                href="/demo-guidata"
-                className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"
-              >
-                Apri demo guidata AI
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Mappa concessioni e criticità</CardTitle>
-            <CardDescription>
-              Accesso rapido alla vista territoriale dimostrativa con marker geolocalizzati e link alle schede.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              <Link
-                href="/mappa"
-                className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
-              >
-                Apri mappa concessioni e criticità
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-
+      <section className="mt-6 grid gap-4 xl:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Criticità prioritarie</CardTitle>

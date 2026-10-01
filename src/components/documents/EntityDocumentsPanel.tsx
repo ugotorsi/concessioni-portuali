@@ -80,10 +80,8 @@ export function EntityDocumentsPanel({
               <TableHead>Tipologia</TableHead>
               <TableHead>Stato</TableHead>
               <TableHead>Data</TableHead>
-              <TableHead>Metadata</TableHead>
-              <TableHead>Storage</TableHead>
-              <TableHead>Download</TableHead>
-              {canUpload ? <TableHead>Azioni</TableHead> : null}
+              <TableHead>Informazioni</TableHead>
+              <TableHead>Documento</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -95,55 +93,60 @@ export function EntityDocumentsPanel({
                 <TableCell>
                   {item.dataDocumento ? formatDateIT(item.dataDocumento) : formatDateIT(item.createdAt)}
                 </TableCell>
-                <TableCell className="text-xs text-slate-700">
-                  <div>{item.direzione ? formatEnumLabel(item.direzione) : "-"} / {item.canale ? formatEnumLabel(item.canale) : "-"}</div>
-                  <div>{item.numeroProtocollo ?? "Nessun protocollo"}</div>
+                <TableCell className="text-xs text-slate-600">
+                  <div>{item.direzione ? formatEnumLabel(item.direzione) : "Direzione non indicata"}</div>
+                  <div>{item.canale ? formatEnumLabel(item.canale) : "Canale non indicato"}</div>
+                  <div>{item.numeroProtocollo ?? "Protocollo non indicato"}</div>
                   {item.dataProtocollo ? <div>{formatDateIT(item.dataProtocollo)}</div> : null}
-                  {item.pecWarningMancataRicevuta ? <div className="font-semibold text-amber-700">Warning PEC</div> : null}
-                </TableCell>
-                <TableCell className="text-xs text-slate-700">
-                  <div>{item.storageProvider ? formatEnumLabel(item.storageProvider) : "-"}</div>
-                  <div>{item.source ? `Fonte: ${formatEnumLabel(item.source)}` : "Fonte: -"}</div>
-                  <div>{item.status ? `Status: ${formatEnumLabel(item.status)}` : "Status: -"}</div>
-                  <div>{item.checksumSha256 ? `Hash: ${item.checksumSha256.slice(0, 10)}...` : "Hash: -"}</div>
-                  <div>{item.sizeBytes !== null && item.sizeBytes !== undefined ? `${item.sizeBytes} bytes` : "-"}</div>
+                  {item.pecWarningMancataRicevuta ? <div className="font-semibold text-amber-700">Ricevuta PEC da verificare</div> : null}
+                  <details className="mt-1">
+                    <summary className="cursor-pointer font-medium text-slate-500">Dettagli tecnici</summary>
+                    <div className="mt-1 space-y-0.5 break-all font-mono text-[11px] text-slate-500">
+                      <div>Storage: {item.storageProvider ? formatEnumLabel(item.storageProvider) : "-"}</div>
+                      <div>Fonte: {item.source ? formatEnumLabel(item.source) : "-"}</div>
+                      <div>Stato: {item.status ? formatEnumLabel(item.status) : "-"}</div>
+                      <div>Hash: {item.checksumSha256 ?? "-"}</div>
+                      <div>Dimensione: {item.sizeBytes !== null && item.sizeBytes !== undefined ? `${item.sizeBytes} byte` : "-"}</div>
+                    </div>
+                  </details>
                 </TableCell>
                 <TableCell>
-                  <div className="flex flex-col gap-1">
-                    <a href={`/documenti/${item.id}/download`} className="text-sm underline underline-offset-4">
-                      Scarica
+                  <div className="flex min-w-36 flex-col items-start gap-2">
+                    <a
+                      href={`/documenti/${item.id}/download${item.url?.includes("/download") ? "?preview=1" : ""}`}
+                      target={item.url?.includes("/download") ? "_blank" : undefined}
+                      rel={item.url?.includes("/download") ? "noreferrer" : undefined}
+                      className="text-sm font-semibold text-[#173d4f] underline decoration-slate-300 underline-offset-4 hover:decoration-[#173d4f]"
+                    >
+                      Apri documento
                     </a>
-                    {item.url?.includes("/download") ? (
-                      <a
-                        href={`/documenti/${item.id}/download?preview=1`}
-                        className="text-xs underline underline-offset-4"
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        Preview
-                      </a>
+                    {(item.url?.includes("/download") || (canUpload && item.statoDocumento !== "ARCHIVIATO")) ? (
+                      <details>
+                        <summary className="cursor-pointer text-xs font-medium text-slate-500 hover:text-slate-900">Altro</summary>
+                        <div className="mt-2 flex flex-col items-start gap-2 border-l border-slate-200 pl-2">
+                          {item.url?.includes("/download") ? (
+                            <a href={`/documenti/${item.id}/download`} className="text-xs text-slate-600 underline underline-offset-4">
+                              Scarica originale
+                            </a>
+                          ) : null}
+                          {canUpload && item.statoDocumento !== "ARCHIVIATO" ? (
+                            <form action={archiveDocumentoAction}>
+                              <input type="hidden" name="id" value={item.id} />
+                              <button type="submit" className="text-xs font-medium text-red-700 underline underline-offset-4">
+                                Archivia
+                              </button>
+                            </form>
+                          ) : null}
+                        </div>
+                      </details>
                     ) : null}
                   </div>
                 </TableCell>
-                {canUpload ? (
-                  <TableCell>
-                    {item.statoDocumento !== "ARCHIVIATO" ? (
-                      <form action={archiveDocumentoAction}>
-                        <input type="hidden" name="id" value={item.id} />
-                        <button type="submit" className="text-sm underline underline-offset-4">
-                          Archivia
-                        </button>
-                      </form>
-                    ) : (
-                      <span className="text-xs text-slate-500">Archiviato</span>
-                    )}
-                  </TableCell>
-                ) : null}
               </TableRow>
             ))}
             {documents.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={canUpload ? 8 : 7} className="text-center text-slate-500">
+                <TableCell colSpan={6} className="text-center text-slate-500">
                   {isProcedimento ? "Nessun documento presente nel fascicolo." : "Nessun documento collegato."}
                 </TableCell>
               </TableRow>
@@ -152,7 +155,9 @@ export function EntityDocumentsPanel({
         </Table>
 
         {canUpload ? (
-          <form action={createDocumentoUploadAction} className="grid gap-3 rounded-md border border-slate-200 bg-slate-50 p-3 md:grid-cols-2">
+          <details className="rounded-md border border-slate-200 bg-slate-50">
+            <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-[#173d4f]">Allega documento</summary>
+          <form action={createDocumentoUploadAction} className="grid gap-3 border-t border-slate-200 p-4 md:grid-cols-2">
             <input type="hidden" name={hiddenFieldName} value={entityId} />
             <input type="hidden" name="intakeOperationId" value={randomUUID()} />
             <label className="text-sm text-slate-700 md:col-span-2">
@@ -252,9 +257,10 @@ export function EntityDocumentsPanel({
               </Select>
             </label>
             <div className="flex items-end">
-              <Button type="submit">{isProcedimento ? "Allega documento" : "Carica documento"}</Button>
+              <Button type="submit">Conferma allegato</Button>
             </div>
           </form>
+          </details>
         ) : null}
       </CardContent>
     </Card>

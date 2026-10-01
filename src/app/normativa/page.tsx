@@ -3,7 +3,9 @@ import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { AmbitoNormaBadge, StatoVersioneBadge } from "@/components/normativa/NormativaBadges";
 import { NormativaFiltersBar } from "@/components/normativa/NormativaFiltersBar";
+import { buttonVariants } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { ClickableTableRow } from "@/components/ui/ClickableTableRow";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
 import { canManageNormativaUpdate, canViewNormativa, requireRole } from "@/lib/auth";
 import { formatDateIT } from "@/lib/utils";
@@ -63,66 +65,43 @@ export default async function NormativaPage({ searchParams }: NormativaPageProps
   const [filtersData, listData] = await Promise.all([getNormativaFilters(), getNormativaList(filters)]);
 
   return (
-    <AppShell title="Normativa" subtitle="Fonti, versioni vigenti e impatti operativi sui moduli">
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Fonti censite</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-slate-900">{listData.summary.totaleFonti}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Versioni vigenti</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-emerald-700">{listData.summary.versioniVigenti}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>In consultazione</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-amber-700">{listData.summary.versioniInConsultazione}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Impatti mappati</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-slate-900">{listData.summary.impattiAperti}</p>
-          </CardContent>
-        </Card>
+    <AppShell title="Normativa" subtitle="Fonti giuridiche, versioni e impatti sulle concessioni">
+      <section aria-label="Riepilogo normativa">
+        <dl className="grid overflow-hidden rounded-md border border-slate-200 bg-white sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            ["Fonti censite", listData.summary.totaleFonti],
+            ["Versioni vigenti", listData.summary.versioniVigenti],
+            ["In consultazione", listData.summary.versioniInConsultazione],
+            ["Impatti mappati", listData.summary.impattiAperti],
+          ].map(([label, value]) => (
+            <div key={label} className="border-b border-slate-200 px-4 py-3 last:border-b-0 sm:border-r sm:border-b-0">
+              <dt className="text-xs font-medium text-slate-600">{label}</dt>
+              <dd className="mt-1 text-2xl font-semibold text-slate-950">{value}</dd>
+            </div>
+          ))}
+        </dl>
       </section>
 
       <section className="mt-4">
-        <div className="mb-4 flex flex-wrap justify-end gap-2">
-          {["ADMIN", "GIURIDICO"].includes(role) ? (
-            <Link
-              href="/normativa/riconciliazione"
-              className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-900 hover:bg-slate-50"
-            >
-              Riconciliazione fonti
-            </Link>
-          ) : null}
-          <Link
-            href="/normativa/orchestrazione"
-            className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-900 hover:bg-slate-50"
-          >
-            Orchestrazione regole
-          </Link>
+        <div className="mb-4 flex flex-wrap items-start justify-end gap-2">
           {canManageNormativaUpdate(role) ? (
-            <Link
-              href="/normativa/aggiornamento"
-              className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
-            >
+            <Link href="/normativa/aggiornamento" className={buttonVariants()}>
               Aggiornamento normativo
             </Link>
           ) : null}
+          <details className="relative">
+            <summary className={buttonVariants({ variant: "secondary" })}>Altro</summary>
+            <div className="absolute right-0 z-20 mt-2 grid min-w-56 gap-1 rounded-md border border-slate-200 bg-white p-2 shadow-lg">
+              {["ADMIN", "GIURIDICO"].includes(role) ? (
+                <Link href="/normativa/riconciliazione" className="rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
+                  Riconciliazione fonti
+                </Link>
+              ) : null}
+              <Link href="/normativa/orchestrazione" className="rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
+                Orchestrazione regole
+              </Link>
+            </div>
+          </details>
         </div>
         <NormativaFiltersBar filtersData={filtersData} current={filters} />
       </section>
@@ -143,14 +122,17 @@ export default async function NormativaPage({ searchParams }: NormativaPageProps
                   <TableHead>Stato</TableHead>
                   <TableHead>Data entrata vigore</TableHead>
                   <TableHead>Impatti</TableHead>
-                  <TableHead>Azioni</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {listData.items.map((item) => (
-                  <TableRow key={item.id}>
+                  <ClickableTableRow key={item.id} href={`/normativa/${item.id}`} label={`Apri fonte ${item.codice}`}>
                     <TableCell className="font-semibold text-slate-900">{item.codice}</TableCell>
-                    <TableCell className="max-w-96 truncate">{item.titolo}</TableCell>
+                    <TableCell className="max-w-96 truncate">
+                      <Link href={`/normativa/${item.id}`} className="font-medium text-[#173d4f] underline decoration-slate-300 underline-offset-4 hover:decoration-[#173d4f]">
+                        {item.titolo}
+                      </Link>
+                    </TableCell>
                     <TableCell>
                       <AmbitoNormaBadge value={item.ambito} />
                     </TableCell>
@@ -160,19 +142,11 @@ export default async function NormativaPage({ searchParams }: NormativaPageProps
                     </TableCell>
                     <TableCell>{item.dataEntrataVigore ? formatDateIT(item.dataEntrataVigore) : "-"}</TableCell>
                     <TableCell>{item.impattiCount}</TableCell>
-                    <TableCell>
-                      <Link
-                        href={`/normativa/${item.id}`}
-                        className="text-sm font-medium text-slate-900 underline underline-offset-4"
-                      >
-                        Apri scheda
-                      </Link>
-                    </TableCell>
-                  </TableRow>
+                  </ClickableTableRow>
                 ))}
                 {listData.items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center text-slate-500">
+                    <TableCell colSpan={7} className="text-center text-slate-500">
                       Nessuna fonte normativa trovata con i filtri correnti.
                     </TableCell>
                   </TableRow>

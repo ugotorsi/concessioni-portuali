@@ -5,12 +5,13 @@ import { describe, expect, it } from "vitest";
 const source = readFileSync("src/components/procedimenti/FascicoloAutomaticWorkflowPanel.tsx", "utf8");
 
 describe("Lotto 7 operational proposal UI", () => {
-  it("states that a proposal is not an executed action and shows status, origins, warnings and history", () => {
+  it("states that proposals require approval and keeps origins, codes and history available", () => {
     for (const label of [
       "Proposte operative",
-      "PROPOSTA ≠ AZIONE ESEGUITA",
-      "Origini strutturate:",
-      "Avvertenze:",
+      "Le proposte richiedono approvazione prima di produrre effetti.",
+      "Dettagli tecnici",
+      "Origini:",
+      "Codici:",
       "Storico review",
       "Entità creata:",
       "Azione manuale richiesta",

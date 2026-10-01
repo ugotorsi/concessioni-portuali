@@ -134,36 +134,50 @@ export function Sidebar({ role, roleLabel }: SidebarProps) {
       return true;
     }),
   })).filter((group) => group.items.length > 0);
+  const primaryGroups = navGroups.filter((group) => !["Amministrazione", "Supporto"].includes(group.label));
+  const secondaryGroups = navGroups.filter((group) => ["Amministrazione", "Supporto"].includes(group.label));
+
+  function renderGroup(group: NavGroup) {
+    return (
+      <div key={group.label}>
+        <p className="mb-1.5 px-3 text-[11px] font-semibold text-slate-400">{group.label}</p>
+        <div className="grid gap-0.5">
+          {group.items.map((item) => {
+            const isActive = isNavItemActive(pathname, item.href, item.matchMode ?? "exact");
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={isActive ? "page" : undefined}
+                className={cn(
+                  "inline-flex min-h-9 items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300",
+                  isActive
+                    ? "bg-white text-[#173d4f] shadow-sm"
+                    : "text-slate-300 hover:bg-slate-800 hover:text-white",
+                )}
+              >
+                <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 
   const navigation = (
     <nav className="space-y-5" aria-label="Navigazione principale">
-      {navGroups.map((group) => (
-        <div key={group.label}>
-          <p className="mb-1.5 px-3 text-[11px] font-semibold text-slate-400">{group.label}</p>
-          <div className="grid gap-0.5">
-            {group.items.map((item) => {
-              const isActive = isNavItemActive(pathname, item.href, item.matchMode ?? "exact");
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={isActive ? "page" : undefined}
-                  className={cn(
-                    "inline-flex min-h-9 items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300",
-                    isActive
-                      ? "bg-white text-[#173d4f] shadow-sm"
-                      : "text-slate-300 hover:bg-slate-800 hover:text-white",
-                  )}
-                >
-                  <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      ))}
+      {primaryGroups.map(renderGroup)}
+      {secondaryGroups.length > 0 ? (
+        <details className="border-t border-slate-800 pt-3">
+          <summary className="cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white">
+            Altro
+          </summary>
+          <div className="mt-3 space-y-5">{secondaryGroups.map(renderGroup)}</div>
+        </details>
+      ) : null}
     </nav>
   );
 
@@ -192,13 +206,6 @@ export function Sidebar({ role, roleLabel }: SidebarProps) {
         <div className="flex-1 overflow-y-auto px-3 py-4">{navigation}</div>
         <div className="border-t border-slate-800 px-3 py-3">
         <div className="grid gap-1">
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-800 hover:text-white"
-          >
-            <Users className="h-4 w-4" aria-hidden="true" />
-            <span>Cambia profilo</span>
-          </Link>
           <Link
             href="/logout"
             data-testid="logout-link"

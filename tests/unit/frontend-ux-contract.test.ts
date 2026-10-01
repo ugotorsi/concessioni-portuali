@@ -17,6 +17,8 @@ describe("frontend UX contract", () => {
     expect(source).toContain('item.href === "/admin/runtime"');
     expect(source).toContain('role === "ADMIN"');
     expect(source).toContain('aria-current={isActive ? "page" : undefined}');
+    expect(source).toContain("Altro");
+    expect(source).not.toContain("Cambia profilo");
   });
 
   it("puts daily attention before contextual dashboard indicators", () => {
@@ -28,6 +30,8 @@ describe("frontend UX contract", () => {
     expect(contextIndex).toBeGreaterThan(attentionIndex);
     expect(source).toContain('title="Criticità urgenti"');
     expect(source).toContain('title="Morosità aperte"');
+    expect(source).not.toContain("Scenari demo istituzionali");
+    expect(source).not.toContain("Apri mappa demo");
   });
 
   it("keeps advanced proceedings filters available without dominating the initial view", () => {
@@ -51,5 +55,40 @@ describe("frontend UX contract", () => {
     expect(workflow).toContain("Verifiche professionali");
     expect(workflow).toContain("Dettaglio tecnico");
     expect(workflow).toContain("Dettagli tecnici del rapporto");
+    expect(workflow).toContain("Genera proposte operative");
+    expect(workflow).toContain("Archivia rapporto");
+    expect(workflow).toContain("Altro");
+  });
+
+  it("uses accessible clickable rows without separate action columns", () => {
+    const clickableRow = readSource("src/components/ui/ClickableTableRow.tsx");
+
+    expect(clickableRow).toContain('role="link"');
+    expect(clickableRow).toContain("event.key === \"Enter\"");
+    expect(clickableRow).toContain("event.key === \" \"");
+
+    for (const page of [
+      "src/app/procedimenti/page.tsx",
+      "src/app/report/page.tsx",
+      "src/app/normativa/page.tsx",
+    ]) {
+      const source = readSource(page);
+      expect(source).toContain("<ClickableTableRow");
+      expect(source).not.toContain("<TableHead>Azioni</TableHead>");
+    }
+  });
+
+  it("keeps document operations available behind one primary action", () => {
+    for (const page of [
+      "src/app/documenti/page.tsx",
+      "src/components/documents/EntityDocumentsPanel.tsx",
+    ]) {
+      const source = readSource(page);
+      expect(source).toContain("Apri documento");
+      expect(source).toContain("Altro");
+      expect(source).toContain("Dettagli tecnici");
+      expect(source).not.toContain("<TableHead>Aggiorna</TableHead>");
+      expect(source).not.toContain("<TableHead>Storage</TableHead>");
+    }
   });
 });

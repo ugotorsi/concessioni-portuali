@@ -125,55 +125,15 @@ export default async function ScadenzePage({ searchParams }: ScadenzePageProps) 
 
   return (
     <AppShell title="Scadenze" subtitle="Calendario operativo degli adempimenti concessori">
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Totale scadenze</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-slate-900">{listData.summary.totale}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Scadute</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-rose-700">{listData.summary.scadute}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Entro 30 giorni</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-rose-700">{listData.summary.entro30}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Entro 60 giorni</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-amber-700">{listData.summary.entro60}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Entro 90 giorni</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-amber-700">{listData.summary.entro90}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Gestite</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-emerald-700">{listData.summary.gestite}</p>
-          </CardContent>
-        </Card>
+      <section aria-label="Riepilogo scadenze" className="border-y border-slate-200 bg-white px-4 py-3">
+        <dl className="grid gap-4 sm:grid-cols-3 xl:grid-cols-6">
+          <div><dt className="text-xs text-slate-500">Totale</dt><dd className="mt-1 text-xl font-semibold text-slate-900">{listData.summary.totale}</dd></div>
+          <div><dt className="text-xs text-slate-500">Scadute</dt><dd className="mt-1 text-xl font-semibold text-rose-700">{listData.summary.scadute}</dd></div>
+          <div><dt className="text-xs text-slate-500">Entro 30 giorni</dt><dd className="mt-1 text-xl font-semibold text-rose-700">{listData.summary.entro30}</dd></div>
+          <div><dt className="text-xs text-slate-500">Entro 60 giorni</dt><dd className="mt-1 text-xl font-semibold text-amber-700">{listData.summary.entro60}</dd></div>
+          <div><dt className="text-xs text-slate-500">Entro 90 giorni</dt><dd className="mt-1 text-xl font-semibold text-amber-700">{listData.summary.entro90}</dd></div>
+          <div><dt className="text-xs text-slate-500">Gestite</dt><dd className="mt-1 text-xl font-semibold text-emerald-700">{listData.summary.gestite}</dd></div>
+        </dl>
       </section>
 
       <section className="mt-4">
@@ -212,9 +172,6 @@ export default async function ScadenzePage({ searchParams }: ScadenzePageProps) 
               </TableHeader>
               <TableBody>
                 {listData.items.map((item) => {
-                  const isProcedimentale = item.tipologia === "TERMINE_PROCEDIMENTALE";
-                  const isPagamentoCanone = item.tipologia === "PAGAMENTO_CANONE";
-                  const isGaranzia = ["POLIZZA", "FIDEIUSSIONE", "CAUZIONE"].includes(item.tipologia);
                   const rowClassName = item.giorniRitardo !== null
                     ? "bg-rose-50"
                     : item.giorniResidui !== null && item.giorniResidui <= 30
@@ -228,12 +185,7 @@ export default async function ScadenzePage({ searchParams }: ScadenzePageProps) 
                         <GiorniBadge giorniResidui={item.giorniResidui} giorniRitardo={item.giorniRitardo} />
                       </TableCell>
                       <TableCell>
-                        <div className="space-y-1">
-                          <p>{formatEnumLabel(item.tipologia)}</p>
-                          {isProcedimentale ? <Badge variant="warning">Procedimentale</Badge> : null}
-                          {isPagamentoCanone ? <Badge variant="danger">Canone</Badge> : null}
-                          {isGaranzia ? <Badge variant="warning">Garanzia</Badge> : null}
-                        </div>
+                        {formatEnumLabel(item.tipologia)}
                       </TableCell>
                       <TableCell className="font-semibold text-slate-900">{item.concessione.numeroAtto}</TableCell>
                       <TableCell>{item.concessione.concessionarioDenominazione}</TableCell>

@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { formatDateIT } from "@/lib/utils";
+import { formatDateIT, formatEnumLabel } from "@/lib/utils";
 import {
   generateOperationalProposalsAction,
   materializeOperationalProposalAction,
@@ -337,7 +337,7 @@ export function FascicoloAutomaticWorkflowPanel({
               </div>
             </div>
             {model.knowledge.revision.warnings.length > 0 ? (
-              <p className="text-xs text-amber-800">Alcuni candidati sono stati esclusi per provenance non valida.</p>
+              <p className="text-xs text-amber-800">Alcuni elementi sono stati esclusi perché privi di provenienza verificabile.</p>
             ) : null}
           </section>
         ) : null}
@@ -347,20 +347,23 @@ export function FascicoloAutomaticWorkflowPanel({
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h3 className="text-sm font-semibold text-slate-900">Rapporto strutturato del fascicolo</h3>
-                <p className="mt-1 text-xs text-slate-500">Proiezione deterministica della Knowledge CURRENT e delle sole fonti utilizzabili.</p>
+                <p className="mt-1 text-xs text-slate-500">Sintesi aggiornata delle informazioni e delle fonti utilizzabili.</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <Badge variant={currentStructuredSnapshot?.effectiveStatus === "STALE" ? "warning" : "success"}>
-                  {currentStructuredSnapshot?.effectiveStatus ?? "CURRENT · non archiviato"}
+                  {currentStructuredSnapshot?.effectiveStatus === "STALE" ? "Da aggiornare" : "Aggiornato"}
                 </Badge>
-                <form action={archiveStructuredFascicoloReportAction}>
-                  <input type="hidden" name="procedimentoId" value={structuredReport.payload.procedimentoId} />
-                  <Button type="submit" size="sm" variant="outline">Archivia rapporto corrente</Button>
-                </form>
                 <form action={generateOperationalProposalsAction}>
                   <input type="hidden" name="procedimentoId" value={structuredReport.payload.procedimentoId} />
                   <Button type="submit" size="sm">Genera proposte operative</Button>
                 </form>
+                <details>
+                  <summary className="cursor-pointer rounded-md px-2 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100">Altro</summary>
+                  <form action={archiveStructuredFascicoloReportAction} className="mt-2">
+                    <input type="hidden" name="procedimentoId" value={structuredReport.payload.procedimentoId} />
+                    <Button type="submit" size="sm" variant="outline">Archivia rapporto</Button>
+                  </form>
+                </details>
               </div>
             </div>
             {currentStructuredSnapshot?.staleReasons.length ? (
@@ -446,8 +449,7 @@ export function FascicoloAutomaticWorkflowPanel({
           <section className="space-y-4 border-t border-slate-200 pt-4">
             <div>
               <h3 className="text-sm font-semibold text-slate-900">Proposte operative</h3>
-              <p className="mt-1 text-sm font-medium text-amber-800">PROPOSTA ≠ AZIONE ESEGUITA</p>
-              <p className="mt-1 text-xs text-slate-500">Analisi, review umana e materializzazione restano passaggi separati.</p>
+              <p className="mt-1 text-sm text-amber-800">Le proposte richiedono approvazione prima di produrre effetti.</p>
             </div>
             <div className="space-y-4">
               {model.operationalProposals.map((proposal) => {
@@ -458,17 +460,18 @@ export function FascicoloAutomaticWorkflowPanel({
                   <article key={proposal.id} className="border-l-2 border-slate-300 pl-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <h4 className="text-sm font-semibold text-slate-900">{proposal.title}</h4>
-                      <Badge variant="default">{proposal.proposalType}</Badge>
+                      <Badge variant="default">{formatEnumLabel(proposal.proposalType)}</Badge>
                       {proposalStatusBadge(proposal.status)}
                     </div>
                     <p className="mt-1 text-sm text-slate-700">{proposal.description}</p>
                     <p className="mt-1 text-xs text-slate-500">Razionale: {proposal.rationale}</p>
-                    <p className="mt-1 text-xs text-slate-500">
-                      Origini strutturate: {proposal.originatingKnowledgeItemIds.length} elementi Knowledge, {proposal.originatingIssueSemanticKeys.length} questioni giuridiche, {proposal.originatingQuestionSemanticKeys.length} quesiti, {proposal.relevantResultIds.length} risultati.
-                    </p>
-                    {proposal.warningCodes.length > 0 ? (
-                      <p className="mt-1 text-xs text-amber-800">Avvertenze: {proposal.warningCodes.join(", ")}.</p>
-                    ) : null}
+                    <details className="mt-2 text-xs text-slate-500">
+                      <summary className="cursor-pointer font-medium">Dettagli tecnici</summary>
+                      <div className="mt-1 space-y-1">
+                        <p>Origini: {proposal.originatingKnowledgeItemIds.length} elementi, {proposal.originatingIssueSemanticKeys.length} questioni, {proposal.originatingQuestionSemanticKeys.length} quesiti, {proposal.relevantResultIds.length} risultati.</p>
+                        {proposal.warningCodes.length > 0 ? <p>Codici: {proposal.warningCodes.join(", ")}.</p> : null}
+                      </div>
+                    </details>
                     {canReview ? (
                       <div className="mt-3 flex flex-wrap items-start gap-2">
                         <form action={reviewOperationalProposalAction}>
@@ -510,7 +513,7 @@ export function FascicoloAutomaticWorkflowPanel({
                       <p className="mt-2 text-sm text-amber-800">Approvata; materializzazione automatica non disponibile. Azione manuale richiesta.</p>
                     ) : null}
                     {proposal.materializedEntityType && proposal.materializedEntityId ? (
-                      <p className="mt-2 text-sm text-emerald-800">Entità creata: {proposal.materializedEntityType} · {proposal.materializedEntityId}</p>
+                      <p className="mt-2 text-sm text-emerald-800">Entità creata: {formatEnumLabel(proposal.materializedEntityType)}.</p>
                     ) : null}
                     {proposal.reviewEvents.length > 0 ? (
                       <details className="mt-2">
@@ -530,7 +533,9 @@ export function FascicoloAutomaticWorkflowPanel({
         ) : null}
 
         {currentReport ? (
-          <section className="space-y-4 border-t border-slate-200 pt-4">
+          <details className="border-t border-slate-200 pt-4">
+            <summary className="cursor-pointer text-sm font-semibold text-slate-700">Analisi documentale precedente</summary>
+          <section className="mt-4 space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h3 className="text-sm font-semibold text-slate-900">Rapporto documentale automatico legacy</h3>
@@ -597,6 +602,7 @@ export function FascicoloAutomaticWorkflowPanel({
               Conclusioni professionali: non formulate. La discovery preliminare non completa la verifica del fascicolo.
             </p>
           </section>
+          </details>
         ) : null}
 
         {model.missions.length > 0 ? (
@@ -607,14 +613,14 @@ export function FascicoloAutomaticWorkflowPanel({
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <p className="max-w-3xl text-sm font-medium text-slate-900">{mission.question}</p>
                   <Badge variant={mission.status === "COMPLETED" ? "success" : mission.status === "REJECTED" ? "danger" : "default"}>
-                    {mission.status}
+                    {mission.status === "COMPLETED" ? "Completata" : mission.status === "REJECTED" ? "Non completata" : "In corso"}
                   </Badge>
                 </div>
                 <p className="text-xs text-slate-500">Data di riferimento: {formatDateIT(mission.referenceDate)}</p>
-                <p className="text-xs text-slate-500">
-                  Executor: {mission.execution.status ?? "NON_AMMESSO"}. Tentativi: {mission.execution.attemptCount}.
-                  {mission.execution.callCount === null ? "" : ` Chiamate provider contabilizzate: ${mission.execution.callCount}.`}
-                </p>
+                <details className="text-xs text-slate-500">
+                  <summary className="cursor-pointer font-medium">Dettagli esecuzione</summary>
+                  <p className="mt-1">Stato: {mission.execution.status ? formatEnumLabel(mission.execution.status) : "Non disponibile"}. Tentativi: {mission.execution.attemptCount}.{mission.execution.callCount === null ? "" : ` Chiamate contabilizzate: ${mission.execution.callCount}.`}</p>
+                </details>
                 {mission.automationRequirementCode ? (
                   <p className="text-sm text-amber-800">
                     Requisito operativo: {researchRequirementLabel(mission.automationRequirementCode)}.
@@ -628,9 +634,10 @@ export function FascicoloAutomaticWorkflowPanel({
                         <li key={`${mission.missionId}-source-${index}`}>
                           {source.sourceUrl ? <a className="underline" href={source.sourceUrl}>{source.title}</a> : source.title}
                           {source.documentDate ? ` · ${source.documentDate}` : ""}
-                          <span className="block text-xs text-amber-700">
-                            Orientamento: {source.supportDirection}. Verifica: {source.verificationState}.
-                          </span>
+                          <details className="text-xs text-slate-500">
+                            <summary className="cursor-pointer font-medium">Stato della fonte</summary>
+                            <span className="block">Orientamento: {formatEnumLabel(source.supportDirection)}. Verifica: {formatEnumLabel(source.verificationState)}.</span>
+                          </details>
                         </li>
                       ))}
                     </ul>
