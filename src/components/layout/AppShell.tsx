@@ -14,12 +14,14 @@ export async function AppShell({ children, title, subtitle }: AppShellProps) {
   const role = await requireRole();
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 md:grid md:grid-cols-[260px_1fr]">
+    <div className="min-h-screen bg-[#f4f6f8] text-slate-900 lg:grid lg:grid-cols-[232px_minmax(0,1fr)]">
       <Sidebar role={role} roleLabel={getRoleLabel(role)} />
-      <div className="flex min-h-screen flex-col">
+      <div className="flex min-h-screen min-w-0 flex-col">
         <Topbar title={title} subtitle={subtitle} roleLabel={getRoleLabel(role)} roleDescription={getRoleDescription(role)} />
-        <main className="flex-1 px-4 py-6 sm:px-6">
-          {children}
+        <main className="flex-1 px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+          <div className="mx-auto w-full max-w-[1680px]">
+            {children}
+          </div>
         </main>
       </div>
     </div>

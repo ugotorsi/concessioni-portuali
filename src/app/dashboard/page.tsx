@@ -4,6 +4,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { SectionHeader } from "@/components/ui/PageHeader";
 import {
   Table,
   TableBody,
@@ -63,29 +64,17 @@ export default async function DashboardPage() {
       title="Dashboard"
       subtitle="Quadro operativo concessioni, criticità, scadenze e priorità istruttorie"
     >
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <MetricCard
-          title="Totale concessioni"
-          value={data.summary.totaleConcessioni}
-          description="Rapporti concessori attualmente censiti"
+      <section aria-labelledby="attenzione-oggi" className="space-y-4">
+        <SectionHeader
+          title="Richiede attenzione oggi"
+          description="Priorità operative, scadenze e posizioni che richiedono una verifica tempestiva."
         />
-        <MetricCard
-          title="Concessioni attive"
-          value={data.summary.concessioniAttive}
-          description="Posizioni operative in regolare esercizio"
-          tone="warning"
-        />
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           title="Scadenza entro 90 giorni"
           value={data.summary.concessioniInScadenza90}
           description="Concessioni da pianificare per rinnovo o nuova procedura"
           tone={data.summary.concessioniInScadenza90 > 0 ? "warning" : "default"}
-        />
-        <MetricCard
-          title="Criticità aperte"
-          value={data.summary.criticitaAperte}
-          description="Segnalazioni con istruttoria ancora aperta"
-          tone={data.summary.criticitaAperte > 0 ? "danger" : "default"}
         />
         <MetricCard
           title="Criticità urgenti"
@@ -100,37 +89,37 @@ export default async function DashboardPage() {
           tone={data.summary.morositaAperte > 0 ? "danger" : "default"}
         />
         <MetricCard
-          title="Pagamenti critici"
-          value={data.summary.pagamentiCritici}
-          description="Pagamenti non pagati, parziali o scaduti"
-          tone={data.summary.pagamentiCritici > 0 ? "danger" : "default"}
-        />
-        <MetricCard
           title="Procedimenti in corso"
           value={data.summary.procedimentiInCorso}
           description="Procedimenti istruttori attivi"
           tone={data.summary.procedimentiInCorso > 0 ? "warning" : "default"}
         />
-        <MetricCard
-          title="Garanzie e polizze critiche"
-          value={data.summary.garanziePolizzeCritiche}
-          description="Scadute o in scadenza entro 60 giorni"
-          tone={data.summary.garanziePolizzeCritiche > 0 ? "danger" : "default"}
-        />
-        <MetricCard
-          title="Fonti normative"
-          value={data.summary.fontiNormative}
-          description="Archivio fonti e riferimenti regolatori"
-        />
-        <MetricCard
-          title="Norme in consultazione"
-          value={data.summary.versioniNormativeInConsultazione}
-          description="Versioni da monitorare con possibile impatto operativo"
-          tone={data.summary.versioniNormativeInConsultazione > 0 ? "warning" : "default"}
-        />
+        </div>
       </section>
 
-      <section className="mt-4 grid gap-4 xl:grid-cols-3">
+      <section aria-label="Indicatori di contesto" className="mt-6 rounded-md border border-slate-200 bg-white p-4">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+        <MetricCard
+          compact
+          title="Totale concessioni"
+          value={data.summary.totaleConcessioni}
+          description="Rapporti censiti"
+        />
+        <MetricCard
+          compact
+          title="Concessioni attive"
+          value={data.summary.concessioniAttive}
+          description="In regolare esercizio"
+        />
+        <MetricCard compact title="Criticità aperte" value={data.summary.criticitaAperte} description="Istruttorie aperte" />
+        <MetricCard compact title="Pagamenti critici" value={data.summary.pagamentiCritici} description="Non pagati o scaduti" />
+        <MetricCard compact title="Garanzie critiche" value={data.summary.garanziePolizzeCritiche} description="Scadute o entro 60 giorni" />
+        <MetricCard compact title="Fonti normative" value={data.summary.fontiNormative} description="Fonti in archivio" />
+        <MetricCard compact title="Norme in consultazione" value={data.summary.versioniNormativeInConsultazione} description="Da monitorare" />
+        </div>
+      </section>
+
+      <section className="mt-6 grid gap-4 xl:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle>Verticali</CardTitle>

@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { formatDateIT } from "@/lib/utils";
 import {
   generateOperationalProposalsAction,
@@ -98,6 +99,45 @@ function proposalStatusBadge(status: FascicoloAutomaticWorkflowReadModel["operat
   return <Badge variant="warning">Da revisionare</Badge>;
 }
 
+function WorkflowSummary({
+  model,
+  currentJob,
+}: {
+  model: FascicoloAutomaticWorkflowReadModel;
+  currentJob: FascicoloAutomaticWorkflowReadModel["jobs"][number] | null;
+}) {
+  const legalIssueCount = model.knowledge?.legalIssues.length ?? 0;
+  const usableSourceCount = model.missions.reduce(
+    (total, mission) => total + mission.results.filter((result) => result.usable).length,
+    0,
+  );
+  const reviewCount = model.missions.reduce(
+    (total, mission) => total + mission.results.filter((result) => result.manualReviewRequired).length,
+    0,
+  );
+
+  return (
+    <div className="grid overflow-hidden rounded-md border border-slate-200 bg-slate-50 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="border-b border-slate-200 px-3 py-2.5 sm:border-r xl:border-b-0">
+        <p className="text-xs font-medium text-slate-500">Stato analisi</p>
+        <p className="mt-1 text-sm font-semibold text-slate-900">{currentJob ? jobLabel(currentJob.status) : "Non avviata"}</p>
+      </div>
+      <div className="border-b border-slate-200 px-3 py-2.5 xl:border-b-0 xl:border-r">
+        <p className="text-xs font-medium text-slate-500">Questioni giuridiche</p>
+        <p className="mt-1 text-lg font-semibold text-slate-950">{legalIssueCount}</p>
+      </div>
+      <div className="border-b border-slate-200 px-3 py-2.5 sm:border-b-0 sm:border-r">
+        <p className="text-xs font-medium text-slate-500">Fonti utilizzabili</p>
+        <p className="mt-1 text-lg font-semibold text-slate-950">{usableSourceCount}</p>
+      </div>
+      <div className="px-3 py-2.5">
+        <p className="text-xs font-medium text-slate-500">Verifiche professionali</p>
+        <p className="mt-1 text-lg font-semibold text-slate-950">{reviewCount}</p>
+      </div>
+    </div>
+  );
+}
+
 export function FascicoloAutomaticWorkflowPanel({
   model,
 }: { model: FascicoloAutomaticWorkflowReadModel | null }) {
@@ -116,6 +156,7 @@ export function FascicoloAutomaticWorkflowPanel({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
+        <WorkflowSummary model={model} currentJob={currentJob} />
         {!model.automaticResearch.authorized && model.automaticResearch.requirementCode ? (
           <div className="border-l-2 border-amber-500 pl-3 text-sm text-amber-900">
             Ricerca automatica non avviata: {researchRequirementLabel(model.automaticResearch.requirementCode)}.
@@ -123,14 +164,16 @@ export function FascicoloAutomaticWorkflowPanel({
         ) : null}
         {currentJob ? (
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={currentJob.status === "TERMINAL_FAILED" ? "danger" : currentJob.status === "SUCCEEDED" ? "success" : "default"}>
-              {jobLabel(currentJob.status)}
-            </Badge>
+            <StatusBadge code={currentJob.status} label={jobLabel(currentJob.status)} />
             <span className="text-xs text-slate-500">Avviata il {formatDateIT(currentJob.createdAt)}</span>
             {currentJob.failureCode ? (
-              <p className="w-full text-sm text-red-700">
-                {failureLabel(currentJob.failureCode)} ({currentJob.failureCode})
-              </p>
+              <div className="w-full text-sm text-red-700">
+                <p>{failureLabel(currentJob.failureCode)}</p>
+                <details className="mt-1 text-xs text-slate-500">
+                  <summary className="cursor-pointer font-medium">Dettaglio tecnico</summary>
+                  <code className="mt-1 block">{currentJob.failureCode}</code>
+                </details>
+              </div>
             ) : null}
           </div>
         ) : null}
@@ -182,9 +225,14 @@ export function FascicoloAutomaticWorkflowPanel({
                                 Motivo: {payloadText(basis.rationale) ?? "Basis non determinata"}.
                               </p>
                               <p className="mt-1 text-xs text-slate-500">
-                                Missione: {mission ? `${mission.status} · ${mission.lifecycleOutcome}` : "NON AVVIATA"}
-                                {mission?.missionFingerprint ? ` · ${mission.missionFingerprint}` : ""}
+                                Ricerca: {mission ? jobLabel(mission.status === "PENDING" ? "QUEUED" : mission.status === "COMPLETED" ? "SUCCEEDED" : mission.status === "REJECTED" ? "TERMINAL_FAILED" : "RUNNING") : "Non avviata"}
                               </p>
+                              {mission?.missionFingerprint ? (
+                                <details className="mt-1 text-xs text-slate-500">
+                                  <summary className="cursor-pointer font-medium">Identificativi tecnici</summary>
+                                  <code className="mt-1 block break-all">{mission.missionFingerprint}</code>
+                                </details>
+                              ) : null}
                               {mission ? (
                                 <div className="mt-2 space-y-2">
                                   <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
@@ -305,7 +353,6 @@ export function FascicoloAutomaticWorkflowPanel({
                 <Badge variant={currentStructuredSnapshot?.effectiveStatus === "STALE" ? "warning" : "success"}>
                   {currentStructuredSnapshot?.effectiveStatus ?? "CURRENT · non archiviato"}
                 </Badge>
-                <Badge variant="default">{structuredReport.reportFingerprint.slice(0, 12)}</Badge>
                 <form action={archiveStructuredFascicoloReportAction}>
                   <input type="hidden" name="procedimentoId" value={structuredReport.payload.procedimentoId} />
                   <Button type="submit" size="sm" variant="outline">Archivia rapporto corrente</Button>
@@ -383,9 +430,15 @@ export function FascicoloAutomaticWorkflowPanel({
             {structuredReport.payload.limitations.length > 0 ? (
               <p className="text-sm text-amber-800">Limiti generali: {structuredReport.payload.limitations.join(", ")}.</p>
             ) : null}
-            <p className="text-xs text-slate-500">
-              Revisione Knowledge {structuredReport.payload.knowledgeRevisionId}. Fingerprint ricerca {structuredReport.payload.researchStateFingerprint.slice(0, 12)}. Fingerprint fonti {structuredReport.payload.sourceStateFingerprint.slice(0, 12)}.
-            </p>
+            <details className="text-xs text-slate-500">
+              <summary className="cursor-pointer font-medium">Dettagli tecnici del rapporto</summary>
+              <div className="mt-1 space-y-1 break-all font-mono">
+                <p>Revisione Knowledge: {structuredReport.payload.knowledgeRevisionId}</p>
+                <p>Rapporto: {structuredReport.reportFingerprint}</p>
+                <p>Ricerca: {structuredReport.payload.researchStateFingerprint}</p>
+                <p>Fonti: {structuredReport.payload.sourceStateFingerprint}</p>
+              </div>
+            </details>
           </section>
         ) : null}
 

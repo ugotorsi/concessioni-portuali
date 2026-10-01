@@ -15,9 +15,9 @@ describe("Fascicolo UX contract", () => {
     expect(sidebar).toContain('{ href: "/procedimenti", label: "Fascicoli"');
     expect(listPage).toContain('title="Fascicoli"');
     expect(listPage).toContain('href="/procedimenti/nuovo"');
-    expect(listPage).toContain("Nuovo Fascicolo");
-    expect(listPage).toContain("Nessun fascicolo presente.");
-    expect(listPage).toContain("Crea il primo fascicolo");
+    expect(listPage).toContain("Nuovo fascicolo");
+    expect(listPage).toContain("Nessun fascicolo trovato");
+    expect(listPage).toContain("Modifica i filtri applicati oppure crea un nuovo fascicolo.");
     expect(createPage).toContain("<form action={createProcedimentoAction}");
     expect(createPage).toContain("Crea e apri Fascicolo");
   });
@@ -30,6 +30,9 @@ describe("Fascicolo UX contract", () => {
 
     expect(detailPage).toContain("Copertina del Fascicolo");
     expect(detailPage).toContain("Torna ai fascicoli");
+    expect(detailPage).toContain("<InPageNav");
+    expect(detailPage).toContain('id="documenti"');
+    expect(detailPage).toContain('id="istruttoria"');
     expect(documentsIndex).toBeGreaterThan(-1);
     expect(documentsIndex).toBeLessThan(coverDataIndex);
     expect(detailPage).toContain('entityType="procedimento"');

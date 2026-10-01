@@ -32,7 +32,7 @@ describe("Lotto 2 structured knowledge UI", () => {
       "Fondamento:",
       "Data di riferimento:",
       "Motivo:",
-      "Missione:",
+      "Ricerca:",
       "Proposta AI",
       "Confermata",
       "Respinta",

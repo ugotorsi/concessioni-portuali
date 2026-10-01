@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { ExternalLink, Plus, SearchX } from "lucide-react";
 
 import { AppShell } from "@/components/layout/AppShell";
+import { buttonVariants } from "@/components/ui/Button";
 import { BACKOFFICE_ROLES, canExportOperationalData, canManageProcedimenti, requireRole } from "@/lib/auth";
 import {
   ProcedimentoGiorniBadge,
@@ -15,6 +16,8 @@ import {
 import { ProcedimentiFiltersBar } from "@/components/procedimenti/ProcedimentiFiltersBar";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { SectionHeader } from "@/components/ui/PageHeader";
 import {
   Table,
   TableBody,
@@ -23,7 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/Table";
-import { formatDateIT, formatEnumLabel } from "@/lib/utils";
+import { cn, formatDateIT, formatEnumLabel } from "@/lib/utils";
 import {
   PROCEDIMENTI_CHECKLIST_VALUES,
   PROCEDIMENTI_MEMORIE_VALUES,
@@ -169,89 +172,52 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
       title="Fascicoli"
       subtitle="Gestione dei fascicoli istruttori e dei procedimenti collegati"
     >
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-7">
-        <Card>
-          <CardHeader>
-            <CardTitle>Totale fascicoli</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-slate-900">{totale}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Da avviare</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-rose-700">{daAvviare}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>In corso</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-amber-700">{inCorso}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Conclusi</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-emerald-700">{conclusi}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Termine contraddittorio scaduto</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-rose-700">{terminiScaduti}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Avvii decadenza/revoca</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-rose-700">{avviiDecRev}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Recupero canoni/escussione garanzie</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-amber-700">{recuperiGaranzie}</p>
-          </CardContent>
-        </Card>
+      <section className="space-y-4" aria-label="Quadro operativo fascicoli">
+        <SectionHeader
+          title="Quadro operativo"
+          description="Volumi correnti e termini che richiedono monitoraggio."
+          actions={canWrite ? (
+            <Link href="/procedimenti/nuovo" className={buttonVariants()}>
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              Nuovo fascicolo
+            </Link>
+          ) : null}
+        />
+        <dl className="grid overflow-hidden rounded-md border border-slate-200 bg-white sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+          {[
+            ["Totale fascicoli", totale],
+            ["Da avviare", daAvviare],
+            ["In corso", inCorso],
+            ["Conclusi", conclusi],
+            ["Termini scaduti", terminiScaduti],
+            ["Avvii decadenza/revoca", avviiDecRev],
+            ["Recuperi e garanzie", recuperiGaranzie],
+          ].map(([label, value]) => (
+            <div key={label} className="border-b border-slate-200 px-4 py-3 last:border-b-0 sm:border-r lg:border-b-0">
+              <dt className="text-xs font-medium leading-4 text-slate-600">{label}</dt>
+              <dd className="mt-1 text-2xl font-semibold text-slate-950">{value}</dd>
+            </div>
+          ))}
+        </dl>
       </section>
 
-      <section className="mt-4">
+      <section className="mt-6">
         {canWrite ? (
           <div className="mb-4 flex flex-wrap justify-end gap-2">
             {canExport ? (
               <Link
                 href="/export/procedimenti"
-                className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                className={buttonVariants({ variant: "secondary" })}
               >
                 Esporta CSV
               </Link>
             ) : null}
-            <Link
-              href="/procedimenti/nuovo"
-              className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
-            >
-              <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
-              Nuovo Fascicolo
-            </Link>
           </div>
         ) : canExport ? (
           <div className="mb-4 flex justify-end">
             <Link
               href="/export/procedimenti"
-              className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              className={buttonVariants({ variant: "secondary" })}
             >
               Esporta CSV
             </Link>
@@ -260,11 +226,14 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
         <ProcedimentiFiltersBar filtersData={filtersData} current={filters} />
       </section>
 
-      <section className="mt-4">
+      <section className="mt-6">
         <Card>
           <CardHeader>
-            <CardTitle>Registro fascicoli</CardTitle>
-            <CardDescription>Vista operativa con focus su priorità, contraddittorio e collegamenti inter-modulo.</CardDescription>
+            <SectionHeader
+              title="Registro fascicoli"
+              count={listData.items.length}
+              description="Risultati ordinati per aggiornamento. Scorri orizzontalmente per consultare tutti i dati istruttori."
+            />
           </CardHeader>
           <CardContent>
             <Table>
@@ -358,8 +327,9 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
                         <div className="flex flex-col gap-1">
                           <Link
                             href={`/procedimenti/${item.id}`}
-                            className="text-sm font-medium text-slate-900 underline underline-offset-4"
+                            className={cn(buttonVariants({ variant: "secondary", size: "sm" }), "w-full justify-start")}
                           >
+                            <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                             Apri scheda
                           </Link>
                           <Link
@@ -383,19 +353,18 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
                 })}
                 {listData.items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={14} className="text-center text-slate-500">
-                      <div className="flex flex-col items-center gap-3 py-4">
-                        <p>Nessun fascicolo presente.</p>
-                        {canWrite ? (
-                          <Link
-                            href="/procedimenti/nuovo"
-                            className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"
-                          >
+                    <TableCell colSpan={14}>
+                      <EmptyState
+                        icon={SearchX}
+                        title="Nessun fascicolo trovato"
+                        description="Modifica i filtri applicati oppure crea un nuovo fascicolo."
+                        action={canWrite ? (
+                          <Link href="/procedimenti/nuovo" className={buttonVariants({ variant: "secondary" })}>
                             <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
-                            Crea il primo fascicolo
+                            Nuovo fascicolo
                           </Link>
                         ) : null}
-                      </div>
+                      />
                     </TableCell>
                   </TableRow>
                 ) : null}

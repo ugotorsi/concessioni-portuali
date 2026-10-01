@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { Building2 } from "lucide-react";
+import { CalendarDays, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 interface TopbarProps {
@@ -13,30 +13,26 @@ export function Topbar({ title, subtitle, roleLabel, roleDescription }: TopbarPr
   const today = format(new Date(), "dd/MM/yyyy");
 
   return (
-    <header className="border-b border-slate-200 bg-white px-4 py-4 sm:px-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight text-slate-900">{title}</h1>
-          {subtitle ? <p className="mt-1 text-sm text-slate-600">{subtitle}</p> : null}
+    <header className="border-b border-slate-200 bg-white px-4 py-3 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-[1680px] flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <nav aria-label="Percorso" className="mb-1 flex items-center gap-1 text-xs text-slate-500">
+            <Link href="/dashboard" className="rounded-sm hover:text-[#173d4f] focus-visible:outline-none">Workspace</Link>
+            <ChevronRight className="h-3 w-3" aria-hidden="true" />
+            <span aria-current="page" className="truncate">{title}</span>
+          </nav>
+          <h1 className="text-xl font-semibold text-slate-950">{title}</h1>
+          {subtitle ? <p className="mt-0.5 max-w-3xl text-sm text-slate-600">{subtitle}</p> : null}
         </div>
-        <div className="flex flex-col items-end gap-2">
-          <div className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
-            <Building2 className="h-4 w-4" aria-hidden="true" />
-            <span>Concessioni Portuali</span>
-            <span className="text-slate-400">|</span>
-            <span>{today}</span>
+        <div className="flex shrink-0 items-center gap-3 text-xs text-slate-600">
+          <div className="hidden items-center gap-1.5 md:flex">
+            <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
+            <time dateTime={format(new Date(), "yyyy-MM-dd")}>{today}</time>
           </div>
-          <div className="rounded-md border border-slate-200 bg-white px-3 py-2 text-right text-xs text-slate-600">
-            <p className="font-semibold text-slate-900">{roleLabel}</p>
-            <p>{roleDescription}</p>
-            <div className="mt-1 inline-flex gap-3">
-              <Link href="/login" className="underline underline-offset-4">
-                Cambia profilo
-              </Link>
-              <Link href="/logout" className="underline underline-offset-4">
-                Logout
-              </Link>
-            </div>
+          <div className="h-6 w-px bg-slate-200" aria-hidden="true" />
+          <div className="text-right" title={roleDescription}>
+            <p className="font-semibold text-slate-800">{roleLabel}</p>
+            <p className="hidden max-w-56 truncate text-slate-500 xl:block">{roleDescription}</p>
           </div>
         </div>
       </div>

@@ -1,9 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f1f5f9;
-  --foreground: #0f172a;
-  --font-geist-sans: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --background: #f4f6f8;
+  --foreground: #172033;
+  --surface: #ffffff;
+  --surface-subtle: #f8fafc;
+  --border: #d9e0e8;
+  --border-strong: #bcc7d4;
+  --muted: #5d697b;
+  --brand: #173d4f;
+  --brand-strong: #0d2d3b;
+  --focus: #0b7285;
+  --success: #157347;
+  --warning: #9a6700;
+  --danger: #b42318;
+  --information: #175cd3;
+  --font-geist-sans: "Aptos", "Segoe UI Variable", "Segoe UI", sans-serif;
   --font-geist-mono: "Cascadia Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 }
 
@@ -18,4 +30,29 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans);
+  letter-spacing: 0;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  letter-spacing: 0 !important;
+}
+
+::selection {
+  background: #c9e8ed;
+  color: var(--brand-strong);
+}
+
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--focus) 55%, transparent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }

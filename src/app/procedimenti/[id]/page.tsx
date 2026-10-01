@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 
 import { SubmitButtonPending } from "@/components/forms/SubmitButtonPending";
 import { GravitaBadge, StatoBadge as CriticitaStatoBadge } from "@/components/criticita/CriticitaBadges";
@@ -28,9 +29,10 @@ import {
 } from "@/components/procedimenti/ProcedimentiBadges";
 import { ScadenzaStatoBadge } from "@/components/scadenze/ScadenzeBadges";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { Button, buttonVariants } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { InPageNav } from "@/components/ui/InPageNav";
 import { Select } from "@/components/ui/Select";
 import {
   Table,
@@ -199,12 +201,17 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
       subtitle="Copertina, documenti e attività istruttorie del fascicolo"
     >
       <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-slate-900">Fascicolo</h1>
-            <p className="mt-1 text-sm text-slate-600">Quadro istruttorio con collegamenti a criticità, pagamenti, sopralluoghi e scadenze.</p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <ProcedimentoStatoBadge value={detail.procedimento.stato} />
+            <ProcedimentoGiorniBadge
+              giorniResiduiContraddittorio={detail.procedimento.giorniResiduiContraddittorio}
+              giorniRitardoContraddittorio={detail.procedimento.giorniRitardoContraddittorio}
+            />
+            <span className="text-sm text-slate-600">Atto {detail.concessione.numeroAtto}</span>
           </div>
-          <Link href="/procedimenti" className="text-sm font-medium text-slate-700 underline underline-offset-4">
+          <Link href="/procedimenti" className={buttonVariants({ variant: "ghost", size: "sm" })}>
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Torna ai fascicoli
           </Link>
         </div>
@@ -215,7 +222,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           </div>
         ) : null}
 
-        <Card>
+        <Card id="copertina" className="scroll-mt-16">
           <CardHeader>
             <CardTitle>Copertina del Fascicolo</CardTitle>
           </CardHeader>
@@ -269,25 +276,36 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           </CardContent>
         </Card>
 
-        <EntityDocumentsPanel
-          title="Documenti del Fascicolo"
-          entityType="procedimento"
-          entityId={detail.procedimento.id}
-          documents={detail.documentiPrincipali}
-          canUpload={canWriteChecklist}
-        />
+        <InPageNav items={[
+          { href: "#copertina", label: "Copertina" },
+          { href: "#documenti", label: "Documenti", count: detail.documentiPrincipali.length },
+          { href: "#automazione", label: "Analisi e ricerca" },
+          { href: "#istruttoria", label: "Istruttoria" },
+          { href: "#decisione", label: "Decisione" },
+          { href: "#collegamenti", label: "Collegamenti" },
+        ]} />
 
-        <NeutralIntakeProcessingPanel items={processingItems} />
+        <section id="documenti" className="scroll-mt-16 space-y-4" aria-label="Documenti del fascicolo">
+          <EntityDocumentsPanel
+            title="Documenti del Fascicolo"
+            entityType="procedimento"
+            entityId={detail.procedimento.id}
+            documents={detail.documentiPrincipali}
+            canUpload={canWriteChecklist}
+          />
+          <NeutralIntakeProcessingPanel items={processingItems} />
+        </section>
 
-        <FascicoloAutomaticWorkflowPanel model={automaticWorkflow} />
+        <section id="automazione" className="scroll-mt-16 space-y-4" aria-label="Analisi automatica e ricerca giuridica">
+          <FascicoloAutomaticWorkflowPanel model={automaticWorkflow} />
+          <LegalSourceCandidatesPanel
+            items={legalSourceCandidates}
+            procedimentoId={detail.procedimento.id}
+            canVerify={canReview && hasCanonicalTenant}
+          />
+        </section>
 
-        <LegalSourceCandidatesPanel
-          items={legalSourceCandidates}
-          procedimentoId={detail.procedimento.id}
-          canVerify={canReview && hasCanonicalTenant}
-        />
-
-        <section className="grid gap-4 xl:grid-cols-2">
+        <section id="istruttoria" className="grid scroll-mt-16 gap-4 xl:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>1. Dati del Fascicolo</CardTitle>
@@ -673,7 +691,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           </Card>
         </section>
 
-        <Card>
+        <Card id="decisione" className="scroll-mt-16">
           <CardHeader>
             <CardTitle>Provvedimento finale registrato</CardTitle>
             <CardDescription>
@@ -1001,7 +1019,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           </CardContent>
         </Card>
 
-        <section className="grid gap-4 xl:grid-cols-2">
+        <section id="collegamenti" className="grid scroll-mt-16 gap-4 xl:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>6. Altre criticità aperte della concessione</CardTitle>
