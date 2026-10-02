@@ -26,12 +26,29 @@ describe("Fascicolo UX contract", () => {
     expect(createPage).toContain("Contesto iniziale");
     expect(createPage).toContain("Collega a concessione già presente");
     expect(createPage).toContain("Crea Fascicolo");
+    expect(createPage).toContain("Nome fascicolo");
+    expect(createPage).not.toContain("Denominazione breve del fascicolo");
+    expect(createPage).toContain("Altri dati della concessione");
+    expect(createPage.indexOf("Inquadramento")).toBeLessThan(createPage.indexOf("Documenti iniziali"));
+    expect(createPage.indexOf("Documenti iniziali")).toBeLessThan(createPage.indexOf("Dati della concessione"));
+    expect(createPage.indexOf("Dati della concessione")).toBeLessThan(createPage.indexOf("Soggetti iniziali"));
+    expect(createPage.indexOf("Soggetti iniziali")).toBeLessThan(createPage.indexOf("Contesto iniziale"));
     expect(createPage).toContain('name="documentiIniziali"');
     expect(createPage).toContain("multiple");
     expect(createPage).not.toContain('name="criticitaId"');
     expect(createPage).not.toContain('name="riferimentoNormativo"');
     expect(createPage).not.toContain('name="dataScadenzaContraddittorio"');
     expect(createPage).not.toContain("checklistContraddittorio");
+    for (const secondaryField of [
+      "autoritaCompetenteIniziale",
+      "dataRilascioIniziale",
+      "decorrenzaIniziale",
+      "beneAreaServizioIniziale",
+    ]) {
+      expect(createPage.indexOf(`name="${secondaryField}"`)).toBeGreaterThan(
+        createPage.indexOf("Altri dati della concessione"),
+      );
+    }
   });
 
   it("opens with cover data and the fixed-context attachment panel", () => {

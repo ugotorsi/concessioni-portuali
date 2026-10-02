@@ -15,12 +15,29 @@ test("nuovo fascicolo mostra solo l'intake iniziale e il collegamento concession
   await expect(page.getByRole("button", { name: "Crea Fascicolo" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Annulla" })).toBeVisible();
 
+  const sectionTitles = await page.locator("main section h2").allTextContents();
+  expect(sectionTitles).toEqual([
+    "Inquadramento",
+    "Documenti iniziali",
+    "Dati della concessione",
+    "Soggetti iniziali",
+    "Contesto iniziale",
+  ]);
+  await expect(page.getByLabel("Nome fascicolo")).toBeVisible();
+  await expect(page.locator('[name="documentiIniziali"]')).toBeVisible();
+
+  const secondaryDisclosure = page.getByText("Altri dati della concessione", { exact: true });
+  await expect(secondaryDisclosure).toBeVisible();
+  await expect(page.locator('[name="autoritaCompetenteIniziale"]')).not.toBeVisible();
+  await secondaryDisclosure.click();
+  await expect(page.locator('[name="autoritaCompetenteIniziale"]')).toBeVisible();
+
   await expect(page.locator('[name="criticitaId"]')).toHaveCount(0);
   await expect(page.locator('[name="riferimentoNormativo"]')).toHaveCount(0);
   await expect(page.locator('[name="dataScadenzaContraddittorio"]')).toHaveCount(0);
   await expect(page.locator('[name="responsabileProcedimentoNome"]')).toHaveCount(0);
 
-  const disclosure = page.getByText("Collega a concessione già presente", { exact: true });
+  const disclosure = page.getByText("Collega a concessione già presente", { exact: false });
   await expect(disclosure).toBeVisible();
   await disclosure.click();
   await expect(page.locator('[name="concessioneId"]')).toBeVisible();
