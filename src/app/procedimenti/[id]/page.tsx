@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import { SubmitButtonPending } from "@/components/forms/SubmitButtonPending";
 import { GravitaBadge, StatoBadge as CriticitaStatoBadge } from "@/components/criticita/CriticitaBadges";
 import { EntityDocumentsPanel } from "@/components/documents/EntityDocumentsPanel";
-import { LegalSourceCandidatesPanel } from "@/components/documents/LegalSourceCandidatesPanel";
 import { NeutralIntakeProcessingPanel } from "@/components/documents/NeutralIntakeProcessingPanel";
 import {
   AiFascicoloTrustedReviewPanel,
@@ -17,6 +16,7 @@ import { FascicoloDocumentRequirementScreeningTrigger } from "@/components/proce
 import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloObservationsPanel";
 import { FascicoloAutomaticWorkflowPanel } from "@/components/procedimenti/FascicoloAutomaticWorkflowPanel";
 import { FascicoloAnalysis } from "@/components/procedimenti/FascicoloAnalysis";
+import { FascicoloResearch } from "@/components/procedimenti/FascicoloResearch";
 import { FascicoloIntakeDetail } from "@/components/procedimenti/FascicoloIntakeDetail";
 import { FascicoloConcession } from "@/components/procedimenti/FascicoloConcession";
 import { FascicoloShell, resolveFascicoloSection, type FascicoloOverviewModel } from "@/components/procedimenti/FascicoloShell";
@@ -473,15 +473,41 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           </div>
         </section> : null}
 
-        {activeSection === "research" ? <section className="space-y-4" aria-label="Ricerca giuridica">
-          <div>
-            <LegalSourceCandidatesPanel
-              items={legalSourceCandidates}
-              procedimentoId={detail.procedimento.id}
-              canVerify={canReview && hasCanonicalTenant}
-            />
-          </div>
-        </section> : null}
+        {activeSection === "research" ? (
+          <FascicoloResearch
+            model={{
+              questions: [],
+              sources: [
+                ...normeCollegate.map((item) => ({
+                  id: `norma-${item.id}`,
+                  title: item.titolo,
+                  identifier: item.codice,
+                  sourceType: formatEnumLabel(item.ambito),
+                  origin: "Normativa collegata al fascicolo",
+                  note: `${formatEnumLabel(item.severita)} · ${item.descrizione}`,
+                })),
+                ...legalSourceCandidates.map((item) => ({
+                  id: `candidato-${item.id}`,
+                  title: item.resolution?.legalSource?.title ?? item.originalName ?? "Fonte acquisita",
+                  identifier: item.resolution?.legalSource?.sourceNumber
+                    ?? item.resolution?.legalSource?.stableKey
+                    ?? item.originalName,
+                  authority: item.resolution?.legalSource?.issuingBody,
+                  sourceType: item.mimeType,
+                  date: formatDateIT(item.admittedAt),
+                  origin: "Documento acquisito al fascicolo",
+                  verificationStatus: item.resolution?.outcome === "LINKED"
+                    ? "Identità della fonte collegata; contenuto e applicabilità temporale da verificare."
+                    : item.resolution?.outcome === "NO_MATCH"
+                      ? "Nessuna fonte ufficiale corrispondente individuata."
+                      : "Verifica della fonte in attesa.",
+                  note: item.resolution?.reviewNote,
+                  usability: item.resolution?.outcome === "NO_MATCH" ? "NOT_USABLE" as const : "TO_VERIFY" as const,
+                })),
+              ],
+            }}
+          />
+        ) : null}
 
         {activeSection === "subjects" ? (
           <FascicoloSubjects
@@ -1058,43 +1084,6 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               <p className="text-xs uppercase tracking-wide text-slate-500">Riferimenti normativi suggeriti</p>
               <p className="mt-1">{lettura.riferimentiNormativiSuggeriti}</p>
             </div>
-          </CardContent>
-        </Card> : null}
-
-        {activeSection === "research" ? <Card>
-          <CardHeader>
-            <CardTitle>Riferimenti normativi collegati</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Codice</TableHead>
-                  <TableHead>Titolo</TableHead>
-                  <TableHead>Ambito</TableHead>
-                  <TableHead>Severita</TableHead>
-                  <TableHead>Impatto</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {normeCollegate.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-semibold text-slate-900">{item.codice}</TableCell>
-                    <TableCell className="max-w-80 truncate">{item.titolo}</TableCell>
-                    <TableCell>{formatEnumLabel(item.ambito)}</TableCell>
-                    <TableCell>{formatEnumLabel(item.severita)}</TableCell>
-                    <TableCell className="max-w-96 truncate">{item.descrizione}</TableCell>
-                  </TableRow>
-                ))}
-                {normeCollegate.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center text-slate-500">
-                      Nessun riferimento normativo collegato al procedimento.
-                    </TableCell>
-                  </TableRow>
-                ) : null}
-              </TableBody>
-            </Table>
           </CardContent>
         </Card> : null}
 

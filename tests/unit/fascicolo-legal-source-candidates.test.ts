@@ -249,15 +249,15 @@ describe("Fascicolo legal-source candidates", () => {
     expect(processingSource).toContain('status: { not: "ROUTED" }');
   });
 
-  it("retains the document and processing surfaces beside the current Fascicolo candidate panel", () => {
+  it("retains document and processing surfaces while projecting candidates into passive research", () => {
     const detailSource = readFileSync("src/app/procedimenti/[id]/page.tsx", "utf8");
 
     expect(detailSource).toContain('title="Documenti del Fascicolo"');
     expect(detailSource).toContain("<NeutralIntakeProcessingPanel items={processingItems} />");
-    expect(detailSource).toContain("<LegalSourceCandidatesPanel");
-    expect(detailSource).toContain("items={legalSourceCandidates}");
-    expect(detailSource).toContain("procedimentoId={detail.procedimento.id}");
-    expect(detailSource).toContain("canVerify={canReview && hasCanonicalTenant}");
+    expect(detailSource).toContain("<FascicoloResearch");
+    expect(detailSource).toContain("...legalSourceCandidates.map");
+    expect(detailSource).toContain('item.resolution?.outcome === "NO_MATCH" ? "NOT_USABLE"');
+    expect(detailSource).not.toContain("<LegalSourceCandidatesPanel");
     expect(detailSource).toContain("getFascicoloLegalSourceCandidates(detail.procedimento.id)");
   });
 });

@@ -3,6 +3,7 @@ import { Paperclip } from "lucide-react";
 import { FascicoloDocumentsArchive, type FascicoloDocumentArchiveItem } from "@/components/documents/FascicoloDocumentsArchive";
 import { FascicoloAnalysis } from "@/components/procedimenti/FascicoloAnalysis";
 import { FascicoloConcession } from "@/components/procedimenti/FascicoloConcession";
+import { FascicoloResearch } from "@/components/procedimenti/FascicoloResearch";
 import { FascicoloShell, type FascicoloOverviewModel, type FascicoloSection } from "@/components/procedimenti/FascicoloShell";
 import { FascicoloSubjects, type FascicoloSubject } from "@/components/procedimenti/FascicoloSubjects";
 import { FascicoloTimeline, type FascicoloTimelineEvent } from "@/components/procedimenti/FascicoloTimeline";
@@ -229,6 +230,8 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload, activeSection }: F
           />
         ) : null}
 
+        {activeSection === "research" ? <FascicoloResearch model={{ questions: [], sources: [] }} /> : null}
+
         {activeSection === "documents" ? (
           <FascicoloDocumentsArchive
             documents={fascicolo.documenti.map(toArchiveItem)}
@@ -263,7 +266,7 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload, activeSection }: F
           />
         ) : null}
 
-        {!["documents", "timeline", "subjects", "concession", "analysis"].includes(activeSection) ? (
+        {!["documents", "timeline", "subjects", "concession", "analysis", "research"].includes(activeSection) ? (
           <p className="rounded-md border border-slate-200 px-4 py-3 text-sm text-slate-600">Nessun dato ancora disponibile.</p>
         ) : null}
       </div>
