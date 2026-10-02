@@ -16,6 +16,7 @@ import { FascicoloDocumentRequirementScreeningTrigger } from "@/components/proce
 import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloObservationsPanel";
 import { FascicoloAutomaticWorkflowPanel } from "@/components/procedimenti/FascicoloAutomaticWorkflowPanel";
 import { FascicoloAnalysis } from "@/components/procedimenti/FascicoloAnalysis";
+import { FascicoloDeadlines, type FascicoloDeadlineStatus } from "@/components/procedimenti/FascicoloDeadlines";
 import { FascicoloResearch } from "@/components/procedimenti/FascicoloResearch";
 import { FascicoloIntakeDetail } from "@/components/procedimenti/FascicoloIntakeDetail";
 import { FascicoloConcession } from "@/components/procedimenti/FascicoloConcession";
@@ -31,7 +32,6 @@ import {
   ProcedimentoTipologiaBadge,
   ProcedimentoWarningBadge,
 } from "@/components/procedimenti/ProcedimentiBadges";
-import { ScadenzaStatoBadge } from "@/components/scadenze/ScadenzeBadges";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -1217,44 +1217,22 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           </Card>
         </section> : null}
 
-        {activeSection === "deadlines" ? <section className="grid min-w-0 gap-4 [&>*]:min-w-0">
-          <Card>
-            <CardHeader>
-              <CardTitle>8. Scadenze rilevanti</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Tipologia</TableHead>
-                    <TableHead>Descrizione</TableHead>
-                    <TableHead>Stato</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {detail.scadenzeRilevanti.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{formatDateIT(item.dataScadenza)}</TableCell>
-                      <TableCell>{formatEnumLabel(item.tipologia)}</TableCell>
-                      <TableCell className="max-w-80 truncate">{item.descrizione ?? "-"}</TableCell>
-                      <TableCell>
-                        <ScadenzaStatoBadge value={item.stato} />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {detail.scadenzeRilevanti.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center text-slate-500">
-                        Nessuna scadenza rilevante.
-                      </TableCell>
-                    </TableRow>
-                  ) : null}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </section> : null}
+        {activeSection === "deadlines" ? (
+          <FascicoloDeadlines
+            model={{
+              deadlines: detail.scadenzeRilevanti.map((item) => ({
+                id: item.id,
+                date: formatDateIT(item.dataScadenza),
+                description: item.descrizione,
+                type: formatEnumLabel(item.tipologia),
+                status: item.stato as FascicoloDeadlineStatus,
+                origin: `Concessione ${detail.concessione.numeroAtto}`,
+                links: [{ label: "Apri concessione", href: `/concessioni/${detail.concessione.id}` }],
+              })),
+              candidates: [],
+            }}
+          />
+        ) : null}
 
         {activeSection === "timeline" ? (
           <FascicoloTimeline
