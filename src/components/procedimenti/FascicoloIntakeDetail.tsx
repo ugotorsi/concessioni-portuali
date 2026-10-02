@@ -1,6 +1,7 @@
 import { Paperclip } from "lucide-react";
 
 import { FascicoloDocumentsArchive, type FascicoloDocumentArchiveItem } from "@/components/documents/FascicoloDocumentsArchive";
+import { FascicoloConcession } from "@/components/procedimenti/FascicoloConcession";
 import { FascicoloShell, type FascicoloOverviewModel, type FascicoloSection } from "@/components/procedimenti/FascicoloShell";
 import { FascicoloSubjects, type FascicoloSubject } from "@/components/procedimenti/FascicoloSubjects";
 import { FascicoloTimeline, type FascicoloTimelineEvent } from "@/components/procedimenti/FascicoloTimeline";
@@ -185,31 +186,35 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload, activeSection }: F
 
         {activeSection === "subjects" ? <FascicoloSubjects subjects={subjects} /> : null}
 
-        {activeSection === "concession" ? <Card>
-          <CardHeader>
-            <CardTitle>Concessione</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <dl className="grid gap-5 md:grid-cols-3">
-              <Value label="Concessionario / titolare" value={fascicolo.concessionario} />
-              <Value label="Ente concedente" value={fascicolo.enteConcedente} />
-              <Value label="Autorità competente" value={fascicolo.autoritaCompetente} />
-              <Value label="Numero concessione" value={fascicolo.numeroConcessione} />
-              <Value label="Data rilascio" value={fascicolo.dataRilascio ? formatDateIT(fascicolo.dataRilascio) : null} />
-              <Value label="Decorrenza" value={fascicolo.decorrenza ? formatDateIT(fascicolo.decorrenza) : null} />
-              <Value label="Scadenza" value={fascicolo.scadenza ? formatDateIT(fascicolo.scadenza) : null} />
-              <Value label="Località" value={fascicolo.localita} />
-              <Value label="Oggetto della concessione" value={fascicolo.oggettoConcessione} />
-              <Value label="Bene / area / servizio" value={fascicolo.beneAreaServizio} />
-            </dl>
-            {fascicolo.contestoIniziale ? (
-              <div className="border-t border-slate-200 pt-5">
-                <p className="text-xs font-medium text-slate-500">Contesto iniziale</p>
-                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-800">{fascicolo.contestoIniziale}</p>
-              </div>
-            ) : null}
-          </CardContent>
-        </Card> : null}
+        {activeSection === "concession" ? (
+          <FascicoloConcession
+            model={{
+              number: fascicolo.concessione?.numeroAtto ?? fascicolo.numeroConcessione,
+              concessionaire: fascicolo.concessionario,
+              grantingAuthority: fascicolo.enteConcedente,
+              competentAuthority: fascicolo.autoritaCompetente,
+              releaseDate: fascicolo.dataRilascio ? formatDateIT(fascicolo.dataRilascio) : null,
+              expiryDate: fascicolo.scadenza ? formatDateIT(fascicolo.scadenza) : null,
+              openHref: fascicolo.concessione ? `/concessioni/${fascicolo.concessione.id}` : null,
+              title: [
+                { label: "Numero atto", value: fascicolo.concessione?.numeroAtto ?? fascicolo.numeroConcessione },
+                { label: "Oggetto della concessione", value: fascicolo.oggettoConcessione },
+                { label: "Data rilascio", value: fascicolo.dataRilascio ? formatDateIT(fascicolo.dataRilascio) : null },
+                { label: "Decorrenza", value: fascicolo.decorrenza ? formatDateIT(fascicolo.decorrenza) : null },
+                { label: "Data scadenza", value: fascicolo.scadenza ? formatDateIT(fascicolo.scadenza) : null },
+              ],
+              property: [
+                { label: "Località", value: fascicolo.localita },
+                { label: "Bene / area / servizio", value: fascicolo.beneAreaServizio },
+              ],
+              activity: [
+                { label: "Verticale", value: getConcessionVerticalLabel(fascicolo.tipologiaConcessione) },
+              ],
+              fee: [],
+              indicators: { documents: fascicolo.documenti.length },
+            }}
+          />
+        ) : null}
 
         {activeSection === "documents" ? (
           <FascicoloDocumentsArchive

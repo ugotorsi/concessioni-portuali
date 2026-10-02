@@ -17,6 +17,7 @@ import { FascicoloDocumentRequirementScreeningTrigger } from "@/components/proce
 import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloObservationsPanel";
 import { FascicoloAutomaticWorkflowPanel } from "@/components/procedimenti/FascicoloAutomaticWorkflowPanel";
 import { FascicoloIntakeDetail } from "@/components/procedimenti/FascicoloIntakeDetail";
+import { FascicoloConcession } from "@/components/procedimenti/FascicoloConcession";
 import { FascicoloShell, resolveFascicoloSection, type FascicoloOverviewModel } from "@/components/procedimenti/FascicoloShell";
 import { FascicoloSubjects } from "@/components/procedimenti/FascicoloSubjects";
 import { FascicoloTimeline, type FascicoloTimelineEvent } from "@/components/procedimenti/FascicoloTimeline";
@@ -1036,62 +1037,48 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           </CardContent>
         </Card> : null}
 
-        {activeSection === "concession" ? <Card>
-          <CardHeader>
-            <CardTitle>4. Contesto concessorio</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-4 text-sm text-slate-700">
-            <div>
-              <p className="text-xs uppercase tracking-wide text-slate-500">Numero atto</p>
-              <p className="mt-1 font-semibold text-slate-900">{detail.concessione.numeroAtto}</p>
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-wide text-slate-500">Stato concessione</p>
-              <div className="mt-1">
-                <Badge>{formatEnumLabel(detail.concessione.stato)}</Badge>
-              </div>
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-wide text-slate-500">Data rilascio</p>
-              <p className="mt-1">{formatDateIT(detail.concessione.dataRilascio)}</p>
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-wide text-slate-500">Data scadenza</p>
-              <p className="mt-1">{formatDateIT(detail.concessione.dataScadenza)}</p>
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-wide text-slate-500">Bene/Area</p>
-              <p className="mt-1">{formatEnumLabel(detail.concessione.tipologiaBene)}</p>
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-wide text-slate-500">Attività</p>
-              <p className="mt-1">{formatEnumLabel(detail.concessione.attivita)}</p>
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-wide text-slate-500">Ubicazione</p>
-              <p className="mt-1">{detail.concessione.ubicazione ?? "-"}</p>
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-wide text-slate-500">Canone annuo</p>
-              <p className="mt-1">
-                {detail.concessione.canoneAnnuo !== null ? formatCurrencyEUR(detail.concessione.canoneAnnuo) : "-"}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-wide text-slate-500">Categoria canone</p>
-              <p className="mt-1">{detail.concessione.categoriaCanone ?? "-"}</p>
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-wide text-slate-500">Scheda concessione</p>
-              <Link
-                href={`/concessioni/${detail.concessione.id}`}
-                className="mt-1 inline-flex text-sm font-medium text-slate-900 underline underline-offset-4"
-              >
-                Apri concessione
-              </Link>
-            </div>
-          </CardContent>
-        </Card> : null}
+        {activeSection === "concession" ? (
+          <FascicoloConcession
+            model={{
+              number: detail.concessione.numeroAtto,
+              state: formatEnumLabel(detail.concessione.stato),
+              concessionaire: detail.concessionario.denominazione,
+              releaseDate: formatDateIT(detail.concessione.dataRilascio),
+              expiryDate: formatDateIT(detail.concessione.dataScadenza),
+              openHref: `/concessioni/${detail.concessione.id}`,
+              title: [
+                { label: "Numero atto", value: detail.concessione.numeroAtto },
+                { label: "Data rilascio", value: formatDateIT(detail.concessione.dataRilascio) },
+                { label: "Data scadenza", value: formatDateIT(detail.concessione.dataScadenza) },
+                { label: "Stato", value: formatEnumLabel(detail.concessione.stato) },
+                { label: "Riferimento normativo", value: detail.procedimento.riferimentoNormativo ? formatEnumLabel(detail.procedimento.riferimentoNormativo) : null },
+              ],
+              property: [
+                { label: "Ubicazione", value: detail.concessione.ubicazione },
+              ],
+              activity: [
+                { label: "Attività", value: formatEnumLabel(detail.concessione.attivita) },
+                { label: "Tipologia bene", value: formatEnumLabel(detail.concessione.tipologiaBene) },
+              ],
+              fee: [
+                { label: "Canone annuo", value: detail.concessione.canoneAnnuo !== null ? formatCurrencyEUR(detail.concessione.canoneAnnuo) : null },
+                { label: "Categoria canone", value: detail.concessione.categoriaCanone },
+              ],
+              normativeReferences: [
+                detail.procedimento.riferimentoNormativo ? formatEnumLabel(detail.procedimento.riferimentoNormativo) : null,
+                ...normeCollegate.map((item) => item.codice),
+              ].filter((item): item is string => Boolean(item)),
+              indicators: {
+                openIssues: openIssueCount,
+                openDeadlines: detail.scadenzeRilevanti.filter((item) => item.stato === "APERTA").length,
+                expiredDeadlines: detail.scadenzeRilevanti.filter((item) => item.stato === "SCADUTA").length,
+                criticalPayments: detail.pagamentiCritici.length,
+                activeProceedings: detail.procedimento.stato === "IN_CORSO" ? 1 : 0,
+                documents: detail.documentiPrincipali.length,
+              },
+            }}
+          />
+        ) : null}
 
         {activeSection === "issues" ? <Card>
           <CardHeader>
@@ -1171,47 +1158,6 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                     <TableRow>
                       <TableCell colSpan={4} className="text-center text-slate-500">
                         Nessuna ulteriore criticità aperta.
-                      </TableCell>
-                    </TableRow>
-                  ) : null}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </section> : null}
-
-        {activeSection === "concession" ? <section className="grid min-w-0 gap-4 [&>*]:min-w-0">
-          <Card>
-            <CardHeader>
-              <CardTitle>7. Pagamenti critici</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Anno</TableHead>
-                    <TableHead>Dovuto</TableHead>
-                    <TableHead>Versato</TableHead>
-                    <TableHead>Residuo</TableHead>
-                    <TableHead>Stato</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {detail.pagamentiCritici.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{item.annoRiferimento}</TableCell>
-                      <TableCell>{formatCurrencyEUR(item.importoDovuto)}</TableCell>
-                      <TableCell>{formatCurrencyEUR(item.importoVersato)}</TableCell>
-                      <TableCell className="font-semibold text-rose-700">{formatCurrencyEUR(item.residuo)}</TableCell>
-                      <TableCell>
-                        <Badge>{formatEnumLabel(item.stato)}</Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {detail.pagamentiCritici.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center text-slate-500">
-                        Nessun pagamento critico collegato.
                       </TableCell>
                     </TableRow>
                   ) : null}
