@@ -10,10 +10,10 @@ describe("frontend UX contract", () => {
   it("provides simple, responsive and role-aware navigation", () => {
     const source = readSource("src/components/layout/Sidebar.tsx");
 
-    for (const item of ["Dashboard", "Fascicoli", "Mappa", "Concessionari"]) {
+    for (const item of ["Dashboard", "Fascicoli", "Verticali", "Mappa", "Concessionari"]) {
       expect(source).toContain(`label: "${item}"`);
     }
-    for (const removed of ["Concessioni", "Scadenze", "Criticità", "Pagamenti", "Sopralluoghi", "Verticali", "Documenti", "Normativa", "Ricerca giuridica", "Report", "Assistente AI", "Audit", "Runtime", "Orchestrazione", "Scenari demo", "Demo guidata"]) {
+    for (const removed of ["Concessioni", "Scadenze", "Criticità", "Pagamenti", "Sopralluoghi", "Documenti", "Normativa", "Ricerca giuridica", "Report", "Assistente AI", "Audit", "Runtime", "Orchestrazione", "Scenari demo", "Demo guidata"]) {
       expect(source).not.toContain(`label: "${removed}"`);
     }
     for (const group of ["Operatività", "Conoscenza", "Territorio", "Amministrazione", "Supporto"]) {
@@ -44,6 +44,7 @@ describe("frontend UX contract", () => {
     }
     expect(source).not.toContain("Scenari demo istituzionali");
     expect(source).not.toContain("Apri mappa demo");
+    expect(source).not.toContain("Verticali");
   });
 
   it("makes dashboard metric cards accessible as one large click target", () => {

@@ -1,17 +1,17 @@
 import { expect, test } from "playwright/test";
 import { loginAndExpectLanding } from "./helpers/auth";
 
-test("backoffice navigation exposes only the four primary destinations", async ({ page }) => {
+test("backoffice navigation exposes only the five primary destinations", async ({ page }) => {
   await loginAndExpectLanding(page, "admin.demo@concessioni.local", "admin123", /\/dashboard$/);
 
   const navigation = page.getByRole("navigation", { name: "Navigazione principale" });
-  await expect(navigation.getByRole("link")).toHaveCount(4);
+  await expect(navigation.getByRole("link")).toHaveCount(5);
 
-  for (const label of ["Dashboard", "Fascicoli", "Mappa", "Concessionari"]) {
+  for (const label of ["Dashboard", "Fascicoli", "Verticali", "Mappa", "Concessionari"]) {
     await expect(navigation.getByRole("link", { name: label, exact: true })).toBeVisible();
   }
 
-  for (const label of ["Concessioni", "Scadenze", "Criticità", "Pagamenti", "Sopralluoghi", "Verticali", "Documenti", "Normativa", "Report", "Audit", "Runtime", "Orchestrazione", "Scenari demo", "Demo guidata"]) {
+  for (const label of ["Concessioni", "Scadenze", "Criticità", "Pagamenti", "Sopralluoghi", "Documenti", "Normativa", "Report", "Audit", "Runtime", "Orchestrazione", "Scenari demo", "Demo guidata"]) {
     await expect(navigation.getByRole("link", { name: label, exact: true })).toHaveCount(0);
   }
 });
@@ -27,6 +27,7 @@ test("dashboard attention cards are accessible links to filtered operational vie
   for (const removedSection of ["Criticità prioritarie", "Scadenze imminenti", "Morosità e pagamenti critici", "Azioni consigliate"]) {
     await expect(page.getByText(removedSection, { exact: true })).toHaveCount(0);
   }
+  await expect(page.getByRole("main").getByText("Verticali", { exact: true })).toHaveCount(0);
 });
 
 test("viewer navigation remains role-aware and minimal", async ({ page }) => {

@@ -1,13 +1,15 @@
 import { expect, test } from "playwright/test";
 import { loginAndExpectLanding } from "./helpers/auth";
 
-test("desktop navigation hides Verticali while its landing page remains available", async ({ page }) => {
+test("desktop navigation exposes Verticali and its landing page remains available", async ({ page }) => {
   await loginAndExpectLanding(page, "admin.demo@concessioni.local", "admin123", /\/dashboard$/);
 
-  await expect(page.getByRole("navigation", { name: "Navigazione principale" }).getByRole("link", { name: "Verticali" })).toHaveCount(0);
+  const verticaliLink = page.getByRole("navigation", { name: "Navigazione principale" }).getByRole("link", { name: "Verticali" });
+  await expect(verticaliLink).toBeVisible();
 
-  await page.goto("/verticali");
+  await verticaliLink.click();
   await expect(page).toHaveURL(/\/verticali$/);
+  await expect(verticaliLink).toHaveAttribute("aria-current", "page");
   await expect(page.getByRole("heading", { name: "Verticali", exact: true })).toBeVisible();
   await expect(page.getByTestId("verticali-cards-grid")).toBeVisible();
   await expect(page.getByTestId(/vertical-card-/).first()).toBeVisible();
@@ -19,14 +21,15 @@ test("desktop navigation hides Verticali while its landing page remains availabl
   await expect(page.getByTestId("vertical-workspace-kpi")).toBeVisible();
 });
 
-test("mobile navigation hides Verticali while its route remains reachable", async ({ page }) => {
+test("mobile navigation exposes Verticali and its route remains reachable", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await loginAndExpectLanding(page, "admin.demo@concessioni.local", "admin123", /\/dashboard$/);
 
   await page.getByText("Concessioni Portuali").first().click();
-  await expect(page.getByRole("navigation", { name: "Navigazione principale" }).getByRole("link", { name: "Verticali" })).toHaveCount(0);
+  const verticaliLink = page.getByRole("navigation", { name: "Navigazione principale" }).getByRole("link", { name: "Verticali" });
+  await expect(verticaliLink).toBeVisible();
 
-  await page.goto("/verticali");
+  await verticaliLink.click();
   await expect(page).toHaveURL(/\/verticali$/);
   await expect(page.getByRole("heading", { name: "Verticali", exact: true })).toBeVisible();
 });

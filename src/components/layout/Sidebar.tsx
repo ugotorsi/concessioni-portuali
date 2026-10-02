@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   DoorOpen,
   FolderOpen,
+  Layers,
   LayoutDashboard,
   Map,
   Menu,
@@ -27,6 +28,7 @@ interface NavItem {
 const backofficeNavItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/procedimenti", label: "Fascicoli", icon: FolderOpen, matchMode: "section" },
+  { href: "/verticali", label: "Verticali", icon: Layers, matchMode: "section" },
   { href: "/mappa", label: "Mappa", icon: Map },
   { href: "/concessionari", label: "Concessionari", icon: Users },
 ];
