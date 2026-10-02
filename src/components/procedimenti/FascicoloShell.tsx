@@ -46,6 +46,7 @@ export interface FascicoloOverviewModel {
     name: string;
     type: string;
     date: string;
+    isFileAvailable: boolean;
     href: string;
   }>;
   documentCount: number;
@@ -150,8 +151,13 @@ function FascicoloOverview({ model, basePath }: { model: FascicoloOverviewModel;
                 <li key={document.id} className="flex min-w-0 items-center gap-3 py-2 first:pt-0">
                   <FileText className="h-4 w-4 shrink-0 text-[#173d4f]" aria-hidden="true" />
                   <div className="min-w-0 flex-1">
-                    <a href={document.href} className="block truncate text-sm font-medium text-slate-950 underline-offset-4 hover:underline">{document.name}</a>
+                    {document.isFileAvailable ? (
+                      <a href={document.href} className="block truncate text-sm font-medium text-slate-950 underline-offset-4 hover:underline">{document.name}</a>
+                    ) : (
+                      <p className="truncate text-sm font-medium text-slate-950">{document.name}</p>
+                    )}
                     <p className="text-xs text-slate-500">{document.type} · {document.date}</p>
+                    {!document.isFileAvailable ? <p className="text-xs text-slate-500">Documento non ancora verificato</p> : null}
                   </div>
                 </li>
               ))}

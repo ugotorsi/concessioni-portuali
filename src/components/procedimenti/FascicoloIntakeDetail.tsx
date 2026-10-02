@@ -57,14 +57,15 @@ function toArchiveItem(documento: FascicoloIntakeDetailData["documenti"][number]
     type: formatEnumLabel(documento.tipologia),
     typeCode: documento.tipologia,
     state: documento.statoDocumento === "ARCHIVIATO" ? "Archiviato" : "Caricato",
+    isFileAvailable: documento.isFileAvailable,
     documentDate: documento.dataDocumento ? formatDateIT(documento.dataDocumento) : null,
     acquiredAt: formatDateIT(documento.createdAt),
     acquiredAtTimestamp: documento.createdAt.getTime(),
     sender: documento.mittente,
     alert: documento.pecWarningMancataRicevuta ? "Ricevuta PEC da verificare" : null,
     openHref: `/documenti/${documento.id}/download${usesStoredFile ? "?preview=1" : ""}`,
-    openInNewTab: usesStoredFile,
-    originalHref: usesStoredFile ? `/documenti/${documento.id}/download` : null,
+    openInNewTab: documento.isFileAvailable && usesStoredFile,
+    originalHref: documento.isFileAvailable && usesStoredFile ? `/documenti/${documento.id}/download` : null,
     details,
   };
 }
@@ -91,6 +92,7 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload, activeSection }: F
       name: documento.nome,
       type: formatEnumLabel(documento.tipologia),
       date: formatDateIT(documento.createdAt),
+      isFileAvailable: documento.isFileAvailable,
       href: `/documenti/${documento.id}/download`,
     })),
     summary: [
@@ -169,8 +171,10 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload, activeSection }: F
         subjects: documento.mittente,
         source: documento.nome,
         alert: documento.pecWarningMancataRicevuta ? "Da verificare" as const : null,
-        href: `/documenti/${documento.id}/download${documento.url?.includes("/download") ? "?preview=1" : ""}`,
-        actionLabel: "Apri documento",
+        href: documento.isFileAvailable
+          ? `/documenti/${documento.id}/download${documento.url?.includes("/download") ? "?preview=1" : ""}`
+          : null,
+        actionLabel: documento.isFileAvailable ? "Apri documento" : null,
       };
     }),
   ];

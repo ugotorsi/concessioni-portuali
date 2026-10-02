@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
+import { hasVerifiedDocumentFileVersion } from "@/server/documents/file-version-availability";
 
 export async function getFascicoloIntakeDetail(id: string) {
   const fascicolo = await prisma.fascicoloIntake.findUnique({
@@ -29,7 +30,13 @@ export async function getFascicoloIntakeDetail(id: string) {
     return null;
   }
 
-  return fascicolo;
+  return {
+    ...fascicolo,
+    documenti: fascicolo.documenti.map(({ currentFileVersionId, ...documento }) => ({
+      ...documento,
+      isFileAvailable: hasVerifiedDocumentFileVersion(currentFileVersionId),
+    })),
+  };
 }
 
 export async function getFascicoliIntakeList(input: { search?: string; concessioneId?: string } = {}) {

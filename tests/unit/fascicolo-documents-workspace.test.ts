@@ -15,6 +15,7 @@ const documents: FascicoloDocumentArchiveItem[] = [
     type: "Titolo Concessorio",
     typeCode: "TITOLO_CONCESSORIO",
     state: "Caricato",
+    isFileAvailable: true,
     documentDate: "15/02/2021",
     acquiredAt: "19/08/2021",
     acquiredAtTimestamp: 1629331200000,
@@ -28,6 +29,7 @@ const documents: FascicoloDocumentArchiveItem[] = [
     type: "Pagamento",
     typeCode: "PAGAMENTO",
     state: "Caricato",
+    isFileAvailable: false,
     acquiredAt: "30/05/2025",
     acquiredAtTimestamp: 1748563200000,
     alert: "Ricevuta PEC da verificare",
@@ -64,6 +66,17 @@ describe("Fascicolo documents workspace", () => {
     expect(html).not.toContain("Canale non indicato");
     expect(html).not.toContain("Protocollo non indicato");
     expect(html).not.toContain("Stato tecnico: -");
+  });
+
+  it("never links a document without a verified file version", () => {
+    const available = renderArchive([documents[0]], false);
+    const unavailable = renderArchive([documents[1]], false);
+
+    expect(available).toContain("Apri documento");
+    expect(available).not.toContain("Documento non ancora verificato");
+    expect(unavailable).not.toContain("Apri documento");
+    expect(unavailable).toContain("Documento non ancora verificato");
+    expect(unavailable).not.toMatch(/LEGACY_UNVERIFIED|currentFileVersionId|storageKey|checksum|hash/i);
   });
 
   it("does not forward technical document internals from legacy or intake", () => {

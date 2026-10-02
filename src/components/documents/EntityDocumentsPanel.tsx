@@ -17,6 +17,7 @@ interface EntityDocumentItem {
   nome: string;
   tipologia: string;
   statoDocumento?: string;
+  isFileAvailable?: boolean;
   dataDocumento: Date | null;
   createdAt: Date;
   direzione?: string | null;
@@ -129,14 +130,15 @@ function toArchiveItem(item: EntityDocumentItem, canUpload: boolean): FascicoloD
     type: formatEnumLabel(item.tipologia),
     typeCode: item.tipologia,
     state: item.statoDocumento === "ARCHIVIATO" ? "Archiviato" : "Caricato",
+    isFileAvailable: item.isFileAvailable === true,
     documentDate: item.dataDocumento ? formatDateIT(item.dataDocumento) : null,
     acquiredAt: formatDateIT(item.createdAt),
     acquiredAtTimestamp: item.createdAt.getTime(),
     sender: item.mittente,
     alert: item.pecWarningMancataRicevuta ? "Ricevuta PEC da verificare" : null,
     openHref: `/documenti/${item.id}/download${usesStoredFile ? "?preview=1" : ""}`,
-    openInNewTab: usesStoredFile,
-    originalHref: usesStoredFile ? `/documenti/${item.id}/download` : null,
+    openInNewTab: item.isFileAvailable === true && usesStoredFile,
+    originalHref: item.isFileAvailable === true && usesStoredFile ? `/documenti/${item.id}/download` : null,
     canArchive: canUpload && item.statoDocumento !== "ARCHIVIATO",
     details,
   };

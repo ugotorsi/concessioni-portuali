@@ -221,6 +221,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
       name: documento.nome,
       type: formatEnumLabel(documento.tipologia),
       date: formatDateIT(documento.dataDocumento ?? documento.createdAt),
+      isFileAvailable: documento.isFileAvailable,
       href: documento.url,
     })),
     attention: [
@@ -351,8 +352,8 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           type: "Documento" as const,
           description: `Documento ${formatEnumLabel(documento.tipologia)} acquisito nel fascicolo.`,
           source: documento.nome,
-          href: documento.url,
-          actionLabel: "Apri documento",
+          href: documento.isFileAvailable ? documento.url : null,
+          actionLabel: documento.isFileAvailable ? "Apri documento" : null,
         };
       }),
     ...detail.sopralluoghiRecenti.map((item) => ({
@@ -601,7 +602,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                   id: documento.id,
                   title: documento.nome,
                   detail: formatEnumLabel(documento.tipologia),
-                  href: documento.url,
+                  href: documento.isFileAvailable ? documento.url : null,
                 })),
               ],
               contradictions: [],
@@ -992,11 +993,13 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                 ) : null}
                 <p><span className="font-medium">Motivazione sintetica:</span> {decisioneConclusiva.motivazioneSintetica}</p>
                 <div className="flex flex-wrap gap-3">
-                  {decisioneConclusiva.documentoId ? (
+                  {decisioneConclusiva.documentoId && detail.documentiPrincipali.some(
+                    (documento) => documento.id === decisioneConclusiva.documentoId && documento.isFileAvailable,
+                  ) ? (
                     <Link href={`/documenti/${decisioneConclusiva.documentoId}/download`} prefetch={false} className="text-sm underline underline-offset-4">
                       Apri documento atto conclusivo
                     </Link>
-                  ) : null}
+                  ) : decisioneConclusiva.documentoId ? <span className="text-sm">Documento atto conclusivo non ancora verificato</span> : null}
                   <Link href={`/concessioni/${detail.concessione.id}`} className="text-sm underline underline-offset-4">
                     Apri concessione collegata
                   </Link>

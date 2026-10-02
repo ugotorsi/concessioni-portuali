@@ -12,6 +12,7 @@ export interface FascicoloDocumentArchiveItem {
   type: string;
   typeCode: string;
   state: string;
+  isFileAvailable: boolean;
   documentDate?: string | null;
   acquiredAt: string;
   acquiredAtTimestamp: number;
@@ -141,14 +142,18 @@ export function FascicoloDocumentsArchive({
               </div>
 
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pl-8 md:flex-nowrap md:pl-0">
-                <a
-                  href={item.openHref}
-                  target={item.openInNewTab ? "_blank" : undefined}
-                  rel={item.openInNewTab ? "noreferrer" : undefined}
-                  className="text-sm font-semibold text-[#173d4f] underline decoration-slate-300 underline-offset-4 hover:decoration-[#173d4f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7285]"
-                >
-                  Apri documento
-                </a>
+                {item.isFileAvailable ? (
+                  <a
+                    href={item.openHref}
+                    target={item.openInNewTab ? "_blank" : undefined}
+                    rel={item.openInNewTab ? "noreferrer" : undefined}
+                    className="text-sm font-semibold text-[#173d4f] underline decoration-slate-300 underline-offset-4 hover:decoration-[#173d4f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7285]"
+                  >
+                    Apri documento
+                  </a>
+                ) : (
+                  <span className="text-sm text-slate-500">Documento non ancora verificato</span>
+                )}
                 <details className="relative">
                   <summary className="cursor-pointer text-sm font-medium text-slate-600 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7285]">Azioni e dettagli</summary>
                   <div className="absolute right-0 z-10 mt-2 w-[min(15rem,calc(100vw-2rem))] space-y-2 rounded-md border border-slate-200 bg-white p-3 text-xs text-slate-600 shadow-sm md:w-72">

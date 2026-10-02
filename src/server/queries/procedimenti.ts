@@ -7,6 +7,7 @@ import {
   getProcedimentoWarningLevel,
 } from "@/lib/procedimento-checklist";
 import { prisma } from "@/lib/prisma";
+import { hasVerifiedDocumentFileVersion } from "@/server/documents/file-version-availability";
 import {
   buildTenantConcessioneWhere,
   getCurrentTenantContext,
@@ -309,6 +310,7 @@ export interface ProcedimentoDetail {
     nome: string;
     tipologia: string;
     statoDocumento: string;
+    isFileAvailable: boolean;
     url: string;
     dataDocumento: Date | null;
     createdAt: Date;
@@ -1027,6 +1029,7 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
       nome: item.nome,
       tipologia: item.tipologia,
       statoDocumento: item.statoDocumento,
+      isFileAvailable: hasVerifiedDocumentFileVersion(item.currentFileVersionId),
       url: item.url ?? `/documenti/${item.id}/download`,
       dataDocumento: item.dataDocumento,
       createdAt: item.createdAt,
