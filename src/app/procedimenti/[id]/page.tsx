@@ -18,6 +18,7 @@ import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloO
 import { FascicoloAutomaticWorkflowPanel } from "@/components/procedimenti/FascicoloAutomaticWorkflowPanel";
 import { FascicoloIntakeDetail } from "@/components/procedimenti/FascicoloIntakeDetail";
 import { FascicoloShell, resolveFascicoloSection, type FascicoloOverviewModel } from "@/components/procedimenti/FascicoloShell";
+import { FascicoloTimeline, type FascicoloTimelineEvent } from "@/components/procedimenti/FascicoloTimeline";
 import {
   ProcedimentoGiorniBadge,
   ProcedimentoChecklistBadge,
@@ -272,6 +273,172 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
         ? formatEnumLabel(detail.altreCriticitaAperte[0].gravita)
         : null,
   };
+  const timelineEvents: FascicoloTimelineEvent[] = [
+    {
+      id: `fascicolo-${detail.procedimento.id}`,
+      date: formatDateIT(detail.procedimento.createdAt),
+      dateTime: detail.procedimento.createdAt.toISOString(),
+      timestamp: detail.procedimento.createdAt.getTime(),
+      title: "Fascicolo creato",
+      type: "Fascicolo",
+      description: `Apertura del fascicolo ${formatEnumLabel(detail.procedimento.tipologia)}.`,
+      subjects: detail.concessionario.denominazione,
+    },
+    ...(detail.procedimento.dataAvvio ? [{
+      id: `avvio-${detail.procedimento.id}`,
+      date: formatDateIT(detail.procedimento.dataAvvio),
+      dateTime: detail.procedimento.dataAvvio.toISOString(),
+      timestamp: detail.procedimento.dataAvvio.getTime(),
+      title: "Procedimento avviato",
+      type: "Fascicolo" as const,
+      description: `Avvio del procedimento ${formatEnumLabel(detail.procedimento.tipologia)}.`,
+      subjects: detail.concessionario.denominazione,
+    }] : []),
+    {
+      id: `concessione-${detail.concessione.id}`,
+      date: formatDateIT(detail.concessione.dataRilascio),
+      dateTime: detail.concessione.dataRilascio.toISOString(),
+      timestamp: detail.concessione.dataRilascio.getTime(),
+      title: "Concessione rilasciata",
+      type: "Concessione",
+      description: `Rilascio della concessione ${detail.concessione.numeroAtto}.`,
+      subjects: detail.concessionario.denominazione,
+      href: `/procedimenti/${detail.procedimento.id}?section=concession`,
+      actionLabel: "Vai alla concessione",
+    },
+    ...(detail.procedimento.comunicazioneAvvioInviata && detail.procedimento.dataComunicazioneAvvio ? [{
+      id: `comunicazione-avvio-${detail.procedimento.id}`,
+      date: formatDateIT(detail.procedimento.dataComunicazioneAvvio),
+      dateTime: detail.procedimento.dataComunicazioneAvvio.toISOString(),
+      timestamp: detail.procedimento.dataComunicazioneAvvio.getTime(),
+      title: "Comunicazione di avvio inviata",
+      type: "Comunicazione" as const,
+      description: "Comunicazione di avvio del procedimento registrata nel fascicolo.",
+      subjects: detail.concessionario.denominazione,
+    }] : []),
+    ...(detail.procedimento.contestazioneFormaleInviata && detail.procedimento.dataContestazioneFormale ? [{
+      id: `contestazione-${detail.procedimento.id}`,
+      date: formatDateIT(detail.procedimento.dataContestazioneFormale),
+      dateTime: detail.procedimento.dataContestazioneFormale.toISOString(),
+      timestamp: detail.procedimento.dataContestazioneFormale.getTime(),
+      title: "Contestazione formale inviata",
+      type: "Comunicazione" as const,
+      description: "Invio della contestazione formale registrato nel fascicolo.",
+      subjects: detail.concessionario.denominazione,
+    }] : []),
+    ...(detail.procedimento.memorieRicevute && detail.procedimento.dataRicezioneMemorie ? [{
+      id: `memorie-${detail.procedimento.id}`,
+      date: formatDateIT(detail.procedimento.dataRicezioneMemorie),
+      dateTime: detail.procedimento.dataRicezioneMemorie.toISOString(),
+      timestamp: detail.procedimento.dataRicezioneMemorie.getTime(),
+      title: "Memorie ricevute",
+      type: "Comunicazione" as const,
+      description: "Ricezione delle memorie registrata nel fascicolo.",
+      subjects: detail.concessionario.denominazione,
+    }] : []),
+    ...detail.documentiPrincipali
+      .filter((documento) => documento.id !== decisioneConclusiva?.documentoId)
+      .map((documento) => {
+        const eventDate = documento.dataDocumento ?? documento.createdAt;
+        return {
+          id: `documento-${documento.id}`,
+          dedupeKey: `documento-${documento.id}`,
+          date: formatDateIT(eventDate),
+          dateTime: eventDate.toISOString(),
+          timestamp: eventDate.getTime(),
+          title: documento.nome,
+          type: "Documento" as const,
+          description: `Documento ${formatEnumLabel(documento.tipologia)} acquisito nel fascicolo.`,
+          source: documento.nome,
+          href: documento.url,
+          actionLabel: "Apri documento",
+        };
+      }),
+    ...detail.sopralluoghiRecenti.map((item) => ({
+      id: `sopralluogo-${item.id}`,
+      date: formatDateIT(item.data),
+      dateTime: item.data.toISOString(),
+      timestamp: item.data.getTime(),
+      title: `Sopralluogo ${formatEnumLabel(item.esito)}`,
+      type: "Sopralluogo" as const,
+      description: item.descrizione ?? `Esito: ${formatEnumLabel(item.esito)}.`,
+      subjects: item.operatori,
+      alert: item.conformitaPlanimetrica ? null : "Non conforme" as const,
+      href: `/sopralluoghi/${item.id}`,
+      actionLabel: "Apri sopralluogo",
+    })),
+    ...(detail.criticitaCollegata ? [{
+      id: `criticita-${detail.criticitaCollegata.id}`,
+      date: formatDateIT(detail.criticitaCollegata.dataRilevazione),
+      dateTime: detail.criticitaCollegata.dataRilevazione.toISOString(),
+      timestamp: detail.criticitaCollegata.dataRilevazione.getTime(),
+      title: formatEnumLabel(detail.criticitaCollegata.tipologia),
+      type: "Criticità" as const,
+      description: detail.criticitaCollegata.descrizione,
+      href: `/criticita/${detail.criticitaCollegata.id}`,
+      actionLabel: "Apri criticità",
+    }] : []),
+    ...detail.altreCriticitaAperte.map((item) => ({
+      id: `criticita-${item.id}`,
+      date: formatDateIT(item.dataRilevazione),
+      dateTime: item.dataRilevazione.toISOString(),
+      timestamp: item.dataRilevazione.getTime(),
+      title: formatEnumLabel(item.tipologia),
+      type: "Criticità" as const,
+      description: item.descrizione,
+      href: `/procedimenti/${detail.procedimento.id}?section=issues`,
+      actionLabel: "Vai alle criticità",
+    })),
+    ...detail.scadenzeRilevanti.map((item) => ({
+      id: `scadenza-${item.id}`,
+      date: formatDateIT(item.dataScadenza),
+      dateTime: item.dataScadenza.toISOString(),
+      timestamp: item.dataScadenza.getTime(),
+      title: `Scadenza ${formatEnumLabel(item.tipologia)}`,
+      type: "Scadenza" as const,
+      description: item.descrizione ?? `Scadenza ${formatEnumLabel(item.tipologia)} registrata nel fascicolo.`,
+      subjects: detail.concessionario.denominazione,
+      alert: ["SCADUTA", "SCADUTO"].includes(item.stato) ? "Scaduto" as const : null,
+      href: `/procedimenti/${detail.procedimento.id}?section=deadlines`,
+      actionLabel: "Vai alle scadenze",
+    })),
+    ...detail.pagamentiCritici.map((item) => ({
+      id: `pagamento-${item.id}`,
+      date: formatDateIT(item.dataScadenza),
+      dateTime: item.dataScadenza.toISOString(),
+      timestamp: item.dataScadenza.getTime(),
+      title: `Pagamento ${item.annoRiferimento}`,
+      type: "Pagamento" as const,
+      description: `Residuo da verificare: ${formatCurrencyEUR(item.residuo)}.`,
+      subjects: detail.concessionario.denominazione,
+      alert: "Da verificare" as const,
+      href: `/procedimenti/${detail.procedimento.id}?section=concession`,
+      actionLabel: "Vai alla concessione",
+    })),
+    ...(decisioneConclusiva ? [{
+      id: `provvedimento-${decisioneConclusiva.id}`,
+      date: formatDateIT(decisioneConclusiva.dataAtto),
+      dateTime: decisioneConclusiva.dataAtto.toISOString(),
+      timestamp: decisioneConclusiva.dataAtto.getTime(),
+      title: `Provvedimento finale ${decisioneConclusiva.numeroAtto}`,
+      type: "Provvedimento" as const,
+      description: decisioneConclusiva.motivazioneSintetica,
+      subjects: [decisioneConclusiva.organoCompetente, decisioneConclusiva.adottanteNome].filter(Boolean).join(" · "),
+      source: decisioneConclusiva.documentoNome,
+      href: `/procedimenti/${detail.procedimento.id}?section=decisione`,
+      actionLabel: "Vai alla decisione",
+    }] : detail.procedimento.dataProvvedimentoFinale ? [{
+      id: `provvedimento-${detail.procedimento.id}`,
+      date: formatDateIT(detail.procedimento.dataProvvedimentoFinale),
+      dateTime: detail.procedimento.dataProvvedimentoFinale.toISOString(),
+      timestamp: detail.procedimento.dataProvvedimentoFinale.getTime(),
+      title: "Provvedimento finale registrato",
+      type: "Provvedimento" as const,
+      description: "Data del provvedimento finale registrata nel fascicolo.",
+      href: `/procedimenti/${detail.procedimento.id}?section=decisione`,
+      actionLabel: "Vai alla decisione",
+    }] : []),
+  ];
 
   return (
     <FascicoloShell
@@ -1158,59 +1325,12 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           </Card>
         </section> : null}
 
-        {activeSection === "timeline" ? <section className="grid min-w-0 gap-4 [&>*]:min-w-0">
-          <Card>
-            <CardHeader>
-              <CardTitle>Cronologia del fascicolo</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm text-slate-700">
-              <p><span className="font-medium text-slate-950">{formatDateIT(detail.procedimento.createdAt)}</span> · Fascicolo creato</p>
-              <p><span className="font-medium text-slate-950">{formatDateIT(detail.concessione.dataRilascio)}</span> · Concessione rilasciata</p>
-              {decisioneConclusiva ? <p><span className="font-medium text-slate-950">{formatDateIT(decisioneConclusiva.dataAtto)}</span> · Provvedimento finale registrato</p> : null}
-              {detail.documentiPrincipali.slice(0, 5).map((documento) => <p key={documento.id}><span className="font-medium text-slate-950">{formatDateIT(documento.dataDocumento ?? documento.createdAt)}</span> · Documento: {documento.nome}</p>)}
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>9. Sopralluoghi recenti</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Esito</TableHead>
-                    <TableHead>Operatori</TableHead>
-                    <TableHead>Conformità</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {detail.sopralluoghiRecenti.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{formatDateIT(item.data)}</TableCell>
-                      <TableCell>
-                        <Badge>{formatEnumLabel(item.esito)}</Badge>
-                      </TableCell>
-                      <TableCell>{item.operatori}</TableCell>
-                      <TableCell>
-                        <Badge variant={item.conformitaPlanimetrica ? "success" : "danger"}>
-                          {item.conformitaPlanimetrica ? "Conforme" : "Non conforme"}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {detail.sopralluoghiRecenti.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center text-slate-500">
-                        Nessun sopralluogo recente disponibile.
-                      </TableCell>
-                    </TableRow>
-                  ) : null}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </section> : null}
+        {activeSection === "timeline" ? (
+          <FascicoloTimeline
+            events={timelineEvents}
+            nextDeadline={nextDeadline ? formatDateIT(nextDeadline.dataScadenza) : null}
+          />
+        ) : null}
 
         {activeSection === "reports" ? <section className="grid min-w-0 gap-4 [&>*]:min-w-0">
           <Card>

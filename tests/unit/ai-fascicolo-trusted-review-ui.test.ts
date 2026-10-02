@@ -161,6 +161,7 @@ const procedimentoDetail = {
   canonicalEnteId: "ente-1",
   procedimento: {
     id: "procedimento-1",
+    createdAt: new Date("2026-01-15T00:00:00.000Z"),
     tipologia: "VARIAZIONE",
     stato: "IN_CORSO",
     riferimentoNormativo: null,

@@ -40,6 +40,7 @@ test("procedimento checklist section and update form visibility by role", async 
   await expect(overview.getByText("Richiede attenzione", { exact: true })).toBeVisible();
   await expect(overview.getByText("Sintesi del fascicolo", { exact: true })).toBeVisible();
   expect(await overview.locator('[aria-labelledby="documenti-sintesi-title"] li').count()).toBeLessThanOrEqual(3);
+  expect(await overview.locator('[aria-labelledby="cronologia-title"] li').count()).toBeLessThanOrEqual(3);
   await expect(overview.getByText("Trusted Review", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Altre funzioni", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Checklist istruttoria" })).toHaveCount(0);
@@ -58,6 +59,17 @@ test("procedimento checklist section and update form visibility by role", async 
   await attachDocument.click();
   await expect(page.locator('input[name="file"]')).toBeVisible();
   await expect(attachDocument).toHaveAttribute("aria-expanded", "true");
+  await expect(page.locator("#panoramica")).toHaveCount(0);
+
+  await page.getByRole("link", { name: "Cronologia", exact: true }).click();
+  await expect(page).toHaveURL(/\?section=timeline$/);
+  await expect(page.getByRole("heading", { name: "Cronologia", exact: true })).toBeVisible();
+  await expect(page.getByText("Eventi, atti e passaggi rilevanti del fascicolo ordinati nel tempo.")).toBeVisible();
+  await expect(page.locator('ol[aria-label="Eventi cronologici"] > li').first()).toBeVisible();
+  await expect(page.getByLabel("Tipo evento")).toBeVisible();
+  await expect(page.getByText("Fonte:").first()).toBeVisible();
+  await expect(page.getByRole("link", { name: "Apri documento" }).first()).toBeVisible();
+  await expect(page.locator("main table")).toHaveCount(0);
   await expect(page.locator("#panoramica")).toHaveCount(0);
 
   await page.getByRole("link", { name: "Concessione", exact: true }).click();

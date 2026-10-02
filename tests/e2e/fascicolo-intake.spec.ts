@@ -83,4 +83,9 @@ test("fascicolo in preparazione usa la panoramica e la navigazione condivise", a
   await page.reload();
   await expect(page).toHaveURL(/\?section=documents$/);
   await expect(page.getByText("Checklist istruttoria", { exact: true })).toHaveCount(0);
+  await page.getByRole("link", { name: "Cronologia", exact: true }).click();
+  await expect(page).toHaveURL(/\?section=timeline$/);
+  await expect(page.getByRole("heading", { name: "Cronologia", exact: true })).toBeVisible();
+  await expect(page.locator('ol[aria-label="Eventi cronologici"] > li').first()).toBeVisible();
+  await expect(page.locator("main table")).toHaveCount(0);
 });

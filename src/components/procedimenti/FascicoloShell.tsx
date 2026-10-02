@@ -165,7 +165,7 @@ function FascicoloOverview({ model, basePath }: { model: FascicoloOverviewModel;
             <h3 id="cronologia-title" className="text-base font-semibold text-slate-950">Cronologia recente</h3>
             {model.timeline.length > 0 ? (
               <ul className="mt-3 space-y-2 text-sm text-slate-700">
-                {model.timeline.slice(0, 5).map((item) => <li key={item.id}><span className="font-medium text-slate-950">{item.date}</span> · {item.label}</li>)}
+                {model.timeline.slice(0, 3).map((item) => <li key={item.id}><span className="font-medium text-slate-950">{item.date}</span> · {item.label}</li>)}
               </ul>
             ) : <p className="mt-2 text-sm text-slate-500">Cronologia non ancora disponibile.</p>}
           </section>

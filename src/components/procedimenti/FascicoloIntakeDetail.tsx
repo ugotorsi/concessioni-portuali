@@ -2,6 +2,7 @@ import { Paperclip } from "lucide-react";
 
 import { FascicoloDocumentsArchive, type FascicoloDocumentArchiveItem } from "@/components/documents/FascicoloDocumentsArchive";
 import { FascicoloShell, type FascicoloOverviewModel, type FascicoloSection } from "@/components/procedimenti/FascicoloShell";
+import { FascicoloTimeline, type FascicoloTimelineEvent } from "@/components/procedimenti/FascicoloTimeline";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -93,6 +94,78 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload, activeSection }: F
       { id: `fascicolo-${fascicolo.id}`, label: "Fascicolo creato", date: formatDateIT(fascicolo.createdAt) },
     ],
   };
+  const timelineEvents: FascicoloTimelineEvent[] = [
+    {
+      id: `fascicolo-${fascicolo.id}`,
+      date: formatDateIT(fascicolo.createdAt),
+      dateTime: fascicolo.createdAt.toISOString(),
+      timestamp: fascicolo.createdAt.getTime(),
+      title: "Fascicolo creato",
+      type: "Fascicolo",
+      description: `Apertura del fascicolo ${title}.`,
+      subjects: fascicolo.soggettoAssistito ?? fascicolo.concessionario,
+    },
+    ...(fascicolo.dataRilascio ? [{
+      id: `rilascio-${fascicolo.id}`,
+      date: formatDateIT(fascicolo.dataRilascio),
+      dateTime: fascicolo.dataRilascio.toISOString(),
+      timestamp: fascicolo.dataRilascio.getTime(),
+      title: "Concessione rilasciata",
+      type: "Concessione" as const,
+      description: fascicolo.numeroConcessione
+        ? `Rilascio della concessione ${fascicolo.numeroConcessione}.`
+        : "Rilascio della concessione registrato nel fascicolo.",
+      subjects: fascicolo.concessionario,
+      href: `/procedimenti/${fascicolo.id}?section=concession`,
+      actionLabel: "Vai alla concessione",
+    }] : []),
+    ...(fascicolo.decorrenza ? [{
+      id: `decorrenza-${fascicolo.id}`,
+      date: formatDateIT(fascicolo.decorrenza),
+      dateTime: fascicolo.decorrenza.toISOString(),
+      timestamp: fascicolo.decorrenza.getTime(),
+      title: "Decorrenza della concessione",
+      type: "Concessione" as const,
+      description: "Inizio della decorrenza indicata per la concessione.",
+      subjects: fascicolo.concessionario,
+      href: `/procedimenti/${fascicolo.id}?section=concession`,
+      actionLabel: "Vai alla concessione",
+    }] : []),
+    ...(fascicolo.scadenza ? [{
+      id: `scadenza-${fascicolo.id}`,
+      date: formatDateIT(fascicolo.scadenza),
+      dateTime: fascicolo.scadenza.toISOString(),
+      timestamp: fascicolo.scadenza.getTime(),
+      title: "Scadenza della concessione",
+      type: "Scadenza" as const,
+      description: "Termine di scadenza indicato per la concessione.",
+      subjects: fascicolo.concessionario,
+      alert: fascicolo.scadenza < new Date() ? "Scaduto" as const : null,
+      href: `/procedimenti/${fascicolo.id}?section=concession`,
+      actionLabel: "Vai alla concessione",
+    }] : []),
+    ...fascicolo.documenti.map((documento) => {
+      const eventDate = documento.dataDocumento ?? documento.createdAt;
+      return {
+        id: `documento-${documento.id}`,
+        dedupeKey: `documento-${documento.id}`,
+        date: formatDateIT(eventDate),
+        dateTime: eventDate.toISOString(),
+        timestamp: eventDate.getTime(),
+        title: documento.nome,
+        type: "Documento" as const,
+        description: `Documento ${formatEnumLabel(documento.tipologia)} acquisito nel fascicolo.`,
+        subjects: documento.mittente,
+        source: documento.nome,
+        alert: documento.pecWarningMancataRicevuta ? "Da verificare" as const : null,
+        href: `/documenti/${documento.id}/download${documento.url?.includes("/download") ? "?preview=1" : ""}`,
+        actionLabel: "Apri documento",
+      };
+    }),
+  ];
+  const nextDeadline = fascicolo.scadenza && fascicolo.scadenza >= new Date()
+    ? formatDateIT(fascicolo.scadenza)
+    : null;
 
   return (
     <FascicoloShell
@@ -101,9 +174,7 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload, activeSection }: F
       activeSection={activeSection}
     >
       <div className="space-y-6">
-        {activeSection === "timeline" ? (
-          <Card><CardHeader><CardTitle>Cronologia</CardTitle></CardHeader><CardContent className="text-sm text-slate-700">{formatDateIT(fascicolo.createdAt)} · Fascicolo creato</CardContent></Card>
-        ) : null}
+        {activeSection === "timeline" ? <FascicoloTimeline events={timelineEvents} nextDeadline={nextDeadline} /> : null}
 
         {activeSection === "subjects" ? (
           <Card>
