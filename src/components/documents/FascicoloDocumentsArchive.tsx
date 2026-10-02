@@ -151,7 +151,7 @@ export function FascicoloDocumentsArchive({
                 </a>
                 <details className="relative">
                   <summary className="cursor-pointer text-sm font-medium text-slate-600 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7285]">Azioni e dettagli</summary>
-                  <div className="absolute right-0 z-10 mt-2 w-[min(18rem,calc(100vw-2rem))] space-y-2 rounded-md border border-slate-200 bg-white p-3 text-xs text-slate-600 shadow-sm">
+                  <div className="absolute right-0 z-10 mt-2 w-[min(15rem,calc(100vw-2rem))] space-y-2 rounded-md border border-slate-200 bg-white p-3 text-xs text-slate-600 shadow-sm md:w-72">
                     <dl className="space-y-1.5">
                       <div><dt className="inline font-medium text-slate-800">Data acquisizione: </dt><dd className="inline">{item.acquiredAt}</dd></div>
                       {item.details?.map((detail) => (

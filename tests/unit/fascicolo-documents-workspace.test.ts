@@ -103,7 +103,7 @@ describe("Fascicolo documents workspace", () => {
     const intakeSource = readFileSync("src/components/procedimenti/FascicoloIntakeDetail.tsx", "utf8");
 
     expect(archiveSource).toContain("md:grid-cols-[minmax(0,1fr)_auto]");
-    expect(archiveSource).toContain("w-[min(18rem,calc(100vw-2rem))]");
+    expect(archiveSource).toContain("w-[min(15rem,calc(100vw-2rem))]");
     expect(archiveSource).not.toContain("<Table");
     expect(detailSource).toContain("archiveMode");
     expect(detailSource).toContain('activeSection === "documents"');
