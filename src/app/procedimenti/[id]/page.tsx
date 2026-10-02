@@ -10,13 +10,13 @@ import {
 } from "@/components/procedimenti/AiFascicoloTrustedReviewPanel";
 import { AiFascicoloTrustedReviewGenerationControl } from "@/components/procedimenti/AiFascicoloTrustedReviewGenerationControl";
 import { ChecklistItemEvidence } from "@/components/procedimenti/ChecklistItemEvidence";
-import { FascicoloDocumentRequirementProposalsPanel } from "@/components/procedimenti/FascicoloDocumentRequirementProposalsPanel";
 import { FascicoloDocumentRequirementScreeningTrigger } from "@/components/procedimenti/FascicoloDocumentRequirementScreeningTrigger";
 import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloObservationsPanel";
 import { FascicoloAutomaticWorkflowPanel } from "@/components/procedimenti/FascicoloAutomaticWorkflowPanel";
 import { FascicoloAnalysis } from "@/components/procedimenti/FascicoloAnalysis";
 import { FascicoloDeadlines, type FascicoloDeadlineStatus } from "@/components/procedimenti/FascicoloDeadlines";
 import { FascicoloIssues, type FascicoloIssueSeverity, type FascicoloIssueStatus } from "@/components/procedimenti/FascicoloIssues";
+import { FascicoloProposals } from "@/components/procedimenti/FascicoloProposals";
 import { FascicoloReport } from "@/components/procedimenti/FascicoloReport";
 import { FascicoloResearch } from "@/components/procedimenti/FascicoloResearch";
 import { FascicoloIntakeDetail } from "@/components/procedimenti/FascicoloIntakeDetail";
@@ -56,7 +56,6 @@ import {
 import { getDecisionRulePreviewForTipologia } from "@/server/procedimenti/decisioni";
 import { getLetturaProcedimentale, getProcedimentoDetail } from "@/server/queries/procedimenti";
 import { getChecklistEvidenceData } from "@/server/queries/checklist-evidence";
-import { getFascicoloDocumentRequirementEvidenceData } from "@/server/queries/fascicolo-document-requirement-evidence";
 import { getFascicoloDocumentRequirementProposals } from "@/server/queries/fascicolo-document-requirements";
 import { getFascicoloLegalSourceCandidates } from "@/server/queries/fascicolo-legal-source-candidates";
 import { getFascicoloObservations } from "@/server/queries/fascicolo-observations";
@@ -166,7 +165,6 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   const legalSourceCandidates = await getFascicoloLegalSourceCandidates(detail.procedimento.id);
   const fascicoloObservations = await getFascicoloObservations(detail.procedimento.id);
   const fascicoloDocumentRequirements = await getFascicoloDocumentRequirementProposals(detail.procedimento.id);
-  const fascicoloDocumentRequirementEvidence = await getFascicoloDocumentRequirementEvidenceData(detail.procedimento.id);
   const checklistEvidenceData = await getChecklistEvidenceData(detail.procedimento.id);
   const hasCanonicalTenant = Boolean(detail.canonicalEnteId);
   const structuredReportSnapshots = activeSection === "reports" && detail.canonicalEnteId
@@ -643,14 +641,12 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
 
         </section> : null}
 
-        {activeSection === "proposals" ? <section>
-            <FascicoloDocumentRequirementProposalsPanel
-              proposals={fascicoloDocumentRequirements.proposals}
-              evidenceData={fascicoloDocumentRequirementEvidence}
-              canReview={canReview}
-              hasCanonicalTenant={hasCanonicalTenant}
-            />
-        </section> : null}
+        {activeSection === "proposals" ? (
+          <FascicoloProposals
+            proposals={automaticWorkflow?.operationalProposals ?? []}
+            canManage={canReview && hasCanonicalTenant}
+          />
+        ) : null}
 
         {activeSection === "istruttoria" ? <section className="grid gap-4 xl:grid-cols-2">
           <Card>

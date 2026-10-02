@@ -363,6 +363,7 @@ describe("B2C9A Trusted Review read consumer panel V1", () => {
     expect(pageSource).toContain("<AiFascicoloTrustedReviewPanel");
     expect(pageSource).toContain("<FascicoloObservationsPanel");
     expect(pageSource).toContain("<FascicoloDocumentRequirementScreeningTrigger");
-    expect(pageSource).toContain("<FascicoloDocumentRequirementProposalsPanel");
+    expect(pageSource).toContain("<FascicoloProposals");
+    expect(pageSource).not.toContain("<FascicoloDocumentRequirementProposalsPanel");
   });
 });

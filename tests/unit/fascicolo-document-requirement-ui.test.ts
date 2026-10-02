@@ -393,38 +393,34 @@ describe("P1-C1 document requirement proposal UI", () => {
     expect(pageSource().match(/await getFascicoloDocumentRequirementProposals\(/g)).toHaveLength(1);
   });
 
-  it("38. derives panel review permission from canManageProcedimenti", () => {
+  it("38. derives operational proposal management from existing permissions", () => {
     const source = pageSource();
     expect(source).toContain("const canReview = canManageProcedimenti(role);");
-    expect(source).toContain("canReview={canReview}");
+    expect(source).toContain("canManage={canReview && hasCanonicalTenant}");
   });
 
-  it("39. requires the page canonical tenant availability for controls", () => {
+  it("39. requires canonical tenant availability for operational controls", () => {
     const source = pageSource();
     expect(source).toContain("const hasCanonicalTenant = Boolean(detail.canonicalEnteId);");
-    expect(source).toContain("hasCanonicalTenant={hasCanonicalTenant}");
+    expect(source).toContain("canManage={canReview && hasCanonicalTenant}");
   });
 
-  it("40. places the proposal panel between observations and checklist", () => {
+  it("40. renders the operational workspace instead of the document requirement panel", () => {
     const source = pageSource();
-    const observationsIndex = source.indexOf("<FascicoloObservationsPanel");
-    const proposalsIndex = source.indexOf("<FascicoloDocumentRequirementProposalsPanel");
-    const checklistIndex = source.indexOf("<CardTitle>Checklist istruttoria</CardTitle>");
-    expect(observationsIndex).toBeGreaterThan(-1);
-    expect(proposalsIndex).toBeGreaterThan(observationsIndex);
-    expect(checklistIndex).toBeGreaterThan(proposalsIndex);
+    expect(source).toContain('<FascicoloProposals');
+    expect(source).not.toContain("<FascicoloDocumentRequirementProposalsPanel");
   });
 
-  it("41. imports the evidence query on the procedimento page", () => {
-    expect(pageSource()).toContain("getFascicoloDocumentRequirementEvidenceData");
+  it("41. does not import the obsolete evidence query on the procedimento page", () => {
+    expect(pageSource()).not.toContain("getFascicoloDocumentRequirementEvidenceData");
   });
 
-  it("42. calls the evidence query exactly once per page render", () => {
-    expect(pageSource().match(/await getFascicoloDocumentRequirementEvidenceData\(/g)).toHaveLength(1);
+  it("42. does not call the obsolete evidence query during page render", () => {
+    expect(pageSource()).not.toContain("await getFascicoloDocumentRequirementEvidenceData(");
   });
 
-  it("43. passes the evidence dataset to the proposal panel", () => {
-    expect(pageSource()).toContain("evidenceData={fascicoloDocumentRequirementEvidence}");
+  it("43. passes persisted operational proposals to the workspace", () => {
+    expect(pageSource()).toContain("proposals={automaticWorkflow?.operationalProposals ?? []}");
   });
 
   it("44. renders the evidence section for a VALIDATO proposal", () => {

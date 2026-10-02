@@ -202,16 +202,17 @@ describe("P1-NEXT-01 explicit requirement screening trigger", () => {
     expect(panel).toContain("RIFIUTA PROPOSTA");
   });
 
-  it("20. places observations, trigger, proposals, and checklist in order", () => {
+  it("20. preserves screening order and routes proposals to the operational workspace", () => {
     const source = pageSource();
     const observationsIndex = source.indexOf("<FascicoloObservationsPanel");
     const triggerIndex = source.indexOf("<FascicoloDocumentRequirementScreeningTrigger");
-    const proposalsIndex = source.indexOf("<FascicoloDocumentRequirementProposalsPanel");
     const checklistIndex = source.indexOf("<CardTitle>Checklist istruttoria</CardTitle>");
     expect(observationsIndex).toBeGreaterThan(-1);
     expect(triggerIndex).toBeGreaterThan(observationsIndex);
-    expect(proposalsIndex).toBeGreaterThan(triggerIndex);
-    expect(checklistIndex).toBeGreaterThan(proposalsIndex);
+    expect(checklistIndex).toBeGreaterThan(triggerIndex);
+    expect(source).toContain('activeSection === "proposals"');
+    expect(source).toContain("<FascicoloProposals");
+    expect(source).not.toContain("<FascicoloDocumentRequirementProposalsPanel");
   });
 
   it("21. encodes no created, no-match, existing, or eligibility outcome in the URL", () => {
