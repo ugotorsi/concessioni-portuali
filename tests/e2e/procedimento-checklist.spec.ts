@@ -43,11 +43,21 @@ test("procedimento checklist section and update form visibility by role", async 
   await expect(overview.getByText("Trusted Review", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Altre funzioni", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Checklist istruttoria" })).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: "Documenti del Fascicolo" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Documenti", exact: true })).toHaveCount(0);
 
   await page.getByRole("link", { name: "Documenti", exact: true }).click();
   await expect(page).toHaveURL(/\?section=documents$/);
-  await expect(page.getByRole("heading", { name: "Documenti del Fascicolo" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Documenti", exact: true })).toBeVisible();
+  await expect(page.getByText("Atti e documenti acquisiti nel fascicolo.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Apri documento" }).first()).toBeVisible();
+  await expect(page.getByText("Direzione non indicata")).toHaveCount(0);
+  await expect(page.getByText("Canale non indicato")).toHaveCount(0);
+  await expect(page.getByText("Protocollo non indicato")).toHaveCount(0);
+  const attachDocument = page.getByRole("button", { name: "Allega documento" });
+  await expect(attachDocument).toHaveAttribute("aria-expanded", "false");
+  await attachDocument.click();
+  await expect(page.locator('input[name="file"]')).toBeVisible();
+  await expect(attachDocument).toHaveAttribute("aria-expanded", "true");
   await expect(page.locator("#panoramica")).toHaveCount(0);
 
   await page.getByRole("link", { name: "Concessione", exact: true }).click();

@@ -292,6 +292,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
             entityId={detail.procedimento.id}
             documents={detail.documentiPrincipali}
             canUpload={canWriteChecklist}
+            archiveMode
           />
           <NeutralIntakeProcessingPanel items={processingItems} />
         </section> : null}

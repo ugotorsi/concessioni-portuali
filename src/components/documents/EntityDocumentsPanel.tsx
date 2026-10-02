@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import { archiveDocumentoAction, createDocumentoUploadAction } from "@/server/actions/documenti";
+import { FascicoloDocumentsArchive, type FascicoloDocumentArchiveItem } from "@/components/documents/FascicoloDocumentsArchive";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
 import { formatDateIT, formatEnumLabel } from "@/lib/utils";
@@ -28,6 +29,8 @@ interface EntityDocumentItem {
   numeroProtocollo?: string | null;
   dataProtocollo?: Date | null;
   pecWarningMancataRicevuta?: boolean;
+  descrizione?: string | null;
+  mittente?: string | null;
   url?: string | null;
 }
 
@@ -37,6 +40,7 @@ interface EntityDocumentsPanelProps {
   entityId: string;
   documents: EntityDocumentItem[];
   canUpload: boolean;
+  archiveMode?: boolean;
 }
 
 function getHiddenFieldName(entityType: EntityDocumentsPanelProps["entityType"]): string {
@@ -56,15 +60,112 @@ function getHiddenFieldName(entityType: EntityDocumentsPanelProps["entityType"])
   }
 }
 
+function EntityDocumentUploadForm({ hiddenFieldName, entityId }: { hiddenFieldName: string; entityId: string }) {
+  return (
+    <form action={createDocumentoUploadAction} className="grid gap-3 md:grid-cols-2">
+      <input type="hidden" name={hiddenFieldName} value={entityId} />
+      <input type="hidden" name="intakeOperationId" value={randomUUID()} />
+      <label className="text-sm text-slate-700 md:col-span-2">
+        File
+        <Input name="file" type="file" required />
+      </label>
+      <label className="text-sm text-slate-700">
+        Nome documento <span className="font-normal text-slate-500">(opzionale)</span>
+        <Input name="nome" placeholder="Usa il nome del file se vuoto" />
+      </label>
+      <label className="text-sm text-slate-700">
+        Tipologia
+        <Select name="tipologia" required defaultValue="NOTA">
+          {DOCUMENT_TIPOLOGIA_VALUES.map((value) => <option key={value} value={value}>{formatEnumLabel(value)}</option>)}
+        </Select>
+      </label>
+      <label className="text-sm text-slate-700 md:col-span-2">
+        Descrizione <span className="font-normal text-slate-500">(opzionale)</span>
+        <Textarea name="descrizione" rows={2} placeholder="Descrizione documento" />
+      </label>
+      <label className="text-sm text-slate-700">
+        Data documento
+        <Input name="dataDocumento" type="date" />
+      </label>
+      <label className="text-sm text-slate-700">
+        Provenienza
+        <Input name="mittente" placeholder="Soggetto mittente" />
+      </label>
+      <details className="md:col-span-2">
+        <summary className="cursor-pointer text-sm font-medium text-slate-600">Altri metadati</summary>
+        <div className="mt-3 grid gap-3 rounded-md border border-slate-200 bg-white p-3 md:grid-cols-2">
+          <label className="text-sm text-slate-700">Direzione<Select name="direzione" defaultValue=""><option value="">Non indicata</option>{DOCUMENT_DIREZIONE_VALUES.map((value) => <option key={value} value={value}>{formatEnumLabel(value)}</option>)}</Select></label>
+          <label className="text-sm text-slate-700">Canale<Select name="canale" defaultValue=""><option value="">Non indicato</option>{DOCUMENT_CANALE_VALUES.map((value) => <option key={value} value={value}>{formatEnumLabel(value)}</option>)}</Select></label>
+          <label className="text-sm text-slate-700">Numero protocollo<Input name="numeroProtocollo" placeholder="Es. PG/2026/000123" /></label>
+          <label className="text-sm text-slate-700">Data protocollo<Input name="dataProtocollo" type="date" /></label>
+          <label className="text-sm text-slate-700">Destinatario<Input name="destinatario" placeholder="Destinatario" /></label>
+          <label className="text-sm text-slate-700">PEC Message-ID<Input name="pecMessageId" placeholder="Message-ID PEC" /></label>
+          <label className="text-sm text-slate-700">Ricevuta accettazione PEC<Input name="pecRicevutaAccettazioneId" placeholder="ID ricevuta" /></label>
+          <label className="text-sm text-slate-700">Ricevuta consegna PEC<Input name="pecRicevutaConsegnaId" placeholder="ID ricevuta" /></label>
+          <label className="text-sm text-slate-700">Fonte<Select name="source" required defaultValue="UPLOAD_UTENTE">{DOCUMENT_SOURCE_VALUES.map((value) => <option key={value} value={value}>{formatEnumLabel(value)}</option>)}</Select></label>
+          <label className="text-sm text-slate-700">Stato<Select name="status" required defaultValue="ATTIVO">{DOCUMENT_STATUS_VALUES.map((value) => <option key={value} value={value}>{formatEnumLabel(value)}</option>)}</Select></label>
+        </div>
+      </details>
+      <div className="md:col-span-2"><Button type="submit">Conferma allegato</Button></div>
+    </form>
+  );
+}
+
+function toArchiveItem(item: EntityDocumentItem, canUpload: boolean): FascicoloDocumentArchiveItem {
+  const usesStoredFile = item.url?.includes("/download") ?? false;
+  const details = [
+    item.numeroProtocollo ? { label: "Protocollo", value: item.numeroProtocollo } : null,
+    item.dataProtocollo ? { label: "Data protocollo", value: formatDateIT(item.dataProtocollo) } : null,
+    item.direzione ? { label: "Direzione", value: formatEnumLabel(item.direzione) } : null,
+    item.canale ? { label: "Canale", value: formatEnumLabel(item.canale) } : null,
+    item.descrizione ? { label: "Descrizione", value: item.descrizione } : null,
+    item.source ? { label: "Fonte", value: formatEnumLabel(item.source) } : null,
+    item.status ? { label: "Stato tecnico", value: formatEnumLabel(item.status) } : null,
+    item.storageProvider ? { label: "Conservazione", value: formatEnumLabel(item.storageProvider) } : null,
+    item.checksumSha256 ? { label: "Impronta", value: item.checksumSha256 } : null,
+    item.sizeBytes !== null && item.sizeBytes !== undefined ? { label: "Dimensione", value: `${item.sizeBytes} byte` } : null,
+  ].filter((detail): detail is { label: string; value: string } => detail !== null);
+
+  return {
+    id: item.id,
+    name: item.nome,
+    type: formatEnumLabel(item.tipologia),
+    typeCode: item.tipologia,
+    state: item.statoDocumento === "ARCHIVIATO" ? "Archiviato" : "Caricato",
+    documentDate: item.dataDocumento ? formatDateIT(item.dataDocumento) : null,
+    acquiredAt: formatDateIT(item.createdAt),
+    acquiredAtTimestamp: item.createdAt.getTime(),
+    sender: item.mittente,
+    alert: item.pecWarningMancataRicevuta ? "Ricevuta PEC da verificare" : null,
+    openHref: `/documenti/${item.id}/download${usesStoredFile ? "?preview=1" : ""}`,
+    openInNewTab: usesStoredFile,
+    originalHref: usesStoredFile ? `/documenti/${item.id}/download` : null,
+    canArchive: canUpload && item.statoDocumento !== "ARCHIVIATO",
+    details,
+  };
+}
+
 export function EntityDocumentsPanel({
   title,
   entityType,
   entityId,
   documents,
   canUpload,
+  archiveMode = false,
 }: EntityDocumentsPanelProps) {
   const hiddenFieldName = getHiddenFieldName(entityType);
   const isProcedimento = entityType === "procedimento";
+  const uploadForm = canUpload ? <EntityDocumentUploadForm hiddenFieldName={hiddenFieldName} entityId={entityId} /> : undefined;
+
+  if (archiveMode) {
+    return (
+      <FascicoloDocumentsArchive
+        documents={documents.map((item) => toArchiveItem(item, canUpload))}
+        uploadForm={uploadForm}
+        archiveAction={archiveDocumentoAction}
+      />
+    );
+  }
 
   return (
     <Card>
@@ -154,112 +255,10 @@ export function EntityDocumentsPanel({
           </TableBody>
         </Table>
 
-        {canUpload ? (
+        {uploadForm ? (
           <details className="rounded-md border border-slate-200 bg-slate-50">
             <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-[#173d4f]">Allega documento</summary>
-          <form action={createDocumentoUploadAction} className="grid gap-3 border-t border-slate-200 p-4 md:grid-cols-2">
-            <input type="hidden" name={hiddenFieldName} value={entityId} />
-            <input type="hidden" name="intakeOperationId" value={randomUUID()} />
-            <label className="text-sm text-slate-700 md:col-span-2">
-              File
-              <Input name="file" type="file" required />
-            </label>
-            <label className="text-sm text-slate-700">
-              Nome documento
-              <Input name="nome" placeholder="Nome visualizzato" />
-            </label>
-            <label className="text-sm text-slate-700">
-              Tipologia
-              <Select name="tipologia" required defaultValue="NOTA">
-                {DOCUMENT_TIPOLOGIA_VALUES.map((value) => (
-                  <option key={value} value={value}>
-                    {formatEnumLabel(value)}
-                  </option>
-                ))}
-              </Select>
-            </label>
-            <label className="text-sm text-slate-700 md:col-span-2">
-              Descrizione
-              <Textarea name="descrizione" rows={2} placeholder="Descrizione documento" />
-            </label>
-            <label className="text-sm text-slate-700">
-              Direzione
-              <Select name="direzione" defaultValue="">
-                <option value="">Non indicata</option>
-                {DOCUMENT_DIREZIONE_VALUES.map((value) => (
-                  <option key={value} value={value}>
-                    {formatEnumLabel(value)}
-                  </option>
-                ))}
-              </Select>
-            </label>
-            <label className="text-sm text-slate-700">
-              Canale
-              <Select name="canale" defaultValue="">
-                <option value="">Non indicato</option>
-                {DOCUMENT_CANALE_VALUES.map((value) => (
-                  <option key={value} value={value}>
-                    {formatEnumLabel(value)}
-                  </option>
-                ))}
-              </Select>
-            </label>
-            <label className="text-sm text-slate-700">
-              Numero protocollo
-              <Input name="numeroProtocollo" placeholder="Es. PG/2026/000123" />
-            </label>
-            <label className="text-sm text-slate-700">
-              Data protocollo
-              <Input name="dataProtocollo" type="date" />
-            </label>
-            <label className="text-sm text-slate-700">
-              Mittente
-              <Input name="mittente" placeholder="Mittente" />
-            </label>
-            <label className="text-sm text-slate-700">
-              Destinatario
-              <Input name="destinatario" placeholder="Destinatario" />
-            </label>
-            <label className="text-sm text-slate-700 md:col-span-2">
-              PEC Message-ID
-              <Input name="pecMessageId" placeholder="Message-ID PEC" />
-            </label>
-            <label className="text-sm text-slate-700">
-              Ricevuta accettazione PEC
-              <Input name="pecRicevutaAccettazioneId" placeholder="ID ricevuta" />
-            </label>
-            <label className="text-sm text-slate-700">
-              Ricevuta consegna PEC
-              <Input name="pecRicevutaConsegnaId" placeholder="ID ricevuta" />
-            </label>
-            <label className="text-sm text-slate-700">
-              Data documento
-              <Input name="dataDocumento" type="date" />
-            </label>
-            <label className="text-sm text-slate-700">
-              Fonte
-              <Select name="source" required defaultValue="UPLOAD_UTENTE">
-                {DOCUMENT_SOURCE_VALUES.map((value) => (
-                  <option key={value} value={value}>
-                    {formatEnumLabel(value)}
-                  </option>
-                ))}
-              </Select>
-            </label>
-            <label className="text-sm text-slate-700">
-              Stato
-              <Select name="status" required defaultValue="ATTIVO">
-                {DOCUMENT_STATUS_VALUES.map((value) => (
-                  <option key={value} value={value}>
-                    {formatEnumLabel(value)}
-                  </option>
-                ))}
-              </Select>
-            </label>
-            <div className="flex items-end">
-              <Button type="submit">Conferma allegato</Button>
-            </div>
-          </form>
+            <div className="border-t border-slate-200 p-4">{uploadForm}</div>
           </details>
         ) : null}
       </CardContent>

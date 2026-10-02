@@ -72,7 +72,14 @@ test("fascicolo in preparazione usa la panoramica e la navigazione condivise", a
   await expect(page.getByRole("heading", { name: "Documenti" })).toHaveCount(0);
   await page.getByRole("link", { name: "Documenti", exact: true }).click();
   await expect(page).toHaveURL(/\?section=documents$/);
-  await expect(page.getByRole("heading", { name: "Documenti" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Documenti", exact: true })).toBeVisible();
+  await expect(page.getByText("Atti e documenti acquisiti nel fascicolo.")).toBeVisible();
+  await expect(page.getByText("Direzione non indicata")).toHaveCount(0);
+  const intakeAttachDocument = page.getByRole("button", { name: "Allega documento" });
+  await expect(intakeAttachDocument).toBeVisible();
+  if (await page.getByRole("link", { name: "Apri documento" }).count()) {
+    await expect(page.getByRole("link", { name: "Apri documento" }).first()).toBeVisible();
+  }
   await page.reload();
   await expect(page).toHaveURL(/\?section=documents$/);
   await expect(page.getByText("Checklist istruttoria", { exact: true })).toHaveCount(0);

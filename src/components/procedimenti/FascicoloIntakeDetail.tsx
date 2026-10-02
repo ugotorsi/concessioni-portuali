@@ -1,6 +1,6 @@
-import Link from "next/link";
-import { FileText, Paperclip } from "lucide-react";
+import { Paperclip } from "lucide-react";
 
+import { FascicoloDocumentsArchive, type FascicoloDocumentArchiveItem } from "@/components/documents/FascicoloDocumentsArchive";
 import { FascicoloShell, type FascicoloOverviewModel, type FascicoloSection } from "@/components/procedimenti/FascicoloShell";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -28,6 +28,39 @@ function Value({ label, value }: { label: string; value: string | null | undefin
       <dd className="mt-1 text-sm text-slate-950">{value || "Non indicato"}</dd>
     </div>
   );
+}
+
+function toArchiveItem(documento: FascicoloIntakeDetailData["documenti"][number]): FascicoloDocumentArchiveItem {
+  const usesStoredFile = documento.url?.includes("/download") ?? false;
+  const details = [
+    documento.numeroProtocollo ? { label: "Protocollo", value: documento.numeroProtocollo } : null,
+    documento.dataProtocollo ? { label: "Data protocollo", value: formatDateIT(documento.dataProtocollo) } : null,
+    documento.direzione ? { label: "Direzione", value: formatEnumLabel(documento.direzione) } : null,
+    documento.canale ? { label: "Canale", value: formatEnumLabel(documento.canale) } : null,
+    documento.descrizione ? { label: "Descrizione", value: documento.descrizione } : null,
+    documento.source ? { label: "Fonte", value: formatEnumLabel(documento.source) } : null,
+    documento.status ? { label: "Stato tecnico", value: formatEnumLabel(documento.status) } : null,
+    documento.storageProvider ? { label: "Conservazione", value: formatEnumLabel(documento.storageProvider) } : null,
+    documento.checksumSha256 ? { label: "Impronta", value: documento.checksumSha256 } : null,
+    documento.sizeBytes !== null ? { label: "Dimensione", value: `${documento.sizeBytes} byte` } : null,
+  ].filter((detail): detail is { label: string; value: string } => detail !== null);
+
+  return {
+    id: documento.id,
+    name: documento.nome,
+    type: formatEnumLabel(documento.tipologia),
+    typeCode: documento.tipologia,
+    state: documento.statoDocumento === "ARCHIVIATO" ? "Archiviato" : "Caricato",
+    documentDate: documento.dataDocumento ? formatDateIT(documento.dataDocumento) : null,
+    acquiredAt: formatDateIT(documento.createdAt),
+    acquiredAtTimestamp: documento.createdAt.getTime(),
+    sender: documento.mittente,
+    alert: documento.pecWarningMancataRicevuta ? "Ricevuta PEC da verificare" : null,
+    openHref: `/documenti/${documento.id}/download${usesStoredFile ? "?preview=1" : ""}`,
+    openInNewTab: usesStoredFile,
+    originalHref: usesStoredFile ? `/documenti/${documento.id}/download` : null,
+    details,
+  };
 }
 
 export function FascicoloIntakeDetail({ fascicolo, canUpload, activeSection }: FascicoloIntakeDetailProps) {
@@ -105,34 +138,11 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload, activeSection }: F
           </CardContent>
         </Card> : null}
 
-        {activeSection === "documents" ? <Card>
-          <CardHeader>
-            <CardTitle>Documenti</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            {fascicolo.documenti.length > 0 ? (
-              <ul className="divide-y divide-slate-200 rounded-md border border-slate-200">
-                {fascicolo.documenti.map((documento) => (
-                  <li key={documento.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-                    <div className="flex min-w-0 items-center gap-3">
-                      <FileText className="h-5 w-5 shrink-0 text-[#173d4f]" aria-hidden="true" />
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-slate-950">{documento.nome}</p>
-                        <p className="text-xs text-slate-500">{formatEnumLabel(documento.tipologia)} · {formatDateIT(documento.createdAt)}</p>
-                      </div>
-                    </div>
-                    <a href={`/documenti/${documento.id}/download`} className="text-sm font-semibold text-[#173d4f] underline underline-offset-4">Apri</a>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="rounded-md border border-dashed border-slate-300 px-5 py-8 text-center text-sm text-slate-600">Nessun documento ancora caricato.</div>
-            )}
-
-            {canUpload ? (
-              <details open={fascicolo.documenti.length === 0} className="rounded-md border border-slate-200 bg-slate-50">
-                <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-[#173d4f]">Allega documento</summary>
-                <form action={uploadFascicoloIntakeDocumentAction} className="grid gap-4 border-t border-slate-200 p-4 md:grid-cols-2">
+        {activeSection === "documents" ? (
+          <FascicoloDocumentsArchive
+            documents={fascicolo.documenti.map(toArchiveItem)}
+            uploadForm={canUpload ? (
+              <form action={uploadFascicoloIntakeDocumentAction} className="grid gap-4 md:grid-cols-2">
                   <input type="hidden" name="fascicoloIntakeId" value={fascicolo.id} />
                   <input type="hidden" name="source" value="UPLOAD_UTENTE" />
                   <input type="hidden" name="status" value="ATTIVO" />
@@ -141,7 +151,7 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload, activeSection }: F
                     <Input name="file" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.csv" required />
                   </label>
                   <label className="text-sm font-medium text-slate-700">
-                    Nome documento
+                    Nome documento <span className="font-normal text-slate-500">(opzionale)</span>
                     <Input name="nome" placeholder="Usa il nome del file se vuoto" />
                   </label>
                   <label className="text-sm font-medium text-slate-700">
@@ -151,17 +161,16 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload, activeSection }: F
                     </Select>
                   </label>
                   <label className="text-sm font-medium text-slate-700 md:col-span-2">
-                    Descrizione
+                    Descrizione <span className="font-normal text-slate-500">(opzionale)</span>
                     <Textarea name="descrizione" rows={2} />
                   </label>
                   <div className="md:col-span-2">
                     <Button type="submit"><Paperclip className="h-4 w-4" aria-hidden="true" />Carica documento</Button>
                   </div>
-                </form>
-              </details>
-            ) : null}
-          </CardContent>
-        </Card> : null}
+              </form>
+            ) : undefined}
+          />
+        ) : null}
 
         {!["documents", "timeline", "subjects", "concession"].includes(activeSection) ? (
           <p className="rounded-md border border-slate-200 px-4 py-3 text-sm text-slate-600">Nessun dato ancora disponibile.</p>
