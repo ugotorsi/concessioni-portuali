@@ -57,7 +57,7 @@ describe("Fascicolo UX contract", () => {
     const intakeDetail = readSource("src/components/procedimenti/FascicoloIntakeDetail.tsx");
     const fascicoloShell = readSource("src/components/procedimenti/FascicoloShell.tsx");
     const documentsIndex = detailPage.indexOf('title="Documenti del Fascicolo"');
-    const coverDataIndex = detailPage.indexOf("1. Dati del Fascicolo");
+    const subjectsIndex = detailPage.indexOf("<FascicoloSubjects");
 
     expect(detailPage).toContain("<FascicoloShell");
     expect(fascicoloShell).toContain("Torna ai fascicoli");
@@ -68,7 +68,7 @@ describe("Fascicolo UX contract", () => {
     }
     expect(detailPage).toContain('["analysis", "istruttoria"].includes(activeSection)');
     expect(documentsIndex).toBeGreaterThan(-1);
-    expect(documentsIndex).toBeLessThan(coverDataIndex);
+    expect(subjectsIndex).toBeGreaterThan(documentsIndex);
     expect(detailPage).toContain('entityType="procedimento"');
     expect(detailPage).toContain("entityId={detail.procedimento.id}");
     expect(documentsPanel).toContain('<input type="hidden" name={hiddenFieldName} value={entityId} />');

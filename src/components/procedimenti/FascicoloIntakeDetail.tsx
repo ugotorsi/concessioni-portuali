@@ -2,6 +2,7 @@ import { Paperclip } from "lucide-react";
 
 import { FascicoloDocumentsArchive, type FascicoloDocumentArchiveItem } from "@/components/documents/FascicoloDocumentsArchive";
 import { FascicoloShell, type FascicoloOverviewModel, type FascicoloSection } from "@/components/procedimenti/FascicoloShell";
+import { FascicoloSubjects, type FascicoloSubject } from "@/components/procedimenti/FascicoloSubjects";
 import { FascicoloTimeline, type FascicoloTimelineEvent } from "@/components/procedimenti/FascicoloTimeline";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -66,6 +67,12 @@ function toArchiveItem(documento: FascicoloIntakeDetailData["documenti"][number]
 
 export function FascicoloIntakeDetail({ fascicolo, canUpload, activeSection }: FascicoloIntakeDetailProps) {
   const title = fascicolo.denominazioneBreve || fascicolo.oggettoFascicolo;
+  const subjects: FascicoloSubject[] = [];
+  if (fascicolo.soggettoAssistito) subjects.push({ name: fascicolo.soggettoAssistito, roles: ["Assistito"], category: "principal" });
+  if (fascicolo.concessionario) subjects.push({ name: fascicolo.concessionario, roles: ["Concessionario"], category: "principal", note: fascicolo.numeroConcessione ? `Concessione ${fascicolo.numeroConcessione}` : null });
+  if (fascicolo.enteConcedente) subjects.push({ name: fascicolo.enteConcedente, roles: ["Ente concedente"], category: "principal", type: "Amministrazione pubblica" });
+  if (fascicolo.autoritaCompetente) subjects.push({ name: fascicolo.autoritaCompetente, roles: ["Autorità competente"], category: "principal", type: "Amministrazione pubblica" });
+  if (fascicolo.controparteAmministrazione) subjects.push({ name: fascicolo.controparteAmministrazione, roles: ["Controparte"], category: "other" });
   const overview: FascicoloOverviewModel = {
     title,
     status: "In preparazione",
@@ -176,12 +183,7 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload, activeSection }: F
       <div className="space-y-6">
         {activeSection === "timeline" ? <FascicoloTimeline events={timelineEvents} nextDeadline={nextDeadline} /> : null}
 
-        {activeSection === "subjects" ? (
-          <Card>
-            <CardHeader><CardTitle>Soggetti</CardTitle></CardHeader>
-            <CardContent><dl className="grid gap-5 md:grid-cols-2"><Value label="Soggetto assistito" value={fascicolo.soggettoAssistito} /><Value label="Concessionario / titolare" value={fascicolo.concessionario} /><Value label="Ente concedente" value={fascicolo.enteConcedente} /><Value label="Autorità competente" value={fascicolo.autoritaCompetente} /><Value label="Controparte / amministrazione" value={fascicolo.controparteAmministrazione} /></dl></CardContent>
-          </Card>
-        ) : null}
+        {activeSection === "subjects" ? <FascicoloSubjects subjects={subjects} /> : null}
 
         {activeSection === "concession" ? <Card>
           <CardHeader>

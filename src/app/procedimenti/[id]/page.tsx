@@ -18,6 +18,7 @@ import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloO
 import { FascicoloAutomaticWorkflowPanel } from "@/components/procedimenti/FascicoloAutomaticWorkflowPanel";
 import { FascicoloIntakeDetail } from "@/components/procedimenti/FascicoloIntakeDetail";
 import { FascicoloShell, resolveFascicoloSection, type FascicoloOverviewModel } from "@/components/procedimenti/FascicoloShell";
+import { FascicoloSubjects } from "@/components/procedimenti/FascicoloSubjects";
 import { FascicoloTimeline, type FascicoloTimelineEvent } from "@/components/procedimenti/FascicoloTimeline";
 import {
   ProcedimentoGiorniBadge,
@@ -480,118 +481,52 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           </div>
         </section> : null}
 
-        {activeSection === "subjects" ? <section className="grid gap-4 xl:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>1. Dati del Fascicolo</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm text-slate-700">
-              <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500">Tipologia</p>
-                <p className="mt-1">{formatEnumLabel(detail.procedimento.tipologia)}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500">Stato</p>
-                <div className="mt-1">
-                  <ProcedimentoStatoBadge value={detail.procedimento.stato} />
-                </div>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500">Giorni contraddittorio</p>
-                <div className="mt-1">
-                  <ProcedimentoGiorniBadge
-                    giorniResiduiContraddittorio={detail.procedimento.giorniResiduiContraddittorio}
-                    giorniRitardoContraddittorio={detail.procedimento.giorniRitardoContraddittorio}
-                  />
-                </div>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500">Note istruttorie</p>
-                <p className="mt-1">{detail.procedimento.noteIstruttorie ?? "-"}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500">Responsabile attuale</p>
-                <p className="mt-1">{detail.procedimento.responsabileProcedimentoNome ?? "-"}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500">Email responsabile</p>
-                <p className="mt-1">{detail.procedimento.responsabileProcedimentoEmail ?? "-"}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500">Unita organizzativa</p>
-                <p className="mt-1">{detail.procedimento.unitaOrganizzativaResponsabile ?? "-"}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500">Data assegnazione responsabile</p>
-                <p className="mt-1">{detail.procedimento.responsabileAssegnatoAt ? formatDateIT(detail.procedimento.responsabileAssegnatoAt) : "-"}</p>
-              </div>
-              <p className="md:col-span-2 text-xs text-slate-500">
-                Il responsabile amministrativo e distinto dal soggetto che registra l assegnazione nel software e non implica competenza all adozione del provvedimento finale.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Storico responsabilita</CardTitle>
-              <CardDescription>Registro cronologico delle assegnazioni amministrative.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {canWriteChecklist ? (
-                <details className="rounded-md border border-slate-200 bg-slate-50 p-3">
-                  <summary className="cursor-pointer text-sm font-medium text-slate-900">Riassegna responsabile</summary>
+        {activeSection === "subjects" ? (
+          <FascicoloSubjects
+            subjects={[{
+              name: detail.concessionario.denominazione,
+              roles: ["Concessionario"],
+              category: "principal",
+              contact: detail.concessionario.email ?? detail.concessionario.pec,
+              organization: detail.concessionario.sedeLegale,
+              note: `Titolare della concessione ${detail.concessione.numeroAtto}`,
+              href: `/procedimenti/${detail.procedimento.id}?section=concession`,
+            }]}
+            responsible={detail.procedimento.responsabileProcedimentoNome ? {
+              name: detail.procedimento.responsabileProcedimentoNome,
+              email: detail.procedimento.responsabileProcedimentoEmail,
+              organization: detail.procedimento.unitaOrganizzativaResponsabile,
+              assignedAt: detail.procedimento.responsabileAssegnatoAt
+                ? formatDateIT(detail.procedimento.responsabileAssegnatoAt)
+                : null,
+            } : null}
+            responsibilityHistory={detail.procedimento.responsabileAssignments.map((assignment) => ({
+              id: assignment.id,
+              name: assignment.responsabileNome,
+              email: assignment.responsabileEmail,
+              organization: assignment.unitaOrganizzativa,
+              assignedAt: formatDateIT(assignment.decorrenza),
+              endedAt: assignment.cessazione ? formatDateIT(assignment.cessazione) : null,
+              note: assignment.motivoAssegnazione,
+            }))}
+            reassignAction={canWriteChecklist ? (
+              <details className="max-w-2xl rounded-md border border-slate-200 bg-slate-50 p-3">
+                <summary className="cursor-pointer text-sm font-medium text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7285]">Riassegna responsabile</summary>
                 <form action={reassignProcedimentoResponsabileAction} className="mt-3 space-y-3">
                   <input type="hidden" name="procedimentoId" value={detail.procedimento.id} />
                   <div className="grid gap-3 md:grid-cols-2">
-                    <label className="text-sm text-slate-700">
-                      Responsabile
-                      <Input name="responsabileNome" required />
-                    </label>
-                    <label className="text-sm text-slate-700">
-                      Email responsabile (opzionale)
-                      <Input name="responsabileEmail" type="email" />
-                    </label>
-                    <label className="text-sm text-slate-700">
-                      Unita organizzativa
-                      <Input name="unitaOrganizzativa" required />
-                    </label>
-                    <label className="text-sm text-slate-700">
-                      Decorrenza
-                      <Input name="decorrenza" type="date" required />
-                    </label>
-                    <label className="text-sm text-slate-700 md:col-span-2">
-                      Motivo assegnazione (opzionale)
-                      <Textarea name="motivoAssegnazione" rows={2} />
-                    </label>
+                    <label className="text-sm text-slate-700">Responsabile<Input name="responsabileNome" required /></label>
+                    <label className="text-sm text-slate-700">Email responsabile (opzionale)<Input name="responsabileEmail" type="email" /></label>
+                    <label className="text-sm text-slate-700">Unità organizzativa<Input name="unitaOrganizzativa" required /></label>
+                    <label className="text-sm text-slate-700">Decorrenza<Input name="decorrenza" type="date" required /></label>
+                    <label className="text-sm text-slate-700 md:col-span-2">Motivo assegnazione (opzionale)<Textarea name="motivoAssegnazione" rows={2} /></label>
                   </div>
                   <Button type="submit">Conferma riassegnazione</Button>
                 </form>
-                </details>
-              ) : null}
-
-              <div className="space-y-3">
-                {detail.procedimento.responsabileAssignments.map((assignment) => (
-                  <div key={assignment.id} className="rounded-md border border-slate-200 bg-white p-3 text-sm text-slate-700">
-                    <div className="grid gap-2 md:grid-cols-2">
-                      <p><span className="font-medium text-slate-900">Responsabile:</span> {assignment.responsabileNome}</p>
-                      <p><span className="font-medium text-slate-900">Email:</span> {assignment.responsabileEmail ?? "-"}</p>
-                      <p><span className="font-medium text-slate-900">Unita:</span> {assignment.unitaOrganizzativa}</p>
-                      <p><span className="font-medium text-slate-900">Dal:</span> {formatDateIT(assignment.decorrenza)}</p>
-                      <p><span className="font-medium text-slate-900">Al:</span> {assignment.cessazione ? formatDateIT(assignment.cessazione) : "In corso"}</p>
-                      <p><span className="font-medium text-slate-900">Comunicata:</span> {assignment.comunicataAt ? formatDateIT(assignment.comunicataAt) : "Non comunicata"}</p>
-                      <p><span className="font-medium text-slate-900">Registrata da:</span> {assignment.registeredByUserEmail ?? assignment.registeredByUserId ?? "-"}</p>
-                      <p><span className="font-medium text-slate-900">Motivo:</span> {assignment.motivoAssegnazione ?? "-"}</p>
-                    </div>
-                  </div>
-                ))}
-                {detail.procedimento.responsabileAssignments.length === 0 ? (
-                  <p className="text-sm text-slate-500">Nessuna assegnazione storica registrata.</p>
-                ) : null}
-              </div>
-            </CardContent>
-          </Card>
-
-        </section> : null}
+              </details>
+            ) : null}
+          />
+        ) : null}
 
         {["analysis", "istruttoria"].includes(activeSection) ? <section className="grid gap-4 xl:grid-cols-2">
           <FascicoloObservationsPanel
