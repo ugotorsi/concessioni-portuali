@@ -1040,7 +1040,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           </CardContent>
         </Card>
 
-        <section className="grid gap-4 xl:grid-cols-2">
+        <section className="grid min-w-0 gap-4 xl:grid-cols-2 [&>*]:min-w-0">
           <Card>
             <CardHeader>
               <CardTitle>6. Altre criticità aperte della concessione</CardTitle>
@@ -1120,7 +1120,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           </Card>
         </section>
 
-        <section id="scadenze" className="grid scroll-mt-16 gap-4 xl:grid-cols-2">
+        <section id="scadenze" className="grid min-w-0 scroll-mt-16 gap-4 xl:grid-cols-2 [&>*]:min-w-0">
           <Card>
             <CardHeader>
               <CardTitle>8. Scadenze rilevanti</CardTitle>
@@ -1200,7 +1200,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           </Card>
         </section>
 
-        <section id="rapporti" className="grid scroll-mt-16 gap-4 xl:grid-cols-2">
+        <section id="rapporti" className="grid min-w-0 scroll-mt-16 gap-4 xl:grid-cols-2 [&>*]:min-w-0">
           <Card>
             <CardHeader>
               <CardTitle>11. Report collegati</CardTitle>
