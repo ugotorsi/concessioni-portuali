@@ -7,6 +7,31 @@ function readSource(path: string): string {
 }
 
 describe("Fascicolo UX contract", () => {
+  it("never routes the Fascicoli flow directly to the standalone concession page", () => {
+    const sidebar = readSource("src/components/layout/Sidebar.tsx");
+    const listPage = readSource("src/app/procedimenti/page.tsx");
+    const detailPage = readSource("src/app/procedimenti/[id]/page.tsx");
+    const registerRow = listPage.match(/<ClickableTableRow[\s\S]*?<\/ClickableTableRow>/)?.[0];
+
+    expect(sidebar, "Fascicoli sidebar entry must open /procedimenti").toContain(
+      '{ href: "/procedimenti", label: "Fascicoli"',
+    );
+    expect(registerRow, "Fascicoli register must render a primary clickable row").toBeDefined();
+    expect(registerRow, "primary Fascicoli action must open /procedimenti/[id]").toContain(
+      'href={`/procedimenti/${item.id}`}',
+    );
+    expect(registerRow, "concession number must stay inside the case workspace").toContain(
+      'href={`/procedimenti/${item.id}?section=concession`}',
+    );
+    expect(listPage, "Fascicoli register must not link directly to /concessioni/[id]").not.toMatch(
+      /href=\{`\/concessioni\/\$\{/,
+    );
+    expect(detailPage, "case workspace must retain an explicit standalone concession action").toContain(
+      'href={`/concessioni/${detail.concessione.id}`}',
+    );
+    expect(detailPage).toContain("Apri concessione");
+  });
+
   it("keeps the Procedimento routes while exposing Fascicoli navigation and creation", () => {
     const sidebar = readSource("src/components/layout/Sidebar.tsx");
     const listPage = readSource("src/app/procedimenti/page.tsx");
