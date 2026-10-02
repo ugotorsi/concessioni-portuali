@@ -21,6 +21,28 @@ test("procedimento checklist section and update form visibility by role", async 
   await expect(page).toHaveURL(/\/procedimenti\/.+/);
   const procedimentoDetailUrl = page.url();
 
+  const fascicoloNav = page.getByRole("navigation", { name: "Navigazione del fascicolo" });
+  await expect(fascicoloNav).toBeVisible();
+  await expect(fascicoloNav.locator(":scope > div > *")).toHaveText([
+    "Panoramica",
+    "Documenti",
+    "Cronologia",
+    "Soggetti",
+    "Concessione",
+    "Analisi",
+    "Ricerca",
+    "Scadenze",
+    "Criticità",
+    "Rapporto",
+    "Proposte",
+  ]);
+  const overview = page.locator("#panoramica");
+  await expect(overview.getByText("Richiede attenzione", { exact: true })).toBeVisible();
+  await expect(overview.getByText("Sintesi del fascicolo", { exact: true })).toBeVisible();
+  expect(await overview.locator('[aria-labelledby="documenti-sintesi-title"] li').count()).toBeLessThanOrEqual(3);
+  await expect(overview.getByText("Trusted Review", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Altre funzioni", { exact: true })).toBeVisible();
+
   await expect(page.getByRole("heading", { name: "2. Checklist contraddittorio" })).toBeVisible();
   await expect(page.getByText(/Checklist (completa|incompleta)/i)).toBeVisible();
   await expect(page.getByText(/Origine procedimento/i)).toBeVisible();

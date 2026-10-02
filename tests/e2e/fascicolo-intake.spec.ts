@@ -43,3 +43,32 @@ test("nuovo fascicolo mostra solo l'intake iniziale e il collegamento concession
   await expect(page.locator('[name="concessioneId"]')).toBeVisible();
   await expect(page.locator('[name="concessioneId"]')).not.toHaveAttribute("required", "");
 });
+
+test("fascicolo in preparazione usa la panoramica e la navigazione condivise", async ({ page }) => {
+  await loginAndExpectLanding(page, "admin@demo.local", "admin123", /\/dashboard$/);
+  await page.goto("/procedimenti", { waitUntil: "domcontentloaded" });
+
+  const intakeList = page.getByRole("heading", { name: "Fascicoli in preparazione" }).locator("..");
+  const intakeLink = intakeList.locator('a[href^="/procedimenti/"]').first();
+  test.skip(await intakeLink.count() === 0, "Nessun FascicoloIntake disponibile nel dataset E2E");
+  await intakeLink.click();
+
+  const fascicoloNav = page.getByRole("navigation", { name: "Navigazione del fascicolo" });
+  await expect(fascicoloNav).toBeVisible();
+  await expect(fascicoloNav.locator(":scope > div > *")).toHaveText([
+    "Panoramica",
+    "Documenti",
+    "Cronologia",
+    "Soggetti",
+    "Concessione",
+    "Analisi",
+    "Ricerca",
+    "Scadenze",
+    "Criticità",
+    "Rapporto",
+    "Proposte",
+  ]);
+  await expect(page.locator("#panoramica").getByText("Sintesi del fascicolo", { exact: true })).toBeVisible();
+  await expect(page.locator("#documenti").getByRole("heading", { name: "Documenti" })).toBeVisible();
+  await expect(page.getByText("2. Checklist contraddittorio", { exact: true })).toHaveCount(0);
+});

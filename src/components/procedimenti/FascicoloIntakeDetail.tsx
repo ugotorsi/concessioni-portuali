@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { ArrowLeft, FileText, Paperclip } from "lucide-react";
+import { FileText, Paperclip } from "lucide-react";
 
-import { AppShell } from "@/components/layout/AppShell";
-import { Button, buttonVariants } from "@/components/ui/Button";
+import { FascicoloShell, type FascicoloOverviewModel } from "@/components/procedimenti/FascicoloShell";
+import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
@@ -31,36 +31,53 @@ function Value({ label, value }: { label: string; value: string | null | undefin
 
 export function FascicoloIntakeDetail({ fascicolo, canUpload }: FascicoloIntakeDetailProps) {
   const title = fascicolo.denominazioneBreve || fascicolo.oggettoFascicolo;
+  const overview: FascicoloOverviewModel = {
+    title,
+    status: "In preparazione",
+    type: getConcessionVerticalLabel(fascicolo.tipologiaConcessione),
+    concession: fascicolo.concessione?.numeroAtto ?? fascicolo.numeroConcessione,
+    subject: fascicolo.soggettoAssistito ?? fascicolo.concessionario,
+    priorityDeadline: fascicolo.scadenza ? formatDateIT(fascicolo.scadenza) : null,
+    attention: [],
+    documentCount: fascicolo.documenti.length,
+    documents: fascicolo.documenti.slice(0, 3).map((documento) => ({
+      id: documento.id,
+      name: documento.nome,
+      type: formatEnumLabel(documento.tipologia),
+      date: formatDateIT(documento.createdAt),
+      href: `/documenti/${documento.id}/download`,
+    })),
+    summary: [
+      { label: "Oggetto", value: fascicolo.oggettoFascicolo },
+      { label: "Contesto iniziale", value: fascicolo.contestoIniziale },
+      { label: "Stato corrente", value: "In preparazione" },
+      { label: "Concessione collegata", value: fascicolo.concessione?.numeroAtto ?? fascicolo.numeroConcessione },
+      { label: "Soggetto assistito", value: fascicolo.soggettoAssistito },
+      { label: "Concessionario / titolare", value: fascicolo.concessionario },
+    ],
+    timeline: [
+      { id: `fascicolo-${fascicolo.id}`, label: "Fascicolo creato", date: formatDateIT(fascicolo.createdAt) },
+    ],
+  };
 
   return (
-    <AppShell title={title} subtitle="Fascicolo in preparazione">
-      <div className="mb-5">
-        <Link href="/procedimenti" className={buttonVariants({ variant: "secondary" })}>
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          Torna ai fascicoli
-        </Link>
-      </div>
-
+    <FascicoloShell
+      model={overview}
+      sectionTargets={{
+        overview: "#panoramica",
+        documents: "#documenti",
+        timeline: "#cronologia",
+        subjects: "#soggetti",
+        concession: "#concessione",
+      }}
+    >
       <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Inquadramento</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <dl className="grid gap-5 md:grid-cols-2">
-              <Value label="Tipologia di concessione" value={getConcessionVerticalLabel(fascicolo.tipologiaConcessione)} />
-              <Value label="Oggetto del fascicolo" value={fascicolo.oggettoFascicolo} />
-              <Value label="Concessione collegata" value={fascicolo.concessione?.numeroAtto} />
-              <Value label="Creato il" value={formatDateIT(fascicolo.createdAt)} />
-            </dl>
-          </CardContent>
-        </Card>
-
-        <Card>
+        <Card id="concessione" className="scroll-mt-16">
           <CardHeader>
             <CardTitle>Dati iniziali</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
+            <span id="soggetti" className="block scroll-mt-16" />
             <dl className="grid gap-5 md:grid-cols-3">
               <Value label="Concessionario / titolare" value={fascicolo.concessionario} />
               <Value label="Ente concedente" value={fascicolo.enteConcedente} />
@@ -142,6 +159,6 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload }: FascicoloIntakeD
           </CardContent>
         </Card>
       </div>
-    </AppShell>
+    </FascicoloShell>
   );
 }

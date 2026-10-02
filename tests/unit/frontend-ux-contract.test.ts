@@ -68,11 +68,16 @@ describe("frontend UX contract", () => {
 
   it("provides in-page detail navigation and progressive technical disclosure", () => {
     const detail = readSource("src/app/procedimenti/[id]/page.tsx");
+    const shell = readSource("src/components/procedimenti/FascicoloShell.tsx");
     const workflow = readSource("src/components/procedimenti/FascicoloAutomaticWorkflowPanel.tsx");
 
-    for (const anchor of ["copertina", "documenti", "automazione", "istruttoria", "decisione", "collegamenti"]) {
-      expect(detail).toContain(`#${anchor}`);
+    for (const anchor of ["panoramica", "documenti", "cronologia", "soggetti", "concessione", "analisi", "ricerca", "scadenze", "criticita", "rapporti", "proposte"]) {
+      expect(`${detail}\n${shell}`).toContain(`#${anchor}`);
     }
+    expect(detail).toContain('{ label: "Istruttoria", href: "#istruttoria" }');
+    expect(detail).toContain('{ label: "Decisione", href: "#decisione" }');
+    expect(shell).not.toContain("Copertina");
+    expect(shell).not.toContain("Collegamenti");
     expect(detail).not.toContain('<h1 className="text-2xl font-semibold text-slate-900">Fascicolo</h1>');
     expect(workflow).toContain("Verifiche professionali");
     expect(workflow).toContain("Dettaglio tecnico");

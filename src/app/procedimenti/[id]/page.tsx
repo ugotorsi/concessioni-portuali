@@ -1,13 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 
 import { SubmitButtonPending } from "@/components/forms/SubmitButtonPending";
 import { GravitaBadge, StatoBadge as CriticitaStatoBadge } from "@/components/criticita/CriticitaBadges";
 import { EntityDocumentsPanel } from "@/components/documents/EntityDocumentsPanel";
 import { LegalSourceCandidatesPanel } from "@/components/documents/LegalSourceCandidatesPanel";
 import { NeutralIntakeProcessingPanel } from "@/components/documents/NeutralIntakeProcessingPanel";
-import { AppShell } from "@/components/layout/AppShell";
 import {
   AiFascicoloTrustedReviewPanel,
   resolveAiFascicoloTrustedReviewSelection,
@@ -19,6 +17,7 @@ import { FascicoloDocumentRequirementScreeningTrigger } from "@/components/proce
 import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloObservationsPanel";
 import { FascicoloAutomaticWorkflowPanel } from "@/components/procedimenti/FascicoloAutomaticWorkflowPanel";
 import { FascicoloIntakeDetail } from "@/components/procedimenti/FascicoloIntakeDetail";
+import { FascicoloShell, type FascicoloOverviewModel } from "@/components/procedimenti/FascicoloShell";
 import {
   ProcedimentoGiorniBadge,
   ProcedimentoChecklistBadge,
@@ -30,10 +29,9 @@ import {
 } from "@/components/procedimenti/ProcedimentiBadges";
 import { ScadenzaStatoBadge } from "@/components/scadenze/ScadenzeBadges";
 import { Badge } from "@/components/ui/Badge";
-import { Button, buttonVariants } from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
-import { InPageNav } from "@/components/ui/InPageNav";
 import { Select } from "@/components/ui/Select";
 import {
   Table,
@@ -201,97 +199,105 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
     canRegisterDecision &&
     !hasDecision &&
     ["DA_AVVIARE", "IN_CORSO"].includes(detail.procedimento.stato);
+  const linkedIssueIsOpen = detail.criticitaCollegata?.stato !== "RISOLTA" && detail.criticitaCollegata !== null;
+  const openIssueCount = detail.altreCriticitaAperte.length + (linkedIssueIsOpen ? 1 : 0);
+  const nextDeadline = [...detail.scadenzeRilevanti]
+    .filter((item) => item.dataScadenza >= new Date())
+    .sort((left, right) => left.dataScadenza.getTime() - right.dataScadenza.getTime())[0];
+  const overview: FascicoloOverviewModel = {
+    title: `Fascicolo ${formatEnumLabel(detail.procedimento.tipologia)}`,
+    status: formatEnumLabel(detail.procedimento.stato),
+    type: formatEnumLabel(detail.procedimento.tipologia),
+    concession: detail.concessione.numeroAtto,
+    subject: detail.concessionario.denominazione,
+    priorityDeadline: nextDeadline ? formatDateIT(nextDeadline.dataScadenza) : null,
+    documentCount: detail.documentiPrincipali.length,
+    documents: detail.documentiPrincipali.slice(0, 3).map((documento) => ({
+      id: documento.id,
+      name: documento.nome,
+      type: formatEnumLabel(documento.tipologia),
+      date: formatDateIT(documento.dataDocumento ?? documento.createdAt),
+      href: documento.url,
+    })),
+    attention: [
+      ...(detail.procedimento.giorniRitardoContraddittorio !== null
+        ? [{ label: `Termine del contraddittorio scaduto da ${detail.procedimento.giorniRitardoContraddittorio} giorni`, href: "#scadenze" as const }]
+        : []),
+      ...(!detail.procedimento.checklistContraddittorioCompleta
+        ? [{ label: "Verifica istruttoria da completare", href: "#istruttoria" as const }]
+        : []),
+      ...(openIssueCount > 0
+        ? [{ label: `${openIssueCount} criticità ${openIssueCount === 1 ? "aperta" : "aperte"}`, href: "#criticita" as const }]
+        : []),
+      ...(detail.pagamentiCritici.length > 0
+        ? [{ label: `${detail.pagamentiCritici.length} ${detail.pagamentiCritici.length === 1 ? "pagamento richiede" : "pagamenti richiedono"} verifica`, href: "#criticita" as const }]
+        : []),
+    ],
+    summary: [
+      { label: "Oggetto", value: lettura.qualificazioneProcedimentale },
+      { label: "Note principali", value: detail.procedimento.noteIstruttorie },
+      { label: "Stato corrente", value: formatEnumLabel(detail.procedimento.stato) },
+      { label: "Concessione collegata", value: detail.concessione.numeroAtto },
+      { label: "Soggetto principale", value: detail.concessionario.denominazione, sectionId: "soggetti" },
+    ],
+    timeline: [
+      { id: `procedimento-${detail.procedimento.id}`, label: "Fascicolo creato", date: formatDateIT(detail.procedimento.createdAt) },
+      ...detail.sopralluoghiRecenti.slice(0, 3).map((item) => ({
+        id: item.id,
+        label: `Sopralluogo: ${formatEnumLabel(item.esito)}`,
+        date: formatDateIT(item.data),
+      })),
+    ],
+    openIssues: [
+      ...(linkedIssueIsOpen && detail.criticitaCollegata ? [{
+        id: detail.criticitaCollegata.id,
+        label: formatEnumLabel(detail.criticitaCollegata.tipologia),
+        detail: detail.criticitaCollegata.descrizione,
+        href: "#criticita" as const,
+      }] : []),
+      ...detail.altreCriticitaAperte.map((item) => ({
+        id: item.id,
+        label: formatEnumLabel(item.tipologia),
+        detail: item.descrizione,
+        href: "#criticita" as const,
+      })),
+    ],
+    nextDeadline: nextDeadline ? formatDateIT(nextDeadline.dataScadenza) : null,
+    openIssueCount,
+    highestIssue: linkedIssueIsOpen && detail.criticitaCollegata
+      ? formatEnumLabel(detail.criticitaCollegata.gravita)
+      : detail.altreCriticitaAperte[0]
+        ? formatEnumLabel(detail.altreCriticitaAperte[0].gravita)
+        : null,
+  };
 
   return (
-    <AppShell
-      title={`Fascicolo ${formatEnumLabel(detail.procedimento.tipologia)}`}
-      subtitle="Copertina, documenti e attività istruttorie del fascicolo"
-    >
-      <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <ProcedimentoStatoBadge value={detail.procedimento.stato} />
-            <ProcedimentoGiorniBadge
-              giorniResiduiContraddittorio={detail.procedimento.giorniResiduiContraddittorio}
-              giorniRitardoContraddittorio={detail.procedimento.giorniRitardoContraddittorio}
-            />
-            <span className="text-sm text-slate-600">Atto {detail.concessione.numeroAtto}</span>
-          </div>
-          <Link href="/procedimenti" className={buttonVariants({ variant: "ghost", size: "sm" })}>
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            Torna ai fascicoli
-          </Link>
+    <FascicoloShell
+      model={overview}
+      sectionTargets={{
+        overview: "#panoramica",
+        documents: "#documenti",
+        timeline: "#cronologia",
+        subjects: "#soggetti",
+        concession: "#concessione",
+        analysis: "#analisi",
+        research: "#ricerca",
+        deadlines: "#scadenze",
+        issues: "#criticita",
+        reports: "#rapporti",
+        proposals: "#proposte",
+      }}
+      secondaryLinks={[
+        { label: "Istruttoria", href: "#istruttoria" },
+        { label: "Decisione", href: "#decisione" },
+      ]}
+      notice={duplicateDocumentUpload ? (
+        <div role="alert" className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+          Documento già presente nel fascicolo.
         </div>
-
-        {duplicateDocumentUpload ? (
-          <div role="alert" className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
-            Documento già presente nel fascicolo.
-          </div>
-        ) : null}
-
-        <Card id="copertina" className="scroll-mt-16">
-          <CardHeader>
-            <CardTitle>Copertina del Fascicolo</CardTitle>
-          </CardHeader>
-          <CardContent className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-4">
-            <div className="min-w-0">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Tipologia</p>
-              <div className="mt-1">
-                <ProcedimentoTipologiaBadge value={detail.procedimento.tipologia} />
-              </div>
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Stato</p>
-              <div className="mt-1">
-                <ProcedimentoStatoBadge value={detail.procedimento.stato} />
-              </div>
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Concessione</p>
-              <p className="mt-1 max-w-full whitespace-normal [overflow-wrap:anywhere] font-semibold text-slate-900">{detail.concessione.numeroAtto}</p>
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Concessionario</p>
-              <p className="mt-1 max-w-full whitespace-normal [overflow-wrap:anywhere] text-slate-900">{detail.concessionario.denominazione}</p>
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Riferimento normativo</p>
-              <p className="mt-1 max-w-full whitespace-normal [overflow-wrap:anywhere] text-slate-900">{detail.procedimento.riferimentoNormativo ?? "-"}</p>
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Data avvio</p>
-              <p className="mt-1 max-w-full whitespace-normal [overflow-wrap:anywhere] text-slate-900">
-                {detail.procedimento.dataAvvio ? formatDateIT(detail.procedimento.dataAvvio) : "-"}
-              </p>
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Termine contraddittorio</p>
-              <p className="mt-1 max-w-full whitespace-normal [overflow-wrap:anywhere] text-slate-900">
-                {detail.procedimento.dataScadenzaContraddittorio
-                  ? formatDateIT(detail.procedimento.dataScadenzaContraddittorio)
-                  : "-"}
-              </p>
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Data provvedimento finale</p>
-              <p className="mt-1 max-w-full whitespace-normal [overflow-wrap:anywhere] text-slate-900">
-                {detail.procedimento.dataProvvedimentoFinale
-                  ? formatDateIT(detail.procedimento.dataProvvedimentoFinale)
-                  : "-"}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <InPageNav items={[
-          { href: "#copertina", label: "Copertina" },
-          { href: "#documenti", label: "Documenti", count: detail.documentiPrincipali.length },
-          { href: "#automazione", label: "Analisi e ricerca" },
-          { href: "#istruttoria", label: "Istruttoria" },
-          { href: "#decisione", label: "Decisione" },
-          { href: "#collegamenti", label: "Collegamenti" },
-        ]} />
-
+      ) : null}
+    >
+      <div className="space-y-4">
         <section id="documenti" className="scroll-mt-16 space-y-4" aria-label="Documenti del fascicolo">
           <EntityDocumentsPanel
             title="Documenti del Fascicolo"
@@ -303,13 +309,17 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           <NeutralIntakeProcessingPanel items={processingItems} />
         </section>
 
-        <section id="automazione" className="scroll-mt-16 space-y-4" aria-label="Analisi automatica e ricerca giuridica">
-          <FascicoloAutomaticWorkflowPanel model={automaticWorkflow} />
-          <LegalSourceCandidatesPanel
-            items={legalSourceCandidates}
-            procedimentoId={detail.procedimento.id}
-            canVerify={canReview && hasCanonicalTenant}
-          />
+        <section className="space-y-4" aria-label="Analisi e ricerca giuridica">
+          <div id="analisi" className="scroll-mt-16">
+            <FascicoloAutomaticWorkflowPanel model={automaticWorkflow} />
+          </div>
+          <div id="ricerca" className="scroll-mt-16">
+            <LegalSourceCandidatesPanel
+              items={legalSourceCandidates}
+              procedimentoId={detail.procedimento.id}
+              canVerify={canReview && hasCanonicalTenant}
+            />
+          </div>
         </section>
 
         <section id="istruttoria" className="grid scroll-mt-16 gap-4 xl:grid-cols-2">
@@ -447,12 +457,14 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
             screeningDone={screeningDone}
           />
 
-          <FascicoloDocumentRequirementProposalsPanel
-            proposals={fascicoloDocumentRequirements.proposals}
-            evidenceData={fascicoloDocumentRequirementEvidence}
-            canReview={canReview}
-            hasCanonicalTenant={hasCanonicalTenant}
-          />
+          <div id="proposte" className="scroll-mt-16">
+            <FascicoloDocumentRequirementProposalsPanel
+              proposals={fascicoloDocumentRequirements.proposals}
+              evidenceData={fascicoloDocumentRequirementEvidence}
+              canReview={canReview}
+              hasCanonicalTenant={hasCanonicalTenant}
+            />
+          </div>
 
           <Card>
             <CardHeader>
@@ -925,7 +937,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           </CardContent>
         </Card>
 
-        <Card>
+        <Card id="concessione" className="scroll-mt-16">
           <CardHeader>
             <CardTitle>4. Contesto concessorio</CardTitle>
           </CardHeader>
@@ -982,7 +994,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           </CardContent>
         </Card>
 
-        <Card>
+        <Card id="criticita" className="scroll-mt-16">
           <CardHeader>
             <CardTitle>5. Criticità collegata</CardTitle>
           </CardHeader>
@@ -1028,7 +1040,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           </CardContent>
         </Card>
 
-        <section id="collegamenti" className="grid scroll-mt-16 gap-4 xl:grid-cols-2">
+        <section className="grid gap-4 xl:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>6. Altre criticità aperte della concessione</CardTitle>
@@ -1108,7 +1120,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           </Card>
         </section>
 
-        <section className="grid gap-4 xl:grid-cols-2">
+        <section id="scadenze" className="grid scroll-mt-16 gap-4 xl:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>8. Scadenze rilevanti</CardTitle>
@@ -1188,7 +1200,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           </Card>
         </section>
 
-        <section className="grid gap-4 xl:grid-cols-2">
+        <section id="rapporti" className="grid scroll-mt-16 gap-4 xl:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>11. Report collegati</CardTitle>
@@ -1229,6 +1241,6 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           </Card>
         </section>
       </div>
-    </AppShell>
+    </FascicoloShell>
   );
 }
