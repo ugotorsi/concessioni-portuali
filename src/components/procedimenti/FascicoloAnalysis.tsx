@@ -118,7 +118,7 @@ export function FascicoloAnalysis({ model }: { model: FascicoloAnalysisModel }) 
                     {question.evidence && question.evidence.length > 0 ? (
                       <p className="mt-3 text-xs text-slate-600"><span className="font-medium text-slate-700">Elementi collegati:</span> {question.evidence.join(" · ")}</p>
                     ) : null}
-                    {question.href ? <Link href={question.href} className="mt-3 inline-flex text-sm font-medium text-[#0b7285] underline underline-offset-4">Apri dettaglio</Link> : null}
+                    {question.href ? <Link href={question.href} prefetch={false} className="mt-3 inline-flex text-sm font-medium text-[#0b7285] underline underline-offset-4">Apri dettaglio</Link> : null}
                   </article>
                 ))}
               </div>
@@ -136,7 +136,7 @@ export function FascicoloAnalysis({ model }: { model: FascicoloAnalysisModel }) 
                   <li key={item.id} className="flex min-w-0 gap-3 rounded-md bg-slate-50 px-3 py-3">
                     <FileText className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
                     <div className="min-w-0">
-                      {item.href ? <Link href={item.href} className="font-medium text-slate-900 underline underline-offset-4 [overflow-wrap:anywhere]">{item.title}</Link> : <p className="font-medium text-slate-900 [overflow-wrap:anywhere]">{item.title}</p>}
+                      {item.href ? <Link href={item.href} prefetch={false} className="font-medium text-slate-900 underline underline-offset-4 [overflow-wrap:anywhere]">{item.title}</Link> : <p className="font-medium text-slate-900 [overflow-wrap:anywhere]">{item.title}</p>}
                       {optionalText(item.detail) ? <p className="mt-1 text-xs text-slate-600">{item.detail}</p> : null}
                     </div>
                   </li>
@@ -193,7 +193,7 @@ export function FascicoloAnalysis({ model }: { model: FascicoloAnalysisModel }) 
                 {model.relevantItems.slice(0, 5).map((item) => (
                   <li key={item.id} className="min-w-0 rounded-md bg-slate-50 px-3 py-3">
                     <div className="flex min-w-0 flex-wrap items-baseline justify-between gap-2">
-                      {item.href ? <Link href={item.href} className="font-medium text-slate-900 underline underline-offset-4 [overflow-wrap:anywhere]">{item.title}</Link> : <p className="font-medium text-slate-900 [overflow-wrap:anywhere]">{item.title}</p>}
+                      {item.href ? <Link href={item.href} prefetch={false} className="font-medium text-slate-900 underline underline-offset-4 [overflow-wrap:anywhere]">{item.title}</Link> : <p className="font-medium text-slate-900 [overflow-wrap:anywhere]">{item.title}</p>}
                       {optionalText(item.detail) ? <span className="text-xs text-slate-500">{item.detail}</span> : null}
                     </div>
                     {optionalText(item.description) ? <p className="mt-1 text-sm text-slate-700">{item.description}</p> : null}

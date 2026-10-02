@@ -106,6 +106,7 @@ describe("Fascicolo analysis workspace", () => {
     expect(component).not.toContain("JSON.stringify");
     expect(component).not.toContain("<Table");
     expect(component).not.toContain("<pre");
+    expect(component.match(/prefetch=\{false\}/g)).toHaveLength(3);
     for (const term of forbiddenTerms) expect(component.toLocaleLowerCase("it")).not.toContain(term);
   });
 });
