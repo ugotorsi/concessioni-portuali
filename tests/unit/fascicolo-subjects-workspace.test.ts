@@ -10,7 +10,7 @@ import {
 
 const subjects: FascicoloSubject[] = [
   { name: "Logistica Molo Sud S.r.l.", roles: ["Assistito"], category: "principal" },
-  { name: "  logistica molo sud s.r.l. ", roles: ["Concessionario"], category: "principal", contact: "ufficio@logisticamolosud.it", note: "Concessione CP-001/2021" },
+  { name: "  logistica molo sud s.r.l. ", roles: ["Concessionario"], category: "principal", contact: "ufficio@logisticamolosud.it", note: "Concessione CP-001/2021", href: "/procedimenti/case-1?section=concession" },
   { name: "Autorità di Sistema Portuale", roles: ["Ente concedente"], category: "principal", type: "Amministrazione pubblica" },
   { name: "Studio Tecnico Porto", roles: ["Tecnico"], category: "other" },
 ];
@@ -52,6 +52,8 @@ describe("Fascicolo subjects workspace", () => {
     expect(html.match(/>Logistica Molo Sud S\.r\.l\.<\/h4>/g)).toHaveLength(1);
     expect(html).toContain("Assistito · Concessionario");
     expect(html).toContain("Soggetti </dt><dd class=\"inline font-semibold text-slate-950\">4</dd>");
+    expect(html).toContain("Apri dettaglio");
+    expect(html.indexOf("mailto:ufficio@logisticamolosud.it")).toBeLessThan(html.indexOf("Apri dettaglio"));
   });
 
   it("keeps the current responsible and compact assignment history separate", () => {

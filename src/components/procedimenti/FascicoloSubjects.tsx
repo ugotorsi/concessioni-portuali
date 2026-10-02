@@ -119,11 +119,12 @@ function SubjectCard({ subject }: { subject: FascicoloSubject }) {
 
   return (
     <article className="min-w-0 rounded-md border border-slate-200 bg-white p-3 shadow-sm">
+      {content}
       {subject.href ? (
-        <a href={subject.href} className="block rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7285]">
-          {content}
+        <a href={subject.href} className="mt-3 inline-flex text-sm font-semibold text-[#173d4f] underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7285]">
+          Apri dettaglio
         </a>
-      ) : content}
+      ) : null}
     </article>
   );
 }
