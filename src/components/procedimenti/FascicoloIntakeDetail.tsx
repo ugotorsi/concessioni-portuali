@@ -4,6 +4,7 @@ import { FascicoloDocumentsArchive, type FascicoloDocumentArchiveItem } from "@/
 import { FascicoloAnalysis } from "@/components/procedimenti/FascicoloAnalysis";
 import { FascicoloConcession } from "@/components/procedimenti/FascicoloConcession";
 import { FascicoloDeadlines } from "@/components/procedimenti/FascicoloDeadlines";
+import { FascicoloIssues } from "@/components/procedimenti/FascicoloIssues";
 import { FascicoloResearch } from "@/components/procedimenti/FascicoloResearch";
 import { FascicoloShell, type FascicoloOverviewModel, type FascicoloSection } from "@/components/procedimenti/FascicoloShell";
 import { FascicoloSubjects, type FascicoloSubject } from "@/components/procedimenti/FascicoloSubjects";
@@ -235,6 +236,8 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload, activeSection }: F
 
         {activeSection === "deadlines" ? <FascicoloDeadlines model={{ deadlines: [], candidates: [] }} /> : null}
 
+        {activeSection === "issues" ? <FascicoloIssues model={{ issues: [] }} /> : null}
+
         {activeSection === "documents" ? (
           <FascicoloDocumentsArchive
             documents={fascicolo.documenti.map(toArchiveItem)}
@@ -269,7 +272,7 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload, activeSection }: F
           />
         ) : null}
 
-        {!["documents", "timeline", "subjects", "concession", "analysis", "research", "deadlines"].includes(activeSection) ? (
+        {!["documents", "timeline", "subjects", "concession", "analysis", "research", "deadlines", "issues"].includes(activeSection) ? (
           <p className="rounded-md border border-slate-200 px-4 py-3 text-sm text-slate-600">Nessun dato ancora disponibile.</p>
         ) : null}
       </div>

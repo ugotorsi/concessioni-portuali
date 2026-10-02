@@ -2,7 +2,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { SubmitButtonPending } from "@/components/forms/SubmitButtonPending";
-import { GravitaBadge, StatoBadge as CriticitaStatoBadge } from "@/components/criticita/CriticitaBadges";
 import { EntityDocumentsPanel } from "@/components/documents/EntityDocumentsPanel";
 import { NeutralIntakeProcessingPanel } from "@/components/documents/NeutralIntakeProcessingPanel";
 import {
@@ -17,6 +16,7 @@ import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloO
 import { FascicoloAutomaticWorkflowPanel } from "@/components/procedimenti/FascicoloAutomaticWorkflowPanel";
 import { FascicoloAnalysis } from "@/components/procedimenti/FascicoloAnalysis";
 import { FascicoloDeadlines, type FascicoloDeadlineStatus } from "@/components/procedimenti/FascicoloDeadlines";
+import { FascicoloIssues, type FascicoloIssueSeverity, type FascicoloIssueStatus } from "@/components/procedimenti/FascicoloIssues";
 import { FascicoloResearch } from "@/components/procedimenti/FascicoloResearch";
 import { FascicoloIntakeDetail } from "@/components/procedimenti/FascicoloIntakeDetail";
 import { FascicoloConcession } from "@/components/procedimenti/FascicoloConcession";
@@ -1130,92 +1130,41 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           />
         ) : null}
 
-        {activeSection === "issues" ? <Card>
-          <CardHeader>
-            <CardTitle>5. Criticità collegata</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {detail.criticitaCollegata ? (
-              <div className="grid gap-3 md:grid-cols-2 text-sm text-slate-700">
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Tipologia</p>
-                  <p className="mt-1">{formatEnumLabel(detail.criticitaCollegata.tipologia)}</p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Gravità</p>
-                  <div className="mt-1">
-                    <GravitaBadge value={detail.criticitaCollegata.gravita} />
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Stato</p>
-                  <div className="mt-1">
-                    <CriticitaStatoBadge value={detail.criticitaCollegata.stato} />
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Data rilevazione</p>
-                  <p className="mt-1">{formatDateIT(detail.criticitaCollegata.dataRilevazione)}</p>
-                </div>
-                <div className="md:col-span-2">
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Descrizione</p>
-                  <p className="mt-1">{detail.criticitaCollegata.descrizione}</p>
-                </div>
-                <div className="md:col-span-2">
-                  <Link
-                    href={`/criticita/${detail.criticitaCollegata.id}`}
-                    className="inline-flex text-sm font-medium text-slate-900 underline underline-offset-4"
-                  >
-                    Apri criticità collegata
-                  </Link>
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-slate-500">Nessuna criticità collegata al procedimento.</p>
-            )}
-          </CardContent>
-        </Card> : null}
-
-        {activeSection === "issues" ? <section className="grid min-w-0 gap-4 [&>*]:min-w-0">
-          <Card>
-            <CardHeader>
-              <CardTitle>6. Altre criticità aperte della concessione</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Gravità</TableHead>
-                    <TableHead>Tipologia</TableHead>
-                    <TableHead>Descrizione</TableHead>
-                    <TableHead>Stato</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {detail.altreCriticitaAperte.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>
-                        <GravitaBadge value={item.gravita} />
-                      </TableCell>
-                      <TableCell>{formatEnumLabel(item.tipologia)}</TableCell>
-                      <TableCell className="max-w-80 truncate">{item.descrizione}</TableCell>
-                      <TableCell>
-                        <CriticitaStatoBadge value={item.stato} />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {detail.altreCriticitaAperte.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center text-slate-500">
-                        Nessuna ulteriore criticità aperta.
-                      </TableCell>
-                    </TableRow>
-                  ) : null}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </section> : null}
+        {activeSection === "issues" ? (
+          <FascicoloIssues
+            model={{
+              issues: [
+                ...(detail.criticitaCollegata ? [{
+                  id: detail.criticitaCollegata.id,
+                  type: formatEnumLabel(detail.criticitaCollegata.tipologia),
+                  description: detail.criticitaCollegata.descrizione,
+                  severity: detail.criticitaCollegata.gravita as FascicoloIssueSeverity,
+                  status: detail.criticitaCollegata.stato as FascicoloIssueStatus,
+                  detectedAt: formatDateIT(detail.criticitaCollegata.dataRilevazione),
+                  normativeReference: detail.criticitaCollegata.riferimentoNormativo,
+                  origin: "Procedimento",
+                  links: [
+                    { label: "Apri criticità", href: `/criticita/${detail.criticitaCollegata.id}` },
+                    { label: "Apri concessione", href: `/concessioni/${detail.concessione.id}` },
+                  ],
+                }] : []),
+                ...detail.altreCriticitaAperte.map((item) => ({
+                  id: item.id,
+                  type: formatEnumLabel(item.tipologia),
+                  description: item.descrizione,
+                  severity: item.gravita as FascicoloIssueSeverity,
+                  status: item.stato as FascicoloIssueStatus,
+                  detectedAt: formatDateIT(item.dataRilevazione),
+                  origin: `Concessione ${detail.concessione.numeroAtto}`,
+                  links: [
+                    { label: "Apri criticità", href: `/criticita/${item.id}` },
+                    { label: "Apri concessione", href: `/concessioni/${detail.concessione.id}` },
+                  ],
+                })),
+              ],
+            }}
+          />
+        ) : null}
 
         {activeSection === "deadlines" ? (
           <FascicoloDeadlines
