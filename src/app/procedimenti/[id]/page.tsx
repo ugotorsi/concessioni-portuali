@@ -17,6 +17,7 @@ import { FascicoloAutomaticWorkflowPanel } from "@/components/procedimenti/Fasci
 import { FascicoloAnalysis } from "@/components/procedimenti/FascicoloAnalysis";
 import { FascicoloDeadlines, type FascicoloDeadlineStatus } from "@/components/procedimenti/FascicoloDeadlines";
 import { FascicoloIssues, type FascicoloIssueSeverity, type FascicoloIssueStatus } from "@/components/procedimenti/FascicoloIssues";
+import { FascicoloReport } from "@/components/procedimenti/FascicoloReport";
 import { FascicoloResearch } from "@/components/procedimenti/FascicoloResearch";
 import { FascicoloIntakeDetail } from "@/components/procedimenti/FascicoloIntakeDetail";
 import { FascicoloConcession } from "@/components/procedimenti/FascicoloConcession";
@@ -37,14 +38,6 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/Table";
 import { Textarea } from "@/components/ui/Textarea";
 import { canManageProcedimenti, canRegisterProcedimentoDecision, requireRole } from "@/lib/auth";
 import {
@@ -73,6 +66,7 @@ import { getFascicoloProcessingItems } from "@/server/queries/neutral-intake-pro
 import { getAiFascicoloHumanReviewReadModel } from "@/server/queries/ai-fascicolo-human-review";
 import { getAiFascicoloTrustedReviewMaterialsReadModel } from "@/server/queries/ai-fascicolo-trusted-review-materials";
 import { getFascicoloIntakeDetail } from "@/server/queries/fascicolo-intake";
+import { listStructuredFascicoloReportSnapshots } from "@/server/fascicolo-report";
 
 import { PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES } from "@/server/queries/procedimenti";
 
@@ -175,6 +169,12 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   const fascicoloDocumentRequirementEvidence = await getFascicoloDocumentRequirementEvidenceData(detail.procedimento.id);
   const checklistEvidenceData = await getChecklistEvidenceData(detail.procedimento.id);
   const hasCanonicalTenant = Boolean(detail.canonicalEnteId);
+  const structuredReportSnapshots = activeSection === "reports" && detail.canonicalEnteId
+    ? await listStructuredFascicoloReportSnapshots({
+        tenantId: detail.canonicalEnteId,
+        procedimentoId: detail.procedimento.id,
+      })
+    : [];
   const trustedReviewPanelData = await loadAiFascicoloTrustedReviewPanelData({
     procedimentoId: detail.procedimento.id,
     materialId,
@@ -1190,46 +1190,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           />
         ) : null}
 
-        {activeSection === "reports" ? <section className="grid min-w-0 gap-4 [&>*]:min-w-0">
-          <Card>
-            <CardHeader>
-              <CardTitle>11. Report collegati</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Titolo</TableHead>
-                    <TableHead>Tipologia</TableHead>
-                    <TableHead>Formato</TableHead>
-                    <TableHead>Validato</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {detail.reportCollegati.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="max-w-80 truncate">{item.titolo}</TableCell>
-                      <TableCell>{formatEnumLabel(item.tipologia)}</TableCell>
-                      <TableCell>{item.formato}</TableCell>
-                      <TableCell>
-                        <Badge variant={item.validato ? "success" : "warning"}>
-                          {item.validato ? "Validato" : "Da validare"}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {detail.reportCollegati.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center text-slate-500">
-                        Nessun report collegato disponibile.
-                      </TableCell>
-                    </TableRow>
-                  ) : null}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </section> : null}
+        {activeSection === "reports" ? <FascicoloReport snapshots={structuredReportSnapshots} /> : null}
       </div>
     </FascicoloShell>
   );
