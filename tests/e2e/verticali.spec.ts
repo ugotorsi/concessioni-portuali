@@ -1,15 +1,13 @@
 import { expect, test } from "playwright/test";
 import { loginAndExpectLanding } from "./helpers/auth";
 
-test("desktop navigation exposes Verticali and landing page renders cards", async ({ page }) => {
+test("desktop navigation hides Verticali while its landing page remains available", async ({ page }) => {
   await loginAndExpectLanding(page, "admin.demo@concessioni.local", "admin123", /\/dashboard$/);
 
-  const verticaliSidebarLink = page.getByRole("link", { name: "Verticali" }).first();
-  await expect(verticaliSidebarLink).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Navigazione principale" }).getByRole("link", { name: "Verticali" })).toHaveCount(0);
 
   await page.goto("/verticali");
   await expect(page).toHaveURL(/\/verticali$/);
-  await expect(verticaliSidebarLink).toHaveAttribute("aria-current", "page");
   await expect(page.getByRole("heading", { name: "Verticali", exact: true })).toBeVisible();
   await expect(page.getByTestId("verticali-cards-grid")).toBeVisible();
   await expect(page.getByTestId(/vertical-card-/).first()).toBeVisible();
@@ -18,18 +16,17 @@ test("desktop navigation exposes Verticali and landing page renders cards", asyn
   await expect(firstWorkspaceCta).toBeVisible();
   await Promise.all([page.waitForURL(/\/verticali\/.+/), firstWorkspaceCta.click()]);
 
-  await expect(verticaliSidebarLink).toHaveAttribute("aria-current", "page");
   await expect(page.getByTestId("vertical-workspace-kpi")).toBeVisible();
 });
 
-test("mobile navigation shows Verticali and workspace links remain reachable", async ({ page }) => {
+test("mobile navigation hides Verticali while its route remains reachable", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await loginAndExpectLanding(page, "admin.demo@concessioni.local", "admin123", /\/dashboard$/);
 
-  const verticaliLink = page.getByRole("link", { name: "Verticali" }).first();
-  await expect(verticaliLink).toBeVisible();
-  await verticaliLink.click();
+  await page.getByText("Concessioni Portuali").first().click();
+  await expect(page.getByRole("navigation", { name: "Navigazione principale" }).getByRole("link", { name: "Verticali" })).toHaveCount(0);
 
+  await page.goto("/verticali");
   await expect(page).toHaveURL(/\/verticali$/);
   await expect(page.getByRole("heading", { name: "Verticali", exact: true })).toBeVisible();
 });

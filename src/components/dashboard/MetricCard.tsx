@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import Link from "next/link";
 
 type MetricCardTone = "default" | "warning" | "danger";
 
@@ -9,6 +10,7 @@ interface MetricCardProps {
   description: string;
   tone?: MetricCardTone;
   compact?: boolean;
+  href?: string;
 }
 
 const toneByVariant: Record<MetricCardTone, "default" | "warning" | "danger"> = {
@@ -17,7 +19,7 @@ const toneByVariant: Record<MetricCardTone, "default" | "warning" | "danger"> = 
   danger: "danger",
 };
 
-export function MetricCard({ title, value, description, tone = "default", compact = false }: MetricCardProps) {
+export function MetricCard({ title, value, description, tone = "default", compact = false, href }: MetricCardProps) {
   if (compact) {
     return (
       <div className="min-w-0 border-l-2 border-slate-200 pl-3">
@@ -30,7 +32,7 @@ export function MetricCard({ title, value, description, tone = "default", compac
     );
   }
 
-  return (
+  const card = (
     <Card className={tone === "danger" ? "border-red-200" : tone === "warning" ? "border-amber-200" : undefined}>
       <CardHeader>
         <CardTitle className="text-sm font-semibold text-slate-800">{title}</CardTitle>
@@ -41,5 +43,19 @@ export function MetricCard({ title, value, description, tone = "default", compac
         <Badge variant={toneByVariant[tone]}>{tone === "danger" ? "Priorità alta" : tone === "warning" ? "Monitorare" : "OK"}</Badge>
       </CardContent>
     </Card>
+  );
+
+  if (!href) {
+    return card;
+  }
+
+  return (
+    <Link
+      href={href}
+      aria-label={`${title}: ${value}. ${description}`}
+      className="block rounded-md transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600 focus-visible:ring-offset-2"
+    >
+      {card}
+    </Link>
   );
 }

@@ -4,26 +4,13 @@ import type { ComponentType } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Activity,
-  AlertTriangle,
-  CalendarClock,
-  ClipboardList,
   DoorOpen,
-  FileText,
   FolderOpen,
-  Layers,
   LayoutDashboard,
-  Lightbulb,
-  Library,
   Map,
   Menu,
-  Presentation,
-  Scale,
-  Ship,
   Shield,
   Users,
-  Wallet,
-  ScrollText,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -37,85 +24,16 @@ interface NavItem {
   matchMode?: NavMatchMode;
 }
 
-interface NavGroup {
-  label: string;
-  items: NavItem[];
-}
-
-const backofficeNavGroups: NavGroup[] = [
-  {
-    label: "Operatività",
-    items: [
-      { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/procedimenti", label: "Fascicoli", icon: FolderOpen, matchMode: "section" },
-      { href: "/concessioni", label: "Concessioni", icon: Ship, matchMode: "section" },
-      { href: "/scadenze", label: "Scadenze", icon: CalendarClock, matchMode: "section" },
-      { href: "/criticita", label: "Criticità", icon: AlertTriangle, matchMode: "section" },
-      { href: "/pagamenti", label: "Pagamenti", icon: Wallet, matchMode: "section" },
-      { href: "/sopralluoghi", label: "Sopralluoghi", icon: ClipboardList, matchMode: "section" },
-    ],
-  },
-  {
-    label: "Conoscenza",
-    items: [
-      { href: "/documenti", label: "Documenti", icon: FileText, matchMode: "section" },
-      { href: "/normativa", label: "Normativa", icon: Library, matchMode: "section" },
-      { href: "/legal-research/assisted-verification", label: "Ricerca giuridica", icon: Scale, matchMode: "section" },
-      { href: "/report", label: "Report", icon: ScrollText, matchMode: "section" },
-      { href: "/ai", label: "Assistente AI", icon: Lightbulb },
-    ],
-  },
-  {
-    label: "Territorio",
-    items: [
-      { href: "/verticali", label: "Verticali", icon: Layers, matchMode: "section" },
-      { href: "/mappa", label: "Mappa", icon: Map },
-      { href: "/concessionari", label: "Concessionari", icon: Users },
-    ],
-  },
-  {
-    label: "Amministrazione",
-    items: [
-      { href: "/audit", label: "Audit", icon: Shield },
-      { href: "/admin/runtime", label: "Runtime", icon: Activity, matchMode: "section" },
-      { href: "/normativa/orchestrazione", label: "Orchestrazione", icon: Library, matchMode: "exact" },
-    ],
-  },
-  {
-    label: "Supporto",
-    items: [
-      { href: "/demo-scenari", label: "Scenari demo", icon: Presentation },
-      { href: "/demo-guidata", label: "Demo guidata", icon: Presentation },
-    ],
-  },
+const backofficeNavItems: NavItem[] = [
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/procedimenti", label: "Fascicoli", icon: FolderOpen, matchMode: "section" },
+  { href: "/mappa", label: "Mappa", icon: Map },
+  { href: "/concessionari", label: "Concessionari", icon: Users },
 ];
 
-const adspNavGroups: NavGroup[] = [
-  {
-    label: "Consultazione",
-    items: [
-      { href: "/adsp", label: "Portale AdSP", icon: Shield },
-      { href: "/concessioni", label: "Concessioni", icon: Ship, matchMode: "section" },
-      { href: "/documenti", label: "Documenti", icon: FileText, matchMode: "section" },
-      { href: "/normativa", label: "Normativa", icon: Library, matchMode: "section" },
-      { href: "/report", label: "Report", icon: ScrollText, matchMode: "section" },
-    ],
-  },
-  {
-    label: "Territorio",
-    items: [
-      { href: "/verticali", label: "Verticali", icon: Layers, matchMode: "section" },
-      { href: "/mappa", label: "Mappa", icon: Map },
-    ],
-  },
-  {
-    label: "Supporto",
-    items: [
-      { href: "/normativa/orchestrazione", label: "Orchestrazione", icon: Library, matchMode: "exact" },
-      { href: "/demo-scenari", label: "Scenari demo", icon: Presentation },
-      { href: "/demo-guidata", label: "Demo guidata", icon: Presentation },
-    ],
-  },
+const adspNavItems: NavItem[] = [
+  { href: "/adsp", label: "Portale AdSP", icon: Shield },
+  { href: "/mappa", label: "Mappa", icon: Map },
 ];
 
 interface SidebarProps {
@@ -125,24 +43,11 @@ interface SidebarProps {
 
 export function Sidebar({ role, roleLabel }: SidebarProps) {
   const pathname = usePathname();
-  const sourceGroups = role === "VIEWER_ADSP" ? adspNavGroups : backofficeNavGroups;
-  const navGroups = sourceGroups.map((group) => ({
-    ...group,
-    items: group.items.filter((item) => {
-      if (item.href === "/legal-research/assisted-verification") return role === "ADMIN" || role === "GIURIDICO";
-      if (item.href === "/admin/runtime") return role === "ADMIN";
-      return true;
-    }),
-  })).filter((group) => group.items.length > 0);
-  const primaryGroups = navGroups.filter((group) => !["Amministrazione", "Supporto"].includes(group.label));
-  const secondaryGroups = navGroups.filter((group) => ["Amministrazione", "Supporto"].includes(group.label));
+  const navItems = role === "VIEWER_ADSP" ? adspNavItems : backofficeNavItems;
 
-  function renderGroup(group: NavGroup) {
-    return (
-      <div key={group.label}>
-        <p className="mb-1.5 px-3 text-[11px] font-semibold text-slate-400">{group.label}</p>
-        <div className="grid gap-0.5">
-          {group.items.map((item) => {
+  const navigation = (
+    <nav className="grid gap-1" aria-label="Navigazione principale">
+      {navItems.map((item) => {
             const isActive = isNavItemActive(pathname, item.href, item.matchMode ?? "exact");
             const Icon = item.icon;
             return (
@@ -162,22 +67,6 @@ export function Sidebar({ role, roleLabel }: SidebarProps) {
               </Link>
             );
           })}
-        </div>
-      </div>
-    );
-  }
-
-  const navigation = (
-    <nav className="space-y-5" aria-label="Navigazione principale">
-      {primaryGroups.map(renderGroup)}
-      {secondaryGroups.length > 0 ? (
-        <details className="border-t border-slate-800 pt-3">
-          <summary className="cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white">
-            Altro
-          </summary>
-          <div className="mt-3 space-y-5">{secondaryGroups.map(renderGroup)}</div>
-        </details>
-      ) : null}
     </nav>
   );
 

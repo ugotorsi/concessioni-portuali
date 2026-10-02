@@ -7,17 +7,22 @@ function readSource(path: string): string {
 }
 
 describe("frontend UX contract", () => {
-  it("provides grouped, responsive and role-aware navigation", () => {
+  it("provides simple, responsive and role-aware navigation", () => {
     const source = readSource("src/components/layout/Sidebar.tsx");
 
+    for (const item of ["Dashboard", "Fascicoli", "Mappa", "Concessionari"]) {
+      expect(source).toContain(`label: "${item}"`);
+    }
+    for (const removed of ["Concessioni", "Scadenze", "Criticità", "Pagamenti", "Sopralluoghi", "Verticali", "Documenti", "Normativa", "Ricerca giuridica", "Report", "Assistente AI", "Audit", "Runtime", "Orchestrazione", "Scenari demo", "Demo guidata"]) {
+      expect(source).not.toContain(`label: "${removed}"`);
+    }
     for (const group of ["Operatività", "Conoscenza", "Territorio", "Amministrazione", "Supporto"]) {
-      expect(source).toContain(`label: "${group}"`);
+      expect(source).not.toContain(`label: "${group}"`);
     }
     expect(source).toContain('<details className="group sticky top-0');
-    expect(source).toContain('item.href === "/admin/runtime"');
-    expect(source).toContain('role === "ADMIN"');
+    expect(source).toContain('role === "VIEWER_ADSP" ? adspNavItems : backofficeNavItems');
+    expect(source).toContain('label: "Portale AdSP"');
     expect(source).toContain('aria-current={isActive ? "page" : undefined}');
-    expect(source).toContain("Altro");
     expect(source).not.toContain("Cambia profilo");
   });
 
@@ -30,8 +35,24 @@ describe("frontend UX contract", () => {
     expect(contextIndex).toBeGreaterThan(attentionIndex);
     expect(source).toContain('title="Criticità urgenti"');
     expect(source).toContain('title="Morosità aperte"');
+    expect(source).toContain('href="/scadenze?periodo=ENTRO_90_GIORNI"');
+    expect(source).toContain('href="/criticita?gravita=URGENTE"');
+    expect(source).toContain('href="/pagamenti?criticita=MOROSITA"');
+    expect(source).toContain('href="/procedimenti?stato=IN_CORSO"');
+    for (const removed of ["Criticità prioritarie", "Scadenze imminenti", "Morosità e pagamenti critici", "Azioni consigliate", "Fonti normative", "Norme in consultazione"]) {
+      expect(source).not.toContain(removed);
+    }
     expect(source).not.toContain("Scenari demo istituzionali");
     expect(source).not.toContain("Apri mappa demo");
+  });
+
+  it("makes dashboard metric cards accessible as one large click target", () => {
+    const source = readSource("src/components/dashboard/MetricCard.tsx");
+
+    expect(source).toContain("href?: string");
+    expect(source).toContain("<Link");
+    expect(source).toContain("aria-label={`${title}: ${value}. ${description}`}");
+    expect(source).toContain("focus-visible:ring-2");
   });
 
   it("keeps advanced proceedings filters available without dominating the initial view", () => {
