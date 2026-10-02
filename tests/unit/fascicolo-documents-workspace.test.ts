@@ -117,6 +117,8 @@ describe("Fascicolo documents workspace", () => {
 
     expect(archiveSource).toContain("md:grid-cols-[minmax(0,1fr)_auto]");
     expect(archiveSource).toContain("w-[min(15rem,calc(100vw-2rem))]");
+    expect(archiveSource).toContain("left-0 z-10");
+    expect(archiveSource).toContain("md:left-auto md:right-0");
     expect(archiveSource).not.toContain("<Table");
     expect(detailSource).toContain("archiveMode");
     expect(detailSource).toContain('activeSection === "documents"');
