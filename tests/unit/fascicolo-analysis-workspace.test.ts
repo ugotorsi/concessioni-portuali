@@ -102,7 +102,7 @@ describe("Fascicolo analysis workspace", () => {
     expect(intake).toContain("<FascicoloAnalysis");
     expect(legacy).not.toContain('["analysis", "istruttoria"].includes(activeSection)');
     expect(legacy.match(/activeSection === "analysis"/g)).toHaveLength(1);
-    expect(legacy.match(/activeSection === "istruttoria"/g)).toHaveLength(4);
+    expect(legacy.match(/activeSection === "istruttoria"/g)).toHaveLength(5);
     expect(component).not.toContain("JSON.stringify");
     expect(component).not.toContain("<Table");
     expect(component).not.toContain("<pre");

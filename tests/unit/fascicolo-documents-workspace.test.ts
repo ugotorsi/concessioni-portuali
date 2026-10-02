@@ -54,7 +54,7 @@ describe("Fascicolo documents workspace", () => {
     expect(html).toContain("Acquisito: 19/08/2021");
     expect(html).toContain("Provenienza: Autorità portuale");
     expect(html).toContain("Apri documento");
-    expect(html).toContain("Altro");
+    expect(html).toContain("Azioni e dettagli");
   });
 
   it("omits missing technical metadata instead of printing empty placeholders", () => {
@@ -64,6 +64,17 @@ describe("Fascicolo documents workspace", () => {
     expect(html).not.toContain("Canale non indicato");
     expect(html).not.toContain("Protocollo non indicato");
     expect(html).not.toContain("Stato tecnico: -");
+  });
+
+  it("does not forward technical document internals from legacy or intake", () => {
+    const legacySource = readFileSync("src/components/documents/EntityDocumentsPanel.tsx", "utf8");
+    const intakeSource = readFileSync("src/components/procedimenti/FascicoloIntakeDetail.tsx", "utf8");
+
+    for (const source of [legacySource, intakeSource]) {
+      expect(source).not.toContain('{ label: "Stato tecnico"');
+      expect(source).not.toContain('{ label: "Conservazione"');
+      expect(source).not.toContain('{ label: "Impronta"');
+    }
   });
 
   it("offers useful local filtering, ordering, and a collapsed upload", () => {
@@ -92,6 +103,7 @@ describe("Fascicolo documents workspace", () => {
     const intakeSource = readFileSync("src/components/procedimenti/FascicoloIntakeDetail.tsx", "utf8");
 
     expect(archiveSource).toContain("md:grid-cols-[minmax(0,1fr)_auto]");
+    expect(archiveSource).toContain("w-[min(18rem,calc(100vw-2rem))]");
     expect(archiveSource).not.toContain("<Table");
     expect(detailSource).toContain("archiveMode");
     expect(detailSource).toContain('activeSection === "documents"');

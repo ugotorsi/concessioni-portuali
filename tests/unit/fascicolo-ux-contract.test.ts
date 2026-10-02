@@ -83,6 +83,8 @@ describe("Fascicolo UX contract", () => {
     const documentsPanel = readSource("src/components/documents/EntityDocumentsPanel.tsx");
     const intakeDetail = readSource("src/components/procedimenti/FascicoloIntakeDetail.tsx");
     const fascicoloShell = readSource("src/components/procedimenti/FascicoloShell.tsx");
+    const checklistEvidence = readSource("src/components/procedimenti/ChecklistItemEvidence.tsx");
+    const observationsPanel = readSource("src/components/procedimenti/FascicoloObservationsPanel.tsx");
     const documentsIndex = detailPage.indexOf('title="Documenti del Fascicolo"');
     const subjectsIndex = detailPage.indexOf("<FascicoloSubjects");
 
@@ -95,6 +97,19 @@ describe("Fascicolo UX contract", () => {
     }
     expect(detailPage).toContain('activeSection === "analysis"');
     expect(detailPage).toContain('activeSection === "istruttoria"');
+    expect(detailPage).toContain('id="istruttoria-title"');
+    expect(detailPage).toContain('id="decisione-title"');
+    expect(detailPage).toContain("Verifiche, osservazioni e valutazioni a supporto del procedimento.");
+    expect(detailPage).toContain("Provvedimento finale e relativo stato di registrazione.");
+    expect(detailPage).toContain('href={`/documenti/${decisioneConclusiva.documentoId}/download`} prefetch={false}');
+    expect(detailPage).not.toContain(">Warning<");
+    expect(detailPage).not.toContain("in questo incremento");
+    expect(detailPage).not.toContain('motivazioneValutazione ?? "-"');
+    expect(detailPage).not.toContain('termineMemorieScadenza) : "-"');
+    expect(detailPage).not.toContain('registeredByUserEmail ?? decisioneConclusiva.registeredByUserId');
+    expect(detailPage).not.toContain('protocolloAtto ?? "-"');
+    expect(detailPage).toContain("Provvedimento registrato (sola lettura)");
+    expect(detailPage).toContain("Apri registro attività");
     expect(documentsIndex).toBeGreaterThan(-1);
     expect(subjectsIndex).toBeGreaterThan(documentsIndex);
     expect(detailPage).toContain('entityType="procedimento"');
@@ -128,5 +143,11 @@ describe("Fascicolo UX contract", () => {
     expect(fascicoloShell).toContain('sectionHref(basePath, "decisione")');
     expect(detailPage).toContain("resolveFascicoloSection(section)");
     expect(detailPage).toContain("activeSection={activeSection}");
+    expect(checklistEvidence).not.toContain("reviewedByActorId");
+    expect(observationsPanel).not.toContain("observation.ruleCode");
+    expect(observationsPanel).not.toContain("observation.ruleVersion");
+    expect(observationsPanel).not.toContain("pecRicevutaAccettazioneId ??");
+    expect(observationsPanel).not.toContain("pecRicevutaConsegnaId ??");
+    expect(observationsPanel).toContain("Ricevuta di accettazione:");
   });
 });

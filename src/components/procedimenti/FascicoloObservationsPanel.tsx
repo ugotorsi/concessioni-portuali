@@ -22,6 +22,13 @@ function statusVariant(status: "PROPOSTO" | "VALIDATO" | "RIFIUTATO" | "SUPERATO
   return "default" as const;
 }
 
+function statusLabel(status: "PROPOSTO" | "VALIDATO" | "RIFIUTATO" | "SUPERATO") {
+  if (status === "PROPOSTO") return "Da verificare";
+  if (status === "VALIDATO") return "Validata";
+  if (status === "RIFIUTATO") return "Rifiutata";
+  return "Superata";
+}
+
 export function FascicoloObservationsPanel({ procedimentoId, canReview, hasCanonicalTenant, observations }: FascicoloObservationsPanelProps) {
   return (
     <Card>
@@ -46,18 +53,19 @@ export function FascicoloObservationsPanel({ procedimentoId, canReview, hasCanon
           <article key={observation.id} className="space-y-3 rounded-md border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="font-medium text-slate-900">{observation.text}</p>
-              <Badge variant={statusVariant(observation.status)}>{observation.status}</Badge>
+              <Badge variant={statusVariant(observation.status)}>{statusLabel(observation.status)}</Badge>
             </div>
             <p>
               Documento sorgente: <a href={`/documenti/${observation.documento.id}/download`} className="underline underline-offset-4">{observation.documento.nome}</a>
             </p>
             <p>
-              Condizione tecnica attuale: {observation.currentConditionDetected ? "rilevata" : "non più rilevata"}
+              Condizione attuale: {observation.currentConditionDetected ? "rilevata" : "non più rilevata"}
             </p>
             <p className="text-xs text-slate-600">
-              Canale: {observation.factsSnapshot.canale ?? "-"}; ricevuta accettazione: {observation.factsSnapshot.pecRicevutaAccettazioneId ?? "non registrata"}; ricevuta consegna: {observation.factsSnapshot.pecRicevutaConsegnaId ?? "non registrata"}
+              {observation.factsSnapshot.canale ? `Canale: ${observation.factsSnapshot.canale}. ` : ""}
+              Ricevuta di accettazione: {observation.factsSnapshot.pecRicevutaAccettazioneId ? "registrata" : "non registrata"}. Ricevuta di consegna: {observation.factsSnapshot.pecRicevutaConsegnaId ? "registrata" : "non registrata"}.
             </p>
-            <p className="text-xs text-slate-600">{observation.ruleCode} v{observation.ruleVersion} - rilevata il {formatDateIT(observation.detectedAt)}</p>
+            <p className="text-xs text-slate-600">Rilevata il {formatDateIT(observation.detectedAt)}.</p>
             <p className="text-xs text-slate-600">{observation.disclaimer}</p>
             {observation.reviewedAt ? <p className="text-xs text-slate-600">Verificata il {formatDateIT(observation.reviewedAt)}{observation.reviewNote ? `: ${observation.reviewNote}` : ""}</p> : null}
 

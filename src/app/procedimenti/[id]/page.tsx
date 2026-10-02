@@ -453,6 +453,20 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
       ) : null}
     >
       <div className="space-y-4">
+        {activeSection === "istruttoria" ? (
+          <section aria-labelledby="istruttoria-title" className="border-b border-slate-200 pb-4">
+            <h2 id="istruttoria-title" className="text-lg font-semibold text-slate-950">Istruttoria</h2>
+            <p className="mt-1 text-sm text-slate-600">Verifiche, osservazioni e valutazioni a supporto del procedimento.</p>
+          </section>
+        ) : null}
+
+        {activeSection === "decisione" ? (
+          <section aria-labelledby="decisione-title" className="border-b border-slate-200 pb-4">
+            <h2 id="decisione-title" className="text-lg font-semibold text-slate-950">Decisione</h2>
+            <p className="mt-1 text-sm text-slate-600">Provvedimento finale e relativo stato di registrazione.</p>
+          </section>
+        ) : null}
+
         {activeSection === "documents" ? <section className="space-y-4" aria-label="Documenti del fascicolo">
           <EntityDocumentsPanel
             title="Documenti del Fascicolo"
@@ -665,7 +679,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Warning</p>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Avvertenze</p>
                   <div className="mt-1">
                     <ProcedimentoWarningBadge level={detail.procedimento.checklistWarningLevel} />
                   </div>
@@ -676,12 +690,12 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                     {detail.procedimento.checklistCompletedItems}/{detail.procedimento.checklistTotalItems} ({detail.procedimento.checklistPercentage}%)
                   </p>
                 </div>
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Termine memorie</p>
-                  <p className="mt-1 text-slate-900">
-                    {detail.procedimento.termineMemorieScadenza ? formatDateIT(detail.procedimento.termineMemorieScadenza) : "-"}
-                  </p>
-                </div>
+                {detail.procedimento.termineMemorieScadenza ? (
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-slate-500">Termine memorie</p>
+                    <p className="mt-1 text-slate-900">{formatDateIT(detail.procedimento.termineMemorieScadenza)}</p>
+                  </div>
+                ) : null}
                 <div>
                   <p className="text-xs uppercase tracking-wide text-slate-500">Origine procedimento</p>
                   <div className="mt-1">
@@ -702,14 +716,12 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                   </div>
                   <p className="mt-1 text-xs text-slate-500">{getStatoPreavvisoRigettoLabel(detail.procedimento.statoPreavvisoRigetto)}</p>
                 </div>
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Termine osservazioni preavviso</p>
-                  <p className="mt-1 text-slate-900">
-                    {detail.procedimento.termineOsservazioniPreavviso
-                      ? formatDateIT(detail.procedimento.termineOsservazioniPreavviso)
-                      : "-"}
-                  </p>
-                </div>
+                {detail.procedimento.termineOsservazioniPreavviso ? (
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-slate-500">Termine osservazioni preavviso</p>
+                    <p className="mt-1 text-slate-900">{formatDateIT(detail.procedimento.termineOsservazioniPreavviso)}</p>
+                  </div>
+                ) : null}
               </div>
 
               <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
@@ -775,36 +787,58 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                 </div>
               ) : null}
 
-              <div className="grid gap-3 md:grid-cols-2 text-sm text-slate-700">
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Motivazione valutazione</p>
-                  <p className="mt-1">{detail.procedimento.motivazioneValutazione ?? "-"}</p>
+              {detail.procedimento.motivazioneValutazione
+                || detail.procedimento.propostaEsitoIstruttorio
+                || detail.procedimento.noteChecklistContraddittorio
+                || detail.procedimento.dataPreavvisoRigetto
+                || detail.procedimento.dataOsservazioniPreavviso
+                || detail.procedimento.valutazioneOsservazioniPreavviso
+                || detail.procedimento.motivazioneMancatoPreavviso ? (
+                <div className="grid gap-3 text-sm text-slate-700 md:grid-cols-2">
+                  {detail.procedimento.motivazioneValutazione ? (
+                    <div>
+                      <p className="text-xs uppercase tracking-wide text-slate-500">Motivazione valutazione</p>
+                      <p className="mt-1">{detail.procedimento.motivazioneValutazione}</p>
+                    </div>
+                  ) : null}
+                  {detail.procedimento.propostaEsitoIstruttorio ? (
+                    <div>
+                      <p className="text-xs uppercase tracking-wide text-slate-500">Proposta esito istruttorio</p>
+                      <p className="mt-1">{formatEnumLabel(detail.procedimento.propostaEsitoIstruttorio)}</p>
+                    </div>
+                  ) : null}
+                  {detail.procedimento.noteChecklistContraddittorio ? (
+                    <div className="md:col-span-2">
+                      <p className="text-xs uppercase tracking-wide text-slate-500">Nota checklist contraddittorio</p>
+                      <p className="mt-1">{detail.procedimento.noteChecklistContraddittorio}</p>
+                    </div>
+                  ) : null}
+                  {detail.procedimento.dataPreavvisoRigetto ? (
+                    <div>
+                      <p className="text-xs uppercase tracking-wide text-slate-500">Data preavviso rigetto</p>
+                      <p className="mt-1">{formatDateIT(detail.procedimento.dataPreavvisoRigetto)}</p>
+                    </div>
+                  ) : null}
+                  {detail.procedimento.dataOsservazioniPreavviso ? (
+                    <div>
+                      <p className="text-xs uppercase tracking-wide text-slate-500">Data osservazioni preavviso</p>
+                      <p className="mt-1">{formatDateIT(detail.procedimento.dataOsservazioniPreavviso)}</p>
+                    </div>
+                  ) : null}
+                  {detail.procedimento.valutazioneOsservazioniPreavviso ? (
+                    <div className="md:col-span-2">
+                      <p className="text-xs uppercase tracking-wide text-slate-500">Valutazione osservazioni preavviso</p>
+                      <p className="mt-1">{detail.procedimento.valutazioneOsservazioniPreavviso}</p>
+                    </div>
+                  ) : null}
+                  {detail.procedimento.motivazioneMancatoPreavviso ? (
+                    <div className="md:col-span-2">
+                      <p className="text-xs uppercase tracking-wide text-slate-500">Motivazione mancato preavviso</p>
+                      <p className="mt-1">{detail.procedimento.motivazioneMancatoPreavviso}</p>
+                    </div>
+                  ) : null}
                 </div>
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Proposta esito istruttorio</p>
-                  <p className="mt-1">{detail.procedimento.propostaEsitoIstruttorio ? formatEnumLabel(detail.procedimento.propostaEsitoIstruttorio) : "-"}</p>
-                </div>
-                <div className="md:col-span-2">
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Nota checklist contraddittorio</p>
-                  <p className="mt-1">{detail.procedimento.noteChecklistContraddittorio ?? "-"}</p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Data preavviso rigetto</p>
-                  <p className="mt-1">{detail.procedimento.dataPreavvisoRigetto ? formatDateIT(detail.procedimento.dataPreavvisoRigetto) : "-"}</p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Data osservazioni preavviso</p>
-                  <p className="mt-1">{detail.procedimento.dataOsservazioniPreavviso ? formatDateIT(detail.procedimento.dataOsservazioniPreavviso) : "-"}</p>
-                </div>
-                <div className="md:col-span-2">
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Valutazione osservazioni preavviso</p>
-                  <p className="mt-1">{detail.procedimento.valutazioneOsservazioniPreavviso ?? "-"}</p>
-                </div>
-                <div className="md:col-span-2">
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Motivazione mancato preavviso</p>
-                  <p className="mt-1">{detail.procedimento.motivazioneMancatoPreavviso ?? "-"}</p>
-                </div>
-              </div>
+              ) : null}
 
               <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
                 {checklistGuidance}
@@ -899,7 +933,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           <CardHeader>
             <CardTitle>Provvedimento finale registrato</CardTitle>
             <CardDescription>
-              Registrazione di atto gia adottato: la registrazione nel sistema non costituisce adozione del provvedimento.
+              Registrazione di atto già adottato: la registrazione nel sistema non costituisce adozione del provvedimento.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -917,7 +951,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
             </div>
 
             <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Matrice decisionale applicata in questo incremento</p>
+              <p className="text-xs uppercase tracking-wide text-slate-500">Matrice decisionale applicata</p>
               <ul className="mt-2 space-y-2 text-sm text-slate-700">
                 {decisionRules.map((rule) => (
                   <li key={rule.tipoDecisione} className="rounded-md border border-slate-200 bg-white px-3 py-2">
@@ -929,28 +963,28 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
 
             {decisioneConclusiva ? (
               <div className="space-y-3 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
-                <p className="font-semibold">Provvedimento registrato (read-only)</p>
+                <p className="font-semibold">Provvedimento registrato (sola lettura)</p>
                 <div className="grid gap-2 md:grid-cols-2">
                   <p><span className="font-medium">Tipo decisione:</span> {formatEnumLabel(decisioneConclusiva.tipoDecisione)}</p>
                   <p><span className="font-medium">Effetto:</span> {formatEnumLabel(decisioneConclusiva.effettoTitolo)}</p>
                   <p><span className="font-medium">Numero atto:</span> {decisioneConclusiva.numeroAtto}</p>
-                  <p><span className="font-medium">Protocollo atto:</span> {decisioneConclusiva.protocolloAtto ?? "-"}</p>
+                  {decisioneConclusiva.protocolloAtto ? <p><span className="font-medium">Protocollo atto:</span> {decisioneConclusiva.protocolloAtto}</p> : null}
                   <p><span className="font-medium">Data atto:</span> {formatDateIT(decisioneConclusiva.dataAtto)}</p>
                   <p><span className="font-medium">Data efficacia:</span> {formatDateIT(decisioneConclusiva.dataEfficacia)}</p>
                   <p><span className="font-medium">Stato effetto:</span> {getStatoEffettoLabel(decisioneConclusiva.statoEffetto)}</p>
                   <p><span className="font-medium">Effetto applicato il:</span> {decisioneConclusiva.effettoApplicatoAt ? formatDateIT(decisioneConclusiva.effettoApplicatoAt) : "Non ancora applicato"}</p>
                   <p><span className="font-medium">Organo competente:</span> {decisioneConclusiva.organoCompetente}</p>
-                  <p><span className="font-medium">Adottante nominativo:</span> {decisioneConclusiva.adottanteNome ?? "-"}</p>
-                  <p><span className="font-medium">Adottante qualifica:</span> {decisioneConclusiva.adottanteQualifica ?? "-"}</p>
-                  <p><span className="font-medium">Registrato da:</span> {decisioneConclusiva.registeredByUserEmail ?? decisioneConclusiva.registeredByUserId}</p>
+                  {decisioneConclusiva.adottanteNome ? <p><span className="font-medium">Adottante nominativo:</span> {decisioneConclusiva.adottanteNome}</p> : null}
+                  {decisioneConclusiva.adottanteQualifica ? <p><span className="font-medium">Adottante qualifica:</span> {decisioneConclusiva.adottanteQualifica}</p> : null}
+                  {decisioneConclusiva.registeredByUserEmail ? <p><span className="font-medium">Registrato da:</span> {decisioneConclusiva.registeredByUserEmail}</p> : null}
                   <p><span className="font-medium">Stato concessione:</span> {decisioneConclusiva.statoConcessionePrecedente ? `${formatEnumLabel(decisioneConclusiva.statoConcessionePrecedente)} -> ${decisioneConclusiva.statoConcessioneSuccessivo ? formatEnumLabel(decisioneConclusiva.statoConcessioneSuccessivo) : "nessuna variazione"}` : "Nessuna variazione"}</p>
                 </div>
                 <p>
-                  <span className="font-medium">Scostamento da istruttoria:</span> {decisioneConclusiva.scostamentoDaIstruttoria ? "Si" : "No"}
+                  <span className="font-medium">Scostamento da istruttoria:</span> {decisioneConclusiva.scostamentoDaIstruttoria ? "Sì" : "No"}
                 </p>
-                <p>
-                  <span className="font-medium">Motivazione scostamento:</span> {decisioneConclusiva.motivazioneScostamentoIstruttoria ?? "-"}
-                </p>
+                {decisioneConclusiva.motivazioneScostamentoIstruttoria ? (
+                  <p><span className="font-medium">Motivazione scostamento:</span> {decisioneConclusiva.motivazioneScostamentoIstruttoria}</p>
+                ) : null}
                 {decisioneConclusiva.statoEffetto === "PENDENTE" ? (
                   <p className="rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-amber-900">
                     Decisione registrata - effetto previsto dal {formatDateIT(decisioneConclusiva.dataEfficacia)} - non ancora applicato.
@@ -959,7 +993,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                 <p><span className="font-medium">Motivazione sintetica:</span> {decisioneConclusiva.motivazioneSintetica}</p>
                 <div className="flex flex-wrap gap-3">
                   {decisioneConclusiva.documentoId ? (
-                    <Link href={`/documenti/${decisioneConclusiva.documentoId}/download`} className="text-sm underline underline-offset-4">
+                    <Link href={`/documenti/${decisioneConclusiva.documentoId}/download`} prefetch={false} className="text-sm underline underline-offset-4">
                       Apri documento atto conclusivo
                     </Link>
                   ) : null}
@@ -967,7 +1001,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                     Apri concessione collegata
                   </Link>
                   <Link href="/audit" className="text-sm underline underline-offset-4">
-                    Apri audit trail
+                    Apri registro attività
                   </Link>
                 </div>
               </div>
@@ -978,7 +1012,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                 <input type="hidden" name="procedimentoId" value={detail.procedimento.id} />
                 <input type="hidden" name="confermaFinalizzazione" value="CONFIRMO_REGISTRAZIONE_ATTO" />
                 <p className="text-sm font-medium text-slate-900">Registra provvedimento finale</p>
-                <p className="text-xs text-slate-500">La registrazione nel sistema non costituisce adozione del provvedimento. L atto deve essere gia stato adottato dall organo competente.</p>
+                <p className="text-xs text-slate-500">La registrazione nel sistema non costituisce adozione del provvedimento. L&apos;atto deve essere già stato adottato dall&apos;organo competente.</p>
                 <div className="grid gap-3 md:grid-cols-2">
                   <label className="text-sm text-slate-700">
                     Tipo decisione
@@ -1018,7 +1052,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                     <Input name="dataEfficacia" type="date" required />
                   </label>
                   <label className="text-sm text-slate-700">
-                    Organo competente (adotta l atto)
+                    Organo competente (adotta l&apos;atto)
                     <Input name="organoCompetente" required placeholder="Es. Comitato di Gestione" />
                   </label>
                   <label className="text-sm text-slate-700">
@@ -1046,7 +1080,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                   </label>
                 </div>
                 <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-                  Conferma esplicita richiesta: la registrazione nel software non prova la competenza amministrativa dell utente registrante.
+                  Conferma esplicita richiesta: la registrazione nel software non prova la competenza amministrativa dell&apos;utente registrante.
                 </div>
                 <SubmitButtonPending pendingLabel="Registrazione provvedimento in corso...">Conferma registrazione provvedimento</SubmitButtonPending>
               </form>

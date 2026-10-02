@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import type { ChecklistItemCode } from "@/lib/procedimento-checklist";
-import { formatDateIT } from "@/lib/utils";
+import { formatDateIT, formatEnumLabel } from "@/lib/utils";
 import {
   createChecklistEvidenceAction,
   reviewChecklistEvidenceAction,
@@ -29,6 +29,12 @@ function statusVariant(status: "PROPOSTO" | "VALIDATO" | "RIFIUTATO") {
   return "default" as const;
 }
 
+function statusLabel(status: "PROPOSTO" | "VALIDATO" | "RIFIUTATO") {
+  if (status === "PROPOSTO") return "Da verificare";
+  if (status === "VALIDATO") return "Validata";
+  return "Rifiutata";
+}
+
 export function ChecklistItemEvidence({ procedimentoId, itemCode, canManage, data }: ChecklistItemEvidenceProps) {
   const itemEvidence = data.evidence.filter((evidence) => evidence.checklistItemCode === itemCode);
   const associatedDocumentIds = new Set(itemEvidence.map((evidence) => evidence.documento.id));
@@ -43,15 +49,15 @@ export function ChecklistItemEvidence({ procedimentoId, itemCode, canManage, dat
             <a href={`/documenti/${evidence.documento.id}/download`} className="font-medium text-slate-900 underline underline-offset-4">
               {evidence.documento.nome}
             </a>
-            <Badge variant={statusVariant(evidence.status)}>{evidence.status}</Badge>
+            <Badge variant={statusVariant(evidence.status)}>{statusLabel(evidence.status)}</Badge>
           </div>
           <p>
-            Associata da {evidence.createdByEmail} ({evidence.createdByRole}) il {formatDateIT(evidence.createdAt)}.
+            Associata da {evidence.createdByEmail} ({formatEnumLabel(evidence.createdByRole)}) il {formatDateIT(evidence.createdAt)}.
           </p>
           {evidence.reviewedAt ? (
             <p>
-              Verifica umana di {evidence.reviewedByEmail ?? evidence.reviewedByActorId ?? "-"}
-              {evidence.reviewedByRole ? ` (${evidence.reviewedByRole})` : ""} il {formatDateIT(evidence.reviewedAt)}
+              Verifica umana{evidence.reviewedByEmail ? ` di ${evidence.reviewedByEmail}` : ""}
+              {evidence.reviewedByRole ? ` (${formatEnumLabel(evidence.reviewedByRole)})` : ""} il {formatDateIT(evidence.reviewedAt)}
               {evidence.reviewNote ? `: ${evidence.reviewNote}` : "."}
             </p>
           ) : null}

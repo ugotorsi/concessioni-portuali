@@ -48,9 +48,6 @@ function toArchiveItem(documento: FascicoloIntakeDetailData["documenti"][number]
     documento.canale ? { label: "Canale", value: formatEnumLabel(documento.canale) } : null,
     documento.descrizione ? { label: "Descrizione", value: documento.descrizione } : null,
     documento.source ? { label: "Fonte", value: formatEnumLabel(documento.source) } : null,
-    documento.status ? { label: "Stato tecnico", value: formatEnumLabel(documento.status) } : null,
-    documento.storageProvider ? { label: "Conservazione", value: formatEnumLabel(documento.storageProvider) } : null,
-    documento.checksumSha256 ? { label: "Impronta", value: documento.checksumSha256 } : null,
     documento.sizeBytes !== null ? { label: "Dimensione", value: `${documento.sizeBytes} byte` } : null,
   ].filter((detail): detail is { label: string; value: string } => detail !== null);
 

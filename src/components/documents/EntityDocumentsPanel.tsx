@@ -120,9 +120,6 @@ function toArchiveItem(item: EntityDocumentItem, canUpload: boolean): FascicoloD
     item.canale ? { label: "Canale", value: formatEnumLabel(item.canale) } : null,
     item.descrizione ? { label: "Descrizione", value: item.descrizione } : null,
     item.source ? { label: "Fonte", value: formatEnumLabel(item.source) } : null,
-    item.status ? { label: "Stato tecnico", value: formatEnumLabel(item.status) } : null,
-    item.storageProvider ? { label: "Conservazione", value: formatEnumLabel(item.storageProvider) } : null,
-    item.checksumSha256 ? { label: "Impronta", value: item.checksumSha256 } : null,
     item.sizeBytes !== null && item.sizeBytes !== undefined ? { label: "Dimensione", value: `${item.sizeBytes} byte` } : null,
   ].filter((detail): detail is { label: string; value: string } => detail !== null);
 
