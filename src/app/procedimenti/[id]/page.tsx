@@ -16,6 +16,7 @@ import { FascicoloDocumentRequirementProposalsPanel } from "@/components/procedi
 import { FascicoloDocumentRequirementScreeningTrigger } from "@/components/procedimenti/FascicoloDocumentRequirementScreeningTrigger";
 import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloObservationsPanel";
 import { FascicoloAutomaticWorkflowPanel } from "@/components/procedimenti/FascicoloAutomaticWorkflowPanel";
+import { FascicoloAnalysis } from "@/components/procedimenti/FascicoloAnalysis";
 import { FascicoloIntakeDetail } from "@/components/procedimenti/FascicoloIntakeDetail";
 import { FascicoloConcession } from "@/components/procedimenti/FascicoloConcession";
 import { FascicoloShell, resolveFascicoloSection, type FascicoloOverviewModel } from "@/components/procedimenti/FascicoloShell";
@@ -466,7 +467,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           <NeutralIntakeProcessingPanel items={processingItems} />
         </section> : null}
 
-        {activeSection === "analysis" ? <section className="space-y-4" aria-label="Analisi del fascicolo">
+        {activeSection === "istruttoria" ? <section className="space-y-4" aria-label="Istruttoria del fascicolo">
           <div>
             <FascicoloAutomaticWorkflowPanel model={automaticWorkflow} />
           </div>
@@ -529,7 +530,67 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           />
         ) : null}
 
-        {["analysis", "istruttoria"].includes(activeSection) ? <section className="grid gap-4 xl:grid-cols-2">
+        {activeSection === "analysis" ? (
+          <FascicoloAnalysis
+            model={{
+              questions: [
+                ...(detail.criticitaCollegata && linkedIssueIsOpen ? [{
+                  id: detail.criticitaCollegata.id,
+                  title: formatEnumLabel(detail.criticitaCollegata.tipologia),
+                  description: detail.criticitaCollegata.descrizione,
+                  status: formatEnumLabel(detail.criticitaCollegata.stato),
+                  area: detail.criticitaCollegata.riferimentoNormativo,
+                  relevance: formatEnumLabel(detail.criticitaCollegata.gravita),
+                  href: `/criticita/${detail.criticitaCollegata.id}`,
+                }] : []),
+                ...detail.altreCriticitaAperte.map((item) => ({
+                  id: item.id,
+                  title: formatEnumLabel(item.tipologia),
+                  description: item.descrizione,
+                  status: formatEnumLabel(item.stato),
+                  relevance: formatEnumLabel(item.gravita),
+                  href: `/criticita/${item.id}`,
+                })),
+              ],
+              evidence: [
+                {
+                  id: `concessione-${detail.concessione.id}`,
+                  title: `Titolo concessorio ${detail.concessione.numeroAtto}`,
+                  detail: formatEnumLabel(detail.concessione.stato),
+                  href: `/procedimenti/${detail.procedimento.id}?section=concession`,
+                },
+                ...detail.documentiPrincipali.slice(0, 4).map((documento) => ({
+                  id: documento.id,
+                  title: documento.nome,
+                  detail: formatEnumLabel(documento.tipologia),
+                  href: documento.url,
+                })),
+              ],
+              contradictions: [],
+              gaps: fascicoloDocumentRequirements.proposals
+                .filter((proposal) => proposal.status !== "RIFIUTATO")
+                .map((proposal) => ({
+                  id: proposal.id,
+                  title: proposal.gapLabelSnapshot,
+                  relevance: proposal.gapDescriptionSnapshot,
+                  status: proposal.status === "VALIDATO" ? "Confermata" : "Da verificare",
+                })),
+              relevantItems: [
+                ...fascicoloObservations
+                  .filter((observation) => observation.status !== "RIFIUTATO")
+                  .map((observation) => ({
+                    id: observation.id,
+                    title: observation.text,
+                    description: `Documento collegato: ${observation.documento.nome}`,
+                    detail: observation.status === "VALIDATO" ? "Verificata" : observation.status === "SUPERATO" ? "Superata" : "Da verificare",
+                    href: `/documenti/${observation.documento.id}/download`,
+                  })),
+              ],
+            }}
+          />
+        ) : null}
+
+        {activeSection === "istruttoria" ? <section className="grid gap-4 xl:grid-cols-2">
           <FascicoloObservationsPanel
             procedimentoId={detail.procedimento.id}
             canReview={canWriteChecklist}
@@ -565,7 +626,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
             />
         </section> : null}
 
-        {["analysis", "istruttoria"].includes(activeSection) ? <section className="grid gap-4 xl:grid-cols-2">
+        {activeSection === "istruttoria" ? <section className="grid gap-4 xl:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>Checklist istruttoria</CardTitle>
@@ -975,7 +1036,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           </CardContent>
         </Card> : null}
 
-        {activeSection === "analysis" ? <Card>
+        {activeSection === "istruttoria" ? <Card>
           <CardHeader>
             <CardTitle>3. Lettura procedimentale e azione consigliata</CardTitle>
             <CardDescription>{lettura.avvertenza}</CardDescription>

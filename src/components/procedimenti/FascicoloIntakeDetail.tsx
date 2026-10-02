@@ -1,6 +1,7 @@
 import { Paperclip } from "lucide-react";
 
 import { FascicoloDocumentsArchive, type FascicoloDocumentArchiveItem } from "@/components/documents/FascicoloDocumentsArchive";
+import { FascicoloAnalysis } from "@/components/procedimenti/FascicoloAnalysis";
 import { FascicoloConcession } from "@/components/procedimenti/FascicoloConcession";
 import { FascicoloShell, type FascicoloOverviewModel, type FascicoloSection } from "@/components/procedimenti/FascicoloShell";
 import { FascicoloSubjects, type FascicoloSubject } from "@/components/procedimenti/FascicoloSubjects";
@@ -216,6 +217,18 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload, activeSection }: F
           />
         ) : null}
 
+        {activeSection === "analysis" ? (
+          <FascicoloAnalysis
+            model={{
+              questions: [],
+              evidence: [],
+              contradictions: [],
+              gaps: [],
+              relevantItems: [],
+            }}
+          />
+        ) : null}
+
         {activeSection === "documents" ? (
           <FascicoloDocumentsArchive
             documents={fascicolo.documenti.map(toArchiveItem)}
@@ -250,7 +263,7 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload, activeSection }: F
           />
         ) : null}
 
-        {!["documents", "timeline", "subjects", "concession"].includes(activeSection) ? (
+        {!["documents", "timeline", "subjects", "concession", "analysis"].includes(activeSection) ? (
           <p className="rounded-md border border-slate-200 px-4 py-3 text-sm text-slate-600">Nessun dato ancora disponibile.</p>
         ) : null}
       </div>

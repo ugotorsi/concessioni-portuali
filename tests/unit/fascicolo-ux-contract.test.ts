@@ -93,7 +93,8 @@ describe("Fascicolo UX contract", () => {
     for (const section of ["documents", "timeline", "subjects", "concession", "analysis", "research", "deadlines", "issues", "reports", "proposals", "decisione"]) {
       expect(detailPage).toContain(`activeSection === "${section}"`);
     }
-    expect(detailPage).toContain('["analysis", "istruttoria"].includes(activeSection)');
+    expect(detailPage).toContain('activeSection === "analysis"');
+    expect(detailPage).toContain('activeSection === "istruttoria"');
     expect(documentsIndex).toBeGreaterThan(-1);
     expect(subjectsIndex).toBeGreaterThan(documentsIndex);
     expect(detailPage).toContain('entityType="procedimento"');
