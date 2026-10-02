@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { FileText, Paperclip } from "lucide-react";
 
-import { FascicoloShell, type FascicoloOverviewModel } from "@/components/procedimenti/FascicoloShell";
+import { FascicoloShell, type FascicoloOverviewModel, type FascicoloSection } from "@/components/procedimenti/FascicoloShell";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -18,6 +18,7 @@ type FascicoloIntakeDetailData = NonNullable<Awaited<ReturnType<typeof getFascic
 interface FascicoloIntakeDetailProps {
   fascicolo: FascicoloIntakeDetailData;
   canUpload: boolean;
+  activeSection: FascicoloSection;
 }
 
 function Value({ label, value }: { label: string; value: string | null | undefined }) {
@@ -29,7 +30,7 @@ function Value({ label, value }: { label: string; value: string | null | undefin
   );
 }
 
-export function FascicoloIntakeDetail({ fascicolo, canUpload }: FascicoloIntakeDetailProps) {
+export function FascicoloIntakeDetail({ fascicolo, canUpload, activeSection }: FascicoloIntakeDetailProps) {
   const title = fascicolo.denominazioneBreve || fascicolo.oggettoFascicolo;
   const overview: FascicoloOverviewModel = {
     title,
@@ -63,21 +64,26 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload }: FascicoloIntakeD
   return (
     <FascicoloShell
       model={overview}
-      sectionTargets={{
-        overview: "#panoramica",
-        documents: "#documenti",
-        timeline: "#cronologia",
-        subjects: "#soggetti",
-        concession: "#concessione",
-      }}
+      basePath={`/procedimenti/${fascicolo.id}`}
+      activeSection={activeSection}
     >
       <div className="space-y-6">
-        <Card id="concessione" className="scroll-mt-16">
+        {activeSection === "timeline" ? (
+          <Card><CardHeader><CardTitle>Cronologia</CardTitle></CardHeader><CardContent className="text-sm text-slate-700">{formatDateIT(fascicolo.createdAt)} · Fascicolo creato</CardContent></Card>
+        ) : null}
+
+        {activeSection === "subjects" ? (
+          <Card>
+            <CardHeader><CardTitle>Soggetti</CardTitle></CardHeader>
+            <CardContent><dl className="grid gap-5 md:grid-cols-2"><Value label="Soggetto assistito" value={fascicolo.soggettoAssistito} /><Value label="Concessionario / titolare" value={fascicolo.concessionario} /><Value label="Ente concedente" value={fascicolo.enteConcedente} /><Value label="Autorità competente" value={fascicolo.autoritaCompetente} /><Value label="Controparte / amministrazione" value={fascicolo.controparteAmministrazione} /></dl></CardContent>
+          </Card>
+        ) : null}
+
+        {activeSection === "concession" ? <Card>
           <CardHeader>
-            <CardTitle>Dati iniziali</CardTitle>
+            <CardTitle>Concessione</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <span id="soggetti" className="block scroll-mt-16" />
             <dl className="grid gap-5 md:grid-cols-3">
               <Value label="Concessionario / titolare" value={fascicolo.concessionario} />
               <Value label="Ente concedente" value={fascicolo.enteConcedente} />
@@ -87,8 +93,6 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload }: FascicoloIntakeD
               <Value label="Decorrenza" value={fascicolo.decorrenza ? formatDateIT(fascicolo.decorrenza) : null} />
               <Value label="Scadenza" value={fascicolo.scadenza ? formatDateIT(fascicolo.scadenza) : null} />
               <Value label="Località" value={fascicolo.localita} />
-              <Value label="Soggetto assistito" value={fascicolo.soggettoAssistito} />
-              <Value label="Controparte / amministrazione" value={fascicolo.controparteAmministrazione} />
               <Value label="Oggetto della concessione" value={fascicolo.oggettoConcessione} />
               <Value label="Bene / area / servizio" value={fascicolo.beneAreaServizio} />
             </dl>
@@ -99,9 +103,9 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload }: FascicoloIntakeD
               </div>
             ) : null}
           </CardContent>
-        </Card>
+        </Card> : null}
 
-        <Card id="documenti">
+        {activeSection === "documents" ? <Card>
           <CardHeader>
             <CardTitle>Documenti</CardTitle>
           </CardHeader>
@@ -157,7 +161,11 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload }: FascicoloIntakeD
               </details>
             ) : null}
           </CardContent>
-        </Card>
+        </Card> : null}
+
+        {!["documents", "timeline", "subjects", "concession"].includes(activeSection) ? (
+          <p className="rounded-md border border-slate-200 px-4 py-3 text-sm text-slate-600">Nessun dato ancora disponibile.</p>
+        ) : null}
       </div>
     </FascicoloShell>
   );

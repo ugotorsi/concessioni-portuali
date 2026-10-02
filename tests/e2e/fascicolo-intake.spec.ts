@@ -69,6 +69,11 @@ test("fascicolo in preparazione usa la panoramica e la navigazione condivise", a
     "Proposte",
   ]);
   await expect(page.locator("#panoramica").getByText("Sintesi del fascicolo", { exact: true })).toBeVisible();
-  await expect(page.locator("#documenti").getByRole("heading", { name: "Documenti" })).toBeVisible();
-  await expect(page.getByText("2. Checklist contraddittorio", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Documenti" })).toHaveCount(0);
+  await page.getByRole("link", { name: "Documenti", exact: true }).click();
+  await expect(page).toHaveURL(/\?section=documents$/);
+  await expect(page.getByRole("heading", { name: "Documenti" })).toBeVisible();
+  await page.reload();
+  await expect(page).toHaveURL(/\?section=documents$/);
+  await expect(page.getByText("Checklist istruttoria", { exact: true })).toHaveCount(0);
 });

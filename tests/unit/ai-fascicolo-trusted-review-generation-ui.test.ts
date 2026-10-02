@@ -148,7 +148,7 @@ describe("B2C9B1 Trusted Review generation trigger UX", () => {
   });
 
   it("renders the dedicated generation control and disables it while pending", () => {
-    expect(findButton(renderControl()).props.children).toBe("Genera analisi Trusted Review");
+    expect(findButton(renderControl()).props.children).toBe("Genera analisi del fascicolo");
     mocks.pending = true;
     const pendingButton = findButton(renderControl());
     expect(pendingButton.props.disabled).toBe(true);

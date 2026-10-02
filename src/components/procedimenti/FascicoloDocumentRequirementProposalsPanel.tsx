@@ -67,7 +67,7 @@ export function FascicoloDocumentRequirementProposalsPanel({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Requisiti istruttori proposti</CardTitle>
+        <CardTitle>Documenti richiesti e proposte</CardTitle>
         <CardDescription>Proposte tecniche sottoposte a verifica umana di applicabilità.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

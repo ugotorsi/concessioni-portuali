@@ -5,7 +5,7 @@ import { ArrowLeft, FileText } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
 
-const NAV_ITEMS = [
+export const FASCICOLO_SECTIONS = [
   ["overview", "Panoramica"],
   ["documents", "Documenti"],
   ["timeline", "Cronologia"],
@@ -19,7 +19,14 @@ const NAV_ITEMS = [
   ["proposals", "Proposte"],
 ] as const;
 
-type FascicoloSection = (typeof NAV_ITEMS)[number][0];
+export type FascicoloSection = (typeof FASCICOLO_SECTIONS)[number][0] | "istruttoria" | "decisione";
+
+export function resolveFascicoloSection(value: string | string[] | undefined): FascicoloSection {
+  const section = Array.isArray(value) ? value[0] : value;
+  return [...FASCICOLO_SECTIONS.map(([key]) => key), "istruttoria", "decisione"].includes(section as FascicoloSection)
+    ? section as FascicoloSection
+    : "overview";
+}
 
 export interface FascicoloOverviewModel {
   title: string;
@@ -33,7 +40,7 @@ export interface FascicoloOverviewModel {
     value: string | null | undefined;
     sectionId?: "soggetti" | "concessione";
   }>;
-  attention: ReadonlyArray<{ label: string; href?: `#${string}` }>;
+  attention: ReadonlyArray<{ label: string; section?: FascicoloSection }>;
   documents: ReadonlyArray<{
     id: string;
     name: string;
@@ -43,7 +50,7 @@ export interface FascicoloOverviewModel {
   }>;
   documentCount: number;
   timeline?: ReadonlyArray<{ id: string; label: string; date: string }>;
-  openIssues?: ReadonlyArray<{ id: string; label: string; detail?: string; href?: `#${string}` }>;
+  openIssues?: ReadonlyArray<{ id: string; label: string; detail?: string; section?: FascicoloSection }>;
   nextDeadline?: string | null;
   openIssueCount?: number;
   highestIssue?: string | null;
@@ -51,23 +58,28 @@ export interface FascicoloOverviewModel {
 
 interface FascicoloShellProps {
   model: FascicoloOverviewModel;
-  sectionTargets: Partial<Record<FascicoloSection, `#${string}`>>;
-  secondaryLinks?: ReadonlyArray<{ label: string; href: `#${string}` }>;
+  basePath: string;
+  activeSection: FascicoloSection;
+  availableSections?: readonly FascicoloSection[];
   notice?: ReactNode;
   children: ReactNode;
 }
 
-function FascicoloNav({ targets }: { targets: FascicoloShellProps["sectionTargets"] }) {
+function sectionHref(basePath: string, section: FascicoloSection): string {
+  return section === "overview" ? basePath : `${basePath}?section=${section}`;
+}
+
+function FascicoloNav({ basePath, activeSection, availableSections }: Pick<FascicoloShellProps, "basePath" | "activeSection" | "availableSections">) {
   return (
     <nav
       aria-label="Navigazione del fascicolo"
       className="sticky top-0 z-20 -mx-4 overflow-x-auto border-y border-slate-200 bg-white/95 px-4 backdrop-blur sm:mx-0 sm:rounded-md sm:border"
     >
       <div className="flex min-w-max items-center gap-1 py-1.5">
-        {NAV_ITEMS.map(([section, label]) => {
-          const href = targets[section];
-          return href ? (
-            <Link key={section} href={href} className="inline-flex min-h-9 items-center rounded-md px-3 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7285]">
+        {FASCICOLO_SECTIONS.map(([section, label]) => {
+          const available = !availableSections || availableSections.includes(section);
+          return available ? (
+            <Link key={section} href={sectionHref(basePath, section)} aria-current={activeSection === section ? "page" : undefined} className="inline-flex min-h-9 items-center rounded-md px-3 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 aria-[current=page]:bg-slate-100 aria-[current=page]:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7285]">
               {label}
             </Link>
           ) : (
@@ -81,7 +93,7 @@ function FascicoloNav({ targets }: { targets: FascicoloShellProps["sectionTarget
   );
 }
 
-function FascicoloOverview({ model }: { model: FascicoloOverviewModel }) {
+function FascicoloOverview({ model, basePath }: { model: FascicoloOverviewModel; basePath: string }) {
   const summary = model.summary.filter((item) => item.value);
   const documents = model.documents.slice(0, 3);
   const attention = model.attention.slice(0, 5);
@@ -104,8 +116,8 @@ function FascicoloOverview({ model }: { model: FascicoloOverviewModel }) {
         {attention.length > 0 ? (
           <ul className="mt-2 grid gap-1.5 text-sm text-amber-950 md:grid-cols-2">
             {attention.map((item) => (
-              <li key={`${item.label}-${item.href ?? "none"}`}>
-                {item.href ? <Link href={item.href} className="underline underline-offset-4">{item.label}</Link> : item.label}
+              <li key={`${item.label}-${item.section ?? "none"}`}>
+                {item.section ? <Link href={sectionHref(basePath, item.section)} className="underline underline-offset-4">{item.label}</Link> : item.label}
               </li>
             ))}
           </ul>
@@ -145,7 +157,7 @@ function FascicoloOverview({ model }: { model: FascicoloOverviewModel }) {
               ))}
             </ul>
           ) : <p className="mt-3 text-sm text-slate-500">Nessun documento presente.</p>}
-          <Link href="#documenti" className="mt-3 inline-flex text-sm font-semibold text-[#173d4f] underline underline-offset-4">Vedi tutti i documenti</Link>
+          <Link href={sectionHref(basePath, "documents")} className="mt-3 inline-flex text-sm font-semibold text-[#173d4f] underline underline-offset-4">Vedi tutti i documenti</Link>
         </section>
 
         {model.timeline ? (
@@ -164,7 +176,7 @@ function FascicoloOverview({ model }: { model: FascicoloOverviewModel }) {
             <h3 id="questioni-title" className="text-base font-semibold text-slate-950">Questioni aperte</h3>
             {issues.length > 0 ? (
               <ul className="mt-3 space-y-2 text-sm text-slate-700">
-                {issues.map((item) => <li key={item.id}>{item.href ? <Link href={item.href} className="font-medium text-slate-950 underline underline-offset-4">{item.label}</Link> : <span className="font-medium text-slate-950">{item.label}</span>}{item.detail ? `: ${item.detail}` : ""}</li>)}
+                {issues.map((item) => <li key={item.id}>{item.section ? <Link href={sectionHref(basePath, item.section)} className="font-medium text-slate-950 underline underline-offset-4">{item.label}</Link> : <span className="font-medium text-slate-950">{item.label}</span>}{item.detail ? `: ${item.detail}` : ""}</li>)}
               </ul>
             ) : null}
             <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-slate-700">
@@ -173,8 +185,8 @@ function FascicoloOverview({ model }: { model: FascicoloOverviewModel }) {
               {model.highestIssue ? <span>Più grave: <strong>{model.highestIssue}</strong></span> : null}
             </div>
             <div className="mt-3 flex flex-wrap gap-4 text-sm font-semibold text-[#173d4f]">
-              {model.nextDeadline ? <Link href="#scadenze" className="underline underline-offset-4">Vedi scadenze</Link> : null}
-              {typeof model.openIssueCount === "number" ? <Link href="#criticita" className="underline underline-offset-4">Vedi criticità</Link> : null}
+              {model.nextDeadline ? <Link href={sectionHref(basePath, "deadlines")} className="underline underline-offset-4">Vedi scadenze</Link> : null}
+              {typeof model.openIssueCount === "number" ? <Link href={sectionHref(basePath, "issues")} className="underline underline-offset-4">Vedi criticità</Link> : null}
             </div>
           </section>
         ) : null}
@@ -183,7 +195,7 @@ function FascicoloOverview({ model }: { model: FascicoloOverviewModel }) {
   );
 }
 
-export function FascicoloShell({ model, sectionTargets, secondaryLinks = [], notice, children }: FascicoloShellProps) {
+export function FascicoloShell({ model, basePath, activeSection, availableSections, notice, children }: FascicoloShellProps) {
   return (
     <AppShell title={model.title} subtitle="Workspace del fascicolo">
       <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-4">
@@ -194,17 +206,18 @@ export function FascicoloShell({ model, sectionTargets, secondaryLinks = [], not
           </Link>
         </div>
         {notice}
-        <FascicoloNav targets={sectionTargets} />
-        <FascicoloOverview model={model} />
-        {secondaryLinks.length > 0 ? (
+        <FascicoloNav basePath={basePath} activeSection={activeSection} availableSections={availableSections} />
+        {activeSection === "overview" ? <FascicoloOverview model={model} basePath={basePath} /> : null}
+        {activeSection === "overview" ? (
           <details className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
             <summary className="cursor-pointer text-sm font-medium text-slate-700">Altre funzioni</summary>
             <div className="mt-2 flex flex-wrap gap-4 border-t border-slate-200 pt-2 text-sm">
-              {secondaryLinks.map((link) => <Link key={link.href} href={link.href} className="font-medium text-[#173d4f] underline underline-offset-4">{link.label}</Link>)}
+              <Link href={sectionHref(basePath, "istruttoria")} className="font-medium text-[#173d4f] underline underline-offset-4">Istruttoria</Link>
+              <Link href={sectionHref(basePath, "decisione")} className="font-medium text-[#173d4f] underline underline-offset-4">Decisione</Link>
             </div>
           </details>
         ) : null}
-        {children}
+        {activeSection === "overview" ? null : children}
       </div>
     </AppShell>
   );

@@ -42,8 +42,26 @@ test("procedimento checklist section and update form visibility by role", async 
   expect(await overview.locator('[aria-labelledby="documenti-sintesi-title"] li').count()).toBeLessThanOrEqual(3);
   await expect(overview.getByText("Trusted Review", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Altre funzioni", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Checklist istruttoria" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Documenti del Fascicolo" })).toHaveCount(0);
 
-  await expect(page.getByRole("heading", { name: "2. Checklist contraddittorio" })).toBeVisible();
+  await page.getByRole("link", { name: "Documenti", exact: true }).click();
+  await expect(page).toHaveURL(/\?section=documents$/);
+  await expect(page.getByRole("heading", { name: "Documenti del Fascicolo" })).toBeVisible();
+  await expect(page.locator("#panoramica")).toHaveCount(0);
+
+  await page.getByRole("link", { name: "Concessione", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "4. Contesto concessorio" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "7. Pagamenti critici" })).toBeVisible();
+
+  await page.getByRole("link", { name: "Ricerca", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Riferimenti normativi collegati" })).toBeVisible();
+
+  await page.goto(`${new URL(procedimentoDetailUrl).pathname}?section=analysis`);
+  await page.reload();
+  await expect(page).toHaveURL(/\?section=analysis$/);
+
+  await expect(page.getByRole("heading", { name: "Checklist istruttoria" })).toBeVisible();
   await expect(page.getByText(/Checklist (completa|incompleta)/i)).toBeVisible();
   await expect(page.getByText(/Origine procedimento/i)).toBeVisible();
   await expect(page.getByText(/Stato preavviso rigetto/i)).toBeVisible();
@@ -56,6 +74,7 @@ test("procedimento checklist section and update form visibility by role", async 
   await page.getByRole("button", { name: "Aggiorna checklist" }).click();
 
   await expect(page).toHaveURL(/\/procedimenti\/.+/);
+  await page.goto(`${new URL(procedimentoDetailUrl).pathname}?section=analysis`);
   await expect(page.getByText(/Istanza di parte/i).first()).toBeVisible();
   await expect(page.getByText(/Preavviso in gestione/i)).toBeVisible();
 
@@ -65,8 +84,8 @@ test("procedimento checklist section and update form visibility by role", async 
   await login(page, "adsp@demo.local", "adsp123");
   await expect(page).toHaveURL(/\/adsp$/);
 
-  await page.goto(procedimentoDetailUrl);
+  await page.goto(`${new URL(procedimentoDetailUrl).pathname}?section=analysis`);
   await expect(page).toHaveURL(/\/procedimenti\/.+/);
-  await expect(page.getByRole("heading", { name: "2. Checklist contraddittorio" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Checklist istruttoria" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Aggiorna checklist" })).toHaveCount(0);
 });

@@ -68,7 +68,7 @@ describe("P1-NEXT-01 explicit requirement screening trigger", () => {
   });
 
   it("1. renders the trigger for an authorized presentation with canonical tenant", () => {
-    expect(renderTrigger()).toContain("Esegui screening istruttorio");
+    expect(renderTrigger()).toContain("Verifica requisiti");
   });
 
   it("2. renders no trigger for an unauthorized presentation", () => {
@@ -80,12 +80,12 @@ describe("P1-NEXT-01 explicit requirement screening trigger", () => {
   });
 
   it("4. uses the required neutral button label", () => {
-    expect(renderTrigger()).toContain("Esegui screening istruttorio");
+    expect(renderTrigger()).toContain("Verifica requisiti");
   });
 
   it("5. displays the human-review boundary wording", () => {
     expect(renderTrigger()).toContain(
-      "Lo screening utilizza i dati canonici registrati per generare eventuali proposte istruttorie da sottoporre a revisione umana.",
+      "La verifica utilizza i dati registrati per preparare proposte istruttorie da sottoporre a revisione umana.",
     );
   });
 
@@ -173,7 +173,7 @@ describe("P1-NEXT-01 explicit requirement screening trigger", () => {
 
   it("17. renders only neutral success wording", () => {
     const html = renderTrigger({ screeningDone: true });
-    expect(html).toContain("Screening eseguito. Eventuali proposte generate richiedono revisione umana.");
+    expect(html).toContain("Verifica completata. Eventuali proposte generate richiedono revisione umana.");
     expect(html).not.toContain("È stata creata una proposta");
   });
 
@@ -207,7 +207,7 @@ describe("P1-NEXT-01 explicit requirement screening trigger", () => {
     const observationsIndex = source.indexOf("<FascicoloObservationsPanel");
     const triggerIndex = source.indexOf("<FascicoloDocumentRequirementScreeningTrigger");
     const proposalsIndex = source.indexOf("<FascicoloDocumentRequirementProposalsPanel");
-    const checklistIndex = source.indexOf("<CardTitle>2. Checklist contraddittorio</CardTitle>");
+    const checklistIndex = source.indexOf("<CardTitle>Checklist istruttoria</CardTitle>");
     expect(observationsIndex).toBeGreaterThan(-1);
     expect(triggerIndex).toBeGreaterThan(observationsIndex);
     expect(proposalsIndex).toBeGreaterThan(triggerIndex);

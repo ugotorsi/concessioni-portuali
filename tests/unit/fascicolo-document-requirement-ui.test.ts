@@ -211,7 +211,7 @@ describe("P1-C1 document requirement proposal UI", () => {
   });
 
   it("1. renders the panel title", () => {
-    expect(renderPanel()).toContain("Requisiti istruttori proposti");
+    expect(renderPanel()).toContain("Documenti richiesti e proposte");
   });
 
   it("2. identifies each record as a proposed instructional requirement", () => {
@@ -409,7 +409,7 @@ describe("P1-C1 document requirement proposal UI", () => {
     const source = pageSource();
     const observationsIndex = source.indexOf("<FascicoloObservationsPanel");
     const proposalsIndex = source.indexOf("<FascicoloDocumentRequirementProposalsPanel");
-    const checklistIndex = source.indexOf("<CardTitle>2. Checklist contraddittorio</CardTitle>");
+    const checklistIndex = source.indexOf("<CardTitle>Checklist istruttoria</CardTitle>");
     expect(observationsIndex).toBeGreaterThan(-1);
     expect(proposalsIndex).toBeGreaterThan(observationsIndex);
     expect(checklistIndex).toBeGreaterThan(proposalsIndex);

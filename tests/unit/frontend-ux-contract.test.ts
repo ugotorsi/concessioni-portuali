@@ -71,11 +71,13 @@ describe("frontend UX contract", () => {
     const shell = readSource("src/components/procedimenti/FascicoloShell.tsx");
     const workflow = readSource("src/components/procedimenti/FascicoloAutomaticWorkflowPanel.tsx");
 
-    for (const anchor of ["panoramica", "documenti", "cronologia", "soggetti", "concessione", "analisi", "ricerca", "scadenze", "criticita", "rapporti", "proposte"]) {
-      expect(`${detail}\n${shell}`).toContain(`#${anchor}`);
+    for (const section of ["overview", "documents", "timeline", "subjects", "concession", "analysis", "research", "deadlines", "issues", "reports", "proposals"]) {
+      expect(`${detail}\n${shell}`).toContain(`"${section}"`);
     }
-    expect(detail).toContain('{ label: "Istruttoria", href: "#istruttoria" }');
-    expect(detail).toContain('{ label: "Decisione", href: "#decisione" }');
+    expect(shell).toContain('sectionHref(basePath, "istruttoria")');
+    expect(shell).toContain('sectionHref(basePath, "decisione")');
+    expect(shell).toContain('?section=${section}');
+    expect(shell).toContain('activeSection === "overview" ? null : children');
     expect(shell).not.toContain("Copertina");
     expect(shell).not.toContain("Collegamenti");
     expect(detail).not.toContain('<h1 className="text-2xl font-semibold text-slate-900">Fascicolo</h1>');

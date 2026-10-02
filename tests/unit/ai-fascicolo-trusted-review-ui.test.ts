@@ -269,7 +269,7 @@ describe("B2C9A Trusted Review read consumer panel V1", () => {
 
   it("renders the empty history without a generation control", () => {
     const html = renderPanel({ materials: [] });
-    expect(html).toContain("Nessuna analisi Trusted Review disponibile");
+    expect(html).toContain("Nessuna analisi del fascicolo disponibile");
     expect(html).not.toMatch(/Genera|button/i);
   });
 

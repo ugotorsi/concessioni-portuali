@@ -104,9 +104,9 @@ export function AiFascicoloTrustedReviewPanel({
   return (
     <Card className="xl:col-span-2">
       <CardHeader>
-        <CardTitle>Trusted Review</CardTitle>
+        <CardTitle>Analisi del fascicolo</CardTitle>
         <CardDescription>
-          Materiali di analisi AI destinati alla revisione professionale e umana.
+          Analisi e verifiche sottoposte alla revisione professionale.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
@@ -123,13 +123,13 @@ export function AiFascicoloTrustedReviewPanel({
         ) : null}
 
         {materials.length === 0 && !readError ? (
-          <p className="text-sm text-slate-600">Nessuna analisi Trusted Review disponibile.</p>
+          <p className="text-sm text-slate-600">Nessuna analisi del fascicolo disponibile.</p>
         ) : null}
 
         {materials.length > 0 ? (
           <section className="space-y-2" aria-labelledby="trusted-review-materials-heading">
             <h3 id="trusted-review-materials-heading" className="text-sm font-semibold text-slate-900">
-              Storico materiali
+              Storico analisi
             </h3>
             <div className="space-y-2">
               {materials.map((material) => (

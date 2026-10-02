@@ -17,7 +17,7 @@ import { FascicoloDocumentRequirementScreeningTrigger } from "@/components/proce
 import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloObservationsPanel";
 import { FascicoloAutomaticWorkflowPanel } from "@/components/procedimenti/FascicoloAutomaticWorkflowPanel";
 import { FascicoloIntakeDetail } from "@/components/procedimenti/FascicoloIntakeDetail";
-import { FascicoloShell, type FascicoloOverviewModel } from "@/components/procedimenti/FascicoloShell";
+import { FascicoloShell, resolveFascicoloSection, type FascicoloOverviewModel } from "@/components/procedimenti/FascicoloShell";
 import {
   ProcedimentoGiorniBadge,
   ProcedimentoChecklistBadge,
@@ -79,6 +79,7 @@ interface ProcedimentoDetailPageProps {
     documentUpload?: string | string[];
     materialId?: string | string[];
     statementPath?: string | string[];
+    section?: string | string[];
   }>;
 }
 
@@ -147,14 +148,15 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   const canWriteChecklist = canReview;
   const canRegisterDecision = canRegisterProcedimentoDecision(role);
   const { id } = await params;
-  const { screening, documentUpload, materialId, statementPath } = await searchParams;
+  const { screening, documentUpload, materialId, statementPath, section } = await searchParams;
+  const activeSection = resolveFascicoloSection(section);
   const screeningDone = screening === "done";
   const duplicateDocumentUpload = documentUpload === "duplicate";
   const detail = await getProcedimentoDetail(id);
   const fascicoloIntake = detail ? null : await getFascicoloIntakeDetail(id);
 
   if (fascicoloIntake) {
-    return <FascicoloIntakeDetail fascicolo={fascicoloIntake} canUpload={canReview} />;
+    return <FascicoloIntakeDetail fascicolo={fascicoloIntake} canUpload={canReview} activeSection={activeSection} />;
   }
 
   if (!detail) {
@@ -221,16 +223,16 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
     })),
     attention: [
       ...(detail.procedimento.giorniRitardoContraddittorio !== null
-        ? [{ label: `Termine del contraddittorio scaduto da ${detail.procedimento.giorniRitardoContraddittorio} giorni`, href: "#scadenze" as const }]
+        ? [{ label: `Termine del contraddittorio scaduto da ${detail.procedimento.giorniRitardoContraddittorio} giorni`, section: "deadlines" as const }]
         : []),
       ...(!detail.procedimento.checklistContraddittorioCompleta
-        ? [{ label: "Verifica istruttoria da completare", href: "#istruttoria" as const }]
+        ? [{ label: "Verifica istruttoria da completare", section: "analysis" as const }]
         : []),
       ...(openIssueCount > 0
-        ? [{ label: `${openIssueCount} criticità ${openIssueCount === 1 ? "aperta" : "aperte"}`, href: "#criticita" as const }]
+        ? [{ label: `${openIssueCount} criticità ${openIssueCount === 1 ? "aperta" : "aperte"}`, section: "issues" as const }]
         : []),
       ...(detail.pagamentiCritici.length > 0
-        ? [{ label: `${detail.pagamentiCritici.length} ${detail.pagamentiCritici.length === 1 ? "pagamento richiede" : "pagamenti richiedono"} verifica`, href: "#criticita" as const }]
+        ? [{ label: `${detail.pagamentiCritici.length} ${detail.pagamentiCritici.length === 1 ? "pagamento richiede" : "pagamenti richiedono"} verifica`, section: "concession" as const }]
         : []),
     ],
     summary: [
@@ -253,13 +255,13 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
         id: detail.criticitaCollegata.id,
         label: formatEnumLabel(detail.criticitaCollegata.tipologia),
         detail: detail.criticitaCollegata.descrizione,
-        href: "#criticita" as const,
+        section: "issues" as const,
       }] : []),
       ...detail.altreCriticitaAperte.map((item) => ({
         id: item.id,
         label: formatEnumLabel(item.tipologia),
         detail: item.descrizione,
-        href: "#criticita" as const,
+        section: "issues" as const,
       })),
     ],
     nextDeadline: nextDeadline ? formatDateIT(nextDeadline.dataScadenza) : null,
@@ -274,23 +276,8 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   return (
     <FascicoloShell
       model={overview}
-      sectionTargets={{
-        overview: "#panoramica",
-        documents: "#documenti",
-        timeline: "#cronologia",
-        subjects: "#soggetti",
-        concession: "#concessione",
-        analysis: "#analisi",
-        research: "#ricerca",
-        deadlines: "#scadenze",
-        issues: "#criticita",
-        reports: "#rapporti",
-        proposals: "#proposte",
-      }}
-      secondaryLinks={[
-        { label: "Istruttoria", href: "#istruttoria" },
-        { label: "Decisione", href: "#decisione" },
-      ]}
+      basePath={`/procedimenti/${detail.procedimento.id}`}
+      activeSection={activeSection}
       notice={duplicateDocumentUpload ? (
         <div role="alert" className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
           Documento già presente nel fascicolo.
@@ -298,7 +285,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
       ) : null}
     >
       <div className="space-y-4">
-        <section id="documenti" className="scroll-mt-16 space-y-4" aria-label="Documenti del fascicolo">
+        {activeSection === "documents" ? <section className="space-y-4" aria-label="Documenti del fascicolo">
           <EntityDocumentsPanel
             title="Documenti del Fascicolo"
             entityType="procedimento"
@@ -307,22 +294,25 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
             canUpload={canWriteChecklist}
           />
           <NeutralIntakeProcessingPanel items={processingItems} />
-        </section>
+        </section> : null}
 
-        <section className="space-y-4" aria-label="Analisi e ricerca giuridica">
-          <div id="analisi" className="scroll-mt-16">
+        {activeSection === "analysis" ? <section className="space-y-4" aria-label="Analisi del fascicolo">
+          <div>
             <FascicoloAutomaticWorkflowPanel model={automaticWorkflow} />
           </div>
-          <div id="ricerca" className="scroll-mt-16">
+        </section> : null}
+
+        {activeSection === "research" ? <section className="space-y-4" aria-label="Ricerca giuridica">
+          <div>
             <LegalSourceCandidatesPanel
               items={legalSourceCandidates}
               procedimentoId={detail.procedimento.id}
               canVerify={canReview && hasCanonicalTenant}
             />
           </div>
-        </section>
+        </section> : null}
 
-        <section id="istruttoria" className="grid scroll-mt-16 gap-4 xl:grid-cols-2">
+        {activeSection === "subjects" ? <section className="grid gap-4 xl:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>1. Dati del Fascicolo</CardTitle>
@@ -433,6 +423,9 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
             </CardContent>
           </Card>
 
+        </section> : null}
+
+        {["analysis", "istruttoria"].includes(activeSection) ? <section className="grid gap-4 xl:grid-cols-2">
           <FascicoloObservationsPanel
             procedimentoId={detail.procedimento.id}
             canReview={canWriteChecklist}
@@ -457,18 +450,21 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
             screeningDone={screeningDone}
           />
 
-          <div id="proposte" className="scroll-mt-16">
+        </section> : null}
+
+        {activeSection === "proposals" ? <section>
             <FascicoloDocumentRequirementProposalsPanel
               proposals={fascicoloDocumentRequirements.proposals}
               evidenceData={fascicoloDocumentRequirementEvidence}
               canReview={canReview}
               hasCanonicalTenant={hasCanonicalTenant}
             />
-          </div>
+        </section> : null}
 
+        {["analysis", "istruttoria"].includes(activeSection) ? <section className="grid gap-4 xl:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>2. Checklist contraddittorio</CardTitle>
+              <CardTitle>Checklist istruttoria</CardTitle>
               <CardDescription>
                 Supporto istruttorio non vincolante: non sostituisce la valutazione del responsabile del procedimento.
               </CardDescription>
@@ -710,9 +706,9 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               ) : null}
             </CardContent>
           </Card>
-        </section>
+        </section> : null}
 
-        <Card id="decisione" className="scroll-mt-16">
+        {activeSection === "decisione" ? <Card>
           <CardHeader>
             <CardTitle>Provvedimento finale registrato</CardTitle>
             <CardDescription>
@@ -873,9 +869,9 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               <p className="text-sm text-slate-500">Profilo non autorizzato alla registrazione del provvedimento finale.</p>
             ) : null}
           </CardContent>
-        </Card>
+        </Card> : null}
 
-        <Card>
+        {activeSection === "analysis" ? <Card>
           <CardHeader>
             <CardTitle>3. Lettura procedimentale e azione consigliata</CardTitle>
             <CardDescription>{lettura.avvertenza}</CardDescription>
@@ -898,9 +894,9 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               <p className="mt-1">{lettura.riferimentiNormativiSuggeriti}</p>
             </div>
           </CardContent>
-        </Card>
+        </Card> : null}
 
-        <Card>
+        {activeSection === "research" ? <Card>
           <CardHeader>
             <CardTitle>Riferimenti normativi collegati</CardTitle>
           </CardHeader>
@@ -935,9 +931,9 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               </TableBody>
             </Table>
           </CardContent>
-        </Card>
+        </Card> : null}
 
-        <Card id="concessione" className="scroll-mt-16">
+        {activeSection === "concession" ? <Card>
           <CardHeader>
             <CardTitle>4. Contesto concessorio</CardTitle>
           </CardHeader>
@@ -992,9 +988,9 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               </Link>
             </div>
           </CardContent>
-        </Card>
+        </Card> : null}
 
-        <Card id="criticita" className="scroll-mt-16">
+        {activeSection === "issues" ? <Card>
           <CardHeader>
             <CardTitle>5. Criticità collegata</CardTitle>
           </CardHeader>
@@ -1038,9 +1034,9 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               <p className="text-sm text-slate-500">Nessuna criticità collegata al procedimento.</p>
             )}
           </CardContent>
-        </Card>
+        </Card> : null}
 
-        <section className="grid min-w-0 gap-4 xl:grid-cols-2 [&>*]:min-w-0">
+        {activeSection === "issues" ? <section className="grid min-w-0 gap-4 [&>*]:min-w-0">
           <Card>
             <CardHeader>
               <CardTitle>6. Altre criticità aperte della concessione</CardTitle>
@@ -1079,7 +1075,9 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               </Table>
             </CardContent>
           </Card>
+        </section> : null}
 
+        {activeSection === "concession" ? <section className="grid min-w-0 gap-4 [&>*]:min-w-0">
           <Card>
             <CardHeader>
               <CardTitle>7. Pagamenti critici</CardTitle>
@@ -1118,9 +1116,9 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               </Table>
             </CardContent>
           </Card>
-        </section>
+        </section> : null}
 
-        <section id="scadenze" className="grid min-w-0 scroll-mt-16 gap-4 xl:grid-cols-2 [&>*]:min-w-0">
+        {activeSection === "deadlines" ? <section className="grid min-w-0 gap-4 [&>*]:min-w-0">
           <Card>
             <CardHeader>
               <CardTitle>8. Scadenze rilevanti</CardTitle>
@@ -1157,7 +1155,20 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               </Table>
             </CardContent>
           </Card>
+        </section> : null}
 
+        {activeSection === "timeline" ? <section className="grid min-w-0 gap-4 [&>*]:min-w-0">
+          <Card>
+            <CardHeader>
+              <CardTitle>Cronologia del fascicolo</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm text-slate-700">
+              <p><span className="font-medium text-slate-950">{formatDateIT(detail.procedimento.createdAt)}</span> · Fascicolo creato</p>
+              <p><span className="font-medium text-slate-950">{formatDateIT(detail.concessione.dataRilascio)}</span> · Concessione rilasciata</p>
+              {decisioneConclusiva ? <p><span className="font-medium text-slate-950">{formatDateIT(decisioneConclusiva.dataAtto)}</span> · Provvedimento finale registrato</p> : null}
+              {detail.documentiPrincipali.slice(0, 5).map((documento) => <p key={documento.id}><span className="font-medium text-slate-950">{formatDateIT(documento.dataDocumento ?? documento.createdAt)}</span> · Documento: {documento.nome}</p>)}
+            </CardContent>
+          </Card>
           <Card>
             <CardHeader>
               <CardTitle>9. Sopralluoghi recenti</CardTitle>
@@ -1198,9 +1209,9 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               </Table>
             </CardContent>
           </Card>
-        </section>
+        </section> : null}
 
-        <section id="rapporti" className="grid min-w-0 scroll-mt-16 gap-4 xl:grid-cols-2 [&>*]:min-w-0">
+        {activeSection === "reports" ? <section className="grid min-w-0 gap-4 [&>*]:min-w-0">
           <Card>
             <CardHeader>
               <CardTitle>11. Report collegati</CardTitle>
@@ -1239,7 +1250,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               </Table>
             </CardContent>
           </Card>
-        </section>
+        </section> : null}
       </div>
     </FascicoloShell>
   );

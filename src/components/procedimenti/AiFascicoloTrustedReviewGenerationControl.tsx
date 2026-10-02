@@ -147,7 +147,7 @@ export function AiFascicoloTrustedReviewGenerationControl({
   return (
     <div className="flex flex-wrap items-center gap-3 xl:col-span-2">
       <Button type="button" onClick={generateTrustedReview} disabled={isPending}>
-        {isPending ? "Generazione in corso..." : "Genera analisi Trusted Review"}
+        {isPending ? "Generazione in corso..." : "Genera analisi del fascicolo"}
       </Button>
       {successMessage ? <p role="status" className="text-sm text-emerald-700">{successMessage}</p> : null}
       {errorMessage ? <p role="alert" className="text-sm text-red-700">{errorMessage}</p> : null}
