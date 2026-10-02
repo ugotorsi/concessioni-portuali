@@ -338,7 +338,7 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
                         />
                       </TableCell>
                       <TableCell>
-                        <Link href={`/concessioni/${item.concessione.id}`} className="font-medium text-[#173d4f] underline decoration-slate-300 underline-offset-4 hover:decoration-[#173d4f]">
+                        <Link href={`/procedimenti/${item.id}?section=concession`} className="font-medium text-[#173d4f] underline decoration-slate-300 underline-offset-4 hover:decoration-[#173d4f]">
                           {item.concessione.numeroAtto}
                         </Link>
                       </TableCell>

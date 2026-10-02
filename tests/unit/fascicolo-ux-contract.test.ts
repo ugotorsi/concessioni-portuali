@@ -15,6 +15,8 @@ describe("Fascicolo UX contract", () => {
     expect(sidebar).toContain('{ href: "/procedimenti", label: "Fascicoli"');
     expect(listPage).toContain('title="Fascicoli"');
     expect(listPage).toContain('href="/procedimenti/nuovo"');
+    expect(listPage).toContain('href={`/procedimenti/${item.id}?section=concession`}');
+    expect(listPage).not.toContain('href={`/concessioni/${item.concessione.id}`}');
     expect(listPage).toContain("Nuovo fascicolo");
     expect(listPage).toContain("Nessun fascicolo trovato");
     expect(listPage).toContain("Modifica i filtri applicati oppure crea un nuovo fascicolo.");
