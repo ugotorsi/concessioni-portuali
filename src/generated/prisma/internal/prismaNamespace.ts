@@ -407,6 +407,7 @@ export const ModelName = {
   Scadenza: 'Scadenza',
   Criticita: 'Criticita',
   Procedimento: 'Procedimento',
+  FascicoloIntake: 'FascicoloIntake',
   ProcedimentoResponsabileAssignment: 'ProcedimentoResponsabileAssignment',
   Sopralluogo: 'Sopralluogo',
   Pagamento: 'Pagamento',
@@ -481,7 +482,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceTemporalAssessment" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "legalReferenceMatch" | "legalReferenceOfficialLookup" | "legalReferenceOfficialHit" | "legalReferenceOfficialReconciliation" | "legalReferenceOfficialReconciliationEvidence" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "runtimeWorkerHeartbeat" | "runtimeBudgetPolicy" | "runtimeCostReservation" | "fascicoloSignal" | "concessioneExpiryChangeCommand" | "researchMissionRecord" | "researchExecutionAttempt" | "researchEvidenceBundleRecord" | "researchQuestionResultRecord" | "researchSourceAssessmentRecord" | "researchAdverseRequirement" | "researchAssistedVerificationRecord" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "automaticFascicoloReport" | "automaticFascicoloReportDocument" | "automaticFascicoloReportMission" | "fascicoloKnowledgeRevision" | "structuredFascicoloReportSnapshot" | "fascicoloOperationalProposal" | "fascicoloOperationalProposalReviewEvent" | "fascicoloOperationalProposalMaterialization" | "fascicoloSubject" | "fascicoloSubjectIdentifier" | "fascicoloKnowledgeItem" | "fascicoloKnowledgeEvidence" | "fascicoloKnowledgeRelation" | "fascicoloKnowledgeReviewEvent" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceTemporalAssessment" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "fascicoloIntake" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "legalReferenceMatch" | "legalReferenceOfficialLookup" | "legalReferenceOfficialHit" | "legalReferenceOfficialReconciliation" | "legalReferenceOfficialReconciliationEvidence" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "runtimeWorkerHeartbeat" | "runtimeBudgetPolicy" | "runtimeCostReservation" | "fascicoloSignal" | "concessioneExpiryChangeCommand" | "researchMissionRecord" | "researchExecutionAttempt" | "researchEvidenceBundleRecord" | "researchQuestionResultRecord" | "researchSourceAssessmentRecord" | "researchAdverseRequirement" | "researchAssistedVerificationRecord" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "automaticFascicoloReport" | "automaticFascicoloReportDocument" | "automaticFascicoloReportMission" | "fascicoloKnowledgeRevision" | "structuredFascicoloReportSnapshot" | "fascicoloOperationalProposal" | "fascicoloOperationalProposalReviewEvent" | "fascicoloOperationalProposalMaterialization" | "fascicoloSubject" | "fascicoloSubjectIdentifier" | "fascicoloKnowledgeItem" | "fascicoloKnowledgeEvidence" | "fascicoloKnowledgeRelation" | "fascicoloKnowledgeReviewEvent" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2184,6 +2185,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ProcedimentoCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ProcedimentoCountAggregateOutputType> | number
+        }
+      }
+    }
+    FascicoloIntake: {
+      payload: Prisma.$FascicoloIntakePayload<ExtArgs>
+      fields: Prisma.FascicoloIntakeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FascicoloIntakeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloIntakePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FascicoloIntakeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloIntakePayload>
+        }
+        findFirst: {
+          args: Prisma.FascicoloIntakeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloIntakePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FascicoloIntakeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloIntakePayload>
+        }
+        findMany: {
+          args: Prisma.FascicoloIntakeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloIntakePayload>[]
+        }
+        create: {
+          args: Prisma.FascicoloIntakeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloIntakePayload>
+        }
+        createMany: {
+          args: Prisma.FascicoloIntakeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FascicoloIntakeCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloIntakePayload>[]
+        }
+        delete: {
+          args: Prisma.FascicoloIntakeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloIntakePayload>
+        }
+        update: {
+          args: Prisma.FascicoloIntakeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloIntakePayload>
+        }
+        deleteMany: {
+          args: Prisma.FascicoloIntakeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FascicoloIntakeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FascicoloIntakeUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloIntakePayload>[]
+        }
+        upsert: {
+          args: Prisma.FascicoloIntakeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FascicoloIntakePayload>
+        }
+        aggregate: {
+          args: Prisma.FascicoloIntakeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFascicoloIntake>
+        }
+        groupBy: {
+          args: Prisma.FascicoloIntakeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FascicoloIntakeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FascicoloIntakeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FascicoloIntakeCountAggregateOutputType> | number
         }
       }
     }
@@ -7106,6 +7181,33 @@ export const ProcedimentoScalarFieldEnum = {
 export type ProcedimentoScalarFieldEnum = (typeof ProcedimentoScalarFieldEnum)[keyof typeof ProcedimentoScalarFieldEnum]
 
 
+export const FascicoloIntakeScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  concessioneId: 'concessioneId',
+  tipologiaConcessione: 'tipologiaConcessione',
+  oggettoFascicolo: 'oggettoFascicolo',
+  denominazioneBreve: 'denominazioneBreve',
+  concessionario: 'concessionario',
+  enteConcedente: 'enteConcedente',
+  autoritaCompetente: 'autoritaCompetente',
+  numeroConcessione: 'numeroConcessione',
+  dataRilascio: 'dataRilascio',
+  decorrenza: 'decorrenza',
+  scadenza: 'scadenza',
+  oggettoConcessione: 'oggettoConcessione',
+  beneAreaServizio: 'beneAreaServizio',
+  localita: 'localita',
+  soggettoAssistito: 'soggettoAssistito',
+  controparteAmministrazione: 'controparteAmministrazione',
+  contestoIniziale: 'contestoIniziale',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FascicoloIntakeScalarFieldEnum = (typeof FascicoloIntakeScalarFieldEnum)[keyof typeof FascicoloIntakeScalarFieldEnum]
+
+
 export const ProcedimentoResponsabileAssignmentScalarFieldEnum = {
   id: 'id',
   procedimentoId: 'procedimentoId',
@@ -7205,6 +7307,7 @@ export const DocumentoScalarFieldEnum = {
   concessioneId: 'concessioneId',
   criticitaId: 'criticitaId',
   procedimentoId: 'procedimentoId',
+  fascicoloIntakeId: 'fascicoloIntakeId',
   sopralluogoId: 'sopralluogoId',
   pagamentoId: 'pagamentoId',
   reportId: 'reportId',
@@ -10333,6 +10436,7 @@ export type GlobalOmitConfig = {
   scadenza?: Prisma.ScadenzaOmit
   criticita?: Prisma.CriticitaOmit
   procedimento?: Prisma.ProcedimentoOmit
+  fascicoloIntake?: Prisma.FascicoloIntakeOmit
   procedimentoResponsabileAssignment?: Prisma.ProcedimentoResponsabileAssignmentOmit
   sopralluogo?: Prisma.SopralluogoOmit
   pagamento?: Prisma.PagamentoOmit

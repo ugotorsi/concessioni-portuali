@@ -18,13 +18,26 @@ describe("Fascicolo UX contract", () => {
     expect(listPage).toContain("Nuovo fascicolo");
     expect(listPage).toContain("Nessun fascicolo trovato");
     expect(listPage).toContain("Modifica i filtri applicati oppure crea un nuovo fascicolo.");
-    expect(createPage).toContain("<form action={createProcedimentoAction}");
-    expect(createPage).toContain("Crea e apri Fascicolo");
+    expect(createPage).toContain("<form action={createFascicoloIntakeAction}");
+    expect(createPage).toContain("Inquadramento");
+    expect(createPage).toContain("Dati della concessione");
+    expect(createPage).toContain("Soggetti iniziali");
+    expect(createPage).toContain("Documenti iniziali");
+    expect(createPage).toContain("Contesto iniziale");
+    expect(createPage).toContain("Collega a concessione già presente");
+    expect(createPage).toContain("Crea Fascicolo");
+    expect(createPage).toContain('name="documentiIniziali"');
+    expect(createPage).toContain("multiple");
+    expect(createPage).not.toContain('name="criticitaId"');
+    expect(createPage).not.toContain('name="riferimentoNormativo"');
+    expect(createPage).not.toContain('name="dataScadenzaContraddittorio"');
+    expect(createPage).not.toContain("checklistContraddittorio");
   });
 
   it("opens with cover data and the fixed-context attachment panel", () => {
     const detailPage = readSource("src/app/procedimenti/[id]/page.tsx");
     const documentsPanel = readSource("src/components/documents/EntityDocumentsPanel.tsx");
+    const intakeDetail = readSource("src/components/procedimenti/FascicoloIntakeDetail.tsx");
     const documentsIndex = detailPage.indexOf('title="Documenti del Fascicolo"');
     const coverDataIndex = detailPage.indexOf("1. Dati del Fascicolo");
 
@@ -40,5 +53,9 @@ describe("Fascicolo UX contract", () => {
     expect(documentsPanel).toContain('<input type="hidden" name={hiddenFieldName} value={entityId} />');
     expect(documentsPanel).toContain("Allega documento");
     expect(documentsPanel).toContain("Nessun documento presente nel fascicolo.");
+    expect(detailPage).toContain("getFascicoloIntakeDetail(id)");
+    expect(detailPage).toContain("<FascicoloIntakeDetail");
+    expect(intakeDetail).toContain('id="documenti"');
+    expect(intakeDetail).toContain("uploadFascicoloIntakeDocumentAction");
   });
 });

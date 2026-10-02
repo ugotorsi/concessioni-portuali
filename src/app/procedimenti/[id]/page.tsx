@@ -18,6 +18,7 @@ import { FascicoloDocumentRequirementProposalsPanel } from "@/components/procedi
 import { FascicoloDocumentRequirementScreeningTrigger } from "@/components/procedimenti/FascicoloDocumentRequirementScreeningTrigger";
 import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloObservationsPanel";
 import { FascicoloAutomaticWorkflowPanel } from "@/components/procedimenti/FascicoloAutomaticWorkflowPanel";
+import { FascicoloIntakeDetail } from "@/components/procedimenti/FascicoloIntakeDetail";
 import {
   ProcedimentoGiorniBadge,
   ProcedimentoChecklistBadge,
@@ -69,6 +70,7 @@ import { getNormeForProcedimento } from "@/server/queries/normativa";
 import { getFascicoloProcessingItems } from "@/server/queries/neutral-intake-processing";
 import { getAiFascicoloHumanReviewReadModel } from "@/server/queries/ai-fascicolo-human-review";
 import { getAiFascicoloTrustedReviewMaterialsReadModel } from "@/server/queries/ai-fascicolo-trusted-review-materials";
+import { getFascicoloIntakeDetail } from "@/server/queries/fascicolo-intake";
 
 import { PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES } from "@/server/queries/procedimenti";
 
@@ -151,6 +153,11 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   const screeningDone = screening === "done";
   const duplicateDocumentUpload = documentUpload === "duplicate";
   const detail = await getProcedimentoDetail(id);
+  const fascicoloIntake = detail ? null : await getFascicoloIntakeDetail(id);
+
+  if (fascicoloIntake) {
+    return <FascicoloIntakeDetail fascicolo={fascicoloIntake} canUpload={canReview} />;
+  }
 
   if (!detail) {
     notFound();

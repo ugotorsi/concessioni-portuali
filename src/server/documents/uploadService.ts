@@ -29,6 +29,7 @@ interface UploadDocumentInput {
   concessioneId?: string | null;
   criticitaId?: string | null;
   procedimentoId?: string | null;
+  fascicoloIntakeId?: string | null;
   sopralluogoId?: string | null;
   pagamentoId?: string | null;
   reportId?: string | null;
@@ -65,6 +66,7 @@ interface UploadedDocumentState {
   concessioneId: string | null;
   criticitaId: string | null;
   procedimentoId: string | null;
+  fascicoloIntakeId: string | null;
   sopralluogoId: string | null;
   pagamentoId: string | null;
   reportId: string | null;
@@ -90,6 +92,7 @@ function matchesExisting(
   return existing.enteId === input.enteId
     && existing.concessioneId === (input.concessioneId ?? null)
     && existing.procedimentoId === (input.procedimentoId ?? null)
+    && (existing.fascicoloIntakeId ?? null) === (input.fascicoloIntakeId ?? null)
     && existing.statoDocumento === input.status
     && existing.source === input.source
     && (existing.checksumSha256 ?? existing.sha256) === checksum
@@ -105,6 +108,7 @@ async function findDocumentState(documentId: string): Promise<UploadedDocumentSt
       concessioneId: true,
       criticitaId: true,
       procedimentoId: true,
+      fascicoloIntakeId: true,
       sopralluogoId: true,
       pagamentoId: true,
       reportId: true,
@@ -224,6 +228,7 @@ export async function uploadDocument<Result = never>(
           concessioneId: input.concessioneId ?? null,
           criticitaId: input.criticitaId ?? null,
           procedimentoId: input.procedimentoId ?? null,
+          fascicoloIntakeId: input.fascicoloIntakeId ?? null,
           sopralluogoId: input.sopralluogoId ?? null,
           pagamentoId: input.pagamentoId ?? null,
           reportId: input.reportId ?? null,

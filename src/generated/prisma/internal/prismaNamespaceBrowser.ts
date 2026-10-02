@@ -74,6 +74,7 @@ export const ModelName = {
   Scadenza: 'Scadenza',
   Criticita: 'Criticita',
   Procedimento: 'Procedimento',
+  FascicoloIntake: 'FascicoloIntake',
   ProcedimentoResponsabileAssignment: 'ProcedimentoResponsabileAssignment',
   Sopralluogo: 'Sopralluogo',
   Pagamento: 'Pagamento',
@@ -665,6 +666,33 @@ export const ProcedimentoScalarFieldEnum = {
 export type ProcedimentoScalarFieldEnum = (typeof ProcedimentoScalarFieldEnum)[keyof typeof ProcedimentoScalarFieldEnum]
 
 
+export const FascicoloIntakeScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  concessioneId: 'concessioneId',
+  tipologiaConcessione: 'tipologiaConcessione',
+  oggettoFascicolo: 'oggettoFascicolo',
+  denominazioneBreve: 'denominazioneBreve',
+  concessionario: 'concessionario',
+  enteConcedente: 'enteConcedente',
+  autoritaCompetente: 'autoritaCompetente',
+  numeroConcessione: 'numeroConcessione',
+  dataRilascio: 'dataRilascio',
+  decorrenza: 'decorrenza',
+  scadenza: 'scadenza',
+  oggettoConcessione: 'oggettoConcessione',
+  beneAreaServizio: 'beneAreaServizio',
+  localita: 'localita',
+  soggettoAssistito: 'soggettoAssistito',
+  controparteAmministrazione: 'controparteAmministrazione',
+  contestoIniziale: 'contestoIniziale',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FascicoloIntakeScalarFieldEnum = (typeof FascicoloIntakeScalarFieldEnum)[keyof typeof FascicoloIntakeScalarFieldEnum]
+
+
 export const ProcedimentoResponsabileAssignmentScalarFieldEnum = {
   id: 'id',
   procedimentoId: 'procedimentoId',
@@ -764,6 +792,7 @@ export const DocumentoScalarFieldEnum = {
   concessioneId: 'concessioneId',
   criticitaId: 'criticitaId',
   procedimentoId: 'procedimentoId',
+  fascicoloIntakeId: 'fascicoloIntakeId',
   sopralluogoId: 'sopralluogoId',
   pagamentoId: 'pagamentoId',
   reportId: 'reportId',

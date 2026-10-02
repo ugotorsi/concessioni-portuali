@@ -28,6 +28,8 @@ import {
   TableRow,
 } from "@/components/ui/Table";
 import { cn, formatDateIT, formatEnumLabel } from "@/lib/utils";
+import { getConcessionVerticalLabel } from "@/lib/concession-vertical-labels";
+import { getFascicoliIntakeList } from "@/server/queries/fascicolo-intake";
 import {
   PROCEDIMENTI_CHECKLIST_VALUES,
   PROCEDIMENTI_MEMORIE_VALUES,
@@ -134,13 +136,27 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
     })(),
   };
 
-  const [filtersData, listData] = await Promise.all([
+  const canShowIntake = !filters.tipologia
+    && (!filters.stato || filters.stato === "DA_AVVIARE")
+    && !filters.criticitaId
+    && filters.periodo === "TUTTI"
+    && filters.checklist === "TUTTE"
+    && filters.memorie === "TUTTE"
+    && !filters.origineProcedimento
+    && filters.procedimentoUfficio === "TUTTI"
+    && filters.preavvisoRigettoApplicabile === "TUTTI"
+    && !filters.statoPreavvisoRigetto;
+
+  const [filtersData, listData, fascicoliIntake] = await Promise.all([
     getProcedimentiFilters(),
     getProcedimentiList(filters),
+    canShowIntake
+      ? getFascicoliIntakeList({ search: filters.search, concessioneId: filters.concessioneId })
+      : Promise.resolve([]),
   ]);
 
-  const totale = listData.items.length;
-  const daAvviare = listData.items.filter((item) => item.stato === "DA_AVVIARE").length;
+  const totale = listData.items.length + fascicoliIntake.length;
+  const daAvviare = listData.items.filter((item) => item.stato === "DA_AVVIARE").length + fascicoliIntake.length;
   const inCorso = listData.items.filter((item) => item.stato === "IN_CORSO").length;
   const conclusi = listData.items.filter((item) => ["CONCLUSO", "ARCHIVIATO"].includes(item.stato)).length;
   const terminiScaduti = listData.items.filter((item) => item.giorniRitardoContraddittorio !== null).length;
@@ -232,11 +248,32 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
           <CardHeader>
             <SectionHeader
               title="Registro fascicoli"
-              count={listData.items.length}
+              count={totale}
               description="Risultati ordinati per aggiornamento. Scorri orizzontalmente per consultare tutti i dati istruttori."
             />
           </CardHeader>
           <CardContent>
+            {fascicoliIntake.length > 0 ? (
+              <div className="mb-6">
+                <h3 className="mb-2 text-sm font-semibold text-slate-950">Fascicoli in preparazione</h3>
+                <div className="divide-y divide-slate-200 rounded-md border border-slate-200">
+                  {fascicoliIntake.map((item) => (
+                    <Link
+                      key={item.id}
+                      href={`/procedimenti/${item.id}`}
+                      className="grid gap-2 px-4 py-3 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0b7285] md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto] md:items-center"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-[#173d4f]">{item.denominazioneBreve || item.oggettoFascicolo}</p>
+                        <p className="truncate text-xs text-slate-600">{item.oggettoFascicolo}</p>
+                      </div>
+                      <p className="text-sm text-slate-700">{getConcessionVerticalLabel(item.tipologiaConcessione)}</p>
+                      <Badge variant="warning">In preparazione</Badge>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ) : null}
             <Table>
               <TableHeader>
                 <TableRow>
@@ -336,7 +373,7 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
                     </ClickableTableRow>
                   );
                 })}
-                {listData.items.length === 0 ? (
+                {listData.items.length === 0 && fascicoliIntake.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={13}>
                       <EmptyState

@@ -133,6 +133,11 @@ export type Criticita = Prisma.CriticitaModel
  */
 export type Procedimento = Prisma.ProcedimentoModel
 /**
+ * Model FascicoloIntake
+ * 
+ */
+export type FascicoloIntake = Prisma.FascicoloIntakeModel
+/**
  * Model ProcedimentoResponsabileAssignment
  * 
  */

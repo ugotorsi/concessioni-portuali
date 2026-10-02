@@ -470,6 +470,7 @@ export type ConcessioneWhereInput = {
   scadenze?: Prisma.ScadenzaListRelationFilter
   criticita?: Prisma.CriticitaListRelationFilter
   procedimenti?: Prisma.ProcedimentoListRelationFilter
+  fascicoliIntake?: Prisma.FascicoloIntakeListRelationFilter
   sopralluoghi?: Prisma.SopralluogoListRelationFilter
   pagamenti?: Prisma.PagamentoListRelationFilter
   documenti?: Prisma.DocumentoListRelationFilter
@@ -523,6 +524,7 @@ export type ConcessioneOrderByWithRelationInput = {
   scadenze?: Prisma.ScadenzaOrderByRelationAggregateInput
   criticita?: Prisma.CriticitaOrderByRelationAggregateInput
   procedimenti?: Prisma.ProcedimentoOrderByRelationAggregateInput
+  fascicoliIntake?: Prisma.FascicoloIntakeOrderByRelationAggregateInput
   sopralluoghi?: Prisma.SopralluogoOrderByRelationAggregateInput
   pagamenti?: Prisma.PagamentoOrderByRelationAggregateInput
   documenti?: Prisma.DocumentoOrderByRelationAggregateInput
@@ -579,6 +581,7 @@ export type ConcessioneWhereUniqueInput = Prisma.AtLeast<{
   scadenze?: Prisma.ScadenzaListRelationFilter
   criticita?: Prisma.CriticitaListRelationFilter
   procedimenti?: Prisma.ProcedimentoListRelationFilter
+  fascicoliIntake?: Prisma.FascicoloIntakeListRelationFilter
   sopralluoghi?: Prisma.SopralluogoListRelationFilter
   pagamenti?: Prisma.PagamentoListRelationFilter
   documenti?: Prisma.DocumentoListRelationFilter
@@ -712,6 +715,7 @@ export type ConcessioneCreateInput = {
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
@@ -763,6 +767,7 @@ export type ConcessioneUncheckedCreateInput = {
   scadenze?: Prisma.ScadenzaUncheckedCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaUncheckedCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
@@ -814,6 +819,7 @@ export type ConcessioneUpdateInput = {
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
@@ -865,6 +871,7 @@ export type ConcessioneUncheckedUpdateInput = {
   scadenze?: Prisma.ScadenzaUncheckedUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUncheckedUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -1343,6 +1350,22 @@ export type ConcessioneUpdateOneRequiredWithoutProcedimentiNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ConcessioneUpdateToOneWithWhereWithoutProcedimentiInput, Prisma.ConcessioneUpdateWithoutProcedimentiInput>, Prisma.ConcessioneUncheckedUpdateWithoutProcedimentiInput>
 }
 
+export type ConcessioneCreateNestedOneWithoutFascicoliIntakeInput = {
+  create?: Prisma.XOR<Prisma.ConcessioneCreateWithoutFascicoliIntakeInput, Prisma.ConcessioneUncheckedCreateWithoutFascicoliIntakeInput>
+  connectOrCreate?: Prisma.ConcessioneCreateOrConnectWithoutFascicoliIntakeInput
+  connect?: Prisma.ConcessioneWhereUniqueInput
+}
+
+export type ConcessioneUpdateOneWithoutFascicoliIntakeNestedInput = {
+  create?: Prisma.XOR<Prisma.ConcessioneCreateWithoutFascicoliIntakeInput, Prisma.ConcessioneUncheckedCreateWithoutFascicoliIntakeInput>
+  connectOrCreate?: Prisma.ConcessioneCreateOrConnectWithoutFascicoliIntakeInput
+  upsert?: Prisma.ConcessioneUpsertWithoutFascicoliIntakeInput
+  disconnect?: Prisma.ConcessioneWhereInput | boolean
+  delete?: Prisma.ConcessioneWhereInput | boolean
+  connect?: Prisma.ConcessioneWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ConcessioneUpdateToOneWithWhereWithoutFascicoliIntakeInput, Prisma.ConcessioneUpdateWithoutFascicoliIntakeInput>, Prisma.ConcessioneUncheckedUpdateWithoutFascicoliIntakeInput>
+}
+
 export type ConcessioneCreateNestedOneWithoutSopralluoghiInput = {
   create?: Prisma.XOR<Prisma.ConcessioneCreateWithoutSopralluoghiInput, Prisma.ConcessioneUncheckedCreateWithoutSopralluoghiInput>
   connectOrCreate?: Prisma.ConcessioneCreateOrConnectWithoutSopralluoghiInput
@@ -1517,6 +1540,7 @@ export type ConcessioneCreateWithoutEnteInput = {
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
@@ -1567,6 +1591,7 @@ export type ConcessioneUncheckedCreateWithoutEnteInput = {
   scadenze?: Prisma.ScadenzaUncheckedCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaUncheckedCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
@@ -1683,6 +1708,7 @@ export type ConcessioneCreateWithoutConcessionarioInput = {
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
@@ -1733,6 +1759,7 @@ export type ConcessioneUncheckedCreateWithoutConcessionarioInput = {
   scadenze?: Prisma.ScadenzaUncheckedCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaUncheckedCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
@@ -1810,6 +1837,7 @@ export type ConcessioneCreateWithoutLegalFrameworksInput = {
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
@@ -1860,6 +1888,7 @@ export type ConcessioneUncheckedCreateWithoutLegalFrameworksInput = {
   scadenze?: Prisma.ScadenzaUncheckedCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaUncheckedCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
@@ -1926,6 +1955,7 @@ export type ConcessioneUpdateWithoutLegalFrameworksInput = {
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
@@ -1976,6 +2006,7 @@ export type ConcessioneUncheckedUpdateWithoutLegalFrameworksInput = {
   scadenze?: Prisma.ScadenzaUncheckedUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUncheckedUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -2025,6 +2056,7 @@ export type ConcessioneCreateWithoutObblighiInput = {
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
@@ -2075,6 +2107,7 @@ export type ConcessioneUncheckedCreateWithoutObblighiInput = {
   scadenze?: Prisma.ScadenzaUncheckedCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaUncheckedCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
@@ -2141,6 +2174,7 @@ export type ConcessioneUpdateWithoutObblighiInput = {
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
@@ -2191,6 +2225,7 @@ export type ConcessioneUncheckedUpdateWithoutObblighiInput = {
   scadenze?: Prisma.ScadenzaUncheckedUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUncheckedUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -2241,6 +2276,7 @@ export type ConcessioneCreateWithoutScadenzeInput = {
   obblighi?: Prisma.ObbligoConcessorioCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
@@ -2291,6 +2327,7 @@ export type ConcessioneUncheckedCreateWithoutScadenzeInput = {
   obblighi?: Prisma.ObbligoConcessorioUncheckedCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaUncheckedCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
@@ -2357,6 +2394,7 @@ export type ConcessioneUpdateWithoutScadenzeInput = {
   obblighi?: Prisma.ObbligoConcessorioUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
@@ -2407,6 +2445,7 @@ export type ConcessioneUncheckedUpdateWithoutScadenzeInput = {
   obblighi?: Prisma.ObbligoConcessorioUncheckedUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUncheckedUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -2457,6 +2496,7 @@ export type ConcessioneCreateWithoutCriticitaInput = {
   obblighi?: Prisma.ObbligoConcessorioCreateNestedManyWithoutConcessioneInput
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
@@ -2507,6 +2547,7 @@ export type ConcessioneUncheckedCreateWithoutCriticitaInput = {
   obblighi?: Prisma.ObbligoConcessorioUncheckedCreateNestedManyWithoutConcessioneInput
   scadenze?: Prisma.ScadenzaUncheckedCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
@@ -2573,6 +2614,7 @@ export type ConcessioneUpdateWithoutCriticitaInput = {
   obblighi?: Prisma.ObbligoConcessorioUpdateManyWithoutConcessioneNestedInput
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
@@ -2623,6 +2665,7 @@ export type ConcessioneUncheckedUpdateWithoutCriticitaInput = {
   obblighi?: Prisma.ObbligoConcessorioUncheckedUpdateManyWithoutConcessioneNestedInput
   scadenze?: Prisma.ScadenzaUncheckedUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -2673,6 +2716,7 @@ export type ConcessioneCreateWithoutProcedimentiInput = {
   obblighi?: Prisma.ObbligoConcessorioCreateNestedManyWithoutConcessioneInput
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
@@ -2723,6 +2767,7 @@ export type ConcessioneUncheckedCreateWithoutProcedimentiInput = {
   obblighi?: Prisma.ObbligoConcessorioUncheckedCreateNestedManyWithoutConcessioneInput
   scadenze?: Prisma.ScadenzaUncheckedCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaUncheckedCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
@@ -2789,6 +2834,7 @@ export type ConcessioneUpdateWithoutProcedimentiInput = {
   obblighi?: Prisma.ObbligoConcessorioUpdateManyWithoutConcessioneNestedInput
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
@@ -2839,6 +2885,227 @@ export type ConcessioneUncheckedUpdateWithoutProcedimentiInput = {
   obblighi?: Prisma.ObbligoConcessorioUncheckedUpdateManyWithoutConcessioneNestedInput
   scadenze?: Prisma.ScadenzaUncheckedUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUncheckedUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedUpdateManyWithoutConcessioneNestedInput
+  sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
+  pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedUpdateManyWithoutConcessioneNestedInput
+  normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutConcessioneNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutConcessioneNestedInput
+  fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutConcessioneNestedInput
+  expiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutConcessioneNestedInput
+}
+
+export type ConcessioneCreateWithoutFascicoliIntakeInput = {
+  id?: string
+  numeroAtto: string
+  dataRilascio: Date | string
+  dataScadenza: Date | string
+  expiryGeneration?: number
+  normaRiferimento: $Enums.NormaRiferimento
+  tipologiaBene: $Enums.TipologiaBene
+  attivita: $Enums.AttivitaConcessione
+  superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
+  canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
+  stato: $Enums.StatoConcessione
+  descrizioneBene?: string | null
+  ubicazione?: string | null
+  note?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessionario: Prisma.ConcessionarioCreateNestedOneWithoutConcessioniInput
+  ente?: Prisma.EnteCreateNestedOneWithoutConcessioniInput
+  obblighi?: Prisma.ObbligoConcessorioCreateNestedManyWithoutConcessioneInput
+  scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
+  criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
+  procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutConcessioneInput
+  sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
+  pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
+  report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkCreateNestedManyWithoutConcessioneInput
+  normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutConcessioneInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutConcessioneInput
+  fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutConcessioneInput
+  expiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutConcessioneInput
+}
+
+export type ConcessioneUncheckedCreateWithoutFascicoliIntakeInput = {
+  id?: string
+  numeroAtto: string
+  dataRilascio: Date | string
+  dataScadenza: Date | string
+  expiryGeneration?: number
+  normaRiferimento: $Enums.NormaRiferimento
+  tipologiaBene: $Enums.TipologiaBene
+  attivita: $Enums.AttivitaConcessione
+  superficieMq?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateGis?: string | null
+  areaDescrizione?: string | null
+  zonaPortuale?: string | null
+  riferimentoCatastale?: string | null
+  canoneAnnuo?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  categoriaCanone?: string | null
+  concessionVertical?: $Enums.ConcessionVertical
+  portActivityLegalType?: $Enums.PortActivityLegalType | null
+  concessionObjectType?: $Enums.ConcessionObjectType | null
+  awardingProcedureType?: $Enums.AwardingProcedureType
+  removableWorksProfile?: $Enums.RemovableWorksProfile
+  seasonalityProfile?: $Enums.SeasonalityProfile
+  feeRegime?: $Enums.FeeRegime
+  comparativeProcedureStatus?: $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: $Enums.ThirdPartyManagementStatus
+  stato: $Enums.StatoConcessione
+  descrizioneBene?: string | null
+  ubicazione?: string | null
+  note?: string | null
+  concessionarioId: string
+  enteId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  obblighi?: Prisma.ObbligoConcessorioUncheckedCreateNestedManyWithoutConcessioneInput
+  scadenze?: Prisma.ScadenzaUncheckedCreateNestedManyWithoutConcessioneInput
+  criticita?: Prisma.CriticitaUncheckedCreateNestedManyWithoutConcessioneInput
+  procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
+  sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
+  pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
+  report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUncheckedCreateNestedManyWithoutConcessioneInput
+  normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutConcessioneInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutConcessioneInput
+  fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutConcessioneInput
+  expiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutConcessioneInput
+}
+
+export type ConcessioneCreateOrConnectWithoutFascicoliIntakeInput = {
+  where: Prisma.ConcessioneWhereUniqueInput
+  create: Prisma.XOR<Prisma.ConcessioneCreateWithoutFascicoliIntakeInput, Prisma.ConcessioneUncheckedCreateWithoutFascicoliIntakeInput>
+}
+
+export type ConcessioneUpsertWithoutFascicoliIntakeInput = {
+  update: Prisma.XOR<Prisma.ConcessioneUpdateWithoutFascicoliIntakeInput, Prisma.ConcessioneUncheckedUpdateWithoutFascicoliIntakeInput>
+  create: Prisma.XOR<Prisma.ConcessioneCreateWithoutFascicoliIntakeInput, Prisma.ConcessioneUncheckedCreateWithoutFascicoliIntakeInput>
+  where?: Prisma.ConcessioneWhereInput
+}
+
+export type ConcessioneUpdateToOneWithWhereWithoutFascicoliIntakeInput = {
+  where?: Prisma.ConcessioneWhereInput
+  data: Prisma.XOR<Prisma.ConcessioneUpdateWithoutFascicoliIntakeInput, Prisma.ConcessioneUncheckedUpdateWithoutFascicoliIntakeInput>
+}
+
+export type ConcessioneUpdateWithoutFascicoliIntakeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
+  dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expiryGeneration?: Prisma.IntFieldUpdateOperationsInput | number
+  normaRiferimento?: Prisma.EnumNormaRiferimentoFieldUpdateOperationsInput | $Enums.NormaRiferimento
+  tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
+  attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
+  superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
+  stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
+  descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessionario?: Prisma.ConcessionarioUpdateOneRequiredWithoutConcessioniNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutConcessioniNestedInput
+  obblighi?: Prisma.ObbligoConcessorioUpdateManyWithoutConcessioneNestedInput
+  scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
+  criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
+  procedimenti?: Prisma.ProcedimentoUpdateManyWithoutConcessioneNestedInput
+  sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
+  pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
+  report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutConcessioneNestedInput
+  legalFrameworks?: Prisma.ConcessioneLegalFrameworkUpdateManyWithoutConcessioneNestedInput
+  normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutConcessioneNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutConcessioneNestedInput
+  fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutConcessioneNestedInput
+  expiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutConcessioneNestedInput
+}
+
+export type ConcessioneUncheckedUpdateWithoutFascicoliIntakeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroAtto?: Prisma.StringFieldUpdateOperationsInput | string
+  dataRilascio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dataScadenza?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expiryGeneration?: Prisma.IntFieldUpdateOperationsInput | number
+  normaRiferimento?: Prisma.EnumNormaRiferimentoFieldUpdateOperationsInput | $Enums.NormaRiferimento
+  tipologiaBene?: Prisma.EnumTipologiaBeneFieldUpdateOperationsInput | $Enums.TipologiaBene
+  attivita?: Prisma.EnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione
+  superficieMq?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  latitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitudineGis?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateGis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  areaDescrizione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zonaPortuale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  riferimentoCatastale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  canoneAnnuo?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  categoriaCanone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionVertical?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  portActivityLegalType?: Prisma.NullableEnumPortActivityLegalTypeFieldUpdateOperationsInput | $Enums.PortActivityLegalType | null
+  concessionObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  awardingProcedureType?: Prisma.EnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType
+  removableWorksProfile?: Prisma.EnumRemovableWorksProfileFieldUpdateOperationsInput | $Enums.RemovableWorksProfile
+  seasonalityProfile?: Prisma.EnumSeasonalityProfileFieldUpdateOperationsInput | $Enums.SeasonalityProfile
+  feeRegime?: Prisma.EnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime
+  comparativeProcedureStatus?: Prisma.EnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus
+  thirdPartyManagementStatus?: Prisma.EnumThirdPartyManagementStatusFieldUpdateOperationsInput | $Enums.ThirdPartyManagementStatus
+  stato?: Prisma.EnumStatoConcessioneFieldUpdateOperationsInput | $Enums.StatoConcessione
+  descrizioneBene?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ubicazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionarioId?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  obblighi?: Prisma.ObbligoConcessorioUncheckedUpdateManyWithoutConcessioneNestedInput
+  scadenze?: Prisma.ScadenzaUncheckedUpdateManyWithoutConcessioneNestedInput
+  criticita?: Prisma.CriticitaUncheckedUpdateManyWithoutConcessioneNestedInput
+  procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -2890,6 +3157,7 @@ export type ConcessioneCreateWithoutSopralluoghiInput = {
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
@@ -2940,6 +3208,7 @@ export type ConcessioneUncheckedCreateWithoutSopralluoghiInput = {
   scadenze?: Prisma.ScadenzaUncheckedCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaUncheckedCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
@@ -3006,6 +3275,7 @@ export type ConcessioneUpdateWithoutSopralluoghiInput = {
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
@@ -3056,6 +3326,7 @@ export type ConcessioneUncheckedUpdateWithoutSopralluoghiInput = {
   scadenze?: Prisma.ScadenzaUncheckedUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUncheckedUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -3106,6 +3377,7 @@ export type ConcessioneCreateWithoutPagamentiInput = {
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
@@ -3156,6 +3428,7 @@ export type ConcessioneUncheckedCreateWithoutPagamentiInput = {
   scadenze?: Prisma.ScadenzaUncheckedCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaUncheckedCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
@@ -3222,6 +3495,7 @@ export type ConcessioneUpdateWithoutPagamentiInput = {
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
@@ -3272,6 +3546,7 @@ export type ConcessioneUncheckedUpdateWithoutPagamentiInput = {
   scadenze?: Prisma.ScadenzaUncheckedUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUncheckedUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -3322,6 +3597,7 @@ export type ConcessioneCreateWithoutDocumentiInput = {
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportCreateNestedManyWithoutConcessioneInput
@@ -3372,6 +3648,7 @@ export type ConcessioneUncheckedCreateWithoutDocumentiInput = {
   scadenze?: Prisma.ScadenzaUncheckedCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaUncheckedCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   report?: Prisma.ReportUncheckedCreateNestedManyWithoutConcessioneInput
@@ -3438,6 +3715,7 @@ export type ConcessioneUpdateWithoutDocumentiInput = {
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUpdateManyWithoutConcessioneNestedInput
@@ -3488,6 +3766,7 @@ export type ConcessioneUncheckedUpdateWithoutDocumentiInput = {
   scadenze?: Prisma.ScadenzaUncheckedUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUncheckedUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   report?: Prisma.ReportUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -3538,6 +3817,7 @@ export type ConcessioneCreateWithoutFascicoloSignalsInput = {
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
@@ -3588,6 +3868,7 @@ export type ConcessioneUncheckedCreateWithoutFascicoloSignalsInput = {
   scadenze?: Prisma.ScadenzaUncheckedCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaUncheckedCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
@@ -3654,6 +3935,7 @@ export type ConcessioneUpdateWithoutFascicoloSignalsInput = {
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
@@ -3704,6 +3986,7 @@ export type ConcessioneUncheckedUpdateWithoutFascicoloSignalsInput = {
   scadenze?: Prisma.ScadenzaUncheckedUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUncheckedUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -3754,6 +4037,7 @@ export type ConcessioneCreateWithoutExpiryChangeCommandsInput = {
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
@@ -3804,6 +4088,7 @@ export type ConcessioneUncheckedCreateWithoutExpiryChangeCommandsInput = {
   scadenze?: Prisma.ScadenzaUncheckedCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaUncheckedCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
@@ -3870,6 +4155,7 @@ export type ConcessioneUpdateWithoutExpiryChangeCommandsInput = {
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
@@ -3920,6 +4206,7 @@ export type ConcessioneUncheckedUpdateWithoutExpiryChangeCommandsInput = {
   scadenze?: Prisma.ScadenzaUncheckedUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUncheckedUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -3970,6 +4257,7 @@ export type ConcessioneCreateWithoutDecisioniProcedimentoInput = {
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
@@ -4020,6 +4308,7 @@ export type ConcessioneUncheckedCreateWithoutDecisioniProcedimentoInput = {
   scadenze?: Prisma.ScadenzaUncheckedCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaUncheckedCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
@@ -4086,6 +4375,7 @@ export type ConcessioneUpdateWithoutDecisioniProcedimentoInput = {
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
@@ -4136,6 +4426,7 @@ export type ConcessioneUncheckedUpdateWithoutDecisioniProcedimentoInput = {
   scadenze?: Prisma.ScadenzaUncheckedUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUncheckedUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -4186,6 +4477,7 @@ export type ConcessioneCreateWithoutReportInput = {
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
@@ -4236,6 +4528,7 @@ export type ConcessioneUncheckedCreateWithoutReportInput = {
   scadenze?: Prisma.ScadenzaUncheckedCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaUncheckedCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
@@ -4302,6 +4595,7 @@ export type ConcessioneUpdateWithoutReportInput = {
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
@@ -4352,6 +4646,7 @@ export type ConcessioneUncheckedUpdateWithoutReportInput = {
   scadenze?: Prisma.ScadenzaUncheckedUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUncheckedUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -4402,6 +4697,7 @@ export type ConcessioneCreateWithoutNormaImpattiInput = {
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
@@ -4452,6 +4748,7 @@ export type ConcessioneUncheckedCreateWithoutNormaImpattiInput = {
   scadenze?: Prisma.ScadenzaUncheckedCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaUncheckedCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
@@ -4518,6 +4815,7 @@ export type ConcessioneUpdateWithoutNormaImpattiInput = {
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
@@ -4568,6 +4866,7 @@ export type ConcessioneUncheckedUpdateWithoutNormaImpattiInput = {
   scadenze?: Prisma.ScadenzaUncheckedUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUncheckedUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -4618,6 +4917,7 @@ export type ConcessioneCreateWithoutActivityLogsInput = {
   scadenze?: Prisma.ScadenzaCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutConcessioneInput
@@ -4668,6 +4968,7 @@ export type ConcessioneUncheckedCreateWithoutActivityLogsInput = {
   scadenze?: Prisma.ScadenzaUncheckedCreateNestedManyWithoutConcessioneInput
   criticita?: Prisma.CriticitaUncheckedCreateNestedManyWithoutConcessioneInput
   procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutConcessioneInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedManyWithoutConcessioneInput
   sopralluoghi?: Prisma.SopralluogoUncheckedCreateNestedManyWithoutConcessioneInput
   pagamenti?: Prisma.PagamentoUncheckedCreateNestedManyWithoutConcessioneInput
   documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConcessioneInput
@@ -4734,6 +5035,7 @@ export type ConcessioneUpdateWithoutActivityLogsInput = {
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
@@ -4784,6 +5086,7 @@ export type ConcessioneUncheckedUpdateWithoutActivityLogsInput = {
   scadenze?: Prisma.ScadenzaUncheckedUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUncheckedUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -4869,6 +5172,7 @@ export type ConcessioneUpdateWithoutEnteInput = {
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
@@ -4919,6 +5223,7 @@ export type ConcessioneUncheckedUpdateWithoutEnteInput = {
   scadenze?: Prisma.ScadenzaUncheckedUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUncheckedUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -5041,6 +5346,7 @@ export type ConcessioneUpdateWithoutConcessionarioInput = {
   scadenze?: Prisma.ScadenzaUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutConcessioneNestedInput
@@ -5091,6 +5397,7 @@ export type ConcessioneUncheckedUpdateWithoutConcessionarioInput = {
   scadenze?: Prisma.ScadenzaUncheckedUpdateManyWithoutConcessioneNestedInput
   criticita?: Prisma.CriticitaUncheckedUpdateManyWithoutConcessioneNestedInput
   procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutConcessioneNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedUpdateManyWithoutConcessioneNestedInput
   sopralluoghi?: Prisma.SopralluogoUncheckedUpdateManyWithoutConcessioneNestedInput
   pagamenti?: Prisma.PagamentoUncheckedUpdateManyWithoutConcessioneNestedInput
   documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutConcessioneNestedInput
@@ -5149,6 +5456,7 @@ export type ConcessioneCountOutputType = {
   scadenze: number
   criticita: number
   procedimenti: number
+  fascicoliIntake: number
   sopralluoghi: number
   pagamenti: number
   documenti: number
@@ -5166,6 +5474,7 @@ export type ConcessioneCountOutputTypeSelect<ExtArgs extends runtime.Types.Exten
   scadenze?: boolean | ConcessioneCountOutputTypeCountScadenzeArgs
   criticita?: boolean | ConcessioneCountOutputTypeCountCriticitaArgs
   procedimenti?: boolean | ConcessioneCountOutputTypeCountProcedimentiArgs
+  fascicoliIntake?: boolean | ConcessioneCountOutputTypeCountFascicoliIntakeArgs
   sopralluoghi?: boolean | ConcessioneCountOutputTypeCountSopralluoghiArgs
   pagamenti?: boolean | ConcessioneCountOutputTypeCountPagamentiArgs
   documenti?: boolean | ConcessioneCountOutputTypeCountDocumentiArgs
@@ -5214,6 +5523,13 @@ export type ConcessioneCountOutputTypeCountCriticitaArgs<ExtArgs extends runtime
  */
 export type ConcessioneCountOutputTypeCountProcedimentiArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ProcedimentoWhereInput
+}
+
+/**
+ * ConcessioneCountOutputType without action
+ */
+export type ConcessioneCountOutputTypeCountFascicoliIntakeArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FascicoloIntakeWhereInput
 }
 
 /**
@@ -5328,6 +5644,7 @@ export type ConcessioneSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   scadenze?: boolean | Prisma.Concessione$scadenzeArgs<ExtArgs>
   criticita?: boolean | Prisma.Concessione$criticitaArgs<ExtArgs>
   procedimenti?: boolean | Prisma.Concessione$procedimentiArgs<ExtArgs>
+  fascicoliIntake?: boolean | Prisma.Concessione$fascicoliIntakeArgs<ExtArgs>
   sopralluoghi?: boolean | Prisma.Concessione$sopralluoghiArgs<ExtArgs>
   pagamenti?: boolean | Prisma.Concessione$pagamentiArgs<ExtArgs>
   documenti?: boolean | Prisma.Concessione$documentiArgs<ExtArgs>
@@ -5464,6 +5781,7 @@ export type ConcessioneInclude<ExtArgs extends runtime.Types.Extensions.Internal
   scadenze?: boolean | Prisma.Concessione$scadenzeArgs<ExtArgs>
   criticita?: boolean | Prisma.Concessione$criticitaArgs<ExtArgs>
   procedimenti?: boolean | Prisma.Concessione$procedimentiArgs<ExtArgs>
+  fascicoliIntake?: boolean | Prisma.Concessione$fascicoliIntakeArgs<ExtArgs>
   sopralluoghi?: boolean | Prisma.Concessione$sopralluoghiArgs<ExtArgs>
   pagamenti?: boolean | Prisma.Concessione$pagamentiArgs<ExtArgs>
   documenti?: boolean | Prisma.Concessione$documentiArgs<ExtArgs>
@@ -5494,6 +5812,7 @@ export type $ConcessionePayload<ExtArgs extends runtime.Types.Extensions.Interna
     scadenze: Prisma.$ScadenzaPayload<ExtArgs>[]
     criticita: Prisma.$CriticitaPayload<ExtArgs>[]
     procedimenti: Prisma.$ProcedimentoPayload<ExtArgs>[]
+    fascicoliIntake: Prisma.$FascicoloIntakePayload<ExtArgs>[]
     sopralluoghi: Prisma.$SopralluogoPayload<ExtArgs>[]
     pagamenti: Prisma.$PagamentoPayload<ExtArgs>[]
     documenti: Prisma.$DocumentoPayload<ExtArgs>[]
@@ -5940,6 +6259,7 @@ export interface Prisma__ConcessioneClient<T, Null = never, ExtArgs extends runt
   scadenze<T extends Prisma.Concessione$scadenzeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$scadenzeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ScadenzaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   criticita<T extends Prisma.Concessione$criticitaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$criticitaArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CriticitaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   procedimenti<T extends Prisma.Concessione$procedimentiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$procedimentiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProcedimentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  fascicoliIntake<T extends Prisma.Concessione$fascicoliIntakeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$fascicoliIntakeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloIntakePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sopralluoghi<T extends Prisma.Concessione$sopralluoghiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$sopralluoghiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SopralluogoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   pagamenti<T extends Prisma.Concessione$pagamentiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$pagamentiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PagamentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documenti<T extends Prisma.Concessione$documentiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Concessione$documentiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -6526,6 +6846,30 @@ export type Concessione$procedimentiArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.ProcedimentoScalarFieldEnum | Prisma.ProcedimentoScalarFieldEnum[]
+}
+
+/**
+ * Concessione.fascicoliIntake
+ */
+export type Concessione$fascicoliIntakeArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FascicoloIntake
+   */
+  select?: Prisma.FascicoloIntakeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FascicoloIntake
+   */
+  omit?: Prisma.FascicoloIntakeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FascicoloIntakeInclude<ExtArgs> | null
+  where?: Prisma.FascicoloIntakeWhereInput
+  orderBy?: Prisma.FascicoloIntakeOrderByWithRelationInput | Prisma.FascicoloIntakeOrderByWithRelationInput[]
+  cursor?: Prisma.FascicoloIntakeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FascicoloIntakeScalarFieldEnum | Prisma.FascicoloIntakeScalarFieldEnum[]
 }
 
 /**

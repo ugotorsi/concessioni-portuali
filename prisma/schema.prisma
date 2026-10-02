@@ -973,6 +973,7 @@ model Ente {
   researchAssistedVerifications ResearchAssistedVerificationRecord[]
   aiFascicoloTrustedReviewMaterials AiFascicoloTrustedReviewMaterial[]
   automaticFascicoloReports         AutomaticFascicoloReport[]
+  fascicoliIntake                   FascicoloIntake[]
   aiFascicoloHumanReviewStates      AiFascicoloHumanReviewState[]
   aiFascicoloHumanReviewEvents      AiFascicoloHumanReviewEvent[]
   fascicoloKnowledgeRevisions       FascicoloKnowledgeRevision[]
@@ -1522,6 +1523,7 @@ model Concessione {
   scadenze              Scadenza[]
   criticita             Criticita[]
   procedimenti          Procedimento[]
+  fascicoliIntake       FascicoloIntake[]
   sopralluoghi          Sopralluogo[]
   pagamenti             Pagamento[]
   documenti             Documento[]
@@ -1744,6 +1746,38 @@ model Procedimento {
   @@index([createdAt])
 }
 
+model FascicoloIntake {
+  id                         String             @id @default(cuid())
+  enteId                     String
+  concessioneId              String?
+  tipologiaConcessione       ConcessionVertical
+  oggettoFascicolo           String
+  denominazioneBreve         String?
+  concessionario             String?
+  enteConcedente             String?
+  autoritaCompetente         String?
+  numeroConcessione          String?
+  dataRilascio               DateTime?
+  decorrenza                 DateTime?
+  scadenza                   DateTime?
+  oggettoConcessione         String?
+  beneAreaServizio           String?
+  localita                   String?
+  soggettoAssistito          String?
+  controparteAmministrazione String?
+  contestoIniziale           String?
+  createdAt                  DateTime           @default(now())
+  updatedAt                  DateTime           @updatedAt
+
+  ente        Ente         @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  concessione Concessione? @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
+  documenti   Documento[]
+
+  @@index([enteId])
+  @@index([concessioneId])
+  @@index([createdAt])
+}
+
 model ProcedimentoResponsabileAssignment {
   id                 String    @id @default(cuid())
   procedimentoId     String
@@ -1860,6 +1894,7 @@ model Documento {
   concessioneId             String?
   criticitaId               String?
   procedimentoId            String?
+  fascicoloIntakeId         String?
   sopralluogoId             String?
   pagamentoId               String?
   reportId                  String?
@@ -1872,6 +1907,7 @@ model Documento {
   concessione           Concessione?                           @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
   criticita             Criticita?                             @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
   procedimento          Procedimento?                          @relation(fields: [procedimentoId], references: [id], onDelete: SetNull)
+  fascicoloIntake       FascicoloIntake?                        @relation(fields: [fascicoloIntakeId], references: [id], onDelete: SetNull)
   sopralluogo           Sopralluogo?                           @relation(fields: [sopralluogoId], references: [id], onDelete: SetNull)
   pagamento             Pagamento?                             @relation(fields: [pagamentoId], references: [id], onDelete: SetNull)
   report                Report?                                @relation(fields: [reportId], references: [id], onDelete: SetNull)
@@ -1889,6 +1925,7 @@ model Documento {
   @@index([concessioneId])
   @@index([criticitaId])
   @@index([procedimentoId])
+  @@index([fascicoloIntakeId])
   @@index([sopralluogoId])
   @@index([pagamentoId])
   @@index([reportId])
