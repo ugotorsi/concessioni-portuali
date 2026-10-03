@@ -6,7 +6,7 @@ Checkout autorizzato: `C:\Users\ugoto\AppData\Local\Temp\concessioni-trusted-rel
 
 Branch verificato: `security-hardening-preprod-2111445`
 
-Implementation SHA verificato: `193dd57`
+Implementation SHA verificato: `215ff15605bfecfc3ee60468ed80c4d82fcb7d29`
 
 Target consentito: Vercel Preview `staging-operativo` / Neon branch `staging-operativo`
 
@@ -16,7 +16,7 @@ Production e DNS: non modificati; `app.noetra.it` non associato.
 
 **HARDENING PRE-PRODUCTION NON SUPERATO.**
 
-La patch applicativa locale compila e supera i test. Auth.js e credenziali demo sono stati chiusi con evidenza; il gate rimane chiuso per rate limiting non distribuito e recovery Neon inadeguata. Non sono stati eseguiti integrazione su `staging-operativo`, deploy Preview della patch o associazione di custom domain.
+La patch applicativa locale compila e supera i test. Auth.js, credenziali demo e rate limiting distribuito Preview sono stati chiusi con evidenza; il gate rimane chiuso per recovery Neon inadeguata. Non sono stati eseguiti deploy Production o associazioni di custom domain.
 
 ## Matrice iniziale e finale
 
@@ -30,14 +30,14 @@ La patch applicativa locale compila e supera i test. Auth.js e credenziali demo 
 | RBAC server-side | PARTIAL | PASS locale | Helper di ruolo su azioni/query; `VIEWER_ADSP` consultivo |
 | CSRF / Origin API cookie | PARTIAL | PASS locale | JSON + same-origin obbligatori in Preview/production sulle mutation custom |
 | Security headers / CSP | FAIL | PASS build | CSP production senza `unsafe-eval`; header difensivi centralizzati |
-| Rate limiting | PARTIAL | **FAIL** | Nessuna risorsa Redis/KV/Upstash nel progetto/team; backend memory per istanza |
+| Rate limiting | PARTIAL | **PASS PREVIEW** | Upstash Marketplace Preview; prova condivisa in due processi completata |
 | Audit trail | PARTIAL | PASS con residuo | Eventi auth/logout e catena SHA-256; storage nello stesso DB |
 | Temporary DB recon | FAIL | PASS | Route, helper, token Vercel e bypass middleware rimossi |
 | Dependency security | FAIL | PASS critical gate | 0 critical; 4 high nella sola catena CLI Prisma, non importata dal runtime |
 | Secret hygiene | FAIL | PASS staging | 13 demo disattivati; 1 identita operativa random; seed vietato in Preview/production |
 | Backup / PITR / restore | FAIL | **FAIL** | Free: 6 ore, 10/10 branch; recovery leggibile ma obsoleta e schema non allineato |
-| Build e unit test | PARTIAL | PASS | 3.343 test passati; build Next 16.3.8 e typecheck passati |
-| Preview security QA | N/D | **PENDING** | Nessun deploy della patch locale finche i blocker restano aperti |
+| Build e unit test | PARTIAL | PASS | 3.349 test passati; build Next 16.3.8 e typecheck passati |
+| Preview security QA | N/D | PARTIAL | Preview rate-limit READY e prova distribuita PASS; QA completa ancora pendente |
 
 ## Matrice RBAC
 
@@ -91,7 +91,7 @@ Il controllo di autorizzazione e applicato lato server; la UI non e considerata 
 
 ## Evidenze di verifica
 
-- `npm test -- --maxWorkers=1 --testTimeout=15000`: 230 file passati, 1 skipped; 3.343 test passati, 5 skipped.
+- `npm test -- --maxWorkers=1 --testTimeout=15000`: 230 file passati, 1 skipped; 3.349 test passati, 5 skipped.
 - Suite security mirata: 15 file e 86 test passati su auth/MFA/lockout, bypass, WorkOS callback, tenant/RBAC, rate limit, same-origin, audit hash-chain e demo seed guard.
 - `npx tsc --noEmit`: PASS.
 - `npm run build` con secret effimeri solo in memoria: PASS su Next 16.3.8.
@@ -102,7 +102,10 @@ Il controllo di autorizzazione e applicato lato server; la UI non e considerata 
 - Auth.js: `GHSA-7rqj-j65f-68wh` (Email provider) non raggiungibile perche e configurato solo Credentials; `GHSA-x445-f3h2-j279` (multi OAuth account linking) non raggiungibile perche NextAuth non configura OAuth provider/linking; `GHSA-xmf8-cvqr-rfgj` (`getToken`) e corretto in 4.24.15 e protetto anche da fail-closed locale. Dependency tree unica su `@auth/core@0.41.3`.
 - Secret scan redatta: 0 private key; 49 occorrenze di password demo in 20 file; `admin123` presente nella cronologia Git.
 - Credenziali staging: prima 13 utenti attivi/13 password note; dopo rotazione 1 operativo attivo, 0 demo attivi, 0 match password note. `STAGING_ADMIN_EMAIL` rimosso dalla Preview. Le fixture storiche restano TEST-ONLY e la history non e stata riscritta.
-- Vercel Marketplace: sole risorse Neon; nessuna Redis/KV/Upstash disponibile. Test adapter/policy: 21 passati; nessuna prova distribuita possibile.
+- Vercel Marketplace: risorsa Upstash `concessioni-portuali-staging-rate-limit` disponibile in `fra1`; env writable limitate a Preview e `RATE_LIMIT_BACKEND=upstash`. Il token read-only non viene usato.
+- Preview rate-limit `dpl_EVhsPpWyRLnSbNPLa2v1VqFQXogj`: READY su `concessioni-portuali-demo-8q7qsdf5l-ugotorsis-projects.vercel.app`; metadata `sourceCommitSha=215ff15605bfecfc3ee60468ed80c4d82fcb7d29`. Build completata con Next 16.3.8 e TypeScript.
+- Prova distribuita: processo A 15 richieste consentite; processo B 15 consentite e richiesta 31 bloccata con HTTP 429; durata totale 2,93 secondi nella finestra di 60 secondi.
+- Nota di riproducibilita: il commit precedente contiene `tests/unit/provider-mcp-catalog-cli.test.ts`, che importa un file rimasto non tracciato. Il bundle Preview ha incluso solo `scripts/legal-research/list-provider-tools.ts`, registrato nei metadata con SHA-256 `9433da40d2e369dcc2b7ddd556f91002225ab54a5a5225db6f8a7aaffec1946f`; il codice rate-limit distribuito corrisponde a `215ff15`.
 - Neon Free: retention 21.600 secondi (6 ore), 10/10 branch, zero snapshot. Snapshot del branch child rifiutato; nuova recovery copy rifiutata con `branches limit exceeded`.
 - Restore drill read-only su `br-delicate-cell-at66cfki`: query riuscita in 1.958 ms, ma 34 migration/62 tabelle contro 45/84 dello staging. Parent point: 2026-09-27T09:47:30Z. Compute recovery minimo `ep-muddy-violet-atk41e05` creato con scale-to-zero.
 - Ricerca protetta: nessun diff in schema Prisma, trusted mission route o server legal-research.
@@ -115,12 +118,13 @@ Il controllo di autorizzazione e applicato lato server; la UI non e considerata 
 - Remediation: override mirato a `@auth/core@0.41.3`, nessuna migrazione v5; NextAuth v4 non importa il peer opzionale. `getToken` e usato una volta e ora e racchiuso in fail-closed `try/catch`.
 - Finale: `npm audit --omit=dev` riporta 0 critical. Credentials, JWT/session, callback, MFA e tipi restano invariati e testati.
 
-### RATE LIMIT - FAIL
+### RATE LIMIT - PASS PREVIEW
 
-- Backend: memory per istanza. Adapter Upstash esistente ma non configurato.
-- Prova distribuita: non eseguita, perche progetto e team non possiedono risorse Redis/KV/Upstash e le env Preview sono assenti.
+- Backend: Upstash REST distribuito, selezionato in Preview con `RATE_LIMIT_BACKEND=upstash` e credenziali writable `KV_REST_API_URL` / `KV_REST_API_TOKEN` generate dall'integrazione Vercel.
+- Fail-closed: in production-like runtime il backend `upstash` senza URL/token writable genera errore; `KV_REST_API_READ_ONLY_TOKEN` non viene accettato per gli incrementi.
+- Prova distribuita: PASS su Preview READY. Due processi distinti hanno condiviso la chiave `middleware:sensitive-api:<IP>`: 30 richieste consentite e la 31 bloccata con HTTP 429 in 2,93 secondi.
 - Route coperte nel codice: login credentials, MFA verify/enrollment, export, document/legal-source/report download, admin e API legal-research sensibili.
-- Azione manuale: provisionare una risorsa Redis compatibile e configurare solo Preview con `RATE_LIMIT_BACKEND=upstash`, URL e token; poi eseguire test concorrente da almeno due processi/istanze.
+- Scope: configurazione e verifica limitate a Vercel Preview; Production, DNS e `app.noetra.it` non modificati.
 
 ### DEMO CREDENTIALS - PASS STAGING
 
@@ -139,9 +143,8 @@ Il controllo di autorizzazione e applicato lato server; la UI non e considerata 
 
 ## Blocker obbligatori
 
-1. **Rate limiting non distribuito.** Nessun backend esistente puo essere configurato senza provisioning esterno. Criterio: Redis Preview, env, fail-closed e prova condivisa multi-istanza.
-2. **Recovery inadeguata.** Free limita history a 6 ore e branch a 10; la recovery disponibile e vecchia e schema-incompleta. Criterio: upgrade/backup approvato, recovery recente e restore/cutover drill.
-3. **Release evidence.** Nessun deploy o QA Preview perche i blocker 1-2 sono ancora aperti. Criterio: solo dopo la chiusura, integrazione sicura, deploy exact SHA e QA completa.
+1. **Recovery inadeguata.** Free limita history a 6 ore e branch a 10; la recovery disponibile e vecchia e schema-incompleta. Criterio: upgrade/backup approvato, recovery recente e restore/cutover drill.
+2. **Release evidence residua.** Il deploy e la prova rate-limit Preview sono completati; resta pendente la QA completa e il commit deve diventare riproducibile senza file supplementari non tracciati.
 
 ## Condizioni di riapertura gate
 
