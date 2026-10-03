@@ -30,7 +30,7 @@ const backofficeNavItems: NavItem[] = [
   { href: "/procedimenti", label: "Fascicoli", icon: FolderOpen, matchMode: "section" },
   { href: "/verticali", label: "Verticali", icon: Layers, matchMode: "section" },
   { href: "/mappa", label: "Mappa", icon: Map },
-  { href: "/concessionari", label: "Concessionari", icon: Users },
+  { href: "/concessionari", label: "Concessionari", icon: Users, matchMode: "section" },
 ];
 
 const adspNavItems: NavItem[] = [
