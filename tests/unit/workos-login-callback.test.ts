@@ -9,7 +9,6 @@ vi.mock("next/navigation", () => ({ redirect: redirectMock }));
 
 import LoginPage from "@/app/login/page";
 import { LoginCredentialsForm } from "@/components/forms/LoginCredentialsForm";
-import { StagingAdminLoginForm } from "@/components/forms/StagingAdminLoginForm";
 
 function findElement(root: ReactNode, type: ReactElement["type"]): ReactElement | null {
   if (!isValidElement(root)) return null;
@@ -23,7 +22,6 @@ function findElement(root: ReactNode, type: ReactElement["type"]): ReactElement 
 
 describe("WorkOS login continuation", () => {
   beforeEach(() => {
-    vi.stubEnv("STAGING_ADMIN_BYPASS", "true");
     vi.stubEnv("VERCEL_ENV", "preview");
     getCurrentRoleMock.mockResolvedValue(null);
     redirectMock.mockReset();
@@ -31,10 +29,9 @@ describe("WorkOS login continuation", () => {
 
   afterEach(() => vi.unstubAllEnvs());
 
-  it("preserves the normal database-free Preview bypass", async () => {
+  it("requires real credentials in Preview", async () => {
     const page = await LoginPage({ searchParams: Promise.resolve({}) });
-    expect(findElement(page, StagingAdminLoginForm)).not.toBeNull();
-    expect(findElement(page, LoginCredentialsForm)).toBeNull();
+    expect(findElement(page, LoginCredentialsForm)).not.toBeNull();
   });
 
   it("forces credentials and passes the canonical callback in Preview", async () => {
@@ -42,7 +39,6 @@ describe("WorkOS login continuation", () => {
     const page = await LoginPage({ searchParams: Promise.resolve({ callbackUrl }) });
     const credentials = findElement(page, LoginCredentialsForm);
 
-    expect(findElement(page, StagingAdminLoginForm)).toBeNull();
     expect(credentials?.props).toMatchObject({ callbackUrl });
   });
 
@@ -66,7 +62,6 @@ describe("WorkOS login continuation", () => {
   it("keeps production login on credentials and handles asynchronous error parameters", async () => {
     vi.stubEnv("VERCEL_ENV", "production");
     const page = await LoginPage({ searchParams: Promise.resolve({ error: ["missing"], callbackUrl: "https://untrusted.example.test" }) });
-    expect(findElement(page, StagingAdminLoginForm)).toBeNull();
     expect(findElement(page, LoginCredentialsForm)?.props).toMatchObject({
       callbackUrl: undefined, initialErrorMessage: "Inserisci email e password per accedere.",
     });

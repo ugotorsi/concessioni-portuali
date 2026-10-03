@@ -131,7 +131,7 @@ describe("tenant enforcement coverage", () => {
       expect.objectContaining({
         where: expect.objectContaining({
           concessione: expect.objectContaining({
-            OR: expect.any(Array),
+            enteId: { in: ["ente-a"] },
           }),
         }),
       }),
@@ -144,7 +144,7 @@ describe("tenant enforcement coverage", () => {
     expect(prismaMock.concessione.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
-          OR: expect.any(Array),
+          enteId: { in: ["ente-a"] },
         }),
       }),
     );
@@ -157,7 +157,7 @@ describe("tenant enforcement coverage", () => {
       expect.objectContaining({
         where: expect.objectContaining({
           concessione: expect.objectContaining({
-            OR: expect.any(Array),
+            enteId: { in: ["ente-a"] },
           }),
         }),
       }),

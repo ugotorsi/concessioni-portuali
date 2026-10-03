@@ -11,6 +11,7 @@ interface LoginCredentialsFormProps {
 export function LoginCredentialsForm({ initialErrorMessage, callbackUrl }: LoginCredentialsFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(initialErrorMessage);
+  const [mfaRequired, setMfaRequired] = useState(false);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -20,6 +21,7 @@ export function LoginCredentialsForm({ initialErrorMessage, callbackUrl }: Login
     const formData = new FormData(event.currentTarget);
     const email = String(formData.get("email") ?? "").trim().toLowerCase();
     const password = String(formData.get("password") ?? "");
+    const mfaCode = String(formData.get("mfaCode") ?? "").trim();
 
     if (!email || !password) {
       setErrorMessage("Inserisci email e password per accedere.");
@@ -30,9 +32,23 @@ export function LoginCredentialsForm({ initialErrorMessage, callbackUrl }: Login
     const result = await signIn("credentials", {
       email,
       password,
+      mfaCode: mfaRequired ? mfaCode : undefined,
       callbackUrl: callbackUrl ?? "/dashboard",
       redirect: false,
     });
+
+    if (result?.error === "MFA_REQUIRED") {
+      setMfaRequired(true);
+      setErrorMessage("Inserisci il codice generato dalla tua app Authenticator.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (result?.error === "MFA_RATE_LIMITED") {
+      setErrorMessage("Troppi tentativi MFA. Attendi prima di riprovare.");
+      setIsSubmitting(false);
+      return;
+    }
 
     if (!result || result.error) {
       setErrorMessage("Credenziali non valide o account temporaneamente bloccato.");
@@ -75,6 +91,22 @@ export function LoginCredentialsForm({ initialErrorMessage, callbackUrl }: Login
           placeholder="nome@organizzazione.it"
         />
       </label>
+      {mfaRequired ? (
+        <label className="grid gap-1 text-sm">
+          <span className="font-medium text-slate-700">Codice Authenticator</span>
+          <input
+            type="text"
+            name="mfaCode"
+            data-testid="login-mfa-code"
+            required
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            pattern="[0-9]{6}"
+            maxLength={6}
+            className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900"
+          />
+        </label>
+      ) : null}
       <label className="grid gap-1 text-sm">
         <span className="font-medium text-slate-700">Password</span>
         <input

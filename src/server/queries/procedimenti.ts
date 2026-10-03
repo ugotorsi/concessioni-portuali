@@ -767,7 +767,7 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
     try {
       requireTenantAccess(tenantContext, procedimento.concessione.enteId, {
         mode: "read",
-        allowWhenEnteMissing: true,
+        allowWhenEnteMissing: false,
       });
     } catch {
       return null;

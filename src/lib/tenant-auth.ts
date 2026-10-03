@@ -34,7 +34,7 @@ export function canReadTenantResource(
   }
 
   if (!resourceEnteId) {
-    return options?.allowWhenEnteMissing ?? true;
+    return options?.allowWhenEnteMissing ?? false;
   }
 
   return context.accessibleTenantIds.includes(resourceEnteId);
@@ -50,7 +50,7 @@ export function canWriteTenantResource(
   }
 
   if (!resourceEnteId) {
-    return options?.allowWhenEnteMissing ?? true;
+    return options?.allowWhenEnteMissing ?? false;
   }
 
   return context.accessibleTenantIds.includes(resourceEnteId);
@@ -147,7 +147,7 @@ export function buildTenantConcessioneWhere(
     return {};
   }
 
-  const allowWhenEnteMissing = options?.allowWhenEnteMissing ?? true;
+  const allowWhenEnteMissing = options?.allowWhenEnteMissing ?? false;
   const tenantIds = context.accessibleTenantIds;
 
   if (tenantIds.length === 0) {

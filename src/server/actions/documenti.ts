@@ -428,7 +428,7 @@ export async function archiveDocumentoAction(formData: FormData) {
     try {
       requireTenantAccess(tenantContext, resourceEnteId, {
         mode: "write",
-        allowWhenEnteMissing: true,
+        allowWhenEnteMissing: false,
       });
     } catch {
       await auditFailure({
@@ -625,7 +625,7 @@ export async function updateDocumentoMetadataAction(formData: FormData) {
     try {
       requireTenantAccess(tenantContext, resourceEnteId, {
         mode: "write",
-        allowWhenEnteMissing: true,
+        allowWhenEnteMissing: false,
       });
     } catch {
       await auditFailure({

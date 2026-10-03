@@ -71,7 +71,7 @@ describe("verticali queries", () => {
       expect.objectContaining({
         where: expect.objectContaining({
           concessionVertical: expect.any(String),
-          OR: expect.any(Array),
+          enteId: { in: ["ente-a"] },
         }),
       }),
     );

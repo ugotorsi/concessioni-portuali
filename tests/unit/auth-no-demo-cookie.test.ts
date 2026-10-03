@@ -7,6 +7,14 @@ vi.mock("next/headers", () => ({
   cookies: cookiesMock,
 }));
 
+vi.mock("@/lib/next-auth", () => ({
+  getAuthSession: vi.fn().mockResolvedValue(null),
+}));
+
+vi.mock("@/server/audit/auditLog", () => ({
+  auditSuccess: vi.fn().mockResolvedValue(undefined),
+}));
+
 import * as authModule from "@/lib/auth";
 import { GET } from "@/app/logout/route";
 

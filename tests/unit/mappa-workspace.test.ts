@@ -99,7 +99,7 @@ describe("mappa workspace", () => {
       criticitaAperte: 2,
       concessioniNonGeolocalizzate: 1,
     });
-    expect(prismaMock.concessione.findMany.mock.calls[0][0].where.OR).toEqual(expect.any(Array));
+    expect(prismaMock.concessione.findMany.mock.calls[0][0].where.enteId).toEqual({ in: ["ente-a"] });
   });
 
   it("keeps map behavior operational and fascicolo-first", () => {

@@ -1,5 +1,4 @@
 import type { Prisma } from "@/generated/prisma/client";
-import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { computeAuditHash, sanitizeMetadata } from "@/server/audit/hash";
 import { getAuditRequestContext, type AuditRequestContext } from "@/server/audit/requestContext";
@@ -49,6 +48,7 @@ async function resolveActor(actor?: AuditActor): Promise<Required<AuditActor>> {
     };
   }
 
+  const { getCurrentUser } = await import("@/lib/auth");
   const currentUser = await getCurrentUser();
 
   return {

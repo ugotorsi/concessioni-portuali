@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { canViewNormativa, getCurrentRole } from "@/lib/auth";
+import { isTrustedJsonMutation, untrustedMutationResponse } from "@/lib/request-security";
 import { OrchestrationInputError, resolveApplicableLegalRules } from "@/server/legal-rules/orchestrator";
 
 const inputSchema = z.object({
@@ -39,6 +40,10 @@ const inputSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  if (!isTrustedJsonMutation(request)) {
+    return untrustedMutationResponse();
+  }
+
   const role = await getCurrentRole();
   if (!role) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });

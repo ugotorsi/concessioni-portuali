@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { canManageProcedimenti, getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isTrustedJsonMutation, untrustedMutationResponse } from "@/lib/request-security";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 import {
@@ -29,6 +30,8 @@ export async function POST(
   request: Request,
   context: { params: Promise<{ id: string }> },
 ): Promise<Response> {
+  if (!isTrustedJsonMutation(request)) return untrustedMutationResponse();
+
   const user = await getCurrentUser();
   if (!user) return jsonError("Authentication required.", 401);
   if (!canManageProcedimenti(user.role)) return jsonError("Forbidden.", 403);

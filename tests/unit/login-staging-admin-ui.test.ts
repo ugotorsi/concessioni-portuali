@@ -5,34 +5,16 @@ import { describe, expect, it } from "vitest";
 
 import { resolveWorkosLoginCallback } from "@/server/auth/workos-login-callback";
 
-describe("staging admin login UI", () => {
-  it("enables preview-only bypass gate in login page", () => {
+describe("login security UI", () => {
+  it("never exposes a staging administrator bypass", () => {
     const source = readFileSync(resolve(process.cwd(), "src/app/login/page.tsx"), "utf8");
 
-    expect(source).toContain('process.env.STAGING_ADMIN_BYPASS === "true"');
-    expect(source).toContain('process.env.VERCEL_ENV === "preview"');
-    expect(source).toContain("Accesso amministratore - ambiente staging");
-    expect(source).toContain("Noetra - Area riservata - Ambiente Preview");
+    expect(source).not.toContain("STAGING_ADMIN_BYPASS");
+    expect(source).not.toContain("StagingAdminLoginForm");
+    expect(source).not.toContain("Accesso amministratore - ambiente staging");
+    expect(source).toContain("Noetra - Area riservata");
     expect(source).toContain('href="https://noetra.it"');
     expect(source).toContain("Torna a Noetra");
-  });
-
-  it("uses single staging admin button form without email/password fields", () => {
-    const pageSource = readFileSync(resolve(process.cwd(), "src/app/login/page.tsx"), "utf8");
-    const formSource = readFileSync(
-      resolve(process.cwd(), "src/components/forms/StagingAdminLoginForm.tsx"),
-      "utf8",
-    );
-
-    expect(pageSource).toContain("<StagingAdminLoginForm initialErrorMessage={errorMessage} />");
-    expect(formSource).toContain('signIn("credentials", {');
-    expect(formSource).toContain('stagingBypass: "true"');
-    expect(formSource).toContain("Entra come amministratore");
-
-    expect(formSource).not.toContain('name="email"');
-    expect(formSource).not.toContain('name="password"');
-    expect(formSource).not.toContain('type="email"');
-    expect(formSource).not.toContain('type="password"');
   });
 
   it("uses real credentials and preserves a validated WorkOS callback", () => {
@@ -42,7 +24,6 @@ describe("staging admin login UI", () => {
       "utf8",
     );
 
-    expect(pageSource).toContain("isStagingAdminBypassEnabled() && !trustedWorkosCallback");
     expect(pageSource).toContain("callbackUrl={trustedWorkosCallback ?? undefined}");
     expect(formSource).toContain('callbackUrl: callbackUrl ?? "/dashboard"');
     expect(formSource).toContain("window.location.assign(callbackUrl)");

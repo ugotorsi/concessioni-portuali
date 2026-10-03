@@ -80,8 +80,8 @@ describe("concessionari workspace", () => {
     expect(result.summary).toEqual({ concessionari: 1, concessioniAttive: 1, criticitaAperte: 1 });
 
     const query = prismaMock.concessionario.findMany.mock.calls[0][0];
-    expect(query.where.concessioni.some.OR).toEqual(expect.any(Array));
-    expect(query.select.concessioni.where.OR).toEqual(expect.any(Array));
+    expect(query.where.concessioni.some.enteId).toEqual({ in: ["ente-a"] });
+    expect(query.select.concessioni.where.enteId).toEqual({ in: ["ente-a"] });
   });
 
   it("returns detail relations without exposing unavailable fields", async () => {

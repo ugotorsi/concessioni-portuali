@@ -22,7 +22,7 @@ function makeRequest(path: string) {
   return new NextRequest(`https://example.test${path}`);
 }
 
-describe("middleware DB recon temporary endpoint bypass", () => {
+describe("middleware sensitive route boundaries", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     buildRateLimitKeyMock.mockReturnValue("rate-limit-key");
@@ -36,12 +36,12 @@ describe("middleware DB recon temporary endpoint bypass", () => {
     getTokenMock.mockResolvedValue(null);
   });
 
-  it("does not redirect exact /api/admin/db-recon-preview-temp", async () => {
+  it("protects the retired DB recon path like every admin route", async () => {
     const response = await middleware(makeRequest("/api/admin/db-recon-preview-temp"));
 
-    expect(response.status).toBe(200);
-    expect(response.headers.get("location")).toBeNull();
-    expect(getTokenMock).not.toHaveBeenCalled();
+    expect(response.status).toBe(307);
+    expect(new URL(response.headers.get("location")!).pathname).toBe("/login");
+    expect(getTokenMock).toHaveBeenCalledTimes(1);
   });
 
   it("allows the exact trusted mission route to perform bearer authentication", async () => {
