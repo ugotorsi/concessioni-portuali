@@ -115,6 +115,8 @@ describe("mappa workspace", () => {
     expect(workspace).toContain("leaflet.latLngBounds(points)");
     expect(workspace).toContain("map.fitBounds(bounds");
     expect(workspace).toContain("points.length === 1");
+    expect(workspace).toContain('marker.on("add", () => {');
+    expect(workspace).toContain('element?.setAttribute("aria-label", `Apri dettagli concessione ${item.numeroAtto}`)');
     expect(workspace).toContain('primary.href = `/procedimenti/${item.fascicoloId}`');
     expect(workspace).toContain('secondary.href = `/concessioni/${item.id}`');
     expect(workspace).toContain("item.concessionarioId === concessionarioId");

@@ -129,7 +129,18 @@ export function MappaWorkspace({ data }: MappaWorkspaceProps) {
           weight: 2,
           fillColor: "#0f6c79",
           fillOpacity: 1,
-        }).addTo(map);
+        });
+        marker.on("add", () => {
+          const element = marker.getElement();
+          element?.setAttribute("role", "button");
+          element?.setAttribute("tabindex", "0");
+          element?.setAttribute("aria-label", `Apri dettagli concessione ${item.numeroAtto}`);
+          element?.addEventListener("keydown", (event) => {
+            const keyboardEvent = event as KeyboardEvent;
+            if (keyboardEvent.key === "Enter" || keyboardEvent.key === " ") marker.openPopup();
+          });
+        });
+        marker.addTo(map);
 
         const popup = document.createElement("div");
         popup.className = "min-w-56 space-y-2 text-sm text-slate-800";
@@ -172,14 +183,6 @@ export function MappaWorkspace({ data }: MappaWorkspaceProps) {
 
         marker.bindPopup(popup, { maxWidth: 300, closeButton: true });
         marker.bindTooltip(`Concessione ${item.numeroAtto}`, { direction: "top", offset: [0, -8] });
-        const element = marker.getElement();
-        element?.setAttribute("role", "button");
-        element?.setAttribute("tabindex", "0");
-        element?.setAttribute("aria-label", `Apri dettagli concessione ${item.numeroAtto}`);
-        element?.addEventListener("keydown", (event) => {
-          const keyboardEvent = event as KeyboardEvent;
-          if (keyboardEvent.key === "Enter" || keyboardEvent.key === " ") marker.openPopup();
-        });
         markersRef.current.set(item.id, marker);
       }
 
