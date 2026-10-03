@@ -12,6 +12,9 @@ describe("staging admin login UI", () => {
     expect(source).toContain('process.env.STAGING_ADMIN_BYPASS === "true"');
     expect(source).toContain('process.env.VERCEL_ENV === "preview"');
     expect(source).toContain("Accesso amministratore - ambiente staging");
+    expect(source).toContain("Noetra - Area riservata - Ambiente Preview");
+    expect(source).toContain('href="https://noetra.it"');
+    expect(source).toContain("Torna a Noetra");
   });
 
   it("uses single staging admin button form without email/password fields", () => {

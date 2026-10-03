@@ -57,7 +57,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     <main className="min-h-screen bg-slate-100 px-4 py-10 sm:px-6">
       <div className="mx-auto w-full max-w-[1100px] rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
         <p className="text-xs uppercase tracking-[0.16em] text-slate-500">
-          {useStagingAdminBypass ? "Ambiente Preview non Production" : "Piattaforma interna"}
+          {useStagingAdminBypass ? "Noetra - Area riservata - Ambiente Preview" : "Noetra - Area riservata"}
         </p>
         <h1 className="mt-2 text-3xl font-semibold text-slate-900">
           {useStagingAdminBypass ? "Accesso amministratore - ambiente staging" : "Accesso alla piattaforma"}
@@ -81,6 +81,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             />
           )}
         </section>
+
+        <a
+          href="https://noetra.it"
+          className="mt-5 inline-flex min-h-10 items-center text-sm font-medium text-slate-600 underline decoration-slate-300 underline-offset-4 hover:text-slate-950"
+        >
+          Torna a Noetra
+        </a>
       </div>
     </main>
   );
