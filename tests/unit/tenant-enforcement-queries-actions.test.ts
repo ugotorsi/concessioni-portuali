@@ -80,7 +80,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { getDashboardData } from "@/server/queries/dashboard";
-import { getMappaDemoData } from "@/server/queries/mappa";
+import { getMappaWorkspaceData } from "@/server/queries/mappa";
 import { getPagamentiSummary } from "@/server/queries/pagamenti";
 import { getLatestAuditLogs } from "@/server/queries/audit";
 import { updatePagamentoAction } from "@/server/actions/pagamenti";
@@ -139,7 +139,7 @@ describe("tenant enforcement coverage", () => {
   });
 
   it("scopes mappa queries to accessible tenant concessions", async () => {
-    await getMappaDemoData();
+    await getMappaWorkspaceData();
 
     expect(prismaMock.concessione.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
