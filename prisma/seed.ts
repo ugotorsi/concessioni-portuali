@@ -10,6 +10,7 @@ import {
   mapTipologiaBeneToConcessionObjectType,
 } from "../src/lib/concession-vertical";
 import { resolveDemoEnteCodeForConcessione } from "../src/lib/tenant";
+import { assertDemoSeedAllowed } from "../src/lib/demo-seed-guard";
 import {
   GAP_KEY,
   RULE_CODE,
@@ -120,6 +121,7 @@ async function clearDemoData() {
 }
 
 async function main() {
+  assertDemoSeedAllowed(process.env);
   await clearDemoData();
 
   const demoCredentials: Array<{
