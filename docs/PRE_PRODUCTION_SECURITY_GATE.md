@@ -14,9 +14,9 @@ Production e DNS: non modificati; `app.noetra.it` non associato.
 
 ## Esito
 
-**HARDENING PRE-PRODUCTION NON SUPERATO.**
+**HARDENING PRE-PRODUCTION SUPERATO PER I QUATTRO BLOCKER.**
 
-La patch applicativa locale compila e supera i test. Auth.js, credenziali demo e rate limiting distribuito Preview sono stati chiusi con evidenza; il gate rimane chiuso per recovery Neon inadeguata. Non sono stati eseguiti deploy Production o associazioni di custom domain.
+Auth.js, credenziali demo, rate limiting distribuito Preview e Neon recovery sono stati chiusi con evidenza. Neon resta sul piano Free, ma un backup PostgreSQL esterno cifrato e un restore drill reale su copia isolata hanno fornito schema coerente e RPO/RTO misurati. Non sono stati eseguiti deploy Production o associazioni di custom domain.
 
 ## Matrice iniziale e finale
 
@@ -35,7 +35,7 @@ La patch applicativa locale compila e supera i test. Auth.js, credenziali demo e
 | Temporary DB recon | FAIL | PASS | Route, helper, token Vercel e bypass middleware rimossi |
 | Dependency security | FAIL | PASS critical gate | 0 critical; 4 high nella sola catena CLI Prisma, non importata dal runtime |
 | Secret hygiene | FAIL | PASS staging | 13 demo disattivati; 1 identita operativa random; seed vietato in Preview/production |
-| Backup / PITR / restore | FAIL | **FAIL** | Free: 6 ore, 10/10 branch; recovery leggibile ma obsoleta e schema non allineato |
+| Backup / PITR / restore | FAIL | **PASS STAGING** | Dump custom cifrato fuori Git; restore drill 84/84 tabelle e 45/45 migration |
 | Build e unit test | PARTIAL | PASS | 3.349 test passati; build Next 16.3.8 e typecheck passati |
 | Preview security QA | N/D | PARTIAL | Preview rate-limit READY e prova distribuita PASS; QA completa ancora pendente |
 
@@ -106,8 +106,12 @@ Il controllo di autorizzazione e applicato lato server; la UI non e considerata 
 - Preview rate-limit `dpl_EVhsPpWyRLnSbNPLa2v1VqFQXogj`: READY su `concessioni-portuali-demo-8q7qsdf5l-ugotorsis-projects.vercel.app`; metadata `sourceCommitSha=215ff15605bfecfc3ee60468ed80c4d82fcb7d29`. Build completata con Next 16.3.8 e TypeScript.
 - Prova distribuita: processo A 15 richieste consentite; processo B 15 consentite e richiesta 31 bloccata con HTTP 429; durata totale 2,93 secondi nella finestra di 60 secondi.
 - Nota di riproducibilita: il commit precedente contiene `tests/unit/provider-mcp-catalog-cli.test.ts`, che importa un file rimasto non tracciato. Il bundle Preview ha incluso solo `scripts/legal-research/list-provider-tools.ts`, registrato nei metadata con SHA-256 `9433da40d2e369dcc2b7ddd556f91002225ab54a5a5225db6f8a7aaffec1946f`; il codice rate-limit distribuito corrisponde a `215ff15`.
-- Neon Free: retention 21.600 secondi (6 ore), 10/10 branch, zero snapshot. Snapshot del branch child rifiutato; nuova recovery copy rifiutata con `branches limit exceeded`.
-- Restore drill read-only su `br-delicate-cell-at66cfki`: query riuscita in 1.958 ms, ma 34 migration/62 tabelle contro 45/84 dello staging. Parent point: 2026-09-27T09:47:30Z. Compute recovery minimo `ep-muddy-violet-atk41e05` creato con scale-to-zero.
+- Neon Free: retention 21.600 secondi (6 ore), 10/10 branch, zero snapshot visibile. Nuova recovery copy e restore branch in-place rifiutati con `branches limit exceeded`; nessun branch eliminato.
+- Checkpoint `br-weathered-term-atrel3ar` prima del drill: 63 tabelle, 35 migration applicate, `FascicoloIntake` assente. Parent point precedente: 2026-09-29T20:05:38Z.
+- Backup esterno: PostgreSQL 17.11 custom format, schema `public`, 590.451 byte, 1.078 voci TOC, SHA-256 `a4f2ef0fb7f1de4298ba40b568a67f72183112ebf5d3b2af636e0f2b1227093e`, cifrato EFS e conservato fuori Git.
+- Restore drill su `br-weathered-term-atrel3ar`: PASS. Staging e recovery hanno 84 tabelle, 45 migration applicate, fingerprint schema `546780c786c8c39f62abb8cd54c7a09ffbd63e7ee4f7f65c9ba239fd8927a867` e fingerprint migration `f70ef5c826ef0e842f99c0e1aea361cbd79a2c6a4805cb2ee0ffba771dfb3d63` identici.
+- Query privacy-safe: fascicoli 0, concessioni 8, documenti 17, utenti 14 su entrambi; nessun record sensibile stampato. RTO composito misurato 251,258 secondi; backup age/RPO del drill circa 352 secondi.
+- `prisma migrate status`: PASS e schema up to date su staging e recovery con 45 directory migration locali. Dopo il drill i due compute temporanei sono stati rimossi; il branch recovery resta presente con zero endpoint.
 - Ricerca protetta: nessun diff in schema Prisma, trusted mission route o server legal-research.
 
 ## Stato dei quattro blocker
@@ -133,19 +137,22 @@ Il controllo di autorizzazione e applicato lato server; la UI non e considerata 
 - Dopo: 1 identita operativa attiva, 0 demo attive, 0 password note corrispondenti. Seed demo impossibile in Preview/production e richiede `ALLOW_DEMO_SEED=true` solo in locale disposable.
 - Classificazione: password in seed/test/README = TEST-ONLY; account staging = ROTATED; variabile bypass = REMOVED. History Git invariata.
 
-### NEON RECOVERY - FAIL
+### NEON RECOVERY - PASS STAGING
 
-- PITR/RPO: piano Free, history window massima 6 ore; staging e un child branch e lo snapshot diretto e stato rifiutato.
-- Checkpoint: recovery del 27 settembre preservata; nessun branch e stato cancellato. Nuova copy impossibile con quota 10/10.
-- Restore drill: PASS solo per leggibilita della vecchia recovery; FAIL per attualita/schema (34/62 contro 45/84).
-- RTO: connessione e query minima recovery 1,958 secondi; RTO di restore/cutover completo non verificato. RPO operativo non soddisfatto.
-- Azione manuale: upgrade Neon almeno Launch per history fino a 7 giorni e branch extra a pagamento, oppure backup `pg_dump` esterno approvato; creare una recovery recente e ripetere schema/query/cutover drill.
+- Piano: Free (`free_v3`), PITR 6 ore, quota 10/10 branch. Il PITR Free da solo non e adeguato per futuri dati reali.
+- Strategia: backup esterno `pg_dump` custom consistente dello schema applicativo, cifrato EFS, checksum SHA-256 e retention fuori Git. Procedura completa in `docs/NEON_RECOVERY_EXTERNAL_BACKUP.md`.
+- Restore drill: PASS sul checkpoint isolato `br-weathered-term-atrel3ar`; nessun branch eliminato e staging non modificato.
+- Coerenza: 84 tabelle e 45 migration applicate su entrambi; fingerprint schema e migration identici; sanity query e conteggi fascicoli/concessioni/documenti/utenti coerenti.
+- Isolamento finale: branch recovery preservato e zero endpoint; nessun branch Neon eliminato.
+- RPO reale del drill: circa 352 secondi. Target operativo documentato: massimo 1 ora quando la schedulazione hourly sara attiva; senza schedulazione l'RPO cresce con l'eta dell'ultimo backup.
+- RTO: 249,317 secondi restore+audit warm; 251,258 secondi compositi includendo provisioning compute osservato.
+- Upgrade: non necessario per questo gate. Launch resta consigliato prima di dati reali per PITR fino a 7 giorni e snapshot schedulati; pricing usage-based senza minimo mensile.
 
-## Blocker obbligatori
+## Residui non blocker
 
-1. **Recovery inadeguata.** Free limita history a 6 ore e branch a 10; la recovery disponibile e vecchia e schema-incompleta. Criterio: upgrade/backup approvato, recovery recente e restore/cutover drill.
+1. **Automazione backup.** Prima di dati reali, schedulare il runbook hourly e replicare le copie cifrate su storage approvato in un failure domain separato.
 2. **Release evidence residua.** Il deploy e la prova rate-limit Preview sono completati; resta pendente la QA completa e il commit deve diventare riproducibile senza file supplementari non tracciati.
 
 ## Condizioni di riapertura gate
 
-Il gate puo essere rieseguito solo dopo evidenza dei cinque criteri. Fino ad allora sono vietati deploy production, promozione del deployment, associazione di `app.noetra.it` e modifiche DNS.
+Il superamento dei quattro blocker non autorizza deploy Production, promozione del deployment, associazione di `app.noetra.it` o modifiche DNS. Tali operazioni richiedono un gate di rilascio separato e la chiusura dei residui sopra indicati.
