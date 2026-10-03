@@ -5,7 +5,7 @@ export function getConcessionVerticalLabel(value: string): string {
     case "PORTUALE_ADSP":
       return "Portuale / AdSP";
     case "MARITTIMA_TURISTICO_RICREATIVA":
-      return "Sottoambito marittimo turistico-ricreativo";
+      return "Marittima turistico-ricreativa";
     case "ALTRA_CONCESSIONE_DEMANIALE":
       return "Altro demanio";
     default:

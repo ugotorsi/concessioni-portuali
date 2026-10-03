@@ -16,7 +16,6 @@ const prismaMock = vi.hoisted(() => ({
     count: vi.fn(),
   },
   procedimento: {
-    groupBy: vi.fn(),
     count: vi.fn(),
   },
   documento: {
@@ -58,7 +57,6 @@ describe("verticali queries", () => {
     prismaMock.concessione.findMany.mockResolvedValue([]);
     prismaMock.criticita.groupBy.mockResolvedValue([]);
     prismaMock.scadenza.groupBy.mockResolvedValue([]);
-    prismaMock.procedimento.groupBy.mockResolvedValue([]);
     prismaMock.criticita.count.mockResolvedValue(0);
     prismaMock.scadenza.count.mockResolvedValue(0);
     prismaMock.procedimento.count.mockResolvedValue(0);
@@ -119,15 +117,18 @@ describe("verticali queries", () => {
         concessionario: {
           denominazione: "Demo Srl",
         },
+        procedimenti: [
+          { id: "proc-2", tipologia: "DIFFIDA", stato: "IN_CORSO" },
+          { id: "proc-1", tipologia: "CHIARIMENTI", stato: "DA_AVVIARE" },
+        ],
       },
     ]);
     prismaMock.criticita.groupBy.mockResolvedValue([{ concessioneId: "con-1", _count: { _all: 2 } }]);
     prismaMock.scadenza.groupBy.mockResolvedValue([{ concessioneId: "con-1", _count: { _all: 1 } }]);
-    prismaMock.procedimento.groupBy.mockResolvedValue([{ concessioneId: "con-1", _count: { _all: 3 } }]);
     prismaMock.concessione.count.mockResolvedValue(1);
     prismaMock.criticita.count.mockResolvedValue(2);
     prismaMock.scadenza.count.mockResolvedValue(1);
-    prismaMock.procedimento.count.mockResolvedValue(3);
+    prismaMock.procedimento.count.mockResolvedValue(2);
     prismaMock.documento.count.mockResolvedValue(4);
     prismaMock.report.count.mockResolvedValue(5);
 
@@ -139,11 +140,44 @@ describe("verticali queries", () => {
       concessioni: 1,
       criticitaAperte: 2,
       scadenzeAperteScadute: 1,
-      procedimentiInCorso: 3,
+      fascicoli: 2,
+      procedimentiInCorso: 2,
       documenti: 4,
       report: 5,
     });
     expect(result?.concessioni[0]?.criticitaAperteCount).toBe(2);
+    expect(result?.concessioni[0]?.fascicoli).toEqual([
+      { id: "proc-2", tipologia: "DIFFIDA", stato: "IN_CORSO" },
+      { id: "proc-1", tipologia: "CHIARIMENTI", stato: "DA_AVVIARE" },
+    ]);
+    expect(prismaMock.concessione.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        select: expect.objectContaining({
+          procedimenti: {
+            orderBy: [{ updatedAt: "desc" }],
+            select: { id: true, tipologia: true, stato: true },
+          },
+        }),
+      }),
+    );
+  });
+
+  it("keeps concessions without linked fascicoli explicit", async () => {
+    prismaMock.concessione.findMany.mockResolvedValue([
+      {
+        id: "con-empty",
+        numeroAtto: "CP-EMPTY",
+        stato: "ATTIVA",
+        dataScadenza: new Date("2027-01-01T00:00:00.000Z"),
+        ubicazione: null,
+        concessionario: { denominazione: "Demo Srl" },
+        procedimenti: [],
+      },
+    ]);
+
+    const result = await getVerticaleWorkspaceBySlug("portuale-adsp");
+
+    expect(result?.concessioni[0]?.fascicoli).toEqual([]);
   });
 
   it("reports configured and represented vertical counts in dashboard summary", async () => {

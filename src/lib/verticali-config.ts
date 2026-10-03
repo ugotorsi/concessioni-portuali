@@ -19,17 +19,17 @@ const VERTICAL_SLUG_BY_VALUE: Record<ConcessionVerticalValue, string> = {
 
 const VERTICAL_DESCRIPTION_BY_VALUE: Record<ConcessionVerticalValue, string> = {
   PORTUALE_ADSP:
-    "Gestione operativa concessioni portuali con presidio su scadenze, criticita istruttorie e monitoraggio dei rapporti in area AdSP.",
+    "Concessioni portuali ricadenti nel perimetro delle Autorita di sistema portuale.",
   MARITTIMA_TURISTICO_RICREATIVA:
-    "Sottoambito della verticale demaniale marittimo-costiera, con attenzione a uso del bene, stagionalita e procedimenti correlati.",
+    "Perimetro concessorio autonomo per gli usi turistico-ricreativi del demanio marittimo-costiero.",
   ALTRA_CONCESSIONE_DEMANIALE:
-    "Perimetro residuale per concessioni demaniali marittimo-costiere non riconducibili ai sottoambiti principali, con monitoraggio operativo centralizzato.",
+    "Concessioni demaniali non ricomprese nei perimetri portuale e turistico-ricreativo.",
 };
 
 const VERTICAL_COVERAGE_BY_VALUE: Record<ConcessionVerticalValue, string> = {
-  PORTUALE_ADSP: "Perimetro configurato",
-  MARITTIMA_TURISTICO_RICREATIVA: "Perimetro configurato",
-  ALTRA_CONCESSIONE_DEMANIALE: "Perimetro configurato",
+  PORTUALE_ADSP: "Configurata",
+  MARITTIMA_TURISTICO_RICREATIVA: "Configurata",
+  ALTRA_CONCESSIONE_DEMANIALE: "Configurata",
 };
 
 export const VERTICALI_CONFIG: VerticaleConfigItem[] = CONCESSION_VERTICAL_VALUES.map((value) => ({
