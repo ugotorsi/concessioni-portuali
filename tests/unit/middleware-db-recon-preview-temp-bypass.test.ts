@@ -44,6 +44,15 @@ describe("middleware sensitive route boundaries", () => {
     expect(getTokenMock).toHaveBeenCalledTimes(1);
   });
 
+  it("fails closed when token parsing throws", async () => {
+    getTokenMock.mockRejectedValueOnce(new URIError("Malformed bearer token"));
+
+    const response = await middleware(makeRequest("/api/admin/runtime-health"));
+
+    expect(response.status).toBe(307);
+    expect(new URL(response.headers.get("location")!).pathname).toBe("/login");
+  });
+
   it("allows the exact trusted mission route to perform bearer authentication", async () => {
     const response = await middleware(makeRequest("/api/legal-research/trusted/mission"));
 

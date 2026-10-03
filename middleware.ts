@@ -148,7 +148,12 @@ export async function middleware(request: NextRequest) {
     return withSecurityHeaders(NextResponse.next());
   }
 
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+  let token = null;
+  try {
+    token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+  } catch {
+    token = null;
+  }
   const role = typeof token?.role === "string" ? token.role : null;
 
   if (!role) {

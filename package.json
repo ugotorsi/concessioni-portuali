@@ -33,6 +33,11 @@
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
+  "overrides": {
+    "next-auth": {
+      "@auth/core": "0.41.3"
+    }
+  },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.3",
     "@aws-sdk/client-s3": "^3.1088.0",
@@ -57,7 +62,6 @@
     "pdfjs-dist": "5.4.149",
     "pdfkit": "^0.19.1",
     "pg": "latest",
-    "prisma": "latest",
     "qrcode": "^1.5.4",
     "react": "latest",
     "react-dom": "latest",
@@ -79,6 +83,7 @@
     "eslint": "latest",
     "eslint-config-next": "latest",
     "playwright": "^1.61.1",
+    "prisma": "latest",
     "tailwindcss": "latest",
     "tsx": "latest",
     "typescript": "latest",
