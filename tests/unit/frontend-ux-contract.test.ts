@@ -23,6 +23,7 @@ describe("frontend UX contract", () => {
     expect(source).toContain('role === "VIEWER_ADSP" ? adspNavItems : backofficeNavItems');
     expect(source).toContain('label: "Portale AdSP"');
     expect(source).toContain('aria-current={isActive ? "page" : undefined}');
+    expect(source.match(/<LogoutButton \/>/g)).toHaveLength(2);
     expect(source).not.toContain("Cambia profilo");
   });
 
@@ -39,6 +40,11 @@ describe("frontend UX contract", () => {
     expect(source).toContain('href="/criticita?gravita=URGENTE"');
     expect(source).toContain('href="/pagamenti?criticita=MOROSITA"');
     expect(source).toContain('href="/procedimenti?stato=IN_CORSO"');
+    expect(source).toContain('title="Fascicoli recenti"');
+    expect(source).toContain("buildDashboardFascicoloHref(item.fascicoloId, item.section)");
+    expect(source).toContain("buildDashboardFascicoloHref(item.id)");
+    expect(source).toContain("Apri il fascicolo");
+    expect(source).not.toContain(">Apri<");
     for (const removed of ["Criticità prioritarie", "Scadenze imminenti", "Morosità e pagamenti critici", "Azioni consigliate", "Fonti normative", "Norme in consultazione"]) {
       expect(source).not.toContain(removed);
     }

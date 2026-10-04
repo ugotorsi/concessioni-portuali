@@ -57,6 +57,7 @@ export interface DashboardSummary {
 
 export interface DashboardCriticitaItem {
   id: string;
+  fascicoloId: string | null;
   gravita: string;
   tipologia: string;
   concessione: string;
@@ -68,6 +69,7 @@ export interface DashboardCriticitaItem {
 
 export interface DashboardScadenzaItem {
   id: string;
+  fascicoloId: string | null;
   data: Date;
   tipologia: string;
   concessione: string;
@@ -77,6 +79,7 @@ export interface DashboardScadenzaItem {
 
 export interface DashboardPagamentoItem {
   id: string;
+  fascicoloId: string | null;
   concessione: string;
   anno: number;
   importoDovuto: number;
@@ -93,6 +96,7 @@ export interface DashboardProcedimentoItem {
   stato: string;
   termineContraddittorio: Date | null;
   riferimentoNormativo: string | null;
+  updatedAt: Date;
 }
 
 export interface DashboardData {
@@ -237,9 +241,24 @@ export async function getDashboardData(): Promise<DashboardData> {
           riferimentoNormativo: true,
           stato: true,
           dataRilevazione: true,
+          procedimenti: {
+            orderBy: { updatedAt: "desc" },
+            take: 1,
+            select: { id: true },
+          },
           concessione: {
             select: {
               numeroAtto: true,
+              procedimenti: {
+                orderBy: { updatedAt: "desc" },
+                take: 1,
+                select: { id: true },
+              },
+              fascicoliIntake: {
+                orderBy: { updatedAt: "desc" },
+                take: 1,
+                select: { id: true },
+              },
             },
           },
         },
@@ -261,6 +280,16 @@ export async function getDashboardData(): Promise<DashboardData> {
           concessione: {
             select: {
               numeroAtto: true,
+              procedimenti: {
+                orderBy: { updatedAt: "desc" },
+                take: 1,
+                select: { id: true },
+              },
+              fascicoliIntake: {
+                orderBy: { updatedAt: "desc" },
+                take: 1,
+                select: { id: true },
+              },
             },
           },
         },
@@ -283,6 +312,16 @@ export async function getDashboardData(): Promise<DashboardData> {
           concessione: {
             select: {
               numeroAtto: true,
+              procedimenti: {
+                orderBy: { updatedAt: "desc" },
+                take: 1,
+                select: { id: true },
+              },
+              fascicoliIntake: {
+                orderBy: { updatedAt: "desc" },
+                take: 1,
+                select: { id: true },
+              },
             },
           },
         },
@@ -294,7 +333,7 @@ export async function getDashboardData(): Promise<DashboardData> {
           },
           ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
         },
-        orderBy: [{ dataScadenzaContraddittorio: "asc" }, { createdAt: "desc" }],
+        orderBy: { updatedAt: "desc" },
         take: 5,
         select: {
           id: true,
@@ -302,6 +341,7 @@ export async function getDashboardData(): Promise<DashboardData> {
           stato: true,
           riferimentoNormativo: true,
           dataScadenzaContraddittorio: true,
+          updatedAt: true,
           concessione: {
             select: {
               numeroAtto: true,
@@ -366,9 +406,18 @@ export async function getDashboardData(): Promise<DashboardData> {
     riferimentoNormativo: string | null;
     stato: string;
     dataRilevazione: Date;
-    concessione: { numeroAtto: string };
+    procedimenti: Array<{ id: string }>;
+    concessione: {
+      numeroAtto: string;
+      procedimenti: Array<{ id: string }>;
+      fascicoliIntake: Array<{ id: string }>;
+    };
   }) => ({
     id: item.id,
+    fascicoloId: item.procedimenti[0]?.id
+      ?? item.concessione.procedimenti[0]?.id
+      ?? item.concessione.fascicoliIntake[0]?.id
+      ?? null,
     gravita: item.gravita,
     tipologia: item.tipologia,
     concessione: item.concessione.numeroAtto,
@@ -383,9 +432,16 @@ export async function getDashboardData(): Promise<DashboardData> {
     dataScadenza: Date;
     tipologia: string;
     stato: string;
-    concessione: { numeroAtto: string };
+    concessione: {
+      numeroAtto: string;
+      procedimenti: Array<{ id: string }>;
+      fascicoliIntake: Array<{ id: string }>;
+    };
   }) => ({
     id: item.id,
+    fascicoloId: item.concessione.procedimenti[0]?.id
+      ?? item.concessione.fascicoliIntake[0]?.id
+      ?? null,
     data: item.dataScadenza,
     tipologia: item.tipologia,
     concessione: item.concessione.numeroAtto,
@@ -400,13 +456,20 @@ export async function getDashboardData(): Promise<DashboardData> {
     importoVersato: number;
     stato: string;
     dataScadenza: Date;
-    concessione: { numeroAtto: string };
+    concessione: {
+      numeroAtto: string;
+      procedimenti: Array<{ id: string }>;
+      fascicoliIntake: Array<{ id: string }>;
+    };
   }) => {
     const dovuto = Number(item.importoDovuto);
     const versato = Number(item.importoVersato);
 
     return {
       id: item.id,
+      fascicoloId: item.concessione.procedimenti[0]?.id
+        ?? item.concessione.fascicoliIntake[0]?.id
+        ?? null,
       concessione: item.concessione.numeroAtto,
       anno: item.annoRiferimento,
       importoDovuto: dovuto,
@@ -423,6 +486,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     stato: string;
     riferimentoNormativo: string | null;
     dataScadenzaContraddittorio: Date | null;
+    updatedAt: Date;
     concessione: { numeroAtto: string };
   }) => ({
     id: item.id,
@@ -431,6 +495,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     stato: item.stato,
     termineContraddittorio: item.dataScadenzaContraddittorio,
     riferimentoNormativo: item.riferimentoNormativo,
+    updatedAt: item.updatedAt,
   }));
 
   const azioniConsigliate: string[] = [];

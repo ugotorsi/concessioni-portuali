@@ -85,6 +85,9 @@ export function Sidebar({ role, roleLabel }: SidebarProps) {
         </summary>
         <div className="max-h-[calc(100vh-3.5rem)] overflow-y-auto border-t border-slate-800 px-3 py-4">
           {navigation}
+          <div className="mt-3 border-t border-slate-800 pt-3">
+            <LogoutButton />
+          </div>
         </div>
       </details>
 
