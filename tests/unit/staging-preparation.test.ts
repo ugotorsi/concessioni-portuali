@@ -6,6 +6,45 @@ import { describe, expect, it, vi } from "vitest";
 const require = createRequire(import.meta.url);
 const operations = require("../../scripts/legal-research/staging-operations.cjs");
 const preparation = require("../../scripts/legal-research/prepare-staging.cjs");
+const { trustedStagingIdentity } = require("../../scripts/legal-research/trusted-staging-identity.cjs");
+
+function stagingConfig(overrides: Record<string, unknown> = {}) {
+  return {
+    environment: "preview",
+    nonProductionConfirmed: true,
+    vercelProjectId: trustedStagingIdentity.vercelProjectId,
+    vercelTeamId: trustedStagingIdentity.vercelTeamScope,
+    neonProjectId: trustedStagingIdentity.neonProjectId,
+    neonBranchId: trustedStagingIdentity.neonBranchId,
+    neonSourceHead: "synthetic-head",
+    databaseHost: "synthetic-staging.invalid",
+    databaseName: "synthetic",
+    previewOrigin: `https://${trustedStagingIdentity.stagingAlias}`,
+    workosIssuer: "https://synthetic-issuer.invalid",
+    productionOrigins: ["https://synthetic-production.invalid"],
+    productionDatabaseHosts: ["synthetic-production-db.invalid"],
+    ...overrides,
+  };
+}
+
+function vercelProject() {
+  return {
+    id: trustedStagingIdentity.vercelProjectId,
+    name: trustedStagingIdentity.vercelProjectName,
+  };
+}
+
+function vercelDeployment(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "synthetic-deployment",
+    projectId: trustedStagingIdentity.vercelProjectId,
+    target: null,
+    readyState: "READY",
+    url: "synthetic-preview.invalid",
+    meta: { stagingReleaseId: "synthetic-release" },
+    ...overrides,
+  };
+}
 
 describe("controlled staging preparation offline", () => {
   it.each(["plan", ...operations.actions])("defaults to no network and no mutation: %s", (action) => {
@@ -17,14 +56,37 @@ describe("controlled staging preparation offline", () => {
 
   it("rejects incomplete and production targets", () => {
     expect(() => operations.validateTarget({})).toThrow("NON_PRODUCTION_CONFIRMATION_REQUIRED");
-    const config = { environment: "preview", nonProductionConfirmed: true, vercelProjectId: "synthetic-project",
-      vercelTeamId: "synthetic-team", neonProjectId: "synthetic-neon", neonBranchId: "synthetic-branch", neonSourceHead: "synthetic-head",
-      databaseHost: "synthetic-staging.invalid", databaseName: "synthetic", previewOrigin: "https://synthetic-staging.invalid",
-      workosIssuer: "https://synthetic-issuer.invalid", productionOrigins: ["https://synthetic-production.invalid"],
-      productionDatabaseHosts: ["synthetic-production-db.invalid"] };
+    const config = stagingConfig();
     expect(operations.validateTarget(config)).toBe(config.previewOrigin);
-    expect(() => operations.validateTarget({ ...config, previewOrigin: config.productionOrigins[0] })).toThrow("PRODUCTION_OR_DEMO_TARGET_FORBIDDEN");
+    expect(() => operations.validateTarget({ ...config, previewOrigin: config.productionOrigins[0] })).toThrow("TRUSTED_STAGING_IDENTITY_MISMATCH");
     expect(() => operations.validateTarget({ ...config, databaseHost: config.productionDatabaseHosts[0] })).toThrow("PRODUCTION_OR_DEMO_TARGET_FORBIDDEN");
+  });
+
+  it("fails closed when declared Vercel or Neon identities differ from the trusted staging allowlist", () => {
+    expect(() => operations.validateTarget(stagingConfig({ vercelProjectId: "production-project" })))
+      .toThrow("TRUSTED_STAGING_IDENTITY_MISMATCH");
+    expect(() => operations.validateTarget(stagingConfig({ vercelTeamId: "production-team" })))
+      .toThrow("TRUSTED_STAGING_IDENTITY_MISMATCH");
+    expect(() => operations.validateTarget(stagingConfig({ neonProjectId: "production-neon" })))
+      .toThrow("TRUSTED_STAGING_IDENTITY_MISMATCH");
+    expect(() => operations.validateTarget(stagingConfig({ neonBranchId: "production-branch" })))
+      .toThrow("TRUSTED_STAGING_IDENTITY_MISMATCH");
+  });
+
+  it("allows only the single trusted staging alias", () => {
+    expect(() => operations.validateTarget(stagingConfig({ previewOrigin: "https://other-preview.invalid" })))
+      .toThrow("TRUSTED_STAGING_IDENTITY_MISMATCH");
+    expect(() => operations.validateTarget(stagingConfig({
+      previewOrigin: `https://${trustedStagingIdentity.stagingAlias}:444`,
+    }))).toThrow("TRUSTED_STAGING_IDENTITY_MISMATCH");
+  });
+
+  it("does not let nonProductionConfirmed bypass the trusted identity", () => {
+    expect(() => operations.validateTarget(stagingConfig({
+      nonProductionConfirmed: true,
+      vercelProjectId: "production-project",
+      neonBranchId: "production-branch",
+    }))).toThrow("TRUSTED_STAGING_IDENTITY_MISMATCH");
   });
 
   it("compares names, checksums and exact pending suffix without inventing ledger state", () => {
@@ -40,17 +102,66 @@ describe("controlled staging preparation offline", () => {
 
   it("rejects production or cross-project deployment metadata before using the deployment", async () => {
     vi.stubEnv("STAGING_VERCEL_TOKEN", "synthetic-verification-token");
-    const config = { vercelProjectId: "synthetic-project", vercelTeamId: "synthetic-team", productionOrigins: ["https://synthetic-production.invalid"] };
-    const response = { id: "synthetic-deployment", projectId: "synthetic-project", target: null, readyState: "READY",
-      url: "synthetic-preview.invalid", meta: { stagingReleaseId: "synthetic-release" } };
-    const fetchMock = vi.fn(async () => Response.json(response));
+    const config = stagingConfig();
+    const response = vercelDeployment();
+    const fetchMock = vi.fn<typeof globalThis.fetch>();
     vi.stubGlobal("fetch", fetchMock);
     try {
+      fetchMock.mockResolvedValueOnce(Response.json(vercelProject())).mockResolvedValueOnce(Response.json(response));
       await expect(operations.deploymentMetadata(config, response.id)).resolves.toMatchObject({ id: response.id, releaseId: "synthetic-release" });
-      fetchMock.mockResolvedValueOnce(Response.json({ ...response, target: "production" }));
+      fetchMock.mockResolvedValueOnce(Response.json(vercelProject()))
+        .mockResolvedValueOnce(Response.json({ ...response, target: "production" }));
       await expect(operations.deploymentMetadata(config, response.id)).rejects.toThrow("DEPLOYMENT_NOT_AUTHORIZED_PREVIEW");
-      fetchMock.mockResolvedValueOnce(Response.json({ ...response, projectId: "other-project" }));
+      fetchMock.mockResolvedValueOnce(Response.json(vercelProject()))
+        .mockResolvedValueOnce(Response.json({ ...response, projectId: "other-project" }));
       await expect(operations.deploymentMetadata(config, response.id)).rejects.toThrow("DEPLOYMENT_NOT_AUTHORIZED_PREVIEW");
+    } finally { vi.unstubAllGlobals(); vi.unstubAllEnvs(); }
+  });
+
+  it("rejects mismatched externally attested Vercel project metadata", async () => {
+    vi.stubEnv("STAGING_VERCEL_TOKEN", "synthetic-verification-token");
+    const fetchMock = vi.fn(async () => Response.json({ ...vercelProject(), id: "production-project" }));
+    vi.stubGlobal("fetch", fetchMock);
+    try {
+      await expect(operations.deploymentMetadata(stagingConfig(), "synthetic-deployment"))
+        .rejects.toThrow("VERCEL_PROJECT_IDENTITY_MISMATCH");
+      expect(fetchMock).toHaveBeenCalledOnce();
+    } finally { vi.unstubAllGlobals(); vi.unstubAllEnvs(); }
+  });
+
+  it("rejects database hosts not externally attested to the trusted Neon branch", async () => {
+    vi.stubEnv("STAGING_NEON_API_KEY", "synthetic-neon-token");
+    vi.stubEnv("STAGING_DATABASE_URL", "postgresql://user:password@manipulated.invalid/synthetic");
+    const fetchMock = vi.fn<typeof globalThis.fetch>()
+      .mockResolvedValueOnce(Response.json({ project: { id: trustedStagingIdentity.neonProjectId } }))
+      .mockResolvedValueOnce(Response.json({ branch: {
+        id: trustedStagingIdentity.neonBranchId,
+        project_id: trustedStagingIdentity.neonProjectId,
+      } }))
+      .mockResolvedValueOnce(Response.json({ endpoints: [{
+        id: "synthetic-endpoint",
+        project_id: trustedStagingIdentity.neonProjectId,
+        branch_id: trustedStagingIdentity.neonBranchId,
+        host: "actual-staging.invalid",
+      }] }));
+    vi.stubGlobal("fetch", fetchMock);
+    try {
+      await expect(operations.neonTargetMetadata(stagingConfig({ databaseHost: "manipulated.invalid" })))
+        .rejects.toThrow("NEON_DATABASE_IDENTITY_MISMATCH");
+    } finally { vi.unstubAllGlobals(); vi.unstubAllEnvs(); }
+  });
+
+  it("denies real operations when external Vercel or Neon attestation is unavailable", async () => {
+    vi.stubEnv("STAGING_VERCEL_TOKEN", "synthetic-verification-token");
+    vi.stubEnv("STAGING_NEON_API_KEY", "synthetic-neon-token");
+    vi.stubEnv("STAGING_DATABASE_URL", "postgresql://user:password@synthetic-staging.invalid/synthetic");
+    const fetchMock = vi.fn(async () => { throw new Error("synthetic network failure"); });
+    vi.stubGlobal("fetch", fetchMock);
+    try {
+      await expect(operations.deploymentMetadata(stagingConfig(), "synthetic-deployment"))
+        .rejects.toThrow("VERCEL_METADATA_UNAVAILABLE");
+      await expect(operations.neonTargetMetadata(stagingConfig()))
+        .rejects.toThrow("NEON_METADATA_UNAVAILABLE");
     } finally { vi.unstubAllGlobals(); vi.unstubAllEnvs(); }
   });
 
