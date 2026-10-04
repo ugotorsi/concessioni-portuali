@@ -44,6 +44,15 @@ export function LoginCredentialsForm({ initialErrorMessage, callbackUrl }: Login
       return;
     }
 
+    if (result?.error === "MFA_INVALID") {
+      setMfaRequired(true);
+      setErrorMessage(
+        "Codice Authenticator non valido o scaduto. Inserisci il codice corrente e riprova.",
+      );
+      setIsSubmitting(false);
+      return;
+    }
+
     if (result?.error === "MFA_RATE_LIMITED") {
       setErrorMessage("Troppi tentativi MFA. Attendi prima di riprovare.");
       setIsSubmitting(false);
