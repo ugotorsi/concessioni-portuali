@@ -328,6 +328,25 @@ export const authOptions: NextAuthOptions = {
         },
       }).catch(() => undefined);
     },
+    async signOut(message) {
+      const token = "token" in message ? message.token : null;
+      const userId = typeof token?.id === "string" ? token.id : undefined;
+
+      if (!userId) {
+        return;
+      }
+
+      await auditSuccess({
+        azione: "AUTH_LOGOUT",
+        entita: "User",
+        entitaId: userId,
+        actor: {
+          userId,
+          userEmail: typeof token?.email === "string" ? token.email : undefined,
+          userRole: typeof token?.role === "string" ? token.role : undefined,
+        },
+      }).catch(() => undefined);
+    },
   },
 };
 

@@ -4,7 +4,6 @@ import type { ComponentType } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  DoorOpen,
   FolderOpen,
   Layers,
   LayoutDashboard,
@@ -16,6 +15,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import type { DemoRole } from "@/lib/auth";
+import { LogoutButton } from "@/components/auth/LogoutButton";
 import { isNavItemActive, type NavMatchMode } from "@/components/layout/nav-active";
 
 interface NavItem {
@@ -97,14 +97,7 @@ export function Sidebar({ role, roleLabel }: SidebarProps) {
         <div className="flex-1 overflow-y-auto px-3 py-4">{navigation}</div>
         <div className="border-t border-slate-800 px-3 py-3">
         <div className="grid gap-1">
-          <Link
-            href="/logout"
-            data-testid="logout-link"
-            className="inline-flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-800 hover:text-white"
-          >
-            <DoorOpen className="h-4 w-4" aria-hidden="true" />
-            <span>Logout</span>
-          </Link>
+          <LogoutButton />
         </div>
         </div>
       </aside>
