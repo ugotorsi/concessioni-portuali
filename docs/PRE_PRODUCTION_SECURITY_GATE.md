@@ -6,7 +6,7 @@ Checkout autorizzato: `C:\Users\ugoto\AppData\Local\Temp\concessioni-trusted-rel
 
 Branch verificato: `security-hardening-final-integration`
 
-Implementation SHA verificato: `c947a5591d9e42d1802617dc8b29526fd5a0e51a`
+Implementation SHA verificato: `24b768d02d84c7c66a093ab31460bb91c4e81aec`
 
 Target consentito: Vercel Preview `staging-operativo` / Neon branch `staging-operativo`
 
@@ -14,9 +14,9 @@ Production e DNS: non modificati; `app.noetra.it` non associato.
 
 ## Esito
 
-**HARDENING PRE-PRODUCTION NON SUPERATO.**
+**HARDENING PRE-PRODUCTION SUPERATO FINO ALLO STOP PRE-PUSH.**
 
-Auth.js, credenziali demo, rate limiting distribuito Preview e Neon recovery restano chiusi con evidenza. Il consolidamento finale ha pero rilevato due test tracciati che importano script provider/staging assenti dal DAG di release e presenti soltanto come file non tracciati nel checkout originario. Il typecheck, la suite completa e il build non sono quindi verdi sullo SHA riproducibile. Gli script ricadono nella superficie provider protetta e non sono stati aggiunti o modificati. Non sono stati eseguiti push, deploy, modifiche Production o associazioni di custom domain.
+Auth.js, credenziali demo, rate limiting distribuito Preview e Neon recovery restano chiusi con evidenza. Il blocker di completezza della release e stato risolto includendo i companion richiesti dai test e ancorando ogni operazione staging reale a un'identita Vercel/Neon versionata, allowlist-based e attestata esternamente. Typecheck, suite completa, build e security suite sono verdi su clean checkout. Non sono stati eseguiti push, deploy, modifiche Production o associazioni di custom domain.
 
 ## Matrice iniziale e finale
 
@@ -36,8 +36,8 @@ Auth.js, credenziali demo, rate limiting distribuito Preview e Neon recovery res
 | Dependency security | FAIL | PASS critical gate | 0 critical; 4 high nella sola catena CLI Prisma, non importata dal runtime |
 | Secret hygiene | FAIL | PASS staging | 13 demo disattivati; 1 identita operativa random; seed vietato in Preview/production |
 | Backup / PITR / restore | FAIL | **PASS STAGING** | Dump custom cifrato fuori Git; restore drill 84/84 tabelle e 45/45 migration |
-| Build e unit test | PARTIAL | **FAIL** | 228 file e 3.324 test passano, ma 2 suite non si caricano; typecheck e build falliscono sugli stessi import mancanti |
-| Preview security QA | N/D | **BLOCKED** | Nessun push/deploy finale eseguito; resta valida solo l'evidenza Preview precedente |
+| Build e unit test | PARTIAL | **PASS** | 230 file e 3.355 test passati; 1 file e 5 test skipped; typecheck e build PASS |
+| Preview security QA | N/D | **PENDING** | Push/deploy finale non ancora autorizzati; resta valida l'evidenza Preview precedente |
 
 ## Stato finale controlli
 
@@ -57,16 +57,18 @@ Auth.js, credenziali demo, rate limiting distribuito Preview e Neon recovery res
 
 ## Consolidamento finale 2026-10-04
 
-- DAG hardening lineare e completo da `2111445` a `c947a55`; `origin/staging-operativo` resta su `2111445` e non contiene aggiornamenti successivi.
+- DAG hardening e remediation lineare da `2111445` a `24b768d`; `origin/staging-operativo` resta su `2111445`.
 - `npm audit --omit=dev`: 9 vulnerabilita, 0 critical, 4 high, 5 moderate.
 - High residue: `deepmerge-ts` (`GHSA-ggr8-5vv4-36mx`) e `mysql2` (`GHSA-3f6p-5ww8-9rcr`, `GHSA-rgwj-5xj2-c3m3`) tramite `@prisma/config` / `prisma` CLI. `npm audit fix --force` propone il downgrade breaking a Prisma 6.19.3.
 - Suite security mirata: PASS, 15 file e 90 test.
-- Suite completa: FAIL, 228 file passati, 1 skipped, 2 falliti al caricamento; 3.324 test passati e 5 skipped.
-- `npx tsc --noEmit`: FAIL per import mancante `scripts/legal-research/list-provider-tools.ts`.
-- `npm run build`: compilazione applicativa PASS; typecheck build FAIL sul medesimo import.
-- Secondo import mancante: `scripts/legal-research/staging-operations.cjs`, richiesto da `tests/unit/staging-preparation.test.ts`.
-- I due script mancanti sono file non tracciati nel checkout originario. Non sono stati inclusi per rispettare il vincolo di non modificare provider/worker protetti e per evitare artefatti non appartenenti al DAG validato.
-- Push `staging-operativo`, deploy Preview finale, riallineamento alias e QA browser finale: NON ESEGUITI per gate non verde.
+- Suite companion mirata: PASS, 2 file e 31 test.
+- Suite completa: PASS, 230 file passati, 1 skipped; 3.355 test passati e 5 skipped.
+- `npx tsc --noEmit`: PASS.
+- `npm run build`: PASS con secret effimeri solo in memoria.
+- Companion inclusi: `list-provider-tools.ts`, `staging-operations.cjs`, `prepare-staging.cjs` e `offline-network-guard.cjs`.
+- Trust boundary staging: Vercel project/team/alias e Neon project/branch provengono da `trusted-staging-identity.cjs`; mismatch dichiarativi o reali falliscono closed. Deployment, progetto, branch ed endpoint database richiedono attestazione API prima delle operazioni reali.
+- `list-provider-tools.ts`: opt-in `--list-tools`, sola enumerazione catalogo, nessun `callTool`, nessun OAuth automatico, errori sanitizzati e nessun side effect all'import.
+- Push `staging-operativo`, deploy Preview finale, riallineamento alias e QA browser finale: NON ESEGUITI per stop pre-push richiesto.
 - Production, `app.noetra.it`, worker/provider, allowlist e ResearchMission `research-mission:7cd3faa5f4294068fc30558e65b4229ff46359463fa0039c61717b5da30e0b63`: invariati.
 
 ## Matrice RBAC
@@ -135,7 +137,7 @@ Il controllo di autorizzazione e applicato lato server; la UI non e considerata 
 - Vercel Marketplace: risorsa Upstash `concessioni-portuali-staging-rate-limit` disponibile in `fra1`; env writable limitate a Preview e `RATE_LIMIT_BACKEND=upstash`. Il token read-only non viene usato.
 - Preview rate-limit `dpl_EVhsPpWyRLnSbNPLa2v1VqFQXogj`: READY su `concessioni-portuali-demo-8q7qsdf5l-ugotorsis-projects.vercel.app`; metadata `sourceCommitSha=215ff15605bfecfc3ee60468ed80c4d82fcb7d29`. Build completata con Next 16.3.8 e TypeScript.
 - Prova distribuita: processo A 15 richieste consentite; processo B 15 consentite e richiesta 31 bloccata con HTTP 429; durata totale 2,93 secondi nella finestra di 60 secondi.
-- Nota di riproducibilita: il commit precedente contiene `tests/unit/provider-mcp-catalog-cli.test.ts`, che importa un file rimasto non tracciato. Il bundle Preview ha incluso solo `scripts/legal-research/list-provider-tools.ts`, registrato nei metadata con SHA-256 `9433da40d2e369dcc2b7ddd556f91002225ab54a5a5225db6f8a7aaffec1946f`; il codice rate-limit distribuito corrisponde a `215ff15`.
+- Riproducibilita chiusa: i companion richiesti dai test sono tracciati; `list-provider-tools.ts` conserva SHA-256 `9433da40d2e369dcc2b7ddd556f91002225ab54a5a5225db6f8a7aaffec1946f`.
 - Neon Free: retention 21.600 secondi (6 ore), 10/10 branch, zero snapshot visibile. Nuova recovery copy e restore branch in-place rifiutati con `branches limit exceeded`; nessun branch eliminato.
 - Checkpoint `br-weathered-term-atrel3ar` prima del drill: 63 tabelle, 35 migration applicate, `FascicoloIntake` assente. Parent point precedente: 2026-09-29T20:05:38Z.
 - Backup esterno: PostgreSQL 17.11 custom format, schema `public`, 590.451 byte, 1.078 voci TOC, SHA-256 `a4f2ef0fb7f1de4298ba40b568a67f72183112ebf5d3b2af636e0f2b1227093e`, cifrato EFS e conservato fuori Git.
@@ -181,7 +183,7 @@ Il controllo di autorizzazione e applicato lato server; la UI non e considerata 
 ## Residui non blocker
 
 1. **Automazione backup.** Prima di dati reali, schedulare il runbook hourly e replicare le copie cifrate su storage approvato in un failure domain separato.
-2. **Release evidence residua.** Il deploy e la prova rate-limit Preview sono completati; resta pendente la QA completa e il commit deve diventare riproducibile senza file supplementari non tracciati.
+2. **Release evidence residua.** Il commit e riproducibile; restano pendenti push, deploy Preview dello SHA finale e QA completa, soggetti ad autorizzazione separata.
 
 ## Condizioni di riapertura gate
 
