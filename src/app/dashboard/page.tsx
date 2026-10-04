@@ -11,6 +11,8 @@ import {
 } from "@/lib/dashboard-navigation";
 import { formatCurrencyEUR, formatDateIT, formatEnumLabel } from "@/lib/utils";
 import { getDashboardData } from "@/server/queries/dashboard";
+import { getFascicoliIntakeList } from "@/server/queries/fascicolo-intake";
+import { getConcessionVerticalLabel } from "@/lib/concession-vertical-labels";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +28,28 @@ interface AttentionItem {
 
 export default async function DashboardPage() {
   await requireRole(BACKOFFICE_ROLES);
-  const data = await getDashboardData();
+  const [data, fascicoliIntake] = await Promise.all([
+    getDashboardData(),
+    getFascicoliIntakeList(),
+  ]);
+  const fascicoliRecenti = [
+    ...data.procedimentiInCorso.map((item) => ({
+      id: item.id,
+      title: item.concessione,
+      subtitle: formatEnumLabel(item.tipologia),
+      status: formatEnumLabel(item.stato),
+      updatedAt: item.updatedAt,
+    })),
+    ...fascicoliIntake.map((item) => ({
+      id: item.id,
+      title: item.denominazioneBreve || item.oggettoFascicolo,
+      subtitle: getConcessionVerticalLabel(item.tipologiaConcessione),
+      status: "In preparazione",
+      updatedAt: item.updatedAt,
+    })),
+  ]
+    .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
+    .slice(0, 5);
   const contraddittorio = data.procedimentiInCorso.find((item) => item.termineContraddittorio);
   const criticita = data.criticitaPrioritarie.find((item) => item.fascicoloId);
   const scadenza = data.scadenzeImminenti.find((item) => item.fascicoloId);
@@ -138,22 +161,22 @@ export default async function DashboardPage() {
           title="Fascicoli recenti"
           description="Ultimi fascicoli operativi aggiornati."
         />
-        {data.procedimentiInCorso.length > 0 ? (
+        {fascicoliRecenti.length > 0 ? (
           <div className="divide-y divide-slate-200 rounded-md border border-slate-200 bg-white">
-            {data.procedimentiInCorso.map((item) => (
+            {fascicoliRecenti.map((item) => (
               <Link
                 key={item.id}
                 href={buildDashboardFascicoloHref(item.id)}
-                aria-label={`Apri fascicolo ${item.concessione}`}
+                aria-label={`Apri fascicolo ${item.title}`}
                 className="flex min-w-0 items-center justify-between gap-4 px-4 py-3 transition-colors first:rounded-t-md last:rounded-b-md hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0b7285]"
               >
                 <span className="min-w-0">
-                  <span className="block truncate text-sm font-semibold text-slate-950">{item.concessione}</span>
-                  <span className="mt-0.5 block text-sm text-slate-600">{formatEnumLabel(item.tipologia)}</span>
+                  <span className="block truncate text-sm font-semibold text-slate-950">{item.title}</span>
+                  <span className="mt-0.5 block text-sm text-slate-600">{item.subtitle}</span>
                 </span>
                 <span className="shrink-0 text-right">
-                  <Badge variant={item.stato === "IN_CORSO" ? "warning" : "default"}>
-                    {formatEnumLabel(item.stato)}
+                  <Badge variant={item.status === "In corso" ? "warning" : "default"}>
+                    {item.status}
                   </Badge>
                   <span className="mt-1 block text-xs text-slate-500">{formatDateIT(item.updatedAt)}</span>
                 </span>

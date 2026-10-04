@@ -6,30 +6,26 @@ test("nuovo fascicolo mostra solo l'intake iniziale e il collegamento concession
   await loginAndExpectLanding(page, "admin@demo.local", "admin123", /\/dashboard$/);
   await page.goto("/procedimenti/nuovo", { waitUntil: "domcontentloaded" });
 
-  await expect(page.getByRole("heading", { name: "Nuovo Fascicolo" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Nuovo fascicolo" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Inquadramento" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Dati della concessione" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Soggetti iniziali" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Riferimenti" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Dati concessione" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Soggetti" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Documenti iniziali" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Contesto iniziale" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Crea Fascicolo" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Crea fascicolo" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Annulla" })).toBeVisible();
 
   const sectionTitles = await page.locator("main section h2").allTextContents();
   expect(sectionTitles).toEqual([
     "Inquadramento",
+    "Riferimenti",
+    "Dati concessione",
+    "Soggetti",
     "Documenti iniziali",
-    "Dati della concessione",
-    "Soggetti iniziali",
-    "Contesto iniziale",
   ]);
-  await expect(page.getByLabel("Nome fascicolo")).toBeVisible();
+  await expect(page.getByLabel("Titolo fascicolo")).toBeVisible();
   await expect(page.locator('[name="documentiIniziali"]')).toBeVisible();
 
-  const secondaryDisclosure = page.getByText("Altri dati della concessione", { exact: true });
-  await expect(secondaryDisclosure).toBeVisible();
-  await expect(page.locator('[name="autoritaCompetenteIniziale"]')).not.toBeVisible();
-  await secondaryDisclosure.click();
   await expect(page.locator('[name="autoritaCompetenteIniziale"]')).toBeVisible();
 
   await expect(page.locator('[name="criticitaId"]')).toHaveCount(0);
@@ -37,11 +33,11 @@ test("nuovo fascicolo mostra solo l'intake iniziale e il collegamento concession
   await expect(page.locator('[name="dataScadenzaContraddittorio"]')).toHaveCount(0);
   await expect(page.locator('[name="responsabileProcedimentoNome"]')).toHaveCount(0);
 
-  const disclosure = page.getByText("Collega a concessione già presente", { exact: false });
-  await expect(disclosure).toBeVisible();
-  await disclosure.click();
   await expect(page.locator('[name="concessioneId"]')).toBeVisible();
   await expect(page.locator('[name="concessioneId"]')).not.toHaveAttribute("required", "");
+  await expect(page.locator('[name="concessioneId"] option').first()).toHaveText(
+    "Crea fascicolo senza collegare una concessione esistente",
+  );
 });
 
 test("fascicolo in preparazione usa la panoramica e la navigazione condivise", async ({ page }) => {

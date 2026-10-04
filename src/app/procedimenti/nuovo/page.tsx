@@ -40,47 +40,121 @@ export default async function NuovoProcedimentoPage({ searchParams }: NuovoProce
 
   return (
     <AppShell
-      title="Nuovo Fascicolo"
-      subtitle="Crea un nuovo fascicolo e inserisci le informazioni iniziali disponibili. Potrai completarle successivamente anche attraverso i documenti caricati."
+      title="Nuovo fascicolo"
+      subtitle="Inserisci le informazioni disponibili ora. Potrai completare il fascicolo in qualsiasi momento."
     >
-      <form action={createFascicoloIntakeAction} className="mx-auto w-full max-w-4xl space-y-6">
-
-        <section aria-labelledby="inquadramento-title" className="space-y-3 border-b border-slate-200 pb-6">
+      <form action={createFascicoloIntakeAction} className="mx-auto w-full max-w-3xl space-y-7">
+        <section aria-labelledby="inquadramento-title" className="space-y-4 rounded-md border border-slate-200 bg-white p-5">
           <div>
             <h2 id="inquadramento-title" className="text-lg font-semibold text-slate-950">Inquadramento</h2>
-            <p className="mt-1 text-sm text-slate-600">Definisci il perimetro essenziale dell&apos;incarico.</p>
+            <p className="mt-1 text-sm text-slate-600">Definisci gli elementi essenziali del fascicolo.</p>
           </div>
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="space-y-1 text-sm font-medium text-slate-700 md:col-span-2">
+              Titolo fascicolo
+              <Input name="titoloFascicolo" required placeholder="Es. Concessione molo sud" />
+            </label>
             <label className="space-y-1 text-sm font-medium text-slate-700">
-              Tipologia di concessione
+              Tipo
               <Select name="tipologiaConcessioneIniziale" required defaultValue="">
-                <option value="" disabled>Seleziona tipologia</option>
+                <option value="" disabled>Seleziona il tipo</option>
                 {VERTICALI_CONFIG.map((item) => (
                   <option key={item.value} value={item.value}>{item.label}</option>
                 ))}
               </Select>
             </label>
-            <label className="space-y-1 text-sm font-medium text-slate-700">
-              Nome fascicolo
-              <Input name="denominazioneBreve" placeholder="Grassi Junior – TPL Costiera Amalfitana" />
-            </label>
             <label className="space-y-1 text-sm font-medium text-slate-700 md:col-span-2">
-              Oggetto del fascicolo
-              <Input name="oggettoFascicolo" required placeholder="Es. Concessione demaniale marittima – servizio TPL Salerno/Amalfi" />
+              Descrizione / contesto iniziale <span className="font-normal text-slate-500">(opzionale)</span>
+              <Textarea
+                name="descrizioneIniziale"
+                rows={3}
+                placeholder="Descrivi brevemente la pratica o il contesto disponibile."
+              />
             </label>
           </div>
         </section>
 
-        <section aria-labelledby="documenti-title" className="space-y-3 border-b border-slate-200 pb-6">
+        <section aria-labelledby="riferimenti-title" className="space-y-4 rounded-md border border-slate-200 bg-white p-5">
+          <div>
+            <h2 id="riferimenti-title" className="text-lg font-semibold text-slate-950">Riferimenti</h2>
+            <p className="mt-1 text-sm text-slate-600">Aggiungi solo i riferimenti già disponibili.</p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="space-y-1 text-sm font-medium text-slate-700">
+              Numero / riferimento pratica
+              <Input name="numeroConcessioneIniziale" />
+            </label>
+            <label className="space-y-1 text-sm font-medium text-slate-700">
+              Ente / amministrazione
+              <Input name="autoritaCompetenteIniziale" />
+            </label>
+            <label className="space-y-1 text-sm font-medium text-slate-700 md:col-span-2">
+              Località / porto
+              <Input name="localitaIniziale" />
+            </label>
+          </div>
+        </section>
+
+        <section aria-labelledby="concessione-title" className="space-y-4 rounded-md border border-slate-200 bg-white p-5">
+          <div>
+            <h2 id="concessione-title" className="text-lg font-semibold text-slate-950">Dati concessione</h2>
+            <p className="mt-1 text-sm text-slate-600">Puoi inserire i dati disponibili ora e completarli successivamente.</p>
+          </div>
+          <label className="block space-y-1 text-sm font-medium text-slate-700">
+            Collegamento a una concessione esistente <span className="font-normal text-slate-500">(opzionale)</span>
+            <Select name="concessioneId" defaultValue={concessioneId ?? ""}>
+              <option value="">Crea fascicolo senza collegare una concessione esistente</option>
+              {filtersData.concessioni.map((item) => (
+                <option key={item.id} value={item.id}>{item.label}</option>
+              ))}
+            </Select>
+          </label>
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="space-y-1 text-sm font-medium text-slate-700">
+              Ente concedente
+              <Input name="enteConcedenteIniziale" />
+            </label>
+            <label className="space-y-1 text-sm font-medium text-slate-700">
+              Oggetto
+              <Input name="oggettoConcessioneIniziale" />
+            </label>
+            <label className="space-y-1 text-sm font-medium text-slate-700">
+              Decorrenza
+              <Input name="decorrenzaIniziale" type="date" />
+            </label>
+            <label className="space-y-1 text-sm font-medium text-slate-700">
+              Scadenza
+              <Input name="scadenzaIniziale" type="date" />
+            </label>
+          </div>
+        </section>
+
+        <section aria-labelledby="soggetti-title" className="space-y-4 rounded-md border border-slate-200 bg-white p-5">
+          <div>
+            <h2 id="soggetti-title" className="text-lg font-semibold text-slate-950">Soggetti</h2>
+            <p className="mt-1 text-sm text-slate-600">Indica i soggetti principali, se già noti.</p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="space-y-1 text-sm font-medium text-slate-700">
+              Soggetto principale / concessionario
+              <Input name="concessionarioIniziale" />
+            </label>
+            <label className="space-y-1 text-sm font-medium text-slate-700">
+              Soggetto assistito
+              <Input name="soggettoAssistito" />
+            </label>
+          </div>
+        </section>
+
+        <section aria-labelledby="documenti-title" className="space-y-4 rounded-md border border-slate-200 bg-white p-5">
           <div>
             <h2 id="documenti-title" className="text-lg font-semibold text-slate-950">Documenti iniziali</h2>
-            <p className="mt-1 text-sm text-slate-600">Carica gli atti e i documenti disponibili. Potrai aggiungerne altri anche dopo la creazione del fascicolo.</p>
+            <p className="mt-1 text-sm text-slate-600">Puoi aggiungere i primi documenti ora oppure farlo successivamente dal fascicolo.</p>
           </div>
           <div className="flex min-h-28 flex-col items-center justify-center rounded-md border border-dashed border-slate-400 bg-slate-50 px-4 py-5 text-center">
             <Paperclip className="h-5 w-5 text-[#173d4f]" aria-hidden="true" />
-            <p className="mt-2 text-sm font-semibold text-slate-900">Trascina qui gli atti oppure selezionali dal computer</p>
-            <p className="mt-1 text-xs text-slate-600">Il sistema li analizzerà dopo la creazione del fascicolo.</p>
-            <p className="mt-1 text-xs text-slate-500">Formati supportati: PDF, PNG, JPG, WEBP, TXT e CSV.</p>
+            <p className="mt-2 text-sm font-semibold text-slate-900">Seleziona uno o più documenti</p>
+            <p className="mt-1 text-xs text-slate-500">PDF, PNG, JPG, WEBP, TXT o CSV. Massimo 10 file.</p>
             <Input
               name="documentiIniziali"
               type="file"
@@ -91,70 +165,14 @@ export default async function NuovoProcedimentoPage({ searchParams }: NuovoProce
           </div>
         </section>
 
-        <section aria-labelledby="concessione-title" className="space-y-3 border-b border-slate-200 pb-6">
-          <div>
-            <h2 id="concessione-title" className="text-lg font-semibold text-slate-950">Dati della concessione</h2>
-            <p className="mt-1 text-sm text-slate-600">Inserisci solo le informazioni già disponibili. Potrai completarle in seguito.</p>
-          </div>
-          <div className="grid gap-3 md:grid-cols-2">
-            <label className="space-y-1 text-sm font-medium text-slate-700">Concessionario / titolare<Input name="concessionarioIniziale" /></label>
-            <label className="space-y-1 text-sm font-medium text-slate-700">Ente concedente<Input name="enteConcedenteIniziale" /></label>
-            <label className="space-y-1 text-sm font-medium text-slate-700">Numero / riferimento concessione<Input name="numeroConcessioneIniziale" /></label>
-            <label className="space-y-1 text-sm font-medium text-slate-700">Scadenza<Input name="scadenzaIniziale" type="date" /></label>
-            <label className="space-y-1 text-sm font-medium text-slate-700">Località / porto / Comune<Input name="localitaIniziale" /></label>
-            <label className="space-y-1 text-sm font-medium text-slate-700">Oggetto della concessione<Input name="oggettoConcessioneIniziale" /></label>
-          </div>
-
-          <details className="rounded-md border border-slate-200">
-            <summary className="cursor-pointer px-3 py-2 text-sm font-medium text-slate-700">Altri dati della concessione</summary>
-            <div className="grid gap-3 border-t border-slate-200 p-3 md:grid-cols-2">
-              <label className="space-y-1 text-sm font-medium text-slate-700">Autorità / amministrazione competente<Input name="autoritaCompetenteIniziale" /></label>
-              <label className="space-y-1 text-sm font-medium text-slate-700">Data rilascio<Input name="dataRilascioIniziale" type="date" /></label>
-              <label className="space-y-1 text-sm font-medium text-slate-700">Decorrenza<Input name="decorrenzaIniziale" type="date" /></label>
-              <label className="space-y-1 text-sm font-medium text-slate-700">Bene / area / servizio interessato<Textarea name="beneAreaServizioIniziale" rows={2} /></label>
-            </div>
-          </details>
-
-          <details className="rounded-md border border-slate-200">
-            <summary className="cursor-pointer px-3 py-2 text-sm font-medium text-slate-600">
-              Collega a concessione già presente <span className="font-normal">(opzionale)</span>
-            </summary>
-            <div className="border-t border-slate-200 p-3">
-              <label className="space-y-1 text-sm font-medium text-slate-700">
-                Concessione esistente (opzionale)
-                <Select name="concessioneId" defaultValue={concessioneId ?? ""}>
-                  <option value="">Nessun collegamento iniziale</option>
-                  {filtersData.concessioni.map((item) => (
-                    <option key={item.id} value={item.id}>{item.label}</option>
-                  ))}
-                </Select>
-              </label>
-            </div>
-          </details>
-        </section>
-
-        <section aria-labelledby="soggetti-title" className="space-y-3 border-b border-slate-200 pb-6">
-          <div>
-            <h2 id="soggetti-title" className="text-lg font-semibold text-slate-950">Soggetti iniziali</h2>
-            <p className="mt-1 text-sm text-slate-600">Indica i soggetti principali, se già noti.</p>
-          </div>
-          <div className="grid gap-3 md:grid-cols-2">
-            <label className="space-y-1 text-sm font-medium text-slate-700">Soggetto assistito<Input name="soggettoAssistito" /></label>
-            <label className="space-y-1 text-sm font-medium text-slate-700">Controparte / amministrazione<Input name="controparteAmministrazione" /></label>
-          </div>
-        </section>
-
-        <section aria-labelledby="contesto-title" className="space-y-3">
-          <div>
-            <h2 id="contesto-title" className="text-lg font-semibold text-slate-950">Contesto iniziale</h2>
-            <p className="mt-1 text-sm text-slate-600">Indica il problema, ciò che è stato richiesto o eventuali informazioni non presenti nei documenti.</p>
-          </div>
-          <label className="space-y-1 text-sm font-medium text-slate-700">Indicazioni iniziali / motivo dell&apos;incarico<Textarea name="noteIstruttorie" rows={4} /></label>
-        </section>
-
-        <div className="flex flex-wrap items-center gap-3 border-t border-slate-200 pt-4">
-          <Button type="submit">Crea Fascicolo</Button>
-          <Link href="/procedimenti" className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100">Annulla</Link>
+        <div className="flex flex-wrap items-center gap-3 border-t border-slate-200 pt-5">
+          <Button type="submit">Crea fascicolo</Button>
+          <Link
+            href="/procedimenti"
+            className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7285] focus-visible:ring-offset-2"
+          >
+            Annulla
+          </Link>
         </div>
       </form>
     </AppShell>

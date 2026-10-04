@@ -18,22 +18,23 @@ const STAGING_PREVIEW_ADMIN_ID = "staging-preview-admin";
 
 const createFascicoloIntakeSchema = z.object({
   concessioneId: z.string().trim().optional(),
-  tipologiaConcessioneIniziale: z.enum(CONCESSION_VERTICAL_VALUES),
-  oggettoFascicolo: z.string().trim().min(1, "Indica l'oggetto del fascicolo."),
-  denominazioneBreve: z.string().trim().optional(),
+  tipologiaConcessioneIniziale: z.enum(CONCESSION_VERTICAL_VALUES, {
+    error: "Seleziona il tipo del fascicolo.",
+  }),
+  titoloFascicolo: z
+    .string({ error: "Inserisci il titolo del fascicolo." })
+    .trim()
+    .min(1, "Inserisci il titolo del fascicolo."),
+  descrizioneIniziale: z.string().trim().optional(),
   concessionarioIniziale: z.string().trim().optional(),
   enteConcedenteIniziale: z.string().trim().optional(),
   autoritaCompetenteIniziale: z.string().trim().optional(),
   numeroConcessioneIniziale: z.string().trim().optional(),
-  dataRilascioIniziale: z.string().optional(),
   decorrenzaIniziale: z.string().optional(),
   scadenzaIniziale: z.string().optional(),
   oggettoConcessioneIniziale: z.string().trim().optional(),
-  beneAreaServizioIniziale: z.string().trim().optional(),
   localitaIniziale: z.string().trim().optional(),
   soggettoAssistito: z.string().trim().optional(),
-  controparteAmministrazione: z.string().trim().optional(),
-  noteIstruttorie: z.string().trim().optional(),
 });
 
 function nullable(value: string | undefined): string | null {
@@ -96,21 +97,21 @@ export async function createFascicoloIntakeAction(formData: FormData) {
       enteId,
       concessioneId,
       tipologiaConcessione: parsed.data.tipologiaConcessioneIniziale,
-      oggettoFascicolo: parsed.data.oggettoFascicolo,
-      denominazioneBreve: nullable(parsed.data.denominazioneBreve),
+      oggettoFascicolo: parsed.data.titoloFascicolo,
+      denominazioneBreve: parsed.data.titoloFascicolo,
       concessionario: nullable(parsed.data.concessionarioIniziale),
       enteConcedente: nullable(parsed.data.enteConcedenteIniziale),
       autoritaCompetente: nullable(parsed.data.autoritaCompetenteIniziale),
       numeroConcessione: nullable(parsed.data.numeroConcessioneIniziale),
-      dataRilascio: optionalDate(parsed.data.dataRilascioIniziale),
+      dataRilascio: null,
       decorrenza: optionalDate(parsed.data.decorrenzaIniziale),
       scadenza: optionalDate(parsed.data.scadenzaIniziale),
       oggettoConcessione: nullable(parsed.data.oggettoConcessioneIniziale),
-      beneAreaServizio: nullable(parsed.data.beneAreaServizioIniziale),
+      beneAreaServizio: null,
       localita: nullable(parsed.data.localitaIniziale),
       soggettoAssistito: nullable(parsed.data.soggettoAssistito),
-      controparteAmministrazione: nullable(parsed.data.controparteAmministrazione),
-      contestoIniziale: nullable(parsed.data.noteIstruttorie),
+      controparteAmministrazione: null,
+      contestoIniziale: nullable(parsed.data.descrizioneIniziale),
     },
   });
 
@@ -146,7 +147,7 @@ export async function createFascicoloIntakeAction(formData: FormData) {
 
   revalidatePath("/procedimenti");
   revalidatePath("/dashboard");
-  redirect(`/procedimenti/${created.id}#documenti`);
+  redirect(`/procedimenti/${created.id}`);
 }
 
 export async function uploadFascicoloIntakeDocumentAction(formData: FormData) {

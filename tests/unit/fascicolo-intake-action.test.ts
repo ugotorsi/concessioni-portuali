@@ -33,10 +33,9 @@ import { createFascicoloIntakeAction } from "@/server/actions/fascicolo-intake";
 function formData(concessioneId?: string) {
   const data = new FormData();
   data.set("tipologiaConcessioneIniziale", "MARITTIMA_TURISTICO_RICREATIVA");
-  data.set("oggettoFascicolo", "Concessione stabilimento balneare");
-  data.set("denominazioneBreve", "Fascicolo Alfa");
+  data.set("titoloFascicolo", "Fascicolo Alfa");
+  data.set("descrizioneIniziale", "Concessione stabilimento balneare");
   data.set("soggettoAssistito", "Società Alfa");
-  data.set("noteIstruttorie", "Verificare gli atti disponibili.");
   if (concessioneId) {
     data.set("concessioneId", concessioneId);
   }
@@ -66,7 +65,7 @@ describe("createFascicoloIntakeAction", () => {
 
   it("crea il fascicolo senza concessione usando il tenant predefinito", async () => {
     await expect(createFascicoloIntakeAction(formData())).rejects.toThrow(
-      "REDIRECT:/procedimenti/fascicolo-1#documenti",
+      "REDIRECT:/procedimenti/fascicolo-1",
     );
 
     expect(requireConcessioneTenantAccessMock).not.toHaveBeenCalled();
@@ -74,7 +73,9 @@ describe("createFascicoloIntakeAction", () => {
       data: expect.objectContaining({
         enteId: "ente-a",
         concessioneId: null,
-        oggettoFascicolo: "Concessione stabilimento balneare",
+        oggettoFascicolo: "Fascicolo Alfa",
+        denominazioneBreve: "Fascicolo Alfa",
+        contestoIniziale: "Concessione stabilimento balneare",
         soggettoAssistito: "Società Alfa",
       }),
     });
@@ -85,7 +86,7 @@ describe("createFascicoloIntakeAction", () => {
     data.append("documentiIniziali", new File(["atto"], "istanza.pdf", { type: "application/pdf" }));
 
     await expect(createFascicoloIntakeAction(data)).rejects.toThrow(
-      "REDIRECT:/procedimenti/fascicolo-1#documenti",
+      "REDIRECT:/procedimenti/fascicolo-1",
     );
 
     expect(uploadDocumentMock).toHaveBeenCalledWith(expect.objectContaining({
@@ -100,7 +101,7 @@ describe("createFascicoloIntakeAction", () => {
     prismaMock.concessione.findUnique.mockResolvedValue({ enteId: "ente-b" });
 
     await expect(createFascicoloIntakeAction(formData("con-1"))).rejects.toThrow(
-      "REDIRECT:/procedimenti/fascicolo-1#documenti",
+      "REDIRECT:/procedimenti/fascicolo-1",
     );
 
     expect(requireConcessioneTenantAccessMock).toHaveBeenCalledWith(
@@ -110,6 +111,44 @@ describe("createFascicoloIntakeAction", () => {
     );
     expect(prismaMock.fascicoloIntake.create).toHaveBeenCalledWith({
       data: expect.objectContaining({ enteId: "ente-b", concessioneId: "con-1" }),
+    });
+  });
+
+  it("richiede un titolo comprensibile", async () => {
+    const data = formData();
+    data.delete("titoloFascicolo");
+
+    await expect(createFascicoloIntakeAction(data)).rejects.toThrow(
+      "Inserisci il titolo del fascicolo.",
+    );
+    expect(prismaMock.fascicoloIntake.create).not.toHaveBeenCalled();
+  });
+
+  it("richiede la selezione del tipo", async () => {
+    const data = formData();
+    data.delete("tipologiaConcessioneIniziale");
+
+    await expect(createFascicoloIntakeAction(data)).rejects.toThrow(
+      "Seleziona il tipo del fascicolo.",
+    );
+    expect(prismaMock.fascicoloIntake.create).not.toHaveBeenCalled();
+  });
+
+  it("mantiene facoltativi i dati della concessione", async () => {
+    await expect(createFascicoloIntakeAction(formData())).rejects.toThrow(
+      "REDIRECT:/procedimenti/fascicolo-1",
+    );
+
+    expect(prismaMock.fascicoloIntake.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        concessioneId: null,
+        enteConcedente: null,
+        numeroConcessione: null,
+        decorrenza: null,
+        scadenza: null,
+        oggettoConcessione: null,
+        localita: null,
+      }),
     });
   });
 
