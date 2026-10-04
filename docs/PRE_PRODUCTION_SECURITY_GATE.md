@@ -1,12 +1,12 @@
 # Pre-production security gate - app.noetra.it
 
-Data verifica: 2026-10-03
+Data verifica: 2026-10-04
 
 Checkout autorizzato: `C:\Users\ugoto\AppData\Local\Temp\concessioni-trusted-release-d252788`
 
-Branch verificato: `security-hardening-preprod-2111445`
+Branch verificato: `security-hardening-final-integration`
 
-Implementation SHA verificato: `215ff15605bfecfc3ee60468ed80c4d82fcb7d29`
+Implementation SHA verificato: `c947a5591d9e42d1802617dc8b29526fd5a0e51a`
 
 Target consentito: Vercel Preview `staging-operativo` / Neon branch `staging-operativo`
 
@@ -14,9 +14,9 @@ Production e DNS: non modificati; `app.noetra.it` non associato.
 
 ## Esito
 
-**HARDENING PRE-PRODUCTION SUPERATO PER I QUATTRO BLOCKER.**
+**HARDENING PRE-PRODUCTION NON SUPERATO.**
 
-Auth.js, credenziali demo, rate limiting distribuito Preview e Neon recovery sono stati chiusi con evidenza. Neon resta sul piano Free, ma un backup PostgreSQL esterno cifrato e un restore drill reale su copia isolata hanno fornito schema coerente e RPO/RTO misurati. Non sono stati eseguiti deploy Production o associazioni di custom domain.
+Auth.js, credenziali demo, rate limiting distribuito Preview e Neon recovery restano chiusi con evidenza. Il consolidamento finale ha pero rilevato due test tracciati che importano script provider/staging assenti dal DAG di release e presenti soltanto come file non tracciati nel checkout originario. Il typecheck, la suite completa e il build non sono quindi verdi sullo SHA riproducibile. Gli script ricadono nella superficie provider protetta e non sono stati aggiunti o modificati. Non sono stati eseguiti push, deploy, modifiche Production o associazioni di custom domain.
 
 ## Matrice iniziale e finale
 
@@ -36,8 +36,38 @@ Auth.js, credenziali demo, rate limiting distribuito Preview e Neon recovery son
 | Dependency security | FAIL | PASS critical gate | 0 critical; 4 high nella sola catena CLI Prisma, non importata dal runtime |
 | Secret hygiene | FAIL | PASS staging | 13 demo disattivati; 1 identita operativa random; seed vietato in Preview/production |
 | Backup / PITR / restore | FAIL | **PASS STAGING** | Dump custom cifrato fuori Git; restore drill 84/84 tabelle e 45/45 migration |
-| Build e unit test | PARTIAL | PASS | 3.349 test passati; build Next 16.3.8 e typecheck passati |
-| Preview security QA | N/D | PARTIAL | Preview rate-limit READY e prova distribuita PASS; QA completa ancora pendente |
+| Build e unit test | PARTIAL | **FAIL** | 228 file e 3.324 test passano, ma 2 suite non si caricano; typecheck e build falliscono sugli stessi import mancanti |
+| Preview security QA | N/D | **BLOCKED** | Nessun push/deploy finale eseguito; resta valida solo l'evidenza Preview precedente |
+
+## Stato finale controlli
+
+| Controllo | Stato | Evidenza |
+| --- | --- | --- |
+| AUTH.JS | PASS | `npm audit --omit=dev`: 0 critical applicabili; provider configurato solo Credentials |
+| MFA | PASS | TOTP required/enrollment, OTP errato negato e OTP valido accettato nella suite mirata |
+| SESSION HARDENING | PASS | TTL, revalidation account, lockout e cookie Secure/HttpOnly/SameSite coperti |
+| TENANT ISOLATION | PASS | Letture e scritture cross-tenant negate |
+| RBAC | PASS | Ruoli invalidi e mutation `VIEWER_ADSP` negate lato server |
+| DEMO CREDENTIALS | PASS | 13 demo disattivati; seed Preview/production fail-closed |
+| RATE LIMIT DISTRIBUITO | PASS | Upstash Preview; prova reale condivisa con richiesta 31 bloccata HTTP 429 |
+| NEON RECOVERY | PASS | Backup cifrato con checksum; restore drill 84/84 tabelle e 45/45 migration; RPO/RTO documentati |
+| AUDIT | PASS | Catena hash SHA-256 e copertura eventi auth/logout; storage nello stesso DB resta residuo non blocker |
+| SECRETS | PARTIAL | Nessuna private key nel diff; fixture/password demo storiche e `admin123` nella history non riscritta |
+| DEPENDENCY AUDIT | PASS critical gate | 0 critical, 4 high, 5 moderate; high residue nella catena Prisma CLI non importata dal runtime |
+
+## Consolidamento finale 2026-10-04
+
+- DAG hardening lineare e completo da `2111445` a `c947a55`; `origin/staging-operativo` resta su `2111445` e non contiene aggiornamenti successivi.
+- `npm audit --omit=dev`: 9 vulnerabilita, 0 critical, 4 high, 5 moderate.
+- High residue: `deepmerge-ts` (`GHSA-ggr8-5vv4-36mx`) e `mysql2` (`GHSA-3f6p-5ww8-9rcr`, `GHSA-rgwj-5xj2-c3m3`) tramite `@prisma/config` / `prisma` CLI. `npm audit fix --force` propone il downgrade breaking a Prisma 6.19.3.
+- Suite security mirata: PASS, 15 file e 90 test.
+- Suite completa: FAIL, 228 file passati, 1 skipped, 2 falliti al caricamento; 3.324 test passati e 5 skipped.
+- `npx tsc --noEmit`: FAIL per import mancante `scripts/legal-research/list-provider-tools.ts`.
+- `npm run build`: compilazione applicativa PASS; typecheck build FAIL sul medesimo import.
+- Secondo import mancante: `scripts/legal-research/staging-operations.cjs`, richiesto da `tests/unit/staging-preparation.test.ts`.
+- I due script mancanti sono file non tracciati nel checkout originario. Non sono stati inclusi per rispettare il vincolo di non modificare provider/worker protetti e per evitare artefatti non appartenenti al DAG validato.
+- Push `staging-operativo`, deploy Preview finale, riallineamento alias e QA browser finale: NON ESEGUITI per gate non verde.
+- Production, `app.noetra.it`, worker/provider, allowlist e ResearchMission `research-mission:7cd3faa5f4294068fc30558e65b4229ff46359463fa0039c61717b5da30e0b63`: invariati.
 
 ## Matrice RBAC
 
@@ -89,7 +119,7 @@ Il controllo di autorizzazione e applicato lato server; la UI non e considerata 
 - Ruotato staging: 13 identita demo disattivate, account operativo random con tenant membership e MFA enrollment.
 - Conservati schema Prisma, provider flag, worker async e ResearchMission protetta.
 
-## Evidenze di verifica
+## Evidenze di verifica precedenti (2026-10-03)
 
 - `npm test -- --maxWorkers=1 --testTimeout=15000`: 230 file passati, 1 skipped; 3.349 test passati, 5 skipped.
 - Suite security mirata: 15 file e 86 test passati su auth/MFA/lockout, bypass, WorkOS callback, tenant/RBAC, rate limit, same-origin, audit hash-chain e demo seed guard.
