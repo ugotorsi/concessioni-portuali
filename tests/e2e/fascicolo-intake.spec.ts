@@ -64,7 +64,8 @@ test("fascicolo in preparazione usa la panoramica e la navigazione condivise", a
     "Rapporto",
     "Proposte",
   ]);
-  await expect(page.locator("#panoramica").getByText("Sintesi del fascicolo", { exact: true })).toBeVisible();
+  await expect(page.locator("#panoramica").getByText("Stato del fascicolo", { exact: true })).toBeVisible();
+  await expect(page.locator("#panoramica").getByText("Concessione / titolo", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Documenti" })).toHaveCount(0);
   await page.getByRole("link", { name: "Documenti", exact: true }).click();
   await expect(page).toHaveURL(/\?section=documents$/);

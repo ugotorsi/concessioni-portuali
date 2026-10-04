@@ -208,14 +208,29 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   const nextDeadline = [...detail.scadenzeRilevanti]
     .filter((item) => item.dataScadenza >= new Date())
     .sort((left, right) => left.dataScadenza.getTime() - right.dataScadenza.getTime())[0];
+  const concessionIncomplete = !detail.concessione.numeroAtto
+    || !detail.concessione.descrizioneBene
+    || !detail.concessione.ubicazione;
+  const primaryIssue = linkedIssueIsOpen && detail.criticitaCollegata
+    ? detail.criticitaCollegata
+    : detail.altreCriticitaAperte[0];
+  const nextChecklistItem = detail.procedimento.checklistMissingItems[0];
   const overview: FascicoloOverviewModel = {
     title: `Fascicolo ${formatEnumLabel(detail.procedimento.tipologia)}`,
     status: formatEnumLabel(detail.procedimento.stato),
     type: formatEnumLabel(detail.procedimento.tipologia),
-    concession: detail.concessione.numeroAtto,
+    reference: detail.concessione.numeroAtto,
+    administration: detail.concessione.ente?.nome,
     subject: detail.concessionario.denominazione,
-    priorityDeadline: nextDeadline ? formatDateIT(nextDeadline.dataScadenza) : null,
+    lastUpdated: formatDateIT(detail.procedimento.updatedAt),
+    phase: lettura.qualificazioneProcedimentale,
+    checklist: {
+      completed: detail.procedimento.checklistCompletedItems,
+      total: detail.procedimento.checklistTotalItems,
+    },
     documentCount: detail.documentiPrincipali.length,
+    openIssueCount,
+    criticalPaymentCount: detail.pagamentiCritici.length,
     documents: detail.documentiPrincipali.slice(0, 3).map((documento) => ({
       id: documento.id,
       name: documento.nome,
@@ -228,52 +243,57 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
       ...(detail.procedimento.giorniRitardoContraddittorio !== null
         ? [{ label: `Termine del contraddittorio scaduto da ${detail.procedimento.giorniRitardoContraddittorio} giorni`, section: "deadlines" as const }]
         : []),
-      ...(!detail.procedimento.checklistContraddittorioCompleta
-        ? [{ label: "Verifica istruttoria da completare", section: "analysis" as const }]
+      ...(nextChecklistItem
+        ? [{ label: nextChecklistItem, section: "analysis" as const }]
         : []),
-      ...(openIssueCount > 0
-        ? [{ label: `${openIssueCount} criticità ${openIssueCount === 1 ? "aperta" : "aperte"}`, section: "issues" as const }]
+      ...(primaryIssue
+        ? [{ label: `${formatEnumLabel(primaryIssue.tipologia)}: ${primaryIssue.descrizione}`, section: "issues" as const }]
         : []),
       ...(detail.pagamentiCritici.length > 0
         ? [{ label: `${detail.pagamentiCritici.length} ${detail.pagamentiCritici.length === 1 ? "pagamento richiede" : "pagamenti richiedono"} verifica`, section: "concession" as const }]
         : []),
+      ...(detail.documentiPrincipali.length === 0
+        ? [{ label: "Nessun documento disponibile", section: "documents" as const }]
+        : []),
     ],
-    summary: [
-      { label: "Oggetto", value: lettura.qualificazioneProcedimentale },
-      { label: "Note principali", value: detail.procedimento.noteIstruttorie },
-      { label: "Stato corrente", value: formatEnumLabel(detail.procedimento.stato) },
-      { label: "Concessione collegata", value: detail.concessione.numeroAtto },
-      { label: "Soggetto principale", value: detail.concessionario.denominazione, sectionId: "soggetti" },
-    ],
-    timeline: [
-      { id: `procedimento-${detail.procedimento.id}`, label: "Fascicolo creato", date: formatDateIT(detail.procedimento.createdAt) },
-      ...detail.sopralluoghiRecenti.slice(0, 3).map((item) => ({
-        id: item.id,
-        label: `Sopralluogo: ${formatEnumLabel(item.esito)}`,
-        date: formatDateIT(item.data),
-      })),
-    ],
-    openIssues: [
-      ...(linkedIssueIsOpen && detail.criticitaCollegata ? [{
-        id: detail.criticitaCollegata.id,
-        label: formatEnumLabel(detail.criticitaCollegata.tipologia),
-        detail: detail.criticitaCollegata.descrizione,
-        section: "issues" as const,
+    deadlines: detail.scadenzeRilevanti.slice(0, 5).map((item) => ({
+      id: item.id,
+      date: formatDateIT(item.dataScadenza),
+      label: item.descrizione || formatEnumLabel(item.tipologia),
+      status: formatEnumLabel(item.stato),
+    })),
+    concession: {
+      number: detail.concessione.numeroAtto,
+      authority: detail.concessione.ente?.nome,
+      object: detail.concessione.descrizioneBene,
+      startDate: formatDateIT(detail.concessione.dataRilascio),
+      expiryDate: formatDateIT(detail.concessione.dataScadenza),
+      location: detail.concessione.ubicazione,
+      incomplete: concessionIncomplete,
+    },
+    subjects: [
+      {
+        name: detail.concessionario.denominazione,
+        role: "Concessionario",
+      },
+      ...(detail.concessione.ente?.nome ? [{
+        name: detail.concessione.ente.nome,
+        role: "Ente concedente",
       }] : []),
-      ...detail.altreCriticitaAperte.map((item) => ({
-        id: item.id,
-        label: formatEnumLabel(item.tipologia),
-        detail: item.descrizione,
-        section: "issues" as const,
-      })),
     ],
-    nextDeadline: nextDeadline ? formatDateIT(nextDeadline.dataScadenza) : null,
-    openIssueCount,
-    highestIssue: linkedIssueIsOpen && detail.criticitaCollegata
-      ? formatEnumLabel(detail.criticitaCollegata.gravita)
-      : detail.altreCriticitaAperte[0]
-        ? formatEnumLabel(detail.altreCriticitaAperte[0].gravita)
-        : null,
+    nextStep: nextChecklistItem
+      ? { label: nextChecklistItem, section: "analysis" as const }
+      : primaryIssue
+        ? {
+            label: `Verificare la criticità ${formatEnumLabel(primaryIssue.tipologia)}`,
+            section: "issues" as const,
+          }
+        : nextDeadline
+          ? {
+              label: `Controllare la scadenza del ${formatDateIT(nextDeadline.dataScadenza)}`,
+              section: "deadlines" as const,
+            }
+          : undefined,
   };
   const timelineEvents: FascicoloTimelineEvent[] = [
     {

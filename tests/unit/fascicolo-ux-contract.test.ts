@@ -127,6 +127,11 @@ describe("Fascicolo UX contract", () => {
     expect(fascicoloShell).toContain("Richiede attenzione");
     expect(fascicoloShell).toContain("Nessuna priorità immediata rilevata.");
     expect(fascicoloShell).toContain("documents.slice(0, 3)");
+    expect(fascicoloShell).toContain("Stato del fascicolo");
+    expect(fascicoloShell).toContain("Prossime scadenze");
+    expect(fascicoloShell).toContain("Concessione / titolo");
+    expect(fascicoloShell).toContain("Soggetti principali");
+    expect(fascicoloShell).toContain("Prossimo passo");
     expect(fascicoloShell).toContain('?section=${section}');
     expect(fascicoloShell).toContain('activeSection === "overview" ? null : children');
     expect(fascicoloShell).toContain('aria-current={activeSection === section ? "page" : undefined}');

@@ -38,9 +38,11 @@ test("procedimento checklist section and update form visibility by role", async 
   ]);
   const overview = page.locator("#panoramica");
   await expect(overview.getByText("Richiede attenzione", { exact: true })).toBeVisible();
-  await expect(overview.getByText("Sintesi del fascicolo", { exact: true })).toBeVisible();
+  await expect(overview.getByText("Stato del fascicolo", { exact: true })).toBeVisible();
+  await expect(overview.getByText("Prossime scadenze", { exact: true })).toBeVisible();
+  await expect(overview.getByText("Concessione / titolo", { exact: true })).toBeVisible();
+  await expect(overview.getByText("Soggetti principali", { exact: true })).toBeVisible();
   expect(await overview.locator('[aria-labelledby="documenti-sintesi-title"] li').count()).toBeLessThanOrEqual(3);
-  expect(await overview.locator('[aria-labelledby="cronologia-title"] li').count()).toBeLessThanOrEqual(3);
   await expect(overview.getByText("Trusted Review", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Altre funzioni", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Checklist istruttoria" })).toHaveCount(0);

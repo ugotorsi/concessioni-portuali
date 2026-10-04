@@ -32,15 +32,16 @@ export interface FascicoloOverviewModel {
   title: string;
   status: string;
   type?: string | null;
-  concession?: string | null;
+  reference?: string | null;
+  administration?: string | null;
   subject?: string | null;
-  priorityDeadline?: string | null;
-  summary: ReadonlyArray<{
-    label: string;
-    value: string | null | undefined;
-    sectionId?: "soggetti" | "concessione";
-  }>;
-  attention: ReadonlyArray<{ label: string; section?: FascicoloSection }>;
+  lastUpdated: string;
+  phase?: string | null;
+  checklist?: {
+    completed: number;
+    total: number;
+  };
+  attention: ReadonlyArray<{ label: string; section: FascicoloSection }>;
   documents: ReadonlyArray<{
     id: string;
     name: string;
@@ -50,11 +51,31 @@ export interface FascicoloOverviewModel {
     href: string;
   }>;
   documentCount: number;
-  timeline?: ReadonlyArray<{ id: string; label: string; date: string }>;
-  openIssues?: ReadonlyArray<{ id: string; label: string; detail?: string; section?: FascicoloSection }>;
-  nextDeadline?: string | null;
-  openIssueCount?: number;
-  highestIssue?: string | null;
+  openIssueCount: number;
+  criticalPaymentCount: number;
+  deadlines: ReadonlyArray<{
+    id: string;
+    date: string;
+    label: string;
+    status: string;
+  }>;
+  concession: {
+    number?: string | null;
+    authority?: string | null;
+    object?: string | null;
+    startDate?: string | null;
+    expiryDate?: string | null;
+    location?: string | null;
+    incomplete: boolean;
+  };
+  subjects: ReadonlyArray<{
+    name: string;
+    role: string;
+  }>;
+  nextStep?: {
+    label: string;
+    section: FascicoloSection;
+  };
 }
 
 interface FascicoloShellProps {
@@ -68,6 +89,25 @@ interface FascicoloShellProps {
 
 function sectionHref(basePath: string, section: FascicoloSection): string {
   return section === "overview" ? basePath : `${basePath}?section=${section}`;
+}
+
+function SectionLink({
+  basePath,
+  section,
+  children,
+}: {
+  basePath: string;
+  section: FascicoloSection;
+  children: ReactNode;
+}) {
+  return (
+    <Link
+      href={sectionHref(basePath, section)}
+      className="text-sm font-semibold text-[#173d4f] underline decoration-slate-300 underline-offset-4 hover:decoration-[#173d4f]"
+    >
+      {children}
+    </Link>
+  );
 }
 
 function FascicoloNav({ basePath, activeSection, availableSections }: Pick<FascicoloShellProps, "basePath" | "activeSection" | "availableSections">) {
@@ -94,53 +134,101 @@ function FascicoloNav({ basePath, activeSection, availableSections }: Pick<Fasci
   );
 }
 
-function FascicoloOverview({ model, basePath }: { model: FascicoloOverviewModel; basePath: string }) {
-  const summary = model.summary.filter((item) => item.value);
+export function FascicoloOverview({ model, basePath }: { model: FascicoloOverviewModel; basePath: string }) {
   const documents = model.documents.slice(0, 3);
   const attention = model.attention.slice(0, 5);
-  const issues = model.openIssues?.slice(0, 3) ?? [];
+  const deadlines = model.deadlines.slice(0, 5);
+  const concessionDetails = [
+    ["Numero / titolo", model.concession.number],
+    ["Ente concedente", model.concession.authority],
+    ["Oggetto", model.concession.object],
+    ["Decorrenza", model.concession.startDate],
+    ["Scadenza", model.concession.expiryDate],
+    ["Località", model.concession.location],
+  ].filter((item): item is [string, string] => Boolean(item[1]));
 
   return (
-    <section id="panoramica" aria-labelledby="panoramica-title" className="scroll-mt-16 space-y-4">
+    <section id="panoramica" aria-labelledby="panoramica-title" className="scroll-mt-16 space-y-5">
       <h2 id="panoramica-title" className="sr-only">Panoramica</h2>
 
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-slate-200 pb-4 text-sm text-slate-700">
-        <Badge>{model.status}</Badge>
-        {model.type ? <span>{model.type}</span> : null}
-        {model.concession ? <span className="font-medium text-slate-900">{model.concession}</span> : null}
-        {model.subject ? <span>{model.subject}</span> : null}
-        {model.priorityDeadline ? <span>Scadenza: {model.priorityDeadline}</span> : null}
-      </div>
+      <section aria-label="Identità del fascicolo" className="rounded-md border border-slate-200 bg-white p-5">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge>{model.status}</Badge>
+          {model.type ? <span className="text-sm text-slate-700">{model.type}</span> : null}
+          {model.reference ? <span className="text-sm font-semibold text-slate-950">{model.reference}</span> : null}
+        </div>
+        <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+          {model.administration ? <div><dt className="text-xs font-medium text-slate-500">Ente / amministrazione</dt><dd className="mt-1 text-slate-950">{model.administration}</dd></div> : null}
+          {model.subject ? <div><dt className="text-xs font-medium text-slate-500">Soggetto principale</dt><dd className="mt-1 text-slate-950">{model.subject}</dd></div> : null}
+          <div><dt className="text-xs font-medium text-slate-500">Ultima modifica</dt><dd className="mt-1 text-slate-950">{model.lastUpdated}</dd></div>
+        </dl>
+      </section>
 
-      <section aria-labelledby="attenzione-title" className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3">
-        <h3 id="attenzione-title" className="text-sm font-semibold text-amber-950">Richiede attenzione</h3>
+      <section aria-labelledby="stato-fascicolo-title" className="rounded-md border border-slate-200 bg-white p-5">
+        <h3 id="stato-fascicolo-title" className="text-base font-semibold text-slate-950">Stato del fascicolo</h3>
+        <dl className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div><dt className="text-xs font-medium text-slate-500">Stato</dt><dd className="mt-1 text-sm font-semibold text-slate-950">{model.status}</dd></div>
+          {model.phase ? <div><dt className="text-xs font-medium text-slate-500">Fase</dt><dd className="mt-1 text-sm text-slate-950">{model.phase}</dd></div> : null}
+          {model.checklist ? <div><dt className="text-xs font-medium text-slate-500">Checklist</dt><dd className="mt-1 text-sm text-slate-950">{model.checklist.completed} di {model.checklist.total} attività completate</dd></div> : null}
+          <div><dt className="text-xs font-medium text-slate-500">Documenti</dt><dd className="mt-1 text-sm text-slate-950">{model.documentCount}</dd></div>
+          <div><dt className="text-xs font-medium text-slate-500">Criticità aperte</dt><dd className="mt-1 text-sm text-slate-950">{model.openIssueCount}</dd></div>
+          <div><dt className="text-xs font-medium text-slate-500">Pagamenti da verificare</dt><dd className="mt-1 text-sm text-slate-950">{model.criticalPaymentCount}</dd></div>
+        </dl>
+      </section>
+
+      <section aria-labelledby="attenzione-title" className="rounded-md border border-amber-200 bg-amber-50 p-5">
+        <h3 id="attenzione-title" className="text-base font-semibold text-amber-950">Richiede attenzione</h3>
         {attention.length > 0 ? (
-          <ul className="mt-2 grid gap-1.5 text-sm text-amber-950 md:grid-cols-2">
+          <ul className="mt-3 grid gap-2 text-sm text-amber-950 md:grid-cols-2">
             {attention.map((item) => (
-              <li key={`${item.label}-${item.section ?? "none"}`}>
-                {item.section ? <Link href={sectionHref(basePath, item.section)} className="underline underline-offset-4">{item.label}</Link> : item.label}
+              <li key={`${item.label}-${item.section}`}>
+                <Link href={sectionHref(basePath, item.section)} className="font-medium underline underline-offset-4">{item.label}</Link>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="mt-1 text-sm text-amber-900">Nessuna priorità immediata rilevata.</p>
+          <p className="mt-2 text-sm text-amber-900">Nessuna priorità immediata rilevata.</p>
         )}
       </section>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <section aria-labelledby="sintesi-title" className="rounded-md border border-slate-200 p-4">
-          <h3 id="sintesi-title" className="text-base font-semibold text-slate-950">Sintesi del fascicolo</h3>
-          <dl className="mt-3 grid gap-3 sm:grid-cols-2">
-            {summary.map((item) => (
-              <div key={item.label} id={item.sectionId} className="min-w-0 scroll-mt-16">
-                <dt className="text-xs font-medium text-slate-500">{item.label}</dt>
-                <dd className="mt-1 whitespace-pre-wrap text-sm text-slate-900 [overflow-wrap:anywhere]">{item.value}</dd>
-              </div>
-            ))}
-          </dl>
+        <section aria-labelledby="scadenze-sintesi-title" className="rounded-md border border-slate-200 bg-white p-5">
+          <h3 id="scadenze-sintesi-title" className="text-base font-semibold text-slate-950">Prossime scadenze</h3>
+          {deadlines.length > 0 ? (
+            <ul className="mt-3 divide-y divide-slate-200">
+              {deadlines.map((deadline) => (
+                <li key={deadline.id} className="flex items-start justify-between gap-3 py-2 first:pt-0">
+                  <span><span className="block text-sm font-medium text-slate-950">{deadline.label}</span><span className="text-xs text-slate-500">{deadline.status}</span></span>
+                  <time className="shrink-0 text-sm font-medium text-slate-700">{deadline.date}</time>
+                </li>
+              ))}
+            </ul>
+          ) : <p className="mt-3 text-sm text-slate-500">Nessuna scadenza imminente.</p>}
+          <div className="mt-3"><SectionLink basePath={basePath} section="deadlines">Vedi scadenze</SectionLink></div>
         </section>
 
-        <section aria-labelledby="documenti-sintesi-title" className="rounded-md border border-slate-200 p-4">
+        <section aria-labelledby="concessione-sintesi-title" className="rounded-md border border-slate-200 bg-white p-5">
+          <h3 id="concessione-sintesi-title" className="text-base font-semibold text-slate-950">Concessione / titolo</h3>
+          {concessionDetails.length > 0 ? (
+            <dl className="mt-3 grid gap-3 sm:grid-cols-2">
+              {concessionDetails.map(([label, value]) => <div key={label}><dt className="text-xs font-medium text-slate-500">{label}</dt><dd className="mt-1 text-sm text-slate-950">{value}</dd></div>)}
+            </dl>
+          ) : <p className="mt-3 text-sm text-slate-500">Dati concessione da completare.</p>}
+          {model.concession.incomplete ? <p className="mt-3 text-sm text-amber-800">Dati da completare</p> : null}
+          <div className="mt-3"><SectionLink basePath={basePath} section="concession">{model.concession.incomplete ? "Completa concessione" : "Vedi concessione"}</SectionLink></div>
+        </section>
+
+        <section aria-labelledby="soggetti-sintesi-title" className="rounded-md border border-slate-200 bg-white p-5">
+          <h3 id="soggetti-sintesi-title" className="text-base font-semibold text-slate-950">Soggetti principali</h3>
+          {model.subjects.length > 0 ? (
+            <ul className="mt-3 space-y-2">
+              {model.subjects.slice(0, 3).map((subject) => <li key={`${subject.name}-${subject.role}`}><span className="block text-sm font-medium text-slate-950">{subject.name}</span><span className="text-xs text-slate-500">{subject.role}</span></li>)}
+            </ul>
+          ) : <p className="mt-3 text-sm text-slate-500">Nessun soggetto disponibile.</p>}
+          <div className="mt-3"><SectionLink basePath={basePath} section="subjects">Vedi soggetti</SectionLink></div>
+        </section>
+
+        <section aria-labelledby="documenti-sintesi-title" className="rounded-md border border-slate-200 bg-white p-5">
           <div className="flex items-center justify-between gap-3">
             <h3 id="documenti-sintesi-title" className="text-base font-semibold text-slate-950">Documenti</h3>
             <span className="text-sm text-slate-500">{model.documentCount}</span>
@@ -150,53 +238,22 @@ function FascicoloOverview({ model, basePath }: { model: FascicoloOverviewModel;
               {documents.map((document) => (
                 <li key={document.id} className="flex min-w-0 items-center gap-3 py-2 first:pt-0">
                   <FileText className="h-4 w-4 shrink-0 text-[#173d4f]" aria-hidden="true" />
-                  <div className="min-w-0 flex-1">
-                    {document.isFileAvailable ? (
-                      <a href={document.href} className="block truncate text-sm font-medium text-slate-950 underline-offset-4 hover:underline">{document.name}</a>
-                    ) : (
-                      <p className="truncate text-sm font-medium text-slate-950">{document.name}</p>
-                    )}
-                    <p className="text-xs text-slate-500">{document.type} · {document.date}</p>
-                    {!document.isFileAvailable ? <p className="text-xs text-slate-500">Documento non ancora verificato</p> : null}
-                  </div>
+                  <span className="min-w-0"><span className="block truncate text-sm font-medium text-slate-950">{document.name}</span><span className="text-xs text-slate-500">{document.type} · {document.date}</span></span>
                 </li>
               ))}
             </ul>
-          ) : <p className="mt-3 text-sm text-slate-500">Nessun documento presente.</p>}
-          <Link href={sectionHref(basePath, "documents")} className="mt-3 inline-flex text-sm font-semibold text-[#173d4f] underline underline-offset-4">Vedi tutti i documenti</Link>
+          ) : <p className="mt-3 text-sm text-slate-500">Nessun documento disponibile.</p>}
+          <div className="mt-3"><SectionLink basePath={basePath} section="documents">Apri documenti</SectionLink></div>
         </section>
-
-        {model.timeline ? (
-          <section id="cronologia" aria-labelledby="cronologia-title" className="scroll-mt-16 rounded-md border border-slate-200 p-4">
-            <h3 id="cronologia-title" className="text-base font-semibold text-slate-950">Cronologia recente</h3>
-            {model.timeline.length > 0 ? (
-              <ul className="mt-3 space-y-2 text-sm text-slate-700">
-                {model.timeline.slice(0, 3).map((item) => <li key={item.id}><span className="font-medium text-slate-950">{item.date}</span> · {item.label}</li>)}
-              </ul>
-            ) : <p className="mt-2 text-sm text-slate-500">Cronologia non ancora disponibile.</p>}
-          </section>
-        ) : null}
-
-        {(issues.length > 0 || model.nextDeadline || typeof model.openIssueCount === "number") ? (
-          <section aria-labelledby="questioni-title" className="rounded-md border border-slate-200 p-4">
-            <h3 id="questioni-title" className="text-base font-semibold text-slate-950">Questioni aperte</h3>
-            {issues.length > 0 ? (
-              <ul className="mt-3 space-y-2 text-sm text-slate-700">
-                {issues.map((item) => <li key={item.id}>{item.section ? <Link href={sectionHref(basePath, item.section)} className="font-medium text-slate-950 underline underline-offset-4">{item.label}</Link> : <span className="font-medium text-slate-950">{item.label}</span>}{item.detail ? `: ${item.detail}` : ""}</li>)}
-              </ul>
-            ) : null}
-            <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-slate-700">
-              {model.nextDeadline ? <span>Prossima scadenza: <strong>{model.nextDeadline}</strong></span> : null}
-              {typeof model.openIssueCount === "number" ? <span>Criticità aperte: <strong>{model.openIssueCount}</strong></span> : null}
-              {model.highestIssue ? <span>Più grave: <strong>{model.highestIssue}</strong></span> : null}
-            </div>
-            <div className="mt-3 flex flex-wrap gap-4 text-sm font-semibold text-[#173d4f]">
-              {model.nextDeadline ? <Link href={sectionHref(basePath, "deadlines")} className="underline underline-offset-4">Vedi scadenze</Link> : null}
-              {typeof model.openIssueCount === "number" ? <Link href={sectionHref(basePath, "issues")} className="underline underline-offset-4">Vedi criticità</Link> : null}
-            </div>
-          </section>
-        ) : null}
       </div>
+
+      {model.nextStep ? (
+        <section aria-labelledby="prossimo-passo-title" className="rounded-md border border-cyan-200 bg-cyan-50 p-5">
+          <h3 id="prossimo-passo-title" className="text-base font-semibold text-slate-950">Prossimo passo</h3>
+          <p className="mt-2 text-sm text-slate-700">{model.nextStep.label}</p>
+          <div className="mt-3"><SectionLink basePath={basePath} section={model.nextStep.section}>Vai alla sezione</SectionLink></div>
+        </section>
+      ) : null}
     </section>
   );
 }

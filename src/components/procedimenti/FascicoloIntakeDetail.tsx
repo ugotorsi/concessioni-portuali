@@ -78,15 +78,32 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload, activeSection }: F
   if (fascicolo.enteConcedente) subjects.push({ name: fascicolo.enteConcedente, roles: ["Ente concedente"], category: "principal", type: "Amministrazione pubblica" });
   if (fascicolo.autoritaCompetente) subjects.push({ name: fascicolo.autoritaCompetente, roles: ["Autorità competente"], category: "principal", type: "Amministrazione pubblica" });
   if (fascicolo.controparteAmministrazione) subjects.push({ name: fascicolo.controparteAmministrazione, roles: ["Controparte"], category: "other" });
+  const concessionIncomplete = !fascicolo.numeroConcessione
+    || !fascicolo.enteConcedente
+    || !fascicolo.oggettoConcessione
+    || !fascicolo.localita;
   const overview: FascicoloOverviewModel = {
     title,
     status: "In preparazione",
     type: getConcessionVerticalLabel(fascicolo.tipologiaConcessione),
-    concession: fascicolo.concessione?.numeroAtto ?? fascicolo.numeroConcessione,
+    reference: fascicolo.concessione?.numeroAtto ?? fascicolo.numeroConcessione,
+    administration: fascicolo.enteConcedente ?? fascicolo.autoritaCompetente,
     subject: fascicolo.soggettoAssistito ?? fascicolo.concessionario,
-    priorityDeadline: fascicolo.scadenza ? formatDateIT(fascicolo.scadenza) : null,
-    attention: [],
+    lastUpdated: formatDateIT(fascicolo.updatedAt),
     documentCount: fascicolo.documenti.length,
+    openIssueCount: 0,
+    criticalPaymentCount: 0,
+    attention: [
+      ...(fascicolo.documenti.length === 0
+        ? [{ label: "Nessun documento disponibile", section: "documents" as const }]
+        : []),
+      ...(concessionIncomplete
+        ? [{ label: "Dati concessione da completare", section: "concession" as const }]
+        : []),
+      ...(subjects.length === 0
+        ? [{ label: "Soggetti da completare", section: "subjects" as const }]
+        : []),
+    ],
     documents: fascicolo.documenti.slice(0, 3).map((documento) => ({
       id: documento.id,
       name: documento.nome,
@@ -95,17 +112,29 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload, activeSection }: F
       isFileAvailable: documento.isFileAvailable,
       href: `/documenti/${documento.id}/download`,
     })),
-    summary: [
-      { label: "Oggetto", value: fascicolo.oggettoFascicolo },
-      { label: "Contesto iniziale", value: fascicolo.contestoIniziale },
-      { label: "Stato corrente", value: "In preparazione" },
-      { label: "Concessione collegata", value: fascicolo.concessione?.numeroAtto ?? fascicolo.numeroConcessione },
-      { label: "Soggetto assistito", value: fascicolo.soggettoAssistito },
-      { label: "Concessionario / titolare", value: fascicolo.concessionario },
-    ],
-    timeline: [
-      { id: `fascicolo-${fascicolo.id}`, label: "Fascicolo creato", date: formatDateIT(fascicolo.createdAt) },
-    ],
+    deadlines: fascicolo.scadenza ? [{
+      id: `scadenza-${fascicolo.id}`,
+      date: formatDateIT(fascicolo.scadenza),
+      label: "Scadenza concessione",
+      status: fascicolo.scadenza < new Date() ? "Scaduta" : "Da verificare",
+    }] : [],
+    concession: {
+      number: fascicolo.concessione?.numeroAtto ?? fascicolo.numeroConcessione,
+      authority: fascicolo.enteConcedente,
+      object: fascicolo.oggettoConcessione,
+      startDate: fascicolo.decorrenza ? formatDateIT(fascicolo.decorrenza) : null,
+      expiryDate: fascicolo.scadenza ? formatDateIT(fascicolo.scadenza) : null,
+      location: fascicolo.localita,
+      incomplete: concessionIncomplete,
+    },
+    subjects: subjects.slice(0, 3).map((item) => ({
+      name: item.name,
+      role: item.roles.join(", "),
+    })),
+    nextStep: concessionIncomplete ? {
+      label: "Completare i dati della concessione",
+      section: "concession",
+    } : undefined,
   };
   const timelineEvents: FascicoloTimelineEvent[] = [
     {

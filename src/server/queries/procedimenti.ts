@@ -215,6 +215,7 @@ export interface ProcedimentoDetail {
     giorniResiduiContraddittorio: number | null;
     giorniRitardoContraddittorio: number | null;
     createdAt: Date;
+    updatedAt: Date;
     decisioneConclusiva: {
       id: string;
       tipoDecisione: string;
@@ -249,8 +250,10 @@ export interface ProcedimentoDetail {
     tipologiaBene: string;
     attivita: string;
     ubicazione: string | null;
+    descrizioneBene: string | null;
     canoneAnnuo: number | null;
     categoriaCanone: string | null;
+    ente: { nome: string } | null;
   };
   concessionario: {
     id: string;
@@ -720,6 +723,11 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
       },
       concessione: {
         include: {
+          ente: {
+            select: {
+              nome: true,
+            },
+          },
           concessionario: {
             select: {
               id: true,
@@ -953,6 +961,7 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
       giorniResiduiContraddittorio,
       giorniRitardoContraddittorio,
       createdAt: procedimento.createdAt,
+      updatedAt: procedimento.updatedAt,
       decisioneConclusiva: procedimento.decisioneProcedimento
         ? {
             statoEffetto: procedimento.decisioneProcedimento.statoEffetto,
@@ -989,8 +998,10 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
       tipologiaBene: procedimento.concessione.tipologiaBene,
       attivita: procedimento.concessione.attivita,
       ubicazione: procedimento.concessione.ubicazione,
+      descrizioneBene: procedimento.concessione.descrizioneBene,
       canoneAnnuo: procedimento.concessione.canoneAnnuo ? Number(procedimento.concessione.canoneAnnuo) : null,
       categoriaCanone: procedimento.concessione.categoriaCanone,
+      ente: procedimento.concessione.ente,
     },
     concessionario: procedimento.concessione.concessionario,
     criticitaCollegata: procedimento.criticita,
