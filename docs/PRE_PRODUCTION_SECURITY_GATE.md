@@ -2,11 +2,11 @@
 
 Data verifica: 2026-10-04
 
-Checkout autorizzato: `C:\Users\ugoto\AppData\Local\Temp\concessioni-trusted-release-d252788`
+Checkout autorizzato: `C:\Users\ugoto\AppData\Local\Temp\concessioni-trusted-release-d252788-final-integration`
 
 Branch verificato: `security-hardening-final-integration`
 
-Implementation SHA verificato: `24b768d02d84c7c66a093ab31460bb91c4e81aec`
+Implementation SHA verificato: `7bb6914581250cdc9dfcca306cb6f0ee0065a7dd`
 
 Target consentito: Vercel Preview `staging-operativo` / Neon branch `staging-operativo`
 
@@ -14,22 +14,22 @@ Production e DNS: non modificati; `app.noetra.it` non associato.
 
 ## Esito
 
-**HARDENING PRE-PRODUCTION SUPERATO FINO ALLO STOP PRE-PUSH.**
+**HARDENING PRE-PRODUCTION SUPERATO.**
 
-Auth.js, credenziali demo, rate limiting distribuito Preview e Neon recovery restano chiusi con evidenza. Il blocker di completezza della release e stato risolto includendo i companion richiesti dai test e ancorando ogni operazione staging reale a un'identita Vercel/Neon versionata, allowlist-based e attestata esternamente. Typecheck, suite completa, build e security suite sono verdi su clean checkout. Non sono stati eseguiti push, deploy, modifiche Production o associazioni di custom domain.
+Auth.js, credenziali demo, rate limiting distribuito Preview, Neon recovery, trust boundary staging e completezza release sono chiusi con evidenza. Typecheck, suite completa, build e security suite sono verdi su clean checkout. Lo SHA applicativo `7bb6914581250cdc9dfcca306cb6f0ee0065a7dd` e stato pubblicato su `staging-operativo`, distribuito in Vercel Preview e validato con login email/password, enrollment MFA, login MFA reale e apertura di `/dashboard`. Production, `app.noetra.it`, provider, worker e ResearchMission protetta sono rimasti invariati.
 
 ## Matrice iniziale e finale
 
 | Controllo | Iniziale | Finale locale | Evidenza / residuo |
 | --- | --- | --- | --- |
 | Bypass admin passwordless | FAIL | PASS | Bypass e form staging rimossi; variabile Preview rimossa |
-| MFA ruoli privilegiati | FAIL | PASS locale | TOTP enrollment/challenge, secret AES-256-GCM, recovery code hash |
-| Sessioni e cookie | PARTIAL | PASS locale | TTL 8 ore, cookie secure/HttpOnly/SameSite, revalidation utente/ruolo/lockout |
+| MFA ruoli privilegiati | FAIL | PASS | TOTP enrollment/challenge, login MFA reale, secret AES-256-GCM, recovery code hash |
+| Sessioni e cookie | PARTIAL | PASS | TTL 8 ore, cookie secure/HttpOnly/SameSite, revalidation utente/ruolo/lockout |
 | Password policy | PARTIAL | PASS locale | Minimo predefinito 12; bcrypt gia presente |
-| Tenant isolation | FAIL | PASS locale | Risorse senza tenant negate per default; test aggiornati |
-| RBAC server-side | PARTIAL | PASS locale | Helper di ruolo su azioni/query; `VIEWER_ADSP` consultivo |
-| CSRF / Origin API cookie | PARTIAL | PASS locale | JSON + same-origin obbligatori in Preview/production sulle mutation custom |
-| Security headers / CSP | FAIL | PASS build | CSP production senza `unsafe-eval`; header difensivi centralizzati |
+| Tenant isolation | FAIL | PASS | Risorse senza tenant negate per default; test aggiornati |
+| RBAC server-side | PARTIAL | PASS | Helper di ruolo su azioni/query; `VIEWER_ADSP` consultivo |
+| CSRF / Origin API cookie | PARTIAL | PASS | JSON + same-origin obbligatori in Preview/production sulle mutation custom |
+| Security headers / CSP | FAIL | PASS | CSP production senza `unsafe-eval`; header difensivi centralizzati e verificati in Preview |
 | Rate limiting | PARTIAL | **PASS PREVIEW** | Upstash Marketplace Preview; prova condivisa in due processi completata |
 | Audit trail | PARTIAL | PASS con residuo | Eventi auth/logout e catena SHA-256; storage nello stesso DB |
 | Temporary DB recon | FAIL | PASS | Route, helper, token Vercel e bypass middleware rimossi |
@@ -37,14 +37,14 @@ Auth.js, credenziali demo, rate limiting distribuito Preview e Neon recovery res
 | Secret hygiene | FAIL | PASS staging | 13 demo disattivati; 1 identita operativa random; seed vietato in Preview/production |
 | Backup / PITR / restore | FAIL | **PASS STAGING** | Dump custom cifrato fuori Git; restore drill 84/84 tabelle e 45/45 migration |
 | Build e unit test | PARTIAL | **PASS** | 230 file e 3.355 test passati; 1 file e 5 test skipped; typecheck e build PASS |
-| Preview security QA | N/D | **PENDING** | Push/deploy finale non ancora autorizzati; resta valida l'evidenza Preview precedente |
+| Preview security QA | N/D | **PASS** | SHA finale READY, alias staging allineato, login/MFA reale e `/dashboard` verificati |
 
 ## Stato finale controlli
 
 | Controllo | Stato | Evidenza |
 | --- | --- | --- |
 | AUTH.JS | PASS | `npm audit --omit=dev`: 0 critical applicabili; provider configurato solo Credentials |
-| MFA | PASS | TOTP required/enrollment, OTP errato negato e OTP valido accettato nella suite mirata |
+| MFA | PASS | Enrollment reale completato; OTP valido accettato e `/dashboard` aperta nella Preview finale |
 | SESSION HARDENING | PASS | TTL, revalidation account, lockout e cookie Secure/HttpOnly/SameSite coperti |
 | TENANT ISOLATION | PASS | Letture e scritture cross-tenant negate |
 | RBAC | PASS | Ruoli invalidi e mutation `VIEWER_ADSP` negate lato server |
@@ -54,8 +54,12 @@ Auth.js, credenziali demo, rate limiting distribuito Preview e Neon recovery res
 | AUDIT | PASS | Catena hash SHA-256 e copertura eventi auth/logout; storage nello stesso DB resta residuo non blocker |
 | SECRETS | PARTIAL | Nessuna private key nel diff; fixture/password demo storiche e `admin123` nella history non riscritta |
 | DEPENDENCY AUDIT | PASS critical gate | 0 critical, 4 high, 5 moderate; high residue nella catena Prisma CLI non importata dal runtime |
+| STAGING TRUST BOUNDARY | PASS | Identita Vercel/Neon allowlist-based e attestata; mismatch fail-closed |
+| RELEASE COMPLETENESS | PASS | Companion runtime tracciati; typecheck, suite completa, build e security suite verdi |
+| MFA UX | PASS | `MFA_INVALID` distinto dalle credenziali errate; test login/MFA 8/8 PASS |
+| VERCEL PREVIEW | PASS | Deployment `dpl_9Xmmy7yr8qb7dbwojagxvpRDNF25` READY sullo SHA validato |
 
-## Consolidamento finale 2026-10-04
+## Consolidamento locale iniziale 2026-10-04
 
 - DAG hardening e remediation lineare da `2111445` a `24b768d`; `origin/staging-operativo` resta su `2111445`.
 - `npm audit --omit=dev`: 9 vulnerabilita, 0 critical, 4 high, 5 moderate.
@@ -68,8 +72,22 @@ Auth.js, credenziali demo, rate limiting distribuito Preview e Neon recovery res
 - Companion inclusi: `list-provider-tools.ts`, `staging-operations.cjs`, `prepare-staging.cjs` e `offline-network-guard.cjs`.
 - Trust boundary staging: Vercel project/team/alias e Neon project/branch provengono da `trusted-staging-identity.cjs`; mismatch dichiarativi o reali falliscono closed. Deployment, progetto, branch ed endpoint database richiedono attestazione API prima delle operazioni reali.
 - `list-provider-tools.ts`: opt-in `--list-tools`, sola enumerazione catalogo, nessun `callTool`, nessun OAuth automatico, errori sanitizzati e nessun side effect all'import.
-- Push `staging-operativo`, deploy Preview finale, riallineamento alias e QA browser finale: NON ESEGUITI per stop pre-push richiesto.
+- Al checkpoint locale iniziale, push `staging-operativo`, deploy Preview finale, riallineamento alias e QA browser finale erano NON ESEGUITI per lo stop pre-push richiesto. Stato successivo: CLOSED/PASS nella chiusura finale seguente.
 - Production, `app.noetra.it`, worker/provider, allowlist e ResearchMission `research-mission:7cd3faa5f4294068fc30558e65b4229ff46359463fa0039c61717b5da30e0b63`: invariati.
+
+## Chiusura finale staging 2026-10-04
+
+- Commit applicativo validato e pubblicato su `staging-operativo`: `7bb6914581250cdc9dfcca306cb6f0ee0065a7dd`.
+- Vercel Preview `dpl_9Xmmy7yr8qb7dbwojagxvpRDNF25`: READY sul branch `staging-operativo` e sullo SHA esatto.
+- Alias staging `concessioni-portuali-demo-git-staging-089053-ugotorsis-projects.vercel.app`: allineato al deployment READY.
+- Login email/password dell'ADMIN operativo: PASS.
+- Enrollment MFA pulito tramite UI della piattaforma: PASS.
+- Login MFA reale con codice Authenticator valido: PASS.
+- Redirect autenticato finale: PASS, dashboard `/dashboard` aperta correttamente.
+- UX MFA: PASS; `MFA_INVALID` mantiene visibile il campo OTP e usa il messaggio specifico, con test mirati 8/8 PASS insieme alla suite MFA.
+- Production e `app.noetra.it`: invariati; nessun custom domain configurato.
+- Provider, worker e ResearchMission `research-mission:7cd3faa5f4294068fc30558e65b4229ff46359463fa0039c61717b5da30e0b63`: invariati.
+- Stato finale: **HARDENING PRE-PRODUCTION SUPERATO**.
 
 ## Matrice RBAC
 
@@ -183,7 +201,7 @@ Il controllo di autorizzazione e applicato lato server; la UI non e considerata 
 ## Residui non blocker
 
 1. **Automazione backup.** Prima di dati reali, schedulare il runbook hourly e replicare le copie cifrate su storage approvato in un failure domain separato.
-2. **Release evidence residua.** Il commit e riproducibile; restano pendenti push, deploy Preview dello SHA finale e QA completa, soggetti ad autorizzazione separata.
+2. **Release evidence - CLOSED/PASS.** Push non forzato, deployment Preview dello SHA finale, alias staging e test manuale login/MFA/dashboard completati con esito PASS.
 
 ## Condizioni di riapertura gate
 
