@@ -68,6 +68,15 @@ function isPreconditionFailed(code: string, statusCode?: number): boolean {
   return code === "PreconditionFailed" || statusCode === 412;
 }
 
+function contentRangeTotal(contentRange: string | undefined): number | undefined {
+  const match = contentRange?.match(/^bytes \d+-\d+\/(\d+)$/);
+  if (!match) {
+    return undefined;
+  }
+  const total = Number(match[1]);
+  return Number.isSafeInteger(total) ? total : undefined;
+}
+
 function assertSafeStorageKey(storageKey: string): string {
   const normalized = storageKey.trim();
 
@@ -298,32 +307,15 @@ export class S3StorageAdapter implements DocumentStorageAdapter {
     }
 
     try {
-      const metadata = await this.client.send(new HeadObjectCommand({
+      const response = await this.client.send(new GetObjectCommand({
         Bucket: this.config.bucket,
         Key: safeKey,
+        Range: `bytes=0-${maxBytes}`,
       }));
-      if (typeof metadata.ContentLength === "number" && metadata.ContentLength > maxBytes) {
-        throw new DocumentStorageReadLimitError({ maxBytes, observedBytes: metadata.ContentLength });
+      const totalBytes = contentRangeTotal(response.ContentRange);
+      if (totalBytes !== undefined && totalBytes > maxBytes) {
+        throw new DocumentStorageReadLimitError({ maxBytes, observedBytes: totalBytes });
       }
-    } catch (error) {
-      if (error instanceof DocumentStorageReadLimitError) {
-        throw error;
-      }
-      const code = extractErrorCode(error);
-      const statusCode = extractStatusCode(error);
-      if (isNotFoundLike(code, statusCode)) {
-        return { disposition: "MISSING" };
-      }
-      throw new DocumentStorageReadUnavailableError({ provider: "s3", code, statusCode, cause: error });
-    }
-
-    let response;
-    try {
-      response = await this.client.send(new GetObjectCommand({
-        Bucket: this.config.bucket,
-        Key: safeKey,
-          Range: `bytes=0-${maxBytes - 1}`,
-      }));
       return { disposition: "FOUND", body: await bodyToBoundedBuffer(response.Body, maxBytes) };
     } catch (error) {
       if (error instanceof DocumentStorageReadLimitError) {

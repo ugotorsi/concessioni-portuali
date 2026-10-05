@@ -3,7 +3,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { GetObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { LocalStorageAdapter } from "@/server/documents/storage/localStorageAdapter";
@@ -20,13 +20,13 @@ describe("bounded storage reads", () => {
     process.env.S3_FORCE_PATH_STYLE = "true";
   });
 
-  it("rejects oversized S3 metadata before GetObject", async () => {
+  it("rejects an oversized S3 object from ranged response metadata", async () => {
     const adapter = new S3StorageAdapter();
     const commands: unknown[] = [];
     Object.defineProperty(adapter, "client", { value: {
       send: async (command: unknown) => {
         commands.push(command);
-        return { ContentLength: 11 };
+        return { ContentRange: "bytes 0-10/11" };
       },
     } });
 
@@ -37,19 +37,19 @@ describe("bounded storage reads", () => {
       observedBytes: 11,
     });
     expect(commands).toHaveLength(1);
-    expect(commands[0]).toBeInstanceOf(HeadObjectCommand);
+    expect(commands[0]).toBeInstanceOf(GetObjectCommand);
   });
 
-  it("uses HEAD plus a bounded range and enforces bytes consumed", async () => {
+  it("uses one bounded range request and enforces bytes consumed", async () => {
     const adapter = new S3StorageAdapter();
     const commands: unknown[] = [];
     Object.defineProperty(adapter, "client", { value: {
       send: async (command: unknown) => {
         commands.push(command);
-        if (command instanceof HeadObjectCommand) {
-          return { ContentLength: 7 };
-        }
-        return { Body: Readable.from([Buffer.from("content")]) };
+        return {
+          ContentRange: "bytes 0-6/7",
+          Body: Readable.from([Buffer.from("content")]),
+        };
       },
     } });
 
@@ -57,17 +57,15 @@ describe("bounded storage reads", () => {
       disposition: "FOUND",
       body: Buffer.from("content"),
     });
-    expect(commands).toHaveLength(2);
-    expect(commands[1]).toBeInstanceOf(GetObjectCommand);
-    expect((commands[1] as GetObjectCommand).input.Range).toBe("bytes=0-9");
+    expect(commands).toHaveLength(1);
+    expect(commands[0]).toBeInstanceOf(GetObjectCommand);
+    expect((commands[0] as GetObjectCommand).input.Range).toBe("bytes=0-10");
   });
 
   it("fails closed if the S3 body exceeds the advertised budget", async () => {
     const adapter = new S3StorageAdapter();
     Object.defineProperty(adapter, "client", { value: {
-      send: async (command: unknown) => command instanceof HeadObjectCommand
-        ? { ContentLength: 4 }
-        : { Body: Readable.from([Buffer.from("12345")]) },
+      send: async () => ({ Body: Readable.from([Buffer.from("12345")]) }),
     } });
 
     await expect(adapter.readBounded("intake/item", 4)).rejects.toMatchObject({
