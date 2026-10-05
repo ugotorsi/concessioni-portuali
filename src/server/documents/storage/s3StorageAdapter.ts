@@ -160,6 +160,8 @@ export class S3StorageAdapter implements DocumentStorageAdapter {
       secretAccessKey: this.config.secretAccessKey,
     },
     forcePathStyle: this.config.forcePathStyle,
+    requestChecksumCalculation: "WHEN_REQUIRED",
+    responseChecksumValidation: "WHEN_REQUIRED",
   });
 
   private toS3Error(operation: StorageOperation, error: unknown): DocumentStorageS3Error {
