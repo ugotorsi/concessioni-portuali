@@ -5,7 +5,6 @@ import {
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { getS3StorageConfig } from "./config";
 import type {
@@ -147,34 +146,6 @@ async function bodyToBoundedBuffer(body: unknown, maxBytes: number): Promise<Buf
     nodeStream.on("error", reject);
     nodeStream.on("end", () => resolve());
   });
-  return Buffer.concat(chunks, consumed);
-}
-
-async function responseToBoundedBuffer(response: Response, maxBytes: number): Promise<Buffer> {
-  if (!response.body) {
-    return Buffer.alloc(0);
-  }
-
-  const reader = response.body.getReader();
-  const chunks: Buffer[] = [];
-  let consumed = 0;
-  try {
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) {
-        break;
-      }
-      const bytes = Buffer.from(value);
-      consumed += bytes.length;
-      if (consumed > maxBytes) {
-        await reader.cancel().catch(() => undefined);
-        throw new DocumentStorageReadLimitError({ maxBytes, observedBytes: consumed });
-      }
-      chunks.push(bytes);
-    }
-  } finally {
-    reader.releaseLock();
-  }
   return Buffer.concat(chunks, consumed);
 }
 
@@ -338,33 +309,22 @@ export class S3StorageAdapter implements DocumentStorageAdapter {
     }
 
     try {
-      const command = new GetObjectCommand({
+      const response = await this.client.send(new GetObjectCommand({
         Bucket: this.config.bucket,
         Key: safeKey,
-      });
-      const url = await getSignedUrl(this.client, command, { expiresIn: 60 });
-      const response = await fetch(url, {
-        headers: { Range: `bytes=0-${maxBytes}` },
-      });
-      if (response.status === 404) {
-        return { disposition: "MISSING" };
-      }
-      if (!response.ok) {
-        throw new DocumentStorageReadUnavailableError({
-          provider: "s3",
-          code: `HTTP_${response.status}`,
-          statusCode: response.status,
-        });
-      }
-      const totalBytes = contentRangeTotal(response.headers.get("content-range") ?? undefined);
+        Range: `bytes=0-${maxBytes}`,
+      }));
+      const totalBytes = contentRangeTotal(response.ContentRange);
       if (totalBytes !== undefined && totalBytes > maxBytes) {
         throw new DocumentStorageReadLimitError({ maxBytes, observedBytes: totalBytes });
       }
-      const contentLength = Number(response.headers.get("content-length"));
-      if (Number.isSafeInteger(contentLength) && contentLength > maxBytes) {
-        throw new DocumentStorageReadLimitError({ maxBytes, observedBytes: contentLength });
+      if (response.ContentLength !== undefined && response.ContentLength > maxBytes) {
+        throw new DocumentStorageReadLimitError({
+          maxBytes,
+          observedBytes: response.ContentLength,
+        });
       }
-      return { disposition: "FOUND", body: await responseToBoundedBuffer(response, maxBytes) };
+      return { disposition: "FOUND", body: await bodyToBoundedBuffer(response.Body, maxBytes) };
     } catch (error) {
       if (error instanceof DocumentStorageReadLimitError) {
         throw error;
