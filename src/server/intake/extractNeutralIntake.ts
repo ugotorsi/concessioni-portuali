@@ -68,6 +68,20 @@ function storageFailureCode(error: unknown): ExtractionFailureCode {
   return "STORAGE_READ_FAILURE";
 }
 
+function storageFailureMessage(error: unknown): string {
+  if (error instanceof DocumentStorageReadUnavailableError) {
+    const code = /^[a-zA-Z0-9_.-]{1,80}$/.test(error.code) ? error.code : "UNKNOWN_STORAGE_ERROR";
+    const status = error.statusCode && error.statusCode >= 100 && error.statusCode <= 599
+      ? `; HTTP ${error.statusCode}`
+      : "";
+    return `Document storage ${error.provider} read unavailable (${code}${status}).`;
+  }
+  if (error instanceof DocumentStorageReadCoherenceError) {
+    return `Document storage read coherence failed (${error.code}).`;
+  }
+  return asBoundedFailureMessage(error);
+}
+
 function extractionFailureCode(error: unknown): ExtractionFailureCode {
   return error instanceof ExtractionFailure ? error.code : "INTERNAL_EXTRACTION_FAILURE";
 }
@@ -139,7 +153,7 @@ export async function extractNeutralIntake(
       startedAt,
       completedAt: dependencies.now(),
       failureCode: storageFailureCode(error),
-      failureMessage: asBoundedFailureMessage(error),
+      failureMessage: storageFailureMessage(error),
     };
     assertCompletedAttempt(completed);
     const attempt = await dependencies.persist(completed);

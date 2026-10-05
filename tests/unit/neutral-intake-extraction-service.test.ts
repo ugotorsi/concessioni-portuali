@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
+import {
+  DocumentStorageReadCoherenceError,
+  DocumentStorageReadUnavailableError,
+} from "@/server/documents/storage/types";
 import { ExtractionFailure } from "@/server/intake/extraction/errors";
 import type { CompletedExtractionAttempt } from "@/server/intake/extraction/persistence";
 import type { TechnicalExtractionResult } from "@/server/intake/extraction/types";
@@ -101,6 +105,45 @@ describe("B2C9 NeutralIntake extraction service", () => {
     });
     expect(deps.extract).not.toHaveBeenCalled();
     expect(deps.persist).toHaveBeenCalledOnce();
+  });
+
+  it("persists bounded storage diagnostics without exposing an unsafe provider code", async () => {
+    const deps = dependencies();
+    deps.readBounded = vi.fn(async () => {
+      throw new DocumentStorageReadUnavailableError({
+        provider: "s3",
+        code: "SignatureDoesNotMatch",
+        statusCode: 403,
+      });
+    });
+    await extractNeutralIntake("intake-1", deps);
+    expect(deps.persist).toHaveBeenCalledWith(expect.objectContaining({
+      failureCode: "STORAGE_READ_FAILURE",
+      failureMessage: "Document storage s3 read unavailable (SignatureDoesNotMatch; HTTP 403).",
+    }));
+
+    deps.readBounded = vi.fn(async () => {
+      throw new DocumentStorageReadUnavailableError({
+        provider: "s3",
+        code: "unsafe credential=value",
+      });
+    });
+    await extractNeutralIntake("intake-1", deps);
+    expect(deps.persist).toHaveBeenLastCalledWith(expect.objectContaining({
+      failureMessage: "Document storage s3 read unavailable (UNKNOWN_STORAGE_ERROR).",
+    }));
+  });
+
+  it("persists the bounded storage-coherence classification", async () => {
+    const deps = dependencies();
+    deps.readBounded = vi.fn(async () => {
+      throw new DocumentStorageReadCoherenceError("BUCKET_MISMATCH");
+    });
+    await extractNeutralIntake("intake-1", deps);
+    expect(deps.persist).toHaveBeenCalledWith(expect.objectContaining({
+      failureCode: "STORAGE_READ_FAILURE",
+      failureMessage: "Document storage read coherence failed (BUCKET_MISMATCH).",
+    }));
   });
 
   it("rejects oversized intake metadata before reading storage", async () => {
