@@ -96,7 +96,7 @@ function defaultWorkerId(): string {
 
 function allowlist(value: string | undefined): readonly string[] {
   if (value === undefined || value.trim() === "") return [];
-  const parsed = [...new Set(value.split(",").map((item) => item.trim()).filter(Boolean))];
+  const parsed = [...new Set(value.split(/[,\r\n]+/).map((item) => item.trim()).filter(Boolean))];
   if (parsed.some((item) => item.length > 256)) {
     throw new ApplicationAsyncWorkerConfigurationError("INVALID_CONFIGURATION");
   }
