@@ -2,6 +2,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
+import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -59,6 +60,8 @@ describe("bounded storage reads", () => {
     expect(fetchMock).toHaveBeenCalledWith("https://example.invalid/presigned", {
       headers: { Range: "bytes=0-10" },
     });
+    const signedCommand = vi.mocked(getSignedUrl).mock.calls[0][1] as GetObjectCommand;
+    expect(signedCommand.input.Range).toBeUndefined();
   });
 
   it("fails closed if the S3 body exceeds the advertised budget", async () => {

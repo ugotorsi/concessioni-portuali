@@ -341,7 +341,6 @@ export class S3StorageAdapter implements DocumentStorageAdapter {
       const command = new GetObjectCommand({
         Bucket: this.config.bucket,
         Key: safeKey,
-        Range: `bytes=0-${maxBytes}`,
       });
       const url = await getSignedUrl(this.client, command, { expiresIn: 60 });
       const response = await fetch(url, {
