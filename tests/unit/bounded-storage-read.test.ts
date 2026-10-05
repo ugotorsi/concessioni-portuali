@@ -59,6 +59,25 @@ describe("bounded storage reads", () => {
     expect(command.input.Range).toBe("bytes=0-10");
   });
 
+  it("consumes an AWS SDK response through its bounded byte transform", async () => {
+    const adapter = new S3StorageAdapter();
+    vi.spyOn(S3Client.prototype, "send").mockResolvedValue({
+      ContentLength: 7,
+      Body: {
+        on: () => {
+          throw new Error("stream event path must not be used");
+        },
+        transformToByteArray: async () => new TextEncoder().encode("content"),
+      },
+      $metadata: { httpStatusCode: 206 },
+    } as never);
+
+    await expect(adapter.readBounded("intake/item", 10)).resolves.toEqual({
+      disposition: "FOUND",
+      body: Buffer.from("content"),
+    });
+  });
+
   it("fails closed if the S3 body exceeds the advertised budget", async () => {
     const adapter = new S3StorageAdapter();
     vi.spyOn(S3Client.prototype, "send").mockResolvedValue({

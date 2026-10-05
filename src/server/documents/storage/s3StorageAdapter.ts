@@ -120,6 +120,20 @@ async function bodyToBoundedBuffer(body: unknown, maxBytes: number): Promise<Buf
     return Buffer.alloc(0);
   }
 
+  const sdkBody = body as {
+    transformToByteArray?: () => Promise<Uint8Array>;
+  };
+  if (typeof sdkBody.transformToByteArray === "function") {
+    const bytes = await sdkBody.transformToByteArray();
+    if (bytes.byteLength > maxBytes) {
+      throw new DocumentStorageReadLimitError({
+        maxBytes,
+        observedBytes: bytes.byteLength,
+      });
+    }
+    return Buffer.from(bytes);
+  }
+
   const nodeStream = body as NodeJS.ReadableStream & { destroy?: (error?: Error) => void };
   if (typeof nodeStream.on !== "function") {
     const buffered = await bodyToBuffer(body);
