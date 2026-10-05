@@ -1,7 +1,5 @@
 import { redirect } from "next/navigation";
 
-import { getAuthSession } from "@/lib/next-auth";
-
 export const DEMO_ROLES = [
   "ADMIN",
   "OPERATORE_SOCIETA",
@@ -36,8 +34,13 @@ function isDemoRole(value: string | undefined): value is DemoRole {
   return DEMO_ROLES.includes(value as DemoRole);
 }
 
+async function loadAuthSession() {
+  const { getAuthSession } = await import("@/lib/next-auth");
+  return getAuthSession();
+}
+
 export async function getCurrentRole(): Promise<DemoRole | null> {
-  const session = await getAuthSession();
+  const session = await loadAuthSession();
   const sessionRole = session?.user?.role;
 
   if (isDemoRole(sessionRole)) {
@@ -48,7 +51,7 @@ export async function getCurrentRole(): Promise<DemoRole | null> {
 }
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
-  const session = await getAuthSession();
+  const session = await loadAuthSession();
   const role = session?.user?.role;
 
   if (session?.user?.email && session.user.id && isDemoRole(role)) {
