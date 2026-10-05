@@ -79,7 +79,16 @@ function storageFailureMessage(error: unknown): string {
   if (error instanceof DocumentStorageReadCoherenceError) {
     return `Document storage read coherence failed (${error.code}).`;
   }
-  return asBoundedFailureMessage(error);
+  const names: string[] = [];
+  let current = error;
+  for (let depth = 0; depth < 3 && current instanceof Error; depth += 1) {
+    const name = /^[a-zA-Z0-9_.-]{1,80}$/.test(current.name) ? current.name : "UnknownError";
+    names.push(name);
+    current = current.cause;
+  }
+  return names.length > 0
+    ? `Technical extraction failed (${names.join(" <- ")}).`
+    : asBoundedFailureMessage(error);
 }
 
 function extractionFailureCode(error: unknown): ExtractionFailureCode {

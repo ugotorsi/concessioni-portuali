@@ -146,6 +146,20 @@ describe("B2C9 NeutralIntake extraction service", () => {
     }));
   });
 
+  it("persists only sanitized error classes for an unknown storage failure", async () => {
+    const deps = dependencies();
+    deps.readBounded = vi.fn(async () => {
+      throw new Error("credential secret must not persist", {
+        cause: new TypeError("endpoint must not persist"),
+      });
+    });
+    await extractNeutralIntake("intake-1", deps);
+    expect(deps.persist).toHaveBeenCalledWith(expect.objectContaining({
+      failureCode: "STORAGE_READ_FAILURE",
+      failureMessage: "Technical extraction failed (Error <- TypeError).",
+    }));
+  });
+
   it("rejects oversized intake metadata before reading storage", async () => {
     const deps = dependencies();
     deps.loadIntake = vi.fn(async () => ({ ...intake, sizeBytes: 25 * 1024 * 1024 + 1 }));
