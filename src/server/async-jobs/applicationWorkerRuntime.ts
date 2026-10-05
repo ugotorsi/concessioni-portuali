@@ -37,7 +37,13 @@ export type ApplicationAsyncWorkerEvent =
       jobId: string;
       outcome: "SUCCEEDED" | "RETRY_SCHEDULED" | "TERMINAL_FAILED" | "CANCELLED";
     }
-  | { event: "ASYNC_WORKER_RECOVERABLE_ERROR"; workerId: string; errorName: string; backoffMs: number };
+  | {
+      event: "ASYNC_WORKER_RECOVERABLE_ERROR";
+      workerId: string;
+      errorName: string;
+      errorCode: string | null;
+      backoffMs: number;
+    };
 
 export class ApplicationAsyncWorkerConfigurationError extends Error {
   constructor(readonly code: "DATABASE_URL_REQUIRED" | "INVALID_CONFIGURATION") {
@@ -117,6 +123,12 @@ function defaultSleep(delayMs: number, signal: AbortSignal): Promise<void> {
 function errorName(error: unknown): string {
   if (error instanceof Error && error.name.trim()) return error.name;
   return "UnknownError";
+}
+
+function errorCode(error: unknown): string | null {
+  if (typeof error !== "object" || error === null || !("code" in error)) return null;
+  const code = Reflect.get(error, "code");
+  return typeof code === "string" && code.length <= 128 ? code : null;
 }
 
 const defaultDrain: Drain = async (input) => {
@@ -265,6 +277,7 @@ export function createApplicationAsyncWorkerRuntime(
             event: "ASYNC_WORKER_RECOVERABLE_ERROR",
             workerId: laneWorkerId,
             errorName: errorName(error),
+            errorCode: errorCode(error),
             backoffMs: config.errorBackoffMs,
           });
           if (!shutdownRequested) await wait(config.errorBackoffMs);

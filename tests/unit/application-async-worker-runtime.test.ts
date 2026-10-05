@@ -267,8 +267,12 @@ describe("Block 3B.7 application async worker runtime", () => {
   });
 
   it("continues after a recoverable drain error using the bounded error backoff", async () => {
+    const recoverableError = Object.assign(
+      new Error("database temporarily unavailable"),
+      { code: "CONNECTION_LOST" },
+    );
     applicationWorker.drainOneApplicationAsyncJob
-      .mockRejectedValueOnce(new Error("database temporarily unavailable"))
+      .mockRejectedValueOnce(recoverableError)
       .mockResolvedValueOnce({ outcome: "IDLE" });
     const { runtime, events, sleeps, sleep } = harness();
     sleep.mockImplementationOnce(async (delayMs: number) => {
@@ -282,6 +286,7 @@ describe("Block 3B.7 application async worker runtime", () => {
     expect(events).toContainEqual(expect.objectContaining({
       event: "ASYNC_WORKER_RECOVERABLE_ERROR",
       errorName: "Error",
+      errorCode: "CONNECTION_LOST",
     }));
     expect(JSON.stringify(events)).not.toContain("database temporarily unavailable");
   });
