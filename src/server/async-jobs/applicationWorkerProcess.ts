@@ -49,6 +49,8 @@ export async function runApplicationAsyncWorkerProcess(
 
   try {
     const config = parseConfig();
+    const { runR2WorkerProbeIfEnabled } = await import("../../../scripts/runtime/r2-worker-probe");
+    await runR2WorkerProbeIfEnabled();
     const runtime = createRuntime(config, { report: dependencies.report ?? report });
     const removeSignalHandlers = installSignalHandlers(runtime);
     try {
