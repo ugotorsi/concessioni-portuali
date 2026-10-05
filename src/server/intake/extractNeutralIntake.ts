@@ -143,7 +143,7 @@ export async function extractNeutralIntake(
       storageProvider: storageProvider(intake.storageProvider),
       storageBucket: intake.storageBucket,
       storageKey: intake.storageKey,
-      maxBytes: B2C9_EXTRACTION_POLICY_V1.maxArtifactBytes,
+      maxBytes: intake.sizeBytes,
     });
     if (stored.disposition !== "FOUND") {
       throw new ExtractionFailure("STORAGE_READ_FAILURE", "Stored artifact is unavailable.");

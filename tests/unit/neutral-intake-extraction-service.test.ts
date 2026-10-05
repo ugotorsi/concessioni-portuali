@@ -62,7 +62,7 @@ describe("B2C9 NeutralIntake extraction service", () => {
       storageProvider: "local",
       storageBucket: null,
       storageKey: intake.storageKey,
-      maxBytes: 25 * 1024 * 1024,
+      maxBytes: body.length,
     });
     expect(deps.persist).toHaveBeenCalledOnce();
     expect((deps.persist as ReturnType<typeof vi.fn>).mock.calls[0][0]).toMatchObject({
