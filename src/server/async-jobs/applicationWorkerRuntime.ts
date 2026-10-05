@@ -131,9 +131,28 @@ function errorCode(error: unknown): string | null {
   return typeof code === "string" && code.length <= 128 ? code : null;
 }
 
+function applicationWorkerLoadErrorCode(error: unknown): string {
+  const message = error instanceof Error ? error.message.toLowerCase() : "";
+  if (message.includes("@napi-rs/canvas") || message.includes("native binding")) {
+    return "APPLICATION_WORKER_NATIVE_BINDING_LOAD_FAILED";
+  }
+  if (message.includes("sharp")) return "APPLICATION_WORKER_SHARP_LOAD_FAILED";
+  if (message.includes("cannot find module") || message.includes("module not found")) {
+    return "APPLICATION_WORKER_MODULE_NOT_FOUND";
+  }
+  return "APPLICATION_WORKER_MODULE_LOAD_FAILED";
+}
+
 const defaultDrain: Drain = async (input) => {
-  const { drainOneApplicationAsyncJob } = await import("./applicationWorker");
-  return drainOneApplicationAsyncJob(input);
+  let applicationWorker: typeof import("./applicationWorker");
+  try {
+    applicationWorker = await import("./applicationWorker");
+  } catch (error) {
+    throw Object.assign(new Error("APPLICATION_WORKER_MODULE_LOAD_FAILED"), {
+      code: applicationWorkerLoadErrorCode(error),
+    });
+  }
+  return applicationWorker.drainOneApplicationAsyncJob(input);
 };
 
 export function parseApplicationAsyncWorkerConfig(
