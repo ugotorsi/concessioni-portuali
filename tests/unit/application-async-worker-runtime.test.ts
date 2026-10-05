@@ -287,6 +287,7 @@ describe("Block 3B.7 application async worker runtime", () => {
       event: "ASYNC_WORKER_RECOVERABLE_ERROR",
       errorName: "Error",
       errorCode: "CONNECTION_LOST",
+      errorSource: null,
     }));
     expect(JSON.stringify(events)).not.toContain("database temporarily unavailable");
   });

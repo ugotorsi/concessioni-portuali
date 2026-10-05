@@ -42,6 +42,7 @@ export type ApplicationAsyncWorkerEvent =
       workerId: string;
       errorName: string;
       errorCode: string | null;
+      errorSource: string | null;
       backoffMs: number;
     };
 
@@ -131,7 +132,24 @@ function errorCode(error: unknown): string | null {
   return typeof code === "string" && code.length <= 128 ? code : null;
 }
 
+function errorSource(error: unknown): string | null {
+  if (typeof error !== "object" || error === null || !("diagnosticSource" in error)) return null;
+  const source = Reflect.get(error, "diagnosticSource");
+  return typeof source === "string" && source.length <= 256 ? source : null;
+}
+
+function applicationWorkerLoadErrorSource(error: unknown): string | null {
+  if (!(error instanceof Error) || !error.stack) return null;
+  const stack = error.stack.replaceAll("\\", "/");
+  const packageMatch = /\/node_modules\/((?:@[^/]+\/)?[^/:\s)]+)/.exec(stack);
+  if (packageMatch?.[1]) return `node_modules/${packageMatch[1]}`;
+  const workspaceMatch = /\/((?:src|scripts|generated)\/[^:\s)]+):\d+/.exec(stack);
+  return workspaceMatch?.[1] ?? null;
+}
+
 function applicationWorkerLoadErrorCode(error: unknown): string {
+  const sourceCode = errorCode(error);
+  if (sourceCode) return `APPLICATION_WORKER_${sourceCode}`.slice(0, 128);
   const message = error instanceof Error ? error.message.toLowerCase() : "";
   if (message.includes("@napi-rs/canvas") || message.includes("native binding")) {
     return "APPLICATION_WORKER_NATIVE_BINDING_LOAD_FAILED";
@@ -150,6 +168,7 @@ const defaultDrain: Drain = async (input) => {
   } catch (error) {
     throw Object.assign(new Error("APPLICATION_WORKER_MODULE_LOAD_FAILED"), {
       code: applicationWorkerLoadErrorCode(error),
+      diagnosticSource: applicationWorkerLoadErrorSource(error),
     });
   }
   return applicationWorker.drainOneApplicationAsyncJob(input);
@@ -297,6 +316,7 @@ export function createApplicationAsyncWorkerRuntime(
             workerId: laneWorkerId,
             errorName: errorName(error),
             errorCode: errorCode(error),
+            errorSource: errorSource(error),
             backoffMs: config.errorBackoffMs,
           });
           if (!shutdownRequested) await wait(config.errorBackoffMs);
