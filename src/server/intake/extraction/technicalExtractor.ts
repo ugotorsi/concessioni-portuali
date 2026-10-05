@@ -3,7 +3,6 @@ import { createHash } from "node:crypto";
 import { ExtractionFailure } from "./errors";
 import { assertImagePixelLimit, readImageDimensions } from "./image";
 import { detectArtifactMimeType, isSupportedExtractionMimeType } from "./mime";
-import { TesseractItalianOcrAdapter } from "./ocrAdapter";
 import { PdfJsExtractionAdapter } from "./pdfAdapter";
 import { B2C9_EXTRACTION_POLICY_V1, type ExtractionPolicy } from "./policy";
 import { assessDirectText, normalizeExtractedText } from "./text";
@@ -80,7 +79,14 @@ export async function extractTechnicalDocument(
 ): Promise<TechnicalExtractionResult> {
   const policy = dependencies.policy ?? B2C9_EXTRACTION_POLICY_V1;
   const pdf = dependencies.pdf ?? new PdfJsExtractionAdapter();
-  const ocr = dependencies.ocr ?? new TesseractItalianOcrAdapter();
+  let ocr = dependencies.ocr;
+  const getOcr = async (): Promise<OcrAdapter> => {
+    if (!ocr) {
+      const { TesseractItalianOcrAdapter } = await import("./ocrAdapter");
+      ocr = new TesseractItalianOcrAdapter();
+    }
+    return ocr;
+  };
   const detectedMimeType = validateArtifact(input, policy);
   const pages: ExtractedPageEvidence[] = [];
   const warnings: string[] = [];
@@ -117,7 +123,7 @@ export async function extractTechnicalDocument(
         }
 
         const image = await session.renderPage(directPage.pageNumber, policy.maxImagePixels);
-        const recognized = await ocr.recognize(image, policy.ocrTimeoutMsPerPage);
+        const recognized = await (await getOcr()).recognize(image, policy.ocrTimeoutMsPerPage);
         addRawCharacters(recognized.text);
         ocrUsed = true;
         pages.push(pageEvidence({
@@ -134,7 +140,7 @@ export async function extractTechnicalDocument(
     }
   } else {
     assertImagePixelLimit(readImageDimensions(input.bytes, detectedMimeType), policy.maxImagePixels);
-    const recognized = await ocr.recognize(input.bytes, policy.ocrTimeoutMsPerPage);
+    const recognized = await (await getOcr()).recognize(input.bytes, policy.ocrTimeoutMsPerPage);
     addRawCharacters(recognized.text);
     ocrUsed = true;
     pages.push(pageEvidence({
@@ -153,8 +159,8 @@ export async function extractTechnicalDocument(
     warnings,
     directExtractorName: detectedMimeType === "application/pdf" ? pdf.name : null,
     directExtractorVersion: detectedMimeType === "application/pdf" ? pdf.version : null,
-    ocrExtractorName: ocrUsed ? ocr.name : null,
-    ocrExtractorVersion: ocrUsed ? ocr.version : null,
+    ocrExtractorName: ocrUsed ? ocr?.name ?? null : null,
+    ocrExtractorVersion: ocrUsed ? ocr?.version ?? null : null,
     rasterizerName: detectedMimeType === "application/pdf" && ocrUsed ? pdf.rasterizerName : null,
     rasterizerVersion: detectedMimeType === "application/pdf" && ocrUsed ? pdf.rasterizerVersion : null,
   };
