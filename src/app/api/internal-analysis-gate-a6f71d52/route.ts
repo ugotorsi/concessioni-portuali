@@ -215,6 +215,19 @@ async function snapshot() {
       where: { destination: { procedimentoId: PROCEDIMENTO_ID } },
       select: {
         id: true,
+        status: true,
+        sha256: true,
+        classificationAttempts: {
+          orderBy: [{ completedAt: "desc" }, { id: "desc" }],
+          take: 1,
+          select: {
+            id: true,
+            extractionAttemptId: true,
+            evidenceHash: true,
+            classifierVersion: true,
+            outcome: true,
+          },
+        },
         extractionAttempts: {
           where: { outcome: "SUCCEEDED" },
           orderBy: [{ completedAt: "desc" }, { id: "desc" }],
