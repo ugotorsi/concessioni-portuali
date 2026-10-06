@@ -142,7 +142,6 @@ async function snapshot() {
         providerId: true,
         toolId: true,
         supportDirection: true,
-        sourceState: true,
       },
       orderBy: { id: "asc" },
     }),
