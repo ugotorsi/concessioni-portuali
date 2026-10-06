@@ -400,7 +400,9 @@ async function runResearchGate() {
   if (missionJobs.length > 1) throw new Error("MISSION_JOB_NOT_UNIQUE");
   const recoverablePlanningFailure = missionJobs.length === 1
     && missionJobs[0].status === "TERMINAL_FAILED"
-    && missionJobs[0].failureCode === "PROVIDER_PLAN_BUDGET_INSUFFICIENT"
+    && ["PROVIDER_PLAN_BUDGET_INSUFFICIENT", "UNHANDLED_ERROR"].includes(
+      missionJobs[0].failureCode ?? "",
+    )
     && before.attempts.length === 0
     && before.bundles.length === 0;
   if (missionJobs.length === 1 && !recoverablePlanningFailure) {

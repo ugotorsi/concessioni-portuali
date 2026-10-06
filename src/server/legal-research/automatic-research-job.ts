@@ -116,6 +116,7 @@ export interface AutomaticResearchExecutionDependencies {
     authority: ExecutionAuthority;
     providerAdapters: readonly import("./provider-research-adapters").ResearchProviderAdapter[];
     jobId: string;
+    attempt: number;
   }>): Promise<TrustedMissionExecutorResult>;
   orchestrateSourceChain(input: Readonly<{
     authority: ExecutionAuthority;
@@ -180,7 +181,7 @@ const defaultDependencies: AutomaticResearchExecutionDependencies = {
       provider: "TRUSTED_RESEARCH_MULTI_PROVIDER",
       operationType: RESEARCH_MISSION_EXECUTION_OPERATION,
       estimatedAmount,
-      idempotencyKey: `${RESEARCH_MISSION_EXECUTION_OPERATION}:${input.jobId}`,
+      idempotencyKey: `${RESEARCH_MISSION_EXECUTION_OPERATION}:${input.jobId}:${input.attempt}`,
     }, async () => {
       const result = await executor.execute(input.authority.mission.missionId);
       return { value: result, actualAmount: result.callsConsumed * unitCost };
@@ -233,7 +234,12 @@ export function createAutomaticResearchExecutionHandler(
         );
       }
       await context.heartbeat();
-      const result = await dependencies.execute({ authority, providerAdapters: adapters, jobId: context.jobId });
+      const result = await dependencies.execute({
+        authority,
+        providerAdapters: adapters,
+        jobId: context.jobId,
+        attempt: context.attempt,
+      });
       if (["RECOVERY_REQUIRED", "LEASE_EXPIRED", "BLOCKED"].includes(result.status)) {
         throw new AsyncJobExecutionError(
           result.status === "RECOVERY_REQUIRED" ? "UNCERTAIN_OUTCOME" : "RESEARCH",
