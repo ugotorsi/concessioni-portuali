@@ -69,7 +69,9 @@ const automaticReferenceSchema = z.object({
 type AutomaticReference = z.output<typeof automaticReferenceSchema>;
 
 export type AutomaticDocumentExcerpt = FascicoloDocumentExcerpt;
-export type AutomaticFascicoloAnalysisInput = FascicoloDocumentAnalysisInput;
+export type AutomaticFascicoloAnalysisInput = FascicoloDocumentAnalysisInput & {
+  readonly attempt: number;
+};
 
 export interface AutomaticFascicoloReport {
   readonly reportId: string;
@@ -444,7 +446,8 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
         provider: "OPENAI",
         operationType: FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
         estimatedAmount,
-        idempotencyKey: `${FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION}:${input.corpusFingerprint}`,
+        idempotencyKey:
+          `${FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION}:${input.corpusFingerprint}:${input.attempt}`,
       }, async () => ({
         value: await createOpenAiFascicoloDocumentRuntimeFromEnv().analyze(input),
         actualAmount: estimatedAmount,
@@ -533,6 +536,7 @@ export function createFascicoloAutomaticAnalysisHandler(
       }
       await context.heartbeat();
       const output = await dependencies.analyze({
+        attempt: context.attempt,
         contractVersion: FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION,
         tenantId: authority.tenantId,
         procedimentoId: authority.procedimentoId,
