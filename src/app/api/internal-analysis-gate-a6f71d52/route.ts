@@ -351,7 +351,6 @@ async function runAnalysisGate() {
         destination: { procedimentoId: PROCEDIMENTO_ID },
       },
       select: { id: true },
-      orderBy: { createdAt: "desc" },
     });
     if (!intake) throw new Error("ROUTED_NEUTRAL_INTAKE_NOT_FOUND");
     const extractionJobs = await prisma.asyncJob.findMany({
