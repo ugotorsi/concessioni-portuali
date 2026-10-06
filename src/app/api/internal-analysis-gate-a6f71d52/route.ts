@@ -325,8 +325,8 @@ async function configureMinimumBudget(tenantId: string): Promise<void> {
 async function runAnalysisGate() {
   const before = await snapshot();
   if (!before.provider.credentialPresent) throw new Error("ANALYSIS_PROVIDER_CREDENTIAL_MISSING");
-  if (before.provider.projectClass !== "NON_PRODUCTION") {
-    throw new Error("ANALYSIS_PROVIDER_PROJECT_NOT_NON_PRODUCTION");
+  if (before.provider.projectClass !== "REAL_DATA_APPROVED") {
+    throw new Error("ANALYSIS_PROVIDER_PROJECT_NOT_APPROVED");
   }
   if (before.protectedMission.id !== PROTECTED_MISSION_ID) {
     throw new Error("PROTECTED_MISSION_MISSING");
