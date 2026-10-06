@@ -218,7 +218,7 @@ async function snapshot() {
         status: true,
         sha256: true,
         classificationAttempts: {
-          orderBy: [{ completedAt: "desc" }, { id: "desc" }],
+          orderBy: [{ classifiedAt: "desc" }, { id: "desc" }],
           take: 1,
           select: {
             id: true,
