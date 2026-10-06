@@ -207,6 +207,7 @@ export function createFascicoloDocumentAnalysisService(config: {
           issues: parsed.error.issues.slice(0, 20).map((issue) => ({
             code: issue.code,
             path: issue.path.join("."),
+            message: issue.message.slice(0, 256),
           })),
         });
         throw new FascicoloDocumentAnalysisError("INVALID_PROVIDER_OUTPUT");
