@@ -121,7 +121,12 @@ function stripGeneratedSchemaMetadata(value: unknown): unknown {
   return Object.fromEntries(
     Object.entries(value)
       .filter(([key]) => key !== "$schema" && key !== "default")
-      .map(([key, item]) => [key, stripGeneratedSchemaMetadata(item)]),
+      .map(([key, item]) => [
+        key,
+        key === "confidence"
+          ? { anyOf: [{ type: "integer", minimum: 0, maximum: 100 }, { type: "null" }] }
+          : stripGeneratedSchemaMetadata(item),
+      ]),
   );
 }
 

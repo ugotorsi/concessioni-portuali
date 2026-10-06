@@ -161,6 +161,22 @@ function providerRequest(input: FascicoloDocumentAnalysisInput): FascicoloDocume
   };
 }
 
+function normalizeDocumentProviderOutput(output: unknown): unknown {
+  if (!output || typeof output !== "object" || Array.isArray(output)) return output;
+  const record = output as Record<string, unknown>;
+  if (!Array.isArray(record.timeline)) return output;
+  return {
+    ...record,
+    timeline: record.timeline.map((item) => {
+      if (!item || typeof item !== "object" || Array.isArray(item)) return item;
+      const event = item as Record<string, unknown>;
+      return typeof event.recordedAt === "string" && /^\d{4}-\d{2}-\d{2}$/.test(event.recordedAt)
+        ? { ...event, recordedAt: `${event.recordedAt}T00:00:00.000Z` }
+        : event;
+    }),
+  };
+}
+
 export function createFascicoloDocumentAnalysisService(config: {
   readonly provider: FascicoloDocumentAnalysisProvider;
   readonly maxInputBytes: number;
@@ -183,7 +199,7 @@ export function createFascicoloDocumentAnalysisService(config: {
         if (error instanceof AiProviderAdapterError) throw mapProviderError(error);
         throw error;
       }
-      const parsed = providerAnalysisPayloadV1Schema.safeParse(output);
+      const parsed = providerAnalysisPayloadV1Schema.safeParse(normalizeDocumentProviderOutput(output));
       if (!parsed.success) {
         console.error({
           event: "fascicolo_document_analysis_invalid_provider_output",
