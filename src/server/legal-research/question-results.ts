@@ -110,9 +110,9 @@ export async function persistResearchQuestionResults(input: {
           "id", "tenantId", "caseId", "missionId", "bundleId", "candidateId",
           "legalIssueSemanticKey", "researchQuestionSemanticKey", "missionFingerprint",
           "providerId", "toolId", "candidateSnapshot", "supportDirection",
-          "classificationSource", "classificationRationale", "coverageElementKeys"
+          "classificationSource", "classificationRationale", "coverageElementKeys", "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::jsonb,
-          $13::"ResearchResultSupportDirection", 'PROVIDER_OUTPUT', $14, $15::text[])
+          $13::"ResearchResultSupportDirection", 'PROVIDER_OUTPUT', $14, $15::text[], CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         ON CONFLICT ("tenantId", "missionId", "candidateId") DO NOTHING
         RETURNING "id"
       `, [id, owner.tenantId, owner.caseId, input.missionId, input.bundleId, candidate.candidateId,

@@ -1,9 +1,21 @@
 import { createHash } from "node:crypto";
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
+import { admitAsyncJob } from "@/server/async-jobs/persistence";
+import { AsyncJobHandlerRegistry } from "@/server/async-jobs/registry";
+import { drainOneAsyncJob } from "@/server/async-jobs/worker";
+import {
+  createAutomaticResearchExecutionHandler,
+} from "@/server/legal-research/automatic-research-job";
+import { evaluateAutomaticResearchPolicy } from "@/server/legal-research/automatic-research-policy";
 import { createAutomaticResearchProviderAdapters } from "@/server/legal-research/automatic-research-providers";
+import {
+  buildResearchMissionAsyncJobAdmission,
+  getResearchMission,
+  RESEARCH_MISSION_EXECUTION_OPERATION,
+} from "@/server/legal-research/persistence";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -36,6 +48,16 @@ function digest(value: unknown): string {
   return createHash("sha256").update(JSON.stringify(value)).digest("hex");
 }
 
+function researchProviderAdapters(requestTimeoutMs: number) {
+  const accessToken = process.env.RESEARCH_GATE_MOONLIT_ACCESS_TOKEN?.trim();
+  return createAutomaticResearchProviderAdapters({
+    requestTimeoutMs,
+    ...(accessToken
+      ? { moonlitTokenReader: { tokens: async () => ({ access_token: accessToken }) } }
+      : {}),
+  });
+}
+
 async function snapshot() {
   const tenant = await prisma.ente.findUnique({
     where: { codice: TENANT_CODE },
@@ -43,7 +65,7 @@ async function snapshot() {
   });
   if (!tenant) throw new Error("TENANT_NOT_FOUND");
 
-  const adapters = await createAutomaticResearchProviderAdapters({ requestTimeoutMs: 30_000 });
+  const adapters = await researchProviderAdapters(30_000);
   const [
     mission,
     protectedMission,
@@ -218,9 +240,9 @@ async function snapshot() {
       requiredCapabilities: missionPayload.executionPlan?.requiredCapabilities ?? null,
     },
     providers: {
-      legalDataHunterCredentialPresent:
-        typeof process.env.LEGAL_DATA_HUNTER_API_KEY === "string"
-        && process.env.LEGAL_DATA_HUNTER_API_KEY.trim().length > 0,
+      moonlitCredentialPresent:
+        typeof process.env.RESEARCH_GATE_MOONLIT_ACCESS_TOKEN === "string"
+        && process.env.RESEARCH_GATE_MOONLIT_ACCESS_TOKEN.trim().length > 0,
       oauthAdapters: adapters.map((adapter) => ({
         provider: adapter.provider,
         capability: adapter.capability,
@@ -251,10 +273,202 @@ async function snapshot() {
   };
 }
 
+async function configureMinimumBudget(tenantId: string, estimatedAmount: number): Promise<void> {
+  if (!Number.isFinite(estimatedAmount) || estimatedAmount <= 0) {
+    throw new Error("INVALID_RESEARCH_COST_ESTIMATE");
+  }
+  const windowSeconds = 900;
+  await prisma.$transaction(async (tx) => {
+    await tx.runtimeBudgetPolicy.updateMany({ data: { enabled: false } });
+    const spentRows = await tx.$queryRaw<Array<{
+      global: string;
+      tenant: string;
+      procedimento: string;
+    }>>`
+      SELECT
+        COALESCE(SUM(CASE WHEN status IN ('RESERVED','SETTLED')
+          AND (status = 'SETTLED' OR "expiresAt" > CURRENT_TIMESTAMP)
+          THEN COALESCE("actualAmount","reservedAmount") ELSE 0 END), 0)::text AS global,
+        COALESCE(SUM(CASE WHEN "tenantId" = ${tenantId}
+          AND status IN ('RESERVED','SETTLED')
+          AND (status = 'SETTLED' OR "expiresAt" > CURRENT_TIMESTAMP)
+          THEN COALESCE("actualAmount","reservedAmount") ELSE 0 END), 0)::text AS tenant,
+        COALESCE(SUM(CASE WHEN "tenantId" = ${tenantId}
+          AND "procedimentoId" = ${PROCEDIMENTO_ID}
+          AND status IN ('RESERVED','SETTLED')
+          AND (status = 'SETTLED' OR "expiresAt" > CURRENT_TIMESTAMP)
+          THEN COALESCE("actualAmount","reservedAmount") ELSE 0 END), 0)::text AS procedimento
+      FROM "RuntimeCostReservation"
+      WHERE "currency" = 'EUR'
+        AND "createdAt" >= CURRENT_TIMESTAMP - (${windowSeconds} * INTERVAL '1 second')
+    `;
+    const spent = spentRows[0] ?? { global: "0", tenant: "0", procedimento: "0" };
+    const policies = [
+      { scope: "GLOBAL", tenantId: null, procedimentoId: null, spent: Number(spent.global) },
+      { scope: "TENANT", tenantId, procedimentoId: null, spent: Number(spent.tenant) },
+      {
+        scope: "PROCEDIMENTO",
+        tenantId,
+        procedimentoId: PROCEDIMENTO_ID,
+        spent: Number(spent.procedimento),
+      },
+    ] as const;
+    for (const policy of policies) {
+      const data = {
+        hardCapAmount: (policy.spent + estimatedAmount).toFixed(6),
+        enabled: true,
+        effectiveFrom: new Date(),
+      };
+      const updated = await tx.runtimeBudgetPolicy.updateMany({
+        where: {
+          scope: policy.scope,
+          tenantId: policy.tenantId,
+          procedimentoId: policy.procedimentoId,
+          currency: "EUR",
+          windowSeconds,
+        },
+        data,
+      });
+      if (updated.count === 0) {
+        await tx.runtimeBudgetPolicy.create({
+          data: {
+            scope: policy.scope,
+            tenantId: policy.tenantId,
+            procedimentoId: policy.procedimentoId,
+            currency: "EUR",
+            windowSeconds,
+            ...data,
+          },
+        });
+      }
+    }
+  });
+}
+
+async function runResearchGate() {
+  const before = await snapshot();
+  if (!before.providers.moonlitCredentialPresent) throw new Error("RESEARCH_PROVIDER_CREDENTIAL_MISSING");
+  if (before.mission.status !== "PENDING" || before.mission.lifecycleStatus !== "CURRENT") {
+    throw new Error("MISSION_NOT_PENDING_CURRENT");
+  }
+  if (before.attempts.length !== 0 || before.bundles.length !== 0
+    || before.results.length !== 0 || before.assessments.length !== 0) {
+    throw new Error("MISSION_ALREADY_EXECUTED");
+  }
+  const missionJobs = before.jobs.filter((job) => {
+    const reference = job.inputReference as { referenceId?: unknown };
+    return reference.referenceId === MISSION_ID;
+  });
+  if (missionJobs.length !== 0) throw new Error("MISSION_JOB_ALREADY_EXISTS");
+  if (before.protectedMission.id !== PROTECTED_MISSION_ID) {
+    throw new Error("PROTECTED_MISSION_MISSING");
+  }
+
+  const stored = await getResearchMission(MISSION_ID, {
+    actorId: process.env.AUTOMATIC_RESEARCH_WORKER_ACTOR_ID ?? "",
+    tenantId: before.tenant.id,
+  });
+  if (!stored) throw new Error("MISSION_NOT_FOUND");
+  const decision = evaluateAutomaticResearchPolicy({
+    tenantId: before.tenant.id,
+    mission: stored.mission,
+  });
+  if (!decision.authorized || !decision.policyDecisionRef || !decision.workerActorId
+    || !decision.providerTimeoutMs) {
+    throw new Error(decision.requirementCode ?? "RESEARCH_POLICY_NOT_AUTHORIZED");
+  }
+  const adapters = await researchProviderAdapters(decision.providerTimeoutMs);
+  const capabilities = new Set(adapters.map((adapter) => adapter.capability));
+  const missingCapability = stored.mission.executionPlan?.requiredCapabilities
+    .find((capability) => !capabilities.has(capability));
+  if (missingCapability) throw new Error(`RESEARCH_CAPABILITY_MISSING:${missingCapability}`);
+
+  const unitCost = Number(process.env.ASYNC_COST_RESEARCH_CALL_ESTIMATE_EUR);
+  await configureMinimumBudget(
+    before.tenant.id,
+    unitCost * stored.mission.budget.maxTotalResearchCalls,
+  );
+  const admitted = await admitAsyncJob(buildResearchMissionAsyncJobAdmission({
+    mission: stored.mission,
+    actor: {
+      actorId: decision.workerActorId,
+      actorEmail: null,
+      actorRole: "STAGING_RESEARCH_GATE",
+      initiatingUserId: null,
+      admissionType: "AUTHORIZED_SYSTEM",
+      tenantId: before.tenant.id,
+    },
+    correlationId: `research-gate:${MISSION_ID}`,
+    policyDecisionRef: decision.policyDecisionRef,
+    availableAt: new Date(),
+    maxAttempts: 1,
+  }));
+
+  const handler = createAutomaticResearchExecutionHandler({
+    async loadAuthority(input) {
+      if (input.jobId !== admitted.job.id || input.missionId !== MISSION_ID) return null;
+      const job = await prisma.asyncJob.findUnique({
+        where: { id: input.jobId },
+        select: { operation: true, tenantId: true, actorId: true, policyDecisionRef: true },
+      });
+      if (!job || job.operation !== RESEARCH_MISSION_EXECUTION_OPERATION
+        || job.tenantId !== before.tenant.id || job.policyDecisionRef !== decision.policyDecisionRef) {
+        return null;
+      }
+      const current = await getResearchMission(MISSION_ID, {
+        actorId: job.actorId,
+        tenantId: before.tenant.id,
+      });
+      if (!current || current.operational.status !== "PENDING") return null;
+      return {
+        mission: current.mission,
+        tenantId: before.tenant.id,
+        actorId: job.actorId,
+        decision,
+      };
+    },
+    createProviderAdapters: ({ requestTimeoutMs }) => researchProviderAdapters(requestTimeoutMs),
+    orchestrateSourceChain: async () => undefined,
+  });
+  const registry = new AsyncJobHandlerRegistry([handler]);
+  const drainOutcome = await drainOneAsyncJob({
+    workerId: `research-gate-${Date.now()}`,
+    leaseDurationMs: 20 * 60 * 1000,
+    retryDelayMs: 0,
+    operationAllowlist: [RESEARCH_MISSION_EXECUTION_OPERATION],
+    operationBlocklist: ["FASCICOLO.AUTOMATIC_ANALYSIS_V1"],
+    procedimentoAllowlist: [PROCEDIMENTO_ID],
+    registry,
+  });
+  const after = await snapshot();
+  return {
+    drainOutcome,
+    protectedMissionUnchanged:
+      before.protectedMission.digest === after.protectedMission.digest,
+    before,
+    after,
+  };
+}
+
 export async function GET() {
   try {
     assertStaging();
     return NextResponse.json(await snapshot(), { headers: NO_STORE });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "UNKNOWN_ERROR" },
+      { status: 500, headers: NO_STORE },
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    assertStaging();
+    if (request.headers.get("x-research-gate-confirm") !== "E2E-TEST-001") {
+      return NextResponse.json({ error: "CONFIRMATION_REQUIRED" }, { status: 403, headers: NO_STORE });
+    }
+    return NextResponse.json(await runResearchGate(), { headers: NO_STORE });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "UNKNOWN_ERROR" },

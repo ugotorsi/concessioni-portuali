@@ -126,14 +126,38 @@ export async function initializeDiscoveredSourceAssessment(input: {
   const row = owner.rows[0];
   if (!row) throw new Error("RESEARCH_RESULT_NOT_FOUND");
   const identity = input.candidate.officialIdentifier ?? input.candidate.ecli ?? input.candidate.celex ?? input.candidate.providerDocumentId ?? null;
+  const retrievalState = input.candidate.exactReferenceMatch === false
+    ? "BLOCKED"
+    : input.candidate.exactReferenceMatch === true || input.candidate.verificationState === "OFFICIALLY_VERIFIED"
+      ? "RESOLVED"
+      : "RETRIEVAL_REQUIRED";
+  const identityState = input.candidate.verificationState === "OFFICIALLY_VERIFIED"
+    ? "VERIFIED"
+    : input.candidate.verificationState === "OFFICIAL_VERIFICATION_FAILED"
+        || input.candidate.exactReferenceMatch === false
+      ? "MISMATCH"
+      : retrievalState === "RESOLVED" ? "INCOMPLETE" : "NOT_ASSESSED";
+  const manualReviewRequired = retrievalState === "BLOCKED"
+    || identityState === "MISMATCH"
+    || identityState === "INCOMPLETE";
   return persistSourceChainAssessment({
     resultId: input.resultId, tenantId: row.tenantId, caseId: row.caseId, missionId: row.missionId,
     researchQuestionSemanticKey: row.researchQuestionSemanticKey, missionFingerprint: row.missionFingerprint,
     referenceDate: row.referenceDate.toISOString().slice(0, 10), referenceDateBasis: row.referenceDateBasis ?? {},
-    verificationVersion: SOURCE_CHAIN_VERIFICATION_VERSION, sourceIdentityKey: identity, contentSha256: null,
-    retrievalState: "RETRIEVAL_REQUIRED", textState: "METADATA_ONLY", identityState: "NOT_ASSESSED",
-    contentState: "NOT_ASSESSED", temporalState: "NOT_ASSESSED", adverseState: "NOT_REQUIRED",
-    officiality: "UNKNOWN", citationAnchors: [], manualReviewRequired: false, manualReviewReason: null,
+    verificationVersion: SOURCE_CHAIN_VERIFICATION_VERSION,
+    sourceIdentityKey: identity,
+    contentSha256: input.candidate.verifiedEvidence?.contentSha256 ?? null,
+    retrievalState,
+    textState: input.candidate.verifiedEvidence ? "FULL_TEXT"
+      : input.candidate.relevantPassage ? "SNIPPET_ONLY" : "METADATA_ONLY",
+    identityState,
+    contentState: input.candidate.verifiedEvidence ? "VERIFIED" : "INCOMPLETE",
+    temporalState: "NOT_ASSESSED",
+    adverseState: input.candidate.supportDirection === "SUPPORT" ? "REQUIRED" : "NOT_REQUIRED",
+    officiality: input.candidate.verifiedEvidence ? "OFFICIAL" : "UNKNOWN",
+    citationAnchors: [],
+    manualReviewRequired,
+    manualReviewReason: manualReviewRequired ? "SOURCE_VERIFICATION_INCOMPLETE" : null,
     currentMission: true,
   }, context);
 }
