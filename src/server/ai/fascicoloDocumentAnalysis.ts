@@ -184,7 +184,17 @@ export function createFascicoloDocumentAnalysisService(config: {
         throw error;
       }
       const parsed = providerAnalysisPayloadV1Schema.safeParse(output);
-      if (!parsed.success) throw new FascicoloDocumentAnalysisError("INVALID_PROVIDER_OUTPUT");
+      if (!parsed.success) {
+        console.error({
+          event: "fascicolo_document_analysis_invalid_provider_output",
+          outputKind: output === null ? "null" : Array.isArray(output) ? "array" : typeof output,
+          issues: parsed.error.issues.slice(0, 20).map((issue) => ({
+            code: issue.code,
+            path: issue.path.join("."),
+          })),
+        });
+        throw new FascicoloDocumentAnalysisError("INVALID_PROVIDER_OUTPUT");
+      }
       return parsed.data;
     },
   };
