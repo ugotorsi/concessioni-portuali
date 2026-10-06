@@ -338,7 +338,7 @@ async function configureMinimumBudget(tenantId: string, estimatedAmount: number)
     ] as const;
     for (const policy of policies) {
       const data = {
-        hardCapAmount: (policy.spent + estimatedAmount).toFixed(6),
+        hardCapAmount: (policy.spent + estimatedAmount + 0.000001).toFixed(6),
         enabled: true,
         effectiveFrom: new Date(),
       };
