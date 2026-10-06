@@ -598,7 +598,12 @@ export function createFascicoloAutomaticAnalysisHandler(
                 && schedulableQuestionKeys.has(plan.questionSemanticKey))
               .map((plan) => plan.mission!);
           }
-        } catch {
+        } catch (error) {
+          console.error({
+            event: "fascicolo_structured_knowledge_persistence_failed",
+            errorName: error instanceof Error ? error.name : typeof error,
+            errorMessage: error instanceof Error ? error.message.slice(0, 512) : "NON_ERROR_THROWN",
+          });
           throw new AsyncJobExecutionError("PERSISTENCE", "STRUCTURED_KNOWLEDGE_PERSISTENCE_FAILED", false);
         }
       }
