@@ -9,6 +9,8 @@ import type {
   FascicoloDocumentAnalysisProvider,
   FascicoloDocumentProviderRequestV1,
 } from "@/server/ai/fascicoloDocumentAnalysis";
+import { fascicoloStructuredKnowledgeSchema } from "@/server/fascicolo-knowledge/structuredContracts";
+import { z } from "zod";
 
 export const OPENAI_ANALYSIS_MODEL = "gpt-5.6-terra" as const;
 export const OPENAI_RESPONSES_ENDPOINTS = {
@@ -113,6 +115,30 @@ export const OPENAI_PROVIDER_ANALYSIS_JSON_SCHEMA = {
   },
 } as const;
 
+function stripGeneratedSchemaMetadata(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(stripGeneratedSchemaMetadata);
+  if (!value || typeof value !== "object") return value;
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([key]) => key !== "$schema" && key !== "default")
+      .map(([key, item]) => [key, stripGeneratedSchemaMetadata(item)]),
+  );
+}
+
+const OPENAI_PROVIDER_DOCUMENT_ANALYSIS_JSON_SCHEMA = {
+  ...OPENAI_PROVIDER_ANALYSIS_JSON_SCHEMA,
+  required: [
+    ...OPENAI_PROVIDER_ANALYSIS_JSON_SCHEMA.required,
+    "structuredKnowledge",
+  ],
+  properties: {
+    ...OPENAI_PROVIDER_ANALYSIS_JSON_SCHEMA.properties,
+    structuredKnowledge: stripGeneratedSchemaMetadata(
+      z.toJSONSchema(fascicoloStructuredKnowledgeSchema, { unrepresentable: "any" }),
+    ),
+  },
+} as const;
+
 class OpenAiProtocolError extends Error {
   constructor() {
     super("OPENAI_PROTOCOL_ERROR");
@@ -195,6 +221,7 @@ function buildProviderInput(request: OpenAiAnalysisProviderRequest): string {
 }
 
 function buildRequestBody(request: OpenAiAnalysisProviderRequest, maxOutputTokens: number) {
+  const documentAnalysis = "documentData" in request;
   return {
     model: OPENAI_ANALYSIS_MODEL,
     store: false,
@@ -213,8 +240,10 @@ function buildRequestBody(request: OpenAiAnalysisProviderRequest, maxOutputToken
       format: {
         type: "json_schema",
         name: "fascicolo_analysis_v1",
-        schema: OPENAI_PROVIDER_ANALYSIS_JSON_SCHEMA,
-        strict: true,
+        schema: documentAnalysis
+          ? OPENAI_PROVIDER_DOCUMENT_ANALYSIS_JSON_SCHEMA
+          : OPENAI_PROVIDER_ANALYSIS_JSON_SCHEMA,
+        strict: !documentAnalysis,
       },
     },
   };
@@ -323,6 +352,9 @@ function extractStructuredPayload(responseBody: unknown): unknown {
       return null;
     }
     const message = outputItem as Record<string, unknown>;
+    if (message.type === "reasoning") {
+      continue;
+    }
     if (message.type !== "message" || message.role !== "assistant" || !Array.isArray(message.content)) {
       return null;
     }
