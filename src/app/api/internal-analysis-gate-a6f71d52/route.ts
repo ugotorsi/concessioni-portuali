@@ -420,6 +420,132 @@ async function enableBoundedManualRetry(): Promise<void> {
   `);
 }
 
+async function ensureExistingArtifactGroundingDocument(tenantId: string): Promise<void> {
+  await prisma.$transaction(async (tx) => {
+    const intakes = await tx.neutralIntake.findMany({
+      where: {
+        enteId: tenantId,
+        destination: { is: { procedimentoId: PROCEDIMENTO_ID } },
+      },
+      select: {
+        id: true,
+        sha256: true,
+        storageProvider: true,
+        storageBucket: true,
+        storageKey: true,
+        mimeType: true,
+        sizeBytes: true,
+        originalName: true,
+        receivedAt: true,
+        extractionAttempts: {
+          where: { outcome: "SUCCEEDED" },
+          orderBy: [{ completedAt: "desc" }, { id: "desc" }],
+          take: 1,
+          select: { artifactSha256: true },
+        },
+      },
+    });
+    if (intakes.length !== 1) throw new Error("GROUNDING_INTAKE_NOT_UNIQUE");
+    const intake = intakes[0];
+    const extraction = intake.extractionAttempts[0];
+    if (!extraction || extraction.artifactSha256 !== intake.sha256) {
+      throw new Error("GROUNDING_ARTIFACT_IDENTITY_MISMATCH");
+    }
+
+    const existing = await tx.documento.findMany({
+      where: {
+        enteId: tenantId,
+        procedimentoId: PROCEDIMENTO_ID,
+        sha256: intake.sha256,
+        currentFileVersionId: { not: null },
+      },
+      select: { id: true },
+    });
+    if (existing.length === 1) return;
+    if (existing.length > 1) throw new Error("GROUNDING_DOCUMENT_AMBIGUOUS");
+
+    const procedimento = await tx.procedimento.findUnique({
+      where: { id: PROCEDIMENTO_ID },
+      select: { concessioneId: true },
+    });
+    const job = await tx.asyncJob.findFirst({
+      where: {
+        procedimentoId: PROCEDIMENTO_ID,
+        operation: FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
+      },
+      select: {
+        initiatingUserId: true,
+        actorId: true,
+        actorEmail: true,
+        actorRole: true,
+      },
+    });
+    if (!procedimento || !job) throw new Error("GROUNDING_AUTHORITY_MISSING");
+
+    const documentId = digest([
+      "ANALYSIS_GATE_EXISTING_ARTIFACT_BINDING_V1",
+      tenantId,
+      PROCEDIMENTO_ID,
+      intake.id,
+      intake.sha256,
+    ]);
+    const fileVersionId = digest([
+      "ANALYSIS_GATE_EXISTING_ARTIFACT_VERSION_V1",
+      documentId,
+      intake.sha256,
+    ]);
+    await tx.documento.create({
+      data: {
+        id: documentId,
+        nome: intake.originalName ?? `Neutral intake ${intake.id}`,
+        tipologia: "ALTRO",
+        statoDocumento: "ATTIVO",
+        mimeType: intake.mimeType,
+        dimensioneBytes: intake.sizeBytes,
+        checksumSha256: intake.sha256,
+        sha256: intake.sha256,
+        url: `/documenti/${documentId}/download`,
+        storagePath: intake.storageKey,
+        storageKey: intake.storageKey,
+        storageProvider: intake.storageProvider,
+        storageBucket: intake.storageBucket,
+        nomeStorage: intake.sha256,
+        originalName: intake.originalName,
+        sizeBytes: intake.sizeBytes,
+        documentType: "ALTRO",
+        documentDate: intake.receivedAt,
+        source: "ANALYSIS_GATE_EXISTING_ARTIFACT_BINDING",
+        status: "ATTIVO",
+        uploadedByUserId: job.initiatingUserId,
+        uploadedByUserEmail: job.actorEmail,
+        uploadedByUserRole: job.actorRole,
+        enteId: tenantId,
+        concessioneId: procedimento.concessioneId,
+        procedimentoId: PROCEDIMENTO_ID,
+        fileVersions: {
+          create: {
+            id: fileVersionId,
+            canonicalEnteId: tenantId,
+            storageProvider: intake.storageProvider,
+            storageKey: intake.storageKey,
+            storageBucket: intake.storageBucket,
+            mimeType: intake.mimeType,
+            sizeBytes: intake.sizeBytes,
+            sha256: intake.sha256,
+            createdByUserId: job.initiatingUserId,
+            createdByActorId: job.actorId,
+            createdByRole: job.actorRole,
+          },
+        },
+      },
+    });
+    await tx.documento.update({
+      where: { id: documentId },
+      data: { currentFileVersionId: fileVersionId },
+    });
+  });
+}
+
 async function runAnalysisGate() {
   const before = await snapshot();
   if (!before.provider.credentialPresent) throw new Error("ANALYSIS_PROVIDER_CREDENTIAL_MISSING");
@@ -431,6 +557,7 @@ async function runAnalysisGate() {
   }
   if (before.attempts.length !== 0) throw new Error("LEGAL_RESEARCH_ALREADY_EXECUTED_FOR_E2E");
 
+  await ensureExistingArtifactGroundingDocument(before.tenant.id);
   await configureMinimumBudget(before.tenant.id);
   process.env.AUTOMATIC_RESEARCH_EXECUTION_ENABLED = "false";
 
