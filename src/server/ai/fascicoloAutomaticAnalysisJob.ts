@@ -192,8 +192,17 @@ function validateGrounding(analysis: ProviderAnalysisPayloadV1, excerpts: readon
     ...analysis.suggestedActivities,
     ...analysis.legalResearchQuestions,
   ];
-  if (grounded.some((statement) => statement.basisRefs.length === 0)
-    || all.some((statement) => statement.basisRefs.some((reference) => !allowed.has(reference)))) {
+  const missingGrounding = grounded.filter((statement) => statement.basisRefs.length === 0).length;
+  const invalidReferences = [...new Set(
+    all.flatMap((statement) => statement.basisRefs.filter((reference) => !allowed.has(reference))),
+  )];
+  if (missingGrounding > 0 || invalidReferences.length > 0) {
+    console.error({
+      event: "fascicolo_document_analysis_invalid_grounding",
+      missingGrounding,
+      invalidReferences,
+      allowedReferences: [...allowed],
+    });
     throw new AsyncJobExecutionError("ANALYSIS", "DOCUMENT_GROUNDING_INVALID", false);
   }
 }
