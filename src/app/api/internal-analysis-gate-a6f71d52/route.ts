@@ -122,7 +122,7 @@ async function snapshot() {
         id: true,
         caseId: true,
         status: true,
-        currentKnowledgeRevisionId: true,
+        knowledgeRevisionId: true,
         firstKnowledgeRevisionId: true,
         createdAt: true,
         updatedAt: true,
