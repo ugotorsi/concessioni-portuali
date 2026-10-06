@@ -66,6 +66,8 @@ async function snapshot() {
     materializationCount,
     reservations,
     protectedMission,
+    groundingIntakes,
+    groundingDocuments,
   ] = await Promise.all([
     prisma.procedimento.findUnique({
       where: { id: PROCEDIMENTO_ID },
@@ -209,6 +211,31 @@ async function snapshot() {
         },
       },
     }),
+    prisma.neutralIntake.findMany({
+      where: { destination: { procedimentoId: PROCEDIMENTO_ID } },
+      select: {
+        id: true,
+        extractionAttempts: {
+          where: { outcome: "SUCCEEDED" },
+          orderBy: [{ completedAt: "desc" }, { id: "desc" }],
+          take: 1,
+          select: {
+            id: true,
+            artifactSha256: true,
+            _count: { select: { pages: true } },
+          },
+        },
+      },
+      orderBy: { id: "asc" },
+    }),
+    prisma.documento.findMany({
+      where: {
+        procedimentoId: PROCEDIMENTO_ID,
+        currentFileVersionId: { not: null },
+      },
+      select: { id: true, sha256: true, currentFileVersionId: true },
+      orderBy: { id: "asc" },
+    }),
   ]);
 
   if (!procedimento) throw new Error("PROCEDIMENTO_NOT_FOUND");
@@ -255,6 +282,10 @@ async function snapshot() {
       materializationCount,
     },
     reservations,
+    documentGrounding: {
+      intakes: groundingIntakes,
+      documents: groundingDocuments,
+    },
     protectedMission: {
       id: protectedMission?.id ?? null,
       status: protectedMission?.status ?? null,
