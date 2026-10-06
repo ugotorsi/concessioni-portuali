@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
   FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
+  createDefaultFascicoloAutomaticAnalysisDependencies,
   createFascicoloAutomaticAnalysisHandler,
   ensureFascicoloAutomaticAnalysisJob,
 } from "@/server/ai/fascicoloAutomaticAnalysisJob";
@@ -632,8 +633,15 @@ async function runAnalysisGate() {
 
   let drainOutcome: unknown = { outcome: "ALREADY_SUCCEEDED", jobId: job.id };
   if (job.status !== "SUCCEEDED") {
+    const analysisDependencies = createDefaultFascicoloAutomaticAnalysisDependencies();
     const registry = new AsyncJobHandlerRegistry([
-      createFascicoloAutomaticAnalysisHandler(),
+      createFascicoloAutomaticAnalysisHandler({
+        ...analysisDependencies,
+        persistReport: async (report) => ({
+          outcome: "REUSED",
+          reportId: report.reportId,
+        }),
+      }),
     ]);
     drainOutcome = await drainOneAsyncJob({
       workerId: `analysis-gate-${Date.now()}`,

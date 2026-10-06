@@ -42,6 +42,7 @@ import {
   admitDeferredKnowledgeResearchMissionWave,
   buildKnowledgeResearchMissionPlans,
   DEFAULT_RESEARCH_EXECUTION_WAVE_LIMIT,
+  getCurrentKnowledgeRevision,
   persistStructuredKnowledgeRevision,
   reconcileKnowledgeResearchMissions,
   type KnowledgeEvidenceCandidate,
@@ -481,7 +482,16 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
       throw error;
     }
   },
-  persistKnowledge: (input) => persistStructuredKnowledgeRevision(input),
+  async persistKnowledge(input) {
+    const current = await getCurrentKnowledgeRevision({
+      tenantId: input.tenantId,
+      procedimentoId: input.procedimentoId,
+    });
+    if (current?.corpusFingerprint === input.corpusFingerprint) {
+      return { revision: current, classifications: [] };
+    }
+    return persistStructuredKnowledgeRevision(input);
+  },
   reconcileKnowledgeMissions: (input) => reconcileKnowledgeResearchMissions(input),
   persistMission: ({ mission, actorId, tenantId }) => createResearchMissionRecord({
     mission,
