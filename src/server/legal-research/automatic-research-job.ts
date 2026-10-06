@@ -32,6 +32,17 @@ const referenceSchema = z.object({
 
 type ResearchExecutionReference = z.output<typeof referenceSchema>;
 
+function executionFailureCode(error: unknown): string {
+  if (error && typeof error === "object" && "code" in error) {
+    const code = (error as { code?: unknown }).code;
+    if (typeof code === "string" && /^[A-Z0-9_:.-]{1,200}$/.test(code)) return code;
+  }
+  if (error instanceof Error && /^[A-Z0-9_:.-]{1,200}$/.test(error.message)) {
+    return error.message;
+  }
+  return "AUTOMATIC_RESEARCH_EXECUTION_FAILED";
+}
+
 export type AutomaticResearchAdmissionResult = Readonly<{
   outcome: "ADMITTED" | "NOT_AUTHORIZED";
   requirementCode: string | null;
@@ -243,12 +254,18 @@ export function createAutomaticResearchExecutionHandler(
         );
       }
       await context.heartbeat();
-      const result = await dependencies.execute({
-        authority,
-        providerAdapters: adapters,
-        jobId: context.jobId,
-        attempt: context.attempt,
-      });
+      let result: TrustedMissionExecutorResult;
+      try {
+        result = await dependencies.execute({
+          authority,
+          providerAdapters: adapters,
+          jobId: context.jobId,
+          attempt: context.attempt,
+        });
+      } catch (error) {
+        if (error instanceof AsyncJobExecutionError) throw error;
+        throw new AsyncJobExecutionError("RESEARCH", executionFailureCode(error), false);
+      }
       if (["RECOVERY_REQUIRED", "LEASE_EXPIRED", "BLOCKED"].includes(result.status)) {
         throw new AsyncJobExecutionError(
           result.status === "RECOVERY_REQUIRED" ? "UNCERTAIN_OUTCOME" : "RESEARCH",

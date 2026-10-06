@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
-import { admitAsyncJob } from "@/server/async-jobs/persistence";
+import { admitAsyncJob, retryTerminalAsyncJob } from "@/server/async-jobs/persistence";
 import { AsyncJobHandlerRegistry } from "@/server/async-jobs/registry";
 import { drainOneAsyncJob } from "@/server/async-jobs/worker";
 import { discoverItalianLegalReferences } from "@/server/intake/legal-reference-discovery/parser";
@@ -370,7 +370,7 @@ async function configureMinimumBudget(tenantId: string, estimatedAmount: number)
 
 async function runOfficialResearchRerun() {
   const before = await snapshot();
-  if (before.mission.status !== "BUDGET_EXHAUSTED"
+  if (!["BUDGET_EXHAUSTED", "PENDING"].includes(before.mission.status)
     || before.mission.lifecycleStatus !== "CURRENT") {
     throw new Error("MISSION_NOT_RECOVERABLE");
   }
@@ -404,48 +404,67 @@ async function runOfficialResearchRerun() {
     before.tenant.id,
     unitCost * stored.mission.budget.maxTotalResearchCalls,
   );
-  const reopened = await prisma.researchMissionRecord.updateMany({
-    where: {
-      id: MISSION_ID,
-      tenantId: before.tenant.id,
-      caseId: PROCEDIMENTO_ID,
-      lifecycleStatus: "CURRENT",
-      status: "BUDGET_EXHAUSTED",
-      activeExecutionId: null,
-    },
-    data: {
-      status: "PENDING",
-      completedAt: null,
-      deferredAt: null,
-      claimantId: null,
-      claimToken: null,
-      claimExpiresAt: null,
-      stateVersion: { increment: 1 },
-    },
-  });
-  if (reopened.count !== 1) throw new Error("MISSION_REOPEN_CONFLICT");
-  const admission = buildResearchMissionAsyncJobAdmission({
-    mission: stored.mission,
-    actor: {
-      actorId: decision.workerActorId,
-      actorEmail: null,
-      actorRole: "STAGING_RESEARCH_GATE",
-      initiatingUserId: null,
-      admissionType: "AUTHORIZED_SYSTEM",
-      tenantId: before.tenant.id,
-    },
-    correlationId: `research-official-rerun:${MISSION_ID}`,
-    policyDecisionRef: decision.policyDecisionRef,
-    availableAt: new Date(),
-    maxAttempts: 1,
-  });
-  const admitted = await admitAsyncJob({
-    ...admission,
-    logicalOperationId: `${MISSION_ID}:official-verification-v1`,
-  });
+  let targetJobId: string;
+  if (before.mission.status === "BUDGET_EXHAUSTED") {
+    const reopened = await prisma.researchMissionRecord.updateMany({
+      where: {
+        id: MISSION_ID,
+        tenantId: before.tenant.id,
+        caseId: PROCEDIMENTO_ID,
+        lifecycleStatus: "CURRENT",
+        status: "BUDGET_EXHAUSTED",
+        activeExecutionId: null,
+      },
+      data: {
+        status: "PENDING",
+        completedAt: null,
+        deferredAt: null,
+        claimantId: null,
+        claimToken: null,
+        claimExpiresAt: null,
+        stateVersion: { increment: 1 },
+      },
+    });
+    if (reopened.count !== 1) throw new Error("MISSION_REOPEN_CONFLICT");
+    const admission = buildResearchMissionAsyncJobAdmission({
+      mission: stored.mission,
+      actor: {
+        actorId: decision.workerActorId,
+        actorEmail: null,
+        actorRole: "STAGING_RESEARCH_GATE",
+        initiatingUserId: null,
+        admissionType: "AUTHORIZED_SYSTEM",
+        tenantId: before.tenant.id,
+      },
+      correlationId: `research-official-rerun:${MISSION_ID}`,
+      policyDecisionRef: decision.policyDecisionRef,
+      availableAt: new Date(),
+      maxAttempts: 1,
+    });
+    const admitted = await admitAsyncJob({
+      ...admission,
+      logicalOperationId: `${MISSION_ID}:official-verification-v1`,
+    });
+    targetJobId = admitted.job.id;
+  } else {
+    const failedJob = before.jobs.find((job) =>
+      job.logicalOperationId === `${MISSION_ID}:official-verification-v1`
+      && job.status === "TERMINAL_FAILED");
+    if (!failedJob) throw new Error("OFFICIAL_RERUN_JOB_NOT_RETRYABLE");
+    const retried = await retryTerminalAsyncJob({
+      jobId: failedJob.id,
+      actor: {
+        userId: null,
+        userEmail: null,
+        userRole: "STAGING_RESEARCH_GATE",
+      },
+    });
+    if (retried.outcome !== "REQUEUED") throw new Error("OFFICIAL_RERUN_JOB_RETRY_CONFLICT");
+    targetJobId = failedJob.id;
+  }
   const handler = createAutomaticResearchExecutionHandler({
     async loadAuthority(input) {
-      if (input.jobId !== admitted.job.id || input.missionId !== MISSION_ID) return null;
+      if (input.jobId !== targetJobId || input.missionId !== MISSION_ID) return null;
       const current = await getResearchMission(MISSION_ID, {
         actorId: decision.workerActorId!,
         tenantId: before.tenant.id,
