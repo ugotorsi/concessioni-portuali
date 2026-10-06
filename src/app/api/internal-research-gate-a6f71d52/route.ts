@@ -524,6 +524,32 @@ async function reverifyOfficialSources() {
   };
 }
 
+async function cleanupGateBudget() {
+  const before = await snapshot();
+  const disabled = await prisma.runtimeBudgetPolicy.updateMany({
+    where: {
+      enabled: true,
+      OR: [
+        { scope: "GLOBAL", tenantId: null, procedimentoId: null },
+        { scope: "TENANT", tenantId: before.tenant.id, procedimentoId: null },
+        {
+          scope: "PROCEDIMENTO",
+          tenantId: before.tenant.id,
+          procedimentoId: PROCEDIMENTO_ID,
+        },
+      ],
+    },
+    data: { enabled: false },
+  });
+  const after = await snapshot();
+  return {
+    disabledPolicyCount: disabled.count,
+    protectedMissionUnchanged: before.protectedMission.digest === after.protectedMission.digest,
+    missionStatus: after.mission.status,
+    usableCount: after.assessments.filter((assessment) => assessment.usable).length,
+  };
+}
+
 export async function GET() {
   try {
     return NextResponse.json(await snapshot(), { headers: NO_STORE });
@@ -545,9 +571,12 @@ export async function POST(request: NextRequest) {
         { status: 403, headers: NO_STORE },
       );
     }
-    const result = request.headers.get("x-research-gate-action") === "reverify-official"
+    const action = request.headers.get("x-research-gate-action");
+    const result = action === "reverify-official"
       ? await reverifyOfficialSources()
-      : await runOfficialResearchRerun();
+      : action === "cleanup-budget"
+        ? await cleanupGateBudget()
+        : await runOfficialResearchRerun();
     return NextResponse.json(result, { headers: NO_STORE });
   } catch (error) {
     return NextResponse.json(
