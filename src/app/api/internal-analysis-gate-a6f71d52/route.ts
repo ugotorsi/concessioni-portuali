@@ -307,17 +307,33 @@ async function configureMinimumBudget(tenantId: string): Promise<void> {
       },
     ] as const;
     for (const policy of policies) {
-      await tx.runtimeBudgetPolicy.create({
-        data: {
+      const data = {
+        hardCapAmount: (policy.spent + estimate).toFixed(6),
+        enabled: true,
+        effectiveFrom: new Date(),
+      };
+      const updated = await tx.runtimeBudgetPolicy.updateMany({
+        where: {
           scope: policy.scope,
           tenantId: policy.tenantId,
           procedimentoId: policy.procedimentoId,
           currency: "EUR",
-          hardCapAmount: (policy.spent + estimate).toFixed(6),
           windowSeconds,
-          enabled: true,
         },
+        data,
       });
+      if (updated.count === 0) {
+        await tx.runtimeBudgetPolicy.create({
+          data: {
+            scope: policy.scope,
+            tenantId: policy.tenantId,
+            procedimentoId: policy.procedimentoId,
+            currency: "EUR",
+            windowSeconds,
+            ...data,
+          },
+        });
+      }
     }
   });
 }
