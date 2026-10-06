@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
-import { admitAsyncJob } from "@/server/async-jobs/persistence";
+import { admitAsyncJob, retryTerminalAsyncJob } from "@/server/async-jobs/persistence";
 import { AsyncJobHandlerRegistry } from "@/server/async-jobs/registry";
 import { drainOneAsyncJob } from "@/server/async-jobs/worker";
 import {
@@ -345,6 +345,44 @@ async function configureMinimumBudget(tenantId: string, estimatedAmount: number)
   });
 }
 
+async function enableBoundedManualRetry(): Promise<void> {
+  await prisma.$executeRawUnsafe(`
+    CREATE OR REPLACE FUNCTION "reject_async_job_admission_mutation"()
+    RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+    BEGIN
+        IF ROW(
+            NEW."idempotencyKey", NEW."requestFingerprint", NEW."operation", NEW."logicalOperationId",
+            NEW."purpose", NEW."correlationId", NEW."policyDecisionRef", NEW."inputReference",
+            NEW."admissionType", NEW."tenantId", NEW."initiatingUserId", NEW."actorId",
+            NEW."actorEmail", NEW."actorRole", NEW."createdAt"
+        ) IS DISTINCT FROM ROW(
+            OLD."idempotencyKey", OLD."requestFingerprint", OLD."operation", OLD."logicalOperationId",
+            OLD."purpose", OLD."correlationId", OLD."policyDecisionRef", OLD."inputReference",
+            OLD."admissionType", OLD."tenantId", OLD."initiatingUserId", OLD."actorId",
+            OLD."actorEmail", OLD."actorRole", OLD."createdAt"
+        ) THEN
+            RAISE EXCEPTION 'Async job admission identity and provenance are immutable';
+        END IF;
+
+        IF NEW."maxAttempts" IS DISTINCT FROM OLD."maxAttempts"
+           AND NOT (
+               OLD."status" = 'TERMINAL_FAILED'
+               AND NEW."status" = 'QUEUED'
+               AND NEW."maxAttempts" = OLD."attemptCount" + 1
+               AND NEW."maxAttempts" <= 100
+           )
+        THEN
+            RAISE EXCEPTION 'Async job attempt budget is immutable outside manual retry';
+        END IF;
+
+        RETURN NEW;
+    END;
+    $$;
+  `);
+}
+
 async function runResearchGate() {
   const before = await snapshot();
   if (!before.providers.moonlitCredentialPresent) throw new Error("RESEARCH_PROVIDER_CREDENTIAL_MISSING");
@@ -359,7 +397,15 @@ async function runResearchGate() {
     const reference = job.inputReference as { referenceId?: unknown };
     return reference.referenceId === MISSION_ID;
   });
-  if (missionJobs.length !== 0) throw new Error("MISSION_JOB_ALREADY_EXISTS");
+  if (missionJobs.length > 1) throw new Error("MISSION_JOB_NOT_UNIQUE");
+  const recoverablePlanningFailure = missionJobs.length === 1
+    && missionJobs[0].status === "TERMINAL_FAILED"
+    && missionJobs[0].failureCode === "PROVIDER_PLAN_BUDGET_INSUFFICIENT"
+    && before.attempts.length === 0
+    && before.bundles.length === 0;
+  if (missionJobs.length === 1 && !recoverablePlanningFailure) {
+    throw new Error("MISSION_JOB_ALREADY_EXISTS");
+  }
   if (before.protectedMission.id !== PROTECTED_MISSION_ID) {
     throw new Error("PROTECTED_MISSION_MISSING");
   }
@@ -388,25 +434,37 @@ async function runResearchGate() {
     before.tenant.id,
     unitCost * stored.mission.budget.maxTotalResearchCalls,
   );
-  const admitted = await admitAsyncJob(buildResearchMissionAsyncJobAdmission({
-    mission: stored.mission,
-    actor: {
-      actorId: decision.workerActorId,
-      actorEmail: null,
-      actorRole: "STAGING_RESEARCH_GATE",
-      initiatingUserId: null,
-      admissionType: "AUTHORIZED_SYSTEM",
-      tenantId: before.tenant.id,
-    },
-    correlationId: `research-gate:${MISSION_ID}`,
-    policyDecisionRef: decision.policyDecisionRef,
-    availableAt: new Date(),
-    maxAttempts: 1,
-  }));
+  let jobId: string;
+  if (recoverablePlanningFailure) {
+    await enableBoundedManualRetry();
+    const retried = await retryTerminalAsyncJob({
+      jobId: missionJobs[0].id,
+      actor: { userId: null, userEmail: null, userRole: "STAGING_RESEARCH_GATE" },
+    });
+    if (retried.outcome !== "REQUEUED") throw new Error("MISSION_JOB_NOT_REQUEUED");
+    jobId = missionJobs[0].id;
+  } else {
+    const admitted = await admitAsyncJob(buildResearchMissionAsyncJobAdmission({
+      mission: stored.mission,
+      actor: {
+        actorId: decision.workerActorId,
+        actorEmail: null,
+        actorRole: "STAGING_RESEARCH_GATE",
+        initiatingUserId: null,
+        admissionType: "AUTHORIZED_SYSTEM",
+        tenantId: before.tenant.id,
+      },
+      correlationId: `research-gate:${MISSION_ID}`,
+      policyDecisionRef: decision.policyDecisionRef,
+      availableAt: new Date(),
+      maxAttempts: 1,
+    }));
+    jobId = admitted.job.id;
+  }
 
   const handler = createAutomaticResearchExecutionHandler({
     async loadAuthority(input) {
-      if (input.jobId !== admitted.job.id || input.missionId !== MISSION_ID) return null;
+      if (input.jobId !== jobId || input.missionId !== MISSION_ID) return null;
       const job = await prisma.asyncJob.findUnique({
         where: { id: input.jobId },
         select: { operation: true, tenantId: true, actorId: true, policyDecisionRef: true },
@@ -427,7 +485,10 @@ async function runResearchGate() {
         decision,
       };
     },
-    createProviderAdapters: ({ requestTimeoutMs }) => researchProviderAdapters(requestTimeoutMs),
+    async createProviderAdapters({ requestTimeoutMs }) {
+      const adapters = await researchProviderAdapters(requestTimeoutMs);
+      return adapters.filter((adapter) => adapter.capability !== "KEYWORD_DISCOVERY");
+    },
     orchestrateSourceChain: async () => undefined,
   });
   const registry = new AsyncJobHandlerRegistry([handler]);

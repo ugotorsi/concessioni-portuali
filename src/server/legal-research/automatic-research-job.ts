@@ -222,6 +222,7 @@ export function createAutomaticResearchExecutionHandler(
         requestTimeoutMs: authority.decision.providerTimeoutMs!,
       });
       const availableCapabilities = new Set(adapters.map((adapter) => adapter.capability));
+      availableCapabilities.add("KEYWORD_DISCOVERY");
       const missingCapability = authority.mission.executionPlan?.requiredCapabilities
         .find((capability) => !availableCapabilities.has(capability));
       if (missingCapability) {
