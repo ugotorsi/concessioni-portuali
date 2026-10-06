@@ -417,7 +417,11 @@ export function createTrustedMissionExecutor(options: TrustedMissionExecutorOpti
       const verifiedCapabilities = evidenceSatisfiedCapabilities(assistedVerification);
       const availableAdapters = options.providerAdapters ?? [];
       const selectedAdapters = requiredCapabilities
-        .filter((capability) => !verifiedCapabilities.has(capability) && capability !== "EXACT_RETRIEVAL")
+        .filter((capability) => !verifiedCapabilities.has(capability)
+          && !(capability === "KEYWORD_DISCOVERY"
+            && requiredCapabilities.includes("SEMANTIC_DISCOVERY")
+            && requiredCapabilities.includes("EXACT_RETRIEVAL"))
+          && capability !== "EXACT_RETRIEVAL")
         .map((capability) => selectProviderAdapter(snapshot.mission, availableAdapters, capability))
         .filter((adapter): adapter is ResearchProviderAdapter => Boolean(adapter));
       const needsExact = requiredCapabilities.includes("EXACT_RETRIEVAL") && !verifiedCapabilities.has("EXACT_RETRIEVAL");
