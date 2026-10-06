@@ -44,6 +44,7 @@ export type TemporalAssessmentInput = Readonly<{
   temporalEvidence?: Readonly<{
     temporalMetadataConflict?: boolean;
     partialSupersessionResolved?: boolean;
+    authoritativeAsOfDate?: boolean;
   }>;
 }>;
 
@@ -273,6 +274,11 @@ export function assessLegalSourceTemporalApplicability(
   if (input.sourceStatus === "HISTORICAL") {
     matchedReasons.push("SOURCE_MARKED_HISTORICAL", "HUMAN_LEGAL_ASSESSMENT_REQUIRED");
     return result(input, "INDETERMINATE", "SATISFIED", "REQUIRES_HUMAN_REVIEW", matchedReasons, true, "LOW");
+  }
+
+  if (input.legalAuthorityKind === "LEGISLATION"
+    && input.temporalEvidence?.authoritativeAsOfDate === true) {
+    return result(input, "VALID", "SATISFIED", "APPLICABLE_ON_DATE", matchedReasons, false, "HIGH");
   }
 
   matchedReasons.push("HUMAN_LEGAL_ASSESSMENT_REQUIRED");

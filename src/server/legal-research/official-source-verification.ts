@@ -389,6 +389,7 @@ async function persistVerifiedNormattivaSource(input: {
       consolidationMetadata: null,
     },
     referenceDate: input.mission.referenceDate.toISOString(),
+    temporalEvidence: { authoritativeAsOfDate: true },
   };
   const temporalResult = assessLegalSourceTemporalApplicability(temporalInput);
   const temporal = await persistTemporalAssessment(temporalInput, temporalResult);

@@ -10,6 +10,7 @@ import { discoverItalianLegalReferences } from "@/server/intake/legal-reference-
 import { createAutomaticResearchExecutionHandler } from "@/server/legal-research/automatic-research-job";
 import { evaluateAutomaticResearchPolicy } from "@/server/legal-research/automatic-research-policy";
 import { createAutomaticResearchProviderAdapters } from "@/server/legal-research/automatic-research-providers";
+import { verifyOfficialResearchSources } from "@/server/legal-research/official-source-verification";
 import {
   buildResearchMissionAsyncJobAdmission,
   getResearchMission,
@@ -503,6 +504,26 @@ async function runOfficialResearchRerun() {
   };
 }
 
+async function reverifyOfficialSources() {
+  const before = await snapshot();
+  if (before.mission.status !== "BUDGET_EXHAUSTED"
+    || before.mission.lifecycleStatus !== "CURRENT") {
+    throw new Error("MISSION_NOT_READY_FOR_OFFICIAL_REVERIFICATION");
+  }
+  const result = await verifyOfficialResearchSources({
+    missionId: MISSION_ID,
+    tenantId: before.tenant.id,
+    caseId: PROCEDIMENTO_ID,
+    actorId: process.env.AUTOMATIC_RESEARCH_WORKER_ACTOR_ID ?? "",
+  });
+  const after = await snapshot();
+  return {
+    result,
+    protectedMissionUnchanged: before.protectedMission.digest === after.protectedMission.digest,
+    after,
+  };
+}
+
 export async function GET() {
   try {
     return NextResponse.json(await snapshot(), { headers: NO_STORE });
@@ -524,7 +545,10 @@ export async function POST(request: NextRequest) {
         { status: 403, headers: NO_STORE },
       );
     }
-    return NextResponse.json(await runOfficialResearchRerun(), { headers: NO_STORE });
+    const result = request.headers.get("x-research-gate-action") === "reverify-official"
+      ? await reverifyOfficialSources()
+      : await runOfficialResearchRerun();
+    return NextResponse.json(result, { headers: NO_STORE });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "UNKNOWN_ERROR" },

@@ -64,6 +64,19 @@ describe("Block 3B.9A legal-source temporal core", () => {
     expect(assessment.effectiveInterval.to).toBeNull();
   });
 
+  it("accepts official consolidated legislation retrieved as of the reference date", () => {
+    expect(assessLegalSourceTemporalApplicability(input({
+      temporalEvidence: { authoritativeAsOfDate: true },
+    }))).toMatchObject({
+      validityState: "VALID",
+      temporalWindowState: "SATISFIED",
+      applicabilityState: "APPLICABLE_ON_DATE",
+      reasonCodes: ["EFFECTIVE_INTERVAL_MATCH"],
+      humanReviewRequired: false,
+      confidence: "HIGH",
+    });
+  });
+
   it.each([
     ["CURRENT", "VALID", "REQUIRES_HUMAN_REVIEW"],
     ["CURRENT_SUBJECT_TO_REVIEW", "VALID", "REQUIRES_HUMAN_REVIEW"],
