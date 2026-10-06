@@ -21,6 +21,7 @@ import { createAutomaticResearchProviderAdapters } from "./automatic-research-pr
 import { createLocalTrustedResearchClient } from "./local-trusted-research-client";
 import { createTrustedMissionExecutor, type TrustedMissionExecutorResult } from "./trusted-mission-executor";
 import { completeAdverseResearchRequirement, ensureAdverseResearchMission } from "./source-chain-persistence";
+import { verifyOfficialResearchSources } from "./official-source-verification";
 
 const referenceSchema = z.object({
   referenceType: z.literal("LEGAL_RESEARCH_MISSION"),
@@ -170,7 +171,7 @@ const defaultDependencies: AutomaticResearchExecutionDependencies = {
       legalDataHunterApiKey: process.env.LEGAL_DATA_HUNTER_API_KEY ?? null,
       providerAdapters: input.providerAdapters,
       leaseDurationMs: decision.leaseDurationMs!,
-      executionId: () => `automatic-research-execution:${input.jobId}`,
+      executionId: () => `automatic-research-execution:${input.jobId}:${input.attempt}`,
     });
     const unitCost = runtimeCostEstimate("ASYNC_COST_RESEARCH_CALL_ESTIMATE_EUR");
     const estimatedAmount = unitCost * input.authority.mission.budget.maxTotalResearchCalls;
@@ -195,6 +196,14 @@ const defaultDependencies: AutomaticResearchExecutionDependencies = {
         adverseMissionId: input.authority.mission.missionId,
       });
       return;
+    }
+    if (process.env.AUTOMATIC_OFFICIAL_SOURCE_VERIFICATION_ENABLED === "true") {
+      await verifyOfficialResearchSources({
+        missionId: input.authority.mission.missionId,
+        tenantId: input.authority.tenantId,
+        caseId: input.authority.mission.caseReference.caseId,
+        actorId: input.authority.actorId,
+      });
     }
     await ensureAdverseResearchMission({
       tenantId: input.authority.tenantId,
