@@ -346,14 +346,26 @@ async function runAnalysisGate() {
   if (analysisJobs.length > 1) throw new Error("MULTIPLE_ANALYSIS_JOBS");
 
   if (analysisJobs.length === 0) {
-    const source = await prisma.asyncJob.findFirst({
+    const intake = await prisma.neutralIntake.findFirst({
       where: {
-        procedimentoId: PROCEDIMENTO_ID,
+        destination: { procedimentoId: PROCEDIMENTO_ID },
+      },
+      select: { id: true },
+      orderBy: { createdAt: "desc" },
+    });
+    if (!intake) throw new Error("ROUTED_NEUTRAL_INTAKE_NOT_FOUND");
+    const extractionJobs = await prisma.asyncJob.findMany({
+      where: {
         operation: "NEUTRAL_INTAKE_EXTRACTION_V1",
         status: "SUCCEEDED",
       },
       select: { id: true, inputReference: true },
       orderBy: { completedAt: "desc" },
+      take: 50,
+    });
+    const source = extractionJobs.find((candidate) => {
+      const input = candidate.inputReference as { referenceId?: unknown };
+      return input.referenceId === intake.id;
     });
     const input = source?.inputReference as {
       referenceId?: unknown;
