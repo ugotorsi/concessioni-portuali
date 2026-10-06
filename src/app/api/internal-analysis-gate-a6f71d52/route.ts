@@ -648,23 +648,32 @@ async function runAnalysisGate() {
           operation: FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
           parseInput: (input: unknown) => input,
           async execute() {
-            const plans = buildKnowledgeResearchMissionPlans(currentRevision);
-            const missions = await reconcileKnowledgeResearchMissions({
-              tenantId: before.tenant.id,
-              procedimentoId: PROCEDIMENTO_ID,
-              knowledgeRevisionId: currentRevision.id,
-              plans,
-            });
-            return {
-              referenceType: "FASCICOLO_KNOWLEDGE_REVISION",
-              referenceId: currentRevision.id,
-              referenceVersion: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1",
-              metadata: {
+            try {
+              const plans = buildKnowledgeResearchMissionPlans(currentRevision);
+              const missions = await reconcileKnowledgeResearchMissions({
+                tenantId: before.tenant.id,
                 procedimentoId: PROCEDIMENTO_ID,
-                missionCount: missions.length,
-                persistenceCode: "RESUMED_CURRENT_REVISION",
-              },
-            };
+                knowledgeRevisionId: currentRevision.id,
+                plans,
+              });
+              return {
+                referenceType: "FASCICOLO_KNOWLEDGE_REVISION",
+                referenceId: currentRevision.id,
+                referenceVersion: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1",
+                metadata: {
+                  procedimentoId: PROCEDIMENTO_ID,
+                  missionCount: missions.length,
+                  persistenceCode: "RESUMED_CURRENT_REVISION",
+                },
+              };
+            } catch (error) {
+              console.error({
+                event: "analysis_gate_revision_resume_failed",
+                errorName: error instanceof Error ? error.name : typeof error,
+                errorMessage: error instanceof Error ? error.message.slice(0, 512) : "NON_ERROR_THROWN",
+              });
+              throw error;
+            }
           },
         }
       : createFascicoloAutomaticAnalysisHandler({
