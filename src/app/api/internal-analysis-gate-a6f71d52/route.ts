@@ -12,6 +12,11 @@ import {
 import { retryTerminalAsyncJob } from "@/server/async-jobs/persistence";
 import { AsyncJobHandlerRegistry } from "@/server/async-jobs/registry";
 import { drainOneAsyncJob } from "@/server/async-jobs/worker";
+import {
+  buildKnowledgeResearchMissionPlans,
+  getCurrentKnowledgeRevision,
+  reconcileKnowledgeResearchMissions,
+} from "@/server/fascicolo-knowledge";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -633,15 +638,44 @@ async function runAnalysisGate() {
 
   let drainOutcome: unknown = { outcome: "ALREADY_SUCCEEDED", jobId: job.id };
   if (job.status !== "SUCCEEDED") {
+    const currentRevision = await getCurrentKnowledgeRevision({
+      tenantId: before.tenant.id,
+      procedimentoId: PROCEDIMENTO_ID,
+    });
     const analysisDependencies = createDefaultFascicoloAutomaticAnalysisDependencies();
+    const handler = currentRevision
+      ? {
+          operation: FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
+          parseInput: (input: unknown) => input,
+          async execute() {
+            const plans = buildKnowledgeResearchMissionPlans(currentRevision);
+            const missions = await reconcileKnowledgeResearchMissions({
+              tenantId: before.tenant.id,
+              procedimentoId: PROCEDIMENTO_ID,
+              knowledgeRevisionId: currentRevision.id,
+              plans,
+            });
+            return {
+              referenceType: "FASCICOLO_KNOWLEDGE_REVISION",
+              referenceId: currentRevision.id,
+              referenceVersion: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1",
+              metadata: {
+                procedimentoId: PROCEDIMENTO_ID,
+                missionCount: missions.length,
+                persistenceCode: "RESUMED_CURRENT_REVISION",
+              },
+            };
+          },
+        }
+      : createFascicoloAutomaticAnalysisHandler({
+          ...analysisDependencies,
+          persistReport: async (report) => ({
+            outcome: "REUSED",
+            reportId: report.reportId,
+          }),
+        });
     const registry = new AsyncJobHandlerRegistry([
-      createFascicoloAutomaticAnalysisHandler({
-        ...analysisDependencies,
-        persistReport: async (report) => ({
-          outcome: "REUSED",
-          reportId: report.reportId,
-        }),
-      }),
+      handler,
     ]);
     drainOutcome = await drainOneAsyncJob({
       workerId: `analysis-gate-${Date.now()}`,
