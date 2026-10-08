@@ -1761,17 +1761,66 @@ describe("Block 3B.13B research mission persistence", () => {
     await expect(completeResearchMission(completion, documentContext)).resolves.toMatchObject({ mission: { operational: { status: "COMPLETED" } } });
   });
 
-  it("rejects a documentary claim with residual evidence gaps before mutation", async () => {
+  it("claims exact-source recovery without prior evidence but requires it for completion", async () => {
     const harness = createHarness();
-    const mission = researchMission({ requiredOutput: {
-      authorityCandidates: false, citationObservations: false, legalResearchSuggestions: false,
+    const mission = researchMission({
+      mode: "EXACT_SOURCE_RECOVERY",
+      missingSourceFamilies: [],
+      requiredOutput: {
+      authorityCandidates: false, citationObservations: true, legalResearchSuggestions: false,
       evidenceGaps: true, fullTextRequired: true,
-    } });
+      },
+      executionPlan: { requiredCapabilities: ["EXACT_RETRIEVAL", "FULL_TEXT_RETRIEVAL"] },
+    });
     await createResearchMissionRecord({ mission, actor }, harness.context);
-    await expect(claimResearchMission({ missionId: mission.missionId, executionId: "blocked-document-claim",
+    const claimed = await claimResearchMission({ missionId: mission.missionId, executionId: "exact-source-claim",
       executor: { kind: "AUTHORIZED_WORKER", claimantId: "worker-a" }, actor, leaseDurationMs: 60_000,
+    }, harness.context);
+    expect(claimed.outcome).toBe("CLAIMED");
+    expect((await getResearchMission(mission.missionId, actor, harness.context))?.operational.status).toBe("IN_PROGRESS");
+
+    const bundle = {
+      ...evidenceBundle(mission, "exact-source-claim", "COMPLETE", []),
+      citationObservations: [createCitationObservation({
+        kind: "CITATION_OBSERVATION",
+        relation: "CITES",
+        sourceAuthorityId: "authority-a",
+        targetAuthorityId: "authority-b",
+        provenance: {
+          evidenceSourceId: "evidence-source-a",
+          providerId: "OFFICIAL_SOURCE",
+          documentId: "official-document-a",
+          locator: { paragraph: "1" },
+          observationMethod: "DOCUMENT_EXTRACTION",
+          evidenceHash: "a".repeat(64),
+        },
+      })],
+    };
+    const bundleId = "bundle-without-assisted-verification";
+    harness.bundles.set(bundleId, {
+      id: bundleId,
+      missionId: mission.missionId,
+      executionId: "exact-source-claim",
+      contractVersion: RESEARCH_BRIDGE_VERSION,
+      fingerprint: researchEvidenceBundleFingerprint(bundle),
+      payload: bundle,
+      completionState: "COMPLETE",
+      totalCalls: 0,
+      moonlitCalls: 0,
+      simpliciterCalls: 0,
+      legalDataHunterCalls: 0,
+      submittedByActorId: actor.actorId,
+      createdAt: now,
+    });
+    await expect(completeResearchMission({
+      missionId: mission.missionId,
+      executionId: "exact-source-claim",
+      bundleId,
+      claimantId: "worker-a",
+      claimToken: claimed.claim.claimToken,
+      actor,
     }, harness.context)).rejects.toMatchObject({ code: "INVALID_TRANSITION" });
-    expect((await getResearchMission(mission.missionId, actor, harness.context))?.operational.status).toBe("PENDING");
+    expect((await getResearchMission(mission.missionId, actor, harness.context))?.operational.status).toBe("IN_PROGRESS");
   });
 
   it("allows one initial snapshot and appends only from the latest record", async () => {

@@ -747,6 +747,15 @@ async function requireDocumentaryEvidence(
   return verification;
 }
 
+async function requirePreClaimDocumentaryEvidence(
+  mission: ResearchMission,
+  actor: ResearchServiceActor,
+  ctx: ResearchPersistenceContext,
+): Promise<void> {
+  if (mission.mode === "EXACT_SOURCE_RECOVERY") return;
+  await requireDocumentaryEvidence(mission, actor, ctx);
+}
+
 export async function claimResearchMission(
   input: Readonly<{
     missionId: string;
@@ -766,7 +775,7 @@ export async function claimResearchMission(
     const current = await tx.researchMissionRecord.findUnique({ where: { id: missionId } });
     if (!current) throw new ResearchPersistenceError("MISSION_NOT_FOUND");
     authorize(current, input.actor);
-    await requireDocumentaryEvidence(missionFrom(current), input.actor, { ...ctx, client: tx });
+    await requirePreClaimDocumentaryEvidence(missionFrom(current), input.actor, { ...ctx, client: tx });
     const now = ctx.clock.now();
     if (["COMPLETED", "BUDGET_EXHAUSTED", "REJECTED"].includes(current.status)) {
       throw new ResearchPersistenceError("INVALID_TRANSITION");
@@ -839,7 +848,7 @@ export async function claimResearchMission(
       throw cause;
     }
     authorize(current, input.actor);
-    await requireDocumentaryEvidence(missionFrom(current), input.actor, ctx);
+    await requirePreClaimDocumentaryEvidence(missionFrom(current), input.actor, ctx);
     return {
       outcome: "REUSED",
       claim: { mission: storedMission(current), execution: repeated, claimToken: repeated.claimToken },
