@@ -42,6 +42,8 @@ import {
   type AssistedVerificationResult,
   type AssistedVerificationPreClaimStatus,
   type AssistedVerificationSnapshot,
+  type SubmittedDocumentEvidence,
+  type VerifiedDocumentEvidence,
 } from "./assisted-verification";
 
 export const RESEARCH_MISSION_EXECUTION_OPERATION = "LEGAL_RESEARCH.EXECUTE_V1" as const;
@@ -108,6 +110,11 @@ export type StoredAssistedVerification = Readonly<{
   fingerprint: string;
   recordedByActorId: string;
   createdAt: Date;
+}>;
+
+type PersistedAssistedVerificationPayload = Readonly<{
+  snapshot: AssistedVerificationSnapshot;
+  submittedDocuments: readonly SubmittedDocumentEvidence[];
 }>;
 
 export type ResearchPersistenceErrorCode =
@@ -362,21 +369,80 @@ function assistedVerificationId(value: string): string {
   return `research-verification:${value}`;
 }
 
+function persistedAssistedVerificationPayload(value: unknown): PersistedAssistedVerificationPayload | null {
+  const legacy = parseAssistedVerificationSnapshot(value);
+  if (legacy) return { snapshot: legacy, submittedDocuments: [] };
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const record = value as Record<string, unknown>;
+  const snapshot = parseAssistedVerificationSnapshot(record.snapshot);
+  if (!snapshot || !Array.isArray(record.submittedDocuments)) return null;
+  const submittedDocuments = record.submittedDocuments.filter((item): item is SubmittedDocumentEvidence => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return false;
+    const document = item as Record<string, unknown>;
+    return typeof document.evidenceSourceId === "string"
+      && typeof document.documentId === "string"
+      && typeof document.fileVersionId === "string"
+      && typeof document.contentSha256 === "string"
+      && /^[a-f0-9]{64}$/.test(document.contentSha256)
+      && typeof document.content === "string"
+      && document.content.length > 0
+      && Buffer.byteLength(document.content, "utf8") <= 1_048_576;
+  });
+  return submittedDocuments.length === record.submittedDocuments.length
+    ? { snapshot, submittedDocuments }
+    : null;
+}
+
+function verifySubmittedDocuments(
+  snapshot: AssistedVerificationSnapshot,
+  documents: readonly SubmittedDocumentEvidence[],
+): readonly VerifiedDocumentEvidence[] {
+  if (documents.length === 0 || documents.length > 16
+    || documents.reduce((size, document) => size + Buffer.byteLength(document.content, "utf8"), 0) > 4_194_304) {
+    throw new ResearchPersistenceError("INVALID_ASSISTED_VERIFICATION");
+  }
+  const identities = new Set<string>();
+  return documents.map((document) => {
+    const identity = `${document.evidenceSourceId}\0${document.documentId}\0${document.fileVersionId}`;
+    const source = snapshot.sources.find((candidate) => candidate.evidenceSourceId === document.evidenceSourceId);
+    const actualHash = createHash("sha256").update(document.content, "utf8").digest("hex");
+    if (identities.has(identity)
+      || !source
+      || !source.fullText.available
+      || source.fullText.documentId !== document.documentId
+      || source.fullText.fileVersionId !== document.fileVersionId
+      || source.fullText.contentSha256 !== document.contentSha256
+      || actualHash !== document.contentSha256) {
+      throw new ResearchPersistenceError("INVALID_ASSISTED_VERIFICATION");
+    }
+    identities.add(identity);
+    return {
+      evidenceSourceId: document.evidenceSourceId,
+      documentId: document.documentId,
+      fileVersionId: document.fileVersionId,
+      contentSha256: document.contentSha256,
+    };
+  });
+}
+
 async function storedAssistedVerification(
   record: ResearchAssistedVerificationRecord,
   mission: ResearchMission,
   ctx: ResearchPersistenceContext,
 ): Promise<StoredAssistedVerification> {
-  const snapshot = parseAssistedVerificationSnapshot(record.payload);
+  const payload = persistedAssistedVerificationPayload(record.payload);
+  const snapshot = payload?.snapshot;
   if (
     !snapshot
     || snapshot.missionId !== mission.missionId
     || record.contractVersion !== ASSISTED_VERIFICATION_VERSION
     || record.fingerprint !== fingerprint(snapshot)
   ) throw new ResearchPersistenceError("INVALID_ASSISTED_VERIFICATION");
-  const verifiedDocuments = await (ctx.readAssistedDocuments ?? readAssistedDocumentEvidence)(mission, record.tenantId, snapshot.sources, {
-    client: ctx.client, read: readDocumentFileBoundedFromProvider,
-  });
+  const verifiedDocuments = payload.submittedDocuments.length > 0
+    ? verifySubmittedDocuments(snapshot, payload.submittedDocuments)
+    : await (ctx.readAssistedDocuments ?? readAssistedDocumentEvidence)(mission, record.tenantId, snapshot.sources, {
+        client: ctx.client, read: readDocumentFileBoundedFromProvider,
+      });
   const result = verifyResearchEvidence({ mission, ...snapshot, verifiedDocuments });
   return {
     recordId: record.id,
@@ -408,6 +474,12 @@ export async function persistAssistedVerification(
     actor: ResearchServiceActor;
     expectedPreviousRecordId?: string | null;
     approveAdverseSearch?: boolean;
+    submittedDocuments?: readonly SubmittedDocumentEvidence[];
+    claim?: Readonly<{
+      executionId: string;
+      claimantId: string;
+      claimToken: string;
+    }>;
   }>,
   overrides?: Partial<ResearchPersistenceContext>,
 ): Promise<Readonly<{ outcome: "CREATED" | "REUSED"; verification: StoredAssistedVerification }>> {
@@ -432,6 +504,13 @@ export async function persistAssistedVerification(
     });
     if (!missionRecord) throw new ResearchPersistenceError("MISSION_NOT_FOUND");
     authorize(missionRecord, input.actor);
+    if (input.claim) {
+      requireLease(missionRecord, {
+        executionId: identifier(input.claim.executionId),
+        claimantId: identifier(input.claim.claimantId),
+        claimToken: claimToken(input.claim.claimToken),
+      }, ctx.clock.now());
+    }
     const tenantId = missionRecord.tenantId;
     if (!tenantId) throw new ResearchPersistenceError("AUTHORIZATION_REQUIRED");
     const mission = missionFrom(missionRecord);
@@ -446,7 +525,7 @@ export async function persistAssistedVerification(
     if (previous && input.expectedPreviousRecordId === undefined && previous.fingerprint !== snapshotFingerprint) {
       throw new ResearchPersistenceError("ASSISTED_VERIFICATION_CONFLICT");
     }
-    const previousSnapshot = previous ? parseAssistedVerificationSnapshot(previous.payload) : null;
+    const previousSnapshot = previous ? persistedAssistedVerificationPayload(previous.payload)?.snapshot ?? null : null;
     const unchanged = (value: unknown, prior: unknown) => value !== undefined && prior !== undefined && fingerprint(value) === fingerprint(prior);
     if (snapshot.adverseSearchReview && !input.approveAdverseSearch
       && (!unchanged(snapshot.adverseSearchReview, previousSnapshot?.adverseSearchReview)
@@ -465,9 +544,12 @@ export async function persistAssistedVerification(
       && !unchanged(snapshot.adverseReview, previousSnapshot?.adverseReview))) {
       throw new ResearchPersistenceError("INVALID_ASSISTED_VERIFICATION");
     }
-    const verifiedDocuments = await (ctx.readAssistedDocuments ?? readAssistedDocumentEvidence)(mission, tenantId, snapshot.sources, {
-      client: tx, read: readDocumentFileBoundedFromProvider,
-    });
+    const submittedDocuments = input.submittedDocuments ?? [];
+    const verifiedDocuments = submittedDocuments.length > 0
+      ? verifySubmittedDocuments(snapshot, submittedDocuments)
+      : await (ctx.readAssistedDocuments ?? readAssistedDocumentEvidence)(mission, tenantId, snapshot.sources, {
+          client: tx, read: readDocumentFileBoundedFromProvider,
+        });
     const verificationResult = verifyResearchEvidence({ mission, ...snapshot, verifiedDocuments });
     if (input.approveAdverseSearch && verificationResult.adverseSearchState !== "COMPLETED_NO_ADVERSE_FOUND") {
       throw new ResearchPersistenceError("INVALID_ASSISTED_VERIFICATION");
@@ -542,7 +624,7 @@ export async function persistAssistedVerification(
         tenantId,
         contractVersion: snapshot.version,
         fingerprint: snapshotFingerprint,
-        payload: json(snapshot),
+        payload: json(submittedDocuments.length > 0 ? { snapshot, submittedDocuments } : snapshot),
         recordedByActorId: input.actor.actorId,
         createdAt: new Date(Math.max(ctx.clock.now().getTime(), (previous?.createdAt.getTime() ?? -1) + 1)),
       },
@@ -561,6 +643,13 @@ export async function persistAssistedVerification(
     });
     if (!missionRecord) throw new ResearchPersistenceError("MISSION_NOT_FOUND");
     authorize(missionRecord, input.actor);
+    if (input.claim) {
+      requireLease(missionRecord, {
+        executionId: identifier(input.claim.executionId),
+        claimantId: identifier(input.claim.claimantId),
+        claimToken: claimToken(input.claim.claimToken),
+      }, ctx.clock.now());
+    }
     const tenantId = missionRecord.tenantId;
     if (!tenantId) throw new ResearchPersistenceError("AUTHORIZATION_REQUIRED");
     const winner = await ctx.client.researchAssistedVerificationRecord.findUnique({

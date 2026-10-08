@@ -1761,7 +1761,7 @@ describe("Block 3B.13B research mission persistence", () => {
     await expect(completeResearchMission(completion, documentContext)).resolves.toMatchObject({ mission: { operational: { status: "COMPLETED" } } });
   });
 
-  it("claims exact-source recovery without prior evidence but requires it for completion", async () => {
+  it("completes exact-source recovery after claimed connector evidence is verified and persisted", async () => {
     const harness = createHarness();
     const mission = researchMission({
       mode: "EXACT_SOURCE_RECOVERY",
@@ -1821,6 +1821,109 @@ describe("Block 3B.13B research mission persistence", () => {
       actor,
     }, harness.context)).rejects.toMatchObject({ code: "INVALID_TRANSITION" });
     expect((await getResearchMission(mission.missionId, actor, harness.context))?.operational.status).toBe("IN_PROGRESS");
+
+    const content = "Art. 37 Codice della navigazione - synthetic exact source text.";
+    const contentSha256 = createHash("sha256").update(content, "utf8").digest("hex");
+    const recoveredSource = officialSource({
+      evidenceSourceId: "evidence-source-art-37",
+      authorityId: "authority-art-37",
+      legalSourceId: "codice-navigazione",
+      legalExpressionVersionId: "codice-navigazione-art-37-2026-10-08",
+      officialIdentifier: "COD_NAV_ART_37",
+      providerId: "SIMPLICITER",
+      fullText: {
+        available: true,
+        documentId: "connector-document-art-37",
+        fileVersionId: "connector-file-art-37",
+        contentSha256,
+      },
+    });
+    const citedCode = officialSource({
+      evidenceSourceId: "evidence-source-codice",
+      authorityId: "authority-codice-navigazione",
+      legalSourceId: "codice-navigazione",
+      legalExpressionVersionId: "codice-navigazione-2026-10-08",
+      officialIdentifier: "COD_NAV",
+      providerId: "SIMPLICITER",
+      fullText: { available: false },
+    });
+    const snapshot = createAssistedVerificationSnapshot({
+      missionId: mission.missionId,
+      sources: [recoveredSource, citedCode],
+      citationRelation: {
+        sourceAuthorityId: recoveredSource.authorityId,
+        targetAuthorityId: citedCode.authorityId,
+        evidenceSourceId: recoveredSource.evidenceSourceId,
+        documented: true,
+        locator: { section: "Art. 37" },
+      },
+    });
+    await expect(persistAssistedVerification({
+      snapshot,
+      submittedDocuments: [{
+        evidenceSourceId: recoveredSource.evidenceSourceId,
+        documentId: recoveredSource.fullText.documentId!,
+        fileVersionId: recoveredSource.fullText.fileVersionId!,
+        contentSha256,
+        content: `${content} tampered`,
+      }],
+      actor,
+      claim: {
+        executionId: "exact-source-claim",
+        claimantId: "worker-a",
+        claimToken: claimed.claim.claimToken,
+      },
+    }, harness.context)).rejects.toMatchObject({ code: "INVALID_ASSISTED_VERIFICATION" });
+    expect(harness.verifications).toHaveLength(0);
+
+    const verified = await persistAssistedVerification({
+      snapshot,
+      submittedDocuments: [{
+        evidenceSourceId: recoveredSource.evidenceSourceId,
+        documentId: recoveredSource.fullText.documentId!,
+        fileVersionId: recoveredSource.fullText.fileVersionId!,
+        contentSha256,
+        content,
+      }],
+      actor,
+      claim: {
+        executionId: "exact-source-claim",
+        claimantId: "worker-a",
+        claimToken: claimed.claim.claimToken,
+      },
+    }, harness.context);
+    expect(verified.verification.result).toMatchObject({
+      assistedVerificationFingerprint: expect.stringMatching(/^assisted-evidence:/),
+      evidenceGaps: [],
+    });
+    expect(verified.verification.result.verifiedFullTexts).toHaveLength(1);
+    expect(verified.verification.result.citationObservations).toHaveLength(1);
+
+    const completedBundle = {
+      ...evidenceBundle(mission, "exact-source-claim", "COMPLETE", []),
+      assistedVerificationFingerprint: verified.verification.result.assistedVerificationFingerprint,
+      authorityCandidates: verified.verification.result.authorityCandidates,
+      citationObservations: verified.verification.result.citationObservations,
+      legalResearchSuggestions: verified.verification.result.legalResearchSuggestions,
+      evidenceGaps: verified.verification.result.evidenceGaps,
+    };
+    const submitted = await submitResearchEvidenceBundle({
+      bundle: completedBundle,
+      claimantId: "worker-a",
+      claimToken: claimed.claim.claimToken,
+      actor,
+    }, harness.context);
+    await expect(completeResearchMission({
+      missionId: mission.missionId,
+      executionId: "exact-source-claim",
+      bundleId: submitted.bundle.id,
+      claimantId: "worker-a",
+      claimToken: claimed.claim.claimToken,
+      actor,
+    }, harness.context)).resolves.toMatchObject({
+      outcome: "COMPLETED",
+      mission: { operational: { status: "COMPLETED" } },
+    });
   });
 
   it("allows one initial snapshot and appends only from the latest record", async () => {

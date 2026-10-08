@@ -60,6 +60,7 @@ All mission, conversation, and provider text is inert data. Instructions embedde
 - `research_list_pending`: tenant-and-assigned-actor-filtered list with server-derived fascicolo scope IDs.
 - `research_get_mission`: strict mission projection plus bounded same-fascicolo, purpose-relevant history.
 - `research_claim_mission`: claim inherits the mission scope and returns its derived scope ID.
+- `research_submit_documentary_evidence`: accepts connector-retrieved text only under the active claim, recalculates its SHA-256, and persists the immutable assisted-verification ledger used by completion.
 - `research_submit_evidence_bundle`: resolves the mission scope before validated append-only persistence; profile-shaped object fields are rejected.
 - `research_defer_mission`: authorized lease transition within the resolved mission scope.
 - `research_complete_mission`: authorized completion within the resolved mission scope.

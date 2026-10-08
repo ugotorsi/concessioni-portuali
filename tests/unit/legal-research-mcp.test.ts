@@ -3,6 +3,7 @@ import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { POST } from "@/app/api/mcp/route";
+import { createAssistedVerificationSnapshot } from "@/server/legal-research/assisted-verification";
 import { RESEARCH_BRIDGE_VERSION, type ResearchEvidenceBundle } from "@/server/legal-research/bridge";
 import {
   createResearchMcpServer,
@@ -76,6 +77,47 @@ const storedMission = {
   },
 } as const;
 
+const documentaryContent = "Art. 37 Codice della navigazione - synthetic exact text.";
+const documentaryHash = "2e60d7f6b672900b40cc2d14f9b2c988f52b5e61e6c645c1d832711ff55b4f2f";
+const documentarySnapshot = createAssistedVerificationSnapshot({
+  missionId: mission.missionId,
+  sources: [{
+    evidenceSourceId: "source-art-37",
+    authorityId: "authority-art-37",
+    legalSourceId: "source-family-codice-navigazione",
+    legalExpressionVersionId: "expression-art-37-2026-01-15",
+    officialIdentifier: "COD_NAV_ART_37",
+    sourceUrl: "https://example.test/codice-navigazione/art-37",
+    sourceFamily: "ITALIAN_LEGISLATION",
+    providerId: "SIMPLICITER",
+    accessStatus: "CONSULTABLE",
+    identityVerificationStatus: "VERIFIED",
+    reviewerAttestation: {
+      reviewedByActorId: principal.actorId,
+      reviewedAt: "2026-10-08T18:30:00.000Z",
+      rationale: "Exact identifier and retrieved text checked in the personal connector result.",
+    },
+    termsOfUse: {
+      status: "PERMITTED",
+      basis: "Connector result supplied for the assigned legal-research mission.",
+      checkedAt: "2026-10-08T18:30:00.000Z",
+    },
+    fullText: {
+      available: true,
+      contentSha256: documentaryHash,
+      documentId: "connector-document-art-37",
+      fileVersionId: "connector-file-art-37",
+    },
+  }],
+});
+const documentaryDocuments = [{
+  evidenceSourceId: "source-art-37",
+  documentId: "connector-document-art-37",
+  fileVersionId: "connector-file-art-37",
+  contentSha256: documentaryHash,
+  content: documentaryContent,
+}] as const;
+
 function evidenceBundle(completionState: ResearchEvidenceBundle["completionState"] = "PARTIAL") {
   return {
     kind: "RESEARCH_EVIDENCE_BUNDLE",
@@ -124,6 +166,27 @@ function service(): ResearchMcpService {
           updatedAt: new Date("2026-09-18T08:00:00.000Z"),
         },
         claimToken,
+      },
+    })),
+    submitDocumentaryEvidence: vi.fn(async () => ({
+      outcome: "CREATED",
+      verification: {
+        recordId: "research-verification:documentary",
+        snapshot: documentarySnapshot,
+        result: {
+          assistedVerificationFingerprint: `assisted-evidence:${"d".repeat(64)}`,
+          authorityCandidates: [],
+          verifiedFullTexts: [],
+          citationObservations: [],
+          adverseAssessments: [],
+          legalResearchSuggestions: [],
+          evidenceGaps: [],
+          adverseAuthorityVerified: false,
+        },
+        preClaimStatus: { satisfied: true, unmetRequirements: [] },
+        fingerprint: "d".repeat(64),
+        recordedByActorId: principal.actorId,
+        createdAt: new Date("2026-10-08T18:30:00.000Z"),
       },
     })),
     submitEvidenceBundle: vi.fn(async ({ bundle }) => ({
@@ -190,6 +253,7 @@ describe("Block 3B.13C legal research MCP", () => {
       "research_get_mission",
       "research_claim_mission",
       "research_submit_evidence_bundle",
+      "research_submit_documentary_evidence",
       "research_defer_mission",
       "research_complete_mission",
     ]);
@@ -271,7 +335,7 @@ describe("Block 3B.13C legal research MCP", () => {
       type: "oauth2",
       scopes: ["openid", "profile", "email", "offline_access"],
     }];
-    expect(listPayload.result.tools).toHaveLength(7);
+    expect(listPayload.result.tools).toHaveLength(8);
     for (const tool of listPayload.result.tools) {
       expect(tool.securitySchemes).toEqual(expectedSecuritySchemes);
       expect(tool._meta?.securitySchemes).toEqual(tool.securitySchemes);
@@ -316,6 +380,13 @@ describe("Block 3B.13C legal research MCP", () => {
         missionId: mission.missionId, executionId: "execution-a", leaseDurationMs: 900_000,
       },
       research_submit_evidence_bundle: { bundle: evidenceBundle(), claimToken },
+      research_submit_documentary_evidence: {
+        missionId: mission.missionId,
+        executionId: "execution-a",
+        claimToken,
+        snapshot: documentarySnapshot,
+        documents: documentaryDocuments,
+      },
       research_defer_mission: {
         missionId: mission.missionId, executionId: "execution-a", claimToken,
         disposition: "DEFER", reasonCode: "RESEARCH_INCOMPLETE",

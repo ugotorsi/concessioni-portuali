@@ -169,6 +169,7 @@ Pre-ChatGPT checks, in order:
    - `research_get_mission`
    - `research_claim_mission`
    - `research_submit_evidence_bundle`
+   - `research_submit_documentary_evidence`
    - `research_defer_mission`
    - `research_complete_mission`
 
@@ -262,14 +263,15 @@ For both paths:
 5. Execute Simpliciter, Moonlit, and LDH plans within the mission budget. Record every call in `researchToolExecutions`.
 6. Assemble provider results as candidates, raw citation observations, suggestions, gaps, conflicts, and unresolved questions.
 7. Preserve citation edges as observations; do not synthesize treatment assessments.
-8. Run official verification for selected administrative and legislative candidates. Do not bypass reconciliation.
-9. Submit one `ResearchEvidenceBundle` through `research_submit_evidence_bundle`.
-10. Confirm the bundle, execution counters, provider counters, actor, mission, and execution IDs persisted.
-11. Complete through `research_complete_mission` using the persisted bundle ID and claim token.
-12. Confirm the mission state maps correctly from completion state and the active lease is cleared.
-13. Replay the identical bundle and require idempotent reuse rather than duplication.
-14. If any provider fails, submit valid partial evidence with an `errorState`, evidence gap, and `PARTIAL` or `BUDGET_EXHAUSTED` state as appropriate.
-15. Verify the entire flow used MCP between platform and ChatGPT, with no mission or bundle copy/paste.
+8. Submit connector-retrieved full text through `research_submit_documentary_evidence`; use only the server-derived fingerprint and evidence projections in the bundle.
+9. Confirm Concessioni recalculated the content hash and persisted the assisted-verification ledger without invoking a provider adapter.
+10. Submit one `ResearchEvidenceBundle` through `research_submit_evidence_bundle`.
+11. Confirm the bundle, execution counters, provider counters, actor, mission, and execution IDs persisted.
+12. Complete through `research_complete_mission` using the persisted bundle ID and claim token.
+13. Confirm the mission state maps correctly from completion state and the active lease is cleared.
+14. Replay the identical bundle and require idempotent reuse rather than duplication.
+15. If any provider fails, submit valid partial evidence with an `errorState`, evidence gap, and `PARTIAL` or `BUDGET_EXHAUSTED` state as appropriate.
+16. Verify the entire flow used MCP between platform and ChatGPT, with no mission or bundle copy/paste.
 
 Current prerequisite: no public/UI mission-creation route exists. Before live execution, authorize either a one-shot server-side test fixture using `createResearchMissionRecord` or a separately reviewed admin-only creation surface. Do not expose mission creation anonymously.
 

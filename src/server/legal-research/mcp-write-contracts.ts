@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+import {
+  assistedVerificationSnapshotSchema,
+  submittedDocumentEvidenceSchema,
+} from "@/server/legal-research/assisted-verification";
 import { RESEARCH_BRIDGE_VERSION } from "@/server/legal-research/bridge";
 
 const COMPLETION_STATES = [
@@ -43,6 +47,13 @@ export const RESEARCH_MCP_WRITE_ARGUMENT_SCHEMAS = {
   research_submit_evidence_bundle: z.object({
     bundle: researchEvidenceBundleInputSchema,
     claimToken: researchClaimTokenSchema,
+  }).strict(),
+  research_submit_documentary_evidence: z.object({
+    missionId: researchMissionIdSchema,
+    executionId: researchExecutionIdSchema,
+    claimToken: researchClaimTokenSchema,
+    snapshot: assistedVerificationSnapshotSchema,
+    documents: z.array(submittedDocumentEvidenceSchema).min(1).max(16),
   }).strict(),
   research_complete_mission: z.object({
     missionId: researchMissionIdSchema,

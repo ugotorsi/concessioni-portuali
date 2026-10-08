@@ -59,6 +59,10 @@ export type VerifiedDocumentEvidence = Readonly<{
   contentSha256: string;
 }>;
 
+export type SubmittedDocumentEvidence = VerifiedDocumentEvidence & Readonly<{
+  content: string;
+}>;
+
 export type AssistedGapResolution = Readonly<{
   gapId: string;
   evidenceSourceId: string;
@@ -250,6 +254,14 @@ export const assistedVerificationSnapshotSchema = z.object({
     reviewedByActorId: nonblank,
     reviewedAt: isoDate,
   }).strict()).optional(),
+}).strict();
+
+export const submittedDocumentEvidenceSchema = z.object({
+  evidenceSourceId: nonblank,
+  documentId: nonblank,
+  fileVersionId: nonblank,
+  contentSha256: z.string().regex(/^[a-f0-9]{64}$/),
+  content: z.string().min(1).max(1_048_576),
 }).strict();
 
 export function parseAssistedVerificationSnapshot(value: unknown): AssistedVerificationSnapshot | null {

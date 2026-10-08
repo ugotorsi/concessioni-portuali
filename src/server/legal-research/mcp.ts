@@ -18,6 +18,7 @@ import {
   getLatestAssistedVerification,
   getResearchFascicoloContext,
   listPendingResearchMissions,
+  persistAssistedVerification,
   releaseOrDeferResearchMission,
   submitResearchEvidenceBundle,
 } from "@/server/legal-research/persistence";
@@ -276,6 +277,18 @@ export const RESEARCH_MCP_OUTPUT_SCHEMAS = {
     executionId: z.string(),
     completionState: z.enum(COMPLETION_STATES),
   }).strict(),
+  research_submit_documentary_evidence: z.object({
+    outcome: z.enum(["CREATED", "DUPLICATE_OR_IDEMPOTENT_SUCCESS"]),
+    recordId: z.string(),
+    missionId: z.string(),
+    fascicoloScopeId: z.string(),
+    assistedVerificationFingerprint: z.string(),
+    authorityCandidates: z.array(z.unknown()),
+    verifiedFullTexts: z.array(z.unknown()),
+    citationObservations: z.array(z.unknown()),
+    legalResearchSuggestions: z.array(z.unknown()),
+    evidenceGaps: z.array(z.unknown()),
+  }).strict(),
   research_defer_mission: z.object({
     missionId: z.string(),
     fascicoloScopeId: z.string(),
@@ -311,6 +324,7 @@ export type ResearchMcpService = Readonly<{
   getFascicoloContext?: typeof getResearchFascicoloContext;
   getAssistedVerification?: typeof getLatestAssistedVerification;
   claimMission: typeof claimResearchMission;
+  submitDocumentaryEvidence: typeof persistAssistedVerification;
   submitEvidenceBundle: typeof submitResearchEvidenceBundle;
   deferMission: typeof releaseOrDeferResearchMission;
   completeMission: typeof completeResearchMission;
@@ -340,6 +354,7 @@ const defaultService: ResearchMcpService = {
   getFascicoloContext: getResearchFascicoloContext,
   getAssistedVerification: getLatestAssistedVerification,
   claimMission: claimResearchMission,
+  submitDocumentaryEvidence: persistAssistedVerification,
   submitEvidenceBundle: submitResearchEvidenceBundle,
   deferMission: releaseOrDeferResearchMission,
   completeMission: completeResearchMission,
@@ -387,6 +402,7 @@ export function mapResearchMcpError(error: unknown): ResearchMcpErrorCode {
     case "INVALID_TRANSITION":
       return "INVALID_MISSION_STATE";
     case "INVALID_BUNDLE":
+    case "INVALID_ASSISTED_VERIFICATION":
       return "INVALID_EVIDENCE_BUNDLE";
     case "BUDGET_OVERRUN":
     case "BUDGET_COUNTER_REGRESSION":
@@ -656,6 +672,52 @@ export function createResearchMcpServer(
         fascicoloScopeId: scope.scopeId,
         executionId: submitted.bundle.executionId,
         completionState: submitted.bundle.completionState,
+      };
+    },
+  ));
+
+  server.registerTool("research_submit_documentary_evidence", {
+    title: "Submit documentary evidence",
+    description:
+      "Submit connector-retrieved full text for server-side hash verification and immutable assisted-verification persistence under the active claim.",
+    inputSchema: RESEARCH_MCP_WRITE_ARGUMENT_SCHEMAS.research_submit_documentary_evidence.shape,
+    outputSchema: RESEARCH_MCP_OUTPUT_SCHEMAS.research_submit_documentary_evidence,
+    annotations: annotations(false, true),
+    ...securityMetadata(),
+  }, async ({ missionId, executionId, claimToken, snapshot, documents }) => invoke(
+    "research_submit_documentary_evidence",
+    RESEARCH_MCP_WRITE_PERMISSION,
+    { missionId, executionId },
+    async () => {
+      if (snapshot.missionId !== missionId) throw new ResearchPersistenceError("WRONG_MISSION");
+      const stored = await service.getMission(missionId, actor(principal));
+      if (!stored) throw new ResearchPersistenceError("MISSION_NOT_FOUND");
+      const scope = requireMissionScope(stored.mission);
+      const persisted = await service.submitDocumentaryEvidence({
+        snapshot,
+        submittedDocuments: documents,
+        actor: actor(principal),
+        claim: {
+          executionId,
+          claimantId: principal.claimantId,
+          claimToken,
+        },
+      });
+      const result = persisted.verification.result;
+      if (!result.assistedVerificationFingerprint) {
+        throw new ResearchPersistenceError("INVALID_ASSISTED_VERIFICATION");
+      }
+      return {
+        outcome: persisted.outcome === "REUSED" ? "DUPLICATE_OR_IDEMPOTENT_SUCCESS" : "CREATED",
+        recordId: persisted.verification.recordId,
+        missionId,
+        fascicoloScopeId: scope.scopeId,
+        assistedVerificationFingerprint: result.assistedVerificationFingerprint,
+        authorityCandidates: result.authorityCandidates,
+        verifiedFullTexts: result.verifiedFullTexts,
+        citationObservations: result.citationObservations,
+        legalResearchSuggestions: result.legalResearchSuggestions,
+        evidenceGaps: result.evidenceGaps,
       };
     },
   ));
