@@ -187,8 +187,27 @@ function leaseDuration(value: number): number {
   return value;
 }
 
-function authorize(record: Pick<ResearchMissionRecord, "tenantId">, actor: ResearchServiceActor): void {
-  if (!identifier(actor.actorId) || record.tenantId !== actor.tenantId) {
+function authorize(
+  record: Pick<ResearchMissionRecord, "tenantId" | "assignedActorId">,
+  actor: ResearchServiceActor,
+): void {
+  if (
+    record.tenantId !== actor.tenantId
+    || record.assignedActorId !== identifier(actor.actorId)
+  ) {
+    throw new ResearchPersistenceError("AUTHORIZATION_REQUIRED");
+  }
+}
+
+function authorizeMissionCreation(
+  record: Pick<ResearchMissionRecord, "tenantId" | "assignedActorId">,
+  actor: ResearchServiceActor,
+  assignedActorId: string,
+): void {
+  if (
+    record.tenantId !== actor.tenantId
+    || record.assignedActorId !== assignedActorId
+  ) {
     throw new ResearchPersistenceError("AUTHORIZATION_REQUIRED");
   }
 }
@@ -263,14 +282,24 @@ function isAssistedVerificationIdentityP2002(error: unknown): boolean {
     ].includes(field));
 }
 
-function sameMission(record: ResearchMissionRecord, mission: ResearchMission, payloadFingerprint: string): boolean {
+function sameMission(
+  record: ResearchMissionRecord,
+  mission: ResearchMission,
+  payloadFingerprint: string,
+  assignedActorId: string,
+): boolean {
   return record.id === mission.missionId
     && record.payloadFingerprint === payloadFingerprint
-    && record.contractVersion === mission.version;
+    && record.contractVersion === mission.version
+    && record.assignedActorId === assignedActorId;
 }
 
 export async function createResearchMissionRecord(
-  input: Readonly<{ mission: ResearchMission; actor: ResearchServiceActor }>,
+  input: Readonly<{
+    mission: ResearchMission;
+    actor: ResearchServiceActor;
+    assignedActorId?: string;
+  }>,
   overrides?: Partial<ResearchPersistenceContext>,
 ): Promise<Readonly<{ outcome: "CREATED" | "REUSED"; mission: StoredResearchMission }>> {
   const ctx = context(overrides);
@@ -278,10 +307,11 @@ export async function createResearchMissionRecord(
     throw new ResearchPersistenceError("INVALID_MISSION");
   }
   identifier(input.actor.actorId);
+  const assignedActorId = identifier(input.assignedActorId ?? input.actor.actorId);
   const payloadFingerprint = fingerprint(input.mission);
   const reuse = (record: ResearchMissionRecord) => {
-    authorize(record, input.actor);
-    if (!sameMission(record, input.mission, payloadFingerprint)) {
+    authorizeMissionCreation(record, input.actor, assignedActorId);
+    if (!sameMission(record, input.mission, payloadFingerprint, assignedActorId)) {
       throw new ResearchPersistenceError("IDEMPOTENCY_CONFLICT");
     }
     return { outcome: "REUSED" as const, mission: storedMission(record) };
@@ -295,6 +325,7 @@ export async function createResearchMissionRecord(
       data: {
         id: input.mission.missionId,
         tenantId: input.actor.tenantId,
+        assignedActorId,
         contractVersion: input.mission.version,
         caseId: input.mission.caseReference.caseId,
         fascicoloReference: input.mission.caseReference.fascicoloReference,
@@ -597,6 +628,7 @@ export async function getResearchFascicoloContext(
   const priorRecords = await ctx.client.researchMissionRecord.findMany({
     where: {
       tenantId: current.tenantId,
+      assignedActorId: identifier(actor.actorId),
       caseId: current.caseId,
       fascicoloReference: current.fascicoloReference,
       status: { in: ["COMPLETED", "BUDGET_EXHAUSTED"] },
@@ -665,6 +697,7 @@ export async function listPendingResearchMissions(
   const records = await ctx.client.researchMissionRecord.findMany({
     where: {
       tenantId: actor.tenantId,
+      assignedActorId: identifier(actor.actorId),
       OR: [
         { status: { in: ["PENDING", "DEFERRED"] } },
         { status: "IN_PROGRESS", claimExpiresAt: { lte: now } },

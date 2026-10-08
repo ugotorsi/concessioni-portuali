@@ -7767,6 +7767,7 @@ export type ConcessioneExpiryChangeCommandScalarFieldEnum = (typeof ConcessioneE
 export const ResearchMissionRecordScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
+  assignedActorId: 'assignedActorId',
   contractVersion: 'contractVersion',
   caseId: 'caseId',
   fascicoloReference: 'fascicoloReference',

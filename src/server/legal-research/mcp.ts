@@ -33,14 +33,9 @@ import {
   type ResearchMcpPermission,
   type ResearchMcpPrincipal,
 } from "@/server/legal-research/mcp-auth";
-import {
-  ResearchFascicoloAccessGrantError,
-  type ResearchFascicoloAccessGrantErrorCode,
-  type ResearchFascicoloAccessGrantPayload,
-} from "@/server/legal-research/fascicolo-access-grant";
 import { RESEARCH_MCP_WRITE_ARGUMENT_SCHEMAS } from "@/server/legal-research/mcp-write-contracts";
 
-export const RESEARCH_MCP_SERVER_VERSION = "3B.14F-1" as const;
+export const RESEARCH_MCP_SERVER_VERSION = "3B.14G-1" as const;
 export const RESEARCH_MCP_ROUTE = "/api/mcp" as const;
 export const RESEARCH_MCP_MAX_PENDING_LIMIT = 50;
 export const RESEARCH_MCP_DEFAULT_PENDING_LIMIT = 20;
@@ -308,7 +303,6 @@ export type ResearchMcpErrorCode =
   | "DUPLICATE_OR_IDEMPOTENT_SUCCESS"
   | "AUTH_REQUIRED"
   | "FORBIDDEN"
-  | ResearchFascicoloAccessGrantErrorCode
   | "INTERNAL_ERROR";
 
 export type ResearchMcpService = Readonly<{
@@ -338,8 +332,6 @@ export type ResearchMcpLogger = (event: ResearchMcpLogEvent) => void;
 export type ResearchMcpServerOptions = Readonly<{
   service?: ResearchMcpService;
   logger?: ResearchMcpLogger;
-  fascicoloGrant?: ResearchFascicoloAccessGrantPayload;
-  fascicoloGrantError?: ResearchFascicoloAccessGrantErrorCode;
 }>;
 
 const defaultService: ResearchMcpService = {
@@ -378,7 +370,6 @@ function failure(code: ResearchMcpErrorCode): CallToolResult {
 }
 
 export function mapResearchMcpError(error: unknown): ResearchMcpErrorCode {
-  if (error instanceof ResearchFascicoloAccessGrantError) return error.code;
   if (!(error instanceof ResearchPersistenceError)) return "INTERNAL_ERROR";
   switch (error.code) {
     case "MISSION_NOT_FOUND":
@@ -451,16 +442,6 @@ function scopeFor(principal: ResearchMcpPrincipal, mission: ResearchMission) {
   });
 }
 
-function requireGrant(options: ResearchMcpServerOptions): ResearchFascicoloAccessGrantPayload {
-  if (options.fascicoloGrantError) {
-    throw new ResearchFascicoloAccessGrantError(options.fascicoloGrantError);
-  }
-  if (!options.fascicoloGrant) {
-    throw new ResearchFascicoloAccessGrantError("FASCICOLO_BINDING_REQUIRED");
-  }
-  return options.fascicoloGrant;
-}
-
 export function createResearchMcpServer(
   principal: ResearchMcpPrincipal,
   options: ResearchMcpServerOptions = {},
@@ -476,12 +457,7 @@ export function createResearchMcpServer(
   );
 
   const requireMissionScope = (mission: ResearchMission) => {
-    const grant = requireGrant(options);
-    const scope = scopeFor(principal, mission);
-    if (scope.scopeId !== grant.fascicoloScopeId) {
-      throw new ResearchFascicoloAccessGrantError("FASCICOLO_SCOPE_MISMATCH");
-    }
-    return scope;
+    return scopeFor(principal, mission);
   };
 
   const invoke = async (
@@ -562,13 +538,9 @@ export function createResearchMcpServer(
     annotations: annotations(true, true),
     ...securityMetadata(),
   }, async ({ limit }) => invoke("research_list_pending", RESEARCH_MCP_READ_PERMISSION, {}, async () => {
-    const grant = requireGrant(options);
     const missions = await service.listPending(actor(principal));
-    const scopedMissions = missions.filter((stored) => (
-      scopeFor(principal, stored.mission).scopeId === grant.fascicoloScopeId
-    ));
     return {
-      missions: scopedMissions.slice(0, limit).map((stored) => ({
+      missions: missions.slice(0, limit).map((stored) => ({
         missionId: stored.mission.missionId,
         fascicoloScopeId: scopeFor(principal, stored.mission).scopeId,
         status: stored.operational.status,
@@ -578,7 +550,7 @@ export function createResearchMcpServer(
         caseReference: projectResearchMissionForMcp(stored.mission).caseReference,
       })),
       limit,
-      truncated: scopedMissions.length > limit,
+      truncated: missions.length > limit,
     };
   }));
 

@@ -37,6 +37,7 @@ export type ResearchMissionRecordSumAggregateOutputType = {
 export type ResearchMissionRecordMinAggregateOutputType = {
   id: string | null
   tenantId: string | null
+  assignedActorId: string | null
   contractVersion: string | null
   caseId: string | null
   fascicoloReference: string | null
@@ -64,6 +65,7 @@ export type ResearchMissionRecordMinAggregateOutputType = {
 export type ResearchMissionRecordMaxAggregateOutputType = {
   id: string | null
   tenantId: string | null
+  assignedActorId: string | null
   contractVersion: string | null
   caseId: string | null
   fascicoloReference: string | null
@@ -91,6 +93,7 @@ export type ResearchMissionRecordMaxAggregateOutputType = {
 export type ResearchMissionRecordCountAggregateOutputType = {
   id: number
   tenantId: number
+  assignedActorId: number
   contractVersion: number
   caseId: number
   fascicoloReference: number
@@ -130,6 +133,7 @@ export type ResearchMissionRecordSumAggregateInputType = {
 export type ResearchMissionRecordMinAggregateInputType = {
   id?: true
   tenantId?: true
+  assignedActorId?: true
   contractVersion?: true
   caseId?: true
   fascicoloReference?: true
@@ -157,6 +161,7 @@ export type ResearchMissionRecordMinAggregateInputType = {
 export type ResearchMissionRecordMaxAggregateInputType = {
   id?: true
   tenantId?: true
+  assignedActorId?: true
   contractVersion?: true
   caseId?: true
   fascicoloReference?: true
@@ -184,6 +189,7 @@ export type ResearchMissionRecordMaxAggregateInputType = {
 export type ResearchMissionRecordCountAggregateInputType = {
   id?: true
   tenantId?: true
+  assignedActorId?: true
   contractVersion?: true
   caseId?: true
   fascicoloReference?: true
@@ -300,6 +306,7 @@ export type ResearchMissionRecordGroupByArgs<ExtArgs extends runtime.Types.Exten
 export type ResearchMissionRecordGroupByOutputType = {
   id: string
   tenantId: string | null
+  assignedActorId: string | null
   contractVersion: string
   caseId: string
   fascicoloReference: string | null
@@ -352,6 +359,7 @@ export type ResearchMissionRecordWhereInput = {
   NOT?: Prisma.ResearchMissionRecordWhereInput | Prisma.ResearchMissionRecordWhereInput[]
   id?: Prisma.StringFilter<"ResearchMissionRecord"> | string
   tenantId?: Prisma.StringNullableFilter<"ResearchMissionRecord"> | string | null
+  assignedActorId?: Prisma.StringNullableFilter<"ResearchMissionRecord"> | string | null
   contractVersion?: Prisma.StringFilter<"ResearchMissionRecord"> | string
   caseId?: Prisma.StringFilter<"ResearchMissionRecord"> | string
   fascicoloReference?: Prisma.StringNullableFilter<"ResearchMissionRecord"> | string | null
@@ -377,6 +385,7 @@ export type ResearchMissionRecordWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"ResearchMissionRecord"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ResearchMissionRecord"> | Date | string
   tenant?: Prisma.XOR<Prisma.EnteNullableScalarRelationFilter, Prisma.EnteWhereInput> | null
+  assignedActor?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   executionAttempts?: Prisma.ResearchExecutionAttemptListRelationFilter
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionListRelationFilter
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordListRelationFilter
@@ -391,6 +400,7 @@ export type ResearchMissionRecordWhereInput = {
 export type ResearchMissionRecordOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
+  assignedActorId?: Prisma.SortOrderInput | Prisma.SortOrder
   contractVersion?: Prisma.SortOrder
   caseId?: Prisma.SortOrder
   fascicoloReference?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -416,6 +426,7 @@ export type ResearchMissionRecordOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   tenant?: Prisma.EnteOrderByWithRelationInput
+  assignedActor?: Prisma.UserOrderByWithRelationInput
   executionAttempts?: Prisma.ResearchExecutionAttemptOrderByRelationAggregateInput
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionOrderByRelationAggregateInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordOrderByRelationAggregateInput
@@ -437,6 +448,7 @@ export type ResearchMissionRecordWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.ResearchMissionRecordWhereInput[]
   NOT?: Prisma.ResearchMissionRecordWhereInput | Prisma.ResearchMissionRecordWhereInput[]
   tenantId?: Prisma.StringNullableFilter<"ResearchMissionRecord"> | string | null
+  assignedActorId?: Prisma.StringNullableFilter<"ResearchMissionRecord"> | string | null
   contractVersion?: Prisma.StringFilter<"ResearchMissionRecord"> | string
   caseId?: Prisma.StringFilter<"ResearchMissionRecord"> | string
   fascicoloReference?: Prisma.StringNullableFilter<"ResearchMissionRecord"> | string | null
@@ -460,6 +472,7 @@ export type ResearchMissionRecordWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"ResearchMissionRecord"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ResearchMissionRecord"> | Date | string
   tenant?: Prisma.XOR<Prisma.EnteNullableScalarRelationFilter, Prisma.EnteWhereInput> | null
+  assignedActor?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   executionAttempts?: Prisma.ResearchExecutionAttemptListRelationFilter
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionListRelationFilter
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordListRelationFilter
@@ -474,6 +487,7 @@ export type ResearchMissionRecordWhereUniqueInput = Prisma.AtLeast<{
 export type ResearchMissionRecordOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
+  assignedActorId?: Prisma.SortOrderInput | Prisma.SortOrder
   contractVersion?: Prisma.SortOrder
   caseId?: Prisma.SortOrder
   fascicoloReference?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -511,6 +525,7 @@ export type ResearchMissionRecordScalarWhereWithAggregatesInput = {
   NOT?: Prisma.ResearchMissionRecordScalarWhereWithAggregatesInput | Prisma.ResearchMissionRecordScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"ResearchMissionRecord"> | string
   tenantId?: Prisma.StringNullableWithAggregatesFilter<"ResearchMissionRecord"> | string | null
+  assignedActorId?: Prisma.StringNullableWithAggregatesFilter<"ResearchMissionRecord"> | string | null
   contractVersion?: Prisma.StringWithAggregatesFilter<"ResearchMissionRecord"> | string
   caseId?: Prisma.StringWithAggregatesFilter<"ResearchMissionRecord"> | string
   fascicoloReference?: Prisma.StringNullableWithAggregatesFilter<"ResearchMissionRecord"> | string | null
@@ -562,6 +577,7 @@ export type ResearchMissionRecordCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant?: Prisma.EnteCreateNestedOneWithoutResearchMissionsInput
+  assignedActor?: Prisma.UserCreateNestedOneWithoutAssignedResearchMissionsInput
   executionAttempts?: Prisma.ResearchExecutionAttemptCreateNestedManyWithoutMissionInput
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionCreateNestedManyWithoutMissionInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
@@ -576,6 +592,7 @@ export type ResearchMissionRecordCreateInput = {
 export type ResearchMissionRecordUncheckedCreateInput = {
   id: string
   tenantId?: string | null
+  assignedActorId?: string | null
   contractVersion: string
   caseId: string
   fascicoloReference?: string | null
@@ -634,6 +651,7 @@ export type ResearchMissionRecordUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.EnteUpdateOneWithoutResearchMissionsNestedInput
+  assignedActor?: Prisma.UserUpdateOneWithoutAssignedResearchMissionsNestedInput
   executionAttempts?: Prisma.ResearchExecutionAttemptUpdateManyWithoutMissionNestedInput
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUpdateManyWithoutMissionNestedInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
@@ -648,6 +666,7 @@ export type ResearchMissionRecordUpdateInput = {
 export type ResearchMissionRecordUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedActorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
   caseId?: Prisma.StringFieldUpdateOperationsInput | string
   fascicoloReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -684,6 +703,7 @@ export type ResearchMissionRecordUncheckedUpdateInput = {
 export type ResearchMissionRecordCreateManyInput = {
   id: string
   tenantId?: string | null
+  assignedActorId?: string | null
   contractVersion: string
   caseId: string
   fascicoloReference?: string | null
@@ -739,6 +759,7 @@ export type ResearchMissionRecordUpdateManyMutationInput = {
 export type ResearchMissionRecordUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedActorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
   caseId?: Prisma.StringFieldUpdateOperationsInput | string
   fascicoloReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -789,6 +810,7 @@ export type ResearchMissionRecordTenantIdCaseIdMissionFingerprintCompoundUniqueI
 export type ResearchMissionRecordCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
+  assignedActorId?: Prisma.SortOrder
   contractVersion?: Prisma.SortOrder
   caseId?: Prisma.SortOrder
   fascicoloReference?: Prisma.SortOrder
@@ -822,6 +844,7 @@ export type ResearchMissionRecordAvgOrderByAggregateInput = {
 export type ResearchMissionRecordMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
+  assignedActorId?: Prisma.SortOrder
   contractVersion?: Prisma.SortOrder
   caseId?: Prisma.SortOrder
   fascicoloReference?: Prisma.SortOrder
@@ -849,6 +872,7 @@ export type ResearchMissionRecordMaxOrderByAggregateInput = {
 export type ResearchMissionRecordMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
+  assignedActorId?: Prisma.SortOrder
   contractVersion?: Prisma.SortOrder
   caseId?: Prisma.SortOrder
   fascicoloReference?: Prisma.SortOrder
@@ -926,6 +950,48 @@ export type ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput = {
   connect?: Prisma.ResearchMissionRecordWhereUniqueInput | Prisma.ResearchMissionRecordWhereUniqueInput[]
   update?: Prisma.ResearchMissionRecordUpdateWithWhereUniqueWithoutTenantInput | Prisma.ResearchMissionRecordUpdateWithWhereUniqueWithoutTenantInput[]
   updateMany?: Prisma.ResearchMissionRecordUpdateManyWithWhereWithoutTenantInput | Prisma.ResearchMissionRecordUpdateManyWithWhereWithoutTenantInput[]
+  deleteMany?: Prisma.ResearchMissionRecordScalarWhereInput | Prisma.ResearchMissionRecordScalarWhereInput[]
+}
+
+export type ResearchMissionRecordCreateNestedManyWithoutAssignedActorInput = {
+  create?: Prisma.XOR<Prisma.ResearchMissionRecordCreateWithoutAssignedActorInput, Prisma.ResearchMissionRecordUncheckedCreateWithoutAssignedActorInput> | Prisma.ResearchMissionRecordCreateWithoutAssignedActorInput[] | Prisma.ResearchMissionRecordUncheckedCreateWithoutAssignedActorInput[]
+  connectOrCreate?: Prisma.ResearchMissionRecordCreateOrConnectWithoutAssignedActorInput | Prisma.ResearchMissionRecordCreateOrConnectWithoutAssignedActorInput[]
+  createMany?: Prisma.ResearchMissionRecordCreateManyAssignedActorInputEnvelope
+  connect?: Prisma.ResearchMissionRecordWhereUniqueInput | Prisma.ResearchMissionRecordWhereUniqueInput[]
+}
+
+export type ResearchMissionRecordUncheckedCreateNestedManyWithoutAssignedActorInput = {
+  create?: Prisma.XOR<Prisma.ResearchMissionRecordCreateWithoutAssignedActorInput, Prisma.ResearchMissionRecordUncheckedCreateWithoutAssignedActorInput> | Prisma.ResearchMissionRecordCreateWithoutAssignedActorInput[] | Prisma.ResearchMissionRecordUncheckedCreateWithoutAssignedActorInput[]
+  connectOrCreate?: Prisma.ResearchMissionRecordCreateOrConnectWithoutAssignedActorInput | Prisma.ResearchMissionRecordCreateOrConnectWithoutAssignedActorInput[]
+  createMany?: Prisma.ResearchMissionRecordCreateManyAssignedActorInputEnvelope
+  connect?: Prisma.ResearchMissionRecordWhereUniqueInput | Prisma.ResearchMissionRecordWhereUniqueInput[]
+}
+
+export type ResearchMissionRecordUpdateManyWithoutAssignedActorNestedInput = {
+  create?: Prisma.XOR<Prisma.ResearchMissionRecordCreateWithoutAssignedActorInput, Prisma.ResearchMissionRecordUncheckedCreateWithoutAssignedActorInput> | Prisma.ResearchMissionRecordCreateWithoutAssignedActorInput[] | Prisma.ResearchMissionRecordUncheckedCreateWithoutAssignedActorInput[]
+  connectOrCreate?: Prisma.ResearchMissionRecordCreateOrConnectWithoutAssignedActorInput | Prisma.ResearchMissionRecordCreateOrConnectWithoutAssignedActorInput[]
+  upsert?: Prisma.ResearchMissionRecordUpsertWithWhereUniqueWithoutAssignedActorInput | Prisma.ResearchMissionRecordUpsertWithWhereUniqueWithoutAssignedActorInput[]
+  createMany?: Prisma.ResearchMissionRecordCreateManyAssignedActorInputEnvelope
+  set?: Prisma.ResearchMissionRecordWhereUniqueInput | Prisma.ResearchMissionRecordWhereUniqueInput[]
+  disconnect?: Prisma.ResearchMissionRecordWhereUniqueInput | Prisma.ResearchMissionRecordWhereUniqueInput[]
+  delete?: Prisma.ResearchMissionRecordWhereUniqueInput | Prisma.ResearchMissionRecordWhereUniqueInput[]
+  connect?: Prisma.ResearchMissionRecordWhereUniqueInput | Prisma.ResearchMissionRecordWhereUniqueInput[]
+  update?: Prisma.ResearchMissionRecordUpdateWithWhereUniqueWithoutAssignedActorInput | Prisma.ResearchMissionRecordUpdateWithWhereUniqueWithoutAssignedActorInput[]
+  updateMany?: Prisma.ResearchMissionRecordUpdateManyWithWhereWithoutAssignedActorInput | Prisma.ResearchMissionRecordUpdateManyWithWhereWithoutAssignedActorInput[]
+  deleteMany?: Prisma.ResearchMissionRecordScalarWhereInput | Prisma.ResearchMissionRecordScalarWhereInput[]
+}
+
+export type ResearchMissionRecordUncheckedUpdateManyWithoutAssignedActorNestedInput = {
+  create?: Prisma.XOR<Prisma.ResearchMissionRecordCreateWithoutAssignedActorInput, Prisma.ResearchMissionRecordUncheckedCreateWithoutAssignedActorInput> | Prisma.ResearchMissionRecordCreateWithoutAssignedActorInput[] | Prisma.ResearchMissionRecordUncheckedCreateWithoutAssignedActorInput[]
+  connectOrCreate?: Prisma.ResearchMissionRecordCreateOrConnectWithoutAssignedActorInput | Prisma.ResearchMissionRecordCreateOrConnectWithoutAssignedActorInput[]
+  upsert?: Prisma.ResearchMissionRecordUpsertWithWhereUniqueWithoutAssignedActorInput | Prisma.ResearchMissionRecordUpsertWithWhereUniqueWithoutAssignedActorInput[]
+  createMany?: Prisma.ResearchMissionRecordCreateManyAssignedActorInputEnvelope
+  set?: Prisma.ResearchMissionRecordWhereUniqueInput | Prisma.ResearchMissionRecordWhereUniqueInput[]
+  disconnect?: Prisma.ResearchMissionRecordWhereUniqueInput | Prisma.ResearchMissionRecordWhereUniqueInput[]
+  delete?: Prisma.ResearchMissionRecordWhereUniqueInput | Prisma.ResearchMissionRecordWhereUniqueInput[]
+  connect?: Prisma.ResearchMissionRecordWhereUniqueInput | Prisma.ResearchMissionRecordWhereUniqueInput[]
+  update?: Prisma.ResearchMissionRecordUpdateWithWhereUniqueWithoutAssignedActorInput | Prisma.ResearchMissionRecordUpdateWithWhereUniqueWithoutAssignedActorInput[]
+  updateMany?: Prisma.ResearchMissionRecordUpdateManyWithWhereWithoutAssignedActorInput | Prisma.ResearchMissionRecordUpdateManyWithWhereWithoutAssignedActorInput[]
   deleteMany?: Prisma.ResearchMissionRecordScalarWhereInput | Prisma.ResearchMissionRecordScalarWhereInput[]
 }
 
@@ -1145,6 +1211,7 @@ export type ResearchMissionRecordCreateWithoutTenantInput = {
   deferredAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  assignedActor?: Prisma.UserCreateNestedOneWithoutAssignedResearchMissionsInput
   executionAttempts?: Prisma.ResearchExecutionAttemptCreateNestedManyWithoutMissionInput
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionCreateNestedManyWithoutMissionInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
@@ -1158,6 +1225,7 @@ export type ResearchMissionRecordCreateWithoutTenantInput = {
 
 export type ResearchMissionRecordUncheckedCreateWithoutTenantInput = {
   id: string
+  assignedActorId?: string | null
   contractVersion: string
   caseId: string
   fascicoloReference?: string | null
@@ -1223,6 +1291,7 @@ export type ResearchMissionRecordScalarWhereInput = {
   NOT?: Prisma.ResearchMissionRecordScalarWhereInput | Prisma.ResearchMissionRecordScalarWhereInput[]
   id?: Prisma.StringFilter<"ResearchMissionRecord"> | string
   tenantId?: Prisma.StringNullableFilter<"ResearchMissionRecord"> | string | null
+  assignedActorId?: Prisma.StringNullableFilter<"ResearchMissionRecord"> | string | null
   contractVersion?: Prisma.StringFilter<"ResearchMissionRecord"> | string
   caseId?: Prisma.StringFilter<"ResearchMissionRecord"> | string
   fascicoloReference?: Prisma.StringNullableFilter<"ResearchMissionRecord"> | string | null
@@ -1247,6 +1316,104 @@ export type ResearchMissionRecordScalarWhereInput = {
   deferredAt?: Prisma.DateTimeNullableFilter<"ResearchMissionRecord"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"ResearchMissionRecord"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ResearchMissionRecord"> | Date | string
+}
+
+export type ResearchMissionRecordCreateWithoutAssignedActorInput = {
+  id: string
+  contractVersion: string
+  caseId: string
+  fascicoloReference?: string | null
+  referenceDate: Date | string
+  mode: string
+  payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  payloadFingerprint: string
+  missionFingerprint?: string | null
+  legalIssueSemanticKey?: string | null
+  researchQuestionSemanticKey?: string | null
+  referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lifecycleStatus?: $Enums.ResearchMissionLifecycleStatus
+  status?: $Enums.ResearchMissionStatus
+  stateVersion?: number
+  claimantId?: string | null
+  claimToken?: string | null
+  claimExpiresAt?: Date | string | null
+  activeExecutionId?: string | null
+  completedAt?: Date | string | null
+  deferredAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant?: Prisma.EnteCreateNestedOneWithoutResearchMissionsInput
+  executionAttempts?: Prisma.ResearchExecutionAttemptCreateNestedManyWithoutMissionInput
+  automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionCreateNestedManyWithoutMissionInput
+  assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
+  questionResults?: Prisma.ResearchQuestionResultRecordCreateNestedManyWithoutMissionInput
+  sourceAssessments?: Prisma.ResearchSourceAssessmentRecordCreateNestedManyWithoutMissionInput
+  primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementCreateNestedManyWithoutPrimaryMissionInput
+  adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
+  knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
+  firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutFirstResearchMissionsInput
+}
+
+export type ResearchMissionRecordUncheckedCreateWithoutAssignedActorInput = {
+  id: string
+  tenantId?: string | null
+  contractVersion: string
+  caseId: string
+  fascicoloReference?: string | null
+  referenceDate: Date | string
+  mode: string
+  payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  payloadFingerprint: string
+  missionFingerprint?: string | null
+  knowledgeRevisionId?: string | null
+  firstKnowledgeRevisionId?: string | null
+  legalIssueSemanticKey?: string | null
+  researchQuestionSemanticKey?: string | null
+  referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lifecycleStatus?: $Enums.ResearchMissionLifecycleStatus
+  status?: $Enums.ResearchMissionStatus
+  stateVersion?: number
+  claimantId?: string | null
+  claimToken?: string | null
+  claimExpiresAt?: Date | string | null
+  activeExecutionId?: string | null
+  completedAt?: Date | string | null
+  deferredAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  executionAttempts?: Prisma.ResearchExecutionAttemptUncheckedCreateNestedManyWithoutMissionInput
+  automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUncheckedCreateNestedManyWithoutMissionInput
+  assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutMissionInput
+  questionResults?: Prisma.ResearchQuestionResultRecordUncheckedCreateNestedManyWithoutMissionInput
+  sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedCreateNestedManyWithoutMissionInput
+  primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedManyWithoutPrimaryMissionInput
+  adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedOneWithoutAdverseMissionInput
+}
+
+export type ResearchMissionRecordCreateOrConnectWithoutAssignedActorInput = {
+  where: Prisma.ResearchMissionRecordWhereUniqueInput
+  create: Prisma.XOR<Prisma.ResearchMissionRecordCreateWithoutAssignedActorInput, Prisma.ResearchMissionRecordUncheckedCreateWithoutAssignedActorInput>
+}
+
+export type ResearchMissionRecordCreateManyAssignedActorInputEnvelope = {
+  data: Prisma.ResearchMissionRecordCreateManyAssignedActorInput | Prisma.ResearchMissionRecordCreateManyAssignedActorInput[]
+  skipDuplicates?: boolean
+}
+
+export type ResearchMissionRecordUpsertWithWhereUniqueWithoutAssignedActorInput = {
+  where: Prisma.ResearchMissionRecordWhereUniqueInput
+  update: Prisma.XOR<Prisma.ResearchMissionRecordUpdateWithoutAssignedActorInput, Prisma.ResearchMissionRecordUncheckedUpdateWithoutAssignedActorInput>
+  create: Prisma.XOR<Prisma.ResearchMissionRecordCreateWithoutAssignedActorInput, Prisma.ResearchMissionRecordUncheckedCreateWithoutAssignedActorInput>
+}
+
+export type ResearchMissionRecordUpdateWithWhereUniqueWithoutAssignedActorInput = {
+  where: Prisma.ResearchMissionRecordWhereUniqueInput
+  data: Prisma.XOR<Prisma.ResearchMissionRecordUpdateWithoutAssignedActorInput, Prisma.ResearchMissionRecordUncheckedUpdateWithoutAssignedActorInput>
+}
+
+export type ResearchMissionRecordUpdateManyWithWhereWithoutAssignedActorInput = {
+  where: Prisma.ResearchMissionRecordScalarWhereInput
+  data: Prisma.XOR<Prisma.ResearchMissionRecordUpdateManyMutationInput, Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutAssignedActorInput>
 }
 
 export type ResearchMissionRecordCreateWithoutExecutionAttemptsInput = {
@@ -1274,6 +1441,7 @@ export type ResearchMissionRecordCreateWithoutExecutionAttemptsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant?: Prisma.EnteCreateNestedOneWithoutResearchMissionsInput
+  assignedActor?: Prisma.UserCreateNestedOneWithoutAssignedResearchMissionsInput
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionCreateNestedManyWithoutMissionInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordCreateNestedManyWithoutMissionInput
@@ -1287,6 +1455,7 @@ export type ResearchMissionRecordCreateWithoutExecutionAttemptsInput = {
 export type ResearchMissionRecordUncheckedCreateWithoutExecutionAttemptsInput = {
   id: string
   tenantId?: string | null
+  assignedActorId?: string | null
   contractVersion: string
   caseId: string
   fascicoloReference?: string | null
@@ -1360,6 +1529,7 @@ export type ResearchMissionRecordUpdateWithoutExecutionAttemptsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.EnteUpdateOneWithoutResearchMissionsNestedInput
+  assignedActor?: Prisma.UserUpdateOneWithoutAssignedResearchMissionsNestedInput
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUpdateManyWithoutMissionNestedInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUpdateManyWithoutMissionNestedInput
@@ -1373,6 +1543,7 @@ export type ResearchMissionRecordUpdateWithoutExecutionAttemptsInput = {
 export type ResearchMissionRecordUncheckedUpdateWithoutExecutionAttemptsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedActorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
   caseId?: Prisma.StringFieldUpdateOperationsInput | string
   fascicoloReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1430,6 +1601,7 @@ export type ResearchMissionRecordCreateWithoutQuestionResultsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant?: Prisma.EnteCreateNestedOneWithoutResearchMissionsInput
+  assignedActor?: Prisma.UserCreateNestedOneWithoutAssignedResearchMissionsInput
   executionAttempts?: Prisma.ResearchExecutionAttemptCreateNestedManyWithoutMissionInput
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionCreateNestedManyWithoutMissionInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
@@ -1443,6 +1615,7 @@ export type ResearchMissionRecordCreateWithoutQuestionResultsInput = {
 export type ResearchMissionRecordUncheckedCreateWithoutQuestionResultsInput = {
   id: string
   tenantId?: string | null
+  assignedActorId?: string | null
   contractVersion: string
   caseId: string
   fascicoloReference?: string | null
@@ -1516,6 +1689,7 @@ export type ResearchMissionRecordUpdateWithoutQuestionResultsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.EnteUpdateOneWithoutResearchMissionsNestedInput
+  assignedActor?: Prisma.UserUpdateOneWithoutAssignedResearchMissionsNestedInput
   executionAttempts?: Prisma.ResearchExecutionAttemptUpdateManyWithoutMissionNestedInput
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUpdateManyWithoutMissionNestedInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
@@ -1529,6 +1703,7 @@ export type ResearchMissionRecordUpdateWithoutQuestionResultsInput = {
 export type ResearchMissionRecordUncheckedUpdateWithoutQuestionResultsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedActorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
   caseId?: Prisma.StringFieldUpdateOperationsInput | string
   fascicoloReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1586,6 +1761,7 @@ export type ResearchMissionRecordCreateWithoutSourceAssessmentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant?: Prisma.EnteCreateNestedOneWithoutResearchMissionsInput
+  assignedActor?: Prisma.UserCreateNestedOneWithoutAssignedResearchMissionsInput
   executionAttempts?: Prisma.ResearchExecutionAttemptCreateNestedManyWithoutMissionInput
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionCreateNestedManyWithoutMissionInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
@@ -1599,6 +1775,7 @@ export type ResearchMissionRecordCreateWithoutSourceAssessmentsInput = {
 export type ResearchMissionRecordUncheckedCreateWithoutSourceAssessmentsInput = {
   id: string
   tenantId?: string | null
+  assignedActorId?: string | null
   contractVersion: string
   caseId: string
   fascicoloReference?: string | null
@@ -1672,6 +1849,7 @@ export type ResearchMissionRecordUpdateWithoutSourceAssessmentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.EnteUpdateOneWithoutResearchMissionsNestedInput
+  assignedActor?: Prisma.UserUpdateOneWithoutAssignedResearchMissionsNestedInput
   executionAttempts?: Prisma.ResearchExecutionAttemptUpdateManyWithoutMissionNestedInput
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUpdateManyWithoutMissionNestedInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
@@ -1685,6 +1863,7 @@ export type ResearchMissionRecordUpdateWithoutSourceAssessmentsInput = {
 export type ResearchMissionRecordUncheckedUpdateWithoutSourceAssessmentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedActorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
   caseId?: Prisma.StringFieldUpdateOperationsInput | string
   fascicoloReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1742,6 +1921,7 @@ export type ResearchMissionRecordCreateWithoutPrimaryAdverseRequirementsInput = 
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant?: Prisma.EnteCreateNestedOneWithoutResearchMissionsInput
+  assignedActor?: Prisma.UserCreateNestedOneWithoutAssignedResearchMissionsInput
   executionAttempts?: Prisma.ResearchExecutionAttemptCreateNestedManyWithoutMissionInput
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionCreateNestedManyWithoutMissionInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
@@ -1755,6 +1935,7 @@ export type ResearchMissionRecordCreateWithoutPrimaryAdverseRequirementsInput = 
 export type ResearchMissionRecordUncheckedCreateWithoutPrimaryAdverseRequirementsInput = {
   id: string
   tenantId?: string | null
+  assignedActorId?: string | null
   contractVersion: string
   caseId: string
   fascicoloReference?: string | null
@@ -1817,6 +1998,7 @@ export type ResearchMissionRecordCreateWithoutAdverseMissionRequirementInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant?: Prisma.EnteCreateNestedOneWithoutResearchMissionsInput
+  assignedActor?: Prisma.UserCreateNestedOneWithoutAssignedResearchMissionsInput
   executionAttempts?: Prisma.ResearchExecutionAttemptCreateNestedManyWithoutMissionInput
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionCreateNestedManyWithoutMissionInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
@@ -1830,6 +2012,7 @@ export type ResearchMissionRecordCreateWithoutAdverseMissionRequirementInput = {
 export type ResearchMissionRecordUncheckedCreateWithoutAdverseMissionRequirementInput = {
   id: string
   tenantId?: string | null
+  assignedActorId?: string | null
   contractVersion: string
   caseId: string
   fascicoloReference?: string | null
@@ -1903,6 +2086,7 @@ export type ResearchMissionRecordUpdateWithoutPrimaryAdverseRequirementsInput = 
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.EnteUpdateOneWithoutResearchMissionsNestedInput
+  assignedActor?: Prisma.UserUpdateOneWithoutAssignedResearchMissionsNestedInput
   executionAttempts?: Prisma.ResearchExecutionAttemptUpdateManyWithoutMissionNestedInput
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUpdateManyWithoutMissionNestedInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
@@ -1916,6 +2100,7 @@ export type ResearchMissionRecordUpdateWithoutPrimaryAdverseRequirementsInput = 
 export type ResearchMissionRecordUncheckedUpdateWithoutPrimaryAdverseRequirementsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedActorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
   caseId?: Prisma.StringFieldUpdateOperationsInput | string
   fascicoloReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1984,6 +2169,7 @@ export type ResearchMissionRecordUpdateWithoutAdverseMissionRequirementInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.EnteUpdateOneWithoutResearchMissionsNestedInput
+  assignedActor?: Prisma.UserUpdateOneWithoutAssignedResearchMissionsNestedInput
   executionAttempts?: Prisma.ResearchExecutionAttemptUpdateManyWithoutMissionNestedInput
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUpdateManyWithoutMissionNestedInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
@@ -1997,6 +2183,7 @@ export type ResearchMissionRecordUpdateWithoutAdverseMissionRequirementInput = {
 export type ResearchMissionRecordUncheckedUpdateWithoutAdverseMissionRequirementInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedActorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
   caseId?: Prisma.StringFieldUpdateOperationsInput | string
   fascicoloReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2054,6 +2241,7 @@ export type ResearchMissionRecordCreateWithoutAssistedVerificationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant?: Prisma.EnteCreateNestedOneWithoutResearchMissionsInput
+  assignedActor?: Prisma.UserCreateNestedOneWithoutAssignedResearchMissionsInput
   executionAttempts?: Prisma.ResearchExecutionAttemptCreateNestedManyWithoutMissionInput
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordCreateNestedManyWithoutMissionInput
@@ -2067,6 +2255,7 @@ export type ResearchMissionRecordCreateWithoutAssistedVerificationsInput = {
 export type ResearchMissionRecordUncheckedCreateWithoutAssistedVerificationsInput = {
   id: string
   tenantId?: string | null
+  assignedActorId?: string | null
   contractVersion: string
   caseId: string
   fascicoloReference?: string | null
@@ -2140,6 +2329,7 @@ export type ResearchMissionRecordUpdateWithoutAssistedVerificationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.EnteUpdateOneWithoutResearchMissionsNestedInput
+  assignedActor?: Prisma.UserUpdateOneWithoutAssignedResearchMissionsNestedInput
   executionAttempts?: Prisma.ResearchExecutionAttemptUpdateManyWithoutMissionNestedInput
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUpdateManyWithoutMissionNestedInput
@@ -2153,6 +2343,7 @@ export type ResearchMissionRecordUpdateWithoutAssistedVerificationsInput = {
 export type ResearchMissionRecordUncheckedUpdateWithoutAssistedVerificationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedActorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
   caseId?: Prisma.StringFieldUpdateOperationsInput | string
   fascicoloReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2210,6 +2401,7 @@ export type ResearchMissionRecordCreateWithoutAutomaticReportLinksInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant?: Prisma.EnteCreateNestedOneWithoutResearchMissionsInput
+  assignedActor?: Prisma.UserCreateNestedOneWithoutAssignedResearchMissionsInput
   executionAttempts?: Prisma.ResearchExecutionAttemptCreateNestedManyWithoutMissionInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordCreateNestedManyWithoutMissionInput
@@ -2223,6 +2415,7 @@ export type ResearchMissionRecordCreateWithoutAutomaticReportLinksInput = {
 export type ResearchMissionRecordUncheckedCreateWithoutAutomaticReportLinksInput = {
   id: string
   tenantId?: string | null
+  assignedActorId?: string | null
   contractVersion: string
   caseId: string
   fascicoloReference?: string | null
@@ -2296,6 +2489,7 @@ export type ResearchMissionRecordUpdateWithoutAutomaticReportLinksInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.EnteUpdateOneWithoutResearchMissionsNestedInput
+  assignedActor?: Prisma.UserUpdateOneWithoutAssignedResearchMissionsNestedInput
   executionAttempts?: Prisma.ResearchExecutionAttemptUpdateManyWithoutMissionNestedInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUpdateManyWithoutMissionNestedInput
@@ -2309,6 +2503,7 @@ export type ResearchMissionRecordUpdateWithoutAutomaticReportLinksInput = {
 export type ResearchMissionRecordUncheckedUpdateWithoutAutomaticReportLinksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedActorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
   caseId?: Prisma.StringFieldUpdateOperationsInput | string
   fascicoloReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2366,6 +2561,7 @@ export type ResearchMissionRecordCreateWithoutKnowledgeRevisionInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant?: Prisma.EnteCreateNestedOneWithoutResearchMissionsInput
+  assignedActor?: Prisma.UserCreateNestedOneWithoutAssignedResearchMissionsInput
   executionAttempts?: Prisma.ResearchExecutionAttemptCreateNestedManyWithoutMissionInput
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionCreateNestedManyWithoutMissionInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
@@ -2379,6 +2575,7 @@ export type ResearchMissionRecordCreateWithoutKnowledgeRevisionInput = {
 export type ResearchMissionRecordUncheckedCreateWithoutKnowledgeRevisionInput = {
   id: string
   tenantId?: string | null
+  assignedActorId?: string | null
   contractVersion: string
   caseId: string
   fascicoloReference?: string | null
@@ -2446,6 +2643,7 @@ export type ResearchMissionRecordCreateWithoutFirstKnowledgeRevisionInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant?: Prisma.EnteCreateNestedOneWithoutResearchMissionsInput
+  assignedActor?: Prisma.UserCreateNestedOneWithoutAssignedResearchMissionsInput
   executionAttempts?: Prisma.ResearchExecutionAttemptCreateNestedManyWithoutMissionInput
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionCreateNestedManyWithoutMissionInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
@@ -2459,6 +2657,7 @@ export type ResearchMissionRecordCreateWithoutFirstKnowledgeRevisionInput = {
 export type ResearchMissionRecordUncheckedCreateWithoutFirstKnowledgeRevisionInput = {
   id: string
   tenantId?: string | null
+  assignedActorId?: string | null
   contractVersion: string
   caseId: string
   fascicoloReference?: string | null
@@ -2535,6 +2734,7 @@ export type ResearchMissionRecordUpdateManyWithWhereWithoutFirstKnowledgeRevisio
 
 export type ResearchMissionRecordCreateManyTenantInput = {
   id: string
+  assignedActorId?: string | null
   contractVersion: string
   caseId: string
   fascicoloReference?: string | null
@@ -2585,6 +2785,7 @@ export type ResearchMissionRecordUpdateWithoutTenantInput = {
   deferredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignedActor?: Prisma.UserUpdateOneWithoutAssignedResearchMissionsNestedInput
   executionAttempts?: Prisma.ResearchExecutionAttemptUpdateManyWithoutMissionNestedInput
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUpdateManyWithoutMissionNestedInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
@@ -2598,6 +2799,7 @@ export type ResearchMissionRecordUpdateWithoutTenantInput = {
 
 export type ResearchMissionRecordUncheckedUpdateWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  assignedActorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
   caseId?: Prisma.StringFieldUpdateOperationsInput | string
   fascicoloReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2633,6 +2835,137 @@ export type ResearchMissionRecordUncheckedUpdateWithoutTenantInput = {
 
 export type ResearchMissionRecordUncheckedUpdateManyWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  assignedActorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  caseId?: Prisma.StringFieldUpdateOperationsInput | string
+  fascicoloReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  referenceDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mode?: Prisma.StringFieldUpdateOperationsInput | string
+  payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  payloadFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  knowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstKnowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lifecycleStatus?: Prisma.EnumResearchMissionLifecycleStatusFieldUpdateOperationsInput | $Enums.ResearchMissionLifecycleStatus
+  status?: Prisma.EnumResearchMissionStatusFieldUpdateOperationsInput | $Enums.ResearchMissionStatus
+  stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  claimantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  activeExecutionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deferredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ResearchMissionRecordCreateManyAssignedActorInput = {
+  id: string
+  tenantId?: string | null
+  contractVersion: string
+  caseId: string
+  fascicoloReference?: string | null
+  referenceDate: Date | string
+  mode: string
+  payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  payloadFingerprint: string
+  missionFingerprint?: string | null
+  knowledgeRevisionId?: string | null
+  firstKnowledgeRevisionId?: string | null
+  legalIssueSemanticKey?: string | null
+  researchQuestionSemanticKey?: string | null
+  referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lifecycleStatus?: $Enums.ResearchMissionLifecycleStatus
+  status?: $Enums.ResearchMissionStatus
+  stateVersion?: number
+  claimantId?: string | null
+  claimToken?: string | null
+  claimExpiresAt?: Date | string | null
+  activeExecutionId?: string | null
+  completedAt?: Date | string | null
+  deferredAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type ResearchMissionRecordUpdateWithoutAssignedActorInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  caseId?: Prisma.StringFieldUpdateOperationsInput | string
+  fascicoloReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  referenceDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mode?: Prisma.StringFieldUpdateOperationsInput | string
+  payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  payloadFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lifecycleStatus?: Prisma.EnumResearchMissionLifecycleStatusFieldUpdateOperationsInput | $Enums.ResearchMissionLifecycleStatus
+  status?: Prisma.EnumResearchMissionStatusFieldUpdateOperationsInput | $Enums.ResearchMissionStatus
+  stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  claimantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  activeExecutionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deferredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.EnteUpdateOneWithoutResearchMissionsNestedInput
+  executionAttempts?: Prisma.ResearchExecutionAttemptUpdateManyWithoutMissionNestedInput
+  automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUpdateManyWithoutMissionNestedInput
+  assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
+  questionResults?: Prisma.ResearchQuestionResultRecordUpdateManyWithoutMissionNestedInput
+  sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUpdateManyWithoutMissionNestedInput
+  primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUpdateManyWithoutPrimaryMissionNestedInput
+  adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
+  knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
+  firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutFirstResearchMissionsNestedInput
+}
+
+export type ResearchMissionRecordUncheckedUpdateWithoutAssignedActorInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  caseId?: Prisma.StringFieldUpdateOperationsInput | string
+  fascicoloReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  referenceDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mode?: Prisma.StringFieldUpdateOperationsInput | string
+  payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  payloadFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  knowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstKnowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lifecycleStatus?: Prisma.EnumResearchMissionLifecycleStatusFieldUpdateOperationsInput | $Enums.ResearchMissionLifecycleStatus
+  status?: Prisma.EnumResearchMissionStatusFieldUpdateOperationsInput | $Enums.ResearchMissionStatus
+  stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  claimantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  activeExecutionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deferredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  executionAttempts?: Prisma.ResearchExecutionAttemptUncheckedUpdateManyWithoutMissionNestedInput
+  automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUncheckedUpdateManyWithoutMissionNestedInput
+  assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutMissionNestedInput
+  questionResults?: Prisma.ResearchQuestionResultRecordUncheckedUpdateManyWithoutMissionNestedInput
+  sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedUpdateManyWithoutMissionNestedInput
+  primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedUpdateManyWithoutPrimaryMissionNestedInput
+  adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedUpdateOneWithoutAdverseMissionNestedInput
+}
+
+export type ResearchMissionRecordUncheckedUpdateManyWithoutAssignedActorInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
   caseId?: Prisma.StringFieldUpdateOperationsInput | string
   fascicoloReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2662,6 +2995,7 @@ export type ResearchMissionRecordUncheckedUpdateManyWithoutTenantInput = {
 export type ResearchMissionRecordCreateManyKnowledgeRevisionInput = {
   id: string
   tenantId?: string | null
+  assignedActorId?: string | null
   contractVersion: string
   caseId: string
   fascicoloReference?: string | null
@@ -2690,6 +3024,7 @@ export type ResearchMissionRecordCreateManyKnowledgeRevisionInput = {
 export type ResearchMissionRecordCreateManyFirstKnowledgeRevisionInput = {
   id: string
   tenantId?: string | null
+  assignedActorId?: string | null
   contractVersion: string
   caseId: string
   fascicoloReference?: string | null
@@ -2740,6 +3075,7 @@ export type ResearchMissionRecordUpdateWithoutKnowledgeRevisionInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.EnteUpdateOneWithoutResearchMissionsNestedInput
+  assignedActor?: Prisma.UserUpdateOneWithoutAssignedResearchMissionsNestedInput
   executionAttempts?: Prisma.ResearchExecutionAttemptUpdateManyWithoutMissionNestedInput
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUpdateManyWithoutMissionNestedInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
@@ -2753,6 +3089,7 @@ export type ResearchMissionRecordUpdateWithoutKnowledgeRevisionInput = {
 export type ResearchMissionRecordUncheckedUpdateWithoutKnowledgeRevisionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedActorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
   caseId?: Prisma.StringFieldUpdateOperationsInput | string
   fascicoloReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2788,6 +3125,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutKnowledgeRevisionInput = 
 export type ResearchMissionRecordUncheckedUpdateManyWithoutKnowledgeRevisionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedActorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
   caseId?: Prisma.StringFieldUpdateOperationsInput | string
   fascicoloReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2838,6 +3176,7 @@ export type ResearchMissionRecordUpdateWithoutFirstKnowledgeRevisionInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.EnteUpdateOneWithoutResearchMissionsNestedInput
+  assignedActor?: Prisma.UserUpdateOneWithoutAssignedResearchMissionsNestedInput
   executionAttempts?: Prisma.ResearchExecutionAttemptUpdateManyWithoutMissionNestedInput
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUpdateManyWithoutMissionNestedInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
@@ -2851,6 +3190,7 @@ export type ResearchMissionRecordUpdateWithoutFirstKnowledgeRevisionInput = {
 export type ResearchMissionRecordUncheckedUpdateWithoutFirstKnowledgeRevisionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedActorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
   caseId?: Prisma.StringFieldUpdateOperationsInput | string
   fascicoloReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2886,6 +3226,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutFirstKnowledgeRevisionInp
 export type ResearchMissionRecordUncheckedUpdateManyWithoutFirstKnowledgeRevisionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedActorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
   caseId?: Prisma.StringFieldUpdateOperationsInput | string
   fascicoloReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2990,6 +3331,7 @@ export type ResearchMissionRecordCountOutputTypeCountPrimaryAdverseRequirementsA
 export type ResearchMissionRecordSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   tenantId?: boolean
+  assignedActorId?: boolean
   contractVersion?: boolean
   caseId?: boolean
   fascicoloReference?: boolean
@@ -3015,6 +3357,7 @@ export type ResearchMissionRecordSelect<ExtArgs extends runtime.Types.Extensions
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.ResearchMissionRecord$tenantArgs<ExtArgs>
+  assignedActor?: boolean | Prisma.ResearchMissionRecord$assignedActorArgs<ExtArgs>
   executionAttempts?: boolean | Prisma.ResearchMissionRecord$executionAttemptsArgs<ExtArgs>
   automaticReportLinks?: boolean | Prisma.ResearchMissionRecord$automaticReportLinksArgs<ExtArgs>
   assistedVerifications?: boolean | Prisma.ResearchMissionRecord$assistedVerificationsArgs<ExtArgs>
@@ -3030,6 +3373,7 @@ export type ResearchMissionRecordSelect<ExtArgs extends runtime.Types.Extensions
 export type ResearchMissionRecordSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   tenantId?: boolean
+  assignedActorId?: boolean
   contractVersion?: boolean
   caseId?: boolean
   fascicoloReference?: boolean
@@ -3055,6 +3399,7 @@ export type ResearchMissionRecordSelectCreateManyAndReturn<ExtArgs extends runti
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.ResearchMissionRecord$tenantArgs<ExtArgs>
+  assignedActor?: boolean | Prisma.ResearchMissionRecord$assignedActorArgs<ExtArgs>
   knowledgeRevision?: boolean | Prisma.ResearchMissionRecord$knowledgeRevisionArgs<ExtArgs>
   firstKnowledgeRevision?: boolean | Prisma.ResearchMissionRecord$firstKnowledgeRevisionArgs<ExtArgs>
 }, ExtArgs["result"]["researchMissionRecord"]>
@@ -3062,6 +3407,7 @@ export type ResearchMissionRecordSelectCreateManyAndReturn<ExtArgs extends runti
 export type ResearchMissionRecordSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   tenantId?: boolean
+  assignedActorId?: boolean
   contractVersion?: boolean
   caseId?: boolean
   fascicoloReference?: boolean
@@ -3087,6 +3433,7 @@ export type ResearchMissionRecordSelectUpdateManyAndReturn<ExtArgs extends runti
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.ResearchMissionRecord$tenantArgs<ExtArgs>
+  assignedActor?: boolean | Prisma.ResearchMissionRecord$assignedActorArgs<ExtArgs>
   knowledgeRevision?: boolean | Prisma.ResearchMissionRecord$knowledgeRevisionArgs<ExtArgs>
   firstKnowledgeRevision?: boolean | Prisma.ResearchMissionRecord$firstKnowledgeRevisionArgs<ExtArgs>
 }, ExtArgs["result"]["researchMissionRecord"]>
@@ -3094,6 +3441,7 @@ export type ResearchMissionRecordSelectUpdateManyAndReturn<ExtArgs extends runti
 export type ResearchMissionRecordSelectScalar = {
   id?: boolean
   tenantId?: boolean
+  assignedActorId?: boolean
   contractVersion?: boolean
   caseId?: boolean
   fascicoloReference?: boolean
@@ -3120,9 +3468,10 @@ export type ResearchMissionRecordSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ResearchMissionRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "contractVersion" | "caseId" | "fascicoloReference" | "referenceDate" | "mode" | "payload" | "payloadFingerprint" | "missionFingerprint" | "knowledgeRevisionId" | "firstKnowledgeRevisionId" | "legalIssueSemanticKey" | "researchQuestionSemanticKey" | "referenceDateBasis" | "lifecycleStatus" | "status" | "stateVersion" | "claimantId" | "claimToken" | "claimExpiresAt" | "activeExecutionId" | "completedAt" | "deferredAt" | "createdAt" | "updatedAt", ExtArgs["result"]["researchMissionRecord"]>
+export type ResearchMissionRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "assignedActorId" | "contractVersion" | "caseId" | "fascicoloReference" | "referenceDate" | "mode" | "payload" | "payloadFingerprint" | "missionFingerprint" | "knowledgeRevisionId" | "firstKnowledgeRevisionId" | "legalIssueSemanticKey" | "researchQuestionSemanticKey" | "referenceDateBasis" | "lifecycleStatus" | "status" | "stateVersion" | "claimantId" | "claimToken" | "claimExpiresAt" | "activeExecutionId" | "completedAt" | "deferredAt" | "createdAt" | "updatedAt", ExtArgs["result"]["researchMissionRecord"]>
 export type ResearchMissionRecordInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.ResearchMissionRecord$tenantArgs<ExtArgs>
+  assignedActor?: boolean | Prisma.ResearchMissionRecord$assignedActorArgs<ExtArgs>
   executionAttempts?: boolean | Prisma.ResearchMissionRecord$executionAttemptsArgs<ExtArgs>
   automaticReportLinks?: boolean | Prisma.ResearchMissionRecord$automaticReportLinksArgs<ExtArgs>
   assistedVerifications?: boolean | Prisma.ResearchMissionRecord$assistedVerificationsArgs<ExtArgs>
@@ -3136,11 +3485,13 @@ export type ResearchMissionRecordInclude<ExtArgs extends runtime.Types.Extension
 }
 export type ResearchMissionRecordIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.ResearchMissionRecord$tenantArgs<ExtArgs>
+  assignedActor?: boolean | Prisma.ResearchMissionRecord$assignedActorArgs<ExtArgs>
   knowledgeRevision?: boolean | Prisma.ResearchMissionRecord$knowledgeRevisionArgs<ExtArgs>
   firstKnowledgeRevision?: boolean | Prisma.ResearchMissionRecord$firstKnowledgeRevisionArgs<ExtArgs>
 }
 export type ResearchMissionRecordIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.ResearchMissionRecord$tenantArgs<ExtArgs>
+  assignedActor?: boolean | Prisma.ResearchMissionRecord$assignedActorArgs<ExtArgs>
   knowledgeRevision?: boolean | Prisma.ResearchMissionRecord$knowledgeRevisionArgs<ExtArgs>
   firstKnowledgeRevision?: boolean | Prisma.ResearchMissionRecord$firstKnowledgeRevisionArgs<ExtArgs>
 }
@@ -3149,6 +3500,7 @@ export type $ResearchMissionRecordPayload<ExtArgs extends runtime.Types.Extensio
   name: "ResearchMissionRecord"
   objects: {
     tenant: Prisma.$EntePayload<ExtArgs> | null
+    assignedActor: Prisma.$UserPayload<ExtArgs> | null
     executionAttempts: Prisma.$ResearchExecutionAttemptPayload<ExtArgs>[]
     automaticReportLinks: Prisma.$AutomaticFascicoloReportMissionPayload<ExtArgs>[]
     assistedVerifications: Prisma.$ResearchAssistedVerificationRecordPayload<ExtArgs>[]
@@ -3162,6 +3514,7 @@ export type $ResearchMissionRecordPayload<ExtArgs extends runtime.Types.Extensio
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenantId: string | null
+    assignedActorId: string | null
     contractVersion: string
     caseId: string
     fascicoloReference: string | null
@@ -3581,6 +3934,7 @@ readonly fields: ResearchMissionRecordFieldRefs;
 export interface Prisma__ResearchMissionRecordClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   tenant<T extends Prisma.ResearchMissionRecord$tenantArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResearchMissionRecord$tenantArgs<ExtArgs>>): Prisma.Prisma__EnteClient<runtime.Types.Result.GetResult<Prisma.$EntePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  assignedActor<T extends Prisma.ResearchMissionRecord$assignedActorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResearchMissionRecord$assignedActorArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   executionAttempts<T extends Prisma.ResearchMissionRecord$executionAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResearchMissionRecord$executionAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResearchExecutionAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   automaticReportLinks<T extends Prisma.ResearchMissionRecord$automaticReportLinksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResearchMissionRecord$automaticReportLinksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AutomaticFascicoloReportMissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assistedVerifications<T extends Prisma.ResearchMissionRecord$assistedVerificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResearchMissionRecord$assistedVerificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResearchAssistedVerificationRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -3621,6 +3975,7 @@ export interface Prisma__ResearchMissionRecordClient<T, Null = never, ExtArgs ex
 export interface ResearchMissionRecordFieldRefs {
   readonly id: Prisma.FieldRef<"ResearchMissionRecord", 'String'>
   readonly tenantId: Prisma.FieldRef<"ResearchMissionRecord", 'String'>
+  readonly assignedActorId: Prisma.FieldRef<"ResearchMissionRecord", 'String'>
   readonly contractVersion: Prisma.FieldRef<"ResearchMissionRecord", 'String'>
   readonly caseId: Prisma.FieldRef<"ResearchMissionRecord", 'String'>
   readonly fascicoloReference: Prisma.FieldRef<"ResearchMissionRecord", 'String'>
@@ -4062,6 +4417,25 @@ export type ResearchMissionRecord$tenantArgs<ExtArgs extends runtime.Types.Exten
    */
   include?: Prisma.EnteInclude<ExtArgs> | null
   where?: Prisma.EnteWhereInput
+}
+
+/**
+ * ResearchMissionRecord.assignedActor
+ */
+export type ResearchMissionRecord$assignedActorArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

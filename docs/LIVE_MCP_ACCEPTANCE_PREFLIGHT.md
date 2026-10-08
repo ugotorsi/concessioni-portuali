@@ -307,6 +307,35 @@ All statuses are initial and must remain `NOT_RUN` until observed in the authori
 | ResearchMission queue | NOT_RUN | NOT_RUN | NOT_RUN | N/A | N/A | N/A | NOT_RUN | NOT_RUN |
 | ResearchEvidenceBundle persistence | NOT_RUN | N/A | NOT_RUN | NOT_RUN | NOT_RUN | NOT_RUN | NOT_RUN | NOT_RUN |
 
+## ACCEPTANCE_MATRIX_OBSERVED_2026_09_23
+
+Target: Vercel Preview `staging-operativo`; tenant demo `DEMO-ENTE-ADSP`.
+
+Missione controllata:
+
+- ID: `research-mission:7cd3faa5f4294068fc30558e65b4229ff46359463fa0039c61717b5da30e0b63`;
+- case reference: `ACCEPTANCE_TEST_LEGAL_RESEARCH_V1`;
+- reference date: `2026-09-23T00:00:00.000Z`;
+- quesito pubblico deterministico dell'harness esistente;
+- primo inserimento: `CREATED`; replay identico: `REUSED`;
+- stato osservato dopo il replay: una missione `PENDING`, zero execution attempt, zero bundle.
+
+| Componente | Stato osservato | Evidenza / gate |
+| --- | --- | --- |
+| Concessioni Portuali MCP | PARZIALE | Connessione autenticata e catalogo aggiornato; `research_capabilities` ha restituito `RESEARCH_BRIDGE_V1`, 11 modi e i tre provider. La chiamata read-only `research_get_mission` dalla stessa connessione ha fallito chiusa con `FASCICOLO_BINDING_REQUIRED`, come previsto per un client ChatGPT manuale privo dell'header trusted. |
+| WorkOS OAuth | SUPERATO | La custom app ChatGPT ha completato una chiamata autenticata a `research_capabilities`; nessun token o dettaglio di verifica e stato esposto. |
+| Simpliciter | BLOCCATO | Previsto dalla missione; nessuna chiamata eseguita perche il gate mission-scoped non puo essere superato dal client ChatGPT manuale privo del trusted fascicolo grant. |
+| Moonlit | BLOCCATO | Previsto dalla missione; nessuna chiamata eseguita perche il gate mission-scoped non puo essere superato dal client ChatGPT manuale privo del trusted fascicolo grant. |
+| Legal Data Hunter | BLOCCATO | Previsto dalla missione; nessuna chiamata eseguita perche il gate mission-scoped non puo essere superato dal client ChatGPT manuale privo del trusted fascicolo grant. |
+| OpenGA | NON ESEGUITO | Verifica ufficiale a valle non avviata: il preflight vieta provider testing prima di identita MCP, tenant isolation e tool listing autenticati. |
+| Normattiva | NON ESEGUITO | Verifica ufficiale a valle non avviata: il preflight vieta provider testing prima di identita MCP, tenant isolation e tool listing autenticati. |
+| ResearchMission queue | SUPERATO | Harness in Preview staging: `CREATED`, poi `REUSED`; persistenza read-only conferma una sola riga e nessuna duplicazione. |
+| ResearchEvidenceBundle persistence | NON ESEGUITO | Nessun execution attempt e nessun bundle; provenienza, riferimenti temporali, non-canonicalita dei candidati e replay del bundle restano da verificare end-to-end. |
+
+Questa matrice conserva l'osservazione storica del 2026-09-23. Il successivo binding persistito attore-missione rimuove il requisito dell'header custom per il connettore ChatGPT personale: le missioni sono visibili e mutabili soltanto dall'attore OAuth assegnato nello stesso tenant. Il nuovo percorso non e ancora stato verificato end-to-end in staging e non modifica gli esiti storici sopra riportati.
+
+Il modello operativo corrente usa i connettori personali ChatGPT per Simpliciter, Moonlit e Legal Data Hunter. Il backend Concessioni Portuali non autentica direttamente questi provider. Prima dell'E2E restano da applicare la migrazione di assegnazione nell'ambiente staging, creare una missione assegnata tramite la superficie admin e verificare claim, submit e complete dalla stessa identita OAuth.
+
 ## LIVE_EXECUTION_ORDER
 
 1. Obtain explicit authorization and confirm the authoritative Neon staging source branch.
@@ -362,8 +391,8 @@ No secret should be pasted into chat, source, logs, artifacts, or command output
 MCP_OAUTH_COMMITTED: YES
 MCP_OAUTH_COMMIT_SHA: ec846ae40671eaa131c3cf9ae80c01dd4d5fa8ba
 BLOCK_3B14A_LIVE_PREFLIGHT_RESULT: PASS
-LIVE_WORKOS_TEST_PERFORMED: NO
-LIVE_CHATGPT_MCP_TEST_PERFORMED: NO
+LIVE_WORKOS_TEST_PERFORMED: YES
+LIVE_CHATGPT_MCP_TEST_PERFORMED: YES
 LIVE_SIMPLICITER_TEST_PERFORMED: NO
 LIVE_MOONLIT_TEST_PERFORMED: NO
 LIVE_LDH_TEST_PERFORMED: NO
@@ -375,7 +404,8 @@ MIGRATION_APPLIED: NO
 VERCEL_ENV_CHANGED: NO
 DEPLOYMENT_PERFORMED: NO
 PUSH_AUTHORIZED: NO
-READY_FOR_CONTROLLED_LIVE_ACCEPTANCE: YES
+READY_FOR_CONTROLLED_LIVE_ACCEPTANCE: NO
+CONTROLLED_LIVE_ACCEPTANCE_BLOCKER: STAGING_ACTOR_BINDING_MIGRATION_AND_CHATGPT_E2E_NOT_RUN
 ```
 
-`READY_FOR_CONTROLLED_LIVE_ACCEPTANCE: YES` means the procedure and stop gates are defined. It does not authorize execution and does not imply that external configuration is already present.
+`READY_FOR_CONTROLLED_LIVE_ACCEPTANCE: NO` records that the actor-binding migration and the controlled personal-ChatGPT round trip have not yet been run in staging. The procedure and stop gates remain defined, but they do not authorize execution.

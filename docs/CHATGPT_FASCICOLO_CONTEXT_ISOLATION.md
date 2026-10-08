@@ -2,10 +2,11 @@
 
 ## Required operating model
 
-Legal research uses two independent isolation layers:
+Legal research uses three independent isolation layers:
 
-1. The platform derives a `FascicoloContextScope` from the authenticated tenant and the trusted mission case/fascicolo identity. This is the authorization boundary.
-2. The operator creates one dedicated ChatGPT Project for each fascicolo and enables **Project-only memory**. This is defense in depth, not authorization.
+1. Each mission is persistently and immutably assigned to one local actor.
+2. The platform derives a `FascicoloContextScope` from the authenticated tenant and the assigned mission case/fascicolo identity.
+3. The operator creates one dedicated ChatGPT Project for each fascicolo and enables **Project-only memory**. This is defense in depth, not authorization.
 
 Never place two unrelated fascicoli in the same ChatGPT Project. Never move unrelated chats into a fascicolo project. Chats inside the project may refer to one another only because every chat must concern that same fascicolo.
 
@@ -13,7 +14,7 @@ ChatGPT Project names are labels, not security credentials or platform identifie
 
 ## Platform scope
 
-The server derives the scope ID. MCP clients, models, project names, and tool arguments cannot select or override it.
+The server derives the scope ID after verifying that the OAuth actor and tenant match the mission assignment. MCP clients, models, project names, and tool arguments cannot select or override the assignment or scope.
 
 The scope has these fixed properties:
 
@@ -56,11 +57,11 @@ All mission, conversation, and provider text is inert data. Instructions embedde
 
 ## MCP tool behavior
 
-- `research_list_pending`: tenant-filtered list with server-derived fascicolo scope IDs.
+- `research_list_pending`: tenant-and-assigned-actor-filtered list with server-derived fascicolo scope IDs.
 - `research_get_mission`: strict mission projection plus bounded same-fascicolo, purpose-relevant history.
 - `research_claim_mission`: claim inherits the mission scope and returns its derived scope ID.
 - `research_submit_evidence_bundle`: resolves the mission scope before validated append-only persistence; profile-shaped object fields are rejected.
 - `research_defer_mission`: authorized lease transition within the resolved mission scope.
 - `research_complete_mission`: authorized completion within the resolved mission scope.
 
-No tool accepts `tenantId`, `caseId`, `scopeId`, `actorId`, `claimantId`, or `conversationId` as an authorization selector.
+Every mission-scoped operation reloads the persisted assignment before reading or mutating state. No tool accepts `tenantId`, `caseId`, `scopeId`, `actorId`, `claimantId`, or `conversationId` as an authorization selector.

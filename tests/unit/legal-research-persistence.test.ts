@@ -217,6 +217,9 @@ function createHarness() {
     }),
     findMany: vi.fn(async ({ where, take }: any) => {
       let values = [...missions.values()].filter((item) => item.tenantId === where.tenantId);
+      if (where.assignedActorId !== undefined) {
+        values = values.filter((item) => item.assignedActorId === where.assignedActorId);
+      }
       if (where.caseId !== undefined) values = values.filter((item) => item.caseId === where.caseId);
       if (where.fascicoloReference !== undefined) {
         values = values.filter((item) => item.fascicoloReference === where.fascicoloReference);
@@ -472,6 +475,54 @@ describe("Block 3B.13B research mission persistence", () => {
       activeExecutionId: null,
     });
     expect(harness.attempts).toHaveLength(0);
+  });
+
+  it("isolates list, get, claim, submit, and complete by assigned actor within one tenant", async () => {
+    const harness = createHarness();
+    const mission = researchMission();
+    await createResearchMissionRecord({ mission, actor }, harness.context);
+    const otherActor = { actorId: "user-2", tenantId: actor.tenantId } as const;
+
+    await expect(listPendingResearchMissions(otherActor, harness.context)).resolves.toEqual([]);
+    await expect(getResearchMission(mission.missionId, otherActor, harness.context))
+      .rejects.toMatchObject({ code: "AUTHORIZATION_REQUIRED" });
+    await expect(claimResearchMission({
+      missionId: mission.missionId,
+      executionId: "execution-other",
+      executor: { kind: "CHATGPT", claimantId: "chat-other" },
+      actor: otherActor,
+      leaseDurationMs: 60_000,
+    }, harness.context)).rejects.toMatchObject({ code: "AUTHORIZATION_REQUIRED" });
+
+    const claimed = await claimResearchMission({
+      missionId: mission.missionId,
+      executionId: "execution-owner",
+      executor: { kind: "CHATGPT", claimantId: "chat-owner" },
+      actor,
+      leaseDurationMs: 60_000,
+    }, harness.context);
+    const bundle = evidenceBundle(mission, "execution-owner");
+    await expect(submitResearchEvidenceBundle({
+      bundle,
+      claimantId: "chat-owner",
+      claimToken: claimed.claim.claimToken,
+      actor: otherActor,
+    }, harness.context)).rejects.toMatchObject({ code: "AUTHORIZATION_REQUIRED" });
+
+    const submitted = await submitResearchEvidenceBundle({
+      bundle,
+      claimantId: "chat-owner",
+      claimToken: claimed.claim.claimToken,
+      actor,
+    }, harness.context);
+    await expect(completeResearchMission({
+      missionId: mission.missionId,
+      executionId: "execution-owner",
+      bundleId: submitted.bundle.id,
+      claimantId: "chat-owner",
+      claimToken: claimed.claim.claimToken,
+      actor: otherActor,
+    }, harness.context)).rejects.toMatchObject({ code: "AUTHORIZATION_REQUIRED" });
   });
 
   it("returns only purpose-relevant prior missions and bundles from the same fascicolo scope", async () => {

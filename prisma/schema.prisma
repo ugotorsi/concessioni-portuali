@@ -1453,6 +1453,7 @@ model User {
   concessioneExpiryChangeCommands                ConcessioneExpiryChangeCommand[]              @relation("ConcessioneExpiryChangeActor")
   documentRequirementEvidenceReviews            FascicoloDocumentRequirementEvidenceReview[] @relation("DocumentRequirementEvidenceReviewedBy")
   aiFascicoloHumanReviewEvents                   AiFascicoloHumanReviewEvent[]
+  assignedResearchMissions                       ResearchMissionRecord[]                        @relation("ResearchMissionAssignedActor")
 
   @@index([ruolo])
   @@index([attivo])
@@ -2511,6 +2512,7 @@ model ConcessioneExpiryChangeCommand {
 model ResearchMissionRecord {
   id                  String                @id @db.VarChar(96)
   tenantId            String?
+  assignedActorId     String?
   contractVersion     String                @db.VarChar(64)
   caseId              String                @db.VarChar(256)
   fascicoloReference  String?               @db.VarChar(256)
@@ -2537,6 +2539,7 @@ model ResearchMissionRecord {
   updatedAt           DateTime              @updatedAt
 
   tenant              Ente?                      @relation(fields: [tenantId], references: [id], onDelete: Restrict, map: "research_mission_tenant_fk")
+  assignedActor       User?                      @relation("ResearchMissionAssignedActor", fields: [assignedActorId], references: [id], onDelete: Restrict, map: "research_mission_assigned_actor_fk")
   executionAttempts   ResearchExecutionAttempt[]
   automaticReportLinks AutomaticFascicoloReportMission[]
   assistedVerifications ResearchAssistedVerificationRecord[]
@@ -2548,6 +2551,7 @@ model ResearchMissionRecord {
   firstKnowledgeRevision FascicoloKnowledgeRevision? @relation("ResearchMissionFirstKnowledgeRevision", fields: [firstKnowledgeRevisionId], references: [id], onDelete: Restrict)
 
   @@unique([id, tenantId], map: "research_mission_tenant_uq")
+  @@index([tenantId, assignedActorId, status, createdAt], map: "research_mission_actor_status_idx")
   @@index([tenantId, status, createdAt], map: "research_mission_tenant_status_idx")
   @@index([status, claimExpiresAt, createdAt], map: "research_mission_claim_queue_idx")
   @@index([caseId, createdAt], map: "research_mission_case_idx")
