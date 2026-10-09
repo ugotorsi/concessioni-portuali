@@ -112,6 +112,21 @@ async function assertAuthority(tx: OperationalProposalSqlExecutor, tenantId: str
   return result.rows[0];
 }
 
+async function assertReadAuthority(
+  tx: OperationalProposalSqlExecutor,
+  tenantId: string,
+  procedimentoId: string,
+): Promise<void> {
+  const result = await tx.query<{ id: string }>(`
+    SELECT p."id" FROM "Procedimento" p
+    LEFT JOIN "Concessione" c ON c."id" = p."concessioneId"
+    WHERE p."id" = $1
+      AND p."enteId" = $2
+      AND (p."concessioneId" IS NULL OR c."enteId" = $2)
+  `, [procedimentoId, tenantId]);
+  if (!result.rows[0]) throw new OperationalProposalRepositoryError("AUTHORITY_MISMATCH");
+}
+
 export async function reconcileOperationalProposals(input: {
   tenantId: string;
   procedimentoId: string;
@@ -421,7 +436,7 @@ export async function listOperationalProposals(input: {
   procedimentoId: string;
 }, overrides: Partial<OperationalProposalRepositoryContext> = {}): Promise<readonly (OperationalProposalRecord & { reviewEvents: readonly unknown[] })[]> {
   const ctx = context(overrides);
-  await assertAuthority(ctx.read, input.tenantId, input.procedimentoId);
+  await assertReadAuthority(ctx.read, input.tenantId, input.procedimentoId);
   const [proposals, events] = await Promise.all([
     ctx.read.query<OperationalProposalRecord>(`
       SELECT * FROM "FascicoloOperationalProposal" WHERE "tenantId"=$1 AND "procedimentoId"=$2

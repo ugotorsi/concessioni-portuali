@@ -138,6 +138,43 @@ describe("tenant enforcement coverage", () => {
     );
   });
 
+  it("renders dashboard procedimenti with and without an existing concession", async () => {
+    tenantContextMock.mockResolvedValue(null);
+    prismaMock.procedimento.findMany.mockResolvedValue([
+      {
+        id: "procedure-neutral",
+        tipologia: "ALTRO",
+        stato: "DA_AVVIARE",
+        riferimentoNormativo: null,
+        dataScadenzaContraddittorio: null,
+        updatedAt: new Date("2026-10-09T12:00:00.000Z"),
+        concessione: null,
+      },
+      {
+        id: "procedure-linked",
+        tipologia: "RINNOVO",
+        stato: "IN_CORSO",
+        riferimentoNormativo: null,
+        dataScadenzaContraddittorio: null,
+        updatedAt: new Date("2026-10-08T12:00:00.000Z"),
+        concessione: { numeroAtto: "ATTO-1" },
+      },
+    ]);
+
+    const dashboard = await getDashboardData();
+
+    expect(dashboard.procedimentiInCorso).toEqual([
+      expect.objectContaining({
+        id: "procedure-neutral",
+        concessione: "Titolo concessorio non accertato",
+      }),
+      expect.objectContaining({
+        id: "procedure-linked",
+        concessione: "ATTO-1",
+      }),
+    ]);
+  });
+
   it("scopes mappa queries to accessible tenant concessions", async () => {
     await getMappaWorkspaceData();
 
