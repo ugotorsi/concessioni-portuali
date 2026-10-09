@@ -20,6 +20,17 @@ import { Textarea } from "@/components/ui/Textarea";
 
 type ReviewDecision = "ADVERSE" | "NOT_ADVERSE" | "INCONCLUSIVE";
 type SuggestionKind = ReviewerVerification["result"]["legalResearchSuggestions"][number]["kind"];
+type ResultDirection = "SUPPORTS" | "OPPOSES" | "NEUTRAL";
+type QuestionResultReviewItem = Readonly<{
+  resultId: string;
+  missionId: string;
+  title: string;
+  sourceUrl: string | null;
+  supportDirection: ResultDirection | "INCONCLUSIVE" | "UNASSESSED";
+  classificationReviewStatus: "AI_PROPOSED" | "HUMAN_CONFIRMED" | "REJECTED";
+  classificationRationale: string | null;
+  sourceUsable: boolean;
+}>;
 
 function locatorLabel(locator: NonNullable<ReviewerVerification["snapshot"]["citationRelation"]>["locator"]): string {
   if (!locator) return "Nessun localizzatore";
@@ -38,6 +49,7 @@ function apiErrorMessage(code: string | undefined): string {
   }
   if (code === "FORBIDDEN") return "Il profilo corrente non può accedere a questa missione.";
   if (code === "INVALID_REQUEST") return "I dati della revisione non sono validi.";
+  if (code === "QUESTION_RESULT_REVIEW_UNAVAILABLE") return "La classificazione delle fonti non è disponibile.";
   return "Il registro delle verifiche assistite non è disponibile.";
 }
 
@@ -56,9 +68,24 @@ export function LegalReviewerClient({ initialMissionId = "" }: Readonly<{ initia
   const [resolutionGapId, setResolutionGapId] = useState("");
   const [resolutionEvidenceId, setResolutionEvidenceId] = useState("");
   const [resolutionTargetId, setResolutionTargetId] = useState("");
+  const [questionResults, setQuestionResults] = useState<readonly QuestionResultReviewItem[]>([]);
+  const [resultId, setResultId] = useState("");
+  const [resultDirection, setResultDirection] = useState<ResultDirection | "">("");
+  const [resultRationale, setResultRationale] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  async function loadQuestionResults(requestedMissionId: string): Promise<void> {
+    const response = await fetch(
+      `/api/legal-research/question-results/review?missionId=${encodeURIComponent(requestedMissionId)}`,
+      { headers: { Accept: "application/json" }, cache: "no-store" },
+    );
+    const payload = await response.json() as { results?: readonly QuestionResultReviewItem[]; error?: string };
+    if (!response.ok || !payload.results) throw new Error(payload.error ?? "QUESTION_RESULT_REVIEW_UNAVAILABLE");
+    setQuestionResults(payload.results);
+    setResultId((current) => payload.results!.some((result) => result.resultId === current) ? current : "");
+  }
 
   async function loadVerification(requestedMissionId = missionId): Promise<void> {
     const normalizedMissionId = requestedMissionId.trim();
@@ -79,13 +106,49 @@ export function LegalReviewerClient({ initialMissionId = "" }: Readonly<{ initia
       }
       setVerification(payload.verification);
       setMissionId(normalizedMissionId);
+      await loadQuestionResults(normalizedMissionId);
       setEvidenceSourceId(payload.verification.snapshot.citationRelation?.evidenceSourceId ?? "");
       setLegalPropositionId(payload.verification.snapshot.adverseReview?.legalPropositionId ?? "");
       setRationale(payload.verification.snapshot.adverseReview?.rationale ?? "");
       setDecision(payload.verification.snapshot.adverseReview?.decision ?? "INCONCLUSIVE");
     } catch {
       setVerification(null);
+      setQuestionResults([]);
       setError(apiErrorMessage(undefined));
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function submitResultReview(event: FormEvent<HTMLFormElement>): Promise<void> {
+    event.preventDefault();
+    if (!verification || !resultId || !resultDirection || resultRationale.trim().length < 20) return;
+    setPending(true);
+    setError(null);
+    setNotice(null);
+    try {
+      const response = await fetch("/api/legal-research/question-results/review", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          missionId: verification.snapshot.missionId,
+          resultId,
+          direction: resultDirection,
+          rationale: resultRationale,
+        }),
+      });
+      const payload = await response.json() as { result?: QuestionResultReviewItem; error?: string };
+      if (!response.ok || !payload.result) {
+        setError(apiErrorMessage(payload.error));
+        return;
+      }
+      setQuestionResults((current) => current.map((result) => (
+        result.resultId === payload.result!.resultId ? payload.result! : result
+      )));
+      setResultRationale("");
+      setNotice("Classificazione e revisione umana registrate.");
+    } catch {
+      setError(apiErrorMessage("QUESTION_RESULT_REVIEW_UNAVAILABLE"));
     } finally {
       setPending(false);
     }
@@ -238,6 +301,7 @@ export function LegalReviewerClient({ initialMissionId = "" }: Readonly<{ initia
                 onChange={(event) => {
                   setMissionId(event.target.value);
                   setVerification(null);
+                  setQuestionResults([]);
                 }}
                 placeholder="research-mission:..."
                 maxLength={96}
@@ -276,6 +340,9 @@ export function LegalReviewerClient({ initialMissionId = "" }: Readonly<{ initia
             setEvidenceSourceId(created.snapshot.citationRelation?.evidenceSourceId ?? "");
             setError(null);
             setNotice("Nuova versione registrata nel registro immutabile.");
+            void loadQuestionResults(created.snapshot.missionId).catch(() => {
+              setError(apiErrorMessage("QUESTION_RESULT_REVIEW_UNAVAILABLE"));
+            });
           }}
         />
       ) : null}
@@ -402,6 +469,94 @@ export function LegalReviewerClient({ initialMissionId = "" }: Readonly<{ initia
                   ) : null}
                 </TableBody>
               </Table>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Classificazione della fonte</CardTitle>
+              <CardDescription>
+                La revisione qualifica il contributo della fonte al quesito. Non modifica i gate documentali,
+                temporali o di usabilità della SourceChain.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Risultato</TableHead>
+                    <TableHead>Direzione</TableHead>
+                    <TableHead>Revisione</TableHead>
+                    <TableHead>SourceChain</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {questionResults.map((result) => (
+                    <TableRow key={result.resultId}>
+                      <TableCell>
+                        <span className="block font-medium text-slate-900">{result.title}</span>
+                        <span className="block break-all font-mono text-[11px] text-slate-500">{result.resultId}</span>
+                        {result.sourceUrl ? (
+                          <a className="mt-1 inline-flex items-center gap-1 text-xs underline underline-offset-4" href={result.sourceUrl} target="_blank" rel="noreferrer">
+                            Apri fonte <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                          </a>
+                        ) : null}
+                      </TableCell>
+                      <TableCell><Badge>{result.supportDirection}</Badge></TableCell>
+                      <TableCell>
+                        <Badge variant={result.classificationReviewStatus === "HUMAN_CONFIRMED" ? "success" : "warning"}>
+                          {result.classificationReviewStatus}
+                        </Badge>
+                        {result.classificationRationale ? <p className="mt-2 max-w-96 text-xs text-slate-600">{result.classificationRationale}</p> : null}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={result.sourceUsable ? "success" : "warning"}>
+                          {result.sourceUsable ? "USABLE" : "NON USABLE"}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {questionResults.length === 0 ? (
+                    <TableRow><TableCell colSpan={4}>Nessun risultato di ricerca associato alla missione.</TableCell></TableRow>
+                  ) : null}
+                </TableBody>
+              </Table>
+
+              <form className="grid gap-3 rounded-md border border-slate-200 p-4 md:grid-cols-2" onSubmit={(event) => { void submitResultReview(event); }}>
+                <label className="text-sm font-medium text-slate-700">
+                  Risultato
+                  <Select className="mt-1" value={resultId} required onChange={(event) => setResultId(event.target.value)}>
+                    <option value="">Seleziona risultato</option>
+                    {questionResults.map((result) => <option key={result.resultId} value={result.resultId}>{result.title}</option>)}
+                  </Select>
+                </label>
+                <label className="text-sm font-medium text-slate-700">
+                  Qualificazione
+                  <Select className="mt-1" value={resultDirection} required onChange={(event) => setResultDirection(event.target.value as ResultDirection | "")}>
+                    <option value="">Seleziona qualificazione</option>
+                    <option value="SUPPORTS">SUPPORTS</option>
+                    <option value="OPPOSES">OPPOSES</option>
+                    <option value="NEUTRAL">NEUTRAL</option>
+                  </Select>
+                </label>
+                <label className="text-sm font-medium text-slate-700 md:col-span-2">
+                  Motivazione
+                  <Textarea
+                    className="mt-1"
+                    value={resultRationale}
+                    onChange={(event) => setResultRationale(event.target.value)}
+                    minLength={20}
+                    maxLength={2000}
+                    required
+                  />
+                </label>
+                <div className="flex justify-end md:col-span-2">
+                  <Button type="submit" className="gap-2" disabled={pending || !resultId || !resultDirection || resultRationale.trim().length < 20}>
+                    {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                    Registra classificazione
+                  </Button>
+                </div>
+              </form>
             </CardContent>
           </Card>
 

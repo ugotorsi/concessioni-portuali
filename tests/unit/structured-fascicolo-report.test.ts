@@ -178,4 +178,41 @@ describe("deterministic structured fascicolo report", () => {
     expect(changed.reportFingerprint).not.toBe(first.reportFingerprint);
     expect(changed.payload.sourceStateFingerprint).not.toBe(first.payload.sourceStateFingerprint);
   });
+
+  it("projects a reviewed direction only when the existing SourceChain gates are satisfied", () => {
+    const report = buildStructuredFascicoloReport({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledge: knowledge(),
+      missions: [mission({
+        results: [{
+          ...mission().results[0],
+          resultId: "reviewed-usable",
+          supportDirection: "SUPPORTS",
+          classificationReviewStatus: "HUMAN_CONFIRMED",
+          classificationRationale: "Classificazione motivata dal revisore.",
+        }, {
+          ...mission().results[2],
+          resultId: "reviewed-not-usable",
+          supportDirection: "OPPOSES",
+          classificationReviewStatus: "HUMAN_CONFIRMED",
+          classificationRationale: "Classificazione contraria motivata dal revisore.",
+        }, {
+          ...mission().results[0],
+          resultId: "reviewed-neutral",
+          supportDirection: "NEUTRAL",
+          classificationReviewStatus: "HUMAN_CONFIRMED",
+          classificationRationale: "La fonte non sostiene nessuna delle due direzioni.",
+        }],
+      })],
+    });
+
+    const question = report.payload.legalIssues[0].questions[0];
+    expect(question.favorableAuthorities.map((authority) => authority.resultId)).toEqual(["reviewed-usable"]);
+    expect(question.contraryAuthorities).toEqual([]);
+    expect(question.nonUsableResults).toEqual(expect.arrayContaining([
+      expect.objectContaining({ resultId: "reviewed-not-usable", reasons: ["CITATION_ANCHOR_REQUIRED", "MISSING_FULL_TEXT"] }),
+      expect.objectContaining({ resultId: "reviewed-neutral", direction: "NEUTRAL" }),
+    ]));
+  });
 });

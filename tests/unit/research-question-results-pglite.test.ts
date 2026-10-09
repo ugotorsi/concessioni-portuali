@@ -53,6 +53,9 @@ async function database() {
     CREATE TABLE "ResearchEvidenceBundleRecord" (
       "id" VARCHAR(96) PRIMARY KEY, "missionId" VARCHAR(96) NOT NULL, "payload" JSONB NOT NULL
     );
+    CREATE TABLE "StructuredFascicoloReportSnapshot" (
+      "id" TEXT PRIMARY KEY
+    );
   `);
   await db.exec(migration);
   return db;
@@ -96,11 +99,37 @@ describe("Lotto 4 research question results", () => {
     const db = await database();
     await seed(db);
     const [created] = await persistResearchQuestionResults({ missionId: "mission-1", bundleId: "bundle-mission-1", candidates: [candidate("candidate-1", "UNKNOWN")] }, context(db));
-    const confirmed = await reviewResearchQuestionResult({ resultId: created.id, tenantId: "tenant-1", direction: "SUPPORTS", reviewStatus: "HUMAN_CONFIRMED", confidence: 0.9, rationale: "Passaggio pertinente verificato." }, context(db));
+    const confirmed = await reviewResearchQuestionResult({ resultId: created.id, tenantId: "tenant-1", missionId: "mission-1", direction: "SUPPORTS", reviewStatus: "HUMAN_CONFIRMED", confidence: 0.9, rationale: "Passaggio pertinente verificato." }, context(db));
     expect(confirmed).toMatchObject({ supportDirection: "SUPPORTS", classificationSource: "HUMAN_REVIEW", classificationReviewStatus: "HUMAN_CONFIRMED" });
-    await reviewResearchQuestionResult({ resultId: created.id, tenantId: "tenant-1", direction: "SUPPORTS", reviewStatus: "REJECTED", confidence: 0.2, rationale: "Classificazione non affidabile." }, context(db));
+    await reviewResearchQuestionResult({ resultId: created.id, tenantId: "tenant-1", missionId: "mission-1", direction: "SUPPORTS", reviewStatus: "REJECTED", confidence: 0.2, rationale: "Classificazione non affidabile." }, context(db));
     const count = await db.query<{ count: number }>('SELECT count(*)::int AS count FROM "ResearchQuestionResultRecord"');
     expect(count.rows[0].count).toBe(1);
+    const reports = await db.query<{ count: number }>('SELECT count(*)::int AS count FROM "StructuredFascicoloReportSnapshot"');
+    expect(reports.rows[0].count).toBe(0);
+  });
+
+  it("rejects a review outside the exact mission scope or without a rationale", async () => {
+    const db = await database();
+    await seed(db);
+    const [created] = await persistResearchQuestionResults({ missionId: "mission-1", bundleId: "bundle-mission-1", candidates: [candidate("candidate-1")] }, context(db));
+    await expect(reviewResearchQuestionResult({
+      resultId: created.id,
+      tenantId: "tenant-1",
+      missionId: "another-mission",
+      direction: "SUPPORTS",
+      reviewStatus: "HUMAN_CONFIRMED",
+      confidence: null,
+      rationale: "Passaggio pertinente verificato dal revisore.",
+    }, context(db))).rejects.toThrow("RESEARCH_QUESTION_RESULT_NOT_FOUND");
+    await expect(reviewResearchQuestionResult({
+      resultId: created.id,
+      tenantId: "tenant-1",
+      missionId: "mission-1",
+      direction: "SUPPORTS",
+      reviewStatus: "HUMAN_CONFIRMED",
+      confidence: null,
+      rationale: "Breve",
+    }, context(db))).rejects.toThrow("INVALID_CLASSIFICATION_RATIONALE");
   });
 
   it("keeps support direction separate from source verification state", () => {

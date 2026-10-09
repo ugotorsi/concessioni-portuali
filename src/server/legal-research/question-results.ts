@@ -44,6 +44,17 @@ export interface ResearchQuestionResultSnapshot {
   unresolvedAspectKeys: readonly string[];
 }
 
+export interface ResearchQuestionResultReviewItem {
+  resultId: string;
+  missionId: string;
+  title: string;
+  sourceUrl: string | null;
+  supportDirection: ResearchResultSupportDirection;
+  classificationReviewStatus: ResearchResultReviewStatus;
+  classificationRationale: string | null;
+  sourceUsable: boolean;
+}
+
 export interface ResearchCoverageGap {
   kind: "MISSING_ASPECT" | "INSUFFICIENT_RESULT" | "CONFLICTING_AUTHORITY" | "UNVERIFIED_SOURCE" | "MISSING_FULL_TEXT";
   key: string;
@@ -132,28 +143,82 @@ export async function persistResearchQuestionResults(input: {
 export async function reviewResearchQuestionResult(input: {
   resultId: string;
   tenantId: string;
+  missionId: string;
   direction: ResearchResultSupportDirection;
   reviewStatus: "HUMAN_CONFIRMED" | "REJECTED";
   confidence: number | null;
   rationale: string;
 }, overrides: Partial<ResearchQuestionResultContext> = {}): Promise<ResearchQuestionResultSnapshot> {
   if (input.confidence !== null && (input.confidence < 0 || input.confidence > 1)) throw new Error("INVALID_CLASSIFICATION_CONFIDENCE");
+  const rationale = input.rationale.trim();
+  if (rationale.length < 20) throw new Error("INVALID_CLASSIFICATION_RATIONALE");
   const context = { ...defaultContext, ...overrides };
   return context.transaction(async (tx) => {
     const updated = await tx.query<ResearchQuestionResultSnapshot>(`
-      UPDATE "ResearchQuestionResultRecord"
+      UPDATE "ResearchQuestionResultRecord" AS result
       SET "supportDirection" = $3::"ResearchResultSupportDirection",
           "classificationSource" = 'HUMAN_REVIEW',
           "classificationConfidence" = $4,
           "classificationRationale" = $5,
           "classificationReviewStatus" = $6::"ResearchResultReviewStatus",
           "updatedAt" = CURRENT_TIMESTAMP
-      WHERE "id" = $1 AND "tenantId" = $2
-      RETURNING *
-    `, [input.resultId, input.tenantId, input.direction, input.confidence, input.rationale.slice(0, 2000), input.reviewStatus]);
+      FROM "ResearchMissionRecord" AS mission
+      WHERE result."id" = $1
+        AND result."tenantId" = $2
+        AND result."missionId" = $7
+        AND mission."id" = result."missionId"
+        AND mission."tenantId" = result."tenantId"
+        AND mission."caseId" = result."caseId"
+      RETURNING result.*
+    `, [input.resultId, input.tenantId, input.direction, input.confidence, rationale.slice(0, 2000), input.reviewStatus, input.missionId]);
     if (!updated.rows[0]) throw new Error("RESEARCH_QUESTION_RESULT_NOT_FOUND");
     return updated.rows[0];
   });
+}
+
+export async function listResearchQuestionResultsForReview(input: {
+  missionId: string;
+  tenantId: string;
+}, overrides: Partial<ResearchQuestionResultContext> = {}): Promise<readonly ResearchQuestionResultReviewItem[]> {
+  const context = { ...defaultContext, ...overrides };
+  const records = await context.read.query<{
+    id: string;
+    missionId: string;
+    candidateSnapshot: AuthorityCandidate;
+    supportDirection: ResearchResultSupportDirection;
+    classificationReviewStatus: ResearchResultReviewStatus;
+    classificationRationale: string | null;
+    sourceUsable: boolean;
+  }>(`
+    SELECT result."id", result."missionId", result."candidateSnapshot",
+      result."supportDirection", result."classificationReviewStatus",
+      result."classificationRationale",
+      EXISTS (
+        SELECT 1 FROM "ResearchSourceAssessmentRecord" AS assessment
+        WHERE assessment."resultId" = result."id"
+          AND assessment."tenantId" = result."tenantId"
+          AND assessment."missionId" = result."missionId"
+          AND assessment."isCurrent" = TRUE
+          AND assessment."usable" = TRUE
+      ) AS "sourceUsable"
+    FROM "ResearchQuestionResultRecord" AS result
+    JOIN "ResearchMissionRecord" AS mission
+      ON mission."id" = result."missionId"
+      AND mission."tenantId" = result."tenantId"
+      AND mission."caseId" = result."caseId"
+    WHERE result."tenantId" = $1 AND result."missionId" = $2
+    ORDER BY result."createdAt" ASC, result."id" ASC
+  `, [input.tenantId, input.missionId]);
+  return records.rows.map((record) => ({
+    resultId: record.id,
+    missionId: record.missionId,
+    title: record.candidateSnapshot.title ?? record.candidateSnapshot.officialIdentifier ?? record.id,
+    sourceUrl: record.candidateSnapshot.sourceUrl ?? null,
+    supportDirection: record.supportDirection,
+    classificationReviewStatus: record.classificationReviewStatus,
+    classificationRationale: record.classificationRationale,
+    sourceUsable: record.sourceUsable,
+  }));
 }
 
 function executionState(status: ResearchMissionStatus): ResearchQuestionExecutionState {
