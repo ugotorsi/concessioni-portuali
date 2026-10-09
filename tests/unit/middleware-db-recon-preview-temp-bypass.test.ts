@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 const getTokenMock = vi.hoisted(() => vi.fn());
@@ -34,6 +34,46 @@ describe("middleware sensitive route boundaries", () => {
     });
     getRateLimitHeadersMock.mockReturnValue({});
     getTokenMock.mockResolvedValue(null);
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("allows only the exact database diagnostic path on the authorized Preview branch", async () => {
+    vi.stubEnv("VERCEL_ENV", "preview");
+    vi.stubEnv("VERCEL_GIT_COMMIT_REF", "e2e-unified-fascicolo-20261009");
+
+    const response = await middleware(makeRequest("/api/diagnostics/preview-database"));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("location")).toBeNull();
+    expect(getTokenMock).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["production", "e2e-unified-fascicolo-20261009"],
+    ["preview", "staging-operativo"],
+  ])("keeps the database diagnostic protected outside its exact scope", async (environment, branch) => {
+    vi.stubEnv("VERCEL_ENV", environment);
+    vi.stubEnv("VERCEL_GIT_COMMIT_REF", branch);
+
+    const response = await middleware(makeRequest("/api/diagnostics/preview-database"));
+
+    expect(response.status).toBe(307);
+    expect(new URL(response.headers.get("location")!).pathname).toBe("/login");
+    expect(getTokenMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps similar database diagnostic paths protected", async () => {
+    vi.stubEnv("VERCEL_ENV", "preview");
+    vi.stubEnv("VERCEL_GIT_COMMIT_REF", "e2e-unified-fascicolo-20261009");
+
+    const response = await middleware(makeRequest("/api/diagnostics/preview-database/extra"));
+
+    expect(response.status).toBe(307);
+    expect(new URL(response.headers.get("location")!).pathname).toBe("/login");
+    expect(getTokenMock).toHaveBeenCalledTimes(1);
   });
 
   it("protects the retired DB recon path like every admin route", async () => {

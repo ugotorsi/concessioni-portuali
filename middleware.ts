@@ -7,6 +7,8 @@ const PUBLIC_PATHS = new Set(["/", "/login", "/logout"]);
 const MCP_PATH = "/api/mcp";
 const TRUSTED_RESEARCH_MISSION_PATH = "/api/legal-research/trusted/mission";
 const TRUSTED_RESEARCH_MISSION_ACTION_PATH = "/api/legal-research/trusted/mission/action";
+const PREVIEW_DATABASE_DIAGNOSTIC_PATH = "/api/diagnostics/preview-database";
+const PREVIEW_DATABASE_DIAGNOSTIC_BRANCH = "e2e-unified-fascicolo-20261009";
 const PROTECTED_PREFIXES = [
   "/dashboard",
   "/mappa",
@@ -128,6 +130,14 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith("/api/auth")) {
+    return withSecurityHeaders(NextResponse.next());
+  }
+
+  if (
+    pathname === PREVIEW_DATABASE_DIAGNOSTIC_PATH
+    && process.env.VERCEL_ENV === "preview"
+    && process.env.VERCEL_GIT_COMMIT_REF === PREVIEW_DATABASE_DIAGNOSTIC_BRANCH
+  ) {
     return withSecurityHeaders(NextResponse.next());
   }
 
