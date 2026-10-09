@@ -550,18 +550,22 @@ export function assessResearchBudget(
   const moonlitCalls = calls("MOONLIT");
   const simpliciterCalls = calls("SIMPLICITER");
   const legalDataHunterCalls = calls("LEGAL_DATA_HUNTER");
-  const values: Array<[number, number]> = [
-    [totalCalls, budget.maxTotalResearchCalls],
+  const providerValues: Array<[number, number]> = [
     [moonlitCalls, budget.maxMoonlitCalls],
     [simpliciterCalls, budget.maxSimpliciterCalls],
     [legalDataHunterCalls, budget.maxLegalDataHunterCalls],
+  ];
+  const values: Array<[number, number]> = [
+    [totalCalls, budget.maxTotalResearchCalls],
+    ...providerValues,
   ];
   return {
     totalCalls,
     moonlitCalls,
     simpliciterCalls,
     legalDataHunterCalls,
-    exhausted: values.some(([used, maximum]) => used >= maximum),
+    exhausted: totalCalls >= budget.maxTotalResearchCalls
+      || providerValues.every(([used, maximum]) => used >= maximum),
     exceeded: values.some(([used, maximum]) => used > maximum),
   };
 }

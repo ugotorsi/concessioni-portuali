@@ -452,6 +452,23 @@ describe("Block 3B.13A chat legal research bridge", () => {
     })))).toContain("BUDGET_EXCEEDED");
   });
 
+  it("allows COMPLETE while unused provider capacity remains", () => {
+    const researchMission = mission({ budget: {
+      maxTotalResearchCalls: 3,
+      maxMoonlitCalls: 1,
+      maxSimpliciterCalls: 1,
+      maxLegalDataHunterCalls: 1,
+    } });
+    const value = bundle(researchMission);
+    expect(assessResearchBudget(researchMission.budget, value.researchToolExecutions)).toMatchObject({
+      totalCalls: 1,
+      simpliciterCalls: 1,
+      exhausted: false,
+      exceeded: false,
+    });
+    expect(validateResearchEvidenceBundle(researchMission, value)).toEqual([]);
+  });
+
   it("preserves partial evidence when the exact call budget is exhausted", () => {
     const researchMission = mission({ budget: {
       maxTotalResearchCalls: 1,
