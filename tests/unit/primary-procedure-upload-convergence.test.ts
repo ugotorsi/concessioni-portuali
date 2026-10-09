@@ -218,7 +218,7 @@ async function runHandoff(outcome: "CASE_DOCUMENT" | "LEGAL_SOURCE_CANDIDATE" | 
   });
 }
 
-describe("primary Procedimento upload convergence", () => {
+describe("primary Procedimento direct upload", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     state.intake = null;
@@ -240,88 +240,53 @@ describe("primary Procedimento upload convergence", () => {
     readFileMock.mockResolvedValue({ disposition: "FOUND", body });
     auditSuccessMock.mockResolvedValue(undefined);
     auditFailureMock.mockResolvedValue(undefined);
+    uploadDocumentMock.mockResolvedValue({
+      created: true,
+      storageKey: "documents/ente-1/document-1/hash",
+      checksum: "a".repeat(64),
+      document: {
+        id: "document-1",
+        concessioneId: null,
+        criticitaId: null,
+        procedimentoId: "procedimento-1",
+        sopralluogoId: null,
+        pagamentoId: null,
+        reportId: null,
+      },
+    });
     redirectMock.mockImplementation(() => undefined);
   });
 
-  it("stores one artifact, admits one destination-bound intake, retries idempotently, and routes CASE_DOCUMENT", async () => {
-    await createDocumentoUploadAction(uploadFormData());
+  it("archives directly without intake, extraction, classification, or reevaluation jobs", async () => {
     await createDocumentoUploadAction(uploadFormData());
 
-    expect(createFileMock).toHaveBeenCalledTimes(2);
-    expect(state.physicalStorageWrites).toBe(1);
-    expect(txMock.neutralIntake.create).toHaveBeenCalledTimes(1);
-    expect(txMock.neutralIntakeDestination.createMany).toHaveBeenCalledTimes(1);
-    expect(state.destination).toMatchObject({
-      neutralIntakeId: "intake-1",
+    expect(uploadDocumentMock).toHaveBeenCalledWith(expect.objectContaining({
+      enteId: "ente-1",
       procedimentoId: "procedimento-1",
-      authoritySource: "CASE_FOLDER_UPLOAD",
-    });
-    expect(uploadDocumentMock).not.toHaveBeenCalled();
-    expect(txMock.documento.createMany).not.toHaveBeenCalled();
-
-    await expect(runHandoff("CASE_DOCUMENT")).resolves.toMatchObject({ outcome: "CASE_DOCUMENT_ROUTED" });
-    expect(txMock.documento.createMany).toHaveBeenCalledTimes(1);
-    expect(txMock.documento.createMany).toHaveBeenCalledWith({
-      data: [expect.objectContaining({
-        procedimentoId: "procedimento-1",
-        storageKey: storageObject.storageKey,
-        sha256,
-      })],
-      skipDuplicates: true,
-    });
-    expect(txMock.documentFileVersion.createMany).toHaveBeenCalledWith({
-      data: [expect.objectContaining({ storageKey: storageObject.storageKey, sha256 })],
-      skipDuplicates: true,
-    });
-    const reevaluationAdmissions = admitJobMock.mock.calls.filter(
-      ([, admission]) => admission.operation === "FASCICOLO_REEVALUATE_V1",
-    );
-    expect(reevaluationAdmissions).toHaveLength(1);
-    expect(reevaluationAdmissions[0][0]).toBe(txMock);
-    expect(reevaluationAdmissions[0][1]).toMatchObject({
-      operation: "FASCICOLO_REEVALUATE_V1",
-      inputReference: {
-        referenceType: "FASCICOLO_REEVALUATION",
-        referenceId: "procedimento-1",
+      actor: {
+        id: "user-1",
+        email: "user@example.test",
+        role: "GIURIDICO",
       },
-    });
-  });
-
-  it("converges race-shaped new operations with identical bytes in one fascicolo", async () => {
-    let transactionTail = Promise.resolve<unknown>(undefined);
-    runTransactionMock.mockImplementation((work) => {
-      const result = transactionTail.then(() => work(txMock));
-      transactionTail = result.then(() => undefined, () => undefined);
-      return result;
-    });
-
-    await Promise.all([
-      createDocumentoUploadAction(uploadFormData({
-        operationId: "61d399ba-b3c5-4faa-88b8-9a477c993431",
-        fileName: "istanza.txt",
-      })),
-      createDocumentoUploadAction(uploadFormData({
-        operationId: "02f41460-9f68-47d6-97a4-936063720974",
-        fileName: "istanza-rinominata.txt",
-      })),
-    ]);
-
-    expect(txMock.neutralIntake.create).toHaveBeenCalledTimes(1);
-    expect(txMock.neutralIntakeDestination.createMany).toHaveBeenCalledTimes(1);
-    expect(admitJobMock).toHaveBeenCalledTimes(1);
-    expect(uploadDocumentMock).not.toHaveBeenCalled();
-    expect(redirectMock).toHaveBeenCalledWith("/procedimenti/procedimento-1?documentUpload=duplicate");
-  });
-
-  it.each([
-    ["LEGAL_SOURCE_CANDIDATE", "LEGAL_SOURCE_CANDIDATE_ADMITTED"],
-    ["UNCERTAIN_REVIEW_REQUIRED", "REVIEW_REQUIRED"],
-  ] as const)("retains procedure context without forcing %s into CASE_DOCUMENT", async (outcome, expected) => {
-    await createDocumentoUploadAction(uploadFormData());
-
-    await expect(runHandoff(outcome)).resolves.toMatchObject({ outcome: expected });
-    expect(state.destination).toMatchObject({ procedimentoId: "procedimento-1" });
+    }));
+    expect(txMock.neutralIntake.create).not.toHaveBeenCalled();
+    expect(txMock.neutralIntakeDestination.createMany).not.toHaveBeenCalled();
+    expect(createFileMock).not.toHaveBeenCalled();
+    expect(admitJobMock).not.toHaveBeenCalled();
     expect(txMock.documento.createMany).not.toHaveBeenCalled();
-    expect(txMock.legalSource.create).not.toHaveBeenCalled();
+    expect(redirectMock).toHaveBeenCalledWith("/procedimenti/procedimento-1");
+  });
+
+  it("keeps tenant rejection ahead of direct storage and all automatic work", async () => {
+    requireTenantAccessMock.mockImplementationOnce(() => {
+      throw new Error("TENANT_DENIED");
+    });
+
+    await expect(createDocumentoUploadAction(uploadFormData())).rejects.toThrow("Accesso tenant non consentito");
+
+    expect(uploadDocumentMock).not.toHaveBeenCalled();
+    expect(createFileMock).not.toHaveBeenCalled();
+    expect(admitJobMock).not.toHaveBeenCalled();
+    expect(txMock.neutralIntake.create).not.toHaveBeenCalled();
   });
 });
