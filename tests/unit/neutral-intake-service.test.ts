@@ -167,7 +167,7 @@ describe("B2C9 Block 3B.1 neutral intake service", () => {
     mocks.findPreflightDuplicateIntake.mockResolvedValue(null);
     mocks.findPreflightDuplicateDocument.mockResolvedValue(null);
     mocks.findUser.mockResolvedValue({ ruolo: "ADMIN" });
-    mocks.findProcedimento.mockResolvedValue({ id: "procedimento-1", concessione: { enteId: "ente-1" } });
+    mocks.findProcedimento.mockResolvedValue({ id: "procedimento-1", enteId: "ente-1" });
     mocks.findDestination.mockResolvedValue(null);
     mocks.findDuplicateIntake.mockResolvedValue(null);
     mocks.findDuplicateDocument.mockResolvedValue(null);
@@ -279,7 +279,7 @@ describe("B2C9 Block 3B.1 neutral intake service", () => {
     mocks.findPreflightDuplicateIntake.mockImplementation(async ({ where }) => (
       where.procedimentoId === "procedimento-1" ? { neutralIntakeId: "intake-existing" } : null
     ));
-    mocks.findProcedimento.mockResolvedValue({ id: "procedimento-2", concessione: { enteId: "ente-1" } });
+    mocks.findProcedimento.mockResolvedValue({ id: "procedimento-2", enteId: "ente-1" });
     mocks.findUnique
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce(record({ enteId: "ente-1" }));
@@ -403,7 +403,7 @@ describe("B2C9 Block 3B.1 neutral intake service", () => {
     mocks.findDuplicateDocument.mockImplementation(async ({ where }: { where: RoutedDocumentWhere }) => (
       matchesRoutedDocumentHash(where, legacyDocument) ? { id: "documento-other-fascicolo" } : null
     ));
-    mocks.findProcedimento.mockResolvedValue({ id: "procedimento-2", concessione: { enteId: "ente-1" } });
+    mocks.findProcedimento.mockResolvedValue({ id: "procedimento-2", enteId: "ente-1" });
     mocks.findUnique
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce(record({ enteId: "ente-1" }));

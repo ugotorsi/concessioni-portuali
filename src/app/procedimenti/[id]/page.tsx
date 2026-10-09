@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { SubmitButtonPending } from "@/components/forms/SubmitButtonPending";
 import { EntityDocumentsPanel } from "@/components/documents/EntityDocumentsPanel";
@@ -152,6 +152,10 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   const detail = await getProcedimentoDetail(id);
   const fascicoloIntake = detail ? null : await getFascicoloIntakeDetail(id);
 
+  if (fascicoloIntake?.procedimento) {
+    redirect(`/procedimenti/${fascicoloIntake.procedimento.id}`);
+  }
+
   if (fascicoloIntake) {
     return <FascicoloIntakeDetail fascicolo={fascicoloIntake} canUpload={canReview} activeSection={activeSection} />;
   }
@@ -179,6 +183,122 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
     statementPath,
   });
 
+  if (!detail.concessione || !detail.concessionario) {
+    const overview: FascicoloOverviewModel = {
+      title: "Fascicolo operativo",
+      status: formatEnumLabel(detail.procedimento.stato),
+      type: formatEnumLabel(detail.procedimento.tipologia),
+      reference: "Titolo concessorio non accertato",
+      lastUpdated: formatDateIT(detail.procedimento.updatedAt),
+      documentCount: detail.documentiPrincipali.length,
+      openIssueCount: detail.altreCriticitaAperte.length,
+      criticalPaymentCount: 0,
+      concession: {
+        number: null,
+        authority: null,
+        object: null,
+        startDate: null,
+        expiryDate: null,
+        location: null,
+        incomplete: true,
+      },
+      subjects: [],
+      documents: detail.documentiPrincipali.slice(0, 3).map((documento) => ({
+        id: documento.id,
+        name: documento.nome,
+        type: formatEnumLabel(documento.tipologia),
+        date: formatDateIT(documento.dataDocumento ?? documento.createdAt),
+        isFileAvailable: documento.isFileAvailable,
+        href: documento.url,
+      })),
+      deadlines: [],
+      attention: [{
+        label: "Titolo concessorio non ancora accertato",
+        section: "concession",
+      }],
+    };
+    return (
+      <FascicoloShell
+        model={overview}
+        basePath={`/procedimenti/${detail.procedimento.id}`}
+        activeSection={activeSection}
+        notice={duplicateDocumentUpload ? (
+          <div role="alert" className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+            Documento già presente nel fascicolo.
+          </div>
+        ) : null}
+      >
+        <div className="space-y-4">
+          {activeSection === "documents" ? (
+            <section className="space-y-4" aria-label="Documenti del fascicolo">
+              <EntityDocumentsPanel
+                title="Documenti del Fascicolo"
+                entityType="procedimento"
+                entityId={detail.procedimento.id}
+                documents={detail.documentiPrincipali}
+                canUpload={canWriteChecklist}
+                archiveMode
+              />
+              <NeutralIntakeProcessingPanel items={processingItems} />
+            </section>
+          ) : null}
+          {activeSection === "istruttoria" ? <FascicoloAutomaticWorkflowPanel model={automaticWorkflow} /> : null}
+          {activeSection === "analysis" ? (
+            <FascicoloAnalysis
+              model={{
+                questions: [],
+                evidence: detail.documentiPrincipali.map((documento) => ({
+                  id: documento.id,
+                  title: documento.nome,
+                  detail: formatEnumLabel(documento.tipologia),
+                  href: documento.isFileAvailable ? documento.url : null,
+                })),
+                contradictions: [],
+                gaps: detail.documentiPrincipali.length === 0 ? [{
+                  id: "documenti-mancanti",
+                  title: "Documentazione da acquisire",
+                  requestedItem: "Carica gli atti disponibili per avviare estrazione e analisi.",
+                }] : [],
+                relevantItems: [],
+              }}
+            />
+          ) : null}
+          {activeSection === "research" ? <FascicoloResearch model={{ questions: [], sources: [] }} /> : null}
+          {activeSection === "reports" ? <FascicoloReport snapshots={structuredReportSnapshots} /> : null}
+          {activeSection === "concession" ? (
+            <Card>
+              <CardHeader><CardTitle>Titolo concessorio non accertato</CardTitle></CardHeader>
+              <CardContent className="text-sm text-slate-600">
+                Il fascicolo è operativo senza rappresentare l&apos;esistenza di una concessione. Il collegamento potrà essere aggiunto solo quando un titolo reale sarà disponibile.
+              </CardContent>
+            </Card>
+          ) : null}
+          {activeSection === "subjects" ? (
+            <FascicoloSubjects
+              subjects={[]}
+              responsible={detail.procedimento.responsabileProcedimentoNome ? {
+                name: detail.procedimento.responsabileProcedimentoNome,
+                email: detail.procedimento.responsabileProcedimentoEmail,
+                organization: detail.procedimento.unitaOrganizzativaResponsabile,
+                assignedAt: detail.procedimento.responsabileAssegnatoAt
+                  ? formatDateIT(detail.procedimento.responsabileAssegnatoAt)
+                  : null,
+              } : null}
+              responsibilityHistory={[]}
+            />
+          ) : null}
+          {["timeline", "deadlines", "issues", "proposals", "decisione"].includes(activeSection) ? (
+            <p className="rounded-md border border-slate-200 px-4 py-3 text-sm text-slate-600">
+              Nessun dato disponibile per questa sezione.
+            </p>
+          ) : null}
+        </div>
+      </FascicoloShell>
+    );
+  }
+
+  const concessione = detail.concessione;
+  const concessionario = detail.concessionario;
   const checklist = getChecklistContraddittorioItems(detail.procedimento);
   const checklistGuidance = getProcedimentoChecklistGuidance(detail.procedimento);
   const preavvisoWarningApplicabileNonInviato =
@@ -304,7 +424,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
       title: "Fascicolo creato",
       type: "Fascicolo",
       description: `Apertura del fascicolo ${formatEnumLabel(detail.procedimento.tipologia)}.`,
-      subjects: detail.concessionario.denominazione,
+      subjects: concessionario.denominazione,
     },
     ...(detail.procedimento.dataAvvio ? [{
       id: `avvio-${detail.procedimento.id}`,
@@ -314,7 +434,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
       title: "Procedimento avviato",
       type: "Fascicolo" as const,
       description: `Avvio del procedimento ${formatEnumLabel(detail.procedimento.tipologia)}.`,
-      subjects: detail.concessionario.denominazione,
+      subjects: concessionario.denominazione,
     }] : []),
     {
       id: `concessione-${detail.concessione.id}`,
@@ -324,7 +444,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
       title: "Concessione rilasciata",
       type: "Concessione",
       description: `Rilascio della concessione ${detail.concessione.numeroAtto}.`,
-      subjects: detail.concessionario.denominazione,
+      subjects: concessionario.denominazione,
       href: `/procedimenti/${detail.procedimento.id}?section=concession`,
       actionLabel: "Vai alla concessione",
     },
@@ -336,7 +456,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
       title: "Comunicazione di avvio inviata",
       type: "Comunicazione" as const,
       description: "Comunicazione di avvio del procedimento registrata nel fascicolo.",
-      subjects: detail.concessionario.denominazione,
+      subjects: concessionario.denominazione,
     }] : []),
     ...(detail.procedimento.contestazioneFormaleInviata && detail.procedimento.dataContestazioneFormale ? [{
       id: `contestazione-${detail.procedimento.id}`,
@@ -346,7 +466,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
       title: "Contestazione formale inviata",
       type: "Comunicazione" as const,
       description: "Invio della contestazione formale registrato nel fascicolo.",
-      subjects: detail.concessionario.denominazione,
+      subjects: concessionario.denominazione,
     }] : []),
     ...(detail.procedimento.memorieRicevute && detail.procedimento.dataRicezioneMemorie ? [{
       id: `memorie-${detail.procedimento.id}`,
@@ -356,7 +476,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
       title: "Memorie ricevute",
       type: "Comunicazione" as const,
       description: "Ricezione delle memorie registrata nel fascicolo.",
-      subjects: detail.concessionario.denominazione,
+      subjects: concessionario.denominazione,
     }] : []),
     ...detail.documentiPrincipali
       .filter((documento) => documento.id !== decisioneConclusiva?.documentoId)
@@ -419,7 +539,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
       title: `Scadenza ${formatEnumLabel(item.tipologia)}`,
       type: "Scadenza" as const,
       description: item.descrizione ?? `Scadenza ${formatEnumLabel(item.tipologia)} registrata nel fascicolo.`,
-      subjects: detail.concessionario.denominazione,
+      subjects: concessionario.denominazione,
       alert: ["SCADUTA", "SCADUTO"].includes(item.stato) ? "Scaduto" as const : null,
       href: `/procedimenti/${detail.procedimento.id}?section=deadlines`,
       actionLabel: "Vai alle scadenze",
@@ -432,7 +552,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
       title: `Pagamento ${item.annoRiferimento}`,
       type: "Pagamento" as const,
       description: `Residuo da verificare: ${formatCurrencyEUR(item.residuo)}.`,
-      subjects: detail.concessionario.denominazione,
+      subjects: concessionario.denominazione,
       alert: "Da verificare" as const,
       href: `/procedimenti/${detail.procedimento.id}?section=concession`,
       actionLabel: "Vai alla concessione",
@@ -1198,7 +1318,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                   origin: "Procedimento",
                   links: [
                     { label: "Apri criticità", href: `/criticita/${detail.criticitaCollegata.id}` },
-                    { label: "Apri concessione", href: `/concessioni/${detail.concessione.id}` },
+                    { label: "Apri concessione", href: `/concessioni/${concessione.id}` },
                   ],
                 }] : []),
                 ...detail.altreCriticitaAperte.map((item) => ({
@@ -1208,10 +1328,10 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                   severity: item.gravita as FascicoloIssueSeverity,
                   status: item.stato as FascicoloIssueStatus,
                   detectedAt: formatDateIT(item.dataRilevazione),
-                  origin: `Concessione ${detail.concessione.numeroAtto}`,
+                  origin: `Concessione ${concessione.numeroAtto}`,
                   links: [
                     { label: "Apri criticità", href: `/criticita/${item.id}` },
-                    { label: "Apri concessione", href: `/concessioni/${detail.concessione.id}` },
+                    { label: "Apri concessione", href: `/concessioni/${concessione.id}` },
                   ],
                 })),
               ],
@@ -1228,8 +1348,8 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                 description: item.descrizione,
                 type: formatEnumLabel(item.tipologia),
                 status: item.stato as FascicoloDeadlineStatus,
-                origin: `Concessione ${detail.concessione.numeroAtto}`,
-                links: [{ label: "Apri concessione", href: `/concessioni/${detail.concessione.id}` }],
+                origin: `Concessione ${concessione.numeroAtto}`,
+                links: [{ label: "Apri concessione", href: `/concessioni/${concessione.id}` }],
               })),
               candidates: [],
             }}

@@ -33,7 +33,7 @@ describe("Fascicolo NeutralIntake processing projection", () => {
       isAdmin: false,
       accessibleTenantIds: ["ente-1"],
     });
-    procedimentoFindUniqueMock.mockResolvedValue({ concessione: { enteId: "ente-1" } });
+    procedimentoFindUniqueMock.mockResolvedValue({ enteId: "ente-1" });
     destinationFindManyMock.mockResolvedValue([{
       neutralIntake: {
         id: "intake-1",

@@ -108,7 +108,7 @@ export async function ensureLegalReferenceDiscoveryJobInTransaction(
         id: true,
         enteId: true,
         destination: {
-          select: { procedimento: { select: { concessione: { select: { enteId: true } } } } },
+          select: { procedimento: { select: { enteId: true } } },
         },
       },
     }),
@@ -132,7 +132,7 @@ export async function ensureLegalReferenceDiscoveryJobInTransaction(
   }
   if (!intake.destination) return { outcome: "NOT_ELIGIBLE" as const, job: null };
 
-  const canonicalEnteId = intake.destination.procedimento.concessione.enteId;
+  const canonicalEnteId = intake.destination.procedimento.enteId;
   if (!canonicalEnteId || canonicalEnteId !== intake.enteId) {
     throw new AsyncJobExecutionError("LEGAL_REFERENCE_DISCOVERY", "DISCOVERY_ADMISSION_AUTHORITY_MISMATCH", false);
   }
@@ -176,14 +176,14 @@ export async function discoverLegalReferencesInTransaction(
             id: true,
             enteId: true,
             destination: {
-              select: { procedimento: { select: { concessione: { select: { enteId: true } } } } },
+              select: { procedimento: { select: { enteId: true } } },
             },
           },
         },
       },
     }),
   ]);
-  const canonicalEnteId = attempt?.neutralIntake.destination?.procedimento.concessione.enteId ?? null;
+  const canonicalEnteId = attempt?.neutralIntake.destination?.procedimento.enteId ?? null;
   if (
     !job
     || job.operation !== LEGAL_REFERENCE_DISCOVERY_OPERATION

@@ -42,11 +42,12 @@ async function authorizedScope(procedimentoId: string): Promise<AuthorizedScope>
     getCurrentTenantContext(),
     prisma.procedimento.findUnique({
       where: { id: procedimentoId },
-      select: { concessioneId: true, concessione: { select: { enteId: true } } },
+      select: { enteId: true, concessioneId: true },
     }),
   ]);
-  const tenantId = procedimento?.concessione.enteId;
+  const tenantId = procedimento?.enteId;
   if (!user || !tenantContext || !tenantId || !procedimento) throw new Error("Procedimento, attore o tenant non disponibile.");
+  if (!procedimento.concessioneId) throw new Error("Titolo concessorio necessario per questa proposta operativa.");
   requireTenantAccess(tenantContext, tenantId, { mode: "write", allowWhenEnteMissing: false });
   return {
     tenantId,

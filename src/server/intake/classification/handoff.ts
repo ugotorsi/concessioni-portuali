@@ -81,7 +81,7 @@ export async function ensureClassificationHandoffInTransaction(
         neutralIntake: {
           include: {
             destination: {
-              include: { procedimento: { include: { concessione: true } } },
+              include: { procedimento: true },
             },
           },
         },
@@ -142,8 +142,7 @@ export async function ensureClassificationHandoffInTransaction(
     await markReviewRequired(tx, intake.id);
     return { outcome: "REVIEW_REQUIRED" as const, classificationAttemptId: decision.id };
   }
-  const concessione = destination.procedimento.concessione;
-  if (!intake.enteId || concessione.enteId !== intake.enteId) {
+  if (!intake.enteId || destination.procedimento.enteId !== intake.enteId) {
     throw new NeutralIntakeHandoffConflictError();
   }
 

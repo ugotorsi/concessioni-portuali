@@ -48,7 +48,7 @@ function transaction(options: {
     procedimento: {
       findUnique: vi.fn(async () => ({
         id: "procedimento-1",
-        concessione: { enteId: options.procedimentoEnteId ?? "ente-1" },
+        enteId: options.procedimentoEnteId ?? "ente-1",
       })),
     },
     neutralIntakeDestination: {
@@ -97,8 +97,8 @@ function resumeTransaction(outcome: "CASE_DOCUMENT" | "UNCERTAIN_REVIEW_REQUIRED
       procedimentoId: "procedimento-1",
       procedimento: {
         id: "procedimento-1",
+        enteId: "ente-1",
         concessioneId: "concessione-1",
-        concessione: { id: "concessione-1", enteId: "ente-1" },
       },
     },
   };

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Paperclip } from "lucide-react";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/Button";
@@ -143,25 +142,6 @@ export default async function NuovoProcedimentoPage({ searchParams }: NuovoProce
               Soggetto assistito
               <Input name="soggettoAssistito" />
             </label>
-          </div>
-        </section>
-
-        <section aria-labelledby="documenti-title" className="space-y-4 rounded-md border border-slate-200 bg-white p-5">
-          <div>
-            <h2 id="documenti-title" className="text-lg font-semibold text-slate-950">Documenti iniziali</h2>
-            <p className="mt-1 text-sm text-slate-600">Puoi aggiungere i primi documenti ora oppure farlo successivamente dal fascicolo.</p>
-          </div>
-          <div className="flex min-h-28 flex-col items-center justify-center rounded-md border border-dashed border-slate-400 bg-slate-50 px-4 py-5 text-center">
-            <Paperclip className="h-5 w-5 text-[#173d4f]" aria-hidden="true" />
-            <p className="mt-2 text-sm font-semibold text-slate-900">Seleziona uno o più documenti</p>
-            <p className="mt-1 text-xs text-slate-500">PDF, PNG, JPG, WEBP, TXT o CSV. Massimo 10 file.</p>
-            <Input
-              name="documentiIniziali"
-              type="file"
-              accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.csv"
-              multiple
-              className="mt-3 max-w-md bg-white"
-            />
           </div>
         </section>
 

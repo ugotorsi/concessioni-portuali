@@ -28,6 +28,7 @@ export type FascicoloIntakeMinAggregateOutputType = {
   id: string | null
   enteId: string | null
   concessioneId: string | null
+  procedimentoId: string | null
   tipologiaConcessione: $Enums.ConcessionVertical | null
   oggettoFascicolo: string | null
   denominazioneBreve: string | null
@@ -52,6 +53,7 @@ export type FascicoloIntakeMaxAggregateOutputType = {
   id: string | null
   enteId: string | null
   concessioneId: string | null
+  procedimentoId: string | null
   tipologiaConcessione: $Enums.ConcessionVertical | null
   oggettoFascicolo: string | null
   denominazioneBreve: string | null
@@ -76,6 +78,7 @@ export type FascicoloIntakeCountAggregateOutputType = {
   id: number
   enteId: number
   concessioneId: number
+  procedimentoId: number
   tipologiaConcessione: number
   oggettoFascicolo: number
   denominazioneBreve: number
@@ -102,6 +105,7 @@ export type FascicoloIntakeMinAggregateInputType = {
   id?: true
   enteId?: true
   concessioneId?: true
+  procedimentoId?: true
   tipologiaConcessione?: true
   oggettoFascicolo?: true
   denominazioneBreve?: true
@@ -126,6 +130,7 @@ export type FascicoloIntakeMaxAggregateInputType = {
   id?: true
   enteId?: true
   concessioneId?: true
+  procedimentoId?: true
   tipologiaConcessione?: true
   oggettoFascicolo?: true
   denominazioneBreve?: true
@@ -150,6 +155,7 @@ export type FascicoloIntakeCountAggregateInputType = {
   id?: true
   enteId?: true
   concessioneId?: true
+  procedimentoId?: true
   tipologiaConcessione?: true
   oggettoFascicolo?: true
   denominazioneBreve?: true
@@ -247,6 +253,7 @@ export type FascicoloIntakeGroupByOutputType = {
   id: string
   enteId: string
   concessioneId: string | null
+  procedimentoId: string | null
   tipologiaConcessione: $Enums.ConcessionVertical
   oggettoFascicolo: string
   denominazioneBreve: string | null
@@ -292,6 +299,7 @@ export type FascicoloIntakeWhereInput = {
   id?: Prisma.StringFilter<"FascicoloIntake"> | string
   enteId?: Prisma.StringFilter<"FascicoloIntake"> | string
   concessioneId?: Prisma.StringNullableFilter<"FascicoloIntake"> | string | null
+  procedimentoId?: Prisma.StringNullableFilter<"FascicoloIntake"> | string | null
   tipologiaConcessione?: Prisma.EnumConcessionVerticalFilter<"FascicoloIntake"> | $Enums.ConcessionVertical
   oggettoFascicolo?: Prisma.StringFilter<"FascicoloIntake"> | string
   denominazioneBreve?: Prisma.StringNullableFilter<"FascicoloIntake"> | string | null
@@ -312,6 +320,7 @@ export type FascicoloIntakeWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"FascicoloIntake"> | Date | string
   ente?: Prisma.XOR<Prisma.EnteScalarRelationFilter, Prisma.EnteWhereInput>
   concessione?: Prisma.XOR<Prisma.ConcessioneNullableScalarRelationFilter, Prisma.ConcessioneWhereInput> | null
+  procedimento?: Prisma.XOR<Prisma.ProcedimentoNullableScalarRelationFilter, Prisma.ProcedimentoWhereInput> | null
   documenti?: Prisma.DocumentoListRelationFilter
 }
 
@@ -319,6 +328,7 @@ export type FascicoloIntakeOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   enteId?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrderInput | Prisma.SortOrder
+  procedimentoId?: Prisma.SortOrderInput | Prisma.SortOrder
   tipologiaConcessione?: Prisma.SortOrder
   oggettoFascicolo?: Prisma.SortOrder
   denominazioneBreve?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -339,11 +349,13 @@ export type FascicoloIntakeOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   ente?: Prisma.EnteOrderByWithRelationInput
   concessione?: Prisma.ConcessioneOrderByWithRelationInput
+  procedimento?: Prisma.ProcedimentoOrderByWithRelationInput
   documenti?: Prisma.DocumentoOrderByRelationAggregateInput
 }
 
 export type FascicoloIntakeWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  procedimentoId?: string
   AND?: Prisma.FascicoloIntakeWhereInput | Prisma.FascicoloIntakeWhereInput[]
   OR?: Prisma.FascicoloIntakeWhereInput[]
   NOT?: Prisma.FascicoloIntakeWhereInput | Prisma.FascicoloIntakeWhereInput[]
@@ -369,13 +381,15 @@ export type FascicoloIntakeWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"FascicoloIntake"> | Date | string
   ente?: Prisma.XOR<Prisma.EnteScalarRelationFilter, Prisma.EnteWhereInput>
   concessione?: Prisma.XOR<Prisma.ConcessioneNullableScalarRelationFilter, Prisma.ConcessioneWhereInput> | null
+  procedimento?: Prisma.XOR<Prisma.ProcedimentoNullableScalarRelationFilter, Prisma.ProcedimentoWhereInput> | null
   documenti?: Prisma.DocumentoListRelationFilter
-}, "id">
+}, "id" | "procedimentoId">
 
 export type FascicoloIntakeOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   enteId?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrderInput | Prisma.SortOrder
+  procedimentoId?: Prisma.SortOrderInput | Prisma.SortOrder
   tipologiaConcessione?: Prisma.SortOrder
   oggettoFascicolo?: Prisma.SortOrder
   denominazioneBreve?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -406,6 +420,7 @@ export type FascicoloIntakeScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"FascicoloIntake"> | string
   enteId?: Prisma.StringWithAggregatesFilter<"FascicoloIntake"> | string
   concessioneId?: Prisma.StringNullableWithAggregatesFilter<"FascicoloIntake"> | string | null
+  procedimentoId?: Prisma.StringNullableWithAggregatesFilter<"FascicoloIntake"> | string | null
   tipologiaConcessione?: Prisma.EnumConcessionVerticalWithAggregatesFilter<"FascicoloIntake"> | $Enums.ConcessionVertical
   oggettoFascicolo?: Prisma.StringWithAggregatesFilter<"FascicoloIntake"> | string
   denominazioneBreve?: Prisma.StringNullableWithAggregatesFilter<"FascicoloIntake"> | string | null
@@ -448,6 +463,7 @@ export type FascicoloIntakeCreateInput = {
   updatedAt?: Date | string
   ente: Prisma.EnteCreateNestedOneWithoutFascicoliIntakeInput
   concessione?: Prisma.ConcessioneCreateNestedOneWithoutFascicoliIntakeInput
+  procedimento?: Prisma.ProcedimentoCreateNestedOneWithoutFascicoloIntakeInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutFascicoloIntakeInput
 }
 
@@ -455,6 +471,7 @@ export type FascicoloIntakeUncheckedCreateInput = {
   id?: string
   enteId: string
   concessioneId?: string | null
+  procedimentoId?: string | null
   tipologiaConcessione: $Enums.ConcessionVertical
   oggettoFascicolo: string
   denominazioneBreve?: string | null
@@ -498,6 +515,7 @@ export type FascicoloIntakeUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ente?: Prisma.EnteUpdateOneRequiredWithoutFascicoliIntakeNestedInput
   concessione?: Prisma.ConcessioneUpdateOneWithoutFascicoliIntakeNestedInput
+  procedimento?: Prisma.ProcedimentoUpdateOneWithoutFascicoloIntakeNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutFascicoloIntakeNestedInput
 }
 
@@ -505,6 +523,7 @@ export type FascicoloIntakeUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tipologiaConcessione?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
   oggettoFascicolo?: Prisma.StringFieldUpdateOperationsInput | string
   denominazioneBreve?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -530,6 +549,7 @@ export type FascicoloIntakeCreateManyInput = {
   id?: string
   enteId: string
   concessioneId?: string | null
+  procedimentoId?: string | null
   tipologiaConcessione: $Enums.ConcessionVertical
   oggettoFascicolo: string
   denominazioneBreve?: string | null
@@ -576,6 +596,7 @@ export type FascicoloIntakeUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tipologiaConcessione?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
   oggettoFascicolo?: Prisma.StringFieldUpdateOperationsInput | string
   denominazioneBreve?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -606,10 +627,16 @@ export type FascicoloIntakeOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type FascicoloIntakeNullableScalarRelationFilter = {
+  is?: Prisma.FascicoloIntakeWhereInput | null
+  isNot?: Prisma.FascicoloIntakeWhereInput | null
+}
+
 export type FascicoloIntakeCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   enteId?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrder
+  procedimentoId?: Prisma.SortOrder
   tipologiaConcessione?: Prisma.SortOrder
   oggettoFascicolo?: Prisma.SortOrder
   denominazioneBreve?: Prisma.SortOrder
@@ -634,6 +661,7 @@ export type FascicoloIntakeMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   enteId?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrder
+  procedimentoId?: Prisma.SortOrder
   tipologiaConcessione?: Prisma.SortOrder
   oggettoFascicolo?: Prisma.SortOrder
   denominazioneBreve?: Prisma.SortOrder
@@ -658,6 +686,7 @@ export type FascicoloIntakeMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   enteId?: Prisma.SortOrder
   concessioneId?: Prisma.SortOrder
+  procedimentoId?: Prisma.SortOrder
   tipologiaConcessione?: Prisma.SortOrder
   oggettoFascicolo?: Prisma.SortOrder
   denominazioneBreve?: Prisma.SortOrder
@@ -676,11 +705,6 @@ export type FascicoloIntakeMinOrderByAggregateInput = {
   contestoIniziale?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-}
-
-export type FascicoloIntakeNullableScalarRelationFilter = {
-  is?: Prisma.FascicoloIntakeWhereInput | null
-  isNot?: Prisma.FascicoloIntakeWhereInput | null
 }
 
 export type FascicoloIntakeCreateNestedManyWithoutEnteInput = {
@@ -767,6 +791,38 @@ export type FascicoloIntakeUncheckedUpdateManyWithoutConcessioneNestedInput = {
   deleteMany?: Prisma.FascicoloIntakeScalarWhereInput | Prisma.FascicoloIntakeScalarWhereInput[]
 }
 
+export type FascicoloIntakeCreateNestedOneWithoutProcedimentoInput = {
+  create?: Prisma.XOR<Prisma.FascicoloIntakeCreateWithoutProcedimentoInput, Prisma.FascicoloIntakeUncheckedCreateWithoutProcedimentoInput>
+  connectOrCreate?: Prisma.FascicoloIntakeCreateOrConnectWithoutProcedimentoInput
+  connect?: Prisma.FascicoloIntakeWhereUniqueInput
+}
+
+export type FascicoloIntakeUncheckedCreateNestedOneWithoutProcedimentoInput = {
+  create?: Prisma.XOR<Prisma.FascicoloIntakeCreateWithoutProcedimentoInput, Prisma.FascicoloIntakeUncheckedCreateWithoutProcedimentoInput>
+  connectOrCreate?: Prisma.FascicoloIntakeCreateOrConnectWithoutProcedimentoInput
+  connect?: Prisma.FascicoloIntakeWhereUniqueInput
+}
+
+export type FascicoloIntakeUpdateOneWithoutProcedimentoNestedInput = {
+  create?: Prisma.XOR<Prisma.FascicoloIntakeCreateWithoutProcedimentoInput, Prisma.FascicoloIntakeUncheckedCreateWithoutProcedimentoInput>
+  connectOrCreate?: Prisma.FascicoloIntakeCreateOrConnectWithoutProcedimentoInput
+  upsert?: Prisma.FascicoloIntakeUpsertWithoutProcedimentoInput
+  disconnect?: Prisma.FascicoloIntakeWhereInput | boolean
+  delete?: Prisma.FascicoloIntakeWhereInput | boolean
+  connect?: Prisma.FascicoloIntakeWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.FascicoloIntakeUpdateToOneWithWhereWithoutProcedimentoInput, Prisma.FascicoloIntakeUpdateWithoutProcedimentoInput>, Prisma.FascicoloIntakeUncheckedUpdateWithoutProcedimentoInput>
+}
+
+export type FascicoloIntakeUncheckedUpdateOneWithoutProcedimentoNestedInput = {
+  create?: Prisma.XOR<Prisma.FascicoloIntakeCreateWithoutProcedimentoInput, Prisma.FascicoloIntakeUncheckedCreateWithoutProcedimentoInput>
+  connectOrCreate?: Prisma.FascicoloIntakeCreateOrConnectWithoutProcedimentoInput
+  upsert?: Prisma.FascicoloIntakeUpsertWithoutProcedimentoInput
+  disconnect?: Prisma.FascicoloIntakeWhereInput | boolean
+  delete?: Prisma.FascicoloIntakeWhereInput | boolean
+  connect?: Prisma.FascicoloIntakeWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.FascicoloIntakeUpdateToOneWithWhereWithoutProcedimentoInput, Prisma.FascicoloIntakeUpdateWithoutProcedimentoInput>, Prisma.FascicoloIntakeUncheckedUpdateWithoutProcedimentoInput>
+}
+
 export type FascicoloIntakeCreateNestedOneWithoutDocumentiInput = {
   create?: Prisma.XOR<Prisma.FascicoloIntakeCreateWithoutDocumentiInput, Prisma.FascicoloIntakeUncheckedCreateWithoutDocumentiInput>
   connectOrCreate?: Prisma.FascicoloIntakeCreateOrConnectWithoutDocumentiInput
@@ -804,12 +860,14 @@ export type FascicoloIntakeCreateWithoutEnteInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   concessione?: Prisma.ConcessioneCreateNestedOneWithoutFascicoliIntakeInput
+  procedimento?: Prisma.ProcedimentoCreateNestedOneWithoutFascicoloIntakeInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutFascicoloIntakeInput
 }
 
 export type FascicoloIntakeUncheckedCreateWithoutEnteInput = {
   id?: string
   concessioneId?: string | null
+  procedimentoId?: string | null
   tipologiaConcessione: $Enums.ConcessionVertical
   oggettoFascicolo: string
   denominazioneBreve?: string | null
@@ -864,6 +922,7 @@ export type FascicoloIntakeScalarWhereInput = {
   id?: Prisma.StringFilter<"FascicoloIntake"> | string
   enteId?: Prisma.StringFilter<"FascicoloIntake"> | string
   concessioneId?: Prisma.StringNullableFilter<"FascicoloIntake"> | string | null
+  procedimentoId?: Prisma.StringNullableFilter<"FascicoloIntake"> | string | null
   tipologiaConcessione?: Prisma.EnumConcessionVerticalFilter<"FascicoloIntake"> | $Enums.ConcessionVertical
   oggettoFascicolo?: Prisma.StringFilter<"FascicoloIntake"> | string
   denominazioneBreve?: Prisma.StringNullableFilter<"FascicoloIntake"> | string | null
@@ -905,12 +964,14 @@ export type FascicoloIntakeCreateWithoutConcessioneInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   ente: Prisma.EnteCreateNestedOneWithoutFascicoliIntakeInput
+  procedimento?: Prisma.ProcedimentoCreateNestedOneWithoutFascicoloIntakeInput
   documenti?: Prisma.DocumentoCreateNestedManyWithoutFascicoloIntakeInput
 }
 
 export type FascicoloIntakeUncheckedCreateWithoutConcessioneInput = {
   id?: string
   enteId: string
+  procedimentoId?: string | null
   tipologiaConcessione: $Enums.ConcessionVertical
   oggettoFascicolo: string
   denominazioneBreve?: string | null
@@ -958,6 +1019,122 @@ export type FascicoloIntakeUpdateManyWithWhereWithoutConcessioneInput = {
   data: Prisma.XOR<Prisma.FascicoloIntakeUpdateManyMutationInput, Prisma.FascicoloIntakeUncheckedUpdateManyWithoutConcessioneInput>
 }
 
+export type FascicoloIntakeCreateWithoutProcedimentoInput = {
+  id?: string
+  tipologiaConcessione: $Enums.ConcessionVertical
+  oggettoFascicolo: string
+  denominazioneBreve?: string | null
+  concessionario?: string | null
+  enteConcedente?: string | null
+  autoritaCompetente?: string | null
+  numeroConcessione?: string | null
+  dataRilascio?: Date | string | null
+  decorrenza?: Date | string | null
+  scadenza?: Date | string | null
+  oggettoConcessione?: string | null
+  beneAreaServizio?: string | null
+  localita?: string | null
+  soggettoAssistito?: string | null
+  controparteAmministrazione?: string | null
+  contestoIniziale?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  ente: Prisma.EnteCreateNestedOneWithoutFascicoliIntakeInput
+  concessione?: Prisma.ConcessioneCreateNestedOneWithoutFascicoliIntakeInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutFascicoloIntakeInput
+}
+
+export type FascicoloIntakeUncheckedCreateWithoutProcedimentoInput = {
+  id?: string
+  enteId: string
+  concessioneId?: string | null
+  tipologiaConcessione: $Enums.ConcessionVertical
+  oggettoFascicolo: string
+  denominazioneBreve?: string | null
+  concessionario?: string | null
+  enteConcedente?: string | null
+  autoritaCompetente?: string | null
+  numeroConcessione?: string | null
+  dataRilascio?: Date | string | null
+  decorrenza?: Date | string | null
+  scadenza?: Date | string | null
+  oggettoConcessione?: string | null
+  beneAreaServizio?: string | null
+  localita?: string | null
+  soggettoAssistito?: string | null
+  controparteAmministrazione?: string | null
+  contestoIniziale?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutFascicoloIntakeInput
+}
+
+export type FascicoloIntakeCreateOrConnectWithoutProcedimentoInput = {
+  where: Prisma.FascicoloIntakeWhereUniqueInput
+  create: Prisma.XOR<Prisma.FascicoloIntakeCreateWithoutProcedimentoInput, Prisma.FascicoloIntakeUncheckedCreateWithoutProcedimentoInput>
+}
+
+export type FascicoloIntakeUpsertWithoutProcedimentoInput = {
+  update: Prisma.XOR<Prisma.FascicoloIntakeUpdateWithoutProcedimentoInput, Prisma.FascicoloIntakeUncheckedUpdateWithoutProcedimentoInput>
+  create: Prisma.XOR<Prisma.FascicoloIntakeCreateWithoutProcedimentoInput, Prisma.FascicoloIntakeUncheckedCreateWithoutProcedimentoInput>
+  where?: Prisma.FascicoloIntakeWhereInput
+}
+
+export type FascicoloIntakeUpdateToOneWithWhereWithoutProcedimentoInput = {
+  where?: Prisma.FascicoloIntakeWhereInput
+  data: Prisma.XOR<Prisma.FascicoloIntakeUpdateWithoutProcedimentoInput, Prisma.FascicoloIntakeUncheckedUpdateWithoutProcedimentoInput>
+}
+
+export type FascicoloIntakeUpdateWithoutProcedimentoInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tipologiaConcessione?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  oggettoFascicolo?: Prisma.StringFieldUpdateOperationsInput | string
+  denominazioneBreve?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enteConcedente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoritaCompetente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  numeroConcessione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataRilascio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  decorrenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  oggettoConcessione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  beneAreaServizio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  localita?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  soggettoAssistito?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  controparteAmministrazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contestoIniziale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ente?: Prisma.EnteUpdateOneRequiredWithoutFascicoliIntakeNestedInput
+  concessione?: Prisma.ConcessioneUpdateOneWithoutFascicoliIntakeNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutFascicoloIntakeNestedInput
+}
+
+export type FascicoloIntakeUncheckedUpdateWithoutProcedimentoInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.StringFieldUpdateOperationsInput | string
+  concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipologiaConcessione?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
+  oggettoFascicolo?: Prisma.StringFieldUpdateOperationsInput | string
+  denominazioneBreve?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  concessionario?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enteConcedente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoritaCompetente?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  numeroConcessione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataRilascio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  decorrenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  oggettoConcessione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  beneAreaServizio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  localita?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  soggettoAssistito?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  controparteAmministrazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contestoIniziale?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutFascicoloIntakeNestedInput
+}
+
 export type FascicoloIntakeCreateWithoutDocumentiInput = {
   id?: string
   tipologiaConcessione: $Enums.ConcessionVertical
@@ -980,12 +1157,14 @@ export type FascicoloIntakeCreateWithoutDocumentiInput = {
   updatedAt?: Date | string
   ente: Prisma.EnteCreateNestedOneWithoutFascicoliIntakeInput
   concessione?: Prisma.ConcessioneCreateNestedOneWithoutFascicoliIntakeInput
+  procedimento?: Prisma.ProcedimentoCreateNestedOneWithoutFascicoloIntakeInput
 }
 
 export type FascicoloIntakeUncheckedCreateWithoutDocumentiInput = {
   id?: string
   enteId: string
   concessioneId?: string | null
+  procedimentoId?: string | null
   tipologiaConcessione: $Enums.ConcessionVertical
   oggettoFascicolo: string
   denominazioneBreve?: string | null
@@ -1044,12 +1223,14 @@ export type FascicoloIntakeUpdateWithoutDocumentiInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ente?: Prisma.EnteUpdateOneRequiredWithoutFascicoliIntakeNestedInput
   concessione?: Prisma.ConcessioneUpdateOneWithoutFascicoliIntakeNestedInput
+  procedimento?: Prisma.ProcedimentoUpdateOneWithoutFascicoloIntakeNestedInput
 }
 
 export type FascicoloIntakeUncheckedUpdateWithoutDocumentiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tipologiaConcessione?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
   oggettoFascicolo?: Prisma.StringFieldUpdateOperationsInput | string
   denominazioneBreve?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1073,6 +1254,7 @@ export type FascicoloIntakeUncheckedUpdateWithoutDocumentiInput = {
 export type FascicoloIntakeCreateManyEnteInput = {
   id?: string
   concessioneId?: string | null
+  procedimentoId?: string | null
   tipologiaConcessione: $Enums.ConcessionVertical
   oggettoFascicolo: string
   denominazioneBreve?: string | null
@@ -1114,12 +1296,14 @@ export type FascicoloIntakeUpdateWithoutEnteInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   concessione?: Prisma.ConcessioneUpdateOneWithoutFascicoliIntakeNestedInput
+  procedimento?: Prisma.ProcedimentoUpdateOneWithoutFascicoloIntakeNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutFascicoloIntakeNestedInput
 }
 
 export type FascicoloIntakeUncheckedUpdateWithoutEnteInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tipologiaConcessione?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
   oggettoFascicolo?: Prisma.StringFieldUpdateOperationsInput | string
   denominazioneBreve?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1144,6 +1328,7 @@ export type FascicoloIntakeUncheckedUpdateWithoutEnteInput = {
 export type FascicoloIntakeUncheckedUpdateManyWithoutEnteInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tipologiaConcessione?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
   oggettoFascicolo?: Prisma.StringFieldUpdateOperationsInput | string
   denominazioneBreve?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1167,6 +1352,7 @@ export type FascicoloIntakeUncheckedUpdateManyWithoutEnteInput = {
 export type FascicoloIntakeCreateManyConcessioneInput = {
   id?: string
   enteId: string
+  procedimentoId?: string | null
   tipologiaConcessione: $Enums.ConcessionVertical
   oggettoFascicolo: string
   denominazioneBreve?: string | null
@@ -1208,12 +1394,14 @@ export type FascicoloIntakeUpdateWithoutConcessioneInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ente?: Prisma.EnteUpdateOneRequiredWithoutFascicoliIntakeNestedInput
+  procedimento?: Prisma.ProcedimentoUpdateOneWithoutFascicoloIntakeNestedInput
   documenti?: Prisma.DocumentoUpdateManyWithoutFascicoloIntakeNestedInput
 }
 
 export type FascicoloIntakeUncheckedUpdateWithoutConcessioneInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
+  procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tipologiaConcessione?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
   oggettoFascicolo?: Prisma.StringFieldUpdateOperationsInput | string
   denominazioneBreve?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1238,6 +1426,7 @@ export type FascicoloIntakeUncheckedUpdateWithoutConcessioneInput = {
 export type FascicoloIntakeUncheckedUpdateManyWithoutConcessioneInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enteId?: Prisma.StringFieldUpdateOperationsInput | string
+  procedimentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tipologiaConcessione?: Prisma.EnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical
   oggettoFascicolo?: Prisma.StringFieldUpdateOperationsInput | string
   denominazioneBreve?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1293,6 +1482,7 @@ export type FascicoloIntakeSelect<ExtArgs extends runtime.Types.Extensions.Inter
   id?: boolean
   enteId?: boolean
   concessioneId?: boolean
+  procedimentoId?: boolean
   tipologiaConcessione?: boolean
   oggettoFascicolo?: boolean
   denominazioneBreve?: boolean
@@ -1313,6 +1503,7 @@ export type FascicoloIntakeSelect<ExtArgs extends runtime.Types.Extensions.Inter
   updatedAt?: boolean
   ente?: boolean | Prisma.EnteDefaultArgs<ExtArgs>
   concessione?: boolean | Prisma.FascicoloIntake$concessioneArgs<ExtArgs>
+  procedimento?: boolean | Prisma.FascicoloIntake$procedimentoArgs<ExtArgs>
   documenti?: boolean | Prisma.FascicoloIntake$documentiArgs<ExtArgs>
   _count?: boolean | Prisma.FascicoloIntakeCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["fascicoloIntake"]>
@@ -1321,6 +1512,7 @@ export type FascicoloIntakeSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   id?: boolean
   enteId?: boolean
   concessioneId?: boolean
+  procedimentoId?: boolean
   tipologiaConcessione?: boolean
   oggettoFascicolo?: boolean
   denominazioneBreve?: boolean
@@ -1341,12 +1533,14 @@ export type FascicoloIntakeSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   updatedAt?: boolean
   ente?: boolean | Prisma.EnteDefaultArgs<ExtArgs>
   concessione?: boolean | Prisma.FascicoloIntake$concessioneArgs<ExtArgs>
+  procedimento?: boolean | Prisma.FascicoloIntake$procedimentoArgs<ExtArgs>
 }, ExtArgs["result"]["fascicoloIntake"]>
 
 export type FascicoloIntakeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   enteId?: boolean
   concessioneId?: boolean
+  procedimentoId?: boolean
   tipologiaConcessione?: boolean
   oggettoFascicolo?: boolean
   denominazioneBreve?: boolean
@@ -1367,12 +1561,14 @@ export type FascicoloIntakeSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   updatedAt?: boolean
   ente?: boolean | Prisma.EnteDefaultArgs<ExtArgs>
   concessione?: boolean | Prisma.FascicoloIntake$concessioneArgs<ExtArgs>
+  procedimento?: boolean | Prisma.FascicoloIntake$procedimentoArgs<ExtArgs>
 }, ExtArgs["result"]["fascicoloIntake"]>
 
 export type FascicoloIntakeSelectScalar = {
   id?: boolean
   enteId?: boolean
   concessioneId?: boolean
+  procedimentoId?: boolean
   tipologiaConcessione?: boolean
   oggettoFascicolo?: boolean
   denominazioneBreve?: boolean
@@ -1393,20 +1589,23 @@ export type FascicoloIntakeSelectScalar = {
   updatedAt?: boolean
 }
 
-export type FascicoloIntakeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "enteId" | "concessioneId" | "tipologiaConcessione" | "oggettoFascicolo" | "denominazioneBreve" | "concessionario" | "enteConcedente" | "autoritaCompetente" | "numeroConcessione" | "dataRilascio" | "decorrenza" | "scadenza" | "oggettoConcessione" | "beneAreaServizio" | "localita" | "soggettoAssistito" | "controparteAmministrazione" | "contestoIniziale" | "createdAt" | "updatedAt", ExtArgs["result"]["fascicoloIntake"]>
+export type FascicoloIntakeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "enteId" | "concessioneId" | "procedimentoId" | "tipologiaConcessione" | "oggettoFascicolo" | "denominazioneBreve" | "concessionario" | "enteConcedente" | "autoritaCompetente" | "numeroConcessione" | "dataRilascio" | "decorrenza" | "scadenza" | "oggettoConcessione" | "beneAreaServizio" | "localita" | "soggettoAssistito" | "controparteAmministrazione" | "contestoIniziale" | "createdAt" | "updatedAt", ExtArgs["result"]["fascicoloIntake"]>
 export type FascicoloIntakeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   ente?: boolean | Prisma.EnteDefaultArgs<ExtArgs>
   concessione?: boolean | Prisma.FascicoloIntake$concessioneArgs<ExtArgs>
+  procedimento?: boolean | Prisma.FascicoloIntake$procedimentoArgs<ExtArgs>
   documenti?: boolean | Prisma.FascicoloIntake$documentiArgs<ExtArgs>
   _count?: boolean | Prisma.FascicoloIntakeCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type FascicoloIntakeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   ente?: boolean | Prisma.EnteDefaultArgs<ExtArgs>
   concessione?: boolean | Prisma.FascicoloIntake$concessioneArgs<ExtArgs>
+  procedimento?: boolean | Prisma.FascicoloIntake$procedimentoArgs<ExtArgs>
 }
 export type FascicoloIntakeIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   ente?: boolean | Prisma.EnteDefaultArgs<ExtArgs>
   concessione?: boolean | Prisma.FascicoloIntake$concessioneArgs<ExtArgs>
+  procedimento?: boolean | Prisma.FascicoloIntake$procedimentoArgs<ExtArgs>
 }
 
 export type $FascicoloIntakePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1414,12 +1613,14 @@ export type $FascicoloIntakePayload<ExtArgs extends runtime.Types.Extensions.Int
   objects: {
     ente: Prisma.$EntePayload<ExtArgs>
     concessione: Prisma.$ConcessionePayload<ExtArgs> | null
+    procedimento: Prisma.$ProcedimentoPayload<ExtArgs> | null
     documenti: Prisma.$DocumentoPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     enteId: string
     concessioneId: string | null
+    procedimentoId: string | null
     tipologiaConcessione: $Enums.ConcessionVertical
     oggettoFascicolo: string
     denominazioneBreve: string | null
@@ -1834,6 +2035,7 @@ export interface Prisma__FascicoloIntakeClient<T, Null = never, ExtArgs extends 
   readonly [Symbol.toStringTag]: "PrismaPromise"
   ente<T extends Prisma.EnteDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EnteDefaultArgs<ExtArgs>>): Prisma.Prisma__EnteClient<runtime.Types.Result.GetResult<Prisma.$EntePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   concessione<T extends Prisma.FascicoloIntake$concessioneArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FascicoloIntake$concessioneArgs<ExtArgs>>): Prisma.Prisma__ConcessioneClient<runtime.Types.Result.GetResult<Prisma.$ConcessionePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  procedimento<T extends Prisma.FascicoloIntake$procedimentoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FascicoloIntake$procedimentoArgs<ExtArgs>>): Prisma.Prisma__ProcedimentoClient<runtime.Types.Result.GetResult<Prisma.$ProcedimentoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   documenti<T extends Prisma.FascicoloIntake$documentiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FascicoloIntake$documentiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1867,6 +2069,7 @@ export interface FascicoloIntakeFieldRefs {
   readonly id: Prisma.FieldRef<"FascicoloIntake", 'String'>
   readonly enteId: Prisma.FieldRef<"FascicoloIntake", 'String'>
   readonly concessioneId: Prisma.FieldRef<"FascicoloIntake", 'String'>
+  readonly procedimentoId: Prisma.FieldRef<"FascicoloIntake", 'String'>
   readonly tipologiaConcessione: Prisma.FieldRef<"FascicoloIntake", 'ConcessionVertical'>
   readonly oggettoFascicolo: Prisma.FieldRef<"FascicoloIntake", 'String'>
   readonly denominazioneBreve: Prisma.FieldRef<"FascicoloIntake", 'String'>
@@ -2302,6 +2505,25 @@ export type FascicoloIntake$concessioneArgs<ExtArgs extends runtime.Types.Extens
    */
   include?: Prisma.ConcessioneInclude<ExtArgs> | null
   where?: Prisma.ConcessioneWhereInput
+}
+
+/**
+ * FascicoloIntake.procedimento
+ */
+export type FascicoloIntake$procedimentoArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Procedimento
+   */
+  select?: Prisma.ProcedimentoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Procedimento
+   */
+  omit?: Prisma.ProcedimentoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProcedimentoInclude<ExtArgs> | null
+  where?: Prisma.ProcedimentoWhereInput
 }
 
 /**

@@ -39,7 +39,8 @@ const txMock = vi.hoisted(() => ({
   procedimento: {
     findUnique: vi.fn(async () => ({
       id: "procedimento-1",
-      concessione: { id: "concessione-1", enteId: "ente-1" },
+      enteId: "ente-1",
+      concessioneId: "concessione-1",
     })),
   },
   neutralIntakeDestination: {
@@ -86,7 +87,8 @@ const prismaMock = vi.hoisted(() => ({
   procedimento: {
     findUnique: vi.fn(async () => ({
       id: "procedimento-1",
-      concessione: { id: "concessione-1", enteId: "ente-1" },
+      enteId: "ente-1",
+      concessioneId: "concessione-1",
     })),
   },
 }));
@@ -155,7 +157,7 @@ function prepareHandoff(outcome: "CASE_DOCUMENT" | "LEGAL_SOURCE_CANDIDATE" | "U
       procedimento: {
         id: "procedimento-1",
         concessioneId: "concessione-1",
-        concessione: { id: "concessione-1", enteId: "ente-1" },
+        enteId: "ente-1",
       },
     },
   };

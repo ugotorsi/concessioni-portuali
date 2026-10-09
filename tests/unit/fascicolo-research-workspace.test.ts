@@ -110,7 +110,7 @@ describe("Fascicolo research workspace", () => {
     expect(legacy).toContain("<FascicoloResearch");
     expect(intake).toContain('activeSection === "research"');
     expect(intake).toContain("<FascicoloResearch");
-    expect(legacy.match(/activeSection === "research"/g)).toHaveLength(1);
+    expect(legacy.match(/activeSection === "research"/g)).toHaveLength(2);
     expect(legacy).not.toContain("LegalSourceCandidatesPanel");
     expect(legacy).not.toContain("<CardTitle>Riferimenti normativi collegati</CardTitle>");
     expect(component).not.toContain("JSON.stringify");

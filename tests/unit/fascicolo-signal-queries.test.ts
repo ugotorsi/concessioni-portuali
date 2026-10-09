@@ -22,7 +22,7 @@ describe("FascicoloSignal F2 query", () => {
     requireTenantAccessMock.mockReturnValue("GIURIDICO");
     prismaMock.procedimento.findUnique.mockResolvedValue({
       id: "procedimento-1",
-      concessione: { enteId: "ente-1" },
+      enteId: "ente-1",
     });
     prismaMock.fascicoloSignal.findMany.mockResolvedValue([{ id: "signal-1" }]);
   });
@@ -61,7 +61,7 @@ describe("FascicoloSignal F2 query", () => {
   });
 
   it("returns no data for a missing canonical tenant", async () => {
-    prismaMock.procedimento.findUnique.mockResolvedValue({ id: "procedimento-1", concessione: { enteId: null } });
+    prismaMock.procedimento.findUnique.mockResolvedValue({ id: "procedimento-1", enteId: null });
     await expect(getFascicoloSignalsForProcedimento("procedimento-1")).resolves.toEqual([]);
     expect(prismaMock.fascicoloSignal.findMany).not.toHaveBeenCalled();
   });

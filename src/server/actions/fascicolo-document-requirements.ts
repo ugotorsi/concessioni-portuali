@@ -51,6 +51,7 @@ export async function createFascicoloDocumentRequirementProposal(input: { proced
     where: { id: parsed.procedimentoId },
     select: {
       id: true,
+      enteId: true,
       concessioneId: true,
       concessione: {
         select: {
@@ -61,7 +62,7 @@ export async function createFascicoloDocumentRequirementProposal(input: { proced
       },
     },
   });
-  const canonicalEnteId = procedimento?.concessione.enteId ?? null;
+  const canonicalEnteId = procedimento?.enteId ?? null;
   if (!procedimento || !canonicalEnteId) {
     throw new Error("Procedimento o tenant canonico non disponibile.");
   }
@@ -70,10 +71,15 @@ export async function createFascicoloDocumentRequirementProposal(input: { proced
   if (tenantContext) {
     requireTenantAccess(tenantContext, canonicalEnteId, { mode: "write", allowWhenEnteMissing: false });
   }
+  if (!procedimento.concessioneId || !procedimento.concessione) {
+    return { eligible: false as const, created: false as const, proposal: null };
+  }
+  const concessioneId = procedimento.concessioneId;
+  const concessione = procedimento.concessione;
 
   const matchResult = evaluateP1C1DocumentRequirement({
-    normaRiferimento: procedimento.concessione.normaRiferimento,
-    portActivityLegalType: procedimento.concessione.portActivityLegalType,
+    normaRiferimento: concessione.normaRiferimento,
+    portActivityLegalType: concessione.portActivityLegalType,
   });
   if (!matchResult.eligible) {
     return { eligible: false as const, created: false as const, proposal: null };
@@ -172,9 +178,9 @@ export async function createFascicoloDocumentRequirementProposal(input: { proced
   const screeningFingerprint = buildP1C1ScreeningFingerprint({
     enteId: canonicalEnteId,
     procedimentoId: procedimento.id,
-    concessioneId: procedimento.concessioneId,
-    normaRiferimento: procedimento.concessione.normaRiferimento,
-    portActivityLegalType: procedimento.concessione.portActivityLegalType,
+    concessioneId,
+    normaRiferimento: concessione.normaRiferimento,
+    portActivityLegalType: concessione.portActivityLegalType,
   });
   const createdByUserId = resolvePersistedUserId(currentUser.id);
   const proposalData = {
@@ -185,7 +191,7 @@ export async function createFascicoloDocumentRequirementProposal(input: { proced
     documentGapId: gap.id,
     matcherAlgorithmVersion: MATCHER_ALGORITHM_VERSION,
     screeningFingerprint,
-    canonicalArt18Snapshot: procedimento.concessione.normaRiferimento,
+    canonicalArt18Snapshot: concessione.normaRiferimento,
     portActivityLegalTypeSnapshot: "OPERAZIONI_PORTUALI" as const,
     sourceStableKeySnapshot: source.sourceKey,
     sourceTitleSnapshot: source.title,
@@ -224,7 +230,7 @@ export async function createFascicoloDocumentRequirementProposal(input: { proced
         entita: "FascicoloDocumentRequirementProposal",
         entitaId: proposal.id,
         enteId: canonicalEnteId,
-        concessioneId: procedimento.concessioneId,
+        concessioneId,
         esito: "SUCCESS",
         actor: { userId: createdByUserId, userEmail: currentUser.email, userRole: role },
         metadata: {
@@ -234,8 +240,8 @@ export async function createFascicoloDocumentRequirementProposal(input: { proced
           sourceStableKey: source.sourceKey,
           ruleCode: rule.ruleCode,
           gapKey: gap.gapKey,
-          normaRiferimento: procedimento.concessione.normaRiferimento,
-          portActivityLegalType: procedimento.concessione.portActivityLegalType,
+          normaRiferimento: concessione.normaRiferimento,
+          portActivityLegalType: concessione.portActivityLegalType,
         },
       });
     }
@@ -277,13 +283,13 @@ export async function reviewFascicoloDocumentRequirementProposalAction(formData:
       gapKeySnapshot: true,
       procedimento: {
         select: {
+          enteId: true,
           concessioneId: true,
-          concessione: { select: { enteId: true } },
         },
       },
     },
   });
-  const canonicalEnteId = proposal?.procedimento.concessione.enteId ?? null;
+  const canonicalEnteId = proposal?.procedimento.enteId ?? null;
   if (!proposal || !canonicalEnteId || proposal.enteId !== canonicalEnteId) {
     throw new Error("Proposta non disponibile o non coerente con il tenant canonico.");
   }

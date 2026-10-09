@@ -974,6 +974,7 @@ model Ente {
   aiFascicoloTrustedReviewMaterials AiFascicoloTrustedReviewMaterial[]
   automaticFascicoloReports         AutomaticFascicoloReport[]
   fascicoliIntake                   FascicoloIntake[]
+  procedimenti                      Procedimento[]
   aiFascicoloHumanReviewStates      AiFascicoloHumanReviewState[]
   aiFascicoloHumanReviewEvents      AiFascicoloHumanReviewEvent[]
   fascicoloKnowledgeRevisions       FascicoloKnowledgeRevision[]
@@ -1662,7 +1663,8 @@ model Criticita {
 
 model Procedimento {
   id                               String                        @id @default(cuid())
-  concessioneId                    String
+  enteId                           String
+  concessioneId                    String?
   criticitaId                      String?
   responsabileProcedimentoNome     String?
   responsabileProcedimentoEmail    String?
@@ -1706,7 +1708,9 @@ model Procedimento {
   createdAt                        DateTime                      @default(now())
   updatedAt                        DateTime                      @updatedAt
 
-  concessione                  Concessione                            @relation(fields: [concessioneId], references: [id], onDelete: Cascade)
+  ente                         Ente                                   @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  concessione                  Concessione?                           @relation(fields: [concessioneId], references: [id], onDelete: Restrict)
+  fascicoloIntake              FascicoloIntake?
   criticita                    Criticita?                             @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
   decisioneProcedimento        DecisioneProcedimento?
   responsabileAssignments      ProcedimentoResponsabileAssignment[]
@@ -1731,6 +1735,7 @@ model Procedimento {
   runtimeBudgetPolicies             RuntimeBudgetPolicy[]
   runtimeCostReservations           RuntimeCostReservation[]
 
+  @@index([enteId])
   @@index([concessioneId])
   @@index([criticitaId])
   @@index([stato])
@@ -1751,6 +1756,7 @@ model FascicoloIntake {
   id                         String             @id @default(cuid())
   enteId                     String
   concessioneId              String?
+  procedimentoId             String?            @unique
   tipologiaConcessione       ConcessionVertical
   oggettoFascicolo           String
   denominazioneBreve         String?
@@ -1772,6 +1778,7 @@ model FascicoloIntake {
 
   ente        Ente         @relation(fields: [enteId], references: [id], onDelete: Restrict)
   concessione Concessione? @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
+  procedimento Procedimento? @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
   documenti   Documento[]
 
   @@index([enteId])

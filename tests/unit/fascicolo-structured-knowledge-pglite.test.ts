@@ -49,7 +49,7 @@ async function database() {
   await db.exec(`
     CREATE TABLE "Ente" ("id" TEXT PRIMARY KEY);
     CREATE TABLE "Concessione" ("id" TEXT PRIMARY KEY, "enteId" TEXT);
-    CREATE TABLE "Procedimento" ("id" TEXT PRIMARY KEY, "concessioneId" TEXT NOT NULL);
+    CREATE TABLE "Procedimento" ("id" TEXT PRIMARY KEY, "enteId" TEXT NOT NULL, "concessioneId" TEXT);
     CREATE TABLE "Documento" ("id" TEXT PRIMARY KEY, "enteId" TEXT, "procedimentoId" TEXT);
     CREATE TABLE "DocumentFileVersion" ("id" TEXT PRIMARY KEY, "documentId" TEXT NOT NULL, "canonicalEnteId" TEXT NOT NULL, "sha256" TEXT NOT NULL);
     CREATE TABLE "NeutralIntake" ("id" TEXT PRIMARY KEY, "enteId" TEXT);
@@ -59,7 +59,10 @@ async function database() {
     CREATE TABLE "Scadenza" ("id" TEXT PRIMARY KEY);
     INSERT INTO "Ente" VALUES ('tenant-a'), ('tenant-b');
     INSERT INTO "Concessione" VALUES ('concession-a1', 'tenant-a'), ('concession-a2', 'tenant-a'), ('concession-b1', 'tenant-b');
-    INSERT INTO "Procedimento" VALUES ('procedure-a1', 'concession-a1'), ('procedure-a2', 'concession-a2'), ('procedure-b1', 'concession-b1');
+    INSERT INTO "Procedimento" VALUES
+      ('procedure-a1', 'tenant-a', 'concession-a1'),
+      ('procedure-a2', 'tenant-a', 'concession-a2'),
+      ('procedure-b1', 'tenant-b', 'concession-b1');
     INSERT INTO "Documento" VALUES ('document-a1', 'tenant-a', 'procedure-a1'), ('document-a2', 'tenant-a', 'procedure-a2'), ('document-b1', 'tenant-b', 'procedure-b1');
     INSERT INTO "DocumentFileVersion" VALUES
       ('version-a1', 'document-a1', 'tenant-a', '${hashA}'),

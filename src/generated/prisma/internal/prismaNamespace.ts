@@ -7133,6 +7133,7 @@ export type CriticitaScalarFieldEnum = (typeof CriticitaScalarFieldEnum)[keyof t
 
 export const ProcedimentoScalarFieldEnum = {
   id: 'id',
+  enteId: 'enteId',
   concessioneId: 'concessioneId',
   criticitaId: 'criticitaId',
   responsabileProcedimentoNome: 'responsabileProcedimentoNome',
@@ -7185,6 +7186,7 @@ export const FascicoloIntakeScalarFieldEnum = {
   id: 'id',
   enteId: 'enteId',
   concessioneId: 'concessioneId',
+  procedimentoId: 'procedimentoId',
   tipologiaConcessione: 'tipologiaConcessione',
   oggettoFascicolo: 'oggettoFascicolo',
   denominazioneBreve: 'denominazioneBreve',

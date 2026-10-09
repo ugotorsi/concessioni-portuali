@@ -47,7 +47,7 @@ async function database() {
   await db.exec(`
     CREATE TABLE "Ente" ("id" TEXT PRIMARY KEY);
     CREATE TABLE "Concessione" ("id" TEXT PRIMARY KEY, "enteId" TEXT NOT NULL);
-    CREATE TABLE "Procedimento" ("id" TEXT PRIMARY KEY, "concessioneId" TEXT NOT NULL);
+    CREATE TABLE "Procedimento" ("id" TEXT PRIMARY KEY, "enteId" TEXT NOT NULL, "concessioneId" TEXT);
     CREATE TABLE "FascicoloKnowledgeRevision" (
       "id" TEXT PRIMARY KEY, "tenantId" TEXT NOT NULL, "procedimentoId" TEXT NOT NULL, "status" TEXT NOT NULL,
       UNIQUE ("id","tenantId","procedimentoId")
@@ -85,7 +85,9 @@ async function database() {
     CREATE TABLE "TestAuditEvent" ("azione" TEXT NOT NULL, "entitaId" TEXT, "metadata" JSONB NOT NULL);
     INSERT INTO "Ente" VALUES ('tenant-a'),('tenant-b');
     INSERT INTO "Concessione" VALUES ('concession-a','tenant-a'),('concession-b','tenant-b');
-    INSERT INTO "Procedimento" VALUES ('procedure-a','concession-a'),('procedure-b','concession-b');
+    INSERT INTO "Procedimento" VALUES
+      ('procedure-a','tenant-a','concession-a'),
+      ('procedure-b','tenant-b','concession-b');
     INSERT INTO "FascicoloKnowledgeRevision" VALUES
       ('revision-a','tenant-a','procedure-a','CURRENT'),('revision-b','tenant-b','procedure-b','CURRENT');
     INSERT INTO "StructuredFascicoloReportSnapshot" VALUES

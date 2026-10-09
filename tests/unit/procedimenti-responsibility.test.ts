@@ -5,6 +5,7 @@ const requireRoleMock = vi.hoisted(() => vi.fn());
 const getCurrentUserMock = vi.hoisted(() => vi.fn());
 const getCurrentTenantContextMock = vi.hoisted(() => vi.fn());
 const requireConcessioneTenantAccessMock = vi.hoisted(() => vi.fn());
+const requireTenantAccessMock = vi.hoisted(() => vi.fn());
 const auditSuccessMock = vi.hoisted(() => vi.fn());
 const redirectMock = vi.hoisted(() => vi.fn());
 const admitAsyncJobInTransactionMock = vi.hoisted(() => vi.fn());
@@ -46,6 +47,7 @@ vi.mock("@/lib/tenant-auth", async () => {
     ...actual,
     getCurrentTenantContext: getCurrentTenantContextMock,
     requireConcessioneTenantAccess: requireConcessioneTenantAccessMock,
+    requireTenantAccess: requireTenantAccessMock,
   };
 });
 vi.mock("@/server/audit/auditLog", () => ({ auditFailure: vi.fn(), auditSuccess: auditSuccessMock }));
@@ -132,7 +134,7 @@ describe("procedimento responsibility assignments", () => {
     txMock.procedimentoResponsabileAssignment.create.mockResolvedValue({ id: "assignment-new" });
     txMock.procedimentoResponsabileAssignment.findFirst.mockResolvedValue(currentAssignment());
     txMock.procedimentoResponsabileAssignment.updateMany.mockResolvedValue({ count: 1 });
-    prismaMock.procedimento.findUnique.mockResolvedValue({ id: "proc-1", concessioneId: "con-1" });
+    prismaMock.procedimento.findUnique.mockResolvedValue({ id: "proc-1", enteId: "ente-a", concessioneId: "con-1" });
     admitAsyncJobInTransactionMock.mockResolvedValue({ outcome: "CREATED", job: { id: "job-1" } });
   });
 
@@ -220,6 +222,7 @@ describe("procedimento responsibility assignments", () => {
   ])("non ammette catch-up per %s", async (_case, procedimentoStato, concessioneStato) => {
     txMock.procedimento.create.mockResolvedValueOnce({
       id: "proc-1",
+      enteId: "ente-a",
       concessioneId: "con-1",
       stato: procedimentoStato,
     });
@@ -263,7 +266,7 @@ describe("procedimento responsibility assignments", () => {
     });
 
     await expect(createProcedimentoAction(createFormData())).rejects.toThrow(
-      "Concessione canonica non coerente con il procedimento creato.",
+      "Concessione canonica non coerente con il procedimento da creare.",
     );
 
     expect(admitAsyncJobInTransactionMock).not.toHaveBeenCalled();

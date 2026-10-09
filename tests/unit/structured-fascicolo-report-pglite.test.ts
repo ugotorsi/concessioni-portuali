@@ -39,7 +39,7 @@ async function database(): Promise<PGlite> {
     CREATE TYPE "FascicoloKnowledgeRevisionStatus" AS ENUM ('BUILDING', 'CURRENT', 'SUPERSEDED');
     CREATE TABLE "Ente" ("id" TEXT PRIMARY KEY);
     CREATE TABLE "Concessione" ("id" TEXT PRIMARY KEY, "enteId" TEXT NOT NULL);
-    CREATE TABLE "Procedimento" ("id" TEXT PRIMARY KEY, "concessioneId" TEXT NOT NULL);
+    CREATE TABLE "Procedimento" ("id" TEXT PRIMARY KEY, "enteId" TEXT NOT NULL, "concessioneId" TEXT);
     CREATE TABLE "FascicoloKnowledgeRevision" (
       "id" TEXT NOT NULL,
       "tenantId" TEXT NOT NULL,
@@ -52,7 +52,9 @@ async function database(): Promise<PGlite> {
     );
     INSERT INTO "Ente" VALUES ('tenant-a'), ('tenant-b');
     INSERT INTO "Concessione" VALUES ('concession-a', 'tenant-a'), ('concession-b', 'tenant-b');
-    INSERT INTO "Procedimento" VALUES ('procedure-a', 'concession-a'), ('procedure-b', 'concession-b');
+    INSERT INTO "Procedimento" VALUES
+      ('procedure-a', 'tenant-a', 'concession-a'),
+      ('procedure-b', 'tenant-b', 'concession-b');
     INSERT INTO "FascicoloKnowledgeRevision" VALUES
       ('revision-a', 'tenant-a', 'procedure-a', '${sha("a")}', 'FASCICOLO_KNOWLEDGE_V1', 'CURRENT'),
       ('revision-b', 'tenant-b', 'procedure-b', '${sha("b")}', 'FASCICOLO_KNOWLEDGE_V1', 'CURRENT');

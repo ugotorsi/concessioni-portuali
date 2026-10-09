@@ -31,9 +31,9 @@ export async function getFascicoloProcessingItems(
 
   const procedimento = await prisma.procedimento.findUnique({
     where: { id: procedimentoId },
-    select: { concessione: { select: { enteId: true } } },
+    select: { enteId: true },
   });
-  const enteId = procedimento?.concessione.enteId ?? null;
+  const enteId = procedimento?.enteId ?? null;
   if (!enteId) {
     return [];
   }

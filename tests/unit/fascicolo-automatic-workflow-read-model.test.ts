@@ -8,7 +8,7 @@ const { findManyMissions, countMissions, findManyHistoricalResults } = vi.hoiste
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    procedimento: { findUnique: vi.fn(async () => ({ concessione: { enteId: "tenant-1" } })) },
+    procedimento: { findUnique: vi.fn(async () => ({ enteId: "tenant-1" })) },
     automaticFascicoloReport: { findMany: vi.fn(async () => []) },
     structuredFascicoloReportSnapshot: { findMany: vi.fn(async () => []) },
     asyncJob: { findMany: vi.fn(async () => []) },

@@ -320,7 +320,7 @@ export async function persistAiFascicoloTrustedReviewMaterial(
   try {
     procedimento = await prisma.procedimento.findUnique({
       where: { id: parsed.procedimentoId },
-      select: { id: true, concessione: { select: { enteId: true } } },
+      select: { id: true, enteId: true },
     });
   } catch (error) {
     throw new AiFascicoloReviewPersistenceError("PERSISTENCE_FAILURE", error);
@@ -328,7 +328,7 @@ export async function persistAiFascicoloTrustedReviewMaterial(
   if (!procedimento) {
     throw new AiFascicoloReviewPersistenceError("PROCEDIMENTO_NOT_FOUND");
   }
-  const enteId = procedimento.concessione?.enteId;
+  const enteId = procedimento.enteId;
   if (!enteId) {
     throw new AiFascicoloReviewPersistenceError("TENANT_MISMATCH");
   }

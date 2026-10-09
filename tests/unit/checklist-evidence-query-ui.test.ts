@@ -28,7 +28,7 @@ describe("checklist evidence read model and UI", () => {
     vi.clearAllMocks();
     getCurrentTenantContextMock.mockResolvedValue({});
     requireTenantAccessMock.mockImplementation(() => undefined);
-    prismaMock.procedimento.findUnique.mockResolvedValue({ id: "procedimento-1", concessione: { enteId: "ente-1" } });
+    prismaMock.procedimento.findUnique.mockResolvedValue({ id: "procedimento-1", enteId: "ente-1" });
     prismaMock.fascicoloChecklistEvidence.findMany.mockResolvedValue([]);
     prismaMock.documento.findMany.mockResolvedValue([]);
   });
@@ -55,7 +55,7 @@ describe("checklist evidence read model and UI", () => {
   });
 
   it("null canonical tenant yields no active association submit", async () => {
-    prismaMock.procedimento.findUnique.mockResolvedValue({ id: "procedimento-1", concessione: { enteId: null } });
+    prismaMock.procedimento.findUnique.mockResolvedValue({ id: "procedimento-1", enteId: null });
     const data = await getChecklistEvidenceData("procedimento-1");
     const html = renderToStaticMarkup(createElement(ChecklistItemEvidence, {
       procedimentoId: "procedimento-1",

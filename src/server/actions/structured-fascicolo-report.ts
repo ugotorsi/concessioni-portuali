@@ -19,10 +19,10 @@ export async function archiveStructuredFascicoloReportAction(formData: FormData)
     getCurrentTenantContext(),
     prisma.procedimento.findUnique({
       where: { id: input.procedimentoId },
-      select: { concessione: { select: { enteId: true } } },
+      select: { enteId: true },
     }),
   ]);
-  const tenantId = procedimento?.concessione.enteId;
+  const tenantId = procedimento?.enteId;
   if (!tenantContext || !tenantId) throw new Error("Procedimento o tenant non disponibile.");
   requireTenantAccess(tenantContext, tenantId, { mode: "write", allowWhenEnteMissing: false });
   const model = await getFascicoloAutomaticWorkflowReadModel(input.procedimentoId);

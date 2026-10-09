@@ -1436,6 +1436,7 @@ async function main() {
     data: [
       {
         concessioneId: concessioniByKey["con-005"],
+        enteId: concessioneEnteById[concessioniByKey["con-005"]],
         criticitaId: criticitaByKey["crit-004"],
         tipologia: "CHIARIMENTI",
         checklistProfile: "PORTUALE_ADSP",
@@ -1473,6 +1474,7 @@ async function main() {
       },
       {
         concessioneId: concessioniByKey["con-002"],
+        enteId: concessioneEnteById[concessioniByKey["con-002"]],
         criticitaId: criticitaByKey["crit-001"],
         tipologia: "DIFFIDA",
         checklistProfile: "PORTUALE_ADSP",
@@ -1509,6 +1511,7 @@ async function main() {
       },
       {
         concessioneId: concessioniByKey["con-006"],
+        enteId: concessioneEnteById[concessioniByKey["con-006"]],
         criticitaId: criticitaByKey["crit-005"],
         tipologia: "AVVIO_DECADENZA",
         checklistProfile: "PORTUALE_ADSP",
@@ -1542,6 +1545,7 @@ async function main() {
       },
       {
         concessioneId: concessioniByKey["con-001"],
+        enteId: concessioneEnteById[concessioniByKey["con-001"]],
         criticitaId: criticitaByKey["crit-003"],
         tipologia: "ORDINE_RIPRISTINO",
         checklistProfile: "PORTUALE_ADSP",
@@ -1554,6 +1558,7 @@ async function main() {
       },
       {
         concessioneId: concessioniByKey["con-003"],
+        enteId: concessioneEnteById[concessioniByKey["con-003"]],
         criticitaId: criticitaByKey["crit-001"],
         checklistProfile: "PORTUALE_ADSP",
         tipologia: "RECUPERO_CANONI",
@@ -1566,6 +1571,7 @@ async function main() {
       },
       {
         concessioneId: concessioniByKey["con-006"],
+        enteId: concessioneEnteById[concessioniByKey["con-006"]],
         criticitaId: criticitaByKey["crit-005"],
         checklistProfile: "PORTUALE_ADSP",
         tipologia: "AVVIO_DECADENZA",
@@ -1578,6 +1584,7 @@ async function main() {
       },
       {
         concessioneId: concessioniByKey["con-007"],
+        enteId: concessioneEnteById[concessioniByKey["con-007"]],
         criticitaId: criticitaByKey["crit-006"],
         checklistProfile: "PORTUALE_ADSP",
         tipologia: "AVVIO_REVOCA",
@@ -1590,6 +1597,7 @@ async function main() {
       },
       {
         concessioneId: concessioniByKey["con-002"],
+        enteId: concessioneEnteById[concessioniByKey["con-002"]],
         tipologia: "NUOVA_PROCEDURA",
         checklistProfile: "TURISTICO_RICREATIVO",
         riferimentoNormativo: "art. 18 l. 84/1994",

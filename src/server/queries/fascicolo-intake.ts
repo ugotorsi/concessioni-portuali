@@ -7,6 +7,7 @@ export async function getFascicoloIntakeDetail(id: string) {
     where: { id },
     include: {
       concessione: { select: { id: true, numeroAtto: true } },
+      procedimento: { select: { id: true } },
       documenti: {
         where: { statoDocumento: { not: "ARCHIVIATO" } },
         orderBy: { createdAt: "desc" },

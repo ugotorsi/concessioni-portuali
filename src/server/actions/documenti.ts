@@ -100,14 +100,12 @@ async function resolveLinkedTenantForDocumento(input: {
   if (input.procedimentoId) {
     const procedimento = await prisma.procedimento.findUnique({
       where: { id: input.procedimentoId },
-      select: { id: true, concessione: { select: { enteId: true } } },
+      select: { id: true, enteId: true },
     });
     if (!procedimento) {
       throw new Error("Procedimento collegato non trovato.");
     }
-    if (procedimento.concessione.enteId) {
-      candidateTenantIds.add(procedimento.concessione.enteId);
-    }
+    candidateTenantIds.add(procedimento.enteId);
   }
 
   if (input.sopralluogoId) {

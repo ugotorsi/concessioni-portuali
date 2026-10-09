@@ -10,7 +10,7 @@ import { canManageProcedimenti, canRegisterProcedimentoDecision, getCurrentUser,
 import { Prisma } from "@/generated/prisma/client";
 import { isContraddittorioCompleto } from "@/lib/procedimento-checklist";
 import { prisma } from "@/lib/prisma";
-import { getCurrentTenantContext, requireConcessioneTenantAccess } from "@/lib/tenant-auth";
+import { getCurrentTenantContext, requireConcessioneTenantAccess, requireTenantAccess } from "@/lib/tenant-auth";
 import { admitAsyncJobInTransaction } from "@/server/async-jobs/persistence";
 import { computeAuditHash, sanitizeMetadata } from "@/server/audit/hash";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
@@ -602,8 +602,16 @@ export async function createProcedimentoAction(formData: FormData) {
 
   const catchUpObservedAt = new Date();
   const created = await runSerializableTransactionWithRetry(async (tx) => {
+    const concessione = await tx.concessione.findUnique({
+      where: { id: parsed.data.concessioneId },
+      select: { id: true, enteId: true, dataScadenza: true, stato: true, expiryGeneration: true },
+    });
+    if (!concessione?.enteId || concessione.id !== parsed.data.concessioneId) {
+      throw new Error("Concessione canonica non coerente con il procedimento da creare.");
+    }
     const createdProcedimento = await tx.procedimento.create({
       data: {
+        enteId: concessione.enteId,
         concessioneId: parsed.data.concessioneId,
         criticitaId,
         responsabileProcedimentoNome: responsabileNome,
@@ -620,6 +628,7 @@ export async function createProcedimentoAction(formData: FormData) {
       },
       select: {
         id: true,
+        enteId: true,
         concessioneId: true,
         stato: true,
       },
@@ -638,13 +647,6 @@ export async function createProcedimentoAction(formData: FormData) {
       });
     }
 
-    const concessione = await tx.concessione.findUnique({
-      where: { id: createdProcedimento.concessioneId },
-      select: { id: true, enteId: true, dataScadenza: true, stato: true, expiryGeneration: true },
-    });
-    if (!concessione || concessione.id !== parsed.data.concessioneId) {
-      throw new Error("Concessione canonica non coerente con il procedimento creato.");
-    }
     if (
       tenantContext
       && !tenantContext.isAdmin
@@ -741,6 +743,7 @@ export async function reassignProcedimentoResponsabileAction(formData: FormData)
     where: { id: parsed.data.procedimentoId },
     select: {
       id: true,
+      enteId: true,
       concessioneId: true,
       responsabileProcedimentoNome: true,
       responsabileProcedimentoEmail: true,
@@ -754,7 +757,7 @@ export async function reassignProcedimentoResponsabileAction(formData: FormData)
   }
 
   if (tenantContext) {
-    await requireConcessioneTenantAccess(tenantContext, procedimento.concessioneId, {
+    requireTenantAccess(tenantContext, procedimento.enteId, {
       mode: "write",
       allowWhenEnteMissing: false,
     });
@@ -868,7 +871,9 @@ export async function reassignProcedimentoResponsabileAction(formData: FormData)
 
   revalidatePath("/procedimenti");
   revalidatePath(`/procedimenti/${procedimento.id}`);
-  revalidatePath(`/concessioni/${procedimento.concessioneId}`);
+  if (procedimento.concessioneId) {
+    revalidatePath(`/concessioni/${procedimento.concessioneId}`);
+  }
   redirect(`/procedimenti/${procedimento.id}`);
 }
 
@@ -947,7 +952,7 @@ export async function updateProcedimentoChecklistAction(formData: FormData) {
 
   const procedimento = await prisma.procedimento.findUnique({
     where: { id: parsed.data.procedimentoId },
-    select: { id: true, concessioneId: true, tipologia: true },
+    select: { id: true, enteId: true, concessioneId: true, tipologia: true },
   });
 
   if (!procedimento) {
@@ -965,7 +970,7 @@ export async function updateProcedimentoChecklistAction(formData: FormData) {
 
   if (tenantContext) {
     try {
-      await requireConcessioneTenantAccess(tenantContext, procedimento.concessioneId, {
+      requireTenantAccess(tenantContext, procedimento.enteId, {
         mode: "write",
         allowWhenEnteMissing: false,
       });
@@ -1061,7 +1066,9 @@ export async function updateProcedimentoChecklistAction(formData: FormData) {
 
   revalidatePath("/procedimenti");
   revalidatePath(`/procedimenti/${procedimento.id}`);
-  revalidatePath(`/concessioni/${procedimento.concessioneId}`);
+  if (procedimento.concessioneId) {
+    revalidatePath(`/concessioni/${procedimento.concessioneId}`);
+  }
   revalidatePath("/dashboard");
   redirect(`/procedimenti/${procedimento.id}`);
 }
@@ -1134,6 +1141,7 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
     where: { id: parsed.data.procedimentoId },
     select: {
       id: true,
+      enteId: true,
       concessioneId: true,
       tipologia: true,
       stato: true,
@@ -1168,10 +1176,15 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
     });
     throw new Error("Procedimento non trovato.");
   }
+  if (!procedimento.concessioneId || !procedimento.concessione) {
+    throw new Error("Titolo concessorio non disponibile: decisione finale non consentita.");
+  }
+  const concessione = procedimento.concessione;
+  const concessioneId = procedimento.concessioneId;
 
   if (tenantContext) {
     try {
-      await requireConcessioneTenantAccess(tenantContext, procedimento.concessioneId, {
+      requireTenantAccess(tenantContext, procedimento.enteId, {
         mode: "write",
         allowWhenEnteMissing: false,
       });
@@ -1180,8 +1193,8 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
         azione: "AUTHZ_DENIED",
         entita: "DecisioneProcedimento",
         entitaId: procedimento.id,
-        concessioneId: procedimento.concessioneId,
-        enteId: procedimento.concessione.enteId,
+        concessioneId,
+        enteId: procedimento.enteId,
         actor: { userId: persistedUserId, userEmail: currentUser.email, userRole: role },
         metadata: {
           actionType: "PROCEDIMENTO_DECISION_FINALIZE",
@@ -1243,18 +1256,14 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
   }
 
   const linkedToProcedimento = documento.procedimentoId === procedimento.id;
-  const linkedToConcessione = documento.concessioneId === procedimento.concessioneId;
+  const linkedToConcessione = documento.concessioneId === concessioneId;
   if (!linkedToProcedimento && !linkedToConcessione) {
     throw new Error("Documento non coerente con procedimento o concessione collegata.");
   }
 
-  if (outcome.statoConcessioneSuccessivo && !procedimento.concessioneId) {
-    throw new Error("Concessione non collegata: impossibile applicare effetto sul titolo.");
-  }
-
   if (
     outcome.statoConcessioneSuccessivo &&
-    ["DECADUTA", "REVOCATA", "ARCHIVIATA"].includes(procedimento.concessione.stato)
+    ["DECADUTA", "REVOCATA", "ARCHIVIATA"].includes(concessione.stato)
   ) {
     throw new Error("Stato concessione incompatibile con l effetto richiesto.");
   }
@@ -1274,8 +1283,8 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
   });
 
   let createdDecisionId: string | null = null;
-  let createdDecisionEnteId: string | null = procedimento.concessione.enteId;
-  let createdDecisionConcessioneId: string | null = procedimento.concessioneId;
+  let createdDecisionEnteId: string | null = procedimento.enteId;
+  let createdDecisionConcessioneId: string | null = concessioneId;
   let recoveredFromIdempotentReplay = false;
 
   try {
@@ -1327,7 +1336,7 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
 
       const createdDecision = await tx.decisioneProcedimento.create({
         data: {
-          enteId: procedimento.concessione.enteId,
+          enteId: procedimento.enteId,
           procedimentoId: latest.id,
           concessioneId: latest.concessioneId,
           tipoDecisione: parsed.data.decisionType,
@@ -1381,7 +1390,7 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
         data: await (async () => {
           const metadata = sanitizeMetadata({
             procedimentoId: procedimento.id,
-            concessioneId: procedimento.concessioneId,
+            concessioneId,
             tipoDecisione: parsed.data.decisionType,
             decisioniConsentite: decisionPreview.map((item) => item.tipoDecisione),
             numeroAtto: parsed.data.numeroAtto,
@@ -1391,7 +1400,7 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
             adottanteQualifica: normalizeOptionalString(parsed.data.adottanteQualifica),
             scostamentoDaIstruttoria: parsed.data.scostamentoDaIstruttoria,
             registeredByUserId: persistedUserId,
-            statoConcessionePrecedente: procedimento.concessione.stato,
+            statoConcessionePrecedente: concessione.stato,
             statoConcessioneSuccessivo: outcome.statoConcessioneSuccessivo,
             dataEfficacia: dataEfficacia.toISOString(),
             effettoTitolo: outcome.effettoTitolo,
@@ -1411,8 +1420,8 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
             azione: "DECISIONE_REGISTRATA",
             entita: "DecisioneProcedimento",
             entitaId: createdDecision.id,
-            enteId: procedimento.concessione.enteId ?? null,
-            concessioneId: procedimento.concessioneId,
+            enteId: procedimento.enteId,
+            concessioneId,
             esito: "SUCCESS",
             actor: {
               userId: persistedUserId,
@@ -1426,8 +1435,8 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
             userId: persistedUserId,
             userEmail: currentUser.email,
             userRole: role,
-            enteId: procedimento.concessione.enteId,
-            concessioneId: procedimento.concessioneId,
+            enteId: procedimento.enteId,
+            concessioneId,
             ipAddress: requestContext.ipAddress,
             userAgent: requestContext.userAgent,
             azione: "DECISIONE_REGISTRATA",
@@ -1489,7 +1498,7 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
 
       const expectedSemantic = {
         procedimentoId: procedimento.id,
-        concessioneId: procedimento.concessioneId,
+        concessioneId,
         tipoDecisione: parsed.data.decisionType,
         numeroAtto: parsed.data.numeroAtto,
         protocolloAtto: parsed.data.protocolloAtto,
@@ -1505,7 +1514,7 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
           : null,
         esito: outcome.statoFinaleProcedimento,
         effettoTitolo: outcome.effettoTitolo,
-        statoConcessionePrecedente: procedimento.concessione.stato,
+        statoConcessionePrecedente: concessione.stato,
         statoConcessioneSuccessivo: outcome.statoConcessioneSuccessivo,
       };
 
@@ -1581,8 +1590,8 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
         azione: "PROCEDIMENTO_DECISION_FINALIZE",
         entita: "DecisioneProcedimento",
         entitaId: procedimento.id,
-        concessioneId: procedimento.concessioneId,
-        enteId: procedimento.concessione.enteId,
+        concessioneId,
+        enteId: procedimento.enteId,
         actor: { userId: persistedUserId, userEmail: currentUser.email, userRole: role },
         metadata: {
           reason: "FINALIZATION_FAILED",
@@ -1713,7 +1722,7 @@ export async function finalizeProcedimentoDecisionAction(formData: FormData) {
 
   revalidatePath("/procedimenti");
   revalidatePath(`/procedimenti/${procedimento.id}`);
-  revalidatePath(`/concessioni/${procedimento.concessioneId}`);
+  revalidatePath(`/concessioni/${concessioneId}`);
   revalidatePath("/concessioni");
   revalidatePath("/audit");
   revalidatePath("/dashboard");

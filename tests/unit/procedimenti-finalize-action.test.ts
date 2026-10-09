@@ -6,6 +6,7 @@ const requireRoleMock = vi.hoisted(() => vi.fn());
 const getCurrentUserMock = vi.hoisted(() => vi.fn());
 const getCurrentTenantContextMock = vi.hoisted(() => vi.fn());
 const requireConcessioneTenantAccessMock = vi.hoisted(() => vi.fn());
+const requireTenantAccessMock = vi.hoisted(() => vi.fn());
 const auditFailureMock = vi.hoisted(() => vi.fn());
 const auditSuccessMock = vi.hoisted(() => vi.fn());
 const redirectMock = vi.hoisted(() => vi.fn());
@@ -62,6 +63,7 @@ vi.mock("@/lib/tenant-auth", async () => {
     ...actual,
     getCurrentTenantContext: getCurrentTenantContextMock,
     requireConcessioneTenantAccess: requireConcessioneTenantAccessMock,
+    requireTenantAccess: requireTenantAccessMock,
   };
 });
 
@@ -101,6 +103,7 @@ function buildProcedimento(input?: Partial<{
 }>) {
   return {
     id: "proc-1",
+    enteId: "ente-1",
     concessioneId: "con-1",
     responsabileProcedimentoNome:
       input && "responsabileProcedimentoNome" in input
@@ -447,7 +450,9 @@ describe("finalizeProcedimentoDecisionAction", () => {
   });
 
   it("blocca tenant errato", async () => {
-    requireConcessioneTenantAccessMock.mockRejectedValueOnce(new Error("TENANT_WRITE_DENIED"));
+    requireTenantAccessMock.mockImplementationOnce(() => {
+      throw new Error("TENANT_WRITE_DENIED");
+    });
 
     await expect(finalizeProcedimentoDecisionAction(baseFormData())).rejects.toThrow(/tenant corrente/i);
     expect(prismaMock.$transaction).not.toHaveBeenCalled();

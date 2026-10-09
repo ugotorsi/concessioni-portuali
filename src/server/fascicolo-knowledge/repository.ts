@@ -158,8 +158,7 @@ async function assertProcedureAuthority(tx: KnowledgeSqlExecutor, scope: Knowled
   const result = await tx.query<{ id: string }>(`
     SELECT p."id"
     FROM "Procedimento" p
-    INNER JOIN "Concessione" c ON c."id" = p."concessioneId"
-    WHERE p."id" = $1 AND c."enteId" = $2
+    WHERE p."id" = $1 AND p."enteId" = $2
   `, [scope.procedimentoId, scope.tenantId]);
   if (result.rows.length !== 1) throw new FascicoloKnowledgeRepositoryError("AUTHORITY_MISMATCH");
 }

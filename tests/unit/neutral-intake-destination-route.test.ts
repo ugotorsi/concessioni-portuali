@@ -74,7 +74,8 @@ describe("POST /api/neutral-intakes/[id]/destination", () => {
     findIntakeMock.mockResolvedValue({ id: "intake-1", enteId: "ente-1" });
     findProcedimentoMock.mockResolvedValue({
       id: "procedimento-1",
-      concessione: { id: "concessione-1", enteId: "ente-1" },
+      enteId: "ente-1",
+      concessioneId: "concessione-1",
     });
     establishDestinationMock.mockResolvedValue({
       outcome: "CREATED",
@@ -124,7 +125,8 @@ describe("POST /api/neutral-intakes/[id]/destination", () => {
   it("rejects cross-tenant destinations before invoking the canonical service", async () => {
     findProcedimentoMock.mockResolvedValue({
       id: "procedimento-1",
-      concessione: { id: "concessione-2", enteId: "ente-2" },
+      enteId: "ente-2",
+      concessioneId: "concessione-2",
     });
     const response = await POST(request(), context());
     expect(response.status).toBe(403);

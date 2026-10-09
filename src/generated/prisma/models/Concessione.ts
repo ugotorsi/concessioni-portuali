@@ -1342,10 +1342,12 @@ export type ConcessioneCreateNestedOneWithoutProcedimentiInput = {
   connect?: Prisma.ConcessioneWhereUniqueInput
 }
 
-export type ConcessioneUpdateOneRequiredWithoutProcedimentiNestedInput = {
+export type ConcessioneUpdateOneWithoutProcedimentiNestedInput = {
   create?: Prisma.XOR<Prisma.ConcessioneCreateWithoutProcedimentiInput, Prisma.ConcessioneUncheckedCreateWithoutProcedimentiInput>
   connectOrCreate?: Prisma.ConcessioneCreateOrConnectWithoutProcedimentiInput
   upsert?: Prisma.ConcessioneUpsertWithoutProcedimentiInput
+  disconnect?: Prisma.ConcessioneWhereInput | boolean
+  delete?: Prisma.ConcessioneWhereInput | boolean
   connect?: Prisma.ConcessioneWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.ConcessioneUpdateToOneWithWhereWithoutProcedimentiInput, Prisma.ConcessioneUpdateWithoutProcedimentiInput>, Prisma.ConcessioneUncheckedUpdateWithoutProcedimentiInput>
 }

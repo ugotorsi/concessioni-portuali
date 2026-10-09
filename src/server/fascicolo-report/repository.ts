@@ -77,9 +77,8 @@ export async function persistStructuredFascicoloReport(
     const authority = await tx.query<{ revisionId: string; corpusFingerprint: string }>(`
       SELECT r."id" AS "revisionId", r."corpusFingerprint"
       FROM "Procedimento" p
-      JOIN "Concessione" c ON c."id" = p."concessioneId"
-      JOIN "FascicoloKnowledgeRevision" r ON r."procedimentoId" = p."id" AND r."tenantId" = c."enteId"
-      WHERE p."id" = $1 AND c."enteId" = $2 AND r."id" = $3 AND r."status" = 'CURRENT'
+      JOIN "FascicoloKnowledgeRevision" r ON r."procedimentoId" = p."id" AND r."tenantId" = p."enteId"
+      WHERE p."id" = $1 AND p."enteId" = $2 AND r."id" = $3 AND r."status" = 'CURRENT'
       FOR UPDATE OF r
     `, [report.payload.procedimentoId, report.payload.tenantId, report.payload.knowledgeRevisionId]);
     const currentRevision = authority.rows[0];

@@ -187,9 +187,9 @@ export async function getFascicoloAutomaticWorkflowReadModel(
   if (!tenantContext) return null;
   const procedimento = await prisma.procedimento.findUnique({
     where: { id: procedimentoId },
-    select: { concessione: { select: { enteId: true } } },
+    select: { enteId: true },
   });
-  const tenantId = procedimento?.concessione.enteId ?? null;
+  const tenantId = procedimento?.enteId ?? null;
   if (!tenantId) return null;
   try {
     requireTenantAccess(tenantContext, tenantId, { mode: "read", allowWhenEnteMissing: false });

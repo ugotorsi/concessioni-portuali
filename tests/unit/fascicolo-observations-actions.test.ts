@@ -48,7 +48,7 @@ function reviewFormData(status: "VALIDATO" | "RIFIUTATO" | "SUPERATO", reviewNot
   return formData;
 }
 
-const procedure = { id: "procedimento-1", concessioneId: "concessione-1", concessione: { enteId: "ente-1" } };
+const procedure = { id: "procedimento-1", enteId: "ente-1", concessioneId: "concessione-1" };
 const warningDocument = {
   id: "documento-1",
   procedimentoId: "procedimento-1",
@@ -75,7 +75,7 @@ describe("fascicolo observation actions", () => {
       status: "PROPOSTO",
       enteId: "ente-1",
       procedimentoId: "procedimento-1",
-      procedimento: { concessioneId: "concessione-1", concessione: { enteId: "ente-1" } },
+      procedimento: { enteId: "ente-1", concessioneId: "concessione-1" },
     });
     prismaMock.fascicoloObservation.findMany.mockResolvedValue([]);
     txMock.fascicoloObservation.updateMany.mockResolvedValue({ count: 1 });
@@ -160,7 +160,7 @@ describe("fascicolo observation actions", () => {
       status: "VALIDATO",
       enteId: "ente-1",
       procedimentoId: "procedimento-1",
-      procedimento: { concessioneId: "concessione-1", concessione: { enteId: "ente-1" } },
+      procedimento: { enteId: "ente-1", concessioneId: "concessione-1" },
     });
 
     await expect(reviewFascicoloObservationAction(reviewFormData("SUPERATO", "Nuova verifica"))).rejects.toThrow("non disponibile");

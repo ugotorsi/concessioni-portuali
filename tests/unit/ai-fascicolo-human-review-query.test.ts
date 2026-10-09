@@ -98,7 +98,7 @@ function materialFixture() {
     canonicalPayload: identity.canonicalPayload,
     trustedReviewSchemaVersion: trustedReview.schemaVersion,
     ...lineage,
-    procedimento: { id: "procedimento-1", concessione: { enteId: "ente-1" } },
+    procedimento: { id: "procedimento-1", enteId: "ente-1" },
   };
 }
 

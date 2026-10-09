@@ -59,6 +59,7 @@ import {
 
 const procedimento = {
   id: "procedimento-1",
+  enteId: "ente-1",
   concessioneId: "concessione-1",
   concessione: {
     enteId: "ente-1",
@@ -117,8 +118,8 @@ const reviewProposal = {
   ruleCodeSnapshot: "P1C_ART18_ART16_AUTH_REQUIREMENT",
   gapKeySnapshot: "REQ-AUTORIZZAZIONE-ART16",
   procedimento: {
+    enteId: "ente-1",
     concessioneId: "concessione-1",
-    concessione: { enteId: "ente-1" },
   },
 };
 

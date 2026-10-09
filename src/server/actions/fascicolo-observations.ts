@@ -26,10 +26,10 @@ async function requireProcedimentoWriteAccess(procedimentoId: string) {
   const tenantContext = await getCurrentTenantContext();
   const procedimento = await prisma.procedimento.findUnique({
     where: { id: procedimentoId },
-    select: { id: true, concessioneId: true, concessione: { select: { enteId: true } } },
+    select: { id: true, enteId: true, concessioneId: true },
   });
 
-  const enteId = procedimento?.concessione.enteId ?? null;
+  const enteId = procedimento?.enteId ?? null;
   if (!procedimento || !enteId) {
     throw new Error("Procedimento o tenant non disponibile.");
   }
@@ -105,7 +105,7 @@ export async function reviewFascicoloObservationAction(formData: FormData) {
       status: true,
       enteId: true,
       procedimentoId: true,
-      procedimento: { select: { concessioneId: true, concessione: { select: { enteId: true } } } },
+      procedimento: { select: { enteId: true, concessioneId: true } },
     },
   });
   if (!observation || observation.status !== "PROPOSTO") {
@@ -113,7 +113,7 @@ export async function reviewFascicoloObservationAction(formData: FormData) {
   }
 
   const tenantContext = await getCurrentTenantContext();
-  const canonicalEnteId = observation.procedimento.concessione.enteId;
+  const canonicalEnteId = observation.procedimento.enteId;
   if (!canonicalEnteId || observation.enteId !== canonicalEnteId) {
     throw new Error("Tenant osservazione non coerente.");
   }

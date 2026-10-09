@@ -40,8 +40,8 @@ const admissionContextSelect = {
           procedimentoId: true,
           procedimento: {
             select: {
+              enteId: true,
               concessioneId: true,
-              concessione: { select: { enteId: true } },
             },
           },
         },
@@ -61,7 +61,7 @@ export type ResolveLegalSourceCandidateResult =
 
 function getCanonicalContext(admission: AdmissionContext | null, procedimentoId: string) {
   const destination = admission?.neutralIntake.destination;
-  const canonicalEnteId = destination?.procedimento.concessione.enteId ?? null;
+  const canonicalEnteId = destination?.procedimento.enteId ?? null;
   if (
     !admission
     || admission.classificationOutcome !== "LEGAL_SOURCE_CANDIDATE"

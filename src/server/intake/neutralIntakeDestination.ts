@@ -54,7 +54,7 @@ export async function establishNeutralIntakeDestinationInTransaction(
     }),
     tx.procedimento.findUnique({
       where: { id: input.procedimentoId },
-      select: { id: true, concessione: { select: { enteId: true } } },
+      select: { id: true, enteId: true },
     }),
     tx.neutralIntakeDestination.findUnique({ where: { neutralIntakeId: input.neutralIntakeId } }),
   ]);
@@ -62,7 +62,7 @@ export async function establishNeutralIntakeDestinationInTransaction(
     !intake
     || !procedimento
     || intake.enteId === null
-    || procedimento.concessione.enteId !== intake.enteId
+    || procedimento.enteId !== intake.enteId
   ) {
     throw new NeutralIntakeDestinationConflictError();
   }

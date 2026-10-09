@@ -306,12 +306,14 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
                     : item.stato === "IN_CORSO" || isCriticoTipologia
                       ? "bg-amber-50"
                       : "";
+                  const numeroAtto = item.concessione?.numeroAtto ?? "Titolo non accertato";
+                  const concessionario = item.concessione?.concessionario?.denominazione ?? "Non disponibile";
 
                   return (
                     <ClickableTableRow
                       key={item.id}
                       href={`/procedimenti/${item.id}`}
-                      label={`Apri fascicolo ${formatEnumLabel(item.tipologia)} - ${item.concessione.numeroAtto}`}
+                      label={`Apri fascicolo ${formatEnumLabel(item.tipologia)} - ${numeroAtto}`}
                       className={rowClassName}
                     >
                       <TableCell>
@@ -339,10 +341,10 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
                       </TableCell>
                       <TableCell>
                         <Link href={`/procedimenti/${item.id}?section=concession`} className="font-medium text-[#173d4f] underline decoration-slate-300 underline-offset-4 hover:decoration-[#173d4f]">
-                          {item.concessione.numeroAtto}
+                          {numeroAtto}
                         </Link>
                       </TableCell>
-                      <TableCell>{item.concessione.concessionario.denominazione}</TableCell>
+                      <TableCell>{concessionario}</TableCell>
                       <TableCell>
                         {item.criticita ? (
                           <div className="space-y-1">

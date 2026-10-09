@@ -94,7 +94,7 @@ interface PersistedMaterial {
   readonly outboundProjectionHashAlgorithm: string;
   readonly procedimento: {
     readonly id: string;
-    readonly concessione: { readonly enteId: string | null } | null;
+    readonly enteId: string;
   };
 }
 
@@ -127,7 +127,7 @@ const MATERIAL_SELECT = {
   procedimento: {
     select: {
       id: true,
-      concessione: { select: { enteId: true } },
+      enteId: true,
     },
   },
 } as const;
@@ -467,7 +467,7 @@ async function applyInTransaction(input: {
   if (!material) {
     throw new AiFascicoloHumanReviewPersistenceError("MATERIAL_NOT_FOUND");
   }
-  const canonicalEnteId = material.procedimento.concessione?.enteId;
+  const canonicalEnteId = material.procedimento.enteId;
   if (
     !canonicalEnteId
     || material.enteId !== canonicalEnteId

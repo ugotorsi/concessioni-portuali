@@ -137,7 +137,7 @@ describe("createDocumentoUploadAction", () => {
     });
     prismaMock.procedimento.findUnique.mockResolvedValue({
       id: "procedimento-1",
-      concessione: { enteId: "ente-1" },
+      enteId: "ente-1",
     });
     prismaMock.documento.create.mockResolvedValue({
       id: "documento-1",
@@ -327,7 +327,7 @@ describe("createDocumentoUploadAction", () => {
   it("fails closed before storage when no canonical tenant can be derived", async () => {
     prismaMock.procedimento.findUnique.mockResolvedValue({
       id: "procedimento-1",
-      concessione: { enteId: null },
+      enteId: null,
     });
 
     await expect(createDocumentoUploadAction(uploadFormData())).rejects.toThrow("Tenant canonico non derivabile");

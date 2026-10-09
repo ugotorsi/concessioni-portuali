@@ -69,7 +69,7 @@ function attempt(mentions: Array<Record<string, unknown>> = []) {
     neutralIntake: {
       id: "intake-1",
       enteId: "ente-1",
-      destination: { procedimento: { concessione: { enteId: "ente-1" } } },
+      destination: { procedimento: { enteId: "ente-1" } },
     },
     legalReferenceMentions: mentions,
   };

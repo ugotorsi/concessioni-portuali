@@ -78,7 +78,7 @@ describe("P1-NEXT-02A requirement evidence query", () => {
     vi.clearAllMocks();
     getCurrentTenantContextMock.mockResolvedValue({});
     requireTenantAccessMock.mockImplementation(() => undefined);
-    prismaMock.procedimento.findUnique.mockResolvedValue({ id: "procedimento-1", concessione: { enteId: "ente-1" } });
+    prismaMock.procedimento.findUnique.mockResolvedValue({ id: "procedimento-1", enteId: "ente-1" });
     prismaMock.fascicoloDocumentRequirementProposal.findMany.mockResolvedValue([
       { id: "proposal-1" },
       { id: "proposal-2" },
