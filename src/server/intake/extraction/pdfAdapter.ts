@@ -1,5 +1,3 @@
-import { createCanvas } from "@napi-rs/canvas";
-
 import { ExtractionFailure } from "./errors";
 import type { DirectPdfPage, PdfExtractionAdapter, PdfExtractionSession } from "./types";
 
@@ -109,6 +107,7 @@ export class PdfJsExtractionAdapter implements PdfExtractionAdapter {
         renderPage: async (pageNumber, maxPixels) => {
           let page;
           try {
+            const { createCanvas } = await import("@napi-rs/canvas");
             page = await document.getPage(pageNumber);
             const unscaled = page.getViewport({ scale: 1 });
             const targetWidth = Math.max(1, Math.ceil(unscaled.width * 2));

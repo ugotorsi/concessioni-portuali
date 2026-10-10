@@ -7,6 +7,7 @@ The application worker is a persistent process separate from `next start`. It re
 ```text
 npm run worker:readiness
 npm run worker:async
+npm run worker:document-extraction
 ```
 
 The readiness command is read-only. It checks database connectivity, the Lotto 8 migration, provider-mode cost configuration, required budget scopes, and optionally a live worker heartbeat. It prints one sanitized JSON result and exits non-zero on failure.
@@ -53,7 +54,7 @@ new current `DocumentFileVersion`. The HTTP request only persists the document a
 queued job; extraction remains in this separate worker.
 
 For a scoped E2E activation that does not claim unrelated queued work, run one worker
-against the E2E database with:
+against the E2E database with `npm run worker:document-extraction` and:
 
 ```text
 ASYNC_WORKER_CONCURRENCY=1
@@ -64,7 +65,10 @@ ASYNC_PROVIDER_EXECUTION_ENABLED=false
 
 Keep `ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST` set to the explicitly authorized E2E
 procedimenti during canary activation. Do not run the worker with empty allowlists
-while unrelated jobs are queued.
+while unrelated jobs are queued. The dedicated command rejects startup unless dedicated
+mode is enabled, the operation allowlist contains only `DOCUMENT_EXTRACTION_V1`, the
+procedimento allowlist is non-empty, and provider execution is disabled. It does not
+load the general handler registry or run application lifecycle bootstraps.
 
 ## Persistent Service
 
