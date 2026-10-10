@@ -10,6 +10,7 @@ import {
 } from "@/components/procedimenti/AiFascicoloTrustedReviewPanel";
 import { AiFascicoloTrustedReviewGenerationControl } from "@/components/procedimenti/AiFascicoloTrustedReviewGenerationControl";
 import { ChecklistItemEvidence } from "@/components/procedimenti/ChecklistItemEvidence";
+import { FascicoloDocumentStructuredKnowledgeTrigger } from "@/components/procedimenti/FascicoloDocumentStructuredKnowledgeTrigger";
 import { FascicoloDocumentRequirementScreeningTrigger } from "@/components/procedimenti/FascicoloDocumentRequirementScreeningTrigger";
 import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloObservationsPanel";
 import { FascicoloAutomaticWorkflowPanel } from "@/components/procedimenti/FascicoloAutomaticWorkflowPanel";
@@ -275,25 +276,33 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           ) : null}
           {activeSection === "istruttoria" ? <FascicoloAutomaticWorkflowPanel model={automaticWorkflow} /> : null}
           {activeSection === "analysis" ? (
-            <FascicoloAnalysis
-              model={{
-                questions: [],
-                evidence: detail.documentiPrincipali.map((documento) => ({
-                  id: documento.id,
-                  title: documento.nome,
-                  detail: formatEnumLabel(documento.tipologia),
-                  href: documento.isFileAvailable ? documento.url : null,
-                })),
-                contradictions: [],
-                gaps: detail.documentiPrincipali.length === 0 ? [{
-                  id: "documenti-mancanti",
-                  title: "Documentazione da acquisire",
-                  requestedItem: "Carica gli atti disponibili per avviare estrazione e analisi.",
-                }] : [],
-                relevantItems: [],
-                corpus: analysisCorpus,
-              }}
-            />
+            <div className="space-y-4">
+              <FascicoloDocumentStructuredKnowledgeTrigger
+                procedimentoId={detail.procedimento.id}
+                corpus={analysisCorpus}
+                canRun={canReview}
+              />
+              <FascicoloAnalysis
+                model={{
+                  questions: [],
+                  evidence: detail.documentiPrincipali.map((documento) => ({
+                    id: documento.id,
+                    title: documento.nome,
+                    detail: formatEnumLabel(documento.tipologia),
+                    href: documento.isFileAvailable ? documento.url : null,
+                  })),
+                  contradictions: [],
+                  gaps: detail.documentiPrincipali.length === 0 ? [{
+                    id: "documenti-mancanti",
+                    title: "Documentazione da acquisire",
+                    requestedItem: "Carica gli atti disponibili per avviare estrazione e analisi.",
+                  }] : [],
+                  relevantItems: [],
+                  corpus: analysisCorpus,
+                }}
+              />
+              <FascicoloAutomaticWorkflowPanel model={automaticWorkflow} />
+            </div>
           ) : null}
           {activeSection === "research" ? <FascicoloResearch model={{ questions: [], sources: [] }} /> : null}
           {activeSection === "reports" ? <FascicoloReport snapshots={structuredReportSnapshots} /> : null}
@@ -742,8 +751,14 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
         ) : null}
 
         {activeSection === "analysis" ? (
-          <FascicoloAnalysis
-            model={{
+          <div className="space-y-4">
+            <FascicoloDocumentStructuredKnowledgeTrigger
+              procedimentoId={detail.procedimento.id}
+              corpus={analysisCorpus}
+              canRun={canReview}
+            />
+            <FascicoloAnalysis
+              model={{
               questions: [
                 ...(detail.criticitaCollegata && linkedIssueIsOpen ? [{
                   id: detail.criticitaCollegata.id,
@@ -798,8 +813,10 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                   })),
               ],
               corpus: analysisCorpus,
-            }}
-          />
+              }}
+            />
+            <FascicoloAutomaticWorkflowPanel model={automaticWorkflow} />
+          </div>
         ) : null}
 
         {activeSection === "istruttoria" ? <section className="grid gap-4 xl:grid-cols-2">

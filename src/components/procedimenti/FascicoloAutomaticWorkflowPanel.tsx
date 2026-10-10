@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -61,6 +63,31 @@ function payloadRecord(value: unknown): Record<string, unknown> {
 
 function payloadText(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+type KnowledgeEvidence =
+  NonNullable<FascicoloAutomaticWorkflowReadModel["knowledge"]>["facts"][number]["evidence"];
+
+function KnowledgeEvidenceReferences({ evidence }: { evidence: KnowledgeEvidence }) {
+  if (evidence.length === 0) return null;
+
+  return (
+    <span className="mt-1 block text-xs text-slate-500">
+      Fonti: {evidence.map((source, index) => (
+        <span key={`${source.documentoId}:${source.pageNumber}:${source.basisRef ?? index}`}>
+          {index > 0 ? "; " : ""}
+          <Link
+            href={`/documenti/${source.documentoId}/download`}
+            prefetch={false}
+            className="underline underline-offset-2"
+          >
+            documento · pagina {source.pageNumber}
+          </Link>
+          {source.basisRef ? ` (${source.basisRef})` : ""}
+        </span>
+      ))}
+    </span>
+  );
 }
 
 function directionBadge(direction: FascicoloAutomaticWorkflowReadModel["missions"][number]["results"][number]["supportDirection"]) {
@@ -184,6 +211,19 @@ export function FascicoloAutomaticWorkflowPanel({
               <h3 className="text-sm font-semibold text-slate-900">Conoscenza strutturata del fascicolo</h3>
               <span className="text-xs text-slate-500">Revisione corrente</span>
             </div>
+            {model.knowledge.subjects.length > 0 ? (
+              <div>
+                <h4 className="text-xs font-semibold uppercase text-slate-600">Soggetti individuati</h4>
+                <ul className="mt-2 space-y-2 text-sm text-slate-700">
+                  {model.knowledge.subjects.map((subject) => (
+                    <li key={subject.id}>
+                      {subject.canonicalName}
+                      <span className="ml-2 text-xs text-slate-500">{formatEnumLabel(subject.subjectType)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
             {model.knowledge.legalIssues.length > 0 ? (
               <div>
                 <h4 className="text-xs font-semibold uppercase text-slate-600">Questioni giuridiche individuate</h4>
@@ -207,6 +247,7 @@ export function FascicoloAutomaticWorkflowPanel({
                           {knowledgeStatus(issue.status)}
                         </div>
                         <p className="mt-1 text-sm text-slate-700">{payloadText(issuePayload.rationale) ?? issue.normalizedText}</p>
+                        <KnowledgeEvidenceReferences evidence={issue.evidence} />
                         <p className="mt-1 text-xs text-slate-500">
                           Fondamento: {originItems.map((item) => item.normalizedText).join("; ") || "Da verificare"}
                         </p>
@@ -224,6 +265,7 @@ export function FascicoloAutomaticWorkflowPanel({
                                 Data di riferimento: {payloadText(questionPayload.referenceDate) ?? "Da verificare"}.
                                 Motivo: {payloadText(basis.rationale) ?? "Basis non determinata"}.
                               </p>
+                              <KnowledgeEvidenceReferences evidence={question.evidence} />
                               <p className="mt-1 text-xs text-slate-500">
                                 Ricerca: {mission ? jobLabel(mission.status === "PENDING" ? "QUEUED" : mission.status === "COMPLETED" ? "SUCCEEDED" : mission.status === "REJECTED" ? "TERMINAL_FAILED" : "RUNNING") : "Non avviata"}
                               </p>
@@ -301,7 +343,10 @@ export function FascicoloAutomaticWorkflowPanel({
                 <h4 className="text-xs font-semibold uppercase text-slate-600">Cronologia derivata</h4>
                 <ul className="mt-2 space-y-2 text-sm text-slate-700">
                   {model.knowledge.timeline.map((event) => (
-                    <li key={event.id}>{event.normalizedText} <span className="ml-2">{knowledgeStatus(event.status)}</span></li>
+                    <li key={event.id}>
+                      {event.normalizedText} <span className="ml-2">{knowledgeStatus(event.status)}</span>
+                      <KnowledgeEvidenceReferences evidence={event.evidence} />
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -311,7 +356,10 @@ export function FascicoloAutomaticWorkflowPanel({
                 <h4 className="text-xs font-semibold uppercase text-slate-600">Fatti principali</h4>
                 <ul className="mt-2 space-y-2 text-sm text-slate-700">
                   {model.knowledge.facts.map((fact) => (
-                    <li key={fact.id}>{fact.normalizedText} <span className="ml-2">{knowledgeStatus(fact.status)}</span></li>
+                    <li key={fact.id}>
+                      {fact.normalizedText} <span className="ml-2">{knowledgeStatus(fact.status)}</span>
+                      <KnowledgeEvidenceReferences evidence={fact.evidence} />
+                    </li>
                   ))}
                 </ul>
               </div>

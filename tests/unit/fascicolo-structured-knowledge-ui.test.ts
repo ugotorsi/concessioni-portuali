@@ -8,9 +8,11 @@ describe("Lotto 2 structured knowledge UI", () => {
   it("shows the required CURRENT knowledge sections in the existing fascicolo panel", () => {
     for (const label of [
       "Conoscenza strutturata del fascicolo",
-      "Soggetti",
+      "Soggetti individuati",
       "Cronologia derivata",
       "Fatti principali",
+      "Fonti:",
+      "pagina",
       "Contraddizioni aperte",
       "Lacune",
       "Scadenze candidate",
@@ -18,6 +20,9 @@ describe("Lotto 2 structured knowledge UI", () => {
       expect(source).toContain(label);
     }
     expect(source).toContain("model.knowledge");
+    expect(source).toContain("source.documentoId");
+    expect(source).toContain("source.pageNumber");
+    expect(source).toContain("source.basisRef");
   });
 
   it("visibly distinguishes AI proposals from human-confirmed knowledge", () => {

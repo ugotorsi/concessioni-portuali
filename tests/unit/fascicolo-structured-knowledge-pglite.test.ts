@@ -2,8 +2,14 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 
 import { PGlite } from "@electric-sql/pglite";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
+import {
+  createFascicoloDocumentAnalysisService,
+  type FascicoloDocumentProviderRequestV1,
+} from "@/server/ai/fascicoloDocumentAnalysis";
+import { createFascicoloDocumentStructuredKnowledgeService } from "@/server/ai/fascicoloDocumentStructuredKnowledge";
+import { createRealDataActivationPolicy } from "@/server/ai/realDataActivation";
 import {
   getCurrentKnowledgeRevision,
   listKnowledgeRevisionHistory,
@@ -14,6 +20,9 @@ import {
   type KnowledgeEvidenceCandidate,
   type KnowledgeSqlExecutor,
 } from "@/server/fascicolo-knowledge";
+import {
+  buildFascicoloDocumentCorpus,
+} from "@/server/queries/fascicolo-document-corpus";
 import {
   loadCurrentStructuredKnowledge,
   type StructuredKnowledgeQueryExecutor,
@@ -60,7 +69,21 @@ async function database() {
     CREATE TABLE "NeutralIntakeDestination" ("neutralIntakeId" TEXT PRIMARY KEY, "procedimentoId" TEXT NOT NULL);
     CREATE TABLE "NeutralIntakeExtractionAttempt" ("id" TEXT PRIMARY KEY, "neutralIntakeId" TEXT NOT NULL, "artifactSha256" TEXT NOT NULL, "outcome" TEXT NOT NULL);
     CREATE TABLE "NeutralIntakeExtractionPage" ("id" TEXT PRIMARY KEY, "extractionAttemptId" TEXT NOT NULL, "pageNumber" INTEGER NOT NULL, "textSha256" TEXT NOT NULL);
-    CREATE TABLE "DocumentExtractionAttempt" ("id" TEXT PRIMARY KEY);
+    CREATE TABLE "DocumentExtractionAttempt" (
+      "id" TEXT PRIMARY KEY,
+      "documentoId" TEXT NOT NULL,
+      "documentFileVersionId" TEXT NOT NULL,
+      "tenantId" TEXT NOT NULL,
+      "procedimentoId" TEXT NOT NULL,
+      "sourceSha256" TEXT NOT NULL,
+      "outcome" TEXT NOT NULL
+    );
+    CREATE TABLE "DocumentExtractionPage" (
+      "id" TEXT PRIMARY KEY,
+      "extractionAttemptId" TEXT NOT NULL,
+      "pageNumber" INTEGER NOT NULL,
+      "textSha256" TEXT NOT NULL
+    );
     CREATE TABLE "Scadenza" ("id" TEXT PRIMARY KEY);
     INSERT INTO "Ente" VALUES ('tenant-a'), ('tenant-b');
     INSERT INTO "Concessione" VALUES ('concession-a1', 'tenant-a'), ('concession-a2', 'tenant-a'), ('concession-b1', 'tenant-b');
@@ -91,6 +114,10 @@ async function database() {
       ('page-a1-mismatch-1', 'attempt-a1-mismatch', 1, '${hashA}'),
       ('page-a2-1', 'attempt-a2', 1, '${hashA}'),
       ('page-b1-1', 'attempt-b1', 1, '${hashA}');
+    INSERT INTO "DocumentExtractionAttempt" VALUES
+      ('document-attempt-a1', 'document-a1', 'version-a1', 'tenant-a', 'procedure-a1', '${hashA}', 'SUCCEEDED');
+    INSERT INTO "DocumentExtractionPage" VALUES
+      ('document-page-a1-1', 'document-attempt-a1', 1, '${hashA}');
   `);
   for (const migration of migrations) await db.exec(migration);
   for (const documentEvidenceMigration of documentEvidenceMigrations) {
@@ -197,6 +224,100 @@ afterEach(async () => {
 });
 
 describe("fascicolo structured knowledge on disposable PGlite", () => {
+  it("persists and rereads ordinary fascicolo document evidence without a Neutral Intake identity", async () => {
+    const db = await database();
+    const ctx = context(db);
+    const corpus = buildFascicoloDocumentCorpus({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-a1",
+      documents: [{
+        id: "document-a1",
+        nome: "Provvedimento.pdf",
+        currentFileVersionId: "version-a1",
+        currentFileVersion: { sha256: hashA },
+      }],
+      attempts: [{
+        id: "document-attempt-a1",
+        documentoId: "document-a1",
+        documentFileVersionId: "version-a1",
+        outcome: "SUCCEEDED",
+        sourceSha256: hashA,
+        failureCode: null,
+        pages: [{
+          pageNumber: 1,
+          normalizedText: "Il provvedimento documenta la partenza.",
+          textSha256: hashA,
+          extractionMethod: "DIRECT_TEXT",
+          ocrConfidence: null,
+          normalizedCharacterCount: 38,
+        }],
+      }],
+    });
+    const provider = vi.fn(async (_request: FascicoloDocumentProviderRequestV1) => ({
+      summary: { text: "Il provvedimento documenta la partenza.", basisRefs: ["DOCUMENT_1.PAGE_1"] },
+      timeline: [],
+      recordedState: [{ text: "La partenza e documentata.", basisRefs: ["DOCUMENT_1.PAGE_1"] }],
+      signals: [],
+      investigativeQuestions: [],
+      suggestedActivities: [],
+      legalResearchQuestions: [],
+      structuredKnowledge: {
+        version: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1",
+        subjects: [],
+        items: [{
+          localId: "fact-document",
+          kind: "FACT",
+          confidence: 90,
+          basisRefs: ["DOCUMENT_1.PAGE_1"],
+          payload: {
+            normalizedStatement: "La partenza e documentata.",
+            subjectLocalIds: [],
+            object: null,
+            qualifier: null,
+          },
+        }],
+      },
+    }));
+    const analysisService = createFascicoloDocumentAnalysisService({
+      provider: { analyze: provider },
+      maxInputBytes: 64_000,
+      realDataActivation: createRealDataActivationPolicy({
+        AI_REAL_DATA_ENABLED: "true",
+        AI_REAL_DATA_APPROVAL_ID: "test-approval",
+        AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
+      }),
+    });
+    const service = createFascicoloDocumentStructuredKnowledgeService({
+      analysisService,
+      dependencies: {
+        getCorpus: async () => corpus,
+        getCurrentRevision: (input) => getCurrentKnowledgeRevision(input, ctx),
+        persistKnowledge: (input) => persistStructuredKnowledgeRevision(input, ctx),
+        loadReadModel: (tenantId, procedimentoId) =>
+          loadCurrentStructuredKnowledge(tenantId, procedimentoId, queryExecutor(db)),
+      },
+    });
+
+    const first = await service.analyzeAndPersist(scope());
+    expect(first.outcome).toBe("PERSISTED");
+    expect(first.knowledge?.facts[0].evidence[0]).toEqual({
+      provenanceType: "FASCICOLO_DOCUMENT_EXTRACTION",
+      basisRef: "DOCUMENT_1.PAGE_1",
+      documentoId: "document-a1",
+      documentFileVersionId: "version-a1",
+      extractionAttemptId: null,
+      documentExtractionAttemptId: "document-attempt-a1",
+      pageNumber: 1,
+      textSha256: hashA,
+    });
+
+    const repeated = await service.analyzeAndPersist(scope());
+    expect(repeated.outcome).toBe("REUSED");
+    expect(repeated.knowledge?.revision.id).toBe(first.knowledge?.revision.id);
+    expect(provider).toHaveBeenCalledOnce();
+    expect(JSON.stringify(provider.mock.calls[0][0])).not.toContain("neutralIntakeId");
+  });
+
   it("deduplicates subjects by strong identifier without merging similar weak names or crossing tenants", async () => {
     const db = await database();
     const ctx = context(db);

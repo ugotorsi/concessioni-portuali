@@ -49,7 +49,7 @@ export interface FascicoloDocumentAnalysisInput {
   readonly contractVersion: typeof FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION;
   readonly tenantId: string;
   readonly procedimentoId: string;
-  readonly neutralIntakeId: string;
+  readonly neutralIntakeId?: string;
   readonly documentVersionId: string;
   readonly artifactSha256: string;
   readonly corpusFingerprint: string;
