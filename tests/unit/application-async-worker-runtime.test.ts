@@ -42,6 +42,7 @@ const config = {
   errorBackoffMs: 2_000,
   operationAllowlist: [],
   procedimentoAllowlist: [],
+  dedicatedMode: false,
 };
 
 function harness() {
@@ -387,12 +388,40 @@ describe("Block 3B.7 application async worker runtime", () => {
       retryDelayMs: 1_500,
       operationAllowlist: ["NEUTRAL_INTAKE_EXTRACTION_V1", "FASCICOLO.AUTOMATIC_ANALYSIS_V1"],
       procedimentoAllowlist: ["procedure-canary"],
+      dedicatedMode: false,
       providerExecutionEnabled: false,
     });
+
     expect(() => parseApplicationAsyncWorkerConfig({}))
       .toThrowError(expect.objectContaining<Partial<ApplicationAsyncWorkerConfigurationError>>({
         code: "DATABASE_URL_REQUIRED",
       }));
+  });
+
+  it("requires both allowlists when dedicated mode is enabled", () => {
+    const base = {
+      DATABASE_URL: "postgresql://server/database",
+      ASYNC_WORKER_DEDICATED_MODE: "true",
+    };
+    expect(() => parseApplicationAsyncWorkerConfig(base))
+      .toThrowError(expect.objectContaining<Partial<ApplicationAsyncWorkerConfigurationError>>({
+        code: "INVALID_CONFIGURATION",
+      }));
+    expect(() => parseApplicationAsyncWorkerConfig({
+      ...base,
+      ASYNC_WORKER_OPERATION_ALLOWLIST: "DOCUMENT_EXTRACTION_V1",
+    })).toThrowError(expect.objectContaining<Partial<ApplicationAsyncWorkerConfigurationError>>({
+      code: "INVALID_CONFIGURATION",
+    }));
+    expect(parseApplicationAsyncWorkerConfig({
+      ...base,
+      ASYNC_WORKER_OPERATION_ALLOWLIST: "DOCUMENT_EXTRACTION_V1",
+      ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST: "procedure-canary",
+    })).toMatchObject({
+      dedicatedMode: true,
+      operationAllowlist: ["DOCUMENT_EXTRACTION_V1"],
+      procedimentoAllowlist: ["procedure-canary"],
+    });
   });
 
   it("requires monetary estimates before provider execution can be enabled", () => {

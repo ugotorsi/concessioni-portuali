@@ -27,6 +27,7 @@ const PROVIDER_BACKED_OPERATIONS = [
   "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
   "LEGAL_RESEARCH.EXECUTE_V1",
 ] as const;
+const AUTOMATIC_RESEARCH_OPERATION = "LEGAL_RESEARCH.EXECUTE_V1";
 
 export function createApplicationAsyncJobRegistry(input: {
   automaticAnalysisDependencies?: FascicoloAutomaticAnalysisDependencies;
@@ -57,7 +58,12 @@ export async function drainOneApplicationAsyncJob(input: {
   procedimentoAllowlist?: readonly string[];
   providerExecutionEnabled?: boolean;
 }) {
-  await reconcilePendingAutomaticResearchExecutions();
+  if (
+    !input.operationAllowlist?.length
+    || input.operationAllowlist.includes(AUTOMATIC_RESEARCH_OPERATION)
+  ) {
+    await reconcilePendingAutomaticResearchExecutions();
+  }
   return drainOneAsyncJob({
     ...input,
     operationBlocklist: input.providerExecutionEnabled === false ? PROVIDER_BACKED_OPERATIONS : undefined,

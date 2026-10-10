@@ -194,6 +194,50 @@ describe("B2C9 generic async job persistence", () => {
     expect(sql).toContain('FROM "AutomaticFascicoloReportMission"');
   });
 
+  it("applies claim allowlists to every queue maintenance update", async () => {
+    harness.tx.$executeRaw.mockResolvedValue(0);
+    harness.tx.$queryRaw.mockResolvedValue([]);
+
+    await claimNextAsyncJob({
+      workerId: "worker-1",
+      leaseDurationMs: 60_000,
+      operationAllowlist: ["DOCUMENT_EXTRACTION_V1"],
+      procedimentoAllowlist: ["procedure-canary"],
+    });
+
+    expect(harness.tx.$executeRaw).toHaveBeenCalledTimes(3);
+    const maintenanceSql = harness.tx.$executeRaw.mock.calls.map(
+      ([query]) => (query as { strings: readonly string[] }).strings.join(" "),
+    );
+    expect(maintenanceSql[0]).toContain('"operation" IN (');
+    expect(maintenanceSql[0]).toContain('"procedimentoId" IN (');
+    expect(maintenanceSql[1]).toContain('"operation" IN (');
+    expect(maintenanceSql[1]).toContain('"procedimentoId" IN (');
+    expect(maintenanceSql[2]).toContain('child."operation" IN (');
+    expect(maintenanceSql[2]).toContain('child."procedimentoId" IN (');
+  });
+
+  it("applies claim allowlists to guarded expired-job reconciliation", async () => {
+    harness.prisma.$queryRaw.mockResolvedValue([]);
+    harness.tx.$executeRaw.mockResolvedValue(0);
+    harness.tx.$queryRaw.mockResolvedValue([]);
+
+    await claimNextAsyncJob({
+      workerId: "worker-1",
+      leaseDurationMs: 60_000,
+      operationAllowlist: ["DOCUMENT_EXTRACTION_V1"],
+      procedimentoAllowlist: ["procedure-canary"],
+      resolveTerminalFailureHook: () => undefined,
+    });
+
+    const guardedQuery = harness.prisma.$queryRaw.mock.calls[0]?.[0] as { strings: readonly string[] };
+    expect(guardedQuery.strings.join(" ")).toContain('"operation" IN (');
+    expect(guardedQuery.strings.join(" ")).toContain('"procedimentoId" IN (');
+    const exhaustedQuery = harness.tx.$queryRaw.mock.calls[0]?.[0] as { strings: readonly string[] };
+    expect(exhaustedQuery.strings.join(" ")).toContain('"operation" IN (');
+    expect(exhaustedQuery.strings.join(" ")).toContain('"procedimentoId" IN (');
+  });
+
   it("leaves provider-backed jobs queued when provider execution is disabled", async () => {
     harness.tx.$executeRaw.mockResolvedValue(0);
     harness.tx.$queryRaw.mockResolvedValue([]);

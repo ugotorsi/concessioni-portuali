@@ -23,6 +23,7 @@ The readiness command is read-only. It checks database connectivity, the Lotto 8
 | `ASYNC_WORKER_RETRY_DELAY_MS` | `30000` | base delay, 0-2592000000 ms |
 | `ASYNC_WORKER_OPERATION_ALLOWLIST` | empty | comma-separated canary scope |
 | `ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST` | empty | comma-separated canary scope |
+| `ASYNC_WORKER_DEDICATED_MODE` | `false` | when `true`, both allowlists are required and non-empty |
 | `ASYNC_PROVIDER_EXECUTION_ENABLED` | `false` | blocks provider-backed claims when false |
 | `ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR` | required when providers enabled | positive decimal, max 6 decimals |
 | `ASYNC_COST_RESEARCH_CALL_ESTIMATE_EUR` | required when providers enabled | positive decimal, max 6 decimals |
@@ -56,6 +57,7 @@ against the E2E database with:
 
 ```text
 ASYNC_WORKER_CONCURRENCY=1
+ASYNC_WORKER_DEDICATED_MODE=true
 ASYNC_WORKER_OPERATION_ALLOWLIST=DOCUMENT_EXTRACTION_V1
 ASYNC_PROVIDER_EXECUTION_ENABLED=false
 ```
