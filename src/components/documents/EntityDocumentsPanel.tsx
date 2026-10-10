@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
 import { DOCUMENT_CANALE_VALUES, DOCUMENT_DIREZIONE_VALUES } from "@/server/documents/protocollo";
 import { DOCUMENT_SOURCE_VALUES, DOCUMENT_STATUS_VALUES, DOCUMENT_TIPOLOGIA_VALUES } from "@/server/documents/validation";
+import type { DocumentExtractionReadModel } from "@/server/queries/document-extractions";
 
 interface EntityDocumentItem {
   id: string;
@@ -31,6 +32,8 @@ interface EntityDocumentItem {
   descrizione?: string | null;
   mittente?: string | null;
   url?: string | null;
+  currentFileVersionId?: string | null;
+  extraction?: DocumentExtractionReadModel;
 }
 
 interface EntityDocumentsPanelProps {
@@ -138,6 +141,8 @@ function toArchiveItem(item: EntityDocumentItem, canUpload: boolean): FascicoloD
     originalHref: item.isFileAvailable === true && usesStoredFile ? `/documenti/${item.id}/download` : null,
     canArchive: canUpload && item.statoDocumento !== "ARCHIVIATO",
     details,
+    versionId: item.currentFileVersionId ?? null,
+    extraction: item.extraction,
   };
 }
 

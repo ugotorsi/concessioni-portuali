@@ -5,6 +5,7 @@ import { AlertTriangle, FileText, Paperclip } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
+import type { DocumentExtractionReadModel } from "@/server/queries/document-extractions";
 
 export interface FascicoloDocumentArchiveItem {
   id: string;
@@ -22,6 +23,8 @@ export interface FascicoloDocumentArchiveItem {
   openInNewTab?: boolean;
   originalHref?: string | null;
   canArchive?: boolean;
+  versionId?: string | null;
+  extraction?: DocumentExtractionReadModel;
   details?: Array<{
     label: string;
     value: string;
@@ -36,6 +39,19 @@ interface FascicoloDocumentsArchiveProps {
 }
 
 type SortOrder = "recent" | "oldest" | "name";
+
+function extractionStatusLabel(status: DocumentExtractionReadModel["status"]): string {
+  switch (status) {
+    case "AVAILABLE":
+      return "Estrazione disponibile";
+    case "OCR_REQUIRED":
+      return "OCR necessario";
+    case "FAILED":
+      return "Estrazione non riuscita";
+    case "NOT_RUN":
+      return "Estrazione non ancora eseguita";
+  }
+}
 
 export function FascicoloDocumentsArchive({
   documents,
@@ -138,6 +154,11 @@ export function FascicoloDocumentsArchive({
                       {item.alert}
                     </p>
                   ) : null}
+                  <p className="text-xs text-slate-600">
+                    Versione: <span className="font-mono">{item.versionId ?? "non disponibile"}</span>
+                    {" · "}
+                    {extractionStatusLabel(item.extraction?.status ?? "NOT_RUN")}
+                  </p>
                 </div>
               </div>
 
@@ -175,6 +196,54 @@ export function FascicoloDocumentsArchive({
                   </div>
                 </details>
               </div>
+              <details className="md:col-span-2 md:ml-8">
+                <summary className="cursor-pointer text-sm font-semibold text-[#173d4f] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7285]">
+                  Consulta testo estratto
+                </summary>
+                <div className="mt-3 space-y-4 rounded-md border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+                  <div>
+                    <p className="font-semibold text-slate-950">{item.name}</p>
+                    <p>Versione: <span className="font-mono text-xs">{item.versionId ?? "non disponibile"}</span></p>
+                  </div>
+                  <dl className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    <div><dt className="font-medium text-slate-900">Stato</dt><dd>{extractionStatusLabel(item.extraction?.status ?? "NOT_RUN")}</dd></div>
+                    <div><dt className="font-medium text-slate-900">Metodo</dt><dd>{item.extraction?.methods.length ? item.extraction.methods.join(", ") : "Non disponibile"}</dd></div>
+                    <div><dt className="font-medium text-slate-900">Pagine</dt><dd>{item.extraction?.pageCount ?? 0}</dd></div>
+                    <div><dt className="font-medium text-slate-900">Caratteri</dt><dd>{item.extraction?.characterCount ?? 0}</dd></div>
+                    <div><dt className="font-medium text-slate-900">Policy</dt><dd>{item.extraction?.policyVersion ?? "Non disponibile"}</dd></div>
+                    <div><dt className="font-medium text-slate-900">Provenienza risultato</dt><dd>{item.extraction?.provenance.length ? item.extraction.provenance.join(", ") : "Non disponibile"}</dd></div>
+                  </dl>
+                  {item.extraction?.status === "OCR_REQUIRED" ? (
+                    <p role="status" className="rounded-md border border-amber-300 bg-amber-50 p-3 font-medium text-amber-900">
+                      OCR_REQUIRED: il documento richiede riconoscimento ottico del testo.
+                    </p>
+                  ) : null}
+                  {item.extraction?.status === "FAILED" ? (
+                    <p role="alert" className="rounded-md border border-red-200 bg-red-50 p-3 text-red-900">
+                      {item.extraction.failureCode ?? "EXTRACTION_FAILED"}
+                      {item.extraction.failureMessage ? `: ${item.extraction.failureMessage}` : ""}
+                    </p>
+                  ) : null}
+                  {(item.extraction?.status ?? "NOT_RUN") === "NOT_RUN" ? (
+                    <p className="rounded-md border border-slate-200 bg-white p-3">Nessun risultato di estrazione disponibile per questa versione.</p>
+                  ) : null}
+                  {item.extraction?.status === "AVAILABLE" ? (
+                    <ol className="space-y-4">
+                      {item.extraction.pages.map((page) => (
+                        <li key={`${item.id}-page-${page.pageNumber}`} className="rounded-md border border-slate-200 bg-white p-4">
+                          <div className="mb-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
+                            <span className="font-semibold text-slate-900">Pagina {page.pageNumber}</span>
+                            <span>Metodo: {page.method}</span>
+                            <span>{page.characterCount} caratteri</span>
+                            {page.ocrConfidence !== null ? <span>Confidenza OCR: {Math.round(page.ocrConfidence * 100)}%</span> : null}
+                          </div>
+                          <pre className="whitespace-pre-wrap break-words font-sans text-sm leading-6 text-slate-900">{page.text}</pre>
+                        </li>
+                      ))}
+                    </ol>
+                  ) : null}
+                </div>
+              </details>
             </li>
           ))}
         </ul>

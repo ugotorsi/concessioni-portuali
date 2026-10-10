@@ -16,6 +16,10 @@ import {
 } from "@/lib/tenant-auth";
 import { formatEnumLabel } from "@/lib/utils";
 import type { Prisma } from "@/generated/prisma/client";
+import {
+  getDocumentExtractionReadModels,
+  type DocumentExtractionReadModel,
+} from "@/server/queries/document-extractions";
 
 export const PROCEDIMENTO_TIPOLOGIA_VALUES = [
   "CHIARIMENTI",
@@ -317,6 +321,8 @@ export interface ProcedimentoDetail {
     url: string;
     dataDocumento: Date | null;
     createdAt: Date;
+    currentFileVersionId: string | null;
+    extraction: DocumentExtractionReadModel;
   }>;
   reportCollegati: Array<{
     id: string;
@@ -785,6 +791,7 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
 
   const documentiCollegati = await prisma.documento.findMany({
     where: {
+      enteId: procedimento.enteId,
       OR: [
         { procedimentoId: procedimento.id },
         ...(procedimento.concessioneId ? [{ concessioneId: procedimento.concessioneId }] : []),
@@ -794,6 +801,14 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
     orderBy: [{ dataDocumento: "desc" }, { createdAt: "desc" }],
     take: 20,
     distinct: ["id"],
+  });
+  const extractionByDocumentId = await getDocumentExtractionReadModels({
+    tenantId: procedimento.enteId,
+    procedimentoId: procedimento.id,
+    documents: documentiCollegati.map((documento) => ({
+      documentId: documento.id,
+      currentFileVersionId: documento.currentFileVersionId,
+    })),
   });
 
   const termineScaduto =
@@ -1049,6 +1064,8 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
       url: item.url ?? `/documenti/${item.id}/download`,
       dataDocumento: item.dataDocumento,
       createdAt: item.createdAt,
+      currentFileVersionId: item.currentFileVersionId,
+      extraction: extractionByDocumentId[item.id],
     })),
     reportCollegati: (procedimento.concessione?.report ?? []).map((item) => ({
       id: item.id,
