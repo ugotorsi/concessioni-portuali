@@ -585,14 +585,6 @@ export type EnumNeutralIntakeExtractionMethodFieldUpdateOperationsInput = {
   set?: $Enums.NeutralIntakeExtractionMethod
 }
 
-export type NullableFloatFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type NeutralIntakeExtractionPageCreateNestedOneWithoutLegalReferenceMentionsInput = {
   create?: Prisma.XOR<Prisma.NeutralIntakeExtractionPageCreateWithoutLegalReferenceMentionsInput, Prisma.NeutralIntakeExtractionPageUncheckedCreateWithoutLegalReferenceMentionsInput>
   connectOrCreate?: Prisma.NeutralIntakeExtractionPageCreateOrConnectWithoutLegalReferenceMentionsInput

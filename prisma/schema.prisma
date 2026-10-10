@@ -728,6 +728,16 @@ enum NeutralIntakeExtractionMethod {
   OCR
 }
 
+enum DocumentExtractionOutcome {
+  SUCCEEDED
+  FAILED
+}
+
+enum DocumentExtractionMethod {
+  DIRECT_TEXT
+  OCR
+}
+
 enum NeutralIntakeClassificationOutcome {
   LEGAL_SOURCE_CANDIDATE
   CASE_DOCUMENT
@@ -973,6 +983,7 @@ model Ente {
   researchAssistedVerifications ResearchAssistedVerificationRecord[]
   aiFascicoloTrustedReviewMaterials AiFascicoloTrustedReviewMaterial[]
   automaticFascicoloReports         AutomaticFascicoloReport[]
+  documentExtractionAttempts        DocumentExtractionAttempt[]
   fascicoliIntake                   FascicoloIntake[]
   procedimenti                      Procedimento[]
   aiFascicoloHumanReviewStates      AiFascicoloHumanReviewState[]
@@ -1732,6 +1743,7 @@ model Procedimento {
   structuredFascicoloReports        StructuredFascicoloReportSnapshot[]
   fascicoloOperationalProposals     FascicoloOperationalProposal[]
   asyncJobs                         AsyncJob[]
+  documentExtractionAttempts        DocumentExtractionAttempt[]
   runtimeBudgetPolicies             RuntimeBudgetPolicy[]
   runtimeCostReservations           RuntimeCostReservation[]
 
@@ -1750,6 +1762,7 @@ model Procedimento {
   @@index([termineMemorieScadenza])
   @@index([contestazioneFormaleInviata])
   @@index([createdAt])
+  @@unique([id, enteId], map: "procedimento_extraction_scope_uq")
 }
 
 model FascicoloIntake {
@@ -1926,6 +1939,7 @@ model Documento {
   fileVersions          DocumentFileVersion[] @relation("DocumentFileVersions")
   currentFileVersion    DocumentFileVersion?  @relation("CurrentDocumentFileVersion", fields: [currentFileVersionId, id, enteId], references: [id, documentId, canonicalEnteId], onDelete: Restrict, onUpdate: NoAction, map: "Documento_currentFileVersion_fkey")
   fascicoloKnowledgeEvidence FascicoloKnowledgeEvidence[]
+  extractionAttempts         DocumentExtractionAttempt[]
 
   @@index([uploadedByUserId])
   @@index([statoDocumento])
@@ -1946,6 +1960,7 @@ model Documento {
   @@index([dataDocumento])
   @@index([createdAt])
   @@unique([currentFileVersionId, id, enteId])
+  @@unique([id, enteId, procedimentoId], map: "documento_extraction_scope_uq")
 }
 
 model DocumentFileVersion {
@@ -1968,12 +1983,77 @@ model DocumentFileVersion {
   createdByUser User?     @relation("DocumentFileVersionCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
   currentFor   Documento? @relation("CurrentDocumentFileVersion")
   fascicoloKnowledgeEvidence FascicoloKnowledgeEvidence[]
+  extractionAttempts         DocumentExtractionAttempt[]
 
   @@unique([documentId, sha256])
   @@unique([storageProvider, storageKey])
   @@unique([id, documentId, canonicalEnteId])
   @@index([canonicalEnteId, documentId, createdAt])
   @@index([createdByUserId])
+}
+
+model DocumentExtractionAttempt {
+  id                     String                    @id @default(cuid())
+  executionKey           String                    @unique(map: "document_extraction_execution_key_uq")
+  documentoId            String
+  documentFileVersionId  String
+  tenantId               String
+  procedimentoId         String
+  policyVersion          String
+  retryOfAttemptId       String?
+  retryAuthorizationId   String?
+  outcome                DocumentExtractionOutcome
+  sourceSha256           String                    @db.Char(64)
+  declaredMimeType       String
+  detectedMimeType       String?
+  sourceSizeBytes        Int
+  startedAt              DateTime
+  completedAt            DateTime
+  directExtractorName    String?
+  directExtractorVersion String?
+  ocrExtractorName       String?
+  ocrExtractorVersion    String?
+  rasterizerName         String?
+  rasterizerVersion      String?
+  failureCode            String?
+  failureMessage         String?
+  warnings               Json?
+  technicalMetadata      Json?
+  createdAt              DateTime                  @default(now())
+
+  documento           Documento                @relation(fields: [documentoId, tenantId, procedimentoId], references: [id, enteId, procedimentoId], onDelete: Restrict, onUpdate: NoAction)
+  documentFileVersion DocumentFileVersion      @relation(fields: [documentFileVersionId, documentoId, tenantId], references: [id, documentId, canonicalEnteId], onDelete: Restrict, onUpdate: NoAction)
+  tenant              Ente                     @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  procedimento        Procedimento             @relation(fields: [procedimentoId, tenantId], references: [id, enteId], onDelete: Restrict, onUpdate: NoAction)
+  pages               DocumentExtractionPage[]
+  retryOfAttempt      DocumentExtractionAttempt?  @relation("DocumentExtractionRetries", fields: [retryOfAttemptId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  retries             DocumentExtractionAttempt[] @relation("DocumentExtractionRetries")
+
+  @@index([documentFileVersionId, policyVersion, outcome], map: "document_extraction_canonical_result_idx")
+  @@index([retryOfAttemptId], map: "document_extraction_retry_source_idx")
+  @@index([documentoId, documentFileVersionId, createdAt], map: "document_extraction_document_version_idx")
+  @@index([tenantId, procedimentoId, createdAt], map: "document_extraction_scope_idx")
+  @@index([outcome, createdAt], map: "document_extraction_outcome_idx")
+}
+
+model DocumentExtractionPage {
+  id                       String                   @id @default(cuid())
+  extractionAttemptId      String
+  pageNumber               Int
+  extractionMethod         DocumentExtractionMethod
+  text                     String
+  normalizedText           String
+  textSha256               String                   @db.Char(64)
+  normalizedCharacterCount Int
+  ocrConfidence            Float?
+  warnings                 Json?
+  technicalMetadata        Json?
+  createdAt                DateTime                 @default(now())
+
+  extractionAttempt DocumentExtractionAttempt @relation(fields: [extractionAttemptId], references: [id], onDelete: Restrict)
+
+  @@unique([extractionAttemptId, pageNumber])
+  @@index([textSha256])
 }
 
 model NeutralIntake {

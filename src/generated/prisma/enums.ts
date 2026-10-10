@@ -994,6 +994,22 @@ export const NeutralIntakeExtractionMethod = {
 export type NeutralIntakeExtractionMethod = (typeof NeutralIntakeExtractionMethod)[keyof typeof NeutralIntakeExtractionMethod]
 
 
+export const DocumentExtractionOutcome = {
+  SUCCEEDED: 'SUCCEEDED',
+  FAILED: 'FAILED'
+} as const
+
+export type DocumentExtractionOutcome = (typeof DocumentExtractionOutcome)[keyof typeof DocumentExtractionOutcome]
+
+
+export const DocumentExtractionMethod = {
+  DIRECT_TEXT: 'DIRECT_TEXT',
+  OCR: 'OCR'
+} as const
+
+export type DocumentExtractionMethod = (typeof DocumentExtractionMethod)[keyof typeof DocumentExtractionMethod]
+
+
 export const NeutralIntakeClassificationOutcome = {
   LEGAL_SOURCE_CANDIDATE: 'LEGAL_SOURCE_CANDIDATE',
   CASE_DOCUMENT: 'CASE_DOCUMENT',

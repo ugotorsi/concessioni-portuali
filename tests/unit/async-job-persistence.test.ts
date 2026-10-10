@@ -29,6 +29,7 @@ import {
   AsyncJobLeaseConflictError,
   admitAsyncJob,
   admitAsyncJobInTransaction,
+  claimAsyncJobById,
   claimNextAsyncJob,
   failAsyncJob,
   heartbeatAsyncJob,
@@ -137,6 +138,28 @@ describe("B2C9 generic async job persistence", () => {
     expect(sql).toContain('active_scope."procedimentoId" = "AsyncJob"."procedimentoId"');
     expect(sql).toContain('CASE "priority" WHEN \'HIGH\'');
     expect(sql).toContain("FLOOR(EXTRACT(EPOCH");
+  });
+
+  it("claims only an explicit job ID without global queue reconciliation", async () => {
+    const job = running({ id: "document-extraction-job", operation: "DOCUMENT_EXTRACTION_V1" });
+    harness.tx.$queryRaw.mockResolvedValueOnce([job]);
+
+    await expect(claimAsyncJobById({
+      jobId: "document-extraction-job",
+      expectedOperation: "DOCUMENT_EXTRACTION_V1",
+      workerId: "one-shot-worker",
+      leaseDurationMs: 60_000,
+    })).resolves.toBe(job);
+
+    expect(harness.tx.$executeRaw).not.toHaveBeenCalled();
+    expect(harness.tx.$queryRaw).toHaveBeenCalledOnce();
+    const query = harness.tx.$queryRaw.mock.calls[0]?.[0] as { strings: readonly string[] };
+    const sql = query.strings.join(" ");
+    expect(sql).toContain('WHERE "id" = ');
+    expect(sql).toContain('AND "operation" = ');
+    expect(sql).toContain(`AND "status" IN ('QUEUED', 'RETRY_WAIT')`);
+    expect(sql).not.toContain("CANCELLATION_REQUESTED' SET");
+    expect(sql).not.toContain("LIMIT 1");
   });
 
   it("does not make a queued job claimable before availableAt", async () => {

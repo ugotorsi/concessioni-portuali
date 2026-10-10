@@ -18,6 +18,7 @@ export interface TechnicalExtractorDependencies {
   pdf: PdfExtractionAdapter;
   ocr: OcrAdapter;
   policy: ExtractionPolicy;
+  ocrMode: "ENABLED" | "DISABLED";
 }
 
 function pageEvidence(input: {
@@ -79,6 +80,7 @@ export async function extractTechnicalDocument(
 ): Promise<TechnicalExtractionResult> {
   const policy = dependencies.policy ?? B2C9_EXTRACTION_POLICY_V1;
   const pdf = dependencies.pdf ?? new PdfJsExtractionAdapter();
+  const ocrMode = dependencies.ocrMode ?? "ENABLED";
   let ocr = dependencies.ocr;
   const getOcr = async (): Promise<OcrAdapter> => {
     if (!ocr) {
@@ -122,6 +124,9 @@ export async function extractTechnicalDocument(
           continue;
         }
 
+        if (ocrMode === "DISABLED") {
+          throw new ExtractionFailure("OCR_REQUIRED");
+        }
         const image = await session.renderPage(directPage.pageNumber, policy.maxImagePixels);
         const recognized = await (await getOcr()).recognize(image, policy.ocrTimeoutMsPerPage);
         addRawCharacters(recognized.text);
@@ -139,6 +144,9 @@ export async function extractTechnicalDocument(
       await session.close(Math.min(policy.ocrTimeoutMsPerPage, 5_000));
     }
   } else {
+    if (ocrMode === "DISABLED") {
+      throw new ExtractionFailure("OCR_REQUIRED");
+    }
     assertImagePixelLimit(readImageDimensions(input.bytes, detectedMimeType), policy.maxImagePixels);
     const recognized = await (await getOcr()).recognize(input.bytes, policy.ocrTimeoutMsPerPage);
     addRawCharacters(recognized.text);

@@ -80,6 +80,8 @@ export const ModelName = {
   Pagamento: 'Pagamento',
   Documento: 'Documento',
   DocumentFileVersion: 'DocumentFileVersion',
+  DocumentExtractionAttempt: 'DocumentExtractionAttempt',
+  DocumentExtractionPage: 'DocumentExtractionPage',
   NeutralIntake: 'NeutralIntake',
   NeutralIntakeExtractionAttempt: 'NeutralIntakeExtractionAttempt',
   NeutralIntakeExtractionPage: 'NeutralIntakeExtractionPage',
@@ -823,6 +825,57 @@ export const DocumentFileVersionScalarFieldEnum = {
 } as const
 
 export type DocumentFileVersionScalarFieldEnum = (typeof DocumentFileVersionScalarFieldEnum)[keyof typeof DocumentFileVersionScalarFieldEnum]
+
+
+export const DocumentExtractionAttemptScalarFieldEnum = {
+  id: 'id',
+  executionKey: 'executionKey',
+  documentoId: 'documentoId',
+  documentFileVersionId: 'documentFileVersionId',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  policyVersion: 'policyVersion',
+  retryOfAttemptId: 'retryOfAttemptId',
+  retryAuthorizationId: 'retryAuthorizationId',
+  outcome: 'outcome',
+  sourceSha256: 'sourceSha256',
+  declaredMimeType: 'declaredMimeType',
+  detectedMimeType: 'detectedMimeType',
+  sourceSizeBytes: 'sourceSizeBytes',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  directExtractorName: 'directExtractorName',
+  directExtractorVersion: 'directExtractorVersion',
+  ocrExtractorName: 'ocrExtractorName',
+  ocrExtractorVersion: 'ocrExtractorVersion',
+  rasterizerName: 'rasterizerName',
+  rasterizerVersion: 'rasterizerVersion',
+  failureCode: 'failureCode',
+  failureMessage: 'failureMessage',
+  warnings: 'warnings',
+  technicalMetadata: 'technicalMetadata',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentExtractionAttemptScalarFieldEnum = (typeof DocumentExtractionAttemptScalarFieldEnum)[keyof typeof DocumentExtractionAttemptScalarFieldEnum]
+
+
+export const DocumentExtractionPageScalarFieldEnum = {
+  id: 'id',
+  extractionAttemptId: 'extractionAttemptId',
+  pageNumber: 'pageNumber',
+  extractionMethod: 'extractionMethod',
+  text: 'text',
+  normalizedText: 'normalizedText',
+  textSha256: 'textSha256',
+  normalizedCharacterCount: 'normalizedCharacterCount',
+  ocrConfidence: 'ocrConfidence',
+  warnings: 'warnings',
+  technicalMetadata: 'technicalMetadata',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentExtractionPageScalarFieldEnum = (typeof DocumentExtractionPageScalarFieldEnum)[keyof typeof DocumentExtractionPageScalarFieldEnum]
 
 
 export const NeutralIntakeScalarFieldEnum = {

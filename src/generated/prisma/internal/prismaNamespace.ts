@@ -413,6 +413,8 @@ export const ModelName = {
   Pagamento: 'Pagamento',
   Documento: 'Documento',
   DocumentFileVersion: 'DocumentFileVersion',
+  DocumentExtractionAttempt: 'DocumentExtractionAttempt',
+  DocumentExtractionPage: 'DocumentExtractionPage',
   NeutralIntake: 'NeutralIntake',
   NeutralIntakeExtractionAttempt: 'NeutralIntakeExtractionAttempt',
   NeutralIntakeExtractionPage: 'NeutralIntakeExtractionPage',
@@ -482,7 +484,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceTemporalAssessment" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "fascicoloIntake" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "legalReferenceMatch" | "legalReferenceOfficialLookup" | "legalReferenceOfficialHit" | "legalReferenceOfficialReconciliation" | "legalReferenceOfficialReconciliationEvidence" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "runtimeWorkerHeartbeat" | "runtimeBudgetPolicy" | "runtimeCostReservation" | "fascicoloSignal" | "concessioneExpiryChangeCommand" | "researchMissionRecord" | "researchExecutionAttempt" | "researchEvidenceBundleRecord" | "researchQuestionResultRecord" | "researchSourceAssessmentRecord" | "researchAdverseRequirement" | "researchAssistedVerificationRecord" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "automaticFascicoloReport" | "automaticFascicoloReportDocument" | "automaticFascicoloReportMission" | "fascicoloKnowledgeRevision" | "structuredFascicoloReportSnapshot" | "fascicoloOperationalProposal" | "fascicoloOperationalProposalReviewEvent" | "fascicoloOperationalProposalMaterialization" | "fascicoloSubject" | "fascicoloSubjectIdentifier" | "fascicoloKnowledgeItem" | "fascicoloKnowledgeEvidence" | "fascicoloKnowledgeRelation" | "fascicoloKnowledgeReviewEvent" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceTemporalAssessment" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "fascicoloIntake" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "documentExtractionAttempt" | "documentExtractionPage" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "legalReferenceMatch" | "legalReferenceOfficialLookup" | "legalReferenceOfficialHit" | "legalReferenceOfficialReconciliation" | "legalReferenceOfficialReconciliationEvidence" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "runtimeWorkerHeartbeat" | "runtimeBudgetPolicy" | "runtimeCostReservation" | "fascicoloSignal" | "concessioneExpiryChangeCommand" | "researchMissionRecord" | "researchExecutionAttempt" | "researchEvidenceBundleRecord" | "researchQuestionResultRecord" | "researchSourceAssessmentRecord" | "researchAdverseRequirement" | "researchAssistedVerificationRecord" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "automaticFascicoloReport" | "automaticFascicoloReportDocument" | "automaticFascicoloReportMission" | "fascicoloKnowledgeRevision" | "structuredFascicoloReportSnapshot" | "fascicoloOperationalProposal" | "fascicoloOperationalProposalReviewEvent" | "fascicoloOperationalProposalMaterialization" | "fascicoloSubject" | "fascicoloSubjectIdentifier" | "fascicoloKnowledgeItem" | "fascicoloKnowledgeEvidence" | "fascicoloKnowledgeRelation" | "fascicoloKnowledgeReviewEvent" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2629,6 +2631,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.DocumentFileVersionCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.DocumentFileVersionCountAggregateOutputType> | number
+        }
+      }
+    }
+    DocumentExtractionAttempt: {
+      payload: Prisma.$DocumentExtractionAttemptPayload<ExtArgs>
+      fields: Prisma.DocumentExtractionAttemptFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocumentExtractionAttemptFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentExtractionAttemptPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocumentExtractionAttemptFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentExtractionAttemptPayload>
+        }
+        findFirst: {
+          args: Prisma.DocumentExtractionAttemptFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentExtractionAttemptPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocumentExtractionAttemptFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentExtractionAttemptPayload>
+        }
+        findMany: {
+          args: Prisma.DocumentExtractionAttemptFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentExtractionAttemptPayload>[]
+        }
+        create: {
+          args: Prisma.DocumentExtractionAttemptCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentExtractionAttemptPayload>
+        }
+        createMany: {
+          args: Prisma.DocumentExtractionAttemptCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocumentExtractionAttemptCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentExtractionAttemptPayload>[]
+        }
+        delete: {
+          args: Prisma.DocumentExtractionAttemptDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentExtractionAttemptPayload>
+        }
+        update: {
+          args: Prisma.DocumentExtractionAttemptUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentExtractionAttemptPayload>
+        }
+        deleteMany: {
+          args: Prisma.DocumentExtractionAttemptDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocumentExtractionAttemptUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocumentExtractionAttemptUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentExtractionAttemptPayload>[]
+        }
+        upsert: {
+          args: Prisma.DocumentExtractionAttemptUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentExtractionAttemptPayload>
+        }
+        aggregate: {
+          args: Prisma.DocumentExtractionAttemptAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocumentExtractionAttempt>
+        }
+        groupBy: {
+          args: Prisma.DocumentExtractionAttemptGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentExtractionAttemptGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocumentExtractionAttemptCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentExtractionAttemptCountAggregateOutputType> | number
+        }
+      }
+    }
+    DocumentExtractionPage: {
+      payload: Prisma.$DocumentExtractionPagePayload<ExtArgs>
+      fields: Prisma.DocumentExtractionPageFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocumentExtractionPageFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentExtractionPagePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocumentExtractionPageFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentExtractionPagePayload>
+        }
+        findFirst: {
+          args: Prisma.DocumentExtractionPageFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentExtractionPagePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocumentExtractionPageFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentExtractionPagePayload>
+        }
+        findMany: {
+          args: Prisma.DocumentExtractionPageFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentExtractionPagePayload>[]
+        }
+        create: {
+          args: Prisma.DocumentExtractionPageCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentExtractionPagePayload>
+        }
+        createMany: {
+          args: Prisma.DocumentExtractionPageCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocumentExtractionPageCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentExtractionPagePayload>[]
+        }
+        delete: {
+          args: Prisma.DocumentExtractionPageDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentExtractionPagePayload>
+        }
+        update: {
+          args: Prisma.DocumentExtractionPageUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentExtractionPagePayload>
+        }
+        deleteMany: {
+          args: Prisma.DocumentExtractionPageDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocumentExtractionPageUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocumentExtractionPageUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentExtractionPagePayload>[]
+        }
+        upsert: {
+          args: Prisma.DocumentExtractionPageUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentExtractionPagePayload>
+        }
+        aggregate: {
+          args: Prisma.DocumentExtractionPageAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocumentExtractionPage>
+        }
+        groupBy: {
+          args: Prisma.DocumentExtractionPageGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentExtractionPageGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocumentExtractionPageCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentExtractionPageCountAggregateOutputType> | number
         }
       }
     }
@@ -7340,6 +7490,57 @@ export const DocumentFileVersionScalarFieldEnum = {
 export type DocumentFileVersionScalarFieldEnum = (typeof DocumentFileVersionScalarFieldEnum)[keyof typeof DocumentFileVersionScalarFieldEnum]
 
 
+export const DocumentExtractionAttemptScalarFieldEnum = {
+  id: 'id',
+  executionKey: 'executionKey',
+  documentoId: 'documentoId',
+  documentFileVersionId: 'documentFileVersionId',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  policyVersion: 'policyVersion',
+  retryOfAttemptId: 'retryOfAttemptId',
+  retryAuthorizationId: 'retryAuthorizationId',
+  outcome: 'outcome',
+  sourceSha256: 'sourceSha256',
+  declaredMimeType: 'declaredMimeType',
+  detectedMimeType: 'detectedMimeType',
+  sourceSizeBytes: 'sourceSizeBytes',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  directExtractorName: 'directExtractorName',
+  directExtractorVersion: 'directExtractorVersion',
+  ocrExtractorName: 'ocrExtractorName',
+  ocrExtractorVersion: 'ocrExtractorVersion',
+  rasterizerName: 'rasterizerName',
+  rasterizerVersion: 'rasterizerVersion',
+  failureCode: 'failureCode',
+  failureMessage: 'failureMessage',
+  warnings: 'warnings',
+  technicalMetadata: 'technicalMetadata',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentExtractionAttemptScalarFieldEnum = (typeof DocumentExtractionAttemptScalarFieldEnum)[keyof typeof DocumentExtractionAttemptScalarFieldEnum]
+
+
+export const DocumentExtractionPageScalarFieldEnum = {
+  id: 'id',
+  extractionAttemptId: 'extractionAttemptId',
+  pageNumber: 'pageNumber',
+  extractionMethod: 'extractionMethod',
+  text: 'text',
+  normalizedText: 'normalizedText',
+  textSha256: 'textSha256',
+  normalizedCharacterCount: 'normalizedCharacterCount',
+  ocrConfidence: 'ocrConfidence',
+  warnings: 'warnings',
+  technicalMetadata: 'technicalMetadata',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentExtractionPageScalarFieldEnum = (typeof DocumentExtractionPageScalarFieldEnum)[keyof typeof DocumentExtractionPageScalarFieldEnum]
+
+
 export const NeutralIntakeScalarFieldEnum = {
   id: 'id',
   idempotencyKey: 'idempotencyKey',
@@ -9454,6 +9655,48 @@ export type ListEnumDocumentoCanaleFieldRefInput<$PrismaModel> = FieldRefInputTy
 
 
 /**
+ * Reference to a field of type 'DocumentExtractionOutcome'
+ */
+export type EnumDocumentExtractionOutcomeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentExtractionOutcome'>
+    
+
+
+/**
+ * Reference to a field of type 'DocumentExtractionOutcome[]'
+ */
+export type ListEnumDocumentExtractionOutcomeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentExtractionOutcome[]'>
+    
+
+
+/**
+ * Reference to a field of type 'DocumentExtractionMethod'
+ */
+export type EnumDocumentExtractionMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentExtractionMethod'>
+    
+
+
+/**
+ * Reference to a field of type 'DocumentExtractionMethod[]'
+ */
+export type ListEnumDocumentExtractionMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentExtractionMethod[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Float'
+ */
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+/**
+ * Reference to a field of type 'Float[]'
+ */
+export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+/**
  * Reference to a field of type 'NeutralIntakeStatus'
  */
 export type EnumNeutralIntakeStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NeutralIntakeStatus'>
@@ -9492,20 +9735,6 @@ export type EnumNeutralIntakeExtractionMethodFieldRefInput<$PrismaModel> = Field
  * Reference to a field of type 'NeutralIntakeExtractionMethod[]'
  */
 export type ListEnumNeutralIntakeExtractionMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NeutralIntakeExtractionMethod[]'>
-    
-
-
-/**
- * Reference to a field of type 'Float'
- */
-export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
-
-
-/**
- * Reference to a field of type 'Float[]'
- */
-export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
 
 
@@ -10445,6 +10674,8 @@ export type GlobalOmitConfig = {
   pagamento?: Prisma.PagamentoOmit
   documento?: Prisma.DocumentoOmit
   documentFileVersion?: Prisma.DocumentFileVersionOmit
+  documentExtractionAttempt?: Prisma.DocumentExtractionAttemptOmit
+  documentExtractionPage?: Prisma.DocumentExtractionPageOmit
   neutralIntake?: Prisma.NeutralIntakeOmit
   neutralIntakeExtractionAttempt?: Prisma.NeutralIntakeExtractionAttemptOmit
   neutralIntakeExtractionPage?: Prisma.NeutralIntakeExtractionPageOmit

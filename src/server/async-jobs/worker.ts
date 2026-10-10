@@ -1,5 +1,6 @@
 import {
   AsyncJobLeaseConflictError,
+  claimAsyncJobById,
   claimNextAsyncJob,
   failAsyncJob,
   finalizeAsyncJobCancellation,
@@ -31,6 +32,15 @@ export interface DrainOneAsyncJobInput {
   registry?: AsyncJobHandlerRegistry;
 }
 
+export interface DrainAsyncJobByIdInput {
+  jobId: string;
+  expectedOperation: string;
+  workerId: string;
+  leaseDurationMs: number;
+  retryDelayMs: number;
+  registry: AsyncJobHandlerRegistry;
+}
+
 export type DrainOneAsyncJobOutcome =
   | { outcome: "IDLE" }
   | { outcome: "SUCCEEDED" | "RETRY_SCHEDULED" | "TERMINAL_FAILED" | "CANCELLED"; jobId: string };
@@ -47,6 +57,15 @@ export async function drainOneAsyncJob(input: DrainOneAsyncJobInput): Promise<Dr
       ? (operation) => registry.resolve(operation)?.beforeTerminalFailureInTransaction
       : undefined,
   });
+  if (!claimed) return { outcome: "IDLE" };
+  return executeClaimedAsyncJob(claimed, input, registry);
+}
+
+async function executeClaimedAsyncJob(
+  claimed: Awaited<ReturnType<typeof claimNextAsyncJob>>,
+  input: Pick<DrainOneAsyncJobInput, "workerId" | "leaseDurationMs" | "retryDelayMs">,
+  registry: AsyncJobHandlerRegistry,
+): Promise<DrainOneAsyncJobOutcome> {
   if (!claimed) return { outcome: "IDLE" };
   const lease = () => ({
     jobId: claimed.id,
@@ -147,4 +166,20 @@ export async function drainOneAsyncJob(input: DrainOneAsyncJobInput): Promise<Dr
   }
   await succeedAsyncJob({ ...lease(), resultReference: result ?? {} });
   return { outcome: "SUCCEEDED", jobId: claimed.id };
+}
+
+export async function drainAsyncJobById(
+  input: DrainAsyncJobByIdInput,
+): Promise<DrainOneAsyncJobOutcome> {
+  if (!input.registry.resolve(input.expectedOperation)) {
+    throw new Error("EXPECTED_ASYNC_JOB_HANDLER_UNAVAILABLE");
+  }
+  const claimed = await claimAsyncJobById({
+    jobId: input.jobId,
+    expectedOperation: input.expectedOperation,
+    workerId: input.workerId,
+    leaseDurationMs: input.leaseDurationMs,
+  });
+  if (!claimed) return { outcome: "IDLE" };
+  return executeClaimedAsyncJob(claimed, input, input.registry);
 }

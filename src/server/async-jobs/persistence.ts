@@ -138,6 +138,13 @@ export interface AsyncJobClaimInput {
   resolveTerminalFailureHook?: (operation: string) => AsyncJobTerminalFailureHook | undefined;
 }
 
+export interface AsyncJobClaimByIdInput {
+  jobId: string;
+  expectedOperation: string;
+  workerId: string;
+  leaseDurationMs: number;
+}
+
 async function resolveTerminalFailureInTransaction(
   tx: Prisma.TransactionClient,
   job: AsyncJob,
@@ -341,6 +348,53 @@ export async function claimNextAsyncJob(input: AsyncJobClaimInput): Promise<Asyn
           "availableAt" ASC, "createdAt" ASC, "id" ASC
         FOR UPDATE SKIP LOCKED
         LIMIT 1
+      )
+      UPDATE "AsyncJob" AS job
+      SET "status" = 'RUNNING', "attemptCount" = job."attemptCount" + 1,
+          "leaseOwner" = ${workerId}, "leaseToken" = ${token},
+          "leaseExpiresAt" = CURRENT_TIMESTAMP + (${leaseMs} * INTERVAL '1 millisecond'),
+          "lastHeartbeatAt" = CURRENT_TIMESTAMP,
+          "startedAt" = COALESCE(job."startedAt", CURRENT_TIMESTAMP),
+          "failureCategory" = NULL, "failureCode" = NULL,
+          "stateVersion" = job."stateVersion" + 1, "updatedAt" = CURRENT_TIMESTAMP
+      FROM candidate
+      WHERE job."id" = candidate."id"
+      RETURNING job.*
+    `);
+    return claimed[0] ?? null;
+  });
+}
+
+export async function claimAsyncJobById(input: AsyncJobClaimByIdInput): Promise<AsyncJob | null> {
+  const parsedJobId = jobId.parse(input.jobId);
+  const expectedOperation = identifier.parse(input.expectedOperation);
+  const workerId = identifier.parse(input.workerId);
+  const leaseMs = durationMs.parse(input.leaseDurationMs);
+  const token = randomBytes(32).toString("hex");
+
+  return runSerializableTransactionWithRetry(async (tx) => {
+    const claimed = await tx.$queryRaw<AsyncJob[]>(Prisma.sql`
+      WITH candidate AS (
+        SELECT "id"
+        FROM "AsyncJob"
+        WHERE "id" = ${parsedJobId}
+          AND "operation" = ${expectedOperation}
+          AND "attemptCount" < "maxAttempts"
+          AND ("dependsOnJobId" IS NULL OR EXISTS (
+            SELECT 1 FROM "AsyncJob" AS dependency
+            WHERE dependency."id" = "AsyncJob"."dependsOnJobId"
+              AND dependency."status" = 'SUCCEEDED'
+          ))
+          AND ("procedimentoId" IS NULL OR NOT EXISTS (
+            SELECT 1 FROM "AsyncJob" AS active_scope
+            WHERE active_scope."id" <> "AsyncJob"."id"
+              AND active_scope."procedimentoId" = "AsyncJob"."procedimentoId"
+              AND active_scope."status" IN ('RUNNING', 'CANCELLATION_REQUESTED')
+              AND active_scope."leaseExpiresAt" > CURRENT_TIMESTAMP
+          ))
+          AND "status" IN ('QUEUED', 'RETRY_WAIT')
+          AND "availableAt" <= CURRENT_TIMESTAMP
+        FOR UPDATE
       )
       UPDATE "AsyncJob" AS job
       SET "status" = 'RUNNING', "attemptCount" = job."attemptCount" + 1,
