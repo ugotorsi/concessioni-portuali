@@ -13,7 +13,10 @@ import { ChecklistItemEvidence } from "@/components/procedimenti/ChecklistItemEv
 import { FascicoloDocumentRequirementScreeningTrigger } from "@/components/procedimenti/FascicoloDocumentRequirementScreeningTrigger";
 import { FascicoloObservationsPanel } from "@/components/procedimenti/FascicoloObservationsPanel";
 import { FascicoloAutomaticWorkflowPanel } from "@/components/procedimenti/FascicoloAutomaticWorkflowPanel";
-import { FascicoloAnalysis } from "@/components/procedimenti/FascicoloAnalysis";
+import {
+  FascicoloAnalysis,
+  type FascicoloAnalysisCorpus,
+} from "@/components/procedimenti/FascicoloAnalysis";
 import { FascicoloDeadlines, type FascicoloDeadlineStatus } from "@/components/procedimenti/FascicoloDeadlines";
 import { FascicoloIssues, type FascicoloIssueSeverity, type FascicoloIssueStatus } from "@/components/procedimenti/FascicoloIssues";
 import { FascicoloProposals } from "@/components/procedimenti/FascicoloProposals";
@@ -60,6 +63,10 @@ import { getFascicoloDocumentRequirementProposals } from "@/server/queries/fasci
 import { getFascicoloLegalSourceCandidates } from "@/server/queries/fascicolo-legal-source-candidates";
 import { getFascicoloObservations } from "@/server/queries/fascicolo-observations";
 import { getFascicoloAutomaticWorkflowReadModel } from "@/server/queries/fascicolo-automatic-workflow";
+import {
+  getFascicoloDocumentCorpus,
+  type FascicoloDocumentCorpus,
+} from "@/server/queries/fascicolo-document-corpus";
 import { getNormeForProcedimento } from "@/server/queries/normativa";
 import { getFascicoloProcessingItems } from "@/server/queries/neutral-intake-processing";
 import { getAiFascicoloHumanReviewReadModel } from "@/server/queries/ai-fascicolo-human-review";
@@ -139,6 +146,23 @@ function getStatoEffettoLabel(value: "NON_PREVISTO" | "PENDENTE" | "PRONTO" | "A
   }
 }
 
+function analysisCorpusModel(corpus: FascicoloDocumentCorpus | null): FascicoloAnalysisCorpus | null {
+  if (!corpus) return null;
+  return {
+    availability: corpus.availability,
+    documentCount: corpus.documentCount,
+    availableDocumentCount: corpus.availableDocumentCount,
+    textPageCount: corpus.textPageCount,
+    documentsToVerify: corpus.documents.flatMap((document) => document.status === "AVAILABLE"
+      ? []
+      : [{
+          id: document.documentoId,
+          name: document.name,
+          status: document.status,
+        }]),
+  };
+}
+
 export default async function ProcedimentoDetailPage({ params, searchParams }: ProcedimentoDetailPageProps) {
   const role = await requireRole();
   const canReview = canManageProcedimenti(role);
@@ -165,6 +189,13 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   }
 
   const processingItems = await getFascicoloProcessingItems(detail.procedimento.id);
+  const documentCorpus = detail.canonicalEnteId
+    ? await getFascicoloDocumentCorpus({
+        tenantId: detail.canonicalEnteId,
+        procedimentoId: detail.procedimento.id,
+      })
+    : null;
+  const analysisCorpus = analysisCorpusModel(documentCorpus);
   const automaticWorkflow = await getFascicoloAutomaticWorkflowReadModel(detail.procedimento.id);
   const legalSourceCandidates = await getFascicoloLegalSourceCandidates(detail.procedimento.id);
   const fascicoloObservations = await getFascicoloObservations(detail.procedimento.id);
@@ -260,6 +291,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                   requestedItem: "Carica gli atti disponibili per avviare estrazione e analisi.",
                 }] : [],
                 relevantItems: [],
+                corpus: analysisCorpus,
               }}
             />
           ) : null}
@@ -765,6 +797,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                     href: `/documenti/${observation.documento.id}/download`,
                   })),
               ],
+              corpus: analysisCorpus,
             }}
           />
         ) : null}

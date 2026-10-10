@@ -42,6 +42,18 @@ export interface FascicoloAnalysisRelevantItem {
   href?: string | null;
 }
 
+export interface FascicoloAnalysisCorpus {
+  availability: "READY" | "PARTIAL" | "NOT_READY";
+  documentCount: number;
+  availableDocumentCount: number;
+  textPageCount: number;
+  documentsToVerify: readonly {
+    id: string;
+    name: string;
+    status: "NOT_EXTRACTED" | "OCR_REQUIRED" | "EXTRACTION_FAILED" | "NO_CURRENT_VERSION";
+  }[];
+}
+
 export interface FascicoloAnalysisModel {
   questions: readonly FascicoloAnalysisQuestion[];
   evidence: readonly FascicoloAnalysisEvidence[];
@@ -49,6 +61,7 @@ export interface FascicoloAnalysisModel {
   gaps: readonly FascicoloAnalysisGap[];
   relevantItems: readonly FascicoloAnalysisRelevantItem[];
   analysisStatus?: string | null;
+  corpus?: FascicoloAnalysisCorpus | null;
 }
 
 function optionalText(value: string | null | undefined): string | null {
@@ -82,6 +95,31 @@ export function FascicoloAnalysis({ model }: { model: FascicoloAnalysisModel }) 
           </dl>
         ) : null}
       </header>
+
+      {model.corpus ? (
+        <section aria-labelledby="document-corpus-title" className="rounded-md border border-slate-200 bg-slate-50 px-4 py-4">
+          <div className="flex items-center gap-2">
+            <FileText className="h-4 w-4 text-[#0b7285]" aria-hidden="true" />
+            <h3 id="document-corpus-title" className="font-semibold text-slate-950">Corpus documentale</h3>
+          </div>
+          <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-3">
+            <div><dt className="text-slate-500">Documenti acquisiti</dt><dd className="font-semibold text-slate-950">{model.corpus.documentCount}</dd></div>
+            <div><dt className="text-slate-500">Testi disponibili</dt><dd className="font-semibold text-slate-950">{model.corpus.availableDocumentCount} documenti · {model.corpus.textPageCount} pagine</dd></div>
+            <div><dt className="text-slate-500">Analisi strutturata</dt><dd className="font-semibold text-slate-950">{model.corpus.availability === "READY" ? "Corpus disponibile" : model.corpus.availability === "PARTIAL" ? "Corpus parziale" : "Non disponibile"}</dd></div>
+          </dl>
+          {model.corpus.documentsToVerify.length > 0 ? (
+            <div className="mt-4 border-t border-slate-200 pt-3">
+              <p className="text-sm font-medium text-slate-800">Documenti da verificare</p>
+              <ul className="mt-2 space-y-1 text-sm text-slate-600">
+                {model.corpus.documentsToVerify.map((document) => (
+                  <li key={document.id}>{document.name}: {document.status === "OCR_REQUIRED" ? "OCR necessario" : document.status === "EXTRACTION_FAILED" ? "estrazione non riuscita" : document.status === "NO_CURRENT_VERSION" ? "versione corrente assente" : "testo non ancora estratto"}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          <p className="mt-3 text-xs text-slate-600">Il corpus contiene evidenze documentali e riferimenti di pagina; non rappresenta ancora fatti o valutazioni giuridiche ricostruiti.</p>
+        </section>
+      ) : null}
 
       {!hasStructuredAnalysis ? (
         <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-4">
