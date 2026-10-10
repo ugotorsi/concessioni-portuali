@@ -19,9 +19,9 @@ import type {
   ExtractedPageEvidence,
   TechnicalExtractionResult,
 } from "@/server/intake/extraction/types";
+import { DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1 } from "./documentExtractionPolicy";
 
-export const DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1 =
-  "DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1" as const;
+export { DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1 } from "./documentExtractionPolicy";
 
 const identifier = z.string().trim().min(1).max(256);
 const RETRYABLE_DOCUMENT_EXTRACTION_FAILURES = new Set([

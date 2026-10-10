@@ -7,7 +7,7 @@ import {
 import {
   DOCUMENT_EXTRACTION_OPERATION,
   documentExtractionLogicalOperationId,
-} from "@/server/documents/documentExtractionJob";
+} from "@/server/documents/documentExtractionAdmission";
 
 export type DocumentExtractionReadModel = {
   status: "AVAILABLE" | "NOT_RUN" | "PENDING" | "PROCESSING" | "OCR_REQUIRED" | "FAILED";

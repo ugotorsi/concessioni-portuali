@@ -8,6 +8,9 @@ import {
   buildDocumentExtractionAdmission,
   createDocumentExtractionHandler,
 } from "@/server/documents/documentExtractionJob";
+import {
+  buildDocumentExtractionAdmission as buildLightweightDocumentExtractionAdmission,
+} from "@/server/documents/documentExtractionAdmission";
 import { applicationAsyncJobRegistry } from "@/server/async-jobs/applicationWorker";
 
 const authority = {
@@ -52,6 +55,26 @@ describe("DOCUMENT_EXTRACTION_V1", () => {
         retryPermitRef: null,
       },
     });
+  });
+
+  it("preserves the normalized admission contract in the lightweight module", () => {
+    const legacyCompatible = normalizeAsyncJobAdmission(admission());
+    const lightweight = normalizeAsyncJobAdmission(buildLightweightDocumentExtractionAdmission({
+      documentoId: "document-1",
+      documentFileVersionId: "version-1",
+      procedimentoId: "procedure-1",
+      correlationId: "document-extraction-test",
+      authority,
+      availableAt: new Date("2026-10-09T16:30:00.000Z"),
+    }));
+
+    expect(lightweight).toEqual(legacyCompatible);
+    expect(lightweight.idempotencyKey).toBe(
+      "3ac75b45d059511fce1c2c53c10129c9ecf40b483029e50ca148c5407f1c5be5",
+    );
+    expect(lightweight.requestFingerprint).toBe(
+      "7b63fbf3b7c0497e4afc37992ef28ed26d1bf29d90139d72c31b13402ee2d613",
+    );
   });
 
   it("executes only the requested version and admits no collateral jobs", async () => {

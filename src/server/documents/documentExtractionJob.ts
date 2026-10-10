@@ -3,9 +3,8 @@ import { hostname } from "node:os";
 import { z } from "zod";
 
 import { prisma } from "@/lib/prisma";
-import type { Prisma } from "@/generated/prisma/client";
 import type { AsyncJobAdmissionInput } from "@/server/async-jobs/domain";
-import { admitAsyncJob, admitAsyncJobInTransaction } from "@/server/async-jobs/persistence";
+import { admitAsyncJob } from "@/server/async-jobs/persistence";
 import {
   AsyncJobHandlerRegistry,
   type AsyncJobHandler,
@@ -19,13 +18,22 @@ import {
   type DocumentExtractionRetryAuthorization,
 } from "./documentExtraction";
 import {
+  DOCUMENT_EXTRACTION_OPERATION,
+  DOCUMENT_EXTRACTION_PURPOSE,
+} from "./documentExtractionAdmission";
+import {
   issueDocumentExtractionRetryPermit,
   verifyDocumentExtractionRetryPermit,
   type DocumentExtractionRetryPermit,
 } from "./documentExtractionRetryPermit";
 
-export const DOCUMENT_EXTRACTION_OPERATION = "DOCUMENT_EXTRACTION_V1" as const;
-export const DOCUMENT_EXTRACTION_PURPOSE = "DOCUMENT_EXTRACTION" as const;
+export {
+  DOCUMENT_EXTRACTION_OPERATION,
+  DOCUMENT_EXTRACTION_PURPOSE,
+  buildDocumentExtractionAdmission,
+  documentExtractionLogicalOperationId,
+  ensureDocumentExtractionJob,
+} from "./documentExtractionAdmission";
 const DOCUMENT_EXTRACTION_LEASE_MS = 5 * 60 * 1_000;
 
 const referenceSchema = z.object({
@@ -45,81 +53,6 @@ const referenceSchema = z.object({
 }).strict();
 
 type DocumentExtractionReference = z.output<typeof referenceSchema>;
-
-type AdmissionAuthority = {
-  admissionType: "AUTHENTICATED_USER" | "AUTHORIZED_SYSTEM";
-  tenantId: string;
-  initiatingUserId: string | null;
-  actorId: string;
-  actorEmail: string | null;
-  actorRole: string;
-  policyDecisionRef: string | null;
-};
-
-export function documentExtractionLogicalOperationId(input: {
-  documentoId: string;
-  documentFileVersionId: string;
-}): string {
-  return [
-    input.documentoId,
-    input.documentFileVersionId,
-    DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
-    "initial",
-  ].join(":");
-}
-
-export function buildDocumentExtractionAdmission(input: {
-  documentoId: string;
-  documentFileVersionId: string;
-  procedimentoId: string;
-  correlationId: string;
-  authority: AdmissionAuthority;
-  availableAt?: Date;
-}): AsyncJobAdmissionInput {
-  return {
-    operation: DOCUMENT_EXTRACTION_OPERATION,
-    logicalOperationId: documentExtractionLogicalOperationId(input),
-    purpose: DOCUMENT_EXTRACTION_PURPOSE,
-    correlationId: input.correlationId,
-    procedimentoId: input.procedimentoId,
-    policyDecisionRef: input.authority.policyDecisionRef,
-    inputReference: {
-      referenceType: "DOCUMENT_FILE_VERSION",
-      referenceId: input.documentFileVersionId,
-      referenceVersion: "V1",
-      metadata: {
-        documentoId: input.documentoId,
-        procedimentoId: input.procedimentoId,
-        policyVersion: DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
-        retryAttemptId: null,
-        retryPermitRef: null,
-      },
-    },
-    maxAttempts: 1,
-    availableAt: input.availableAt ?? new Date(),
-    admission: input.authority.admissionType === "AUTHENTICATED_USER"
-      ? {
-          admissionType: "AUTHENTICATED_USER",
-          tenantId: input.authority.tenantId,
-          initiatingUserId: input.authority.initiatingUserId!,
-          actor: {
-            actorId: input.authority.initiatingUserId!,
-            actorEmail: input.authority.actorEmail,
-            actorRole: input.authority.actorRole,
-          },
-        }
-      : {
-          admissionType: "AUTHORIZED_SYSTEM",
-          tenantId: input.authority.tenantId,
-          initiatingUserId: null,
-          actor: {
-            actorId: input.authority.actorId,
-            actorEmail: input.authority.actorEmail,
-            actorRole: input.authority.actorRole,
-          },
-        },
-  };
-}
 
 function buildAuthorizedRetryAdmission(
   permit: DocumentExtractionRetryPermit,
@@ -161,16 +94,6 @@ function buildAuthorizedRetryAdmission(
       },
     },
   };
-}
-
-export function ensureDocumentExtractionJob(
-  input: Parameters<typeof buildDocumentExtractionAdmission>[0],
-  tx?: Prisma.TransactionClient,
-) {
-  const admission = buildDocumentExtractionAdmission(input);
-  return tx
-    ? admitAsyncJobInTransaction(tx, admission)
-    : admitAsyncJob(admission);
 }
 
 export async function ensureAuthorizedDocumentExtractionRetryJob(

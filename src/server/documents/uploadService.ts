@@ -12,7 +12,7 @@ import {
 import { DocumentStorageS3Error } from "@/server/documents/storage/s3StorageAdapter";
 import type { StoredDocumentObject } from "@/server/documents/storage/types";
 import { validateUploadFile, type ParsedUploadDocumentInput } from "@/server/documents/validation";
-import { ensureDocumentExtractionJob } from "@/server/documents/documentExtractionJob";
+import { ensureDocumentExtractionJob } from "@/server/documents/documentExtractionAdmission";
 
 const STAGING_PREVIEW_ADMIN_ID = "staging-preview-admin";
 const DOCUMENT_UPLOAD_EXTRACTION_POLICY_DECISION = "DOCUMENT_UPLOAD_EXTRACTION_ADMISSION_V1";
