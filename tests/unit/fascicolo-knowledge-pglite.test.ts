@@ -13,6 +13,7 @@ import {
   reconcileAndPromoteKnowledgeRevision,
   reviewCurrentKnowledgeItem,
   type FascicoloKnowledgeRepositoryContext,
+  type KnowledgeEvidenceCandidate,
   type KnowledgeItemCandidate,
   type KnowledgeSqlExecutor,
 } from "@/server/fascicolo-knowledge";
@@ -31,6 +32,10 @@ const structuredKnowledgeMigration = readFileSync(path.join(
   "20260929_fascicolo_structured_knowledge",
   "migration.sql",
 ), "utf8");
+const documentEvidenceMigrations = [
+  "20261010_fascicolo_document_evidence_provenance",
+  "20261010_fascicolo_document_knowledge_evidence",
+].map((name) => readFileSync(path.join(process.cwd(), "prisma", "migrations", name, "migration.sql"), "utf8"));
 const textHash = "a".repeat(64);
 const corpusA = "1".repeat(64);
 const corpusB = "2".repeat(64);
@@ -61,27 +66,64 @@ async function database() {
     CREATE TABLE "Ente" ("id" TEXT PRIMARY KEY);
     CREATE TABLE "Concessione" ("id" TEXT PRIMARY KEY, "enteId" TEXT);
     CREATE TABLE "Procedimento" ("id" TEXT PRIMARY KEY, "enteId" TEXT NOT NULL, "concessioneId" TEXT);
-    CREATE TABLE "Documento" ("id" TEXT PRIMARY KEY, "enteId" TEXT, "procedimentoId" TEXT);
+    CREATE TABLE "Documento" ("id" TEXT PRIMARY KEY, "enteId" TEXT, "procedimentoId" TEXT, "currentFileVersionId" TEXT);
     CREATE TABLE "DocumentFileVersion" ("id" TEXT PRIMARY KEY, "documentId" TEXT NOT NULL, "canonicalEnteId" TEXT NOT NULL, "sha256" TEXT NOT NULL);
     CREATE TABLE "NeutralIntake" ("id" TEXT PRIMARY KEY, "enteId" TEXT);
     CREATE TABLE "NeutralIntakeDestination" ("neutralIntakeId" TEXT PRIMARY KEY, "procedimentoId" TEXT NOT NULL);
-    CREATE TABLE "NeutralIntakeExtractionAttempt" ("id" TEXT PRIMARY KEY, "neutralIntakeId" TEXT NOT NULL, "artifactSha256" TEXT NOT NULL);
+    CREATE TABLE "NeutralIntakeExtractionAttempt" ("id" TEXT PRIMARY KEY, "neutralIntakeId" TEXT NOT NULL, "artifactSha256" TEXT NOT NULL, "outcome" TEXT NOT NULL);
     CREATE TABLE "NeutralIntakeExtractionPage" ("id" TEXT PRIMARY KEY, "extractionAttemptId" TEXT NOT NULL, "pageNumber" INTEGER NOT NULL, "textSha256" TEXT NOT NULL);
+    CREATE TABLE "DocumentExtractionAttempt" (
+      "id" TEXT PRIMARY KEY,
+      "documentoId" TEXT NOT NULL,
+      "documentFileVersionId" TEXT NOT NULL,
+      "tenantId" TEXT NOT NULL,
+      "procedimentoId" TEXT NOT NULL,
+      "sourceSha256" TEXT NOT NULL,
+      "outcome" TEXT NOT NULL
+    );
+    CREATE TABLE "DocumentExtractionPage" ("id" TEXT PRIMARY KEY, "extractionAttemptId" TEXT NOT NULL, "pageNumber" INTEGER NOT NULL, "textSha256" TEXT NOT NULL);
     INSERT INTO "Ente" VALUES ('tenant-a'), ('tenant-b');
     INSERT INTO "Concessione" VALUES ('concession-a1', 'tenant-a'), ('concession-a2', 'tenant-a'), ('concession-b1', 'tenant-b');
     INSERT INTO "Procedimento" VALUES
       ('procedure-a1', 'tenant-a', 'concession-a1'),
       ('procedure-a2', 'tenant-a', 'concession-a2'),
       ('procedure-b1', 'tenant-b', 'concession-b1');
-    INSERT INTO "Documento" VALUES ('document-a1', 'tenant-a', 'procedure-a1'), ('document-a2', 'tenant-a', 'procedure-a2'), ('document-b1', 'tenant-b', 'procedure-b1');
-    INSERT INTO "DocumentFileVersion" VALUES ('version-a1', 'document-a1', 'tenant-a', '${textHash}'), ('version-a2', 'document-a2', 'tenant-a', '${textHash}'), ('version-b1', 'document-b1', 'tenant-b', '${textHash}');
+    INSERT INTO "Documento" VALUES
+      ('document-a1', 'tenant-a', 'procedure-a1', 'version-a1'),
+      ('document-a2', 'tenant-a', 'procedure-a2', 'version-a2'),
+      ('document-b1', 'tenant-b', 'procedure-b1', 'version-b1');
+    INSERT INTO "DocumentFileVersion" VALUES
+      ('version-a1', 'document-a1', 'tenant-a', '${textHash}'),
+      ('version-a1-old', 'document-a1', 'tenant-a', '${textHash}'),
+      ('version-a2', 'document-a2', 'tenant-a', '${textHash}'),
+      ('version-b1', 'document-b1', 'tenant-b', '${textHash}');
     INSERT INTO "NeutralIntake" VALUES ('intake-a1', 'tenant-a'), ('intake-a2', 'tenant-a'), ('intake-b1', 'tenant-b');
     INSERT INTO "NeutralIntakeDestination" VALUES ('intake-a1', 'procedure-a1'), ('intake-a2', 'procedure-a2'), ('intake-b1', 'procedure-b1');
-    INSERT INTO "NeutralIntakeExtractionAttempt" VALUES ('attempt-a1', 'intake-a1', '${textHash}'), ('attempt-a2', 'intake-a2', '${textHash}'), ('attempt-b1', 'intake-b1', '${textHash}');
+    INSERT INTO "NeutralIntakeExtractionAttempt" VALUES
+      ('attempt-a1', 'intake-a1', '${textHash}', 'SUCCEEDED'),
+      ('attempt-a2', 'intake-a2', '${textHash}', 'SUCCEEDED'),
+      ('attempt-b1', 'intake-b1', '${textHash}', 'SUCCEEDED');
     INSERT INTO "NeutralIntakeExtractionPage" VALUES ('page-a1-1', 'attempt-a1', 1, '${textHash}'), ('page-a2-1', 'attempt-a2', 1, '${textHash}'), ('page-b1-1', 'attempt-b1', 1, '${textHash}');
+    INSERT INTO "DocumentExtractionAttempt" VALUES
+      ('document-attempt-a1', 'document-a1', 'version-a1', 'tenant-a', 'procedure-a1', '${textHash}', 'SUCCEEDED'),
+      ('document-attempt-a2', 'document-a2', 'version-a2', 'tenant-a', 'procedure-a2', '${textHash}', 'SUCCEEDED'),
+      ('document-attempt-b1', 'document-b1', 'version-b1', 'tenant-b', 'procedure-b1', '${textHash}', 'SUCCEEDED'),
+      ('document-attempt-old', 'document-a1', 'version-a1-old', 'tenant-a', 'procedure-a1', '${textHash}', 'SUCCEEDED'),
+      ('document-attempt-hash-mismatch', 'document-a1', 'version-a1', 'tenant-a', 'procedure-a1', '${"b".repeat(64)}', 'SUCCEEDED'),
+      ('document-attempt-failed', 'document-a1', 'version-a1', 'tenant-a', 'procedure-a1', '${textHash}', 'FAILED');
+    INSERT INTO "DocumentExtractionPage" VALUES
+      ('document-page-a1-1', 'document-attempt-a1', 1, '${textHash}'),
+      ('document-page-a2-1', 'document-attempt-a2', 1, '${textHash}'),
+      ('document-page-b1-1', 'document-attempt-b1', 1, '${textHash}'),
+      ('document-page-old-1', 'document-attempt-old', 1, '${textHash}'),
+      ('document-page-hash-mismatch-1', 'document-attempt-hash-mismatch', 1, '${textHash}'),
+      ('document-page-failed-1', 'document-attempt-failed', 1, '${textHash}');
   `);
   await db.exec(migration);
   await db.exec(structuredKnowledgeMigration);
+  for (const documentEvidenceMigration of documentEvidenceMigrations) {
+    await db.exec(documentEvidenceMigration);
+  }
   return db;
 }
 
@@ -108,6 +150,25 @@ function candidate(identity: string, overrides: Partial<KnowledgeItemCandidate> 
     }],
     ...overrides,
   };
+}
+
+function fascicoloDocumentCandidate(
+  identity: string,
+  evidenceOverrides: Partial<KnowledgeEvidenceCandidate> = {},
+): KnowledgeItemCandidate {
+  return candidate(identity, {
+    evidence: [{
+      provenanceType: "FASCICOLO_DOCUMENT_EXTRACTION",
+      documentoId: "document-a1",
+      documentFileVersionId: "version-a1",
+      documentExtractionAttemptId: "document-attempt-a1",
+      pageNumber: 1,
+      textSha256: textHash,
+      quoteSha256: null,
+      basisRef: "DOCUMENT_1.PAGE_1",
+      ...evidenceOverrides,
+    }],
+  });
 }
 
 afterEach(async () => {
@@ -262,6 +323,89 @@ describe("fascicolo knowledge repository on disposable PGlite", () => {
       }] })],
     }, ctx)).rejects.toMatchObject({ code: "EVIDENCE_SCOPE_MISMATCH" });
     expect((await getCurrentKnowledgeRevision(scope(), ctx))?.id).toBe(first.id);
+  });
+
+  it("persists ordinary document evidence while preserving the historical Neutral Intake path", async () => {
+    const db = await database();
+    const ctx = repositoryContext(db);
+    const first = await createBuildingKnowledgeRevision({ ...scope(), corpusFingerprint: corpusA }, ctx);
+    const firstResult = await reconcileAndPromoteKnowledgeRevision({
+      ...scope(),
+      revisionId: first.id,
+      expectedCurrentRevisionId: null,
+      candidates: [candidate("historical"), fascicoloDocumentCandidate("ordinary")],
+    }, ctx);
+
+    expect(firstResult.revision.items.map((item) => item.evidence[0])).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        provenanceType: "DOCUMENT_EXTRACTION",
+        extractionAttemptId: "attempt-a1",
+        documentExtractionAttemptId: null,
+      }),
+      expect.objectContaining({
+        provenanceType: "FASCICOLO_DOCUMENT_EXTRACTION",
+        extractionAttemptId: null,
+        documentExtractionAttemptId: "document-attempt-a1",
+      }),
+    ]));
+
+    const ordinary = firstResult.revision.items.find((item) => item.normalizedText === "Testo ordinary")!;
+    await reviewCurrentKnowledgeItem({ ...scope(), itemId: ordinary.id, status: "HUMAN_CONFIRMED" }, ctx);
+    const second = await createBuildingKnowledgeRevision({ ...scope(), corpusFingerprint: corpusB }, ctx);
+    const secondResult = await reconcileAndPromoteKnowledgeRevision({
+      ...scope(),
+      revisionId: second.id,
+      expectedCurrentRevisionId: first.id,
+      candidates: [fascicoloDocumentCandidate("ordinary")],
+    }, ctx);
+    expect(secondResult.revision.items[0].status).toBe("HUMAN_CONFIRMED");
+  });
+
+  it.each([
+    ["other procedure", { documentoId: "document-a2", documentFileVersionId: "version-a2", documentExtractionAttemptId: "document-attempt-a2" }],
+    ["other tenant", { documentoId: "document-b1", documentFileVersionId: "version-b1", documentExtractionAttemptId: "document-attempt-b1" }],
+    ["superseded version", { documentFileVersionId: "version-a1-old", documentExtractionAttemptId: "document-attempt-old" }],
+    ["file hash mismatch", { documentExtractionAttemptId: "document-attempt-hash-mismatch" }],
+    ["failed extraction", { documentExtractionAttemptId: "document-attempt-failed" }],
+    ["wrong page", { pageNumber: 2 }],
+    ["wrong page hash", { textSha256: "b".repeat(64) }],
+  ] as const)("rejects ordinary document evidence with %s", async (_case, overrides) => {
+    const db = await database();
+    const ctx = repositoryContext(db);
+    const revision = await createBuildingKnowledgeRevision({ ...scope(), corpusFingerprint: corpusA }, ctx);
+
+    await expect(reconcileAndPromoteKnowledgeRevision({
+      ...scope(),
+      revisionId: revision.id,
+      expectedCurrentRevisionId: null,
+      candidates: [fascicoloDocumentCandidate("invalid", overrides)],
+    }, ctx)).rejects.toMatchObject({ code: "EVIDENCE_SCOPE_MISMATCH" });
+  });
+
+  it("anchors page references to their corpus revision instead of treating them as global identities", async () => {
+    const db = await database();
+    const ctx = repositoryContext(db);
+    const first = await createBuildingKnowledgeRevision({ ...scope(), corpusFingerprint: corpusA }, ctx);
+    const firstResult = await reconcileAndPromoteKnowledgeRevision({
+      ...scope(),
+      revisionId: first.id,
+      expectedCurrentRevisionId: null,
+      candidates: [fascicoloDocumentCandidate("anchored")],
+    }, ctx);
+    const second = await createBuildingKnowledgeRevision({ ...scope(), corpusFingerprint: corpusB }, ctx);
+    const secondResult = await reconcileAndPromoteKnowledgeRevision({
+      ...scope(),
+      revisionId: second.id,
+      expectedCurrentRevisionId: first.id,
+      candidates: [fascicoloDocumentCandidate("anchored", { basisRef: "DOCUMENT_2.PAGE_1" })],
+    }, ctx);
+
+    expect(secondResult.classifications[0].classification).toBe("MODIFIED");
+    expect(secondResult.revision.items[0].evidence[0].basisRef).toBe("DOCUMENT_2.PAGE_1");
+    const history = await listKnowledgeRevisionHistory(scope(), ctx);
+    expect(history[0].corpusFingerprint).toBe(corpusA);
+    expect(history[0].items[0].evidence[0].basisRef).toBe("DOCUMENT_1.PAGE_1");
+    expect(firstResult.revision.corpusFingerprint).not.toBe(secondResult.revision.corpusFingerprint);
   });
 
   it("rolls back supersession when promotion fails", async () => {

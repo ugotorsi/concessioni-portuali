@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   procedimentoFindFirst: vi.fn(),
   documentoFindMany: vi.fn(),
   extractionFindMany: vi.fn(),
+  jobFindMany: vi.fn(),
 }));
 
 vi.mock("@/lib/prisma", () => ({
@@ -13,6 +14,7 @@ vi.mock("@/lib/prisma", () => ({
     procedimento: { findFirst: mocks.procedimentoFindFirst },
     documento: { findMany: mocks.documentoFindMany },
     documentExtractionAttempt: { findMany: mocks.extractionFindMany },
+    asyncJob: { findMany: mocks.jobFindMany },
   },
 }));
 
@@ -24,6 +26,7 @@ vi.mock("@/lib/tenant-auth", () => ({
 
 import {
   buildFascicoloDocumentCorpus,
+  buildFascicoloDocumentKnowledgeEvidence,
   getFascicoloDocumentCorpus,
   toFascicoloDocumentAnalysisCorpus,
 } from "@/server/queries/fascicolo-document-corpus";
@@ -45,6 +48,7 @@ describe("fascicolo document corpus", () => {
     mocks.procedimentoFindFirst.mockResolvedValue({ id: "procedure-a" });
     mocks.documentoFindMany.mockResolvedValue([]);
     mocks.extractionFindMany.mockResolvedValue([]);
+    mocks.jobFindMany.mockResolvedValue([]);
   });
 
   it("builds a deterministic multi-PDF corpus with stable page provenance", () => {
@@ -185,6 +189,40 @@ describe("fascicolo document corpus", () => {
     expect(JSON.stringify(corpus)).not.toContain("version-previous");
   });
 
+  it("classifies a terminal extraction job without a persisted attempt as failed", async () => {
+    mocks.documentoFindMany.mockResolvedValue([{
+      id: "document-a",
+      nome: "Fallito.pdf",
+      currentFileVersionId: "version-a",
+      currentFileVersion: { sha256: "a".repeat(64) },
+    }]);
+    mocks.jobFindMany.mockResolvedValue([{
+      logicalOperationId: "document-a:version-a:DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1:initial",
+      status: "TERMINAL_FAILED",
+      failureCode: "RETRY_EXHAUSTED",
+    }]);
+
+    const corpus = await getFascicoloDocumentCorpus({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-a",
+    });
+
+    expect(corpus?.documents[0]).toMatchObject({
+      status: "EXTRACTION_FAILED",
+      failureCode: "RETRY_EXHAUSTED",
+      extractionAttemptId: null,
+    });
+    expect(mocks.jobFindMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({
+        tenantId: "tenant-a",
+        procedimentoId: "procedure-a",
+        logicalOperationId: {
+          in: ["document-a:version-a:DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1:initial"],
+        },
+      }),
+    }));
+  });
+
   it("rejects unauthorized tenant access before querying documents or extraction text", async () => {
     mocks.requireTenantAccess.mockImplementation(() => {
       throw new Error("TENANT_ACCESS_DENIED");
@@ -248,5 +286,15 @@ describe("fascicolo document corpus", () => {
       excerpts: corpus.excerpts,
     });
     expect(analysisCorpus).not.toHaveProperty("neutralIntakeId");
+    expect(buildFascicoloDocumentKnowledgeEvidence(corpus).get("DOCUMENT_1.PAGE_1")).toEqual({
+      provenanceType: "FASCICOLO_DOCUMENT_EXTRACTION",
+      documentoId: "document-a",
+      documentFileVersionId: "version-a",
+      documentExtractionAttemptId: "attempt-a",
+      pageNumber: 1,
+      textSha256: "0".repeat(64),
+      quoteSha256: null,
+      basisRef: "DOCUMENT_1.PAGE_1",
+    });
   });
 });

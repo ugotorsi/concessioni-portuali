@@ -13,7 +13,16 @@ export interface StructuredKnowledgeReadItem {
   confidence: number | null;
   status: KnowledgeItemReviewStatus;
   reviewVersion: number;
-  evidence: readonly { basisRef: string | null; documentoId: string; documentFileVersionId: string | null; pageNumber: number; textSha256: string }[];
+  evidence: readonly {
+    provenanceType?: "DOCUMENT_EXTRACTION" | "FASCICOLO_DOCUMENT_EXTRACTION";
+    basisRef: string | null;
+    documentoId: string;
+    documentFileVersionId: string | null;
+    extractionAttemptId?: string | null;
+    documentExtractionAttemptId?: string | null;
+    pageNumber: number;
+    textSha256: string;
+  }[];
 }
 
 export interface StructuredKnowledgeReadModel {
@@ -41,7 +50,17 @@ export interface StructuredKnowledgeReadModel {
 
 interface RevisionRow { id: string; corpusFingerprint: string; contractVersion: string; createdAt: Date; completedAt: Date | null; warnings: unknown }
 interface ItemRow extends Omit<StructuredKnowledgeReadItem, "payload" | "evidence"> { structuredPayload: JsonValue }
-interface EvidenceRow { itemId: string; basisRef: string | null; documentoId: string; documentFileVersionId: string | null; pageNumber: number; textSha256: string }
+interface EvidenceRow {
+  itemId: string;
+  provenanceType: "DOCUMENT_EXTRACTION" | "FASCICOLO_DOCUMENT_EXTRACTION";
+  basisRef: string | null;
+  documentoId: string;
+  documentFileVersionId: string | null;
+  extractionAttemptId: string | null;
+  documentExtractionAttemptId: string | null;
+  pageNumber: number;
+  textSha256: string;
+}
 interface RelationRow { sourceItemId: string; targetItemId: string; relationType: string }
 interface SubjectRow { id: string; canonicalName: string; subjectType: string; aliases: unknown }
 
@@ -102,7 +121,8 @@ export async function loadCurrentStructuredKnowledge(
       ORDER BY "createdAt", "id"
     `, [tenantId, procedimentoId, revision.id]),
     executor.query<EvidenceRow>(`
-      SELECT e."itemId", e."basisRef", e."documentoId", e."documentFileVersionId", e."pageNumber", e."textSha256"
+      SELECT e."itemId", e."provenanceType", e."basisRef", e."documentoId", e."documentFileVersionId",
+        e."extractionAttemptId", e."documentExtractionAttemptId", e."pageNumber", e."textSha256"
       FROM "FascicoloKnowledgeEvidence" e
       INNER JOIN "FascicoloKnowledgeItem" i ON i."id" = e."itemId"
         AND i."tenantId" = e."tenantId" AND i."procedimentoId" = e."procedimentoId"

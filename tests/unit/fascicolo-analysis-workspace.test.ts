@@ -106,6 +106,7 @@ describe("Fascicolo analysis workspace", () => {
         documentsToVerify: [
           { id: "doc-2", name: "Scansione.pdf", status: "OCR_REQUIRED" },
           { id: "doc-3", name: "Allegato.pdf", status: "NOT_EXTRACTED" },
+          { id: "doc-4", name: "Errore.pdf", status: "EXTRACTION_FAILED" },
         ],
       },
     });
@@ -114,8 +115,12 @@ describe("Fascicolo analysis workspace", () => {
     expect(html).toContain("3");
     expect(html).toContain("1 documenti · 2 pagine");
     expect(html).toContain("Corpus parziale");
+    expect(html).toContain("Disponibilità del corpus");
+    expect(html).not.toContain("Analisi strutturata</dt>");
     expect(html).toContain("Scansione.pdf: OCR necessario");
-    expect(html).toContain("Allegato.pdf: testo non ancora estratto");
+    expect(html).toContain("Allegato.pdf: Testo non ancora estratto");
+    expect(html).toContain("Errore.pdf: Estrazione non riuscita");
+    expect(html).not.toContain("Errore.pdf: Testo non ancora estratto");
     expect(html).toContain("non rappresenta ancora fatti o valutazioni giuridiche ricostruiti");
     expect(html).toContain("L’analisi strutturata del fascicolo non è ancora disponibile.");
   });

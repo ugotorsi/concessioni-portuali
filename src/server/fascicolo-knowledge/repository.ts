@@ -98,10 +98,11 @@ interface EvidenceRow {
   tenantId: string;
   procedimentoId: string;
   itemId: string;
-  provenanceType: "DOCUMENT_EXTRACTION";
+  provenanceType: "DOCUMENT_EXTRACTION" | "FASCICOLO_DOCUMENT_EXTRACTION";
   documentoId: string;
   documentFileVersionId: string | null;
-  extractionAttemptId: string | null;
+  extractionAttemptId?: string | null;
+  documentExtractionAttemptId?: string | null;
   pageNumber: number;
   textSha256: string;
   quoteSha256: string | null;
@@ -206,13 +207,14 @@ async function validateEvidenceScope(
 ): Promise<void> {
   for (const candidate of candidates) {
     for (const evidence of candidate.evidence) {
-      const page = await tx.query<{ id: string }>(`
+      const page = evidence.provenanceType === "DOCUMENT_EXTRACTION"
+        ? await tx.query<{ id: string }>(`
         SELECT p."id"
         FROM "Documento" d
         INNER JOIN "DocumentFileVersion" v
           ON v."id" = $4 AND v."documentId" = d."id" AND v."canonicalEnteId" = d."enteId"
         INNER JOIN "NeutralIntakeExtractionAttempt" a
-          ON a."id" = $5 AND a."artifactSha256" = v."sha256"
+          ON a."id" = $5 AND a."artifactSha256" = v."sha256" AND a."outcome" = 'SUCCEEDED'
         INNER JOIN "NeutralIntake" n
           ON n."id" = a."neutralIntakeId" AND n."enteId" = d."enteId"
         INNER JOIN "NeutralIntakeDestination" destination
@@ -220,8 +222,28 @@ async function validateEvidenceScope(
         INNER JOIN "NeutralIntakeExtractionPage" p
           ON p."extractionAttemptId" = a."id" AND p."pageNumber" = $6 AND p."textSha256" = $7
         WHERE d."id" = $1 AND d."enteId" = $2 AND d."procedimentoId" = $3
+          AND d."currentFileVersionId" = v."id"
       `, [evidence.documentoId, scope.tenantId, scope.procedimentoId, evidence.documentFileVersionId,
-        evidence.extractionAttemptId, evidence.pageNumber, evidence.textSha256]);
+          evidence.extractionAttemptId ?? null, evidence.pageNumber, evidence.textSha256])
+        : await tx.query<{ id: string }>(`
+        SELECT p."id"
+        FROM "Documento" d
+        INNER JOIN "DocumentFileVersion" v
+          ON v."id" = $4 AND v."documentId" = d."id" AND v."canonicalEnteId" = d."enteId"
+        INNER JOIN "DocumentExtractionAttempt" a
+          ON a."id" = $5
+          AND a."documentoId" = d."id"
+          AND a."documentFileVersionId" = v."id"
+          AND a."tenantId" = d."enteId"
+          AND a."procedimentoId" = d."procedimentoId"
+          AND a."sourceSha256" = v."sha256"
+          AND a."outcome" = 'SUCCEEDED'
+        INNER JOIN "DocumentExtractionPage" p
+          ON p."extractionAttemptId" = a."id" AND p."pageNumber" = $6 AND p."textSha256" = $7
+        WHERE d."id" = $1 AND d."enteId" = $2 AND d."procedimentoId" = $3
+          AND d."currentFileVersionId" = v."id"
+      `, [evidence.documentoId, scope.tenantId, scope.procedimentoId, evidence.documentFileVersionId,
+          evidence.documentExtractionAttemptId ?? null, evidence.pageNumber, evidence.textSha256]);
       if (page.rows.length !== 1) throw new FascicoloKnowledgeRepositoryError("EVIDENCE_SCOPE_MISMATCH");
     }
   }
@@ -455,10 +477,13 @@ export async function reconcileAndPromoteKnowledgeRevision(
         await tx.query(`
           INSERT INTO "FascicoloKnowledgeEvidence" (
             "id", "tenantId", "procedimentoId", "itemId", "provenanceType", "documentoId",
-            "documentFileVersionId", "extractionAttemptId", "pageNumber", "textSha256", "quoteSha256", "basisRef"
-          ) VALUES ($1, $2, $3, $4, $5::"FascicoloKnowledgeProvenanceType", $6, $7, $8, $9, $10, $11, $12)
+            "documentFileVersionId", "extractionAttemptId", "documentExtractionAttemptId",
+            "pageNumber", "textSha256", "quoteSha256", "basisRef"
+          ) VALUES ($1, $2, $3, $4, $5::"FascicoloKnowledgeProvenanceType", $6, $7, $8, $9, $10, $11, $12, $13)
         `, [(ctx.id ?? randomUUID)(), input.tenantId, input.procedimentoId, itemId, evidence.provenanceType,
-          evidence.documentoId, evidence.documentFileVersionId, evidence.extractionAttemptId,
+          evidence.documentoId, evidence.documentFileVersionId,
+          evidence.provenanceType === "DOCUMENT_EXTRACTION" ? evidence.extractionAttemptId ?? null : null,
+          evidence.provenanceType === "FASCICOLO_DOCUMENT_EXTRACTION" ? evidence.documentExtractionAttemptId ?? null : null,
           evidence.pageNumber, evidence.textSha256, evidence.quoteSha256, evidence.basisRef]);
       }
       if (entry.classification === "MODIFIED" && entry.previousItemId) {

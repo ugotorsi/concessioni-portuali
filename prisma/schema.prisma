@@ -134,6 +134,7 @@ enum FascicoloSubjectType {
 
 enum FascicoloKnowledgeProvenanceType {
   DOCUMENT_EXTRACTION
+  FASCICOLO_DOCUMENT_EXTRACTION
 }
 
 enum NormaRiferimento {
@@ -2028,6 +2029,7 @@ model DocumentExtractionAttempt {
   pages               DocumentExtractionPage[]
   retryOfAttempt      DocumentExtractionAttempt?  @relation("DocumentExtractionRetries", fields: [retryOfAttemptId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   retries             DocumentExtractionAttempt[] @relation("DocumentExtractionRetries")
+  fascicoloKnowledgeEvidence FascicoloKnowledgeEvidence[]
 
   @@index([documentFileVersionId, policyVersion, outcome], map: "document_extraction_canonical_result_idx")
   @@index([retryOfAttemptId], map: "document_extraction_retry_source_idx")
@@ -3473,6 +3475,7 @@ model FascicoloKnowledgeEvidence {
   documentoId           String
   documentFileVersionId String?
   extractionAttemptId   String?
+  documentExtractionAttemptId String?
   pageNumber            Int
   textSha256            String   @db.Char(64)
   quoteSha256           String?  @db.Char(64)
@@ -3485,11 +3488,13 @@ model FascicoloKnowledgeEvidence {
   documento           Documento                       @relation(fields: [documentoId], references: [id], onDelete: Restrict)
   documentFileVersion DocumentFileVersion?            @relation(fields: [documentFileVersionId], references: [id], onDelete: Restrict)
   extractionAttempt   NeutralIntakeExtractionAttempt? @relation(fields: [extractionAttemptId], references: [id], onDelete: Restrict)
+  documentExtractionAttempt DocumentExtractionAttempt? @relation(fields: [documentExtractionAttemptId], references: [id], onDelete: Restrict)
 
-  @@unique([itemId, documentoId, documentFileVersionId, extractionAttemptId, pageNumber, textSha256, quoteSha256], map: "fascicolo_knowledge_evidence_identity_uq")
+  @@unique([itemId, documentoId, documentFileVersionId, extractionAttemptId, documentExtractionAttemptId, pageNumber, textSha256, quoteSha256], map: "fascicolo_knowledge_evidence_identity_uq")
   @@index([tenantId, procedimentoId, itemId], map: "fascicolo_knowledge_evidence_scope_item_idx")
   @@index([documentoId, documentFileVersionId], map: "fascicolo_knowledge_evidence_document_idx")
   @@index([extractionAttemptId], map: "fascicolo_knowledge_evidence_extraction_idx")
+  @@index([documentExtractionAttemptId], map: "fascicolo_knowledge_evidence_document_extraction_idx")
 }
 
 model FascicoloKnowledgeRelation {

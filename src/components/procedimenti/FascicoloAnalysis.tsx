@@ -105,14 +105,14 @@ export function FascicoloAnalysis({ model }: { model: FascicoloAnalysisModel }) 
           <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-3">
             <div><dt className="text-slate-500">Documenti acquisiti</dt><dd className="font-semibold text-slate-950">{model.corpus.documentCount}</dd></div>
             <div><dt className="text-slate-500">Testi disponibili</dt><dd className="font-semibold text-slate-950">{model.corpus.availableDocumentCount} documenti · {model.corpus.textPageCount} pagine</dd></div>
-            <div><dt className="text-slate-500">Analisi strutturata</dt><dd className="font-semibold text-slate-950">{model.corpus.availability === "READY" ? "Corpus disponibile" : model.corpus.availability === "PARTIAL" ? "Corpus parziale" : "Non disponibile"}</dd></div>
+            <div><dt className="text-slate-500">Disponibilità del corpus</dt><dd className="font-semibold text-slate-950">{model.corpus.availability === "READY" ? "Corpus disponibile" : model.corpus.availability === "PARTIAL" ? "Corpus parziale" : "Non disponibile"}</dd></div>
           </dl>
           {model.corpus.documentsToVerify.length > 0 ? (
             <div className="mt-4 border-t border-slate-200 pt-3">
               <p className="text-sm font-medium text-slate-800">Documenti da verificare</p>
               <ul className="mt-2 space-y-1 text-sm text-slate-600">
                 {model.corpus.documentsToVerify.map((document) => (
-                  <li key={document.id}>{document.name}: {document.status === "OCR_REQUIRED" ? "OCR necessario" : document.status === "EXTRACTION_FAILED" ? "estrazione non riuscita" : document.status === "NO_CURRENT_VERSION" ? "versione corrente assente" : "testo non ancora estratto"}</li>
+                  <li key={document.id}>{document.name}: {document.status === "OCR_REQUIRED" ? "OCR necessario" : document.status === "EXTRACTION_FAILED" ? "Estrazione non riuscita" : document.status === "NO_CURRENT_VERSION" ? "Versione corrente assente" : "Testo non ancora estratto"}</li>
                 ))}
               </ul>
             </div>

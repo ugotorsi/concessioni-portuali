@@ -10,6 +10,11 @@ import type {
   FascicoloDocumentAnalysisInput,
   FascicoloDocumentExcerpt,
 } from "@/server/ai/fascicoloDocumentAnalysis";
+import type { KnowledgeEvidenceCandidate } from "@/server/fascicolo-knowledge";
+import {
+  DOCUMENT_EXTRACTION_OPERATION,
+  documentExtractionLogicalOperationId,
+} from "@/server/documents/documentExtractionAdmission";
 
 export type FascicoloDocumentCorpusDocumentStatus =
   | "AVAILABLE"
@@ -72,6 +77,12 @@ interface CorpusAttemptRow {
   }[];
 }
 
+interface CorpusJobRow {
+  readonly logicalOperationId: string;
+  readonly status: string;
+  readonly failureCode: string | null;
+}
+
 function fingerprint(value: unknown): string {
   return createHash("sha256").update(JSON.stringify(value), "utf8").digest("hex");
 }
@@ -81,6 +92,7 @@ export function buildFascicoloDocumentCorpus(input: {
   procedimentoId: string;
   documents: readonly CorpusDocumentRow[];
   attempts: readonly CorpusAttemptRow[];
+  jobs?: readonly CorpusJobRow[];
 }): FascicoloDocumentCorpus {
   const documents = [...input.documents].sort((left, right) => left.id.localeCompare(right.id));
   const attemptsByVersion = new Map<string, CorpusAttemptRow[]>();
@@ -92,6 +104,12 @@ export function buildFascicoloDocumentCorpus(input: {
   }
 
   const excerpts: FascicoloDocumentCorpusExcerpt[] = [];
+  const jobsByLogicalOperationId = new Map<string, CorpusJobRow>();
+  for (const job of input.jobs ?? []) {
+    if (!jobsByLogicalOperationId.has(job.logicalOperationId)) {
+      jobsByLogicalOperationId.set(job.logicalOperationId, job);
+    }
+  }
   const corpusDocuments = documents.map((document, documentIndex): FascicoloDocumentCorpusDocument => {
     const reference = `DOCUMENT_${documentIndex + 1}`;
     if (!document.currentFileVersionId || !document.currentFileVersion) {
@@ -143,6 +161,11 @@ export function buildFascicoloDocumentCorpus(input: {
     }
 
     const failed = attempts[0];
+    const job = jobsByLogicalOperationId.get(documentExtractionLogicalOperationId({
+      documentoId: document.id,
+      documentFileVersionId: document.currentFileVersionId,
+    }));
+    const jobFailed = job?.status === "TERMINAL_FAILED" || job?.status === "CANCELLED";
     return {
       reference,
       documentoId: document.id,
@@ -152,10 +175,10 @@ export function buildFascicoloDocumentCorpus(input: {
       sourceSha256: failed?.sourceSha256 ?? document.currentFileVersion.sha256,
       status: failed?.failureCode === "OCR_REQUIRED"
         ? "OCR_REQUIRED"
-        : failed
+        : failed || jobFailed
           ? "EXTRACTION_FAILED"
           : "NOT_EXTRACTED",
-      failureCode: failed?.failureCode ?? null,
+      failureCode: failed?.failureCode ?? (jobFailed ? job?.failureCode ?? "EXTRACTION_FAILED" : null),
       pageCount: 0,
       characterCount: 0,
     };
@@ -215,6 +238,24 @@ export function toFascicoloDocumentAnalysisCorpus(
       })),
     excerpts: corpus.excerpts,
   };
+}
+
+export function buildFascicoloDocumentKnowledgeEvidence(
+  corpus: FascicoloDocumentCorpus,
+): ReadonlyMap<string, KnowledgeEvidenceCandidate> {
+  return new Map(corpus.excerpts.map((excerpt) => [
+    excerpt.reference,
+    {
+      provenanceType: "FASCICOLO_DOCUMENT_EXTRACTION" as const,
+      documentoId: excerpt.documentoId,
+      documentFileVersionId: excerpt.documentVersionId,
+      documentExtractionAttemptId: excerpt.extractionAttemptId,
+      pageNumber: excerpt.pageNumber,
+      textSha256: excerpt.textSha256,
+      quoteSha256: null,
+      basisRef: excerpt.reference,
+    },
+  ]));
 }
 
 export async function getFascicoloDocumentCorpus(input: {
@@ -283,11 +324,32 @@ export async function getFascicoloDocumentCorpus(input: {
           },
         },
       });
+  const logicalOperationIds = versionedDocuments.map((document) => documentExtractionLogicalOperationId({
+    documentoId: document.id,
+    documentFileVersionId: document.currentFileVersionId,
+  }));
+  const jobs = logicalOperationIds.length === 0
+    ? []
+    : await prisma.asyncJob.findMany({
+        where: {
+          operation: DOCUMENT_EXTRACTION_OPERATION,
+          tenantId: input.tenantId,
+          procedimentoId: input.procedimentoId,
+          logicalOperationId: { in: logicalOperationIds },
+        },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        select: {
+          logicalOperationId: true,
+          status: true,
+          failureCode: true,
+        },
+      });
 
   return buildFascicoloDocumentCorpus({
     tenantId: input.tenantId,
     procedimentoId: input.procedimentoId,
     documents,
     attempts,
+    jobs,
   });
 }

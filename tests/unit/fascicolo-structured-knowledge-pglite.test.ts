@@ -23,6 +23,10 @@ const migrations = [
   "20260928_fascicolo_knowledge_foundation",
   "20260929_fascicolo_structured_knowledge",
 ].map((name) => readFileSync(path.join(process.cwd(), "prisma", "migrations", name, "migration.sql"), "utf8"));
+const documentEvidenceMigrations = [
+  "20261010_fascicolo_document_evidence_provenance",
+  "20261010_fascicolo_document_knowledge_evidence",
+].map((name) => readFileSync(path.join(process.cwd(), "prisma", "migrations", name, "migration.sql"), "utf8"));
 const databases: PGlite[] = [];
 const hashA = "a".repeat(64);
 const hashB = "b".repeat(64);
@@ -50,12 +54,13 @@ async function database() {
     CREATE TABLE "Ente" ("id" TEXT PRIMARY KEY);
     CREATE TABLE "Concessione" ("id" TEXT PRIMARY KEY, "enteId" TEXT);
     CREATE TABLE "Procedimento" ("id" TEXT PRIMARY KEY, "enteId" TEXT NOT NULL, "concessioneId" TEXT);
-    CREATE TABLE "Documento" ("id" TEXT PRIMARY KEY, "enteId" TEXT, "procedimentoId" TEXT);
+    CREATE TABLE "Documento" ("id" TEXT PRIMARY KEY, "enteId" TEXT, "procedimentoId" TEXT, "currentFileVersionId" TEXT);
     CREATE TABLE "DocumentFileVersion" ("id" TEXT PRIMARY KEY, "documentId" TEXT NOT NULL, "canonicalEnteId" TEXT NOT NULL, "sha256" TEXT NOT NULL);
     CREATE TABLE "NeutralIntake" ("id" TEXT PRIMARY KEY, "enteId" TEXT);
     CREATE TABLE "NeutralIntakeDestination" ("neutralIntakeId" TEXT PRIMARY KEY, "procedimentoId" TEXT NOT NULL);
-    CREATE TABLE "NeutralIntakeExtractionAttempt" ("id" TEXT PRIMARY KEY, "neutralIntakeId" TEXT NOT NULL, "artifactSha256" TEXT NOT NULL);
+    CREATE TABLE "NeutralIntakeExtractionAttempt" ("id" TEXT PRIMARY KEY, "neutralIntakeId" TEXT NOT NULL, "artifactSha256" TEXT NOT NULL, "outcome" TEXT NOT NULL);
     CREATE TABLE "NeutralIntakeExtractionPage" ("id" TEXT PRIMARY KEY, "extractionAttemptId" TEXT NOT NULL, "pageNumber" INTEGER NOT NULL, "textSha256" TEXT NOT NULL);
+    CREATE TABLE "DocumentExtractionAttempt" ("id" TEXT PRIMARY KEY);
     CREATE TABLE "Scadenza" ("id" TEXT PRIMARY KEY);
     INSERT INTO "Ente" VALUES ('tenant-a'), ('tenant-b');
     INSERT INTO "Concessione" VALUES ('concession-a1', 'tenant-a'), ('concession-a2', 'tenant-a'), ('concession-b1', 'tenant-b');
@@ -63,7 +68,10 @@ async function database() {
       ('procedure-a1', 'tenant-a', 'concession-a1'),
       ('procedure-a2', 'tenant-a', 'concession-a2'),
       ('procedure-b1', 'tenant-b', 'concession-b1');
-    INSERT INTO "Documento" VALUES ('document-a1', 'tenant-a', 'procedure-a1'), ('document-a2', 'tenant-a', 'procedure-a2'), ('document-b1', 'tenant-b', 'procedure-b1');
+    INSERT INTO "Documento" VALUES
+      ('document-a1', 'tenant-a', 'procedure-a1', 'version-a1'),
+      ('document-a2', 'tenant-a', 'procedure-a2', 'version-a2'),
+      ('document-b1', 'tenant-b', 'procedure-b1', 'version-b1');
     INSERT INTO "DocumentFileVersion" VALUES
       ('version-a1', 'document-a1', 'tenant-a', '${hashA}'),
       ('version-a1-mismatch', 'document-a1', 'tenant-a', '${hashB}'),
@@ -72,11 +80,11 @@ async function database() {
     INSERT INTO "NeutralIntake" VALUES ('intake-a1', 'tenant-a'), ('intake-a2', 'tenant-a'), ('intake-b1', 'tenant-b');
     INSERT INTO "NeutralIntakeDestination" VALUES ('intake-a1', 'procedure-a1'), ('intake-a2', 'procedure-a2'), ('intake-b1', 'procedure-b1');
     INSERT INTO "NeutralIntakeExtractionAttempt" VALUES
-      ('attempt-a1', 'intake-a1', '${hashA}'),
-      ('attempt-a1-v2', 'intake-a1', '${hashA}'),
-      ('attempt-a1-mismatch', 'intake-a1', '${hashB}'),
-      ('attempt-a2', 'intake-a2', '${hashA}'),
-      ('attempt-b1', 'intake-b1', '${hashA}');
+      ('attempt-a1', 'intake-a1', '${hashA}', 'SUCCEEDED'),
+      ('attempt-a1-v2', 'intake-a1', '${hashA}', 'SUCCEEDED'),
+      ('attempt-a1-mismatch', 'intake-a1', '${hashB}', 'SUCCEEDED'),
+      ('attempt-a2', 'intake-a2', '${hashA}', 'SUCCEEDED'),
+      ('attempt-b1', 'intake-b1', '${hashA}', 'SUCCEEDED');
     INSERT INTO "NeutralIntakeExtractionPage" VALUES
       ('page-a1-1', 'attempt-a1', 1, '${hashA}'),
       ('page-a1-v2-1', 'attempt-a1-v2', 1, '${hashB}'),
@@ -85,6 +93,9 @@ async function database() {
       ('page-b1-1', 'attempt-b1', 1, '${hashA}');
   `);
   for (const migration of migrations) await db.exec(migration);
+  for (const documentEvidenceMigration of documentEvidenceMigrations) {
+    await db.exec(documentEvidenceMigration);
+  }
   return db;
 }
 
