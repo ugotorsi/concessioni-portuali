@@ -151,7 +151,10 @@ describe("createDocumentoUploadAction", () => {
     prismaMock.$transaction.mockImplementation(async (callback) => callback(txMock));
     txMock.documento.create.mockResolvedValue({ id: "documento-1" });
     txMock.documento.update.mockResolvedValue({ id: "documento-1", procedimentoId: "procedimento-1" });
-    createVersionMock.mockResolvedValue({ outcome: "CREATED", version: { id: "version-1" } });
+    createVersionMock.mockResolvedValue({
+      outcome: "CREATED",
+      version: { id: "version-1", createdAt: new Date("2026-10-10T07:00:00.000Z") },
+    });
     reconcileVersionMock.mockImplementation(async (_input, error) => { throw error; });
     uploadDocumentMock.mockResolvedValue({
       created: true,
@@ -252,6 +255,7 @@ describe("createDocumentoUploadAction", () => {
 
     expect(createNeutralIntakeMock).not.toHaveBeenCalled();
     expect(uploadDocumentMock).not.toHaveBeenCalled();
+    expect(admitAsyncJobMock).not.toHaveBeenCalled();
   });
 
   it("rejects a procedure upload without authenticated tenant context before storage", async () => {
@@ -421,6 +425,118 @@ describe("createDocumentoUploadAction", () => {
       expect(admitAsyncJobMock).not.toHaveBeenCalled();
     },
   );
+
+  it("atomically admits one tenant-scoped extraction job for a persisted PDF version", async () => {
+    const { uploadDocument } = await vi.importActual<typeof import("@/server/documents/uploadService")>(
+      "@/server/documents/uploadService",
+    );
+    const checksum = createHash("sha256").update("%PDF-1.7").digest("hex");
+    const storageKey = `documents/ente-1/documento-1/${checksum}`;
+    createDocumentFileMock.mockResolvedValue({
+      disposition: "CREATED",
+      ownedByAttempt: true,
+      object: {
+        storageProvider: "local",
+        storageKey,
+        fileName: checksum,
+        bucket: null,
+        sizeBytes: Buffer.byteLength("%PDF-1.7"),
+        sha256: checksum,
+        mimeType: "application/pdf",
+        originalName: "atto.pdf",
+      },
+    });
+
+    await uploadDocument({
+      documentId: "documento-1",
+      file: new File(["%PDF-1.7"], "atto.pdf", { type: "application/pdf" }),
+      actor: { id: "user-1", email: "admin@example.test", role: "ADMIN" },
+      enteId: "ente-1",
+      procedimentoId: "procedimento-1",
+      nome: "atto.pdf",
+      tipologia: "VERBALE",
+      source: "UPLOAD_UTENTE",
+      status: "ATTIVO",
+    });
+
+    expect(admitAsyncJobMock).toHaveBeenCalledOnce();
+    expect(admitAsyncJobMock).toHaveBeenCalledWith(txMock, expect.objectContaining({
+      operation: "DOCUMENT_EXTRACTION_V1",
+      logicalOperationId: "documento-1:version-1:DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1:initial",
+      correlationId: "document-upload:documento-1:version-1",
+      procedimentoId: "procedimento-1",
+      inputReference: expect.objectContaining({
+        referenceId: "version-1",
+        metadata: expect.objectContaining({
+          documentoId: "documento-1",
+          procedimentoId: "procedimento-1",
+        }),
+      }),
+      admission: {
+        admissionType: "AUTHORIZED_SYSTEM",
+        tenantId: "ente-1",
+        initiatingUserId: null,
+        actor: {
+          actorId: "document-upload-extraction-admission",
+          actorEmail: null,
+          actorRole: "SYSTEM",
+        },
+      },
+      policyDecisionRef: "DOCUMENT_UPLOAD_EXTRACTION_ADMISSION_V1",
+    }));
+  });
+
+  it("keeps admission idempotent for the same document version and uses system authority for Preview", async () => {
+    const { uploadDocument } = await vi.importActual<typeof import("@/server/documents/uploadService")>(
+      "@/server/documents/uploadService",
+    );
+    const { normalizeAsyncJobAdmission } = await vi.importActual<typeof import("@/server/async-jobs/domain")>(
+      "@/server/async-jobs/domain",
+    );
+    const checksum = createHash("sha256").update("%PDF-1.7").digest("hex");
+    const storageKey = `documents/ente-1/documento-1/${checksum}`;
+    prismaMock.documento.findUnique.mockResolvedValue(null);
+    createDocumentFileMock.mockResolvedValue({
+      disposition: "ALREADY_EXISTS",
+      ownedByAttempt: false,
+      object: {
+        storageProvider: "local",
+        storageKey,
+        fileName: checksum,
+        bucket: null,
+        sizeBytes: Buffer.byteLength("%PDF-1.7"),
+        sha256: checksum,
+        mimeType: "application/pdf",
+        originalName: "atto.pdf",
+      },
+    });
+    const input = {
+      documentId: "documento-1",
+      file: new File(["%PDF-1.7"], "atto.pdf", { type: "application/pdf" }),
+      actor: { id: "staging-preview-admin", email: "preview@example.test", role: "ADMIN" },
+      enteId: "ente-1",
+      procedimentoId: "procedimento-1",
+      nome: "atto.pdf",
+      tipologia: "VERBALE" as const,
+      source: "UPLOAD_UTENTE" as const,
+      status: "ATTIVO" as const,
+    };
+
+    await uploadDocument(input);
+    await uploadDocument(input);
+
+    const admissions = admitAsyncJobMock.mock.calls.map((call) => normalizeAsyncJobAdmission(call[1]));
+    expect(admissions).toHaveLength(2);
+    expect(admissions[0].idempotencyKey).toBe(admissions[1].idempotencyKey);
+    expect(admissions[0].requestFingerprint).toBe(admissions[1].requestFingerprint);
+    expect(admissions[0].admission).toMatchObject({
+      admissionType: "AUTHORIZED_SYSTEM",
+      tenantId: "ente-1",
+      initiatingUserId: null,
+      actor: { actorId: "document-upload-extraction-admission" },
+    });
+    expect(admissions[0].policyDecisionRef).toBe("DOCUMENT_UPLOAD_EXTRACTION_ADMISSION_V1");
+  });
 });
 
 describe("document archive and metadata audit actors", () => {

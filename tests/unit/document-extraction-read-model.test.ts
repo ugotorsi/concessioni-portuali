@@ -3,13 +3,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   getCurrentTenantContext: vi.fn(),
   requireTenantAccess: vi.fn(),
-  findMany: vi.fn(),
+  extractionFindMany: vi.fn(),
+  jobFindMany: vi.fn(),
 }));
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     documentExtractionAttempt: {
-      findMany: mocks.findMany,
+      findMany: mocks.extractionFindMany,
+    },
+    asyncJob: {
+      findMany: mocks.jobFindMany,
     },
   },
 }));
@@ -35,11 +39,12 @@ describe("document extraction read model", () => {
       accessibleTenantIds: ["tenant-a"],
     });
     mocks.requireTenantAccess.mockImplementation(() => undefined);
-    mocks.findMany.mockResolvedValue([]);
+    mocks.extractionFindMany.mockResolvedValue([]);
+    mocks.jobFindMany.mockResolvedValue([]);
   });
 
   it("reads persisted pages for the current document version in tenant scope", async () => {
-    mocks.findMany.mockResolvedValue([
+    mocks.extractionFindMany.mockResolvedValue([
       {
         id: "attempt-a",
         documentoId: "document-a",
@@ -68,7 +73,7 @@ describe("document extraction read model", () => {
 
     const result = await getDocumentExtractionReadModels(scope);
 
-    expect(mocks.findMany).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mocks.extractionFindMany).toHaveBeenCalledWith(expect.objectContaining({
       where: {
         tenantId: "tenant-a",
         procedimentoId: "procedure-a",
@@ -88,7 +93,7 @@ describe("document extraction read model", () => {
   it("does not request or return attempts for a previous version", async () => {
     await getDocumentExtractionReadModels(scope);
 
-    const query = mocks.findMany.mock.calls[0][0];
+    const query = mocks.extractionFindMany.mock.calls[0][0];
     expect(query.where.OR).toEqual([
       { documentoId: "document-a", documentFileVersionId: "version-current" },
     ]);
@@ -114,11 +119,12 @@ describe("document extraction read model", () => {
     await expect(getDocumentExtractionReadModels(scope)).rejects.toThrow(
       "Operazione non autorizzata per il tenant corrente.",
     );
-    expect(mocks.findMany).not.toHaveBeenCalled();
+    expect(mocks.extractionFindMany).not.toHaveBeenCalled();
+    expect(mocks.jobFindMany).not.toHaveBeenCalled();
   });
 
   it("exposes OCR_REQUIRED and failed states without pages from other results", async () => {
-    mocks.findMany.mockResolvedValue([
+    mocks.extractionFindMany.mockResolvedValue([
       {
         id: "attempt-ocr",
         documentoId: "document-a",
@@ -147,7 +153,7 @@ describe("document extraction read model", () => {
   });
 
   it("exposes a failed extraction distinctly from OCR_REQUIRED", async () => {
-    mocks.findMany.mockResolvedValue([
+    mocks.extractionFindMany.mockResolvedValue([
       {
         id: "attempt-failed",
         documentoId: "document-a",
@@ -173,5 +179,39 @@ describe("document extraction read model", () => {
       failureCode: "UNSUPPORTED_MIME_TYPE",
       pages: [],
     });
+  });
+
+  it.each([
+    ["QUEUED", "PENDING"],
+    ["RUNNING", "PROCESSING"],
+    ["TERMINAL_FAILED", "FAILED"],
+  ] as const)("maps extraction job state %s to %s without exposing another document", async (jobStatus, status) => {
+    mocks.jobFindMany.mockResolvedValue([
+      {
+        logicalOperationId: "document-a:version-current:DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1:initial",
+        status: jobStatus,
+        failureCode: jobStatus === "TERMINAL_FAILED" ? "EXTRACTION_FAILED" : null,
+      },
+      {
+        logicalOperationId: "document-other:version-other:DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1:initial",
+        status: "RUNNING",
+        failureCode: null,
+      },
+    ]);
+
+    const result = await getDocumentExtractionReadModels(scope);
+
+    expect(mocks.jobFindMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({
+        operation: "DOCUMENT_EXTRACTION_V1",
+        tenantId: "tenant-a",
+        procedimentoId: "procedure-a",
+        logicalOperationId: {
+          in: ["document-a:version-current:DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1:initial"],
+        },
+      }),
+    }));
+    expect(result["document-a"]).toMatchObject({ status, jobStatus });
+    expect(result["document-other"]).toBeUndefined();
   });
 });

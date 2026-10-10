@@ -45,6 +45,25 @@ Provider credentials are validated by their adapters only when the corresponding
 11. Only after separate authorization, configure provider credentials, positive cost estimates, and enable provider execution.
 12. Remove canary allowlists only after queue, failure, latency, and cost observations are accepted.
 
+## Document Extraction Activation
+
+PDF uploads linked to a procedimento admit `DOCUMENT_EXTRACTION_V1` atomically with the
+new current `DocumentFileVersion`. The HTTP request only persists the document and the
+queued job; extraction remains in this separate worker.
+
+For a scoped E2E activation that does not claim unrelated queued work, run one worker
+against the E2E database with:
+
+```text
+ASYNC_WORKER_CONCURRENCY=1
+ASYNC_WORKER_OPERATION_ALLOWLIST=DOCUMENT_EXTRACTION_V1
+ASYNC_PROVIDER_EXECUTION_ENABLED=false
+```
+
+Keep `ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST` set to the explicitly authorized E2E
+procedimenti during canary activation. Do not run the worker with empty allowlists
+while unrelated jobs are queued.
+
 ## Persistent Service
 
 Run the worker under the platform process manager with automatic restart and graceful `SIGTERM`. A systemd deployment can use:

@@ -3,8 +3,9 @@ import { hostname } from "node:os";
 import { z } from "zod";
 
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@/generated/prisma/client";
 import type { AsyncJobAdmissionInput } from "@/server/async-jobs/domain";
-import { admitAsyncJob } from "@/server/async-jobs/persistence";
+import { admitAsyncJob, admitAsyncJobInTransaction } from "@/server/async-jobs/persistence";
 import {
   AsyncJobHandlerRegistry,
   type AsyncJobHandler,
@@ -55,6 +56,18 @@ type AdmissionAuthority = {
   policyDecisionRef: string | null;
 };
 
+export function documentExtractionLogicalOperationId(input: {
+  documentoId: string;
+  documentFileVersionId: string;
+}): string {
+  return [
+    input.documentoId,
+    input.documentFileVersionId,
+    DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
+    "initial",
+  ].join(":");
+}
+
 export function buildDocumentExtractionAdmission(input: {
   documentoId: string;
   documentFileVersionId: string;
@@ -65,12 +78,7 @@ export function buildDocumentExtractionAdmission(input: {
 }): AsyncJobAdmissionInput {
   return {
     operation: DOCUMENT_EXTRACTION_OPERATION,
-    logicalOperationId: [
-      input.documentoId,
-      input.documentFileVersionId,
-      DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
-      "initial",
-    ].join(":"),
+    logicalOperationId: documentExtractionLogicalOperationId(input),
     purpose: DOCUMENT_EXTRACTION_PURPOSE,
     correlationId: input.correlationId,
     procedimentoId: input.procedimentoId,
@@ -157,8 +165,12 @@ function buildAuthorizedRetryAdmission(
 
 export function ensureDocumentExtractionJob(
   input: Parameters<typeof buildDocumentExtractionAdmission>[0],
+  tx?: Prisma.TransactionClient,
 ) {
-  return admitAsyncJob(buildDocumentExtractionAdmission(input));
+  const admission = buildDocumentExtractionAdmission(input);
+  return tx
+    ? admitAsyncJobInTransaction(tx, admission)
+    : admitAsyncJob(admission);
 }
 
 export async function ensureAuthorizedDocumentExtractionRetryJob(

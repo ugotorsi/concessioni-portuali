@@ -12,8 +12,11 @@ import {
 import { DocumentStorageS3Error } from "@/server/documents/storage/s3StorageAdapter";
 import type { StoredDocumentObject } from "@/server/documents/storage/types";
 import { validateUploadFile, type ParsedUploadDocumentInput } from "@/server/documents/validation";
+import { ensureDocumentExtractionJob } from "@/server/documents/documentExtractionJob";
 
 const STAGING_PREVIEW_ADMIN_ID = "staging-preview-admin";
+const DOCUMENT_UPLOAD_EXTRACTION_POLICY_DECISION = "DOCUMENT_UPLOAD_EXTRACTION_ADMISSION_V1";
+const DOCUMENT_UPLOAD_EXTRACTION_ACTOR_ID = "document-upload-extraction-admission";
 
 interface UploadActor {
   id: string;
@@ -253,6 +256,24 @@ export async function uploadDocument<Result = never>(
       where: { id: created.id },
       data: { currentFileVersionId: fileVersion.version.id },
     });
+    if (input.procedimentoId && stored.mimeType === "application/pdf") {
+      await ensureDocumentExtractionJob({
+        documentoId: created.id,
+        documentFileVersionId: fileVersion.version.id,
+        procedimentoId: input.procedimentoId,
+        correlationId: `document-upload:${created.id}:${fileVersion.version.id}`,
+        availableAt: fileVersion.version.createdAt,
+        authority: {
+          admissionType: "AUTHORIZED_SYSTEM",
+          tenantId: input.enteId,
+          initiatingUserId: null,
+          actorId: DOCUMENT_UPLOAD_EXTRACTION_ACTOR_ID,
+          actorEmail: null,
+          actorRole: "SYSTEM",
+          policyDecisionRef: DOCUMENT_UPLOAD_EXTRACTION_POLICY_DECISION,
+        },
+      }, tx);
+    }
     const extensionResult = input.transactionExtension
       ? await input.transactionExtension.createRecord(tx)
       : undefined;

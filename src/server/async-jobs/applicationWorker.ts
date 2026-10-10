@@ -20,6 +20,7 @@ import {
   reconcilePendingAutomaticResearchExecutions,
   type AutomaticResearchExecutionDependencies,
 } from "../legal-research/automatic-research-job";
+import { createDocumentExtractionHandler } from "../documents/documentExtractionJob";
 
 const APPLICATION_ASYNC_JOB_LEASE_MS = 5 * 60 * 1_000;
 const PROVIDER_BACKED_OPERATIONS = [
@@ -32,6 +33,7 @@ export function createApplicationAsyncJobRegistry(input: {
   automaticResearchDependencies?: Partial<AutomaticResearchExecutionDependencies>;
 } = {}) {
   return new AsyncJobHandlerRegistry([
+    createDocumentExtractionHandler(),
     createNeutralIntakeExtractionHandler(),
     createFascicoloAutomaticAnalysisHandler(input.automaticAnalysisDependencies),
     createAutomaticResearchExecutionHandler(input.automaticResearchDependencies),

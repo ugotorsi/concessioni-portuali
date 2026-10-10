@@ -8,6 +8,7 @@ import {
   buildDocumentExtractionAdmission,
   createDocumentExtractionHandler,
 } from "@/server/documents/documentExtractionJob";
+import { applicationAsyncJobRegistry } from "@/server/async-jobs/applicationWorker";
 
 const authority = {
   admissionType: "AUTHORIZED_SYSTEM" as const,
@@ -31,6 +32,10 @@ function admission() {
 }
 
 describe("DOCUMENT_EXTRACTION_V1", () => {
+  it("registers the extraction handler in the separate application worker", () => {
+    expect(applicationAsyncJobRegistry.resolve(DOCUMENT_EXTRACTION_OPERATION)).not.toBeNull();
+  });
+
   it("creates one idempotent direct-document job identity", () => {
     const first = normalizeAsyncJobAdmission(admission());
     const second = normalizeAsyncJobAdmission(admission());

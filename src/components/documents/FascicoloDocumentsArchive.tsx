@@ -44,6 +44,10 @@ function extractionStatusLabel(status: DocumentExtractionReadModel["status"]): s
   switch (status) {
     case "AVAILABLE":
       return "Estrazione disponibile";
+    case "PENDING":
+      return "Estrazione in attesa";
+    case "PROCESSING":
+      return "Estrazione in elaborazione";
     case "OCR_REQUIRED":
       return "OCR necessario";
     case "FAILED":
@@ -226,6 +230,16 @@ export function FascicoloDocumentsArchive({
                   ) : null}
                   {(item.extraction?.status ?? "NOT_RUN") === "NOT_RUN" ? (
                     <p className="rounded-md border border-slate-200 bg-white p-3">Nessun risultato di estrazione disponibile per questa versione.</p>
+                  ) : null}
+                  {item.extraction?.status === "PENDING" ? (
+                    <p role="status" className="rounded-md border border-sky-200 bg-sky-50 p-3 text-sky-900">
+                      Estrazione ammessa e in attesa dell'esecutore.
+                    </p>
+                  ) : null}
+                  {item.extraction?.status === "PROCESSING" ? (
+                    <p role="status" className="rounded-md border border-blue-200 bg-blue-50 p-3 text-blue-900">
+                      Estrazione in elaborazione.
+                    </p>
                   ) : null}
                   {item.extraction?.status === "AVAILABLE" ? (
                     <ol className="space-y-4">

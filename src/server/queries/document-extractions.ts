@@ -4,9 +4,13 @@ import {
   isTenantContextConstrained,
   requireTenantAccess,
 } from "@/lib/tenant-auth";
+import {
+  DOCUMENT_EXTRACTION_OPERATION,
+  documentExtractionLogicalOperationId,
+} from "@/server/documents/documentExtractionJob";
 
 export type DocumentExtractionReadModel = {
-  status: "AVAILABLE" | "NOT_RUN" | "OCR_REQUIRED" | "FAILED";
+  status: "AVAILABLE" | "NOT_RUN" | "PENDING" | "PROCESSING" | "OCR_REQUIRED" | "FAILED";
   versionId: string | null;
   attemptId: string | null;
   outcome: string | null;
@@ -17,6 +21,7 @@ export type DocumentExtractionReadModel = {
   provenance: string[];
   failureCode: string | null;
   failureMessage: string | null;
+  jobStatus: string | null;
   pages: Array<{
     pageNumber: number;
     method: string;
@@ -44,6 +49,7 @@ function emptyResult(versionId: string | null): DocumentExtractionReadModel {
     provenance: [],
     failureCode: null,
     failureMessage: null,
+    jobStatus: null,
     pages: [],
   };
 }
@@ -92,6 +98,55 @@ export async function getDocumentExtractionReadModels(input: {
       },
     },
   });
+  const logicalOperationByDocumentId = new Map(
+    versionedDocuments.map((document) => [
+      document.documentId,
+      documentExtractionLogicalOperationId({
+        documentoId: document.documentId,
+        documentFileVersionId: document.currentFileVersionId,
+      }),
+    ]),
+  );
+  const documentIdByLogicalOperation = new Map(
+    [...logicalOperationByDocumentId.entries()].map(([documentId, logicalOperationId]) => [
+      logicalOperationId,
+      documentId,
+    ]),
+  );
+  const jobs = await prisma.asyncJob.findMany({
+    where: {
+      operation: DOCUMENT_EXTRACTION_OPERATION,
+      tenantId: input.tenantId,
+      procedimentoId: input.procedimentoId,
+      logicalOperationId: { in: [...documentIdByLogicalOperation.keys()] },
+    },
+    orderBy: [{ createdAt: "desc" }],
+    select: {
+      logicalOperationId: true,
+      status: true,
+      failureCode: true,
+    },
+  });
+
+  for (const job of jobs) {
+    const documentId = documentIdByLogicalOperation.get(job.logicalOperationId);
+    if (!documentId || results[documentId].jobStatus !== null) {
+      continue;
+    }
+    const status = job.status === "QUEUED" || job.status === "RETRY_WAIT"
+      ? "PENDING"
+      : job.status === "RUNNING" || job.status === "CANCELLATION_REQUESTED"
+        ? "PROCESSING"
+        : job.status === "TERMINAL_FAILED" || job.status === "CANCELLED"
+          ? "FAILED"
+          : "PENDING";
+    results[documentId] = {
+      ...results[documentId],
+      status,
+      failureCode: job.failureCode,
+      jobStatus: job.status,
+    };
+  }
 
   for (const attempt of attempts) {
     if (results[attempt.documentoId]?.attemptId) {
@@ -131,6 +186,7 @@ export async function getDocumentExtractionReadModels(input: {
       provenance,
       failureCode: attempt.failureCode,
       failureMessage: attempt.failureMessage,
+      jobStatus: results[attempt.documentoId]?.jobStatus ?? null,
       pages,
     };
   }
