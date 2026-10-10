@@ -16,7 +16,7 @@ import {
 import { createOpenAiFascicoloDocumentRuntimeFromEnv } from "@/server/ai/openaiRuntime";
 import { createFascicoloDocumentStructuredKnowledgeService } from "@/server/ai/fascicoloDocumentStructuredKnowledge";
 
-export class FascicoloDocumentStructuredKnowledgeActionError extends Error {
+class FascicoloDocumentStructuredKnowledgeActionError extends Error {
   constructor(
     readonly code:
       | "INVALID_INPUT"
