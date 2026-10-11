@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  E2E_STRUCTURED_KNOWLEDGE_DATABASE_BRANCH,
   E2E_STRUCTURED_KNOWLEDGE_DATABASE_HOST,
   E2E_STRUCTURED_KNOWLEDGE_GIT_BRANCH,
   E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
@@ -13,11 +14,13 @@ function authorizedEnvironment() {
     E2E_FASCICOLO_STRUCTURED_ANALYSIS_BUDGET_APPROVED: "true",
     VERCEL_ENV: "preview",
     VERCEL_GIT_COMMIT_REF: E2E_STRUCTURED_KNOWLEDGE_GIT_BRANCH,
+    NEON_BRANCH_ID: E2E_STRUCTURED_KNOWLEDGE_DATABASE_BRANCH,
     DATABASE_URL: `postgresql://local-test:local-test@${E2E_STRUCTURED_KNOWLEDGE_DATABASE_HOST}/neondb`,
     AI_REAL_DATA_ENABLED: "true",
     AI_REAL_DATA_APPROVAL_ID: "local-test-approval",
     AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
     AI_OPENAI_API_KEY: "local-test-key",
+    AI_OPENAI_PROJECT_ID: "proj_local_e2e",
     AI_OPENAI_REGION: "EU",
     AI_OPENAI_TIMEOUT_MS: "1000",
     AI_OPENAI_MAX_RAW_RESPONSE_BYTES: "10000",
@@ -78,6 +81,22 @@ describe("E2E fascicolo document structured knowledge access", () => {
       env,
       procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
     })).toBe("DESTINATION_NOT_ALLOWED");
+  });
+
+  it("requires the exact Neon branch and an explicit OpenAI project", () => {
+    const wrongBranch = authorizedEnvironment();
+    wrongBranch.NEON_BRANCH_ID = "br-staging";
+    expect(getFascicoloDocumentStructuredKnowledgeAccessCode({
+      env: wrongBranch,
+      procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
+    })).toBe("DESTINATION_NOT_ALLOWED");
+
+    const projectMissing = authorizedEnvironment();
+    projectMissing.AI_OPENAI_PROJECT_ID = "";
+    expect(getFascicoloDocumentStructuredKnowledgeAccessCode({
+      env: projectMissing,
+      procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
+    })).toBe("PROVIDER_CONFIGURATION_REQUIRED");
   });
 
   it("rejects any other procedimento", () => {

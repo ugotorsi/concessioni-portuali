@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => ({
   analyzeAndPersist: vi.fn(),
   createKnowledgeService: vi.fn(),
   createRuntime: vi.fn(),
+  createTransport: vi.fn(),
   findProcedimento: vi.fn(),
   getTenantContext: vi.fn(),
   revalidatePath: vi.fn(),
@@ -31,6 +32,13 @@ vi.mock("@/server/ai/openaiRuntime", async (importOriginal) => {
     createOpenAiFascicoloDocumentRuntimeFromEnv: mocks.createRuntime,
   };
 });
+vi.mock("@/server/ai/e2eFascicoloStructuredKnowledgeGuard", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/server/ai/e2eFascicoloStructuredKnowledgeGuard")>();
+  return {
+    ...actual,
+    createE2EFascicoloStructuredKnowledgeTransport: mocks.createTransport,
+  };
+});
 vi.mock("@/server/ai/fascicoloDocumentStructuredKnowledge", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/server/ai/fascicoloDocumentStructuredKnowledge")>();
   return {
@@ -44,6 +52,7 @@ import {
 } from "@/server/actions/fascicolo-document-structured-knowledge";
 import type { DemoRole } from "@/lib/auth";
 import {
+  E2E_STRUCTURED_KNOWLEDGE_DATABASE_BRANCH,
   E2E_STRUCTURED_KNOWLEDGE_DATABASE_HOST,
   E2E_STRUCTURED_KNOWLEDGE_GIT_BRANCH,
   E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
@@ -71,6 +80,7 @@ function enableAuthorizedEnvironment(): void {
   vi.stubEnv("E2E_FASCICOLO_STRUCTURED_ANALYSIS_BUDGET_APPROVED", "true");
   vi.stubEnv("VERCEL_ENV", "preview");
   vi.stubEnv("VERCEL_GIT_COMMIT_REF", E2E_STRUCTURED_KNOWLEDGE_GIT_BRANCH);
+  vi.stubEnv("NEON_BRANCH_ID", E2E_STRUCTURED_KNOWLEDGE_DATABASE_BRANCH);
   vi.stubEnv(
     "DATABASE_URL",
     `postgresql://local-test:local-test@${E2E_STRUCTURED_KNOWLEDGE_DATABASE_HOST}/neondb`,
@@ -79,6 +89,7 @@ function enableAuthorizedEnvironment(): void {
   vi.stubEnv("AI_REAL_DATA_APPROVAL_ID", "local-test-approval");
   vi.stubEnv("AI_PROVIDER_PROJECT_CLASS", "REAL_DATA_APPROVED");
   vi.stubEnv("AI_OPENAI_API_KEY", "local-test-key");
+  vi.stubEnv("AI_OPENAI_PROJECT_ID", "proj_local_e2e");
   vi.stubEnv("AI_OPENAI_REGION", "EU");
   vi.stubEnv("AI_OPENAI_TIMEOUT_MS", "1000");
   vi.stubEnv("AI_OPENAI_MAX_RAW_RESPONSE_BYTES", "10000");
@@ -95,6 +106,7 @@ describe("fascicolo document structured knowledge action", () => {
       enteId: "ente-e2e",
     });
     mocks.createRuntime.mockReturnValue({ analyze: vi.fn() });
+    mocks.createTransport.mockReturnValue(vi.fn());
     mocks.createKnowledgeService.mockReturnValue({
       analyzeAndPersist: mocks.analyzeAndPersist,
     });
@@ -168,6 +180,12 @@ describe("fascicolo document structured knowledge action", () => {
     await analyzeFascicoloDocumentStructuredKnowledgeAction(input());
 
     expect(mocks.createRuntime).toHaveBeenCalledTimes(1);
+    expect(mocks.createTransport).toHaveBeenCalledWith({
+      tenantId: "ente-e2e",
+      procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
+      projectId: "proj_local_e2e",
+      region: "EU",
+    });
     expect(mocks.analyzeAndPersist).toHaveBeenCalledWith({
       tenantId: "ente-e2e",
       procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,

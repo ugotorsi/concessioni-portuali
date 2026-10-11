@@ -13,6 +13,9 @@ import {
   assertFascicoloDocumentStructuredKnowledgeAvailable,
   readFascicoloDocumentStructuredKnowledgeEnvironment,
 } from "@/server/ai/fascicoloDocumentStructuredKnowledgeAccess";
+import {
+  createE2EFascicoloStructuredKnowledgeTransport,
+} from "@/server/ai/e2eFascicoloStructuredKnowledgeGuard";
 import { createOpenAiFascicoloDocumentRuntimeFromEnv } from "@/server/ai/openaiRuntime";
 import { createFascicoloDocumentStructuredKnowledgeService } from "@/server/ai/fascicoloDocumentStructuredKnowledge";
 
@@ -48,8 +51,9 @@ export async function analyzeFascicoloDocumentStructuredKnowledgeAction(
     throw new FascicoloDocumentStructuredKnowledgeActionError("ROLE_FORBIDDEN");
   }
 
+  const environment = readFascicoloDocumentStructuredKnowledgeEnvironment();
   assertFascicoloDocumentStructuredKnowledgeAvailable({
-    env: readFascicoloDocumentStructuredKnowledgeEnvironment(),
+    env: environment,
     procedimentoId,
   });
 
@@ -72,7 +76,17 @@ export async function analyzeFascicoloDocumentStructuredKnowledgeAction(
     throw new FascicoloDocumentStructuredKnowledgeActionError("TENANT_ACCESS_DENIED");
   }
 
-  const analysisService = createOpenAiFascicoloDocumentRuntimeFromEnv();
+  const analysisService = createOpenAiFascicoloDocumentRuntimeFromEnv(
+    undefined,
+    {
+      transport: createE2EFascicoloStructuredKnowledgeTransport({
+        tenantId: procedimento.enteId,
+        procedimentoId: procedimento.id,
+        projectId: environment.AI_OPENAI_PROJECT_ID,
+        region: environment.AI_OPENAI_REGION,
+      }),
+    },
+  );
   const service = createFascicoloDocumentStructuredKnowledgeService({ analysisService });
   const result = await service.analyzeAndPersist({
     tenantId: procedimento.enteId,

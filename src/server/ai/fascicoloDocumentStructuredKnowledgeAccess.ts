@@ -5,6 +5,8 @@ export const E2E_STRUCTURED_KNOWLEDGE_GIT_BRANCH =
 export const E2E_STRUCTURED_KNOWLEDGE_DATABASE_HOST =
   "ep-wispy-breeze-ate2kt5o.c-9.us-east-1.aws.neon.tech";
 export const E2E_STRUCTURED_KNOWLEDGE_DATABASE_NAME = "neondb";
+export const E2E_STRUCTURED_KNOWLEDGE_DATABASE_BRANCH =
+  "br-silent-sun-atmiy16m";
 
 export type FascicoloDocumentStructuredKnowledgeAccessCode =
   | "FEATURE_DISABLED"
@@ -21,10 +23,12 @@ export interface FascicoloDocumentStructuredKnowledgeEnvironment {
   VERCEL_ENV?: string;
   VERCEL_GIT_COMMIT_REF?: string;
   DATABASE_URL?: string;
+  NEON_BRANCH_ID?: string;
   AI_REAL_DATA_ENABLED?: string;
   AI_REAL_DATA_APPROVAL_ID?: string;
   AI_PROVIDER_PROJECT_CLASS?: string;
   AI_OPENAI_API_KEY?: string;
+  AI_OPENAI_PROJECT_ID?: string;
   AI_OPENAI_REGION?: string;
   AI_OPENAI_TIMEOUT_MS?: string;
   AI_OPENAI_MAX_RAW_RESPONSE_BYTES?: string;
@@ -50,10 +54,12 @@ export function readFascicoloDocumentStructuredKnowledgeEnvironment(
     VERCEL_ENV: env.VERCEL_ENV,
     VERCEL_GIT_COMMIT_REF: env.VERCEL_GIT_COMMIT_REF,
     DATABASE_URL: env.DATABASE_URL,
+    NEON_BRANCH_ID: env.NEON_BRANCH_ID,
     AI_REAL_DATA_ENABLED: env.AI_REAL_DATA_ENABLED,
     AI_REAL_DATA_APPROVAL_ID: env.AI_REAL_DATA_APPROVAL_ID,
     AI_PROVIDER_PROJECT_CLASS: env.AI_PROVIDER_PROJECT_CLASS,
     AI_OPENAI_API_KEY: env.AI_OPENAI_API_KEY,
+    AI_OPENAI_PROJECT_ID: env.AI_OPENAI_PROJECT_ID,
     AI_OPENAI_REGION: env.AI_OPENAI_REGION,
     AI_OPENAI_TIMEOUT_MS: env.AI_OPENAI_TIMEOUT_MS,
     AI_OPENAI_MAX_RAW_RESPONSE_BYTES: env.AI_OPENAI_MAX_RAW_RESPONSE_BYTES,
@@ -70,6 +76,7 @@ function hasProviderConfiguration(
   env: FascicoloDocumentStructuredKnowledgeEnvironment,
 ): boolean {
   return Boolean(env.AI_OPENAI_API_KEY?.trim())
+    && Boolean(env.AI_OPENAI_PROJECT_ID?.trim())
     && (env.AI_OPENAI_REGION === "GLOBAL" || env.AI_OPENAI_REGION === "EU")
     && isPositiveInteger(env.AI_OPENAI_TIMEOUT_MS)
     && isPositiveInteger(env.AI_OPENAI_MAX_RAW_RESPONSE_BYTES)
@@ -120,6 +127,9 @@ export function getFascicoloDocumentStructuredKnowledgeAccessCode(input: {
     return "ENVIRONMENT_NOT_ALLOWED";
   }
   if (!hasAuthorizedDatabaseDestination(input.env.DATABASE_URL)) {
+    return "DESTINATION_NOT_ALLOWED";
+  }
+  if (input.env.NEON_BRANCH_ID !== E2E_STRUCTURED_KNOWLEDGE_DATABASE_BRANCH) {
     return "DESTINATION_NOT_ALLOWED";
   }
   return null;
