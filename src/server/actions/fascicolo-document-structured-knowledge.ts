@@ -16,7 +16,7 @@ import {
 import {
   createE2EFascicoloStructuredKnowledgeTransport,
 } from "@/server/ai/e2eFascicoloStructuredKnowledgeGuard";
-import { createOpenAiFascicoloDocumentRuntimeFromEnv } from "@/server/ai/openaiRuntime";
+import { createOpenAiE2EFascicoloDocumentRuntimeFromEnv } from "@/server/ai/openaiRuntime";
 import { createFascicoloDocumentStructuredKnowledgeService } from "@/server/ai/fascicoloDocumentStructuredKnowledge";
 
 class FascicoloDocumentStructuredKnowledgeActionError extends Error {
@@ -75,8 +75,13 @@ export async function analyzeFascicoloDocumentStructuredKnowledgeAction(
   if (!procedimento.enteId) {
     throw new FascicoloDocumentStructuredKnowledgeActionError("TENANT_ACCESS_DENIED");
   }
+  assertFascicoloDocumentStructuredKnowledgeAvailable({
+    env: environment,
+    procedimentoId: procedimento.id,
+    tenantId: procedimento.enteId,
+  });
 
-  const analysisService = createOpenAiFascicoloDocumentRuntimeFromEnv(
+  const analysisService = createOpenAiE2EFascicoloDocumentRuntimeFromEnv(
     undefined,
     {
       transport: createE2EFascicoloStructuredKnowledgeTransport({
@@ -84,6 +89,10 @@ export async function analyzeFascicoloDocumentStructuredKnowledgeAction(
         procedimentoId: procedimento.id,
         projectId: environment.AI_OPENAI_PROJECT_ID,
         region: environment.AI_OPENAI_REGION,
+        authorizationNotBefore:
+          environment.E2E_FASCICOLO_STRUCTURED_ANALYSIS_NOT_BEFORE,
+        authorizationExpiresAt:
+          environment.E2E_FASCICOLO_STRUCTURED_ANALYSIS_EXPIRES_AT,
       }),
     },
   );

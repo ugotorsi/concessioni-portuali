@@ -18,6 +18,7 @@ import {
 import {
   assertRealDataActivation,
   createRealDataActivationPolicy,
+  type RealDataActivationPolicy,
   type RealDataActivationEnv,
 } from "@/server/ai/realDataActivation";
 
@@ -103,9 +104,13 @@ function parseRuntimeConfig(env: OpenAiRuntimeEnv): ParsedOpenAiRuntimeConfig {
 
 function createOpenAiFascicoloServiceConfig(
   env: OpenAiRuntimeEnv,
-  dependencies: { transport?: OpenAiFetch },
+  dependencies: {
+    transport?: OpenAiFetch;
+    realDataActivation?: RealDataActivationPolicy;
+  },
 ) {
-  const realDataActivation = createRealDataActivationPolicy(env);
+  const realDataActivation =
+    dependencies.realDataActivation ?? createRealDataActivationPolicy(env);
   assertRealDataActivation(realDataActivation);
   const config = parseRuntimeConfig(env);
   const provider = createOpenAiAnalysisProvider({
@@ -148,6 +153,26 @@ export function createOpenAiFascicoloDocumentRuntimeFromEnv(
   dependencies: { transport?: OpenAiFetch } = {},
 ) {
   const config = createOpenAiFascicoloServiceConfig(env, dependencies);
+  return createFascicoloDocumentAnalysisService({
+    provider: config.provider as typeof config.provider & FascicoloDocumentAnalysisProvider,
+    maxInputBytes: config.maxInputBytes,
+    realDataActivation: config.realDataActivation,
+  });
+}
+
+export function createOpenAiE2EFascicoloDocumentRuntimeFromEnv(
+  env: OpenAiRuntimeEnv = defaultOpenAiRuntimeEnv(),
+  dependencies: { transport?: OpenAiFetch } = {},
+) {
+  const realDataActivation = createRealDataActivationPolicy({
+    AI_REAL_DATA_ENABLED: "true",
+    AI_REAL_DATA_APPROVAL_ID: "E2E_FASCICOLO_STRUCTURED_ANALYSIS_ONCE",
+    AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
+  });
+  const config = createOpenAiFascicoloServiceConfig(env, {
+    ...dependencies,
+    realDataActivation,
+  });
   return createFascicoloDocumentAnalysisService({
     provider: config.provider as typeof config.provider & FascicoloDocumentAnalysisProvider,
     maxInputBytes: config.maxInputBytes,

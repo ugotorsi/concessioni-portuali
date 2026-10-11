@@ -7,26 +7,32 @@ export const E2E_STRUCTURED_KNOWLEDGE_DATABASE_HOST =
 export const E2E_STRUCTURED_KNOWLEDGE_DATABASE_NAME = "neondb";
 export const E2E_STRUCTURED_KNOWLEDGE_DATABASE_BRANCH =
   "br-silent-sun-atmiy16m";
+export const E2E_STRUCTURED_KNOWLEDGE_TENANT_ID =
+  "cmrzd08yp000dqwudd9dvaidl";
+export const E2E_STRUCTURED_KNOWLEDGE_OPENAI_PROJECT_ID =
+  "proj_qgUdhE5ccior406knOnVkayp";
+export const E2E_STRUCTURED_KNOWLEDGE_AUTHORIZATION_MAX_MS = 10 * 60 * 1_000;
 
 export type FascicoloDocumentStructuredKnowledgeAccessCode =
   | "FEATURE_DISABLED"
   | "BUDGET_APPROVAL_REQUIRED"
-  | "PROVIDER_APPROVAL_REQUIRED"
+  | "AUTHORIZATION_INVALID"
+  | "AUTHORIZATION_EXPIRED"
   | "PROVIDER_CONFIGURATION_REQUIRED"
   | "ENVIRONMENT_NOT_ALLOWED"
   | "DESTINATION_NOT_ALLOWED"
-  | "PROCEDIMENTO_NOT_ALLOWED";
+  | "PROCEDIMENTO_NOT_ALLOWED"
+  | "TENANT_NOT_ALLOWED";
 
 export interface FascicoloDocumentStructuredKnowledgeEnvironment {
   E2E_FASCICOLO_STRUCTURED_ANALYSIS_ENABLED?: string;
   E2E_FASCICOLO_STRUCTURED_ANALYSIS_BUDGET_APPROVED?: string;
+  E2E_FASCICOLO_STRUCTURED_ANALYSIS_NOT_BEFORE?: string;
+  E2E_FASCICOLO_STRUCTURED_ANALYSIS_EXPIRES_AT?: string;
   VERCEL_ENV?: string;
   VERCEL_GIT_COMMIT_REF?: string;
   DATABASE_URL?: string;
   NEON_BRANCH_ID?: string;
-  AI_REAL_DATA_ENABLED?: string;
-  AI_REAL_DATA_APPROVAL_ID?: string;
-  AI_PROVIDER_PROJECT_CLASS?: string;
   AI_OPENAI_API_KEY?: string;
   AI_OPENAI_PROJECT_ID?: string;
   AI_OPENAI_REGION?: string;
@@ -51,13 +57,14 @@ export function readFascicoloDocumentStructuredKnowledgeEnvironment(
       env.E2E_FASCICOLO_STRUCTURED_ANALYSIS_ENABLED,
     E2E_FASCICOLO_STRUCTURED_ANALYSIS_BUDGET_APPROVED:
       env.E2E_FASCICOLO_STRUCTURED_ANALYSIS_BUDGET_APPROVED,
+    E2E_FASCICOLO_STRUCTURED_ANALYSIS_NOT_BEFORE:
+      env.E2E_FASCICOLO_STRUCTURED_ANALYSIS_NOT_BEFORE,
+    E2E_FASCICOLO_STRUCTURED_ANALYSIS_EXPIRES_AT:
+      env.E2E_FASCICOLO_STRUCTURED_ANALYSIS_EXPIRES_AT,
     VERCEL_ENV: env.VERCEL_ENV,
     VERCEL_GIT_COMMIT_REF: env.VERCEL_GIT_COMMIT_REF,
     DATABASE_URL: env.DATABASE_URL,
     NEON_BRANCH_ID: env.NEON_BRANCH_ID,
-    AI_REAL_DATA_ENABLED: env.AI_REAL_DATA_ENABLED,
-    AI_REAL_DATA_APPROVAL_ID: env.AI_REAL_DATA_APPROVAL_ID,
-    AI_PROVIDER_PROJECT_CLASS: env.AI_PROVIDER_PROJECT_CLASS,
     AI_OPENAI_API_KEY: env.AI_OPENAI_API_KEY,
     AI_OPENAI_PROJECT_ID: env.AI_OPENAI_PROJECT_ID,
     AI_OPENAI_REGION: env.AI_OPENAI_REGION,
@@ -76,8 +83,8 @@ function hasProviderConfiguration(
   env: FascicoloDocumentStructuredKnowledgeEnvironment,
 ): boolean {
   return Boolean(env.AI_OPENAI_API_KEY?.trim())
-    && Boolean(env.AI_OPENAI_PROJECT_ID?.trim())
-    && (env.AI_OPENAI_REGION === "GLOBAL" || env.AI_OPENAI_REGION === "EU")
+    && env.AI_OPENAI_PROJECT_ID === E2E_STRUCTURED_KNOWLEDGE_OPENAI_PROJECT_ID
+    && env.AI_OPENAI_REGION === "GLOBAL"
     && isPositiveInteger(env.AI_OPENAI_TIMEOUT_MS)
     && isPositiveInteger(env.AI_OPENAI_MAX_RAW_RESPONSE_BYTES)
     && isPositiveInteger(env.AI_OPENAI_MAX_OUTPUT_TOKENS)
@@ -97,9 +104,43 @@ function hasAuthorizedDatabaseDestination(databaseUrl: string | undefined): bool
   }
 }
 
+function authorizationWindowCode(
+  env: FascicoloDocumentStructuredKnowledgeEnvironment,
+  now: Date,
+): FascicoloDocumentStructuredKnowledgeAccessCode | null {
+  const notBefore = env.E2E_FASCICOLO_STRUCTURED_ANALYSIS_NOT_BEFORE;
+  const expiresAt = env.E2E_FASCICOLO_STRUCTURED_ANALYSIS_EXPIRES_AT;
+  if (
+    typeof notBefore !== "string"
+    || typeof expiresAt !== "string"
+    || !notBefore.endsWith("Z")
+    || !expiresAt.endsWith("Z")
+  ) {
+    return "AUTHORIZATION_INVALID";
+  }
+  const notBeforeMs = Date.parse(notBefore);
+  const expiresAtMs = Date.parse(expiresAt);
+  const durationMs = expiresAtMs - notBeforeMs;
+  if (
+    !Number.isFinite(notBeforeMs)
+    || !Number.isFinite(expiresAtMs)
+    || durationMs <= 0
+    || durationMs > E2E_STRUCTURED_KNOWLEDGE_AUTHORIZATION_MAX_MS
+  ) {
+    return "AUTHORIZATION_INVALID";
+  }
+  const nowMs = now.getTime();
+  if (!Number.isFinite(nowMs) || nowMs < notBeforeMs || nowMs >= expiresAtMs) {
+    return "AUTHORIZATION_EXPIRED";
+  }
+  return null;
+}
+
 export function getFascicoloDocumentStructuredKnowledgeAccessCode(input: {
   env: FascicoloDocumentStructuredKnowledgeEnvironment;
   procedimentoId: string;
+  tenantId?: string;
+  now?: Date;
 }): FascicoloDocumentStructuredKnowledgeAccessCode | null {
   if (input.procedimentoId !== E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID) {
     return "PROCEDIMENTO_NOT_ALLOWED";
@@ -110,12 +151,15 @@ export function getFascicoloDocumentStructuredKnowledgeAccessCode(input: {
   if (input.env.E2E_FASCICOLO_STRUCTURED_ANALYSIS_BUDGET_APPROVED !== "true") {
     return "BUDGET_APPROVAL_REQUIRED";
   }
+  const authorizationCode = authorizationWindowCode(input.env, input.now ?? new Date());
+  if (authorizationCode) {
+    return authorizationCode;
+  }
   if (
-    input.env.AI_REAL_DATA_ENABLED !== "true"
-    || !input.env.AI_REAL_DATA_APPROVAL_ID?.trim()
-    || input.env.AI_PROVIDER_PROJECT_CLASS !== "REAL_DATA_APPROVED"
+    input.tenantId !== undefined
+    && input.tenantId !== E2E_STRUCTURED_KNOWLEDGE_TENANT_ID
   ) {
-    return "PROVIDER_APPROVAL_REQUIRED";
+    return "TENANT_NOT_ALLOWED";
   }
   if (!hasProviderConfiguration(input.env)) {
     return "PROVIDER_CONFIGURATION_REQUIRED";
@@ -138,6 +182,8 @@ export function getFascicoloDocumentStructuredKnowledgeAccessCode(input: {
 export function isFascicoloDocumentStructuredKnowledgeAvailable(input: {
   env: FascicoloDocumentStructuredKnowledgeEnvironment;
   procedimentoId: string;
+  tenantId?: string;
+  now?: Date;
 }): boolean {
   return getFascicoloDocumentStructuredKnowledgeAccessCode(input) === null;
 }
@@ -145,6 +191,8 @@ export function isFascicoloDocumentStructuredKnowledgeAvailable(input: {
 export function assertFascicoloDocumentStructuredKnowledgeAvailable(input: {
   env: FascicoloDocumentStructuredKnowledgeEnvironment;
   procedimentoId: string;
+  tenantId?: string;
+  now?: Date;
 }): void {
   const code = getFascicoloDocumentStructuredKnowledgeAccessCode(input);
   if (code) {

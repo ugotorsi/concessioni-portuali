@@ -29,7 +29,7 @@ vi.mock("@/server/ai/openaiRuntime", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/server/ai/openaiRuntime")>();
   return {
     ...actual,
-    createOpenAiFascicoloDocumentRuntimeFromEnv: mocks.createRuntime,
+    createOpenAiE2EFascicoloDocumentRuntimeFromEnv: mocks.createRuntime,
   };
 });
 vi.mock("@/server/ai/e2eFascicoloStructuredKnowledgeGuard", async (importOriginal) => {
@@ -55,8 +55,13 @@ import {
   E2E_STRUCTURED_KNOWLEDGE_DATABASE_BRANCH,
   E2E_STRUCTURED_KNOWLEDGE_DATABASE_HOST,
   E2E_STRUCTURED_KNOWLEDGE_GIT_BRANCH,
+  E2E_STRUCTURED_KNOWLEDGE_OPENAI_PROJECT_ID,
   E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
+  E2E_STRUCTURED_KNOWLEDGE_TENANT_ID,
 } from "@/server/ai/fascicoloDocumentStructuredKnowledgeAccess";
+
+const AUTHORIZATION_NOT_BEFORE = "2026-10-11T11:00:00.000Z";
+const AUTHORIZATION_EXPIRES_AT = "2026-10-11T11:10:00.000Z";
 
 function input(procedimentoId = E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID): FormData {
   const formData = new FormData();
@@ -64,7 +69,10 @@ function input(procedimentoId = E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID): FormD
   return formData;
 }
 
-function tenantContext(role: DemoRole = "GIURIDICO", accessibleTenantIds = ["ente-e2e"]) {
+function tenantContext(
+  role: DemoRole = "GIURIDICO",
+  accessibleTenantIds = [E2E_STRUCTURED_KNOWLEDGE_TENANT_ID],
+) {
   return {
     userId: "user-e2e",
     role,
@@ -78,6 +86,8 @@ function tenantContext(role: DemoRole = "GIURIDICO", accessibleTenantIds = ["ent
 function enableAuthorizedEnvironment(): void {
   vi.stubEnv("E2E_FASCICOLO_STRUCTURED_ANALYSIS_ENABLED", "true");
   vi.stubEnv("E2E_FASCICOLO_STRUCTURED_ANALYSIS_BUDGET_APPROVED", "true");
+  vi.stubEnv("E2E_FASCICOLO_STRUCTURED_ANALYSIS_NOT_BEFORE", AUTHORIZATION_NOT_BEFORE);
+  vi.stubEnv("E2E_FASCICOLO_STRUCTURED_ANALYSIS_EXPIRES_AT", AUTHORIZATION_EXPIRES_AT);
   vi.stubEnv("VERCEL_ENV", "preview");
   vi.stubEnv("VERCEL_GIT_COMMIT_REF", E2E_STRUCTURED_KNOWLEDGE_GIT_BRANCH);
   vi.stubEnv("NEON_BRANCH_ID", E2E_STRUCTURED_KNOWLEDGE_DATABASE_BRANCH);
@@ -85,12 +95,10 @@ function enableAuthorizedEnvironment(): void {
     "DATABASE_URL",
     `postgresql://local-test:local-test@${E2E_STRUCTURED_KNOWLEDGE_DATABASE_HOST}/neondb`,
   );
-  vi.stubEnv("AI_REAL_DATA_ENABLED", "true");
-  vi.stubEnv("AI_REAL_DATA_APPROVAL_ID", "local-test-approval");
-  vi.stubEnv("AI_PROVIDER_PROJECT_CLASS", "REAL_DATA_APPROVED");
+  vi.stubEnv("AI_REAL_DATA_ENABLED", "false");
   vi.stubEnv("AI_OPENAI_API_KEY", "local-test-key");
-  vi.stubEnv("AI_OPENAI_PROJECT_ID", "proj_local_e2e");
-  vi.stubEnv("AI_OPENAI_REGION", "EU");
+  vi.stubEnv("AI_OPENAI_PROJECT_ID", E2E_STRUCTURED_KNOWLEDGE_OPENAI_PROJECT_ID);
+  vi.stubEnv("AI_OPENAI_REGION", "GLOBAL");
   vi.stubEnv("AI_OPENAI_TIMEOUT_MS", "1000");
   vi.stubEnv("AI_OPENAI_MAX_RAW_RESPONSE_BYTES", "10000");
   vi.stubEnv("AI_OPENAI_MAX_OUTPUT_TOKENS", "1000");
@@ -99,11 +107,13 @@ function enableAuthorizedEnvironment(): void {
 
 describe("fascicolo document structured knowledge action", () => {
   beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-11T11:05:00.000Z"));
     vi.clearAllMocks();
     mocks.getTenantContext.mockResolvedValue(tenantContext());
     mocks.findProcedimento.mockResolvedValue({
       id: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
-      enteId: "ente-e2e",
+      enteId: E2E_STRUCTURED_KNOWLEDGE_TENANT_ID,
     });
     mocks.createRuntime.mockReturnValue({ analyze: vi.fn() });
     mocks.createTransport.mockReturnValue(vi.fn());
@@ -120,6 +130,7 @@ describe("fascicolo document structured knowledge action", () => {
 
   afterEach(() => {
     vi.unstubAllEnvs();
+    vi.useRealTimers();
   });
 
   it("performs no provider construction or persistence while disabled", async () => {
@@ -181,13 +192,15 @@ describe("fascicolo document structured knowledge action", () => {
 
     expect(mocks.createRuntime).toHaveBeenCalledTimes(1);
     expect(mocks.createTransport).toHaveBeenCalledWith({
-      tenantId: "ente-e2e",
+      tenantId: E2E_STRUCTURED_KNOWLEDGE_TENANT_ID,
       procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
-      projectId: "proj_local_e2e",
-      region: "EU",
+      projectId: E2E_STRUCTURED_KNOWLEDGE_OPENAI_PROJECT_ID,
+      region: "GLOBAL",
+      authorizationNotBefore: AUTHORIZATION_NOT_BEFORE,
+      authorizationExpiresAt: AUTHORIZATION_EXPIRES_AT,
     });
     expect(mocks.analyzeAndPersist).toHaveBeenCalledWith({
-      tenantId: "ente-e2e",
+      tenantId: E2E_STRUCTURED_KNOWLEDGE_TENANT_ID,
       procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
     });
     expect(mocks.revalidatePath).toHaveBeenCalledWith(

@@ -24,6 +24,7 @@ import {
   AI_OPENAI_RUNTIME_ENV_NAMES,
   AI_REAL_DATA_ACTIVATION_ENV_NAMES,
   OpenAiRuntimeConfigurationError,
+  createOpenAiE2EFascicoloDocumentRuntimeFromEnv,
   createOpenAiFascicoloRuntimeFromEnv,
   createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv,
   type OpenAiRuntimeEnv,
@@ -153,6 +154,27 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
       validEnv({ AI_OPENAI_TIMEOUT_MS: "invalid" }),
     )).toThrowError(expect.objectContaining({ code: "AI_CONFIGURATION_ERROR" }));
     expect(createTrustedReviewServiceMock).not.toHaveBeenCalled();
+  });
+
+  it("keeps ordinary AI runtimes disabled while composing the isolated E2E runtime", () => {
+    const e2eEnv = validEnv({
+      AI_REAL_DATA_ENABLED: "false",
+      AI_REAL_DATA_APPROVAL_ID: undefined,
+      AI_PROVIDER_PROJECT_CLASS: undefined,
+    });
+
+    expect(() => createOpenAiFascicoloRuntimeFromEnv(e2eEnv))
+      .toThrowError(AiRealDataActivationError);
+    expect(createProviderMock).not.toHaveBeenCalled();
+    expect(createServiceMock).not.toHaveBeenCalled();
+
+    const runtime = createOpenAiE2EFascicoloDocumentRuntimeFromEnv(e2eEnv, {
+      transport: fakeTransport(),
+    });
+
+    expect(runtime.analyze).toBeTypeOf("function");
+    expect(createProviderMock).toHaveBeenCalledOnce();
+    expect(createServiceMock).not.toHaveBeenCalled();
   });
 
   it("exposes no direct provider or authority override in the normal trusted-review runtime contract", () => {
@@ -319,7 +341,7 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
     expect(source).toMatch(
       /function defaultOpenAiRuntimeEnv\(\): OpenAiRuntimeEnv \{\s*return process\.env as unknown as OpenAiRuntimeEnv;\s*\}/,
     );
-    expect(source.match(/env: OpenAiRuntimeEnv = defaultOpenAiRuntimeEnv\(\)/g)).toHaveLength(3);
+    expect(source.match(/env: OpenAiRuntimeEnv = defaultOpenAiRuntimeEnv\(\)/g)).toHaveLength(4);
     expect(source).not.toMatch(/(?<!AI_)OPENAI_API_KEY/);
     for (const forbidden of [
       "NEXT_PUBLIC_",

@@ -3,21 +3,26 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   calculateE2EStructuredAnalysisMaximumCost,
+  consumeE2EStructuredAnalysisCost,
   createE2EFascicoloStructuredKnowledgeTransport,
   E2E_STRUCTURED_ANALYSIS_MAX_COST_EUR,
+  type E2EOneShotCostContext,
 } from "@/server/ai/e2eFascicoloStructuredKnowledgeGuard";
+import {
+  E2E_STRUCTURED_KNOWLEDGE_OPENAI_PROJECT_ID,
+  E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
+  E2E_STRUCTURED_KNOWLEDGE_TENANT_ID,
+} from "@/server/ai/fascicoloDocumentStructuredKnowledgeAccess";
 import {
   OPENAI_ANALYSIS_MODEL,
   OPENAI_RESPONSES_ENDPOINTS,
 } from "@/server/ai/providers/openai";
-import {
-  reserveRuntimeCost,
-  settleRuntimeCost,
-  type RuntimeCostContext,
-} from "@/server/runtime/cost";
 import type { RuntimeSqlExecutor } from "@/server/runtime/health";
 
 const databases: PGlite[] = [];
+const AUTHORIZATION_NOT_BEFORE = "2026-10-11T11:00:00.000Z";
+const AUTHORIZATION_EXPIRES_AT = "2026-10-11T11:10:00.000Z";
+const AUTHORIZED_NOW = new Date("2026-10-11T11:05:00.000Z");
 
 function requestBody(overrides: Record<string, unknown> = {}): string {
   return JSON.stringify({
@@ -31,11 +36,11 @@ function requestBody(overrides: Record<string, unknown> = {}): string {
 function dependencies() {
   return {
     transport: vi.fn().mockResolvedValue(new Response("{}", { status: 200 })),
-    reserveCost: vi.fn().mockResolvedValue({
+    consumeCost: vi.fn().mockResolvedValue({
       reservationId: "reservation-e2e",
-      outcome: "RESERVED" as const,
+      outcome: "CONSUMED" as const,
     }),
-    settleCost: vi.fn().mockResolvedValue(undefined),
+    now: vi.fn(() => AUTHORIZED_NOW),
   };
 }
 
@@ -45,14 +50,16 @@ function guardedTransport(
   >,
 ) {
   return createE2EFascicoloStructuredKnowledgeTransport({
-    tenantId: "ente-e2e",
-    procedimentoId: "procedimento-intake-9a0169f9de7e3a1ec2364691",
-    projectId: "proj_e2e",
-    region: "EU",
+    tenantId: E2E_STRUCTURED_KNOWLEDGE_TENANT_ID,
+    procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
+    projectId: E2E_STRUCTURED_KNOWLEDGE_OPENAI_PROJECT_ID,
+    region: "GLOBAL",
+    authorizationNotBefore: AUTHORIZATION_NOT_BEFORE,
+    authorizationExpiresAt: AUTHORIZATION_EXPIRES_AT,
   }, deps);
 }
 
-function costContext(db: PGlite): RuntimeCostContext {
+function costContext(db: PGlite): E2EOneShotCostContext {
   return {
     transaction: <T>(operation: (executor: RuntimeSqlExecutor) => Promise<T>) =>
       db.transaction((tx) => operation({
@@ -102,10 +109,14 @@ async function budgetDatabase(): Promise<PGlite> {
       ("id","scope","tenantId","procedimentoId","currency","hardCapAmount",
        "windowSeconds","enabled","effectiveFrom")
     VALUES
-      ('global','GLOBAL',NULL,NULL,'EUR',2.00,86400,true,CURRENT_TIMESTAMP),
-      ('tenant','TENANT','ente-e2e',NULL,'EUR',2.00,86400,true,CURRENT_TIMESTAMP),
-      ('procedure','PROCEDIMENTO','ente-e2e',
-       'procedimento-intake-9a0169f9de7e3a1ec2364691','EUR',2.00,86400,true,
+      ('e2e_ai_one_shot_20261011_global_disabled',
+       'GLOBAL',NULL,NULL,'EUR',2.00,1200,false,CURRENT_TIMESTAMP),
+      ('e2e_ai_one_shot_20261011_tenant_disabled',
+       'TENANT','cmrzd08yp000dqwudd9dvaidl',NULL,'EUR',2.00,31536000,false,
+       CURRENT_TIMESTAMP),
+      ('e2e_ai_one_shot_20261011_procedimento_disabled',
+       'PROCEDIMENTO','cmrzd08yp000dqwudd9dvaidl',
+       'procedimento-intake-9a0169f9de7e3a1ec2364691','EUR',2.00,31536000,false,
        CURRENT_TIMESTAMP);
   `);
   return db;
@@ -124,24 +135,25 @@ describe("E2E fascicolo structured knowledge provider guard", () => {
     expect(E2E_STRUCTURED_ANALYSIS_MAX_COST_EUR).toBeLessThan(2);
   });
 
-  it("settles the maximum before one provider call and selects the project", async () => {
+  it("consumes the maximum before one provider call and selects the project", async () => {
     const deps = dependencies();
     const transport = guardedTransport(deps);
 
-    await transport(OPENAI_RESPONSES_ENDPOINTS.EU, {
+    await transport(OPENAI_RESPONSES_ENDPOINTS.GLOBAL, {
       method: "POST",
       body: requestBody(),
     });
 
-    expect(deps.reserveCost).toHaveBeenCalledTimes(1);
-    expect(deps.settleCost).toHaveBeenCalledWith({
-      reservationId: "reservation-e2e",
-      actualAmount: E2E_STRUCTURED_ANALYSIS_MAX_COST_EUR,
+    expect(deps.consumeCost).toHaveBeenCalledWith({
+      tenantId: E2E_STRUCTURED_KNOWLEDGE_TENANT_ID,
+      procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
+      authorizationExpiresAt: AUTHORIZATION_EXPIRES_AT,
     });
-    expect(deps.settleCost.mock.invocationCallOrder[0])
+    expect(deps.consumeCost.mock.invocationCallOrder[0])
       .toBeLessThan(deps.transport.mock.invocationCallOrder[0]);
     const headers = new Headers(deps.transport.mock.calls[0]?.[1]?.headers);
-    expect(headers.get("OpenAI-Project")).toBe("proj_e2e");
+    expect(headers.get("OpenAI-Project"))
+      .toBe(E2E_STRUCTURED_KNOWLEDGE_OPENAI_PROJECT_ID);
   });
 
   it("rejects oversized input, output, and a different model before reservation", async () => {
@@ -153,11 +165,11 @@ describe("E2E fascicolo structured knowledge provider guard", () => {
 
     for (const body of cases) {
       const deps = dependencies();
-      await expect(guardedTransport(deps)(OPENAI_RESPONSES_ENDPOINTS.EU, {
+      await expect(guardedTransport(deps)(OPENAI_RESPONSES_ENDPOINTS.GLOBAL, {
         method: "POST",
         body,
       })).rejects.toBeDefined();
-      expect(deps.reserveCost).not.toHaveBeenCalled();
+      expect(deps.consumeCost).not.toHaveBeenCalled();
       expect(deps.transport).not.toHaveBeenCalled();
     }
   });
@@ -165,20 +177,20 @@ describe("E2E fascicolo structured knowledge provider guard", () => {
   it("blocks concurrent or repeated calls with the persistent reservation", async () => {
     const deps = dependencies();
     let reserved = false;
-    deps.reserveCost.mockImplementation(async () => {
+    deps.consumeCost.mockImplementation(async () => {
       if (reserved) {
         return { reservationId: "reservation-e2e", outcome: "REUSED" as const };
       }
       reserved = true;
-      return { reservationId: "reservation-e2e", outcome: "RESERVED" as const };
+      return { reservationId: "reservation-e2e", outcome: "CONSUMED" as const };
     });
 
     const first = guardedTransport(deps);
     const second = guardedTransport(deps);
 
     const outcomes = await Promise.allSettled([
-      first(OPENAI_RESPONSES_ENDPOINTS.EU, { body: requestBody() }),
-      second(OPENAI_RESPONSES_ENDPOINTS.EU, { body: requestBody() }),
+      first(OPENAI_RESPONSES_ENDPOINTS.GLOBAL, { body: requestBody() }),
+      second(OPENAI_RESPONSES_ENDPOINTS.GLOBAL, { body: requestBody() }),
     ]);
 
     expect(outcomes.filter((outcome) => outcome.status === "fulfilled")).toHaveLength(1);
@@ -192,17 +204,16 @@ describe("E2E fascicolo structured knowledge provider guard", () => {
     const provider = vi.fn().mockResolvedValue(new Response("{}", { status: 200 }));
     const persistentDependencies = {
       transport: provider,
-      reserveCost: (input: Parameters<typeof reserveRuntimeCost>[0]) =>
-        reserveRuntimeCost(input, context),
-      settleCost: (input: Parameters<typeof settleRuntimeCost>[0]) =>
-        settleRuntimeCost(input, context),
+      consumeCost: (input: Parameters<typeof consumeE2EStructuredAnalysisCost>[0]) =>
+        consumeE2EStructuredAnalysisCost(input, context),
+      now: () => AUTHORIZED_NOW,
     };
 
     const outcomes = await Promise.allSettled([
-      guardedTransport(persistentDependencies)(OPENAI_RESPONSES_ENDPOINTS.EU, {
+      guardedTransport(persistentDependencies)(OPENAI_RESPONSES_ENDPOINTS.GLOBAL, {
         body: requestBody(),
       }),
-      guardedTransport(persistentDependencies)(OPENAI_RESPONSES_ENDPOINTS.EU, {
+      guardedTransport(persistentDependencies)(OPENAI_RESPONSES_ENDPOINTS.GLOBAL, {
         body: requestBody(),
       }),
     ]);
@@ -226,18 +237,17 @@ describe("E2E fascicolo structured knowledge provider guard", () => {
     const provider = vi.fn().mockRejectedValue(new Error("provider failure"));
     const persistentDependencies = {
       transport: provider,
-      reserveCost: (input: Parameters<typeof reserveRuntimeCost>[0]) =>
-        reserveRuntimeCost(input, context),
-      settleCost: (input: Parameters<typeof settleRuntimeCost>[0]) =>
-        settleRuntimeCost(input, context),
+      consumeCost: (input: Parameters<typeof consumeE2EStructuredAnalysisCost>[0]) =>
+        consumeE2EStructuredAnalysisCost(input, context),
+      now: () => AUTHORIZED_NOW,
     };
 
     await expect(guardedTransport(persistentDependencies)(
-      OPENAI_RESPONSES_ENDPOINTS.EU,
+      OPENAI_RESPONSES_ENDPOINTS.GLOBAL,
       { body: requestBody() },
     )).rejects.toThrow("provider failure");
     await expect(guardedTransport(persistentDependencies)(
-      OPENAI_RESPONSES_ENDPOINTS.EU,
+      OPENAI_RESPONSES_ENDPOINTS.GLOBAL,
       { body: requestBody() },
     )).rejects.toThrow("RUNTIME_COST_RESERVATION_ALREADY_ACTIVE");
 
@@ -251,37 +261,125 @@ describe("E2E fascicolo structured knowledge provider guard", () => {
       deps.transport.mockRejectedValue(new Error("simulated failure"));
       const first = guardedTransport(deps);
 
-      await expect(first(OPENAI_RESPONSES_ENDPOINTS.EU, {
+      await expect(first(OPENAI_RESPONSES_ENDPOINTS.GLOBAL, {
         body: requestBody(),
       })).rejects.toThrow("simulated failure");
 
-      deps.reserveCost.mockResolvedValue({
+      deps.consumeCost.mockResolvedValue({
         reservationId: "reservation-e2e",
         outcome: "REUSED",
       });
       const retry = guardedTransport(deps);
-      await expect(retry(OPENAI_RESPONSES_ENDPOINTS.EU, {
+      await expect(retry(OPENAI_RESPONSES_ENDPOINTS.GLOBAL, {
         body: requestBody(),
       })).rejects.toThrow("RUNTIME_COST_RESERVATION_ALREADY_ACTIVE");
       expect(deps.transport).toHaveBeenCalledTimes(1);
     },
   );
 
-  it("does not transmit when reservation or settlement fails", async () => {
-    const reservationFailure = dependencies();
-    reservationFailure.reserveCost.mockRejectedValue(new Error("budget unavailable"));
-    await expect(guardedTransport(reservationFailure)(
-      OPENAI_RESPONSES_ENDPOINTS.EU,
+  it("does not transmit when the atomic ledger consumption fails", async () => {
+    const ledgerFailure = dependencies();
+    ledgerFailure.consumeCost.mockRejectedValue(new Error("budget unavailable"));
+    await expect(guardedTransport(ledgerFailure)(
+      OPENAI_RESPONSES_ENDPOINTS.GLOBAL,
       { body: requestBody() },
     )).rejects.toThrow("budget unavailable");
-    expect(reservationFailure.transport).not.toHaveBeenCalled();
+    expect(ledgerFailure.transport).not.toHaveBeenCalled();
+  });
 
-    const settlementFailure = dependencies();
-    settlementFailure.settleCost.mockRejectedValue(new Error("settlement unavailable"));
-    await expect(guardedTransport(settlementFailure)(
-      OPENAI_RESPONSES_ENDPOINTS.EU,
+  it("rejects expired authorization immediately before transmission", async () => {
+    const deps = dependencies();
+    deps.now
+      .mockReturnValueOnce(AUTHORIZED_NOW)
+      .mockReturnValueOnce(new Date(AUTHORIZATION_EXPIRES_AT));
+
+    await expect(guardedTransport(deps)(OPENAI_RESPONSES_ENDPOINTS.GLOBAL, {
+      body: requestBody(),
+    })).rejects.toMatchObject({ code: "AUTHORIZATION_EXPIRED" });
+    expect(deps.consumeCost).toHaveBeenCalledTimes(1);
+    expect(deps.transport).not.toHaveBeenCalled();
+  });
+
+  it("rejects an authorization window longer than ten minutes", async () => {
+    const deps = dependencies();
+    const transport = createE2EFascicoloStructuredKnowledgeTransport({
+      tenantId: E2E_STRUCTURED_KNOWLEDGE_TENANT_ID,
+      procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
+      projectId: E2E_STRUCTURED_KNOWLEDGE_OPENAI_PROJECT_ID,
+      region: "GLOBAL",
+      authorizationNotBefore: AUTHORIZATION_NOT_BEFORE,
+      authorizationExpiresAt: "2026-10-11T11:10:00.001Z",
+    }, deps);
+
+    await expect(transport(OPENAI_RESPONSES_ENDPOINTS.GLOBAL, {
+      body: requestBody(),
+    })).rejects.toMatchObject({ code: "AUTHORIZATION_INVALID" });
+    expect(deps.consumeCost).not.toHaveBeenCalled();
+    expect(deps.transport).not.toHaveBeenCalled();
+  });
+
+  it("rejects enabled E2E policies instead of authorizing other operations", async () => {
+    const db = await budgetDatabase();
+    await db.exec(`
+      UPDATE "RuntimeBudgetPolicy"
+      SET "enabled"=true
+      WHERE "scope"='GLOBAL'
+    `);
+    const provider = vi.fn();
+
+    await expect(guardedTransport({
+      transport: provider,
+      consumeCost: (input) =>
+        consumeE2EStructuredAnalysisCost(input, costContext(db)),
+      now: () => AUTHORIZED_NOW,
+    })(OPENAI_RESPONSES_ENDPOINTS.GLOBAL, {
+      body: requestBody(),
+    })).rejects.toMatchObject({ code: "E2E_POLICY_CONFIGURATION_INVALID" });
+    expect(provider).not.toHaveBeenCalled();
+  });
+
+  it("rejects a consumed ledger after a server restart", async () => {
+    const db = await budgetDatabase();
+    const context = costContext(db);
+    const provider = vi.fn().mockResolvedValue(new Response("{}", { status: 200 }));
+    const persistentDependencies = {
+      transport: provider,
+      consumeCost: (input: Parameters<typeof consumeE2EStructuredAnalysisCost>[0]) =>
+        consumeE2EStructuredAnalysisCost(input, context),
+      now: () => AUTHORIZED_NOW,
+    };
+
+    await guardedTransport(persistentDependencies)(OPENAI_RESPONSES_ENDPOINTS.GLOBAL, {
+      body: requestBody(),
+    });
+    await expect(guardedTransport(persistentDependencies)(
+      OPENAI_RESPONSES_ENDPOINTS.GLOBAL,
       { body: requestBody() },
-    )).rejects.toThrow("settlement unavailable");
-    expect(settlementFailure.transport).not.toHaveBeenCalled();
+    )).rejects.toThrow("RUNTIME_COST_RESERVATION_ALREADY_ACTIVE");
+    expect(provider).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects consumption when prior one-shot ledger spend exceeds the cap", async () => {
+    const db = await budgetDatabase();
+    await db.exec(`
+      INSERT INTO "RuntimeCostReservation" (
+        "id","tenantId","procedimentoId","jobId","provider","operationType","currency",
+        "estimatedAmount","reservedAmount","actualAmount","releasedAmount","status",
+        "idempotencyKey","expiresAt","settledAt"
+      ) VALUES (
+        'prior','${E2E_STRUCTURED_KNOWLEDGE_TENANT_ID}',
+        '${E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID}',NULL,'OPENAI',
+        'E2E_FASCICOLO_STRUCTURED_ANALYSIS_ONCE','EUR',1,1,1,0,'SETTLED',
+        '${"f".repeat(64)}',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP
+      )
+    `);
+
+    await expect(consumeE2EStructuredAnalysisCost({
+      tenantId: E2E_STRUCTURED_KNOWLEDGE_TENANT_ID,
+      procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
+      authorizationExpiresAt: AUTHORIZATION_EXPIRES_AT,
+    }, costContext(db))).rejects.toMatchObject({
+      code: "PROVIDER_COST_LIMIT_EXCEEDED",
+    });
   });
 });

@@ -4,24 +4,27 @@ import {
   E2E_STRUCTURED_KNOWLEDGE_DATABASE_BRANCH,
   E2E_STRUCTURED_KNOWLEDGE_DATABASE_HOST,
   E2E_STRUCTURED_KNOWLEDGE_GIT_BRANCH,
+  E2E_STRUCTURED_KNOWLEDGE_OPENAI_PROJECT_ID,
   E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
+  E2E_STRUCTURED_KNOWLEDGE_TENANT_ID,
   getFascicoloDocumentStructuredKnowledgeAccessCode,
 } from "@/server/ai/fascicoloDocumentStructuredKnowledgeAccess";
+
+const AUTHORIZED_NOW = new Date("2026-10-11T11:05:00.000Z");
 
 function authorizedEnvironment() {
   return {
     E2E_FASCICOLO_STRUCTURED_ANALYSIS_ENABLED: "true",
     E2E_FASCICOLO_STRUCTURED_ANALYSIS_BUDGET_APPROVED: "true",
+    E2E_FASCICOLO_STRUCTURED_ANALYSIS_NOT_BEFORE: "2026-10-11T11:00:00.000Z",
+    E2E_FASCICOLO_STRUCTURED_ANALYSIS_EXPIRES_AT: "2026-10-11T11:10:00.000Z",
     VERCEL_ENV: "preview",
     VERCEL_GIT_COMMIT_REF: E2E_STRUCTURED_KNOWLEDGE_GIT_BRANCH,
     NEON_BRANCH_ID: E2E_STRUCTURED_KNOWLEDGE_DATABASE_BRANCH,
     DATABASE_URL: `postgresql://local-test:local-test@${E2E_STRUCTURED_KNOWLEDGE_DATABASE_HOST}/neondb`,
-    AI_REAL_DATA_ENABLED: "true",
-    AI_REAL_DATA_APPROVAL_ID: "local-test-approval",
-    AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
     AI_OPENAI_API_KEY: "local-test-key",
-    AI_OPENAI_PROJECT_ID: "proj_local_e2e",
-    AI_OPENAI_REGION: "EU",
+    AI_OPENAI_PROJECT_ID: E2E_STRUCTURED_KNOWLEDGE_OPENAI_PROJECT_ID,
+    AI_OPENAI_REGION: "GLOBAL",
     AI_OPENAI_TIMEOUT_MS: "1000",
     AI_OPENAI_MAX_RAW_RESPONSE_BYTES: "10000",
     AI_OPENAI_MAX_OUTPUT_TOKENS: "1000",
@@ -34,6 +37,7 @@ describe("E2E fascicolo document structured knowledge access", () => {
     expect(getFascicoloDocumentStructuredKnowledgeAccessCode({
       env: {},
       procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
+      now: AUTHORIZED_NOW,
     })).toBe("FEATURE_DISABLED");
   });
 
@@ -44,6 +48,7 @@ describe("E2E fascicolo document structured knowledge access", () => {
     expect(getFascicoloDocumentStructuredKnowledgeAccessCode({
       env,
       procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
+      now: AUTHORIZED_NOW,
     })).toBe("BUDGET_APPROVAL_REQUIRED");
   });
 
@@ -54,22 +59,17 @@ describe("E2E fascicolo document structured knowledge access", () => {
     expect(getFascicoloDocumentStructuredKnowledgeAccessCode({
       env,
       procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
+      now: AUTHORIZED_NOW,
     })).toBe("ENVIRONMENT_NOT_ALLOWED");
   });
 
-  it("requires real-data provider approval and complete runtime configuration", () => {
-    const approvalMissing = authorizedEnvironment();
-    approvalMissing.AI_REAL_DATA_APPROVAL_ID = "";
-    expect(getFascicoloDocumentStructuredKnowledgeAccessCode({
-      env: approvalMissing,
-      procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
-    })).toBe("PROVIDER_APPROVAL_REQUIRED");
-
+  it("requires complete provider configuration without global AI activation", () => {
     const configurationMissing = authorizedEnvironment();
     configurationMissing.AI_OPENAI_API_KEY = "";
     expect(getFascicoloDocumentStructuredKnowledgeAccessCode({
       env: configurationMissing,
       procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
+      now: AUTHORIZED_NOW,
     })).toBe("PROVIDER_CONFIGURATION_REQUIRED");
   });
 
@@ -80,6 +80,7 @@ describe("E2E fascicolo document structured knowledge access", () => {
     expect(getFascicoloDocumentStructuredKnowledgeAccessCode({
       env,
       procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
+      now: AUTHORIZED_NOW,
     })).toBe("DESTINATION_NOT_ALLOWED");
   });
 
@@ -89,6 +90,7 @@ describe("E2E fascicolo document structured knowledge access", () => {
     expect(getFascicoloDocumentStructuredKnowledgeAccessCode({
       env: wrongBranch,
       procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
+      now: AUTHORIZED_NOW,
     })).toBe("DESTINATION_NOT_ALLOWED");
 
     const projectMissing = authorizedEnvironment();
@@ -96,6 +98,7 @@ describe("E2E fascicolo document structured knowledge access", () => {
     expect(getFascicoloDocumentStructuredKnowledgeAccessCode({
       env: projectMissing,
       procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
+      now: AUTHORIZED_NOW,
     })).toBe("PROVIDER_CONFIGURATION_REQUIRED");
   });
 
@@ -103,13 +106,50 @@ describe("E2E fascicolo document structured knowledge access", () => {
     expect(getFascicoloDocumentStructuredKnowledgeAccessCode({
       env: authorizedEnvironment(),
       procedimentoId: "procedimento-non-autorizzato",
+      now: AUTHORIZED_NOW,
     })).toBe("PROCEDIMENTO_NOT_ALLOWED");
+  });
+
+  it("rejects absent, expired, or overlong temporal authorization", () => {
+    const absent = authorizedEnvironment();
+    absent.E2E_FASCICOLO_STRUCTURED_ANALYSIS_EXPIRES_AT = "";
+    expect(getFascicoloDocumentStructuredKnowledgeAccessCode({
+      env: absent,
+      procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
+      now: AUTHORIZED_NOW,
+    })).toBe("AUTHORIZATION_INVALID");
+
+    expect(getFascicoloDocumentStructuredKnowledgeAccessCode({
+      env: authorizedEnvironment(),
+      procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
+      now: new Date("2026-10-11T11:10:00.000Z"),
+    })).toBe("AUTHORIZATION_EXPIRED");
+
+    const overlong = authorizedEnvironment();
+    overlong.E2E_FASCICOLO_STRUCTURED_ANALYSIS_EXPIRES_AT =
+      "2026-10-11T11:10:00.001Z";
+    expect(getFascicoloDocumentStructuredKnowledgeAccessCode({
+      env: overlong,
+      procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
+      now: AUTHORIZED_NOW,
+    })).toBe("AUTHORIZATION_INVALID");
+  });
+
+  it("rejects a different tenant", () => {
+    expect(getFascicoloDocumentStructuredKnowledgeAccessCode({
+      env: authorizedEnvironment(),
+      procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
+      tenantId: "tenant-altro",
+      now: AUTHORIZED_NOW,
+    })).toBe("TENANT_NOT_ALLOWED");
   });
 
   it("allows only the explicitly authorized E2E combination", () => {
     expect(getFascicoloDocumentStructuredKnowledgeAccessCode({
       env: authorizedEnvironment(),
       procedimentoId: E2E_STRUCTURED_KNOWLEDGE_PROCEDIMENTO_ID,
+      tenantId: E2E_STRUCTURED_KNOWLEDGE_TENANT_ID,
+      now: AUTHORIZED_NOW,
     })).toBeNull();
   });
 });
