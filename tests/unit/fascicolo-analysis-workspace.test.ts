@@ -125,6 +125,29 @@ describe("Fascicolo analysis workspace", () => {
     expect(html).toContain("L’analisi strutturata del fascicolo non è ancora disponibile.");
   });
 
+  it("keeps a partial corpus visible without showing the unavailable message when a CURRENT revision exists", () => {
+    const html = render({
+      questions: [],
+      evidence: [],
+      contradictions: [],
+      gaps: [],
+      relevantItems: [],
+      analysisStatus: "Revisione corrente della conoscenza strutturata disponibile.",
+      corpus: {
+        availability: "PARTIAL",
+        documentCount: 3,
+        availableDocumentCount: 2,
+        textPageCount: 4,
+        documentsToVerify: [{ id: "doc-3", name: "Allegato.pdf", status: "NOT_EXTRACTED" }],
+      },
+    });
+
+    expect(html).toContain("Revisione corrente della conoscenza strutturata disponibile.");
+    expect(html).toContain("2 documenti · 4 pagine");
+    expect(html).toContain("Corpus parziale");
+    expect(html).not.toContain("L’analisi strutturata del fascicolo non è ancora disponibile.");
+  });
+
   it("uses the same UX for legacy and intake while preserving the instruction section", () => {
     const legacy = readFileSync("src/app/procedimenti/[id]/page.tsx", "utf8");
     const intake = readFileSync("src/components/procedimenti/FascicoloIntakeDetail.tsx", "utf8");

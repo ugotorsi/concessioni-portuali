@@ -164,12 +164,12 @@ export async function loadCurrentStructuredKnowledge(
       && relation.relationType === "CONTRADICTS").map((relation) => relation.targetItemId),
   }));
   const events = visibleByKind("EVENT");
-  const legalIssues = byKind("LEGAL_ISSUE").map((item) => ({
+  const legalIssues = visibleByKind("LEGAL_ISSUE").map((item) => ({
     ...item,
     originatingItemIds: relationRows.rows.filter((relation) => relation.sourceItemId === item.id
       && relation.relationType === "ISSUE_DERIVED_FROM").map((relation) => relation.targetItemId),
   }));
-  const researchQuestions = byKind("RESEARCH_QUESTION").map((item) => ({
+  const researchQuestions = visibleByKind("RESEARCH_QUESTION").map((item) => ({
     ...item,
     legalIssueId: relationRows.rows.find((relation) => relation.sourceItemId === item.id
       && relation.relationType === "QUESTION_FOR_ISSUE")?.targetItemId ?? null,

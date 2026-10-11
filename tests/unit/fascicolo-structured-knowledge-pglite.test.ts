@@ -227,6 +227,11 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
   it("persists and rereads ordinary fascicolo document evidence without a Neutral Intake identity", async () => {
     const db = await database();
     const ctx = context(db);
+    await expect(loadCurrentStructuredKnowledge(
+      "tenant-a",
+      "procedure-a1",
+      queryExecutor(db),
+    )).resolves.toBeNull();
     const corpus = buildFascicoloDocumentCorpus({
       tenantId: "tenant-a",
       procedimentoId: "procedure-a1",
@@ -310,6 +315,11 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
       pageNumber: 1,
       textSha256: hashA,
     });
+    await expect(loadCurrentStructuredKnowledge(
+      "tenant-b",
+      "procedure-a1",
+      queryExecutor(db),
+    )).resolves.toBeNull();
 
     const repeated = await service.analyzeAndPersist(scope());
     expect(repeated.outcome).toBe("REUSED");
@@ -625,5 +635,10 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
     expect(readModel?.legalIssues[0]).toMatchObject({ status: "HUMAN_CONFIRMED", originatingItemIds: expect.any(Array) });
     expect(readModel?.legalIssues[0].originatingItemIds).toHaveLength(3);
     expect(readModel?.researchQuestions[0]).toMatchObject({ legalIssueId: readModel!.legalIssues[0].id });
+    await reviewCurrentKnowledgeItem({ ...scope(), itemId: readModel!.legalIssues[0].id, status: "REJECTED" }, ctx);
+    await reviewCurrentKnowledgeItem({ ...scope(), itemId: readModel!.researchQuestions[0].id, status: "REJECTED" }, ctx);
+    const filteredReadModel = await loadCurrentStructuredKnowledge("tenant-a", "procedure-a1", queryExecutor(db));
+    expect(filteredReadModel?.legalIssues).toEqual([]);
+    expect(filteredReadModel?.researchQuestions).toEqual([]);
   });
 });

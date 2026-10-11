@@ -9,10 +9,13 @@ describe("Lotto 2 structured knowledge UI", () => {
     for (const label of [
       "Conoscenza strutturata del fascicolo",
       "Soggetti individuati",
+      "partyRoles",
       "Cronologia derivata",
       "Fatti principali",
       "Fonti:",
       "pagina",
+      "documentFileVersionId",
+      "provenanceType",
       "Contraddizioni aperte",
       "Lacune",
       "Scadenze candidate",

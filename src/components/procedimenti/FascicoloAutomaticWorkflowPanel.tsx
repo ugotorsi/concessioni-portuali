@@ -65,6 +65,10 @@ function payloadText(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
+function payloadStrings(value: unknown): readonly string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
+
 type KnowledgeEvidence =
   NonNullable<FascicoloAutomaticWorkflowReadModel["knowledge"]>["facts"][number]["evidence"];
 
@@ -81,8 +85,10 @@ function KnowledgeEvidenceReferences({ evidence }: { evidence: KnowledgeEvidence
             prefetch={false}
             className="underline underline-offset-2"
           >
-            documento · pagina {source.pageNumber}
+            documento {source.documentoId} · pagina {source.pageNumber}
           </Link>
+          {source.documentFileVersionId ? ` · versione ${source.documentFileVersionId}` : ""}
+          {source.provenanceType ? ` · provenienza ${formatEnumLabel(source.provenanceType)}` : ""}
           {source.basisRef ? ` (${source.basisRef})` : ""}
         </span>
       ))}
@@ -219,6 +225,15 @@ export function FascicoloAutomaticWorkflowPanel({
                     <li key={subject.id}>
                       {subject.canonicalName}
                       <span className="ml-2 text-xs text-slate-500">{formatEnumLabel(subject.subjectType)}</span>
+                      {model.knowledge!.partyRoles
+                        .filter((role) => payloadStrings(payloadRecord(role.payload).subjectIds).includes(subject.id))
+                        .map((role) => (
+                          <div key={role.id} className="mt-1 border-l-2 border-slate-200 pl-2">
+                            <span>{role.normalizedText}</span>
+                            <span className="ml-2">{knowledgeStatus(role.status)}</span>
+                            <KnowledgeEvidenceReferences evidence={role.evidence} />
+                          </div>
+                        ))}
                     </li>
                   ))}
                 </ul>

@@ -298,6 +298,9 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                     requestedItem: "Carica gli atti disponibili per avviare estrazione e analisi.",
                   }] : [],
                   relevantItems: [],
+                  analysisStatus: automaticWorkflow?.knowledge
+                    ? "Revisione corrente della conoscenza strutturata disponibile."
+                    : null,
                   corpus: analysisCorpus,
                 }}
               />
@@ -812,6 +815,9 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                     href: `/documenti/${observation.documento.id}/download`,
                   })),
               ],
+              analysisStatus: automaticWorkflow?.knowledge
+                ? "Revisione corrente della conoscenza strutturata disponibile."
+                : null,
               corpus: analysisCorpus,
               }}
             />
