@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 
 const migration = readFileSync(resolve(
   process.cwd(),
-  "prisma/migrations/20261009_unified_fascicolo/migration.sql",
+  "prisma/migrations/20261009_00_unified_fascicolo/migration.sql",
 ), "utf8");
 
 async function createLegacyBaseline(database: PGlite) {

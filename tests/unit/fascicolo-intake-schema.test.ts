@@ -7,7 +7,7 @@ const migration = readFileSync(
   "utf8",
 );
 const unifiedMigration = readFileSync(
-  "prisma/migrations/20261009_unified_fascicolo/migration.sql",
+  "prisma/migrations/20261009_00_unified_fascicolo/migration.sql",
   "utf8",
 );
 
