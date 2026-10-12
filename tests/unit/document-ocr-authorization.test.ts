@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import type { CurrentTenantContext } from "@/lib/tenant-auth";
+import { sanitizeMetadata } from "@/server/audit/hash";
 import {
   issueDocumentOcrAuthorization,
   verifyDocumentOcrAuthorization,
@@ -49,14 +50,20 @@ function attempt(failureCode = "OCR_REQUIRED") {
   };
 }
 
-function record(reference: string, source = attempt()) {
+function record(
+  reference: string,
+  source = attempt(),
+  format: "current" | "historical" = "current",
+) {
   return {
     entitaId: reference,
     userId: actor.id,
     userRole: actor.role,
     enteId: source.tenantId,
     metadata: {
-      authorizationVersion: "DOCUMENT_OCR_BATCH_AUTHORIZATION_V2",
+      ...(format === "current"
+        ? { permitVersion: "DOCUMENT_OCR_BATCH_AUTHORIZATION_V2" }
+        : {}),
       failedAttemptId: source.id,
       documentoId: source.documentoId,
       documentFileVersionId: source.documentFileVersionId,
@@ -129,6 +136,123 @@ describe("document batch OCR authorization", () => {
       documentFileVersionId: "version-1",
       tenantId: "tenant-1",
     });
+  });
+
+  it("emits and verifies the new permitVersion metadata format", async () => {
+      const harness = dependencies();
+      const authorization = await issueDocumentOcrAuthorization(
+        "attempt-direct-failed",
+        harness,
+      );
+      const persisted = vi.mocked(harness.persistAuthorization).mock.results[0];
+      expect(persisted).toBeDefined();
+      const savedRecord = await persisted!.value;
+      expect(savedRecord.metadata).toMatchObject({
+        permitVersion: "DOCUMENT_OCR_BATCH_AUTHORIZATION_V2",
+      });
+      expect(sanitizeMetadata(savedRecord.metadata)).toMatchObject({
+        permitVersion: "DOCUMENT_OCR_BATCH_AUTHORIZATION_V2",
+      });
+
+      await expect(verifyDocumentOcrAuthorization({
+        authorizationRef: authorization.authorizationRef,
+        failedAttemptId: authorization.failedAttemptId,
+        documentoId: authorization.documentoId,
+        documentFileVersionId: authorization.documentFileVersionId,
+        tenantId: authorization.tenantId,
+        procedimentoId: authorization.procedimentoId,
+        actorUserId: authorization.actor.userId,
+        actorRole: authorization.actor.userRole,
+      }, {
+        loadAttempt: vi.fn().mockResolvedValue(attempt()),
+        loadAuthorization: vi.fn().mockResolvedValue(savedRecord),
+      })).resolves.toBeUndefined();
+  });
+
+  it("accepts the historical sanitized record only with its deterministic reference and full scope", async () => {
+      const source = attempt();
+      const harness = dependencies({
+        persistAuthorization: vi.fn(async ({ authorizationRef }) =>
+          record(authorizationRef, source, "historical")),
+      });
+      const authorization = await issueDocumentOcrAuthorization(source.id, harness);
+      const historicalRecord = await vi.mocked(harness.persistAuthorization).mock.results[0]!.value;
+
+      await expect(verifyDocumentOcrAuthorization({
+        authorizationRef: authorization.authorizationRef,
+        failedAttemptId: source.id,
+        documentoId: source.documentoId,
+        documentFileVersionId: source.documentFileVersionId,
+        tenantId: source.tenantId,
+        procedimentoId: source.procedimentoId,
+        actorUserId: actor.id,
+        actorRole: actor.role,
+      }, {
+        loadAttempt: vi.fn().mockResolvedValue(source),
+        loadAuthorization: vi.fn().mockResolvedValue(historicalRecord),
+      })).resolves.toBeUndefined();
+  });
+
+  it("rejects a historical record with a forged non-deterministic reference", async () => {
+      const source = attempt();
+      await expect(verifyDocumentOcrAuthorization({
+        authorizationRef: "forged-reference",
+        failedAttemptId: source.id,
+        documentoId: source.documentoId,
+        documentFileVersionId: source.documentFileVersionId,
+        tenantId: source.tenantId,
+        procedimentoId: source.procedimentoId,
+        actorUserId: actor.id,
+        actorRole: actor.role,
+      }, {
+        loadAttempt: vi.fn().mockResolvedValue(source),
+        loadAuthorization: vi.fn().mockResolvedValue(
+          record("forged-reference", source, "historical"),
+        ),
+      })).rejects.toMatchObject({ code: "AUTHORIZATION_SCOPE_MISMATCH" });
+  });
+
+  it("rejects a counterfeit version instead of treating it as historical", async () => {
+      const source = attempt();
+      const harness = dependencies();
+      const authorization = await issueDocumentOcrAuthorization(source.id, harness);
+      const counterfeit = record(authorization.authorizationRef, source);
+      counterfeit.metadata.permitVersion = "DOCUMENT_OCR_BATCH_AUTHORIZATION_V1";
+
+      await expect(verifyDocumentOcrAuthorization({
+        authorizationRef: authorization.authorizationRef,
+        failedAttemptId: source.id,
+        documentoId: source.documentoId,
+        documentFileVersionId: source.documentFileVersionId,
+        tenantId: source.tenantId,
+        procedimentoId: source.procedimentoId,
+        actorUserId: actor.id,
+        actorRole: actor.role,
+      }, {
+        loadAttempt: vi.fn().mockResolvedValue(source),
+        loadAuthorization: vi.fn().mockResolvedValue(counterfeit),
+      })).rejects.toMatchObject({ code: "AUTHORIZATION_SCOPE_MISMATCH" });
+  });
+
+  it("rejects a deterministic authorization presented for another document or version", async () => {
+      const source = attempt();
+      const harness = dependencies();
+      const authorization = await issueDocumentOcrAuthorization(source.id, harness);
+      const savedRecord = await vi.mocked(harness.persistAuthorization).mock.results[0]!.value;
+
+      await expect(verifyDocumentOcrAuthorization({
+        authorizationRef: authorization.authorizationRef,
+        failedAttemptId: source.id,
+        documentoId: "other-document",
+        documentFileVersionId: "other-version",
+        tenantId: source.tenantId,
+        procedimentoId: source.procedimentoId,
+        actorUserId: actor.id,
+        actorRole: actor.role,
+      }, {
+        loadAttempt: vi.fn().mockResolvedValue(source),
+        loadAuthorization: vi.fn().mockResolvedValue(savedRecord),
+      })).rejects.toMatchObject({ code: "AUTHORIZATION_SCOPE_MISMATCH" });
   });
 
   it("authorizes the V2 path for a DIRECT_TEXT_V1 file rejected between 25 and 30 MB", async () => {

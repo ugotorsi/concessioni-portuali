@@ -123,11 +123,20 @@ function validAuthorizationRecord(input: {
   actorRole: string;
 }): boolean {
   const metadata = recordMetadata(input.record.metadata);
+  const persistedVersion = metadata?.permitVersion ?? metadata?.authorizationVersion;
+  const isHistoricalSanitizedRecord =
+    metadata !== null
+    && !Object.hasOwn(metadata, "permitVersion")
+    && !Object.hasOwn(metadata, "authorizationVersion");
   return input.record.entitaId === input.authorizationRef
+    && input.authorizationRef === authorizationRef(input.attempt)
     && input.record.userId === input.actorUserId
     && input.record.userRole === input.actorRole
     && input.record.enteId === input.attempt.tenantId
-    && metadata?.authorizationVersion === AUTHORIZATION_VERSION
+    && (
+      persistedVersion === AUTHORIZATION_VERSION
+      || isHistoricalSanitizedRecord
+    )
     && metadata?.failedAttemptId === input.attempt.id
     && metadata?.documentoId === input.attempt.documentoId
     && metadata?.documentFileVersionId === input.attempt.documentFileVersionId
@@ -185,7 +194,7 @@ async function persistAuthorization(input: {
         userRole: input.actor.role,
       },
       metadata: {
-        authorizationVersion: AUTHORIZATION_VERSION,
+        permitVersion: AUTHORIZATION_VERSION,
         failedAttemptId: input.attempt.id,
         documentoId: input.attempt.documentoId,
         documentFileVersionId: input.attempt.documentFileVersionId,
