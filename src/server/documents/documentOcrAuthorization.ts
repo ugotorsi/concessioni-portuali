@@ -146,12 +146,16 @@ async function persistAuthorization(input: {
   actor: CurrentUser;
 }): Promise<AuthorizationRecord> {
   return prisma.$transaction(async (tx) => {
-    await tx.$queryRaw`
-      SELECT pg_advisory_xact_lock(
+    const rows = await tx.$queryRaw<Array<{ acquired: boolean }>>`
+      SELECT TRUE AS "acquired"
+      FROM pg_advisory_xact_lock(
         hashtext('document-ocr-batch-authorization:v2'),
         hashtext(${input.authorizationRef})
       )
     `;
+    if (rows.length !== 1 || rows[0]?.acquired !== true) {
+      throw new Error("DOCUMENT_OCR_AUTHORIZATION_LOCK_FAILED");
+    }
     const existing = await tx.activityLog.findFirst({
       where: {
         azione: AUTHORIZATION_ACTION,
