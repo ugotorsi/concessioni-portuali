@@ -97,7 +97,10 @@ describe("direct document upload", () => {
       const request = input(size);
       const initiated = await initiateDirectDocumentUpload(request);
       const presign = createPresignedPutMock.mock.calls[0][0];
-      expect(initiated.headers["If-None-Match"]).toBe("*");
+      expect(initiated.headers).toEqual({
+        "Content-Type": "application/pdf",
+        "If-None-Match": "*",
+      });
       expect(presign).toMatchObject({ sizeBytes: size, mimeType: "application/pdf" });
       const body = pdf(size);
       headMock.mockResolvedValue({

@@ -219,7 +219,6 @@ export async function initiateDirectDocumentUpload(input: DirectDocumentUploadIn
     headers: {
       "Content-Type": authorized.file.type.toLowerCase(),
       "If-None-Match": "*",
-      ...Object.fromEntries(Object.entries(authorized.storageMetadata).map(([key, value]) => [`x-amz-meta-${key}`, value])),
     },
   };
 }

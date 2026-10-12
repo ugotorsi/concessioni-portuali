@@ -23,6 +23,8 @@ interface InitiatedUpload {
   headers: Readonly<Record<string, string>>;
 }
 
+type UploadTransferOutcome = "CONFIRMED" | "RESPONSE_UNAVAILABLE";
+
 function metadataFrom(formData: FormData): Record<string, string> {
   const metadata: Record<string, string> = {};
   for (const [key, value] of formData.entries()) {
@@ -41,7 +43,7 @@ function putWithProgress(input: {
   file: File;
   upload: InitiatedUpload;
   onProgress: (percent: number) => void;
-}): Promise<void> {
+}): Promise<UploadTransferOutcome> {
   return new Promise((resolve, reject) => {
     const request = new XMLHttpRequest();
     request.open("PUT", input.upload.uploadUrl);
@@ -49,11 +51,20 @@ function putWithProgress(input: {
     request.upload.onprogress = (event) => {
       if (event.lengthComputable) input.onProgress(Math.round((event.loaded / event.total) * 100));
     };
-    request.onerror = () => reject(new Error("Connessione interrotta durante il trasferimento. È possibile riprovare."));
+    request.onerror = () => resolve("RESPONSE_UNAVAILABLE");
     request.onabort = () => reject(new Error("Caricamento interrotto. È possibile riprovare."));
     request.onload = () => {
-      if ((request.status >= 200 && request.status < 300) || request.status === 412) resolve();
-      else reject(new Error(`R2 ha rifiutato il caricamento (HTTP ${request.status}).`));
+      if (request.status >= 200 && request.status < 300) {
+        resolve("CONFIRMED");
+        return;
+      }
+      if (request.status === 412) {
+        resolve("RESPONSE_UNAVAILABLE");
+        return;
+      }
+      const errorCode = request.responseText.match(/<Code>([^<]+)<\/Code>/)?.[1];
+      const detail = errorCode ? `, ${errorCode}` : "";
+      reject(new Error(`R2 ha rifiutato il caricamento (HTTP ${request.status}${detail}).`));
     };
     request.send(input.file);
   });
@@ -125,8 +136,10 @@ export function DirectDocumentUploadForm({
         body: JSON.stringify(request),
       }));
       setMessage("Trasferimento diretto allo storage...");
-      await putWithProgress({ file, upload: initiated, onProgress: setProgress });
-      setMessage("Verifica integrità e registrazione...");
+      const transferOutcome = await putWithProgress({ file, upload: initiated, onProgress: setProgress });
+      setMessage(transferOutcome === "CONFIRMED"
+        ? "Verifica integrità e registrazione..."
+        : "Risposta storage non disponibile: verifica sicura dell'oggetto...");
       const completed = await jsonResponse<{ procedimentoId: string | null }>(await fetch(
         "/api/document-uploads/direct/complete",
         {

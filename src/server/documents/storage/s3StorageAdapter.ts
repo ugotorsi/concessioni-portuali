@@ -226,7 +226,10 @@ export class S3StorageAdapter implements DocumentStorageAdapter {
         ContentLength: input.sizeBytes,
         IfNoneMatch: "*",
         Metadata: input.metadata,
-      }), { expiresIn: input.expiresInSeconds });
+      }), {
+        expiresIn: input.expiresInSeconds,
+        signableHeaders: new Set(["content-type"]),
+      });
     } catch (error) {
       throw this.toS3Error("PRESIGN", error);
     }
