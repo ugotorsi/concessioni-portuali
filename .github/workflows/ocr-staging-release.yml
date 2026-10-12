@@ -1,0 +1,70 @@
+name: OCR V2 Staging Release Gate
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - staging-operativo
+    paths:
+      - ".github/workflows/ocr-staging-release.yml"
+      - "package.json"
+      - "package-lock.json"
+      - "prisma/**"
+      - "src/server/ai/**"
+      - "src/server/async-jobs/**"
+      - "src/server/documents/**"
+      - "src/server/intake/**"
+      - "src/server/legal-research/**"
+      - "src/server/queries/**"
+      - "tests/unit/ai-fascicolo-snapshot.test.ts"
+      - "tests/unit/document-*.test.ts"
+      - "tests/unit/fascicolo-automatic-*.test.ts"
+      - "tests/unit/fascicolo-document-*.test.ts"
+      - "tests/unit/legal-research-*.test.ts"
+      - "tests/unit/neutral-intake-technical-extractor.test.ts"
+      - "tests/unit/research-assisted-verification-route.test.ts"
+      - "tests/unit/trusted-research-mission-route.test.ts"
+
+permissions:
+  contents: read
+
+jobs:
+  staging-release-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/concessioni_test?schema=public
+      NEXTAUTH_SECRET: ocr-staging-release-test-secret-not-for-production
+      NEXTAUTH_URL: http://localhost:3000
+      AUTH_MAX_FAILED_ATTEMPTS: 5
+      AUTH_LOCKOUT_MINUTES: 15
+      AUTH_PASSWORD_MIN_LENGTH: 10
+      RATE_LIMIT_BACKEND: memory
+      ASYNC_PROVIDER_EXECUTION_ENABLED: "false"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npm run db:generate
+
+      - name: Validate Prisma schema
+        run: npx prisma validate
+
+      - name: Type-check
+        run: npx tsc --noEmit
+
+      - name: Run OCR staging release tests
+        run: npm run test:ocr-staging
+
+      - name: Build production application
+        run: npm run build
