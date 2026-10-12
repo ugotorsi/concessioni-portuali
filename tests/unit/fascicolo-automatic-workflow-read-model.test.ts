@@ -124,7 +124,12 @@ describe("Lotto 3A fascicolo automatic workflow read model", () => {
             payload: {
               authorityCandidates: [{ title: "Fonte corrente", supportDirection: "SUPPORT", verificationState: "OFFICIALLY_VERIFIED" }],
               evidenceGaps: [],
-              conflicts: [],
+              conflicts: ["Orientamento contrario da verificare"],
+              legalResearchSuggestions: [{
+                suggestionId: "suggestion-1",
+                kind: "POSSIBLE_COUNTERARGUMENT",
+                description: "Valutare l'orientamento contrario con revisione professionale.",
+              }],
             },
             completionState: "COMPLETE",
           }],
@@ -138,6 +143,13 @@ describe("Lotto 3A fascicolo automatic workflow read model", () => {
     expect(model?.missions).toHaveLength(1);
     expect(model?.missions[0]).toMatchObject({
       missionId: "mission-current",
+      conflicts: ["Orientamento contrario da verificare"],
+      suggestions: [{
+        suggestionId: "suggestion-1",
+        kind: "POSSIBLE_COUNTERARGUMENT",
+        description: "Valutare l'orientamento contrario con revisione professionale.",
+        targetId: null,
+      }],
       lifecycleStatus: "CURRENT",
       resultCount: 2,
       historicalResultCount: 1,

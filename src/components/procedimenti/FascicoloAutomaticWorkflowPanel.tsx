@@ -676,6 +676,19 @@ export function FascicoloAutomaticWorkflowPanel({
                     </div>
                   </div>
                 ) : null}
+                {mission.suggestions.length > 0 ? (
+                  <div>
+                    <h4 className="text-xs font-semibold uppercase text-slate-600">Suggerimenti da sottoporre a revisione</h4>
+                    <ul className="mt-2 space-y-2 text-sm text-slate-700">
+                      {mission.suggestions.map((suggestion) => (
+                        <li key={suggestion.suggestionId}>
+                          <span className="font-medium">{suggestion.kind.replaceAll("_", " ")}:</span>{" "}
+                          {suggestion.description}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
                 <p className="text-xs text-slate-500">
                   Le fonti sono risultati di ricerca. Fatti, inferenze e conclusioni professionali restano distinti e soggetti a verifica.
                 </p>

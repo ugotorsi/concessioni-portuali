@@ -49,6 +49,33 @@ Il percorso operativo e: Concessioni Portuali crea e assegna la missione -> Chat
 
 Il `fascicoloScopeId` continua a essere derivato dal server usando tenant e case reference della missione persistita. La separazione delle conversazioni ChatGPT per fascicolo resta difesa in profondita e non sostituisce l'assegnazione applicativa.
 
+## Limiti di attivazione ChatGPT
+
+MCP e un protocollo client-initiated: il backend pubblica missioni persistenti, ma non puo avviare una conversazione o un'attivita nell'account ChatGPT dell'utente. Non esiste nel contratto una chiamata backend che riutilizzi la sessione o l'abbonamento ChatGPT personale.
+
+Le attivita ChatGPT basate su eventi supportano soltanto gli eventi indicati dal prodotto ChatGPT, attualmente Gmail, Slack e GitHub. Un nuovo documento NOETRA non e un evento ChatGPT supportato. La Responses API puo invocare un server MCP remoto, ma costituisce un'esecuzione API separata e potenzialmente a pagamento: non deve essere usata come sostituto implicito dell'account ChatGPT o dei suoi plugin.
+
+Il comportamento supportato e quindi:
+
+1. il nuovo documento genera una missione `PENDING`, assegnata all'attore locale;
+2. i controlli periodici generano missioni `SUBSEQUENT_TREATMENT_SEARCH` deduplicate per fascicolo e periodo;
+3. ChatGPT, avviato dall'utente o da una modalita ChatGPT che supporti effettivamente il connettore MCP, elenca e prende le missioni;
+4. ChatGPT usa i plugin autorizzati dall'utente e restituisce fonti e bundle al server MCP;
+5. NOETRA aggiorna copertura, conflitti, lacune e rapporto lasciando ogni valutazione in stato di revisione professionale.
+
+Non configurare automazioni Gmail, Slack o GitHub come trigger fittizi per documenti NOETRA.
+
+## Controlli periodici
+
+Il worker applicativo puo creare missioni di controllo periodico senza eseguire provider:
+
+```dotenv
+PERIODIC_LEGAL_RESEARCH_ENABLED="true"
+PERIODIC_LEGAL_RESEARCH_INTERVAL_DAYS="30"
+```
+
+L'opzione e disabilitata per default. L'intervallo ammesso e 1-365 giorni. Il worker riconcilia al massimo una volta l'ora e crea nuove missioni soltanto quando l'ultima missione corrente del fascicolo e antecedente alla soglia. Ogni missione conserva `tenantId`, `procedimentoId`, revisione e attore assegnato; un fascicolo di rinnovo usa un `procedimentoId` autonomo e non eredita missioni o conclusioni dal fascicolo precedente.
+
 ## Configurazione WorkOS
 
 1. Creare o selezionare un ambiente AuthKit con dominio HTTPS pubblico.

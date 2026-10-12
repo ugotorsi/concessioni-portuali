@@ -21,6 +21,7 @@ import {
   type AutomaticResearchExecutionDependencies,
 } from "../legal-research/automatic-research-job";
 import { createDocumentExtractionHandler } from "../documents/documentExtractionJob";
+import { createPeriodicLegalResearchScheduler } from "../legal-research/periodic-legal-research";
 
 const APPLICATION_ASYNC_JOB_LEASE_MS = 5 * 60 * 1_000;
 const PROVIDER_BACKED_OPERATIONS = [
@@ -28,6 +29,7 @@ const PROVIDER_BACKED_OPERATIONS = [
   "LEGAL_RESEARCH.EXECUTE_V1",
 ] as const;
 const AUTOMATIC_RESEARCH_OPERATION = "LEGAL_RESEARCH.EXECUTE_V1";
+const reconcilePeriodicLegalResearch = createPeriodicLegalResearchScheduler();
 
 export function createApplicationAsyncJobRegistry(input: {
   automaticAnalysisDependencies?: FascicoloAutomaticAnalysisDependencies;
@@ -58,6 +60,9 @@ export async function drainOneApplicationAsyncJob(input: {
   procedimentoAllowlist?: readonly string[];
   providerExecutionEnabled?: boolean;
 }) {
+  if (!input.procedimentoAllowlist?.length) {
+    await reconcilePeriodicLegalResearch();
+  }
   if (
     !input.operationAllowlist?.length
     || input.operationAllowlist.includes(AUTOMATIC_RESEARCH_OPERATION)

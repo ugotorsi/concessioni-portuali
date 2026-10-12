@@ -158,6 +158,7 @@ export interface FascicoloAutomaticAnalysisDependencies {
     tenantId: string;
     procedimentoId: string;
     knowledgeRevisionId: string;
+    assignedActorId: string;
     plans: ReturnType<typeof buildKnowledgeResearchMissionPlans>;
   }): Promise<readonly KnowledgeMissionLifecycleResult[]>;
   researchExecutionWaveLimit?: number;
@@ -689,6 +690,7 @@ export function createFascicoloAutomaticAnalysisHandler(
               tenantId: authority.tenantId,
               procedimentoId: authority.procedimentoId,
               knowledgeRevisionId: reconciliation.revision.id,
+              assignedActorId: authority.actorId,
               plans,
             });
             structuredMissions = plans

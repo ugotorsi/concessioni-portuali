@@ -55,6 +55,10 @@ function records(value: unknown): readonly JsonRecord[] {
   return Array.isArray(value) ? value.map(record).filter((item): item is JsonRecord => item !== null) : [];
 }
 
+function texts(value: unknown): readonly string[] {
+  return Array.isArray(value) ? value.map(text).filter((item): item is string => item !== null) : [];
+}
+
 export interface FascicoloAutomaticWorkflowReadModel {
   analysisUpdate: {
     status: "CURRENT" | "UPDATING" | "STALE" | "WAITING_AUTHORIZATION" | "ERROR";
@@ -176,6 +180,12 @@ export interface FascicoloAutomaticWorkflowReadModel {
     }[];
     gaps: readonly string[];
     conflicts: readonly string[];
+    suggestions: readonly {
+      suggestionId: string;
+      kind: string;
+      description: string;
+      targetId: string | null;
+    }[];
     completionState: string | null;
     execution: {
       status: AsyncJobStatus | null;
@@ -577,9 +587,19 @@ export async function getFascicoloAutomaticWorkflowReadModel(
           verificationState: text(source.verificationState) ?? "OFFICIAL_VERIFICATION_REQUIRED",
         })),
         gaps: records(bundle?.evidenceGaps).map((gap) => text(gap.kind) ?? "GAP_NON_SPECIFICATO"),
-        conflicts: records(bundle?.conflicts).map((conflict) => (
-          text(conflict.description) ?? text(conflict.kind) ?? "CONFLITTO_DA_VERIFICARE"
-        )),
+        conflicts: texts(bundle?.conflicts),
+        suggestions: records(bundle?.legalResearchSuggestions).flatMap((suggestion) => {
+          const suggestionId = text(suggestion.suggestionId);
+          const kind = text(suggestion.kind);
+          const description = text(suggestion.description);
+          if (!suggestionId || !kind || !description) return [];
+          return [{
+            suggestionId,
+            kind,
+            description,
+            targetId: text(suggestion.targetId),
+          }];
+        }),
         completionState: bundleRecord?.completionState ?? null,
         execution: {
           status: researchJob?.status ?? null,

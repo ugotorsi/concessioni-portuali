@@ -38,6 +38,7 @@ async function database() {
     CREATE TABLE "ResearchMissionRecord" (
       "id" VARCHAR(96) PRIMARY KEY,
       "tenantId" TEXT,
+      "assignedActorId" TEXT,
       "contractVersion" VARCHAR(64) NOT NULL,
       "caseId" VARCHAR(256) NOT NULL,
       "fascicoloReference" VARCHAR(256),
@@ -112,25 +113,27 @@ afterEach(async () => {
 });
 
 describe("Lotto 3 research mission lifecycle on PGlite", () => {
+  const assignment = { assignedActorId: "actor-1" };
+
   it("reuses an invariant fingerprint and creates a new CURRENT mission while preserving the historical bundle when assumptions change", async () => {
     const db = await database();
     const ctx = context(db);
     await setCurrent(db, "revision-1");
     const first = await reconcileKnowledgeResearchMissions({
-      tenantId: "tenant-1", procedimentoId: "procedure-1", knowledgeRevisionId: "revision-1", plans: [plan("a".repeat(64))],
+      tenantId: "tenant-1", procedimentoId: "procedure-1", knowledgeRevisionId: "revision-1", ...assignment, plans: [plan("a".repeat(64))],
     }, ctx);
     expect(first[0].outcome).toBe("CREATED");
     await db.query('INSERT INTO "ResearchEvidenceBundleRecord" VALUES ($1, $2, $3::jsonb)', ["bundle-1", first[0].missionId, JSON.stringify({ immutable: true })]);
 
     await setCurrent(db, "revision-2");
     const reused = await reconcileKnowledgeResearchMissions({
-      tenantId: "tenant-1", procedimentoId: "procedure-1", knowledgeRevisionId: "revision-2", plans: [plan("a".repeat(64))],
+      tenantId: "tenant-1", procedimentoId: "procedure-1", knowledgeRevisionId: "revision-2", ...assignment, plans: [plan("a".repeat(64))],
     }, ctx);
     expect(reused[0]).toMatchObject({ outcome: "REUSED", missionId: first[0].missionId });
 
     await setCurrent(db, "revision-3");
     const changed = await reconcileKnowledgeResearchMissions({
-      tenantId: "tenant-1", procedimentoId: "procedure-1", knowledgeRevisionId: "revision-3", plans: [plan("b".repeat(64))],
+      tenantId: "tenant-1", procedimentoId: "procedure-1", knowledgeRevisionId: "revision-3", ...assignment, plans: [plan("b".repeat(64))],
     }, ctx);
     expect(changed[0].outcome).toBe("CREATED");
     expect(changed[0].missionId).not.toBe(first[0].missionId);
@@ -154,7 +157,7 @@ describe("Lotto 3 research mission lifecycle on PGlite", () => {
     const ctx = context(db);
     await db.query('INSERT INTO "FascicoloKnowledgeRevision" VALUES ($1, $2, $3, $4)', ["revision-building", "tenant-1", "procedure-1", "BUILDING"]);
     await expect(reconcileKnowledgeResearchMissions({
-      tenantId: "tenant-1", procedimentoId: "procedure-1", knowledgeRevisionId: "revision-building", plans: [plan("c".repeat(64))],
+      tenantId: "tenant-1", procedimentoId: "procedure-1", knowledgeRevisionId: "revision-building", ...assignment, plans: [plan("c".repeat(64))],
     }, ctx)).rejects.toThrow("KNOWLEDGE_REVISION_NOT_CURRENT");
     const count = await db.query<{ count: number }>('SELECT count(*)::int AS "count" FROM "ResearchMissionRecord"');
     expect(count.rows[0].count).toBe(0);
@@ -165,10 +168,13 @@ describe("Lotto 3 research mission lifecycle on PGlite", () => {
     const ctx = context(db);
     await setCurrent(db, "revision-a", "tenant-1", "procedure-1");
     await setCurrent(db, "revision-b", "tenant-2", "procedure-2");
-    await reconcileKnowledgeResearchMissions({ tenantId: "tenant-1", procedimentoId: "procedure-1", knowledgeRevisionId: "revision-a", plans: [plan("d".repeat(64))] }, ctx);
-    await reconcileKnowledgeResearchMissions({ tenantId: "tenant-2", procedimentoId: "procedure-2", knowledgeRevisionId: "revision-b", plans: [plan("d".repeat(64), "q".repeat(64), "procedure-2")] }, ctx);
-    const rows = await db.query<{ tenantId: string; caseId: string }>('SELECT "tenantId", "caseId" FROM "ResearchMissionRecord" ORDER BY "tenantId"');
-    expect(rows.rows).toEqual([{ tenantId: "tenant-1", caseId: "procedure-1" }, { tenantId: "tenant-2", caseId: "procedure-2" }]);
+    await reconcileKnowledgeResearchMissions({ tenantId: "tenant-1", procedimentoId: "procedure-1", knowledgeRevisionId: "revision-a", assignedActorId: "actor-1", plans: [plan("d".repeat(64))] }, ctx);
+    await reconcileKnowledgeResearchMissions({ tenantId: "tenant-2", procedimentoId: "procedure-2", knowledgeRevisionId: "revision-b", assignedActorId: "actor-2", plans: [plan("d".repeat(64), "q".repeat(64), "procedure-2")] }, ctx);
+    const rows = await db.query<{ tenantId: string; caseId: string; assignedActorId: string }>('SELECT "tenantId", "caseId", "assignedActorId" FROM "ResearchMissionRecord" ORDER BY "tenantId"');
+    expect(rows.rows).toEqual([
+      { tenantId: "tenant-1", caseId: "procedure-1", assignedActorId: "actor-1" },
+      { tenantId: "tenant-2", caseId: "procedure-2", assignedActorId: "actor-2" },
+    ]);
   });
 
   it("persists seven missions, defers two, and admits the residual wave without duplicates", async () => {
@@ -181,7 +187,7 @@ describe("Lotto 3 research mission lifecycle on PGlite", () => {
       blockReason: index < 5 ? null : "EXECUTION_WAVE_LIMIT",
     }));
     await reconcileKnowledgeResearchMissions({
-      tenantId: "tenant-1", procedimentoId: "procedure-1", knowledgeRevisionId: "revision-wave", plans,
+      tenantId: "tenant-1", procedimentoId: "procedure-1", knowledgeRevisionId: "revision-wave", ...assignment, plans,
     }, ctx);
     const firstWave = await db.query<{ status: string; count: number }>('SELECT "status", count(*)::int AS "count" FROM "ResearchMissionRecord" GROUP BY "status" ORDER BY "status"');
     expect(firstWave.rows).toEqual(expect.arrayContaining([{ status: "DEFERRED", count: 2 }, { status: "PENDING", count: 5 }]));
@@ -197,12 +203,12 @@ describe("Lotto 3 research mission lifecycle on PGlite", () => {
     const ctx = context(db);
     await setCurrent(db, "revision-with-question");
     const created = await reconcileKnowledgeResearchMissions({
-      tenantId: "tenant-1", procedimentoId: "procedure-1", knowledgeRevisionId: "revision-with-question", plans: [plan("e".repeat(64))],
+      tenantId: "tenant-1", procedimentoId: "procedure-1", knowledgeRevisionId: "revision-with-question", ...assignment, plans: [plan("e".repeat(64))],
     }, ctx);
     await db.query('INSERT INTO "ResearchEvidenceBundleRecord" VALUES ($1, $2, $3::jsonb)', ["bundle-zero", created[0].missionId, JSON.stringify({ immutable: true })]);
     await setCurrent(db, "revision-zero");
     expect(await reconcileKnowledgeResearchMissions({
-      tenantId: "tenant-1", procedimentoId: "procedure-1", knowledgeRevisionId: "revision-zero", plans: [],
+      tenantId: "tenant-1", procedimentoId: "procedure-1", knowledgeRevisionId: "revision-zero", ...assignment, plans: [],
     }, ctx)).toEqual([]);
     const mission = await db.query<{ lifecycleStatus: string }>('SELECT "lifecycleStatus" FROM "ResearchMissionRecord" WHERE "id" = $1', [created[0].missionId]);
     expect(mission.rows[0].lifecycleStatus).toBe("HISTORICAL");
@@ -216,12 +222,13 @@ describe("Lotto 3 research mission lifecycle on PGlite", () => {
     await setCurrent(db, "revision-valid");
     const valid = plan("f".repeat(64));
     const created = await reconcileKnowledgeResearchMissions({
-      tenantId: "tenant-1", procedimentoId: "procedure-1", knowledgeRevisionId: "revision-valid", plans: [valid],
+      tenantId: "tenant-1", procedimentoId: "procedure-1", knowledgeRevisionId: "revision-valid", ...assignment, plans: [valid],
     }, ctx);
     await db.query('INSERT INTO "ResearchEvidenceBundleRecord" VALUES ($1, $2, $3::jsonb)', ["bundle-rejected", created[0].missionId, JSON.stringify({ immutable: true })]);
     await setCurrent(db, "revision-rejected");
     await reconcileKnowledgeResearchMissions({
       tenantId: "tenant-1", procedimentoId: "procedure-1", knowledgeRevisionId: "revision-rejected",
+      ...assignment,
       plans: [{ ...valid, execution: "REJECTED", blockReason: "QUESTION_REJECTED", mission: null }],
     }, ctx);
     const mission = await db.query<{ lifecycleStatus: string }>('SELECT "lifecycleStatus" FROM "ResearchMissionRecord" WHERE "id" = $1', [created[0].missionId]);

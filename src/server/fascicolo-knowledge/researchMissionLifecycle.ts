@@ -54,6 +54,7 @@ export async function reconcileKnowledgeResearchMissions(input: {
   tenantId: string;
   procedimentoId: string;
   knowledgeRevisionId: string;
+  assignedActorId: string;
   plans: readonly KnowledgeResearchMissionPlan[];
 }, overrides: Partial<ResearchMissionLifecycleContext> = {}): Promise<readonly KnowledgeMissionLifecycleResult[]> {
   const context = { ...defaultContext, ...overrides };
@@ -99,12 +100,12 @@ export async function reconcileKnowledgeResearchMissions(input: {
         operationalStatus = plan.execution === "DEFERRED_BY_POLICY" ? "DEFERRED" : "PENDING";
         await tx.query(`
           INSERT INTO "ResearchMissionRecord" (
-            "id", "tenantId", "contractVersion", "caseId", "fascicoloReference", "referenceDate", "mode",
+            "id", "tenantId", "assignedActorId", "contractVersion", "caseId", "fascicoloReference", "referenceDate", "mode",
             "payload", "payloadFingerprint", "missionFingerprint", "knowledgeRevisionId",
             "firstKnowledgeRevisionId", "legalIssueSemanticKey", "researchQuestionSemanticKey",
             "referenceDateBasis", "lifecycleStatus", "status", "createdAt", "updatedAt"
-          ) VALUES ($1, $2, $3, $4, $5, $6::timestamptz, $7, $8::jsonb, $9, $10, $11, $11, $12, $13, $14::jsonb, 'CURRENT', $15::"ResearchMissionStatus", CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-        `, [missionId, input.tenantId, mission.version, input.procedimentoId,
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7::timestamptz, $8, $9::jsonb, $10, $11, $12, $12, $13, $14, $15::jsonb, 'CURRENT', $16::"ResearchMissionStatus", CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        `, [missionId, input.tenantId, input.assignedActorId, mission.version, input.procedimentoId,
           mission.caseReference.fascicoloReference ?? null, mission.referenceDate, mission.mode,
           JSON.stringify(mission), payloadFingerprint(mission as unknown as JsonValue), plan.missionFingerprint,
           input.knowledgeRevisionId, plan.legalIssueSemanticKey, plan.questionSemanticKey,
