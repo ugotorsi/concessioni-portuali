@@ -245,7 +245,7 @@ export async function readAuthorizedVerifiedDocumentBytes(input: {
       sizeBytes: true,
       currentFileVersionId: true,
       concessione: { select: { enteId: true } },
-      procedimento: { select: { concessione: { select: { enteId: true } } } },
+      procedimento: { select: { enteId: true } },
       currentFileVersion: {
         select: {
           id: true,
@@ -282,7 +282,7 @@ export async function readAuthorizedVerifiedDocumentBytes(input: {
   const resourceEnteId = resolveResourceTenantId({
     documentoEnteId: documento.enteId,
     concessioneEnteId: documento.concessione?.enteId ?? null,
-    procedimentoEnteId: documento.procedimento?.concessione.enteId ?? null,
+    procedimentoEnteId: documento.procedimento?.enteId ?? null,
   });
 
   if (!resourceEnteId) {

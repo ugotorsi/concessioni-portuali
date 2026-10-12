@@ -4,6 +4,7 @@ const persistence = vi.hoisted(() => {
   class MockLeaseConflictError extends Error {}
   return {
     AsyncJobLeaseConflictError: MockLeaseConflictError,
+    claimAsyncJobById: vi.fn(),
     claimNextAsyncJob: vi.fn(),
     failAsyncJob: vi.fn(),
     finalizeAsyncJobCancellation: vi.fn(),
@@ -17,7 +18,11 @@ const persistence = vi.hoisted(() => {
 vi.mock("@/server/async-jobs/persistence", () => persistence);
 
 import { AsyncJobHandlerRegistry } from "@/server/async-jobs/registry";
-import { AsyncJobExecutionError, drainOneAsyncJob } from "@/server/async-jobs/worker";
+import {
+  AsyncJobExecutionError,
+  drainAsyncJobById,
+  drainOneAsyncJob,
+} from "@/server/async-jobs/worker";
 
 const claimed = {
   id: "job-1",
@@ -33,6 +38,7 @@ describe("B2C9 generic async job worker", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     persistence.claimNextAsyncJob.mockResolvedValue(claimed);
+    persistence.claimAsyncJobById.mockResolvedValue(claimed);
     persistence.isAsyncJobCancellationRequested.mockResolvedValue(false);
     persistence.failAsyncJob.mockResolvedValue({ outcome: "TERMINAL_FAILED" });
   });
@@ -84,6 +90,29 @@ describe("B2C9 generic async job worker", () => {
     expect(persistence.succeedAsyncJob).toHaveBeenCalledWith(expect.objectContaining({
       resultReference: { referenceType: "FIXTURE_RESULT", referenceId: "fixture-1", metadata: { attemptCount: 1 } },
     }));
+  });
+
+  it("executes only the explicitly claimed job ID", async () => {
+    const registry = new AsyncJobHandlerRegistry([{
+      operation: "GENERIC.TEST",
+      parseInput: (value) => value,
+      execute: async () => ({ referenceType: "FIXTURE_RESULT", referenceId: "result-1" }),
+    }]);
+    await expect(drainAsyncJobById({
+      jobId: "job-1",
+      expectedOperation: "GENERIC.TEST",
+      workerId: "one-shot-worker",
+      leaseDurationMs: 60_000,
+      retryDelayMs: 0,
+      registry,
+    })).resolves.toEqual({ outcome: "SUCCEEDED", jobId: "job-1" });
+    expect(persistence.claimAsyncJobById).toHaveBeenCalledWith({
+      jobId: "job-1",
+      expectedOperation: "GENERIC.TEST",
+      workerId: "one-shot-worker",
+      leaseDurationMs: 60_000,
+    });
+    expect(persistence.claimNextAsyncJob).not.toHaveBeenCalled();
   });
 
   it("leaves a successful workload recoverable when success persistence fails", async () => {

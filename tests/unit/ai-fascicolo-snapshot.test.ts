@@ -367,8 +367,8 @@ function configureAllowedSources() {
   canUseAIMock.mockReturnValue(true);
   canonicalProcedimentoMock.mockResolvedValue({
     id: "proc-1",
+    enteId: "ente-1",
     concessioneId: "concession-1",
-    concessione: { enteId: "ente-1" },
   });
   getCurrentTenantContextMock.mockResolvedValue({
     userId: "actor-1",
@@ -491,7 +491,7 @@ describe("AI-00B deterministic fascicolo snapshot", () => {
   });
 
   it("fails closed for a null canonical tenant without dependent composition", async () => {
-    canonicalProcedimentoMock.mockResolvedValue({ id: "proc-1", concessioneId: "concession-1", concessione: { enteId: null } });
+    canonicalProcedimentoMock.mockResolvedValue({ id: "proc-1", enteId: null, concessioneId: "concession-1" });
     await expect(buildAiFascicoloSnapshotV1("proc-1")).rejects.toSatisfy((error: unknown) => {
       expectSnapshotError(error, "SOURCE_INCONSISTENCY");
       return true;
@@ -588,6 +588,25 @@ describe("AI-00B deterministic fascicolo snapshot", () => {
     expect(snapshot.content.finalActContext).toBeNull();
   });
 
+  it("builds the automatic-analysis snapshot without inventing a concession", async () => {
+    canonicalProcedimentoMock.mockResolvedValue({
+      id: "proc-1",
+      enteId: "ente-1",
+      concessioneId: null,
+    });
+    getProcedimentoDetailMock.mockResolvedValue({
+      ...detailFixture(),
+      concessione: null,
+      concessionario: null,
+    });
+
+    const snapshot = await buildAiFascicoloSnapshotV1("proc-1");
+
+    expect(snapshot.content.concessione).toBeNull();
+    expect(snapshot.content.concessionario).toBeNull();
+    expect(snapshot.content.procedimento.id).toBe("proc-1");
+  });
+
   it("rejects an unexpectedly undefined final-act container", async () => {
     const inconsistent = detailFixture();
     (inconsistent.procedimento as unknown as Record<string, unknown>).decisioneConclusiva = undefined;
@@ -648,7 +667,7 @@ describe("AI-00B deterministic fascicolo snapshot", () => {
 
     expect(second.content).toEqual(first.content);
     expect(second.metadata.contentHash).toBe(first.metadata.contentHash);
-    expect(second.content.concessionario.denominazione).toBe("Società concessionaria");
+    expect(second.content.concessionario?.denominazione).toBe("Società concessionaria");
     expect(second.content.procedimento.motivazioneValutazione).toBe("Prima riga\nSeconda riga");
   });
 
@@ -731,7 +750,7 @@ describe("AI-00B deterministic fascicolo snapshot", () => {
     (decimalLikeMoney.concessione as unknown as Record<string, unknown>).canoneAnnuo = { toString: () => "1234.5" };
     getProcedimentoDetailMock.mockResolvedValue(decimalLikeMoney);
     const second = await buildAiFascicoloSnapshotV1("proc-1");
-    expect(second.content.concessione.canoneAnnuo).toBe("1234.5");
+    expect(second.content.concessione?.canoneAnnuo).toBe("1234.5");
     expect(second.content).toEqual(first.content);
     expect(second.metadata.contentHash).toBe(first.metadata.contentHash);
   });

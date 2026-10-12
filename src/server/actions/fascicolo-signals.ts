@@ -107,6 +107,7 @@ async function loadCanonicalCurrentSignal(
   if (!signal) throw new Error("FASCICOLO_SIGNAL_NOT_FOUND");
 
   const concessione = signal.procedimento.concessione;
+  if (!concessione) throw new Error("FASCICOLO_SIGNAL_REQUIRES_CONCESSIONE");
   if (
     !concessione.enteId
     || signal.procedimentoId !== signal.procedimento.id

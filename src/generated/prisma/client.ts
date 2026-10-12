@@ -187,6 +187,16 @@ export type Documento = Prisma.DocumentoModel
  */
 export type DocumentFileVersion = Prisma.DocumentFileVersionModel
 /**
+ * Model DocumentExtractionAttempt
+ * 
+ */
+export type DocumentExtractionAttempt = Prisma.DocumentExtractionAttemptModel
+/**
+ * Model DocumentExtractionPage
+ * 
+ */
+export type DocumentExtractionPage = Prisma.DocumentExtractionPageModel
+/**
  * Model NeutralIntake
  * 
  */

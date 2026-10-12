@@ -119,14 +119,14 @@ export async function ensureLegalReferenceMatchingJobInTransaction(
             id: true,
             enteId: true,
             destination: {
-              select: { procedimento: { select: { concessione: { select: { enteId: true } } } } },
+              select: { procedimento: { select: { enteId: true } } },
             },
           },
         },
       },
     }),
   ]);
-  const canonicalEnteId = attempt?.neutralIntake.destination?.procedimento.concessione.enteId ?? null;
+  const canonicalEnteId = attempt?.neutralIntake.destination?.procedimento.enteId ?? null;
   if (
     !sourceJob
     || sourceJob.operation !== SOURCE_DISCOVERY_OPERATION
@@ -198,7 +198,7 @@ export async function matchLegalReferencesInTransaction(
             id: true,
             enteId: true,
             destination: {
-              select: { procedimento: { select: { concessione: { select: { enteId: true } } } } },
+              select: { procedimento: { select: { enteId: true } } },
             },
           },
         },
@@ -223,7 +223,7 @@ export async function matchLegalReferencesInTransaction(
       },
     }),
   ]);
-  const canonicalEnteId = attempt?.neutralIntake.destination?.procedimento.concessione.enteId ?? null;
+  const canonicalEnteId = attempt?.neutralIntake.destination?.procedimento.enteId ?? null;
   if (
     !job
     || job.operation !== LEGAL_REFERENCE_MATCHING_OPERATION

@@ -1,7 +1,5 @@
 "use server";
 
-import { randomUUID } from "node:crypto";
-
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -11,10 +9,7 @@ import { CONCESSION_VERTICAL_VALUES } from "@/lib/concession-vertical";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireConcessioneTenantAccess, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditSuccess } from "@/server/audit/auditLog";
-import { uploadDocument } from "@/server/documents/uploadService";
-import { parseUploadDocumentFormData } from "@/server/documents/validation";
-
-const STAGING_PREVIEW_ADMIN_ID = "staging-preview-admin";
+import { activateFascicoloIntake } from "@/server/fascicolo-intake/activation";
 
 const createFascicoloIntakeSchema = z.object({
   concessioneId: z.string().trim().optional(),
@@ -85,13 +80,6 @@ export async function createFascicoloIntakeAction(formData: FormData) {
     throw new Error("Seleziona un tenant predefinito prima di creare un fascicolo senza concessione collegata.");
   }
 
-  const initialDocuments = formData
-    .getAll("documentiIniziali")
-    .filter((value): value is File => value instanceof File && value.size > 0);
-  if (initialDocuments.length > 10) {
-    throw new Error("Puoi caricare al massimo 10 documenti iniziali.");
-  }
-
   const created = await prisma.fascicoloIntake.create({
     data: {
       enteId,
@@ -116,24 +104,10 @@ export async function createFascicoloIntakeAction(formData: FormData) {
   });
 
   const currentUser = await getCurrentUser();
-  for (const file of initialDocuments) {
-    await uploadDocument({
-      documentId: randomUUID(),
-      file,
-      actor: {
-        id: currentUser?.id ?? STAGING_PREVIEW_ADMIN_ID,
-        email: currentUser?.email ?? null,
-        role,
-      },
-      enteId,
-      concessioneId,
-      fascicoloIntakeId: created.id,
-      nome: file.name,
-      tipologia: "NOTA",
-      source: "UPLOAD_UTENTE",
-      status: "ATTIVO",
-    });
-  }
+  const activation = await activateFascicoloIntake({
+    fascicoloIntakeId: created.id,
+    tenantId: enteId,
+  });
 
   await auditSuccess({
     azione: "FASCICOLO_INTAKE_CREATE",
@@ -142,7 +116,11 @@ export async function createFascicoloIntakeAction(formData: FormData) {
     enteId,
     concessioneId,
     actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
-    metadata: { tipologiaConcessione: created.tipologiaConcessione },
+    metadata: {
+      tipologiaConcessione: created.tipologiaConcessione,
+      procedimentoId: activation.procedimento.id,
+      activationOutcome: activation.outcome,
+    },
   });
 
   revalidatePath("/procedimenti");
@@ -150,13 +128,13 @@ export async function createFascicoloIntakeAction(formData: FormData) {
   redirect(`/procedimenti/${created.id}`);
 }
 
-export async function uploadFascicoloIntakeDocumentAction(formData: FormData) {
+export async function activateFascicoloIntakeAction(formData: FormData) {
   const role = await requireRole(BACKOFFICE_ROLES);
   if (!canManageProcedimenti(role)) {
     redirect("/procedimenti");
   }
 
-  const fascicoloIntakeId = z.string().min(1).parse(formData.get("fascicoloIntakeId"));
+  const fascicoloIntakeId = z.string().trim().min(1).parse(formData.get("fascicoloIntakeId"));
   const fascicolo = await prisma.fascicoloIntake.findUnique({
     where: { id: fascicoloIntakeId },
     select: { id: true, enteId: true, concessioneId: true },
@@ -171,37 +149,25 @@ export async function uploadFascicoloIntakeDocumentAction(formData: FormData) {
   }
   requireTenantAccess(tenantContext, fascicolo.enteId, { mode: "write", allowWhenEnteMissing: false });
 
-  const payload = parseUploadDocumentFormData(formData);
   const currentUser = await getCurrentUser();
-  await uploadDocument({
-    documentId: randomUUID(),
-    file: payload.file,
-    actor: {
-      id: currentUser?.id ?? STAGING_PREVIEW_ADMIN_ID,
-      email: currentUser?.email ?? null,
-      role,
-    },
+  const activation = await activateFascicoloIntake({
+    fascicoloIntakeId: fascicolo.id,
+    tenantId: fascicolo.enteId,
+  });
+  await auditSuccess({
+    azione: "FASCICOLO_INTAKE_ACTIVATE",
+    entita: "FascicoloIntake",
+    entitaId: fascicolo.id,
     enteId: fascicolo.enteId,
     concessioneId: fascicolo.concessioneId,
-    fascicoloIntakeId: fascicolo.id,
-    nome: payload.nome,
-    tipologia: payload.tipologia,
-    descrizione: payload.descrizione,
-    dataDocumento: payload.dataDocumento,
-    source: payload.source,
-    status: payload.status,
-    direzione: payload.direzione,
-    canale: payload.canale,
-    numeroProtocollo: payload.numeroProtocollo,
-    dataProtocollo: payload.dataProtocollo,
-    mittente: payload.mittente,
-    destinatario: payload.destinatario,
-    pecMessageId: payload.pecMessageId,
-    pecRicevutaAccettazioneId: payload.pecRicevutaAccettazioneId,
-    pecRicevutaConsegnaId: payload.pecRicevutaConsegnaId,
-    pecWarningMancataRicevuta: payload.pecWarningMancataRicevuta,
+    actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+    metadata: {
+      procedimentoId: activation.procedimento.id,
+      activationOutcome: activation.outcome,
+    },
   });
 
   revalidatePath(`/procedimenti/${fascicolo.id}`);
-  redirect(`/procedimenti/${fascicolo.id}#documenti`);
+  revalidatePath(`/procedimenti/${activation.procedimento.id}`);
+  redirect(`/procedimenti/${fascicolo.id}`);
 }

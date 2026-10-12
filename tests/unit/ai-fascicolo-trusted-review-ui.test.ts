@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { createElement } from "react";
-import { renderToStaticMarkup } from "react-dom/server";
+import { renderToReadableStream, renderToStaticMarkup } from "react-dom/server";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -86,6 +86,10 @@ vi.mock("@/server/queries/fascicolo-automatic-workflow", () => ({
   getFascicoloAutomaticWorkflowReadModel: queryMocks.getAutomaticWorkflow,
 }));
 
+vi.mock("@/server/queries/fascicolo-document-corpus", () => ({
+  getFascicoloDocumentCorpus: vi.fn().mockResolvedValue(null),
+}));
+
 import {
   AiFascicoloTrustedReviewPanel,
   resolveAiFascicoloTrustedReviewSelection,
@@ -162,6 +166,7 @@ const procedimentoDetail = {
   procedimento: {
     id: "procedimento-1",
     createdAt: new Date("2026-01-15T00:00:00.000Z"),
+    updatedAt: new Date("2026-10-09T12:00:00.000Z"),
     tipologia: "VARIAZIONE",
     stato: "IN_CORSO",
     riferimentoNormativo: null,
@@ -261,10 +266,20 @@ describe("B2C9A Trusted Review read consumer panel V1", () => {
       materials,
     });
     queryMocks.getAutomaticWorkflow.mockResolvedValue({
+      analysisUpdate: {
+        status: "CURRENT",
+        corpusFingerprint: "a".repeat(64),
+        currentRevisionFingerprint: "a".repeat(64),
+      },
       automaticResearch: { authorized: false, requirementCode: "AUTOMATIC_RESEARCH_POLICY_DISABLED" },
+      knowledge: null,
+      structuredReport: null,
+      structuredReportSnapshots: [],
+      operationalProposals: [],
       jobs: [],
       reports: [],
       missions: [],
+      historicalMissionCount: 0,
     });
   });
 
@@ -324,6 +339,25 @@ describe("B2C9A Trusted Review read consumer panel V1", () => {
       materialId: "material-older",
       statementPath: "summary",
     });
+  });
+
+  it("opens the operational fascicolo when no concession has been established", async () => {
+    queryMocks.getProcedimentoDetail.mockResolvedValue({
+      ...procedimentoDetail,
+      concessione: null,
+      concessionario: null,
+    });
+
+    const page = await executePage();
+    const stream = await renderToReadableStream(page);
+    await stream.allReady;
+    const html = await new Response(stream).text();
+
+    expect(html).toContain("Fascicolo operativo");
+    expect(html).toContain("Titolo concessorio non accertato");
+    expect(html).not.toContain("ATTO-1");
+    expect(html).not.toContain("Apri concessione");
+    expect(queryMocks.getAutomaticWorkflow).toHaveBeenCalledWith("procedimento-1");
   });
 
   it("renders canonical statement content, current review state, and review history read-only", () => {

@@ -167,7 +167,7 @@ describe("B2C8 Trusted Review Material Discovery Read Model V1", () => {
     }));
     mocks.procedimentoFindUnique.mockResolvedValue({
       id: "procedimento-1",
-      concessione: { enteId: "ente-1" },
+      enteId: "ente-1",
     });
     mocks.materialFindMany.mockResolvedValue([]);
   });
@@ -229,7 +229,7 @@ describe("B2C8 Trusted Review Material Discovery Read Model V1", () => {
       where: { id: "procedimento-1" },
       select: {
         id: true,
-        concessione: { select: { enteId: true } },
+        enteId: true,
       },
     });
   });
@@ -251,7 +251,7 @@ describe("B2C8 Trusted Review Material Discovery Read Model V1", () => {
   it("fails closed for an invalid canonical tenant linkage", async () => {
     mocks.procedimentoFindUnique.mockResolvedValue({
       id: "procedimento-1",
-      concessione: { enteId: null },
+      enteId: null,
     });
     await expectCode(getAiFascicoloTrustedReviewMaterialsReadModel(input()), "TENANT_MISMATCH");
     expect(mocks.materialFindMany).not.toHaveBeenCalled();

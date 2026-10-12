@@ -7,6 +7,7 @@ The application worker is a persistent process separate from `next start`. It re
 ```text
 npm run worker:readiness
 npm run worker:async
+npm run worker:document-extraction
 ```
 
 The readiness command is read-only. It checks database connectivity, the Lotto 8 migration, provider-mode cost configuration, required budget scopes, and optionally a live worker heartbeat. It prints one sanitized JSON result and exits non-zero on failure.
@@ -23,6 +24,7 @@ The readiness command is read-only. It checks database connectivity, the Lotto 8
 | `ASYNC_WORKER_RETRY_DELAY_MS` | `30000` | base delay, 0-2592000000 ms |
 | `ASYNC_WORKER_OPERATION_ALLOWLIST` | empty | comma-separated canary scope |
 | `ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST` | empty | comma-separated canary scope |
+| `ASYNC_WORKER_DEDICATED_MODE` | `false` | when `true`, both allowlists are required and non-empty |
 | `ASYNC_PROVIDER_EXECUTION_ENABLED` | `false` | blocks provider-backed claims when false |
 | `ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR` | required when providers enabled | positive decimal, max 6 decimals |
 | `ASYNC_COST_RESEARCH_CALL_ESTIMATE_EUR` | required when providers enabled | positive decimal, max 6 decimals |
@@ -44,6 +46,29 @@ Provider credentials are validated by their adapters only when the corresponding
 10. Configure enabled EUR budget policies for GLOBAL, TENANT, and PROCEDIMENTO scopes.
 11. Only after separate authorization, configure provider credentials, positive cost estimates, and enable provider execution.
 12. Remove canary allowlists only after queue, failure, latency, and cost observations are accepted.
+
+## Document Extraction Activation
+
+PDF uploads linked to a procedimento admit `DOCUMENT_EXTRACTION_V1` atomically with the
+new current `DocumentFileVersion`. The HTTP request only persists the document and the
+queued job; extraction remains in this separate worker.
+
+For a scoped E2E activation that does not claim unrelated queued work, run one worker
+against the E2E database with `npm run worker:document-extraction` and:
+
+```text
+ASYNC_WORKER_CONCURRENCY=1
+ASYNC_WORKER_DEDICATED_MODE=true
+ASYNC_WORKER_OPERATION_ALLOWLIST=DOCUMENT_EXTRACTION_V1
+ASYNC_PROVIDER_EXECUTION_ENABLED=false
+```
+
+Keep `ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST` set to the explicitly authorized E2E
+procedimenti during canary activation. Do not run the worker with empty allowlists
+while unrelated jobs are queued. The dedicated command rejects startup unless dedicated
+mode is enabled, the operation allowlist contains only `DOCUMENT_EXTRACTION_V1`, the
+procedimento allowlist is non-empty, and provider execution is disabled. It does not
+load the general handler registry or run application lifecycle bootstraps.
 
 ## Persistent Service
 

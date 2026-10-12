@@ -13,13 +13,9 @@ import { FascicoloSubjects, type FascicoloSubject } from "@/components/procedime
 import { FascicoloTimeline, type FascicoloTimelineEvent } from "@/components/procedimenti/FascicoloTimeline";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
-import { Textarea } from "@/components/ui/Textarea";
 import { getConcessionVerticalLabel } from "@/lib/concession-vertical-labels";
 import { formatDateIT, formatEnumLabel } from "@/lib/utils";
-import { uploadFascicoloIntakeDocumentAction } from "@/server/actions/fascicolo-intake";
-import { DOCUMENT_TIPOLOGIA_VALUES } from "@/server/documents/validation";
+import { activateFascicoloIntakeAction } from "@/server/actions/fascicolo-intake";
 import type { getFascicoloIntakeDetail } from "@/server/queries/fascicolo-intake";
 
 type FascicoloIntakeDetailData = NonNullable<Awaited<ReturnType<typeof getFascicoloIntakeDetail>>>;
@@ -278,31 +274,15 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload, activeSection }: F
           <FascicoloDocumentsArchive
             documents={fascicolo.documenti.map(toArchiveItem)}
             uploadForm={canUpload ? (
-              <form action={uploadFascicoloIntakeDocumentAction} className="grid gap-4 md:grid-cols-2">
-                  <input type="hidden" name="fascicoloIntakeId" value={fascicolo.id} />
-                  <input type="hidden" name="source" value="UPLOAD_UTENTE" />
-                  <input type="hidden" name="status" value="ATTIVO" />
-                  <label className="text-sm font-medium text-slate-700 md:col-span-2">
-                    File
-                    <Input name="file" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.csv" required />
-                  </label>
-                  <label className="text-sm font-medium text-slate-700">
-                    Nome documento <span className="font-normal text-slate-500">(opzionale)</span>
-                    <Input name="nome" placeholder="Usa il nome del file se vuoto" />
-                  </label>
-                  <label className="text-sm font-medium text-slate-700">
-                    Tipologia
-                    <Select name="tipologia" defaultValue="NOTA" required>
-                      {DOCUMENT_TIPOLOGIA_VALUES.map((value) => <option key={value} value={value}>{formatEnumLabel(value)}</option>)}
-                    </Select>
-                  </label>
-                  <label className="text-sm font-medium text-slate-700 md:col-span-2">
-                    Descrizione <span className="font-normal text-slate-500">(opzionale)</span>
-                    <Textarea name="descrizione" rows={2} />
-                  </label>
-                  <div className="md:col-span-2">
-                    <Button type="submit"><Paperclip className="h-4 w-4" aria-hidden="true" />Carica documento</Button>
-                  </div>
+              <form action={activateFascicoloIntakeAction} className="space-y-3">
+                <input type="hidden" name="fascicoloIntakeId" value={fascicolo.id} />
+                <p className="text-sm text-slate-600">
+                  Attiva il fascicolo operativo prima di caricare documenti. L&apos;attivazione non avvia analisi o provider.
+                </p>
+                <Button type="submit">
+                  <Paperclip className="h-4 w-4" aria-hidden="true" />
+                  Attiva caricamento documentale
+                </Button>
               </form>
             ) : undefined}
           />

@@ -37,16 +37,34 @@ export const knowledgeScopeSchema = z.object({
   procedimentoId: identifierSchema,
 }).strict();
 
-export const knowledgeEvidenceCandidateSchema = z.object({
-  provenanceType: z.literal("DOCUMENT_EXTRACTION").default("DOCUMENT_EXTRACTION"),
+const commonKnowledgeEvidence = {
   documentoId: identifierSchema,
   documentFileVersionId: identifierSchema,
-  extractionAttemptId: identifierSchema,
   pageNumber: z.number().int().positive(),
   textSha256: sha256Schema,
   quoteSha256: sha256Schema.nullable().optional().transform((value) => value ?? null),
   basisRef: documentBasisRefSchema,
-}).strict();
+};
+
+export const knowledgeEvidenceCandidateSchema = z.object({
+  ...commonKnowledgeEvidence,
+  provenanceType: z.enum([
+    "DOCUMENT_EXTRACTION",
+    "FASCICOLO_DOCUMENT_EXTRACTION",
+  ]).default("DOCUMENT_EXTRACTION"),
+  extractionAttemptId: identifierSchema.optional(),
+  documentExtractionAttemptId: identifierSchema.optional(),
+}).strict().superRefine((value, context) => {
+  const valid = value.provenanceType === "DOCUMENT_EXTRACTION"
+    ? value.extractionAttemptId !== undefined && value.documentExtractionAttemptId === undefined
+    : value.documentExtractionAttemptId !== undefined && value.extractionAttemptId === undefined;
+  if (!valid) {
+    context.addIssue({
+      code: "custom",
+      message: "EXTRACTION_PROVENANCE_ID_MISMATCH",
+    });
+  }
+});
 
 export const knowledgeItemCandidateSchema = z.object({
   kind: knowledgeItemKindSchema,

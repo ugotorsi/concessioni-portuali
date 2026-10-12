@@ -1459,6 +1459,67 @@ export type EnumDocumentoCanaleNullableWithAggregatesFilter<$PrismaModel = never
   _max?: Prisma.NestedEnumDocumentoCanaleNullableFilter<$PrismaModel>
 }
 
+export type EnumDocumentExtractionOutcomeFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentExtractionOutcome | Prisma.EnumDocumentExtractionOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentExtractionOutcome[] | Prisma.ListEnumDocumentExtractionOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentExtractionOutcome[] | Prisma.ListEnumDocumentExtractionOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentExtractionOutcomeFilter<$PrismaModel> | $Enums.DocumentExtractionOutcome
+}
+
+export type EnumDocumentExtractionOutcomeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentExtractionOutcome | Prisma.EnumDocumentExtractionOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentExtractionOutcome[] | Prisma.ListEnumDocumentExtractionOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentExtractionOutcome[] | Prisma.ListEnumDocumentExtractionOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentExtractionOutcomeWithAggregatesFilter<$PrismaModel> | $Enums.DocumentExtractionOutcome
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocumentExtractionOutcomeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocumentExtractionOutcomeFilter<$PrismaModel>
+}
+
+export type EnumDocumentExtractionMethodFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentExtractionMethod | Prisma.EnumDocumentExtractionMethodFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentExtractionMethod[] | Prisma.ListEnumDocumentExtractionMethodFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentExtractionMethod[] | Prisma.ListEnumDocumentExtractionMethodFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentExtractionMethodFilter<$PrismaModel> | $Enums.DocumentExtractionMethod
+}
+
+export type FloatNullableFilter<$PrismaModel = never> = {
+  equals?: number | Prisma.FloatFieldRefInput<$PrismaModel> | null
+  in?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel> | null
+  notIn?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel> | null
+  lt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  lte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedFloatNullableFilter<$PrismaModel> | number | null
+}
+
+export type EnumDocumentExtractionMethodWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentExtractionMethod | Prisma.EnumDocumentExtractionMethodFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentExtractionMethod[] | Prisma.ListEnumDocumentExtractionMethodFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentExtractionMethod[] | Prisma.ListEnumDocumentExtractionMethodFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentExtractionMethodWithAggregatesFilter<$PrismaModel> | $Enums.DocumentExtractionMethod
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocumentExtractionMethodFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocumentExtractionMethodFilter<$PrismaModel>
+}
+
+export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: number | Prisma.FloatFieldRefInput<$PrismaModel> | null
+  in?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel> | null
+  notIn?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel> | null
+  lt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  lte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _avg?: Prisma.NestedFloatNullableFilter<$PrismaModel>
+  _sum?: Prisma.NestedFloatNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedFloatNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedFloatNullableFilter<$PrismaModel>
+}
+
 export type EnumNeutralIntakeStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.NeutralIntakeStatus | Prisma.EnumNeutralIntakeStatusFieldRefInput<$PrismaModel>
   in?: $Enums.NeutralIntakeStatus[] | Prisma.ListEnumNeutralIntakeStatusFieldRefInput<$PrismaModel>
@@ -1500,17 +1561,6 @@ export type EnumNeutralIntakeExtractionMethodFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumNeutralIntakeExtractionMethodFilter<$PrismaModel> | $Enums.NeutralIntakeExtractionMethod
 }
 
-export type FloatNullableFilter<$PrismaModel = never> = {
-  equals?: number | Prisma.FloatFieldRefInput<$PrismaModel> | null
-  in?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel> | null
-  notIn?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel> | null
-  lt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
-  lte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
-  gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
-  gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedFloatNullableFilter<$PrismaModel> | number | null
-}
-
 export type EnumNeutralIntakeExtractionMethodWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.NeutralIntakeExtractionMethod | Prisma.EnumNeutralIntakeExtractionMethodFieldRefInput<$PrismaModel>
   in?: $Enums.NeutralIntakeExtractionMethod[] | Prisma.ListEnumNeutralIntakeExtractionMethodFieldRefInput<$PrismaModel>
@@ -1519,22 +1569,6 @@ export type EnumNeutralIntakeExtractionMethodWithAggregatesFilter<$PrismaModel =
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumNeutralIntakeExtractionMethodFilter<$PrismaModel>
   _max?: Prisma.NestedEnumNeutralIntakeExtractionMethodFilter<$PrismaModel>
-}
-
-export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: number | Prisma.FloatFieldRefInput<$PrismaModel> | null
-  in?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel> | null
-  notIn?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel> | null
-  lt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
-  lte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
-  gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
-  gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
-  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
-  _avg?: Prisma.NestedFloatNullableFilter<$PrismaModel>
-  _sum?: Prisma.NestedFloatNullableFilter<$PrismaModel>
-  _min?: Prisma.NestedFloatNullableFilter<$PrismaModel>
-  _max?: Prisma.NestedFloatNullableFilter<$PrismaModel>
 }
 
 export type EnumLegalReferenceKindFilter<$PrismaModel = never> = {
@@ -3961,6 +3995,56 @@ export type NestedEnumDocumentoCanaleNullableWithAggregatesFilter<$PrismaModel =
   _max?: Prisma.NestedEnumDocumentoCanaleNullableFilter<$PrismaModel>
 }
 
+export type NestedEnumDocumentExtractionOutcomeFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentExtractionOutcome | Prisma.EnumDocumentExtractionOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentExtractionOutcome[] | Prisma.ListEnumDocumentExtractionOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentExtractionOutcome[] | Prisma.ListEnumDocumentExtractionOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentExtractionOutcomeFilter<$PrismaModel> | $Enums.DocumentExtractionOutcome
+}
+
+export type NestedEnumDocumentExtractionOutcomeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentExtractionOutcome | Prisma.EnumDocumentExtractionOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentExtractionOutcome[] | Prisma.ListEnumDocumentExtractionOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentExtractionOutcome[] | Prisma.ListEnumDocumentExtractionOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentExtractionOutcomeWithAggregatesFilter<$PrismaModel> | $Enums.DocumentExtractionOutcome
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocumentExtractionOutcomeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocumentExtractionOutcomeFilter<$PrismaModel>
+}
+
+export type NestedEnumDocumentExtractionMethodFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentExtractionMethod | Prisma.EnumDocumentExtractionMethodFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentExtractionMethod[] | Prisma.ListEnumDocumentExtractionMethodFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentExtractionMethod[] | Prisma.ListEnumDocumentExtractionMethodFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentExtractionMethodFilter<$PrismaModel> | $Enums.DocumentExtractionMethod
+}
+
+export type NestedEnumDocumentExtractionMethodWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentExtractionMethod | Prisma.EnumDocumentExtractionMethodFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentExtractionMethod[] | Prisma.ListEnumDocumentExtractionMethodFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentExtractionMethod[] | Prisma.ListEnumDocumentExtractionMethodFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentExtractionMethodWithAggregatesFilter<$PrismaModel> | $Enums.DocumentExtractionMethod
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocumentExtractionMethodFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocumentExtractionMethodFilter<$PrismaModel>
+}
+
+export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: number | Prisma.FloatFieldRefInput<$PrismaModel> | null
+  in?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel> | null
+  notIn?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel> | null
+  lt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  lte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _avg?: Prisma.NestedFloatNullableFilter<$PrismaModel>
+  _sum?: Prisma.NestedFloatNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedFloatNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedFloatNullableFilter<$PrismaModel>
+}
+
 export type NestedEnumNeutralIntakeStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.NeutralIntakeStatus | Prisma.EnumNeutralIntakeStatusFieldRefInput<$PrismaModel>
   in?: $Enums.NeutralIntakeStatus[] | Prisma.ListEnumNeutralIntakeStatusFieldRefInput<$PrismaModel>
@@ -4010,22 +4094,6 @@ export type NestedEnumNeutralIntakeExtractionMethodWithAggregatesFilter<$PrismaM
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumNeutralIntakeExtractionMethodFilter<$PrismaModel>
   _max?: Prisma.NestedEnumNeutralIntakeExtractionMethodFilter<$PrismaModel>
-}
-
-export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: number | Prisma.FloatFieldRefInput<$PrismaModel> | null
-  in?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel> | null
-  notIn?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel> | null
-  lt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
-  lte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
-  gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
-  gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
-  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
-  _avg?: Prisma.NestedFloatNullableFilter<$PrismaModel>
-  _sum?: Prisma.NestedFloatNullableFilter<$PrismaModel>
-  _min?: Prisma.NestedFloatNullableFilter<$PrismaModel>
-  _max?: Prisma.NestedFloatNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumLegalReferenceKindFilter<$PrismaModel = never> = {

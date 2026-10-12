@@ -55,7 +55,7 @@ function intake(destination = true) {
     id: "intake-1",
     enteId: "ente-1",
     destination: destination
-      ? { procedimento: { concessione: { enteId: "ente-1" } } }
+      ? { procedimento: { enteId: "ente-1" } }
       : null,
   };
 }
@@ -144,7 +144,7 @@ describe("B2C10 Block 3B.6A async legal reference discovery", () => {
   it("derives tenant authority from the source job, intake, and destination hierarchy", async () => {
     mocks.tx.neutralIntake.findUnique.mockResolvedValueOnce({
       ...intake(),
-      destination: { procedimento: { concessione: { enteId: "ente-2" } } },
+      destination: { procedimento: { enteId: "ente-2" } },
     });
 
     await expect(ensureLegalReferenceDiscoveryJobInTransaction(mocks.tx as never, {

@@ -20,18 +20,21 @@ import {
   reconcilePendingAutomaticResearchExecutions,
   type AutomaticResearchExecutionDependencies,
 } from "../legal-research/automatic-research-job";
+import { createDocumentExtractionHandler } from "../documents/documentExtractionJob";
 
 const APPLICATION_ASYNC_JOB_LEASE_MS = 5 * 60 * 1_000;
 const PROVIDER_BACKED_OPERATIONS = [
   "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
   "LEGAL_RESEARCH.EXECUTE_V1",
 ] as const;
+const AUTOMATIC_RESEARCH_OPERATION = "LEGAL_RESEARCH.EXECUTE_V1";
 
 export function createApplicationAsyncJobRegistry(input: {
   automaticAnalysisDependencies?: FascicoloAutomaticAnalysisDependencies;
   automaticResearchDependencies?: Partial<AutomaticResearchExecutionDependencies>;
 } = {}) {
   return new AsyncJobHandlerRegistry([
+    createDocumentExtractionHandler(),
     createNeutralIntakeExtractionHandler(),
     createFascicoloAutomaticAnalysisHandler(input.automaticAnalysisDependencies),
     createAutomaticResearchExecutionHandler(input.automaticResearchDependencies),
@@ -55,7 +58,12 @@ export async function drainOneApplicationAsyncJob(input: {
   procedimentoAllowlist?: readonly string[];
   providerExecutionEnabled?: boolean;
 }) {
-  await reconcilePendingAutomaticResearchExecutions();
+  if (
+    !input.operationAllowlist?.length
+    || input.operationAllowlist.includes(AUTOMATIC_RESEARCH_OPERATION)
+  ) {
+    await reconcilePendingAutomaticResearchExecutions();
+  }
   return drainOneAsyncJob({
     ...input,
     operationBlocklist: input.providerExecutionEnabled === false ? PROVIDER_BACKED_OPERATIONS : undefined,

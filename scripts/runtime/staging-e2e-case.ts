@@ -183,6 +183,7 @@ async function createCase(): Promise<Readonly<Record<string, unknown>>> {
     const procedimento = procedures[0] ?? await tx.procedimento.create({
       data: {
         id: STAGING_E2E_CASE.procedimentoId,
+        enteId: tenant.id,
         concessioneId: concessione.id,
         tipologia: "ALTRO",
         origineProcedimento: "UFFICIO",
@@ -242,6 +243,7 @@ async function cleanupCase(): Promise<Readonly<Record<string, unknown>>> {
       },
     });
     if (!procedimento) return { outcome: "NOT_FOUND" };
+    if (!procedimento.concessione) throw new Error("STAGING_E2E_CLEANUP_SCOPE_MISMATCH");
     if (
       procedimento.concessioneId !== STAGING_E2E_CASE.concessioneId
       || procedimento.noteIstruttorie !== "STAGING ONLY - E2E-TEST-001 - DATI SINTETICI"

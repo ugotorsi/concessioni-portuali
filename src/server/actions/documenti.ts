@@ -13,10 +13,8 @@ import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 import { parseUploadDocumentFormData, DOCUMENT_TIPOLOGIA_VALUES } from "@/server/documents/validation";
 import { DOCUMENT_CANALE_VALUES, DOCUMENT_DIREZIONE_VALUES, normalizeProtocolloMetadata } from "@/server/documents/protocollo";
 import { uploadDocument } from "@/server/documents/uploadService";
-import { createNeutralIntake } from "@/server/intake/createNeutralIntake";
 
 const STAGING_PREVIEW_ADMIN_ID = "staging-preview-admin";
-const intakeOperationIdSchema = z.string().uuid();
 
 function resolveDocumentoUploadedByUserId(currentUserId: string | null | undefined): string | null {
   if (!currentUserId || currentUserId === STAGING_PREVIEW_ADMIN_ID) {
@@ -100,14 +98,12 @@ async function resolveLinkedTenantForDocumento(input: {
   if (input.procedimentoId) {
     const procedimento = await prisma.procedimento.findUnique({
       where: { id: input.procedimentoId },
-      select: { id: true, concessione: { select: { enteId: true } } },
+      select: { id: true, enteId: true },
     });
     if (!procedimento) {
       throw new Error("Procedimento collegato non trovato.");
     }
-    if (procedimento.concessione.enteId) {
-      candidateTenantIds.add(procedimento.concessione.enteId);
-    }
+    candidateTenantIds.add(procedimento.enteId);
   }
 
   if (input.sopralluogoId) {
@@ -287,54 +283,6 @@ export async function createDocumentoUploadAction(formData: FormData) {
     }
   }
 
-  if (payload.procedimentoId) {
-    const operationId = intakeOperationIdSchema.parse(formData.get("intakeOperationId"));
-    const actorId = currentUser?.id ?? STAGING_PREVIEW_ADMIN_ID;
-    const result = await createNeutralIntake({
-      body: Buffer.from(await payload.file.arrayBuffer()),
-      mimeType: payload.file.type,
-      originalName: payload.file.name,
-      ingressChannel: "FASCICOLO_PROCEDIMENTO_UPLOAD",
-      enteId: canonicalEnteId,
-      receivedByUserId: persistedUserId,
-      receivedByActorId: actorId,
-      receivedByRole: role,
-      destination: {
-        procedimentoId: payload.procedimentoId,
-        authoritySource: "CASE_FOLDER_UPLOAD",
-      },
-      idempotencyAnchor: { type: "OPERATION_ID", value: operationId },
-    });
-    if (result.outcome === "DUPLICATE_DOCUMENT_IN_FASCICOLO") {
-      await auditFailure({
-        azione: "NEUTRAL_INTAKE_PROCEDIMENTO_DUPLICATE_REJECTED",
-        entita: "NeutralIntake",
-        enteId: canonicalEnteId,
-        actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
-        metadata: {
-          procedimentoId: payload.procedimentoId,
-          reason: "DUPLICATE_DOCUMENT_IN_FASCICOLO",
-        },
-      });
-      revalidatePath(`/procedimenti/${payload.procedimentoId}`);
-      return redirect(`/procedimenti/${payload.procedimentoId}?documentUpload=duplicate`);
-    }
-    await auditSuccess({
-      azione: "NEUTRAL_INTAKE_PROCEDIMENTO_UPLOAD",
-      entita: "NeutralIntake",
-      entitaId: result.intake.id,
-      enteId: canonicalEnteId,
-      actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
-      metadata: {
-        procedimentoId: payload.procedimentoId,
-        intakeOutcome: result.outcome,
-        destinationAuthoritySource: "CASE_FOLDER_UPLOAD",
-      },
-    });
-    revalidateLinkedPaths({ procedimentoId: payload.procedimentoId });
-    return redirect(`/procedimenti/${payload.procedimentoId}`);
-  }
-
   const uploaded = await uploadDocument({
     documentId: randomUUID(),
     file: payload.file,
@@ -374,6 +322,9 @@ export async function createDocumentoUploadAction(formData: FormData) {
     reportId: created.reportId ?? undefined,
   });
 
+  if (created.procedimentoId) {
+    return redirect(`/procedimenti/${created.procedimentoId}`);
+  }
   redirect("/documenti");
 }
 

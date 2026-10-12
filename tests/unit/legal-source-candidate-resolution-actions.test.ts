@@ -20,7 +20,7 @@ const admission = {
       procedimentoId: "procedimento-1",
       procedimento: {
         concessioneId: "concessione-1",
-        concessione: { enteId: "ente-1" },
+        enteId: "ente-1",
       },
     },
   },

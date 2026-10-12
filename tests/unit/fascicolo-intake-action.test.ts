@@ -7,6 +7,7 @@ const requireConcessioneTenantAccessMock = vi.hoisted(() => vi.fn());
 const auditSuccessMock = vi.hoisted(() => vi.fn());
 const redirectMock = vi.hoisted(() => vi.fn());
 const uploadDocumentMock = vi.hoisted(() => vi.fn());
+const activateFascicoloIntakeMock = vi.hoisted(() => vi.fn());
 
 const prismaMock = vi.hoisted(() => ({
   concessione: { findUnique: vi.fn() },
@@ -25,6 +26,9 @@ vi.mock("@/lib/tenant-auth", () => ({
 }));
 vi.mock("@/server/audit/auditLog", () => ({ auditSuccess: auditSuccessMock }));
 vi.mock("@/server/documents/uploadService", () => ({ uploadDocument: uploadDocumentMock }));
+vi.mock("@/server/fascicolo-intake/activation", () => ({
+  activateFascicoloIntake: activateFascicoloIntakeMock,
+}));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("next/navigation", () => ({ redirect: redirectMock }));
 
@@ -58,6 +62,10 @@ describe("createFascicoloIntakeAction", () => {
       id: "fascicolo-1",
       tipologiaConcessione: "MARITTIMA_TURISTICO_RICREATIVA",
     });
+    activateFascicoloIntakeMock.mockResolvedValue({
+      outcome: "CREATED",
+      procedimento: { id: "procedimento-1", enteId: "ente-a", concessioneId: null },
+    });
     redirectMock.mockImplementation((path: string) => {
       throw new Error(`REDIRECT:${path}`);
     });
@@ -79,9 +87,13 @@ describe("createFascicoloIntakeAction", () => {
         soggettoAssistito: "Società Alfa",
       }),
     });
+    expect(activateFascicoloIntakeMock).toHaveBeenCalledWith({
+      fascicoloIntakeId: "fascicolo-1",
+      tenantId: "ente-a",
+    });
   });
 
-  it("collega i documenti iniziali al fascicolo creato", async () => {
+  it("non carica documenti o avvia job durante la creazione e attivazione", async () => {
     const data = formData();
     data.append("documentiIniziali", new File(["atto"], "istanza.pdf", { type: "application/pdf" }));
 
@@ -89,12 +101,8 @@ describe("createFascicoloIntakeAction", () => {
       "REDIRECT:/procedimenti/fascicolo-1",
     );
 
-    expect(uploadDocumentMock).toHaveBeenCalledWith(expect.objectContaining({
-      fascicoloIntakeId: "fascicolo-1",
-      enteId: "ente-a",
-      nome: "istanza.pdf",
-      tipologia: "NOTA",
-    }));
+    expect(uploadDocumentMock).not.toHaveBeenCalled();
+    expect(activateFascicoloIntakeMock).toHaveBeenCalledTimes(1);
   });
 
   it("collega facoltativamente una concessione reale e ne usa il tenant", async () => {

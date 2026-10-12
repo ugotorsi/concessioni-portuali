@@ -35,9 +35,12 @@ function normalizeIdentity(value: string): string {
 
 function materialEvidence(evidence: readonly KnowledgeEvidenceCandidate[]) {
   return evidence.map((item) => ({
+    provenanceType: item.provenanceType,
     documentoId: item.documentoId,
     documentFileVersionId: item.documentFileVersionId,
-    extractionAttemptId: item.extractionAttemptId,
+    extractionAttemptId: item.provenanceType === "DOCUMENT_EXTRACTION"
+      ? item.extractionAttemptId ?? null
+      : item.documentExtractionAttemptId ?? null,
     pageNumber: item.pageNumber,
     textSha256: item.textSha256,
     quoteSha256: item.quoteSha256,

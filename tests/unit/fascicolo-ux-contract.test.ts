@@ -51,7 +51,7 @@ describe("Fascicolo UX contract", () => {
     expect(createPage).toContain("Riferimenti");
     expect(createPage).toContain("Dati concessione");
     expect(createPage).toContain("Soggetti");
-    expect(createPage).toContain("Documenti iniziali");
+    expect(createPage).not.toContain("Documenti iniziali");
     expect(createPage).toContain("Crea fascicolo senza collegare una concessione esistente");
     expect(createPage).toContain("Crea fascicolo");
     expect(createPage).toContain("Titolo fascicolo");
@@ -60,9 +60,7 @@ describe("Fascicolo UX contract", () => {
     expect(createPage.indexOf("Inquadramento")).toBeLessThan(createPage.indexOf("Riferimenti"));
     expect(createPage.indexOf("Riferimenti")).toBeLessThan(createPage.indexOf("Dati concessione"));
     expect(createPage.indexOf("Dati concessione")).toBeLessThan(createPage.indexOf("Soggetti"));
-    expect(createPage.indexOf("Soggetti")).toBeLessThan(createPage.indexOf("Documenti iniziali"));
-    expect(createPage).toContain('name="documentiIniziali"');
-    expect(createPage).toContain("multiple");
+    expect(createPage).not.toContain('name="documentiIniziali"');
     expect(createPage).not.toContain('name="criticitaId"');
     expect(createPage).not.toContain('name="riferimentoNormativo"');
     expect(createPage).not.toContain('name="dataScadenzaContraddittorio"');
@@ -115,13 +113,14 @@ describe("Fascicolo UX contract", () => {
     expect(documentsPanel).toContain("Allega documento");
     expect(documentsPanel).toContain("Nessun documento presente nel fascicolo.");
     expect(detailPage).toContain("getFascicoloIntakeDetail(id)");
+    expect(detailPage).toContain("redirect(`/procedimenti/${fascicoloIntake.procedimento.id}`)");
     expect(detailPage).toContain("<FascicoloIntakeDetail");
     expect(intakeDetail).toContain("<FascicoloShell");
     expect(intakeDetail).toContain('activeSection === "documents"');
     expect(intakeDetail).toContain('activeSection === "timeline"');
     expect(intakeDetail).toContain('activeSection === "subjects"');
     expect(intakeDetail).toContain('activeSection === "concession"');
-    expect(intakeDetail).toContain("uploadFascicoloIntakeDocumentAction");
+    expect(intakeDetail).toContain("activateFascicoloIntakeAction");
     expect(fascicoloShell).toContain("Panoramica");
     expect(fascicoloShell).toContain("Navigazione del fascicolo");
     expect(fascicoloShell).toContain("Richiede attenzione");

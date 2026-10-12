@@ -16,6 +16,10 @@ import {
 } from "@/lib/tenant-auth";
 import { formatEnumLabel } from "@/lib/utils";
 import type { Prisma } from "@/generated/prisma/client";
+import {
+  getDocumentExtractionReadModels,
+  type DocumentExtractionReadModel,
+} from "@/server/queries/document-extractions";
 
 export const PROCEDIMENTO_TIPOLOGIA_VALUES = [
   "CHIARIMENTI",
@@ -120,8 +124,8 @@ export interface ProcedimentoListItem {
     ubicazione: string | null;
     concessionario: {
       denominazione: string;
-    };
-  };
+    } | null;
+  } | null;
   criticita: {
     id: string;
     tipologia: string;
@@ -254,7 +258,7 @@ export interface ProcedimentoDetail {
     canoneAnnuo: number | null;
     categoriaCanone: string | null;
     ente: { nome: string } | null;
-  };
+  } | null;
   concessionario: {
     id: string;
     denominazione: string;
@@ -263,7 +267,7 @@ export interface ProcedimentoDetail {
     sedeLegale: string | null;
     pec: string | null;
     email: string | null;
-  };
+  } | null;
   criticitaCollegata: {
     id: string;
     tipologia: string;
@@ -317,6 +321,8 @@ export interface ProcedimentoDetail {
     url: string;
     dataDocumento: Date | null;
     createdAt: Date;
+    currentFileVersionId: string | null;
+    extraction: DocumentExtractionReadModel;
   }>;
   reportCollegati: Array<{
     id: string;
@@ -368,11 +374,12 @@ function buildWhere(
   const search = params.search?.trim();
   const today = startOfDay(new Date());
   const in7 = addDays(today, 7);
-  const concessioneTenantWhere = buildTenantConcessioneWhere(tenantContext);
-  const hasConcessioneTenantScope = Object.keys(concessioneTenantWhere).length > 0;
+  const tenantWhere = tenantContext && isTenantContextConstrained(tenantContext)
+    ? { enteId: { in: tenantContext.accessibleTenantIds } }
+    : {};
 
   return {
-    ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
+    ...tenantWhere,
     ...(search
       ? {
           OR: [
@@ -473,7 +480,7 @@ function toListItem(
       dataScadenza: Date;
       ubicazione: string | null;
       concessionario: { denominazione: string };
-    };
+    } | null;
     criticita: {
       id: string;
       tipologia: string;
@@ -773,7 +780,7 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
 
   if (tenantContext && isTenantContextConstrained(tenantContext)) {
     try {
-      requireTenantAccess(tenantContext, procedimento.concessione.enteId, {
+      requireTenantAccess(tenantContext, procedimento.enteId, {
         mode: "read",
         allowWhenEnteMissing: false,
       });
@@ -784,11 +791,24 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
 
   const documentiCollegati = await prisma.documento.findMany({
     where: {
-      OR: [{ procedimentoId: procedimento.id }, { concessioneId: procedimento.concessioneId }],
+      enteId: procedimento.enteId,
+      OR: [
+        { procedimentoId: procedimento.id },
+        ...(procedimento.concessioneId ? [{ concessioneId: procedimento.concessioneId }] : []),
+        { fascicoloIntake: { procedimentoId: procedimento.id } },
+      ],
     },
     orderBy: [{ dataDocumento: "desc" }, { createdAt: "desc" }],
     take: 20,
     distinct: ["id"],
+  });
+  const extractionByDocumentId = await getDocumentExtractionReadModels({
+    tenantId: procedimento.enteId,
+    procedimentoId: procedimento.id,
+    documents: documentiCollegati.map((documento) => ({
+      documentId: documento.id,
+      currentFileVersionId: documento.currentFileVersionId,
+    })),
   });
 
   const termineScaduto =
@@ -806,7 +826,7 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
       ? Math.abs(differenceInCalendarDays(procedimento.dataScadenzaContraddittorio, today))
       : null;
 
-  const altreCriticitaAperte = procedimento.concessione.criticita
+  const altreCriticitaAperte = (procedimento.concessione?.criticita ?? [])
     .filter((item) => item.id !== procedimento.criticitaId)
     .map((item) => ({
       id: item.id,
@@ -899,7 +919,7 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
   });
 
   return {
-    canonicalEnteId: procedimento.concessione.enteId ?? null,
+    canonicalEnteId: procedimento.enteId,
     procedimento: {
       id: procedimento.id,
       responsabileProcedimentoNome: procedimento.responsabileProcedimentoNome,
@@ -989,7 +1009,7 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
           }
         : null,
     },
-    concessione: {
+    concessione: procedimento.concessione ? {
       id: procedimento.concessione.id,
       numeroAtto: procedimento.concessione.numeroAtto,
       stato: procedimento.concessione.stato,
@@ -1002,11 +1022,11 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
       canoneAnnuo: procedimento.concessione.canoneAnnuo ? Number(procedimento.concessione.canoneAnnuo) : null,
       categoriaCanone: procedimento.concessione.categoriaCanone,
       ente: procedimento.concessione.ente,
-    },
-    concessionario: procedimento.concessione.concessionario,
+    } : null,
+    concessionario: procedimento.concessione?.concessionario ?? null,
     criticitaCollegata: procedimento.criticita,
     altreCriticitaAperte,
-    pagamentiCritici: procedimento.concessione.pagamenti.map((item) => {
+    pagamentiCritici: (procedimento.concessione?.pagamenti ?? []).map((item) => {
       const importoDovuto = Number(item.importoDovuto);
       const importoVersato = Number(item.importoVersato);
 
@@ -1020,14 +1040,14 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
         dataScadenza: item.dataScadenza,
       };
     }),
-    scadenzeRilevanti: procedimento.concessione.scadenze.map((item) => ({
+    scadenzeRilevanti: (procedimento.concessione?.scadenze ?? []).map((item) => ({
       id: item.id,
       tipologia: item.tipologia,
       stato: item.stato,
       dataScadenza: item.dataScadenza,
       descrizione: item.descrizione,
     })),
-    sopralluoghiRecenti: procedimento.concessione.sopralluoghi.map((item) => ({
+    sopralluoghiRecenti: (procedimento.concessione?.sopralluoghi ?? []).map((item) => ({
       id: item.id,
       data: item.data,
       esito: item.esito,
@@ -1044,8 +1064,10 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
       url: item.url ?? `/documenti/${item.id}/download`,
       dataDocumento: item.dataDocumento,
       createdAt: item.createdAt,
+      currentFileVersionId: item.currentFileVersionId,
+      extraction: extractionByDocumentId[item.id],
     })),
-    reportCollegati: procedimento.concessione.report.map((item) => ({
+    reportCollegati: (procedimento.concessione?.report ?? []).map((item) => ({
       id: item.id,
       tipologia: item.tipologia,
       titolo: item.titolo,

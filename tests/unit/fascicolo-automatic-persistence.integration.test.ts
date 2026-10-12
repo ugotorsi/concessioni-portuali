@@ -89,6 +89,7 @@ run("automatic fascicolo persistence on temporary PostgreSQL", () => {
     await prisma.procedimento.create({
       data: {
         id: procedimentoId,
+        enteId: tenantId,
         concessioneId: `concession-${suffix}`,
         tipologia: "CHIARIMENTI",
         stato: "IN_CORSO",
@@ -359,6 +360,7 @@ run("automatic fascicolo persistence on temporary PostgreSQL", () => {
     await prisma.procedimento.create({
       data: {
         id: outsideProcedimentoId,
+        enteId: tenantId,
         concessioneId: `concession-${suffix}`,
         tipologia: "CHIARIMENTI",
         stato: "IN_CORSO",

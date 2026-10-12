@@ -5,9 +5,9 @@ export async function getFascicoloDocumentRequirementEvidenceData(procedimentoId
   const tenantContext = await getCurrentTenantContext();
   const procedimento = await prisma.procedimento.findUnique({
     where: { id: procedimentoId },
-    select: { id: true, concessione: { select: { enteId: true } } },
+    select: { id: true, enteId: true },
   });
-  const canonicalEnteId = procedimento?.concessione.enteId ?? null;
+  const canonicalEnteId = procedimento?.enteId ?? null;
   if (!procedimento || !canonicalEnteId) {
     return { hasCanonicalTenant: false, associationsByProposalId: {}, eligibleDocumentsByProposalId: {} };
   }

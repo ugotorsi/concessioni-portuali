@@ -173,15 +173,15 @@ export async function buildAiFascicoloSnapshotV1(procedimentoId: string) {
     where: { id: procedimentoId },
     select: {
       id: true,
+      enteId: true,
       concessioneId: true,
-      concessione: { select: { enteId: true } },
     },
   });
   if (!canonicalProcedimento) {
     throw new AiFascicoloSnapshotError("PROCEDIMENTO_NOT_FOUND");
   }
 
-  const canonicalEnteId = requiredValue(canonicalProcedimento.concessione).enteId;
+  const canonicalEnteId = canonicalProcedimento.enteId;
   if (!canonicalEnteId) {
     throw new AiFascicoloSnapshotError("SOURCE_INCONSISTENCY");
   }
@@ -217,12 +217,11 @@ export async function buildAiFascicoloSnapshotV1(procedimentoId: string) {
     throw new AiFascicoloSnapshotError("SOURCE_INCONSISTENCY");
   }
   requiredValue(detail.procedimento);
-  requiredValue(detail.concessione);
-  requiredValue(detail.concessionario);
 
   if (
     detail.procedimento.id !== canonicalProcedimento.id
-    || detail.concessione.id !== canonicalProcedimento.concessioneId
+    || (detail.concessione?.id ?? null) !== canonicalProcedimento.concessioneId
+    || (detail.concessione === null) !== (detail.concessionario === null)
     || detail.canonicalEnteId !== canonicalEnteId
     || !requirementData.hasCanonicalTenant
     || !evidenceData.hasCanonicalTenant
@@ -499,7 +498,7 @@ export async function buildAiFascicoloSnapshotV1(procedimentoId: string) {
       motivazioneMancatoPreavviso: nullableText(detail.procedimento.motivazioneMancatoPreavviso),
       createdAt: requiredIso(detail.procedimento.createdAt),
     },
-    concessione: {
+    concessione: detail.concessione ? {
       id: detail.concessione.id,
       numeroAtto: normalizeText(detail.concessione.numeroAtto),
       stato: detail.concessione.stato,
@@ -510,11 +509,11 @@ export async function buildAiFascicoloSnapshotV1(procedimentoId: string) {
       ubicazione: nullableText(detail.concessione.ubicazione),
       canoneAnnuo: decimalString(detail.concessione.canoneAnnuo),
       categoriaCanone: nullableText(detail.concessione.categoriaCanone),
-    },
-    concessionario: {
+    } : null,
+    concessionario: detail.concessionario ? {
       id: detail.concessionario.id,
       denominazione: normalizeText(detail.concessionario.denominazione),
-    },
+    } : null,
     requirements,
     evidence,
     humanReviewReceipts,

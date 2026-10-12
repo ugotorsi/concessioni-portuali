@@ -8,7 +8,12 @@ const { findManyMissions, countMissions, findManyHistoricalResults } = vi.hoiste
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    procedimento: { findUnique: vi.fn(async () => ({ concessione: { enteId: "tenant-1" } })) },
+    procedimento: {
+      findUnique: vi.fn(async () => ({ enteId: "tenant-1" })),
+      findFirst: vi.fn(async () => ({ id: "procedure-1" })),
+    },
+    documento: { findMany: vi.fn(async () => []) },
+    documentExtractionAttempt: { findMany: vi.fn(async () => []) },
     automaticFascicoloReport: { findMany: vi.fn(async () => []) },
     structuredFascicoloReportSnapshot: { findMany: vi.fn(async () => []) },
     asyncJob: { findMany: vi.fn(async () => []) },
@@ -19,6 +24,7 @@ vi.mock("@/lib/prisma", () => ({
 
 vi.mock("@/lib/tenant-auth", () => ({
   getCurrentTenantContext: vi.fn(async () => ({ userId: "user-1" })),
+  isTenantContextConstrained: vi.fn(() => false),
   requireTenantAccess: vi.fn(),
 }));
 

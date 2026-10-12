@@ -130,8 +130,8 @@ function buildRegistry(
     content.identityContext.procedimentoAlias !== "PROCEDIMENTO_A"
     || content.identityContext.enteAlias !== "ENTE_A"
     || content.procedimento.alias !== "PROCEDIMENTO_A"
-    || content.concessione.alias !== "TITOLO_A"
-    || content.concessionario.alias !== "CONCESSIONARIO_A"
+    || (content.concessione !== null && content.concessione.alias !== "TITOLO_A")
+    || (content.concessionario !== null && content.concessionario.alias !== "CONCESSIONARIO_A")
   ) {
     fail();
   }
@@ -161,8 +161,12 @@ function buildRegistry(
     "dataOsservazioniPreavviso",
   ]);
   addEntity("ENTE_A", "ENTE", content.identityContext, []);
-  addEntity("TITOLO_A", "CONCESSIONE", content.concessione, ["dataRilascio", "dataScadenza"]);
-  addEntity("CONCESSIONARIO_A", "CONCESSIONARIO", content.concessionario, []);
+  if (content.concessione) {
+    addEntity("TITOLO_A", "CONCESSIONE", content.concessione, ["dataRilascio", "dataScadenza"]);
+  }
+  if (content.concessionario) {
+    addEntity("CONCESSIONARIO_A", "CONCESSIONARIO", content.concessionario, []);
+  }
 
   content.procedimento.responsibilityAssignments.forEach((item, index) => {
     if (item.alias !== `ASSIGNMENT_${index + 1}`) {

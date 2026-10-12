@@ -59,15 +59,18 @@ export async function uploadFascicoloDocumentRequirementEvidence(input: UploadRe
       status: true,
       procedimento: {
         select: {
+          enteId: true,
           concessioneId: true,
-          concessione: { select: { enteId: true } },
         },
       },
     },
   });
-  const canonicalEnteId = proposal?.procedimento.concessione.enteId ?? null;
+  const canonicalEnteId = proposal?.procedimento.enteId ?? null;
   if (!proposal || !canonicalEnteId || proposal.enteId !== canonicalEnteId) {
     throw new Error("Proposta non disponibile o non coerente con il tenant canonico.");
+  }
+  if (!proposal.procedimento.concessioneId) {
+    throw new Error("Titolo concessorio non disponibile per il requisito istruttorio.");
   }
   if (proposal.status !== "VALIDATO") {
     throw new Error("Solo un requisito istruttorio validato puo ricevere un nuovo documento.");

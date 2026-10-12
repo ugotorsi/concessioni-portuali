@@ -72,7 +72,7 @@ describe("Lotto 7 operational proposal server actions", () => {
     mocks.canManageProcedimenti.mockReturnValue(true);
     mocks.canManageCriticita.mockReturnValue(true);
     mocks.getCurrentTenantContext.mockResolvedValue({ userId: "user-1", enteId: "tenant-1" });
-    mocks.findProcedure.mockResolvedValue({ concessioneId: "concession-1", concessione: { enteId: "tenant-1" } });
+    mocks.findProcedure.mockResolvedValue({ enteId: "tenant-1", concessioneId: "concession-1" });
     mocks.getWorkflow.mockResolvedValue({ structuredReport: { reportFingerprint: "a".repeat(64), payload: {} } });
     mocks.persistReport.mockResolvedValue({ snapshot: {
       id: "report-1", tenantId: "tenant-1", procedimentoId: "procedure-1", knowledgeRevisionId: "revision-1",

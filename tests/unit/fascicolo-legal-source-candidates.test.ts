@@ -30,7 +30,7 @@ describe("Fascicolo legal-source candidates", () => {
       isAdmin: false,
       accessibleTenantIds: ["ente-1"],
     });
-    procedimentoFindUniqueMock.mockResolvedValue({ concessione: { enteId: "ente-1" } });
+    procedimentoFindUniqueMock.mockResolvedValue({ enteId: "ente-1" });
     admissionFindManyMock.mockResolvedValue([{
       id: "admission-1",
       admittedAt: new Date("2026-09-14T10:02:00.000Z"),

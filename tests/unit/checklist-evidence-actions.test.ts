@@ -45,6 +45,7 @@ import {
 
 const procedimento = {
   id: "procedimento-1",
+  enteId: "ente-1",
   concessioneId: "concessione-1",
   concessione: { enteId: "ente-1" },
   tipologia: "ALTRO",
@@ -64,7 +65,7 @@ const evidence = {
   procedimentoId: "procedimento-1",
   documentoId: "documento-1",
   checklistItemCode: "COMUNICAZIONE_AVVIO_INVIATA",
-  procedimento: { concessioneId: "concessione-1", concessione: { enteId: "ente-1" } },
+  procedimento: { enteId: "ente-1", concessioneId: "concessione-1" },
   documento: { enteId: "ente-1", procedimentoId: "procedimento-1" },
 };
 
@@ -128,7 +129,7 @@ describe("checklist evidence actions", () => {
   });
 
   it("rejects a null canonical tenant", async () => {
-    prismaMock.procedimento.findUnique.mockResolvedValue({ ...procedimento, concessione: { enteId: null } });
+    prismaMock.procedimento.findUnique.mockResolvedValue({ ...procedimento, enteId: null });
     await expect(createChecklistEvidenceAction(createForm())).rejects.toThrow("tenant canonico");
     expect(prismaMock.$transaction).not.toHaveBeenCalled();
   });

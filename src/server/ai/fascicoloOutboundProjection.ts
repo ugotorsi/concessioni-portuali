@@ -90,10 +90,10 @@ export interface AiFascicoloOutboundProjectionV1 {
       readonly alias: "TITOLO_A";
       readonly dataRilascio: string;
       readonly dataScadenza: string;
-    };
+    } | null;
     readonly concessionario: {
       readonly alias: "CONCESSIONARIO_A";
-    };
+    } | null;
     readonly requirements: readonly {
       readonly alias: string;
       readonly createdAt: string;
@@ -386,8 +386,12 @@ function buildAiFascicoloOutboundV1(
   const usedAliases = new Set<string>();
   addMapping(mapping, usedAliases, "PROCEDIMENTO_A", "PROCEDIMENTO", procedimentoId);
   addMapping(mapping, usedAliases, "ENTE_A", "ENTE", source.identityContext.canonicalEnteId);
-  addMapping(mapping, usedAliases, "TITOLO_A", "CONCESSIONE", source.concessione.id);
-  addMapping(mapping, usedAliases, "CONCESSIONARIO_A", "CONCESSIONARIO", source.concessionario.id);
+  if (source.concessione) {
+    addMapping(mapping, usedAliases, "TITOLO_A", "CONCESSIONE", source.concessione.id);
+  }
+  if (source.concessionario) {
+    addMapping(mapping, usedAliases, "CONCESSIONARIO_A", "CONCESSIONARIO", source.concessionario.id);
+  }
   for (const item of assignments) {
     addMapping(mapping, usedAliases, resolveAlias(assignmentAliases, item.id), "RESPONSIBILITY_ASSIGNMENT", item.id);
   }
@@ -465,14 +469,14 @@ function buildAiFascicoloOutboundV1(
           comunicataAt: normalizeNullableDate(item.comunicataAt),
         })),
       },
-      concessione: {
+      concessione: source.concessione ? {
         alias: "TITOLO_A",
         dataRilascio: normalizeDate(source.concessione.dataRilascio),
         dataScadenza: normalizeDate(source.concessione.dataScadenza),
-      },
-      concessionario: {
+      } : null,
+      concessionario: source.concessionario ? {
         alias: "CONCESSIONARIO_A",
-      },
+      } : null,
       requirements: requirements.map((item) => ({
         alias: resolveAlias(requirementAliases, item.id),
         createdAt: normalizeDate(item.createdAt),

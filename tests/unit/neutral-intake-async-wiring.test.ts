@@ -19,6 +19,7 @@ import {
   applicationAsyncJobRegistry,
   drainOneApplicationAsyncJob,
 } from "@/server/async-jobs/applicationWorker";
+import { prisma } from "@/lib/prisma";
 import { normalizeAsyncJobAdmission } from "@/server/async-jobs/domain";
 import { AsyncJobExecutionError } from "@/server/async-jobs/worker";
 import {
@@ -258,6 +259,23 @@ describe("B2C9 Block 3B.2C NeutralIntake async extraction wiring", () => {
       leaseDurationMs: 300_000,
       registry: applicationAsyncJobRegistry,
     });
+  });
+
+  it("does not reconcile automatic research for an extraction-only worker", async () => {
+    worker.drainOneAsyncJob.mockResolvedValueOnce({ outcome: "IDLE" });
+    await expect(drainOneApplicationAsyncJob({
+      workerId: "worker-1",
+      retryDelayMs: 1_000,
+      operationAllowlist: ["DOCUMENT_EXTRACTION_V1"],
+      procedimentoAllowlist: ["procedure-canary"],
+      providerExecutionEnabled: false,
+    })).resolves.toEqual({ outcome: "IDLE" });
+
+    expect(worker.drainOneAsyncJob).toHaveBeenCalledWith(expect.objectContaining({
+      operationAllowlist: ["DOCUMENT_EXTRACTION_V1"],
+      procedimentoAllowlist: ["procedure-canary"],
+    }));
+    expect(prisma.automaticFascicoloReportMission.findMany).not.toHaveBeenCalled();
   });
 
   it("renews the five-minute lease every minute while extraction remains pending", async () => {

@@ -1,5 +1,3 @@
-import { randomUUID } from "node:crypto";
-
 import { archiveDocumentoAction, createDocumentoUploadAction } from "@/server/actions/documenti";
 import { FascicoloDocumentsArchive, type FascicoloDocumentArchiveItem } from "@/components/documents/FascicoloDocumentsArchive";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -11,6 +9,7 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
 import { DOCUMENT_CANALE_VALUES, DOCUMENT_DIREZIONE_VALUES } from "@/server/documents/protocollo";
 import { DOCUMENT_SOURCE_VALUES, DOCUMENT_STATUS_VALUES, DOCUMENT_TIPOLOGIA_VALUES } from "@/server/documents/validation";
+import type { DocumentExtractionReadModel } from "@/server/queries/document-extractions";
 
 interface EntityDocumentItem {
   id: string;
@@ -33,6 +32,8 @@ interface EntityDocumentItem {
   descrizione?: string | null;
   mittente?: string | null;
   url?: string | null;
+  currentFileVersionId?: string | null;
+  extraction?: DocumentExtractionReadModel;
 }
 
 interface EntityDocumentsPanelProps {
@@ -65,7 +66,6 @@ function EntityDocumentUploadForm({ hiddenFieldName, entityId }: { hiddenFieldNa
   return (
     <form action={createDocumentoUploadAction} className="grid gap-3 md:grid-cols-2">
       <input type="hidden" name={hiddenFieldName} value={entityId} />
-      <input type="hidden" name="intakeOperationId" value={randomUUID()} />
       <label className="text-sm text-slate-700 md:col-span-2">
         File
         <Input name="file" type="file" required />
@@ -141,6 +141,8 @@ function toArchiveItem(item: EntityDocumentItem, canUpload: boolean): FascicoloD
     originalHref: item.isFileAvailable === true && usesStoredFile ? `/documenti/${item.id}/download` : null,
     canArchive: canUpload && item.statoDocumento !== "ARCHIVIATO",
     details,
+    versionId: item.currentFileVersionId ?? null,
+    extraction: item.extraction,
   };
 }
 

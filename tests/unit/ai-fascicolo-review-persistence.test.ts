@@ -210,7 +210,7 @@ describe("trusted review material persistence", () => {
     vi.clearAllMocks();
     prismaMock.procedimento.findUnique.mockResolvedValue({
       id: "procedure-1",
-      concessione: { enteId: "ente-1" },
+      enteId: "ente-1",
     });
     getCurrentTenantContextMock.mockResolvedValue({
       role: "ADMIN",
@@ -250,7 +250,7 @@ describe("trusted review material persistence", () => {
 
     prismaMock.procedimento.findUnique.mockResolvedValueOnce({
       id: "procedure-1",
-      concessione: { enteId: null },
+      enteId: null,
     });
     await expectCode(persistAiFascicoloTrustedReviewMaterial(input()), "TENANT_MISMATCH");
   });
@@ -424,7 +424,7 @@ describe("trusted review material persistence", () => {
     await expectCode(persistAiFascicoloTrustedReviewMaterial(input()), "MATERIAL_IDENTITY_CONFLICT");
 
     vi.clearAllMocks();
-    prismaMock.procedimento.findUnique.mockResolvedValue({ id: "procedure-1", concessione: { enteId: "ente-1" } });
+    prismaMock.procedimento.findUnique.mockResolvedValue({ id: "procedure-1", enteId: "ente-1" });
     getCurrentTenantContextMock.mockResolvedValue({ role: "ADMIN", isAdmin: true, accessibleTenantIds: [] });
     identityBuilderMock.mockReturnValue(identity);
     tx.aiFascicoloTrustedReviewMaterial.findUnique.mockResolvedValue(null);

@@ -258,7 +258,10 @@ export async function getDocumentiFiltersData(): Promise<DocumentiFiltersData> {
     canali: DOCUMENT_CANALE_VALUES.map((value) => ({ value, label: formatEnumLabel(value) })),
     concessioni: concessioni.map((item) => ({ id: item.id, label: item.numeroAtto })),
     criticita: criticita.map((item) => ({ id: item.id, label: `${item.concessione.numeroAtto} - ${formatEnumLabel(item.tipologia)}` })),
-    procedimenti: procedimenti.map((item) => ({ id: item.id, label: `${item.concessione.numeroAtto} - ${formatEnumLabel(item.tipologia)}` })),
+    procedimenti: procedimenti.map((item) => ({
+      id: item.id,
+      label: `${item.concessione?.numeroAtto ?? "Titolo non accertato"} - ${formatEnumLabel(item.tipologia)}`,
+    })),
     sopralluoghi: sopralluoghi.map((item) => ({ id: item.id, label: `${item.concessione.numeroAtto} - ${item.data.toISOString().slice(0, 10)}` })),
     pagamenti: pagamenti.map((item) => ({ id: item.id, label: `${item.concessione.numeroAtto} - ${item.annoRiferimento}` })),
     report: report.map((item) => ({ id: item.id, label: item.titolo })),

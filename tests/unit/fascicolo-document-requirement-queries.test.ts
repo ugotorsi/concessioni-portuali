@@ -21,7 +21,7 @@ describe("P1-C1 document requirement query", () => {
     vi.clearAllMocks();
     getCurrentTenantContextMock.mockResolvedValue({});
     requireTenantAccessMock.mockImplementation(() => undefined);
-    prismaMock.procedimento.findUnique.mockResolvedValue({ id: "procedimento-1", concessione: { enteId: "ente-1" } });
+    prismaMock.procedimento.findUnique.mockResolvedValue({ id: "procedimento-1", enteId: "ente-1" });
     prismaMock.fascicoloDocumentRequirementProposal.findMany.mockResolvedValue([
       {
         id: "proposal-1",
@@ -57,7 +57,7 @@ describe("P1-C1 document requirement query", () => {
   });
 
   it("returns no data without a canonical tenant", async () => {
-    prismaMock.procedimento.findUnique.mockResolvedValue({ id: "procedimento-1", concessione: { enteId: null } });
+    prismaMock.procedimento.findUnique.mockResolvedValue({ id: "procedimento-1", enteId: null });
     await expect(getFascicoloDocumentRequirementProposals("procedimento-1")).resolves.toEqual({
       hasCanonicalTenant: false,
       proposals: [],

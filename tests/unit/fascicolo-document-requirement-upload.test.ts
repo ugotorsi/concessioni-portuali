@@ -63,7 +63,7 @@ const proposal = {
   enteId: "ente-1",
   procedimentoId: "procedimento-1",
   status: "VALIDATO",
-  procedimento: { concessioneId: "concessione-1", concessione: { enteId: "ente-1" } },
+  procedimento: { enteId: "ente-1", concessioneId: "concessione-1" },
 };
 const stored = {
   storageProvider: "s3" as const,

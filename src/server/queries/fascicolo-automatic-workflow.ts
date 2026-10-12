@@ -2,7 +2,9 @@ import type { AsyncJobStatus, ResearchMissionStatus } from "@/generated/prisma/e
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION } from "@/server/ai/fascicoloAutomaticAnalysisJob";
+import { createRealDataActivationPolicy } from "@/server/ai/realDataActivation";
 import { providerAnalysisPayloadV1Schema } from "@/server/ai/fascicoloAnalysis";
+import { DOCUMENT_EXTRACTION_OPERATION } from "@/server/documents/documentExtractionAdmission";
 import { buildStructuredFascicoloReport, type BuiltStructuredFascicoloReport } from "@/server/fascicolo-report";
 import { listOperationalProposals, type OperationalProposalRecord } from "@/server/fascicolo-operational-proposals";
 import { RESEARCH_MISSION_EXECUTION_OPERATION } from "@/server/legal-research/persistence";
@@ -24,6 +26,7 @@ import {
   loadCurrentStructuredKnowledge,
   type StructuredKnowledgeReadModel,
 } from "@/server/queries/fascicolo-knowledge";
+import { getFascicoloDocumentCorpus } from "@/server/queries/fascicolo-document-corpus";
 
 type JsonRecord = Readonly<Record<string, unknown>>;
 
@@ -53,6 +56,11 @@ function records(value: unknown): readonly JsonRecord[] {
 }
 
 export interface FascicoloAutomaticWorkflowReadModel {
+  analysisUpdate: {
+    status: "CURRENT" | "UPDATING" | "STALE" | "WAITING_AUTHORIZATION" | "ERROR";
+    corpusFingerprint: string;
+    currentRevisionFingerprint: string | null;
+  };
   knowledge: StructuredKnowledgeReadModel | null;
   structuredReport: BuiltStructuredFascicoloReport | null;
   structuredReportSnapshots: readonly {
@@ -187,9 +195,9 @@ export async function getFascicoloAutomaticWorkflowReadModel(
   if (!tenantContext) return null;
   const procedimento = await prisma.procedimento.findUnique({
     where: { id: procedimentoId },
-    select: { concessione: { select: { enteId: true } } },
+    select: { enteId: true },
   });
-  const tenantId = procedimento?.concessione.enteId ?? null;
+  const tenantId = procedimento?.enteId ?? null;
   if (!tenantId) return null;
   try {
     requireTenantAccess(tenantContext, tenantId, { mode: "read", allowWhenEnteMissing: false });
@@ -197,7 +205,7 @@ export async function getFascicoloAutomaticWorkflowReadModel(
     return null;
   }
 
-  const [reports, structuredReportSnapshots, candidateJobs, missions, historicalMissionCount, historicalResults, knowledge, operationalProposals] = await Promise.all([
+  const [reports, structuredReportSnapshots, candidateJobs, missions, historicalMissionCount, historicalResults, knowledge, operationalProposals, documentCorpus] = await Promise.all([
     prisma.automaticFascicoloReport.findMany({
       where: { tenantId, procedimentoId },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
@@ -230,7 +238,13 @@ export async function getFascicoloAutomaticWorkflowReadModel(
     prisma.asyncJob.findMany({
       where: {
         tenantId,
-        operation: { in: [FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION, RESEARCH_MISSION_EXECUTION_OPERATION] },
+        operation: {
+          in: [
+            FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
+            RESEARCH_MISSION_EXECUTION_OPERATION,
+            DOCUMENT_EXTRACTION_OPERATION,
+          ],
+        },
       },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       take: 200,
@@ -330,20 +344,64 @@ export async function getFascicoloAutomaticWorkflowReadModel(
     }),
     loadCurrentStructuredKnowledge(tenantId, procedimentoId),
     listOperationalProposals({ tenantId, procedimentoId }),
+    getFascicoloDocumentCorpus({ tenantId, procedimentoId }),
   ]);
+  if (!documentCorpus) return null;
 
   const analysisJobs = candidateJobs.filter((job) => job.operation === FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION);
   const researchJobs = candidateJobs.filter((job) => job.operation === RESEARCH_MISSION_EXECUTION_OPERATION);
+  const extractionJobs = candidateJobs.filter((job) => job.operation === DOCUMENT_EXTRACTION_OPERATION);
   const matchingJobs = analysisJobs.flatMap((job) => {
     const metadata = record(record(job.inputReference)?.metadata);
     return text(metadata?.procedimentoId) === procedimentoId
-      ? [{ ...job, documentVersionId: text(metadata?.extractionAttemptId) ?? "UNKNOWN" }]
+      ? [{
+          ...job,
+          documentVersionId:
+            text(metadata?.extractionAttemptId)
+            ?? "CORPUS",
+          corpusFingerprint: text(metadata?.corpusHash),
+        }]
       : [];
   });
-  const currentVersionId = matchingJobs[0]?.documentVersionId ?? null;
+  const currentCorpusJob = matchingJobs.find(
+    (job) => job.corpusFingerprint === documentCorpus.corpusFingerprint,
+  ) ?? null;
+  const providerAuthorized = process.env.ASYNC_PROVIDER_EXECUTION_ENABLED === "true"
+    && createRealDataActivationPolicy({
+      AI_REAL_DATA_ENABLED: process.env.AI_REAL_DATA_ENABLED,
+      AI_REAL_DATA_APPROVAL_ID: process.env.AI_REAL_DATA_APPROVAL_ID,
+      AI_PROVIDER_PROJECT_CLASS: process.env.AI_PROVIDER_PROJECT_CLASS,
+    }).enabled;
+  const extractionInProgress = extractionJobs.some((job) => {
+    const metadata = record(record(job.inputReference)?.metadata);
+    return text(metadata?.procedimentoId) === procedimentoId
+      && ["QUEUED", "RUNNING", "RETRY_WAIT"].includes(job.status);
+  });
+  const extractionFailed = documentCorpus.documents.some(
+    (document) => document.status === "EXTRACTION_FAILED" || document.status === "OCR_REQUIRED",
+  );
+  const analysisUpdateStatus =
+    knowledge?.revision.corpusFingerprint === documentCorpus.corpusFingerprint
+      ? "CURRENT" as const
+      : currentCorpusJob?.status === "TERMINAL_FAILED" || currentCorpusJob?.status === "CANCELLED"
+        ? "ERROR" as const
+        : currentCorpusJob && ["QUEUED", "RUNNING", "RETRY_WAIT"].includes(currentCorpusJob.status)
+          ? currentCorpusJob.status === "QUEUED" && !providerAuthorized
+            ? "WAITING_AUTHORIZATION" as const
+            : "UPDATING" as const
+          : extractionInProgress
+            ? "UPDATING" as const
+            : extractionFailed
+              ? "ERROR" as const
+              : "STALE" as const;
   const researchPolicy = evaluateAutomaticResearchPolicy({ tenantId });
 
   const readModel: Omit<FascicoloAutomaticWorkflowReadModel, "structuredReport" | "structuredReportSnapshots"> = {
+    analysisUpdate: {
+      status: analysisUpdateStatus,
+      corpusFingerprint: documentCorpus.corpusFingerprint,
+      currentRevisionFingerprint: knowledge?.revision.corpusFingerprint ?? null,
+    },
     knowledge,
     operationalProposals: operationalProposals as FascicoloAutomaticWorkflowReadModel["operationalProposals"],
     historicalMissionCount,
@@ -403,7 +461,8 @@ export async function getFascicoloAutomaticWorkflowReadModel(
       createdAt: job.createdAt,
       completedAt: job.completedAt,
       failureCode: job.failureCode,
-      superseded: currentVersionId !== null && job.documentVersionId !== currentVersionId,
+      superseded: job.corpusFingerprint !== null
+        && job.corpusFingerprint !== documentCorpus.corpusFingerprint,
     })),
     missions: missions.filter((mission) => mission.mode !== "ADVERSE_SEARCH").map((mission) => {
       const payload = record(mission.payload);

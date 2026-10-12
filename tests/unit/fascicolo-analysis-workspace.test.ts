@@ -91,6 +91,40 @@ describe("Fascicolo analysis workspace", () => {
     expect(html).not.toContain("Contraddizioni");
   });
 
+  it("renders corpus readiness separately from unavailable structured analysis", () => {
+    const html = render({
+      questions: [],
+      evidence: [],
+      contradictions: [],
+      gaps: [],
+      relevantItems: [],
+      corpus: {
+        availability: "PARTIAL",
+        documentCount: 3,
+        availableDocumentCount: 1,
+        textPageCount: 2,
+        documentsToVerify: [
+          { id: "doc-2", name: "Scansione.pdf", status: "OCR_REQUIRED" },
+          { id: "doc-3", name: "Allegato.pdf", status: "NOT_EXTRACTED" },
+          { id: "doc-4", name: "Errore.pdf", status: "EXTRACTION_FAILED" },
+        ],
+      },
+    });
+
+    expect(html).toContain("Corpus documentale");
+    expect(html).toContain("3");
+    expect(html).toContain("1 documenti · 2 pagine");
+    expect(html).toContain("Corpus parziale");
+    expect(html).toContain("Disponibilità del corpus");
+    expect(html).not.toContain("Analisi strutturata</dt>");
+    expect(html).toContain("Scansione.pdf: OCR necessario");
+    expect(html).toContain("Allegato.pdf: Testo non ancora estratto");
+    expect(html).toContain("Errore.pdf: Estrazione non riuscita");
+    expect(html).not.toContain("Errore.pdf: Testo non ancora estratto");
+    expect(html).toContain("non rappresenta ancora fatti o valutazioni giuridiche ricostruiti");
+    expect(html).toContain("L’analisi strutturata del fascicolo non è ancora disponibile.");
+  });
+
   it("uses the same UX for legacy and intake while preserving the instruction section", () => {
     const legacy = readFileSync("src/app/procedimenti/[id]/page.tsx", "utf8");
     const intake = readFileSync("src/components/procedimenti/FascicoloIntakeDetail.tsx", "utf8");
@@ -101,8 +135,8 @@ describe("Fascicolo analysis workspace", () => {
     expect(intake).toContain('activeSection === "analysis"');
     expect(intake).toContain("<FascicoloAnalysis");
     expect(legacy).not.toContain('["analysis", "istruttoria"].includes(activeSection)');
-    expect(legacy.match(/activeSection === "analysis"/g)).toHaveLength(1);
-    expect(legacy.match(/activeSection === "istruttoria"/g)).toHaveLength(5);
+    expect(legacy.match(/activeSection === "analysis"/g)).toHaveLength(2);
+    expect(legacy.match(/activeSection === "istruttoria"/g)).toHaveLength(6);
     expect(component).not.toContain("JSON.stringify");
     expect(component).not.toContain("<Table");
     expect(component).not.toContain("<pre");

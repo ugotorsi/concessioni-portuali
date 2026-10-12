@@ -76,12 +76,12 @@ export async function createChecklistEvidenceAction(formData: FormData) {
     where: { id: parsed.procedimentoId },
     select: {
       id: true,
+      enteId: true,
       concessioneId: true,
-      concessione: { select: { enteId: true } },
       ...checklistSelect,
     },
   });
-  const canonicalEnteId = procedimento?.concessione.enteId ?? null;
+  const canonicalEnteId = procedimento?.enteId ?? null;
   if (!procedimento || !canonicalEnteId) {
     throw new Error("Procedimento o tenant canonico non disponibile.");
   }
@@ -190,11 +190,11 @@ export async function reviewChecklistEvidenceAction(formData: FormData) {
       procedimentoId: true,
       documentoId: true,
       checklistItemCode: true,
-      procedimento: { select: { concessioneId: true, concessione: { select: { enteId: true } } } },
+      procedimento: { select: { enteId: true, concessioneId: true } },
       documento: { select: { enteId: true, procedimentoId: true } },
     },
   });
-  const canonicalEnteId = evidence?.procedimento.concessione.enteId ?? null;
+  const canonicalEnteId = evidence?.procedimento.enteId ?? null;
   if (
     !evidence ||
     evidence.status !== "PROPOSTO" ||

@@ -91,7 +91,7 @@ function documento(overrides: Record<string, unknown> = {}) {
     sizeBytes: null,
     currentFileVersionId: FILE_VERSION_ID,
     concessione: { enteId: TENANT_ID },
-    procedimento: { concessione: { enteId: TENANT_ID } },
+    procedimento: { enteId: TENANT_ID },
     currentFileVersion: fileVersion(),
     ...overrides,
   };

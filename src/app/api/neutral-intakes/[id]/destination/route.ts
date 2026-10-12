@@ -54,12 +54,12 @@ export async function POST(
     }),
     prisma.procedimento.findUnique({
       where: { id: input.data.procedimentoId },
-      select: { id: true, concessione: { select: { id: true, enteId: true } } },
+      select: { id: true, enteId: true, concessioneId: true },
     }),
   ]);
   if (!intake || !procedimento) return jsonError("Reference not found.", 404);
 
-  const procedimentoEnteId = procedimento.concessione.enteId;
+  const procedimentoEnteId = procedimento.enteId;
   try {
     if (!tenantContext || tenantContext.userId !== user.id) throw new Error("Tenant context unavailable.");
     requireTenantAccess(tenantContext, intake.enteId, { mode: "write", allowWhenEnteMissing: false });
@@ -71,7 +71,7 @@ export async function POST(
       entita: "NeutralIntake",
       entitaId: intake.id,
       enteId: intake.enteId,
-      concessioneId: procedimento.concessione.id,
+      concessioneId: procedimento.concessioneId,
       actor: { userId: user.id, userEmail: user.email, userRole: user.role },
       metadata: { reason: "TENANT_WRITE_DENIED", procedimentoId: procedimento.id },
     }).catch(() => undefined);
@@ -92,7 +92,7 @@ export async function POST(
       entita: "NeutralIntake",
       entitaId: intake.id,
       enteId: intake.enteId,
-      concessioneId: procedimento.concessione.id,
+      concessioneId: procedimento.concessioneId,
       actor: { userId: user.id, userEmail: user.email, userRole: user.role },
       metadata: {
         procedimentoId: procedimento.id,
@@ -112,7 +112,7 @@ export async function POST(
         entita: "NeutralIntake",
         entitaId: intake.id,
         enteId: intake.enteId,
-        concessioneId: procedimento.concessione.id,
+        concessioneId: procedimento.concessioneId,
         actor: { userId: user.id, userEmail: user.email, userRole: user.role },
         metadata: { reason: "DESTINATION_CONFLICT", procedimentoId: procedimento.id },
       }).catch(() => undefined);
@@ -124,7 +124,7 @@ export async function POST(
         entita: "NeutralIntake",
         entitaId: intake.id,
         enteId: intake.enteId,
-        concessioneId: procedimento.concessione.id,
+        concessioneId: procedimento.concessioneId,
         actor: { userId: user.id, userEmail: user.email, userRole: user.role },
         metadata: { reason: "HANDOFF_RETRY_REQUIRED", procedimentoId: procedimento.id },
       }).catch(() => undefined);
@@ -135,7 +135,7 @@ export async function POST(
       entita: "NeutralIntake",
       entitaId: intake.id,
       enteId: intake.enteId,
-      concessioneId: procedimento.concessione.id,
+      concessioneId: procedimento.concessioneId,
       actor: { userId: user.id, userEmail: user.email, userRole: user.role },
       metadata: { reason: "DESTINATION_ESTABLISHMENT_FAILED", procedimentoId: procedimento.id },
     }).catch(() => undefined);

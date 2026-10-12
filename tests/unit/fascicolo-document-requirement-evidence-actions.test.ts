@@ -65,8 +65,8 @@ const proposal = {
   procedimentoId: "procedimento-1",
   status: "VALIDATO",
   procedimento: {
+    enteId: "ente-1",
     concessioneId: "concessione-1",
-    concessione: { enteId: "ente-1" },
   },
 };
 

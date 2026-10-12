@@ -23,6 +23,7 @@ export interface ApplicationAsyncWorkerConfig {
   readonly errorBackoffMs: number;
   readonly operationAllowlist: readonly string[];
   readonly procedimentoAllowlist: readonly string[];
+  readonly dedicatedMode: boolean;
   readonly providerExecutionEnabled?: boolean;
 }
 
@@ -185,6 +186,7 @@ export function parseApplicationAsyncWorkerConfig(
     throw new ApplicationAsyncWorkerConfigurationError("INVALID_CONFIGURATION");
   }
   const providerExecutionEnabled = enabled(environment.ASYNC_PROVIDER_EXECUTION_ENABLED);
+  const dedicatedMode = enabled(environment.ASYNC_WORKER_DEDICATED_MODE);
   if (providerExecutionEnabled) {
     try {
       runtimeCostEstimate("ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR", environment);
@@ -195,6 +197,11 @@ export function parseApplicationAsyncWorkerConfig(
       }
       throw error;
     }
+  }
+  const operationAllowlist = allowlist(environment.ASYNC_WORKER_OPERATION_ALLOWLIST);
+  const procedimentoAllowlist = allowlist(environment.ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST);
+  if (dedicatedMode && (operationAllowlist.length === 0 || procedimentoAllowlist.length === 0)) {
+    throw new ApplicationAsyncWorkerConfigurationError("INVALID_CONFIGURATION");
   }
   return Object.freeze({
     workerId,
@@ -222,8 +229,9 @@ export function parseApplicationAsyncWorkerConfig(
       0,
       30 * 24 * 60 * 60 * 1_000,
     ),
-    operationAllowlist: allowlist(environment.ASYNC_WORKER_OPERATION_ALLOWLIST),
-    procedimentoAllowlist: allowlist(environment.ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST),
+    operationAllowlist,
+    procedimentoAllowlist,
+    dedicatedMode,
     providerExecutionEnabled,
   });
 }

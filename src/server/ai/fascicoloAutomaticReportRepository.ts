@@ -117,7 +117,7 @@ async function assertAuthority(tx: RepositoryClient, input: AutomaticFascicoloRe
   const [procedure, attempts, missionCount] = await Promise.all([
     tx.procedimento.findUnique({
       where: { id: input.procedimentoId },
-      select: { concessione: { select: { enteId: true } } },
+      select: { enteId: true },
     }),
     tx.neutralIntakeExtractionAttempt.findMany({
       where: { id: { in: input.documents.map((document) => document.documentVersionId) } },
@@ -151,7 +151,7 @@ async function assertAuthority(tx: RepositoryClient, input: AutomaticFascicoloRe
       && attempt.outcome === "SUCCEEDED";
   });
   const trigger = attemptsById.get(input.documentVersionId);
-  if (procedure?.concessione.enteId !== input.tenantId
+  if (procedure?.enteId !== input.tenantId
     || attempts.length !== input.documents.length
     || !corpusMatches
     || trigger?.neutralIntakeId !== input.neutralIntakeId

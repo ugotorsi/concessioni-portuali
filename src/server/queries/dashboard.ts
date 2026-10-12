@@ -487,11 +487,11 @@ export async function getDashboardData(): Promise<DashboardData> {
     riferimentoNormativo: string | null;
     dataScadenzaContraddittorio: Date | null;
     updatedAt: Date;
-    concessione: { numeroAtto: string };
+    concessione: { numeroAtto: string } | null;
   }) => ({
     id: item.id,
     tipologia: item.tipologia,
-    concessione: item.concessione.numeroAtto,
+    concessione: item.concessione?.numeroAtto ?? "Titolo concessorio non accertato",
     stato: item.stato,
     termineContraddittorio: item.dataScadenzaContraddittorio,
     riferimentoNormativo: item.riferimentoNormativo,

@@ -7,9 +7,9 @@ export async function getFascicoloSignalsForProcedimento(procedimentoId: string)
 
   const procedimento = await prisma.procedimento.findUnique({
     where: { id: procedimentoId },
-    select: { id: true, concessione: { select: { enteId: true } } },
+    select: { id: true, enteId: true },
   });
-  const enteId = procedimento?.concessione.enteId ?? null;
+  const enteId = procedimento?.enteId ?? null;
   if (!procedimento || !enteId) return [];
 
   try {

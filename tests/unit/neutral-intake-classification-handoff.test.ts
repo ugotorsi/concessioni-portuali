@@ -37,7 +37,7 @@ const intake = {
     procedimento: {
       id: "procedimento-1",
       concessioneId: "concessione-1",
-      concessione: { id: "concessione-1", enteId: "ente-1" },
+      enteId: "ente-1",
     },
   },
 };

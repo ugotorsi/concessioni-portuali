@@ -48,7 +48,7 @@ export interface AiFascicoloTrustedReviewMaterialsReadModelV1 {
 
 interface PersistedProcedimento {
   readonly id: string;
-  readonly concessione: { readonly enteId: string | null } | null;
+  readonly enteId: string;
 }
 
 interface PersistedMaterial {
@@ -72,7 +72,7 @@ interface PersistedMaterial {
 
 const PROCEDIMENTO_SELECT = {
   id: true,
-  concessione: { select: { enteId: true } },
+  enteId: true,
 } as const;
 
 const MATERIAL_SELECT = {
@@ -220,7 +220,7 @@ export async function getAiFascicoloTrustedReviewMaterialsReadModel(
       if (!procedimento) {
         throw new AiFascicoloTrustedReviewMaterialsQueryError("PROCEDIMENTO_NOT_FOUND");
       }
-      const canonicalEnteId = procedimento.concessione?.enteId;
+      const canonicalEnteId = procedimento.enteId;
       if (procedimento.id !== parsed.procedimentoId || !nonEmpty(canonicalEnteId)) {
         throw new AiFascicoloTrustedReviewMaterialsQueryError("TENANT_MISMATCH");
       }

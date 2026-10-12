@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   FASCICOLO_OPERATIONAL_PROPOSAL_POLICY_VERSION,
   OperationalProposalRepositoryError,
+  listOperationalProposals,
   materializeOperationalProposal,
   reconcileOperationalProposals,
   reviewOperationalProposal,
@@ -47,7 +48,7 @@ async function database() {
   await db.exec(`
     CREATE TABLE "Ente" ("id" TEXT PRIMARY KEY);
     CREATE TABLE "Concessione" ("id" TEXT PRIMARY KEY, "enteId" TEXT NOT NULL);
-    CREATE TABLE "Procedimento" ("id" TEXT PRIMARY KEY, "concessioneId" TEXT NOT NULL);
+    CREATE TABLE "Procedimento" ("id" TEXT PRIMARY KEY, "enteId" TEXT NOT NULL, "concessioneId" TEXT);
     CREATE TABLE "FascicoloKnowledgeRevision" (
       "id" TEXT PRIMARY KEY, "tenantId" TEXT NOT NULL, "procedimentoId" TEXT NOT NULL, "status" TEXT NOT NULL,
       UNIQUE ("id","tenantId","procedimentoId")
@@ -85,7 +86,11 @@ async function database() {
     CREATE TABLE "TestAuditEvent" ("azione" TEXT NOT NULL, "entitaId" TEXT, "metadata" JSONB NOT NULL);
     INSERT INTO "Ente" VALUES ('tenant-a'),('tenant-b');
     INSERT INTO "Concessione" VALUES ('concession-a','tenant-a'),('concession-b','tenant-b');
-    INSERT INTO "Procedimento" VALUES ('procedure-a','concession-a'),('procedure-b','concession-b');
+    INSERT INTO "Procedimento" VALUES
+      ('procedure-a','tenant-a','concession-a'),
+      ('procedure-b','tenant-b','concession-b'),
+      ('procedure-neutral','tenant-a',NULL),
+      ('procedure-inconsistent','tenant-a','concession-b');
     INSERT INTO "FascicoloKnowledgeRevision" VALUES
       ('revision-a','tenant-a','procedure-a','CURRENT'),('revision-b','tenant-b','procedure-b','CURRENT');
     INSERT INTO "StructuredFascicoloReportSnapshot" VALUES
@@ -147,6 +152,39 @@ afterEach(async () => {
 });
 
 describe("Lotto 7 operational proposal persistence", () => {
+  it("allows tenant-scoped reads without a concession while preserving tenant and concession authority", async () => {
+    const db = await database();
+    await expect(listOperationalProposals({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-neutral",
+    }, repositoryContext(db))).resolves.toEqual([]);
+    await expect(listOperationalProposals({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-a",
+    }, repositoryContext(db))).resolves.toEqual([]);
+    await expect(listOperationalProposals({
+      tenantId: "tenant-b",
+      procedimentoId: "procedure-neutral",
+    }, repositoryContext(db))).rejects.toMatchObject({ code: "AUTHORITY_MISMATCH" });
+    await expect(listOperationalProposals({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-inconsistent",
+    }, repositoryContext(db))).rejects.toMatchObject({ code: "AUTHORITY_MISMATCH" });
+  });
+
+  it("keeps write authority restricted to procedimenti with a tenant-consistent concession", async () => {
+    const db = await database();
+    const neutralCandidate = candidate("DEADLINE", { procedimentoId: "procedure-neutral" });
+    await expect(reconcileOperationalProposals({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-neutral",
+      knowledgeRevisionId: "revision-a",
+      structuredReportId: "report-a",
+      structuredReportFingerprint: reportFingerprint,
+      candidates: [neutralCandidate],
+    }, repositoryContext(db))).rejects.toMatchObject({ code: "AUTHORITY_MISMATCH" });
+  });
+
   it("reuses an unchanged proposal with its review and supersedes an approved changed proposal", async () => {
     const db = await database();
     const first = await reconcile(db, [candidate()]);

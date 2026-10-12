@@ -22,10 +22,10 @@ export async function getFascicoloObservations(procedimentoId: string) {
   const tenantContext = await getCurrentTenantContext();
   const procedimento = await prisma.procedimento.findUnique({
     where: { id: procedimentoId },
-    select: { concessione: { select: { enteId: true } } },
+    select: { enteId: true },
   });
 
-  const enteId = procedimento?.concessione.enteId ?? null;
+  const enteId = procedimento?.enteId ?? null;
   if (!procedimento || !enteId) {
     return [];
   }

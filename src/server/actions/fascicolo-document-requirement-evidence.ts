@@ -39,8 +39,8 @@ const evidenceContextSelect = {
       status: true,
       procedimento: {
         select: {
+          enteId: true,
           concessioneId: true,
-          concessione: { select: { enteId: true } },
         },
       },
     },
@@ -57,7 +57,7 @@ function resolvePersistedUserId(currentUserId: string): string | null {
 }
 
 function canonicalEnteIdForEvidence(evidence: EvidenceContext | null): string | null {
-  const canonicalEnteId = evidence?.proposal.procedimento.concessione.enteId ?? null;
+  const canonicalEnteId = evidence?.proposal.procedimento.enteId ?? null;
   if (
     !evidence
     || !canonicalEnteId
@@ -109,16 +109,20 @@ export async function createFascicoloDocumentRequirementEvidence(input: {
       status: true,
       procedimento: {
         select: {
+          enteId: true,
           concessioneId: true,
-          concessione: { select: { enteId: true } },
         },
       },
     },
   });
-  const canonicalEnteId = proposal?.procedimento.concessione.enteId ?? null;
+  const canonicalEnteId = proposal?.procedimento.enteId ?? null;
   if (!proposal || !canonicalEnteId || proposal.enteId !== canonicalEnteId) {
     throw new Error("Proposta non disponibile o non coerente con il tenant canonico.");
   }
+  if (!proposal.procedimento.concessioneId) {
+    throw new Error("Titolo concessorio non disponibile per il requisito istruttorio.");
+  }
+  const concessioneId = proposal.procedimento.concessioneId;
   if (proposal.status !== "VALIDATO") {
     throw new Error("Solo un requisito istruttorio validato puo ricevere evidenze associate.");
   }
@@ -146,7 +150,7 @@ export async function createFascicoloDocumentRequirementEvidence(input: {
     canonicalEnteId,
     proposalId: proposal.id,
     documentoId: documento.id,
-    concessioneId: proposal.procedimento.concessioneId,
+    concessioneId,
     createdByUserId,
     createdByActorId: currentUser.id,
     createdByEmail: currentUser.email,
