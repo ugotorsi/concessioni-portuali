@@ -1,6 +1,5 @@
-import { randomUUID } from "node:crypto";
-
 import { AppShell } from "@/components/layout/AppShell";
+import { DirectDocumentUploadForm } from "@/components/documents/DirectDocumentUploadForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
 import { Input } from "@/components/ui/Input";
@@ -9,7 +8,7 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
 import { BACKOFFICE_ROLES, requireRole } from "@/lib/auth";
 import { formatDateIT, formatEnumLabel } from "@/lib/utils";
-import { archiveDocumentoAction, createDocumentoUploadAction, updateDocumentoMetadataAction } from "@/server/actions/documenti";
+import { archiveDocumentoAction, updateDocumentoMetadataAction } from "@/server/actions/documenti";
 import { DOCUMENT_CANALE_VALUES, DOCUMENT_DIREZIONE_VALUES } from "@/server/documents/protocollo";
 import {
   DOCUMENT_STATO_VALUES,
@@ -127,8 +126,7 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
           <details className="rounded-md border border-slate-200 bg-white">
             <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-[#173d4f]">Carica documento</summary>
             <div className="border-t border-slate-200 p-4">
-              <form action={createDocumentoUploadAction} className="grid gap-3 md:grid-cols-3">
-                <input type="hidden" name="intakeOperationId" value={randomUUID()} />
+              <DirectDocumentUploadForm className="grid gap-3 md:grid-cols-3" submitLabel="Conferma caricamento">
                 <label className="text-sm text-slate-700 md:col-span-3">
                   File
                   <Input name="file" type="file" required />
@@ -291,10 +289,7 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
                     ))}
                   </Select>
                 </label>
-                <div className="md:col-span-3">
-                  <Button type="submit">Conferma caricamento</Button>
-                </div>
-              </form>
+              </DirectDocumentUploadForm>
             </div>
           </details>
         ) : null}

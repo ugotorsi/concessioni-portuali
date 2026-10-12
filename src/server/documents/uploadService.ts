@@ -18,13 +18,13 @@ const STAGING_PREVIEW_ADMIN_ID = "staging-preview-admin";
 const DOCUMENT_UPLOAD_EXTRACTION_POLICY_DECISION = "DOCUMENT_UPLOAD_EXTRACTION_ADMISSION_V1";
 const DOCUMENT_UPLOAD_EXTRACTION_ACTOR_ID = "document-upload-extraction-admission";
 
-interface UploadActor {
+export interface UploadActor {
   id: string;
   email: string | null;
   role: string;
 }
 
-interface UploadDocumentInput {
+export interface UploadDocumentInput {
   documentId: string;
   file: File;
   actor: UploadActor;
@@ -58,7 +58,9 @@ interface UploadDocumentInput {
   };
 }
 
-interface UploadTransactionExtension<Result> {
+export type StoredDocumentRegistrationInput = Omit<UploadDocumentInput, "file">;
+
+export interface UploadTransactionExtension<Result> {
   createRecord(tx: Prisma.TransactionClient): Promise<Result>;
   writeAudit(tx: Prisma.TransactionClient, result: Result): Promise<void>;
 }
@@ -88,7 +90,7 @@ function persistedUserId(actorId: string): string | null {
 
 function matchesExisting(
   existing: UploadedDocumentState,
-  input: UploadDocumentInput,
+  input: StoredDocumentRegistrationInput,
   checksum: string,
   storageKey: string,
 ) {
@@ -183,6 +185,25 @@ export async function uploadDocument<Result = never>(
       },
     });
     throw new Error("Caricamento documento non riuscito: errore durante la persistenza storage.");
+  }
+
+  return registerStoredDocument(input, stored, { existingStateChecked: true, existingState: existing });
+}
+
+export async function registerStoredDocument<Result = never>(
+  input: StoredDocumentRegistrationInput & { transactionExtension?: UploadTransactionExtension<Result> },
+  stored: StoredDocumentObject,
+  options: { existingStateChecked?: boolean; existingState?: UploadedDocumentState | null } = {},
+) {
+  const checksum = stored.sha256;
+  const storageKey = stored.storageKey;
+  const existing = options.existingStateChecked
+    ? options.existingState ?? null
+    : input.deterministicStorage
+      ? await findDocumentState(input.documentId)
+      : null;
+  if (existing && !matchesExisting(existing, input, checksum, storageKey)) {
+    throw new Error("Conflitto di idempotenza per il documento richiesto.");
   }
 
   const sourceFileVersionInput: CreateSourceFileVersionInput = {
@@ -327,7 +348,7 @@ export async function uploadDocument<Result = never>(
 
   try {
     const result = await runAtomicUnit(existing);
-    return { ...result, storageKey: stored.storageKey, checksum };
+    return { ...result, storageKey, checksum };
   } catch (error) {
     let sourceFileVersionRace = false;
     try {
@@ -346,7 +367,7 @@ export async function uploadDocument<Result = never>(
       throw new Error("Conflitto di idempotenza per il documento richiesto.");
     }
     const retried = await runAtomicUnit(concurrent);
-    return { ...retried, storageKey: stored.storageKey, checksum };
+    return { ...retried, storageKey, checksum };
   }
 }
 

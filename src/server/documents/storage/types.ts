@@ -13,6 +13,12 @@ export interface DocumentStorageGetOutput {
   body: Buffer;
 }
 
+export interface DocumentStorageHeadOutput {
+  sizeBytes: number;
+  mimeType: string;
+  metadata: Readonly<Record<string, string>>;
+}
+
 export type DocumentStorageReadResult =
   | { disposition: "FOUND"; body: Buffer }
   | { disposition: "MISSING" };

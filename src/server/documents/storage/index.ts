@@ -153,3 +153,14 @@ export async function storedDocumentExists(storageKey: string): Promise<boolean>
   const storage = getDocumentStorageAdapter();
   return storage.exists(storageKey);
 }
+
+export function requireS3DocumentStorage(): S3StorageAdapter {
+  if (getDocumentStorageBackend() !== "s3") {
+    throw new Error("Upload diretto disponibile solo con storage S3/R2.");
+  }
+  const storage = getDocumentStorageAdapter();
+  if (!(storage instanceof S3StorageAdapter)) {
+    throw new Error("Adapter storage S3/R2 non disponibile.");
+  }
+  return storage;
+}

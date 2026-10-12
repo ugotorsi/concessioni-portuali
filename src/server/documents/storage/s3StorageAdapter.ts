@@ -5,19 +5,21 @@ import {
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { getS3StorageConfig } from "./config";
 import type {
   DocumentStorageAdapter,
   DocumentStorageCreateResult,
   DocumentStorageGetOutput,
+  DocumentStorageHeadOutput,
   DocumentStoragePutInput,
   DocumentStorageReadResult,
   StoredDocumentObject,
 } from "./types";
 import { DocumentStorageReadLimitError, DocumentStorageReadUnavailableError } from "./types";
 
-type StorageOperation = "PUT" | "GET" | "DELETE" | "HEAD";
+type StorageOperation = "PUT" | "GET" | "DELETE" | "HEAD" | "PRESIGN";
 
 interface StorageDiagnostics {
   provider: "s3";
@@ -206,6 +208,52 @@ export class S3StorageAdapter implements DocumentStorageAdapter {
       mimeType: input.mimeType,
       originalName: input.originalName,
     };
+  }
+
+  async createPresignedPut(input: {
+    storageKey: string;
+    mimeType: string;
+    sizeBytes: number;
+    metadata: Readonly<Record<string, string>>;
+    expiresInSeconds: number;
+  }): Promise<string> {
+    const storageKey = assertSafeStorageKey(input.storageKey);
+    try {
+      return await getSignedUrl(this.client, new PutObjectCommand({
+        Bucket: this.config.bucket,
+        Key: storageKey,
+        ContentType: input.mimeType,
+        ContentLength: input.sizeBytes,
+        IfNoneMatch: "*",
+        Metadata: input.metadata,
+      }), { expiresIn: input.expiresInSeconds });
+    } catch (error) {
+      throw this.toS3Error("PRESIGN", error);
+    }
+  }
+
+  async head(storageKey: string): Promise<DocumentStorageHeadOutput | null> {
+    const safeKey = assertSafeStorageKey(storageKey);
+    try {
+      const response = await this.client.send(new HeadObjectCommand({
+        Bucket: this.config.bucket,
+        Key: safeKey,
+      }));
+      const sizeBytes = response.ContentLength;
+      if (!Number.isSafeInteger(sizeBytes) || (sizeBytes ?? 0) < 0) {
+        throw new Error("Dimensione oggetto storage non valida.");
+      }
+      return {
+        sizeBytes: sizeBytes ?? 0,
+        mimeType: response.ContentType?.trim().toLowerCase() ?? "",
+        metadata: response.Metadata ?? {},
+      };
+    } catch (error) {
+      const code = extractErrorCode(error);
+      const statusCode = extractStatusCode(error);
+      if (isNotFoundLike(code, statusCode)) return null;
+      throw this.toS3Error("HEAD", error);
+    }
   }
 
   async put(input: DocumentStoragePutInput): Promise<StoredDocumentObject> {

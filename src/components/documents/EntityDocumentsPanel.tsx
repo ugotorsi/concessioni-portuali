@@ -1,4 +1,5 @@
-import { archiveDocumentoAction, createDocumentoUploadAction } from "@/server/actions/documenti";
+import { archiveDocumentoAction } from "@/server/actions/documenti";
+import { DirectDocumentUploadForm } from "@/components/documents/DirectDocumentUploadForm";
 import { FascicoloDocumentsArchive, type FascicoloDocumentArchiveItem } from "@/components/documents/FascicoloDocumentsArchive";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
@@ -64,7 +65,7 @@ function getHiddenFieldName(entityType: EntityDocumentsPanelProps["entityType"])
 
 function EntityDocumentUploadForm({ hiddenFieldName, entityId }: { hiddenFieldName: string; entityId: string }) {
   return (
-    <form action={createDocumentoUploadAction} className="grid gap-3 md:grid-cols-2">
+    <DirectDocumentUploadForm className="grid gap-3 md:grid-cols-2" submitLabel="Conferma allegato">
       <input type="hidden" name={hiddenFieldName} value={entityId} />
       <label className="text-sm text-slate-700 md:col-span-2">
         File
@@ -107,8 +108,7 @@ function EntityDocumentUploadForm({ hiddenFieldName, entityId }: { hiddenFieldNa
           <label className="text-sm text-slate-700">Stato<Select name="status" required defaultValue="ATTIVO">{DOCUMENT_STATUS_VALUES.map((value) => <option key={value} value={value}>{formatEnumLabel(value)}</option>)}</Select></label>
         </div>
       </details>
-      <div className="md:col-span-2"><Button type="submit">Conferma allegato</Button></div>
-    </form>
+    </DirectDocumentUploadForm>
   );
 }
 

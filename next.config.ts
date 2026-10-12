@@ -8,6 +8,15 @@ const commonSecurityHeaders = [
 	{ key: "X-DNS-Prefetch-Control", value: "on" },
 ];
 
+function configuredStorageOrigin(): string | null {
+	try {
+		return process.env.S3_ENDPOINT ? new URL(process.env.S3_ENDPOINT).origin : null;
+	} catch {
+		return null;
+	}
+}
+
+const storageOrigin = configuredStorageOrigin();
 const productionContentSecurityPolicy = [
 	"default-src 'self'",
 	"base-uri 'self'",
@@ -18,7 +27,7 @@ const productionContentSecurityPolicy = [
 	"style-src 'self' 'unsafe-inline'",
 	"img-src 'self' data: blob:",
 	"font-src 'self' data:",
-	"connect-src 'self' https://vitals.vercel-insights.com",
+	`connect-src 'self' https://vitals.vercel-insights.com${storageOrigin ? ` ${storageOrigin}` : ""}`,
 	"worker-src 'self' blob:",
 	"manifest-src 'self'",
 	"upgrade-insecure-requests",

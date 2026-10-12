@@ -101,3 +101,24 @@ Cloudflare R2 e opzione consigliata per il backend S3-compatible per:
 
 La scelta resta intercambiabile con altri provider S3-compatible senza cambiare il modulo applicativo.
 
+### Upload diretti dal browser
+
+I file fino a 512 KiB continuano a usare la Server Action esistente. La soglia lascia margine rispetto al limite predefinito di 1 MiB del corpo delle Server Actions, inclusivo dell'overhead multipart. I file superiori usano un URL `PUT` presigned valido dieci minuti e trasferiscono il contenuto direttamente dal browser al bucket privato, evitando anche il limite di richiesta Vercel di 4,5 MB. Le credenziali S3/R2 restano esclusivamente sul server.
+
+Prima di firmare l'URL, il server verifica sessione, ruolo, tenant e riferimenti del fascicolo. Al completamento legge l'oggetto da R2, verifica chiave, metadati di ambito, dimensione, tipo effettivo e SHA-256 calcolato lato server, poi riusa la registrazione atomica di `Documento`, `SourceFileVersion`, audit e job di estrazione. Un tentativo interrotto puo essere ripreso con lo stesso identificativo operazione. Gli oggetti non confermati non vengono cancellati automaticamente; la loro eventuale bonifica deve usare una policy separata con periodo di conservazione e verifica dell'assenza di riferimenti DB.
+
+Il bucket R2 deve autorizzare soltanto l'origine operativa e gli header firmati:
+
+```json
+[
+  {
+    "AllowedOrigins": ["https://app.noetra.it"],
+    "AllowedMethods": ["PUT"],
+    "AllowedHeaders": ["Content-Type", "If-None-Match", "x-amz-meta-*"],
+    "ExposeHeaders": ["ETag"],
+    "MaxAgeSeconds": 3600
+  }
+]
+```
+
+Per ambienti di sviluppo aggiungere esplicitamente le relative origini senza usare `*`. `S3_ENDPOINT` viene inoltre inserito nella direttiva CSP `connect-src` durante la build.
