@@ -3,473 +3,210 @@ import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { Badge } from "@/components/ui/Badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/Table";
-import { formatCurrencyEUR, formatDateIT, formatEnumLabel } from "@/lib/utils";
+import { SectionHeader } from "@/components/ui/PageHeader";
 import { BACKOFFICE_ROLES, requireRole } from "@/lib/auth";
-import { isInvestorDemoMode } from "@/lib/investor-demo";
-import { investorDemoDashboard } from "@/lib/investor-demo-data";
+import {
+  buildDashboardFascicoloHref,
+  type DashboardFascicoloSection,
+} from "@/lib/dashboard-navigation";
+import { formatCurrencyEUR, formatDateIT, formatEnumLabel } from "@/lib/utils";
 import { getDashboardData } from "@/server/queries/dashboard";
-import { getVerticaliDashboardSummary } from "@/server/queries/verticali";
+import { getFascicoliIntakeList } from "@/server/queries/fascicolo-intake";
+import { getConcessionVerticalLabel } from "@/lib/concession-vertical-labels";
 
 export const dynamic = "force-dynamic";
 
-function getSeverityVariant(value: string): "default" | "success" | "warning" | "danger" {
-  if (value === "URGENTE" || value === "ALTA") {
-    return "danger";
-  }
-  if (value === "MEDIA") {
-    return "warning";
-  }
-  return "default";
-}
-
-function getStateVariant(value: string): "default" | "success" | "warning" | "danger" {
-  if (["SCADUTA", "SCADUTO", "NON_PAGATO", "INADEMPIUTO", "APERTA"].includes(value)) {
-    return "danger";
-  }
-  if (["PARZIALE", "IN_GESTIONE", "DA_AVVIARE", "IN_CORSO", "SOSPESA"].includes(value)) {
-    return "warning";
-  }
-  if (["PAGATO", "RISOLTA", "CONCLUSO", "ATTIVA", "ADEMPIUTO", "GESTITA"].includes(value)) {
-    return "success";
-  }
-  return "default";
-}
-
-function formatDeltaLabel(giorniDelta: number): string {
-  if (giorniDelta === 0) {
-    return "Scadenza oggi";
-  }
-
-  if (giorniDelta < 0) {
-    return `${Math.abs(giorniDelta)} gg di ritardo`;
-  }
-
-  return `${giorniDelta} gg residui`;
+interface AttentionItem {
+  id: string;
+  fascicoloId: string;
+  section?: DashboardFascicoloSection;
+  title: string;
+  description: string;
+  meta: string;
+  variant: "warning" | "danger";
 }
 
 export default async function DashboardPage() {
-  if (isInvestorDemoMode()) {
-    return (
-      <AppShell
-        title="Dashboard"
-        subtitle="Vista investitore su dati simulati e non persistiti"
-      >
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4" data-testid="investor-demo-dashboard">
-          <MetricCard title="Concessioni monitorate" value={investorDemoDashboard.concessioniMonitorate} description="Dataset dimostrativo" />
-          <MetricCard title="Procedimenti in istruttoria" value={investorDemoDashboard.procedimentiInIstruttoria} description="Stato simulato" tone="warning" />
-          <MetricCard title="Scadenze entro 90 giorni" value={investorDemoDashboard.scadenze90Giorni} description="Presidio dimostrativo" tone="warning" />
-          <MetricCard title="Possibili anomalie da verificare" value={investorDemoDashboard.anomalieDaVerificare} description="Segnalazioni simulate" tone="danger" />
-          <MetricCard title="Fonti documentali censite" value={investorDemoDashboard.fontiDocumentali} description="Raccolta simulata" />
-          <MetricCard title="Porti pilota" value={investorDemoDashboard.portiPilota} description="Perimetro dimostrativo" />
-        </section>
-
-        <section className="mt-4 grid gap-4 xl:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Contesto istituzionale simulato</CardTitle>
-              <CardDescription>{investorDemoDashboard.autorita}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="grid gap-2 text-sm text-slate-700">
-                {investorDemoDashboard.porti.map((porto) => (
-                  <li key={porto} className="rounded-md border border-slate-200 bg-slate-50 p-2">{porto}</li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Navigazione demo</CardTitle>
-              <CardDescription>Accesso rapido alle sezioni abilitate in modalita investitore</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-wrap gap-2">
-              <Link href="/concessioni" className="inline-flex h-10 items-center rounded-md border border-slate-300 px-3 text-sm font-medium hover:bg-slate-100">Concessioni</Link>
-              <Link href="/demo" className="inline-flex h-10 items-center rounded-md border border-slate-300 px-3 text-sm font-medium hover:bg-slate-100">Demo</Link>
-              <Link href="/verticali" className="inline-flex h-10 items-center rounded-md border border-slate-300 px-3 text-sm font-medium hover:bg-slate-100">Verticali</Link>
-              <Link href="/procedimenti" className="inline-flex h-10 items-center rounded-md border border-slate-300 px-3 text-sm font-medium hover:bg-slate-100">Procedimenti</Link>
-              <Link href="/documenti" className="inline-flex h-10 items-center rounded-md border border-slate-300 px-3 text-sm font-medium hover:bg-slate-100">Documenti</Link>
-              <Link href="/scadenze" className="inline-flex h-10 items-center rounded-md border border-slate-300 px-3 text-sm font-medium hover:bg-slate-100">Scadenze</Link>
-              <Link href="/normativa" className="inline-flex h-10 items-center rounded-md bg-slate-900 px-3 text-sm font-medium text-white hover:bg-slate-800">Normativa</Link>
-              <Link href="/normativa/orchestrazione" className="inline-flex h-10 items-center rounded-md border border-slate-300 px-3 text-sm font-medium hover:bg-slate-100">Orchestrazione</Link>
-            </CardContent>
-          </Card>
-        </section>
-      </AppShell>
-    );
-  }
-
   await requireRole(BACKOFFICE_ROLES);
-  const [data, verticaliSummary] = await Promise.all([getDashboardData(), getVerticaliDashboardSummary()]);
+  const [data, fascicoliIntake] = await Promise.all([
+    getDashboardData(),
+    getFascicoliIntakeList(),
+  ]);
+  const fascicoliRecenti = [
+    ...data.procedimentiInCorso.map((item) => ({
+      id: item.id,
+      title: item.concessione,
+      subtitle: formatEnumLabel(item.tipologia),
+      status: formatEnumLabel(item.stato),
+      updatedAt: item.updatedAt,
+    })),
+    ...fascicoliIntake.map((item) => ({
+      id: item.id,
+      title: item.denominazioneBreve || item.oggettoFascicolo,
+      subtitle: getConcessionVerticalLabel(item.tipologiaConcessione),
+      status: "In preparazione",
+      updatedAt: item.updatedAt,
+    })),
+  ]
+    .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
+    .slice(0, 5);
+  const contraddittorio = data.procedimentiInCorso.find((item) => item.termineContraddittorio);
+  const criticita = data.criticitaPrioritarie.find((item) => item.fascicoloId);
+  const scadenza = data.scadenzeImminenti.find((item) => item.fascicoloId);
+  const pagamento = data.pagamentiCritici.find((item) => item.fascicoloId);
+  const attentionItems: AttentionItem[] = [
+    ...(contraddittorio?.termineContraddittorio ? [{
+      id: `procedimento-${contraddittorio.id}`,
+      fascicoloId: contraddittorio.id,
+      section: "deadlines" as const,
+      title: "Termine del contraddittorio",
+      description: contraddittorio.concessione,
+      meta: formatDateIT(contraddittorio.termineContraddittorio),
+      variant: "warning" as const,
+    }] : []),
+    ...(criticita?.fascicoloId ? [{
+      id: `criticita-${criticita.id}`,
+      fascicoloId: criticita.fascicoloId,
+      section: "issues" as const,
+      title: formatEnumLabel(criticita.tipologia),
+      description: criticita.concessione,
+      meta: formatEnumLabel(criticita.gravita),
+      variant: "danger" as const,
+    }] : []),
+    ...(scadenza?.fascicoloId ? [{
+      id: `scadenza-${scadenza.id}`,
+      fascicoloId: scadenza.fascicoloId,
+      section: "deadlines" as const,
+      title: formatEnumLabel(scadenza.tipologia),
+      description: scadenza.concessione,
+      meta: formatDateIT(scadenza.data),
+      variant: "warning" as const,
+    }] : []),
+    ...(pagamento?.fascicoloId ? [{
+      id: `pagamento-${pagamento.id}`,
+      fascicoloId: pagamento.fascicoloId,
+      title: "Pagamento da verificare",
+      description: pagamento.concessione,
+      meta: formatCurrencyEUR(pagamento.residuo),
+      variant: "danger" as const,
+    }] : []),
+  ];
 
   return (
     <AppShell
       title="Dashboard"
       subtitle="Quadro operativo concessioni, criticità, scadenze e priorità istruttorie"
     >
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <MetricCard
-          title="Totale concessioni"
-          value={data.summary.totaleConcessioni}
-          description="Rapporti concessori attualmente censiti"
+      <section aria-labelledby="attenzione-oggi" className="space-y-4">
+        <SectionHeader
+          title="Richiede attenzione oggi"
+          description="Priorità operative, scadenze e posizioni che richiedono una verifica tempestiva."
         />
-        <MetricCard
-          title="Concessioni attive"
-          value={data.summary.concessioniAttive}
-          description="Posizioni operative in regolare esercizio"
-          tone="warning"
-        />
-        <MetricCard
-          title="Scadenza entro 90 giorni"
-          value={data.summary.concessioniInScadenza90}
-          description="Concessioni da pianificare per rinnovo o nuova procedura"
-          tone={data.summary.concessioniInScadenza90 > 0 ? "warning" : "default"}
-        />
-        <MetricCard
-          title="Criticità aperte"
-          value={data.summary.criticitaAperte}
-          description="Segnalazioni con istruttoria ancora aperta"
-          tone={data.summary.criticitaAperte > 0 ? "danger" : "default"}
-        />
-        <MetricCard
-          title="Criticità urgenti"
-          value={data.summary.criticitaUrgenti}
-          description="Elementi ad alta priorità operativa"
-          tone={data.summary.criticitaUrgenti > 0 ? "danger" : "default"}
-        />
-        <MetricCard
-          title="Morosità aperte"
-          value={data.summary.morositaAperte}
-          description="Posizioni critiche su canoni e versamenti"
-          tone={data.summary.morositaAperte > 0 ? "danger" : "default"}
-        />
-        <MetricCard
-          title="Pagamenti critici"
-          value={data.summary.pagamentiCritici}
-          description="Pagamenti non pagati, parziali o scaduti"
-          tone={data.summary.pagamentiCritici > 0 ? "danger" : "default"}
-        />
-        <MetricCard
-          title="Procedimenti in corso"
-          value={data.summary.procedimentiInCorso}
-          description="Procedimenti istruttori attivi"
-          tone={data.summary.procedimentiInCorso > 0 ? "warning" : "default"}
-        />
-        <MetricCard
-          title="Garanzie e polizze critiche"
-          value={data.summary.garanziePolizzeCritiche}
-          description="Scadute o in scadenza entro 60 giorni"
-          tone={data.summary.garanziePolizzeCritiche > 0 ? "danger" : "default"}
-        />
-        <MetricCard
-          title="Fonti normative"
-          value={data.summary.fontiNormative}
-          description="Archivio fonti e riferimenti regolatori"
-        />
-        <MetricCard
-          title="Norme in consultazione"
-          value={data.summary.versioniNormativeInConsultazione}
-          description="Versioni da monitorare con possibile impatto operativo"
-          tone={data.summary.versioniNormativeInConsultazione > 0 ? "warning" : "default"}
-        />
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <MetricCard
+            title="Scadenza entro 90 giorni"
+            value={data.summary.concessioniInScadenza90}
+            description="Concessioni da pianificare per rinnovo o nuova procedura"
+            tone={data.summary.concessioniInScadenza90 > 0 ? "warning" : "default"}
+            href="/scadenze?periodo=ENTRO_90_GIORNI"
+          />
+          <MetricCard
+            title="Criticità urgenti"
+            value={data.summary.criticitaUrgenti}
+            description="Elementi ad alta priorità operativa"
+            tone={data.summary.criticitaUrgenti > 0 ? "danger" : "default"}
+            href="/criticita?gravita=URGENTE"
+          />
+          <MetricCard
+            title="Morosità aperte"
+            value={data.summary.morositaAperte}
+            description="Posizioni critiche su canoni e versamenti"
+            tone={data.summary.morositaAperte > 0 ? "danger" : "default"}
+            href="/pagamenti?criticita=MOROSITA"
+          />
+          <MetricCard
+            title="Fascicoli in corso"
+            value={data.summary.procedimentiInCorso}
+            description="Fascicoli istruttori attivi"
+            tone={data.summary.procedimentiInCorso > 0 ? "warning" : "default"}
+            href="/procedimenti?stato=IN_CORSO"
+          />
+        </div>
+        {attentionItems.length > 0 ? (
+          <div className="grid gap-3 md:grid-cols-2">
+            {attentionItems.map((item) => (
+              <Link
+                key={item.id}
+                href={buildDashboardFascicoloHref(item.fascicoloId, item.section)}
+                aria-label={`${item.title}. ${item.description}. Apri il fascicolo`}
+                className="flex min-w-0 items-center justify-between gap-4 rounded-md border border-slate-200 bg-white px-4 py-3 transition-colors hover:border-[#0b7285] hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7285] focus-visible:ring-offset-2"
+              >
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold text-slate-950">{item.title}</span>
+                  <span className="mt-0.5 block truncate text-sm text-slate-600">{item.description}</span>
+                </span>
+                <Badge variant={item.variant}>{item.meta}</Badge>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <p className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+            Nessuna priorità immediata collegata ai fascicoli.
+          </p>
+        )}
       </section>
 
-      <section className="mt-4 grid gap-4 xl:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Verticali</CardTitle>
-            <CardDescription>
-              Dati disponibili nel perimetro corrente per i workspace verticali configurati.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3" data-testid="dashboard-verticali-operative">
-            <p className="text-sm text-slate-700">
-              Verticali configurate: <span className="font-semibold">{verticaliSummary.totalVerticaliConfigurate}</span>
-            </p>
-            <p className="text-sm text-slate-700">
-              Verticali con concessioni nel perimetro: <span className="font-semibold">{verticaliSummary.verticaliConConcessioniNelPerimetro}</span>
-            </p>
-
-            <div className="grid gap-2 sm:grid-cols-2">
-              {verticaliSummary.items.map((item) => (
-                <Link
-                  key={item.slug}
-                  href={`/verticali/${item.slug}`}
-                  className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 hover:bg-slate-100"
-                >
-                  <p className="font-medium">{item.label}</p>
-                  <p className="text-xs text-slate-600">Concessioni per verticale: {item.concessioniCount}</p>
-                </Link>
-              ))}
-            </div>
-
-            <div>
+      <section aria-labelledby="fascicoli-recenti" className="mt-6 space-y-4">
+        <SectionHeader
+          title="Fascicoli recenti"
+          description="Ultimi fascicoli operativi aggiornati."
+        />
+        {fascicoliRecenti.length > 0 ? (
+          <div className="divide-y divide-slate-200 rounded-md border border-slate-200 bg-white">
+            {fascicoliRecenti.map((item) => (
               <Link
-                href="/verticali"
-                className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
+                key={item.id}
+                href={buildDashboardFascicoloHref(item.id)}
+                aria-label={`Apri fascicolo ${item.title}`}
+                className="flex min-w-0 items-center justify-between gap-4 px-4 py-3 transition-colors first:rounded-t-md last:rounded-b-md hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0b7285]"
               >
-                Apri area verticali
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-semibold text-slate-950">{item.title}</span>
+                  <span className="mt-0.5 block text-sm text-slate-600">{item.subtitle}</span>
+                </span>
+                <span className="shrink-0 text-right">
+                  <Badge variant={item.status === "In corso" ? "warning" : "default"}>
+                    {item.status}
+                  </Badge>
+                  <span className="mt-1 block text-xs text-slate-500">{formatDateIT(item.updatedAt)}</span>
+                </span>
               </Link>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Scenari demo istituzionali</CardTitle>
-            <CardDescription>
-              Percorsi guidati su morosità Art. 47, occupazione difforme, regolarizzazione e art. 10-bis.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              <Link
-                href="/demo-scenari"
-                className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
-              >
-                Apri scenari demo
-              </Link>
-              <Link
-                href="/documenti"
-                className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"
-              >
-                Apri fascicolo documentale
-              </Link>
-              <Link
-                href="/mappa"
-                className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"
-              >
-                Apri mappa demo
-              </Link>
-              <Link
-                href="/demo-guidata"
-                className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"
-              >
-                Apri demo guidata AI
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Mappa concessioni e criticità</CardTitle>
-            <CardDescription>
-              Accesso rapido alla vista territoriale dimostrativa con marker geolocalizzati e link alle schede.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              <Link
-                href="/mappa"
-                className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
-              >
-                Apri mappa concessioni e criticità
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Criticità prioritarie</CardTitle>
-            <CardDescription>Massimo 6 elementi ordinati per gravità e data.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Gravità</TableHead>
-                  <TableHead>Tipologia</TableHead>
-                  <TableHead>Concessione</TableHead>
-                  <TableHead>Descrizione</TableHead>
-                  <TableHead>Rif. normativo</TableHead>
-                  <TableHead>Stato</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.criticitaPrioritarie.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>
-                      <Badge variant={getSeverityVariant(item.gravita)}>{formatEnumLabel(item.gravita)}</Badge>
-                    </TableCell>
-                    <TableCell>{formatEnumLabel(item.tipologia)}</TableCell>
-                    <TableCell className="font-medium text-slate-900">{item.concessione}</TableCell>
-                    <TableCell className="max-w-80 truncate">{item.descrizione}</TableCell>
-                    <TableCell>{item.riferimentoNormativo ?? "-"}</TableCell>
-                    <TableCell>
-                      <Badge variant={getStateVariant(item.stato)}>{formatEnumLabel(item.stato)}</Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {data.criticitaPrioritarie.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-slate-500">
-                      Nessuna criticità prioritaria presente.
-                    </TableCell>
-                  </TableRow>
-                ) : null}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Scadenze imminenti</CardTitle>
-            <CardDescription>Massimo 8 scadenze aperte o già scadute, ordinate per data.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Tipologia</TableHead>
-                  <TableHead>Concessione</TableHead>
-                  <TableHead>Stato</TableHead>
-                  <TableHead>Delta giorni</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.scadenzeImminenti.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>{formatDateIT(item.data)}</TableCell>
-                    <TableCell>{formatEnumLabel(item.tipologia)}</TableCell>
-                    <TableCell className="font-medium text-slate-900">{item.concessione}</TableCell>
-                    <TableCell>
-                      <Badge variant={getStateVariant(item.stato)}>{formatEnumLabel(item.stato)}</Badge>
-                    </TableCell>
-                    <TableCell className={item.giorniDelta < 0 ? "font-semibold text-rose-700" : "text-slate-700"}>
-                      {formatDeltaLabel(item.giorniDelta)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {data.scadenzeImminenti.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center text-slate-500">
-                      Nessuna scadenza imminente da monitorare.
-                    </TableCell>
-                  </TableRow>
-                ) : null}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+            ))}
+          </div>
+        ) : (
+          <p className="rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
+            Nessun fascicolo operativo disponibile.
+          </p>
+        )}
       </section>
 
-      <section className="mt-4 grid gap-4 xl:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Morosità e pagamenti critici</CardTitle>
-            <CardDescription>Posizioni con stato NON PAGATO, PARZIALE o SCADUTO.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Concessione</TableHead>
-                  <TableHead>Anno</TableHead>
-                  <TableHead>Dovuto</TableHead>
-                  <TableHead>Versato</TableHead>
-                  <TableHead>Residuo</TableHead>
-                  <TableHead>Stato</TableHead>
-                  <TableHead>Scadenza</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.pagamentiCritici.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium text-slate-900">{item.concessione}</TableCell>
-                    <TableCell>{item.anno}</TableCell>
-                    <TableCell>{formatCurrencyEUR(item.importoDovuto)}</TableCell>
-                    <TableCell>{formatCurrencyEUR(item.importoVersato)}</TableCell>
-                    <TableCell className="font-semibold text-rose-700">{formatCurrencyEUR(item.residuo)}</TableCell>
-                    <TableCell>
-                      <Badge variant={getStateVariant(item.stato)}>{formatEnumLabel(item.stato)}</Badge>
-                    </TableCell>
-                    <TableCell>{formatDateIT(item.dataScadenza)}</TableCell>
-                  </TableRow>
-                ))}
-                {data.pagamentiCritici.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center text-slate-500">
-                      Nessun pagamento critico presente.
-                    </TableCell>
-                  </TableRow>
-                ) : null}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Procedimenti in corso</CardTitle>
-            <CardDescription>Massimo 5 procedimenti non conclusi con focus sul contraddittorio.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tipologia</TableHead>
-                  <TableHead>Concessione</TableHead>
-                  <TableHead>Stato</TableHead>
-                  <TableHead>Termine contraddittorio</TableHead>
-                  <TableHead>Rif. normativo</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.procedimentiInCorso.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>{formatEnumLabel(item.tipologia)}</TableCell>
-                    <TableCell className="font-medium text-slate-900">{item.concessione}</TableCell>
-                    <TableCell>
-                      <Badge variant={getStateVariant(item.stato)}>{formatEnumLabel(item.stato)}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      {item.termineContraddittorio ? formatDateIT(item.termineContraddittorio) : "-"}
-                    </TableCell>
-                    <TableCell>{item.riferimentoNormativo ?? "-"}</TableCell>
-                  </TableRow>
-                ))}
-                {data.procedimentiInCorso.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center text-slate-500">
-                      Nessun procedimento in corso.
-                    </TableCell>
-                  </TableRow>
-                ) : null}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </section>
-
-      <section className="mt-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Azioni consigliate</CardTitle>
-            <CardDescription>Priorità operative generate automaticamente dal quadro attuale.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2 text-sm text-slate-700">
-              {data.azioniConsigliate.map((item, index) => (
-                <li key={`${index}-${item}`} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+      <section aria-label="Indicatori di contesto" className="mt-6 rounded-md border border-slate-200 bg-white p-4">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <MetricCard
+            compact
+            title="Totale concessioni"
+            value={data.summary.totaleConcessioni}
+            description="Rapporti censiti"
+          />
+          <MetricCard
+            compact
+            title="Concessioni attive"
+            value={data.summary.concessioniAttive}
+            description="In regolare esercizio"
+          />
+          <MetricCard compact title="Criticità aperte" value={data.summary.criticitaAperte} description="Istruttorie aperte" />
+          <MetricCard compact title="Garanzie critiche" value={data.summary.garanziePolizzeCritiche} description="Scadute o entro 60 giorni" />
+        </div>
       </section>
     </AppShell>
   );

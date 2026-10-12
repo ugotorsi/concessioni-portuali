@@ -10,6 +10,12 @@ import {
   mapTipologiaBeneToConcessionObjectType,
 } from "../src/lib/concession-vertical";
 import { resolveDemoEnteCodeForConcessione } from "../src/lib/tenant";
+import { assertDemoSeedAllowed } from "../src/lib/demo-seed-guard";
+import {
+  GAP_KEY,
+  RULE_CODE,
+  SOURCE_KEY,
+} from "../src/server/fascicolo-document-requirements/types";
 import { PrismaClient } from "../src/generated/prisma/client";
 import type {
   Art47CodNavLettera,
@@ -94,6 +100,7 @@ function buildAuditHash(payload: {
 }
 
 async function clearDemoData() {
+  await prisma.fascicoloDocumentRequirementProposal.deleteMany();
   await prisma.normaImpatto.deleteMany();
   await prisma.normaVersione.deleteMany();
   await prisma.normaFonte.deleteMany();
@@ -114,6 +121,7 @@ async function clearDemoData() {
 }
 
 async function main() {
+  assertDemoSeedAllowed(process.env);
   await clearDemoData();
 
   const demoCredentials: Array<{
@@ -250,6 +258,153 @@ async function main() {
       role: item.ruolo,
       isDefault: true,
     })),
+  });
+
+  const p1c1LegalSource = await prisma.legalSource.upsert({
+    where: { sourceKey: SOURCE_KEY },
+    create: {
+      sourceKey: SOURCE_KEY,
+      title: "L. 28 gennaio 1994 n. 84",
+      sourceType: "LEGGE",
+      status: "CURRENT_SUBJECT_TO_REVIEW",
+      role: "NORMATIVE",
+      legalRank: "NATIONAL_LAW",
+      territorialScope: "NATIONAL",
+      confidence: "MEDIUM",
+      sourceNumber: "84",
+      sourceDate: new Date("1994-01-28T00:00:00.000Z"),
+      humanReviewRequired: true,
+      isConformative: true,
+      isExtractable: false,
+      enteId: null,
+      authorityId: null,
+      portId: null,
+      effectiveFrom: null,
+      effectiveTo: null,
+      fileName: null,
+      filePath: null,
+      fileChecksumSha256: null,
+      fileMimeType: null,
+      fileSizeBytes: null,
+    },
+    update: {
+      title: "L. 28 gennaio 1994 n. 84",
+      sourceType: "LEGGE",
+      status: "CURRENT_SUBJECT_TO_REVIEW",
+      role: "NORMATIVE",
+      legalRank: "NATIONAL_LAW",
+      territorialScope: "NATIONAL",
+      confidence: "MEDIUM",
+      sourceNumber: "84",
+      sourceDate: new Date("1994-01-28T00:00:00.000Z"),
+      humanReviewRequired: true,
+      isConformative: true,
+      isExtractable: false,
+      enteId: null,
+      authorityId: null,
+      portId: null,
+      effectiveFrom: null,
+      effectiveTo: null,
+      fileName: null,
+      filePath: null,
+      fileChecksumSha256: null,
+      fileMimeType: null,
+      fileSizeBytes: null,
+    },
+  });
+
+  const p1c1LegalRule = await prisma.legalRule.upsert({
+    where: {
+      sourceId_ruleCode: {
+        sourceId: p1c1LegalSource.id,
+        ruleCode: RULE_CODE,
+      },
+    },
+    create: {
+      sourceId: p1c1LegalSource.id,
+      ruleCode: RULE_CODE,
+      title: "Verifica autorizzazione ex art. 16 per concessioni ex art. 18",
+      summary:
+        "Per una concessione ex art. 18 con attività OPERAZIONI_PORTUALI proporre esclusivamente la verifica del titolo autorizzatorio ex art. 16.",
+      category: "DOCUMENTAZIONE",
+      status: "BOZZA",
+      priority: 100,
+      enteId: null,
+      portId: null,
+      matchConcessionVertical: null,
+      matchObjectType: null,
+      matchAttivita: null,
+      matchAwardingProcedure: null,
+      matchFeeRegime: null,
+      matchComparativeStatus: null,
+      requiresRilevanzaArt47: null,
+      matchArt47Letter: null,
+      requiresMorosita: null,
+      requiresPolizzaValida: null,
+      outputSeverity: "MEDIA",
+      outcomeTitle: "Verifica titolo autorizzatorio ex art. 16 L. 84/1994",
+      outcomeSummary:
+        "Sottoporre a verifica umana l'applicabilità del requisito istruttorio senza attestare esistenza, validità, efficacia o sufficienza del titolo.",
+      disclaimer:
+        "La proposta indica esclusivamente un'attività istruttoria da verificare e non determina l'esito del procedimento.",
+      humanReviewRequired: true,
+    },
+    update: {
+      title: "Verifica autorizzazione ex art. 16 per concessioni ex art. 18",
+      summary:
+        "Per una concessione ex art. 18 con attività OPERAZIONI_PORTUALI proporre esclusivamente la verifica del titolo autorizzatorio ex art. 16.",
+      category: "DOCUMENTAZIONE",
+      status: "BOZZA",
+      priority: 100,
+      enteId: null,
+      portId: null,
+      matchConcessionVertical: null,
+      matchObjectType: null,
+      matchAttivita: null,
+      matchAwardingProcedure: null,
+      matchFeeRegime: null,
+      matchComparativeStatus: null,
+      requiresRilevanzaArt47: null,
+      matchArt47Letter: null,
+      requiresMorosita: null,
+      requiresPolizzaValida: null,
+      outputSeverity: "MEDIA",
+      outcomeTitle: "Verifica titolo autorizzatorio ex art. 16 L. 84/1994",
+      outcomeSummary:
+        "Sottoporre a verifica umana l'applicabilità del requisito istruttorio senza attestare esistenza, validità, efficacia o sufficienza del titolo.",
+      disclaimer:
+        "La proposta indica esclusivamente un'attività istruttoria da verificare e non determina l'esito del procedimento.",
+      humanReviewRequired: true,
+    },
+  });
+
+  await prisma.documentGap.upsert({
+    where: { gapKey: GAP_KEY },
+    create: {
+      gapKey: GAP_KEY,
+      ruleId: p1c1LegalRule.id,
+      title: "Verifica titolo autorizzatorio ex art. 16 L. 84/1994",
+      description:
+        "Requisito istruttorio di verifica del titolo autorizzatorio ex art. 16 senza presupporne esistenza, validità, efficacia o sufficienza.",
+      severity: "MEDIA",
+      status: "APERTA",
+      requiredDocumentTypes: [],
+      humanReviewRequired: true,
+      enteId: null,
+      portId: null,
+    },
+    update: {
+      ruleId: p1c1LegalRule.id,
+      title: "Verifica titolo autorizzatorio ex art. 16 L. 84/1994",
+      description:
+        "Requisito istruttorio di verifica del titolo autorizzatorio ex art. 16 senza presupporne esistenza, validità, efficacia o sufficienza.",
+      severity: "MEDIA",
+      status: "APERTA",
+      requiredDocumentTypes: [],
+      humanReviewRequired: true,
+      enteId: null,
+      portId: null,
+    },
   });
 
   const concessionariData = [
@@ -1281,6 +1436,7 @@ async function main() {
     data: [
       {
         concessioneId: concessioniByKey["con-005"],
+        enteId: concessioneEnteById[concessioniByKey["con-005"]],
         criticitaId: criticitaByKey["crit-004"],
         tipologia: "CHIARIMENTI",
         checklistProfile: "PORTUALE_ADSP",
@@ -1318,6 +1474,7 @@ async function main() {
       },
       {
         concessioneId: concessioniByKey["con-002"],
+        enteId: concessioneEnteById[concessioniByKey["con-002"]],
         criticitaId: criticitaByKey["crit-001"],
         tipologia: "DIFFIDA",
         checklistProfile: "PORTUALE_ADSP",
@@ -1354,6 +1511,7 @@ async function main() {
       },
       {
         concessioneId: concessioniByKey["con-006"],
+        enteId: concessioneEnteById[concessioniByKey["con-006"]],
         criticitaId: criticitaByKey["crit-005"],
         tipologia: "AVVIO_DECADENZA",
         checklistProfile: "PORTUALE_ADSP",
@@ -1387,6 +1545,7 @@ async function main() {
       },
       {
         concessioneId: concessioniByKey["con-001"],
+        enteId: concessioneEnteById[concessioniByKey["con-001"]],
         criticitaId: criticitaByKey["crit-003"],
         tipologia: "ORDINE_RIPRISTINO",
         checklistProfile: "PORTUALE_ADSP",
@@ -1399,6 +1558,7 @@ async function main() {
       },
       {
         concessioneId: concessioniByKey["con-003"],
+        enteId: concessioneEnteById[concessioniByKey["con-003"]],
         criticitaId: criticitaByKey["crit-001"],
         checklistProfile: "PORTUALE_ADSP",
         tipologia: "RECUPERO_CANONI",
@@ -1411,6 +1571,7 @@ async function main() {
       },
       {
         concessioneId: concessioniByKey["con-006"],
+        enteId: concessioneEnteById[concessioniByKey["con-006"]],
         criticitaId: criticitaByKey["crit-005"],
         checklistProfile: "PORTUALE_ADSP",
         tipologia: "AVVIO_DECADENZA",
@@ -1423,6 +1584,7 @@ async function main() {
       },
       {
         concessioneId: concessioniByKey["con-007"],
+        enteId: concessioneEnteById[concessioniByKey["con-007"]],
         criticitaId: criticitaByKey["crit-006"],
         checklistProfile: "PORTUALE_ADSP",
         tipologia: "AVVIO_REVOCA",
@@ -1435,6 +1597,7 @@ async function main() {
       },
       {
         concessioneId: concessioniByKey["con-002"],
+        enteId: concessioneEnteById[concessioniByKey["con-002"]],
         tipologia: "NUOVA_PROCEDURA",
         checklistProfile: "TURISTICO_RICREATIVO",
         riferimentoNormativo: "art. 18 l. 84/1994",

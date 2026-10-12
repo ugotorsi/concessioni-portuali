@@ -1,9 +1,4 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-
-import { investorDemoIdentity } from "@/lib/investor-demo-data";
-import { isInvestorDemoMode } from "@/lib/investor-demo";
-import { getAuthSession } from "@/lib/next-auth";
 
 export const DEMO_ROLES = [
   "ADMIN",
@@ -24,8 +19,6 @@ export const BACKOFFICE_ROLES: DemoRole[] = [
   "ECONOMICO",
 ];
 
-export const DEMO_ROLE_COOKIE = "cp_demo_role";
-
 export interface CurrentUser {
   id: string;
   email: string;
@@ -41,42 +34,24 @@ function isDemoRole(value: string | undefined): value is DemoRole {
   return DEMO_ROLES.includes(value as DemoRole);
 }
 
-export async function getCurrentRole(): Promise<DemoRole | null> {
-  if (isInvestorDemoMode()) {
-    return "ADMIN";
-  }
+async function loadAuthSession() {
+  const { getAuthSession } = await import("@/lib/next-auth");
+  return getAuthSession();
+}
 
-  const session = await getAuthSession();
+export async function getCurrentRole(): Promise<DemoRole | null> {
+  const session = await loadAuthSession();
   const sessionRole = session?.user?.role;
 
   if (isDemoRole(sessionRole)) {
     return sessionRole;
   }
 
-  // Temporary fallback for local demo continuity while transitioning from cookie auth.
-  if (process.env.NODE_ENV !== "production") {
-    const cookieStore = await cookies();
-    const role = cookieStore.get(DEMO_ROLE_COOKIE)?.value;
-
-    if (isDemoRole(role)) {
-      return role;
-    }
-  }
-
   return null;
 }
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
-  if (isInvestorDemoMode()) {
-    return {
-      id: investorDemoIdentity.tenantId,
-      email: "investor-demo@local",
-      name: investorDemoIdentity.userName,
-      role: "ADMIN",
-    };
-  }
-
-  const session = await getAuthSession();
+  const session = await loadAuthSession();
   const role = session?.user?.role;
 
   if (session?.user?.email && session.user.id && isDemoRole(role)) {
@@ -135,7 +110,7 @@ export function getRoleLabel(role: DemoRole): string {
 export function getRoleDescription(role: DemoRole): string {
   switch (role) {
     case "ADMIN":
-      return "Accesso completo alla vista Back-office società in modalità dimostrativa.";
+      return "Accesso completo alla vista Back-office società.";
     case "OPERATORE_SOCIETA":
       return "Profilo operativo Back-office società per monitoraggio e coordinamento.";
     case "GIURIDICO":
@@ -147,7 +122,7 @@ export function getRoleDescription(role: DemoRole): string {
     case "VIEWER_ADSP":
       return "Vista consultiva AdSP con focus su report validati e quadro sintetico.";
     default:
-      return "Profilo demo";
+      return "Profilo applicativo";
   }
 }
 
@@ -171,11 +146,27 @@ export function canValidateReport(role: DemoRole): boolean {
   return ["ADMIN", "GIURIDICO"].includes(role);
 }
 
+export function canRegisterProcedimentoDecision(role: DemoRole): boolean {
+  return ["ADMIN", "GIURIDICO"].includes(role);
+}
+
+export function canFinalizeProcedimentoDecision(role: DemoRole): boolean {
+  return canRegisterProcedimentoDecision(role);
+}
+
 export function canViewNormativa(_role: DemoRole): boolean {
   return true;
 }
 
 export function canManageNormativaUpdate(role: DemoRole): boolean {
+  return ["ADMIN", "OPERATORE_SOCIETA", "GIURIDICO"].includes(role);
+}
+
+export function canManageConcessioneLegalClassification(role: DemoRole): boolean {
+  return ["ADMIN", "OPERATORE_SOCIETA", "GIURIDICO"].includes(role);
+}
+
+export function canManageConcessioneExpiry(role: DemoRole): boolean {
   return ["ADMIN", "OPERATORE_SOCIETA", "GIURIDICO"].includes(role);
 }
 

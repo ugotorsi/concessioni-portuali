@@ -5,6 +5,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { ReportTipologiaBadge, ReportValidatoBadge } from "@/components/report/ReportBadges";
 import { ReportFiltersBar } from "@/components/report/ReportFiltersBar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { ClickableTableRow } from "@/components/ui/ClickableTableRow";
 import {
   Table,
   TableBody,
@@ -110,71 +111,24 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
     >
       <ResumeDemoBanner />
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Totale report</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-slate-900">{summary.totaleReport}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Validati</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-emerald-700">{summary.reportValidati}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Non validati</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-rose-700">{summary.reportNonValidati}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Mensili</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-slate-900">{summary.reportMensili}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Dossier istruttori</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-amber-700">{summary.dossierIstruttori}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Report criticità</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-rose-700">{summary.reportCriticita}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Report morosità</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-rose-700">{summary.reportMorosita}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Proposte bando</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-amber-700">{summary.proposteBando}</p>
-          </CardContent>
-        </Card>
+      <section aria-label="Riepilogo report">
+        <dl className="grid overflow-hidden rounded-md border border-slate-200 bg-white sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
+          {[
+            ["Totale", summary.totaleReport],
+            ["Validati", summary.reportValidati],
+            ["Da validare", summary.reportNonValidati],
+            ["Mensili", summary.reportMensili],
+            ["Dossier", summary.dossierIstruttori],
+            ["Criticità", summary.reportCriticita],
+            ["Morosità", summary.reportMorosita],
+            ["Proposte bando", summary.proposteBando],
+          ].map(([label, value]) => (
+            <div key={label} className="border-b border-slate-200 px-4 py-3 last:border-b-0 sm:border-r lg:border-b-0">
+              <dt className="text-xs font-medium text-slate-600">{label}</dt>
+              <dd className="mt-1 text-2xl font-semibold text-slate-950">{value}</dd>
+            </div>
+          ))}
+        </dl>
       </section>
 
       <section className="mt-4">
@@ -215,61 +169,37 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
                   <TableHead>Formato</TableHead>
                   <TableHead>Validato</TableHead>
                   <TableHead>Creato il</TableHead>
-                  <TableHead>Azioni</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {listData.items.map((item) => {
-                  const isCritico =
-                    !item.validato ||
-                    item.tipologia === "DOSSIER_ISTRUTTORIO" ||
-                    item.tipologia === "REPORT_MOROSITA" ||
-                    item.tipologia === "PROPOSTA_BANDO" ||
-                    item.tipologia === "REPORT_CRITICITA";
-
-                  const rowClassName = !item.validato
-                    ? "bg-rose-50"
-                    : isCritico
-                      ? "bg-amber-50"
-                      : "";
-
-                  return (
-                    <TableRow key={item.id} className={rowClassName}>
+                {listData.items.map((item) => (
+                    <ClickableTableRow key={item.id} href={`/report/${item.id}`} label={`Apri report ${item.titolo}`}>
                       <TableCell>
                         <ReportTipologiaBadge value={item.tipologia} />
                       </TableCell>
-                      <TableCell className="max-w-96 truncate font-medium text-slate-900">{item.titolo}</TableCell>
-                      <TableCell>{item.concessione?.numeroAtto ?? "-"}</TableCell>
+                      <TableCell className="max-w-96 truncate font-medium text-slate-900">
+                        <Link href={`/report/${item.id}`} className="text-[#173d4f] underline decoration-slate-300 underline-offset-4 hover:decoration-[#173d4f]">
+                          {item.titolo}
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        {item.concessione ? (
+                          <Link href={`/concessioni/${item.concessione.id}`} className="text-[#173d4f] underline decoration-slate-300 underline-offset-4 hover:decoration-[#173d4f]">
+                            {item.concessione.numeroAtto}
+                          </Link>
+                        ) : "-"}
+                      </TableCell>
                       <TableCell>{item.concessione?.concessionario.denominazione ?? "-"}</TableCell>
                       <TableCell>{formatEnumLabel(item.formato)}</TableCell>
                       <TableCell>
                         <ReportValidatoBadge value={item.validato} />
                       </TableCell>
                       <TableCell>{formatDateIT(item.createdAt)}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-col gap-1">
-                          <Link
-                            href={`/report/${item.id}`}
-                            className="text-sm font-medium text-slate-900 underline underline-offset-4"
-                          >
-                            Apri report
-                          </Link>
-                          {item.concessione ? (
-                            <Link
-                              href={`/concessioni/${item.concessione.id}`}
-                              className="text-xs text-slate-600 underline underline-offset-4"
-                            >
-                              Concessione
-                            </Link>
-                          ) : null}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                    </ClickableTableRow>
+                ))}
                 {listData.items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center text-slate-500">
+                    <TableCell colSpan={7} className="text-center text-slate-500">
                       Nessun report trovato con i filtri correnti.
                     </TableCell>
                   </TableRow>

@@ -1,9 +1,17 @@
 import { createHash } from "node:crypto";
 
-import { getDocumentStorageBackend } from "./config";
+import { getDocumentStorageBackend, getS3StorageConfig } from "./config";
 import { LocalStorageAdapter } from "./localStorageAdapter";
 import { S3StorageAdapter } from "./s3StorageAdapter";
-import type { DocumentStorageAdapter, DocumentStorageBackend, StoredDocumentObject } from "./types";
+import type {
+  DocumentStorageAdapter,
+  DocumentStorageBackend,
+  DocumentStorageCreateResult,
+  DocumentStoragePutInput,
+  DocumentStorageReadResult,
+  StoredDocumentObject,
+} from "./types";
+import { DocumentStorageReadCoherenceError } from "./types";
 
 function sanitizeFileName(fileName: string): string {
   const base = fileName.replace(/[^a-zA-Z0-9._-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
@@ -13,6 +21,18 @@ function sanitizeFileName(fileName: string): string {
 function buildStorageKey(documentId: string, originalName: string): string {
   const now = Date.now();
   return `${documentId}/${now}-${sanitizeFileName(originalName)}`;
+}
+
+async function fileStorageInput(file: File) {
+  const arrayBuffer = await file.arrayBuffer();
+  const body = Buffer.from(arrayBuffer);
+  const sha256 = createHash("sha256").update(body).digest("hex");
+
+  return { body, sha256 };
+}
+
+export async function computeDocumentFileSha256(file: File): Promise<string> {
+  return (await fileStorageInput(file)).sha256;
 }
 
 let adapter: DocumentStorageAdapter | null = null;
@@ -39,20 +59,36 @@ export async function storeDocumentFile(input: {
   documentId: string;
   file: File;
 }): Promise<StoredDocumentObject> {
-  const storage = getDocumentStorageAdapter();
-  const arrayBuffer = await input.file.arrayBuffer();
-  const body = Buffer.from(arrayBuffer);
-  const sha256 = createHash("sha256").update(body).digest("hex");
   const storageKey = buildStorageKey(input.documentId, input.file.name);
 
+  return storeDocumentFileAtKey({ storageKey, file: input.file });
+}
+
+export async function storeDocumentFileAtKey(input: {
+  storageKey: string;
+  file: File;
+}): Promise<StoredDocumentObject> {
+  const storage = getDocumentStorageAdapter();
+  const { body, sha256 } = await fileStorageInput(input.file);
+
   return storage.put({
-    storageKey,
+    storageKey: input.storageKey,
     body,
     mimeType: input.file.type || "application/octet-stream",
     originalName: input.file.name,
     sha256,
     sizeBytes: input.file.size,
   });
+}
+
+export async function createDocumentFileIfAbsent(
+  input: DocumentStoragePutInput,
+): Promise<DocumentStorageCreateResult> {
+  return getDocumentStorageAdapter().createIfAbsent(input);
+}
+
+export async function deleteDocumentFile(storageKey: string): Promise<void> {
+  return getDocumentStorageAdapter().delete(storageKey);
 }
 
 export async function readStoredDocument(storageKey: string): Promise<Buffer> {
@@ -74,7 +110,57 @@ export async function readStoredDocumentWithProvider(storageKey: string): Promis
   };
 }
 
+export async function readDocumentFileFromProvider(input: {
+  storageProvider: DocumentStorageBackend;
+  storageKey: string;
+  storageBucket?: string | null;
+}): Promise<DocumentStorageReadResult> {
+  const activeProvider = getDocumentStorageBackend();
+  if (input.storageProvider !== activeProvider) {
+    throw new DocumentStorageReadCoherenceError("PROVIDER_MISMATCH");
+  }
+  if (input.storageProvider === "s3" && input.storageBucket) {
+    const configuredBucket = getS3StorageConfig().bucket;
+    if (input.storageBucket !== configuredBucket) {
+      throw new DocumentStorageReadCoherenceError("BUCKET_MISMATCH");
+    }
+  }
+
+  return getDocumentStorageAdapter().read(input.storageKey);
+}
+
+export async function readDocumentFileBoundedFromProvider(input: {
+  storageProvider: DocumentStorageBackend;
+  storageKey: string;
+  storageBucket?: string | null;
+  maxBytes: number;
+}): Promise<DocumentStorageReadResult> {
+  const activeProvider = getDocumentStorageBackend();
+  if (input.storageProvider !== activeProvider) {
+    throw new DocumentStorageReadCoherenceError("PROVIDER_MISMATCH");
+  }
+  if (input.storageProvider === "s3" && input.storageBucket) {
+    const configuredBucket = getS3StorageConfig().bucket;
+    if (input.storageBucket !== configuredBucket) {
+      throw new DocumentStorageReadCoherenceError("BUCKET_MISMATCH");
+    }
+  }
+
+  return getDocumentStorageAdapter().readBounded(input.storageKey, input.maxBytes);
+}
+
 export async function storedDocumentExists(storageKey: string): Promise<boolean> {
   const storage = getDocumentStorageAdapter();
   return storage.exists(storageKey);
+}
+
+export function requireS3DocumentStorage(): S3StorageAdapter {
+  if (getDocumentStorageBackend() !== "s3") {
+    throw new Error("Upload diretto disponibile solo con storage S3/R2.");
+  }
+  const storage = getDocumentStorageAdapter();
+  if (!(storage instanceof S3StorageAdapter)) {
+    throw new Error("Adapter storage S3/R2 non disponibile.");
+  }
+  return storage;
 }

@@ -1,5 +1,39 @@
 export type ProcedimentoWarningLevel = "default" | "warning" | "danger";
 
+export const CHECKLIST_ITEM_CODES = [
+  "COMUNICAZIONE_AVVIO_INVIATA",
+  "TERMINE_MEMORIE",
+  "MEMORIE_RICEVUTE",
+  "AUDIZIONE_SVOLTA",
+  "CONTESTAZIONE_FORMALE_INVIATA",
+  "CONTRODEDUZIONI_VALUTATE",
+  "MOTIVAZIONE_VALUTAZIONE",
+  "PROPOSTA_ESITO_ISTRUTTORIO",
+  "PREAVVISO_VALUTATO",
+  "PREAVVISO_INVIATO",
+  "TERMINE_OSSERVAZIONI_PREAVVISO",
+  "OSSERVAZIONI_PREAVVISO_VALUTATE",
+  "MOTIVAZIONE_MANCATO_PREAVVISO",
+] as const;
+
+export type ChecklistItemCode = (typeof CHECKLIST_ITEM_CODES)[number];
+
+const CHECKLIST_ITEM_CODE_BY_KEY = {
+  comunicazioneAvvioInviata: "COMUNICAZIONE_AVVIO_INVIATA",
+  termineMemorie: "TERMINE_MEMORIE",
+  memorieRicevute: "MEMORIE_RICEVUTE",
+  audizioneSvolta: "AUDIZIONE_SVOLTA",
+  contestazioneFormaleInviata: "CONTESTAZIONE_FORMALE_INVIATA",
+  controdeduzioniValutate: "CONTRODEDUZIONI_VALUTATE",
+  motivazioneValutazione: "MOTIVAZIONE_VALUTAZIONE",
+  propostaEsitoIstruttorio: "PROPOSTA_ESITO_ISTRUTTORIO",
+  preavvisoValutato: "PREAVVISO_VALUTATO",
+  preavvisoInviato: "PREAVVISO_INVIATO",
+  termineOsservazioniPreavviso: "TERMINE_OSSERVAZIONI_PREAVVISO",
+  osservazioniPreavvisoValutate: "OSSERVAZIONI_PREAVVISO_VALUTATE",
+  motivazioneMancatoPreavviso: "MOTIVAZIONE_MANCATO_PREAVVISO",
+} as const satisfies Record<string, ChecklistItemCode>;
+
 export interface ProcedimentoChecklistInput {
   tipologia?: string | null;
   origineProcedimento?: string | null;
@@ -29,6 +63,7 @@ export interface ProcedimentoChecklistInput {
 
 export interface ChecklistItemStatus {
   key: string;
+  code: ChecklistItemCode;
   label: string;
   required: boolean;
   completed: boolean;
@@ -214,12 +249,14 @@ export function getPreavvisoRigettoChecklistItems(
   return [
     {
       key: "preavvisoValutato",
+      code: CHECKLIST_ITEM_CODE_BY_KEY.preavvisoValutato,
       label: "Valutazione applicabilità preavviso art. 10-bis",
       required: true,
       completed: stato !== null && stato !== undefined && stato !== "NON_VALUTATO",
     },
     {
       key: "preavvisoInviato",
+      code: CHECKLIST_ITEM_CODE_BY_KEY.preavvisoInviato,
       label: "Preavviso di rigetto inviato (se applicabile)",
       required: applicabile,
       completed:
@@ -231,12 +268,14 @@ export function getPreavvisoRigettoChecklistItems(
     },
     {
       key: "termineOsservazioniPreavviso",
+      code: CHECKLIST_ITEM_CODE_BY_KEY.termineOsservazioniPreavviso,
       label: "Termine osservazioni preavviso definito",
       required: applicabile,
       completed: !applicabile || procedimento.termineOsservazioniPreavviso instanceof Date,
     },
     {
       key: "osservazioniPreavvisoValutate",
+      code: CHECKLIST_ITEM_CODE_BY_KEY.osservazioniPreavvisoValutate,
       label: "Osservazioni preavviso valutate (se ricevute)",
       required: applicabile && osservazioniRicevute,
       completed:
@@ -247,6 +286,7 @@ export function getPreavvisoRigettoChecklistItems(
     },
     {
       key: "motivazioneMancatoPreavviso",
+      code: CHECKLIST_ITEM_CODE_BY_KEY.motivazioneMancatoPreavviso,
       label: "Motivazione mancato preavviso / non applicabilità",
       required: !applicabile,
       completed:
@@ -293,6 +333,7 @@ export function getChecklistContraddittorioItems(
 
   const baseItems = keys.map((key) => ({
     key,
+    code: CHECKLIST_ITEM_CODE_BY_KEY[key as keyof typeof CHECKLIST_ITEM_CODE_BY_KEY],
     label: formatChecklistItemLabel(key),
     required: isRequiredForTipologia(key, procedimento.tipologia),
     completed: isCompleted(key, procedimento),

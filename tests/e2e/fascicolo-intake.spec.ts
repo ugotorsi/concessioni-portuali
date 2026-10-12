@@ -1,0 +1,88 @@
+import { expect, test } from "playwright/test";
+
+import { loginAndExpectLanding } from "./helpers/auth";
+
+test("nuovo fascicolo mostra solo l'intake iniziale e il collegamento concessione resta opzionale", async ({ page }) => {
+  await loginAndExpectLanding(page, "admin@demo.local", "admin123", /\/dashboard$/);
+  await page.goto("/procedimenti/nuovo", { waitUntil: "domcontentloaded" });
+
+  await expect(page.getByRole("heading", { name: "Nuovo fascicolo" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Inquadramento" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Riferimenti" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Dati concessione" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Soggetti" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Documenti iniziali" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Crea fascicolo" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Annulla" })).toBeVisible();
+
+  const sectionTitles = await page.locator("main section h2").allTextContents();
+  expect(sectionTitles).toEqual([
+    "Inquadramento",
+    "Riferimenti",
+    "Dati concessione",
+    "Soggetti",
+    "Documenti iniziali",
+  ]);
+  await expect(page.getByLabel("Titolo fascicolo")).toBeVisible();
+  await expect(page.locator('[name="documentiIniziali"]')).toBeVisible();
+
+  await expect(page.locator('[name="autoritaCompetenteIniziale"]')).toBeVisible();
+
+  await expect(page.locator('[name="criticitaId"]')).toHaveCount(0);
+  await expect(page.locator('[name="riferimentoNormativo"]')).toHaveCount(0);
+  await expect(page.locator('[name="dataScadenzaContraddittorio"]')).toHaveCount(0);
+  await expect(page.locator('[name="responsabileProcedimentoNome"]')).toHaveCount(0);
+
+  await expect(page.locator('[name="concessioneId"]')).toBeVisible();
+  await expect(page.locator('[name="concessioneId"]')).not.toHaveAttribute("required", "");
+  await expect(page.locator('[name="concessioneId"] option').first()).toHaveText(
+    "Crea fascicolo senza collegare una concessione esistente",
+  );
+});
+
+test("fascicolo in preparazione usa la panoramica e la navigazione condivise", async ({ page }) => {
+  await loginAndExpectLanding(page, "admin@demo.local", "admin123", /\/dashboard$/);
+  await page.goto("/procedimenti", { waitUntil: "domcontentloaded" });
+
+  const intakeList = page.getByRole("heading", { name: "Fascicoli in preparazione" }).locator("..");
+  const intakeLink = intakeList.locator('a[href^="/procedimenti/"]').first();
+  test.skip(await intakeLink.count() === 0, "Nessun FascicoloIntake disponibile nel dataset E2E");
+  await intakeLink.click();
+
+  const fascicoloNav = page.getByRole("navigation", { name: "Navigazione del fascicolo" });
+  await expect(fascicoloNav).toBeVisible();
+  await expect(fascicoloNav.locator(":scope > div > *")).toHaveText([
+    "Panoramica",
+    "Documenti",
+    "Cronologia",
+    "Soggetti",
+    "Concessione",
+    "Analisi",
+    "Ricerca",
+    "Scadenze",
+    "Criticità",
+    "Rapporto",
+    "Proposte",
+  ]);
+  await expect(page.locator("#panoramica").getByText("Stato del fascicolo", { exact: true })).toBeVisible();
+  await expect(page.locator("#panoramica").getByText("Concessione / titolo", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Documenti" })).toHaveCount(0);
+  await page.getByRole("link", { name: "Documenti", exact: true }).click();
+  await expect(page).toHaveURL(/\?section=documents$/);
+  await expect(page.getByRole("heading", { name: "Documenti", exact: true })).toBeVisible();
+  await expect(page.getByText("Atti e documenti acquisiti nel fascicolo.")).toBeVisible();
+  await expect(page.getByText("Direzione non indicata")).toHaveCount(0);
+  const intakeAttachDocument = page.getByRole("button", { name: "Allega documento" });
+  await expect(intakeAttachDocument).toBeVisible();
+  if (await page.getByRole("link", { name: "Apri documento" }).count()) {
+    await expect(page.getByRole("link", { name: "Apri documento" }).first()).toBeVisible();
+  }
+  await page.reload();
+  await expect(page).toHaveURL(/\?section=documents$/);
+  await expect(page.getByText("Checklist istruttoria", { exact: true })).toHaveCount(0);
+  await page.getByRole("link", { name: "Cronologia", exact: true }).click();
+  await expect(page).toHaveURL(/\?section=timeline$/);
+  await expect(page.getByRole("heading", { name: "Cronologia", exact: true })).toBeVisible();
+  await expect(page.locator('ol[aria-label="Eventi cronologici"] > li').first()).toBeVisible();
+  await expect(page.locator("main table")).toHaveCount(0);
+});

@@ -8,6 +8,31 @@ const commonSecurityHeaders = [
 	{ key: "X-DNS-Prefetch-Control", value: "on" },
 ];
 
+function configuredStorageOrigin(): string | null {
+	try {
+		return process.env.S3_ENDPOINT ? new URL(process.env.S3_ENDPOINT).origin : null;
+	} catch {
+		return null;
+	}
+}
+
+const storageOrigin = configuredStorageOrigin();
+const productionContentSecurityPolicy = [
+	"default-src 'self'",
+	"base-uri 'self'",
+	"form-action 'self'",
+	"frame-ancestors 'none'",
+	"object-src 'none'",
+	"script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com",
+	"style-src 'self' 'unsafe-inline'",
+	"img-src 'self' data: blob:",
+	"font-src 'self' data:",
+	`connect-src 'self' https://vitals.vercel-insights.com${storageOrigin ? ` ${storageOrigin}` : ""}`,
+	"worker-src 'self' blob:",
+	"manifest-src 'self'",
+	"upgrade-insecure-requests",
+].join("; ");
+
 const nextConfig: NextConfig = {
 	async headers() {
 		const headers = [...commonSecurityHeaders];
@@ -16,6 +41,10 @@ const nextConfig: NextConfig = {
 			headers.push({
 				key: "Strict-Transport-Security",
 				value: "max-age=31536000; includeSubDomains",
+			});
+			headers.push({
+				key: "Content-Security-Policy",
+				value: productionContentSecurityPolicy,
 			});
 		}
 

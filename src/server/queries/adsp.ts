@@ -26,7 +26,7 @@ export interface AdspCriticitaItem {
   gravita: string;
   stato: string;
   descrizione: string;
-  concessioneNumeroAtto: string;
+  concessioneNumeroAtto: string | null;
 }
 
 export interface AdspProcedimentoItem {
@@ -34,7 +34,7 @@ export interface AdspProcedimentoItem {
   tipologia: string;
   stato: string;
   riferimentoNormativo: string | null;
-  concessioneNumeroAtto: string;
+  concessioneNumeroAtto: string | null;
   dataScadenzaContraddittorio: Date | null;
 }
 
@@ -178,14 +178,14 @@ export async function getAdspData(): Promise<AdspData> {
       gravita: item.gravita,
       stato: item.stato,
       descrizione: item.descrizione,
-      concessioneNumeroAtto: item.concessione.numeroAtto,
+      concessioneNumeroAtto: item.concessione?.numeroAtto ?? null,
     })),
     procedimentiInCorso: procedimentiInCorsoRows.map((item) => ({
       id: item.id,
       tipologia: item.tipologia,
       stato: item.stato,
       riferimentoNormativo: item.riferimentoNormativo,
-      concessioneNumeroAtto: item.concessione.numeroAtto,
+      concessioneNumeroAtto: item.concessione?.numeroAtto ?? null,
       dataScadenzaContraddittorio: item.dataScadenzaContraddittorio,
     })),
   };

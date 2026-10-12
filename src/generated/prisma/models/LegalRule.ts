@@ -396,6 +396,7 @@ export type LegalRuleWhereInput = {
   ente?: Prisma.XOR<Prisma.EnteNullableScalarRelationFilter, Prisma.EnteWhereInput> | null
   port?: Prisma.XOR<Prisma.PortNullableScalarRelationFilter, Prisma.PortWhereInput> | null
   documentGaps?: Prisma.DocumentGapListRelationFilter
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalListRelationFilter
 }
 
 export type LegalRuleOrderByWithRelationInput = {
@@ -430,6 +431,7 @@ export type LegalRuleOrderByWithRelationInput = {
   ente?: Prisma.EnteOrderByWithRelationInput
   port?: Prisma.PortOrderByWithRelationInput
   documentGaps?: Prisma.DocumentGapOrderByRelationAggregateInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalOrderByRelationAggregateInput
 }
 
 export type LegalRuleWhereUniqueInput = Prisma.AtLeast<{
@@ -468,6 +470,7 @@ export type LegalRuleWhereUniqueInput = Prisma.AtLeast<{
   ente?: Prisma.XOR<Prisma.EnteNullableScalarRelationFilter, Prisma.EnteWhereInput> | null
   port?: Prisma.XOR<Prisma.PortNullableScalarRelationFilter, Prisma.PortWhereInput> | null
   documentGaps?: Prisma.DocumentGapListRelationFilter
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalListRelationFilter
 }, "id" | "sourceId_ruleCode">
 
 export type LegalRuleOrderByWithAggregationInput = {
@@ -567,6 +570,7 @@ export type LegalRuleCreateInput = {
   ente?: Prisma.EnteCreateNestedOneWithoutLegalRulesInput
   port?: Prisma.PortCreateNestedOneWithoutLegalRulesInput
   documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutRuleInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutLegalRuleInput
 }
 
 export type LegalRuleUncheckedCreateInput = {
@@ -598,6 +602,7 @@ export type LegalRuleUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutRuleInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutLegalRuleInput
 }
 
 export type LegalRuleUpdateInput = {
@@ -629,6 +634,7 @@ export type LegalRuleUpdateInput = {
   ente?: Prisma.EnteUpdateOneWithoutLegalRulesNestedInput
   port?: Prisma.PortUpdateOneWithoutLegalRulesNestedInput
   documentGaps?: Prisma.DocumentGapUpdateManyWithoutRuleNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutLegalRuleNestedInput
 }
 
 export type LegalRuleUncheckedUpdateInput = {
@@ -660,6 +666,7 @@ export type LegalRuleUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutRuleNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutLegalRuleNestedInput
 }
 
 export type LegalRuleCreateManyInput = {
@@ -867,6 +874,11 @@ export type LegalRuleNullableScalarRelationFilter = {
   isNot?: Prisma.LegalRuleWhereInput | null
 }
 
+export type LegalRuleScalarRelationFilter = {
+  is?: Prisma.LegalRuleWhereInput
+  isNot?: Prisma.LegalRuleWhereInput
+}
+
 export type LegalRuleCreateNestedManyWithoutEnteInput = {
   create?: Prisma.XOR<Prisma.LegalRuleCreateWithoutEnteInput, Prisma.LegalRuleUncheckedCreateWithoutEnteInput> | Prisma.LegalRuleCreateWithoutEnteInput[] | Prisma.LegalRuleUncheckedCreateWithoutEnteInput[]
   connectOrCreate?: Prisma.LegalRuleCreateOrConnectWithoutEnteInput | Prisma.LegalRuleCreateOrConnectWithoutEnteInput[]
@@ -1053,6 +1065,20 @@ export type LegalRuleUpdateOneWithoutDocumentGapsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.LegalRuleUpdateToOneWithWhereWithoutDocumentGapsInput, Prisma.LegalRuleUpdateWithoutDocumentGapsInput>, Prisma.LegalRuleUncheckedUpdateWithoutDocumentGapsInput>
 }
 
+export type LegalRuleCreateNestedOneWithoutDocumentRequirementProposalsInput = {
+  create?: Prisma.XOR<Prisma.LegalRuleCreateWithoutDocumentRequirementProposalsInput, Prisma.LegalRuleUncheckedCreateWithoutDocumentRequirementProposalsInput>
+  connectOrCreate?: Prisma.LegalRuleCreateOrConnectWithoutDocumentRequirementProposalsInput
+  connect?: Prisma.LegalRuleWhereUniqueInput
+}
+
+export type LegalRuleUpdateOneRequiredWithoutDocumentRequirementProposalsNestedInput = {
+  create?: Prisma.XOR<Prisma.LegalRuleCreateWithoutDocumentRequirementProposalsInput, Prisma.LegalRuleUncheckedCreateWithoutDocumentRequirementProposalsInput>
+  connectOrCreate?: Prisma.LegalRuleCreateOrConnectWithoutDocumentRequirementProposalsInput
+  upsert?: Prisma.LegalRuleUpsertWithoutDocumentRequirementProposalsInput
+  connect?: Prisma.LegalRuleWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LegalRuleUpdateToOneWithWhereWithoutDocumentRequirementProposalsInput, Prisma.LegalRuleUpdateWithoutDocumentRequirementProposalsInput>, Prisma.LegalRuleUncheckedUpdateWithoutDocumentRequirementProposalsInput>
+}
+
 export type LegalRuleCreateWithoutEnteInput = {
   id?: string
   ruleCode: string
@@ -1081,6 +1107,7 @@ export type LegalRuleCreateWithoutEnteInput = {
   source: Prisma.LegalSourceCreateNestedOneWithoutRulesInput
   port?: Prisma.PortCreateNestedOneWithoutLegalRulesInput
   documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutRuleInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutLegalRuleInput
 }
 
 export type LegalRuleUncheckedCreateWithoutEnteInput = {
@@ -1111,6 +1138,7 @@ export type LegalRuleUncheckedCreateWithoutEnteInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutRuleInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutLegalRuleInput
 }
 
 export type LegalRuleCreateOrConnectWithoutEnteInput = {
@@ -1200,6 +1228,7 @@ export type LegalRuleCreateWithoutPortInput = {
   source: Prisma.LegalSourceCreateNestedOneWithoutRulesInput
   ente?: Prisma.EnteCreateNestedOneWithoutLegalRulesInput
   documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutRuleInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutLegalRuleInput
 }
 
 export type LegalRuleUncheckedCreateWithoutPortInput = {
@@ -1230,6 +1259,7 @@ export type LegalRuleUncheckedCreateWithoutPortInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutRuleInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutLegalRuleInput
 }
 
 export type LegalRuleCreateOrConnectWithoutPortInput = {
@@ -1286,6 +1316,7 @@ export type LegalRuleCreateWithoutSourceInput = {
   ente?: Prisma.EnteCreateNestedOneWithoutLegalRulesInput
   port?: Prisma.PortCreateNestedOneWithoutLegalRulesInput
   documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutRuleInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutLegalRuleInput
 }
 
 export type LegalRuleUncheckedCreateWithoutSourceInput = {
@@ -1316,6 +1347,7 @@ export type LegalRuleUncheckedCreateWithoutSourceInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutRuleInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutLegalRuleInput
 }
 
 export type LegalRuleCreateOrConnectWithoutSourceInput = {
@@ -1372,6 +1404,7 @@ export type LegalRuleCreateWithoutDocumentGapsInput = {
   source: Prisma.LegalSourceCreateNestedOneWithoutRulesInput
   ente?: Prisma.EnteCreateNestedOneWithoutLegalRulesInput
   port?: Prisma.PortCreateNestedOneWithoutLegalRulesInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutLegalRuleInput
 }
 
 export type LegalRuleUncheckedCreateWithoutDocumentGapsInput = {
@@ -1402,6 +1435,7 @@ export type LegalRuleUncheckedCreateWithoutDocumentGapsInput = {
   humanReviewRequired?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutLegalRuleInput
 }
 
 export type LegalRuleCreateOrConnectWithoutDocumentGapsInput = {
@@ -1448,6 +1482,7 @@ export type LegalRuleUpdateWithoutDocumentGapsInput = {
   source?: Prisma.LegalSourceUpdateOneRequiredWithoutRulesNestedInput
   ente?: Prisma.EnteUpdateOneWithoutLegalRulesNestedInput
   port?: Prisma.PortUpdateOneWithoutLegalRulesNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutLegalRuleNestedInput
 }
 
 export type LegalRuleUncheckedUpdateWithoutDocumentGapsInput = {
@@ -1478,6 +1513,147 @@ export type LegalRuleUncheckedUpdateWithoutDocumentGapsInput = {
   humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutLegalRuleNestedInput
+}
+
+export type LegalRuleCreateWithoutDocumentRequirementProposalsInput = {
+  id?: string
+  ruleCode: string
+  title: string
+  summary: string
+  category: $Enums.LegalRuleCategory
+  status?: $Enums.LegalRuleStatus
+  priority?: number
+  matchConcessionVertical?: $Enums.ConcessionVertical | null
+  matchObjectType?: $Enums.ConcessionObjectType | null
+  matchAttivita?: $Enums.AttivitaConcessione | null
+  matchAwardingProcedure?: $Enums.AwardingProcedureType | null
+  matchFeeRegime?: $Enums.FeeRegime | null
+  matchComparativeStatus?: $Enums.ComparativeProcedureStatus | null
+  requiresRilevanzaArt47?: boolean | null
+  matchArt47Letter?: $Enums.Art47CodNavLettera | null
+  requiresMorosita?: boolean | null
+  requiresPolizzaValida?: boolean | null
+  outputSeverity?: $Enums.GravitaCriticita
+  outcomeTitle: string
+  outcomeSummary: string
+  disclaimer?: string | null
+  humanReviewRequired?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  source: Prisma.LegalSourceCreateNestedOneWithoutRulesInput
+  ente?: Prisma.EnteCreateNestedOneWithoutLegalRulesInput
+  port?: Prisma.PortCreateNestedOneWithoutLegalRulesInput
+  documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutRuleInput
+}
+
+export type LegalRuleUncheckedCreateWithoutDocumentRequirementProposalsInput = {
+  id?: string
+  sourceId: string
+  ruleCode: string
+  title: string
+  summary: string
+  category: $Enums.LegalRuleCategory
+  status?: $Enums.LegalRuleStatus
+  priority?: number
+  enteId?: string | null
+  portId?: string | null
+  matchConcessionVertical?: $Enums.ConcessionVertical | null
+  matchObjectType?: $Enums.ConcessionObjectType | null
+  matchAttivita?: $Enums.AttivitaConcessione | null
+  matchAwardingProcedure?: $Enums.AwardingProcedureType | null
+  matchFeeRegime?: $Enums.FeeRegime | null
+  matchComparativeStatus?: $Enums.ComparativeProcedureStatus | null
+  requiresRilevanzaArt47?: boolean | null
+  matchArt47Letter?: $Enums.Art47CodNavLettera | null
+  requiresMorosita?: boolean | null
+  requiresPolizzaValida?: boolean | null
+  outputSeverity?: $Enums.GravitaCriticita
+  outcomeTitle: string
+  outcomeSummary: string
+  disclaimer?: string | null
+  humanReviewRequired?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutRuleInput
+}
+
+export type LegalRuleCreateOrConnectWithoutDocumentRequirementProposalsInput = {
+  where: Prisma.LegalRuleWhereUniqueInput
+  create: Prisma.XOR<Prisma.LegalRuleCreateWithoutDocumentRequirementProposalsInput, Prisma.LegalRuleUncheckedCreateWithoutDocumentRequirementProposalsInput>
+}
+
+export type LegalRuleUpsertWithoutDocumentRequirementProposalsInput = {
+  update: Prisma.XOR<Prisma.LegalRuleUpdateWithoutDocumentRequirementProposalsInput, Prisma.LegalRuleUncheckedUpdateWithoutDocumentRequirementProposalsInput>
+  create: Prisma.XOR<Prisma.LegalRuleCreateWithoutDocumentRequirementProposalsInput, Prisma.LegalRuleUncheckedCreateWithoutDocumentRequirementProposalsInput>
+  where?: Prisma.LegalRuleWhereInput
+}
+
+export type LegalRuleUpdateToOneWithWhereWithoutDocumentRequirementProposalsInput = {
+  where?: Prisma.LegalRuleWhereInput
+  data: Prisma.XOR<Prisma.LegalRuleUpdateWithoutDocumentRequirementProposalsInput, Prisma.LegalRuleUncheckedUpdateWithoutDocumentRequirementProposalsInput>
+}
+
+export type LegalRuleUpdateWithoutDocumentRequirementProposalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ruleCode?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  summary?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.EnumLegalRuleCategoryFieldUpdateOperationsInput | $Enums.LegalRuleCategory
+  status?: Prisma.EnumLegalRuleStatusFieldUpdateOperationsInput | $Enums.LegalRuleStatus
+  priority?: Prisma.IntFieldUpdateOperationsInput | number
+  matchConcessionVertical?: Prisma.NullableEnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical | null
+  matchObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  matchAttivita?: Prisma.NullableEnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione | null
+  matchAwardingProcedure?: Prisma.NullableEnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType | null
+  matchFeeRegime?: Prisma.NullableEnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime | null
+  matchComparativeStatus?: Prisma.NullableEnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus | null
+  requiresRilevanzaArt47?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  matchArt47Letter?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
+  requiresMorosita?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  requiresPolizzaValida?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  outputSeverity?: Prisma.EnumGravitaCriticitaFieldUpdateOperationsInput | $Enums.GravitaCriticita
+  outcomeTitle?: Prisma.StringFieldUpdateOperationsInput | string
+  outcomeSummary?: Prisma.StringFieldUpdateOperationsInput | string
+  disclaimer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  source?: Prisma.LegalSourceUpdateOneRequiredWithoutRulesNestedInput
+  ente?: Prisma.EnteUpdateOneWithoutLegalRulesNestedInput
+  port?: Prisma.PortUpdateOneWithoutLegalRulesNestedInput
+  documentGaps?: Prisma.DocumentGapUpdateManyWithoutRuleNestedInput
+}
+
+export type LegalRuleUncheckedUpdateWithoutDocumentRequirementProposalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceId?: Prisma.StringFieldUpdateOperationsInput | string
+  ruleCode?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  summary?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.EnumLegalRuleCategoryFieldUpdateOperationsInput | $Enums.LegalRuleCategory
+  status?: Prisma.EnumLegalRuleStatusFieldUpdateOperationsInput | $Enums.LegalRuleStatus
+  priority?: Prisma.IntFieldUpdateOperationsInput | number
+  enteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  portId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  matchConcessionVertical?: Prisma.NullableEnumConcessionVerticalFieldUpdateOperationsInput | $Enums.ConcessionVertical | null
+  matchObjectType?: Prisma.NullableEnumConcessionObjectTypeFieldUpdateOperationsInput | $Enums.ConcessionObjectType | null
+  matchAttivita?: Prisma.NullableEnumAttivitaConcessioneFieldUpdateOperationsInput | $Enums.AttivitaConcessione | null
+  matchAwardingProcedure?: Prisma.NullableEnumAwardingProcedureTypeFieldUpdateOperationsInput | $Enums.AwardingProcedureType | null
+  matchFeeRegime?: Prisma.NullableEnumFeeRegimeFieldUpdateOperationsInput | $Enums.FeeRegime | null
+  matchComparativeStatus?: Prisma.NullableEnumComparativeProcedureStatusFieldUpdateOperationsInput | $Enums.ComparativeProcedureStatus | null
+  requiresRilevanzaArt47?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  matchArt47Letter?: Prisma.NullableEnumArt47CodNavLetteraFieldUpdateOperationsInput | $Enums.Art47CodNavLettera | null
+  requiresMorosita?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  requiresPolizzaValida?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  outputSeverity?: Prisma.EnumGravitaCriticitaFieldUpdateOperationsInput | $Enums.GravitaCriticita
+  outcomeTitle?: Prisma.StringFieldUpdateOperationsInput | string
+  outcomeSummary?: Prisma.StringFieldUpdateOperationsInput | string
+  disclaimer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  humanReviewRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutRuleNestedInput
 }
 
 export type LegalRuleCreateManyEnteInput = {
@@ -1537,6 +1713,7 @@ export type LegalRuleUpdateWithoutEnteInput = {
   source?: Prisma.LegalSourceUpdateOneRequiredWithoutRulesNestedInput
   port?: Prisma.PortUpdateOneWithoutLegalRulesNestedInput
   documentGaps?: Prisma.DocumentGapUpdateManyWithoutRuleNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutLegalRuleNestedInput
 }
 
 export type LegalRuleUncheckedUpdateWithoutEnteInput = {
@@ -1567,6 +1744,7 @@ export type LegalRuleUncheckedUpdateWithoutEnteInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutRuleNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutLegalRuleNestedInput
 }
 
 export type LegalRuleUncheckedUpdateManyWithoutEnteInput = {
@@ -1655,6 +1833,7 @@ export type LegalRuleUpdateWithoutPortInput = {
   source?: Prisma.LegalSourceUpdateOneRequiredWithoutRulesNestedInput
   ente?: Prisma.EnteUpdateOneWithoutLegalRulesNestedInput
   documentGaps?: Prisma.DocumentGapUpdateManyWithoutRuleNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutLegalRuleNestedInput
 }
 
 export type LegalRuleUncheckedUpdateWithoutPortInput = {
@@ -1685,6 +1864,7 @@ export type LegalRuleUncheckedUpdateWithoutPortInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutRuleNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutLegalRuleNestedInput
 }
 
 export type LegalRuleUncheckedUpdateManyWithoutPortInput = {
@@ -1773,6 +1953,7 @@ export type LegalRuleUpdateWithoutSourceInput = {
   ente?: Prisma.EnteUpdateOneWithoutLegalRulesNestedInput
   port?: Prisma.PortUpdateOneWithoutLegalRulesNestedInput
   documentGaps?: Prisma.DocumentGapUpdateManyWithoutRuleNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutLegalRuleNestedInput
 }
 
 export type LegalRuleUncheckedUpdateWithoutSourceInput = {
@@ -1803,6 +1984,7 @@ export type LegalRuleUncheckedUpdateWithoutSourceInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutRuleNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutLegalRuleNestedInput
 }
 
 export type LegalRuleUncheckedUpdateManyWithoutSourceInput = {
@@ -1841,10 +2023,12 @@ export type LegalRuleUncheckedUpdateManyWithoutSourceInput = {
 
 export type LegalRuleCountOutputType = {
   documentGaps: number
+  documentRequirementProposals: number
 }
 
 export type LegalRuleCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   documentGaps?: boolean | LegalRuleCountOutputTypeCountDocumentGapsArgs
+  documentRequirementProposals?: boolean | LegalRuleCountOutputTypeCountDocumentRequirementProposalsArgs
 }
 
 /**
@@ -1862,6 +2046,13 @@ export type LegalRuleCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Ex
  */
 export type LegalRuleCountOutputTypeCountDocumentGapsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.DocumentGapWhereInput
+}
+
+/**
+ * LegalRuleCountOutputType without action
+ */
+export type LegalRuleCountOutputTypeCountDocumentRequirementProposalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FascicoloDocumentRequirementProposalWhereInput
 }
 
 
@@ -1897,6 +2088,7 @@ export type LegalRuleSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   ente?: boolean | Prisma.LegalRule$enteArgs<ExtArgs>
   port?: boolean | Prisma.LegalRule$portArgs<ExtArgs>
   documentGaps?: boolean | Prisma.LegalRule$documentGapsArgs<ExtArgs>
+  documentRequirementProposals?: boolean | Prisma.LegalRule$documentRequirementProposalsArgs<ExtArgs>
   _count?: boolean | Prisma.LegalRuleCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["legalRule"]>
 
@@ -2002,6 +2194,7 @@ export type LegalRuleInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
   ente?: boolean | Prisma.LegalRule$enteArgs<ExtArgs>
   port?: boolean | Prisma.LegalRule$portArgs<ExtArgs>
   documentGaps?: boolean | Prisma.LegalRule$documentGapsArgs<ExtArgs>
+  documentRequirementProposals?: boolean | Prisma.LegalRule$documentRequirementProposalsArgs<ExtArgs>
   _count?: boolean | Prisma.LegalRuleCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type LegalRuleIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2022,6 +2215,7 @@ export type $LegalRulePayload<ExtArgs extends runtime.Types.Extensions.InternalA
     ente: Prisma.$EntePayload<ExtArgs> | null
     port: Prisma.$PortPayload<ExtArgs> | null
     documentGaps: Prisma.$DocumentGapPayload<ExtArgs>[]
+    documentRequirementProposals: Prisma.$FascicoloDocumentRequirementProposalPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2449,6 +2643,7 @@ export interface Prisma__LegalRuleClient<T, Null = never, ExtArgs extends runtim
   ente<T extends Prisma.LegalRule$enteArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalRule$enteArgs<ExtArgs>>): Prisma.Prisma__EnteClient<runtime.Types.Result.GetResult<Prisma.$EntePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   port<T extends Prisma.LegalRule$portArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalRule$portArgs<ExtArgs>>): Prisma.Prisma__PortClient<runtime.Types.Result.GetResult<Prisma.$PortPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   documentGaps<T extends Prisma.LegalRule$documentGapsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalRule$documentGapsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentGapPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documentRequirementProposals<T extends Prisma.LegalRule$documentRequirementProposalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LegalRule$documentRequirementProposalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloDocumentRequirementProposalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2965,6 +3160,30 @@ export type LegalRule$documentGapsArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.DocumentGapScalarFieldEnum | Prisma.DocumentGapScalarFieldEnum[]
+}
+
+/**
+ * LegalRule.documentRequirementProposals
+ */
+export type LegalRule$documentRequirementProposalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FascicoloDocumentRequirementProposal
+   */
+  select?: Prisma.FascicoloDocumentRequirementProposalSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FascicoloDocumentRequirementProposal
+   */
+  omit?: Prisma.FascicoloDocumentRequirementProposalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FascicoloDocumentRequirementProposalInclude<ExtArgs> | null
+  where?: Prisma.FascicoloDocumentRequirementProposalWhereInput
+  orderBy?: Prisma.FascicoloDocumentRequirementProposalOrderByWithRelationInput | Prisma.FascicoloDocumentRequirementProposalOrderByWithRelationInput[]
+  cursor?: Prisma.FascicoloDocumentRequirementProposalWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FascicoloDocumentRequirementProposalScalarFieldEnum | Prisma.FascicoloDocumentRequirementProposalScalarFieldEnum[]
 }
 
 /**

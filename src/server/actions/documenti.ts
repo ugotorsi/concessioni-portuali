@@ -1,17 +1,28 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
-import { BACKOFFICE_ROLES, getCurrentUser, requireRole } from "@/lib/auth";
+import { BACKOFFICE_ROLES, canManageProcedimenti, getCurrentUser, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
-import { buildLinkedEntityMetadata, parseUploadDocumentFormData, DOCUMENT_TIPOLOGIA_VALUES } from "@/server/documents/validation";
+import { parseUploadDocumentFormData, DOCUMENT_TIPOLOGIA_VALUES } from "@/server/documents/validation";
 import { DOCUMENT_CANALE_VALUES, DOCUMENT_DIREZIONE_VALUES, normalizeProtocolloMetadata } from "@/server/documents/protocollo";
-import { storeDocumentFile } from "@/server/documents/storage";
-import { DocumentStorageS3Error } from "@/server/documents/storage/s3StorageAdapter";
+import { uploadDocument } from "@/server/documents/uploadService";
+
+const STAGING_PREVIEW_ADMIN_ID = "staging-preview-admin";
+
+function resolveDocumentoUploadedByUserId(currentUserId: string | null | undefined): string | null {
+  if (!currentUserId || currentUserId === STAGING_PREVIEW_ADMIN_ID) {
+    return null;
+  }
+
+  return currentUserId;
+}
 
 async function assertLinkedEntitiesExist(input: {
   concessioneId?: string;
@@ -87,14 +98,12 @@ async function resolveLinkedTenantForDocumento(input: {
   if (input.procedimentoId) {
     const procedimento = await prisma.procedimento.findUnique({
       where: { id: input.procedimentoId },
-      select: { id: true, concessione: { select: { enteId: true } } },
+      select: { id: true, enteId: true },
     });
     if (!procedimento) {
       throw new Error("Procedimento collegato non trovato.");
     }
-    if (procedimento.concessione.enteId) {
-      candidateTenantIds.add(procedimento.concessione.enteId);
-    }
+    candidateTenantIds.add(procedimento.enteId);
   }
 
   if (input.sopralluogoId) {
@@ -206,6 +215,9 @@ export async function createDocumentoUploadAction(formData: FormData) {
   let payload;
   try {
     payload = parseUploadDocumentFormData(formData);
+    if (payload.procedimentoId && !canManageProcedimenti(role)) {
+      throw new Error("Profilo non autorizzato al caricamento nel procedimento.");
+    }
     await assertLinkedEntitiesExist(payload);
   } catch (error) {
     await auditFailure({
@@ -221,22 +233,47 @@ export async function createDocumentoUploadAction(formData: FormData) {
   }
 
   const currentUser = await getCurrentUser();
+  const persistedUserId = resolveDocumentoUploadedByUserId(currentUser?.id);
   const tenantContext = await getCurrentTenantContext();
   const linkedTenant = await resolveLinkedTenantForDocumento(payload);
+  if (!linkedTenant.enteId) {
+    await auditFailure({
+      azione: "DOCUMENT_UPLOAD",
+      entita: "Documento",
+      actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
+      metadata: {
+        reason: "CANONICAL_TENANT_REQUIRED",
+        issue: "Tenant canonico non derivabile dalle entita collegate.",
+      },
+    });
+    throw new Error("Tenant canonico non derivabile per il caricamento documento.");
+  }
+  const canonicalEnteId = linkedTenant.enteId;
+
+  if (payload.procedimentoId && (!currentUser || !tenantContext)) {
+    await auditFailure({
+      azione: "AUTHZ_DENIED",
+      entita: "NeutralIntake",
+      enteId: canonicalEnteId,
+      actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
+      metadata: { actionType: "PROCEDIMENTO_INTAKE_UPLOAD", reason: "TENANT_CONTEXT_REQUIRED" },
+    });
+    throw new Error("Contesto tenant autenticato richiesto.");
+  }
 
   if (tenantContext) {
     try {
-      requireTenantAccess(tenantContext, linkedTenant.enteId, {
+      requireTenantAccess(tenantContext, canonicalEnteId, {
         mode: "write",
-        allowWhenEnteMissing: true,
+        allowWhenEnteMissing: false,
       });
     } catch {
       await auditFailure({
         azione: "AUTHZ_DENIED",
         entita: "Documento",
         concessioneId: payload.concessioneId ?? null,
-        enteId: linkedTenant.enteId,
-        actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+        enteId: canonicalEnteId,
+        actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
         metadata: {
           actionType: "DOCUMENT_UPLOAD",
           reason: "CROSS_TENANT_BLOCKED",
@@ -246,131 +283,35 @@ export async function createDocumentoUploadAction(formData: FormData) {
     }
   }
 
-  const linked = buildLinkedEntityMetadata(payload);
-
-  const created = await prisma.documento.create({
-    data: {
-      nome: payload.nome,
-      tipologia: payload.tipologia,
-      documentType: payload.tipologia,
-      source: payload.source,
-      status: payload.status,
-      descrizione: payload.descrizione ?? null,
-      dataDocumento: payload.dataDocumento ?? null,
-      documentDate: payload.dataDocumento ?? new Date(),
-      statoDocumento: payload.status,
-      direzione: payload.direzione ?? null,
-      canale: payload.canale ?? null,
-      numeroProtocollo: payload.numeroProtocollo ?? null,
-      dataProtocollo: payload.dataProtocollo ?? null,
-      mittente: payload.mittente ?? null,
-      destinatario: payload.destinatario ?? null,
-      pecMessageId: payload.pecMessageId ?? null,
-      pecRicevutaAccettazioneId: payload.pecRicevutaAccettazioneId ?? null,
-      pecRicevutaConsegnaId: payload.pecRicevutaConsegnaId ?? null,
-      pecWarningMancataRicevuta: payload.pecWarningMancataRicevuta,
-      uploadedByUserId: currentUser?.id ?? null,
-      uploadedByUserEmail: currentUser?.email ?? null,
-      uploadedByUserRole: role,
-      enteId: linkedTenant.enteId,
-      concessioneId: payload.concessioneId ?? null,
-      criticitaId: payload.criticitaId ?? null,
-      procedimentoId: payload.procedimentoId ?? null,
-      sopralluogoId: payload.sopralluogoId ?? null,
-      pagamentoId: payload.pagamentoId ?? null,
-      reportId: payload.reportId ?? null,
-    },
-    select: {
-      id: true,
-      concessioneId: true,
-      criticitaId: true,
-      procedimentoId: true,
-      sopralluogoId: true,
-      pagamentoId: true,
-      reportId: true,
-    },
+  const uploaded = await uploadDocument({
+    documentId: randomUUID(),
+    file: payload.file,
+    actor: { id: currentUser?.id ?? STAGING_PREVIEW_ADMIN_ID, email: currentUser?.email ?? null, role },
+    enteId: canonicalEnteId,
+    concessioneId: payload.concessioneId,
+    criticitaId: payload.criticitaId,
+    procedimentoId: payload.procedimentoId,
+    sopralluogoId: payload.sopralluogoId,
+    pagamentoId: payload.pagamentoId,
+    reportId: payload.reportId,
+    nome: payload.nome,
+    tipologia: payload.tipologia,
+    descrizione: payload.descrizione,
+    dataDocumento: payload.dataDocumento,
+    source: payload.source,
+    status: payload.status,
+    direzione: payload.direzione,
+    canale: payload.canale,
+    numeroProtocollo: payload.numeroProtocollo,
+    dataProtocollo: payload.dataProtocollo,
+    mittente: payload.mittente,
+    destinatario: payload.destinatario,
+    pecMessageId: payload.pecMessageId,
+    pecRicevutaAccettazioneId: payload.pecRicevutaAccettazioneId,
+    pecRicevutaConsegnaId: payload.pecRicevutaConsegnaId,
+    pecWarningMancataRicevuta: payload.pecWarningMancataRicevuta,
   });
-
-  let stored;
-  try {
-    stored = await storeDocumentFile({ documentId: created.id, file: payload.file });
-  } catch (error) {
-    const storageDiagnostics =
-      error instanceof DocumentStorageS3Error
-        ? {
-            provider: error.diagnostics.provider,
-            operation: error.diagnostics.operation,
-            code: error.diagnostics.code,
-            statusCode: error.diagnostics.statusCode,
-            retryable: error.diagnostics.retryable,
-            bucketConfigured: error.diagnostics.bucketConfigured,
-            endpointConfigured: error.diagnostics.endpointConfigured,
-            regionConfigured: error.diagnostics.regionConfigured,
-            forcePathStyle: error.diagnostics.forcePathStyle,
-          }
-        : undefined;
-
-    await auditFailure({
-      azione: "DOCUMENT_UPLOAD",
-      entita: "Documento",
-      entitaId: created.id,
-      concessioneId: created.concessioneId,
-      actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
-      metadata: {
-        reason: "STORAGE_WRITE_FAILED",
-        issue: error instanceof Error ? error.message : "Errore storage documento.",
-        storageDiagnostics,
-      },
-      enteId: linkedTenant.enteId,
-    });
-    throw new Error("Caricamento documento non riuscito: errore durante la persistenza storage.");
-  }
-
-  await prisma.documento.update({
-    where: { id: created.id },
-    data: {
-      nomeStorage: stored.fileName,
-      storagePath: stored.storageKey,
-      storageKey: stored.storageKey,
-      storageProvider: stored.storageProvider,
-      storageBucket: stored.bucket,
-      publicUrl: stored.publicUrl ?? null,
-      mimeType: stored.mimeType,
-      originalName: stored.originalName,
-      dimensioneBytes: stored.sizeBytes,
-      sizeBytes: stored.sizeBytes,
-      checksumSha256: stored.sha256,
-      sha256: stored.sha256,
-      url: `/documenti/${created.id}/download`,
-    },
-  });
-
-  await auditSuccess({
-    azione: "DOCUMENT_UPLOAD",
-    entita: "Documento",
-    entitaId: created.id,
-    concessioneId: created.concessioneId,
-    actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
-    metadata: {
-      tipologia: payload.tipologia,
-      source: payload.source,
-      status: payload.status,
-      mimeType: stored.mimeType,
-      dimensioneBytes: stored.sizeBytes,
-      storageProvider: stored.storageProvider,
-      storageKey: stored.storageKey,
-      protocollo: {
-        direzione: payload.direzione ?? null,
-        canale: payload.canale ?? null,
-        numeroProtocollo: payload.numeroProtocollo ?? null,
-        dataProtocollo: payload.dataProtocollo?.toISOString() ?? null,
-        pecWarningMancataRicevuta: payload.pecWarningMancataRicevuta,
-      },
-      notaLegale: "Metadato registrato a fini istruttori",
-      linkedEntities: linked,
-    },
-    enteId: linkedTenant.enteId,
-  });
+  const created = uploaded.document;
 
   revalidateLinkedPaths({
     concessioneId: created.concessioneId ?? undefined,
@@ -381,6 +322,9 @@ export async function createDocumentoUploadAction(formData: FormData) {
     reportId: created.reportId ?? undefined,
   });
 
+  if (created.procedimentoId) {
+    return redirect(`/procedimenti/${created.procedimentoId}`);
+  }
   redirect("/documenti");
 }
 
@@ -410,6 +354,7 @@ export async function archiveDocumentoAction(formData: FormData) {
   }
 
   const currentUser = await getCurrentUser();
+  const persistedUserId = resolveDocumentoUploadedByUserId(currentUser?.id);
 
   const existing = await prisma.documento.findUnique({
     where: { id: parsed.data.id },
@@ -434,7 +379,7 @@ export async function archiveDocumentoAction(formData: FormData) {
     try {
       requireTenantAccess(tenantContext, resourceEnteId, {
         mode: "write",
-        allowWhenEnteMissing: true,
+        allowWhenEnteMissing: false,
       });
     } catch {
       await auditFailure({
@@ -442,7 +387,7 @@ export async function archiveDocumentoAction(formData: FormData) {
         entita: "Documento",
         entitaId: parsed.data.id,
         enteId: resourceEnteId,
-        actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+        actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
         metadata: {
           actionType: "DOCUMENT_ARCHIVE",
           reason: "CROSS_TENANT_BLOCKED",
@@ -475,7 +420,7 @@ export async function archiveDocumentoAction(formData: FormData) {
     entita: "Documento",
     entitaId: updated.id,
     concessioneId: updated.concessioneId,
-    actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+    actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
     metadata: {
       changedFields: ["statoDocumento", "archivedAt"],
     },
@@ -606,6 +551,7 @@ export async function updateDocumentoMetadataAction(formData: FormData) {
   });
 
   const currentUser = await getCurrentUser();
+  const persistedUserId = resolveDocumentoUploadedByUserId(currentUser?.id);
 
   const existing = await prisma.documento.findUnique({
     where: { id: parsed.data.id },
@@ -630,7 +576,7 @@ export async function updateDocumentoMetadataAction(formData: FormData) {
     try {
       requireTenantAccess(tenantContext, resourceEnteId, {
         mode: "write",
-        allowWhenEnteMissing: true,
+        allowWhenEnteMissing: false,
       });
     } catch {
       await auditFailure({
@@ -638,7 +584,7 @@ export async function updateDocumentoMetadataAction(formData: FormData) {
         entita: "Documento",
         entitaId: parsed.data.id,
         enteId: resourceEnteId,
-        actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+        actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
         metadata: {
           actionType: "DOCUMENT_METADATA_UPDATE",
           reason: "CROSS_TENANT_BLOCKED",
@@ -681,7 +627,7 @@ export async function updateDocumentoMetadataAction(formData: FormData) {
     entita: "Documento",
     entitaId: updated.id,
     concessioneId: updated.concessioneId,
-    actor: { userId: currentUser?.id, userEmail: currentUser?.email, userRole: role },
+    actor: { userId: persistedUserId, userEmail: currentUser?.email, userRole: role },
     metadata: {
       changedFields: [
         "nome",

@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { Plus, SearchX } from "lucide-react";
 
 import { AppShell } from "@/components/layout/AppShell";
+import { buttonVariants } from "@/components/ui/Button";
 import { BACKOFFICE_ROLES, canExportOperationalData, canManageProcedimenti, requireRole } from "@/lib/auth";
 import {
   ProcedimentoGiorniBadge,
@@ -14,6 +16,9 @@ import {
 import { ProcedimentiFiltersBar } from "@/components/procedimenti/ProcedimentiFiltersBar";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { ClickableTableRow } from "@/components/ui/ClickableTableRow";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { SectionHeader } from "@/components/ui/PageHeader";
 import {
   Table,
   TableBody,
@@ -22,9 +27,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/Table";
-import { formatDateIT, formatEnumLabel } from "@/lib/utils";
-import { isInvestorDemoMode } from "@/lib/investor-demo";
-import { investorDemoProcedimenti } from "@/lib/investor-demo-data";
+import { cn, formatDateIT, formatEnumLabel } from "@/lib/utils";
+import { getConcessionVerticalLabel } from "@/lib/concession-vertical-labels";
+import { getFascicoliIntakeList } from "@/server/queries/fascicolo-intake";
 import {
   PROCEDIMENTI_CHECKLIST_VALUES,
   PROCEDIMENTI_MEMORIE_VALUES,
@@ -66,39 +71,6 @@ function pickString(value: string | string[] | undefined): string | undefined {
 export const dynamic = "force-dynamic";
 
 export default async function ProcedimentiPage({ searchParams }: ProcedimentiPageProps) {
-  if (isInvestorDemoMode()) {
-    return (
-      <AppShell title="Procedimenti" subtitle="Vista dimostrativa su procedimenti simulati">
-        <Card>
-          <CardHeader>
-            <CardTitle>Procedimenti demo</CardTitle>
-            <CardDescription>Nessun dato personale o amministrativo reale</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Titolo</TableHead>
-                  <TableHead>Stato</TableHead>
-                  <TableHead>Nota</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {investorDemoProcedimenti.map((item) => (
-                  <TableRow key={item.title}>
-                    <TableCell className="font-medium text-slate-900">{item.title}</TableCell>
-                    <TableCell>{item.status}</TableCell>
-                    <TableCell>{item.note}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </AppShell>
-    );
-  }
-
   const role = await requireRole(BACKOFFICE_ROLES);
   const canWrite = canManageProcedimenti(role);
   const canExport = canExportOperationalData(role);
@@ -164,13 +136,27 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
     })(),
   };
 
-  const [filtersData, listData] = await Promise.all([
+  const canShowIntake = !filters.tipologia
+    && (!filters.stato || filters.stato === "DA_AVVIARE")
+    && !filters.criticitaId
+    && filters.periodo === "TUTTI"
+    && filters.checklist === "TUTTE"
+    && filters.memorie === "TUTTE"
+    && !filters.origineProcedimento
+    && filters.procedimentoUfficio === "TUTTI"
+    && filters.preavvisoRigettoApplicabile === "TUTTI"
+    && !filters.statoPreavvisoRigetto;
+
+  const [filtersData, listData, fascicoliIntake] = await Promise.all([
     getProcedimentiFilters(),
     getProcedimentiList(filters),
+    canShowIntake
+      ? getFascicoliIntakeList({ search: filters.search, concessioneId: filters.concessioneId })
+      : Promise.resolve([]),
   ]);
 
-  const totale = listData.items.length;
-  const daAvviare = listData.items.filter((item) => item.stato === "DA_AVVIARE").length;
+  const totale = listData.items.length + fascicoliIntake.length;
+  const daAvviare = listData.items.filter((item) => item.stato === "DA_AVVIARE").length + fascicoliIntake.length;
   const inCorso = listData.items.filter((item) => item.stato === "IN_CORSO").length;
   const conclusi = listData.items.filter((item) => ["CONCLUSO", "ARCHIVIATO"].includes(item.stato)).length;
   const terminiScaduti = listData.items.filter((item) => item.giorniRitardoContraddittorio !== null).length;
@@ -200,91 +186,55 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
 
   return (
     <AppShell
-      title="Procedimenti"
-      subtitle="Monitoraggio istruttorio di diffide, contestazioni, recuperi, revoche, decadenze e nuove procedure"
+      title="Fascicoli"
+      subtitle="Gestione dei fascicoli istruttori e dei procedimenti collegati"
     >
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-7">
-        <Card>
-          <CardHeader>
-            <CardTitle>Totale procedimenti</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-slate-900">{totale}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Da avviare</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-rose-700">{daAvviare}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>In corso</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-amber-700">{inCorso}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Conclusi</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-emerald-700">{conclusi}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Termine contraddittorio scaduto</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-rose-700">{terminiScaduti}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Avvii decadenza/revoca</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-rose-700">{avviiDecRev}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Recupero canoni/escussione garanzie</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-amber-700">{recuperiGaranzie}</p>
-          </CardContent>
-        </Card>
+      <section className="space-y-4" aria-label="Quadro operativo fascicoli">
+        <SectionHeader
+          title="Quadro operativo"
+          description="Volumi correnti e termini che richiedono monitoraggio."
+          actions={canWrite ? (
+            <Link href="/procedimenti/nuovo" className={buttonVariants()}>
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              Nuovo fascicolo
+            </Link>
+          ) : null}
+        />
+        <dl className="grid overflow-hidden rounded-md border border-slate-200 bg-white sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+          {[
+            ["Totale fascicoli", totale],
+            ["Da avviare", daAvviare],
+            ["In corso", inCorso],
+            ["Conclusi", conclusi],
+            ["Termini scaduti", terminiScaduti],
+            ["Avvii decadenza/revoca", avviiDecRev],
+            ["Recuperi e garanzie", recuperiGaranzie],
+          ].map(([label, value]) => (
+            <div key={label} className="border-b border-slate-200 px-4 py-3 last:border-b-0 sm:border-r lg:border-b-0">
+              <dt className="text-xs font-medium leading-4 text-slate-600">{label}</dt>
+              <dd className="mt-1 text-2xl font-semibold text-slate-950">{value}</dd>
+            </div>
+          ))}
+        </dl>
       </section>
 
-      <section className="mt-4">
+      <section className="mt-6">
         {canWrite ? (
           <div className="mb-4 flex flex-wrap justify-end gap-2">
             {canExport ? (
               <Link
                 href="/export/procedimenti"
-                className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                className={buttonVariants({ variant: "secondary" })}
               >
                 Esporta CSV
               </Link>
             ) : null}
-            <Link
-              href="/procedimenti/nuovo"
-              className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
-            >
-              Nuovo procedimento
-            </Link>
           </div>
         ) : canExport ? (
           <div className="mb-4 flex justify-end">
             <Link
               href="/export/procedimenti"
-              className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              className={buttonVariants({ variant: "secondary" })}
             >
               Esporta CSV
             </Link>
@@ -293,13 +243,37 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
         <ProcedimentiFiltersBar filtersData={filtersData} current={filters} />
       </section>
 
-      <section className="mt-4">
+      <section className="mt-6">
         <Card>
           <CardHeader>
-            <CardTitle>Registro procedimenti</CardTitle>
-            <CardDescription>Vista read-only con focus su priorità, contraddittorio e collegamenti inter-modulo.</CardDescription>
+            <SectionHeader
+              title="Registro fascicoli"
+              count={totale}
+              description="Risultati ordinati per aggiornamento. Scorri orizzontalmente per consultare tutti i dati istruttori."
+            />
           </CardHeader>
           <CardContent>
+            {fascicoliIntake.length > 0 ? (
+              <div className="mb-6">
+                <h3 className="mb-2 text-sm font-semibold text-slate-950">Fascicoli in preparazione</h3>
+                <div className="divide-y divide-slate-200 rounded-md border border-slate-200">
+                  {fascicoliIntake.map((item) => (
+                    <Link
+                      key={item.id}
+                      href={`/procedimenti/${item.id}`}
+                      className="grid gap-2 px-4 py-3 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0b7285] md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto] md:items-center"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-[#173d4f]">{item.denominazioneBreve || item.oggettoFascicolo}</p>
+                        <p className="truncate text-xs text-slate-600">{item.oggettoFascicolo}</p>
+                      </div>
+                      <p className="text-sm text-slate-700">{getConcessionVerticalLabel(item.tipologiaConcessione)}</p>
+                      <Badge variant="warning">In preparazione</Badge>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ) : null}
             <Table>
               <TableHeader>
                 <TableRow>
@@ -316,7 +290,6 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
                   <TableHead>Termine memorie</TableHead>
                   <TableHead>Termine contraddittorio</TableHead>
                   <TableHead>Giorni</TableHead>
-                  <TableHead>Azioni</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -333,11 +306,20 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
                     : item.stato === "IN_CORSO" || isCriticoTipologia
                       ? "bg-amber-50"
                       : "";
+                  const numeroAtto = item.concessione?.numeroAtto ?? "Titolo non accertato";
+                  const concessionario = item.concessione?.concessionario?.denominazione ?? "Non disponibile";
 
                   return (
-                    <TableRow key={item.id} className={rowClassName}>
+                    <ClickableTableRow
+                      key={item.id}
+                      href={`/procedimenti/${item.id}`}
+                      label={`Apri fascicolo ${formatEnumLabel(item.tipologia)} - ${numeroAtto}`}
+                      className={rowClassName}
+                    >
                       <TableCell>
-                        <ProcedimentoTipologiaBadge value={item.tipologia} />
+                        <Link href={`/procedimenti/${item.id}`} className="rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b7285]">
+                          <ProcedimentoTipologiaBadge value={item.tipologia} />
+                        </Link>
                       </TableCell>
                       <TableCell>
                         <ProcedimentoStatoBadge value={item.stato} />
@@ -352,20 +334,23 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
                         <ProcedimentoOrigineBadge value={item.origineProcedimento} />
                       </TableCell>
                       <TableCell>
-                        <div className="space-y-1">
-                          <ProcedimentoPreavvisoBadge
-                            applicabile={item.preavvisoRigettoApplicabile}
-                            stato={item.statoPreavvisoRigetto}
-                          />
-                          <p className="text-xs text-slate-500">{formatEnumLabel(item.statoPreavvisoRigetto)}</p>
-                        </div>
+                        <ProcedimentoPreavvisoBadge
+                          applicabile={item.preavvisoRigettoApplicabile}
+                          stato={item.statoPreavvisoRigetto}
+                        />
                       </TableCell>
-                      <TableCell>{item.concessione.numeroAtto}</TableCell>
-                      <TableCell>{item.concessione.concessionario.denominazione}</TableCell>
+                      <TableCell>
+                        <Link href={`/procedimenti/${item.id}?section=concession`} className="font-medium text-[#173d4f] underline decoration-slate-300 underline-offset-4 hover:decoration-[#173d4f]">
+                          {numeroAtto}
+                        </Link>
+                      </TableCell>
+                      <TableCell>{concessionario}</TableCell>
                       <TableCell>
                         {item.criticita ? (
                           <div className="space-y-1">
-                            <p>{formatEnumLabel(item.criticita.tipologia)}</p>
+                            <Link href={`/criticita/${item.criticita.id}`} className="font-medium text-[#173d4f] underline decoration-slate-300 underline-offset-4 hover:decoration-[#173d4f]">
+                              {formatEnumLabel(item.criticita.tipologia)}
+                            </Link>
                             <Badge variant={item.criticita.stato === "APERTA" ? "danger" : "warning"}>
                               {formatEnumLabel(item.criticita.gravita)}
                             </Badge>
@@ -387,37 +372,23 @@ export default async function ProcedimentiPage({ searchParams }: ProcedimentiPag
                           giorniRitardoContraddittorio={item.giorniRitardoContraddittorio}
                         />
                       </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col gap-1">
-                          <Link
-                            href={`/procedimenti/${item.id}`}
-                            className="text-sm font-medium text-slate-900 underline underline-offset-4"
-                          >
-                            Apri scheda
-                          </Link>
-                          <Link
-                            href={`/concessioni/${item.concessione.id}`}
-                            className="text-xs text-slate-600 underline underline-offset-4"
-                          >
-                            Concessione
-                          </Link>
-                          {item.criticita ? (
-                            <Link
-                              href={`/criticita/${item.criticita.id}`}
-                              className="text-xs text-slate-600 underline underline-offset-4"
-                            >
-                              Criticità
-                            </Link>
-                          ) : null}
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                    </ClickableTableRow>
                   );
                 })}
-                {listData.items.length === 0 ? (
+                {listData.items.length === 0 && fascicoliIntake.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={14} className="text-center text-slate-500">
-                      Nessun procedimento trovato con i filtri correnti.
+                    <TableCell colSpan={13}>
+                      <EmptyState
+                        icon={SearchX}
+                        title="Nessun fascicolo trovato"
+                        description="Modifica i filtri applicati oppure crea un nuovo fascicolo."
+                        action={canWrite ? (
+                          <Link href="/procedimenti/nuovo" className={buttonVariants({ variant: "secondary" })}>
+                            <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
+                            Nuovo fascicolo
+                          </Link>
+                        ) : null}
+                      />
                     </TableCell>
                   </TableRow>
                 ) : null}

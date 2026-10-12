@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import Link from "next/link";
 import { addDays, startOfDay } from "date-fns";
 import { notFound } from "next/navigation";
@@ -6,7 +8,11 @@ import { EntityDocumentsPanel } from "@/components/documents/EntityDocumentsPane
 import { GravitaBadge, StatoBadge } from "@/components/concessioni/ConcessioniBadges";
 import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
+import { Textarea } from "@/components/ui/Textarea";
 import {
   Table,
   TableBody,
@@ -15,9 +21,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/Table";
-import { BACKOFFICE_ROLES, requireRole } from "@/lib/auth";
+import {
+  BACKOFFICE_ROLES,
+  canManageConcessioneExpiry,
+  canManageConcessioneLegalClassification,
+  requireRole,
+} from "@/lib/auth";
 import { getConcessionVerticalLabel, getLegalFrameworkLabel } from "@/lib/concession-vertical-labels";
+import {
+  getPortActivityLegalTypeLabel,
+  PORT_ACTIVITY_LEGAL_TYPE_VALUES,
+} from "@/lib/port-activity-legal-type";
 import { formatCurrencyEUR, formatDateIT, formatEnumLabel } from "@/lib/utils";
+import { getCurrentTenantContext } from "@/lib/tenant-auth";
+import {
+  changeConcessioneExpiryAction,
+  updateConcessionePortActivityLegalType,
+} from "@/server/actions/concessioni";
+import { isConcessioneExpiryChangeEnabled } from "@/server/fascicolo-lifecycle/concessioneExpiryChange";
 import { getConcessioneDetail } from "@/server/queries/concessioni";
 
 interface ConcessioneDetailPageProps {
@@ -33,12 +54,23 @@ export const dynamic = "force-dynamic";
 export default async function ConcessioneDetailPage({ params }: ConcessioneDetailPageProps) {
   const role = await requireRole();
   const canUploadDocumenti = BACKOFFICE_ROLES.includes(role);
+  const canManageLegalClassification = canManageConcessioneLegalClassification(role);
   const { id } = await params;
-  const concessione = await getConcessioneDetail(id);
+  const [concessione, tenantContext] = await Promise.all([
+    getConcessioneDetail(id),
+    getCurrentTenantContext(),
+  ]);
 
   if (!concessione) {
     notFound();
   }
+
+  const effectiveExpiryRole = role === "ADMIN" && tenantContext?.isAdmin
+    ? "ADMIN"
+    : tenantContext?.tenantMemberships.find((membership) => membership.enteId === concessione.enteId)?.role;
+  const canChangeExpiry = isConcessioneExpiryChangeEnabled()
+    && effectiveExpiryRole !== undefined
+    && canManageConcessioneExpiry(effectiveExpiryRole);
 
   const today = startOfDay(new Date());
   const in90 = addDays(today, 90);
@@ -167,6 +199,30 @@ export default async function ConcessioneDetailPage({ params }: ConcessioneDetai
                 <p className="text-xs uppercase tracking-wide text-slate-500">Attività</p>
                 <p className="mt-1 text-slate-900">{formatEnumLabel(concessione.attivita)}</p>
               </div>
+              <div className="md:col-span-2">
+                <p className="text-xs uppercase tracking-wide text-slate-500">Classificazione giuridica attività portuale</p>
+                <p className="mt-1 text-slate-900">{getPortActivityLegalTypeLabel(concessione.portActivityLegalType)}</p>
+                {canManageLegalClassification ? (
+                  <form action={updateConcessionePortActivityLegalType} className="mt-2 flex flex-wrap items-center gap-2">
+                    <input type="hidden" name="concessioneId" value={concessione.id} />
+                    <Select
+                      name="portActivityLegalType"
+                      defaultValue={concessione.portActivityLegalType ?? ""}
+                      className="max-w-sm"
+                    >
+                      <option value="">Non classificata</option>
+                      {PORT_ACTIVITY_LEGAL_TYPE_VALUES.map((value) => (
+                        <option key={value} value={value}>{getPortActivityLegalTypeLabel(value)}</option>
+                      ))}
+                    </Select>
+                    <Button type="submit" size="sm">Aggiorna classificazione</Button>
+                  </form>
+                ) : null}
+                <p className="mt-2 text-xs text-slate-500">
+                  Classificazione istruttoria inserita da un operatore. Non determina automaticamente il regime applicabile,
+                  l&apos;esito del procedimento o effetti sul titolo concessorio.
+                </p>
+              </div>
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-500">Verticale</p>
                 <div className="mt-1">
@@ -198,6 +254,24 @@ export default async function ConcessioneDetailPage({ params }: ConcessioneDetai
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-500">Data scadenza</p>
                 <p className="mt-1 text-slate-900">{formatDateIT(concessione.dataScadenza)}</p>
+                {canChangeExpiry ? (
+                  <form action={changeConcessioneExpiryAction} className="mt-3 grid gap-2">
+                    <input type="hidden" name="requestId" value={randomUUID()} />
+                    <input type="hidden" name="concessioneId" value={concessione.id} />
+                    <input type="hidden" name="expectedGeneration" value={concessione.expiryGeneration} />
+                    <input type="hidden" name="expectedDataScadenza" value={concessione.dataScadenza.toISOString()} />
+                    <Input
+                      aria-label="Nuova data scadenza"
+                      name="newDate"
+                      type="date"
+                      defaultValue={concessione.dataScadenza.toISOString().slice(0, 10)}
+                      required
+                    />
+                    <Textarea aria-label="Motivazione cambio scadenza" name="motivation" required maxLength={2000} />
+                    <Input aria-label="Riferimento atto" name="reference" maxLength={1000} />
+                    <Button type="submit" size="sm">Aggiorna scadenza</Button>
+                  </form>
+                ) : null}
               </div>
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-500">Coordinate GIS</p>
@@ -287,6 +361,77 @@ export default async function ConcessioneDetailPage({ params }: ConcessioneDetai
                 </li>
               ))}
             </ul>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Ultimo evento decisionale conclusivo</CardTitle>
+            <CardDescription>
+              Tracciamento dell ultimo provvedimento conclusivo collegato al titolo concessorio.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {concessione.ultimaDecisioneConclusiva ? (
+              <div className="grid gap-3 text-sm text-slate-700 md:grid-cols-2 xl:grid-cols-4">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Procedimento origine</p>
+                  <p className="mt-1 text-slate-900">{formatEnumLabel(concessione.ultimaDecisioneConclusiva.tipologiaProcedimento)}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Decisione</p>
+                  <p className="mt-1 text-slate-900">{formatEnumLabel(concessione.ultimaDecisioneConclusiva.tipoDecisione)}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Numero atto</p>
+                  <p className="mt-1 text-slate-900">{concessione.ultimaDecisioneConclusiva.numeroAtto}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Data atto</p>
+                  <p className="mt-1 text-slate-900">{formatDateIT(concessione.ultimaDecisioneConclusiva.dataAtto)}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Data efficacia</p>
+                  <p className="mt-1 text-slate-900">{formatDateIT(concessione.ultimaDecisioneConclusiva.dataEfficacia)}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Organo competente</p>
+                  <p className="mt-1 text-slate-900">{concessione.ultimaDecisioneConclusiva.organoCompetente}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Effetto sul titolo</p>
+                  <p className="mt-1 text-slate-900">{formatEnumLabel(concessione.ultimaDecisioneConclusiva.effettoTitolo)}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Stato effetto</p>
+                  <p className="mt-1 text-slate-900">{getStatoEffettoLabel(concessione.ultimaDecisioneConclusiva.statoEffetto)}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Effetto applicato il</p>
+                  <p className="mt-1 text-slate-900">{concessione.ultimaDecisioneConclusiva.effettoApplicatoAt ? formatDateIT(concessione.ultimaDecisioneConclusiva.effettoApplicatoAt) : "Non ancora applicato"}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Stato concessione</p>
+                  <p className="mt-1 text-slate-900">
+                    {concessione.ultimaDecisioneConclusiva.statoConcessionePrecedente
+                      ? `${formatEnumLabel(concessione.ultimaDecisioneConclusiva.statoConcessionePrecedente)} -> ${concessione.ultimaDecisioneConclusiva.statoConcessioneSuccessivo ? formatEnumLabel(concessione.ultimaDecisioneConclusiva.statoConcessioneSuccessivo) : "nessuna variazione"}`
+                      : "Nessuna variazione"}
+                  </p>
+                </div>
+                <div className="xl:col-span-4 flex flex-wrap gap-3">
+                  <Link href={`/procedimenti/${concessione.ultimaDecisioneConclusiva.procedimentoId}`} className="text-sm underline underline-offset-4">
+                    Apri procedimento di origine
+                  </Link>
+                  {concessione.ultimaDecisioneConclusiva.documentoId ? (
+                    <Link href={`/documenti/${concessione.ultimaDecisioneConclusiva.documentoId}/download`} className="text-sm underline underline-offset-4">
+                      Apri documento atto
+                    </Link>
+                  ) : null}
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-slate-500">Nessuna decisione conclusiva registrata per questa concessione.</p>
+            )}
           </CardContent>
         </Card>
 
@@ -538,4 +683,23 @@ export default async function ConcessioneDetailPage({ params }: ConcessioneDetai
       </div>
     </AppShell>
   );
+}
+
+function getStatoEffettoLabel(value: "NON_PREVISTO" | "PENDENTE" | "PRONTO" | "APPLICATO" | "BLOCCATO" | "ERRORE") {
+  switch (value) {
+    case "NON_PREVISTO":
+      return "Effetto non previsto";
+    case "PENDENTE":
+      return "Effetto pendente";
+    case "PRONTO":
+      return "Effetto pronto";
+    case "APPLICATO":
+      return "Effetto applicato";
+    case "BLOCCATO":
+      return "Effetto bloccato";
+    case "ERRORE":
+      return "Errore applicazione";
+    default:
+      return value;
+  }
 }

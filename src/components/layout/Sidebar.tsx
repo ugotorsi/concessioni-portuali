@@ -4,27 +4,18 @@ import type { ComponentType } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  AlertTriangle,
-  CalendarClock,
-  ClipboardList,
-  DoorOpen,
-  FileText,
+  FolderOpen,
   Layers,
   LayoutDashboard,
-  Lightbulb,
-  Library,
   Map,
-  Presentation,
-  Ship,
+  Menu,
   Shield,
   Users,
-  Wallet,
-  Wrench,
-  ScrollText,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import type { DemoRole } from "@/lib/auth";
+import { LogoutButton } from "@/components/auth/LogoutButton";
 import { isNavItemActive, type NavMatchMode } from "@/components/layout/nav-active";
 
 interface NavItem {
@@ -36,38 +27,15 @@ interface NavItem {
 
 const backofficeNavItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/concessioni", label: "Concessioni", icon: Ship, matchMode: "section" },
+  { href: "/procedimenti", label: "Fascicoli", icon: FolderOpen, matchMode: "section" },
   { href: "/verticali", label: "Verticali", icon: Layers, matchMode: "section" },
   { href: "/mappa", label: "Mappa", icon: Map },
-  { href: "/concessionari", label: "Concessionari", icon: Users },
-  { href: "/criticita", label: "Criticità", icon: AlertTriangle, matchMode: "section" },
-  { href: "/scadenze", label: "Scadenze", icon: CalendarClock, matchMode: "section" },
-  { href: "/pagamenti", label: "Pagamenti", icon: Wallet, matchMode: "section" },
-  { href: "/sopralluoghi", label: "Sopralluoghi", icon: ClipboardList, matchMode: "section" },
-  { href: "/procedimenti", label: "Procedimenti", icon: Wrench, matchMode: "section" },
-  { href: "/report", label: "Report", icon: FileText, matchMode: "section" },
-  { href: "/documenti", label: "Documenti", icon: FileText, matchMode: "section" },
-  { href: "/normativa", label: "Normativa", icon: Library, matchMode: "section" },
-  { href: "/normativa/orchestrazione", label: "Orchestrazione", icon: Library, matchMode: "exact" },
-  { href: "/audit", label: "Audit", icon: ScrollText },
-  { href: "/ai", label: "Assistente AI", icon: Lightbulb },
-  { href: "/demo", label: "Demo", icon: Presentation },
-  { href: "/demo-scenari", label: "Scenari demo", icon: Presentation },
-  { href: "/demo-guidata", label: "Demo guidata", icon: Presentation },
+  { href: "/concessionari", label: "Concessionari", icon: Users, matchMode: "section" },
 ];
 
 const adspNavItems: NavItem[] = [
   { href: "/adsp", label: "Portale AdSP", icon: Shield },
-  { href: "/concessioni", label: "Concessioni", icon: Ship, matchMode: "section" },
-  { href: "/verticali", label: "Verticali", icon: Layers, matchMode: "section" },
   { href: "/mappa", label: "Mappa", icon: Map },
-  { href: "/report", label: "Report", icon: FileText, matchMode: "section" },
-  { href: "/documenti", label: "Documenti", icon: FileText, matchMode: "section" },
-  { href: "/normativa", label: "Normativa", icon: Library, matchMode: "section" },
-  { href: "/normativa/orchestrazione", label: "Orchestrazione", icon: Library, matchMode: "exact" },
-  { href: "/demo", label: "Demo", icon: Presentation },
-  { href: "/demo-scenari", label: "Scenari demo", icon: Presentation },
-  { href: "/demo-guidata", label: "Demo guidata", icon: Presentation },
 ];
 
 interface SidebarProps {
@@ -79,57 +47,63 @@ export function Sidebar({ role, roleLabel }: SidebarProps) {
   const pathname = usePathname();
   const navItems = role === "VIEWER_ADSP" ? adspNavItems : backofficeNavItems;
 
+  const navigation = (
+    <nav className="grid gap-1" aria-label="Navigazione principale">
+      {navItems.map((item) => {
+            const isActive = isNavItemActive(pathname, item.href, item.matchMode ?? "exact");
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={isActive ? "page" : undefined}
+                className={cn(
+                  "inline-flex min-h-9 items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300",
+                  isActive
+                    ? "bg-white text-[#173d4f] shadow-sm"
+                    : "text-slate-300 hover:bg-slate-800 hover:text-white",
+                )}
+              >
+                <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+    </nav>
+  );
+
   return (
-    <aside className="border-r border-slate-200 bg-slate-900 text-slate-100">
-      <div className="border-b border-slate-800 px-4 py-5 sm:px-6">
-        <p className="text-xs uppercase tracking-[0.14em] text-slate-400">Piattaforma interna</p>
-        <p className="mt-2 text-lg font-semibold">Concessioni Portuali</p>
-        <p className="mt-2 text-xs text-slate-300">Profilo: {roleLabel}</p>
-      </div>
-
-      <nav className="grid gap-1 px-3 py-4 sm:px-4" aria-label="Navigazione principale">
-        {navItems.map((item) => {
-          const isActive = isNavItemActive(pathname, item.href, item.matchMode ?? "exact");
-          const Icon = item.icon;
-
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={isActive ? "page" : undefined}
-              className={cn(
-                "inline-flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-slate-100 text-slate-900"
-                  : "text-slate-200 hover:bg-slate-800 hover:text-white",
-              )}
-            >
-              <Icon className="h-4 w-4" aria-hidden="true" />
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
-      </nav>
-
-      <div className="border-t border-slate-800 px-3 py-4 sm:px-4">
-        <div className="grid gap-1">
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-800 hover:text-white"
-          >
-            <Users className="h-4 w-4" aria-hidden="true" />
-            <span>Cambia profilo demo</span>
-          </Link>
-          <Link
-            href="/logout"
-            data-testid="logout-link"
-            className="inline-flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-800 hover:text-white"
-          >
-            <DoorOpen className="h-4 w-4" aria-hidden="true" />
-            <span>Logout</span>
-          </Link>
+    <>
+      <details className="group sticky top-0 z-40 border-b border-slate-700 bg-slate-900 text-white lg:hidden">
+        <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between px-4 [&::-webkit-details-marker]:hidden">
+          <span>
+            <span className="block text-sm font-semibold">Concessioni Portuali</span>
+            <span className="block text-xs text-slate-400">{roleLabel}</span>
+          </span>
+          <Menu className="h-5 w-5" aria-hidden="true" />
+          <span className="sr-only">Apri navigazione</span>
+        </summary>
+        <div className="max-h-[calc(100vh-3.5rem)] overflow-y-auto border-t border-slate-800 px-3 py-4">
+          {navigation}
+          <div className="mt-3 border-t border-slate-800 pt-3">
+            <LogoutButton />
+          </div>
         </div>
-      </div>
-    </aside>
+      </details>
+
+      <aside className="hidden h-screen flex-col border-r border-slate-800 bg-slate-900 text-slate-100 lg:sticky lg:top-0 lg:flex">
+        <div className="border-b border-slate-800 px-5 py-5">
+          <p className="text-xs font-medium text-slate-400">Workspace istituzionale</p>
+          <p className="mt-1 text-base font-semibold">Concessioni Portuali</p>
+          <p className="mt-1 text-xs text-slate-400">{roleLabel}</p>
+        </div>
+        <div className="flex-1 overflow-y-auto px-3 py-4">{navigation}</div>
+        <div className="border-t border-slate-800 px-3 py-3">
+        <div className="grid gap-1">
+          <LogoutButton />
+        </div>
+        </div>
+      </aside>
+    </>
   );
 }

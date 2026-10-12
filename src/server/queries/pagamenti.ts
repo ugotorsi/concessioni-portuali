@@ -505,7 +505,7 @@ export async function getPagamentoDetail(id: string): Promise<PagamentoDetail | 
     try {
       requireTenantAccess(tenantContext, pagamento.concessione.enteId, {
         mode: "read",
-        allowWhenEnteMissing: true,
+        allowWhenEnteMissing: false,
       });
     } catch {
       return null;

@@ -14,8 +14,25 @@ test("auth + role redirects baseline", async ({ page, context }) => {
   await page.goto("/ai", { waitUntil: "domcontentloaded" });
   await expect(page).toHaveURL(/\/ai$/);
 
-  await page.goto("/logout", { waitUntil: "domcontentloaded" });
+  const signOutResponsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === "POST"
+      && response.url().includes("/api/auth/signout"),
+  );
+  await page.getByTestId("logout-link").click();
+  const signOutResponse = await signOutResponsePromise;
+  expect(signOutResponse.ok()).toBe(true);
   await expect(page).toHaveURL(/\/login$/);
+
+  const sessionResponse = await page.request.get("/api/auth/session");
+  expect(sessionResponse.ok()).toBe(true);
+  expect((await sessionResponse.json()).user).toBeUndefined();
+
+  await page.goto("/dashboard", { waitUntil: "domcontentloaded" });
+  await expect(page).toHaveURL(/\/login/);
+
+  await page.goto("/login", { waitUntil: "domcontentloaded" });
+  await expect(page.getByTestId("login-email")).toBeVisible();
 
   await loginAndExpectLanding(page, "adsp@demo.local", "adsp123", /\/adsp$/);
 

@@ -94,7 +94,7 @@ export async function toggleReportValidationAction(formData: FormData) {
     try {
       requireTenantAccess(tenantContext, resourceEnteId, {
         mode: "write",
-        allowWhenEnteMissing: true,
+        allowWhenEnteMissing: false,
       });
     } catch {
       await auditFailure({

@@ -4,8 +4,13 @@ import { cn } from "@/lib/utils";
 
 export function Table({ className, ...props }: React.TableHTMLAttributes<HTMLTableElement>) {
   return (
-    <div className="w-full overflow-x-auto rounded-md border border-slate-200 bg-white">
-      <table className={cn("w-full text-sm", className)} {...props} />
+    <div
+      className="w-full overflow-x-auto rounded-md border border-slate-200 bg-white focus-visible:ring-2 focus-visible:ring-[#0b7285]"
+      role="region"
+      aria-label="Tabella dati scorrevole"
+      tabIndex={0}
+    >
+      <table className={cn("w-full border-separate border-spacing-0 text-sm", className)} {...props} />
     </div>
   );
 }
@@ -19,14 +24,14 @@ export function TableBody({ className, ...props }: React.HTMLAttributes<HTMLTabl
 }
 
 export function TableRow({ className, ...props }: React.HTMLAttributes<HTMLTableRowElement>) {
-  return <tr className={cn("hover:bg-slate-50", className)} {...props} />;
+  return <tr className={cn("transition-colors hover:bg-slate-50", className)} {...props} />;
 }
 
 export function TableHead({ className, ...props }: React.ThHTMLAttributes<HTMLTableCellElement>) {
   return (
     <th
       className={cn(
-        "px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600",
+        "sticky top-0 z-[1] border-b border-slate-200 bg-slate-50 px-4 py-2.5 text-left text-xs font-semibold text-slate-600",
         className,
       )}
       {...props}
@@ -35,7 +40,7 @@ export function TableHead({ className, ...props }: React.ThHTMLAttributes<HTMLTa
 }
 
 export function TableCell({ className, ...props }: React.TdHTMLAttributes<HTMLTableCellElement>) {
-  return <td className={cn("px-4 py-3 text-slate-700", className)} {...props} />;
+  return <td className={cn("px-4 py-3 align-top text-slate-700", className)} {...props} />;
 }
 
 export function TableCaption({ className, ...props }: React.HTMLAttributes<HTMLTableCaptionElement>) {

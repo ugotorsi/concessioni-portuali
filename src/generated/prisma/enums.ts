@@ -23,6 +23,179 @@ export const RuoloUser = {
 export type RuoloUser = (typeof RuoloUser)[keyof typeof RuoloUser]
 
 
+export const FascicoloObservationKind = {
+  DOCUMENT_COMPLETENESS: 'DOCUMENT_COMPLETENESS'
+} as const
+
+export type FascicoloObservationKind = (typeof FascicoloObservationKind)[keyof typeof FascicoloObservationKind]
+
+
+export const FascicoloObservationStatus = {
+  PROPOSTO: 'PROPOSTO',
+  VALIDATO: 'VALIDATO',
+  RIFIUTATO: 'RIFIUTATO',
+  SUPERATO: 'SUPERATO'
+} as const
+
+export type FascicoloObservationStatus = (typeof FascicoloObservationStatus)[keyof typeof FascicoloObservationStatus]
+
+
+export const FascicoloChecklistEvidenceStatus = {
+  PROPOSTO: 'PROPOSTO',
+  VALIDATO: 'VALIDATO',
+  RIFIUTATO: 'RIFIUTATO'
+} as const
+
+export type FascicoloChecklistEvidenceStatus = (typeof FascicoloChecklistEvidenceStatus)[keyof typeof FascicoloChecklistEvidenceStatus]
+
+
+export const FascicoloDocumentRequirementProposalStatus = {
+  PROPOSTO: 'PROPOSTO',
+  VALIDATO: 'VALIDATO',
+  RIFIUTATO: 'RIFIUTATO'
+} as const
+
+export type FascicoloDocumentRequirementProposalStatus = (typeof FascicoloDocumentRequirementProposalStatus)[keyof typeof FascicoloDocumentRequirementProposalStatus]
+
+
+export const FascicoloSignalStatus = {
+  OPEN: 'OPEN',
+  SUPERSEDED: 'SUPERSEDED'
+} as const
+
+export type FascicoloSignalStatus = (typeof FascicoloSignalStatus)[keyof typeof FascicoloSignalStatus]
+
+
+export const FascicoloSignalHumanDisposition = {
+  UNREVIEWED: 'UNREVIEWED',
+  ACKNOWLEDGED: 'ACKNOWLEDGED',
+  DISMISSED: 'DISMISSED',
+  PROMOTED: 'PROMOTED'
+} as const
+
+export type FascicoloSignalHumanDisposition = (typeof FascicoloSignalHumanDisposition)[keyof typeof FascicoloSignalHumanDisposition]
+
+
+export const FascicoloSignalAttentionLevel = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  CRITICAL: 'CRITICAL'
+} as const
+
+export type FascicoloSignalAttentionLevel = (typeof FascicoloSignalAttentionLevel)[keyof typeof FascicoloSignalAttentionLevel]
+
+
+export const FascicoloSignalKind = {
+  CONCESSION_EXPIRY: 'CONCESSION_EXPIRY'
+} as const
+
+export type FascicoloSignalKind = (typeof FascicoloSignalKind)[keyof typeof FascicoloSignalKind]
+
+
+export const AiFascicoloHumanReviewDisposition = {
+  COMPANY_ACCEPTED: 'COMPANY_ACCEPTED',
+  COMPANY_REJECTED: 'COMPANY_REJECTED',
+  COMPANY_NEEDS_VERIFICATION: 'COMPANY_NEEDS_VERIFICATION',
+  COMPANY_AMENDED: 'COMPANY_AMENDED'
+} as const
+
+export type AiFascicoloHumanReviewDisposition = (typeof AiFascicoloHumanReviewDisposition)[keyof typeof AiFascicoloHumanReviewDisposition]
+
+
+export const FascicoloKnowledgeRevisionStatus = {
+  BUILDING: 'BUILDING',
+  CURRENT: 'CURRENT',
+  SUPERSEDED: 'SUPERSEDED'
+} as const
+
+export type FascicoloKnowledgeRevisionStatus = (typeof FascicoloKnowledgeRevisionStatus)[keyof typeof FascicoloKnowledgeRevisionStatus]
+
+
+export const StructuredFascicoloReportStatus = {
+  CURRENT: 'CURRENT',
+  STALE: 'STALE',
+  SUPERSEDED: 'SUPERSEDED'
+} as const
+
+export type StructuredFascicoloReportStatus = (typeof StructuredFascicoloReportStatus)[keyof typeof StructuredFascicoloReportStatus]
+
+
+export const FascicoloOperationalProposalType = {
+  DEADLINE: 'DEADLINE',
+  CRITICALITY: 'CRITICALITY',
+  DOCUMENT_REQUIREMENT: 'DOCUMENT_REQUIREMENT',
+  CHECKLIST_ITEM: 'CHECKLIST_ITEM',
+  ACTIVITY: 'ACTIVITY',
+  NOTE: 'NOTE',
+  SUBJECT_UPDATE: 'SUBJECT_UPDATE'
+} as const
+
+export type FascicoloOperationalProposalType = (typeof FascicoloOperationalProposalType)[keyof typeof FascicoloOperationalProposalType]
+
+
+export const FascicoloOperationalProposalStatus = {
+  PROPOSED: 'PROPOSED',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  AMENDED_AND_APPROVED: 'AMENDED_AND_APPROVED',
+  MATERIALIZED: 'MATERIALIZED',
+  SUPERSEDED: 'SUPERSEDED',
+  STALE: 'STALE'
+} as const
+
+export type FascicoloOperationalProposalStatus = (typeof FascicoloOperationalProposalStatus)[keyof typeof FascicoloOperationalProposalStatus]
+
+
+export const FascicoloOperationalProposalReviewAction = {
+  APPROVE: 'APPROVE',
+  REJECT: 'REJECT',
+  AMEND_AND_APPROVE: 'AMEND_AND_APPROVE'
+} as const
+
+export type FascicoloOperationalProposalReviewAction = (typeof FascicoloOperationalProposalReviewAction)[keyof typeof FascicoloOperationalProposalReviewAction]
+
+
+export const FascicoloKnowledgeItemStatus = {
+  AI_PROPOSED: 'AI_PROPOSED',
+  HUMAN_CONFIRMED: 'HUMAN_CONFIRMED',
+  REJECTED: 'REJECTED'
+} as const
+
+export type FascicoloKnowledgeItemStatus = (typeof FascicoloKnowledgeItemStatus)[keyof typeof FascicoloKnowledgeItemStatus]
+
+
+export const FascicoloKnowledgeRelationType = {
+  RELATED_TO: 'RELATED_TO',
+  SUPERSEDES: 'SUPERSEDES',
+  CONTRADICTS: 'CONTRADICTS',
+  ISSUE_DERIVED_FROM: 'ISSUE_DERIVED_FROM',
+  QUESTION_FOR_ISSUE: 'QUESTION_FOR_ISSUE'
+} as const
+
+export type FascicoloKnowledgeRelationType = (typeof FascicoloKnowledgeRelationType)[keyof typeof FascicoloKnowledgeRelationType]
+
+
+export const FascicoloSubjectType = {
+  PERSON: 'PERSON',
+  ORGANIZATION: 'ORGANIZATION',
+  PUBLIC_ADMINISTRATION: 'PUBLIC_ADMINISTRATION',
+  OFFICE: 'OFFICE',
+  AUTHORITY: 'AUTHORITY',
+  UNKNOWN: 'UNKNOWN'
+} as const
+
+export type FascicoloSubjectType = (typeof FascicoloSubjectType)[keyof typeof FascicoloSubjectType]
+
+
+export const FascicoloKnowledgeProvenanceType = {
+  DOCUMENT_EXTRACTION: 'DOCUMENT_EXTRACTION',
+  FASCICOLO_DOCUMENT_EXTRACTION: 'FASCICOLO_DOCUMENT_EXTRACTION'
+} as const
+
+export type FascicoloKnowledgeProvenanceType = (typeof FascicoloKnowledgeProvenanceType)[keyof typeof FascicoloKnowledgeProvenanceType]
+
+
 export const NormaRiferimento = {
   ART_36_COD_NAV: 'ART_36_COD_NAV',
   ART_18_L_84_1994: 'ART_18_L_84_1994',
@@ -67,6 +240,16 @@ export const ConcessionVertical = {
 } as const
 
 export type ConcessionVertical = (typeof ConcessionVertical)[keyof typeof ConcessionVertical]
+
+
+export const PortActivityLegalType = {
+  OPERAZIONI_PORTUALI: 'OPERAZIONI_PORTUALI',
+  SERVIZI_PORTUALI: 'SERVIZI_PORTUALI',
+  PASSEGGERI: 'PASSEGGERI',
+  ALTRO: 'ALTRO'
+} as const
+
+export type PortActivityLegalType = (typeof PortActivityLegalType)[keyof typeof PortActivityLegalType]
 
 
 export const LegalFramework = {
@@ -356,6 +539,37 @@ export const EsitoIstruttorioProcedimento = {
 export type EsitoIstruttorioProcedimento = (typeof EsitoIstruttorioProcedimento)[keyof typeof EsitoIstruttorioProcedimento]
 
 
+export const TipoDecisioneProcedimento = {
+  DECADENZA_DICHIARATA: 'DECADENZA_DICHIARATA',
+  REVOCA_DISPOSTA: 'REVOCA_DISPOSTA',
+  ARCHIVIAZIONE: 'ARCHIVIAZIONE',
+  CHIUSURA_SENZA_EFFETTO: 'CHIUSURA_SENZA_EFFETTO'
+} as const
+
+export type TipoDecisioneProcedimento = (typeof TipoDecisioneProcedimento)[keyof typeof TipoDecisioneProcedimento]
+
+
+export const EffettoTitoloProcedimento = {
+  NESSUNO: 'NESSUNO',
+  CONCESSIONE_DECADUTA: 'CONCESSIONE_DECADUTA',
+  CONCESSIONE_REVOCATA: 'CONCESSIONE_REVOCATA'
+} as const
+
+export type EffettoTitoloProcedimento = (typeof EffettoTitoloProcedimento)[keyof typeof EffettoTitoloProcedimento]
+
+
+export const StatoEffettoProcedimento = {
+  NON_PREVISTO: 'NON_PREVISTO',
+  PENDENTE: 'PENDENTE',
+  PRONTO: 'PRONTO',
+  APPLICATO: 'APPLICATO',
+  BLOCCATO: 'BLOCCATO',
+  ERRORE: 'ERRORE'
+} as const
+
+export type StatoEffettoProcedimento = (typeof StatoEffettoProcedimento)[keyof typeof StatoEffettoProcedimento]
+
+
 export const OrigineProcedimento = {
   UFFICIO: 'UFFICIO',
   ISTANZA_PARTE: 'ISTANZA_PARTE',
@@ -552,6 +766,7 @@ export type LegalSourceType = (typeof LegalSourceType)[keyof typeof LegalSourceT
 export const LegalSourceStatus = {
   CURRENT: 'CURRENT',
   CURRENT_SUBJECT_TO_REVIEW: 'CURRENT_SUBJECT_TO_REVIEW',
+  IDENTITY_VERIFIED_PENDING_VALIDITY: 'IDENTITY_VERIFIED_PENDING_VALIDITY',
   PENDING_VALIDITY_CHECK: 'PENDING_VALIDITY_CHECK',
   HISTORICAL: 'HISTORICAL',
   SUPERSEDED: 'SUPERSEDED',
@@ -562,6 +777,85 @@ export const LegalSourceStatus = {
 } as const
 
 export type LegalSourceStatus = (typeof LegalSourceStatus)[keyof typeof LegalSourceStatus]
+
+
+export const LegalSourceIdentityScopeKind = {
+  GLOBAL: 'GLOBAL',
+  TENANT: 'TENANT'
+} as const
+
+export type LegalSourceIdentityScopeKind = (typeof LegalSourceIdentityScopeKind)[keyof typeof LegalSourceIdentityScopeKind]
+
+
+export const ResourceSemanticType = {
+  NORMATIVE_INSTRUMENT: 'NORMATIVE_INSTRUMENT',
+  JUDICIAL_DECISION: 'JUDICIAL_DECISION',
+  ADMINISTRATIVE_ACT: 'ADMINISTRATIVE_ACT',
+  CONTRACT: 'CONTRACT',
+  CORRESPONDENCE: 'CORRESPONDENCE',
+  TECHNICAL_DOCUMENT: 'TECHNICAL_DOCUMENT',
+  MEDIA_RECORD: 'MEDIA_RECORD',
+  OTHER: 'OTHER'
+} as const
+
+export type ResourceSemanticType = (typeof ResourceSemanticType)[keyof typeof ResourceSemanticType]
+
+
+export const LegalAuthorityKind = {
+  LEGISLATION: 'LEGISLATION',
+  CASE_LAW: 'CASE_LAW',
+  ADMINISTRATIVE_REGULATION: 'ADMINISTRATIVE_REGULATION',
+  ADMINISTRATIVE_ACT: 'ADMINISTRATIVE_ACT',
+  AUTHORITY_PRACTICE: 'AUTHORITY_PRACTICE',
+  OTHER_LEGAL_AUTHORITY: 'OTHER_LEGAL_AUTHORITY'
+} as const
+
+export type LegalAuthorityKind = (typeof LegalAuthorityKind)[keyof typeof LegalAuthorityKind]
+
+
+export const SourceCharacter = {
+  PUBLIC_OFFICIAL: 'PUBLIC_OFFICIAL',
+  PUBLIC_NON_OFFICIAL: 'PUBLIC_NON_OFFICIAL',
+  PRIVATE: 'PRIVATE',
+  UNKNOWN: 'UNKNOWN'
+} as const
+
+export type SourceCharacter = (typeof SourceCharacter)[keyof typeof SourceCharacter]
+
+
+export const LegalSourceIdentityVerificationStatus = {
+  UNVERIFIED: 'UNVERIFIED',
+  VERIFIED: 'VERIFIED',
+  REJECTED: 'REJECTED',
+  CONFLICTING: 'CONFLICTING'
+} as const
+
+export type LegalSourceIdentityVerificationStatus = (typeof LegalSourceIdentityVerificationStatus)[keyof typeof LegalSourceIdentityVerificationStatus]
+
+
+export const LegalSourceVersionLifecycleStatus = {
+  CURRENT: 'CURRENT',
+  CURRENT_SUBJECT_TO_REVIEW: 'CURRENT_SUBJECT_TO_REVIEW',
+  PENDING_VALIDITY_CHECK: 'PENDING_VALIDITY_CHECK',
+  HISTORICAL: 'HISTORICAL',
+  SUPERSEDED: 'SUPERSEDED',
+  PARTIALLY_SUPERSEDED: 'PARTIALLY_SUPERSEDED',
+  DRAFT_OR_ONGOING_PROCEDURE: 'DRAFT_OR_ONGOING_PROCEDURE',
+  CASE_SPECIFIC: 'CASE_SPECIFIC'
+} as const
+
+export type LegalSourceVersionLifecycleStatus = (typeof LegalSourceVersionLifecycleStatus)[keyof typeof LegalSourceVersionLifecycleStatus]
+
+
+export const LegalSourceAcquisitionOutcome = {
+  ACQUIRED: 'ACQUIRED',
+  MISSING: 'MISSING',
+  INTEGRITY_MISMATCH: 'INTEGRITY_MISMATCH',
+  FAILED: 'FAILED',
+  PENDING_IDENTITY: 'PENDING_IDENTITY'
+} as const
+
+export type LegalSourceAcquisitionOutcome = (typeof LegalSourceAcquisitionOutcome)[keyof typeof LegalSourceAcquisitionOutcome]
 
 
 export const LegalSourceRole = {
@@ -670,3 +964,362 @@ export const ImportRunStatus = {
 } as const
 
 export type ImportRunStatus = (typeof ImportRunStatus)[keyof typeof ImportRunStatus]
+
+
+export const NeutralIntakeStatus = {
+  RECEIVED: 'RECEIVED',
+  EVIDENCE_READY: 'EVIDENCE_READY',
+  REVIEW_REQUIRED: 'REVIEW_REQUIRED',
+  ROUTED: 'ROUTED',
+  FAILED_EXTRACTION: 'FAILED_EXTRACTION',
+  FAILED_CLASSIFICATION: 'FAILED_CLASSIFICATION',
+  FAILED_HANDOFF: 'FAILED_HANDOFF'
+} as const
+
+export type NeutralIntakeStatus = (typeof NeutralIntakeStatus)[keyof typeof NeutralIntakeStatus]
+
+
+export const NeutralIntakeExtractionOutcome = {
+  SUCCEEDED: 'SUCCEEDED',
+  FAILED: 'FAILED'
+} as const
+
+export type NeutralIntakeExtractionOutcome = (typeof NeutralIntakeExtractionOutcome)[keyof typeof NeutralIntakeExtractionOutcome]
+
+
+export const NeutralIntakeExtractionMethod = {
+  DIRECT_TEXT: 'DIRECT_TEXT',
+  OCR: 'OCR'
+} as const
+
+export type NeutralIntakeExtractionMethod = (typeof NeutralIntakeExtractionMethod)[keyof typeof NeutralIntakeExtractionMethod]
+
+
+export const DocumentExtractionOutcome = {
+  SUCCEEDED: 'SUCCEEDED',
+  FAILED: 'FAILED'
+} as const
+
+export type DocumentExtractionOutcome = (typeof DocumentExtractionOutcome)[keyof typeof DocumentExtractionOutcome]
+
+
+export const DocumentExtractionMethod = {
+  DIRECT_TEXT: 'DIRECT_TEXT',
+  OCR: 'OCR'
+} as const
+
+export type DocumentExtractionMethod = (typeof DocumentExtractionMethod)[keyof typeof DocumentExtractionMethod]
+
+
+export const DocumentOcrRunStatus = {
+  PLANNED: 'PLANNED',
+  PROCESSING: 'PROCESSING',
+  SUCCEEDED: 'SUCCEEDED',
+  FAILED: 'FAILED'
+} as const
+
+export type DocumentOcrRunStatus = (typeof DocumentOcrRunStatus)[keyof typeof DocumentOcrRunStatus]
+
+
+export const NeutralIntakeClassificationOutcome = {
+  LEGAL_SOURCE_CANDIDATE: 'LEGAL_SOURCE_CANDIDATE',
+  CASE_DOCUMENT: 'CASE_DOCUMENT',
+  UNCERTAIN_REVIEW_REQUIRED: 'UNCERTAIN_REVIEW_REQUIRED'
+} as const
+
+export type NeutralIntakeClassificationOutcome = (typeof NeutralIntakeClassificationOutcome)[keyof typeof NeutralIntakeClassificationOutcome]
+
+
+export const NeutralIntakeClassificationConfidence = {
+  HIGH: 'HIGH',
+  MEDIUM: 'MEDIUM',
+  LOW: 'LOW',
+  INSUFFICIENT: 'INSUFFICIENT'
+} as const
+
+export type NeutralIntakeClassificationConfidence = (typeof NeutralIntakeClassificationConfidence)[keyof typeof NeutralIntakeClassificationConfidence]
+
+
+export const LegalSourceCandidateResolutionOutcome = {
+  LINKED: 'LINKED',
+  NO_MATCH: 'NO_MATCH'
+} as const
+
+export type LegalSourceCandidateResolutionOutcome = (typeof LegalSourceCandidateResolutionOutcome)[keyof typeof LegalSourceCandidateResolutionOutcome]
+
+
+export const LegalReferenceKind = {
+  LEGISLATION: 'LEGISLATION',
+  CODE: 'CODE',
+  CASE_LAW: 'CASE_LAW'
+} as const
+
+export type LegalReferenceKind = (typeof LegalReferenceKind)[keyof typeof LegalReferenceKind]
+
+
+export const LegalReferenceMatchStatus = {
+  MATCHED: 'MATCHED',
+  AMBIGUOUS: 'AMBIGUOUS',
+  NO_MATCH: 'NO_MATCH'
+} as const
+
+export type LegalReferenceMatchStatus = (typeof LegalReferenceMatchStatus)[keyof typeof LegalReferenceMatchStatus]
+
+
+export const LegalReferenceMatchReason = {
+  EXACT_IDENTITY: 'EXACT_IDENTITY',
+  MULTIPLE_EXACT_MATCHES: 'MULTIPLE_EXACT_MATCHES',
+  NO_CATALOG_MATCH: 'NO_CATALOG_MATCH',
+  INSUFFICIENT_IDENTITY: 'INSUFFICIENT_IDENTITY'
+} as const
+
+export type LegalReferenceMatchReason = (typeof LegalReferenceMatchReason)[keyof typeof LegalReferenceMatchReason]
+
+
+export const LegalReferenceOfficialLookupStatus = {
+  NOT_FOUND: 'NOT_FOUND',
+  FOUND_UNIQUE: 'FOUND_UNIQUE',
+  AMBIGUOUS: 'AMBIGUOUS'
+} as const
+
+export type LegalReferenceOfficialLookupStatus = (typeof LegalReferenceOfficialLookupStatus)[keyof typeof LegalReferenceOfficialLookupStatus]
+
+
+export const LegalReferenceOfficialReconciliationState = {
+  INCOMPLETE: 'INCOMPLETE',
+  PENDING_REVIEW: 'PENDING_REVIEW',
+  CONFLICTED: 'CONFLICTED',
+  LINKED_EXISTING: 'LINKED_EXISTING',
+  ACCEPTED_NEW: 'ACCEPTED_NEW',
+  REJECTED: 'REJECTED'
+} as const
+
+export type LegalReferenceOfficialReconciliationState = (typeof LegalReferenceOfficialReconciliationState)[keyof typeof LegalReferenceOfficialReconciliationState]
+
+
+export const LegalReferenceOfficialEvidenceClassification = {
+  OFFICIAL_AUTHORITY: 'OFFICIAL_AUTHORITY',
+  COMMERCIAL_CORROBORATION: 'COMMERCIAL_CORROBORATION'
+} as const
+
+export type LegalReferenceOfficialEvidenceClassification = (typeof LegalReferenceOfficialEvidenceClassification)[keyof typeof LegalReferenceOfficialEvidenceClassification]
+
+
+export const LegalReferenceOfficialEvidenceDisposition = {
+  COMPATIBLE: 'COMPATIBLE',
+  CONFLICTING: 'CONFLICTING',
+  INCOMPLETE: 'INCOMPLETE',
+  RECORDED_AFTER_TERMINAL: 'RECORDED_AFTER_TERMINAL'
+} as const
+
+export type LegalReferenceOfficialEvidenceDisposition = (typeof LegalReferenceOfficialEvidenceDisposition)[keyof typeof LegalReferenceOfficialEvidenceDisposition]
+
+
+export const AsyncJobStatus = {
+  QUEUED: 'QUEUED',
+  RUNNING: 'RUNNING',
+  RETRY_WAIT: 'RETRY_WAIT',
+  CANCELLATION_REQUESTED: 'CANCELLATION_REQUESTED',
+  SUCCEEDED: 'SUCCEEDED',
+  TERMINAL_FAILED: 'TERMINAL_FAILED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type AsyncJobStatus = (typeof AsyncJobStatus)[keyof typeof AsyncJobStatus]
+
+
+export const AsyncJobAdmissionType = {
+  AUTHENTICATED_USER: 'AUTHENTICATED_USER',
+  AUTHORIZED_SYSTEM: 'AUTHORIZED_SYSTEM'
+} as const
+
+export type AsyncJobAdmissionType = (typeof AsyncJobAdmissionType)[keyof typeof AsyncJobAdmissionType]
+
+
+export const AsyncJobPriority = {
+  HIGH: 'HIGH',
+  NORMAL: 'NORMAL',
+  LOW: 'LOW'
+} as const
+
+export type AsyncJobPriority = (typeof AsyncJobPriority)[keyof typeof AsyncJobPriority]
+
+
+export const RuntimeWorkerStatus = {
+  RUNNING: 'RUNNING',
+  DRAINING: 'DRAINING',
+  STOPPED: 'STOPPED'
+} as const
+
+export type RuntimeWorkerStatus = (typeof RuntimeWorkerStatus)[keyof typeof RuntimeWorkerStatus]
+
+
+export const RuntimeBudgetScope = {
+  GLOBAL: 'GLOBAL',
+  TENANT: 'TENANT',
+  PROCEDIMENTO: 'PROCEDIMENTO'
+} as const
+
+export type RuntimeBudgetScope = (typeof RuntimeBudgetScope)[keyof typeof RuntimeBudgetScope]
+
+
+export const RuntimeCostReservationStatus = {
+  RESERVED: 'RESERVED',
+  SETTLED: 'SETTLED',
+  RELEASED: 'RELEASED',
+  EXPIRED: 'EXPIRED'
+} as const
+
+export type RuntimeCostReservationStatus = (typeof RuntimeCostReservationStatus)[keyof typeof RuntimeCostReservationStatus]
+
+
+export const ResearchMissionStatus = {
+  PENDING: 'PENDING',
+  IN_PROGRESS: 'IN_PROGRESS',
+  COMPLETED: 'COMPLETED',
+  BUDGET_EXHAUSTED: 'BUDGET_EXHAUSTED',
+  DEFERRED: 'DEFERRED',
+  REJECTED: 'REJECTED'
+} as const
+
+export type ResearchMissionStatus = (typeof ResearchMissionStatus)[keyof typeof ResearchMissionStatus]
+
+
+export const ResearchMissionLifecycleStatus = {
+  CURRENT: 'CURRENT',
+  HISTORICAL: 'HISTORICAL'
+} as const
+
+export type ResearchMissionLifecycleStatus = (typeof ResearchMissionLifecycleStatus)[keyof typeof ResearchMissionLifecycleStatus]
+
+
+export const ResearchResultSupportDirection = {
+  SUPPORTS: 'SUPPORTS',
+  OPPOSES: 'OPPOSES',
+  NEUTRAL: 'NEUTRAL',
+  INCONCLUSIVE: 'INCONCLUSIVE',
+  UNASSESSED: 'UNASSESSED'
+} as const
+
+export type ResearchResultSupportDirection = (typeof ResearchResultSupportDirection)[keyof typeof ResearchResultSupportDirection]
+
+
+export const ResearchResultClassificationSource = {
+  PROVIDER_OUTPUT: 'PROVIDER_OUTPUT',
+  SYNTHETIC_TEST: 'SYNTHETIC_TEST',
+  HUMAN_REVIEW: 'HUMAN_REVIEW',
+  AI_CLASSIFIER: 'AI_CLASSIFIER'
+} as const
+
+export type ResearchResultClassificationSource = (typeof ResearchResultClassificationSource)[keyof typeof ResearchResultClassificationSource]
+
+
+export const ResearchResultReviewStatus = {
+  AI_PROPOSED: 'AI_PROPOSED',
+  HUMAN_CONFIRMED: 'HUMAN_CONFIRMED',
+  REJECTED: 'REJECTED'
+} as const
+
+export type ResearchResultReviewStatus = (typeof ResearchResultReviewStatus)[keyof typeof ResearchResultReviewStatus]
+
+
+export const ResearchSourceRetrievalState = {
+  RETRIEVAL_REQUIRED: 'RETRIEVAL_REQUIRED',
+  RESOLVED: 'RESOLVED',
+  BLOCKED: 'BLOCKED'
+} as const
+
+export type ResearchSourceRetrievalState = (typeof ResearchSourceRetrievalState)[keyof typeof ResearchSourceRetrievalState]
+
+
+export const ResearchSourceTextState = {
+  METADATA_ONLY: 'METADATA_ONLY',
+  SNIPPET_ONLY: 'SNIPPET_ONLY',
+  PARTIAL_TEXT: 'PARTIAL_TEXT',
+  FULL_TEXT: 'FULL_TEXT'
+} as const
+
+export type ResearchSourceTextState = (typeof ResearchSourceTextState)[keyof typeof ResearchSourceTextState]
+
+
+export const ResearchSourceIdentityState = {
+  NOT_ASSESSED: 'NOT_ASSESSED',
+  VERIFIED: 'VERIFIED',
+  MISMATCH: 'MISMATCH',
+  INCOMPLETE: 'INCOMPLETE',
+  MANUAL_REVIEW_REQUIRED: 'MANUAL_REVIEW_REQUIRED'
+} as const
+
+export type ResearchSourceIdentityState = (typeof ResearchSourceIdentityState)[keyof typeof ResearchSourceIdentityState]
+
+
+export const ResearchSourceContentState = {
+  NOT_ASSESSED: 'NOT_ASSESSED',
+  VERIFIED: 'VERIFIED',
+  MISMATCH: 'MISMATCH',
+  INCOMPLETE: 'INCOMPLETE',
+  MANUAL_REVIEW_REQUIRED: 'MANUAL_REVIEW_REQUIRED'
+} as const
+
+export type ResearchSourceContentState = (typeof ResearchSourceContentState)[keyof typeof ResearchSourceContentState]
+
+
+export const ResearchSourceTemporalState = {
+  NOT_ASSESSED: 'NOT_ASSESSED',
+  APPLICABLE: 'APPLICABLE',
+  NOT_APPLICABLE: 'NOT_APPLICABLE',
+  UNCERTAIN: 'UNCERTAIN'
+} as const
+
+export type ResearchSourceTemporalState = (typeof ResearchSourceTemporalState)[keyof typeof ResearchSourceTemporalState]
+
+
+export const ResearchSourceAdverseState = {
+  NOT_REQUIRED: 'NOT_REQUIRED',
+  REQUIRED: 'REQUIRED',
+  COMPLETED: 'COMPLETED'
+} as const
+
+export type ResearchSourceAdverseState = (typeof ResearchSourceAdverseState)[keyof typeof ResearchSourceAdverseState]
+
+
+export const ResearchSourceOfficiality = {
+  OFFICIAL: 'OFFICIAL',
+  NON_OFFICIAL: 'NON_OFFICIAL',
+  SECONDARY: 'SECONDARY',
+  UNKNOWN: 'UNKNOWN'
+} as const
+
+export type ResearchSourceOfficiality = (typeof ResearchSourceOfficiality)[keyof typeof ResearchSourceOfficiality]
+
+
+export const ResearchAdverseRequirementStatus = {
+  REQUIRED: 'REQUIRED',
+  COMPLETED: 'COMPLETED',
+  HISTORICAL: 'HISTORICAL'
+} as const
+
+export type ResearchAdverseRequirementStatus = (typeof ResearchAdverseRequirementStatus)[keyof typeof ResearchAdverseRequirementStatus]
+
+
+export const ResearchExecutionState = {
+  COMPLETE: 'COMPLETE',
+  PARTIAL: 'PARTIAL',
+  BUDGET_EXHAUSTED: 'BUDGET_EXHAUSTED',
+  DEFERRED: 'DEFERRED',
+  FAILED: 'FAILED',
+  HUMAN_DECISION_REQUIRED: 'HUMAN_DECISION_REQUIRED'
+} as const
+
+export type ResearchExecutionState = (typeof ResearchExecutionState)[keyof typeof ResearchExecutionState]
+
+
+export const ResearchCompletionState = {
+  COMPLETE: 'COMPLETE',
+  PARTIAL: 'PARTIAL',
+  BUDGET_EXHAUSTED: 'BUDGET_EXHAUSTED',
+  FAILED: 'FAILED',
+  HUMAN_DECISION_REQUIRED: 'HUMAN_DECISION_REQUIRED'
+} as const
+
+export type ResearchCompletionState = (typeof ResearchCompletionState)[keyof typeof ResearchCompletionState]

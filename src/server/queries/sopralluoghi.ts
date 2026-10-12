@@ -366,7 +366,7 @@ export async function getSopralluogoDetail(id: string): Promise<SopralluogoDetai
     try {
       requireTenantAccess(tenantContext, sopralluogo.concessione.enteId, {
         mode: "read",
-        allowWhenEnteMissing: true,
+        allowWhenEnteMissing: false,
       });
     } catch {
       return null;

@@ -72,6 +72,31 @@ export type ImportRun = Prisma.ImportRunModel
  */
 export type LegalSource = Prisma.LegalSourceModel
 /**
+ * Model LegalExpressionVersion
+ * A legal/textual expression within a canonical LegalSource family.
+ */
+export type LegalExpressionVersion = Prisma.LegalExpressionVersionModel
+/**
+ * Model LegalSourceTemporalAssessment
+ * An immutable evaluation event produced by the versioned temporal evaluator.
+ */
+export type LegalSourceTemporalAssessment = Prisma.LegalSourceTemporalAssessmentModel
+/**
+ * Model LegalSourceIdentityAssertion
+ * Provider-independent evidence supporting a canonical family identity.
+ */
+export type LegalSourceIdentityAssertion = Prisma.LegalSourceIdentityAssertionModel
+/**
+ * Model LegalSourceVersion
+ * An artifact/byte representation; temporal fields remain legacy compatibility metadata.
+ */
+export type LegalSourceVersion = Prisma.LegalSourceVersionModel
+/**
+ * Model LegalSourceAcquisition
+ * 
+ */
+export type LegalSourceAcquisition = Prisma.LegalSourceAcquisitionModel
+/**
  * Model SourceRelation
  * 
  */
@@ -132,6 +157,16 @@ export type Criticita = Prisma.CriticitaModel
  */
 export type Procedimento = Prisma.ProcedimentoModel
 /**
+ * Model FascicoloIntake
+ * 
+ */
+export type FascicoloIntake = Prisma.FascicoloIntakeModel
+/**
+ * Model ProcedimentoResponsabileAssignment
+ * 
+ */
+export type ProcedimentoResponsabileAssignment = Prisma.ProcedimentoResponsabileAssignmentModel
+/**
  * Model Sopralluogo
  * 
  */
@@ -146,6 +181,191 @@ export type Pagamento = Prisma.PagamentoModel
  * 
  */
 export type Documento = Prisma.DocumentoModel
+/**
+ * Model DocumentFileVersion
+ * 
+ */
+export type DocumentFileVersion = Prisma.DocumentFileVersionModel
+/**
+ * Model DocumentExtractionAttempt
+ * 
+ */
+export type DocumentExtractionAttempt = Prisma.DocumentExtractionAttemptModel
+/**
+ * Model DocumentExtractionPage
+ * 
+ */
+export type DocumentExtractionPage = Prisma.DocumentExtractionPageModel
+/**
+ * Model DocumentOcrRun
+ * 
+ */
+export type DocumentOcrRun = Prisma.DocumentOcrRunModel
+/**
+ * Model DocumentOcrPageCheckpoint
+ * 
+ */
+export type DocumentOcrPageCheckpoint = Prisma.DocumentOcrPageCheckpointModel
+/**
+ * Model NeutralIntake
+ * 
+ */
+export type NeutralIntake = Prisma.NeutralIntakeModel
+/**
+ * Model NeutralIntakeExtractionAttempt
+ * 
+ */
+export type NeutralIntakeExtractionAttempt = Prisma.NeutralIntakeExtractionAttemptModel
+/**
+ * Model NeutralIntakeExtractionPage
+ * 
+ */
+export type NeutralIntakeExtractionPage = Prisma.NeutralIntakeExtractionPageModel
+/**
+ * Model LegalReferenceMention
+ * 
+ */
+export type LegalReferenceMention = Prisma.LegalReferenceMentionModel
+/**
+ * Model LegalReferenceMatch
+ * 
+ */
+export type LegalReferenceMatch = Prisma.LegalReferenceMatchModel
+/**
+ * Model LegalReferenceOfficialLookup
+ * 
+ */
+export type LegalReferenceOfficialLookup = Prisma.LegalReferenceOfficialLookupModel
+/**
+ * Model LegalReferenceOfficialHit
+ * 
+ */
+export type LegalReferenceOfficialHit = Prisma.LegalReferenceOfficialHitModel
+/**
+ * Model LegalReferenceOfficialReconciliation
+ * 
+ */
+export type LegalReferenceOfficialReconciliation = Prisma.LegalReferenceOfficialReconciliationModel
+/**
+ * Model LegalReferenceOfficialReconciliationEvidence
+ * 
+ */
+export type LegalReferenceOfficialReconciliationEvidence = Prisma.LegalReferenceOfficialReconciliationEvidenceModel
+/**
+ * Model NeutralIntakeClassificationAttempt
+ * 
+ */
+export type NeutralIntakeClassificationAttempt = Prisma.NeutralIntakeClassificationAttemptModel
+/**
+ * Model NeutralIntakeDestination
+ * 
+ */
+export type NeutralIntakeDestination = Prisma.NeutralIntakeDestinationModel
+/**
+ * Model LegalSourceCandidateAdmission
+ * 
+ */
+export type LegalSourceCandidateAdmission = Prisma.LegalSourceCandidateAdmissionModel
+/**
+ * Model LegalSourceCandidateResolution
+ * 
+ */
+export type LegalSourceCandidateResolution = Prisma.LegalSourceCandidateResolutionModel
+/**
+ * Model AsyncJob
+ * 
+ */
+export type AsyncJob = Prisma.AsyncJobModel
+/**
+ * Model RuntimeWorkerHeartbeat
+ * 
+ */
+export type RuntimeWorkerHeartbeat = Prisma.RuntimeWorkerHeartbeatModel
+/**
+ * Model RuntimeBudgetPolicy
+ * 
+ */
+export type RuntimeBudgetPolicy = Prisma.RuntimeBudgetPolicyModel
+/**
+ * Model RuntimeCostReservation
+ * 
+ */
+export type RuntimeCostReservation = Prisma.RuntimeCostReservationModel
+/**
+ * Model FascicoloSignal
+ * 
+ */
+export type FascicoloSignal = Prisma.FascicoloSignalModel
+/**
+ * Model ConcessioneExpiryChangeCommand
+ * 
+ */
+export type ConcessioneExpiryChangeCommand = Prisma.ConcessioneExpiryChangeCommandModel
+/**
+ * Model ResearchMissionRecord
+ * 
+ */
+export type ResearchMissionRecord = Prisma.ResearchMissionRecordModel
+/**
+ * Model ResearchExecutionAttempt
+ * 
+ */
+export type ResearchExecutionAttempt = Prisma.ResearchExecutionAttemptModel
+/**
+ * Model ResearchEvidenceBundleRecord
+ * 
+ */
+export type ResearchEvidenceBundleRecord = Prisma.ResearchEvidenceBundleRecordModel
+/**
+ * Model ResearchQuestionResultRecord
+ * 
+ */
+export type ResearchQuestionResultRecord = Prisma.ResearchQuestionResultRecordModel
+/**
+ * Model ResearchSourceAssessmentRecord
+ * 
+ */
+export type ResearchSourceAssessmentRecord = Prisma.ResearchSourceAssessmentRecordModel
+/**
+ * Model ResearchAdverseRequirement
+ * 
+ */
+export type ResearchAdverseRequirement = Prisma.ResearchAdverseRequirementModel
+/**
+ * Model ResearchAssistedVerificationRecord
+ * 
+ */
+export type ResearchAssistedVerificationRecord = Prisma.ResearchAssistedVerificationRecordModel
+/**
+ * Model FascicoloObservation
+ * 
+ */
+export type FascicoloObservation = Prisma.FascicoloObservationModel
+/**
+ * Model FascicoloChecklistEvidence
+ * 
+ */
+export type FascicoloChecklistEvidence = Prisma.FascicoloChecklistEvidenceModel
+/**
+ * Model FascicoloDocumentRequirementProposal
+ * 
+ */
+export type FascicoloDocumentRequirementProposal = Prisma.FascicoloDocumentRequirementProposalModel
+/**
+ * Model FascicoloDocumentRequirementEvidence
+ * 
+ */
+export type FascicoloDocumentRequirementEvidence = Prisma.FascicoloDocumentRequirementEvidenceModel
+/**
+ * Model FascicoloDocumentRequirementEvidenceReview
+ * 
+ */
+export type FascicoloDocumentRequirementEvidenceReview = Prisma.FascicoloDocumentRequirementEvidenceReviewModel
+/**
+ * Model DecisioneProcedimento
+ * 
+ */
+export type DecisioneProcedimento = Prisma.DecisioneProcedimentoModel
 /**
  * Model Report
  * 
@@ -171,3 +391,88 @@ export type NormaImpatto = Prisma.NormaImpattoModel
  * 
  */
 export type ActivityLog = Prisma.ActivityLogModel
+/**
+ * Model AiFascicoloTrustedReviewMaterial
+ * 
+ */
+export type AiFascicoloTrustedReviewMaterial = Prisma.AiFascicoloTrustedReviewMaterialModel
+/**
+ * Model AutomaticFascicoloReport
+ * 
+ */
+export type AutomaticFascicoloReport = Prisma.AutomaticFascicoloReportModel
+/**
+ * Model AutomaticFascicoloReportDocument
+ * 
+ */
+export type AutomaticFascicoloReportDocument = Prisma.AutomaticFascicoloReportDocumentModel
+/**
+ * Model AutomaticFascicoloReportMission
+ * 
+ */
+export type AutomaticFascicoloReportMission = Prisma.AutomaticFascicoloReportMissionModel
+/**
+ * Model FascicoloKnowledgeRevision
+ * 
+ */
+export type FascicoloKnowledgeRevision = Prisma.FascicoloKnowledgeRevisionModel
+/**
+ * Model StructuredFascicoloReportSnapshot
+ * 
+ */
+export type StructuredFascicoloReportSnapshot = Prisma.StructuredFascicoloReportSnapshotModel
+/**
+ * Model FascicoloOperationalProposal
+ * 
+ */
+export type FascicoloOperationalProposal = Prisma.FascicoloOperationalProposalModel
+/**
+ * Model FascicoloOperationalProposalReviewEvent
+ * 
+ */
+export type FascicoloOperationalProposalReviewEvent = Prisma.FascicoloOperationalProposalReviewEventModel
+/**
+ * Model FascicoloOperationalProposalMaterialization
+ * 
+ */
+export type FascicoloOperationalProposalMaterialization = Prisma.FascicoloOperationalProposalMaterializationModel
+/**
+ * Model FascicoloSubject
+ * 
+ */
+export type FascicoloSubject = Prisma.FascicoloSubjectModel
+/**
+ * Model FascicoloSubjectIdentifier
+ * 
+ */
+export type FascicoloSubjectIdentifier = Prisma.FascicoloSubjectIdentifierModel
+/**
+ * Model FascicoloKnowledgeItem
+ * 
+ */
+export type FascicoloKnowledgeItem = Prisma.FascicoloKnowledgeItemModel
+/**
+ * Model FascicoloKnowledgeEvidence
+ * 
+ */
+export type FascicoloKnowledgeEvidence = Prisma.FascicoloKnowledgeEvidenceModel
+/**
+ * Model FascicoloKnowledgeRelation
+ * 
+ */
+export type FascicoloKnowledgeRelation = Prisma.FascicoloKnowledgeRelationModel
+/**
+ * Model FascicoloKnowledgeReviewEvent
+ * 
+ */
+export type FascicoloKnowledgeReviewEvent = Prisma.FascicoloKnowledgeReviewEventModel
+/**
+ * Model AiFascicoloHumanReviewState
+ * 
+ */
+export type AiFascicoloHumanReviewState = Prisma.AiFascicoloHumanReviewStateModel
+/**
+ * Model AiFascicoloHumanReviewEvent
+ * 
+ */
+export type AiFascicoloHumanReviewEvent = Prisma.AiFascicoloHumanReviewEventModel

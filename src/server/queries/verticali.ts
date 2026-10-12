@@ -9,7 +9,14 @@ export interface VerticaleOverviewItem {
   description: string;
   coverageLabel: string;
   concessioniCount: number;
+  fascicoliCount: number;
   hasConcessioni: boolean;
+}
+
+export interface VerticaleWorkspaceFascicoloItem {
+  id: string;
+  tipologia: string;
+  stato: string;
 }
 
 export interface VerticaleWorkspaceConcessioneItem {
@@ -21,6 +28,7 @@ export interface VerticaleWorkspaceConcessioneItem {
   ubicazione: string | null;
   criticitaAperteCount: number;
   scadenzeAperteScaduteCount: number;
+  fascicoli: VerticaleWorkspaceFascicoloItem[];
   procedimentiInCorsoCount: number;
 }
 
@@ -30,6 +38,7 @@ export interface VerticaleWorkspaceData {
     concessioni: number;
     criticitaAperte: number;
     scadenzeAperteScadute: number;
+    fascicoli: number;
     procedimentiInCorso: number;
     documenti: number;
     report: number;
@@ -56,15 +65,17 @@ export async function getVerticaliOverview(): Promise<VerticaleOverviewItem[]> {
   const tenantWhere = buildTenantConcessioneWhere(tenantContext);
 
   const counts = await Promise.all(
-    VERTICALI_CONFIG.map((verticale) =>
-      prisma.concessione.count({
-        where: buildVerticalConcessioneWhere(tenantWhere, verticale.value),
-      }),
-    ),
+    VERTICALI_CONFIG.map(async (verticale) => {
+      const concessioneWhere = buildVerticalConcessioneWhere(tenantWhere, verticale.value);
+      return Promise.all([
+        prisma.concessione.count({ where: concessioneWhere }),
+        prisma.procedimento.count({ where: { concessione: { is: concessioneWhere } } }),
+      ]);
+    }),
   );
 
   return VERTICALI_CONFIG.map((verticale, index) => {
-    const concessioniCount = counts[index] ?? 0;
+    const [concessioniCount = 0, fascicoliCount = 0] = counts[index] ?? [];
     return {
       value: verticale.value,
       slug: verticale.slug,
@@ -72,6 +83,7 @@ export async function getVerticaliOverview(): Promise<VerticaleOverviewItem[]> {
       description: verticale.description,
       coverageLabel: verticale.coverageLabel,
       concessioniCount,
+      fascicoliCount,
       hasConcessioni: concessioniCount > 0,
     };
   });
@@ -121,12 +133,20 @@ export async function getVerticaleWorkspaceBySlug(slug: string): Promise<Vertica
           denominazione: true,
         },
       },
+      procedimenti: {
+        orderBy: [{ updatedAt: "desc" as const }],
+        select: {
+          id: true,
+          tipologia: true,
+          stato: true,
+        },
+      },
     },
   });
 
   const concessioneIds = concessioniRows.map((item) => item.id);
 
-  const [criticitaGrouped, scadenzeGrouped, procedimentiGrouped, indicatori] = await Promise.all([
+  const [criticitaGrouped, scadenzeGrouped, indicatori] = await Promise.all([
     concessioneIds.length > 0
       ? prisma.criticita.groupBy({
           by: ["concessioneId"],
@@ -147,16 +167,6 @@ export async function getVerticaleWorkspaceBySlug(slug: string): Promise<Vertica
           _count: { _all: true },
         })
       : Promise.resolve([]),
-    concessioneIds.length > 0
-      ? prisma.procedimento.groupBy({
-          by: ["concessioneId"],
-          where: {
-            concessioneId: { in: concessioneIds },
-            stato: { in: ["DA_AVVIARE", "IN_CORSO"] },
-          },
-          _count: { _all: true },
-        })
-      : Promise.resolve([]),
     Promise.all([
       prisma.concessione.count({ where: concessioneWhere }),
       prisma.criticita.count({
@@ -173,7 +183,6 @@ export async function getVerticaleWorkspaceBySlug(slug: string): Promise<Vertica
       }),
       prisma.procedimento.count({
         where: {
-          stato: { in: ["DA_AVVIARE", "IN_CORSO"] },
           concessione: { is: concessioneWhere },
         },
       }),
@@ -192,8 +201,10 @@ export async function getVerticaleWorkspaceBySlug(slug: string): Promise<Vertica
 
   const criticitaMap = new Map(criticitaGrouped.map((item) => [item.concessioneId, item._count._all]));
   const scadenzeMap = new Map(scadenzeGrouped.map((item) => [item.concessioneId, item._count._all]));
-  const procedimentiMap = new Map(procedimentiGrouped.map((item) => [item.concessioneId, item._count._all]));
-
+  const procedimentiInCorso = concessioniRows.reduce(
+    (total, item) => total + item.procedimenti.filter((procedimento) => ["DA_AVVIARE", "IN_CORSO"].includes(procedimento.stato)).length,
+    0,
+  );
   return {
     verticale: {
       value: verticale.value,
@@ -202,13 +213,15 @@ export async function getVerticaleWorkspaceBySlug(slug: string): Promise<Vertica
       description: verticale.description,
       coverageLabel: verticale.coverageLabel,
       concessioniCount: indicatori[0],
+      fascicoliCount: indicatori[3],
       hasConcessioni: indicatori[0] > 0,
     },
     indicatori: {
       concessioni: indicatori[0],
       criticitaAperte: indicatori[1],
       scadenzeAperteScadute: indicatori[2],
-      procedimentiInCorso: indicatori[3],
+      fascicoli: indicatori[3],
+      procedimentiInCorso,
       documenti: indicatori[4],
       report: indicatori[5],
     },
@@ -221,7 +234,8 @@ export async function getVerticaleWorkspaceBySlug(slug: string): Promise<Vertica
       ubicazione: item.ubicazione,
       criticitaAperteCount: criticitaMap.get(item.id) ?? 0,
       scadenzeAperteScaduteCount: scadenzeMap.get(item.id) ?? 0,
-      procedimentiInCorsoCount: procedimentiMap.get(item.id) ?? 0,
+      fascicoli: item.procedimenti,
+      procedimentiInCorsoCount: item.procedimenti.filter((procedimento) => ["DA_AVVIARE", "IN_CORSO"].includes(procedimento.stato)).length,
     })),
   };
 }

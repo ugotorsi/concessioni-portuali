@@ -1,5 +1,4 @@
 import type { Prisma } from "@/generated/prisma/client";
-import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { computeAuditHash, sanitizeMetadata } from "@/server/audit/hash";
 import { getAuditRequestContext, type AuditRequestContext } from "@/server/audit/requestContext";
@@ -22,6 +21,24 @@ interface CreateAuditLogInput {
   requestContext?: AuditRequestContext;
 }
 
+async function acquireActivityLogHashChainTransactionLock(
+  tx: Prisma.TransactionClient,
+): Promise<void> {
+  // Existing callers are not all Serializable, so the global chain needs its own transaction lock.
+  const namespace = "concessioni-portuali";
+  const resource = "activity-log-hash-chain:v1";
+  const rows = await tx.$queryRaw<Array<{ acquired: boolean }>>`
+    SELECT TRUE AS "acquired"
+    FROM pg_advisory_xact_lock(
+      hashtext(${namespace}),
+      hashtext(${resource})
+    )
+  `;
+  if (rows.length !== 1 || rows[0]?.acquired !== true) {
+    throw new Error("ACTIVITY_LOG_HASH_CHAIN_LOCK_FAILED");
+  }
+}
+
 async function resolveActor(actor?: AuditActor): Promise<Required<AuditActor>> {
   if (actor?.userId || actor?.userEmail || actor?.userRole) {
     return {
@@ -31,6 +48,7 @@ async function resolveActor(actor?: AuditActor): Promise<Required<AuditActor>> {
     };
   }
 
+  const { getCurrentUser } = await import("@/lib/auth");
   const currentUser = await getCurrentUser();
 
   return {
@@ -40,52 +58,63 @@ async function resolveActor(actor?: AuditActor): Promise<Required<AuditActor>> {
   };
 }
 
-export async function createAuditLog(input: CreateAuditLogInput) {
-  const actor = await resolveActor(input.actor);
-  const context = input.requestContext ?? (await getAuditRequestContext());
+async function createAuditLogRecord(
+  tx: Prisma.TransactionClient,
+  input: CreateAuditLogInput,
+  actor: Required<AuditActor>,
+  context: AuditRequestContext,
+) {
   const metadata = sanitizeMetadata(input.metadata);
   const createdAt = new Date();
+  await acquireActivityLogHashChainTransactionLock(tx);
+  const previous = await tx.activityLog.findFirst({
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    select: { currentHash: true },
+  });
 
-  return prisma.$transaction(async (tx) => {
-    const previous = await tx.activityLog.findFirst({
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      select: { currentHash: true },
-    });
+  const previousHash = previous?.currentHash ?? null;
+  const currentHash = computeAuditHash({
+    previousHash,
+    createdAt,
+    azione: input.azione,
+    entita: input.entita,
+    entitaId: input.entitaId ?? null,
+    enteId: input.enteId ?? null,
+    concessioneId: input.concessioneId ?? null,
+    esito: input.esito,
+    actor,
+    metadata,
+  });
 
-    const previousHash = previous?.currentHash ?? null;
-    const currentHash = computeAuditHash({
-      previousHash,
-      createdAt,
+  return tx.activityLog.create({
+    data: {
+      userId: actor.userId,
+      userEmail: actor.userEmail,
+      userRole: actor.userRole,
+      enteId: input.enteId ?? null,
+      concessioneId: input.concessioneId ?? null,
       azione: input.azione,
       entita: input.entita,
       entitaId: input.entitaId ?? null,
-      enteId: input.enteId ?? null,
-      concessioneId: input.concessioneId ?? null,
+      ipAddress: context.ipAddress,
+      userAgent: context.userAgent,
       esito: input.esito,
-      actor,
-      metadata,
-    });
-
-    return tx.activityLog.create({
-      data: {
-        userId: actor.userId,
-        userEmail: actor.userEmail,
-        userRole: actor.userRole,
-        enteId: input.enteId ?? null,
-        concessioneId: input.concessioneId ?? null,
-        azione: input.azione,
-        entita: input.entita,
-        entitaId: input.entitaId ?? null,
-        ipAddress: context.ipAddress,
-        userAgent: context.userAgent,
-        esito: input.esito,
-        metadata: metadata ?? undefined,
-        previousHash,
-        currentHash,
-        createdAt,
-      },
-    });
+      metadata: metadata ?? undefined,
+      previousHash,
+      currentHash,
+      createdAt,
+    },
   });
+}
+
+export async function createAuditLogInTransaction(tx: Prisma.TransactionClient, input: CreateAuditLogInput) {
+  const actor = await resolveActor(input.actor);
+  const context = input.requestContext ?? (await getAuditRequestContext());
+  return createAuditLogRecord(tx, input, actor, context);
+}
+
+export async function createAuditLog(input: CreateAuditLogInput) {
+  return prisma.$transaction((tx) => createAuditLogInTransaction(tx, input));
 }
 
 export function auditSuccess(input: Omit<CreateAuditLogInput, "esito">) {

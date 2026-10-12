@@ -1,0 +1,339 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const createProviderMock = vi.hoisted(() => vi.fn());
+const createServiceMock = vi.hoisted(() => vi.fn());
+const createTrustedReviewServiceMock = vi.hoisted(() => vi.fn());
+const providerAnalyzeMock = vi.hoisted(() => vi.fn());
+const serviceAnalyzeMock = vi.hoisted(() => vi.fn());
+const trustedReviewExecuteMock = vi.hoisted(() => vi.fn());
+
+vi.mock("@/server/ai/providers/openai", () => ({
+  createOpenAiAnalysisProvider: createProviderMock,
+}));
+vi.mock("@/server/ai/fascicoloLiveAnalysis", () => ({
+  createFascicoloLiveAnalysisService: createServiceMock,
+}));
+vi.mock("@/server/ai/fascicoloTrustedReviewProduction", () => ({
+  createFascicoloTrustedReviewProductionService: createTrustedReviewServiceMock,
+}));
+
+import {
+  AI_OPENAI_RUNTIME_ENV_NAMES,
+  AI_REAL_DATA_ACTIVATION_ENV_NAMES,
+  OpenAiRuntimeConfigurationError,
+  createOpenAiFascicoloRuntimeFromEnv,
+  createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv,
+  type OpenAiRuntimeEnv,
+} from "@/server/ai/openaiRuntime";
+import type { OpenAiFetch } from "@/server/ai/providers/openai";
+import { AiRealDataActivationError } from "@/server/ai/realDataActivation";
+
+const SECRET = "sk-runtime-DO-NOT-LEAK";
+
+function validEnv(overrides: Partial<OpenAiRuntimeEnv> = {}): OpenAiRuntimeEnv {
+  return {
+    AI_OPENAI_API_KEY: SECRET,
+    AI_OPENAI_REGION: "GLOBAL",
+    AI_OPENAI_TIMEOUT_MS: "45000",
+    AI_OPENAI_MAX_RAW_RESPONSE_BYTES: "262144",
+    AI_OPENAI_MAX_OUTPUT_TOKENS: "8192",
+    AI_MAX_INPUT_BYTES: "262144",
+    AI_REAL_DATA_ENABLED: "true",
+    AI_REAL_DATA_APPROVAL_ID: "UNIT-TEST-APPROVAL",
+    AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
+    ...overrides,
+  };
+}
+
+function fakeTransport(): ReturnType<typeof vi.fn<OpenAiFetch>> {
+  return vi.fn<OpenAiFetch>();
+}
+
+function expectConfigurationError(operation: () => unknown, envName: string) {
+  try {
+    operation();
+    throw new Error("Expected configuration failure");
+  } catch (error) {
+    expect(error).toBeInstanceOf(OpenAiRuntimeConfigurationError);
+    expect((error as OpenAiRuntimeConfigurationError).code).toBe("AI_CONFIGURATION_ERROR");
+    expect((error as OpenAiRuntimeConfigurationError).envName).toBe(envName);
+    expect((error as Error).message).not.toContain(SECRET);
+    expect(JSON.stringify(error)).not.toContain(SECRET);
+  }
+}
+
+function sourceText() {
+  return readFileSync(resolve(process.cwd(), "src/server/ai/openaiRuntime.ts"), "utf8");
+}
+
+describe("AI-01B2B1 OpenAI runtime wiring", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    createProviderMock.mockReturnValue({ analyze: providerAnalyzeMock });
+    createServiceMock.mockReturnValue({ analyze: serviceAnalyzeMock });
+    createTrustedReviewServiceMock.mockReturnValue({ execute: trustedReviewExecuteMock });
+  });
+
+  it("imports without reading env, creating a provider, or composing a service", () => {
+    expect(AI_OPENAI_RUNTIME_ENV_NAMES).toEqual([
+      "AI_OPENAI_API_KEY",
+      "AI_OPENAI_REGION",
+      "AI_OPENAI_TIMEOUT_MS",
+      "AI_OPENAI_MAX_RAW_RESPONSE_BYTES",
+      "AI_OPENAI_MAX_OUTPUT_TOKENS",
+      "AI_MAX_INPUT_BYTES",
+    ]);
+    expect(AI_REAL_DATA_ACTIVATION_ENV_NAMES).toEqual([
+      "AI_REAL_DATA_ENABLED",
+      "AI_REAL_DATA_APPROVAL_ID",
+      "AI_PROVIDER_PROJECT_CLASS",
+    ]);
+    expect(createProviderMock).not.toHaveBeenCalled();
+    expect(createServiceMock).not.toHaveBeenCalled();
+    expect(providerAnalyzeMock).not.toHaveBeenCalled();
+    expect(serviceAnalyzeMock).not.toHaveBeenCalled();
+  });
+
+  it("composes the B2C6 production service from the same server-owned runtime config", () => {
+    const transport = fakeTransport();
+    const runtime = createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv(
+      validEnv(),
+      { transport },
+    );
+
+    expect(createProviderMock).toHaveBeenCalledOnce();
+    expect(createProviderMock).toHaveBeenCalledWith({
+      apiKey: SECRET,
+      region: "GLOBAL",
+      timeoutMs: 45000,
+      maxRawResponseBytes: 262144,
+      maxOutputTokens: 8192,
+      transport,
+    });
+    expect(createTrustedReviewServiceMock).toHaveBeenCalledOnce();
+    expect(createTrustedReviewServiceMock).toHaveBeenCalledWith({
+      provider: { analyze: providerAnalyzeMock },
+      maxInputBytes: 262144,
+      realDataActivation: expect.objectContaining({ enabled: true }),
+    });
+    expect(runtime).toEqual({ execute: trustedReviewExecuteMock });
+    expect(transport).not.toHaveBeenCalled();
+    expect(providerAnalyzeMock).not.toHaveBeenCalled();
+    expect(trustedReviewExecuteMock).not.toHaveBeenCalled();
+  });
+
+  it("keeps live and trusted-review runtime configuration behaviorally aligned", () => {
+    const runtimeEnv = validEnv({ AI_OPENAI_REGION: "EU", AI_MAX_INPUT_BYTES: "131072" });
+
+    createOpenAiFascicoloRuntimeFromEnv(runtimeEnv);
+    const liveConfig = createServiceMock.mock.calls[0][0];
+    createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv(runtimeEnv);
+    const trustedReviewConfig = createTrustedReviewServiceMock.mock.calls[0][0];
+
+    expect(trustedReviewConfig).toEqual(liveConfig);
+    expect(createProviderMock).toHaveBeenCalledTimes(2);
+    expect(createProviderMock).toHaveBeenNthCalledWith(1, expect.objectContaining({ region: "EU" }));
+    expect(createProviderMock).toHaveBeenNthCalledWith(2, expect.objectContaining({ region: "EU" }));
+    expect(liveConfig.maxInputBytes).toBe(131072);
+    expect(trustedReviewConfig.maxInputBytes).toBe(131072);
+  });
+
+  it("fails closed before B2C6 composition for disabled activation or invalid configuration", () => {
+    const disabled = validEnv();
+    delete disabled.AI_REAL_DATA_ENABLED;
+    expect(() => createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv(disabled)).toThrowError(
+      expect.objectContaining({ code: "AI_REAL_DATA_DISABLED" }),
+    );
+    expect(createTrustedReviewServiceMock).not.toHaveBeenCalled();
+
+    expect(() => createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv(
+      validEnv({ AI_OPENAI_TIMEOUT_MS: "invalid" }),
+    )).toThrowError(expect.objectContaining({ code: "AI_CONFIGURATION_ERROR" }));
+    expect(createTrustedReviewServiceMock).not.toHaveBeenCalled();
+  });
+
+  it("exposes no direct provider or authority override in the normal trusted-review runtime contract", () => {
+    expect(createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv.length).toBe(0);
+    expect(sourceText()).not.toMatch(
+      /createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv\s*\([^)]*(?:provider|model|activation|maxInputBytes|preparation|tenant|actor)/,
+    );
+  });
+
+  it("parses complete GLOBAL configuration and composes provider plus B1 service", () => {
+    const transport = fakeTransport();
+    const runtime = createOpenAiFascicoloRuntimeFromEnv(validEnv(), { transport });
+    expect(createProviderMock).toHaveBeenCalledOnce();
+    expect(createProviderMock).toHaveBeenCalledWith({
+      apiKey: SECRET,
+      region: "GLOBAL",
+      timeoutMs: 45000,
+      maxRawResponseBytes: 262144,
+      maxOutputTokens: 8192,
+      transport,
+    });
+    expect(createServiceMock).toHaveBeenCalledOnce();
+    expect(createServiceMock).toHaveBeenCalledWith({
+      provider: { analyze: providerAnalyzeMock },
+      maxInputBytes: 262144,
+      realDataActivation: expect.objectContaining({ enabled: true }),
+    });
+    expect(runtime).toEqual({ analyze: serviceAnalyzeMock });
+    expect(transport).not.toHaveBeenCalled();
+    expect(serviceAnalyzeMock).not.toHaveBeenCalled();
+  });
+
+  it("accepts EU structurally without claiming runtime eligibility", () => {
+    const transport = fakeTransport();
+    createOpenAiFascicoloRuntimeFromEnv(validEnv({ AI_OPENAI_REGION: "EU" }), { transport });
+    expect(createProviderMock).toHaveBeenCalledWith(expect.objectContaining({ region: "EU" }));
+    expect(transport).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    "AI_REAL_DATA_ENABLED",
+    "AI_REAL_DATA_APPROVAL_ID",
+    "AI_PROVIDER_PROJECT_CLASS",
+  ] as const)("fails closed before composition when %s is missing", (envName) => {
+    const runtimeEnv = validEnv();
+    delete runtimeEnv[envName];
+    const transport = fakeTransport();
+    expect(() => createOpenAiFascicoloRuntimeFromEnv(runtimeEnv, { transport })).toThrowError(
+      expect.objectContaining({ code: "AI_REAL_DATA_DISABLED" }),
+    );
+    expect(createProviderMock).not.toHaveBeenCalled();
+    expect(createServiceMock).not.toHaveBeenCalled();
+    expect(transport).not.toHaveBeenCalled();
+    expect(serviceAnalyzeMock).not.toHaveBeenCalled();
+  });
+
+  it("fails closed for malformed activation without leaking governance values", () => {
+    const approval = "APPROVAL-SECRET-DO-NOT-LEAK";
+    const transport = fakeTransport();
+    try {
+      createOpenAiFascicoloRuntimeFromEnv(validEnv({
+        AI_REAL_DATA_ENABLED: "TRUE",
+        AI_REAL_DATA_APPROVAL_ID: approval,
+      }), { transport });
+      throw new Error("Expected disabled gate");
+    } catch (error) {
+      expect(error).toBeInstanceOf(AiRealDataActivationError);
+      expect((error as Error).message).toBe("AI_REAL_DATA_DISABLED");
+      expect((error as Error).message).not.toContain(approval);
+    }
+    expect(createProviderMock).not.toHaveBeenCalled();
+    expect(createServiceMock).not.toHaveBeenCalled();
+    expect(transport).not.toHaveBeenCalled();
+  });
+
+  it("rejects invalid region and lowercase coercion", () => {
+    for (const region of ["global", "eu", "CUSTOM", ""] ) {
+      expectConfigurationError(
+        () => createOpenAiFascicoloRuntimeFromEnv(validEnv({ AI_OPENAI_REGION: region })),
+        "AI_OPENAI_REGION",
+      );
+    }
+  });
+
+  it("requires every exact environment variable individually", () => {
+    for (const envName of AI_OPENAI_RUNTIME_ENV_NAMES) {
+      const env = validEnv();
+      delete env[envName];
+      expectConfigurationError(() => createOpenAiFascicoloRuntimeFromEnv(env), envName);
+      expect(createProviderMock).not.toHaveBeenCalled();
+      expect(createServiceMock).not.toHaveBeenCalled();
+    }
+  });
+
+  it("does not accept OPENAI_API_KEY or NEXT_PUBLIC aliases", () => {
+    const withoutExactKey = validEnv();
+    delete withoutExactKey.AI_OPENAI_API_KEY;
+    const envWithAliases = {
+      ...withoutExactKey,
+      OPENAI_API_KEY: SECRET,
+      NEXT_PUBLIC_OPENAI_API_KEY: SECRET,
+    } as OpenAiRuntimeEnv & Record<string, string>;
+    expectConfigurationError(
+      () => createOpenAiFascicoloRuntimeFromEnv(envWithAliases),
+      "AI_OPENAI_API_KEY",
+    );
+    expect(createProviderMock).not.toHaveBeenCalled();
+  });
+
+  it("trims the API key but never leaks it through configuration failures", () => {
+    const transport = fakeTransport();
+    createOpenAiFascicoloRuntimeFromEnv(validEnv({ AI_OPENAI_API_KEY: `  ${SECRET}  ` }), { transport });
+    expect(createProviderMock).toHaveBeenCalledWith(expect.objectContaining({ apiKey: SECRET }));
+
+    const invalid = validEnv({
+      AI_OPENAI_API_KEY: SECRET,
+      AI_OPENAI_TIMEOUT_MS: "invalid",
+    });
+    expectConfigurationError(
+      () => createOpenAiFascicoloRuntimeFromEnv(invalid),
+      "AI_OPENAI_TIMEOUT_MS",
+    );
+  });
+
+  it("rejects non-canonical numeric environment values for every numeric setting", () => {
+    const numericNames = [
+      "AI_OPENAI_TIMEOUT_MS",
+      "AI_OPENAI_MAX_RAW_RESPONSE_BYTES",
+      "AI_OPENAI_MAX_OUTPUT_TOKENS",
+      "AI_MAX_INPUT_BYTES",
+    ] as const;
+    const unsafe = String(Number.MAX_SAFE_INTEGER + 1);
+    for (const envName of numericNames) {
+      for (const value of ["", " ", "0", "-1", "+1", "1.5", "1e3", "0x100", "Infinity", "NaN", "45000abc", unsafe]) {
+        expectConfigurationError(
+          () => createOpenAiFascicoloRuntimeFromEnv(validEnv({ [envName]: value })),
+          envName,
+        );
+      }
+    }
+    expect(createProviderMock).not.toHaveBeenCalled();
+    expect(createServiceMock).not.toHaveBeenCalled();
+  });
+
+  it("intentionally trims surrounding whitespace before strict numeric validation", () => {
+    const transport = fakeTransport();
+    createOpenAiFascicoloRuntimeFromEnv(validEnv({
+      AI_OPENAI_TIMEOUT_MS: " 45000 ",
+      AI_OPENAI_MAX_RAW_RESPONSE_BYTES: " 262144 ",
+      AI_OPENAI_MAX_OUTPUT_TOKENS: " 8192 ",
+      AI_MAX_INPUT_BYTES: " 262144 ",
+    }), { transport });
+    expect(createProviderMock).toHaveBeenCalledWith(expect.objectContaining({
+      timeoutMs: 45000,
+      maxRawResponseBytes: 262144,
+      maxOutputTokens: 8192,
+    }));
+    expect(createServiceMock).toHaveBeenCalledWith(expect.objectContaining({ maxInputBytes: 262144 }));
+  });
+
+  it("contains no top-level env read, alias, logging, route, persistence, or automatic analysis", () => {
+    const source = sourceText();
+    expect(source.match(/process\.env/g)).toHaveLength(1);
+    expect(source).toMatch(
+      /function defaultOpenAiRuntimeEnv\(\): OpenAiRuntimeEnv \{\s*return process\.env as unknown as OpenAiRuntimeEnv;\s*\}/,
+    );
+    expect(source.match(/env: OpenAiRuntimeEnv = defaultOpenAiRuntimeEnv\(\)/g)).toHaveLength(3);
+    expect(source).not.toMatch(/(?<!AI_)OPENAI_API_KEY/);
+    for (const forbidden of [
+      "NEXT_PUBLIC_",
+      "console.log",
+      "console.error",
+      "@/lib/prisma",
+      "storageKey",
+      "Simpliciter",
+      "revalidatePath",
+      "server/actions",
+      "readFile",
+      ".analyze(\"",
+    ]) {
+      expect(source).not.toContain(forbidden);
+    }
+  });
+});

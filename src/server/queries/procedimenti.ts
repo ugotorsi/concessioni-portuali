@@ -7,6 +7,7 @@ import {
   getProcedimentoWarningLevel,
 } from "@/lib/procedimento-checklist";
 import { prisma } from "@/lib/prisma";
+import { hasVerifiedDocumentFileVersion } from "@/server/documents/file-version-availability";
 import {
   buildTenantConcessioneWhere,
   getCurrentTenantContext,
@@ -15,6 +16,10 @@ import {
 } from "@/lib/tenant-auth";
 import { formatEnumLabel } from "@/lib/utils";
 import type { Prisma } from "@/generated/prisma/client";
+import {
+  getDocumentExtractionReadModels,
+  type DocumentExtractionReadModel,
+} from "@/server/queries/document-extractions";
 
 export const PROCEDIMENTO_TIPOLOGIA_VALUES = [
   "CHIARIMENTI",
@@ -84,6 +89,10 @@ export interface GetProcedimentiListParams {
 
 export interface ProcedimentoListItem {
   id: string;
+  responsabileProcedimentoNome: string | null;
+  responsabileProcedimentoEmail: string | null;
+  unitaOrganizzativaResponsabile: string | null;
+  responsabileAssegnatoAt: Date | null;
   tipologia: string;
   checklistProfile: string;
   riferimentoNormativo: string | null;
@@ -115,8 +124,8 @@ export interface ProcedimentoListItem {
     ubicazione: string | null;
     concessionario: {
       denominazione: string;
-    };
-  };
+    } | null;
+  } | null;
   criticita: {
     id: string;
     tipologia: string;
@@ -148,8 +157,25 @@ export interface ProcedimentiFiltersData {
 }
 
 export interface ProcedimentoDetail {
+  canonicalEnteId: string | null;
   procedimento: {
     id: string;
+    responsabileProcedimentoNome: string | null;
+    responsabileProcedimentoEmail: string | null;
+    unitaOrganizzativaResponsabile: string | null;
+    responsabileAssegnatoAt: Date | null;
+    responsabileAssignments: Array<{
+      id: string;
+      responsabileNome: string;
+      responsabileEmail: string | null;
+      unitaOrganizzativa: string;
+      decorrenza: Date;
+      cessazione: Date | null;
+      motivoAssegnazione: string | null;
+      comunicataAt: Date | null;
+      registeredByUserId: string | null;
+      registeredByUserEmail: string | null;
+    }>;
     tipologia: string;
     checklistProfile: string;
     riferimentoNormativo: string | null;
@@ -193,6 +219,31 @@ export interface ProcedimentoDetail {
     giorniResiduiContraddittorio: number | null;
     giorniRitardoContraddittorio: number | null;
     createdAt: Date;
+    updatedAt: Date;
+    decisioneConclusiva: {
+      id: string;
+      tipoDecisione: string;
+      numeroAtto: string;
+      protocolloAtto: string | null;
+      dataAtto: Date;
+      dataEfficacia: Date;
+      organoCompetente: string;
+      adottanteNome: string | null;
+      adottanteQualifica: string | null;
+      scostamentoDaIstruttoria: boolean;
+      motivazioneScostamentoIstruttoria: string | null;
+      motivazioneSintetica: string;
+      effettoTitolo: string;
+      statoConcessionePrecedente: string | null;
+      statoConcessioneSuccessivo: string | null;
+      statoEffetto: "NON_PREVISTO" | "PENDENTE" | "PRONTO" | "APPLICATO" | "BLOCCATO" | "ERRORE";
+      effettoApplicatoAt: Date | null;
+      documentoId: string | null;
+      documentoNome: string | null;
+      registeredByUserId: string | null;
+      registeredByUserEmail: string | null;
+      createdAt: Date;
+    } | null;
   };
   concessione: {
     id: string;
@@ -203,9 +254,11 @@ export interface ProcedimentoDetail {
     tipologiaBene: string;
     attivita: string;
     ubicazione: string | null;
+    descrizioneBene: string | null;
     canoneAnnuo: number | null;
     categoriaCanone: string | null;
-  };
+    ente: { nome: string } | null;
+  } | null;
   concessionario: {
     id: string;
     denominazione: string;
@@ -214,7 +267,7 @@ export interface ProcedimentoDetail {
     sedeLegale: string | null;
     pec: string | null;
     email: string | null;
-  };
+  } | null;
   criticitaCollegata: {
     id: string;
     tipologia: string;
@@ -264,9 +317,12 @@ export interface ProcedimentoDetail {
     nome: string;
     tipologia: string;
     statoDocumento: string;
+    isFileAvailable: boolean;
     url: string;
     dataDocumento: Date | null;
     createdAt: Date;
+    currentFileVersionId: string | null;
+    extraction: DocumentExtractionReadModel;
   }>;
   reportCollegati: Array<{
     id: string;
@@ -318,11 +374,12 @@ function buildWhere(
   const search = params.search?.trim();
   const today = startOfDay(new Date());
   const in7 = addDays(today, 7);
-  const concessioneTenantWhere = buildTenantConcessioneWhere(tenantContext);
-  const hasConcessioneTenantScope = Object.keys(concessioneTenantWhere).length > 0;
+  const tenantWhere = tenantContext && isTenantContextConstrained(tenantContext)
+    ? { enteId: { in: tenantContext.accessibleTenantIds } }
+    : {};
 
   return {
-    ...(hasConcessioneTenantScope ? { concessione: concessioneTenantWhere } : {}),
+    ...tenantWhere,
     ...(search
       ? {
           OR: [
@@ -379,6 +436,10 @@ function statoPriority(stato: string): number {
 function toListItem(
   row: {
     id: string;
+    responsabileProcedimentoNome: string | null;
+    responsabileProcedimentoEmail: string | null;
+    unitaOrganizzativaResponsabile: string | null;
+    responsabileAssegnatoAt: Date | null;
     tipologia: string;
     checklistProfile: string;
     riferimentoNormativo: string | null;
@@ -419,7 +480,7 @@ function toListItem(
       dataScadenza: Date;
       ubicazione: string | null;
       concessionario: { denominazione: string };
-    };
+    } | null;
     criticita: {
       id: string;
       tipologia: string;
@@ -482,6 +543,10 @@ function toListItem(
 
   return {
     id: row.id,
+    responsabileProcedimentoNome: row.responsabileProcedimentoNome,
+    responsabileProcedimentoEmail: row.responsabileProcedimentoEmail,
+    unitaOrganizzativaResponsabile: row.unitaOrganizzativaResponsabile,
+    responsabileAssegnatoAt: row.responsabileAssegnatoAt,
     tipologia: row.tipologia,
     checklistProfile: row.checklistProfile,
     riferimentoNormativo: row.riferimentoNormativo,
@@ -522,6 +587,10 @@ export async function getProcedimentiList(params: GetProcedimentiListParams): Pr
     where: buildWhere(params, tenantContext),
     select: {
       id: true,
+      responsabileProcedimentoNome: true,
+      responsabileProcedimentoEmail: true,
+      unitaOrganizzativaResponsabile: true,
+      responsabileAssegnatoAt: true,
       tipologia: true,
       checklistProfile: true,
       riferimentoNormativo: true,
@@ -610,6 +679,41 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
   const procedimento = await prisma.procedimento.findUnique({
     where: { id },
     include: {
+      decisioneProcedimento: {
+        include: {
+          documento: {
+            select: {
+              id: true,
+              nome: true,
+            },
+          },
+          registeredByUser: {
+            select: {
+              id: true,
+              email: true,
+            },
+          },
+        },
+      },
+      responsabileAssignments: {
+        orderBy: [{ decorrenza: "desc" }],
+        select: {
+          id: true,
+          responsabileNome: true,
+          responsabileEmail: true,
+          unitaOrganizzativa: true,
+          decorrenza: true,
+          cessazione: true,
+          motivoAssegnazione: true,
+          comunicataAt: true,
+          registeredByUserId: true,
+          registeredByUser: {
+            select: {
+              email: true,
+            },
+          },
+        },
+      },
       criticita: {
         select: {
           id: true,
@@ -626,6 +730,11 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
       },
       concessione: {
         include: {
+          ente: {
+            select: {
+              nome: true,
+            },
+          },
           concessionario: {
             select: {
               id: true,
@@ -671,9 +780,9 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
 
   if (tenantContext && isTenantContextConstrained(tenantContext)) {
     try {
-      requireTenantAccess(tenantContext, procedimento.concessione.enteId, {
+      requireTenantAccess(tenantContext, procedimento.enteId, {
         mode: "read",
-        allowWhenEnteMissing: true,
+        allowWhenEnteMissing: false,
       });
     } catch {
       return null;
@@ -682,11 +791,24 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
 
   const documentiCollegati = await prisma.documento.findMany({
     where: {
-      OR: [{ procedimentoId: procedimento.id }, { concessioneId: procedimento.concessioneId }],
+      enteId: procedimento.enteId,
+      OR: [
+        { procedimentoId: procedimento.id },
+        ...(procedimento.concessioneId ? [{ concessioneId: procedimento.concessioneId }] : []),
+        { fascicoloIntake: { procedimentoId: procedimento.id } },
+      ],
     },
     orderBy: [{ dataDocumento: "desc" }, { createdAt: "desc" }],
     take: 20,
     distinct: ["id"],
+  });
+  const extractionByDocumentId = await getDocumentExtractionReadModels({
+    tenantId: procedimento.enteId,
+    procedimentoId: procedimento.id,
+    documents: documentiCollegati.map((documento) => ({
+      documentId: documento.id,
+      currentFileVersionId: documento.currentFileVersionId,
+    })),
   });
 
   const termineScaduto =
@@ -704,7 +826,7 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
       ? Math.abs(differenceInCalendarDays(procedimento.dataScadenzaContraddittorio, today))
       : null;
 
-  const altreCriticitaAperte = procedimento.concessione.criticita
+  const altreCriticitaAperte = (procedimento.concessione?.criticita ?? [])
     .filter((item) => item.id !== procedimento.criticitaId)
     .map((item) => ({
       id: item.id,
@@ -797,8 +919,25 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
   });
 
   return {
+    canonicalEnteId: procedimento.enteId,
     procedimento: {
       id: procedimento.id,
+      responsabileProcedimentoNome: procedimento.responsabileProcedimentoNome,
+      responsabileProcedimentoEmail: procedimento.responsabileProcedimentoEmail,
+      unitaOrganizzativaResponsabile: procedimento.unitaOrganizzativaResponsabile,
+      responsabileAssegnatoAt: procedimento.responsabileAssegnatoAt,
+      responsabileAssignments: procedimento.responsabileAssignments.map((assignment) => ({
+        id: assignment.id,
+        responsabileNome: assignment.responsabileNome,
+        responsabileEmail: assignment.responsabileEmail,
+        unitaOrganizzativa: assignment.unitaOrganizzativa,
+        decorrenza: assignment.decorrenza,
+        cessazione: assignment.cessazione,
+        motivoAssegnazione: assignment.motivoAssegnazione,
+        comunicataAt: assignment.comunicataAt,
+        registeredByUserId: assignment.registeredByUserId,
+        registeredByUserEmail: assignment.registeredByUser?.email ?? null,
+      })),
       tipologia: procedimento.tipologia,
       checklistProfile: procedimento.checklistProfile,
       riferimentoNormativo: procedimento.riferimentoNormativo,
@@ -842,8 +981,35 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
       giorniResiduiContraddittorio,
       giorniRitardoContraddittorio,
       createdAt: procedimento.createdAt,
+      updatedAt: procedimento.updatedAt,
+      decisioneConclusiva: procedimento.decisioneProcedimento
+        ? {
+            statoEffetto: procedimento.decisioneProcedimento.statoEffetto,
+            effettoApplicatoAt: procedimento.decisioneProcedimento.effettoApplicatoAt,
+            id: procedimento.decisioneProcedimento.id,
+            tipoDecisione: procedimento.decisioneProcedimento.tipoDecisione,
+            numeroAtto: procedimento.decisioneProcedimento.numeroAtto,
+            protocolloAtto: procedimento.decisioneProcedimento.protocolloAtto,
+            dataAtto: procedimento.decisioneProcedimento.dataAtto,
+            dataEfficacia: procedimento.decisioneProcedimento.dataEfficacia,
+            organoCompetente: procedimento.decisioneProcedimento.organoCompetente,
+            adottanteNome: procedimento.decisioneProcedimento.adottanteNome,
+            adottanteQualifica: procedimento.decisioneProcedimento.adottanteQualifica,
+            scostamentoDaIstruttoria: procedimento.decisioneProcedimento.scostamentoDaIstruttoria,
+            motivazioneScostamentoIstruttoria: procedimento.decisioneProcedimento.motivazioneScostamentoIstruttoria,
+            motivazioneSintetica: procedimento.decisioneProcedimento.motivazioneSintetica,
+            effettoTitolo: procedimento.decisioneProcedimento.effettoTitolo,
+            statoConcessionePrecedente: procedimento.decisioneProcedimento.statoConcessionePrecedente,
+            statoConcessioneSuccessivo: procedimento.decisioneProcedimento.statoConcessioneSuccessivo,
+            documentoId: procedimento.decisioneProcedimento.documentoId,
+            documentoNome: procedimento.decisioneProcedimento.documento?.nome ?? null,
+            registeredByUserId: procedimento.decisioneProcedimento.registeredByUserId,
+            registeredByUserEmail: procedimento.decisioneProcedimento.registeredByUser?.email ?? null,
+            createdAt: procedimento.decisioneProcedimento.createdAt,
+          }
+        : null,
     },
-    concessione: {
+    concessione: procedimento.concessione ? {
       id: procedimento.concessione.id,
       numeroAtto: procedimento.concessione.numeroAtto,
       stato: procedimento.concessione.stato,
@@ -852,13 +1018,15 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
       tipologiaBene: procedimento.concessione.tipologiaBene,
       attivita: procedimento.concessione.attivita,
       ubicazione: procedimento.concessione.ubicazione,
+      descrizioneBene: procedimento.concessione.descrizioneBene,
       canoneAnnuo: procedimento.concessione.canoneAnnuo ? Number(procedimento.concessione.canoneAnnuo) : null,
       categoriaCanone: procedimento.concessione.categoriaCanone,
-    },
-    concessionario: procedimento.concessione.concessionario,
+      ente: procedimento.concessione.ente,
+    } : null,
+    concessionario: procedimento.concessione?.concessionario ?? null,
     criticitaCollegata: procedimento.criticita,
     altreCriticitaAperte,
-    pagamentiCritici: procedimento.concessione.pagamenti.map((item) => {
+    pagamentiCritici: (procedimento.concessione?.pagamenti ?? []).map((item) => {
       const importoDovuto = Number(item.importoDovuto);
       const importoVersato = Number(item.importoVersato);
 
@@ -872,14 +1040,14 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
         dataScadenza: item.dataScadenza,
       };
     }),
-    scadenzeRilevanti: procedimento.concessione.scadenze.map((item) => ({
+    scadenzeRilevanti: (procedimento.concessione?.scadenze ?? []).map((item) => ({
       id: item.id,
       tipologia: item.tipologia,
       stato: item.stato,
       dataScadenza: item.dataScadenza,
       descrizione: item.descrizione,
     })),
-    sopralluoghiRecenti: procedimento.concessione.sopralluoghi.map((item) => ({
+    sopralluoghiRecenti: (procedimento.concessione?.sopralluoghi ?? []).map((item) => ({
       id: item.id,
       data: item.data,
       esito: item.esito,
@@ -892,11 +1060,14 @@ export async function getProcedimentoDetail(id: string): Promise<ProcedimentoDet
       nome: item.nome,
       tipologia: item.tipologia,
       statoDocumento: item.statoDocumento,
+      isFileAvailable: hasVerifiedDocumentFileVersion(item.currentFileVersionId),
       url: item.url ?? `/documenti/${item.id}/download`,
       dataDocumento: item.dataDocumento,
       createdAt: item.createdAt,
+      currentFileVersionId: item.currentFileVersionId,
+      extraction: extractionByDocumentId[item.id],
     })),
-    reportCollegati: procedimento.concessione.report.map((item) => ({
+    reportCollegati: (procedimento.concessione?.report ?? []).map((item) => ({
       id: item.id,
       tipologia: item.tipologia,
       titolo: item.titolo,

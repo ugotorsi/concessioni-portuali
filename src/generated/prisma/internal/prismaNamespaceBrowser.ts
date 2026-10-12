@@ -57,6 +57,11 @@ export const ModelName = {
   PortArea: 'PortArea',
   ImportRun: 'ImportRun',
   LegalSource: 'LegalSource',
+  LegalExpressionVersion: 'LegalExpressionVersion',
+  LegalSourceTemporalAssessment: 'LegalSourceTemporalAssessment',
+  LegalSourceIdentityAssertion: 'LegalSourceIdentityAssertion',
+  LegalSourceVersion: 'LegalSourceVersion',
+  LegalSourceAcquisition: 'LegalSourceAcquisition',
   SourceRelation: 'SourceRelation',
   LegalRule: 'LegalRule',
   DocumentGap: 'DocumentGap',
@@ -69,14 +74,70 @@ export const ModelName = {
   Scadenza: 'Scadenza',
   Criticita: 'Criticita',
   Procedimento: 'Procedimento',
+  FascicoloIntake: 'FascicoloIntake',
+  ProcedimentoResponsabileAssignment: 'ProcedimentoResponsabileAssignment',
   Sopralluogo: 'Sopralluogo',
   Pagamento: 'Pagamento',
   Documento: 'Documento',
+  DocumentFileVersion: 'DocumentFileVersion',
+  DocumentExtractionAttempt: 'DocumentExtractionAttempt',
+  DocumentExtractionPage: 'DocumentExtractionPage',
+  DocumentOcrRun: 'DocumentOcrRun',
+  DocumentOcrPageCheckpoint: 'DocumentOcrPageCheckpoint',
+  NeutralIntake: 'NeutralIntake',
+  NeutralIntakeExtractionAttempt: 'NeutralIntakeExtractionAttempt',
+  NeutralIntakeExtractionPage: 'NeutralIntakeExtractionPage',
+  LegalReferenceMention: 'LegalReferenceMention',
+  LegalReferenceMatch: 'LegalReferenceMatch',
+  LegalReferenceOfficialLookup: 'LegalReferenceOfficialLookup',
+  LegalReferenceOfficialHit: 'LegalReferenceOfficialHit',
+  LegalReferenceOfficialReconciliation: 'LegalReferenceOfficialReconciliation',
+  LegalReferenceOfficialReconciliationEvidence: 'LegalReferenceOfficialReconciliationEvidence',
+  NeutralIntakeClassificationAttempt: 'NeutralIntakeClassificationAttempt',
+  NeutralIntakeDestination: 'NeutralIntakeDestination',
+  LegalSourceCandidateAdmission: 'LegalSourceCandidateAdmission',
+  LegalSourceCandidateResolution: 'LegalSourceCandidateResolution',
+  AsyncJob: 'AsyncJob',
+  RuntimeWorkerHeartbeat: 'RuntimeWorkerHeartbeat',
+  RuntimeBudgetPolicy: 'RuntimeBudgetPolicy',
+  RuntimeCostReservation: 'RuntimeCostReservation',
+  FascicoloSignal: 'FascicoloSignal',
+  ConcessioneExpiryChangeCommand: 'ConcessioneExpiryChangeCommand',
+  ResearchMissionRecord: 'ResearchMissionRecord',
+  ResearchExecutionAttempt: 'ResearchExecutionAttempt',
+  ResearchEvidenceBundleRecord: 'ResearchEvidenceBundleRecord',
+  ResearchQuestionResultRecord: 'ResearchQuestionResultRecord',
+  ResearchSourceAssessmentRecord: 'ResearchSourceAssessmentRecord',
+  ResearchAdverseRequirement: 'ResearchAdverseRequirement',
+  ResearchAssistedVerificationRecord: 'ResearchAssistedVerificationRecord',
+  FascicoloObservation: 'FascicoloObservation',
+  FascicoloChecklistEvidence: 'FascicoloChecklistEvidence',
+  FascicoloDocumentRequirementProposal: 'FascicoloDocumentRequirementProposal',
+  FascicoloDocumentRequirementEvidence: 'FascicoloDocumentRequirementEvidence',
+  FascicoloDocumentRequirementEvidenceReview: 'FascicoloDocumentRequirementEvidenceReview',
+  DecisioneProcedimento: 'DecisioneProcedimento',
   Report: 'Report',
   NormaFonte: 'NormaFonte',
   NormaVersione: 'NormaVersione',
   NormaImpatto: 'NormaImpatto',
-  ActivityLog: 'ActivityLog'
+  ActivityLog: 'ActivityLog',
+  AiFascicoloTrustedReviewMaterial: 'AiFascicoloTrustedReviewMaterial',
+  AutomaticFascicoloReport: 'AutomaticFascicoloReport',
+  AutomaticFascicoloReportDocument: 'AutomaticFascicoloReportDocument',
+  AutomaticFascicoloReportMission: 'AutomaticFascicoloReportMission',
+  FascicoloKnowledgeRevision: 'FascicoloKnowledgeRevision',
+  StructuredFascicoloReportSnapshot: 'StructuredFascicoloReportSnapshot',
+  FascicoloOperationalProposal: 'FascicoloOperationalProposal',
+  FascicoloOperationalProposalReviewEvent: 'FascicoloOperationalProposalReviewEvent',
+  FascicoloOperationalProposalMaterialization: 'FascicoloOperationalProposalMaterialization',
+  FascicoloSubject: 'FascicoloSubject',
+  FascicoloSubjectIdentifier: 'FascicoloSubjectIdentifier',
+  FascicoloKnowledgeItem: 'FascicoloKnowledgeItem',
+  FascicoloKnowledgeEvidence: 'FascicoloKnowledgeEvidence',
+  FascicoloKnowledgeRelation: 'FascicoloKnowledgeRelation',
+  FascicoloKnowledgeReviewEvent: 'FascicoloKnowledgeReviewEvent',
+  AiFascicoloHumanReviewState: 'AiFascicoloHumanReviewState',
+  AiFascicoloHumanReviewEvent: 'AiFascicoloHumanReviewEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -175,6 +236,9 @@ export const LegalSourceScalarFieldEnum = {
   sourceKey: 'sourceKey',
   title: 'title',
   sourceType: 'sourceType',
+  resourceSemanticType: 'resourceSemanticType',
+  legalAuthorityKind: 'legalAuthorityKind',
+  sourceCharacter: 'sourceCharacter',
   status: 'status',
   role: 'role',
   legalRank: 'legalRank',
@@ -203,11 +267,121 @@ export const LegalSourceScalarFieldEnum = {
   authorityId: 'authorityId',
   portId: 'portId',
   importRunId: 'importRunId',
+  identityNamespace: 'identityNamespace',
+  identityScopeKind: 'identityScopeKind',
+  identityScopeKey: 'identityScopeKey',
+  canonicalKey: 'canonicalKey',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type LegalSourceScalarFieldEnum = (typeof LegalSourceScalarFieldEnum)[keyof typeof LegalSourceScalarFieldEnum]
+
+
+export const LegalExpressionVersionScalarFieldEnum = {
+  id: 'id',
+  sourceFamilyId: 'sourceFamilyId',
+  expressionKey: 'expressionKey',
+  publicationDate: 'publicationDate',
+  effectiveFrom: 'effectiveFrom',
+  effectiveTo: 'effectiveTo',
+  expressionStatus: 'expressionStatus',
+  correctionMetadata: 'correctionMetadata',
+  consolidationMetadata: 'consolidationMetadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LegalExpressionVersionScalarFieldEnum = (typeof LegalExpressionVersionScalarFieldEnum)[keyof typeof LegalExpressionVersionScalarFieldEnum]
+
+
+export const LegalSourceTemporalAssessmentScalarFieldEnum = {
+  id: 'id',
+  sourceFamilyId: 'sourceFamilyId',
+  legalExpressionVersionId: 'legalExpressionVersionId',
+  assessmentVersion: 'assessmentVersion',
+  referenceDate: 'referenceDate',
+  validityState: 'validityState',
+  temporalWindowState: 'temporalWindowState',
+  applicabilityState: 'applicabilityState',
+  reasonCodes: 'reasonCodes',
+  effectiveFromSnapshot: 'effectiveFromSnapshot',
+  effectiveToSnapshot: 'effectiveToSnapshot',
+  humanReviewRequired: 'humanReviewRequired',
+  confidence: 'confidence',
+  inputFingerprint: 'inputFingerprint',
+  createdAt: 'createdAt'
+} as const
+
+export type LegalSourceTemporalAssessmentScalarFieldEnum = (typeof LegalSourceTemporalAssessmentScalarFieldEnum)[keyof typeof LegalSourceTemporalAssessmentScalarFieldEnum]
+
+
+export const LegalSourceIdentityAssertionScalarFieldEnum = {
+  id: 'id',
+  sourceFamilyId: 'sourceFamilyId',
+  identifierScheme: 'identifierScheme',
+  rawValue: 'rawValue',
+  normalizedValue: 'normalizedValue',
+  issuingAuthority: 'issuingAuthority',
+  jurisdiction: 'jurisdiction',
+  verificationStatus: 'verificationStatus',
+  provenanceReference: 'provenanceReference',
+  verifiedAt: 'verifiedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type LegalSourceIdentityAssertionScalarFieldEnum = (typeof LegalSourceIdentityAssertionScalarFieldEnum)[keyof typeof LegalSourceIdentityAssertionScalarFieldEnum]
+
+
+export const LegalSourceVersionScalarFieldEnum = {
+  id: 'id',
+  sourceFamilyId: 'sourceFamilyId',
+  legalExpressionVersionId: 'legalExpressionVersionId',
+  observedSha256: 'observedSha256',
+  observedSizeBytes: 'observedSizeBytes',
+  observedMimeType: 'observedMimeType',
+  versionLabel: 'versionLabel',
+  publicationDate: 'publicationDate',
+  effectiveFrom: 'effectiveFrom',
+  effectiveTo: 'effectiveTo',
+  legalLifecycleStatus: 'legalLifecycleStatus',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LegalSourceVersionScalarFieldEnum = (typeof LegalSourceVersionScalarFieldEnum)[keyof typeof LegalSourceVersionScalarFieldEnum]
+
+
+export const LegalSourceAcquisitionScalarFieldEnum = {
+  id: 'id',
+  sourceFamilyId: 'sourceFamilyId',
+  sourceVersionId: 'sourceVersionId',
+  enteId: 'enteId',
+  idempotencyKey: 'idempotencyKey',
+  outcome: 'outcome',
+  originClass: 'originClass',
+  providerOrChannel: 'providerOrChannel',
+  originalUrl: 'originalUrl',
+  externalSourceId: 'externalSourceId',
+  artifactLocator: 'artifactLocator',
+  originalFilename: 'originalFilename',
+  acquiredAt: 'acquiredAt',
+  observedSha256: 'observedSha256',
+  declaredSha256: 'declaredSha256',
+  observedSizeBytes: 'observedSizeBytes',
+  declaredSizeBytes: 'declaredSizeBytes',
+  observedMimeType: 'observedMimeType',
+  importRunId: 'importRunId',
+  acquiredByActorId: 'acquiredByActorId',
+  acquiredByProcess: 'acquiredByProcess',
+  transformationType: 'transformationType',
+  transformationVersion: 'transformationVersion',
+  transformedContentSha256: 'transformedContentSha256',
+  failureCode: 'failureCode',
+  createdAt: 'createdAt'
+} as const
+
+export type LegalSourceAcquisitionScalarFieldEnum = (typeof LegalSourceAcquisitionScalarFieldEnum)[keyof typeof LegalSourceAcquisitionScalarFieldEnum]
 
 
 export const SourceRelationScalarFieldEnum = {
@@ -335,6 +509,7 @@ export const ConcessioneScalarFieldEnum = {
   numeroAtto: 'numeroAtto',
   dataRilascio: 'dataRilascio',
   dataScadenza: 'dataScadenza',
+  expiryGeneration: 'expiryGeneration',
   normaRiferimento: 'normaRiferimento',
   tipologiaBene: 'tipologiaBene',
   attivita: 'attivita',
@@ -348,6 +523,7 @@ export const ConcessioneScalarFieldEnum = {
   canoneAnnuo: 'canoneAnnuo',
   categoriaCanone: 'categoriaCanone',
   concessionVertical: 'concessionVertical',
+  portActivityLegalType: 'portActivityLegalType',
   concessionObjectType: 'concessionObjectType',
   awardingProcedureType: 'awardingProcedureType',
   removableWorksProfile: 'removableWorksProfile',
@@ -446,8 +622,13 @@ export type CriticitaScalarFieldEnum = (typeof CriticitaScalarFieldEnum)[keyof t
 
 export const ProcedimentoScalarFieldEnum = {
   id: 'id',
+  enteId: 'enteId',
   concessioneId: 'concessioneId',
   criticitaId: 'criticitaId',
+  responsabileProcedimentoNome: 'responsabileProcedimentoNome',
+  responsabileProcedimentoEmail: 'responsabileProcedimentoEmail',
+  unitaOrganizzativaResponsabile: 'unitaOrganizzativaResponsabile',
+  responsabileAssegnatoAt: 'responsabileAssegnatoAt',
   tipologia: 'tipologia',
   origineProcedimento: 'origineProcedimento',
   procedimentoUfficio: 'procedimentoUfficio',
@@ -488,6 +669,51 @@ export const ProcedimentoScalarFieldEnum = {
 } as const
 
 export type ProcedimentoScalarFieldEnum = (typeof ProcedimentoScalarFieldEnum)[keyof typeof ProcedimentoScalarFieldEnum]
+
+
+export const FascicoloIntakeScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  concessioneId: 'concessioneId',
+  procedimentoId: 'procedimentoId',
+  tipologiaConcessione: 'tipologiaConcessione',
+  oggettoFascicolo: 'oggettoFascicolo',
+  denominazioneBreve: 'denominazioneBreve',
+  concessionario: 'concessionario',
+  enteConcedente: 'enteConcedente',
+  autoritaCompetente: 'autoritaCompetente',
+  numeroConcessione: 'numeroConcessione',
+  dataRilascio: 'dataRilascio',
+  decorrenza: 'decorrenza',
+  scadenza: 'scadenza',
+  oggettoConcessione: 'oggettoConcessione',
+  beneAreaServizio: 'beneAreaServizio',
+  localita: 'localita',
+  soggettoAssistito: 'soggettoAssistito',
+  controparteAmministrazione: 'controparteAmministrazione',
+  contestoIniziale: 'contestoIniziale',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FascicoloIntakeScalarFieldEnum = (typeof FascicoloIntakeScalarFieldEnum)[keyof typeof FascicoloIntakeScalarFieldEnum]
+
+
+export const ProcedimentoResponsabileAssignmentScalarFieldEnum = {
+  id: 'id',
+  procedimentoId: 'procedimentoId',
+  responsabileNome: 'responsabileNome',
+  responsabileEmail: 'responsabileEmail',
+  unitaOrganizzativa: 'unitaOrganizzativa',
+  decorrenza: 'decorrenza',
+  cessazione: 'cessazione',
+  motivoAssegnazione: 'motivoAssegnazione',
+  comunicataAt: 'comunicataAt',
+  registeredByUserId: 'registeredByUserId',
+  createdAt: 'createdAt'
+} as const
+
+export type ProcedimentoResponsabileAssignmentScalarFieldEnum = (typeof ProcedimentoResponsabileAssignmentScalarFieldEnum)[keyof typeof ProcedimentoResponsabileAssignmentScalarFieldEnum]
 
 
 export const SopralluogoScalarFieldEnum = {
@@ -572,14 +798,888 @@ export const DocumentoScalarFieldEnum = {
   concessioneId: 'concessioneId',
   criticitaId: 'criticitaId',
   procedimentoId: 'procedimentoId',
+  fascicoloIntakeId: 'fascicoloIntakeId',
   sopralluogoId: 'sopralluogoId',
   pagamentoId: 'pagamentoId',
   reportId: 'reportId',
+  currentFileVersionId: 'currentFileVersionId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type DocumentoScalarFieldEnum = (typeof DocumentoScalarFieldEnum)[keyof typeof DocumentoScalarFieldEnum]
+
+
+export const DocumentFileVersionScalarFieldEnum = {
+  id: 'id',
+  documentId: 'documentId',
+  canonicalEnteId: 'canonicalEnteId',
+  storageProvider: 'storageProvider',
+  storageKey: 'storageKey',
+  storageBucket: 'storageBucket',
+  mimeType: 'mimeType',
+  sizeBytes: 'sizeBytes',
+  sha256: 'sha256',
+  createdByUserId: 'createdByUserId',
+  createdByActorId: 'createdByActorId',
+  createdByRole: 'createdByRole',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentFileVersionScalarFieldEnum = (typeof DocumentFileVersionScalarFieldEnum)[keyof typeof DocumentFileVersionScalarFieldEnum]
+
+
+export const DocumentExtractionAttemptScalarFieldEnum = {
+  id: 'id',
+  executionKey: 'executionKey',
+  documentoId: 'documentoId',
+  documentFileVersionId: 'documentFileVersionId',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  policyVersion: 'policyVersion',
+  retryOfAttemptId: 'retryOfAttemptId',
+  retryAuthorizationId: 'retryAuthorizationId',
+  outcome: 'outcome',
+  sourceSha256: 'sourceSha256',
+  declaredMimeType: 'declaredMimeType',
+  detectedMimeType: 'detectedMimeType',
+  sourceSizeBytes: 'sourceSizeBytes',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  directExtractorName: 'directExtractorName',
+  directExtractorVersion: 'directExtractorVersion',
+  ocrExtractorName: 'ocrExtractorName',
+  ocrExtractorVersion: 'ocrExtractorVersion',
+  rasterizerName: 'rasterizerName',
+  rasterizerVersion: 'rasterizerVersion',
+  failureCode: 'failureCode',
+  failureMessage: 'failureMessage',
+  warnings: 'warnings',
+  technicalMetadata: 'technicalMetadata',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentExtractionAttemptScalarFieldEnum = (typeof DocumentExtractionAttemptScalarFieldEnum)[keyof typeof DocumentExtractionAttemptScalarFieldEnum]
+
+
+export const DocumentExtractionPageScalarFieldEnum = {
+  id: 'id',
+  extractionAttemptId: 'extractionAttemptId',
+  pageNumber: 'pageNumber',
+  extractionMethod: 'extractionMethod',
+  text: 'text',
+  normalizedText: 'normalizedText',
+  textSha256: 'textSha256',
+  normalizedCharacterCount: 'normalizedCharacterCount',
+  ocrConfidence: 'ocrConfidence',
+  warnings: 'warnings',
+  technicalMetadata: 'technicalMetadata',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentExtractionPageScalarFieldEnum = (typeof DocumentExtractionPageScalarFieldEnum)[keyof typeof DocumentExtractionPageScalarFieldEnum]
+
+
+export const DocumentOcrRunScalarFieldEnum = {
+  id: 'id',
+  coordinatorJobId: 'coordinatorJobId',
+  documentoId: 'documentoId',
+  documentFileVersionId: 'documentFileVersionId',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  sourceAttemptId: 'sourceAttemptId',
+  authorizationRef: 'authorizationRef',
+  policyVersion: 'policyVersion',
+  sourceSha256: 'sourceSha256',
+  sourceSizeBytes: 'sourceSizeBytes',
+  declaredMimeType: 'declaredMimeType',
+  pageCount: 'pageCount',
+  batchSize: 'batchSize',
+  status: 'status',
+  completedPageCount: 'completedPageCount',
+  extractionAttemptId: 'extractionAttemptId',
+  failureCode: 'failureCode',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DocumentOcrRunScalarFieldEnum = (typeof DocumentOcrRunScalarFieldEnum)[keyof typeof DocumentOcrRunScalarFieldEnum]
+
+
+export const DocumentOcrPageCheckpointScalarFieldEnum = {
+  id: 'id',
+  runId: 'runId',
+  pageNumber: 'pageNumber',
+  extractionMethod: 'extractionMethod',
+  text: 'text',
+  normalizedText: 'normalizedText',
+  textSha256: 'textSha256',
+  normalizedCharacterCount: 'normalizedCharacterCount',
+  ocrConfidence: 'ocrConfidence',
+  warnings: 'warnings',
+  directExtractorName: 'directExtractorName',
+  directExtractorVersion: 'directExtractorVersion',
+  ocrExtractorName: 'ocrExtractorName',
+  ocrExtractorVersion: 'ocrExtractorVersion',
+  rasterizerName: 'rasterizerName',
+  rasterizerVersion: 'rasterizerVersion',
+  completedAt: 'completedAt'
+} as const
+
+export type DocumentOcrPageCheckpointScalarFieldEnum = (typeof DocumentOcrPageCheckpointScalarFieldEnum)[keyof typeof DocumentOcrPageCheckpointScalarFieldEnum]
+
+
+export const NeutralIntakeScalarFieldEnum = {
+  id: 'id',
+  idempotencyKey: 'idempotencyKey',
+  storageProvider: 'storageProvider',
+  storageBucket: 'storageBucket',
+  storageKey: 'storageKey',
+  sha256: 'sha256',
+  mimeType: 'mimeType',
+  sizeBytes: 'sizeBytes',
+  originalName: 'originalName',
+  ingressChannel: 'ingressChannel',
+  originReference: 'originReference',
+  enteId: 'enteId',
+  receivedByUserId: 'receivedByUserId',
+  receivedByActorId: 'receivedByActorId',
+  receivedByRole: 'receivedByRole',
+  receivedAt: 'receivedAt',
+  status: 'status',
+  statusVersion: 'statusVersion'
+} as const
+
+export type NeutralIntakeScalarFieldEnum = (typeof NeutralIntakeScalarFieldEnum)[keyof typeof NeutralIntakeScalarFieldEnum]
+
+
+export const NeutralIntakeExtractionAttemptScalarFieldEnum = {
+  id: 'id',
+  neutralIntakeId: 'neutralIntakeId',
+  policyVersion: 'policyVersion',
+  outcome: 'outcome',
+  artifactSha256: 'artifactSha256',
+  declaredMimeType: 'declaredMimeType',
+  detectedMimeType: 'detectedMimeType',
+  artifactSizeBytes: 'artifactSizeBytes',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  directExtractorName: 'directExtractorName',
+  directExtractorVersion: 'directExtractorVersion',
+  ocrExtractorName: 'ocrExtractorName',
+  ocrExtractorVersion: 'ocrExtractorVersion',
+  rasterizerName: 'rasterizerName',
+  rasterizerVersion: 'rasterizerVersion',
+  failureCode: 'failureCode',
+  failureMessage: 'failureMessage',
+  warnings: 'warnings',
+  technicalMetadata: 'technicalMetadata',
+  createdAt: 'createdAt'
+} as const
+
+export type NeutralIntakeExtractionAttemptScalarFieldEnum = (typeof NeutralIntakeExtractionAttemptScalarFieldEnum)[keyof typeof NeutralIntakeExtractionAttemptScalarFieldEnum]
+
+
+export const NeutralIntakeExtractionPageScalarFieldEnum = {
+  id: 'id',
+  extractionAttemptId: 'extractionAttemptId',
+  pageNumber: 'pageNumber',
+  extractionMethod: 'extractionMethod',
+  text: 'text',
+  normalizedText: 'normalizedText',
+  textSha256: 'textSha256',
+  normalizedCharacterCount: 'normalizedCharacterCount',
+  ocrConfidence: 'ocrConfidence',
+  warnings: 'warnings',
+  technicalMetadata: 'technicalMetadata',
+  createdAt: 'createdAt'
+} as const
+
+export type NeutralIntakeExtractionPageScalarFieldEnum = (typeof NeutralIntakeExtractionPageScalarFieldEnum)[keyof typeof NeutralIntakeExtractionPageScalarFieldEnum]
+
+
+export const LegalReferenceMentionScalarFieldEnum = {
+  id: 'id',
+  extractionAttemptId: 'extractionAttemptId',
+  extractionPageId: 'extractionPageId',
+  discoveryVersion: 'discoveryVersion',
+  kind: 'kind',
+  observedText: 'observedText',
+  normalizedKey: 'normalizedKey',
+  authorityHint: 'authorityHint',
+  actType: 'actType',
+  actNumber: 'actNumber',
+  year: 'year',
+  article: 'article',
+  subArticle: 'subArticle',
+  chamberSection: 'chamberSection',
+  characterStart: 'characterStart',
+  characterEnd: 'characterEnd',
+  discoveredAt: 'discoveredAt'
+} as const
+
+export type LegalReferenceMentionScalarFieldEnum = (typeof LegalReferenceMentionScalarFieldEnum)[keyof typeof LegalReferenceMentionScalarFieldEnum]
+
+
+export const LegalReferenceMatchScalarFieldEnum = {
+  id: 'id',
+  mentionId: 'mentionId',
+  matchingVersion: 'matchingVersion',
+  status: 'status',
+  reason: 'reason',
+  legalSourceId: 'legalSourceId',
+  candidateCount: 'candidateCount',
+  matchedAt: 'matchedAt'
+} as const
+
+export type LegalReferenceMatchScalarFieldEnum = (typeof LegalReferenceMatchScalarFieldEnum)[keyof typeof LegalReferenceMatchScalarFieldEnum]
+
+
+export const LegalReferenceOfficialLookupScalarFieldEnum = {
+  id: 'id',
+  mentionId: 'mentionId',
+  provider: 'provider',
+  lookupVersion: 'lookupVersion',
+  status: 'status',
+  resultCount: 'resultCount',
+  completedAt: 'completedAt'
+} as const
+
+export type LegalReferenceOfficialLookupScalarFieldEnum = (typeof LegalReferenceOfficialLookupScalarFieldEnum)[keyof typeof LegalReferenceOfficialLookupScalarFieldEnum]
+
+
+export const LegalReferenceOfficialHitScalarFieldEnum = {
+  id: 'id',
+  lookupId: 'lookupId',
+  documentKind: 'documentKind',
+  providerSourceId: 'providerSourceId',
+  providerRecordId: 'providerRecordId',
+  denominazioneAtto: 'denominazioneAtto',
+  numeroProvvedimento: 'numeroProvvedimento',
+  annoProvvedimento: 'annoProvvedimento',
+  dataEmanazione: 'dataEmanazione',
+  descrizioneAtto: 'descrizioneAtto',
+  titoloAtto: 'titoloAtto',
+  numeroGU: 'numeroGU',
+  dataGU: 'dataGU',
+  authority: 'authority',
+  court: 'court',
+  decisionNumber: 'decisionNumber',
+  decisionYear: 'decisionYear',
+  decisionDate: 'decisionDate',
+  chamberSection: 'chamberSection',
+  decisionType: 'decisionType',
+  ecli: 'ecli',
+  publicationDate: 'publicationDate',
+  subject: 'subject',
+  outcome: 'outcome',
+  sourceUrl: 'sourceUrl'
+} as const
+
+export type LegalReferenceOfficialHitScalarFieldEnum = (typeof LegalReferenceOfficialHitScalarFieldEnum)[keyof typeof LegalReferenceOfficialHitScalarFieldEnum]
+
+
+export const LegalReferenceOfficialReconciliationScalarFieldEnum = {
+  id: 'id',
+  mentionId: 'mentionId',
+  kind: 'kind',
+  jurisdiction: 'jurisdiction',
+  courtFamily: 'courtFamily',
+  courtLocality: 'courtLocality',
+  courtBranch: 'courtBranch',
+  decisionType: 'decisionType',
+  decisionNumber: 'decisionNumber',
+  decisionYear: 'decisionYear',
+  section: 'section',
+  ecli: 'ecli',
+  decisionDate: 'decisionDate',
+  publicationDate: 'publicationDate',
+  identityVersion: 'identityVersion',
+  normalizedIdentity: 'normalizedIdentity',
+  identityFingerprint: 'identityFingerprint',
+  policyVersion: 'policyVersion',
+  state: 'state',
+  revision: 'revision',
+  legalSourceId: 'legalSourceId',
+  reviewedAt: 'reviewedAt',
+  reviewedByUserId: 'reviewedByUserId',
+  reviewedByActorId: 'reviewedByActorId',
+  reviewedByEmail: 'reviewedByEmail',
+  reviewedByRole: 'reviewedByRole',
+  reviewNote: 'reviewNote',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LegalReferenceOfficialReconciliationScalarFieldEnum = (typeof LegalReferenceOfficialReconciliationScalarFieldEnum)[keyof typeof LegalReferenceOfficialReconciliationScalarFieldEnum]
+
+
+export const LegalReferenceOfficialReconciliationEvidenceScalarFieldEnum = {
+  id: 'id',
+  reconciliationId: 'reconciliationId',
+  officialHitId: 'officialHitId',
+  identityVersion: 'identityVersion',
+  evidenceFingerprint: 'evidenceFingerprint',
+  classification: 'classification',
+  disposition: 'disposition',
+  observedAt: 'observedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type LegalReferenceOfficialReconciliationEvidenceScalarFieldEnum = (typeof LegalReferenceOfficialReconciliationEvidenceScalarFieldEnum)[keyof typeof LegalReferenceOfficialReconciliationEvidenceScalarFieldEnum]
+
+
+export const NeutralIntakeClassificationAttemptScalarFieldEnum = {
+  id: 'id',
+  neutralIntakeId: 'neutralIntakeId',
+  extractionAttemptId: 'extractionAttemptId',
+  idempotencyKey: 'idempotencyKey',
+  classifierVersion: 'classifierVersion',
+  evidenceHash: 'evidenceHash',
+  outcome: 'outcome',
+  confidence: 'confidence',
+  reasonCodes: 'reasonCodes',
+  evidenceMarkers: 'evidenceMarkers',
+  reviewRequired: 'reviewRequired',
+  classifiedAt: 'classifiedAt'
+} as const
+
+export type NeutralIntakeClassificationAttemptScalarFieldEnum = (typeof NeutralIntakeClassificationAttemptScalarFieldEnum)[keyof typeof NeutralIntakeClassificationAttemptScalarFieldEnum]
+
+
+export const NeutralIntakeDestinationScalarFieldEnum = {
+  neutralIntakeId: 'neutralIntakeId',
+  procedimentoId: 'procedimentoId',
+  contractVersion: 'contractVersion',
+  authoritySource: 'authoritySource',
+  establishedByUserId: 'establishedByUserId',
+  establishedByActorId: 'establishedByActorId',
+  establishedByRole: 'establishedByRole',
+  establishedAt: 'establishedAt'
+} as const
+
+export type NeutralIntakeDestinationScalarFieldEnum = (typeof NeutralIntakeDestinationScalarFieldEnum)[keyof typeof NeutralIntakeDestinationScalarFieldEnum]
+
+
+export const LegalSourceCandidateAdmissionScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  neutralIntakeId: 'neutralIntakeId',
+  classificationAttemptId: 'classificationAttemptId',
+  extractionAttemptId: 'extractionAttemptId',
+  evidenceHash: 'evidenceHash',
+  classifierVersion: 'classifierVersion',
+  classificationOutcome: 'classificationOutcome',
+  contractVersion: 'contractVersion',
+  actorId: 'actorId',
+  actorEmail: 'actorEmail',
+  actorRole: 'actorRole',
+  purpose: 'purpose',
+  admittedAt: 'admittedAt'
+} as const
+
+export type LegalSourceCandidateAdmissionScalarFieldEnum = (typeof LegalSourceCandidateAdmissionScalarFieldEnum)[keyof typeof LegalSourceCandidateAdmissionScalarFieldEnum]
+
+
+export const LegalSourceCandidateResolutionScalarFieldEnum = {
+  id: 'id',
+  admissionId: 'admissionId',
+  outcome: 'outcome',
+  legalSourceId: 'legalSourceId',
+  reviewedByUserId: 'reviewedByUserId',
+  reviewedByActorId: 'reviewedByActorId',
+  reviewedByEmail: 'reviewedByEmail',
+  reviewedByRole: 'reviewedByRole',
+  resolvedAt: 'resolvedAt',
+  reviewNote: 'reviewNote'
+} as const
+
+export type LegalSourceCandidateResolutionScalarFieldEnum = (typeof LegalSourceCandidateResolutionScalarFieldEnum)[keyof typeof LegalSourceCandidateResolutionScalarFieldEnum]
+
+
+export const AsyncJobScalarFieldEnum = {
+  id: 'id',
+  idempotencyKey: 'idempotencyKey',
+  requestFingerprint: 'requestFingerprint',
+  operation: 'operation',
+  logicalOperationId: 'logicalOperationId',
+  purpose: 'purpose',
+  correlationId: 'correlationId',
+  policyDecisionRef: 'policyDecisionRef',
+  inputReference: 'inputReference',
+  admissionType: 'admissionType',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  dependsOnJobId: 'dependsOnJobId',
+  initiatingUserId: 'initiatingUserId',
+  actorId: 'actorId',
+  actorEmail: 'actorEmail',
+  actorRole: 'actorRole',
+  status: 'status',
+  priority: 'priority',
+  stateVersion: 'stateVersion',
+  maxAttempts: 'maxAttempts',
+  attemptCount: 'attemptCount',
+  availableAt: 'availableAt',
+  leaseOwner: 'leaseOwner',
+  leaseToken: 'leaseToken',
+  leaseExpiresAt: 'leaseExpiresAt',
+  lastHeartbeatAt: 'lastHeartbeatAt',
+  cancellationRequestedAt: 'cancellationRequestedAt',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  failureCategory: 'failureCategory',
+  failureCode: 'failureCode',
+  blockedReason: 'blockedReason',
+  resultReference: 'resultReference',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AsyncJobScalarFieldEnum = (typeof AsyncJobScalarFieldEnum)[keyof typeof AsyncJobScalarFieldEnum]
+
+
+export const RuntimeWorkerHeartbeatScalarFieldEnum = {
+  id: 'id',
+  workerId: 'workerId',
+  status: 'status',
+  concurrency: 'concurrency',
+  providerExecutionEnabled: 'providerExecutionEnabled',
+  startedAt: 'startedAt',
+  lastSeenAt: 'lastSeenAt',
+  stoppedAt: 'stoppedAt',
+  metadata: 'metadata'
+} as const
+
+export type RuntimeWorkerHeartbeatScalarFieldEnum = (typeof RuntimeWorkerHeartbeatScalarFieldEnum)[keyof typeof RuntimeWorkerHeartbeatScalarFieldEnum]
+
+
+export const RuntimeBudgetPolicyScalarFieldEnum = {
+  id: 'id',
+  scope: 'scope',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  currency: 'currency',
+  hardCapAmount: 'hardCapAmount',
+  windowSeconds: 'windowSeconds',
+  enabled: 'enabled',
+  effectiveFrom: 'effectiveFrom',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RuntimeBudgetPolicyScalarFieldEnum = (typeof RuntimeBudgetPolicyScalarFieldEnum)[keyof typeof RuntimeBudgetPolicyScalarFieldEnum]
+
+
+export const RuntimeCostReservationScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  jobId: 'jobId',
+  provider: 'provider',
+  operationType: 'operationType',
+  currency: 'currency',
+  estimatedAmount: 'estimatedAmount',
+  reservedAmount: 'reservedAmount',
+  actualAmount: 'actualAmount',
+  releasedAmount: 'releasedAmount',
+  status: 'status',
+  idempotencyKey: 'idempotencyKey',
+  expiresAt: 'expiresAt',
+  settledAt: 'settledAt',
+  releasedAt: 'releasedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RuntimeCostReservationScalarFieldEnum = (typeof RuntimeCostReservationScalarFieldEnum)[keyof typeof RuntimeCostReservationScalarFieldEnum]
+
+
+export const FascicoloSignalScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  concessioneId: 'concessioneId',
+  procedimentoId: 'procedimentoId',
+  kind: 'kind',
+  sourceOperation: 'sourceOperation',
+  ruleCode: 'ruleCode',
+  ruleVersion: 'ruleVersion',
+  subjectType: 'subjectType',
+  subjectId: 'subjectId',
+  semanticKey: 'semanticKey',
+  generationFingerprint: 'generationFingerprint',
+  expiryGeneration: 'expiryGeneration',
+  identityKey: 'identityKey',
+  currentThreshold: 'currentThreshold',
+  attentionLevel: 'attentionLevel',
+  factsSnapshot: 'factsSnapshot',
+  status: 'status',
+  humanDisposition: 'humanDisposition',
+  dispositionThreshold: 'dispositionThreshold',
+  reviewedAt: 'reviewedAt',
+  reviewedByUserId: 'reviewedByUserId',
+  reviewedByActorId: 'reviewedByActorId',
+  reviewedByEmail: 'reviewedByEmail',
+  reviewedByRole: 'reviewedByRole',
+  reviewNote: 'reviewNote',
+  criticitaId: 'criticitaId',
+  detectedAt: 'detectedAt',
+  lastObservedAt: 'lastObservedAt',
+  supersededAt: 'supersededAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FascicoloSignalScalarFieldEnum = (typeof FascicoloSignalScalarFieldEnum)[keyof typeof FascicoloSignalScalarFieldEnum]
+
+
+export const ConcessioneExpiryChangeCommandScalarFieldEnum = {
+  id: 'id',
+  requestId: 'requestId',
+  payloadFingerprint: 'payloadFingerprint',
+  concessioneId: 'concessioneId',
+  enteId: 'enteId',
+  expectedGeneration: 'expectedGeneration',
+  resultingGeneration: 'resultingGeneration',
+  previousDataScadenza: 'previousDataScadenza',
+  newDataScadenza: 'newDataScadenza',
+  motivation: 'motivation',
+  reference: 'reference',
+  actorUserId: 'actorUserId',
+  actorId: 'actorId',
+  actorEmail: 'actorEmail',
+  actorRole: 'actorRole',
+  createdAt: 'createdAt'
+} as const
+
+export type ConcessioneExpiryChangeCommandScalarFieldEnum = (typeof ConcessioneExpiryChangeCommandScalarFieldEnum)[keyof typeof ConcessioneExpiryChangeCommandScalarFieldEnum]
+
+
+export const ResearchMissionRecordScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  assignedActorId: 'assignedActorId',
+  contractVersion: 'contractVersion',
+  caseId: 'caseId',
+  fascicoloReference: 'fascicoloReference',
+  referenceDate: 'referenceDate',
+  mode: 'mode',
+  payload: 'payload',
+  payloadFingerprint: 'payloadFingerprint',
+  missionFingerprint: 'missionFingerprint',
+  knowledgeRevisionId: 'knowledgeRevisionId',
+  firstKnowledgeRevisionId: 'firstKnowledgeRevisionId',
+  legalIssueSemanticKey: 'legalIssueSemanticKey',
+  researchQuestionSemanticKey: 'researchQuestionSemanticKey',
+  referenceDateBasis: 'referenceDateBasis',
+  lifecycleStatus: 'lifecycleStatus',
+  status: 'status',
+  stateVersion: 'stateVersion',
+  claimantId: 'claimantId',
+  claimToken: 'claimToken',
+  claimExpiresAt: 'claimExpiresAt',
+  activeExecutionId: 'activeExecutionId',
+  completedAt: 'completedAt',
+  deferredAt: 'deferredAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ResearchMissionRecordScalarFieldEnum = (typeof ResearchMissionRecordScalarFieldEnum)[keyof typeof ResearchMissionRecordScalarFieldEnum]
+
+
+export const ResearchExecutionAttemptScalarFieldEnum = {
+  id: 'id',
+  missionId: 'missionId',
+  executorKind: 'executorKind',
+  claimantId: 'claimantId',
+  claimToken: 'claimToken',
+  startedAt: 'startedAt',
+  leaseExpiresAt: 'leaseExpiresAt',
+  completedAt: 'completedAt',
+  completionState: 'completionState',
+  totalCalls: 'totalCalls',
+  moonlitCalls: 'moonlitCalls',
+  simpliciterCalls: 'simpliciterCalls',
+  legalDataHunterCalls: 'legalDataHunterCalls',
+  errorCode: 'errorCode',
+  deferReason: 'deferReason',
+  finalBundleId: 'finalBundleId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ResearchExecutionAttemptScalarFieldEnum = (typeof ResearchExecutionAttemptScalarFieldEnum)[keyof typeof ResearchExecutionAttemptScalarFieldEnum]
+
+
+export const ResearchEvidenceBundleRecordScalarFieldEnum = {
+  id: 'id',
+  missionId: 'missionId',
+  executionId: 'executionId',
+  contractVersion: 'contractVersion',
+  fingerprint: 'fingerprint',
+  payload: 'payload',
+  completionState: 'completionState',
+  totalCalls: 'totalCalls',
+  moonlitCalls: 'moonlitCalls',
+  simpliciterCalls: 'simpliciterCalls',
+  legalDataHunterCalls: 'legalDataHunterCalls',
+  submittedByActorId: 'submittedByActorId',
+  createdAt: 'createdAt'
+} as const
+
+export type ResearchEvidenceBundleRecordScalarFieldEnum = (typeof ResearchEvidenceBundleRecordScalarFieldEnum)[keyof typeof ResearchEvidenceBundleRecordScalarFieldEnum]
+
+
+export const ResearchQuestionResultRecordScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  caseId: 'caseId',
+  missionId: 'missionId',
+  bundleId: 'bundleId',
+  candidateId: 'candidateId',
+  legalIssueSemanticKey: 'legalIssueSemanticKey',
+  researchQuestionSemanticKey: 'researchQuestionSemanticKey',
+  missionFingerprint: 'missionFingerprint',
+  providerId: 'providerId',
+  toolId: 'toolId',
+  candidateSnapshot: 'candidateSnapshot',
+  supportDirection: 'supportDirection',
+  classificationSource: 'classificationSource',
+  classificationConfidence: 'classificationConfidence',
+  classificationRationale: 'classificationRationale',
+  classificationReviewStatus: 'classificationReviewStatus',
+  coverageElementKeys: 'coverageElementKeys',
+  unresolvedAspectKeys: 'unresolvedAspectKeys',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ResearchQuestionResultRecordScalarFieldEnum = (typeof ResearchQuestionResultRecordScalarFieldEnum)[keyof typeof ResearchQuestionResultRecordScalarFieldEnum]
+
+
+export const ResearchSourceAssessmentRecordScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  caseId: 'caseId',
+  resultId: 'resultId',
+  missionId: 'missionId',
+  researchQuestionSemanticKey: 'researchQuestionSemanticKey',
+  missionFingerprint: 'missionFingerprint',
+  referenceDate: 'referenceDate',
+  referenceDateBasis: 'referenceDateBasis',
+  verificationVersion: 'verificationVersion',
+  chainFingerprint: 'chainFingerprint',
+  sourceFamilyId: 'sourceFamilyId',
+  sourceVersionId: 'sourceVersionId',
+  acquisitionId: 'acquisitionId',
+  temporalAssessmentId: 'temporalAssessmentId',
+  sourceIdentityKey: 'sourceIdentityKey',
+  contentSha256: 'contentSha256',
+  retrievalState: 'retrievalState',
+  textState: 'textState',
+  identityState: 'identityState',
+  contentState: 'contentState',
+  temporalState: 'temporalState',
+  adverseState: 'adverseState',
+  officiality: 'officiality',
+  citationAnchors: 'citationAnchors',
+  blockingReasons: 'blockingReasons',
+  manualReviewRequired: 'manualReviewRequired',
+  manualReviewReason: 'manualReviewReason',
+  usable: 'usable',
+  isCurrent: 'isCurrent',
+  createdAt: 'createdAt'
+} as const
+
+export type ResearchSourceAssessmentRecordScalarFieldEnum = (typeof ResearchSourceAssessmentRecordScalarFieldEnum)[keyof typeof ResearchSourceAssessmentRecordScalarFieldEnum]
+
+
+export const ResearchAdverseRequirementScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  caseId: 'caseId',
+  researchQuestionSemanticKey: 'researchQuestionSemanticKey',
+  primaryMissionId: 'primaryMissionId',
+  adverseMissionId: 'adverseMissionId',
+  primaryMissionFingerprint: 'primaryMissionFingerprint',
+  policyVersion: 'policyVersion',
+  requirementFingerprint: 'requirementFingerprint',
+  rationale: 'rationale',
+  status: 'status',
+  createdAt: 'createdAt',
+  completedAt: 'completedAt'
+} as const
+
+export type ResearchAdverseRequirementScalarFieldEnum = (typeof ResearchAdverseRequirementScalarFieldEnum)[keyof typeof ResearchAdverseRequirementScalarFieldEnum]
+
+
+export const ResearchAssistedVerificationRecordScalarFieldEnum = {
+  id: 'id',
+  missionId: 'missionId',
+  tenantId: 'tenantId',
+  contractVersion: 'contractVersion',
+  fingerprint: 'fingerprint',
+  payload: 'payload',
+  recordedByActorId: 'recordedByActorId',
+  createdAt: 'createdAt'
+} as const
+
+export type ResearchAssistedVerificationRecordScalarFieldEnum = (typeof ResearchAssistedVerificationRecordScalarFieldEnum)[keyof typeof ResearchAssistedVerificationRecordScalarFieldEnum]
+
+
+export const FascicoloObservationScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  procedimentoId: 'procedimentoId',
+  documentoId: 'documentoId',
+  kind: 'kind',
+  ruleCode: 'ruleCode',
+  ruleVersion: 'ruleVersion',
+  factsSnapshot: 'factsSnapshot',
+  status: 'status',
+  detectedAt: 'detectedAt',
+  reviewedAt: 'reviewedAt',
+  reviewedByUserId: 'reviewedByUserId',
+  reviewedByActorId: 'reviewedByActorId',
+  reviewedByEmail: 'reviewedByEmail',
+  reviewedByRole: 'reviewedByRole',
+  reviewNote: 'reviewNote',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FascicoloObservationScalarFieldEnum = (typeof FascicoloObservationScalarFieldEnum)[keyof typeof FascicoloObservationScalarFieldEnum]
+
+
+export const FascicoloChecklistEvidenceScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  procedimentoId: 'procedimentoId',
+  documentoId: 'documentoId',
+  checklistItemCode: 'checklistItemCode',
+  status: 'status',
+  createdAt: 'createdAt',
+  createdByActorId: 'createdByActorId',
+  createdByUserId: 'createdByUserId',
+  createdByEmail: 'createdByEmail',
+  createdByRole: 'createdByRole',
+  reviewedAt: 'reviewedAt',
+  reviewedByActorId: 'reviewedByActorId',
+  reviewedByUserId: 'reviewedByUserId',
+  reviewedByEmail: 'reviewedByEmail',
+  reviewedByRole: 'reviewedByRole',
+  reviewNote: 'reviewNote'
+} as const
+
+export type FascicoloChecklistEvidenceScalarFieldEnum = (typeof FascicoloChecklistEvidenceScalarFieldEnum)[keyof typeof FascicoloChecklistEvidenceScalarFieldEnum]
+
+
+export const FascicoloDocumentRequirementProposalScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  procedimentoId: 'procedimentoId',
+  legalSourceId: 'legalSourceId',
+  legalRuleId: 'legalRuleId',
+  documentGapId: 'documentGapId',
+  status: 'status',
+  matcherAlgorithmVersion: 'matcherAlgorithmVersion',
+  screeningFingerprint: 'screeningFingerprint',
+  canonicalArt18Snapshot: 'canonicalArt18Snapshot',
+  portActivityLegalTypeSnapshot: 'portActivityLegalTypeSnapshot',
+  sourceStableKeySnapshot: 'sourceStableKeySnapshot',
+  sourceTitleSnapshot: 'sourceTitleSnapshot',
+  sourceRelevantProvisionsSnapshot: 'sourceRelevantProvisionsSnapshot',
+  ruleCodeSnapshot: 'ruleCodeSnapshot',
+  ruleContractVersionSnapshot: 'ruleContractVersionSnapshot',
+  legalRuleDefinitionSnapshot: 'legalRuleDefinitionSnapshot',
+  gapKeySnapshot: 'gapKeySnapshot',
+  gapLabelSnapshot: 'gapLabelSnapshot',
+  gapDescriptionSnapshot: 'gapDescriptionSnapshot',
+  matchedCriteriaSnapshot: 'matchedCriteriaSnapshot',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  createdByUserId: 'createdByUserId',
+  createdByActorId: 'createdByActorId',
+  createdByEmail: 'createdByEmail',
+  createdByRole: 'createdByRole',
+  reviewedAt: 'reviewedAt',
+  reviewedByUserId: 'reviewedByUserId',
+  reviewedByActorId: 'reviewedByActorId',
+  reviewedByEmail: 'reviewedByEmail',
+  reviewedByRole: 'reviewedByRole',
+  reviewNote: 'reviewNote'
+} as const
+
+export type FascicoloDocumentRequirementProposalScalarFieldEnum = (typeof FascicoloDocumentRequirementProposalScalarFieldEnum)[keyof typeof FascicoloDocumentRequirementProposalScalarFieldEnum]
+
+
+export const FascicoloDocumentRequirementEvidenceScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  proposalId: 'proposalId',
+  documentoId: 'documentoId',
+  createdAt: 'createdAt',
+  createdByUserId: 'createdByUserId',
+  createdByActorId: 'createdByActorId',
+  createdByEmail: 'createdByEmail',
+  createdByRole: 'createdByRole',
+  revokedAt: 'revokedAt',
+  revokedByUserId: 'revokedByUserId',
+  revokedByActorId: 'revokedByActorId',
+  revokedByEmail: 'revokedByEmail',
+  revokedByRole: 'revokedByRole',
+  revocationNote: 'revocationNote'
+} as const
+
+export type FascicoloDocumentRequirementEvidenceScalarFieldEnum = (typeof FascicoloDocumentRequirementEvidenceScalarFieldEnum)[keyof typeof FascicoloDocumentRequirementEvidenceScalarFieldEnum]
+
+
+export const FascicoloDocumentRequirementEvidenceReviewScalarFieldEnum = {
+  id: 'id',
+  evidenceId: 'evidenceId',
+  createdAt: 'createdAt',
+  reviewedByUserId: 'reviewedByUserId',
+  reviewedByActorId: 'reviewedByActorId',
+  reviewedByEmail: 'reviewedByEmail',
+  reviewedByRole: 'reviewedByRole',
+  reviewNote: 'reviewNote'
+} as const
+
+export type FascicoloDocumentRequirementEvidenceReviewScalarFieldEnum = (typeof FascicoloDocumentRequirementEvidenceReviewScalarFieldEnum)[keyof typeof FascicoloDocumentRequirementEvidenceReviewScalarFieldEnum]
+
+
+export const DecisioneProcedimentoScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  procedimentoId: 'procedimentoId',
+  concessioneId: 'concessioneId',
+  tipoDecisione: 'tipoDecisione',
+  numeroAtto: 'numeroAtto',
+  protocolloAtto: 'protocolloAtto',
+  dataAtto: 'dataAtto',
+  dataEfficacia: 'dataEfficacia',
+  organoCompetente: 'organoCompetente',
+  adottanteNome: 'adottanteNome',
+  adottanteQualifica: 'adottanteQualifica',
+  scostamentoDaIstruttoria: 'scostamentoDaIstruttoria',
+  motivazioneScostamentoIstruttoria: 'motivazioneScostamentoIstruttoria',
+  motivazioneSintetica: 'motivazioneSintetica',
+  documentoId: 'documentoId',
+  effettoTitolo: 'effettoTitolo',
+  statoEffetto: 'statoEffetto',
+  effettoApplicatoAt: 'effettoApplicatoAt',
+  effectVersion: 'effectVersion',
+  statoConcessionePrecedente: 'statoConcessionePrecedente',
+  statoConcessioneSuccessivo: 'statoConcessioneSuccessivo',
+  registeredByUserId: 'registeredByUserId',
+  idempotencyKey: 'idempotencyKey',
+  createdAt: 'createdAt'
+} as const
+
+export type DecisioneProcedimentoScalarFieldEnum = (typeof DecisioneProcedimentoScalarFieldEnum)[keyof typeof DecisioneProcedimentoScalarFieldEnum]
 
 
 export const ReportScalarFieldEnum = {
@@ -605,6 +1705,7 @@ export const NormaFonteScalarFieldEnum = {
   enteEmittente: 'enteEmittente',
   ambito: 'ambito',
   descrizione: 'descrizione',
+  legalSourceId: 'legalSourceId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -622,6 +1723,7 @@ export const NormaVersioneScalarFieldEnum = {
   urlTesto: 'urlTesto',
   sintesi: 'sintesi',
   note: 'note',
+  legalSourceVersionId: 'legalSourceVersionId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -670,6 +1772,322 @@ export const ActivityLogScalarFieldEnum = {
 export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[keyof typeof ActivityLogScalarFieldEnum]
 
 
+export const AiFascicoloTrustedReviewMaterialScalarFieldEnum = {
+  id: 'id',
+  enteId: 'enteId',
+  procedimentoId: 'procedimentoId',
+  identityContractVersion: 'identityContractVersion',
+  canonicalizationVersion: 'canonicalizationVersion',
+  fingerprintAlgorithm: 'fingerprintAlgorithm',
+  fingerprint: 'fingerprint',
+  canonicalPayload: 'canonicalPayload',
+  trustedReviewSchemaVersion: 'trustedReviewSchemaVersion',
+  analysisSchemaVersion: 'analysisSchemaVersion',
+  snapshotSchemaVersion: 'snapshotSchemaVersion',
+  outboundSchemaVersion: 'outboundSchemaVersion',
+  sourceSnapshotContentHash: 'sourceSnapshotContentHash',
+  outboundProjectionHash: 'outboundProjectionHash',
+  outboundProjectionHashAlgorithm: 'outboundProjectionHashAlgorithm',
+  createdAt: 'createdAt'
+} as const
+
+export type AiFascicoloTrustedReviewMaterialScalarFieldEnum = (typeof AiFascicoloTrustedReviewMaterialScalarFieldEnum)[keyof typeof AiFascicoloTrustedReviewMaterialScalarFieldEnum]
+
+
+export const AutomaticFascicoloReportScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  neutralIntakeId: 'neutralIntakeId',
+  documentVersionId: 'documentVersionId',
+  contractVersion: 'contractVersion',
+  artifactSha256: 'artifactSha256',
+  corpusFingerprint: 'corpusFingerprint',
+  payloadFingerprint: 'payloadFingerprint',
+  analysisPayload: 'analysisPayload',
+  provenancePayload: 'provenancePayload',
+  status: 'status',
+  verificationStatus: 'verificationStatus',
+  createdByActorId: 'createdByActorId',
+  supersededByReportId: 'supersededByReportId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AutomaticFascicoloReportScalarFieldEnum = (typeof AutomaticFascicoloReportScalarFieldEnum)[keyof typeof AutomaticFascicoloReportScalarFieldEnum]
+
+
+export const AutomaticFascicoloReportDocumentScalarFieldEnum = {
+  reportId: 'reportId',
+  documentVersionId: 'documentVersionId',
+  artifactSha256: 'artifactSha256',
+  ordinal: 'ordinal',
+  createdAt: 'createdAt'
+} as const
+
+export type AutomaticFascicoloReportDocumentScalarFieldEnum = (typeof AutomaticFascicoloReportDocumentScalarFieldEnum)[keyof typeof AutomaticFascicoloReportDocumentScalarFieldEnum]
+
+
+export const AutomaticFascicoloReportMissionScalarFieldEnum = {
+  reportId: 'reportId',
+  missionId: 'missionId',
+  purpose: 'purpose',
+  createdAt: 'createdAt'
+} as const
+
+export type AutomaticFascicoloReportMissionScalarFieldEnum = (typeof AutomaticFascicoloReportMissionScalarFieldEnum)[keyof typeof AutomaticFascicoloReportMissionScalarFieldEnum]
+
+
+export const FascicoloKnowledgeRevisionScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  corpusFingerprint: 'corpusFingerprint',
+  contractVersion: 'contractVersion',
+  status: 'status',
+  warnings: 'warnings',
+  createdAt: 'createdAt',
+  completedAt: 'completedAt',
+  supersededAt: 'supersededAt'
+} as const
+
+export type FascicoloKnowledgeRevisionScalarFieldEnum = (typeof FascicoloKnowledgeRevisionScalarFieldEnum)[keyof typeof FascicoloKnowledgeRevisionScalarFieldEnum]
+
+
+export const StructuredFascicoloReportSnapshotScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  knowledgeRevisionId: 'knowledgeRevisionId',
+  contractVersion: 'contractVersion',
+  reportFingerprint: 'reportFingerprint',
+  corpusFingerprint: 'corpusFingerprint',
+  researchStateFingerprint: 'researchStateFingerprint',
+  sourceStateFingerprint: 'sourceStateFingerprint',
+  status: 'status',
+  payload: 'payload',
+  warnings: 'warnings',
+  staleReasons: 'staleReasons',
+  supersededBySnapshotId: 'supersededBySnapshotId',
+  generatedAt: 'generatedAt'
+} as const
+
+export type StructuredFascicoloReportSnapshotScalarFieldEnum = (typeof StructuredFascicoloReportSnapshotScalarFieldEnum)[keyof typeof StructuredFascicoloReportSnapshotScalarFieldEnum]
+
+
+export const FascicoloOperationalProposalScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  knowledgeRevisionId: 'knowledgeRevisionId',
+  structuredReportId: 'structuredReportId',
+  structuredReportFingerprint: 'structuredReportFingerprint',
+  policyVersion: 'policyVersion',
+  proposalType: 'proposalType',
+  status: 'status',
+  title: 'title',
+  description: 'description',
+  proposedPayload: 'proposedPayload',
+  approvedPayload: 'approvedPayload',
+  originatingKnowledgeItemIds: 'originatingKnowledgeItemIds',
+  originatingIssueSemanticKeys: 'originatingIssueSemanticKeys',
+  originatingQuestionSemanticKeys: 'originatingQuestionSemanticKeys',
+  relevantResultIds: 'relevantResultIds',
+  rationale: 'rationale',
+  confidence: 'confidence',
+  proposalFingerprint: 'proposalFingerprint',
+  warningCodes: 'warningCodes',
+  reviewVersion: 'reviewVersion',
+  reviewedAt: 'reviewedAt',
+  reviewedByActorId: 'reviewedByActorId',
+  reviewedByEmail: 'reviewedByEmail',
+  reviewedByRole: 'reviewedByRole',
+  reviewNote: 'reviewNote',
+  materializedAt: 'materializedAt',
+  materializedEntityType: 'materializedEntityType',
+  materializedEntityId: 'materializedEntityId',
+  supersededAt: 'supersededAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FascicoloOperationalProposalScalarFieldEnum = (typeof FascicoloOperationalProposalScalarFieldEnum)[keyof typeof FascicoloOperationalProposalScalarFieldEnum]
+
+
+export const FascicoloOperationalProposalReviewEventScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  proposalId: 'proposalId',
+  action: 'action',
+  previousStatus: 'previousStatus',
+  nextStatus: 'nextStatus',
+  reviewVersion: 'reviewVersion',
+  proposedPayload: 'proposedPayload',
+  approvedPayload: 'approvedPayload',
+  actorId: 'actorId',
+  actorEmail: 'actorEmail',
+  actorRole: 'actorRole',
+  reviewNote: 'reviewNote',
+  createdAt: 'createdAt'
+} as const
+
+export type FascicoloOperationalProposalReviewEventScalarFieldEnum = (typeof FascicoloOperationalProposalReviewEventScalarFieldEnum)[keyof typeof FascicoloOperationalProposalReviewEventScalarFieldEnum]
+
+
+export const FascicoloOperationalProposalMaterializationScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  proposalId: 'proposalId',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  createdAt: 'createdAt'
+} as const
+
+export type FascicoloOperationalProposalMaterializationScalarFieldEnum = (typeof FascicoloOperationalProposalMaterializationScalarFieldEnum)[keyof typeof FascicoloOperationalProposalMaterializationScalarFieldEnum]
+
+
+export const FascicoloSubjectScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  canonicalName: 'canonicalName',
+  normalizedName: 'normalizedName',
+  subjectType: 'subjectType',
+  strongIdentifiers: 'strongIdentifiers',
+  aliases: 'aliases',
+  mergedIntoId: 'mergedIntoId',
+  createdAt: 'createdAt'
+} as const
+
+export type FascicoloSubjectScalarFieldEnum = (typeof FascicoloSubjectScalarFieldEnum)[keyof typeof FascicoloSubjectScalarFieldEnum]
+
+
+export const FascicoloSubjectIdentifierScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  subjectId: 'subjectId',
+  identifierType: 'identifierType',
+  normalizedValue: 'normalizedValue',
+  createdAt: 'createdAt'
+} as const
+
+export type FascicoloSubjectIdentifierScalarFieldEnum = (typeof FascicoloSubjectIdentifierScalarFieldEnum)[keyof typeof FascicoloSubjectIdentifierScalarFieldEnum]
+
+
+export const FascicoloKnowledgeItemScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  revisionId: 'revisionId',
+  kind: 'kind',
+  semanticKey: 'semanticKey',
+  semanticKeyVersion: 'semanticKeyVersion',
+  contentFingerprint: 'contentFingerprint',
+  normalizedText: 'normalizedText',
+  structuredPayload: 'structuredPayload',
+  confidence: 'confidence',
+  status: 'status',
+  reviewVersion: 'reviewVersion',
+  createdAt: 'createdAt',
+  supersededAt: 'supersededAt'
+} as const
+
+export type FascicoloKnowledgeItemScalarFieldEnum = (typeof FascicoloKnowledgeItemScalarFieldEnum)[keyof typeof FascicoloKnowledgeItemScalarFieldEnum]
+
+
+export const FascicoloKnowledgeEvidenceScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  itemId: 'itemId',
+  provenanceType: 'provenanceType',
+  documentoId: 'documentoId',
+  documentFileVersionId: 'documentFileVersionId',
+  extractionAttemptId: 'extractionAttemptId',
+  documentExtractionAttemptId: 'documentExtractionAttemptId',
+  pageNumber: 'pageNumber',
+  textSha256: 'textSha256',
+  quoteSha256: 'quoteSha256',
+  basisRef: 'basisRef',
+  createdAt: 'createdAt'
+} as const
+
+export type FascicoloKnowledgeEvidenceScalarFieldEnum = (typeof FascicoloKnowledgeEvidenceScalarFieldEnum)[keyof typeof FascicoloKnowledgeEvidenceScalarFieldEnum]
+
+
+export const FascicoloKnowledgeRelationScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  revisionId: 'revisionId',
+  sourceItemId: 'sourceItemId',
+  targetItemId: 'targetItemId',
+  relationType: 'relationType',
+  confidence: 'confidence',
+  createdAt: 'createdAt'
+} as const
+
+export type FascicoloKnowledgeRelationScalarFieldEnum = (typeof FascicoloKnowledgeRelationScalarFieldEnum)[keyof typeof FascicoloKnowledgeRelationScalarFieldEnum]
+
+
+export const FascicoloKnowledgeReviewEventScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  itemId: 'itemId',
+  previousStatus: 'previousStatus',
+  nextStatus: 'nextStatus',
+  reviewVersion: 'reviewVersion',
+  actorId: 'actorId',
+  actorEmail: 'actorEmail',
+  actorRole: 'actorRole',
+  createdAt: 'createdAt'
+} as const
+
+export type FascicoloKnowledgeReviewEventScalarFieldEnum = (typeof FascicoloKnowledgeReviewEventScalarFieldEnum)[keyof typeof FascicoloKnowledgeReviewEventScalarFieldEnum]
+
+
+export const AiFascicoloHumanReviewStateScalarFieldEnum = {
+  id: 'id',
+  materialId: 'materialId',
+  enteId: 'enteId',
+  procedimentoId: 'procedimentoId',
+  statementPath: 'statementPath',
+  version: 'version',
+  latestDisposition: 'latestDisposition',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AiFascicoloHumanReviewStateScalarFieldEnum = (typeof AiFascicoloHumanReviewStateScalarFieldEnum)[keyof typeof AiFascicoloHumanReviewStateScalarFieldEnum]
+
+
+export const AiFascicoloHumanReviewEventScalarFieldEnum = {
+  id: 'id',
+  stateId: 'stateId',
+  materialId: 'materialId',
+  enteId: 'enteId',
+  procedimentoId: 'procedimentoId',
+  statementPath: 'statementPath',
+  sequence: 'sequence',
+  disposition: 'disposition',
+  humanUserId: 'humanUserId',
+  actorIdSnapshot: 'actorIdSnapshot',
+  actorEmailSnapshot: 'actorEmailSnapshot',
+  actorRoleSnapshot: 'actorRoleSnapshot',
+  occurredAt: 'occurredAt',
+  createdAt: 'createdAt',
+  note: 'note',
+  reason: 'reason',
+  amendmentText: 'amendmentText',
+  idempotencyKey: 'idempotencyKey',
+  commandFingerprint: 'commandFingerprint'
+} as const
+
+export type AiFascicoloHumanReviewEventScalarFieldEnum = (typeof AiFascicoloHumanReviewEventScalarFieldEnum)[keyof typeof AiFascicoloHumanReviewEventScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -684,6 +2102,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

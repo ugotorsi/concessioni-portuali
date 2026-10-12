@@ -1,10 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-import { isInvestorDemoMode, isInvestorDemoRoute } from "@/lib/investor-demo";
 import { buildRateLimitKey, checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 
-const PUBLIC_PATHS = new Set(["/", "/login", "/logout", "/demo"]);
+const PUBLIC_PATHS = new Set(["/", "/login", "/logout"]);
+const MCP_PATH = "/api/mcp";
+const TRUSTED_RESEARCH_MISSION_PATH = "/api/legal-research/trusted/mission";
+const TRUSTED_RESEARCH_MISSION_ACTION_PATH = "/api/legal-research/trusted/mission/action";
 const PROTECTED_PREFIXES = [
   "/dashboard",
   "/mappa",
@@ -23,6 +25,7 @@ const PROTECTED_PREFIXES = [
   "/demo-guidata",
   "/ai",
   "/adsp",
+  "/mfa",
   "/export",
   "/api",
 ];
@@ -50,12 +53,44 @@ function isViewerBlockedPath(pathname: string): boolean {
   return VIEWER_ADSP_BLOCKED_PATHS.some((blocked) => pathname === blocked || pathname.startsWith(`${blocked}/`));
 }
 
-function shouldRateLimit(pathname: string): boolean {
+function getRateLimitPolicy(pathname: string): { limit: number; scope: string } | null {
   if (pathname === "/api/auth/callback/credentials") {
-    return true;
+    return { limit: 10, scope: "credentials-login" };
   }
 
-  return pathname.startsWith("/export/");
+  if (pathname === "/api/auth/mfa/enrollment") {
+    return { limit: 10, scope: "mfa-enrollment" };
+  }
+
+  if (pathname.startsWith("/export/")) {
+    return { limit: 25, scope: "export" };
+  }
+
+  if (
+    (pathname.startsWith("/documenti/") && pathname.endsWith("/download"))
+    || (pathname.startsWith("/legal-sources/") && pathname.endsWith("/download"))
+    || (pathname.startsWith("/report/") && pathname.endsWith("/pdf"))
+  ) {
+    return { limit: 60, scope: "sensitive-download" };
+  }
+
+  if (pathname.startsWith("/api/admin/")) {
+    return { limit: 30, scope: "admin-api" };
+  }
+
+  if (
+    pathname === MCP_PATH
+    || pathname === TRUSTED_RESEARCH_MISSION_PATH
+    || pathname === TRUSTED_RESEARCH_MISSION_ACTION_PATH
+  ) {
+    return { limit: 30, scope: "research-service" };
+  }
+
+  if (pathname.startsWith("/api/legal-research/") || pathname === "/api/legal-rules/resolve") {
+    return { limit: 30, scope: "sensitive-api" };
+  }
+
+  return null;
 }
 
 function withSecurityHeaders(response: NextResponse): NextResponse {
@@ -70,12 +105,12 @@ function withSecurityHeaders(response: NextResponse): NextResponse {
 
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
-  const investorDemoMode = isInvestorDemoMode();
+  const rateLimitPolicy = getRateLimitPolicy(pathname);
 
-  if (shouldRateLimit(pathname)) {
+  if (rateLimitPolicy) {
     const result = await checkRateLimit({
-      key: buildRateLimitKey(`middleware:${pathname}`, request.headers),
-      limit: pathname === "/api/auth/callback/credentials" ? 10 : 25,
+      key: buildRateLimitKey(`middleware:${rateLimitPolicy.scope}`, request.headers),
+      limit: rateLimitPolicy.limit,
       windowMs: 60_000,
     });
 
@@ -96,11 +131,16 @@ export async function middleware(request: NextRequest) {
     return withSecurityHeaders(NextResponse.next());
   }
 
-  if (PUBLIC_PATHS.has(pathname)) {
+  // MCP routes perform bearer authentication at the route boundary, not through browser sessions.
+  if (
+    pathname === MCP_PATH
+    || pathname === TRUSTED_RESEARCH_MISSION_PATH
+    || pathname === TRUSTED_RESEARCH_MISSION_ACTION_PATH
+  ) {
     return withSecurityHeaders(NextResponse.next());
   }
 
-  if (investorDemoMode && isInvestorDemoRoute(pathname)) {
+  if (PUBLIC_PATHS.has(pathname)) {
     return withSecurityHeaders(NextResponse.next());
   }
 
@@ -108,7 +148,12 @@ export async function middleware(request: NextRequest) {
     return withSecurityHeaders(NextResponse.next());
   }
 
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+  let token = null;
+  try {
+    token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+  } catch {
+    token = null;
+  }
   const role = typeof token?.role === "string" ? token.role : null;
 
   if (!role) {
@@ -117,6 +162,15 @@ export async function middleware(request: NextRequest) {
     loginUrl.searchParams.set("callbackUrl", callbackUrl);
 
     return withSecurityHeaders(NextResponse.redirect(loginUrl));
+  }
+
+  const mfaEnrollmentRequired = token?.mfaEnrollmentRequired === true;
+  if (mfaEnrollmentRequired && pathname !== "/mfa/enroll") {
+    return withSecurityHeaders(NextResponse.redirect(new URL("/mfa/enroll", request.url)));
+  }
+
+  if (!mfaEnrollmentRequired && (pathname === "/mfa" || pathname.startsWith("/mfa/"))) {
+    return withSecurityHeaders(NextResponse.redirect(new URL("/dashboard", request.url)));
   }
 
   if (role === "VIEWER_ADSP") {

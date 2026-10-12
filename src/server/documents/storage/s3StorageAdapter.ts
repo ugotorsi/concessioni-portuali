@@ -5,11 +5,21 @@ import {
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { getS3StorageConfig } from "./config";
-import type { DocumentStorageAdapter, DocumentStorageGetOutput, DocumentStoragePutInput, StoredDocumentObject } from "./types";
+import type {
+  DocumentStorageAdapter,
+  DocumentStorageCreateResult,
+  DocumentStorageGetOutput,
+  DocumentStorageHeadOutput,
+  DocumentStoragePutInput,
+  DocumentStorageReadResult,
+  StoredDocumentObject,
+} from "./types";
+import { DocumentStorageReadLimitError, DocumentStorageReadUnavailableError } from "./types";
 
-type StorageOperation = "PUT" | "GET" | "DELETE" | "HEAD";
+type StorageOperation = "PUT" | "GET" | "DELETE" | "HEAD" | "PRESIGN";
 
 interface StorageDiagnostics {
   provider: "s3";
@@ -56,6 +66,19 @@ function isNotFoundLike(code: string, statusCode?: number): boolean {
   return code === "NotFound" || code === "NoSuchKey" || statusCode === 404;
 }
 
+function isPreconditionFailed(code: string, statusCode?: number): boolean {
+  return code === "PreconditionFailed" || statusCode === 412;
+}
+
+function contentRangeTotal(contentRange: string | undefined): number | undefined {
+  const match = contentRange?.match(/^bytes \d+-\d+\/(\d+)$/);
+  if (!match) {
+    return undefined;
+  }
+  const total = Number(match[1]);
+  return Number.isSafeInteger(total) ? total : undefined;
+}
+
 function assertSafeStorageKey(storageKey: string): string {
   const normalized = storageKey.trim();
 
@@ -94,6 +117,54 @@ async function bodyToBuffer(body: unknown): Promise<Buffer> {
   return Buffer.concat(chunks);
 }
 
+async function bodyToBoundedBuffer(body: unknown, maxBytes: number): Promise<Buffer> {
+  if (!body) {
+    return Buffer.alloc(0);
+  }
+
+  const sdkBody = body as {
+    transformToByteArray?: () => Promise<Uint8Array>;
+  };
+  if (typeof sdkBody.transformToByteArray === "function") {
+    const bytes = await sdkBody.transformToByteArray();
+    if (bytes.byteLength > maxBytes) {
+      throw new DocumentStorageReadLimitError({
+        maxBytes,
+        observedBytes: bytes.byteLength,
+      });
+    }
+    return Buffer.from(bytes);
+  }
+
+  const nodeStream = body as NodeJS.ReadableStream & { destroy?: (error?: Error) => void };
+  if (typeof nodeStream.on !== "function") {
+    const buffered = await bodyToBuffer(body);
+    if (buffered.length > maxBytes) {
+      throw new DocumentStorageReadLimitError({ maxBytes, observedBytes: buffered.length });
+    }
+    return buffered;
+  }
+
+  const chunks: Buffer[] = [];
+  let consumed = 0;
+  await new Promise<void>((resolve, reject) => {
+    nodeStream.on("data", (chunk) => {
+      const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      consumed += bytes.length;
+      if (consumed > maxBytes) {
+        const error = new DocumentStorageReadLimitError({ maxBytes, observedBytes: consumed });
+        nodeStream.destroy?.(error);
+        reject(error);
+        return;
+      }
+      chunks.push(bytes);
+    });
+    nodeStream.on("error", reject);
+    nodeStream.on("end", () => resolve());
+  });
+  return Buffer.concat(chunks, consumed);
+}
+
 export class S3StorageAdapter implements DocumentStorageAdapter {
   private readonly config = getS3StorageConfig();
 
@@ -105,6 +176,8 @@ export class S3StorageAdapter implements DocumentStorageAdapter {
       secretAccessKey: this.config.secretAccessKey,
     },
     forcePathStyle: this.config.forcePathStyle,
+    requestChecksumCalculation: "WHEN_REQUIRED",
+    responseChecksumValidation: "WHEN_REQUIRED",
   });
 
   private toS3Error(operation: StorageOperation, error: unknown): DocumentStorageS3Error {
@@ -122,6 +195,70 @@ export class S3StorageAdapter implements DocumentStorageAdapter {
       regionConfigured: this.config.region.length > 0,
       forcePathStyle: this.config.forcePathStyle,
     }, { cause: error });
+  }
+
+  private storedObject(input: DocumentStoragePutInput, storageKey: string): StoredDocumentObject {
+    return {
+      storageProvider: "s3",
+      storageKey,
+      fileName: storageKey.split("/").pop() ?? storageKey,
+      bucket: this.config.bucket,
+      sizeBytes: input.sizeBytes,
+      sha256: input.sha256,
+      mimeType: input.mimeType,
+      originalName: input.originalName,
+    };
+  }
+
+  async createPresignedPut(input: {
+    storageKey: string;
+    mimeType: string;
+    sizeBytes: number;
+    metadata: Readonly<Record<string, string>>;
+    expiresInSeconds: number;
+  }): Promise<string> {
+    const storageKey = assertSafeStorageKey(input.storageKey);
+    const metadataHeaders = new Set(Object.keys(input.metadata).map((key) => `x-amz-meta-${key}`));
+    try {
+      return await getSignedUrl(this.client, new PutObjectCommand({
+        Bucket: this.config.bucket,
+        Key: storageKey,
+        ContentType: input.mimeType,
+        ContentLength: input.sizeBytes,
+        IfNoneMatch: "*",
+        Metadata: input.metadata,
+      }), {
+        expiresIn: input.expiresInSeconds,
+        signableHeaders: new Set(["content-type"]),
+        unhoistableHeaders: metadataHeaders,
+      });
+    } catch (error) {
+      throw this.toS3Error("PRESIGN", error);
+    }
+  }
+
+  async head(storageKey: string): Promise<DocumentStorageHeadOutput | null> {
+    const safeKey = assertSafeStorageKey(storageKey);
+    try {
+      const response = await this.client.send(new HeadObjectCommand({
+        Bucket: this.config.bucket,
+        Key: safeKey,
+      }));
+      const sizeBytes = response.ContentLength;
+      if (!Number.isSafeInteger(sizeBytes) || (sizeBytes ?? 0) < 0) {
+        throw new Error("Dimensione oggetto storage non valida.");
+      }
+      return {
+        sizeBytes: sizeBytes ?? 0,
+        mimeType: response.ContentType?.trim().toLowerCase() ?? "",
+        metadata: response.Metadata ?? {},
+      };
+    } catch (error) {
+      const code = extractErrorCode(error);
+      const statusCode = extractStatusCode(error);
+      if (isNotFoundLike(code, statusCode)) return null;
+      throw this.toS3Error("HEAD", error);
+    }
   }
 
   async put(input: DocumentStoragePutInput): Promise<StoredDocumentObject> {
@@ -144,15 +281,43 @@ export class S3StorageAdapter implements DocumentStorageAdapter {
       throw this.toS3Error("PUT", error);
     }
 
+    return this.storedObject(input, storageKey);
+  }
+
+  async createIfAbsent(input: DocumentStoragePutInput): Promise<DocumentStorageCreateResult> {
+    const storageKey = assertSafeStorageKey(input.storageKey);
+
+    try {
+      await this.client.send(
+        new PutObjectCommand({
+          Bucket: this.config.bucket,
+          Key: storageKey,
+          Body: input.body,
+          ContentType: input.mimeType,
+          IfNoneMatch: "*",
+          Metadata: {
+            sha256: input.sha256,
+            originalname: input.originalName,
+          },
+        }),
+      );
+    } catch (error) {
+      const code = extractErrorCode(error);
+      const statusCode = extractStatusCode(error);
+      if (isPreconditionFailed(code, statusCode)) {
+        return {
+          disposition: "ALREADY_EXISTS",
+          object: this.storedObject(input, storageKey),
+          ownedByAttempt: false,
+        };
+      }
+      throw this.toS3Error("PUT", error);
+    }
+
     return {
-      storageProvider: "s3",
-      storageKey,
-      fileName: storageKey.split("/").pop() ?? storageKey,
-      bucket: this.config.bucket,
-      sizeBytes: input.sizeBytes,
-      sha256: input.sha256,
-      mimeType: input.mimeType,
-      originalName: input.originalName,
+      disposition: "CREATED",
+      object: this.storedObject(input, storageKey),
+      ownedByAttempt: true,
     };
   }
 
@@ -172,6 +337,75 @@ export class S3StorageAdapter implements DocumentStorageAdapter {
 
     const body = await bodyToBuffer(response.Body);
     return { body };
+  }
+
+  async read(storageKey: string): Promise<DocumentStorageReadResult> {
+    const safeKey = assertSafeStorageKey(storageKey);
+    let response;
+    try {
+      response = await this.client.send(
+        new GetObjectCommand({
+          Bucket: this.config.bucket,
+          Key: safeKey,
+        }),
+      );
+    } catch (error) {
+      const code = extractErrorCode(error);
+      const statusCode = extractStatusCode(error);
+      if (isNotFoundLike(code, statusCode)) {
+        return { disposition: "MISSING" };
+      }
+      throw new DocumentStorageReadUnavailableError({ provider: "s3", code, statusCode, cause: error });
+    }
+
+    try {
+      return { disposition: "FOUND", body: await bodyToBuffer(response.Body) };
+    } catch (error) {
+      throw new DocumentStorageReadUnavailableError({
+        provider: "s3",
+        code: "BODY_READ_FAILED",
+        cause: error,
+      });
+    }
+  }
+
+  async readBounded(storageKey: string, maxBytes: number): Promise<DocumentStorageReadResult> {
+    const safeKey = assertSafeStorageKey(storageKey);
+    if (!Number.isSafeInteger(maxBytes) || maxBytes <= 0) {
+      throw new TypeError("Document storage byte limit must be a positive safe integer.");
+    }
+
+    try {
+      const response = await this.client.send(new GetObjectCommand({
+        Bucket: this.config.bucket,
+        Key: safeKey,
+        Range: `bytes=0-${maxBytes}`,
+      }));
+      const totalBytes = contentRangeTotal(response.ContentRange);
+      if (totalBytes !== undefined && totalBytes > maxBytes) {
+        throw new DocumentStorageReadLimitError({ maxBytes, observedBytes: totalBytes });
+      }
+      if (response.ContentLength !== undefined && response.ContentLength > maxBytes) {
+        throw new DocumentStorageReadLimitError({
+          maxBytes,
+          observedBytes: response.ContentLength,
+        });
+      }
+      return { disposition: "FOUND", body: await bodyToBoundedBuffer(response.Body, maxBytes) };
+    } catch (error) {
+      if (error instanceof DocumentStorageReadLimitError) {
+        throw error;
+      }
+      if (error instanceof DocumentStorageReadUnavailableError) {
+        throw error;
+      }
+      const code = extractErrorCode(error);
+      const statusCode = extractStatusCode(error);
+      if (isNotFoundLike(code, statusCode)) {
+        return { disposition: "MISSING" };
+      }
+      throw new DocumentStorageReadUnavailableError({ provider: "s3", code, statusCode, cause: error });
+    }
   }
 
   async delete(storageKey: string): Promise<void> {

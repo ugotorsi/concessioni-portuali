@@ -1,0 +1,31 @@
+{
+  "generatedAt": "2026-08-03T17:33:40.835Z",
+  "migrationCount": 2,
+  "migrationNames": [
+    "20260727_decisione_procedimento_minima",
+    "20260802_p0d1_stato_effetto"
+  ],
+  "schemaEnumCount": 59,
+  "schemaModelCount": 27,
+  "historyCreatesEnumCount": 3,
+  "historyCreatesTableCount": 1,
+  "migrateDeployOnEmptyLikelySafe": false,
+  "riskCounts": {
+    "high": 83,
+    "medium": 0
+  },
+  "baseline": {
+    "path": "prisma/baselines/20260803_p0_e8_empty_to_current/baseline.sql",
+    "lineCount": 1504,
+    "createTypeCount": 59,
+    "createTableCount": 27,
+    "createIndexCount": 171,
+    "createUniqueIndexCount": 15,
+    "hasDrop": false,
+    "hasDml": false,
+    "missingEnumsInBaseline": [],
+    "missingTablesInBaseline": [],
+    "fkMissingTargets": [],
+    "fkMissingSources": []
+  }
+}

@@ -1,0 +1,7 @@
+PHASE3_STATUS_LABEL=initial_attempt
+PRISMA_VALIDATE_EXIT=0
+PRISMA_GENERATE_EXIT=0
+PRISMA_DIFF_COMMAND_INITIAL=npx prisma migrate diff --from-config-datasource --to-schema-datamodel prisma/schema.prisma --script
+PRISMA_DIFF_EXIT_INITIAL=1
+PRISMA_DIFF_FAILURE_CLASS=CLI_ARGUMENT_ERROR
+PRISMA_DIFF_SCHEMA_DRIFT_DETECTED=false

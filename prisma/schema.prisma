@@ -18,6 +18,125 @@ enum RuoloUser {
   VIEWER_ADSP
 }
 
+enum FascicoloObservationKind {
+  DOCUMENT_COMPLETENESS
+}
+
+enum FascicoloObservationStatus {
+  PROPOSTO
+  VALIDATO
+  RIFIUTATO
+  SUPERATO
+}
+
+enum FascicoloChecklistEvidenceStatus {
+  PROPOSTO
+  VALIDATO
+  RIFIUTATO
+}
+
+enum FascicoloDocumentRequirementProposalStatus {
+  PROPOSTO
+  VALIDATO
+  RIFIUTATO
+}
+
+enum FascicoloSignalStatus {
+  OPEN
+  SUPERSEDED
+}
+
+enum FascicoloSignalHumanDisposition {
+  UNREVIEWED
+  ACKNOWLEDGED
+  DISMISSED
+  PROMOTED
+}
+
+enum FascicoloSignalAttentionLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum FascicoloSignalKind {
+  CONCESSION_EXPIRY
+}
+
+enum AiFascicoloHumanReviewDisposition {
+  COMPANY_ACCEPTED
+  COMPANY_REJECTED
+  COMPANY_NEEDS_VERIFICATION
+  COMPANY_AMENDED
+}
+
+enum FascicoloKnowledgeRevisionStatus {
+  BUILDING
+  CURRENT
+  SUPERSEDED
+}
+
+enum StructuredFascicoloReportStatus {
+  CURRENT
+  STALE
+  SUPERSEDED
+}
+
+enum FascicoloOperationalProposalType {
+  DEADLINE
+  CRITICALITY
+  DOCUMENT_REQUIREMENT
+  CHECKLIST_ITEM
+  ACTIVITY
+  NOTE
+  SUBJECT_UPDATE
+}
+
+enum FascicoloOperationalProposalStatus {
+  PROPOSED
+  APPROVED
+  REJECTED
+  AMENDED_AND_APPROVED
+  MATERIALIZED
+  SUPERSEDED
+  STALE
+}
+
+enum FascicoloOperationalProposalReviewAction {
+  APPROVE
+  REJECT
+  AMEND_AND_APPROVE
+}
+
+enum FascicoloKnowledgeItemStatus {
+  AI_PROPOSED
+  HUMAN_CONFIRMED
+  REJECTED
+}
+
+enum FascicoloKnowledgeRelationType {
+  RELATED_TO
+  SUPERSEDES
+  CONTRADICTS
+  ISSUE_DERIVED_FROM
+  QUESTION_FOR_ISSUE
+}
+
+enum FascicoloSubjectType {
+  PERSON
+  ORGANIZATION
+  PUBLIC_ADMINISTRATION
+  OFFICE
+  AUTHORITY
+  UNKNOWN
+}
+
+enum FascicoloKnowledgeProvenanceType {
+  DOCUMENT_EXTRACTION
+  FASCICOLO_DOCUMENT_EXTRACTION
+}
+
 enum NormaRiferimento {
   ART_36_COD_NAV
   ART_18_L_84_1994
@@ -50,6 +169,13 @@ enum ConcessionVertical {
   PORTUALE_ADSP
   MARITTIMA_TURISTICO_RICREATIVA
   ALTRA_CONCESSIONE_DEMANIALE
+}
+
+enum PortActivityLegalType {
+  OPERAZIONI_PORTUALI
+  SERVIZI_PORTUALI
+  PASSEGGERI
+  ALTRO
 }
 
 enum LegalFramework {
@@ -267,6 +393,28 @@ enum EsitoIstruttorioProcedimento {
   ALTRO
 }
 
+enum TipoDecisioneProcedimento {
+  DECADENZA_DICHIARATA
+  REVOCA_DISPOSTA
+  ARCHIVIAZIONE
+  CHIUSURA_SENZA_EFFETTO
+}
+
+enum EffettoTitoloProcedimento {
+  NESSUNO
+  CONCESSIONE_DECADUTA
+  CONCESSIONE_REVOCATA
+}
+
+enum StatoEffettoProcedimento {
+  NON_PREVISTO
+  PENDENTE
+  PRONTO
+  APPLICATO
+  BLOCCATO
+  ERRORE
+}
+
 enum OrigineProcedimento {
   UFFICIO
   ISTANZA_PARTE
@@ -412,6 +560,7 @@ enum LegalSourceType {
 enum LegalSourceStatus {
   CURRENT
   CURRENT_SUBJECT_TO_REVIEW
+  IDENTITY_VERIFIED_PENDING_VALIDITY
   PENDING_VALIDITY_CHECK
   HISTORICAL
   SUPERSEDED
@@ -419,6 +568,64 @@ enum LegalSourceStatus {
   DRAFT_OR_ONGOING_PROCEDURE
   CASE_SPECIFIC
   MISSING_SOURCE
+}
+
+enum LegalSourceIdentityScopeKind {
+  GLOBAL
+  TENANT
+}
+
+enum ResourceSemanticType {
+  NORMATIVE_INSTRUMENT
+  JUDICIAL_DECISION
+  ADMINISTRATIVE_ACT
+  CONTRACT
+  CORRESPONDENCE
+  TECHNICAL_DOCUMENT
+  MEDIA_RECORD
+  OTHER
+}
+
+enum LegalAuthorityKind {
+  LEGISLATION
+  CASE_LAW
+  ADMINISTRATIVE_REGULATION
+  ADMINISTRATIVE_ACT
+  AUTHORITY_PRACTICE
+  OTHER_LEGAL_AUTHORITY
+}
+
+enum SourceCharacter {
+  PUBLIC_OFFICIAL
+  PUBLIC_NON_OFFICIAL
+  PRIVATE
+  UNKNOWN
+}
+
+enum LegalSourceIdentityVerificationStatus {
+  UNVERIFIED
+  VERIFIED
+  REJECTED
+  CONFLICTING
+}
+
+enum LegalSourceVersionLifecycleStatus {
+  CURRENT
+  CURRENT_SUBJECT_TO_REVIEW
+  PENDING_VALIDITY_CHECK
+  HISTORICAL
+  SUPERSEDED
+  PARTIALLY_SUPERSEDED
+  DRAFT_OR_ONGOING_PROCEDURE
+  CASE_SPECIFIC
+}
+
+enum LegalSourceAcquisitionOutcome {
+  ACQUIRED
+  MISSING
+  INTEGRITY_MISMATCH
+  FAILED
+  PENDING_IDENTITY
 }
 
 enum LegalSourceRole {
@@ -502,24 +709,302 @@ enum ImportRunStatus {
   FAILED
 }
 
+enum NeutralIntakeStatus {
+  RECEIVED
+  EVIDENCE_READY
+  REVIEW_REQUIRED
+  ROUTED
+  FAILED_EXTRACTION
+  FAILED_CLASSIFICATION
+  FAILED_HANDOFF
+}
+
+enum NeutralIntakeExtractionOutcome {
+  SUCCEEDED
+  FAILED
+}
+
+enum NeutralIntakeExtractionMethod {
+  DIRECT_TEXT
+  OCR
+}
+
+enum DocumentExtractionOutcome {
+  SUCCEEDED
+  FAILED
+}
+
+enum DocumentExtractionMethod {
+  DIRECT_TEXT
+  OCR
+}
+
+enum DocumentOcrRunStatus {
+  PLANNED
+  PROCESSING
+  SUCCEEDED
+  FAILED
+}
+
+enum NeutralIntakeClassificationOutcome {
+  LEGAL_SOURCE_CANDIDATE
+  CASE_DOCUMENT
+  UNCERTAIN_REVIEW_REQUIRED
+}
+
+enum NeutralIntakeClassificationConfidence {
+  HIGH
+  MEDIUM
+  LOW
+  INSUFFICIENT
+}
+
+enum LegalSourceCandidateResolutionOutcome {
+  LINKED
+  NO_MATCH
+}
+
+enum LegalReferenceKind {
+  LEGISLATION
+  CODE
+  CASE_LAW
+}
+
+enum LegalReferenceMatchStatus {
+  MATCHED
+  AMBIGUOUS
+  NO_MATCH
+}
+
+enum LegalReferenceMatchReason {
+  EXACT_IDENTITY
+  MULTIPLE_EXACT_MATCHES
+  NO_CATALOG_MATCH
+  INSUFFICIENT_IDENTITY
+}
+
+enum LegalReferenceOfficialLookupStatus {
+  NOT_FOUND
+  FOUND_UNIQUE
+  AMBIGUOUS
+}
+
+enum LegalReferenceOfficialReconciliationState {
+  INCOMPLETE
+  PENDING_REVIEW
+  CONFLICTED
+  LINKED_EXISTING
+  ACCEPTED_NEW
+  REJECTED
+}
+
+enum LegalReferenceOfficialEvidenceClassification {
+  OFFICIAL_AUTHORITY
+  COMMERCIAL_CORROBORATION
+}
+
+enum LegalReferenceOfficialEvidenceDisposition {
+  COMPATIBLE
+  CONFLICTING
+  INCOMPLETE
+  RECORDED_AFTER_TERMINAL
+}
+
+enum AsyncJobStatus {
+  QUEUED
+  RUNNING
+  RETRY_WAIT
+  CANCELLATION_REQUESTED
+  SUCCEEDED
+  TERMINAL_FAILED
+  CANCELLED
+}
+
+enum AsyncJobAdmissionType {
+  AUTHENTICATED_USER
+  AUTHORIZED_SYSTEM
+}
+
+enum AsyncJobPriority {
+  HIGH
+  NORMAL
+  LOW
+}
+
+enum RuntimeWorkerStatus {
+  RUNNING
+  DRAINING
+  STOPPED
+}
+
+enum RuntimeBudgetScope {
+  GLOBAL
+  TENANT
+  PROCEDIMENTO
+}
+
+enum RuntimeCostReservationStatus {
+  RESERVED
+  SETTLED
+  RELEASED
+  EXPIRED
+}
+
+enum ResearchMissionStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  BUDGET_EXHAUSTED
+  DEFERRED
+  REJECTED
+}
+
+enum ResearchMissionLifecycleStatus {
+  CURRENT
+  HISTORICAL
+}
+
+enum ResearchResultSupportDirection {
+  SUPPORTS
+  OPPOSES
+  NEUTRAL
+  INCONCLUSIVE
+  UNASSESSED
+}
+
+enum ResearchResultClassificationSource {
+  PROVIDER_OUTPUT
+  SYNTHETIC_TEST
+  HUMAN_REVIEW
+  AI_CLASSIFIER
+}
+
+enum ResearchResultReviewStatus {
+  AI_PROPOSED
+  HUMAN_CONFIRMED
+  REJECTED
+}
+
+enum ResearchSourceRetrievalState {
+  RETRIEVAL_REQUIRED
+  RESOLVED
+  BLOCKED
+}
+
+enum ResearchSourceTextState {
+  METADATA_ONLY
+  SNIPPET_ONLY
+  PARTIAL_TEXT
+  FULL_TEXT
+}
+
+enum ResearchSourceIdentityState {
+  NOT_ASSESSED
+  VERIFIED
+  MISMATCH
+  INCOMPLETE
+  MANUAL_REVIEW_REQUIRED
+}
+
+enum ResearchSourceContentState {
+  NOT_ASSESSED
+  VERIFIED
+  MISMATCH
+  INCOMPLETE
+  MANUAL_REVIEW_REQUIRED
+}
+
+enum ResearchSourceTemporalState {
+  NOT_ASSESSED
+  APPLICABLE
+  NOT_APPLICABLE
+  UNCERTAIN
+}
+
+enum ResearchSourceAdverseState {
+  NOT_REQUIRED
+  REQUIRED
+  COMPLETED
+}
+
+enum ResearchSourceOfficiality {
+  OFFICIAL
+  NON_OFFICIAL
+  SECONDARY
+  UNKNOWN
+}
+
+enum ResearchAdverseRequirementStatus {
+  REQUIRED
+  COMPLETED
+  HISTORICAL
+}
+
+enum ResearchExecutionState {
+  COMPLETE
+  PARTIAL
+  BUDGET_EXHAUSTED
+  DEFERRED
+  FAILED
+  HUMAN_DECISION_REQUIRED
+}
+
+enum ResearchCompletionState {
+  COMPLETE
+  PARTIAL
+  BUDGET_EXHAUSTED
+  FAILED
+  HUMAN_DECISION_REQUIRED
+}
+
 model Ente {
-  id           String             @id @default(cuid())
-  nome         String
-  codice       String             @unique
-  tipo         EnteTipo           @default(ALTRO)
-  stato        EnteStato          @default(ATTIVO)
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
-  concessioni  Concessione[]
-  documenti    Documento[]
-  report       Report[]
-  activityLog  ActivityLog[]
-  memberships  TenantMembership[]
-  ports        Port[]
-  legalSources LegalSource[]
-  legalRules   LegalRule[]
-  documentGaps DocumentGap[]
-  importRuns   ImportRun[]
+  id                           String                                 @id @default(cuid())
+  nome                         String
+  codice                       String                                 @unique
+  tipo                         EnteTipo                               @default(ALTRO)
+  stato                        EnteStato                              @default(ATTIVO)
+  createdAt                    DateTime                               @default(now())
+  updatedAt                    DateTime                               @updatedAt
+  concessioni                  Concessione[]
+  documenti                    Documento[]
+  report                       Report[]
+  activityLog                  ActivityLog[]
+  memberships                  TenantMembership[]
+  ports                        Port[]
+  legalSources                 LegalSource[]
+  legalRules                   LegalRule[]
+  documentGaps                 DocumentGap[]
+  importRuns                   ImportRun[]
+  decisioniProcedimento        DecisioneProcedimento[]
+  fascicoloObservations        FascicoloObservation[]
+  checklistEvidence            FascicoloChecklistEvidence[]
+  documentRequirementProposals FascicoloDocumentRequirementProposal[]
+  documentRequirementEvidence  FascicoloDocumentRequirementEvidence[]
+  documentFileVersions         DocumentFileVersion[]
+  legalSourceAcquisitions      LegalSourceAcquisition[]
+  neutralIntakes               NeutralIntake[]
+  legalSourceCandidateAdmissions LegalSourceCandidateAdmission[]
+  asyncJobs                    AsyncJob[]
+  fascicoloSignals             FascicoloSignal[]
+  concessioneExpiryChangeCommands ConcessioneExpiryChangeCommand[]
+  researchMissions             ResearchMissionRecord[]
+  researchAssistedVerifications ResearchAssistedVerificationRecord[]
+  aiFascicoloTrustedReviewMaterials AiFascicoloTrustedReviewMaterial[]
+  automaticFascicoloReports         AutomaticFascicoloReport[]
+  documentExtractionAttempts        DocumentExtractionAttempt[]
+  fascicoliIntake                   FascicoloIntake[]
+  procedimenti                      Procedimento[]
+  aiFascicoloHumanReviewStates      AiFascicoloHumanReviewState[]
+  aiFascicoloHumanReviewEvents      AiFascicoloHumanReviewEvent[]
+  fascicoloKnowledgeRevisions       FascicoloKnowledgeRevision[]
+  fascicoloKnowledgeItems           FascicoloKnowledgeItem[]
+  fascicoloKnowledgeEvidence        FascicoloKnowledgeEvidence[]
+  fascicoloKnowledgeRelations       FascicoloKnowledgeRelation[]
+  fascicoloSubjects                 FascicoloSubject[]
+  structuredFascicoloReports        StructuredFascicoloReportSnapshot[]
+  fascicoloOperationalProposals     FascicoloOperationalProposal[]
+  runtimeBudgetPolicies             RuntimeBudgetPolicy[]
+  runtimeCostReservations           RuntimeCostReservation[]
 
   @@index([tipo])
   @@index([stato])
@@ -604,6 +1089,7 @@ model ImportRun {
   authority    Authority?    @relation(fields: [authorityId], references: [id], onDelete: SetNull)
   port         Port?         @relation(fields: [portId], references: [id], onDelete: SetNull)
   legalSources LegalSource[]
+  legalSourceAcquisitions LegalSourceAcquisition[]
 
   @@index([packCode])
   @@index([status])
@@ -616,6 +1102,9 @@ model LegalSource {
   sourceKey            String                @unique
   title                String
   sourceType           LegalSourceType
+  resourceSemanticType ResourceSemanticType?
+  legalAuthorityKind   LegalAuthorityKind?
+  sourceCharacter      SourceCharacter?
   status               LegalSourceStatus     @default(CURRENT_SUBJECT_TO_REVIEW)
   role                 LegalSourceRole       @default(NORMATIVE)
   legalRank            LegalRank             @default(OTHER)
@@ -644,18 +1133,37 @@ model LegalSource {
   authorityId          String?
   portId               String?
   importRunId          String?
+  identityNamespace    String?
+  identityScopeKind    LegalSourceIdentityScopeKind?
+  identityScopeKey     String?
+  canonicalKey         String?
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
 
-  ente              Ente?            @relation(fields: [enteId], references: [id], onDelete: SetNull)
-  authority         Authority?       @relation(fields: [authorityId], references: [id], onDelete: SetNull)
-  port              Port?            @relation(fields: [portId], references: [id], onDelete: SetNull)
-  importRun         ImportRun?       @relation(fields: [importRunId], references: [id], onDelete: SetNull)
-  rules             LegalRule[]
-  outgoingRelations SourceRelation[] @relation("SourceRelationFrom")
-  incomingRelations SourceRelation[] @relation("SourceRelationTo")
+  ente                         Ente?                                  @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  authority                    Authority?                             @relation(fields: [authorityId], references: [id], onDelete: SetNull)
+  port                         Port?                                  @relation(fields: [portId], references: [id], onDelete: SetNull)
+  importRun                    ImportRun?                             @relation(fields: [importRunId], references: [id], onDelete: SetNull)
+  rules                        LegalRule[]
+  documentRequirementProposals FascicoloDocumentRequirementProposal[]
+  outgoingRelations            SourceRelation[]                       @relation("SourceRelationFrom")
+  incomingRelations            SourceRelation[]                       @relation("SourceRelationTo")
+  expressions                  LegalExpressionVersion[]
+  versions                     LegalSourceVersion[]
+  acquisitions                 LegalSourceAcquisition[]
+  identityAssertions           LegalSourceIdentityAssertion[]
+  legacyNormaFonti             NormaFonte[]
+  candidateResolutions         LegalSourceCandidateResolution[]
+  legalReferenceMatches        LegalReferenceMatch[]
+  officialReconciliations      LegalReferenceOfficialReconciliation[]
+  temporalAssessments          LegalSourceTemporalAssessment[]
+  researchSourceAssessments    ResearchSourceAssessmentRecord[]
 
+  @@unique([identityNamespace, identityScopeKey, canonicalKey])
   @@index([sourceType])
+  @@index([resourceSemanticType])
+  @@index([legalAuthorityKind])
+  @@index([sourceCharacter])
   @@index([status])
   @@index([role])
   @@index([legalRank])
@@ -667,6 +1175,151 @@ model LegalSource {
   @@index([portId])
   @@index([effectiveFrom])
   @@index([createdAt])
+}
+
+/// A legal/textual expression within a canonical LegalSource family.
+model LegalExpressionVersion {
+  id                    String   @id @default(cuid())
+  sourceFamilyId        String
+  expressionKey         String
+  publicationDate       DateTime?
+  effectiveFrom         DateTime?
+  effectiveTo           DateTime?
+  expressionStatus      String?
+  correctionMetadata    Json?
+  consolidationMetadata Json?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  sourceFamily   LegalSource          @relation(fields: [sourceFamilyId], references: [id], onDelete: Restrict)
+  representations LegalSourceVersion[]
+  temporalAssessments LegalSourceTemporalAssessment[]
+
+  @@unique([sourceFamilyId, expressionKey])
+  @@unique([id, sourceFamilyId])
+  @@index([sourceFamilyId, effectiveFrom])
+  @@index([effectiveTo])
+}
+
+/// An immutable evaluation event produced by the versioned temporal evaluator.
+model LegalSourceTemporalAssessment {
+  id                       String   @id @default(cuid())
+  sourceFamilyId           String
+  legalExpressionVersionId String
+  assessmentVersion        String   @db.VarChar(100)
+  referenceDate            DateTime
+  validityState            String   @db.VarChar(50)
+  temporalWindowState      String   @db.VarChar(50)
+  applicabilityState       String   @db.VarChar(50)
+  reasonCodes              Json
+  effectiveFromSnapshot    DateTime?
+  effectiveToSnapshot      DateTime?
+  humanReviewRequired      Boolean
+  confidence               String   @db.VarChar(20)
+  inputFingerprint         String   @db.Char(64)
+  createdAt                DateTime @default(now())
+
+  sourceFamily          LegalSource            @relation(fields: [sourceFamilyId], references: [id], onDelete: Restrict)
+  legalExpressionVersion LegalExpressionVersion @relation(fields: [legalExpressionVersionId, sourceFamilyId], references: [id, sourceFamilyId], onDelete: Restrict)
+  researchSourceAssessments ResearchSourceAssessmentRecord[]
+
+  @@unique([inputFingerprint], map: "temporal_assessment_identity_uq")
+  @@index([legalExpressionVersionId, referenceDate, createdAt], map: "temporal_assessment_latest_idx")
+  @@index([sourceFamilyId], map: "temporal_assessment_family_idx")
+}
+
+/// Provider-independent evidence supporting a canonical family identity.
+model LegalSourceIdentityAssertion {
+  id                   String                                @id @default(cuid())
+  sourceFamilyId       String
+  identifierScheme     String
+  rawValue             String?
+  normalizedValue      String
+  issuingAuthority     String?
+  jurisdiction         String?
+  verificationStatus   LegalSourceIdentityVerificationStatus @default(UNVERIFIED)
+  provenanceReference  String
+  verifiedAt            DateTime?
+  createdAt             DateTime                              @default(now())
+
+  sourceFamily LegalSource @relation(fields: [sourceFamilyId], references: [id], onDelete: Restrict)
+
+  @@index([sourceFamilyId, identifierScheme, normalizedValue], map: "LegalSourceIdentityAssertion_sourceFamilyId_identifierScheme_no")
+  @@unique([sourceFamilyId, identifierScheme, normalizedValue], map: "legal_source_identity_assertion_identity_uq")
+  @@index([identifierScheme, normalizedValue], map: "LegalSourceIdentityAssertion_identifierScheme_normalizedValue_i")
+  @@index([verificationStatus])
+}
+
+/// An artifact/byte representation; temporal fields remain legacy compatibility metadata.
+model LegalSourceVersion {
+  id                   String                            @id @default(cuid())
+  sourceFamilyId       String
+  legalExpressionVersionId String?
+  observedSha256       String                            @db.Char(64)
+  observedSizeBytes    Int
+  observedMimeType     String
+  versionLabel         String?
+  publicationDate      DateTime?
+  effectiveFrom        DateTime?
+  effectiveTo          DateTime?
+  legalLifecycleStatus LegalSourceVersionLifecycleStatus
+  createdAt            DateTime                          @default(now())
+  updatedAt            DateTime                          @updatedAt
+
+  sourceFamily           LegalSource                    @relation(fields: [sourceFamilyId], references: [id], onDelete: Restrict)
+  legalExpressionVersion LegalExpressionVersion?        @relation(fields: [legalExpressionVersionId, sourceFamilyId], references: [id, sourceFamilyId], onDelete: Restrict)
+  acquisitions           LegalSourceAcquisition[]
+  legacyNormaVersioni    NormaVersione[]
+  researchSourceAssessments ResearchSourceAssessmentRecord[]
+
+  @@unique([sourceFamilyId, observedSha256])
+  @@unique([id, sourceFamilyId])
+  @@unique([id, sourceFamilyId, observedSha256])
+  @@index([legalExpressionVersionId])
+  @@index([sourceFamilyId, legalLifecycleStatus])
+  @@index([effectiveFrom])
+  @@index([effectiveTo])
+}
+
+model LegalSourceAcquisition {
+  id                       String                        @id @default(cuid())
+  sourceFamilyId           String?
+  sourceVersionId          String?
+  enteId                   String?
+  idempotencyKey           String                        @unique @db.Char(64)
+  outcome                  LegalSourceAcquisitionOutcome
+  originClass              String
+  providerOrChannel        String
+  originalUrl              String?
+  externalSourceId         String?
+  artifactLocator          String?
+  originalFilename         String?
+  acquiredAt               DateTime
+  observedSha256           String?                       @db.Char(64)
+  declaredSha256           String?                       @db.Char(64)
+  observedSizeBytes        Int?
+  declaredSizeBytes        Int?
+  observedMimeType         String?
+  importRunId              String?
+  acquiredByActorId        String?
+  acquiredByProcess        String?
+  transformationType       String?
+  transformationVersion    String?
+  transformedContentSha256 String?                       @db.Char(64)
+  failureCode              String?
+  createdAt                DateTime                      @default(now())
+
+  sourceFamily LegalSource?         @relation(fields: [sourceFamilyId], references: [id], onDelete: Restrict)
+  sourceVersion LegalSourceVersion? @relation(fields: [sourceVersionId, sourceFamilyId, observedSha256], references: [id, sourceFamilyId, observedSha256], onDelete: Restrict, map: "LegalSourceAcquisition_sourceVersionId_sourceFamilyId_observedS")
+  ente         Ente?                 @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  importRun     ImportRun?           @relation(fields: [importRunId], references: [id], onDelete: Restrict)
+  researchSourceAssessments ResearchSourceAssessmentRecord[]
+
+  @@index([sourceFamilyId, acquiredAt])
+  @@index([sourceVersionId])
+  @@index([importRunId])
+  @@index([outcome, acquiredAt])
+  @@index([enteId, outcome, acquiredAt])
 }
 
 model SourceRelation {
@@ -715,10 +1368,11 @@ model LegalRule {
   createdAt               DateTime                    @default(now())
   updatedAt               DateTime                    @updatedAt
 
-  source       LegalSource   @relation(fields: [sourceId], references: [id], onDelete: Cascade)
-  ente         Ente?         @relation(fields: [enteId], references: [id], onDelete: SetNull)
-  port         Port?         @relation(fields: [portId], references: [id], onDelete: SetNull)
-  documentGaps DocumentGap[]
+  source                       LegalSource                            @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  ente                         Ente?                                  @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  port                         Port?                                  @relation(fields: [portId], references: [id], onDelete: SetNull)
+  documentGaps                 DocumentGap[]
+  documentRequirementProposals FascicoloDocumentRequirementProposal[]
 
   @@unique([sourceId, ruleCode])
   @@index([status])
@@ -746,9 +1400,10 @@ model DocumentGap {
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
 
-  ente Ente?      @relation(fields: [enteId], references: [id], onDelete: SetNull)
-  port Port?      @relation(fields: [portId], references: [id], onDelete: SetNull)
-  rule LegalRule? @relation(fields: [ruleId], references: [id], onDelete: SetNull)
+  ente                         Ente?                                  @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  port                         Port?                                  @relation(fields: [portId], references: [id], onDelete: SetNull)
+  rule                         LegalRule?                             @relation(fields: [ruleId], references: [id], onDelete: SetNull)
+  documentRequirementProposals FascicoloDocumentRequirementProposal[]
 
   @@index([status])
   @@index([severity])
@@ -778,27 +1433,47 @@ model TenantMembership {
 }
 
 model User {
-  id                  String             @id @default(cuid())
-  nome                String
-  email               String             @unique
-  passwordHash        String?
-  ruolo               RuoloUser
-  attivo              Boolean            @default(true)
-  failedLoginAttempts Int                @default(0)
-  lockedUntil         DateTime?
-  lastFailedLoginAt   DateTime?
-  lastLoginAt         DateTime?
-  passwordChangedAt   DateTime?
-  mustChangePassword  Boolean            @default(false)
-  mfaEnabled          Boolean            @default(false)
-  mfaSecret           String?
-  mfaRecoveryCodes    Json?
-  mfaVerifiedAt       DateTime?
-  createdAt           DateTime           @default(now())
-  updatedAt           DateTime           @updatedAt
-  activityLogs        ActivityLog[]
-  documentiCaricati   Documento[]        @relation("DocumentoUploader")
-  tenantMemberships   TenantMembership[]
+  id                                            String                                       @id @default(cuid())
+  nome                                          String
+  email                                         String                                       @unique
+  passwordHash                                  String?
+  ruolo                                         RuoloUser
+  attivo                                        Boolean                                      @default(true)
+  failedLoginAttempts                           Int                                          @default(0)
+  lockedUntil                                   DateTime?
+  lastFailedLoginAt                             DateTime?
+  lastLoginAt                                   DateTime?
+  passwordChangedAt                             DateTime?
+  mustChangePassword                            Boolean                                      @default(false)
+  mfaEnabled                                    Boolean                                      @default(false)
+  mfaSecret                                     String?
+  mfaRecoveryCodes                              Json?
+  mfaVerifiedAt                                 DateTime?
+  createdAt                                     DateTime                                     @default(now())
+  updatedAt                                     DateTime                                     @updatedAt
+  activityLogs                                  ActivityLog[]
+  documentiCaricati                             Documento[]                                  @relation("DocumentoUploader")
+  tenantMemberships                             TenantMembership[]
+  decisioniProcedimentoRegistrate               DecisioneProcedimento[]                      @relation("DecisioneProcedimentoRegisteredBy")
+  procedimentoResponsabileAssignmentsRegistrate ProcedimentoResponsabileAssignment[]         @relation("ProcedimentoResponsabileAssignmentRegisteredBy")
+  fascicoloObservationsReviewed                 FascicoloObservation[]                       @relation("FascicoloObservationReviewedBy")
+  fascicoloSignalsReviewed                      FascicoloSignal[]                            @relation("FascicoloSignalReviewedBy")
+  checklistEvidenceCreated                      FascicoloChecklistEvidence[]                 @relation("ChecklistEvidenceCreatedBy")
+  checklistEvidenceReviewed                     FascicoloChecklistEvidence[]                 @relation("ChecklistEvidenceReviewedBy")
+  documentRequirementProposalsCreated           FascicoloDocumentRequirementProposal[]       @relation("DocumentRequirementProposalCreatedBy")
+  documentRequirementProposalsReviewed          FascicoloDocumentRequirementProposal[]       @relation("DocumentRequirementProposalReviewedBy")
+  documentRequirementEvidenceCreated            FascicoloDocumentRequirementEvidence[]       @relation("DocumentRequirementEvidenceCreatedBy")
+  documentRequirementEvidenceRevoked            FascicoloDocumentRequirementEvidence[]       @relation("DocumentRequirementEvidenceRevokedBy")
+  documentFileVersionsCreated                    DocumentFileVersion[]                         @relation("DocumentFileVersionCreatedBy")
+  neutralIntakesReceived                         NeutralIntake[]                               @relation("NeutralIntakeReceivedBy")
+  neutralIntakeDestinationsEstablished           NeutralIntakeDestination[]                   @relation("NeutralIntakeDestinationEstablishedBy")
+  legalSourceCandidateResolutionsReviewed        LegalSourceCandidateResolution[]             @relation("LegalSourceCandidateResolutionReviewedBy")
+  legalReferenceOfficialReconciliationsReviewed  LegalReferenceOfficialReconciliation[]        @relation("LegalReferenceOfficialReconciliationReviewedBy")
+  asyncJobsInitiated                             AsyncJob[]                                    @relation("AsyncJobInitiatedBy")
+  concessioneExpiryChangeCommands                ConcessioneExpiryChangeCommand[]              @relation("ConcessioneExpiryChangeActor")
+  documentRequirementEvidenceReviews            FascicoloDocumentRequirementEvidenceReview[] @relation("DocumentRequirementEvidenceReviewedBy")
+  aiFascicoloHumanReviewEvents                   AiFascicoloHumanReviewEvent[]
+  assignedResearchMissions                       ResearchMissionRecord[]                        @relation("ResearchMissionAssignedActor")
 
   @@index([ruolo])
   @@index([attivo])
@@ -832,6 +1507,7 @@ model Concessione {
   numeroAtto                 String
   dataRilascio               DateTime
   dataScadenza               DateTime
+  expiryGeneration           Int                        @default(1)
   normaRiferimento           NormaRiferimento
   tipologiaBene              TipologiaBene
   attivita                   AttivitaConcessione
@@ -845,6 +1521,7 @@ model Concessione {
   canoneAnnuo                Decimal?
   categoriaCanone            String?
   concessionVertical         ConcessionVertical         @default(PORTUALE_ADSP)
+  portActivityLegalType      PortActivityLegalType?
   concessionObjectType       ConcessionObjectType?
   awardingProcedureType      AwardingProcedureType      @default(ALTRO)
   removableWorksProfile      RemovableWorksProfile      @default(NON_RILEVATO)
@@ -861,19 +1538,23 @@ model Concessione {
   createdAt                  DateTime                   @default(now())
   updatedAt                  DateTime                   @updatedAt
 
-  concessionario  Concessionario              @relation(fields: [concessionarioId], references: [id], onDelete: Restrict)
-  ente            Ente?                       @relation(fields: [enteId], references: [id], onDelete: SetNull)
-  obblighi        ObbligoConcessorio[]
-  scadenze        Scadenza[]
-  criticita       Criticita[]
-  procedimenti    Procedimento[]
-  sopralluoghi    Sopralluogo[]
-  pagamenti       Pagamento[]
-  documenti       Documento[]
-  report          Report[]
-  legalFrameworks ConcessioneLegalFramework[]
-  normaImpatti    NormaImpatto[]
-  activityLogs    ActivityLog[]
+  concessionario        Concessionario              @relation(fields: [concessionarioId], references: [id], onDelete: Restrict)
+  ente                  Ente?                       @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  obblighi              ObbligoConcessorio[]
+  scadenze              Scadenza[]
+  criticita             Criticita[]
+  procedimenti          Procedimento[]
+  fascicoliIntake       FascicoloIntake[]
+  sopralluoghi          Sopralluogo[]
+  pagamenti             Pagamento[]
+  documenti             Documento[]
+  report                Report[]
+  decisioniProcedimento DecisioneProcedimento[]
+  legalFrameworks       ConcessioneLegalFramework[]
+  normaImpatti          NormaImpatto[]
+  activityLogs          ActivityLog[]
+  fascicoloSignals      FascicoloSignal[]
+  expiryChangeCommands  ConcessioneExpiryChangeCommand[]
 
   @@index([stato])
   @@index([dataScadenza])
@@ -981,6 +1662,7 @@ model Criticita {
   procedimenti Procedimento[]
   documenti    Documento[]
   normaImpatti NormaImpatto[]
+  fascicoloSignal FascicoloSignal?
 
   @@index([concessioneId])
   @@index([stato])
@@ -1000,8 +1682,13 @@ model Criticita {
 
 model Procedimento {
   id                               String                        @id @default(cuid())
-  concessioneId                    String
+  enteId                           String
+  concessioneId                    String?
   criticitaId                      String?
+  responsabileProcedimentoNome     String?
+  responsabileProcedimentoEmail    String?
+  unitaOrganizzativaResponsabile   String?
+  responsabileAssegnatoAt          DateTime?
   tipologia                        TipologiaProcedimento
   origineProcedimento              OrigineProcedimento           @default(UFFICIO)
   procedimentoUfficio              Boolean                       @default(true)
@@ -1040,11 +1727,35 @@ model Procedimento {
   createdAt                        DateTime                      @default(now())
   updatedAt                        DateTime                      @updatedAt
 
-  concessione  Concessione    @relation(fields: [concessioneId], references: [id], onDelete: Cascade)
-  criticita    Criticita?     @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
-  documenti    Documento[]
-  normaImpatti NormaImpatto[]
+  ente                         Ente                                   @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  concessione                  Concessione?                           @relation(fields: [concessioneId], references: [id], onDelete: Restrict)
+  fascicoloIntake              FascicoloIntake?
+  criticita                    Criticita?                             @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
+  decisioneProcedimento        DecisioneProcedimento?
+  responsabileAssignments      ProcedimentoResponsabileAssignment[]
+  documenti                    Documento[]
+  normaImpatti                 NormaImpatto[]
+  fascicoloObservations        FascicoloObservation[]
+  checklistEvidence            FascicoloChecklistEvidence[]
+  documentRequirementProposals FascicoloDocumentRequirementProposal[]
+  aiFascicoloTrustedReviewMaterials AiFascicoloTrustedReviewMaterial[]
+  automaticFascicoloReports         AutomaticFascicoloReport[]
+  aiFascicoloHumanReviewStates      AiFascicoloHumanReviewState[]
+  aiFascicoloHumanReviewEvents      AiFascicoloHumanReviewEvent[]
+  neutralIntakeDestinations         NeutralIntakeDestination[]
+  fascicoloSignals                  FascicoloSignal[]
+  fascicoloKnowledgeRevisions       FascicoloKnowledgeRevision[]
+  fascicoloKnowledgeItems           FascicoloKnowledgeItem[]
+  fascicoloKnowledgeEvidence        FascicoloKnowledgeEvidence[]
+  fascicoloKnowledgeRelations       FascicoloKnowledgeRelation[]
+  structuredFascicoloReports        StructuredFascicoloReportSnapshot[]
+  fascicoloOperationalProposals     FascicoloOperationalProposal[]
+  asyncJobs                         AsyncJob[]
+  documentExtractionAttempts        DocumentExtractionAttempt[]
+  runtimeBudgetPolicies             RuntimeBudgetPolicy[]
+  runtimeCostReservations           RuntimeCostReservation[]
 
+  @@index([enteId])
   @@index([concessioneId])
   @@index([criticitaId])
   @@index([stato])
@@ -1059,6 +1770,63 @@ model Procedimento {
   @@index([termineMemorieScadenza])
   @@index([contestazioneFormaleInviata])
   @@index([createdAt])
+  @@unique([id, enteId], map: "procedimento_extraction_scope_uq")
+}
+
+model FascicoloIntake {
+  id                         String             @id @default(cuid())
+  enteId                     String
+  concessioneId              String?
+  procedimentoId             String?            @unique
+  tipologiaConcessione       ConcessionVertical
+  oggettoFascicolo           String
+  denominazioneBreve         String?
+  concessionario             String?
+  enteConcedente             String?
+  autoritaCompetente         String?
+  numeroConcessione          String?
+  dataRilascio               DateTime?
+  decorrenza                 DateTime?
+  scadenza                   DateTime?
+  oggettoConcessione         String?
+  beneAreaServizio           String?
+  localita                   String?
+  soggettoAssistito          String?
+  controparteAmministrazione String?
+  contestoIniziale           String?
+  createdAt                  DateTime           @default(now())
+  updatedAt                  DateTime           @updatedAt
+
+  ente        Ente         @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  concessione Concessione? @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
+  procedimento Procedimento? @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  documenti   Documento[]
+
+  @@index([enteId])
+  @@index([concessioneId])
+  @@index([createdAt])
+}
+
+model ProcedimentoResponsabileAssignment {
+  id                 String    @id @default(cuid())
+  procedimentoId     String
+  responsabileNome   String
+  responsabileEmail  String?
+  unitaOrganizzativa String
+  decorrenza         DateTime
+  cessazione         DateTime?
+  motivoAssegnazione String?
+  comunicataAt       DateTime?
+  registeredByUserId String?
+  createdAt          DateTime  @default(now())
+
+  procedimento     Procedimento @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  registeredByUser User?        @relation("ProcedimentoResponsabileAssignmentRegisteredBy", fields: [registeredByUserId], references: [id], onDelete: SetNull)
+
+  @@index([procedimentoId])
+  @@index([decorrenza])
+  @@index([cessazione])
+  @@index([registeredByUserId])
 }
 
 model Sopralluogo {
@@ -1155,20 +1923,32 @@ model Documento {
   concessioneId             String?
   criticitaId               String?
   procedimentoId            String?
+  fascicoloIntakeId         String?
   sopralluogoId             String?
   pagamentoId               String?
   reportId                  String?
+  currentFileVersionId      String?             @unique
   createdAt                 DateTime            @default(now())
   updatedAt                 DateTime            @updatedAt
 
-  uploadedByUser User?         @relation("DocumentoUploader", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
-  ente           Ente?         @relation(fields: [enteId], references: [id], onDelete: SetNull)
-  concessione    Concessione?  @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
-  criticita      Criticita?    @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
-  procedimento   Procedimento? @relation(fields: [procedimentoId], references: [id], onDelete: SetNull)
-  sopralluogo    Sopralluogo?  @relation(fields: [sopralluogoId], references: [id], onDelete: SetNull)
-  pagamento      Pagamento?    @relation(fields: [pagamentoId], references: [id], onDelete: SetNull)
-  report         Report?       @relation(fields: [reportId], references: [id], onDelete: SetNull)
+  uploadedByUser        User?                                  @relation("DocumentoUploader", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
+  ente                  Ente?                                  @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  concessione           Concessione?                           @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
+  criticita             Criticita?                             @relation(fields: [criticitaId], references: [id], onDelete: SetNull)
+  procedimento          Procedimento?                          @relation(fields: [procedimentoId], references: [id], onDelete: SetNull)
+  fascicoloIntake       FascicoloIntake?                        @relation(fields: [fascicoloIntakeId], references: [id], onDelete: SetNull)
+  sopralluogo           Sopralluogo?                           @relation(fields: [sopralluogoId], references: [id], onDelete: SetNull)
+  pagamento             Pagamento?                             @relation(fields: [pagamentoId], references: [id], onDelete: SetNull)
+  report                Report?                                @relation(fields: [reportId], references: [id], onDelete: SetNull)
+  decisioniProcedimento DecisioneProcedimento[]
+  fascicoloObservations FascicoloObservation[]
+  checklistEvidence     FascicoloChecklistEvidence[]
+  requirementEvidence   FascicoloDocumentRequirementEvidence[]
+  fileVersions          DocumentFileVersion[] @relation("DocumentFileVersions")
+  currentFileVersion    DocumentFileVersion?  @relation("CurrentDocumentFileVersion", fields: [currentFileVersionId, id, enteId], references: [id, documentId, canonicalEnteId], onDelete: Restrict, onUpdate: NoAction, map: "Documento_currentFileVersion_fkey")
+  fascicoloKnowledgeEvidence FascicoloKnowledgeEvidence[]
+  extractionAttempts         DocumentExtractionAttempt[]
+  ocrRuns                    DocumentOcrRun[]
 
   @@index([uploadedByUserId])
   @@index([statoDocumento])
@@ -1176,6 +1956,7 @@ model Documento {
   @@index([concessioneId])
   @@index([criticitaId])
   @@index([procedimentoId])
+  @@index([fascicoloIntakeId])
   @@index([sopralluogoId])
   @@index([pagamentoId])
   @@index([reportId])
@@ -1186,6 +1967,1140 @@ model Documento {
   @@index([dataProtocollo])
   @@index([pecWarningMancataRicevuta])
   @@index([dataDocumento])
+  @@index([createdAt])
+  @@unique([currentFileVersionId, id, enteId])
+  @@unique([id, enteId, procedimentoId], map: "documento_extraction_scope_uq")
+}
+
+model DocumentFileVersion {
+  id               String   @id @default(cuid())
+  documentId       String
+  canonicalEnteId  String
+  storageProvider  String
+  storageKey       String
+  storageBucket    String?
+  mimeType         String
+  sizeBytes        Int
+  sha256           String   @db.Char(64)
+  createdByUserId  String?
+  createdByActorId String
+  createdByRole    String
+  createdAt        DateTime @default(now())
+
+  document     Documento  @relation("DocumentFileVersions", fields: [documentId], references: [id], onDelete: Restrict)
+  ente         Ente       @relation(fields: [canonicalEnteId], references: [id], onDelete: Restrict)
+  createdByUser User?     @relation("DocumentFileVersionCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  currentFor   Documento? @relation("CurrentDocumentFileVersion")
+  fascicoloKnowledgeEvidence FascicoloKnowledgeEvidence[]
+  extractionAttempts         DocumentExtractionAttempt[]
+  ocrRuns                    DocumentOcrRun[]
+
+  @@unique([documentId, sha256])
+  @@unique([storageProvider, storageKey])
+  @@unique([id, documentId, canonicalEnteId])
+  @@index([canonicalEnteId, documentId, createdAt])
+  @@index([createdByUserId])
+}
+
+model DocumentExtractionAttempt {
+  id                     String                    @id @default(cuid())
+  executionKey           String                    @unique(map: "document_extraction_execution_key_uq")
+  documentoId            String
+  documentFileVersionId  String
+  tenantId               String
+  procedimentoId         String
+  policyVersion          String
+  retryOfAttemptId       String?
+  retryAuthorizationId   String?
+  outcome                DocumentExtractionOutcome
+  sourceSha256           String                    @db.Char(64)
+  declaredMimeType       String
+  detectedMimeType       String?
+  sourceSizeBytes        Int
+  startedAt              DateTime
+  completedAt            DateTime
+  directExtractorName    String?
+  directExtractorVersion String?
+  ocrExtractorName       String?
+  ocrExtractorVersion    String?
+  rasterizerName         String?
+  rasterizerVersion      String?
+  failureCode            String?
+  failureMessage         String?
+  warnings               Json?
+  technicalMetadata      Json?
+  createdAt              DateTime                  @default(now())
+
+  documento           Documento                @relation(fields: [documentoId, tenantId, procedimentoId], references: [id, enteId, procedimentoId], onDelete: Restrict, onUpdate: NoAction)
+  documentFileVersion DocumentFileVersion      @relation(fields: [documentFileVersionId, documentoId, tenantId], references: [id, documentId, canonicalEnteId], onDelete: Restrict, onUpdate: NoAction)
+  tenant              Ente                     @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  procedimento        Procedimento             @relation(fields: [procedimentoId, tenantId], references: [id, enteId], onDelete: Restrict, onUpdate: NoAction)
+  pages               DocumentExtractionPage[]
+  retryOfAttempt      DocumentExtractionAttempt?  @relation("DocumentExtractionRetries", fields: [retryOfAttemptId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  retries             DocumentExtractionAttempt[] @relation("DocumentExtractionRetries")
+  ocrSourceRuns       DocumentOcrRun[]             @relation("DocumentOcrSourceAttempt")
+  ocrCompletedRun     DocumentOcrRun?              @relation("DocumentOcrCompletedAttempt")
+  fascicoloKnowledgeEvidence FascicoloKnowledgeEvidence[]
+
+  @@index([documentFileVersionId, policyVersion, outcome], map: "document_extraction_canonical_result_idx")
+  @@index([retryOfAttemptId], map: "document_extraction_retry_source_idx")
+  @@index([documentoId, documentFileVersionId, createdAt], map: "document_extraction_document_version_idx")
+  @@index([tenantId, procedimentoId, createdAt], map: "document_extraction_scope_idx")
+  @@index([outcome, createdAt], map: "document_extraction_outcome_idx")
+}
+
+model DocumentExtractionPage {
+  id                       String                   @id @default(cuid())
+  extractionAttemptId      String
+  pageNumber               Int
+  extractionMethod         DocumentExtractionMethod
+  text                     String
+  normalizedText           String
+  textSha256               String                   @db.Char(64)
+  normalizedCharacterCount Int
+  ocrConfidence            Float?
+  warnings                 Json?
+  technicalMetadata        Json?
+  createdAt                DateTime                 @default(now())
+
+  extractionAttempt DocumentExtractionAttempt @relation(fields: [extractionAttemptId], references: [id], onDelete: Restrict)
+
+  @@unique([extractionAttemptId, pageNumber])
+  @@index([textSha256])
+}
+
+model DocumentOcrRun {
+  id                    String               @id @default(cuid())
+  coordinatorJobId      String               @unique
+  documentoId           String
+  documentFileVersionId String
+  tenantId              String
+  procedimentoId        String
+  sourceAttemptId       String
+  authorizationRef      String
+  policyVersion         String
+  sourceSha256          String               @db.Char(64)
+  sourceSizeBytes       Int
+  declaredMimeType      String
+  pageCount             Int
+  batchSize             Int
+  status                DocumentOcrRunStatus @default(PLANNED)
+  completedPageCount    Int                  @default(0)
+  extractionAttemptId   String?              @unique
+  failureCode           String?
+  startedAt             DateTime?
+  completedAt           DateTime?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+
+  documento           Documento                   @relation(fields: [documentoId, tenantId, procedimentoId], references: [id, enteId, procedimentoId], onDelete: Restrict, onUpdate: NoAction)
+  documentFileVersion DocumentFileVersion         @relation(fields: [documentFileVersionId, documentoId, tenantId], references: [id, documentId, canonicalEnteId], onDelete: Restrict, onUpdate: NoAction)
+  sourceAttempt       DocumentExtractionAttempt   @relation("DocumentOcrSourceAttempt", fields: [sourceAttemptId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  extractionAttempt   DocumentExtractionAttempt?  @relation("DocumentOcrCompletedAttempt", fields: [extractionAttemptId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  pages               DocumentOcrPageCheckpoint[]
+
+  @@unique([documentFileVersionId, policyVersion], map: "document_ocr_run_version_policy_uq")
+  @@index([tenantId, procedimentoId, status, createdAt], map: "document_ocr_run_scope_status_idx")
+  @@index([sourceAttemptId], map: "document_ocr_run_source_attempt_idx")
+}
+
+model DocumentOcrPageCheckpoint {
+  id                       String                   @id @default(cuid())
+  runId                    String
+  pageNumber               Int
+  extractionMethod         DocumentExtractionMethod
+  text                     String
+  normalizedText           String
+  textSha256               String                   @db.Char(64)
+  normalizedCharacterCount Int
+  ocrConfidence            Float?
+  warnings                 Json?
+  directExtractorName      String?
+  directExtractorVersion   String?
+  ocrExtractorName         String?
+  ocrExtractorVersion      String?
+  rasterizerName           String?
+  rasterizerVersion        String?
+  completedAt              DateTime                 @default(now())
+
+  run DocumentOcrRun @relation(fields: [runId], references: [id], onDelete: Restrict)
+
+  @@unique([runId, pageNumber], map: "document_ocr_page_run_page_uq")
+  @@index([textSha256], map: "document_ocr_page_sha_idx")
+}
+
+model NeutralIntake {
+  id                String              @id @default(cuid())
+  idempotencyKey    String              @unique @db.Char(64)
+  storageProvider   String
+  storageBucket     String?
+  storageKey        String
+  sha256            String              @db.Char(64)
+  mimeType          String
+  sizeBytes         Int
+  originalName      String?
+  ingressChannel    String
+  originReference   String?
+  enteId             String?
+  receivedByUserId   String?
+  receivedByActorId  String
+  receivedByRole     String
+  receivedAt         DateTime            @default(now())
+  status             NeutralIntakeStatus @default(RECEIVED)
+  statusVersion      Int                 @default(0)
+
+  ente           Ente? @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  receivedByUser User? @relation("NeutralIntakeReceivedBy", fields: [receivedByUserId], references: [id], onDelete: Restrict)
+  destination            NeutralIntakeDestination?
+  extractionAttempts     NeutralIntakeExtractionAttempt[]
+  classificationAttempts NeutralIntakeClassificationAttempt[]
+  legalSourceCandidateAdmissions LegalSourceCandidateAdmission[]
+
+  @@index([storageProvider, storageKey])
+  @@index([sha256])
+  @@index([enteId, status, receivedAt])
+  @@index([receivedByUserId])
+}
+
+model NeutralIntakeExtractionAttempt {
+  id                     String                         @id @default(cuid())
+  neutralIntakeId        String
+  policyVersion          String
+  outcome                NeutralIntakeExtractionOutcome
+  artifactSha256         String                         @db.Char(64)
+  declaredMimeType       String
+  detectedMimeType       String?
+  artifactSizeBytes      Int
+  startedAt              DateTime
+  completedAt            DateTime
+  directExtractorName    String?
+  directExtractorVersion String?
+  ocrExtractorName       String?
+  ocrExtractorVersion    String?
+  rasterizerName         String?
+  rasterizerVersion      String?
+  failureCode            String?
+  failureMessage         String?
+  warnings               Json?
+  technicalMetadata      Json?
+  createdAt              DateTime                       @default(now())
+
+  neutralIntake          NeutralIntake                         @relation(fields: [neutralIntakeId], references: [id], onDelete: Restrict)
+  pages                  NeutralIntakeExtractionPage[]
+  classificationAttempts NeutralIntakeClassificationAttempt[]
+  legalReferenceMentions LegalReferenceMention[]
+  automaticFascicoloReports AutomaticFascicoloReport[]
+  automaticFascicoloReportDocuments AutomaticFascicoloReportDocument[]
+  fascicoloKnowledgeEvidence FascicoloKnowledgeEvidence[]
+
+  @@unique([id, neutralIntakeId])
+  @@index([neutralIntakeId, createdAt])
+  @@index([outcome, createdAt])
+}
+
+model NeutralIntakeExtractionPage {
+  id                       String                          @id @default(cuid())
+  extractionAttemptId      String
+  pageNumber               Int
+  extractionMethod         NeutralIntakeExtractionMethod
+  text                     String
+  normalizedText           String
+  textSha256               String                          @db.Char(64)
+  normalizedCharacterCount Int
+  ocrConfidence            Float?
+  warnings                 Json?
+  technicalMetadata        Json?
+  createdAt                DateTime                        @default(now())
+
+  extractionAttempt     NeutralIntakeExtractionAttempt @relation(fields: [extractionAttemptId], references: [id], onDelete: Restrict)
+  legalReferenceMentions LegalReferenceMention[]
+
+  @@unique([extractionAttemptId, pageNumber])
+  @@unique([id, extractionAttemptId])
+  @@index([textSha256])
+}
+
+model LegalReferenceMention {
+  id                  String             @id @default(cuid())
+  extractionAttemptId String
+  extractionPageId    String
+  discoveryVersion    String
+  kind                LegalReferenceKind
+  observedText        String             @db.VarChar(500)
+  normalizedKey       String             @db.VarChar(500)
+  authorityHint       String?            @db.VarChar(200)
+  actType             String?            @db.VarChar(100)
+  actNumber           String?            @db.VarChar(100)
+  year                Int?
+  article             String?            @db.VarChar(100)
+  subArticle          String?            @db.VarChar(50)
+  chamberSection      String?            @db.VarChar(100)
+  characterStart      Int
+  characterEnd        Int
+  discoveredAt        DateTime           @default(now())
+
+  extractionAttempt NeutralIntakeExtractionAttempt @relation(fields: [extractionAttemptId], references: [id], onDelete: Restrict)
+  extractionPage    NeutralIntakeExtractionPage    @relation(fields: [extractionPageId, extractionAttemptId], references: [id, extractionAttemptId], onDelete: Restrict, map: "LegalReferenceMention_extractionPage_binding_fkey")
+  matches           LegalReferenceMatch[]
+  officialLookups   LegalReferenceOfficialLookup[]
+  officialReconciliations LegalReferenceOfficialReconciliation[]
+
+  @@unique([extractionPageId, discoveryVersion, characterStart, characterEnd, normalizedKey], map: "LegalReferenceMention_occurrence_key")
+  @@index([extractionAttemptId, discoveryVersion])
+  @@index([kind, normalizedKey])
+}
+
+model LegalReferenceMatch {
+  id               String                    @id @default(cuid())
+  mentionId        String
+  matchingVersion  String
+  status           LegalReferenceMatchStatus
+  reason           LegalReferenceMatchReason
+  legalSourceId    String?
+  candidateCount   Int
+  matchedAt        DateTime                  @default(now())
+
+  mention     LegalReferenceMention @relation(fields: [mentionId], references: [id], onDelete: Restrict)
+  legalSource LegalSource?          @relation(fields: [legalSourceId], references: [id], onDelete: Restrict)
+
+  @@unique([mentionId, matchingVersion])
+  @@index([legalSourceId])
+  @@index([status, matchedAt])
+}
+
+model LegalReferenceOfficialLookup {
+  id            String                             @id @default(cuid())
+  mentionId     String
+  provider      String                             @db.VarChar(100)
+  lookupVersion String                             @db.VarChar(100)
+  status        LegalReferenceOfficialLookupStatus
+  resultCount   Int
+  completedAt   DateTime                           @default(now())
+
+  mention LegalReferenceMention       @relation(fields: [mentionId], references: [id], onDelete: Restrict)
+  hits    LegalReferenceOfficialHit[]
+
+  @@unique([mentionId, provider, lookupVersion], map: "LegalReferenceOfficialLookup_mentionId_provider_lookupVersion_k")
+  @@index([status, completedAt])
+}
+
+model LegalReferenceOfficialHit {
+  id                    String    @id @default(cuid())
+  lookupId              String
+  documentKind          String    @db.VarChar(20)
+  providerSourceId      String    @db.VarChar(200)
+  providerRecordId      String    @db.VarChar(200)
+  denominazioneAtto     String?   @db.VarChar(200)
+  numeroProvvedimento   String?   @db.VarChar(100)
+  annoProvvedimento     Int?
+  dataEmanazione        DateTime?
+  descrizioneAtto       String?   @db.VarChar(500)
+  titoloAtto            String?   @db.VarChar(500)
+  numeroGU              String?   @db.VarChar(100)
+  dataGU                DateTime?
+  authority             String?   @db.VarChar(200)
+  court                 String?   @db.VarChar(200)
+  decisionNumber        String?   @db.VarChar(100)
+  decisionYear          Int?
+  decisionDate          DateTime?
+  chamberSection        String?   @db.VarChar(100)
+  decisionType          String?   @db.VarChar(100)
+  ecli                  String?   @db.VarChar(200)
+  publicationDate       DateTime?
+  subject               String?   @db.VarChar(500)
+  outcome               String?   @db.VarChar(500)
+  sourceUrl             String?   @db.VarChar(2000)
+
+  lookup                  LegalReferenceOfficialLookup                 @relation(fields: [lookupId], references: [id], onDelete: Restrict)
+  reconciliationEvidence LegalReferenceOfficialReconciliationEvidence[]
+
+  @@unique([lookupId, providerSourceId, providerRecordId], map: "LegalReferenceOfficialHit_lookupId_providerSourceId_providerRec")
+  @@index([providerRecordId])
+}
+
+model LegalReferenceOfficialReconciliation {
+  id                    String                                    @id @default(cuid())
+  mentionId             String
+  kind                  LegalReferenceKind
+  jurisdiction          String?                                   @db.VarChar(100)
+  courtFamily           String?                                   @db.VarChar(200)
+  courtLocality         String?                                   @db.VarChar(200)
+  courtBranch           String?                                   @db.VarChar(100)
+  decisionType          String?                                   @db.VarChar(100)
+  decisionNumber        String?                                   @db.VarChar(100)
+  decisionYear          Int?
+  section               String?                                   @db.VarChar(100)
+  ecli                  String?                                   @db.VarChar(200)
+  decisionDate          DateTime?
+  publicationDate       DateTime?
+  identityVersion       String                                    @db.VarChar(100)
+  normalizedIdentity    Json
+  identityFingerprint   String?                                   @db.Char(64)
+  policyVersion         String                                    @db.VarChar(100)
+  state                 LegalReferenceOfficialReconciliationState
+  revision              Int                                       @default(0)
+  legalSourceId         String?
+  reviewedAt            DateTime?
+  reviewedByUserId      String?
+  reviewedByActorId     String?                                   @db.VarChar(256)
+  reviewedByEmail       String?                                   @db.VarChar(320)
+  reviewedByRole        String?                                   @db.VarChar(100)
+  reviewNote            String?                                   @db.VarChar(2000)
+  createdAt             DateTime                                  @default(now())
+  updatedAt             DateTime                                  @updatedAt
+
+  legalSource   LegalSource?                                      @relation(fields: [legalSourceId], references: [id], onDelete: Restrict)
+  mention       LegalReferenceMention                             @relation(fields: [mentionId], references: [id], onDelete: Restrict)
+  reviewedByUser User?                                             @relation("LegalReferenceOfficialReconciliationReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+  evidence      LegalReferenceOfficialReconciliationEvidence[]
+
+  @@unique([mentionId, identityVersion], map: "LegalReferenceOfficialReconciliation_mentionId_identityVersion_")
+  @@unique([id, identityVersion])
+  @@index([identityVersion, identityFingerprint], map: "LegalReferenceOfficialReconciliation_identityVersion_identityFi")
+  @@index([state, updatedAt])
+  @@index([legalSourceId])
+  @@index([reviewedByUserId])
+}
+
+model LegalReferenceOfficialReconciliationEvidence {
+  id                     String                                         @id @default(cuid())
+  reconciliationId       String
+  officialHitId          String
+  identityVersion        String                                         @db.VarChar(100)
+  evidenceFingerprint    String                                         @db.Char(64)
+  classification         LegalReferenceOfficialEvidenceClassification
+  disposition            LegalReferenceOfficialEvidenceDisposition
+  observedAt             DateTime
+  createdAt              DateTime                                       @default(now())
+
+  reconciliation LegalReferenceOfficialReconciliation @relation(fields: [reconciliationId, identityVersion], references: [id, identityVersion], onDelete: Restrict, map: "LegalReferenceOfficialReconciliationEvidence_reconciliationId_f")
+  officialHit    LegalReferenceOfficialHit              @relation(fields: [officialHitId], references: [id], onDelete: Restrict)
+
+  @@unique([officialHitId, identityVersion], map: "LegalReferenceOfficialReconciliationEvidence_officialHitId_iden")
+  @@index([reconciliationId, createdAt], map: "LegalReferenceOfficialReconciliationEvidence_reconciliationId_c")
+  @@index([classification, disposition], map: "LegalReferenceOfficialReconciliationEvidence_classification_dis")
+}
+
+model NeutralIntakeClassificationAttempt {
+  id                  String                                @id @default(cuid())
+  neutralIntakeId     String
+  extractionAttemptId String
+  idempotencyKey      String                                @unique @db.Char(64)
+  classifierVersion   String
+  evidenceHash        String                                @db.Char(64)
+  outcome             NeutralIntakeClassificationOutcome
+  confidence          NeutralIntakeClassificationConfidence
+  reasonCodes         Json
+  evidenceMarkers     Json
+  reviewRequired      Boolean
+  classifiedAt        DateTime                              @default(now())
+
+  neutralIntake     NeutralIntake                  @relation(fields: [neutralIntakeId], references: [id], onDelete: Restrict)
+  extractionAttempt NeutralIntakeExtractionAttempt @relation(fields: [extractionAttemptId, neutralIntakeId], references: [id, neutralIntakeId], onDelete: Restrict, map: "NeutralIntakeClassificationAttempt_extractionAttemptId_fkey")
+  legalSourceCandidateAdmissions LegalSourceCandidateAdmission[]
+
+  @@unique([neutralIntakeId, evidenceHash, classifierVersion], map: "NeutralIntakeClassificationAttempt_neutralIntakeId_evidenceHash")
+  @@unique([id, neutralIntakeId, extractionAttemptId, evidenceHash, classifierVersion, outcome], map: "NeutralIntakeClassificationAttempt_handoff_binding_key")
+  @@index([neutralIntakeId, classifiedAt], map: "NeutralIntakeClassificationAttempt_neutralIntakeId_classifiedAt")
+  @@index([extractionAttemptId])
+  @@index([outcome, reviewRequired])
+}
+
+model NeutralIntakeDestination {
+  neutralIntakeId       String   @id
+  procedimentoId        String
+  contractVersion       String
+  authoritySource       String
+  establishedByUserId   String?
+  establishedByActorId  String
+  establishedByRole     String
+  establishedAt         DateTime @default(now())
+
+  neutralIntake     NeutralIntake @relation(fields: [neutralIntakeId], references: [id], onDelete: Restrict)
+  procedimento      Procedimento  @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  establishedByUser User?         @relation("NeutralIntakeDestinationEstablishedBy", fields: [establishedByUserId], references: [id], onDelete: Restrict)
+
+  @@index([procedimentoId])
+  @@index([establishedByUserId])
+}
+
+model LegalSourceCandidateAdmission {
+  id                      String   @id @default(cuid())
+  enteId                  String?
+  neutralIntakeId         String
+  classificationAttemptId String
+  extractionAttemptId     String
+  evidenceHash            String   @db.Char(64)
+  classifierVersion       String
+  classificationOutcome   NeutralIntakeClassificationOutcome
+  contractVersion         String
+  actorId                 String
+  actorEmail              String?
+  actorRole               String
+  purpose                 String
+  admittedAt              DateTime @default(now())
+
+  ente                  Ente?                               @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  neutralIntake         NeutralIntake                       @relation(fields: [neutralIntakeId], references: [id], onDelete: Restrict)
+  classificationAttempt NeutralIntakeClassificationAttempt @relation(fields: [classificationAttemptId, neutralIntakeId, extractionAttemptId, evidenceHash, classifierVersion, classificationOutcome], references: [id, neutralIntakeId, extractionAttemptId, evidenceHash, classifierVersion, outcome], onDelete: Restrict, map: "LegalSourceCandidateAdmission_classification_binding_fkey")
+  resolution            LegalSourceCandidateResolution?
+
+  @@unique([neutralIntakeId, classificationAttemptId, evidenceHash, contractVersion], map: "LegalSourceCandidateAdmission_identity_key")
+  @@index([enteId, admittedAt])
+  @@index([classificationAttemptId])
+}
+
+model LegalSourceCandidateResolution {
+  id                  String                                @id @default(cuid())
+  admissionId         String                                @unique
+  outcome             LegalSourceCandidateResolutionOutcome
+  legalSourceId       String?
+  reviewedByUserId    String?
+  reviewedByActorId   String
+  reviewedByEmail     String
+  reviewedByRole      String
+  resolvedAt          DateTime                              @default(now())
+  reviewNote          String?                               @db.VarChar(2000)
+
+  admission       LegalSourceCandidateAdmission @relation(fields: [admissionId], references: [id], onDelete: Restrict)
+  legalSource     LegalSource?                  @relation(fields: [legalSourceId], references: [id], onDelete: Restrict)
+  reviewedByUser User?                         @relation("LegalSourceCandidateResolutionReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([legalSourceId])
+  @@index([reviewedByUserId])
+  @@index([outcome, resolvedAt])
+}
+
+model AsyncJob {
+  id                      String                @id @default(cuid())
+  idempotencyKey          String                @unique @db.Char(64)
+  requestFingerprint      String                @db.Char(64)
+  operation               String
+  logicalOperationId      String
+  purpose                 String
+  correlationId           String
+  policyDecisionRef       String?
+  inputReference          Json
+  admissionType           AsyncJobAdmissionType
+  tenantId                String?
+  procedimentoId          String?
+  dependsOnJobId          String?
+  initiatingUserId        String?
+  actorId                 String
+  actorEmail              String?
+  actorRole               String
+  status                  AsyncJobStatus        @default(QUEUED)
+  priority                AsyncJobPriority      @default(NORMAL)
+  stateVersion            Int                   @default(0)
+  maxAttempts             Int
+  attemptCount            Int                   @default(0)
+  availableAt             DateTime
+  leaseOwner              String?
+  leaseToken              String?               @db.Char(64)
+  leaseExpiresAt          DateTime?
+  lastHeartbeatAt         DateTime?
+  cancellationRequestedAt DateTime?
+  startedAt               DateTime?
+  completedAt             DateTime?
+  failureCategory         String?
+  failureCode             String?
+  blockedReason           String?
+  resultReference         Json?
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+
+  tenant           Ente? @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  procedimento    Procedimento? @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  dependsOnJob    AsyncJob? @relation("AsyncJobDependency", fields: [dependsOnJobId], references: [id], onDelete: Restrict)
+  dependentJobs   AsyncJob[] @relation("AsyncJobDependency")
+  initiatingUser   User? @relation("AsyncJobInitiatedBy", fields: [initiatingUserId], references: [id], onDelete: Restrict)
+  costReservations RuntimeCostReservation[]
+
+  @@index([status, availableAt, createdAt])
+  @@index([status, leaseExpiresAt])
+  @@index([tenantId, createdAt])
+  @@index([procedimentoId, createdAt])
+  @@index([dependsOnJobId])
+  @@index([status, priority, availableAt, createdAt])
+  @@index([initiatingUserId])
+  @@index([correlationId])
+  @@index([operation, createdAt])
+}
+
+model RuntimeWorkerHeartbeat {
+  id                       String              @id @default(cuid())
+  workerId                 String              @unique @db.VarChar(256)
+  status                   RuntimeWorkerStatus @default(RUNNING)
+  concurrency              Int
+  providerExecutionEnabled Boolean             @default(false)
+  startedAt                DateTime            @default(now())
+  lastSeenAt               DateTime            @default(now())
+  stoppedAt                DateTime?
+  metadata                 Json?
+
+  @@index([status, lastSeenAt])
+}
+
+model RuntimeBudgetPolicy {
+  id               String             @id @default(cuid())
+  scope            RuntimeBudgetScope
+  tenantId         String?
+  procedimentoId   String?
+  currency         String             @default("EUR") @db.VarChar(3)
+  hardCapAmount    Decimal            @db.Decimal(18, 6)
+  windowSeconds    Int
+  enabled          Boolean            @default(true)
+  effectiveFrom    DateTime           @default(now())
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  tenant           Ente?              @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  procedimento     Procedimento?       @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+
+  @@unique([scope, tenantId, procedimentoId, currency, windowSeconds])
+  @@index([enabled, scope, effectiveFrom])
+}
+
+model RuntimeCostReservation {
+  id                String                       @id @default(cuid())
+  tenantId          String?
+  procedimentoId    String?
+  jobId             String?
+  provider          String                       @db.VarChar(128)
+  operationType     String                       @db.VarChar(256)
+  currency          String                       @default("EUR") @db.VarChar(3)
+  estimatedAmount   Decimal                      @db.Decimal(18, 6)
+  reservedAmount    Decimal                      @db.Decimal(18, 6)
+  actualAmount      Decimal?                     @db.Decimal(18, 6)
+  releasedAmount    Decimal?                     @db.Decimal(18, 6)
+  status            RuntimeCostReservationStatus @default(RESERVED)
+  idempotencyKey    String                       @unique @db.Char(64)
+  expiresAt         DateTime
+  settledAt         DateTime?
+  releasedAt        DateTime?
+  createdAt         DateTime                     @default(now())
+  updatedAt         DateTime                     @updatedAt
+
+  tenant            Ente?                        @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  procedimento      Procedimento?                 @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  job               AsyncJob?                     @relation(fields: [jobId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, createdAt])
+  @@index([procedimentoId, createdAt])
+  @@index([jobId])
+  @@index([status, expiresAt])
+  @@index([currency, createdAt])
+}
+
+model FascicoloSignal {
+  id                    String                           @id @default(cuid())
+  enteId                String
+  concessioneId         String
+  procedimentoId        String
+  kind                  FascicoloSignalKind
+  sourceOperation       String
+  ruleCode              String
+  ruleVersion           Int
+  subjectType           String
+  subjectId             String
+  semanticKey           String                           @db.Char(64)
+  generationFingerprint String                           @db.Char(64)
+  expiryGeneration      Int?
+  identityKey           String                           @unique @db.Char(64)
+  currentThreshold      String
+  attentionLevel        FascicoloSignalAttentionLevel
+  factsSnapshot         Json
+  status                FascicoloSignalStatus            @default(OPEN)
+  humanDisposition      FascicoloSignalHumanDisposition  @default(UNREVIEWED)
+  dispositionThreshold  String?
+  reviewedAt            DateTime?
+  reviewedByUserId      String?
+  reviewedByActorId     String?
+  reviewedByEmail       String?
+  reviewedByRole        String?
+  reviewNote            String?
+  criticitaId           String?                          @unique
+  detectedAt            DateTime
+  lastObservedAt        DateTime
+  supersededAt          DateTime?
+  createdAt             DateTime                         @default(now())
+  updatedAt             DateTime                         @updatedAt
+
+  ente           Ente          @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  concessione    Concessione   @relation(fields: [concessioneId], references: [id], onDelete: Restrict)
+  procedimento  Procedimento  @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  reviewedByUser User?         @relation("FascicoloSignalReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+  criticita      Criticita?    @relation(fields: [criticitaId], references: [id], onDelete: Restrict)
+
+  @@index([enteId, status])
+  @@index([enteId, status, humanDisposition])
+  @@index([procedimentoId, status])
+  @@index([procedimentoId, status, humanDisposition])
+  @@index([concessioneId, status])
+  @@index([semanticKey, status])
+  @@index([attentionLevel])
+}
+
+model ConcessioneExpiryChangeCommand {
+  id                       String   @id @default(cuid())
+  requestId                String   @unique @db.VarChar(128)
+  payloadFingerprint       String   @db.Char(64)
+  concessioneId            String
+  enteId                    String
+  expectedGeneration       Int
+  resultingGeneration      Int
+  previousDataScadenza     DateTime
+  newDataScadenza          DateTime
+  motivation               String   @db.VarChar(2000)
+  reference                String?  @db.VarChar(1000)
+  actorUserId              String?
+  actorId                  String   @db.VarChar(256)
+  actorEmail               String?
+  actorRole                String   @db.VarChar(64)
+  createdAt                DateTime @default(now())
+
+  concessione Concessione @relation(fields: [concessioneId], references: [id], onDelete: Restrict)
+  ente         Ente        @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  actorUser    User?       @relation("ConcessioneExpiryChangeActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@unique([concessioneId, resultingGeneration])
+  @@index([enteId, createdAt])
+  @@index([concessioneId, createdAt])
+  @@index([actorUserId])
+}
+
+model ResearchMissionRecord {
+  id                  String                @id @db.VarChar(96)
+  tenantId            String?
+  assignedActorId     String?
+  contractVersion     String                @db.VarChar(64)
+  caseId              String                @db.VarChar(256)
+  fascicoloReference  String?               @db.VarChar(256)
+  referenceDate       DateTime
+  mode                String                @db.VarChar(64)
+  payload             Json
+  payloadFingerprint  String                @unique(map: "research_mission_payload_uq") @db.Char(64)
+  missionFingerprint  String?               @db.Char(64)
+  knowledgeRevisionId String?
+  firstKnowledgeRevisionId String?
+  legalIssueSemanticKey String?             @db.Char(64)
+  researchQuestionSemanticKey String?       @db.Char(64)
+  referenceDateBasis  Json?
+  lifecycleStatus     ResearchMissionLifecycleStatus @default(CURRENT)
+  status              ResearchMissionStatus @default(PENDING)
+  stateVersion        Int                   @default(0)
+  claimantId          String?               @db.VarChar(256)
+  claimToken          String?               @db.Char(64)
+  claimExpiresAt      DateTime?
+  activeExecutionId   String?               @unique(map: "research_mission_active_exec_uq") @db.VarChar(256)
+  completedAt         DateTime?
+  deferredAt          DateTime?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+
+  tenant              Ente?                      @relation(fields: [tenantId], references: [id], onDelete: Restrict, map: "research_mission_tenant_fk")
+  assignedActor       User?                      @relation("ResearchMissionAssignedActor", fields: [assignedActorId], references: [id], onDelete: Restrict, map: "research_mission_assigned_actor_fk")
+  executionAttempts   ResearchExecutionAttempt[]
+  automaticReportLinks AutomaticFascicoloReportMission[]
+  assistedVerifications ResearchAssistedVerificationRecord[]
+  questionResults     ResearchQuestionResultRecord[]
+  sourceAssessments   ResearchSourceAssessmentRecord[]
+  primaryAdverseRequirements ResearchAdverseRequirement[] @relation("PrimaryAdverseMission")
+  adverseMissionRequirement ResearchAdverseRequirement? @relation("AdverseMission")
+  knowledgeRevision  FascicoloKnowledgeRevision? @relation("ResearchMissionCurrentKnowledgeRevision", fields: [knowledgeRevisionId], references: [id], onDelete: Restrict)
+  firstKnowledgeRevision FascicoloKnowledgeRevision? @relation("ResearchMissionFirstKnowledgeRevision", fields: [firstKnowledgeRevisionId], references: [id], onDelete: Restrict)
+
+  @@unique([id, tenantId], map: "research_mission_tenant_uq")
+  @@index([tenantId, assignedActorId, status, createdAt], map: "research_mission_actor_status_idx")
+  @@index([tenantId, status, createdAt], map: "research_mission_tenant_status_idx")
+  @@index([status, claimExpiresAt, createdAt], map: "research_mission_claim_queue_idx")
+  @@index([caseId, createdAt], map: "research_mission_case_idx")
+  @@unique([tenantId, caseId, missionFingerprint], map: "research_mission_knowledge_fingerprint_uq")
+  @@index([tenantId, caseId, lifecycleStatus], map: "research_mission_lifecycle_idx")
+  @@index([knowledgeRevisionId], map: "research_mission_knowledge_revision_idx")
+  @@index([firstKnowledgeRevisionId], map: "research_mission_first_knowledge_revision_idx")
+  @@index([tenantId, caseId, researchQuestionSemanticKey], map: "research_mission_question_idx")
+}
+
+model ResearchExecutionAttempt {
+  id                   String                  @id @db.VarChar(256)
+  missionId            String                  @db.VarChar(96)
+  executorKind         String                  @db.VarChar(64)
+  claimantId           String                  @db.VarChar(256)
+  claimToken           String                  @db.Char(64)
+  startedAt            DateTime
+  leaseExpiresAt       DateTime
+  completedAt          DateTime?
+  completionState      ResearchExecutionState?
+  totalCalls           Int                     @default(0)
+  moonlitCalls         Int                     @default(0)
+  simpliciterCalls     Int                     @default(0)
+  legalDataHunterCalls Int                     @default(0)
+  errorCode            String?                 @db.VarChar(128)
+  deferReason          String?                 @db.VarChar(512)
+  finalBundleId        String?                 @db.VarChar(96)
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+
+  mission              ResearchMissionRecord          @relation(fields: [missionId], references: [id], onDelete: Restrict, map: "research_attempt_mission_fk")
+  evidenceBundles      ResearchEvidenceBundleRecord[]
+
+  @@unique([id, missionId], map: "research_attempt_mission_uq")
+  @@index([missionId, startedAt], map: "research_attempt_mission_idx")
+  @@index([claimantId, startedAt], map: "research_attempt_claimant_idx")
+  @@index([finalBundleId], map: "research_attempt_final_bundle_idx")
+}
+
+model ResearchEvidenceBundleRecord {
+  id                   String                  @id @db.VarChar(96)
+  missionId            String                  @db.VarChar(96)
+  executionId          String                  @db.VarChar(256)
+  contractVersion      String                  @db.VarChar(64)
+  fingerprint          String                  @unique(map: "research_bundle_fingerprint_uq") @db.Char(64)
+  payload              Json
+  completionState      ResearchCompletionState
+  totalCalls           Int
+  moonlitCalls         Int
+  simpliciterCalls     Int
+  legalDataHunterCalls Int
+  submittedByActorId   String                  @db.VarChar(256)
+  createdAt            DateTime                @default(now())
+
+  executionAttempt ResearchExecutionAttempt @relation(fields: [executionId, missionId], references: [id, missionId], onDelete: Restrict, map: "research_bundle_attempt_fk")
+  questionResults ResearchQuestionResultRecord[]
+
+  @@unique([id, missionId], map: "research_bundle_mission_uq")
+  @@index([missionId, createdAt], map: "research_bundle_mission_idx")
+  @@index([executionId, createdAt], map: "research_bundle_execution_idx")
+}
+
+model ResearchQuestionResultRecord {
+  id                          String                              @id @db.VarChar(96)
+  tenantId                    String
+  caseId                      String                              @db.VarChar(256)
+  missionId                   String                              @db.VarChar(96)
+  bundleId                    String                              @db.VarChar(96)
+  candidateId                 String                              @db.VarChar(256)
+  legalIssueSemanticKey       String                              @db.Char(64)
+  researchQuestionSemanticKey String                              @db.Char(64)
+  missionFingerprint          String                              @db.Char(64)
+  providerId                  String?                             @db.VarChar(128)
+  toolId                      String                              @db.VarChar(128)
+  candidateSnapshot           Json
+  supportDirection            ResearchResultSupportDirection     @default(UNASSESSED)
+  classificationSource        ResearchResultClassificationSource @default(PROVIDER_OUTPUT)
+  classificationConfidence    Float?
+  classificationRationale     String?                             @db.VarChar(2000)
+  classificationReviewStatus  ResearchResultReviewStatus         @default(AI_PROPOSED)
+  coverageElementKeys         String[]                            @default([])
+  unresolvedAspectKeys        String[]                            @default([])
+  createdAt                   DateTime                            @default(now())
+  updatedAt                   DateTime                            @updatedAt
+
+  mission ResearchMissionRecord         @relation(fields: [missionId, tenantId], references: [id, tenantId], onDelete: Restrict, map: "research_question_result_mission_tenant_fk")
+  bundle  ResearchEvidenceBundleRecord @relation(fields: [bundleId, missionId], references: [id, missionId], onDelete: Restrict, map: "research_question_result_bundle_mission_fk")
+  sourceAssessments ResearchSourceAssessmentRecord[]
+
+  @@unique([tenantId, missionId, candidateId], map: "research_question_result_identity_uq")
+  @@index([tenantId, caseId, researchQuestionSemanticKey], map: "research_question_result_question_idx")
+  @@index([missionId, createdAt], map: "research_question_result_mission_idx")
+  @@index([bundleId], map: "research_question_result_bundle_idx")
+}
+
+model ResearchSourceAssessmentRecord {
+  id                          String                       @id @db.VarChar(96)
+  tenantId                    String
+  caseId                      String                       @db.VarChar(256)
+  resultId                    String                       @db.VarChar(96)
+  missionId                   String                       @db.VarChar(96)
+  researchQuestionSemanticKey String                       @db.Char(64)
+  missionFingerprint          String                       @db.Char(64)
+  referenceDate               DateTime
+  referenceDateBasis          Json
+  verificationVersion         String                       @db.VarChar(64)
+  chainFingerprint            String                       @unique @db.Char(64)
+  sourceFamilyId              String?
+  sourceVersionId             String?
+  acquisitionId               String?
+  temporalAssessmentId        String?
+  sourceIdentityKey           String?                      @db.VarChar(512)
+  contentSha256               String?                      @db.Char(64)
+  retrievalState              ResearchSourceRetrievalState @default(RETRIEVAL_REQUIRED)
+  textState                   ResearchSourceTextState      @default(METADATA_ONLY)
+  identityState               ResearchSourceIdentityState  @default(NOT_ASSESSED)
+  contentState                ResearchSourceContentState   @default(NOT_ASSESSED)
+  temporalState               ResearchSourceTemporalState  @default(NOT_ASSESSED)
+  adverseState                ResearchSourceAdverseState   @default(NOT_REQUIRED)
+  officiality                 ResearchSourceOfficiality    @default(UNKNOWN)
+  citationAnchors             Json
+  blockingReasons             String[]                     @default([])
+  manualReviewRequired        Boolean                      @default(false)
+  manualReviewReason          String?                      @db.VarChar(1000)
+  usable                      Boolean                      @default(false)
+  isCurrent                   Boolean                      @default(true)
+  createdAt                   DateTime                     @default(now())
+
+  result             ResearchQuestionResultRecord       @relation(fields: [resultId], references: [id], onDelete: Restrict)
+  mission            ResearchMissionRecord              @relation(fields: [missionId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  sourceFamily       LegalSource?                       @relation(fields: [sourceFamilyId], references: [id], onDelete: Restrict)
+  sourceVersion      LegalSourceVersion?                @relation(fields: [sourceVersionId], references: [id], onDelete: Restrict)
+  acquisition        LegalSourceAcquisition?            @relation(fields: [acquisitionId], references: [id], onDelete: Restrict)
+  temporalAssessment LegalSourceTemporalAssessment?     @relation(fields: [temporalAssessmentId], references: [id], onDelete: Restrict)
+
+  @@unique([resultId, chainFingerprint], map: "research_source_assessment_identity_uq")
+  @@index([tenantId, caseId, researchQuestionSemanticKey, isCurrent], map: "research_source_assessment_current_question_idx")
+  @@index([missionId, isCurrent], map: "research_source_assessment_current_mission_idx")
+  @@index([sourceFamilyId, sourceVersionId], map: "research_source_assessment_source_idx")
+}
+
+model ResearchAdverseRequirement {
+  id                          String                           @id @db.VarChar(96)
+  tenantId                    String
+  caseId                      String                           @db.VarChar(256)
+  researchQuestionSemanticKey String                           @db.Char(64)
+  primaryMissionId            String                           @db.VarChar(96)
+  adverseMissionId            String?                          @unique @db.VarChar(96)
+  primaryMissionFingerprint   String                           @db.Char(64)
+  policyVersion               String                           @db.VarChar(64)
+  requirementFingerprint      String                           @unique @db.Char(64)
+  rationale                   String                           @db.VarChar(2000)
+  status                      ResearchAdverseRequirementStatus @default(REQUIRED)
+  createdAt                   DateTime                         @default(now())
+  completedAt                 DateTime?
+
+  primaryMission ResearchMissionRecord  @relation("PrimaryAdverseMission", fields: [primaryMissionId], references: [id], onDelete: Restrict)
+  adverseMission ResearchMissionRecord? @relation("AdverseMission", fields: [adverseMissionId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, caseId, researchQuestionSemanticKey, status], map: "research_adverse_requirement_question_idx")
+  @@index([primaryMissionId], map: "research_adverse_requirement_primary_idx")
+}
+
+model ResearchAssistedVerificationRecord {
+  id                String   @id @db.VarChar(96)
+  missionId         String   @db.VarChar(96)
+  tenantId          String
+  contractVersion   String   @db.VarChar(64)
+  fingerprint       String   @unique(map: "research_assisted_verification_fingerprint_uq") @db.Char(64)
+  payload           Json
+  recordedByActorId String   @db.VarChar(256)
+  createdAt         DateTime @default(now())
+
+  mission ResearchMissionRecord @relation(fields: [missionId, tenantId], references: [id, tenantId], onDelete: Restrict, map: "research_assisted_verification_mission_tenant_fk")
+  tenant  Ente?                 @relation(fields: [tenantId], references: [id], onDelete: Restrict, map: "research_assisted_verification_tenant_fk")
+
+  @@index([tenantId, missionId, createdAt], map: "research_assisted_verification_tenant_mission_idx")
+}
+
+model FascicoloObservation {
+  id                String                     @id @default(cuid())
+  enteId            String
+  procedimentoId    String
+  documentoId       String
+  kind              FascicoloObservationKind
+  ruleCode          String
+  ruleVersion       Int
+  factsSnapshot     Json
+  status            FascicoloObservationStatus @default(PROPOSTO)
+  detectedAt        DateTime                   @default(now())
+  reviewedAt        DateTime?
+  reviewedByUserId  String?
+  reviewedByActorId String?
+  reviewedByEmail   String?
+  reviewedByRole    String?
+  reviewNote        String?
+  createdAt         DateTime                   @default(now())
+  updatedAt         DateTime                   @updatedAt
+
+  ente           Ente         @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  procedimento   Procedimento @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  documento      Documento    @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+  reviewedByUser User?        @relation("FascicoloObservationReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([enteId, procedimentoId, documentoId, ruleCode, ruleVersion], map: "FascicoloObservation_enteId_procedimentoId_documentoId_ruleCode")
+  @@index([enteId, status])
+  @@index([procedimentoId, status])
+  @@index([documentoId])
+  @@index([reviewedByUserId])
+  @@index([detectedAt])
+}
+
+model FascicoloChecklistEvidence {
+  id                String                           @id @default(cuid())
+  enteId            String
+  procedimentoId    String
+  documentoId       String
+  checklistItemCode String
+  status            FascicoloChecklistEvidenceStatus @default(PROPOSTO)
+  createdAt         DateTime                         @default(now())
+  createdByActorId  String
+  createdByUserId   String?
+  createdByEmail    String
+  createdByRole     String
+  reviewedAt        DateTime?
+  reviewedByActorId String?
+  reviewedByUserId  String?
+  reviewedByEmail   String?
+  reviewedByRole    String?
+  reviewNote        String?
+
+  ente           Ente         @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  procedimento   Procedimento @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  documento      Documento    @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+  createdByUser  User?        @relation("ChecklistEvidenceCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  reviewedByUser User?        @relation("ChecklistEvidenceReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([enteId, procedimentoId, documentoId, checklistItemCode], map: "FascicoloChecklistEvidence_enteId_procedimentoId_documentoId_ch")
+  @@index([enteId, procedimentoId, checklistItemCode], map: "FascicoloChecklistEvidence_enteId_procedimentoId_checklistItemC")
+  @@index([documentoId])
+  @@index([createdByUserId])
+  @@index([reviewedByUserId])
+  @@index([createdAt])
+  @@index([reviewedAt])
+}
+
+model FascicoloDocumentRequirementProposal {
+  id                               String                                     @id @default(cuid())
+  enteId                           String
+  procedimentoId                   String
+  legalSourceId                    String
+  legalRuleId                      String
+  documentGapId                    String
+  status                           FascicoloDocumentRequirementProposalStatus @default(PROPOSTO)
+  matcherAlgorithmVersion          String
+  screeningFingerprint             String
+  canonicalArt18Snapshot           NormaRiferimento
+  portActivityLegalTypeSnapshot    PortActivityLegalType
+  sourceStableKeySnapshot          String
+  sourceTitleSnapshot              String
+  sourceRelevantProvisionsSnapshot Json
+  ruleCodeSnapshot                 String
+  ruleContractVersionSnapshot      Int
+  legalRuleDefinitionSnapshot      Json
+  gapKeySnapshot                   String
+  gapLabelSnapshot                 String
+  gapDescriptionSnapshot           String
+  matchedCriteriaSnapshot          Json
+  createdAt                        DateTime                                   @default(now())
+  updatedAt                        DateTime                                   @updatedAt
+  createdByUserId                  String?
+  createdByActorId                 String
+  createdByEmail                   String
+  createdByRole                    String
+  reviewedAt                       DateTime?
+  reviewedByUserId                 String?
+  reviewedByActorId                String?
+  reviewedByEmail                  String?
+  reviewedByRole                   String?
+  reviewNote                       String?
+
+  ente           Ente                                   @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  procedimento   Procedimento                           @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  legalSource    LegalSource                            @relation(fields: [legalSourceId], references: [id], onDelete: Restrict)
+  legalRule      LegalRule                              @relation(fields: [legalRuleId], references: [id], onDelete: Restrict)
+  documentGap    DocumentGap                            @relation(fields: [documentGapId], references: [id], onDelete: Restrict)
+  createdByUser  User?                                  @relation("DocumentRequirementProposalCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  reviewedByUser User?                                  @relation("DocumentRequirementProposalReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+  evidence       FascicoloDocumentRequirementEvidence[]
+
+  @@unique([enteId, procedimentoId, screeningFingerprint], map: "FascicoloDocumentRequirementProposal_enteId_procedimentoId_scre")
+  @@index([enteId, procedimentoId, status], map: "FascicoloDocumentRequirementProposal_enteId_procedimentoId_stat")
+  @@index([legalSourceId])
+  @@index([legalRuleId])
+  @@index([documentGapId])
+  @@index([createdByUserId])
+  @@index([reviewedByUserId])
+  @@index([createdAt])
+}
+
+model FascicoloDocumentRequirementEvidence {
+  id               String    @id @default(cuid())
+  enteId           String
+  proposalId       String
+  documentoId      String
+  createdAt        DateTime  @default(now())
+  createdByUserId  String?
+  createdByActorId String
+  createdByEmail   String
+  createdByRole    String
+  revokedAt        DateTime?
+  revokedByUserId  String?
+  revokedByActorId String?
+  revokedByEmail   String?
+  revokedByRole    String?
+  revocationNote   String?
+
+  ente          Ente                                        @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  proposal      FascicoloDocumentRequirementProposal        @relation(fields: [proposalId], references: [id], onDelete: Restrict)
+  documento     Documento                                   @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+  createdByUser User?                                       @relation("DocumentRequirementEvidenceCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  revokedByUser User?                                       @relation("DocumentRequirementEvidenceRevokedBy", fields: [revokedByUserId], references: [id], onDelete: SetNull)
+  review        FascicoloDocumentRequirementEvidenceReview?
+
+  @@unique([enteId, proposalId, documentoId], map: "FascicoloDocumentRequirementEvidence_enteId_proposalId_document")
+  @@index([enteId, proposalId])
+  @@index([documentoId])
+  @@index([createdByUserId])
+  @@index([revokedByUserId])
+  @@index([createdAt])
+}
+
+model FascicoloDocumentRequirementEvidenceReview {
+  id                String   @id @default(cuid())
+  evidenceId        String   @unique
+  createdAt         DateTime @default(now())
+  reviewedByUserId  String?
+  reviewedByActorId String
+  reviewedByEmail   String
+  reviewedByRole    String
+  reviewNote        String?
+
+  evidence       FascicoloDocumentRequirementEvidence @relation(fields: [evidenceId], references: [id], onDelete: Restrict)
+  reviewedByUser User?                                @relation("DocumentRequirementEvidenceReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull, map: "FascicoloDocumentRequirementEvidenceReview_reviewedByUserId_fke")
+
+  @@index([reviewedByUserId])
+  @@index([createdAt])
+}
+
+model DecisioneProcedimento {
+  id                                String                    @id @default(cuid())
+  enteId                            String?
+  procedimentoId                    String                    @unique
+  concessioneId                     String?
+  tipoDecisione                     TipoDecisioneProcedimento
+  numeroAtto                        String
+  protocolloAtto                    String?
+  dataAtto                          DateTime
+  dataEfficacia                     DateTime
+  organoCompetente                  String
+  adottanteNome                     String?
+  adottanteQualifica                String?
+  scostamentoDaIstruttoria          Boolean                   @default(false)
+  motivazioneScostamentoIstruttoria String?
+  motivazioneSintetica              String
+  documentoId                       String?
+  effettoTitolo                     EffettoTitoloProcedimento @default(NESSUNO)
+  statoEffetto                      StatoEffettoProcedimento  @default(BLOCCATO)
+  effettoApplicatoAt                DateTime?
+  effectVersion                     Int                       @default(0)
+  statoConcessionePrecedente        StatoConcessione?
+  statoConcessioneSuccessivo        StatoConcessione?
+  registeredByUserId                String?
+  idempotencyKey                    String                    @unique
+  createdAt                         DateTime                  @default(now())
+
+  ente             Ente?        @relation(fields: [enteId], references: [id], onDelete: SetNull)
+  procedimento     Procedimento @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  concessione      Concessione? @relation(fields: [concessioneId], references: [id], onDelete: SetNull)
+  documento        Documento?   @relation(fields: [documentoId], references: [id], onDelete: SetNull)
+  registeredByUser User?        @relation("DecisioneProcedimentoRegisteredBy", fields: [registeredByUserId], references: [id], onDelete: Restrict)
+
+  @@index([enteId])
+  @@index([procedimentoId])
+  @@index([concessioneId])
+  @@index([documentoId])
+  @@index([registeredByUserId])
+  @@index([tipoDecisione])
+  @@index([statoEffetto, dataEfficacia])
   @@index([createdAt])
 }
 
@@ -1220,12 +3135,15 @@ model NormaFonte {
   enteEmittente String?
   ambito        NormaAmbito
   descrizione   String?
+  legalSourceId String?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
-  versioni NormaVersione[]
-  impatti  NormaImpatto[]
+  legalSource LegalSource?   @relation(fields: [legalSourceId], references: [id], onDelete: Restrict)
+  versioni   NormaVersione[]
+  impatti    NormaImpatto[]
 
+  @@index([legalSourceId])
   @@index([ambito])
   @@index([titolo])
   @@index([createdAt])
@@ -1241,14 +3159,17 @@ model NormaVersione {
   urlTesto          String?
   sintesi           String
   note              String?
+  legalSourceVersionId String?
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
 
-  normaFonte NormaFonte     @relation(fields: [normaFonteId], references: [id], onDelete: Cascade)
-  impatti    NormaImpatto[]
+  normaFonte         NormaFonte          @relation(fields: [normaFonteId], references: [id], onDelete: Cascade)
+  legalSourceVersion LegalSourceVersion? @relation(fields: [legalSourceVersionId], references: [id], onDelete: Restrict)
+  impatti            NormaImpatto[]
 
   @@unique([normaFonteId, versione])
   @@index([normaFonteId])
+  @@index([legalSourceVersionId])
   @@index([stato])
   @@index([dataEntrataVigore])
   @@index([createdAt])
@@ -1315,4 +3236,427 @@ model ActivityLog {
   @@index([entita, entitaId])
   @@index([concessioneId])
   @@index([createdAt])
+}
+
+model AiFascicoloTrustedReviewMaterial {
+  id                              String   @id @default(cuid())
+  enteId                          String
+  procedimentoId                  String
+  identityContractVersion         String
+  canonicalizationVersion         String
+  fingerprintAlgorithm            String
+  fingerprint                     String
+  canonicalPayload                String   @db.Text
+  trustedReviewSchemaVersion      String
+  analysisSchemaVersion           String
+  snapshotSchemaVersion           String
+  outboundSchemaVersion           String
+  sourceSnapshotContentHash       String
+  outboundProjectionHash          String
+  outboundProjectionHashAlgorithm String
+  createdAt                       DateTime @default(now())
+
+  ente         Ente                            @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  procedimento Procedimento                    @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  states       AiFascicoloHumanReviewState[]
+
+  @@unique([enteId, procedimentoId, identityContractVersion, canonicalizationVersion, fingerprintAlgorithm, fingerprint])
+  @@unique([id, enteId, procedimentoId])
+  @@index([enteId, procedimentoId])
+}
+
+model AutomaticFascicoloReport {
+  id                    String   @id @db.VarChar(96)
+  tenantId              String
+  procedimentoId        String
+  neutralIntakeId       String
+  documentVersionId     String
+  contractVersion       String   @db.VarChar(64)
+  artifactSha256        String   @db.Char(64)
+  corpusFingerprint     String   @db.Char(64)
+  payloadFingerprint    String   @db.Char(64)
+  analysisPayload       Json
+  provenancePayload     Json
+  status                String   @db.VarChar(64)
+  verificationStatus    String   @db.VarChar(64)
+  createdByActorId      String   @db.VarChar(256)
+  supersededByReportId  String?  @db.VarChar(96)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  tenant           Ente                              @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  procedimento     Procedimento                      @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  documentVersion  NeutralIntakeExtractionAttempt   @relation(fields: [documentVersionId], references: [id], onDelete: Restrict)
+  supersededBy     AutomaticFascicoloReport?         @relation("AutomaticFascicoloReportSupersession", fields: [supersededByReportId], references: [id], onDelete: Restrict)
+  supersedes       AutomaticFascicoloReport[]        @relation("AutomaticFascicoloReportSupersession")
+  missionLinks     AutomaticFascicoloReportMission[]
+  corpusDocuments  AutomaticFascicoloReportDocument[]
+
+  @@unique([tenantId, procedimentoId, documentVersionId, contractVersion], map: "automatic_fascicolo_report_version_uq")
+  @@unique([tenantId, procedimentoId, corpusFingerprint, contractVersion], map: "automatic_fascicolo_report_corpus_uq")
+  @@index([tenantId, procedimentoId, createdAt], map: "automatic_fascicolo_report_scope_idx")
+  @@index([documentVersionId], map: "automatic_fascicolo_report_document_version_idx")
+  @@index([supersededByReportId], map: "automatic_fascicolo_report_superseded_idx")
+}
+
+model AutomaticFascicoloReportDocument {
+  reportId          String   @db.VarChar(96)
+  documentVersionId String
+  artifactSha256    String   @db.Char(64)
+  ordinal           Int
+  createdAt         DateTime @default(now())
+
+  report          AutomaticFascicoloReport       @relation(fields: [reportId], references: [id], onDelete: Restrict)
+  documentVersion NeutralIntakeExtractionAttempt @relation(fields: [documentVersionId], references: [id], onDelete: Restrict)
+
+  @@id([reportId, documentVersionId])
+  @@unique([reportId, ordinal], map: "automatic_fascicolo_report_document_ordinal_uq")
+  @@index([documentVersionId], map: "automatic_fascicolo_report_document_link_idx")
+}
+
+model AutomaticFascicoloReportMission {
+  reportId   String   @db.VarChar(96)
+  missionId  String   @db.VarChar(96)
+  purpose    String   @db.VarChar(64)
+  createdAt  DateTime @default(now())
+
+  report  AutomaticFascicoloReport @relation(fields: [reportId], references: [id], onDelete: Restrict)
+  mission ResearchMissionRecord    @relation(fields: [missionId], references: [id], onDelete: Restrict)
+
+  @@id([reportId, missionId])
+  @@index([missionId], map: "automatic_fascicolo_report_mission_idx")
+}
+
+model FascicoloKnowledgeRevision {
+  id                String                            @id @default(cuid())
+  tenantId          String
+  procedimentoId    String
+  corpusFingerprint String                            @db.Char(64)
+  contractVersion   String                            @db.VarChar(64)
+  status            FascicoloKnowledgeRevisionStatus @default(BUILDING)
+  warnings          Json                              @default("[]")
+  createdAt         DateTime                          @default(now())
+  completedAt       DateTime?
+  supersededAt      DateTime?
+
+  tenant         Ente                        @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  procedimento   Procedimento                @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  items          FascicoloKnowledgeItem[]
+  relations      FascicoloKnowledgeRelation[]
+  researchMissions ResearchMissionRecord[] @relation("ResearchMissionCurrentKnowledgeRevision")
+  firstResearchMissions ResearchMissionRecord[] @relation("ResearchMissionFirstKnowledgeRevision")
+  structuredReports StructuredFascicoloReportSnapshot[]
+  operationalProposals FascicoloOperationalProposal[]
+
+  @@unique([id, tenantId, procedimentoId], map: "fascicolo_knowledge_revision_scope_uq")
+  @@unique([tenantId, procedimentoId, corpusFingerprint, contractVersion], map: "fascicolo_knowledge_revision_corpus_uq")
+  @@index([tenantId, procedimentoId, status, createdAt], map: "fascicolo_knowledge_revision_scope_status_idx")
+}
+
+model StructuredFascicoloReportSnapshot {
+  id                       String                           @id @db.VarChar(96)
+  tenantId                 String
+  procedimentoId           String
+  knowledgeRevisionId      String
+  contractVersion          String                           @db.VarChar(64)
+  reportFingerprint        String                           @unique @db.Char(64)
+  corpusFingerprint        String                           @db.Char(64)
+  researchStateFingerprint String                           @db.Char(64)
+  sourceStateFingerprint   String                           @db.Char(64)
+  status                   StructuredFascicoloReportStatus  @default(CURRENT)
+  payload                  Json
+  warnings                 Json                             @default("[]")
+  staleReasons             String[]                         @default([])
+  supersededBySnapshotId   String?                          @db.VarChar(96)
+  generatedAt              DateTime                         @default(now())
+
+  tenant       Ente                       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  procedimento Procedimento               @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  knowledgeRevision FascicoloKnowledgeRevision @relation(fields: [knowledgeRevisionId, tenantId, procedimentoId], references: [id, tenantId, procedimentoId], onDelete: Restrict)
+  supersededBy StructuredFascicoloReportSnapshot? @relation("StructuredFascicoloReportSupersession", fields: [supersededBySnapshotId], references: [id], onDelete: Restrict)
+  supersedes StructuredFascicoloReportSnapshot[] @relation("StructuredFascicoloReportSupersession")
+  operationalProposals FascicoloOperationalProposal[]
+
+  @@index([tenantId, procedimentoId, status, generatedAt], map: "structured_fascicolo_report_scope_status_idx")
+  @@index([knowledgeRevisionId], map: "structured_fascicolo_report_revision_idx")
+  @@index([supersededBySnapshotId], map: "structured_fascicolo_report_superseded_idx")
+}
+
+model FascicoloOperationalProposal {
+  id                            String                              @id @db.VarChar(96)
+  tenantId                      String
+  procedimentoId                String
+  knowledgeRevisionId           String
+  structuredReportId            String?
+  structuredReportFingerprint   String                              @db.Char(64)
+  policyVersion                 String                              @db.VarChar(64)
+  proposalType                  FascicoloOperationalProposalType
+  status                        FascicoloOperationalProposalStatus @default(PROPOSED)
+  title                         String                              @db.VarChar(512)
+  description                   String                              @db.Text
+  proposedPayload               Json
+  approvedPayload               Json?
+  originatingKnowledgeItemIds   String[]
+  originatingIssueSemanticKeys  String[]
+  originatingQuestionSemanticKeys String[]
+  relevantResultIds             String[]
+  rationale                     String                              @db.Text
+  confidence                    Int?
+  proposalFingerprint           String                              @db.Char(64)
+  warningCodes                  String[]                            @default([])
+  reviewVersion                 Int                                 @default(0)
+  reviewedAt                    DateTime?
+  reviewedByActorId             String?                             @db.VarChar(256)
+  reviewedByEmail               String?                             @db.VarChar(320)
+  reviewedByRole                String?                             @db.VarChar(128)
+  reviewNote                    String?                             @db.Text
+  materializedAt                DateTime?
+  materializedEntityType        String?                             @db.VarChar(64)
+  materializedEntityId          String?                             @db.VarChar(256)
+  supersededAt                  DateTime?
+  createdAt                     DateTime                            @default(now())
+  updatedAt                     DateTime                            @updatedAt
+
+  tenant           Ente                              @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  procedimento     Procedimento                      @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  knowledgeRevision FascicoloKnowledgeRevision      @relation(fields: [knowledgeRevisionId, tenantId, procedimentoId], references: [id, tenantId, procedimentoId], onDelete: Restrict)
+  structuredReport StructuredFascicoloReportSnapshot? @relation(fields: [structuredReportId], references: [id], onDelete: Restrict)
+  reviewEvents     FascicoloOperationalProposalReviewEvent[]
+  materialization  FascicoloOperationalProposalMaterialization?
+
+  @@unique([tenantId, procedimentoId, proposalFingerprint], map: "fascicolo_operational_proposal_identity_uq")
+  @@unique([id, tenantId, procedimentoId], map: "fascicolo_operational_proposal_scope_uq")
+  @@index([tenantId, procedimentoId, status, proposalType], map: "fascicolo_operational_proposal_scope_status_idx")
+  @@index([knowledgeRevisionId], map: "fascicolo_operational_proposal_revision_idx")
+  @@index([structuredReportId], map: "fascicolo_operational_proposal_report_idx")
+}
+
+model FascicoloOperationalProposalReviewEvent {
+  id                  String                                    @id @db.VarChar(96)
+  tenantId            String
+  procedimentoId      String
+  proposalId          String                                    @db.VarChar(96)
+  action              FascicoloOperationalProposalReviewAction
+  previousStatus      FascicoloOperationalProposalStatus
+  nextStatus          FascicoloOperationalProposalStatus
+  reviewVersion       Int
+  proposedPayload     Json
+  approvedPayload     Json?
+  actorId             String                                    @db.VarChar(256)
+  actorEmail          String?                                   @db.VarChar(320)
+  actorRole           String                                    @db.VarChar(128)
+  reviewNote          String?                                   @db.Text
+  createdAt           DateTime                                  @default(now())
+
+  proposal FascicoloOperationalProposal @relation(fields: [proposalId, tenantId, procedimentoId], references: [id, tenantId, procedimentoId], onDelete: Restrict)
+
+  @@unique([proposalId, reviewVersion], map: "fascicolo_operational_proposal_review_version_uq")
+  @@index([tenantId, procedimentoId, createdAt], map: "fascicolo_operational_proposal_review_scope_idx")
+}
+
+model FascicoloOperationalProposalMaterialization {
+  id             String   @id @db.VarChar(96)
+  tenantId       String
+  procedimentoId String
+  proposalId     String   @unique @db.VarChar(96)
+  entityType     String   @db.VarChar(64)
+  entityId       String   @db.VarChar(256)
+  createdAt      DateTime @default(now())
+
+  proposal FascicoloOperationalProposal @relation(fields: [proposalId, tenantId, procedimentoId], references: [id, tenantId, procedimentoId], onDelete: Restrict)
+
+  @@unique([proposalId, tenantId, procedimentoId], map: "fascicolo_operational_materialization_scope_uq")
+  @@unique([entityType, entityId], map: "fascicolo_operational_materialization_entity_uq")
+  @@index([tenantId, procedimentoId, createdAt], map: "fascicolo_operational_materialization_scope_idx")
+}
+
+model FascicoloSubject {
+  id                String                @id @default(cuid())
+  tenantId          String
+  canonicalName     String                @db.VarChar(512)
+  normalizedName    String                @db.VarChar(512)
+  subjectType       FascicoloSubjectType  @default(UNKNOWN)
+  strongIdentifiers Json                  @default("[]")
+  aliases           Json                  @default("[]")
+  mergedIntoId      String?
+  createdAt         DateTime              @default(now())
+
+  tenant       Ente               @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  mergedInto   FascicoloSubject?  @relation("FascicoloSubjectMerge", fields: [mergedIntoId], references: [id], onDelete: Restrict)
+  mergedFrom   FascicoloSubject[] @relation("FascicoloSubjectMerge")
+  identifiers  FascicoloSubjectIdentifier[]
+
+  @@unique([id, tenantId], map: "fascicolo_subject_scope_uq")
+  @@index([tenantId, normalizedName], map: "fascicolo_subject_name_idx")
+  @@index([tenantId, subjectType], map: "fascicolo_subject_type_idx")
+  @@index([mergedIntoId], map: "fascicolo_subject_merged_idx")
+}
+
+model FascicoloSubjectIdentifier {
+  id              String   @id @default(cuid())
+  tenantId        String
+  subjectId       String
+  identifierType  String   @db.VarChar(64)
+  normalizedValue String   @db.VarChar(512)
+  createdAt       DateTime @default(now())
+
+  subject FascicoloSubject @relation(fields: [subjectId, tenantId], references: [id, tenantId], onDelete: Cascade)
+
+  @@unique([tenantId, identifierType, normalizedValue], map: "fascicolo_subject_identifier_value_uq")
+  @@index([subjectId, tenantId], map: "fascicolo_subject_identifier_subject_idx")
+}
+
+model FascicoloKnowledgeItem {
+  id                 String                        @id @default(cuid())
+  tenantId           String
+  procedimentoId     String
+  revisionId         String
+  kind               String                        @db.VarChar(64)
+  semanticKey        String                        @db.Char(64)
+  semanticKeyVersion String                        @db.VarChar(32)
+  contentFingerprint String                        @db.Char(64)
+  normalizedText     String                        @db.Text
+  structuredPayload  Json
+  confidence         Int?
+  status             FascicoloKnowledgeItemStatus @default(AI_PROPOSED)
+  reviewVersion      Int                           @default(0)
+  createdAt          DateTime                      @default(now())
+  supersededAt       DateTime?
+
+  tenant            Ente                           @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  procedimento      Procedimento                   @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  revision          FascicoloKnowledgeRevision     @relation(fields: [revisionId, tenantId, procedimentoId], references: [id, tenantId, procedimentoId], onDelete: Restrict)
+  evidence          FascicoloKnowledgeEvidence[]
+  outgoingRelations FascicoloKnowledgeRelation[]   @relation("FascicoloKnowledgeRelationSource")
+  incomingRelations FascicoloKnowledgeRelation[]   @relation("FascicoloKnowledgeRelationTarget")
+  reviewEvents      FascicoloKnowledgeReviewEvent[]
+
+  @@unique([id, tenantId, procedimentoId], map: "fascicolo_knowledge_item_scope_uq")
+  @@unique([revisionId, semanticKeyVersion, semanticKey], map: "fascicolo_knowledge_item_revision_semantic_uq")
+  @@index([tenantId, procedimentoId, revisionId, status], map: "fascicolo_knowledge_item_scope_status_idx")
+  @@index([tenantId, procedimentoId, semanticKeyVersion, semanticKey], map: "fascicolo_knowledge_item_semantic_idx")
+}
+
+model FascicoloKnowledgeEvidence {
+  id                    String   @id @default(cuid())
+  tenantId              String
+  procedimentoId        String
+  itemId                String
+  provenanceType        FascicoloKnowledgeProvenanceType @default(DOCUMENT_EXTRACTION)
+  documentoId           String
+  documentFileVersionId String?
+  extractionAttemptId   String?
+  documentExtractionAttemptId String?
+  pageNumber            Int
+  textSha256            String   @db.Char(64)
+  quoteSha256           String?  @db.Char(64)
+  basisRef              String?  @db.VarChar(256)
+  createdAt             DateTime @default(now())
+
+  tenant              Ente                            @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  procedimento        Procedimento                    @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  item                FascicoloKnowledgeItem          @relation(fields: [itemId, tenantId, procedimentoId], references: [id, tenantId, procedimentoId], onDelete: Restrict)
+  documento           Documento                       @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+  documentFileVersion DocumentFileVersion?            @relation(fields: [documentFileVersionId], references: [id], onDelete: Restrict)
+  extractionAttempt   NeutralIntakeExtractionAttempt? @relation(fields: [extractionAttemptId], references: [id], onDelete: Restrict)
+  documentExtractionAttempt DocumentExtractionAttempt? @relation(fields: [documentExtractionAttemptId], references: [id], onDelete: Restrict)
+
+  @@unique([itemId, documentoId, documentFileVersionId, extractionAttemptId, documentExtractionAttemptId, pageNumber, textSha256, quoteSha256], map: "fascicolo_knowledge_evidence_identity_uq")
+  @@index([tenantId, procedimentoId, itemId], map: "fascicolo_knowledge_evidence_scope_item_idx")
+  @@index([documentoId, documentFileVersionId], map: "fascicolo_knowledge_evidence_document_idx")
+  @@index([extractionAttemptId], map: "fascicolo_knowledge_evidence_extraction_idx")
+  @@index([documentExtractionAttemptId], map: "fascicolo_knowledge_evidence_document_extraction_idx")
+}
+
+model FascicoloKnowledgeRelation {
+  id              String                         @id @default(cuid())
+  tenantId        String
+  procedimentoId  String
+  revisionId      String
+  sourceItemId    String
+  targetItemId    String
+  relationType    FascicoloKnowledgeRelationType
+  confidence      Int?
+  createdAt       DateTime                       @default(now())
+
+  tenant        Ente                       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  procedimento  Procedimento               @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  revision      FascicoloKnowledgeRevision @relation(fields: [revisionId, tenantId, procedimentoId], references: [id, tenantId, procedimentoId], onDelete: Restrict)
+  sourceItem    FascicoloKnowledgeItem     @relation("FascicoloKnowledgeRelationSource", fields: [sourceItemId, tenantId, procedimentoId], references: [id, tenantId, procedimentoId], onDelete: Restrict)
+  targetItem    FascicoloKnowledgeItem     @relation("FascicoloKnowledgeRelationTarget", fields: [targetItemId, tenantId, procedimentoId], references: [id, tenantId, procedimentoId], onDelete: Restrict)
+
+  @@unique([revisionId, sourceItemId, targetItemId, relationType], map: "fascicolo_knowledge_relation_identity_uq")
+  @@index([tenantId, procedimentoId, revisionId], map: "fascicolo_knowledge_relation_scope_revision_idx")
+  @@index([targetItemId], map: "fascicolo_knowledge_relation_target_idx")
+}
+
+model FascicoloKnowledgeReviewEvent {
+  id             String                        @id @default(cuid())
+  tenantId       String
+  procedimentoId String
+  itemId         String
+  previousStatus FascicoloKnowledgeItemStatus
+  nextStatus     FascicoloKnowledgeItemStatus
+  reviewVersion  Int
+  actorId        String                        @db.VarChar(256)
+  actorEmail     String?                       @db.VarChar(320)
+  actorRole      String                        @db.VarChar(128)
+  createdAt      DateTime                      @default(now())
+
+  item FascicoloKnowledgeItem @relation(fields: [itemId, tenantId, procedimentoId], references: [id, tenantId, procedimentoId], onDelete: Restrict)
+
+  @@unique([itemId, reviewVersion], map: "fascicolo_knowledge_review_item_version_uq")
+  @@index([tenantId, procedimentoId, createdAt], map: "fascicolo_knowledge_review_scope_idx")
+}
+
+model AiFascicoloHumanReviewState {
+  id                String                               @id @default(cuid())
+  materialId        String
+  enteId            String
+  procedimentoId    String
+  statementPath     String
+  version           Int                                  @default(0)
+  latestDisposition AiFascicoloHumanReviewDisposition?
+  createdAt         DateTime                             @default(now())
+  updatedAt         DateTime                             @updatedAt
+
+  material AiFascicoloTrustedReviewMaterial @relation(fields: [materialId, enteId, procedimentoId], references: [id, enteId, procedimentoId], onDelete: Restrict)
+  ente         Ente                           @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  procedimento Procedimento                   @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  events       AiFascicoloHumanReviewEvent[]
+
+  @@unique([materialId, statementPath])
+  @@unique([id, materialId, statementPath, enteId, procedimentoId])
+  @@index([enteId, procedimentoId])
+}
+
+model AiFascicoloHumanReviewEvent {
+  id                 String                               @id @default(cuid())
+  stateId            String
+  materialId         String
+  enteId             String
+  procedimentoId     String
+  statementPath      String
+  sequence           Int
+  disposition        AiFascicoloHumanReviewDisposition
+  humanUserId        String
+  actorIdSnapshot    String
+  actorEmailSnapshot String
+  actorRoleSnapshot  String
+  occurredAt         DateTime
+  createdAt          DateTime                             @default(now())
+  note               String?
+  reason             String?
+  amendmentText      String?
+  idempotencyKey     String
+  commandFingerprint String
+
+  state AiFascicoloHumanReviewState @relation(fields: [stateId, materialId, statementPath, enteId, procedimentoId], references: [id, materialId, statementPath, enteId, procedimentoId], onDelete: Restrict)
+  ente         Ente         @relation(fields: [enteId], references: [id], onDelete: Restrict)
+  procedimento Procedimento @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  humanUser    User         @relation(fields: [humanUserId], references: [id], onDelete: Restrict)
+
+  @@unique([materialId, statementPath, sequence])
+  @@unique([enteId, idempotencyKey])
+  @@index([enteId, procedimentoId])
 }

@@ -9,26 +9,36 @@ import {
 } from "@/lib/rate-limit";
 
 describe("checkRateLimit", () => {
-  const originalBackend = process.env.RATE_LIMIT_BACKEND;
-  const originalUpstashUrl = process.env.UPSTASH_REDIS_REST_URL;
-  const originalUpstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
-
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-01T10:00:00.000Z"));
-    process.env.RATE_LIMIT_BACKEND = "memory";
-    delete process.env.UPSTASH_REDIS_REST_URL;
-    delete process.env.UPSTASH_REDIS_REST_TOKEN;
+    vi.stubEnv("RATE_LIMIT_BACKEND", "memory");
+    for (const name of [
+      "UPSTASH_REDIS_REST_URL",
+      "UPSTASH_REDIS_REST_TOKEN",
+      "KV_REST_API_URL",
+      "KV_REST_API_TOKEN",
+      "KV_REST_API_READ_ONLY_TOKEN",
+    ]) {
+      vi.stubEnv(name, "");
+    }
     clearRateLimitStore();
   });
 
   afterEach(() => {
     clearRateLimitStore();
-    process.env.RATE_LIMIT_BACKEND = originalBackend;
-    process.env.UPSTASH_REDIS_REST_URL = originalUpstashUrl;
-    process.env.UPSTASH_REDIS_REST_TOKEN = originalUpstashToken;
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
     vi.useRealTimers();
   });
+
+  function mockUpstashResponses() {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ result: 1 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ result: 5_000 }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    return fetchMock;
+  }
 
   it("consente richieste entro limite", async () => {
     const first = await checkRateLimit({ key: "ip:1", limit: 3, windowMs: 60_000 });
@@ -89,9 +99,7 @@ describe("checkRateLimit", () => {
   });
 
   it("backend upstash senza credenziali in test ripiega su memory", async () => {
-    process.env.RATE_LIMIT_BACKEND = "upstash";
-    delete process.env.UPSTASH_REDIS_REST_URL;
-    delete process.env.UPSTASH_REDIS_REST_TOKEN;
+    vi.stubEnv("RATE_LIMIT_BACKEND", "upstash");
     clearRateLimitStore();
 
     const first = await checkRateLimit({ key: "fallback:key", limit: 1, windowMs: 5_000 });
@@ -99,6 +107,87 @@ describe("checkRateLimit", () => {
 
     expect(first.allowed).toBe(true);
     expect(second.allowed).toBe(false);
+  });
+
+  it("usa credenziali UPSTASH legacy quando configurate", async () => {
+    vi.stubEnv("RATE_LIMIT_BACKEND", "upstash");
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://legacy.example.test");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "primary-write");
+    const fetchMock = mockUpstashResponses();
+    clearRateLimitStore();
+
+    await checkRateLimit({ key: "legacy:key", limit: 2, windowMs: 5_000 });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[0]?.[0]).toBe("https://legacy.example.test/incr/legacy%3Akey");
+  });
+
+  it("usa credenziali KV REST generate da Vercel", async () => {
+    vi.stubEnv("RATE_LIMIT_BACKEND", "upstash");
+    vi.stubEnv("KV_REST_API_URL", "https://kv.example.test");
+    vi.stubEnv("KV_REST_API_TOKEN", "kv-write");
+    const fetchMock = mockUpstashResponses();
+    clearRateLimitStore();
+
+    await checkRateLimit({ key: "kv:key", limit: 2, windowMs: 5_000 });
+
+    expect(fetchMock.mock.calls[0]?.[0]).toBe("https://kv.example.test/incr/kv%3Akey");
+  });
+
+  it("preferisce UPSTASH quando entrambi i naming sono configurati", async () => {
+    vi.stubEnv("RATE_LIMIT_BACKEND", "upstash");
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://preferred.example.test");
+    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "preferred-write");
+    vi.stubEnv("KV_REST_API_URL", "https://fallback.example.test");
+    vi.stubEnv("KV_REST_API_TOKEN", "fallback-write");
+    const fetchMock = mockUpstashResponses();
+    clearRateLimitStore();
+
+    await checkRateLimit({ key: "priority:key", limit: 2, windowMs: 5_000 });
+
+    expect(fetchMock.mock.calls[0]?.[0]).toBe("https://preferred.example.test/incr/priority%3Akey");
+    expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({
+      headers: { Authorization: "Bearer preferred-write" },
+    });
+  });
+
+  it("non usa il token KV read-only per operazioni di scrittura", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("RATE_LIMIT_BACKEND", "upstash");
+    vi.stubEnv("KV_REST_API_URL", "https://kv.example.test");
+    vi.stubEnv("KV_REST_API_READ_ONLY_TOKEN", "read-only");
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    clearRateLimitStore();
+
+    await expect(checkRateLimit({ key: "readonly:key", limit: 2, windowMs: 5_000 }))
+      .rejects.toThrow("writable REST URL and token");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("senza credenziali in production fallisce closed", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("RATE_LIMIT_BACKEND", "upstash");
+    clearRateLimitStore();
+
+    await expect(checkRateLimit({ key: "production:key", limit: 2, windowMs: 5_000 }))
+      .rejects.toThrow("writable REST URL and token");
+  });
+
+  it("backend diverso da upstash resta memory", async () => {
+    vi.stubEnv("RATE_LIMIT_BACKEND", "redis");
+    vi.stubEnv("KV_REST_API_URL", "https://kv.example.test");
+    vi.stubEnv("KV_REST_API_TOKEN", "kv-write");
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    clearRateLimitStore();
+
+    const first = await checkRateLimit({ key: "memory:key", limit: 1, windowMs: 5_000 });
+    const second = await checkRateLimit({ key: "memory:key", limit: 1, windowMs: 5_000 });
+
+    expect(first.allowed).toBe(true);
+    expect(second.allowed).toBe(false);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("header Retry-After e remaining sono valorizzati", async () => {

@@ -1,6 +1,4 @@
 import { getCurrentUser, type DemoRole } from "@/lib/auth";
-import { isInvestorDemoMode } from "@/lib/investor-demo";
-import { investorDemoIdentity } from "@/lib/investor-demo-data";
 import { prisma } from "@/lib/prisma";
 import { getDefaultTenantMembership, isTenantScopedRole, type TenantMembershipLike } from "@/lib/tenant";
 import type { Prisma } from "@/generated/prisma/client";
@@ -36,7 +34,7 @@ export function canReadTenantResource(
   }
 
   if (!resourceEnteId) {
-    return options?.allowWhenEnteMissing ?? true;
+    return options?.allowWhenEnteMissing ?? false;
   }
 
   return context.accessibleTenantIds.includes(resourceEnteId);
@@ -52,7 +50,7 @@ export function canWriteTenantResource(
   }
 
   if (!resourceEnteId) {
-    return options?.allowWhenEnteMissing ?? true;
+    return options?.allowWhenEnteMissing ?? false;
   }
 
   return context.accessibleTenantIds.includes(resourceEnteId);
@@ -88,17 +86,6 @@ export function requireTenantAccess(
 }
 
 export async function getCurrentTenantContext(): Promise<CurrentTenantContext | null> {
-  if (isInvestorDemoMode()) {
-    return {
-      userId: investorDemoIdentity.tenantId,
-      role: "ADMIN",
-      isAdmin: true,
-      tenantMemberships: [],
-      defaultTenantId: investorDemoIdentity.tenantId,
-      accessibleTenantIds: [],
-    };
-  }
-
   const user = await getCurrentUser();
   if (!user) {
     return null;
@@ -160,7 +147,7 @@ export function buildTenantConcessioneWhere(
     return {};
   }
 
-  const allowWhenEnteMissing = options?.allowWhenEnteMissing ?? true;
+  const allowWhenEnteMissing = options?.allowWhenEnteMissing ?? false;
   const tenantIds = context.accessibleTenantIds;
 
   if (tenantIds.length === 0) {
