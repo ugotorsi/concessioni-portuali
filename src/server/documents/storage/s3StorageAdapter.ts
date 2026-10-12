@@ -218,6 +218,7 @@ export class S3StorageAdapter implements DocumentStorageAdapter {
     expiresInSeconds: number;
   }): Promise<string> {
     const storageKey = assertSafeStorageKey(input.storageKey);
+    const metadataHeaders = new Set(Object.keys(input.metadata).map((key) => `x-amz-meta-${key}`));
     try {
       return await getSignedUrl(this.client, new PutObjectCommand({
         Bucket: this.config.bucket,
@@ -229,6 +230,7 @@ export class S3StorageAdapter implements DocumentStorageAdapter {
       }), {
         expiresIn: input.expiresInSeconds,
         signableHeaders: new Set(["content-type"]),
+        unhoistableHeaders: metadataHeaders,
       });
     } catch (error) {
       throw this.toS3Error("PRESIGN", error);

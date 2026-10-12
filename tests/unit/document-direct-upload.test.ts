@@ -97,9 +97,10 @@ describe("direct document upload", () => {
       const request = input(size);
       const initiated = await initiateDirectDocumentUpload(request);
       const presign = createPresignedPutMock.mock.calls[0][0];
-      expect(initiated.headers).toEqual({
+      expect(initiated.headers).toMatchObject({
         "Content-Type": "application/pdf",
         "If-None-Match": "*",
+        "x-amz-meta-operationid": operationId,
       });
       expect(presign).toMatchObject({ sizeBytes: size, mimeType: "application/pdf" });
       const body = pdf(size);
@@ -178,6 +179,37 @@ describe("direct document upload", () => {
     expect(registerStoredDocumentMock).toHaveBeenCalledTimes(2);
     expect(registerStoredDocumentMock.mock.calls[0][0].documentId)
       .toBe(registerStoredDocumentMock.mock.calls[1][0].documentId);
+  });
+
+  it("recovers an accepted R2 object whose query metadata was not materialized", async () => {
+    const size = 5 * 1024 * 1024;
+    const request = input(size);
+    const initiated = await initiateDirectDocumentUpload(request);
+    const body = pdf(size);
+    headMock.mockResolvedValue({
+      sizeBytes: size,
+      mimeType: "application/pdf",
+      metadata: {},
+    });
+    readBoundedMock.mockResolvedValue({ disposition: "FOUND", body });
+
+    await expect(completeDirectDocumentUpload({ ...request, objectKey: initiated.objectKey }))
+      .resolves.toMatchObject({ created: true, documentId: operationId });
+  });
+
+  it("rejects partially present identity metadata instead of accepting a mismatch", async () => {
+    const size = 5 * 1024 * 1024;
+    const request = input(size);
+    const initiated = await initiateDirectDocumentUpload(request);
+    headMock.mockResolvedValue({
+      sizeBytes: size,
+      mimeType: "application/pdf",
+      metadata: { operationid: "different-operation" },
+    });
+
+    await expect(completeDirectDocumentUpload({ ...request, objectKey: initiated.objectKey }))
+      .rejects.toThrow("Identità dell'oggetto caricato non valida");
+    expect(registerStoredDocumentMock).not.toHaveBeenCalled();
   });
 
   it("rejects a binary payload disguised as an allowed text file", async () => {

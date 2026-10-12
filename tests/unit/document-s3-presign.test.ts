@@ -7,7 +7,7 @@ describe("document S3 presigned PUT", () => {
     vi.unstubAllEnvs();
   });
 
-  it("signs browser-controlled headers and keeps metadata in the signed query only", async () => {
+  it("signs every browser-controlled header without hoisting metadata", async () => {
     vi.stubEnv("S3_ENDPOINT", "https://account-id.r2.cloudflarestorage.com");
     vi.stubEnv("S3_REGION", "auto");
     vi.stubEnv("S3_BUCKET", "private-documents");
@@ -27,13 +27,15 @@ describe("document S3 presigned PUT", () => {
       expiresInSeconds: 600,
     }));
 
-    expect(signed.searchParams.get("x-amz-meta-operationid")).toBe("operation");
-    expect(signed.searchParams.get("x-amz-meta-tenantref")).toBe("tenant");
+    expect(signed.searchParams.has("x-amz-meta-operationid")).toBe(false);
+    expect(signed.searchParams.has("x-amz-meta-tenantref")).toBe(false);
     expect(signed.searchParams.get("X-Amz-SignedHeaders")?.split(";")).toEqual([
       "content-length",
       "content-type",
       "host",
       "if-none-match",
+      "x-amz-meta-operationid",
+      "x-amz-meta-tenantref",
     ]);
   });
 });

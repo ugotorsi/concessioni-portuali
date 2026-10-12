@@ -219,6 +219,7 @@ export async function initiateDirectDocumentUpload(input: DirectDocumentUploadIn
     headers: {
       "Content-Type": authorized.file.type.toLowerCase(),
       "If-None-Match": "*",
+      ...Object.fromEntries(Object.entries(authorized.storageMetadata).map(([key, value]) => [`x-amz-meta-${key}`, value])),
     },
   };
 }
@@ -237,9 +238,13 @@ export async function completeDirectDocumentUpload(input: DirectDocumentUploadIn
   if (head.mimeType !== authorized.file.type.toLowerCase()) {
     throw new Error("Il tipo dichiarato dell'oggetto non corrisponde all'upload autorizzato.");
   }
-  for (const [key, value] of Object.entries(authorized.storageMetadata)) {
-    if (head.metadata[key] !== value) {
-      throw new Error("Identità dell'oggetto caricato non valida.");
+  const identityMetadata = Object.entries(authorized.storageMetadata);
+  const hasIdentityMetadata = identityMetadata.some(([key]) => head.metadata[key] !== undefined);
+  if (hasIdentityMetadata) {
+    for (const [key, value] of identityMetadata) {
+      if (head.metadata[key] !== value) {
+        throw new Error("Identità dell'oggetto caricato non valida.");
+      }
     }
   }
   const read = await storage.readBounded(authorized.storageKey, getDocumentMaxBytes());

@@ -107,14 +107,22 @@ I file fino a 512 KiB continuano a usare la Server Action esistente. La soglia l
 
 Prima di firmare l'URL, il server verifica sessione, ruolo, tenant e riferimenti del fascicolo. Al completamento legge l'oggetto da R2, verifica chiave, metadati di ambito, dimensione, tipo effettivo e SHA-256 calcolato lato server, poi riusa la registrazione atomica di `Documento`, `SourceFileVersion`, audit e job di estrazione. Un tentativo interrotto puo essere ripreso con lo stesso identificativo operazione. Gli oggetti non confermati non vengono cancellati automaticamente; la loro eventuale bonifica deve usare una policy separata con periodo di conservazione e verifica dell'assenza di riferimenti DB.
 
-I metadati di ambito sono inclusi nella query firmata dell'URL e non devono essere reinviati dal browser come header `x-amz-meta-*`. Il bucket R2 deve autorizzare soltanto l'origine operativa e gli header effettivamente inviati:
+I metadati di ambito sono firmati come header `x-amz-meta-*` non trasferibili nella query e devono corrispondere esattamente a quelli inviati dal browser. Il bucket R2 deve autorizzare soltanto l'origine operativa e gli header effettivamente inviati:
 
 ```json
 [
   {
     "AllowedOrigins": ["https://app.noetra.it"],
     "AllowedMethods": ["PUT"],
-    "AllowedHeaders": ["Content-Type", "If-None-Match"],
+    "AllowedHeaders": [
+      "Content-Type",
+      "If-None-Match",
+      "x-amz-meta-operationid",
+      "x-amz-meta-tenantref",
+      "x-amz-meta-actorref",
+      "x-amz-meta-scopefingerprint",
+      "x-amz-meta-originalnamehash"
+    ],
     "ExposeHeaders": ["ETag"],
     "MaxAgeSeconds": 3600
   }
