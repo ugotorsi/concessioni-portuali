@@ -84,6 +84,41 @@ function dependencies(
 }
 
 describe("document batch OCR authorization", () => {
+  it("requires a real authenticated session with a matching tenant context", async () => {
+    const harness = dependencies({
+      getCurrentUser: vi.fn().mockResolvedValue(null),
+    });
+    await expect(issueDocumentOcrAuthorization("attempt-direct-failed", harness))
+      .rejects.toMatchObject({ code: "UNAUTHENTICATED" });
+    expect(harness.persistAuthorization).not.toHaveBeenCalled();
+  });
+
+  it("rejects a role that cannot authorize OCR", async () => {
+    const harness = dependencies({
+      getCurrentUser: vi.fn().mockResolvedValue({ ...actor, role: "GIURIDICO" }),
+      getCurrentTenantContext: vi.fn().mockResolvedValue({
+        ...tenantContext(),
+        role: "GIURIDICO",
+      }),
+    });
+    await expect(issueDocumentOcrAuthorization("attempt-direct-failed", harness))
+      .rejects.toMatchObject({ code: "ROLE_NOT_ALLOWED" });
+    expect(harness.persistAuthorization).not.toHaveBeenCalled();
+  });
+
+  it("rejects a current-version attempt belonging to another tenant", async () => {
+    const harness = dependencies({
+      getCurrentTenantContext: vi.fn().mockResolvedValue({
+        ...tenantContext(),
+        accessibleTenantIds: ["tenant-2"],
+        defaultTenantId: "tenant-2",
+      }),
+    });
+    await expect(issueDocumentOcrAuthorization("attempt-direct-failed", harness))
+      .rejects.toMatchObject({ code: "TENANT_ACCESS_DENIED" });
+    expect(harness.persistAuthorization).not.toHaveBeenCalled();
+  });
+
   it("issues one deterministic, auditable authorization for OCR_REQUIRED", async () => {
     const harness = dependencies();
     const first = await issueDocumentOcrAuthorization("attempt-direct-failed", harness);

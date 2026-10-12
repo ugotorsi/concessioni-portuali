@@ -56,6 +56,7 @@ export interface DocumentoListItem {
   reportId: string | null;
   downloadUrl: string;
   uploadedByUserEmail: string | null;
+  ocrFailedAttemptId: string | null;
 }
 
 export interface DocumentiFiltersData {
@@ -178,6 +179,20 @@ export async function getDocumentiList(params: GetDocumentiListParams): Promise<
       pagamentoId: true,
       reportId: true,
       uploadedByUserEmail: true,
+      currentFileVersion: {
+        select: {
+          extractionAttempts: {
+            where: {
+              policyVersion: "DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1",
+              outcome: "FAILED",
+              failureCode: "OCR_REQUIRED",
+            },
+            orderBy: { createdAt: "desc" },
+            take: 1,
+            select: { id: true },
+          },
+        },
+      },
     },
   });
 
@@ -185,6 +200,7 @@ export async function getDocumentiList(params: GetDocumentiListParams): Promise<
     ...row,
     dimensioneBytes: row.dimensioneBytes ?? null,
     downloadUrl: `/documenti/${row.id}/download`,
+    ocrFailedAttemptId: row.currentFileVersion?.extractionAttempts[0]?.id ?? null,
   }));
 }
 

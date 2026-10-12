@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { BACKOFFICE_ROLES, requireRole } from "@/lib/auth";
 import { formatDateIT, formatEnumLabel } from "@/lib/utils";
 import { archiveDocumentoAction, updateDocumentoMetadataAction } from "@/server/actions/documenti";
+import { startDocumentoOcrAction } from "@/server/actions/document-ocr";
 import { DOCUMENT_CANALE_VALUES, DOCUMENT_DIREZIONE_VALUES } from "@/server/documents/protocollo";
 import {
   DOCUMENT_STATO_VALUES,
@@ -26,6 +27,8 @@ interface DocumentiPageProps {
     direzione?: (typeof DOCUMENT_DIREZIONE_VALUES)[number];
     canale?: (typeof DOCUMENT_CANALE_VALUES)[number];
     pecWarning?: "SI" | "NO";
+    ocr?: "queued" | "error";
+    ocrMessage?: string;
   }>;
 }
 
@@ -42,6 +45,7 @@ export const dynamic = "force-dynamic";
 export default async function DocumentiPage({ searchParams }: DocumentiPageProps) {
   const role = await requireRole();
   const canUpload = BACKOFFICE_ROLES.includes(role);
+  const canStartOcr = role === "ADMIN" || role === "TECNICO";
   const params = (await searchParams) ?? {};
 
   const [filters, items] = await Promise.all([
@@ -62,6 +66,16 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
       subtitle="Consulta e gestisci i documenti collegati alle attività istruttorie"
     >
       <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-4">
+        {params.ocr === "queued" ? (
+          <div role="status" className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+            Elaborazione OCR autorizzata e aggiunta alla coda.
+          </div>
+        ) : null}
+        {params.ocr === "error" ? (
+          <div role="alert" className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+            {params.ocrMessage ?? "Impossibile avviare l'elaborazione OCR."}
+          </div>
+        ) : null}
         <form className="rounded-md border border-slate-200 bg-white p-4" method="GET">
           <div className="grid gap-3 md:grid-cols-3">
               <label>
@@ -351,6 +365,14 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
                               {item.mimeType?.startsWith("application/pdf") || item.mimeType?.startsWith("image/") ? (
                                 <a href={item.downloadUrl} className="text-xs text-slate-600 underline underline-offset-4">Scarica originale</a>
                               ) : null}
+                          {canStartOcr && item.ocrFailedAttemptId ? (
+                            <form action={startDocumentoOcrAction}>
+                              <input type="hidden" name="failedAttemptId" value={item.ocrFailedAttemptId} />
+                              <Button type="submit" variant="outline">
+                                Avvia OCR
+                              </Button>
+                            </form>
+                          ) : null}
                           {canUpload ? (
                             <details>
                               <summary className="cursor-pointer text-xs font-medium text-slate-600">Modifica informazioni</summary>
