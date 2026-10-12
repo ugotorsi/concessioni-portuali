@@ -38,6 +38,7 @@ function completed(): CompletedDocumentExtraction {
   return {
     attemptId: "attempt-1",
     executionKey: "job-1",
+    policyVersion: DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
     retryAuthorization: null,
     source: {
       documentoId: "document-1",

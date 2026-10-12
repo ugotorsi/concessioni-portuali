@@ -65,10 +65,63 @@ ASYNC_PROVIDER_EXECUTION_ENABLED=false
 
 Keep `ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST` set to the explicitly authorized E2E
 procedimenti during canary activation. Do not run the worker with empty allowlists
-while unrelated jobs are queued. The dedicated command rejects startup unless dedicated
-mode is enabled, the operation allowlist contains only `DOCUMENT_EXTRACTION_V1`, the
-procedimento allowlist is non-empty, and provider execution is disabled. It does not
-load the general handler registry or run application lifecycle bootstraps.
+while unrelated jobs are queued. The dedicated command rejects startup unless dedicated mode is enabled, the operation
+allowlist contains only document-extraction operations, the procedimento allowlist is
+non-empty, and provider execution is disabled. It does not load the general handler
+registry or run application lifecycle bootstraps.
+
+Scanned PDFs are not retried under `DOCUMENT_EXTRACTION_V1`. An `ADMIN` or `TECNICO`
+must explicitly authorize an immutable `OCR_REQUIRED` attempt (or an
+`ARTIFACT_TOO_LARGE` attempt for the V1 25-30 MB gap). This admits a versioned
+`DOCUMENT_OCR_COORDINATOR_V2` job under
+`DOCUMENT_OCR_BATCH_EXTRACTION_POLICY_V2`; it never mutates or requeues the failed V1
+job.
+
+Do not add OCR to the existing direct-extraction worker. Run a separate service using
+the OCR-specific command `npm run worker:document-ocr`, with a distinct worker ID and an OCR-only operation
+allowlist:
+
+```text
+ASYNC_WORKER_CONCURRENCY=1
+ASYNC_WORKER_DEDICATED_MODE=true
+ASYNC_WORKER_OPERATION_ALLOWLIST=DOCUMENT_OCR_COORDINATOR_V2,DOCUMENT_OCR_PAGE_BATCH_V2
+ASYNC_PROVIDER_EXECUTION_ENABLED=false
+NODE_OPTIONS=--max-old-space-size=1024
+```
+
+Local OCR uses the bundled Italian Tesseract model and does not call an AI provider.
+The coordinator validates the immutable file manifest and reads the structural PDF page
+count without rendering or OCR. The admitted limit is 30 MiB and 100 pages. Page jobs
+process inclusive ranges of five pages sequentially, with a 45-second OCR timeout per
+page and an 8-million-pixel raster limit. The raster cap bounds the canvas RGBA
+allocation to about 32 MB before PNG and OCR working memory.
+
+Each completed page is persisted immediately with its source version, page number,
+method, raw and normalized text, SHA-256, OCR confidence, warnings, and tool versions.
+The page record is immutable. A retry skips existing checkpoints, and the final page
+atomically creates one successful `DocumentExtractionAttempt` for the complete document.
+Only that final attempt can update the fascicolo corpus and downstream legal analysis.
+Only the next range is admitted after a range completes, so long documents yield the
+OCR queue between batches instead of enqueueing all 20 ranges at once. Use
+`ASYNC_WORKER_CONCURRENCY=1`; do not run two OCR jobs concurrently in the same 2 GB
+instance.
+
+Measured local profiles with Node's old-space limit set to 320 MB reached approximately
+509 MB RSS for a 20-page A4 scanned PDF and 644 MB RSS for one page near the pixel
+boundary. A 512 MB Render instance therefore has no safe operating margin and must not
+enable either V2 OCR operation. Use a separate `1c-2g` Render background worker (2 GB
+RAM) with a distinct worker ID and a non-empty procedimento allowlist. The
+`20261012_document_ocr_batch_pipeline` migration is required before activation. Keep
+both OCR operations absent from every deployed allowlist until the migration, service,
+and explicit processing authorization have separately been approved.
+
+The V2 batch path was also profiled with `NODE_OPTIONS=--max-old-space-size=1024`
+against image-only A4 PDFs while reopening the source for each five-page job, as the
+production worker does. A 50-page, 20.05 MB file completed in 262.5 seconds with a
+688.5 MiB peak RSS. A 100-page, 29.96 MB file completed in 533.7 seconds with a
+730.6 MiB peak RSS. Structural preflight returned the exact page count in both cases,
+and all pages were extracted. These measurements support one concurrent OCR batch on
+2 GB; they do not support OCR on 512 MB or multiple concurrent batches per instance.
 
 ## Persistent Service
 

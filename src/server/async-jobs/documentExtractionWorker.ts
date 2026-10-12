@@ -15,9 +15,13 @@ export const documentExtractionAsyncJobRegistry = new AsyncJobHandlerRegistry([
   createDocumentExtractionHandler(),
 ]);
 
-function hasExactOperationAllowlist(operationAllowlist: readonly string[]): boolean {
-  return operationAllowlist.length === 1
-    && operationAllowlist[0] === DOCUMENT_EXTRACTION_OPERATION;
+const DOCUMENT_EXTRACTION_OPERATIONS = new Set<string>([
+  DOCUMENT_EXTRACTION_OPERATION,
+]);
+
+function hasDocumentExtractionOnlyAllowlist(operationAllowlist: readonly string[]): boolean {
+  return operationAllowlist.length > 0
+    && operationAllowlist.every((operation) => DOCUMENT_EXTRACTION_OPERATIONS.has(operation));
 }
 
 export function assertDocumentExtractionWorkerConfig(
@@ -25,7 +29,7 @@ export function assertDocumentExtractionWorkerConfig(
 ): void {
   if (
     !config.dedicatedMode
-    || !hasExactOperationAllowlist(config.operationAllowlist)
+    || !hasDocumentExtractionOnlyAllowlist(config.operationAllowlist)
     || config.procedimentoAllowlist.length === 0
     || config.providerExecutionEnabled !== false
   ) {
@@ -41,7 +45,7 @@ export async function drainOneDocumentExtractionAsyncJob(input: {
   providerExecutionEnabled?: boolean;
 }): Promise<DrainOneAsyncJobOutcome> {
   if (
-    !hasExactOperationAllowlist(input.operationAllowlist)
+    !hasDocumentExtractionOnlyAllowlist(input.operationAllowlist)
     || input.procedimentoAllowlist.length === 0
     || input.providerExecutionEnabled !== false
   ) {

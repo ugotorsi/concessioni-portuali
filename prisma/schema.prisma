@@ -739,6 +739,13 @@ enum DocumentExtractionMethod {
   OCR
 }
 
+enum DocumentOcrRunStatus {
+  PLANNED
+  PROCESSING
+  SUCCEEDED
+  FAILED
+}
+
 enum NeutralIntakeClassificationOutcome {
   LEGAL_SOURCE_CANDIDATE
   CASE_DOCUMENT
@@ -1941,6 +1948,7 @@ model Documento {
   currentFileVersion    DocumentFileVersion?  @relation("CurrentDocumentFileVersion", fields: [currentFileVersionId, id, enteId], references: [id, documentId, canonicalEnteId], onDelete: Restrict, onUpdate: NoAction, map: "Documento_currentFileVersion_fkey")
   fascicoloKnowledgeEvidence FascicoloKnowledgeEvidence[]
   extractionAttempts         DocumentExtractionAttempt[]
+  ocrRuns                    DocumentOcrRun[]
 
   @@index([uploadedByUserId])
   @@index([statoDocumento])
@@ -1985,6 +1993,7 @@ model DocumentFileVersion {
   currentFor   Documento? @relation("CurrentDocumentFileVersion")
   fascicoloKnowledgeEvidence FascicoloKnowledgeEvidence[]
   extractionAttempts         DocumentExtractionAttempt[]
+  ocrRuns                    DocumentOcrRun[]
 
   @@unique([documentId, sha256])
   @@unique([storageProvider, storageKey])
@@ -2029,6 +2038,8 @@ model DocumentExtractionAttempt {
   pages               DocumentExtractionPage[]
   retryOfAttempt      DocumentExtractionAttempt?  @relation("DocumentExtractionRetries", fields: [retryOfAttemptId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   retries             DocumentExtractionAttempt[] @relation("DocumentExtractionRetries")
+  ocrSourceRuns       DocumentOcrRun[]             @relation("DocumentOcrSourceAttempt")
+  ocrCompletedRun     DocumentOcrRun?              @relation("DocumentOcrCompletedAttempt")
   fascicoloKnowledgeEvidence FascicoloKnowledgeEvidence[]
 
   @@index([documentFileVersionId, policyVersion, outcome], map: "document_extraction_canonical_result_idx")
@@ -2056,6 +2067,66 @@ model DocumentExtractionPage {
 
   @@unique([extractionAttemptId, pageNumber])
   @@index([textSha256])
+}
+
+model DocumentOcrRun {
+  id                    String               @id @default(cuid())
+  coordinatorJobId      String               @unique
+  documentoId           String
+  documentFileVersionId String
+  tenantId              String
+  procedimentoId        String
+  sourceAttemptId       String
+  authorizationRef      String
+  policyVersion         String
+  sourceSha256          String               @db.Char(64)
+  sourceSizeBytes       Int
+  declaredMimeType      String
+  pageCount             Int
+  batchSize             Int
+  status                DocumentOcrRunStatus @default(PLANNED)
+  completedPageCount    Int                  @default(0)
+  extractionAttemptId   String?              @unique
+  failureCode           String?
+  startedAt             DateTime?
+  completedAt           DateTime?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+
+  documento           Documento                   @relation(fields: [documentoId, tenantId, procedimentoId], references: [id, enteId, procedimentoId], onDelete: Restrict, onUpdate: NoAction)
+  documentFileVersion DocumentFileVersion         @relation(fields: [documentFileVersionId, documentoId, tenantId], references: [id, documentId, canonicalEnteId], onDelete: Restrict, onUpdate: NoAction)
+  sourceAttempt       DocumentExtractionAttempt   @relation("DocumentOcrSourceAttempt", fields: [sourceAttemptId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  extractionAttempt   DocumentExtractionAttempt?  @relation("DocumentOcrCompletedAttempt", fields: [extractionAttemptId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  pages               DocumentOcrPageCheckpoint[]
+
+  @@unique([documentFileVersionId, policyVersion], map: "document_ocr_run_version_policy_uq")
+  @@index([tenantId, procedimentoId, status, createdAt], map: "document_ocr_run_scope_status_idx")
+  @@index([sourceAttemptId], map: "document_ocr_run_source_attempt_idx")
+}
+
+model DocumentOcrPageCheckpoint {
+  id                       String                   @id @default(cuid())
+  runId                    String
+  pageNumber               Int
+  extractionMethod         DocumentExtractionMethod
+  text                     String
+  normalizedText           String
+  textSha256               String                   @db.Char(64)
+  normalizedCharacterCount Int
+  ocrConfidence            Float?
+  warnings                 Json?
+  directExtractorName      String?
+  directExtractorVersion   String?
+  ocrExtractorName         String?
+  ocrExtractorVersion      String?
+  rasterizerName           String?
+  rasterizerVersion        String?
+  completedAt              DateTime                 @default(now())
+
+  run DocumentOcrRun @relation(fields: [runId], references: [id], onDelete: Restrict)
+
+  @@unique([runId, pageNumber], map: "document_ocr_page_run_page_uq")
+  @@index([textSha256], map: "document_ocr_page_sha_idx")
 }
 
 model NeutralIntake {

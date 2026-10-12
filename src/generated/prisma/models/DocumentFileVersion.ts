@@ -286,6 +286,7 @@ export type DocumentFileVersionWhereInput = {
   currentFor?: Prisma.XOR<Prisma.DocumentoNullableScalarRelationFilter, Prisma.DocumentoWhereInput> | null
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceListRelationFilter
   extractionAttempts?: Prisma.DocumentExtractionAttemptListRelationFilter
+  ocrRuns?: Prisma.DocumentOcrRunListRelationFilter
 }
 
 export type DocumentFileVersionOrderByWithRelationInput = {
@@ -308,6 +309,7 @@ export type DocumentFileVersionOrderByWithRelationInput = {
   currentFor?: Prisma.DocumentoOrderByWithRelationInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceOrderByRelationAggregateInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptOrderByRelationAggregateInput
+  ocrRuns?: Prisma.DocumentOcrRunOrderByRelationAggregateInput
 }
 
 export type DocumentFileVersionWhereUniqueInput = Prisma.AtLeast<{
@@ -336,6 +338,7 @@ export type DocumentFileVersionWhereUniqueInput = Prisma.AtLeast<{
   currentFor?: Prisma.XOR<Prisma.DocumentoNullableScalarRelationFilter, Prisma.DocumentoWhereInput> | null
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceListRelationFilter
   extractionAttempts?: Prisma.DocumentExtractionAttemptListRelationFilter
+  ocrRuns?: Prisma.DocumentOcrRunListRelationFilter
 }, "id" | "documentId_sha256" | "storageProvider_storageKey" | "id_documentId_canonicalEnteId">
 
 export type DocumentFileVersionOrderByWithAggregationInput = {
@@ -395,6 +398,7 @@ export type DocumentFileVersionCreateInput = {
   currentFor?: Prisma.DocumentoCreateNestedOneWithoutCurrentFileVersionInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutDocumentFileVersionInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutDocumentFileVersionInput
+  ocrRuns?: Prisma.DocumentOcrRunCreateNestedManyWithoutDocumentFileVersionInput
 }
 
 export type DocumentFileVersionUncheckedCreateInput = {
@@ -414,6 +418,7 @@ export type DocumentFileVersionUncheckedCreateInput = {
   currentFor?: Prisma.DocumentoUncheckedCreateNestedOneWithoutCurrentFileVersionInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutDocumentFileVersionInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutDocumentFileVersionInput
+  ocrRuns?: Prisma.DocumentOcrRunUncheckedCreateNestedManyWithoutDocumentFileVersionInput
 }
 
 export type DocumentFileVersionUpdateInput = {
@@ -433,6 +438,7 @@ export type DocumentFileVersionUpdateInput = {
   currentFor?: Prisma.DocumentoUpdateOneWithoutCurrentFileVersionNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutDocumentFileVersionNestedInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutDocumentFileVersionNestedInput
+  ocrRuns?: Prisma.DocumentOcrRunUpdateManyWithoutDocumentFileVersionNestedInput
 }
 
 export type DocumentFileVersionUncheckedUpdateInput = {
@@ -452,6 +458,7 @@ export type DocumentFileVersionUncheckedUpdateInput = {
   currentFor?: Prisma.DocumentoUncheckedUpdateOneWithoutCurrentFileVersionNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutDocumentFileVersionNestedInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutDocumentFileVersionNestedInput
+  ocrRuns?: Prisma.DocumentOcrRunUncheckedUpdateManyWithoutDocumentFileVersionNestedInput
 }
 
 export type DocumentFileVersionCreateManyInput = {
@@ -747,6 +754,20 @@ export type DocumentFileVersionUpdateOneRequiredWithoutExtractionAttemptsNestedI
   update?: Prisma.XOR<Prisma.XOR<Prisma.DocumentFileVersionUpdateToOneWithWhereWithoutExtractionAttemptsInput, Prisma.DocumentFileVersionUpdateWithoutExtractionAttemptsInput>, Prisma.DocumentFileVersionUncheckedUpdateWithoutExtractionAttemptsInput>
 }
 
+export type DocumentFileVersionCreateNestedOneWithoutOcrRunsInput = {
+  create?: Prisma.XOR<Prisma.DocumentFileVersionCreateWithoutOcrRunsInput, Prisma.DocumentFileVersionUncheckedCreateWithoutOcrRunsInput>
+  connectOrCreate?: Prisma.DocumentFileVersionCreateOrConnectWithoutOcrRunsInput
+  connect?: Prisma.DocumentFileVersionWhereUniqueInput
+}
+
+export type DocumentFileVersionUpdateOneRequiredWithoutOcrRunsNestedInput = {
+  create?: Prisma.XOR<Prisma.DocumentFileVersionCreateWithoutOcrRunsInput, Prisma.DocumentFileVersionUncheckedCreateWithoutOcrRunsInput>
+  connectOrCreate?: Prisma.DocumentFileVersionCreateOrConnectWithoutOcrRunsInput
+  upsert?: Prisma.DocumentFileVersionUpsertWithoutOcrRunsInput
+  connect?: Prisma.DocumentFileVersionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DocumentFileVersionUpdateToOneWithWhereWithoutOcrRunsInput, Prisma.DocumentFileVersionUpdateWithoutOcrRunsInput>, Prisma.DocumentFileVersionUncheckedUpdateWithoutOcrRunsInput>
+}
+
 export type DocumentFileVersionCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput = {
   create?: Prisma.XOR<Prisma.DocumentFileVersionCreateWithoutFascicoloKnowledgeEvidenceInput, Prisma.DocumentFileVersionUncheckedCreateWithoutFascicoloKnowledgeEvidenceInput>
   connectOrCreate?: Prisma.DocumentFileVersionCreateOrConnectWithoutFascicoloKnowledgeEvidenceInput
@@ -779,6 +800,7 @@ export type DocumentFileVersionCreateWithoutEnteInput = {
   currentFor?: Prisma.DocumentoCreateNestedOneWithoutCurrentFileVersionInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutDocumentFileVersionInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutDocumentFileVersionInput
+  ocrRuns?: Prisma.DocumentOcrRunCreateNestedManyWithoutDocumentFileVersionInput
 }
 
 export type DocumentFileVersionUncheckedCreateWithoutEnteInput = {
@@ -797,6 +819,7 @@ export type DocumentFileVersionUncheckedCreateWithoutEnteInput = {
   currentFor?: Prisma.DocumentoUncheckedCreateNestedOneWithoutCurrentFileVersionInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutDocumentFileVersionInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutDocumentFileVersionInput
+  ocrRuns?: Prisma.DocumentOcrRunUncheckedCreateNestedManyWithoutDocumentFileVersionInput
 }
 
 export type DocumentFileVersionCreateOrConnectWithoutEnteInput = {
@@ -860,6 +883,7 @@ export type DocumentFileVersionCreateWithoutCreatedByUserInput = {
   currentFor?: Prisma.DocumentoCreateNestedOneWithoutCurrentFileVersionInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutDocumentFileVersionInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutDocumentFileVersionInput
+  ocrRuns?: Prisma.DocumentOcrRunCreateNestedManyWithoutDocumentFileVersionInput
 }
 
 export type DocumentFileVersionUncheckedCreateWithoutCreatedByUserInput = {
@@ -878,6 +902,7 @@ export type DocumentFileVersionUncheckedCreateWithoutCreatedByUserInput = {
   currentFor?: Prisma.DocumentoUncheckedCreateNestedOneWithoutCurrentFileVersionInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutDocumentFileVersionInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutDocumentFileVersionInput
+  ocrRuns?: Prisma.DocumentOcrRunUncheckedCreateNestedManyWithoutDocumentFileVersionInput
 }
 
 export type DocumentFileVersionCreateOrConnectWithoutCreatedByUserInput = {
@@ -922,6 +947,7 @@ export type DocumentFileVersionCreateWithoutDocumentInput = {
   currentFor?: Prisma.DocumentoCreateNestedOneWithoutCurrentFileVersionInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutDocumentFileVersionInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutDocumentFileVersionInput
+  ocrRuns?: Prisma.DocumentOcrRunCreateNestedManyWithoutDocumentFileVersionInput
 }
 
 export type DocumentFileVersionUncheckedCreateWithoutDocumentInput = {
@@ -940,6 +966,7 @@ export type DocumentFileVersionUncheckedCreateWithoutDocumentInput = {
   currentFor?: Prisma.DocumentoUncheckedCreateNestedOneWithoutCurrentFileVersionInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutDocumentFileVersionInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutDocumentFileVersionInput
+  ocrRuns?: Prisma.DocumentOcrRunUncheckedCreateNestedManyWithoutDocumentFileVersionInput
 }
 
 export type DocumentFileVersionCreateOrConnectWithoutDocumentInput = {
@@ -968,6 +995,7 @@ export type DocumentFileVersionCreateWithoutCurrentForInput = {
   createdByUser?: Prisma.UserCreateNestedOneWithoutDocumentFileVersionsCreatedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutDocumentFileVersionInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutDocumentFileVersionInput
+  ocrRuns?: Prisma.DocumentOcrRunCreateNestedManyWithoutDocumentFileVersionInput
 }
 
 export type DocumentFileVersionUncheckedCreateWithoutCurrentForInput = {
@@ -986,6 +1014,7 @@ export type DocumentFileVersionUncheckedCreateWithoutCurrentForInput = {
   createdAt?: Date | string
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutDocumentFileVersionInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutDocumentFileVersionInput
+  ocrRuns?: Prisma.DocumentOcrRunUncheckedCreateNestedManyWithoutDocumentFileVersionInput
 }
 
 export type DocumentFileVersionCreateOrConnectWithoutCurrentForInput = {
@@ -1036,6 +1065,7 @@ export type DocumentFileVersionUpdateWithoutCurrentForInput = {
   createdByUser?: Prisma.UserUpdateOneWithoutDocumentFileVersionsCreatedNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutDocumentFileVersionNestedInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutDocumentFileVersionNestedInput
+  ocrRuns?: Prisma.DocumentOcrRunUpdateManyWithoutDocumentFileVersionNestedInput
 }
 
 export type DocumentFileVersionUncheckedUpdateWithoutCurrentForInput = {
@@ -1054,6 +1084,7 @@ export type DocumentFileVersionUncheckedUpdateWithoutCurrentForInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutDocumentFileVersionNestedInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutDocumentFileVersionNestedInput
+  ocrRuns?: Prisma.DocumentOcrRunUncheckedUpdateManyWithoutDocumentFileVersionNestedInput
 }
 
 export type DocumentFileVersionCreateWithoutExtractionAttemptsInput = {
@@ -1072,6 +1103,7 @@ export type DocumentFileVersionCreateWithoutExtractionAttemptsInput = {
   createdByUser?: Prisma.UserCreateNestedOneWithoutDocumentFileVersionsCreatedInput
   currentFor?: Prisma.DocumentoCreateNestedOneWithoutCurrentFileVersionInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutDocumentFileVersionInput
+  ocrRuns?: Prisma.DocumentOcrRunCreateNestedManyWithoutDocumentFileVersionInput
 }
 
 export type DocumentFileVersionUncheckedCreateWithoutExtractionAttemptsInput = {
@@ -1090,6 +1122,7 @@ export type DocumentFileVersionUncheckedCreateWithoutExtractionAttemptsInput = {
   createdAt?: Date | string
   currentFor?: Prisma.DocumentoUncheckedCreateNestedOneWithoutCurrentFileVersionInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutDocumentFileVersionInput
+  ocrRuns?: Prisma.DocumentOcrRunUncheckedCreateNestedManyWithoutDocumentFileVersionInput
 }
 
 export type DocumentFileVersionCreateOrConnectWithoutExtractionAttemptsInput = {
@@ -1124,6 +1157,7 @@ export type DocumentFileVersionUpdateWithoutExtractionAttemptsInput = {
   createdByUser?: Prisma.UserUpdateOneWithoutDocumentFileVersionsCreatedNestedInput
   currentFor?: Prisma.DocumentoUpdateOneWithoutCurrentFileVersionNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutDocumentFileVersionNestedInput
+  ocrRuns?: Prisma.DocumentOcrRunUpdateManyWithoutDocumentFileVersionNestedInput
 }
 
 export type DocumentFileVersionUncheckedUpdateWithoutExtractionAttemptsInput = {
@@ -1142,6 +1176,99 @@ export type DocumentFileVersionUncheckedUpdateWithoutExtractionAttemptsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   currentFor?: Prisma.DocumentoUncheckedUpdateOneWithoutCurrentFileVersionNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutDocumentFileVersionNestedInput
+  ocrRuns?: Prisma.DocumentOcrRunUncheckedUpdateManyWithoutDocumentFileVersionNestedInput
+}
+
+export type DocumentFileVersionCreateWithoutOcrRunsInput = {
+  id?: string
+  storageProvider: string
+  storageKey: string
+  storageBucket?: string | null
+  mimeType: string
+  sizeBytes: number
+  sha256: string
+  createdByActorId: string
+  createdByRole: string
+  createdAt?: Date | string
+  document: Prisma.DocumentoCreateNestedOneWithoutFileVersionsInput
+  ente: Prisma.EnteCreateNestedOneWithoutDocumentFileVersionsInput
+  createdByUser?: Prisma.UserCreateNestedOneWithoutDocumentFileVersionsCreatedInput
+  currentFor?: Prisma.DocumentoCreateNestedOneWithoutCurrentFileVersionInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutDocumentFileVersionInput
+  extractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutDocumentFileVersionInput
+}
+
+export type DocumentFileVersionUncheckedCreateWithoutOcrRunsInput = {
+  id?: string
+  documentId: string
+  canonicalEnteId: string
+  storageProvider: string
+  storageKey: string
+  storageBucket?: string | null
+  mimeType: string
+  sizeBytes: number
+  sha256: string
+  createdByUserId?: string | null
+  createdByActorId: string
+  createdByRole: string
+  createdAt?: Date | string
+  currentFor?: Prisma.DocumentoUncheckedCreateNestedOneWithoutCurrentFileVersionInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutDocumentFileVersionInput
+  extractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutDocumentFileVersionInput
+}
+
+export type DocumentFileVersionCreateOrConnectWithoutOcrRunsInput = {
+  where: Prisma.DocumentFileVersionWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocumentFileVersionCreateWithoutOcrRunsInput, Prisma.DocumentFileVersionUncheckedCreateWithoutOcrRunsInput>
+}
+
+export type DocumentFileVersionUpsertWithoutOcrRunsInput = {
+  update: Prisma.XOR<Prisma.DocumentFileVersionUpdateWithoutOcrRunsInput, Prisma.DocumentFileVersionUncheckedUpdateWithoutOcrRunsInput>
+  create: Prisma.XOR<Prisma.DocumentFileVersionCreateWithoutOcrRunsInput, Prisma.DocumentFileVersionUncheckedCreateWithoutOcrRunsInput>
+  where?: Prisma.DocumentFileVersionWhereInput
+}
+
+export type DocumentFileVersionUpdateToOneWithWhereWithoutOcrRunsInput = {
+  where?: Prisma.DocumentFileVersionWhereInput
+  data: Prisma.XOR<Prisma.DocumentFileVersionUpdateWithoutOcrRunsInput, Prisma.DocumentFileVersionUncheckedUpdateWithoutOcrRunsInput>
+}
+
+export type DocumentFileVersionUpdateWithoutOcrRunsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  storageProvider?: Prisma.StringFieldUpdateOperationsInput | string
+  storageKey?: Prisma.StringFieldUpdateOperationsInput | string
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  sha256?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByActorId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByRole?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  document?: Prisma.DocumentoUpdateOneRequiredWithoutFileVersionsNestedInput
+  ente?: Prisma.EnteUpdateOneRequiredWithoutDocumentFileVersionsNestedInput
+  createdByUser?: Prisma.UserUpdateOneWithoutDocumentFileVersionsCreatedNestedInput
+  currentFor?: Prisma.DocumentoUpdateOneWithoutCurrentFileVersionNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutDocumentFileVersionNestedInput
+  extractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutDocumentFileVersionNestedInput
+}
+
+export type DocumentFileVersionUncheckedUpdateWithoutOcrRunsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  documentId?: Prisma.StringFieldUpdateOperationsInput | string
+  canonicalEnteId?: Prisma.StringFieldUpdateOperationsInput | string
+  storageProvider?: Prisma.StringFieldUpdateOperationsInput | string
+  storageKey?: Prisma.StringFieldUpdateOperationsInput | string
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  sha256?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdByActorId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByRole?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  currentFor?: Prisma.DocumentoUncheckedUpdateOneWithoutCurrentFileVersionNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutDocumentFileVersionNestedInput
+  extractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutDocumentFileVersionNestedInput
 }
 
 export type DocumentFileVersionCreateWithoutFascicoloKnowledgeEvidenceInput = {
@@ -1160,6 +1287,7 @@ export type DocumentFileVersionCreateWithoutFascicoloKnowledgeEvidenceInput = {
   createdByUser?: Prisma.UserCreateNestedOneWithoutDocumentFileVersionsCreatedInput
   currentFor?: Prisma.DocumentoCreateNestedOneWithoutCurrentFileVersionInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutDocumentFileVersionInput
+  ocrRuns?: Prisma.DocumentOcrRunCreateNestedManyWithoutDocumentFileVersionInput
 }
 
 export type DocumentFileVersionUncheckedCreateWithoutFascicoloKnowledgeEvidenceInput = {
@@ -1178,6 +1306,7 @@ export type DocumentFileVersionUncheckedCreateWithoutFascicoloKnowledgeEvidenceI
   createdAt?: Date | string
   currentFor?: Prisma.DocumentoUncheckedCreateNestedOneWithoutCurrentFileVersionInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutDocumentFileVersionInput
+  ocrRuns?: Prisma.DocumentOcrRunUncheckedCreateNestedManyWithoutDocumentFileVersionInput
 }
 
 export type DocumentFileVersionCreateOrConnectWithoutFascicoloKnowledgeEvidenceInput = {
@@ -1212,6 +1341,7 @@ export type DocumentFileVersionUpdateWithoutFascicoloKnowledgeEvidenceInput = {
   createdByUser?: Prisma.UserUpdateOneWithoutDocumentFileVersionsCreatedNestedInput
   currentFor?: Prisma.DocumentoUpdateOneWithoutCurrentFileVersionNestedInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutDocumentFileVersionNestedInput
+  ocrRuns?: Prisma.DocumentOcrRunUpdateManyWithoutDocumentFileVersionNestedInput
 }
 
 export type DocumentFileVersionUncheckedUpdateWithoutFascicoloKnowledgeEvidenceInput = {
@@ -1230,6 +1360,7 @@ export type DocumentFileVersionUncheckedUpdateWithoutFascicoloKnowledgeEvidenceI
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   currentFor?: Prisma.DocumentoUncheckedUpdateOneWithoutCurrentFileVersionNestedInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutDocumentFileVersionNestedInput
+  ocrRuns?: Prisma.DocumentOcrRunUncheckedUpdateManyWithoutDocumentFileVersionNestedInput
 }
 
 export type DocumentFileVersionCreateManyEnteInput = {
@@ -1263,6 +1394,7 @@ export type DocumentFileVersionUpdateWithoutEnteInput = {
   currentFor?: Prisma.DocumentoUpdateOneWithoutCurrentFileVersionNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutDocumentFileVersionNestedInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutDocumentFileVersionNestedInput
+  ocrRuns?: Prisma.DocumentOcrRunUpdateManyWithoutDocumentFileVersionNestedInput
 }
 
 export type DocumentFileVersionUncheckedUpdateWithoutEnteInput = {
@@ -1281,6 +1413,7 @@ export type DocumentFileVersionUncheckedUpdateWithoutEnteInput = {
   currentFor?: Prisma.DocumentoUncheckedUpdateOneWithoutCurrentFileVersionNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutDocumentFileVersionNestedInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutDocumentFileVersionNestedInput
+  ocrRuns?: Prisma.DocumentOcrRunUncheckedUpdateManyWithoutDocumentFileVersionNestedInput
 }
 
 export type DocumentFileVersionUncheckedUpdateManyWithoutEnteInput = {
@@ -1329,6 +1462,7 @@ export type DocumentFileVersionUpdateWithoutCreatedByUserInput = {
   currentFor?: Prisma.DocumentoUpdateOneWithoutCurrentFileVersionNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutDocumentFileVersionNestedInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutDocumentFileVersionNestedInput
+  ocrRuns?: Prisma.DocumentOcrRunUpdateManyWithoutDocumentFileVersionNestedInput
 }
 
 export type DocumentFileVersionUncheckedUpdateWithoutCreatedByUserInput = {
@@ -1347,6 +1481,7 @@ export type DocumentFileVersionUncheckedUpdateWithoutCreatedByUserInput = {
   currentFor?: Prisma.DocumentoUncheckedUpdateOneWithoutCurrentFileVersionNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutDocumentFileVersionNestedInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutDocumentFileVersionNestedInput
+  ocrRuns?: Prisma.DocumentOcrRunUncheckedUpdateManyWithoutDocumentFileVersionNestedInput
 }
 
 export type DocumentFileVersionUncheckedUpdateManyWithoutCreatedByUserInput = {
@@ -1395,6 +1530,7 @@ export type DocumentFileVersionUpdateWithoutDocumentInput = {
   currentFor?: Prisma.DocumentoUpdateOneWithoutCurrentFileVersionNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutDocumentFileVersionNestedInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutDocumentFileVersionNestedInput
+  ocrRuns?: Prisma.DocumentOcrRunUpdateManyWithoutDocumentFileVersionNestedInput
 }
 
 export type DocumentFileVersionUncheckedUpdateWithoutDocumentInput = {
@@ -1413,6 +1549,7 @@ export type DocumentFileVersionUncheckedUpdateWithoutDocumentInput = {
   currentFor?: Prisma.DocumentoUncheckedUpdateOneWithoutCurrentFileVersionNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutDocumentFileVersionNestedInput
   extractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutDocumentFileVersionNestedInput
+  ocrRuns?: Prisma.DocumentOcrRunUncheckedUpdateManyWithoutDocumentFileVersionNestedInput
 }
 
 export type DocumentFileVersionUncheckedUpdateManyWithoutDocumentInput = {
@@ -1438,11 +1575,13 @@ export type DocumentFileVersionUncheckedUpdateManyWithoutDocumentInput = {
 export type DocumentFileVersionCountOutputType = {
   fascicoloKnowledgeEvidence: number
   extractionAttempts: number
+  ocrRuns: number
 }
 
 export type DocumentFileVersionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   fascicoloKnowledgeEvidence?: boolean | DocumentFileVersionCountOutputTypeCountFascicoloKnowledgeEvidenceArgs
   extractionAttempts?: boolean | DocumentFileVersionCountOutputTypeCountExtractionAttemptsArgs
+  ocrRuns?: boolean | DocumentFileVersionCountOutputTypeCountOcrRunsArgs
 }
 
 /**
@@ -1469,6 +1608,13 @@ export type DocumentFileVersionCountOutputTypeCountExtractionAttemptsArgs<ExtArg
   where?: Prisma.DocumentExtractionAttemptWhereInput
 }
 
+/**
+ * DocumentFileVersionCountOutputType without action
+ */
+export type DocumentFileVersionCountOutputTypeCountOcrRunsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentOcrRunWhereInput
+}
+
 
 export type DocumentFileVersionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1490,6 +1636,7 @@ export type DocumentFileVersionSelect<ExtArgs extends runtime.Types.Extensions.I
   currentFor?: boolean | Prisma.DocumentFileVersion$currentForArgs<ExtArgs>
   fascicoloKnowledgeEvidence?: boolean | Prisma.DocumentFileVersion$fascicoloKnowledgeEvidenceArgs<ExtArgs>
   extractionAttempts?: boolean | Prisma.DocumentFileVersion$extractionAttemptsArgs<ExtArgs>
+  ocrRuns?: boolean | Prisma.DocumentFileVersion$ocrRunsArgs<ExtArgs>
   _count?: boolean | Prisma.DocumentFileVersionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["documentFileVersion"]>
 
@@ -1555,6 +1702,7 @@ export type DocumentFileVersionInclude<ExtArgs extends runtime.Types.Extensions.
   currentFor?: boolean | Prisma.DocumentFileVersion$currentForArgs<ExtArgs>
   fascicoloKnowledgeEvidence?: boolean | Prisma.DocumentFileVersion$fascicoloKnowledgeEvidenceArgs<ExtArgs>
   extractionAttempts?: boolean | Prisma.DocumentFileVersion$extractionAttemptsArgs<ExtArgs>
+  ocrRuns?: boolean | Prisma.DocumentFileVersion$ocrRunsArgs<ExtArgs>
   _count?: boolean | Prisma.DocumentFileVersionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type DocumentFileVersionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1577,6 +1725,7 @@ export type $DocumentFileVersionPayload<ExtArgs extends runtime.Types.Extensions
     currentFor: Prisma.$DocumentoPayload<ExtArgs> | null
     fascicoloKnowledgeEvidence: Prisma.$FascicoloKnowledgeEvidencePayload<ExtArgs>[]
     extractionAttempts: Prisma.$DocumentExtractionAttemptPayload<ExtArgs>[]
+    ocrRuns: Prisma.$DocumentOcrRunPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1992,6 +2141,7 @@ export interface Prisma__DocumentFileVersionClient<T, Null = never, ExtArgs exte
   currentFor<T extends Prisma.DocumentFileVersion$currentForArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentFileVersion$currentForArgs<ExtArgs>>): Prisma.Prisma__DocumentoClient<runtime.Types.Result.GetResult<Prisma.$DocumentoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   fascicoloKnowledgeEvidence<T extends Prisma.DocumentFileVersion$fascicoloKnowledgeEvidenceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentFileVersion$fascicoloKnowledgeEvidenceArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloKnowledgeEvidencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   extractionAttempts<T extends Prisma.DocumentFileVersion$extractionAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentFileVersion$extractionAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentExtractionAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  ocrRuns<T extends Prisma.DocumentFileVersion$ocrRunsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentFileVersion$ocrRunsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentOcrRunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2518,6 +2668,30 @@ export type DocumentFileVersion$extractionAttemptsArgs<ExtArgs extends runtime.T
   take?: number
   skip?: number
   distinct?: Prisma.DocumentExtractionAttemptScalarFieldEnum | Prisma.DocumentExtractionAttemptScalarFieldEnum[]
+}
+
+/**
+ * DocumentFileVersion.ocrRuns
+ */
+export type DocumentFileVersion$ocrRunsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocumentOcrRun
+   */
+  select?: Prisma.DocumentOcrRunSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocumentOcrRun
+   */
+  omit?: Prisma.DocumentOcrRunOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentOcrRunInclude<ExtArgs> | null
+  where?: Prisma.DocumentOcrRunWhereInput
+  orderBy?: Prisma.DocumentOcrRunOrderByWithRelationInput | Prisma.DocumentOcrRunOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentOcrRunWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentOcrRunScalarFieldEnum | Prisma.DocumentOcrRunScalarFieldEnum[]
 }
 
 /**

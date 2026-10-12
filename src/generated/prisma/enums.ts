@@ -189,7 +189,8 @@ export type FascicoloSubjectType = (typeof FascicoloSubjectType)[keyof typeof Fa
 
 
 export const FascicoloKnowledgeProvenanceType = {
-  DOCUMENT_EXTRACTION: 'DOCUMENT_EXTRACTION'
+  DOCUMENT_EXTRACTION: 'DOCUMENT_EXTRACTION',
+  FASCICOLO_DOCUMENT_EXTRACTION: 'FASCICOLO_DOCUMENT_EXTRACTION'
 } as const
 
 export type FascicoloKnowledgeProvenanceType = (typeof FascicoloKnowledgeProvenanceType)[keyof typeof FascicoloKnowledgeProvenanceType]
@@ -1008,6 +1009,16 @@ export const DocumentExtractionMethod = {
 } as const
 
 export type DocumentExtractionMethod = (typeof DocumentExtractionMethod)[keyof typeof DocumentExtractionMethod]
+
+
+export const DocumentOcrRunStatus = {
+  PLANNED: 'PLANNED',
+  PROCESSING: 'PROCESSING',
+  SUCCEEDED: 'SUCCEEDED',
+  FAILED: 'FAILED'
+} as const
+
+export type DocumentOcrRunStatus = (typeof DocumentOcrRunStatus)[keyof typeof DocumentOcrRunStatus]
 
 
 export const NeutralIntakeClassificationOutcome = {

@@ -173,6 +173,16 @@ export type DocumentExtractionAttempt = Prisma.DocumentExtractionAttemptModel
  */
 export type DocumentExtractionPage = Prisma.DocumentExtractionPageModel
 /**
+ * Model DocumentOcrRun
+ * 
+ */
+export type DocumentOcrRun = Prisma.DocumentOcrRunModel
+/**
+ * Model DocumentOcrPageCheckpoint
+ * 
+ */
+export type DocumentOcrPageCheckpoint = Prisma.DocumentOcrPageCheckpointModel
+/**
  * Model NeutralIntake
  * 
  */

@@ -415,6 +415,8 @@ export const ModelName = {
   DocumentFileVersion: 'DocumentFileVersion',
   DocumentExtractionAttempt: 'DocumentExtractionAttempt',
   DocumentExtractionPage: 'DocumentExtractionPage',
+  DocumentOcrRun: 'DocumentOcrRun',
+  DocumentOcrPageCheckpoint: 'DocumentOcrPageCheckpoint',
   NeutralIntake: 'NeutralIntake',
   NeutralIntakeExtractionAttempt: 'NeutralIntakeExtractionAttempt',
   NeutralIntakeExtractionPage: 'NeutralIntakeExtractionPage',
@@ -484,7 +486,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceTemporalAssessment" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "fascicoloIntake" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "documentExtractionAttempt" | "documentExtractionPage" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "legalReferenceMatch" | "legalReferenceOfficialLookup" | "legalReferenceOfficialHit" | "legalReferenceOfficialReconciliation" | "legalReferenceOfficialReconciliationEvidence" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "runtimeWorkerHeartbeat" | "runtimeBudgetPolicy" | "runtimeCostReservation" | "fascicoloSignal" | "concessioneExpiryChangeCommand" | "researchMissionRecord" | "researchExecutionAttempt" | "researchEvidenceBundleRecord" | "researchQuestionResultRecord" | "researchSourceAssessmentRecord" | "researchAdverseRequirement" | "researchAssistedVerificationRecord" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "automaticFascicoloReport" | "automaticFascicoloReportDocument" | "automaticFascicoloReportMission" | "fascicoloKnowledgeRevision" | "structuredFascicoloReportSnapshot" | "fascicoloOperationalProposal" | "fascicoloOperationalProposalReviewEvent" | "fascicoloOperationalProposalMaterialization" | "fascicoloSubject" | "fascicoloSubjectIdentifier" | "fascicoloKnowledgeItem" | "fascicoloKnowledgeEvidence" | "fascicoloKnowledgeRelation" | "fascicoloKnowledgeReviewEvent" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceTemporalAssessment" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "fascicoloIntake" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "documentExtractionAttempt" | "documentExtractionPage" | "documentOcrRun" | "documentOcrPageCheckpoint" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "legalReferenceMatch" | "legalReferenceOfficialLookup" | "legalReferenceOfficialHit" | "legalReferenceOfficialReconciliation" | "legalReferenceOfficialReconciliationEvidence" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "runtimeWorkerHeartbeat" | "runtimeBudgetPolicy" | "runtimeCostReservation" | "fascicoloSignal" | "concessioneExpiryChangeCommand" | "researchMissionRecord" | "researchExecutionAttempt" | "researchEvidenceBundleRecord" | "researchQuestionResultRecord" | "researchSourceAssessmentRecord" | "researchAdverseRequirement" | "researchAssistedVerificationRecord" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "automaticFascicoloReport" | "automaticFascicoloReportDocument" | "automaticFascicoloReportMission" | "fascicoloKnowledgeRevision" | "structuredFascicoloReportSnapshot" | "fascicoloOperationalProposal" | "fascicoloOperationalProposalReviewEvent" | "fascicoloOperationalProposalMaterialization" | "fascicoloSubject" | "fascicoloSubjectIdentifier" | "fascicoloKnowledgeItem" | "fascicoloKnowledgeEvidence" | "fascicoloKnowledgeRelation" | "fascicoloKnowledgeReviewEvent" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2779,6 +2781,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.DocumentExtractionPageCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.DocumentExtractionPageCountAggregateOutputType> | number
+        }
+      }
+    }
+    DocumentOcrRun: {
+      payload: Prisma.$DocumentOcrRunPayload<ExtArgs>
+      fields: Prisma.DocumentOcrRunFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocumentOcrRunFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentOcrRunPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocumentOcrRunFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentOcrRunPayload>
+        }
+        findFirst: {
+          args: Prisma.DocumentOcrRunFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentOcrRunPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocumentOcrRunFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentOcrRunPayload>
+        }
+        findMany: {
+          args: Prisma.DocumentOcrRunFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentOcrRunPayload>[]
+        }
+        create: {
+          args: Prisma.DocumentOcrRunCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentOcrRunPayload>
+        }
+        createMany: {
+          args: Prisma.DocumentOcrRunCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocumentOcrRunCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentOcrRunPayload>[]
+        }
+        delete: {
+          args: Prisma.DocumentOcrRunDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentOcrRunPayload>
+        }
+        update: {
+          args: Prisma.DocumentOcrRunUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentOcrRunPayload>
+        }
+        deleteMany: {
+          args: Prisma.DocumentOcrRunDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocumentOcrRunUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocumentOcrRunUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentOcrRunPayload>[]
+        }
+        upsert: {
+          args: Prisma.DocumentOcrRunUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentOcrRunPayload>
+        }
+        aggregate: {
+          args: Prisma.DocumentOcrRunAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocumentOcrRun>
+        }
+        groupBy: {
+          args: Prisma.DocumentOcrRunGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentOcrRunGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocumentOcrRunCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentOcrRunCountAggregateOutputType> | number
+        }
+      }
+    }
+    DocumentOcrPageCheckpoint: {
+      payload: Prisma.$DocumentOcrPageCheckpointPayload<ExtArgs>
+      fields: Prisma.DocumentOcrPageCheckpointFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocumentOcrPageCheckpointFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentOcrPageCheckpointPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocumentOcrPageCheckpointFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentOcrPageCheckpointPayload>
+        }
+        findFirst: {
+          args: Prisma.DocumentOcrPageCheckpointFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentOcrPageCheckpointPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocumentOcrPageCheckpointFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentOcrPageCheckpointPayload>
+        }
+        findMany: {
+          args: Prisma.DocumentOcrPageCheckpointFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentOcrPageCheckpointPayload>[]
+        }
+        create: {
+          args: Prisma.DocumentOcrPageCheckpointCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentOcrPageCheckpointPayload>
+        }
+        createMany: {
+          args: Prisma.DocumentOcrPageCheckpointCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocumentOcrPageCheckpointCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentOcrPageCheckpointPayload>[]
+        }
+        delete: {
+          args: Prisma.DocumentOcrPageCheckpointDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentOcrPageCheckpointPayload>
+        }
+        update: {
+          args: Prisma.DocumentOcrPageCheckpointUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentOcrPageCheckpointPayload>
+        }
+        deleteMany: {
+          args: Prisma.DocumentOcrPageCheckpointDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocumentOcrPageCheckpointUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocumentOcrPageCheckpointUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentOcrPageCheckpointPayload>[]
+        }
+        upsert: {
+          args: Prisma.DocumentOcrPageCheckpointUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentOcrPageCheckpointPayload>
+        }
+        aggregate: {
+          args: Prisma.DocumentOcrPageCheckpointAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocumentOcrPageCheckpoint>
+        }
+        groupBy: {
+          args: Prisma.DocumentOcrPageCheckpointGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentOcrPageCheckpointGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocumentOcrPageCheckpointCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentOcrPageCheckpointCountAggregateOutputType> | number
         }
       }
     }
@@ -7541,6 +7691,57 @@ export const DocumentExtractionPageScalarFieldEnum = {
 export type DocumentExtractionPageScalarFieldEnum = (typeof DocumentExtractionPageScalarFieldEnum)[keyof typeof DocumentExtractionPageScalarFieldEnum]
 
 
+export const DocumentOcrRunScalarFieldEnum = {
+  id: 'id',
+  coordinatorJobId: 'coordinatorJobId',
+  documentoId: 'documentoId',
+  documentFileVersionId: 'documentFileVersionId',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  sourceAttemptId: 'sourceAttemptId',
+  authorizationRef: 'authorizationRef',
+  policyVersion: 'policyVersion',
+  sourceSha256: 'sourceSha256',
+  sourceSizeBytes: 'sourceSizeBytes',
+  declaredMimeType: 'declaredMimeType',
+  pageCount: 'pageCount',
+  batchSize: 'batchSize',
+  status: 'status',
+  completedPageCount: 'completedPageCount',
+  extractionAttemptId: 'extractionAttemptId',
+  failureCode: 'failureCode',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DocumentOcrRunScalarFieldEnum = (typeof DocumentOcrRunScalarFieldEnum)[keyof typeof DocumentOcrRunScalarFieldEnum]
+
+
+export const DocumentOcrPageCheckpointScalarFieldEnum = {
+  id: 'id',
+  runId: 'runId',
+  pageNumber: 'pageNumber',
+  extractionMethod: 'extractionMethod',
+  text: 'text',
+  normalizedText: 'normalizedText',
+  textSha256: 'textSha256',
+  normalizedCharacterCount: 'normalizedCharacterCount',
+  ocrConfidence: 'ocrConfidence',
+  warnings: 'warnings',
+  directExtractorName: 'directExtractorName',
+  directExtractorVersion: 'directExtractorVersion',
+  ocrExtractorName: 'ocrExtractorName',
+  ocrExtractorVersion: 'ocrExtractorVersion',
+  rasterizerName: 'rasterizerName',
+  rasterizerVersion: 'rasterizerVersion',
+  completedAt: 'completedAt'
+} as const
+
+export type DocumentOcrPageCheckpointScalarFieldEnum = (typeof DocumentOcrPageCheckpointScalarFieldEnum)[keyof typeof DocumentOcrPageCheckpointScalarFieldEnum]
+
+
 export const NeutralIntakeScalarFieldEnum = {
   id: 'id',
   idempotencyKey: 'idempotencyKey',
@@ -8615,6 +8816,7 @@ export const FascicoloKnowledgeEvidenceScalarFieldEnum = {
   documentoId: 'documentoId',
   documentFileVersionId: 'documentFileVersionId',
   extractionAttemptId: 'extractionAttemptId',
+  documentExtractionAttemptId: 'documentExtractionAttemptId',
   pageNumber: 'pageNumber',
   textSha256: 'textSha256',
   quoteSha256: 'quoteSha256',
@@ -9697,6 +9899,20 @@ export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMode
 
 
 /**
+ * Reference to a field of type 'DocumentOcrRunStatus'
+ */
+export type EnumDocumentOcrRunStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentOcrRunStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'DocumentOcrRunStatus[]'
+ */
+export type ListEnumDocumentOcrRunStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentOcrRunStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'NeutralIntakeStatus'
  */
 export type EnumNeutralIntakeStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NeutralIntakeStatus'>
@@ -10676,6 +10892,8 @@ export type GlobalOmitConfig = {
   documentFileVersion?: Prisma.DocumentFileVersionOmit
   documentExtractionAttempt?: Prisma.DocumentExtractionAttemptOmit
   documentExtractionPage?: Prisma.DocumentExtractionPageOmit
+  documentOcrRun?: Prisma.DocumentOcrRunOmit
+  documentOcrPageCheckpoint?: Prisma.DocumentOcrPageCheckpointOmit
   neutralIntake?: Prisma.NeutralIntakeOmit
   neutralIntakeExtractionAttempt?: Prisma.NeutralIntakeExtractionAttemptOmit
   neutralIntakeExtractionPage?: Prisma.NeutralIntakeExtractionPageOmit

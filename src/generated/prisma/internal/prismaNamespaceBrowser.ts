@@ -82,6 +82,8 @@ export const ModelName = {
   DocumentFileVersion: 'DocumentFileVersion',
   DocumentExtractionAttempt: 'DocumentExtractionAttempt',
   DocumentExtractionPage: 'DocumentExtractionPage',
+  DocumentOcrRun: 'DocumentOcrRun',
+  DocumentOcrPageCheckpoint: 'DocumentOcrPageCheckpoint',
   NeutralIntake: 'NeutralIntake',
   NeutralIntakeExtractionAttempt: 'NeutralIntakeExtractionAttempt',
   NeutralIntakeExtractionPage: 'NeutralIntakeExtractionPage',
@@ -876,6 +878,57 @@ export const DocumentExtractionPageScalarFieldEnum = {
 } as const
 
 export type DocumentExtractionPageScalarFieldEnum = (typeof DocumentExtractionPageScalarFieldEnum)[keyof typeof DocumentExtractionPageScalarFieldEnum]
+
+
+export const DocumentOcrRunScalarFieldEnum = {
+  id: 'id',
+  coordinatorJobId: 'coordinatorJobId',
+  documentoId: 'documentoId',
+  documentFileVersionId: 'documentFileVersionId',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  sourceAttemptId: 'sourceAttemptId',
+  authorizationRef: 'authorizationRef',
+  policyVersion: 'policyVersion',
+  sourceSha256: 'sourceSha256',
+  sourceSizeBytes: 'sourceSizeBytes',
+  declaredMimeType: 'declaredMimeType',
+  pageCount: 'pageCount',
+  batchSize: 'batchSize',
+  status: 'status',
+  completedPageCount: 'completedPageCount',
+  extractionAttemptId: 'extractionAttemptId',
+  failureCode: 'failureCode',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DocumentOcrRunScalarFieldEnum = (typeof DocumentOcrRunScalarFieldEnum)[keyof typeof DocumentOcrRunScalarFieldEnum]
+
+
+export const DocumentOcrPageCheckpointScalarFieldEnum = {
+  id: 'id',
+  runId: 'runId',
+  pageNumber: 'pageNumber',
+  extractionMethod: 'extractionMethod',
+  text: 'text',
+  normalizedText: 'normalizedText',
+  textSha256: 'textSha256',
+  normalizedCharacterCount: 'normalizedCharacterCount',
+  ocrConfidence: 'ocrConfidence',
+  warnings: 'warnings',
+  directExtractorName: 'directExtractorName',
+  directExtractorVersion: 'directExtractorVersion',
+  ocrExtractorName: 'ocrExtractorName',
+  ocrExtractorVersion: 'ocrExtractorVersion',
+  rasterizerName: 'rasterizerName',
+  rasterizerVersion: 'rasterizerVersion',
+  completedAt: 'completedAt'
+} as const
+
+export type DocumentOcrPageCheckpointScalarFieldEnum = (typeof DocumentOcrPageCheckpointScalarFieldEnum)[keyof typeof DocumentOcrPageCheckpointScalarFieldEnum]
 
 
 export const NeutralIntakeScalarFieldEnum = {
@@ -1952,6 +2005,7 @@ export const FascicoloKnowledgeEvidenceScalarFieldEnum = {
   documentoId: 'documentoId',
   documentFileVersionId: 'documentFileVersionId',
   extractionAttemptId: 'extractionAttemptId',
+  documentExtractionAttemptId: 'documentExtractionAttemptId',
   pageNumber: 'pageNumber',
   textSha256: 'textSha256',
   quoteSha256: 'quoteSha256',

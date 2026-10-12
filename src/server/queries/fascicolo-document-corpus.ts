@@ -127,7 +127,9 @@ export function buildFascicoloDocumentCorpus(input: {
       };
     }
 
-    const attempts = attemptsByVersion.get(`${document.id}\n${document.currentFileVersionId}`) ?? [];
+    const attempts = (
+      attemptsByVersion.get(`${document.id}\n${document.currentFileVersionId}`) ?? []
+    ).filter((attempt) => attempt.sourceSha256 === document.currentFileVersion?.sha256);
     const succeeded = attempts.find((attempt) => attempt.outcome === "SUCCEEDED");
     if (succeeded) {
       const pages = [...succeeded.pages].sort((left, right) => left.pageNumber - right.pageNumber);

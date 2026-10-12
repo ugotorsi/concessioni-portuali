@@ -6,7 +6,11 @@ import { ExtractionFailure } from "@/server/intake/extraction/errors";
 import { TesseractItalianOcrAdapter, type OcrExecution } from "@/server/intake/extraction/ocrAdapter";
 import { acquirePdfDocument, collectBoundedPdfText } from "@/server/intake/extraction/pdfAdapter";
 import { B2C9_EXTRACTION_POLICY_V1 } from "@/server/intake/extraction/policy";
-import { extractTechnicalDocument } from "@/server/intake/extraction/technicalExtractor";
+import {
+  extractTechnicalDocument,
+  extractTechnicalDocumentPageRange,
+  inspectTechnicalPdfPageCount,
+} from "@/server/intake/extraction/technicalExtractor";
 import type { OcrAdapter, OcrResult, PdfExtractionAdapter } from "@/server/intake/extraction/types";
 
 function artifact(bytes: Buffer, declaredMimeType = "application/pdf") {
@@ -56,6 +60,36 @@ describe("B2C9 technical extraction orchestration", () => {
     expect(result.pages[1].warnings).toEqual(["OCR_REQUIRED", "OCR_FALLBACK_USED"]);
     expect(dependencies.renderPage).toHaveBeenCalledOnce();
     expect(dependencies.ocr.recognize).toHaveBeenCalledOnce();
+    expect(dependencies.close).toHaveBeenCalledOnce();
+  });
+
+  it("extracts only missing pages in an inclusive range and checkpoints each page", async () => {
+    const bytes = Buffer.from("%PDF-mocked");
+    const text = "Contenuto diretto sufficiente della concessione demaniale per la verifica tecnica.";
+    const dependencies = adapters(Array.from({ length: 10 }, (_, index) => `${text} ${index + 1}`));
+    const checkpointedPages: number[] = [];
+
+    const result = await extractTechnicalDocumentPageRange(artifact(bytes), {
+      firstPage: 3,
+      lastPage: 7,
+      skipPageNumbers: new Set([4, 6]),
+      onPage: async (page) => { checkpointedPages.push(page.pageNumber); },
+    }, dependencies);
+
+    expect(result.pages.map((page) => page.pageNumber)).toEqual([3, 5, 7]);
+    expect(checkpointedPages).toEqual([3, 5, 7]);
+    expect(dependencies.pdf.open).toHaveBeenCalledOnce();
+    expect(dependencies.close).toHaveBeenCalledOnce();
+  });
+
+  it.each([50, 100])("reads a %i-page PDF structure without rendering or OCR", async (pageCount) => {
+    const bytes = Buffer.from("%PDF-mocked");
+    const dependencies = adapters(Array.from({ length: pageCount }, () => ""));
+
+    await expect(inspectTechnicalPdfPageCount(artifact(bytes), dependencies))
+      .resolves.toBe(pageCount);
+    expect(dependencies.renderPage).not.toHaveBeenCalled();
+    expect(dependencies.ocr.recognize).not.toHaveBeenCalled();
     expect(dependencies.close).toHaveBeenCalledOnce();
   });
 

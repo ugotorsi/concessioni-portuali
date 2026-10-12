@@ -4,7 +4,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
+  DOCUMENT_LOCAL_OCR_EXTRACTION_POLICY_V1,
   extractDocumentFileVersion,
+  extractDocumentFileVersionWithLocalOcr,
   type ExtractDocumentFileVersionDependencies,
 } from "@/server/documents/documentExtraction";
 import { DocumentStorageReadCoherenceError } from "@/server/documents/storage/types";
@@ -107,7 +109,7 @@ function harness() {
         documentFileVersionId: versionId,
         tenantId,
         procedimentoId,
-        policyVersion: DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
+        policyVersion: input.policyVersion,
         retryOfAttemptId: input.retryAuthorization?.failedAttemptId ?? null,
         retryAuthorizationId: input.retryAuthorization?.authorizationId ?? null,
         failureCode: input.outcome === "FAILED" ? input.failureCode : null,
@@ -374,5 +376,73 @@ describe("archived DocumentFileVersion extraction", () => {
       expectedSizeBytes: imageOnlyPdf.length,
     }, { ocrMode: "DISABLED", ocr })).rejects.toMatchObject({ code: "OCR_REQUIRED" });
     expect(ocr.recognize).not.toHaveBeenCalled();
+  });
+
+  it("runs local OCR only from an authorized DIRECT_TEXT_V1 OCR_REQUIRED attempt", async () => {
+    const dependencies = harness();
+    vi.mocked(dependencies.loadRetryAttempt).mockResolvedValueOnce(attempt({
+      failureCode: "OCR_REQUIRED",
+    }));
+    vi.mocked(dependencies.extract).mockResolvedValueOnce({
+      ...directResult(),
+      pages: [{
+        ...directResult().pages[0],
+        method: "OCR",
+        ocrConfidence: 91,
+        warnings: ["OCR_REQUIRED", "OCR_FALLBACK_USED"],
+      }],
+      ocrExtractorName: "tesseract.js",
+      ocrExtractorVersion: "6.0.1",
+      rasterizerName: "@napi-rs/canvas",
+      rasterizerVersion: "0.1.80",
+    });
+
+    await expect(extractDocumentFileVersionWithLocalOcr({
+      documentoId: documentId,
+      documentFileVersionId: versionId,
+      tenantId,
+      executionKey: "job-ocr-1",
+      retryAuthorization: {
+        failedAttemptId: "attempt-1",
+        authorizationId: "ocr-authorization-1",
+      },
+      actor,
+    }, dependencies)).resolves.toMatchObject({
+      reused: false,
+      attempt: {
+        outcome: "SUCCEEDED",
+        policyVersion: DOCUMENT_LOCAL_OCR_EXTRACTION_POLICY_V1,
+      },
+    });
+    expect(dependencies.persist).toHaveBeenCalledWith(expect.objectContaining({
+      policyVersion: DOCUMENT_LOCAL_OCR_EXTRACTION_POLICY_V1,
+      retryAuthorization: {
+        failedAttemptId: "attempt-1",
+        authorizationId: "ocr-authorization-1",
+      },
+      result: expect.objectContaining({
+        ocrExtractorName: "tesseract.js",
+        pages: [expect.objectContaining({ method: "OCR" })],
+      }),
+    }));
+  });
+
+  it("does not treat a normal retryable failure as OCR authorization", async () => {
+    const dependencies = harness();
+    vi.mocked(dependencies.loadRetryAttempt).mockResolvedValueOnce(attempt());
+    await expect(extractDocumentFileVersionWithLocalOcr({
+      documentoId: documentId,
+      documentFileVersionId: versionId,
+      tenantId,
+      executionKey: "job-ocr-invalid",
+      retryAuthorization: {
+        failedAttemptId: "attempt-1",
+        authorizationId: "ocr-authorization-invalid",
+      },
+      actor,
+    }, dependencies)).rejects.toMatchObject({
+      code: "RETRY_AUTHORIZATION_MISMATCH",
+    });
+    expect(dependencies.readBounded).not.toHaveBeenCalled();
   });
 });

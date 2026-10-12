@@ -391,6 +391,9 @@ export type DocumentExtractionAttemptWhereInput = {
   pages?: Prisma.DocumentExtractionPageListRelationFilter
   retryOfAttempt?: Prisma.XOR<Prisma.DocumentExtractionAttemptNullableScalarRelationFilter, Prisma.DocumentExtractionAttemptWhereInput> | null
   retries?: Prisma.DocumentExtractionAttemptListRelationFilter
+  ocrSourceRuns?: Prisma.DocumentOcrRunListRelationFilter
+  ocrCompletedRun?: Prisma.XOR<Prisma.DocumentOcrRunNullableScalarRelationFilter, Prisma.DocumentOcrRunWhereInput> | null
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceListRelationFilter
 }
 
 export type DocumentExtractionAttemptOrderByWithRelationInput = {
@@ -428,6 +431,9 @@ export type DocumentExtractionAttemptOrderByWithRelationInput = {
   pages?: Prisma.DocumentExtractionPageOrderByRelationAggregateInput
   retryOfAttempt?: Prisma.DocumentExtractionAttemptOrderByWithRelationInput
   retries?: Prisma.DocumentExtractionAttemptOrderByRelationAggregateInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunOrderByRelationAggregateInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunOrderByWithRelationInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceOrderByRelationAggregateInput
 }
 
 export type DocumentExtractionAttemptWhereUniqueInput = Prisma.AtLeast<{
@@ -468,6 +474,9 @@ export type DocumentExtractionAttemptWhereUniqueInput = Prisma.AtLeast<{
   pages?: Prisma.DocumentExtractionPageListRelationFilter
   retryOfAttempt?: Prisma.XOR<Prisma.DocumentExtractionAttemptNullableScalarRelationFilter, Prisma.DocumentExtractionAttemptWhereInput> | null
   retries?: Prisma.DocumentExtractionAttemptListRelationFilter
+  ocrSourceRuns?: Prisma.DocumentOcrRunListRelationFilter
+  ocrCompletedRun?: Prisma.XOR<Prisma.DocumentOcrRunNullableScalarRelationFilter, Prisma.DocumentOcrRunWhereInput> | null
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceListRelationFilter
 }, "id" | "executionKey">
 
 export type DocumentExtractionAttemptOrderByWithAggregationInput = {
@@ -568,6 +577,9 @@ export type DocumentExtractionAttemptCreateInput = {
   pages?: Prisma.DocumentExtractionPageCreateNestedManyWithoutExtractionAttemptInput
   retryOfAttempt?: Prisma.DocumentExtractionAttemptCreateNestedOneWithoutRetriesInput
   retries?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutRetryOfAttemptInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunCreateNestedManyWithoutSourceAttemptInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunCreateNestedOneWithoutExtractionAttemptInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutDocumentExtractionAttemptInput
 }
 
 export type DocumentExtractionAttemptUncheckedCreateInput = {
@@ -600,6 +612,9 @@ export type DocumentExtractionAttemptUncheckedCreateInput = {
   createdAt?: Date | string
   pages?: Prisma.DocumentExtractionPageUncheckedCreateNestedManyWithoutExtractionAttemptInput
   retries?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutRetryOfAttemptInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUncheckedCreateNestedManyWithoutSourceAttemptInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUncheckedCreateNestedOneWithoutExtractionAttemptInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutDocumentExtractionAttemptInput
 }
 
 export type DocumentExtractionAttemptUpdateInput = {
@@ -632,6 +647,9 @@ export type DocumentExtractionAttemptUpdateInput = {
   pages?: Prisma.DocumentExtractionPageUpdateManyWithoutExtractionAttemptNestedInput
   retryOfAttempt?: Prisma.DocumentExtractionAttemptUpdateOneWithoutRetriesNestedInput
   retries?: Prisma.DocumentExtractionAttemptUpdateManyWithoutRetryOfAttemptNestedInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUpdateManyWithoutSourceAttemptNestedInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUpdateOneWithoutExtractionAttemptNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutDocumentExtractionAttemptNestedInput
 }
 
 export type DocumentExtractionAttemptUncheckedUpdateInput = {
@@ -664,6 +682,9 @@ export type DocumentExtractionAttemptUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pages?: Prisma.DocumentExtractionPageUncheckedUpdateManyWithoutExtractionAttemptNestedInput
   retries?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutRetryOfAttemptNestedInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUncheckedUpdateManyWithoutSourceAttemptNestedInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUncheckedUpdateOneWithoutExtractionAttemptNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutDocumentExtractionAttemptNestedInput
 }
 
 export type DocumentExtractionAttemptCreateManyInput = {
@@ -1109,6 +1130,52 @@ export type DocumentExtractionAttemptUpdateOneRequiredWithoutPagesNestedInput = 
   update?: Prisma.XOR<Prisma.XOR<Prisma.DocumentExtractionAttemptUpdateToOneWithWhereWithoutPagesInput, Prisma.DocumentExtractionAttemptUpdateWithoutPagesInput>, Prisma.DocumentExtractionAttemptUncheckedUpdateWithoutPagesInput>
 }
 
+export type DocumentExtractionAttemptCreateNestedOneWithoutOcrSourceRunsInput = {
+  create?: Prisma.XOR<Prisma.DocumentExtractionAttemptCreateWithoutOcrSourceRunsInput, Prisma.DocumentExtractionAttemptUncheckedCreateWithoutOcrSourceRunsInput>
+  connectOrCreate?: Prisma.DocumentExtractionAttemptCreateOrConnectWithoutOcrSourceRunsInput
+  connect?: Prisma.DocumentExtractionAttemptWhereUniqueInput
+}
+
+export type DocumentExtractionAttemptCreateNestedOneWithoutOcrCompletedRunInput = {
+  create?: Prisma.XOR<Prisma.DocumentExtractionAttemptCreateWithoutOcrCompletedRunInput, Prisma.DocumentExtractionAttemptUncheckedCreateWithoutOcrCompletedRunInput>
+  connectOrCreate?: Prisma.DocumentExtractionAttemptCreateOrConnectWithoutOcrCompletedRunInput
+  connect?: Prisma.DocumentExtractionAttemptWhereUniqueInput
+}
+
+export type DocumentExtractionAttemptUpdateOneRequiredWithoutOcrSourceRunsNestedInput = {
+  create?: Prisma.XOR<Prisma.DocumentExtractionAttemptCreateWithoutOcrSourceRunsInput, Prisma.DocumentExtractionAttemptUncheckedCreateWithoutOcrSourceRunsInput>
+  connectOrCreate?: Prisma.DocumentExtractionAttemptCreateOrConnectWithoutOcrSourceRunsInput
+  upsert?: Prisma.DocumentExtractionAttemptUpsertWithoutOcrSourceRunsInput
+  connect?: Prisma.DocumentExtractionAttemptWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DocumentExtractionAttemptUpdateToOneWithWhereWithoutOcrSourceRunsInput, Prisma.DocumentExtractionAttemptUpdateWithoutOcrSourceRunsInput>, Prisma.DocumentExtractionAttemptUncheckedUpdateWithoutOcrSourceRunsInput>
+}
+
+export type DocumentExtractionAttemptUpdateOneWithoutOcrCompletedRunNestedInput = {
+  create?: Prisma.XOR<Prisma.DocumentExtractionAttemptCreateWithoutOcrCompletedRunInput, Prisma.DocumentExtractionAttemptUncheckedCreateWithoutOcrCompletedRunInput>
+  connectOrCreate?: Prisma.DocumentExtractionAttemptCreateOrConnectWithoutOcrCompletedRunInput
+  upsert?: Prisma.DocumentExtractionAttemptUpsertWithoutOcrCompletedRunInput
+  disconnect?: Prisma.DocumentExtractionAttemptWhereInput | boolean
+  delete?: Prisma.DocumentExtractionAttemptWhereInput | boolean
+  connect?: Prisma.DocumentExtractionAttemptWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DocumentExtractionAttemptUpdateToOneWithWhereWithoutOcrCompletedRunInput, Prisma.DocumentExtractionAttemptUpdateWithoutOcrCompletedRunInput>, Prisma.DocumentExtractionAttemptUncheckedUpdateWithoutOcrCompletedRunInput>
+}
+
+export type DocumentExtractionAttemptCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput = {
+  create?: Prisma.XOR<Prisma.DocumentExtractionAttemptCreateWithoutFascicoloKnowledgeEvidenceInput, Prisma.DocumentExtractionAttemptUncheckedCreateWithoutFascicoloKnowledgeEvidenceInput>
+  connectOrCreate?: Prisma.DocumentExtractionAttemptCreateOrConnectWithoutFascicoloKnowledgeEvidenceInput
+  connect?: Prisma.DocumentExtractionAttemptWhereUniqueInput
+}
+
+export type DocumentExtractionAttemptUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput = {
+  create?: Prisma.XOR<Prisma.DocumentExtractionAttemptCreateWithoutFascicoloKnowledgeEvidenceInput, Prisma.DocumentExtractionAttemptUncheckedCreateWithoutFascicoloKnowledgeEvidenceInput>
+  connectOrCreate?: Prisma.DocumentExtractionAttemptCreateOrConnectWithoutFascicoloKnowledgeEvidenceInput
+  upsert?: Prisma.DocumentExtractionAttemptUpsertWithoutFascicoloKnowledgeEvidenceInput
+  disconnect?: Prisma.DocumentExtractionAttemptWhereInput | boolean
+  delete?: Prisma.DocumentExtractionAttemptWhereInput | boolean
+  connect?: Prisma.DocumentExtractionAttemptWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DocumentExtractionAttemptUpdateToOneWithWhereWithoutFascicoloKnowledgeEvidenceInput, Prisma.DocumentExtractionAttemptUpdateWithoutFascicoloKnowledgeEvidenceInput>, Prisma.DocumentExtractionAttemptUncheckedUpdateWithoutFascicoloKnowledgeEvidenceInput>
+}
+
 export type DocumentExtractionAttemptCreateWithoutTenantInput = {
   id?: string
   executionKey: string
@@ -1138,6 +1205,9 @@ export type DocumentExtractionAttemptCreateWithoutTenantInput = {
   pages?: Prisma.DocumentExtractionPageCreateNestedManyWithoutExtractionAttemptInput
   retryOfAttempt?: Prisma.DocumentExtractionAttemptCreateNestedOneWithoutRetriesInput
   retries?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutRetryOfAttemptInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunCreateNestedManyWithoutSourceAttemptInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunCreateNestedOneWithoutExtractionAttemptInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutDocumentExtractionAttemptInput
 }
 
 export type DocumentExtractionAttemptUncheckedCreateWithoutTenantInput = {
@@ -1169,6 +1239,9 @@ export type DocumentExtractionAttemptUncheckedCreateWithoutTenantInput = {
   createdAt?: Date | string
   pages?: Prisma.DocumentExtractionPageUncheckedCreateNestedManyWithoutExtractionAttemptInput
   retries?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutRetryOfAttemptInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUncheckedCreateNestedManyWithoutSourceAttemptInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUncheckedCreateNestedOneWithoutExtractionAttemptInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutDocumentExtractionAttemptInput
 }
 
 export type DocumentExtractionAttemptCreateOrConnectWithoutTenantInput = {
@@ -1259,6 +1332,9 @@ export type DocumentExtractionAttemptCreateWithoutProcedimentoInput = {
   pages?: Prisma.DocumentExtractionPageCreateNestedManyWithoutExtractionAttemptInput
   retryOfAttempt?: Prisma.DocumentExtractionAttemptCreateNestedOneWithoutRetriesInput
   retries?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutRetryOfAttemptInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunCreateNestedManyWithoutSourceAttemptInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunCreateNestedOneWithoutExtractionAttemptInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutDocumentExtractionAttemptInput
 }
 
 export type DocumentExtractionAttemptUncheckedCreateWithoutProcedimentoInput = {
@@ -1289,6 +1365,9 @@ export type DocumentExtractionAttemptUncheckedCreateWithoutProcedimentoInput = {
   createdAt?: Date | string
   pages?: Prisma.DocumentExtractionPageUncheckedCreateNestedManyWithoutExtractionAttemptInput
   retries?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutRetryOfAttemptInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUncheckedCreateNestedManyWithoutSourceAttemptInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUncheckedCreateNestedOneWithoutExtractionAttemptInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutDocumentExtractionAttemptInput
 }
 
 export type DocumentExtractionAttemptCreateOrConnectWithoutProcedimentoInput = {
@@ -1346,6 +1425,9 @@ export type DocumentExtractionAttemptCreateWithoutDocumentoInput = {
   pages?: Prisma.DocumentExtractionPageCreateNestedManyWithoutExtractionAttemptInput
   retryOfAttempt?: Prisma.DocumentExtractionAttemptCreateNestedOneWithoutRetriesInput
   retries?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutRetryOfAttemptInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunCreateNestedManyWithoutSourceAttemptInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunCreateNestedOneWithoutExtractionAttemptInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutDocumentExtractionAttemptInput
 }
 
 export type DocumentExtractionAttemptUncheckedCreateWithoutDocumentoInput = {
@@ -1375,6 +1457,9 @@ export type DocumentExtractionAttemptUncheckedCreateWithoutDocumentoInput = {
   createdAt?: Date | string
   pages?: Prisma.DocumentExtractionPageUncheckedCreateNestedManyWithoutExtractionAttemptInput
   retries?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutRetryOfAttemptInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUncheckedCreateNestedManyWithoutSourceAttemptInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUncheckedCreateNestedOneWithoutExtractionAttemptInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutDocumentExtractionAttemptInput
 }
 
 export type DocumentExtractionAttemptCreateOrConnectWithoutDocumentoInput = {
@@ -1432,6 +1517,9 @@ export type DocumentExtractionAttemptCreateWithoutDocumentFileVersionInput = {
   pages?: Prisma.DocumentExtractionPageCreateNestedManyWithoutExtractionAttemptInput
   retryOfAttempt?: Prisma.DocumentExtractionAttemptCreateNestedOneWithoutRetriesInput
   retries?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutRetryOfAttemptInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunCreateNestedManyWithoutSourceAttemptInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunCreateNestedOneWithoutExtractionAttemptInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutDocumentExtractionAttemptInput
 }
 
 export type DocumentExtractionAttemptUncheckedCreateWithoutDocumentFileVersionInput = {
@@ -1461,6 +1549,9 @@ export type DocumentExtractionAttemptUncheckedCreateWithoutDocumentFileVersionIn
   createdAt?: Date | string
   pages?: Prisma.DocumentExtractionPageUncheckedCreateNestedManyWithoutExtractionAttemptInput
   retries?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutRetryOfAttemptInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUncheckedCreateNestedManyWithoutSourceAttemptInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUncheckedCreateNestedOneWithoutExtractionAttemptInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutDocumentExtractionAttemptInput
 }
 
 export type DocumentExtractionAttemptCreateOrConnectWithoutDocumentFileVersionInput = {
@@ -1518,6 +1609,9 @@ export type DocumentExtractionAttemptCreateWithoutRetriesInput = {
   procedimento: Prisma.ProcedimentoCreateNestedOneWithoutDocumentExtractionAttemptsInput
   pages?: Prisma.DocumentExtractionPageCreateNestedManyWithoutExtractionAttemptInput
   retryOfAttempt?: Prisma.DocumentExtractionAttemptCreateNestedOneWithoutRetriesInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunCreateNestedManyWithoutSourceAttemptInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunCreateNestedOneWithoutExtractionAttemptInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutDocumentExtractionAttemptInput
 }
 
 export type DocumentExtractionAttemptUncheckedCreateWithoutRetriesInput = {
@@ -1549,6 +1643,9 @@ export type DocumentExtractionAttemptUncheckedCreateWithoutRetriesInput = {
   technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   pages?: Prisma.DocumentExtractionPageUncheckedCreateNestedManyWithoutExtractionAttemptInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUncheckedCreateNestedManyWithoutSourceAttemptInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUncheckedCreateNestedOneWithoutExtractionAttemptInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutDocumentExtractionAttemptInput
 }
 
 export type DocumentExtractionAttemptCreateOrConnectWithoutRetriesInput = {
@@ -1585,6 +1682,9 @@ export type DocumentExtractionAttemptCreateWithoutRetryOfAttemptInput = {
   procedimento: Prisma.ProcedimentoCreateNestedOneWithoutDocumentExtractionAttemptsInput
   pages?: Prisma.DocumentExtractionPageCreateNestedManyWithoutExtractionAttemptInput
   retries?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutRetryOfAttemptInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunCreateNestedManyWithoutSourceAttemptInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunCreateNestedOneWithoutExtractionAttemptInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutDocumentExtractionAttemptInput
 }
 
 export type DocumentExtractionAttemptUncheckedCreateWithoutRetryOfAttemptInput = {
@@ -1616,6 +1716,9 @@ export type DocumentExtractionAttemptUncheckedCreateWithoutRetryOfAttemptInput =
   createdAt?: Date | string
   pages?: Prisma.DocumentExtractionPageUncheckedCreateNestedManyWithoutExtractionAttemptInput
   retries?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutRetryOfAttemptInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUncheckedCreateNestedManyWithoutSourceAttemptInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUncheckedCreateNestedOneWithoutExtractionAttemptInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutDocumentExtractionAttemptInput
 }
 
 export type DocumentExtractionAttemptCreateOrConnectWithoutRetryOfAttemptInput = {
@@ -1668,6 +1771,9 @@ export type DocumentExtractionAttemptUpdateWithoutRetriesInput = {
   procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutDocumentExtractionAttemptsNestedInput
   pages?: Prisma.DocumentExtractionPageUpdateManyWithoutExtractionAttemptNestedInput
   retryOfAttempt?: Prisma.DocumentExtractionAttemptUpdateOneWithoutRetriesNestedInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUpdateManyWithoutSourceAttemptNestedInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUpdateOneWithoutExtractionAttemptNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutDocumentExtractionAttemptNestedInput
 }
 
 export type DocumentExtractionAttemptUncheckedUpdateWithoutRetriesInput = {
@@ -1699,6 +1805,9 @@ export type DocumentExtractionAttemptUncheckedUpdateWithoutRetriesInput = {
   technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pages?: Prisma.DocumentExtractionPageUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUncheckedUpdateManyWithoutSourceAttemptNestedInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUncheckedUpdateOneWithoutExtractionAttemptNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutDocumentExtractionAttemptNestedInput
 }
 
 export type DocumentExtractionAttemptUpsertWithWhereUniqueWithoutRetryOfAttemptInput = {
@@ -1746,6 +1855,9 @@ export type DocumentExtractionAttemptCreateWithoutPagesInput = {
   procedimento: Prisma.ProcedimentoCreateNestedOneWithoutDocumentExtractionAttemptsInput
   retryOfAttempt?: Prisma.DocumentExtractionAttemptCreateNestedOneWithoutRetriesInput
   retries?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutRetryOfAttemptInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunCreateNestedManyWithoutSourceAttemptInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunCreateNestedOneWithoutExtractionAttemptInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutDocumentExtractionAttemptInput
 }
 
 export type DocumentExtractionAttemptUncheckedCreateWithoutPagesInput = {
@@ -1777,6 +1889,9 @@ export type DocumentExtractionAttemptUncheckedCreateWithoutPagesInput = {
   technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   retries?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutRetryOfAttemptInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUncheckedCreateNestedManyWithoutSourceAttemptInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUncheckedCreateNestedOneWithoutExtractionAttemptInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutDocumentExtractionAttemptInput
 }
 
 export type DocumentExtractionAttemptCreateOrConnectWithoutPagesInput = {
@@ -1824,6 +1939,9 @@ export type DocumentExtractionAttemptUpdateWithoutPagesInput = {
   procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutDocumentExtractionAttemptsNestedInput
   retryOfAttempt?: Prisma.DocumentExtractionAttemptUpdateOneWithoutRetriesNestedInput
   retries?: Prisma.DocumentExtractionAttemptUpdateManyWithoutRetryOfAttemptNestedInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUpdateManyWithoutSourceAttemptNestedInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUpdateOneWithoutExtractionAttemptNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutDocumentExtractionAttemptNestedInput
 }
 
 export type DocumentExtractionAttemptUncheckedUpdateWithoutPagesInput = {
@@ -1855,6 +1973,465 @@ export type DocumentExtractionAttemptUncheckedUpdateWithoutPagesInput = {
   technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   retries?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutRetryOfAttemptNestedInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUncheckedUpdateManyWithoutSourceAttemptNestedInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUncheckedUpdateOneWithoutExtractionAttemptNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutDocumentExtractionAttemptNestedInput
+}
+
+export type DocumentExtractionAttemptCreateWithoutOcrSourceRunsInput = {
+  id?: string
+  executionKey: string
+  policyVersion: string
+  retryAuthorizationId?: string | null
+  outcome: $Enums.DocumentExtractionOutcome
+  sourceSha256: string
+  declaredMimeType: string
+  detectedMimeType?: string | null
+  sourceSizeBytes: number
+  startedAt: Date | string
+  completedAt: Date | string
+  directExtractorName?: string | null
+  directExtractorVersion?: string | null
+  ocrExtractorName?: string | null
+  ocrExtractorVersion?: string | null
+  rasterizerName?: string | null
+  rasterizerVersion?: string | null
+  failureCode?: string | null
+  failureMessage?: string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  documento: Prisma.DocumentoCreateNestedOneWithoutExtractionAttemptsInput
+  documentFileVersion: Prisma.DocumentFileVersionCreateNestedOneWithoutExtractionAttemptsInput
+  tenant: Prisma.EnteCreateNestedOneWithoutDocumentExtractionAttemptsInput
+  procedimento: Prisma.ProcedimentoCreateNestedOneWithoutDocumentExtractionAttemptsInput
+  pages?: Prisma.DocumentExtractionPageCreateNestedManyWithoutExtractionAttemptInput
+  retryOfAttempt?: Prisma.DocumentExtractionAttemptCreateNestedOneWithoutRetriesInput
+  retries?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutRetryOfAttemptInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunCreateNestedOneWithoutExtractionAttemptInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutDocumentExtractionAttemptInput
+}
+
+export type DocumentExtractionAttemptUncheckedCreateWithoutOcrSourceRunsInput = {
+  id?: string
+  executionKey: string
+  documentoId: string
+  documentFileVersionId: string
+  tenantId: string
+  procedimentoId: string
+  policyVersion: string
+  retryOfAttemptId?: string | null
+  retryAuthorizationId?: string | null
+  outcome: $Enums.DocumentExtractionOutcome
+  sourceSha256: string
+  declaredMimeType: string
+  detectedMimeType?: string | null
+  sourceSizeBytes: number
+  startedAt: Date | string
+  completedAt: Date | string
+  directExtractorName?: string | null
+  directExtractorVersion?: string | null
+  ocrExtractorName?: string | null
+  ocrExtractorVersion?: string | null
+  rasterizerName?: string | null
+  rasterizerVersion?: string | null
+  failureCode?: string | null
+  failureMessage?: string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  pages?: Prisma.DocumentExtractionPageUncheckedCreateNestedManyWithoutExtractionAttemptInput
+  retries?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutRetryOfAttemptInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUncheckedCreateNestedOneWithoutExtractionAttemptInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutDocumentExtractionAttemptInput
+}
+
+export type DocumentExtractionAttemptCreateOrConnectWithoutOcrSourceRunsInput = {
+  where: Prisma.DocumentExtractionAttemptWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocumentExtractionAttemptCreateWithoutOcrSourceRunsInput, Prisma.DocumentExtractionAttemptUncheckedCreateWithoutOcrSourceRunsInput>
+}
+
+export type DocumentExtractionAttemptCreateWithoutOcrCompletedRunInput = {
+  id?: string
+  executionKey: string
+  policyVersion: string
+  retryAuthorizationId?: string | null
+  outcome: $Enums.DocumentExtractionOutcome
+  sourceSha256: string
+  declaredMimeType: string
+  detectedMimeType?: string | null
+  sourceSizeBytes: number
+  startedAt: Date | string
+  completedAt: Date | string
+  directExtractorName?: string | null
+  directExtractorVersion?: string | null
+  ocrExtractorName?: string | null
+  ocrExtractorVersion?: string | null
+  rasterizerName?: string | null
+  rasterizerVersion?: string | null
+  failureCode?: string | null
+  failureMessage?: string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  documento: Prisma.DocumentoCreateNestedOneWithoutExtractionAttemptsInput
+  documentFileVersion: Prisma.DocumentFileVersionCreateNestedOneWithoutExtractionAttemptsInput
+  tenant: Prisma.EnteCreateNestedOneWithoutDocumentExtractionAttemptsInput
+  procedimento: Prisma.ProcedimentoCreateNestedOneWithoutDocumentExtractionAttemptsInput
+  pages?: Prisma.DocumentExtractionPageCreateNestedManyWithoutExtractionAttemptInput
+  retryOfAttempt?: Prisma.DocumentExtractionAttemptCreateNestedOneWithoutRetriesInput
+  retries?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutRetryOfAttemptInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunCreateNestedManyWithoutSourceAttemptInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutDocumentExtractionAttemptInput
+}
+
+export type DocumentExtractionAttemptUncheckedCreateWithoutOcrCompletedRunInput = {
+  id?: string
+  executionKey: string
+  documentoId: string
+  documentFileVersionId: string
+  tenantId: string
+  procedimentoId: string
+  policyVersion: string
+  retryOfAttemptId?: string | null
+  retryAuthorizationId?: string | null
+  outcome: $Enums.DocumentExtractionOutcome
+  sourceSha256: string
+  declaredMimeType: string
+  detectedMimeType?: string | null
+  sourceSizeBytes: number
+  startedAt: Date | string
+  completedAt: Date | string
+  directExtractorName?: string | null
+  directExtractorVersion?: string | null
+  ocrExtractorName?: string | null
+  ocrExtractorVersion?: string | null
+  rasterizerName?: string | null
+  rasterizerVersion?: string | null
+  failureCode?: string | null
+  failureMessage?: string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  pages?: Prisma.DocumentExtractionPageUncheckedCreateNestedManyWithoutExtractionAttemptInput
+  retries?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutRetryOfAttemptInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUncheckedCreateNestedManyWithoutSourceAttemptInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutDocumentExtractionAttemptInput
+}
+
+export type DocumentExtractionAttemptCreateOrConnectWithoutOcrCompletedRunInput = {
+  where: Prisma.DocumentExtractionAttemptWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocumentExtractionAttemptCreateWithoutOcrCompletedRunInput, Prisma.DocumentExtractionAttemptUncheckedCreateWithoutOcrCompletedRunInput>
+}
+
+export type DocumentExtractionAttemptUpsertWithoutOcrSourceRunsInput = {
+  update: Prisma.XOR<Prisma.DocumentExtractionAttemptUpdateWithoutOcrSourceRunsInput, Prisma.DocumentExtractionAttemptUncheckedUpdateWithoutOcrSourceRunsInput>
+  create: Prisma.XOR<Prisma.DocumentExtractionAttemptCreateWithoutOcrSourceRunsInput, Prisma.DocumentExtractionAttemptUncheckedCreateWithoutOcrSourceRunsInput>
+  where?: Prisma.DocumentExtractionAttemptWhereInput
+}
+
+export type DocumentExtractionAttemptUpdateToOneWithWhereWithoutOcrSourceRunsInput = {
+  where?: Prisma.DocumentExtractionAttemptWhereInput
+  data: Prisma.XOR<Prisma.DocumentExtractionAttemptUpdateWithoutOcrSourceRunsInput, Prisma.DocumentExtractionAttemptUncheckedUpdateWithoutOcrSourceRunsInput>
+}
+
+export type DocumentExtractionAttemptUpdateWithoutOcrSourceRunsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  executionKey?: Prisma.StringFieldUpdateOperationsInput | string
+  policyVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  retryAuthorizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outcome?: Prisma.EnumDocumentExtractionOutcomeFieldUpdateOperationsInput | $Enums.DocumentExtractionOutcome
+  sourceSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  declaredMimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  detectedMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceSizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  directExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  directExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documento?: Prisma.DocumentoUpdateOneRequiredWithoutExtractionAttemptsNestedInput
+  documentFileVersion?: Prisma.DocumentFileVersionUpdateOneRequiredWithoutExtractionAttemptsNestedInput
+  tenant?: Prisma.EnteUpdateOneRequiredWithoutDocumentExtractionAttemptsNestedInput
+  procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutDocumentExtractionAttemptsNestedInput
+  pages?: Prisma.DocumentExtractionPageUpdateManyWithoutExtractionAttemptNestedInput
+  retryOfAttempt?: Prisma.DocumentExtractionAttemptUpdateOneWithoutRetriesNestedInput
+  retries?: Prisma.DocumentExtractionAttemptUpdateManyWithoutRetryOfAttemptNestedInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUpdateOneWithoutExtractionAttemptNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutDocumentExtractionAttemptNestedInput
+}
+
+export type DocumentExtractionAttemptUncheckedUpdateWithoutOcrSourceRunsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  executionKey?: Prisma.StringFieldUpdateOperationsInput | string
+  documentoId?: Prisma.StringFieldUpdateOperationsInput | string
+  documentFileVersionId?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  procedimentoId?: Prisma.StringFieldUpdateOperationsInput | string
+  policyVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  retryOfAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryAuthorizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outcome?: Prisma.EnumDocumentExtractionOutcomeFieldUpdateOperationsInput | $Enums.DocumentExtractionOutcome
+  sourceSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  declaredMimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  detectedMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceSizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  directExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  directExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  pages?: Prisma.DocumentExtractionPageUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+  retries?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutRetryOfAttemptNestedInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUncheckedUpdateOneWithoutExtractionAttemptNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutDocumentExtractionAttemptNestedInput
+}
+
+export type DocumentExtractionAttemptUpsertWithoutOcrCompletedRunInput = {
+  update: Prisma.XOR<Prisma.DocumentExtractionAttemptUpdateWithoutOcrCompletedRunInput, Prisma.DocumentExtractionAttemptUncheckedUpdateWithoutOcrCompletedRunInput>
+  create: Prisma.XOR<Prisma.DocumentExtractionAttemptCreateWithoutOcrCompletedRunInput, Prisma.DocumentExtractionAttemptUncheckedCreateWithoutOcrCompletedRunInput>
+  where?: Prisma.DocumentExtractionAttemptWhereInput
+}
+
+export type DocumentExtractionAttemptUpdateToOneWithWhereWithoutOcrCompletedRunInput = {
+  where?: Prisma.DocumentExtractionAttemptWhereInput
+  data: Prisma.XOR<Prisma.DocumentExtractionAttemptUpdateWithoutOcrCompletedRunInput, Prisma.DocumentExtractionAttemptUncheckedUpdateWithoutOcrCompletedRunInput>
+}
+
+export type DocumentExtractionAttemptUpdateWithoutOcrCompletedRunInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  executionKey?: Prisma.StringFieldUpdateOperationsInput | string
+  policyVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  retryAuthorizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outcome?: Prisma.EnumDocumentExtractionOutcomeFieldUpdateOperationsInput | $Enums.DocumentExtractionOutcome
+  sourceSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  declaredMimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  detectedMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceSizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  directExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  directExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documento?: Prisma.DocumentoUpdateOneRequiredWithoutExtractionAttemptsNestedInput
+  documentFileVersion?: Prisma.DocumentFileVersionUpdateOneRequiredWithoutExtractionAttemptsNestedInput
+  tenant?: Prisma.EnteUpdateOneRequiredWithoutDocumentExtractionAttemptsNestedInput
+  procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutDocumentExtractionAttemptsNestedInput
+  pages?: Prisma.DocumentExtractionPageUpdateManyWithoutExtractionAttemptNestedInput
+  retryOfAttempt?: Prisma.DocumentExtractionAttemptUpdateOneWithoutRetriesNestedInput
+  retries?: Prisma.DocumentExtractionAttemptUpdateManyWithoutRetryOfAttemptNestedInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUpdateManyWithoutSourceAttemptNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutDocumentExtractionAttemptNestedInput
+}
+
+export type DocumentExtractionAttemptUncheckedUpdateWithoutOcrCompletedRunInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  executionKey?: Prisma.StringFieldUpdateOperationsInput | string
+  documentoId?: Prisma.StringFieldUpdateOperationsInput | string
+  documentFileVersionId?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  procedimentoId?: Prisma.StringFieldUpdateOperationsInput | string
+  policyVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  retryOfAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryAuthorizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outcome?: Prisma.EnumDocumentExtractionOutcomeFieldUpdateOperationsInput | $Enums.DocumentExtractionOutcome
+  sourceSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  declaredMimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  detectedMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceSizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  directExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  directExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  pages?: Prisma.DocumentExtractionPageUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+  retries?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutRetryOfAttemptNestedInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUncheckedUpdateManyWithoutSourceAttemptNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutDocumentExtractionAttemptNestedInput
+}
+
+export type DocumentExtractionAttemptCreateWithoutFascicoloKnowledgeEvidenceInput = {
+  id?: string
+  executionKey: string
+  policyVersion: string
+  retryAuthorizationId?: string | null
+  outcome: $Enums.DocumentExtractionOutcome
+  sourceSha256: string
+  declaredMimeType: string
+  detectedMimeType?: string | null
+  sourceSizeBytes: number
+  startedAt: Date | string
+  completedAt: Date | string
+  directExtractorName?: string | null
+  directExtractorVersion?: string | null
+  ocrExtractorName?: string | null
+  ocrExtractorVersion?: string | null
+  rasterizerName?: string | null
+  rasterizerVersion?: string | null
+  failureCode?: string | null
+  failureMessage?: string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  documento: Prisma.DocumentoCreateNestedOneWithoutExtractionAttemptsInput
+  documentFileVersion: Prisma.DocumentFileVersionCreateNestedOneWithoutExtractionAttemptsInput
+  tenant: Prisma.EnteCreateNestedOneWithoutDocumentExtractionAttemptsInput
+  procedimento: Prisma.ProcedimentoCreateNestedOneWithoutDocumentExtractionAttemptsInput
+  pages?: Prisma.DocumentExtractionPageCreateNestedManyWithoutExtractionAttemptInput
+  retryOfAttempt?: Prisma.DocumentExtractionAttemptCreateNestedOneWithoutRetriesInput
+  retries?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutRetryOfAttemptInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunCreateNestedManyWithoutSourceAttemptInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunCreateNestedOneWithoutExtractionAttemptInput
+}
+
+export type DocumentExtractionAttemptUncheckedCreateWithoutFascicoloKnowledgeEvidenceInput = {
+  id?: string
+  executionKey: string
+  documentoId: string
+  documentFileVersionId: string
+  tenantId: string
+  procedimentoId: string
+  policyVersion: string
+  retryOfAttemptId?: string | null
+  retryAuthorizationId?: string | null
+  outcome: $Enums.DocumentExtractionOutcome
+  sourceSha256: string
+  declaredMimeType: string
+  detectedMimeType?: string | null
+  sourceSizeBytes: number
+  startedAt: Date | string
+  completedAt: Date | string
+  directExtractorName?: string | null
+  directExtractorVersion?: string | null
+  ocrExtractorName?: string | null
+  ocrExtractorVersion?: string | null
+  rasterizerName?: string | null
+  rasterizerVersion?: string | null
+  failureCode?: string | null
+  failureMessage?: string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  pages?: Prisma.DocumentExtractionPageUncheckedCreateNestedManyWithoutExtractionAttemptInput
+  retries?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutRetryOfAttemptInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUncheckedCreateNestedManyWithoutSourceAttemptInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUncheckedCreateNestedOneWithoutExtractionAttemptInput
+}
+
+export type DocumentExtractionAttemptCreateOrConnectWithoutFascicoloKnowledgeEvidenceInput = {
+  where: Prisma.DocumentExtractionAttemptWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocumentExtractionAttemptCreateWithoutFascicoloKnowledgeEvidenceInput, Prisma.DocumentExtractionAttemptUncheckedCreateWithoutFascicoloKnowledgeEvidenceInput>
+}
+
+export type DocumentExtractionAttemptUpsertWithoutFascicoloKnowledgeEvidenceInput = {
+  update: Prisma.XOR<Prisma.DocumentExtractionAttemptUpdateWithoutFascicoloKnowledgeEvidenceInput, Prisma.DocumentExtractionAttemptUncheckedUpdateWithoutFascicoloKnowledgeEvidenceInput>
+  create: Prisma.XOR<Prisma.DocumentExtractionAttemptCreateWithoutFascicoloKnowledgeEvidenceInput, Prisma.DocumentExtractionAttemptUncheckedCreateWithoutFascicoloKnowledgeEvidenceInput>
+  where?: Prisma.DocumentExtractionAttemptWhereInput
+}
+
+export type DocumentExtractionAttemptUpdateToOneWithWhereWithoutFascicoloKnowledgeEvidenceInput = {
+  where?: Prisma.DocumentExtractionAttemptWhereInput
+  data: Prisma.XOR<Prisma.DocumentExtractionAttemptUpdateWithoutFascicoloKnowledgeEvidenceInput, Prisma.DocumentExtractionAttemptUncheckedUpdateWithoutFascicoloKnowledgeEvidenceInput>
+}
+
+export type DocumentExtractionAttemptUpdateWithoutFascicoloKnowledgeEvidenceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  executionKey?: Prisma.StringFieldUpdateOperationsInput | string
+  policyVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  retryAuthorizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outcome?: Prisma.EnumDocumentExtractionOutcomeFieldUpdateOperationsInput | $Enums.DocumentExtractionOutcome
+  sourceSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  declaredMimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  detectedMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceSizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  directExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  directExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documento?: Prisma.DocumentoUpdateOneRequiredWithoutExtractionAttemptsNestedInput
+  documentFileVersion?: Prisma.DocumentFileVersionUpdateOneRequiredWithoutExtractionAttemptsNestedInput
+  tenant?: Prisma.EnteUpdateOneRequiredWithoutDocumentExtractionAttemptsNestedInput
+  procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutDocumentExtractionAttemptsNestedInput
+  pages?: Prisma.DocumentExtractionPageUpdateManyWithoutExtractionAttemptNestedInput
+  retryOfAttempt?: Prisma.DocumentExtractionAttemptUpdateOneWithoutRetriesNestedInput
+  retries?: Prisma.DocumentExtractionAttemptUpdateManyWithoutRetryOfAttemptNestedInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUpdateManyWithoutSourceAttemptNestedInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUpdateOneWithoutExtractionAttemptNestedInput
+}
+
+export type DocumentExtractionAttemptUncheckedUpdateWithoutFascicoloKnowledgeEvidenceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  executionKey?: Prisma.StringFieldUpdateOperationsInput | string
+  documentoId?: Prisma.StringFieldUpdateOperationsInput | string
+  documentFileVersionId?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  procedimentoId?: Prisma.StringFieldUpdateOperationsInput | string
+  policyVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  retryOfAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryAuthorizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outcome?: Prisma.EnumDocumentExtractionOutcomeFieldUpdateOperationsInput | $Enums.DocumentExtractionOutcome
+  sourceSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  declaredMimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  detectedMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceSizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  directExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  directExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ocrExtractorVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rasterizerVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failureMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  technicalMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  pages?: Prisma.DocumentExtractionPageUncheckedUpdateManyWithoutExtractionAttemptNestedInput
+  retries?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutRetryOfAttemptNestedInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUncheckedUpdateManyWithoutSourceAttemptNestedInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUncheckedUpdateOneWithoutExtractionAttemptNestedInput
 }
 
 export type DocumentExtractionAttemptCreateManyTenantInput = {
@@ -1915,6 +2492,9 @@ export type DocumentExtractionAttemptUpdateWithoutTenantInput = {
   pages?: Prisma.DocumentExtractionPageUpdateManyWithoutExtractionAttemptNestedInput
   retryOfAttempt?: Prisma.DocumentExtractionAttemptUpdateOneWithoutRetriesNestedInput
   retries?: Prisma.DocumentExtractionAttemptUpdateManyWithoutRetryOfAttemptNestedInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUpdateManyWithoutSourceAttemptNestedInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUpdateOneWithoutExtractionAttemptNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutDocumentExtractionAttemptNestedInput
 }
 
 export type DocumentExtractionAttemptUncheckedUpdateWithoutTenantInput = {
@@ -1946,6 +2526,9 @@ export type DocumentExtractionAttemptUncheckedUpdateWithoutTenantInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pages?: Prisma.DocumentExtractionPageUncheckedUpdateManyWithoutExtractionAttemptNestedInput
   retries?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutRetryOfAttemptNestedInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUncheckedUpdateManyWithoutSourceAttemptNestedInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUncheckedUpdateOneWithoutExtractionAttemptNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutDocumentExtractionAttemptNestedInput
 }
 
 export type DocumentExtractionAttemptUncheckedUpdateManyWithoutTenantInput = {
@@ -2034,6 +2617,9 @@ export type DocumentExtractionAttemptUpdateWithoutProcedimentoInput = {
   pages?: Prisma.DocumentExtractionPageUpdateManyWithoutExtractionAttemptNestedInput
   retryOfAttempt?: Prisma.DocumentExtractionAttemptUpdateOneWithoutRetriesNestedInput
   retries?: Prisma.DocumentExtractionAttemptUpdateManyWithoutRetryOfAttemptNestedInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUpdateManyWithoutSourceAttemptNestedInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUpdateOneWithoutExtractionAttemptNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutDocumentExtractionAttemptNestedInput
 }
 
 export type DocumentExtractionAttemptUncheckedUpdateWithoutProcedimentoInput = {
@@ -2064,6 +2650,9 @@ export type DocumentExtractionAttemptUncheckedUpdateWithoutProcedimentoInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pages?: Prisma.DocumentExtractionPageUncheckedUpdateManyWithoutExtractionAttemptNestedInput
   retries?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutRetryOfAttemptNestedInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUncheckedUpdateManyWithoutSourceAttemptNestedInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUncheckedUpdateOneWithoutExtractionAttemptNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutDocumentExtractionAttemptNestedInput
 }
 
 export type DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoInput = {
@@ -2150,6 +2739,9 @@ export type DocumentExtractionAttemptUpdateWithoutDocumentoInput = {
   pages?: Prisma.DocumentExtractionPageUpdateManyWithoutExtractionAttemptNestedInput
   retryOfAttempt?: Prisma.DocumentExtractionAttemptUpdateOneWithoutRetriesNestedInput
   retries?: Prisma.DocumentExtractionAttemptUpdateManyWithoutRetryOfAttemptNestedInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUpdateManyWithoutSourceAttemptNestedInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUpdateOneWithoutExtractionAttemptNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutDocumentExtractionAttemptNestedInput
 }
 
 export type DocumentExtractionAttemptUncheckedUpdateWithoutDocumentoInput = {
@@ -2179,6 +2771,9 @@ export type DocumentExtractionAttemptUncheckedUpdateWithoutDocumentoInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pages?: Prisma.DocumentExtractionPageUncheckedUpdateManyWithoutExtractionAttemptNestedInput
   retries?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutRetryOfAttemptNestedInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUncheckedUpdateManyWithoutSourceAttemptNestedInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUncheckedUpdateOneWithoutExtractionAttemptNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutDocumentExtractionAttemptNestedInput
 }
 
 export type DocumentExtractionAttemptUncheckedUpdateManyWithoutDocumentoInput = {
@@ -2264,6 +2859,9 @@ export type DocumentExtractionAttemptUpdateWithoutDocumentFileVersionInput = {
   pages?: Prisma.DocumentExtractionPageUpdateManyWithoutExtractionAttemptNestedInput
   retryOfAttempt?: Prisma.DocumentExtractionAttemptUpdateOneWithoutRetriesNestedInput
   retries?: Prisma.DocumentExtractionAttemptUpdateManyWithoutRetryOfAttemptNestedInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUpdateManyWithoutSourceAttemptNestedInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUpdateOneWithoutExtractionAttemptNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutDocumentExtractionAttemptNestedInput
 }
 
 export type DocumentExtractionAttemptUncheckedUpdateWithoutDocumentFileVersionInput = {
@@ -2293,6 +2891,9 @@ export type DocumentExtractionAttemptUncheckedUpdateWithoutDocumentFileVersionIn
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pages?: Prisma.DocumentExtractionPageUncheckedUpdateManyWithoutExtractionAttemptNestedInput
   retries?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutRetryOfAttemptNestedInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUncheckedUpdateManyWithoutSourceAttemptNestedInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUncheckedUpdateOneWithoutExtractionAttemptNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutDocumentExtractionAttemptNestedInput
 }
 
 export type DocumentExtractionAttemptUncheckedUpdateManyWithoutDocumentFileVersionInput = {
@@ -2380,6 +2981,9 @@ export type DocumentExtractionAttemptUpdateWithoutRetryOfAttemptInput = {
   procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutDocumentExtractionAttemptsNestedInput
   pages?: Prisma.DocumentExtractionPageUpdateManyWithoutExtractionAttemptNestedInput
   retries?: Prisma.DocumentExtractionAttemptUpdateManyWithoutRetryOfAttemptNestedInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUpdateManyWithoutSourceAttemptNestedInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUpdateOneWithoutExtractionAttemptNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutDocumentExtractionAttemptNestedInput
 }
 
 export type DocumentExtractionAttemptUncheckedUpdateWithoutRetryOfAttemptInput = {
@@ -2411,6 +3015,9 @@ export type DocumentExtractionAttemptUncheckedUpdateWithoutRetryOfAttemptInput =
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pages?: Prisma.DocumentExtractionPageUncheckedUpdateManyWithoutExtractionAttemptNestedInput
   retries?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutRetryOfAttemptNestedInput
+  ocrSourceRuns?: Prisma.DocumentOcrRunUncheckedUpdateManyWithoutSourceAttemptNestedInput
+  ocrCompletedRun?: Prisma.DocumentOcrRunUncheckedUpdateOneWithoutExtractionAttemptNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutDocumentExtractionAttemptNestedInput
 }
 
 export type DocumentExtractionAttemptUncheckedUpdateManyWithoutRetryOfAttemptInput = {
@@ -2450,11 +3057,15 @@ export type DocumentExtractionAttemptUncheckedUpdateManyWithoutRetryOfAttemptInp
 export type DocumentExtractionAttemptCountOutputType = {
   pages: number
   retries: number
+  ocrSourceRuns: number
+  fascicoloKnowledgeEvidence: number
 }
 
 export type DocumentExtractionAttemptCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   pages?: boolean | DocumentExtractionAttemptCountOutputTypeCountPagesArgs
   retries?: boolean | DocumentExtractionAttemptCountOutputTypeCountRetriesArgs
+  ocrSourceRuns?: boolean | DocumentExtractionAttemptCountOutputTypeCountOcrSourceRunsArgs
+  fascicoloKnowledgeEvidence?: boolean | DocumentExtractionAttemptCountOutputTypeCountFascicoloKnowledgeEvidenceArgs
 }
 
 /**
@@ -2479,6 +3090,20 @@ export type DocumentExtractionAttemptCountOutputTypeCountPagesArgs<ExtArgs exten
  */
 export type DocumentExtractionAttemptCountOutputTypeCountRetriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.DocumentExtractionAttemptWhereInput
+}
+
+/**
+ * DocumentExtractionAttemptCountOutputType without action
+ */
+export type DocumentExtractionAttemptCountOutputTypeCountOcrSourceRunsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentOcrRunWhereInput
+}
+
+/**
+ * DocumentExtractionAttemptCountOutputType without action
+ */
+export type DocumentExtractionAttemptCountOutputTypeCountFascicoloKnowledgeEvidenceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FascicoloKnowledgeEvidenceWhereInput
 }
 
 
@@ -2517,6 +3142,9 @@ export type DocumentExtractionAttemptSelect<ExtArgs extends runtime.Types.Extens
   pages?: boolean | Prisma.DocumentExtractionAttempt$pagesArgs<ExtArgs>
   retryOfAttempt?: boolean | Prisma.DocumentExtractionAttempt$retryOfAttemptArgs<ExtArgs>
   retries?: boolean | Prisma.DocumentExtractionAttempt$retriesArgs<ExtArgs>
+  ocrSourceRuns?: boolean | Prisma.DocumentExtractionAttempt$ocrSourceRunsArgs<ExtArgs>
+  ocrCompletedRun?: boolean | Prisma.DocumentExtractionAttempt$ocrCompletedRunArgs<ExtArgs>
+  fascicoloKnowledgeEvidence?: boolean | Prisma.DocumentExtractionAttempt$fascicoloKnowledgeEvidenceArgs<ExtArgs>
   _count?: boolean | Prisma.DocumentExtractionAttemptCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["documentExtractionAttempt"]>
 
@@ -2629,6 +3257,9 @@ export type DocumentExtractionAttemptInclude<ExtArgs extends runtime.Types.Exten
   pages?: boolean | Prisma.DocumentExtractionAttempt$pagesArgs<ExtArgs>
   retryOfAttempt?: boolean | Prisma.DocumentExtractionAttempt$retryOfAttemptArgs<ExtArgs>
   retries?: boolean | Prisma.DocumentExtractionAttempt$retriesArgs<ExtArgs>
+  ocrSourceRuns?: boolean | Prisma.DocumentExtractionAttempt$ocrSourceRunsArgs<ExtArgs>
+  ocrCompletedRun?: boolean | Prisma.DocumentExtractionAttempt$ocrCompletedRunArgs<ExtArgs>
+  fascicoloKnowledgeEvidence?: boolean | Prisma.DocumentExtractionAttempt$fascicoloKnowledgeEvidenceArgs<ExtArgs>
   _count?: boolean | Prisma.DocumentExtractionAttemptCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type DocumentExtractionAttemptIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2656,6 +3287,9 @@ export type $DocumentExtractionAttemptPayload<ExtArgs extends runtime.Types.Exte
     pages: Prisma.$DocumentExtractionPagePayload<ExtArgs>[]
     retryOfAttempt: Prisma.$DocumentExtractionAttemptPayload<ExtArgs> | null
     retries: Prisma.$DocumentExtractionAttemptPayload<ExtArgs>[]
+    ocrSourceRuns: Prisma.$DocumentOcrRunPayload<ExtArgs>[]
+    ocrCompletedRun: Prisma.$DocumentOcrRunPayload<ExtArgs> | null
+    fascicoloKnowledgeEvidence: Prisma.$FascicoloKnowledgeEvidencePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3086,6 +3720,9 @@ export interface Prisma__DocumentExtractionAttemptClient<T, Null = never, ExtArg
   pages<T extends Prisma.DocumentExtractionAttempt$pagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentExtractionAttempt$pagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentExtractionPagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   retryOfAttempt<T extends Prisma.DocumentExtractionAttempt$retryOfAttemptArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentExtractionAttempt$retryOfAttemptArgs<ExtArgs>>): Prisma.Prisma__DocumentExtractionAttemptClient<runtime.Types.Result.GetResult<Prisma.$DocumentExtractionAttemptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   retries<T extends Prisma.DocumentExtractionAttempt$retriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentExtractionAttempt$retriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentExtractionAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  ocrSourceRuns<T extends Prisma.DocumentExtractionAttempt$ocrSourceRunsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentExtractionAttempt$ocrSourceRunsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentOcrRunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  ocrCompletedRun<T extends Prisma.DocumentExtractionAttempt$ocrCompletedRunArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentExtractionAttempt$ocrCompletedRunArgs<ExtArgs>>): Prisma.Prisma__DocumentOcrRunClient<runtime.Types.Result.GetResult<Prisma.$DocumentOcrRunPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  fascicoloKnowledgeEvidence<T extends Prisma.DocumentExtractionAttempt$fascicoloKnowledgeEvidenceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentExtractionAttempt$fascicoloKnowledgeEvidenceArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloKnowledgeEvidencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3607,6 +4244,73 @@ export type DocumentExtractionAttempt$retriesArgs<ExtArgs extends runtime.Types.
   take?: number
   skip?: number
   distinct?: Prisma.DocumentExtractionAttemptScalarFieldEnum | Prisma.DocumentExtractionAttemptScalarFieldEnum[]
+}
+
+/**
+ * DocumentExtractionAttempt.ocrSourceRuns
+ */
+export type DocumentExtractionAttempt$ocrSourceRunsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocumentOcrRun
+   */
+  select?: Prisma.DocumentOcrRunSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocumentOcrRun
+   */
+  omit?: Prisma.DocumentOcrRunOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentOcrRunInclude<ExtArgs> | null
+  where?: Prisma.DocumentOcrRunWhereInput
+  orderBy?: Prisma.DocumentOcrRunOrderByWithRelationInput | Prisma.DocumentOcrRunOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentOcrRunWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentOcrRunScalarFieldEnum | Prisma.DocumentOcrRunScalarFieldEnum[]
+}
+
+/**
+ * DocumentExtractionAttempt.ocrCompletedRun
+ */
+export type DocumentExtractionAttempt$ocrCompletedRunArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocumentOcrRun
+   */
+  select?: Prisma.DocumentOcrRunSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocumentOcrRun
+   */
+  omit?: Prisma.DocumentOcrRunOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentOcrRunInclude<ExtArgs> | null
+  where?: Prisma.DocumentOcrRunWhereInput
+}
+
+/**
+ * DocumentExtractionAttempt.fascicoloKnowledgeEvidence
+ */
+export type DocumentExtractionAttempt$fascicoloKnowledgeEvidenceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FascicoloKnowledgeEvidence
+   */
+  select?: Prisma.FascicoloKnowledgeEvidenceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FascicoloKnowledgeEvidence
+   */
+  omit?: Prisma.FascicoloKnowledgeEvidenceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FascicoloKnowledgeEvidenceInclude<ExtArgs> | null
+  where?: Prisma.FascicoloKnowledgeEvidenceWhereInput
+  orderBy?: Prisma.FascicoloKnowledgeEvidenceOrderByWithRelationInput | Prisma.FascicoloKnowledgeEvidenceOrderByWithRelationInput[]
+  cursor?: Prisma.FascicoloKnowledgeEvidenceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FascicoloKnowledgeEvidenceScalarFieldEnum | Prisma.FascicoloKnowledgeEvidenceScalarFieldEnum[]
 }
 
 /**

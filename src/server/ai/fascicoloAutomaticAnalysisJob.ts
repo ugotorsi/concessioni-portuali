@@ -1008,7 +1008,10 @@ export async function ensureFascicoloDocumentCorpusUpdateJob(
   });
   if (
     !sourceJob
-    || sourceJob.operation !== "DOCUMENT_EXTRACTION_V1"
+    || (
+      sourceJob.operation !== "DOCUMENT_EXTRACTION_V1"
+      && sourceJob.operation !== "DOCUMENT_OCR_PAGE_BATCH_V2"
+    )
     || !sourceJob.tenantId
     || !sourceJob.procedimentoId
     || (sourceJob.admissionType === "AUTHENTICATED_USER" && !sourceJob.initiatingUserId)

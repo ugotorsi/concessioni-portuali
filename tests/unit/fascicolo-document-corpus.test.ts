@@ -117,6 +117,36 @@ describe("fascicolo document corpus", () => {
     expect(repeated.corpusFingerprint).toBe(corpus.corpusFingerprint);
   });
 
+  it("does not expose a successful attempt whose source hash differs from the current version", () => {
+    const corpus = buildFascicoloDocumentCorpus({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-a",
+      documents: [{
+        id: "document-a",
+        nome: "Corrente.pdf",
+        currentFileVersionId: "version-a",
+        currentFileVersion: { sha256: "a".repeat(64) },
+      }],
+      attempts: [{
+        id: "attempt-stale",
+        documentoId: "document-a",
+        documentFileVersionId: "version-a",
+        outcome: "SUCCEEDED",
+        sourceSha256: "b".repeat(64),
+        failureCode: null,
+        pages: [page(1, "Testo non coerente", "0".repeat(64))],
+      }],
+    });
+
+    expect(corpus.availability).toBe("NOT_READY");
+    expect(corpus.documents[0]).toMatchObject({
+      status: "NOT_EXTRACTED",
+      extractionAttemptId: null,
+      sourceSha256: "a".repeat(64),
+    });
+    expect(corpus.excerpts).toEqual([]);
+  });
+
   it("uses only current-version successful attempts and reports failed or missing documents", async () => {
     mocks.documentoFindMany.mockResolvedValue([
       {

@@ -1520,6 +1520,23 @@ export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedFloatNullableFilter<$PrismaModel>
 }
 
+export type EnumDocumentOcrRunStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentOcrRunStatus | Prisma.EnumDocumentOcrRunStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentOcrRunStatus[] | Prisma.ListEnumDocumentOcrRunStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentOcrRunStatus[] | Prisma.ListEnumDocumentOcrRunStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentOcrRunStatusFilter<$PrismaModel> | $Enums.DocumentOcrRunStatus
+}
+
+export type EnumDocumentOcrRunStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentOcrRunStatus | Prisma.EnumDocumentOcrRunStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentOcrRunStatus[] | Prisma.ListEnumDocumentOcrRunStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentOcrRunStatus[] | Prisma.ListEnumDocumentOcrRunStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentOcrRunStatusWithAggregatesFilter<$PrismaModel> | $Enums.DocumentOcrRunStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocumentOcrRunStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocumentOcrRunStatusFilter<$PrismaModel>
+}
+
 export type EnumNeutralIntakeStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.NeutralIntakeStatus | Prisma.EnumNeutralIntakeStatusFieldRefInput<$PrismaModel>
   in?: $Enums.NeutralIntakeStatus[] | Prisma.ListEnumNeutralIntakeStatusFieldRefInput<$PrismaModel>
@@ -4043,6 +4060,23 @@ export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
   _sum?: Prisma.NestedFloatNullableFilter<$PrismaModel>
   _min?: Prisma.NestedFloatNullableFilter<$PrismaModel>
   _max?: Prisma.NestedFloatNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumDocumentOcrRunStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentOcrRunStatus | Prisma.EnumDocumentOcrRunStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentOcrRunStatus[] | Prisma.ListEnumDocumentOcrRunStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentOcrRunStatus[] | Prisma.ListEnumDocumentOcrRunStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentOcrRunStatusFilter<$PrismaModel> | $Enums.DocumentOcrRunStatus
+}
+
+export type NestedEnumDocumentOcrRunStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentOcrRunStatus | Prisma.EnumDocumentOcrRunStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentOcrRunStatus[] | Prisma.ListEnumDocumentOcrRunStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocumentOcrRunStatus[] | Prisma.ListEnumDocumentOcrRunStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocumentOcrRunStatusWithAggregatesFilter<$PrismaModel> | $Enums.DocumentOcrRunStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocumentOcrRunStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocumentOcrRunStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumNeutralIntakeStatusFilter<$PrismaModel = never> = {

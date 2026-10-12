@@ -1,2 +1,16 @@
 export const DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1 =
   "DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1" as const;
+
+export const DOCUMENT_LOCAL_OCR_EXTRACTION_POLICY_V1 =
+  "DOCUMENT_LOCAL_OCR_EXTRACTION_POLICY_V1" as const;
+
+export const DOCUMENT_OCR_BATCH_EXTRACTION_POLICY_V2 =
+  "DOCUMENT_OCR_BATCH_EXTRACTION_POLICY_V2" as const;
+
+export const DOCUMENT_OCR_BATCH_LIMITS_V2 = Object.freeze({
+  maxArtifactBytes: 30 * 1024 * 1024,
+  maxPdfPages: 100,
+  pagesPerBatch: 5,
+  maxImagePixels: 8_000_000,
+  ocrTimeoutMsPerPage: 45_000,
+});

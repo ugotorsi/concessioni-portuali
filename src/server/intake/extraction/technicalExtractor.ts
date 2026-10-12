@@ -21,6 +21,13 @@ export interface TechnicalExtractorDependencies {
   ocrMode: "ENABLED" | "DISABLED";
 }
 
+export interface TechnicalExtractionPageSelection {
+  readonly firstPage: number;
+  readonly lastPage: number;
+  readonly skipPageNumbers?: ReadonlySet<number>;
+  readonly onPage?: (page: ExtractedPageEvidence) => Promise<void>;
+}
+
 function pageEvidence(input: {
   pageNumber: number;
   method: "DIRECT_TEXT" | "OCR";
@@ -74,9 +81,10 @@ function assertTotalTextLimit(pages: readonly ExtractedPageEvidence[], policy: E
   }
 }
 
-export async function extractTechnicalDocument(
+async function extractTechnicalDocumentInternal(
   input: TechnicalExtractionInput,
   dependencies: Partial<TechnicalExtractorDependencies> = {},
+  selection?: TechnicalExtractionPageSelection,
 ): Promise<TechnicalExtractionResult> {
   const policy = dependencies.policy ?? B2C9_EXTRACTION_POLICY_V1;
   const pdf = dependencies.pdf ?? new PdfJsExtractionAdapter();
@@ -106,7 +114,23 @@ export async function extractTechnicalDocument(
   if (detectedMimeType === "application/pdf") {
     const session = await pdf.open(input.bytes, policy.maxPdfPages);
     try {
-      for (const directPage of session.pages) {
+      const firstPage = selection?.firstPage ?? 1;
+      const lastPage = selection?.lastPage ?? session.pageCount;
+      if (
+        !Number.isInteger(firstPage)
+        || !Number.isInteger(lastPage)
+        || firstPage < 1
+        || lastPage < firstPage
+        || lastPage > session.pageCount
+      ) {
+        throw new ExtractionFailure("PAGE_LIMIT_EXCEEDED");
+      }
+      const selectedPages = session.pages.filter((page) => (
+        page.pageNumber >= firstPage
+        && page.pageNumber <= lastPage
+        && !selection?.skipPageNumbers?.has(page.pageNumber)
+      ));
+      for (const directPage of selectedPages) {
         const remainingRawCharacters = policy.maxRawCharsPerAttempt - totalRawCharacters;
         const rawDirectText = await directPage.readText(
           Math.min(policy.maxRawCharsPerPage, remainingRawCharacters),
@@ -115,12 +139,14 @@ export async function extractTechnicalDocument(
         const normalizedDirectText = normalizeExtractedText(rawDirectText);
         const assessment = assessDirectText(normalizedDirectText, policy);
         if (assessment.decision === "DIRECT_TEXT_SUFFICIENT") {
-          pages.push(pageEvidence({
+          const evidence = pageEvidence({
             pageNumber: directPage.pageNumber,
             method: "DIRECT_TEXT",
             text: rawDirectText,
             policy,
-          }));
+          });
+          pages.push(evidence);
+          await selection?.onPage?.(evidence);
           continue;
         }
 
@@ -131,14 +157,16 @@ export async function extractTechnicalDocument(
         const recognized = await (await getOcr()).recognize(image, policy.ocrTimeoutMsPerPage);
         addRawCharacters(recognized.text);
         ocrUsed = true;
-        pages.push(pageEvidence({
+        const evidence = pageEvidence({
           pageNumber: directPage.pageNumber,
           method: "OCR",
           text: recognized.text,
           confidence: recognized.confidence,
           warnings: [assessment.decision, "OCR_FALLBACK_USED"],
           policy,
-        }));
+        });
+        pages.push(evidence);
+        await selection?.onPage?.(evidence);
       }
     } finally {
       await session.close(Math.min(policy.ocrTimeoutMsPerPage, 5_000));
@@ -151,13 +179,15 @@ export async function extractTechnicalDocument(
     const recognized = await (await getOcr()).recognize(input.bytes, policy.ocrTimeoutMsPerPage);
     addRawCharacters(recognized.text);
     ocrUsed = true;
-    pages.push(pageEvidence({
+    const evidence = pageEvidence({
       pageNumber: 1,
       method: "OCR",
       text: recognized.text,
       confidence: recognized.confidence,
       policy,
-    }));
+    });
+    pages.push(evidence);
+    await selection?.onPage?.(evidence);
   }
 
   assertTotalTextLimit(pages, policy);
@@ -172,4 +202,37 @@ export async function extractTechnicalDocument(
     rasterizerName: detectedMimeType === "application/pdf" && ocrUsed ? pdf.rasterizerName : null,
     rasterizerVersion: detectedMimeType === "application/pdf" && ocrUsed ? pdf.rasterizerVersion : null,
   };
+}
+
+export function extractTechnicalDocument(
+  input: TechnicalExtractionInput,
+  dependencies: Partial<TechnicalExtractorDependencies> = {},
+): Promise<TechnicalExtractionResult> {
+  return extractTechnicalDocumentInternal(input, dependencies);
+}
+
+export function extractTechnicalDocumentPageRange(
+  input: TechnicalExtractionInput,
+  selection: TechnicalExtractionPageSelection,
+  dependencies: Partial<TechnicalExtractorDependencies> = {},
+): Promise<TechnicalExtractionResult> {
+  return extractTechnicalDocumentInternal(input, dependencies, selection);
+}
+
+export async function inspectTechnicalPdfPageCount(
+  input: TechnicalExtractionInput,
+  dependencies: Pick<Partial<TechnicalExtractorDependencies>, "pdf" | "policy"> = {},
+): Promise<number> {
+  const policy = dependencies.policy ?? B2C9_EXTRACTION_POLICY_V1;
+  const detectedMimeType = validateArtifact(input, policy);
+  if (detectedMimeType !== "application/pdf") {
+    throw new ExtractionFailure("UNSUPPORTED_MIME");
+  }
+  const pdf = dependencies.pdf ?? new PdfJsExtractionAdapter();
+  const session = await pdf.open(input.bytes, policy.maxPdfPages);
+  try {
+    return session.pageCount;
+  } finally {
+    await session.close(Math.min(policy.ocrTimeoutMsPerPage, 5_000));
+  }
 }

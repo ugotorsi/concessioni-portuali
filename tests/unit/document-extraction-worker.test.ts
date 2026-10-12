@@ -21,8 +21,17 @@ import {
   documentExtractionAsyncJobRegistry,
   drainOneDocumentExtractionAsyncJob,
 } from "@/server/async-jobs/documentExtractionWorker";
+import {
+  assertDocumentOcrWorkerConfig,
+  documentOcrAsyncJobRegistry,
+  drainOneDocumentOcrAsyncJob,
+} from "@/server/async-jobs/documentOcrWorker";
 import { runDocumentExtractionWorkerProcess } from "@/server/async-jobs/documentExtractionWorkerProcess";
 import { DOCUMENT_EXTRACTION_OPERATION } from "@/server/documents/documentExtractionAdmission";
+import {
+  DOCUMENT_OCR_COORDINATOR_OPERATION,
+  DOCUMENT_OCR_PAGE_BATCH_OPERATION,
+} from "@/server/documents/documentOcrExtractionJob";
 
 const root = process.cwd();
 const sourceRoot = path.join(root, "src");
@@ -102,6 +111,8 @@ describe("dedicated document extraction worker", () => {
     })).resolves.toEqual({ outcome: "IDLE" });
 
     expect(documentExtractionAsyncJobRegistry.resolve(DOCUMENT_EXTRACTION_OPERATION)).not.toBeNull();
+    expect(documentExtractionAsyncJobRegistry.resolve(DOCUMENT_OCR_COORDINATOR_OPERATION)).toBeNull();
+    expect(documentExtractionAsyncJobRegistry.resolve(DOCUMENT_OCR_PAGE_BATCH_OPERATION)).toBeNull();
     expect(documentExtractionAsyncJobRegistry.resolve("FASCICOLO.AUTOMATIC_ANALYSIS_V1")).toBeNull();
     expect(documentExtractionAsyncJobRegistry.resolve("LEGAL_RESEARCH.EXECUTE_V1")).toBeNull();
     expect(worker.drainOneAsyncJob).toHaveBeenCalledWith({
@@ -112,6 +123,16 @@ describe("dedicated document extraction worker", () => {
       procedimentoAllowlist: ["procedure-canary"],
       registry: documentExtractionAsyncJobRegistry,
     });
+  });
+
+  it("rejects OCR operations from the direct-text worker", () => {
+    expect(() => assertDocumentExtractionWorkerConfig(config({
+      operationAllowlist: [
+        DOCUMENT_EXTRACTION_OPERATION,
+        DOCUMENT_OCR_COORDINATOR_OPERATION,
+        DOCUMENT_OCR_PAGE_BATCH_OPERATION,
+      ],
+    }))).toThrowError(expect.objectContaining({ code: "INVALID_CONFIGURATION" }));
   });
 
   it("validates configuration before creating or running the persistent runtime", async () => {
@@ -194,5 +215,51 @@ describe("dedicated document extraction worker", () => {
     );
     expect(packageJson.scripts["worker:document-extraction"])
       .not.toBe(packageJson.scripts["worker:document-extraction-one-shot"]);
+  });
+});
+
+describe("dedicated document OCR worker", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  const ocrOperations = [
+    DOCUMENT_OCR_COORDINATOR_OPERATION,
+    DOCUMENT_OCR_PAGE_BATCH_OPERATION,
+  ];
+
+  it("accepts only the two OCR V2 operations with concurrency one", () => {
+    expect(() => assertDocumentOcrWorkerConfig(config({
+      operationAllowlist: ocrOperations,
+    }))).not.toThrow();
+    expect(() => assertDocumentOcrWorkerConfig(config({
+      operationAllowlist: ocrOperations,
+      concurrency: 2,
+    }))).toThrowError(expect.objectContaining({ code: "INVALID_CONFIGURATION" }));
+    expect(() => assertDocumentOcrWorkerConfig(config({
+      operationAllowlist: [DOCUMENT_EXTRACTION_OPERATION, ...ocrOperations],
+    }))).toThrowError(expect.objectContaining({ code: "INVALID_CONFIGURATION" }));
+  });
+
+  it("registers and claims only coordinator and page-batch jobs", async () => {
+    worker.drainOneAsyncJob.mockResolvedValueOnce({ outcome: "IDLE" });
+
+    await expect(drainOneDocumentOcrAsyncJob({
+      workerId: "document-ocr-e2e",
+      retryDelayMs: 30_000,
+      operationAllowlist: ocrOperations,
+      procedimentoAllowlist: ["procedure-canary"],
+      providerExecutionEnabled: false,
+    })).resolves.toEqual({ outcome: "IDLE" });
+
+    expect(documentOcrAsyncJobRegistry.resolve(DOCUMENT_OCR_COORDINATOR_OPERATION)).not.toBeNull();
+    expect(documentOcrAsyncJobRegistry.resolve(DOCUMENT_OCR_PAGE_BATCH_OPERATION)).not.toBeNull();
+    expect(documentOcrAsyncJobRegistry.resolve(DOCUMENT_EXTRACTION_OPERATION)).toBeNull();
+    expect(worker.drainOneAsyncJob).toHaveBeenCalledWith({
+      workerId: "document-ocr-e2e",
+      retryDelayMs: 30_000,
+      leaseDurationMs: 300_000,
+      operationAllowlist: ocrOperations,
+      procedimentoAllowlist: ["procedure-canary"],
+      registry: documentOcrAsyncJobRegistry,
+    });
   });
 });

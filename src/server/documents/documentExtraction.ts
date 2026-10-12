@@ -13,15 +13,24 @@ import {
   DocumentStorageReadUnavailableError,
 } from "@/server/documents/storage/types";
 import { ExtractionFailure } from "@/server/intake/extraction/errors";
-import { B2C9_EXTRACTION_POLICY_V1 } from "@/server/intake/extraction/policy";
+import {
+  B2C9_EXTRACTION_POLICY_V1,
+  type ExtractionPolicy,
+} from "@/server/intake/extraction/policy";
 import { extractTechnicalDocument } from "@/server/intake/extraction/technicalExtractor";
 import type {
   ExtractedPageEvidence,
   TechnicalExtractionResult,
 } from "@/server/intake/extraction/types";
-import { DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1 } from "./documentExtractionPolicy";
+import {
+  DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
+  DOCUMENT_LOCAL_OCR_EXTRACTION_POLICY_V1,
+} from "./documentExtractionPolicy";
 
-export { DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1 } from "./documentExtractionPolicy";
+export {
+  DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
+  DOCUMENT_LOCAL_OCR_EXTRACTION_POLICY_V1,
+} from "./documentExtractionPolicy";
 
 const identifier = z.string().trim().min(1).max(256);
 const RETRYABLE_DOCUMENT_EXTRACTION_FAILURES = new Set([
@@ -95,6 +104,9 @@ export type DocumentExtractionRetryAuthorization = {
 export type CompletedDocumentExtraction = {
   attemptId: string;
   executionKey: string;
+  policyVersion:
+    | typeof DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1
+    | typeof DOCUMENT_LOCAL_OCR_EXTRACTION_POLICY_V1;
   retryAuthorization: DocumentExtractionRetryAuthorization | null;
   source: DocumentExtractionSourceManifest;
   actor: Actor;
@@ -119,7 +131,8 @@ export class DocumentExtractionAuthorityError extends Error {
       | "CURRENT_VERSION_MISMATCH"
       | "VERSION_MANIFEST_MISMATCH"
       | "EXECUTION_IDENTITY_MISMATCH"
-      | "RETRY_AUTHORIZATION_MISMATCH",
+      | "RETRY_AUTHORIZATION_MISMATCH"
+      | "OCR_AUTHORIZATION_REQUIRED",
   ) {
     super(code);
     this.name = "DocumentExtractionAuthorityError";
@@ -238,23 +251,30 @@ function pageData(page: ExtractedPageEvidence) {
 function sameAttemptScope(
   attempt: ExistingAttempt,
   source: DocumentExtractionSourceManifest,
+  policyVersion: string,
 ): boolean {
   return attempt.documentoId === source.documentoId
     && attempt.documentFileVersionId === source.documentFileVersionId
     && attempt.tenantId === source.tenantId
     && attempt.procedimentoId === source.procedimentoId
-    && attempt.policyVersion === DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1;
+    && attempt.policyVersion === policyVersion;
 }
 
 function validRetrySource(
   attempt: ExistingAttempt | null,
   source: DocumentExtractionSourceManifest,
+  targetPolicyVersion: CompletedDocumentExtraction["policyVersion"],
 ): attempt is ExistingAttempt {
   return Boolean(
     attempt
     && attempt.outcome === "FAILED"
-    && isRetryableDocumentExtractionFailure(attempt.failureCode)
-    && sameAttemptScope(attempt, source),
+    && (
+      targetPolicyVersion === DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1
+        ? isRetryableDocumentExtractionFailure(attempt.failureCode)
+          && sameAttemptScope(attempt, source, DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1)
+        : attempt.failureCode === "OCR_REQUIRED"
+          && sameAttemptScope(attempt, source, DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1)
+    ),
   );
 }
 
@@ -287,7 +307,7 @@ export async function persistCompletedDocumentExtraction(
       where: { executionKey: input.executionKey },
     });
     if (executionAttempt) {
-      if (!sameAttemptScope(executionAttempt, input.source)) {
+      if (!sameAttemptScope(executionAttempt, input.source, input.policyVersion)) {
         throw new DocumentExtractionAuthorityError("EXECUTION_IDENTITY_MISMATCH");
       }
       return { attempt: executionAttempt, reused: true };
@@ -295,13 +315,13 @@ export async function persistCompletedDocumentExtraction(
     const canonicalSuccess = await tx.documentExtractionAttempt.findFirst({
       where: {
         documentFileVersionId: input.source.documentFileVersionId,
-        policyVersion: DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
+        policyVersion: input.policyVersion,
         outcome: "SUCCEEDED",
       },
       orderBy: { createdAt: "asc" },
     });
     if (canonicalSuccess) {
-      if (!sameAttemptScope(canonicalSuccess, input.source)) {
+      if (!sameAttemptScope(canonicalSuccess, input.source, input.policyVersion)) {
         throw new DocumentExtractionAuthorityError("EXECUTION_IDENTITY_MISMATCH");
       }
       return { attempt: canonicalSuccess, reused: true };
@@ -310,20 +330,20 @@ export async function persistCompletedDocumentExtraction(
       const retrySource = await tx.documentExtractionAttempt.findUnique({
         where: { id: input.retryAuthorization.failedAttemptId },
       });
-      if (!validRetrySource(retrySource, input.source)) {
+      if (!validRetrySource(retrySource, input.source, input.policyVersion)) {
         throw new DocumentExtractionAuthorityError("RETRY_AUTHORIZATION_MISMATCH");
       }
     } else {
       const previousFailure = await tx.documentExtractionAttempt.findFirst({
         where: {
           documentFileVersionId: input.source.documentFileVersionId,
-          policyVersion: DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
+          policyVersion: input.policyVersion,
           outcome: "FAILED",
         },
         orderBy: { createdAt: "desc" },
       });
       if (previousFailure) {
-        if (!sameAttemptScope(previousFailure, input.source)) {
+        if (!sameAttemptScope(previousFailure, input.source, input.policyVersion)) {
           throw new DocumentExtractionAuthorityError("EXECUTION_IDENTITY_MISMATCH");
         }
         return { attempt: previousFailure, reused: true };
@@ -339,7 +359,7 @@ export async function persistCompletedDocumentExtraction(
         documentFileVersionId: input.source.documentFileVersionId,
         tenantId: input.source.tenantId,
         procedimentoId: input.source.procedimentoId,
-        policyVersion: DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
+        policyVersion: input.policyVersion,
         retryOfAttemptId: input.retryAuthorization?.failedAttemptId ?? null,
         retryAuthorizationId: input.retryAuthorization?.authorizationId ?? null,
         outcome: input.outcome,
@@ -371,7 +391,7 @@ export async function persistCompletedDocumentExtraction(
       metadata: {
         documentFileVersionId: input.source.documentFileVersionId,
         procedimentoId: input.source.procedimentoId,
-        policyVersion: DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
+        policyVersion: input.policyVersion,
         sourceSha256: input.source.sha256,
         executionKey: input.executionKey,
         retryOfAttemptId: input.retryAuthorization?.failedAttemptId ?? null,
@@ -392,7 +412,7 @@ export async function persistCompletedDocumentExtraction(
       where: { executionKey: input.executionKey },
     });
     if (executionAttempt) {
-      if (!sameAttemptScope(executionAttempt, input.source)) {
+      if (!sameAttemptScope(executionAttempt, input.source, input.policyVersion)) {
         throw new DocumentExtractionAuthorityError("EXECUTION_IDENTITY_MISMATCH");
       }
       return { attempt: executionAttempt, reused: true };
@@ -400,20 +420,46 @@ export async function persistCompletedDocumentExtraction(
     const canonicalSuccess = await prisma.documentExtractionAttempt.findFirst({
       where: {
         documentFileVersionId: input.source.documentFileVersionId,
-        policyVersion: DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
+        policyVersion: input.policyVersion,
         outcome: "SUCCEEDED",
       },
       orderBy: { createdAt: "asc" },
     });
     if (!canonicalSuccess) throw error;
-    if (!sameAttemptScope(canonicalSuccess, input.source)) {
+    if (!sameAttemptScope(canonicalSuccess, input.source, input.policyVersion)) {
       throw new DocumentExtractionAuthorityError("EXECUTION_IDENTITY_MISMATCH");
     }
     return { attempt: canonicalSuccess, reused: true };
   }
 }
 
-const defaultDependencies: ExtractDocumentFileVersionDependencies = {
+type DocumentExtractionProfile = {
+  policyVersion: CompletedDocumentExtraction["policyVersion"];
+  ocrMode: "ENABLED" | "DISABLED";
+  technicalPolicy: ExtractionPolicy;
+};
+
+const DIRECT_TEXT_PROFILE: DocumentExtractionProfile = {
+  policyVersion: DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
+  ocrMode: "DISABLED",
+  technicalPolicy: B2C9_EXTRACTION_POLICY_V1,
+};
+
+const LOCAL_OCR_PROFILE: DocumentExtractionProfile = {
+  policyVersion: DOCUMENT_LOCAL_OCR_EXTRACTION_POLICY_V1,
+  ocrMode: "ENABLED",
+  technicalPolicy: {
+    ...B2C9_EXTRACTION_POLICY_V1,
+    version: "DOCUMENT_LOCAL_OCR_TECHNICAL_POLICY_V1",
+    maxPdfPages: 20,
+    maxImagePixels: 12_000_000,
+  },
+};
+
+function defaultDependencies(
+  profile: DocumentExtractionProfile,
+): ExtractDocumentFileVersionDependencies {
+  return {
   loadDocument: (documentoId) => prisma.documento.findUnique({
     where: { id: documentoId },
     select: {
@@ -452,7 +498,10 @@ const defaultDependencies: ExtractDocumentFileVersionDependencies = {
   loadRetryAttempt: (attemptId) =>
     prisma.documentExtractionAttempt.findUnique({ where: { id: attemptId } }),
   readBounded: (input) => readDocumentFileBoundedFromProvider(input),
-  extract: (input) => extractTechnicalDocument(input, { ocrMode: "DISABLED" }),
+  extract: (input) => extractTechnicalDocument(input, {
+    ocrMode: profile.ocrMode,
+    policy: profile.technicalPolicy,
+  }),
   persist: persistCompletedDocumentExtraction,
   auditRejected: (input) => auditFailure({
     azione: "DOCUMENT_EXTRACTION",
@@ -462,14 +511,15 @@ const defaultDependencies: ExtractDocumentFileVersionDependencies = {
     actor: input.actor,
     metadata: {
       documentFileVersionId: input.documentFileVersionId,
-      policyVersion: DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
+      policyVersion: profile.policyVersion,
       outcome: "REJECTED",
       failureCode: input.code,
     },
   }),
   createAttemptId: randomUUID,
   now: () => new Date(),
-};
+  };
+}
 
 function storageFailure(error: unknown): string {
   if (error instanceof DocumentStorageReadCoherenceError) return error.code;
@@ -488,7 +538,36 @@ export async function extractDocumentFileVersion(
     retryAuthorization?: DocumentExtractionRetryAuthorization | null;
     actor: Actor;
   },
-  dependencies: ExtractDocumentFileVersionDependencies = defaultDependencies,
+  dependencies: ExtractDocumentFileVersionDependencies = defaultDependencies(DIRECT_TEXT_PROFILE),
+): Promise<ExtractDocumentFileVersionResult> {
+  return extractDocumentFileVersionWithProfile(rawInput, dependencies, DIRECT_TEXT_PROFILE);
+}
+
+export async function extractDocumentFileVersionWithLocalOcr(
+  rawInput: {
+    documentoId: string;
+    documentFileVersionId: string;
+    tenantId: string;
+    executionKey: string;
+    retryAuthorization: DocumentExtractionRetryAuthorization;
+    actor: Actor;
+  },
+  dependencies: ExtractDocumentFileVersionDependencies = defaultDependencies(LOCAL_OCR_PROFILE),
+): Promise<ExtractDocumentFileVersionResult> {
+  return extractDocumentFileVersionWithProfile(rawInput, dependencies, LOCAL_OCR_PROFILE);
+}
+
+async function extractDocumentFileVersionWithProfile(
+  rawInput: {
+    documentoId: string;
+    documentFileVersionId: string;
+    tenantId: string;
+    executionKey: string;
+    retryAuthorization?: DocumentExtractionRetryAuthorization | null;
+    actor: Actor;
+  },
+  dependencies: ExtractDocumentFileVersionDependencies,
+  profile: DocumentExtractionProfile,
 ): Promise<ExtractDocumentFileVersionResult> {
   const input = {
     documentoId: identifier.parse(rawInput.documentoId),
@@ -503,6 +582,9 @@ export async function extractDocumentFileVersion(
       : null,
     actor: rawInput.actor,
   };
+  if (profile.ocrMode === "ENABLED" && !input.retryAuthorization) {
+    throw new DocumentExtractionAuthorityError("OCR_AUTHORIZATION_REQUIRED");
+  }
   const document = await dependencies.loadDocument(input.documentoId);
   if (!document) {
     await dependencies.auditRejected({ ...input, code: "DOCUMENT_NOT_FOUND" });
@@ -522,7 +604,7 @@ export async function extractDocumentFileVersion(
 
   const executionAttempt = await dependencies.findExecutionAttempt(input.executionKey);
   if (executionAttempt) {
-    if (!sameAttemptScope(executionAttempt, source)) {
+    if (!sameAttemptScope(executionAttempt, source, profile.policyVersion)) {
       throw new DocumentExtractionAuthorityError("EXECUTION_IDENTITY_MISMATCH");
     }
     return { attempt: executionAttempt, reused: true };
@@ -530,10 +612,10 @@ export async function extractDocumentFileVersion(
 
   const canonicalSuccess = await dependencies.findCanonicalSuccess(
     source.documentFileVersionId,
-    DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
+    profile.policyVersion,
   );
   if (canonicalSuccess) {
-    if (!sameAttemptScope(canonicalSuccess, source)) {
+    if (!sameAttemptScope(canonicalSuccess, source, profile.policyVersion)) {
       throw new DocumentExtractionAuthorityError("EXECUTION_IDENTITY_MISMATCH");
     }
     return { attempt: canonicalSuccess, reused: true };
@@ -543,16 +625,16 @@ export async function extractDocumentFileVersion(
     const retrySource = await dependencies.loadRetryAttempt(
       input.retryAuthorization.failedAttemptId,
     );
-    if (!validRetrySource(retrySource, source)) {
+    if (!validRetrySource(retrySource, source, profile.policyVersion)) {
       throw new DocumentExtractionAuthorityError("RETRY_AUTHORIZATION_MISMATCH");
     }
   } else {
     const previousFailure = await dependencies.findLatestFailure(
       source.documentFileVersionId,
-      DOCUMENT_DIRECT_TEXT_EXTRACTION_POLICY_V1,
+      profile.policyVersion,
     );
     if (previousFailure) {
-      if (!sameAttemptScope(previousFailure, source)) {
+      if (!sameAttemptScope(previousFailure, source, profile.policyVersion)) {
         throw new DocumentExtractionAuthorityError("EXECUTION_IDENTITY_MISMATCH");
       }
       return { attempt: previousFailure, reused: true };
@@ -563,7 +645,7 @@ export async function extractDocumentFileVersion(
   const attemptId = dependencies.createAttemptId();
   let completed: CompletedDocumentExtraction;
   try {
-    if (source.sizeBytes > B2C9_EXTRACTION_POLICY_V1.maxArtifactBytes) {
+    if (source.sizeBytes > profile.technicalPolicy.maxArtifactBytes) {
       throw new ExtractionFailure("ARTIFACT_TOO_LARGE");
     }
     const stored = await dependencies.readBounded({
@@ -581,18 +663,19 @@ export async function extractDocumentFileVersion(
       expectedSha256: source.sha256,
       expectedSizeBytes: source.sizeBytes,
     });
-    if (
+    if (profile.ocrMode === "DISABLED" && (
       result.pages.some((page) => page.method !== "DIRECT_TEXT")
       || result.ocrExtractorName !== null
       || result.ocrExtractorVersion !== null
       || result.rasterizerName !== null
       || result.rasterizerVersion !== null
-    ) {
+    )) {
       throw new ExtractionFailure("OCR_REQUIRED");
     }
     completed = {
       attemptId,
       executionKey: input.executionKey,
+      policyVersion: profile.policyVersion,
       retryAuthorization: input.retryAuthorization,
       source,
       actor: input.actor,
@@ -605,6 +688,7 @@ export async function extractDocumentFileVersion(
     completed = {
       attemptId,
       executionKey: input.executionKey,
+      policyVersion: profile.policyVersion,
       retryAuthorization: input.retryAuthorization,
       source,
       actor: input.actor,
