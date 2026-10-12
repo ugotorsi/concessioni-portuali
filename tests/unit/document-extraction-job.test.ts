@@ -44,7 +44,7 @@ describe("DOCUMENT_EXTRACTION_V1", () => {
     const second = normalizeAsyncJobAdmission(admission());
     expect(first.operation).toBe(DOCUMENT_EXTRACTION_OPERATION);
     expect(first.idempotencyKey).toBe(second.idempotencyKey);
-    expect(first.maxAttempts).toBe(1);
+    expect(first.maxAttempts).toBe(3);
     expect(first.inputReference).toMatchObject({
       referenceType: "DOCUMENT_FILE_VERSION",
       referenceId: "version-1",
@@ -73,11 +73,12 @@ describe("DOCUMENT_EXTRACTION_V1", () => {
       "3ac75b45d059511fce1c2c53c10129c9ecf40b483029e50ca148c5407f1c5be5",
     );
     expect(lightweight.requestFingerprint).toBe(
-      "7b63fbf3b7c0497e4afc37992ef28ed26d1bf29d90139d72c31b13402ee2d613",
+      "350d5e3ca51824855964f3f4690891ed260d8011b4218ccd5350a56db97f27d3",
     );
   });
 
   it("executes only the requested version and admits no collateral jobs", async () => {
+    const ensureFascicoloUpdate = vi.fn().mockResolvedValue({ outcome: "CREATED" });
     const extract = vi.fn().mockResolvedValue({
       reused: false,
       attempt: {
@@ -99,6 +100,7 @@ describe("DOCUMENT_EXTRACTION_V1", () => {
       }),
       verifyRetryPermit: vi.fn(),
       extract,
+      ensureFascicoloUpdate,
     });
     const reference = handler.parseInput(normalizeAsyncJobAdmission(admission()).inputReference);
     await expect(handler.execute(reference, {
@@ -119,6 +121,46 @@ describe("DOCUMENT_EXTRACTION_V1", () => {
       executionKey: "job-1",
       retryAuthorization: null,
     }));
+    expect(ensureFascicoloUpdate).toHaveBeenCalledWith({
+      sourceJobId: "job-1",
+      documentoId: "document-1",
+      documentFileVersionId: "version-1",
+      extractionAttemptId: "attempt-1",
+    });
+  });
+
+  it("marks update admission failures as retryable after successful extraction", async () => {
+    const handler = createDocumentExtractionHandler({
+      loadJob: vi.fn().mockResolvedValue({
+        operation: DOCUMENT_EXTRACTION_OPERATION,
+        tenantId: "tenant-1",
+        procedimentoId: "procedure-1",
+        initiatingUserId: null,
+        actorEmail: null,
+        actorRole: "SYSTEM",
+      }),
+      verifyRetryPermit: vi.fn(),
+      extract: vi.fn().mockResolvedValue({
+        reused: true,
+        attempt: {
+          id: "attempt-1",
+          outcome: "SUCCEEDED",
+          failureCode: null,
+        },
+      }),
+      ensureFascicoloUpdate: vi.fn().mockRejectedValue(new Error("DATABASE_INTERRUPTED")),
+    });
+    const parsed = handler.parseInput(normalizeAsyncJobAdmission(admission()).inputReference);
+    await expect(handler.execute(parsed, {
+      jobId: "job-1",
+      correlationId: "document-extraction-test",
+      attempt: 1,
+      isCancellationRequested: vi.fn().mockResolvedValue(false),
+      heartbeat: vi.fn(),
+    })).rejects.toMatchObject({
+      code: "FASCICOLO_UPDATE_ADMISSION_FAILED",
+      retryable: true,
+    });
   });
 
   it("fails closed when job authority and procedure do not match", async () => {
@@ -134,6 +176,7 @@ describe("DOCUMENT_EXTRACTION_V1", () => {
       }),
       verifyRetryPermit: vi.fn(),
       extract,
+      ensureFascicoloUpdate: vi.fn(),
     });
     const reference = handler.parseInput(normalizeAsyncJobAdmission(admission()).inputReference);
     await expect(handler.execute(reference, {
@@ -159,6 +202,7 @@ describe("DOCUMENT_EXTRACTION_V1", () => {
       }),
       verifyRetryPermit: vi.fn().mockRejectedValue(new Error("PERMIT_NOT_FOUND")),
       extract,
+      ensureFascicoloUpdate: vi.fn(),
     });
     const reference = handler.parseInput({
       referenceType: "DOCUMENT_FILE_VERSION",

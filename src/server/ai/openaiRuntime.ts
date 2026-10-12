@@ -153,10 +153,13 @@ export function createOpenAiFascicoloDocumentRuntimeFromEnv(
   dependencies: { transport?: OpenAiFetch } = {},
 ) {
   const config = createOpenAiFascicoloServiceConfig(env, dependencies);
+  const realDataActivation = env.AI_REAL_DATA_APPROVAL_ID === "E2E_FASCICOLO_STRUCTURED_ANALYSIS_ONCE"
+    ? createRealDataActivationPolicy({})
+    : config.realDataActivation;
   return createFascicoloDocumentAnalysisService({
     provider: config.provider as typeof config.provider & FascicoloDocumentAnalysisProvider,
     maxInputBytes: config.maxInputBytes,
-    realDataActivation: config.realDataActivation,
+    realDataActivation,
   });
 }
 

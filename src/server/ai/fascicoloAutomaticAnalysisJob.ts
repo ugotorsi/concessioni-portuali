@@ -49,6 +49,10 @@ import {
   type KnowledgeMissionLifecycleResult,
   type KnowledgeReconciliationResult,
 } from "@/server/fascicolo-knowledge";
+import {
+  getFascicoloDocumentCorpus,
+  type FascicoloDocumentCorpus,
+} from "@/server/queries/fascicolo-document-corpus";
 
 export { FASCICOLO_AUTOMATIC_ANALYSIS_CONTRACT_VERSION } from "@/server/ai/fascicoloAutomaticContracts";
 
@@ -56,7 +60,7 @@ export const FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION = "FASCICOLO.AUTOMATIC_ANALY
 export const FASCICOLO_AUTOMATIC_ANALYSIS_PURPOSE = "FASCICOLO_AUTOMATIC_ANALYSIS" as const;
 const MAX_DOCUMENT_EXCERPT_CHARACTERS = 24_000;
 
-const automaticReferenceSchema = z.object({
+const neutralIntakeReferenceSchema = z.object({
   referenceType: z.literal("FASCICOLO_DOCUMENT_VERSION"),
   referenceId: z.string().trim().min(1).max(256),
   referenceVersion: z.literal("V1"),
@@ -66,6 +70,19 @@ const automaticReferenceSchema = z.object({
     extractionAttemptId: z.string().trim().min(1).max(256),
   }).strict(),
 }).strict();
+const documentCorpusReferenceSchema = z.object({
+  referenceType: z.literal("FASCICOLO_DOCUMENT_CORPUS"),
+  referenceId: z.string().regex(/^[0-9a-f]{64}$/),
+  referenceVersion: z.literal("V1"),
+  metadata: z.object({
+    procedimentoId: z.string().trim().min(1).max(256),
+    corpusHash: z.string().regex(/^[0-9a-f]{64}$/),
+  }).strict(),
+}).strict();
+const automaticReferenceSchema = z.discriminatedUnion("referenceType", [
+  neutralIntakeReferenceSchema,
+  documentCorpusReferenceSchema,
+]);
 
 type AutomaticReference = z.output<typeof automaticReferenceSchema>;
 
@@ -94,9 +111,10 @@ export interface AutomaticFascicoloReport {
 }
 
 interface AutomaticAuthority {
+  readonly sourceKind?: "NEUTRAL_INTAKE" | "DOCUMENT_CORPUS";
   readonly tenantId: string;
   readonly procedimentoId: string;
-  readonly neutralIntakeId: string;
+  readonly neutralIntakeId?: string;
   readonly extractionAttemptId: string;
   readonly artifactSha256: string;
   readonly corpusFingerprint: string;
@@ -119,6 +137,10 @@ interface AutomaticAuthority {
 
 export interface FascicoloAutomaticAnalysisDependencies {
   loadAuthority(input: { jobId: string; reference: AutomaticReference }): Promise<AutomaticAuthority | null>;
+  getCurrentRevision?(input: {
+    tenantId: string;
+    procedimentoId: string;
+  }): ReturnType<typeof getCurrentKnowledgeRevision>;
   findExistingReport(input: {
     tenantId: string;
     procedimentoId: string;
@@ -324,6 +346,49 @@ export async function executeDeferredKnowledgeResearchWave(input: {
 
 const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
   async loadAuthority(input) {
+    if (input.reference.referenceType === "FASCICOLO_DOCUMENT_CORPUS") {
+      const metadata = input.reference.metadata;
+      const job = await prisma.asyncJob.findUnique({
+        where: { id: input.jobId },
+        select: {
+          operation: true,
+          tenantId: true,
+          procedimentoId: true,
+          actorId: true,
+        },
+      });
+      if (
+        !job
+        || job.operation !== FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION
+        || !job.tenantId
+        || job.procedimentoId !== metadata.procedimentoId
+      ) {
+        return null;
+      }
+      const corpus = await getFascicoloDocumentCorpus({
+        tenantId: job.tenantId,
+        procedimentoId: metadata.procedimentoId,
+      });
+      if (
+        !corpus
+        || corpus.corpusFingerprint !== metadata.corpusHash
+        || corpus.availability === "NOT_READY"
+      ) {
+        return null;
+      }
+      const trigger = corpus.documents.find((document) => (
+        document.status === "AVAILABLE"
+        && document.extractionAttemptId !== null
+        && document.sourceSha256 !== null
+      ));
+      if (!trigger?.sourceSha256) return null;
+      return documentCorpusAuthority({
+        corpus,
+        actorId: job.actorId,
+        triggerExtractionAttemptId: trigger.extractionAttemptId!,
+        triggerArtifactSha256: trigger.sourceSha256,
+      });
+    }
     const [job, attempt] = await Promise.all([
       prisma.asyncJob.findUnique({
         where: { id: input.jobId },
@@ -426,6 +491,7 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
       artifactSha256: document.artifactSha256,
     }))), "utf8").digest("hex");
     return {
+      sourceKind: "NEUTRAL_INTAKE",
       tenantId: job.tenantId,
       procedimentoId: destination.procedimentoId,
       neutralIntakeId: attempt.neutralIntake.id,
@@ -436,6 +502,7 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
       documents,
     };
   },
+  getCurrentRevision: (input) => getCurrentKnowledgeRevision(input),
   findExistingReport: findAutomaticFascicoloReportByVersion,
   async analyze(input) {
     try {
@@ -521,11 +588,33 @@ export function createFascicoloAutomaticAnalysisHandler(
       if (await context.isCancellationRequested()) {
         throw new AsyncJobExecutionError("CANCELLATION", "CANCELLATION_REQUESTED", false);
       }
-      const existingReport = await dependencies.findExistingReport({
-        tenantId: authority.tenantId,
-        procedimentoId: authority.procedimentoId,
-        corpusFingerprint: authority.corpusFingerprint,
-      });
+      const sourceKind = authority.sourceKind ?? "NEUTRAL_INTAKE";
+      const currentRevision = dependencies.getCurrentRevision
+        ? await dependencies.getCurrentRevision({
+            tenantId: authority.tenantId,
+            procedimentoId: authority.procedimentoId,
+          })
+        : null;
+      if (currentRevision?.corpusFingerprint === authority.corpusFingerprint) {
+        return {
+          referenceType: "FASCICOLO_KNOWLEDGE_REVISION",
+          referenceId: currentRevision.id,
+          referenceVersion: FASCICOLO_AUTOMATIC_ANALYSIS_CONTRACT_VERSION,
+          metadata: {
+            procedimentoId: authority.procedimentoId,
+            documentVersionId: authority.extractionAttemptId,
+            corpusFingerprint: authority.corpusFingerprint,
+            persistenceCode: "REUSED",
+          },
+        };
+      }
+      const existingReport = sourceKind === "NEUTRAL_INTAKE"
+        ? await dependencies.findExistingReport({
+            tenantId: authority.tenantId,
+            procedimentoId: authority.procedimentoId,
+            corpusFingerprint: authority.corpusFingerprint,
+          })
+        : null;
       if (existingReport) {
         return {
           referenceType: "FASCICOLO_AUTOMATIC_REPORT",
@@ -550,7 +639,7 @@ export function createFascicoloAutomaticAnalysisHandler(
         contractVersion: FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION,
         tenantId: authority.tenantId,
         procedimentoId: authority.procedimentoId,
-        neutralIntakeId: authority.neutralIntakeId,
+        neutralIntakeId: authority.neutralIntakeId!,
         documentVersionId: authority.extractionAttemptId,
         artifactSha256: authority.artifactSha256,
         corpusFingerprint: authority.corpusFingerprint,
@@ -567,8 +656,12 @@ export function createFascicoloAutomaticAnalysisHandler(
         throw new AsyncJobExecutionError("ANALYSIS", "INVALID_PROVIDER_OUTPUT", false);
       }
       validateGrounding(parsed.data, excerpts);
+      if (sourceKind === "DOCUMENT_CORPUS" && !parsed.data.structuredKnowledge) {
+        throw new AsyncJobExecutionError("ANALYSIS", "NO_STRUCTURED_KNOWLEDGE", false);
+      }
       let structuredMissions: readonly ResearchMission[] | null = null;
       let structuredMissionsToSchedule: readonly ResearchMission[] | null = null;
+      let knowledgeRevisionId: string | null = null;
       if (parsed.data.structuredKnowledge) {
         const evidenceByBasisRef = resolveKnowledgeEvidence(authority, excerpts);
         if (evidenceByBasisRef.size !== excerpts.length || !dependencies.persistKnowledge) {
@@ -587,6 +680,7 @@ export function createFascicoloAutomaticAnalysisHandler(
             || !dependencies.reconcileKnowledgeMissions) {
             throw new Error("STRUCTURED_KNOWLEDGE_NOT_CURRENT");
           }
+          knowledgeRevisionId = reconciliation.revision.id;
           {
             const plans = buildKnowledgeResearchMissionPlans(reconciliation.revision, {
               maxQuestionsPerWave: dependencies.researchExecutionWaveLimit ?? DEFAULT_RESEARCH_EXECUTION_WAVE_LIMIT,
@@ -612,6 +706,23 @@ export function createFascicoloAutomaticAnalysisHandler(
           throw new AsyncJobExecutionError("PERSISTENCE", "STRUCTURED_KNOWLEDGE_PERSISTENCE_FAILED", false);
         }
       }
+      if (sourceKind === "DOCUMENT_CORPUS") {
+        await context.heartbeat();
+        return {
+          referenceType: "FASCICOLO_KNOWLEDGE_REVISION",
+          referenceId: knowledgeRevisionId!,
+          referenceVersion: FASCICOLO_AUTOMATIC_ANALYSIS_CONTRACT_VERSION,
+          metadata: {
+            procedimentoId: authority.procedimentoId,
+            documentVersionId: authority.extractionAttemptId,
+            corpusFingerprint: authority.corpusFingerprint,
+            missionCount: structuredMissions?.length ?? 0,
+            persistenceCode: "CREATED",
+            researchJobCount: 0,
+            researchRequirementCode: "EXPLICIT_AUTHORIZATION_REQUIRED",
+          },
+        };
+      }
       const missions = structuredMissions ?? missionsFromAnalysis({ authority, analysis: parsed.data });
       const supersedesReportIds = await dependencies.listPriorReportIds({
         tenantId: authority.tenantId,
@@ -636,7 +747,7 @@ export function createFascicoloAutomaticAnalysisHandler(
         reportId,
         tenantId: authority.tenantId,
         procedimentoId: authority.procedimentoId,
-        neutralIntakeId: authority.neutralIntakeId,
+        neutralIntakeId: authority.neutralIntakeId!,
         documentVersionId: authority.extractionAttemptId,
         artifactSha256: authority.artifactSha256,
         corpusFingerprint: authority.corpusFingerprint,
@@ -684,6 +795,56 @@ export interface FascicoloAutomaticAnalysisSource {
   readonly extractionAttemptId?: string;
 }
 
+export interface FascicoloDocumentCorpusUpdateSource {
+  readonly sourceJobId: string;
+  readonly documentoId: string;
+  readonly documentFileVersionId: string;
+  readonly extractionAttemptId: string;
+}
+
+function documentCorpusAuthority(input: {
+  corpus: FascicoloDocumentCorpus;
+  actorId: string;
+  triggerExtractionAttemptId: string;
+  triggerArtifactSha256: string;
+}): AutomaticAuthority {
+  return {
+    sourceKind: "DOCUMENT_CORPUS",
+    tenantId: input.corpus.tenantId,
+    procedimentoId: input.corpus.procedimentoId,
+    extractionAttemptId: input.triggerExtractionAttemptId,
+    artifactSha256: input.triggerArtifactSha256,
+    corpusFingerprint: input.corpus.corpusFingerprint,
+    actorId: input.actorId,
+    documents: input.corpus.documents.flatMap((document) => {
+      if (
+        document.status !== "AVAILABLE"
+        || !document.documentFileVersionId
+        || !document.extractionAttemptId
+        || !document.sourceSha256
+      ) {
+        return [];
+      }
+      return [{
+        neutralIntakeId: "",
+        documentVersionId: document.extractionAttemptId,
+        artifactSha256: document.sourceSha256,
+        documentoId: document.documentoId,
+        documentFileVersionId: document.documentFileVersionId,
+        pages: input.corpus.excerpts
+          .filter((excerpt) => excerpt.documentoId === document.documentoId)
+          .map((excerpt) => ({
+            pageNumber: excerpt.pageNumber,
+            normalizedText: excerpt.text,
+            textSha256: excerpt.textSha256,
+            extractionMethod: excerpt.extractionMethod,
+            ocrConfidence: excerpt.ocrConfidence,
+          })),
+      }];
+    }),
+  };
+}
+
 function logicalOperationId(input: {
   tenantId: string;
   procedimentoId: string;
@@ -694,6 +855,20 @@ function logicalOperationId(input: {
     input.tenantId,
     input.procedimentoId,
     input.extractionAttemptId,
+  ].join("\n"), "utf8").digest("hex");
+}
+
+function documentCorpusLogicalOperationId(input: {
+  tenantId: string;
+  procedimentoId: string;
+  corpusFingerprint: string;
+}): string {
+  return createHash("sha256").update([
+    FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
+    "DOCUMENT_CORPUS",
+    input.tenantId,
+    input.procedimentoId,
+    input.corpusFingerprint,
   ].join("\n"), "utf8").digest("hex");
 }
 
@@ -753,6 +928,124 @@ export function buildFascicoloAutomaticAnalysisAdmission(input: {
     availableAt: new Date(0),
     admission,
   };
+}
+
+export function buildFascicoloDocumentCorpusUpdateAdmission(input: {
+  tenantId: string;
+  procedimentoId: string;
+  corpusFingerprint: string;
+  correlationId: string;
+  policyDecisionRef: string | null;
+  admissionType: "AUTHENTICATED_USER" | "AUTHORIZED_SYSTEM";
+  initiatingUserId: string | null;
+  actorId: string;
+  actorEmail: string | null;
+  actorRole: string;
+}): AsyncJobAdmissionInput {
+  const admission = input.admissionType === "AUTHENTICATED_USER"
+    ? {
+        admissionType: "AUTHENTICATED_USER" as const,
+        tenantId: input.tenantId,
+        initiatingUserId: input.initiatingUserId!,
+        actor: {
+          actorId: input.initiatingUserId!,
+          actorEmail: input.actorEmail,
+          actorRole: input.actorRole,
+        },
+      }
+    : {
+        admissionType: "AUTHORIZED_SYSTEM" as const,
+        tenantId: input.tenantId,
+        initiatingUserId: null,
+        actor: {
+          actorId: input.actorId,
+          actorEmail: input.actorEmail,
+          actorRole: input.actorRole,
+        },
+      };
+  return {
+    operation: FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
+    logicalOperationId: documentCorpusLogicalOperationId(input),
+    purpose: FASCICOLO_AUTOMATIC_ANALYSIS_PURPOSE,
+    correlationId: input.correlationId,
+    procedimentoId: input.procedimentoId,
+    priority: "NORMAL",
+    policyDecisionRef: input.policyDecisionRef,
+    inputReference: {
+      referenceType: "FASCICOLO_DOCUMENT_CORPUS",
+      referenceId: input.corpusFingerprint,
+      referenceVersion: "V1",
+      metadata: {
+        procedimentoId: input.procedimentoId,
+        corpusHash: input.corpusFingerprint,
+      },
+    },
+    maxAttempts: 3,
+    availableAt: new Date(0),
+    admission,
+  };
+}
+
+export async function ensureFascicoloDocumentCorpusUpdateJob(
+  input: FascicoloDocumentCorpusUpdateSource,
+) {
+  const sourceJob = await prisma.asyncJob.findUnique({
+    where: { id: input.sourceJobId },
+    select: {
+      operation: true,
+      tenantId: true,
+      procedimentoId: true,
+      correlationId: true,
+      policyDecisionRef: true,
+      admissionType: true,
+      initiatingUserId: true,
+      actorId: true,
+      actorEmail: true,
+      actorRole: true,
+    },
+  });
+  if (
+    !sourceJob
+    || sourceJob.operation !== "DOCUMENT_EXTRACTION_V1"
+    || !sourceJob.tenantId
+    || !sourceJob.procedimentoId
+    || (sourceJob.admissionType === "AUTHENTICATED_USER" && !sourceJob.initiatingUserId)
+    || (sourceJob.admissionType === "AUTHORIZED_SYSTEM" && !sourceJob.policyDecisionRef)
+  ) {
+    throw new Error("FASCICOLO_AUTOMATIC_ANALYSIS_AUTHORITY_MISMATCH");
+  }
+  const corpus = await getFascicoloDocumentCorpus({
+    tenantId: sourceJob.tenantId,
+    procedimentoId: sourceJob.procedimentoId,
+  });
+  const trigger = corpus?.documents.find((document) => (
+    document.documentoId === input.documentoId
+    && document.documentFileVersionId === input.documentFileVersionId
+    && document.extractionAttemptId === input.extractionAttemptId
+    && document.status === "AVAILABLE"
+  ));
+  if (!corpus || !trigger) {
+    throw new Error("FASCICOLO_DOCUMENT_CORPUS_NOT_READY");
+  }
+  const current = await getCurrentKnowledgeRevision({
+    tenantId: sourceJob.tenantId,
+    procedimentoId: sourceJob.procedimentoId,
+  });
+  if (current?.corpusFingerprint === corpus.corpusFingerprint) {
+    return { outcome: "UNCHANGED" as const, job: null };
+  }
+  return admitAsyncJob(buildFascicoloDocumentCorpusUpdateAdmission({
+    tenantId: sourceJob.tenantId,
+    procedimentoId: sourceJob.procedimentoId,
+    corpusFingerprint: corpus.corpusFingerprint,
+    correlationId: sourceJob.correlationId,
+    policyDecisionRef: sourceJob.policyDecisionRef,
+    admissionType: sourceJob.admissionType,
+    initiatingUserId: sourceJob.initiatingUserId,
+    actorId: sourceJob.actorId,
+    actorEmail: sourceJob.actorEmail,
+    actorRole: sourceJob.actorRole,
+  }));
 }
 
 export async function ensureFascicoloAutomaticAnalysisJob(input: FascicoloAutomaticAnalysisSource) {

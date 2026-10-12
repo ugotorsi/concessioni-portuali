@@ -38,6 +38,18 @@ function jobLabel(status: FascicoloAutomaticWorkflowReadModel["jobs"][number]["s
   }
 }
 
+function analysisUpdateLabel(
+  status: FascicoloAutomaticWorkflowReadModel["analysisUpdate"]["status"],
+): string {
+  switch (status) {
+    case "CURRENT": return "Aggiornato";
+    case "UPDATING": return "Aggiornamento in corso";
+    case "STALE": return "Da aggiornare";
+    case "WAITING_AUTHORIZATION": return "In attesa di autorizzazione";
+    case "ERROR": return "Errore";
+  }
+}
+
 function researchRequirementLabel(code: string): string {
   if (code === "AUTOMATIC_RESEARCH_POLICY_DISABLED") return "Abilitare la policy di ricerca automatica";
   if (code === "AUTOMATIC_RESEARCH_TENANT_NOT_ALLOWED") return "Autorizzare questo ente nella policy di ricerca automatica";
@@ -134,10 +146,8 @@ function proposalStatusBadge(status: FascicoloAutomaticWorkflowReadModel["operat
 
 function WorkflowSummary({
   model,
-  currentJob,
 }: {
   model: FascicoloAutomaticWorkflowReadModel;
-  currentJob: FascicoloAutomaticWorkflowReadModel["jobs"][number] | null;
 }) {
   const legalIssueCount = model.knowledge?.legalIssues.length ?? 0;
   const usableSourceCount = model.missions.reduce(
@@ -153,7 +163,9 @@ function WorkflowSummary({
     <div className="grid overflow-hidden rounded-md border border-slate-200 bg-slate-50 sm:grid-cols-2 xl:grid-cols-4">
       <div className="border-b border-slate-200 px-3 py-2.5 sm:border-r xl:border-b-0">
         <p className="text-xs font-medium text-slate-500">Stato analisi</p>
-        <p className="mt-1 text-sm font-semibold text-slate-900">{currentJob ? jobLabel(currentJob.status) : "Non avviata"}</p>
+        <p className="mt-1 text-sm font-semibold text-slate-900">
+          {analysisUpdateLabel(model.analysisUpdate.status)}
+        </p>
       </div>
       <div className="border-b border-slate-200 px-3 py-2.5 xl:border-b-0 xl:border-r">
         <p className="text-xs font-medium text-slate-500">Questioni giuridiche</p>
@@ -174,7 +186,7 @@ function WorkflowSummary({
 export function FascicoloAutomaticWorkflowPanel({
   model,
 }: { model: FascicoloAutomaticWorkflowReadModel | null }) {
-  if (!model || (!model.knowledge && model.reports.length === 0 && model.jobs.length === 0 && model.missions.length === 0 && model.operationalProposals.length === 0)) return null;
+  if (!model) return null;
   const currentJob = model.jobs.find((job) => !job.superseded) ?? null;
   const currentReport = model.reports.find((report) => report.status !== "SUPERSEDED") ?? null;
   const structuredReport = model.structuredReport;
@@ -189,7 +201,16 @@ export function FascicoloAutomaticWorkflowPanel({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
-        <WorkflowSummary model={model} currentJob={currentJob} />
+        <WorkflowSummary model={model} />
+        {model.analysisUpdate.status !== "CURRENT" ? (
+          <div className={`border-l-2 pl-3 text-sm ${
+            model.analysisUpdate.status === "ERROR"
+              ? "border-red-500 text-red-800"
+              : "border-amber-500 text-amber-900"
+          }`}>
+            {analysisUpdateLabel(model.analysisUpdate.status)}. La revisione precedente, se presente, non rappresenta il corpus corrente.
+          </div>
+        ) : null}
         {!model.automaticResearch.authorized && model.automaticResearch.requirementCode ? (
           <div className="border-l-2 border-amber-500 pl-3 text-sm text-amber-900">
             Ricerca automatica non avviata: {researchRequirementLabel(model.automaticResearch.requirementCode)}.

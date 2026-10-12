@@ -86,6 +86,10 @@ vi.mock("@/server/queries/fascicolo-automatic-workflow", () => ({
   getFascicoloAutomaticWorkflowReadModel: queryMocks.getAutomaticWorkflow,
 }));
 
+vi.mock("@/server/queries/fascicolo-document-corpus", () => ({
+  getFascicoloDocumentCorpus: vi.fn().mockResolvedValue(null),
+}));
+
 import {
   AiFascicoloTrustedReviewPanel,
   resolveAiFascicoloTrustedReviewSelection,
@@ -262,10 +266,20 @@ describe("B2C9A Trusted Review read consumer panel V1", () => {
       materials,
     });
     queryMocks.getAutomaticWorkflow.mockResolvedValue({
+      analysisUpdate: {
+        status: "CURRENT",
+        corpusFingerprint: "a".repeat(64),
+        currentRevisionFingerprint: "a".repeat(64),
+      },
       automaticResearch: { authorized: false, requirementCode: "AUTOMATIC_RESEARCH_POLICY_DISABLED" },
+      knowledge: null,
+      structuredReport: null,
+      structuredReportSnapshots: [],
+      operationalProposals: [],
       jobs: [],
       reports: [],
       missions: [],
+      historicalMissionCount: 0,
     });
   });
 

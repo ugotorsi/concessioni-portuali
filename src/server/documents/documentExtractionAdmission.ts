@@ -56,7 +56,7 @@ export function buildDocumentExtractionAdmission(input: {
         retryPermitRef: null,
       },
     },
-    maxAttempts: 1,
+    maxAttempts: 3,
     availableAt: input.availableAt ?? new Date(),
     admission: input.authority.admissionType === "AUTHENTICATED_USER"
       ? {

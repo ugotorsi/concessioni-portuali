@@ -4,6 +4,7 @@ vi.mock("@/lib/prisma", () => ({ prisma: {} }));
 
 import {
   buildFascicoloAutomaticAnalysisAdmission,
+  buildFascicoloDocumentCorpusUpdateAdmission,
   createFascicoloAutomaticAnalysisHandler,
   executeDeferredKnowledgeResearchWave,
   FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
@@ -250,6 +251,84 @@ describe("automatic fascicolo analysis job", () => {
     expect(first.idempotencyKey).toBe(second.idempotencyKey);
     expect(first.admission.tenantId).toBe("tenant-1");
     expect(first.inputReference.metadata.extractionAttemptId).toBe("attempt-1");
+  });
+
+  it("deduplicates each corpus version while keeping ten fascicoli independent", () => {
+    const admissions = Array.from({ length: 10 }, (_, index) => {
+      const input = {
+        tenantId: "tenant-1",
+        procedimentoId: `procedimento-${index + 1}`,
+        corpusFingerprint: (index + 1).toString(16).padStart(64, "0"),
+        correlationId: `correlation-${index + 1}`,
+        policyDecisionRef: null,
+        admissionType: "AUTHENTICATED_USER" as const,
+        initiatingUserId: "user-1",
+        actorId: "user-1",
+        actorEmail: "user@example.test",
+        actorRole: "GIURIDICO",
+      };
+      const first = normalizeAsyncJobAdmission(buildFascicoloDocumentCorpusUpdateAdmission(input));
+      const duplicate = normalizeAsyncJobAdmission(buildFascicoloDocumentCorpusUpdateAdmission(input));
+      expect(duplicate.idempotencyKey).toBe(first.idempotencyKey);
+      return first;
+    });
+    expect(new Set(admissions.map((item) => item.idempotencyKey)).size).toBe(10);
+    expect(new Set(admissions.map((item) => item.logicalOperationId)).size).toBe(10);
+  });
+
+  it("persists a direct document corpus revision without starting paid legal research", async () => {
+    const directReference = {
+      referenceType: "FASCICOLO_DOCUMENT_CORPUS",
+      referenceId: "c".repeat(64),
+      referenceVersion: "V1",
+      metadata: {
+        procedimentoId: "procedimento-1",
+        corpusHash: "c".repeat(64),
+      },
+    } as const;
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        documents: authority.documents.map((document) => ({
+          ...document,
+          documentoId: "document-1",
+          documentFileVersionId: "file-version-1",
+        })),
+      })),
+      getCurrentRevision: vi.fn(async () => null),
+      analyze: vi.fn(async () => ({ ...analysis, structuredKnowledge })),
+      persistKnowledge: vi.fn(async () => currentReconciliation(structuredKnowledge)),
+      reconcileKnowledgeMissions: vi.fn(async () => []),
+    });
+    const result = await createFascicoloAutomaticAnalysisHandler(deps)
+      .execute(directReference, context());
+    expect(result).toMatchObject({
+      referenceType: "FASCICOLO_KNOWLEDGE_REVISION",
+      referenceId: "revision-current",
+      metadata: {
+        corpusFingerprint: "c".repeat(64),
+        researchJobCount: 0,
+      },
+    });
+    expect(deps.persistKnowledge).toHaveBeenCalledOnce();
+    expect(deps.persistReport).not.toHaveBeenCalled();
+    expect(deps.scheduleMission).not.toHaveBeenCalled();
+  });
+
+  it("recovers idempotently after persistence by reusing the current corpus revision", async () => {
+    const deps = dependencies({
+      getCurrentRevision: vi.fn(async () => currentReconciliation(structuredKnowledge).revision),
+    });
+    const result = await createFascicoloAutomaticAnalysisHandler(deps)
+      .execute(reference, context());
+    expect(result).toMatchObject({
+      referenceType: "FASCICOLO_KNOWLEDGE_REVISION",
+      referenceId: "revision-current",
+      metadata: { persistenceCode: "REUSED" },
+    });
+    expect(deps.analyze).not.toHaveBeenCalled();
+    expect(deps.persistReport).not.toHaveBeenCalled();
   });
 
   it("derives a question from document text, persists a report, and creates a pending mission without manual input", async () => {

@@ -184,6 +184,12 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
     );
   });
 
+  it("does not reuse the E2E one-shot approval in the automatic document runtime", () => {
+    expect(sourceText()).toMatch(
+      /createOpenAiFascicoloDocumentRuntimeFromEnv[\s\S]*AI_REAL_DATA_APPROVAL_ID === "E2E_FASCICOLO_STRUCTURED_ANALYSIS_ONCE"[\s\S]*\? createRealDataActivationPolicy\(\{\}\)/,
+    );
+  });
+
   it("parses complete GLOBAL configuration and composes provider plus B1 service", () => {
     const transport = fakeTransport();
     const runtime = createOpenAiFascicoloRuntimeFromEnv(validEnv(), { transport });

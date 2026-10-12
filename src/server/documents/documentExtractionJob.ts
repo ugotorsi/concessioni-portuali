@@ -131,6 +131,12 @@ export interface DocumentExtractionHandlerDependencies {
     retryAuthorization: DocumentExtractionRetryAuthorization | null;
     actor: { userId: string | null; userEmail: string | null; userRole: string };
   }): ReturnType<typeof extractDocumentFileVersion>;
+  ensureFascicoloUpdate?(input: {
+    sourceJobId: string;
+    documentoId: string;
+    documentFileVersionId: string;
+    extractionAttemptId: string;
+  }): Promise<unknown>;
 }
 
 const defaultDependencies: DocumentExtractionHandlerDependencies = {
@@ -146,6 +152,12 @@ const defaultDependencies: DocumentExtractionHandlerDependencies = {
     },
   }),
   extract: (input) => extractDocumentFileVersion(input),
+  ensureFascicoloUpdate: async (input) => {
+    const { ensureFascicoloDocumentCorpusUpdateJob } = await import(
+      "@/server/ai/fascicoloAutomaticAnalysisJob"
+    );
+    return ensureFascicoloDocumentCorpusUpdateJob(input);
+  },
   verifyRetryPermit: verifyDocumentExtractionRetryPermit,
 };
 
@@ -206,6 +218,21 @@ export function createDocumentExtractionHandler(
           "EXTRACTION",
           result.attempt.failureCode ?? "DOCUMENT_EXTRACTION_FAILED",
           false,
+        );
+      }
+      try {
+        await (dependencies.ensureFascicoloUpdate ?? defaultDependencies.ensureFascicoloUpdate!)({
+          sourceJobId: context.jobId,
+          documentoId: input.metadata.documentoId,
+          documentFileVersionId: input.referenceId,
+          extractionAttemptId: result.attempt.id,
+        });
+      } catch (error) {
+        if (error instanceof AsyncJobExecutionError) throw error;
+        throw new AsyncJobExecutionError(
+          "FASCICOLO_UPDATE_ADMISSION",
+          "FASCICOLO_UPDATE_ADMISSION_FAILED",
+          true,
         );
       }
       return {
