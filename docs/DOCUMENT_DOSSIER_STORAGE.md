@@ -114,7 +114,15 @@ Il bucket R2 deve autorizzare soltanto l'origine operativa e gli header firmati:
   {
     "AllowedOrigins": ["https://app.noetra.it"],
     "AllowedMethods": ["PUT"],
-    "AllowedHeaders": ["Content-Type", "If-None-Match", "x-amz-meta-*"],
+    "AllowedHeaders": [
+      "Content-Type",
+      "If-None-Match",
+      "x-amz-meta-operationid",
+      "x-amz-meta-tenantref",
+      "x-amz-meta-actorref",
+      "x-amz-meta-scopefingerprint",
+      "x-amz-meta-originalnamehash"
+    ],
     "ExposeHeaders": ["ETag"],
     "MaxAgeSeconds": 3600
   }
