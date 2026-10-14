@@ -288,7 +288,7 @@ describe("automatic fascicolo analysis job", () => {
       pageNumber: index + 1,
       normalizedText: `Pagina ${index + 1}: ` + "x".repeat(3400),
     }));
-    const analyze = vi.fn(async () => ({ ...analysis, structuredKnowledge }));
+    const analyze = vi.fn(async (_input: unknown) => ({ ...analysis, structuredKnowledge }));
     const deps = dependencies({
       loadAuthority: vi.fn(async () => ({
         ...authority,
@@ -301,7 +301,7 @@ describe("automatic fascicolo analysis job", () => {
       reconcileKnowledgeMissions: vi.fn(async () => []),
     });
     await createFascicoloAutomaticAnalysisHandler(deps).execute(directReference, context());
-    const excerpts = analyze.mock.calls[0]?.[0]?.excerpts;
+    const excerpts = (analyze.mock.calls[0]?.[0] as { excerpts: { text: string }[] } | undefined)?.excerpts;
     expect(excerpts).toHaveLength(21);
     expect(excerpts.map((excerpt) => excerpt.text)).toEqual(pages.map((page) => page.normalizedText));
   });
@@ -313,7 +313,7 @@ describe("automatic fascicolo analysis job", () => {
       referenceVersion: "V1",
       metadata: { procedimentoId: "procedimento-1", corpusHash: "c".repeat(64) },
     } as const;
-    const analyze = vi.fn(async () => ({ ...analysis, structuredKnowledge }));
+    const analyze = vi.fn(async (_input: unknown) => ({ ...analysis, structuredKnowledge }));
     const deps = dependencies({
       loadAuthority: vi.fn(async () => ({
         ...authority,
