@@ -276,6 +276,60 @@ describe("automatic fascicolo analysis job", () => {
     expect(new Set(admissions.map((item) => item.logicalOperationId)).size).toBe(10);
   });
 
+  it("passes all 21 OCR pages through to document-only analysis without truncation", async () => {
+    const directReference = {
+      referenceType: "FASCICOLO_DOCUMENT_CORPUS",
+      referenceId: "c".repeat(64),
+      referenceVersion: "V1",
+      metadata: { procedimentoId: "procedimento-1", corpusHash: "c".repeat(64) },
+    } as const;
+    const pages = Array.from({ length: 21 }, (_, index) => ({
+      ...authority.documents[0].pages[0],
+      pageNumber: index + 1,
+      normalizedText: `Pagina ${index + 1}: ` + "x".repeat(3400),
+    }));
+    const analyze = vi.fn(async () => ({ ...analysis, structuredKnowledge }));
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        documents: [{ ...authority.documents[0], documentoId: "document-1", documentFileVersionId: "file-version-1", pages }],
+      })),
+      getCurrentRevision: vi.fn(async () => null),
+      analyze,
+      persistKnowledge: vi.fn(async () => currentReconciliation(structuredKnowledge)),
+      reconcileKnowledgeMissions: vi.fn(async () => []),
+    });
+    await createFascicoloAutomaticAnalysisHandler(deps).execute(directReference, context());
+    const excerpts = analyze.mock.calls[0]?.[0]?.excerpts;
+    expect(excerpts).toHaveLength(21);
+    expect(excerpts.map((excerpt) => excerpt.text)).toEqual(pages.map((page) => page.normalizedText));
+  });
+
+  it("rejects oversized OCR corpus before charging the analysis provider", async () => {
+    const directReference = {
+      referenceType: "FASCICOLO_DOCUMENT_CORPUS",
+      referenceId: "c".repeat(64),
+      referenceVersion: "V1",
+      metadata: { procedimentoId: "procedimento-1", corpusHash: "c".repeat(64) },
+    } as const;
+    const analyze = vi.fn(async () => ({ ...analysis, structuredKnowledge }));
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        documents: [{ ...authority.documents[0], documentoId: "document-1", documentFileVersionId: "file-version-1", pages: [
+          { ...authority.documents[0].pages[0], normalizedText: "x".repeat(96_001) },
+        ] }],
+      })),
+      getCurrentRevision: vi.fn(async () => null),
+      analyze,
+    });
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(directReference, context()))
+      .rejects.toMatchObject({ code: "DOCUMENT_CORPUS_EXCEEDS_ANALYSIS_LIMIT" });
+    expect(analyze).not.toHaveBeenCalled();
+  });
+
   it("persists a direct document corpus revision without starting paid legal research", async () => {
     const directReference = {
       referenceType: "FASCICOLO_DOCUMENT_CORPUS",
