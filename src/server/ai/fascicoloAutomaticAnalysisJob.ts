@@ -58,7 +58,7 @@ export { FASCICOLO_AUTOMATIC_ANALYSIS_CONTRACT_VERSION } from "@/server/ai/fasci
 
 export const FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION = "FASCICOLO.AUTOMATIC_ANALYSIS_V1" as const;
 export const FASCICOLO_AUTOMATIC_ANALYSIS_PURPOSE = "FASCICOLO_AUTOMATIC_ANALYSIS" as const;
-const MAX_DOCUMENT_EXCERPT_CHARACTERS = 24_000;
+const MAX_DOCUMENT_EXCERPT_CHARACTERS = 96_000;
 
 const neutralIntakeReferenceSchema = z.object({
   referenceType: z.literal("FASCICOLO_DOCUMENT_VERSION"),
@@ -178,6 +178,16 @@ function stableIdentity(prefix: string, value: unknown): string {
 }
 
 function boundedExcerpts(authority: AutomaticAuthority): readonly AutomaticDocumentExcerpt[] {
+  if (authority.sourceKind === "DOCUMENT_CORPUS") {
+    const perDocumentLimit = Math.max(1, Math.floor(MAX_DOCUMENT_EXCERPT_CHARACTERS / authority.documents.length));
+    const pageTextLengths = authority.documents.map((document) => document.pages.reduce(
+      (length, page) => length + page.normalizedText.length, 0,
+    ));
+    if (pageTextLengths.some((length) => length > perDocumentLimit)
+      || pageTextLengths.reduce((sum, length) => sum + length, 0) > MAX_DOCUMENT_EXCERPT_CHARACTERS) {
+      throw new AsyncJobExecutionError("DOCUMENT", "DOCUMENT_CORPUS_EXCEEDS_ANALYSIS_LIMIT", false);
+    }
+  }
   let remaining = MAX_DOCUMENT_EXCERPT_CHARACTERS;
   const excerpts: AutomaticDocumentExcerpt[] = [];
   const perDocumentLimit = Math.max(1, Math.floor(MAX_DOCUMENT_EXCERPT_CHARACTERS / authority.documents.length));
