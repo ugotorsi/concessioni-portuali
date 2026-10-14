@@ -50,7 +50,7 @@ import {
   type KnowledgeReconciliationResult,
 } from "@/server/fascicolo-knowledge";
 import {
-  getFascicoloDocumentCorpus,
+  getFascicoloDocumentCorpusForAsyncJob,
   type FascicoloDocumentCorpus,
 } from "@/server/queries/fascicolo-document-corpus";
 
@@ -355,6 +355,9 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
           operation: true,
           tenantId: true,
           procedimentoId: true,
+          policyDecisionRef: true,
+          admissionType: true,
+          initiatingUserId: true,
           actorId: true,
         },
       });
@@ -363,12 +366,18 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
         || job.operation !== FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION
         || !job.tenantId
         || job.procedimentoId !== metadata.procedimentoId
+        || (job.admissionType === "AUTHENTICATED_USER" && !job.initiatingUserId)
+        || (job.admissionType === "AUTHORIZED_SYSTEM" && !job.policyDecisionRef)
       ) {
         return null;
       }
-      const corpus = await getFascicoloDocumentCorpus({
+      const corpus = await getFascicoloDocumentCorpusForAsyncJob({
+        jobId: input.jobId,
         tenantId: job.tenantId,
         procedimentoId: metadata.procedimentoId,
+        operation: job.operation,
+        policyDecisionRef: job.policyDecisionRef,
+        actorId: job.actorId,
       });
       if (
         !corpus
@@ -1019,9 +1028,13 @@ export async function ensureFascicoloDocumentCorpusUpdateJob(
   ) {
     throw new Error("FASCICOLO_AUTOMATIC_ANALYSIS_AUTHORITY_MISMATCH");
   }
-  const corpus = await getFascicoloDocumentCorpus({
+  const corpus = await getFascicoloDocumentCorpusForAsyncJob({
+    jobId: input.sourceJobId,
     tenantId: sourceJob.tenantId,
     procedimentoId: sourceJob.procedimentoId,
+    operation: sourceJob.operation,
+    policyDecisionRef: sourceJob.policyDecisionRef,
+    actorId: sourceJob.actorId,
   });
   const trigger = corpus?.documents.find((document) => (
     document.documentoId === input.documentoId

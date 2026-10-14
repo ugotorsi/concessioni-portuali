@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   procedimentoFindFirst: vi.fn(),
   documentoFindMany: vi.fn(),
   extractionFindMany: vi.fn(),
+  jobFindFirst: vi.fn(),
   jobFindMany: vi.fn(),
 }));
 
@@ -14,7 +15,10 @@ vi.mock("@/lib/prisma", () => ({
     procedimento: { findFirst: mocks.procedimentoFindFirst },
     documento: { findMany: mocks.documentoFindMany },
     documentExtractionAttempt: { findMany: mocks.extractionFindMany },
-    asyncJob: { findMany: mocks.jobFindMany },
+    asyncJob: {
+      findFirst: mocks.jobFindFirst,
+      findMany: mocks.jobFindMany,
+    },
   },
 }));
 
@@ -28,6 +32,7 @@ import {
   buildFascicoloDocumentCorpus,
   buildFascicoloDocumentKnowledgeEvidence,
   getFascicoloDocumentCorpus,
+  getFascicoloDocumentCorpusForAsyncJob,
   toFascicoloDocumentAnalysisCorpus,
 } from "@/server/queries/fascicolo-document-corpus";
 
@@ -48,6 +53,7 @@ describe("fascicolo document corpus", () => {
     mocks.procedimentoFindFirst.mockResolvedValue({ id: "procedure-a" });
     mocks.documentoFindMany.mockResolvedValue([]);
     mocks.extractionFindMany.mockResolvedValue([]);
+    mocks.jobFindFirst.mockResolvedValue({ id: "job-a" });
     mocks.jobFindMany.mockResolvedValue([]);
   });
 
@@ -280,6 +286,66 @@ describe("fascicolo document corpus", () => {
       where: { id: "procedure-other", enteId: "tenant-a" },
       select: { id: true },
     });
+    expect(mocks.documentoFindMany).not.toHaveBeenCalled();
+    expect(mocks.extractionFindMany).not.toHaveBeenCalled();
+  });
+
+  it("reads the corpus for a database-authorized worker without an HTTP session", async () => {
+    mocks.getCurrentTenantContext.mockRejectedValue(new Error("NEXTAUTH_SESSION_UNAVAILABLE"));
+
+    const corpus = await getFascicoloDocumentCorpusForAsyncJob({
+      jobId: "job-a",
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-a",
+      operation: "DOCUMENT_OCR_PAGE_BATCH_V2",
+      policyDecisionRef: "OCR_PERMIT_A",
+      actorId: "ocr-worker",
+    });
+
+    expect(corpus).not.toBeNull();
+    expect(mocks.getCurrentTenantContext).not.toHaveBeenCalled();
+    expect(mocks.jobFindFirst).toHaveBeenCalledWith({
+      where: {
+        id: "job-a",
+        tenantId: "tenant-a",
+        procedimentoId: "procedure-a",
+        operation: "DOCUMENT_OCR_PAGE_BATCH_V2",
+        policyDecisionRef: "OCR_PERMIT_A",
+        actorId: "ocr-worker",
+        OR: [
+          {
+            admissionType: "AUTHENTICATED_USER",
+            initiatingUserId: { not: null },
+          },
+          {
+            admissionType: "AUTHORIZED_SYSTEM",
+            policyDecisionRef: { not: null },
+          },
+        ],
+      },
+      select: { id: true },
+    });
+  });
+
+  it.each([
+    ["a different tenant", { tenantId: "tenant-b" }],
+    ["a different procedure", { procedimentoId: "procedure-b" }],
+    ["an unauthorized job", { jobId: "job-unauthorized" }],
+  ])("rejects worker corpus access for %s", async (_case, override) => {
+    mocks.jobFindFirst.mockResolvedValue(null);
+
+    const corpus = await getFascicoloDocumentCorpusForAsyncJob({
+      jobId: "job-a",
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-a",
+      operation: "DOCUMENT_OCR_PAGE_BATCH_V2",
+      policyDecisionRef: "OCR_PERMIT_A",
+      actorId: "ocr-worker",
+      ...override,
+    });
+
+    expect(corpus).toBeNull();
+    expect(mocks.procedimentoFindFirst).not.toHaveBeenCalled();
     expect(mocks.documentoFindMany).not.toHaveBeenCalled();
     expect(mocks.extractionFindMany).not.toHaveBeenCalled();
   });

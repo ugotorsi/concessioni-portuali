@@ -260,17 +260,21 @@ export function buildFascicoloDocumentKnowledgeEvidence(
   ]));
 }
 
-export async function getFascicoloDocumentCorpus(input: {
+interface FascicoloDocumentCorpusScope {
   tenantId: string;
   procedimentoId: string;
-}): Promise<FascicoloDocumentCorpus | null> {
-  const tenantContext = await getCurrentTenantContext();
-  if (tenantContext && isTenantContextConstrained(tenantContext)) {
-    requireTenantAccess(tenantContext, input.tenantId, {
-      mode: "read",
-      allowWhenEnteMissing: false,
-    });
-  }
+}
+
+export interface FascicoloDocumentCorpusAsyncJobAccess extends FascicoloDocumentCorpusScope {
+  jobId: string;
+  operation: string;
+  policyDecisionRef: string | null;
+  actorId: string;
+}
+
+async function readFascicoloDocumentCorpus(
+  input: FascicoloDocumentCorpusScope,
+): Promise<FascicoloDocumentCorpus | null> {
   const procedimento = await prisma.procedimento.findFirst({
     where: { id: input.procedimentoId, enteId: input.tenantId },
     select: { id: true },
@@ -354,4 +358,46 @@ export async function getFascicoloDocumentCorpus(input: {
     attempts,
     jobs,
   });
+}
+
+export async function getFascicoloDocumentCorpus(input: {
+  tenantId: string;
+  procedimentoId: string;
+}): Promise<FascicoloDocumentCorpus | null> {
+  const tenantContext = await getCurrentTenantContext();
+  if (tenantContext && isTenantContextConstrained(tenantContext)) {
+    requireTenantAccess(tenantContext, input.tenantId, {
+      mode: "read",
+      allowWhenEnteMissing: false,
+    });
+  }
+  return readFascicoloDocumentCorpus(input);
+}
+
+export async function getFascicoloDocumentCorpusForAsyncJob(
+  input: FascicoloDocumentCorpusAsyncJobAccess,
+): Promise<FascicoloDocumentCorpus | null> {
+  const authorizedJob = await prisma.asyncJob.findFirst({
+    where: {
+      id: input.jobId,
+      tenantId: input.tenantId,
+      procedimentoId: input.procedimentoId,
+      operation: input.operation,
+      policyDecisionRef: input.policyDecisionRef,
+      actorId: input.actorId,
+      OR: [
+        {
+          admissionType: "AUTHENTICATED_USER",
+          initiatingUserId: { not: null },
+        },
+        {
+          admissionType: "AUTHORIZED_SYSTEM",
+          policyDecisionRef: { not: null },
+        },
+      ],
+    },
+    select: { id: true },
+  });
+  if (!authorizedJob) return null;
+  return readFascicoloDocumentCorpus(input);
 }
