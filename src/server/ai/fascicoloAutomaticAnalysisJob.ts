@@ -269,11 +269,19 @@ function resolveKnowledgeEvidence(
   return new Map(excerpts.flatMap((excerpt) => {
     const document = authority.documents.find((candidate) => candidate.documentVersionId === excerpt.documentVersionId);
     if (!document?.documentoId || !document.documentFileVersionId) return [];
+    const extractionProvenance = authority.sourceKind === "DOCUMENT_CORPUS"
+      ? {
+          provenanceType: "FASCICOLO_DOCUMENT_EXTRACTION" as const,
+          documentExtractionAttemptId: document.documentVersionId,
+        }
+      : {
+          provenanceType: "DOCUMENT_EXTRACTION" as const,
+          extractionAttemptId: document.documentVersionId,
+        };
     return [[excerpt.reference, {
-      provenanceType: "DOCUMENT_EXTRACTION",
+      ...extractionProvenance,
       documentoId: document.documentoId,
       documentFileVersionId: document.documentFileVersionId,
-      extractionAttemptId: document.documentVersionId,
       pageNumber: excerpt.pageNumber,
       textSha256: excerpt.textSha256,
       quoteSha256: null,

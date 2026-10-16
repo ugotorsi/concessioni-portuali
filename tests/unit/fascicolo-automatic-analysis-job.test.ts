@@ -400,6 +400,52 @@ describe("automatic fascicolo analysis job", () => {
     expect(deps.scheduleMission).not.toHaveBeenCalled();
   });
 
+  it("maps direct document corpus evidence to the fascicolo extraction attempt", async () => {
+    const directReference = {
+      referenceType: "FASCICOLO_DOCUMENT_CORPUS",
+      referenceId: "c".repeat(64),
+      referenceVersion: "V1",
+      metadata: {
+        procedimentoId: "procedimento-1",
+        corpusHash: "c".repeat(64),
+      },
+    } as const;
+    const persistKnowledge = vi.fn(async (input: Parameters<NonNullable<
+      FascicoloAutomaticAnalysisDependencies["persistKnowledge"]
+    >>[0]) => {
+      expect([...input.evidenceByBasisRef.values()]).toEqual([{
+        provenanceType: "FASCICOLO_DOCUMENT_EXTRACTION",
+        documentoId: "document-1",
+        documentFileVersionId: "file-version-1",
+        documentExtractionAttemptId: "attempt-1",
+        pageNumber: 1,
+        textSha256: "b".repeat(64),
+        quoteSha256: null,
+        basisRef: "DOCUMENT_1.PAGE_1",
+      }]);
+      return currentReconciliation(structuredKnowledge);
+    });
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        documents: authority.documents.map((document) => ({
+          ...document,
+          documentoId: "document-1",
+          documentFileVersionId: "file-version-1",
+        })),
+      })),
+      getCurrentRevision: vi.fn(async () => null),
+      analyze: vi.fn(async () => ({ ...analysis, structuredKnowledge })),
+      persistKnowledge,
+      reconcileKnowledgeMissions: vi.fn(async () => []),
+    });
+
+    await createFascicoloAutomaticAnalysisHandler(deps).execute(directReference, context());
+
+    expect(persistKnowledge).toHaveBeenCalledOnce();
+  });
+
   it("recovers idempotently after persistence by reusing the current corpus revision", async () => {
     const deps = dependencies({
       getCurrentRevision: vi.fn(async () => currentReconciliation(structuredKnowledge).revision),
