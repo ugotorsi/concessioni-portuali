@@ -60,7 +60,7 @@ export async function runApplicationAsyncWorkerProcess(
         );
         return bootstrapConcessioneTimeWatches();
       });
-      await bootstrap();
+      if (config.bootstrapTimeWatches) await bootstrap();
       await runtime.run();
     } finally {
       let teardownError: unknown;

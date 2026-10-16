@@ -16,6 +16,7 @@ const admitAsyncJobMock = vi.hoisted(() => vi.fn());
 const createDocumentFileMock = vi.hoisted(() => vi.fn());
 const createVersionMock = vi.hoisted(() => vi.fn());
 const reconcileVersionMock = vi.hoisted(() => vi.fn());
+const requestDocumentWorkerActivationMock = vi.hoisted(() => vi.fn());
 const revalidatePathMock = vi.hoisted(() => vi.fn());
 const redirectMock = vi.hoisted(() => vi.fn());
 
@@ -89,6 +90,9 @@ vi.mock("@/server/documents/protocollo", () => ({
 vi.mock("@/server/documents/uploadService", () => ({ uploadDocument: uploadDocumentMock }));
 vi.mock("@/server/intake/createNeutralIntake", () => ({ createNeutralIntake: createNeutralIntakeMock }));
 vi.mock("@/server/async-jobs/persistence", () => ({ admitAsyncJobInTransaction: admitAsyncJobMock }));
+vi.mock("@/server/async-jobs/documentWorkerActivation", () => ({
+  requestDocumentWorkerActivation: requestDocumentWorkerActivationMock,
+}));
 vi.mock("next/cache", () => ({ revalidatePath: revalidatePathMock }));
 vi.mock("next/navigation", () => ({ redirect: redirectMock }));
 
@@ -484,6 +488,10 @@ describe("createDocumentoUploadAction", () => {
       },
       policyDecisionRef: "DOCUMENT_UPLOAD_EXTRACTION_ADMISSION_V1",
     }));
+    expect(requestDocumentWorkerActivationMock).toHaveBeenCalledWith(
+      "DOCUMENT_EXTRACTION",
+      "procedimento-1",
+    );
   });
 
   it("keeps admission idempotent for the same document version and uses system authority for Preview", async () => {

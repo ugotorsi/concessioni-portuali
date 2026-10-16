@@ -281,12 +281,21 @@ describe("B2C9 generic async job persistence", () => {
   });
 
   it("manually requeues a terminal failure without erasing attempt history", async () => {
-    harness.tx.$queryRaw.mockResolvedValue([running({ status: "TERMINAL_FAILED", attemptCount: 3 })]);
+    harness.tx.$queryRaw.mockResolvedValue([running({
+      status: "TERMINAL_FAILED",
+      attemptCount: 3,
+      operation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+      procedimentoId: "procedure-1",
+    })]);
     harness.tx.$executeRaw.mockResolvedValue(1);
     await expect(retryTerminalAsyncJob({
       jobId: "job-1",
       actor: { userId: "operator-1", userEmail: "operator@example.test", userRole: "ADMIN" },
-    })).resolves.toEqual({ outcome: "REQUEUED" });
+    })).resolves.toEqual({
+      outcome: "REQUEUED",
+      operation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+      procedimentoId: "procedure-1",
+    });
     const retryQuery = harness.tx.$executeRaw.mock.calls[0][0] as { strings: readonly string[] };
     const sql = retryQuery.strings.join(" ");
     expect(sql).toContain('"maxAttempts"=GREATEST("maxAttempts", "attemptCount" + 1)');

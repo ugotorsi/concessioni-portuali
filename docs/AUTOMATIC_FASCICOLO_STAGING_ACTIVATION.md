@@ -3,6 +3,13 @@
 Data di preparazione: 28 settembre 2026. Questo documento non autorizza
 operazioni remote.
 
+> Nota per il primo rilascio operativo: la ricerca giuridica automatica descritta in
+> questo documento storico non fa parte del canary. Usare la procedura event-driven in
+> `APPLICATION_ASYNC_WORKER.md`, con la sola analisi
+> `FASCICOLO.AUTOMATIC_ANALYSIS_V1`; mantenere
+> `AUTOMATIC_RESEARCH_EXECUTION_ENABLED=false` e non includere
+> `LEGAL_RESEARCH.EXECUTE_V1` in alcuna operation allowlist.
+
 ## Stato e perimetro
 
 Il percorso applicativo e completo nel checkout:

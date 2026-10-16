@@ -47,6 +47,8 @@ function config(overrides: Partial<ApplicationAsyncWorkerConfig> = {}): Applicat
     operationAllowlist: [DOCUMENT_EXTRACTION_OPERATION],
     procedimentoAllowlist: ["procedure-canary"],
     dedicatedMode: true,
+    exitOnIdle: false,
+    bootstrapTimeWatches: true,
     providerExecutionEnabled: false,
     ...overrides,
   };

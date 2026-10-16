@@ -22,6 +22,8 @@ The readiness command is read-only. It checks database connectivity, the Lotto 8
 | `ASYNC_WORKER_IDLE_BACKOFF_MS` | `1000` | 100-60000 ms |
 | `ASYNC_WORKER_ERROR_BACKOFF_MS` | `5000` | 100-60000 ms |
 | `ASYNC_WORKER_RETRY_DELAY_MS` | `30000` | base delay, 0-2592000000 ms |
+| `ASYNC_WORKER_EXIT_ON_IDLE` | `false` | one-off mode; exit after the first empty scoped claim |
+| `ASYNC_WORKER_BOOTSTRAP_TIME_WATCHES` | `true` | disable for document-analysis one-off jobs |
 | `ASYNC_WORKER_OPERATION_ALLOWLIST` | empty | comma-separated canary scope |
 | `ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST` | empty | comma-separated canary scope |
 | `ASYNC_WORKER_DEDICATED_MODE` | `false` | when `true`, both allowlists are required and non-empty |
@@ -29,6 +31,12 @@ The readiness command is read-only. It checks database connectivity, the Lotto 8
 | `ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR` | required when providers enabled | positive decimal, max 6 decimals |
 | `ASYNC_COST_RESEARCH_CALL_ESTIMATE_EUR` | required when providers enabled | positive decimal, max 6 decimals |
 | `ASYNC_READINESS_REQUIRE_LIVE_WORKER` | `false` | set true for post-start readiness |
+| `DOCUMENT_WORKER_ACTIVATION_MODE` | `DISABLED` | `DISABLED` or `RENDER_ONE_OFF` |
+| `DOCUMENT_WORKER_ACTIVATION_TIMEOUT_MS` | `10000` | 1000-30000 ms |
+| `RENDER_APPLICATION_WORKER_SERVICE_ID` | empty | Render `srv-...` or `crn-...` base service |
+| `RENDER_DOCUMENT_OCR_WORKER_SERVICE_ID` | empty | Render `srv-...` or `crn-...` OCR base service |
+| `RENDER_WORKER_API_KEY` | empty | server-side secret; never logged |
+| `DOCUMENT_WORKER_RECOVERY_PROCEDIMENTO_ALLOWLIST` | empty | required scoped recovery procedures |
 
 Provider credentials are validated by their adapters only when the corresponding workload is eligible. Never print environment values.
 
@@ -114,6 +122,95 @@ RAM) with a distinct worker ID and a non-empty procedimento allowlist. The
 `20261012_document_ocr_batch_pipeline` migration is required before activation. Keep
 both OCR operations absent from every deployed allowlist until the migration, service,
 and explicit processing authorization have separately been approved.
+
+## Event-Driven One-Off Activation
+
+When `DOCUMENT_WORKER_ACTIVATION_MODE=RENDER_ONE_OFF`, committed document jobs request
+Render one-off jobs through the official Create Job API. Activation is post-commit:
+an unavailable Render API cannot roll back or delete the durable `AsyncJob`.
+
+The application generates fixed commands with a validated procedimento identifier:
+
+- direct extraction: only `DOCUMENT_EXTRACTION_V1`, provider execution disabled,
+  command `npm run worker:document-extraction`;
+- OCR: only `DOCUMENT_OCR_COORDINATOR_V2` and `DOCUMENT_OCR_PAGE_BATCH_V2`, provider
+  execution disabled, command `npm run worker:document-ocr`;
+- document analysis: only `FASCICOLO.AUTOMATIC_ANALYSIS_V1`, the same procedimento
+  allowlist, time-watch bootstrap disabled, command `npm run worker:async`.
+
+The analysis command does not allow `LEGAL_RESEARCH.EXECUTE_V1`. It therefore cannot
+claim or execute automatic legal-research jobs. Existing provider, real-data, approval,
+budget, tenant, and procedimento gates still apply to the document-analysis handler.
+
+Each generated command sets concurrency `1`, dedicated mode, both claim allowlists,
+and `ASYNC_WORKER_EXIT_ON_IDLE=true`. The worker drains eligible child jobs, exits after
+the first empty scoped claim, and waits once for `ASYNC_WORKER_RETRY_DELAY_MS` after a
+retryable failure. OCR coordinator and page-batch jobs remain on the existing V2
+pipeline; `NEUTRAL_INTAKE_EXTRACTION_V1` is not used as an OCR replacement.
+
+Render documents that an already running one-off job continues if its base service is
+suspended. The public documentation does not explicitly guarantee that a new one-off
+job can be created from an already suspended base service. Keep activation mode
+`DISABLED` until this is confirmed by Render or by a separately authorized non-production
+test. Do not resume a polling background worker merely to test this assumption.
+
+If Render does not permit creation from a suspended `srv-...` base, use dedicated
+Render Cron services (`crn-...`) as the base artifacts for application and OCR one-off
+jobs. Configure the OCR Cron base with the approved 2 GB plan. Their ordinary schedule
+must remain a low-frequency scoped recovery run, not a continuous worker and not a
+frequent empty wake-up. The event-driven Create Job request remains the normal path.
+
+Activation failures emit only a bounded error code and HTTP status. The queued job
+remains recoverable. Render does not expose an idempotency key for Create Job; duplicate
+one-off requests are safe at the queue level because claim authority remains
+`FOR UPDATE SKIP LOCKED`, although duplicate instance startup can add cost.
+
+### Scoped recovery
+
+`npm run worker:document-recovery` is an optional low-frequency recovery command. It:
+
+1. requires a non-empty `DOCUMENT_WORKER_RECOVERY_PROCEDIMENTO_ALLOWLIST`;
+2. performs one scoped Neon query for due `QUEUED`/`RETRY_WAIT` jobs and expired
+   `RUNNING`/`CANCELLATION_REQUESTED` leases;
+3. considers only direct extraction, OCR V2, and document-analysis operations;
+4. coalesces OCR coordinator and page-batch recovery per procedimento;
+5. creates no one-off jobs when the scoped queue has no recoverable work.
+
+The recovery command necessarily wakes Neon once when scheduled. Do not configure it
+as a frequent poller. Enable it only as a bounded safety net after one-off creation from
+the chosen base services has been validated, and select the longest acceptable recovery
+interval. Future `RETRY_WAIT` jobs are ignored until `availableAt`.
+
+### Failed canary recovery
+
+For a terminal canary failure, first correct the diagnosed configuration without
+changing the job payload. In `/admin/runtime`, an ADMIN can retry the exact
+`TERMINAL_FAILED` job. The audited transition preserves `attemptCount`, adds one
+allowed attempt, clears only sanitized failure metadata, and returns the job to
+`QUEUED`.
+
+After that commit, the admin action requests the same scoped one-off used by normal
+document admission. The closed operation mapping accepts only direct extraction, OCR
+V2 coordinator/page batches, and document analysis. A terminal
+`LEGAL_RESEARCH.EXECUTE_V1` job is never activated by this path. If Render activation
+is unavailable, the job remains durable and the procedure-scoped recovery command can
+request it later.
+
+For OpenAI document-analysis failures, logs expose only:
+
+- the invalid runtime environment variable name for local configuration errors; or
+- the mapped error code, HTTP status, and a validated provider error code for provider
+  responses.
+
+Provider messages, response bodies, API keys, and environment values are not logged.
+Before retrying the canary, verify that its operation is exactly
+`FASCICOLO.AUTOMATIC_ANALYSIS_V1`, its procedimento is the authorized canary, and the
+corrected configuration has been deployed in the base service's latest successful
+build artifact.
+
+The existing E2E service remains unchanged: its command is
+`npm run worker:document-extraction`. The event-driven code does not replace that
+command and does not broaden its document-extraction-only registry or allowlists.
 
 The V2 batch path was also profiled with `NODE_OPTIONS=--max-old-space-size=1024`
 against image-only A4 PDFs while reopening the source for each five-page job, as the

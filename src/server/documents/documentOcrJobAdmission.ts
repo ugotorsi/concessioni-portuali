@@ -1,4 +1,5 @@
 import { admitAsyncJob } from "@/server/async-jobs/persistence";
+import { requestDocumentWorkerActivation } from "@/server/async-jobs/documentWorkerActivation";
 
 import {
   issueDocumentOcrAuthorization,
@@ -23,7 +24,7 @@ export async function ensureAuthorizedDocumentOcrExtractionJob(
     actorUserId: authorization.actor.userId,
     actorRole: authorization.actor.userRole,
   });
-  return admitAsyncJob({
+  const admission = await admitAsyncJob({
     operation: DOCUMENT_OCR_COORDINATOR_OPERATION,
     logicalOperationId: [
       authorization.documentoId,
@@ -60,4 +61,9 @@ export async function ensureAuthorizedDocumentOcrExtractionJob(
       },
     },
   });
+  await requestDocumentWorkerActivation(
+    "DOCUMENT_OCR",
+    authorization.procedimentoId,
+  );
+  return admission;
 }

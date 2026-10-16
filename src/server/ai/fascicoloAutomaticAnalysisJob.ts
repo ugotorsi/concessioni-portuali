@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import type { AsyncJobAdmissionInput } from "@/server/async-jobs/domain";
 import { admitAsyncJob } from "@/server/async-jobs/persistence";
+import { requestDocumentWorkerActivation } from "@/server/async-jobs/documentWorkerActivation";
 import type { AsyncJobHandler, AsyncJobHandlerContext } from "@/server/async-jobs/registry";
 import { AsyncJobExecutionError } from "@/server/async-jobs/worker";
 import {
@@ -171,6 +172,24 @@ export interface FascicoloAutomaticAnalysisDependencies {
     correlationId: string;
   }): Promise<AutomaticResearchAdmissionResult>;
   listPriorReportIds(input: { tenantId: string; procedimentoId: string; exceptVersionId: string }): Promise<readonly string[]>;
+}
+
+export function fascicoloAutomaticAnalysisDiagnostic(error: unknown): Readonly<Record<string, unknown>> | null {
+  if (error instanceof OpenAiRuntimeConfigurationError) {
+    return {
+      event: "fascicolo_automatic_analysis_configuration_error",
+      envName: error.envName,
+    };
+  }
+  if (error instanceof FascicoloDocumentAnalysisError && error.providerDiagnostics) {
+    return {
+      event: "fascicolo_automatic_analysis_provider_error",
+      errorCode: error.code,
+      httpStatus: error.providerDiagnostics.httpStatus,
+      providerCode: error.providerDiagnostics.providerCode,
+    };
+  }
+  return null;
 }
 
 function stableIdentity(prefix: string, value: unknown): string {
@@ -541,6 +560,8 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
         actualAmount: estimatedAmount,
       }));
     } catch (error) {
+      const diagnostic = fascicoloAutomaticAnalysisDiagnostic(error);
+      if (diagnostic) console.error(diagnostic);
       if (error instanceof OpenAiRuntimeConfigurationError) {
         throw new AsyncJobExecutionError("CONFIGURATION", "AI_CONFIGURATION_ERROR", false);
       }
@@ -1062,7 +1083,7 @@ export async function ensureFascicoloDocumentCorpusUpdateJob(
   if (current?.corpusFingerprint === corpus.corpusFingerprint) {
     return { outcome: "UNCHANGED" as const, job: null };
   }
-  return admitAsyncJob(buildFascicoloDocumentCorpusUpdateAdmission({
+  const admission = await admitAsyncJob(buildFascicoloDocumentCorpusUpdateAdmission({
     tenantId: sourceJob.tenantId,
     procedimentoId: sourceJob.procedimentoId,
     corpusFingerprint: corpus.corpusFingerprint,
@@ -1074,6 +1095,11 @@ export async function ensureFascicoloDocumentCorpusUpdateJob(
     actorEmail: sourceJob.actorEmail,
     actorRole: sourceJob.actorRole,
   }));
+  await requestDocumentWorkerActivation(
+    "DOCUMENT_ANALYSIS",
+    sourceJob.procedimentoId,
+  );
+  return admission;
 }
 
 export async function ensureFascicoloAutomaticAnalysisJob(input: FascicoloAutomaticAnalysisSource) {

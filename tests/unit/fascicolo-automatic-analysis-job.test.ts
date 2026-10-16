@@ -7,10 +7,13 @@ import {
   buildFascicoloDocumentCorpusUpdateAdmission,
   createFascicoloAutomaticAnalysisHandler,
   executeDeferredKnowledgeResearchWave,
+  fascicoloAutomaticAnalysisDiagnostic,
   FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
   type AutomaticFascicoloReport,
   type FascicoloAutomaticAnalysisDependencies,
 } from "@/server/ai/fascicoloAutomaticAnalysisJob";
+import { FascicoloDocumentAnalysisError } from "@/server/ai/fascicoloDocumentAnalysis";
+import { OpenAiRuntimeConfigurationError } from "@/server/ai/openaiRuntime";
 import { applicationAsyncJobRegistry } from "@/server/async-jobs/applicationWorker";
 import { normalizeAsyncJobAdmission } from "@/server/async-jobs/domain";
 import { AsyncJobExecutionError } from "@/server/async-jobs/worker";
@@ -205,6 +208,32 @@ function context() {
   };
 }
 
+describe("automatic analysis safe diagnostics", () => {
+  it("identifies the invalid runtime parameter without its value", () => {
+    expect(fascicoloAutomaticAnalysisDiagnostic(
+      new OpenAiRuntimeConfigurationError("AI_OPENAI_API_KEY"),
+    )).toEqual({
+      event: "fascicolo_automatic_analysis_configuration_error",
+      envName: "AI_OPENAI_API_KEY",
+    });
+  });
+
+  it.each([
+    [401, "invalid_api_key"],
+    [403, "project_permission_denied"],
+  ] as const)("reports HTTP %s and a safe provider code", (httpStatus, providerCode) => {
+    expect(fascicoloAutomaticAnalysisDiagnostic(new FascicoloDocumentAnalysisError(
+      "AI_CONFIGURATION_ERROR",
+      { httpStatus, providerCode },
+    ))).toEqual({
+      event: "fascicolo_automatic_analysis_provider_error",
+      errorCode: "AI_CONFIGURATION_ERROR",
+      httpStatus,
+      providerCode,
+    });
+  });
+});
+
 function dependencies(overrides: Partial<FascicoloAutomaticAnalysisDependencies> = {}) {
   const reports = new Map<string, AutomaticFascicoloReport>();
   return {
@@ -303,6 +332,7 @@ describe("automatic fascicolo analysis job", () => {
     await createFascicoloAutomaticAnalysisHandler(deps).execute(directReference, context());
     const excerpts = (analyze.mock.calls[0]?.[0] as { excerpts: { text: string }[] } | undefined)?.excerpts;
     expect(excerpts).toHaveLength(21);
+    if (!excerpts) throw new Error("EXPECTED_ANALYSIS_EXCERPTS");
     expect(excerpts.map((excerpt) => excerpt.text)).toEqual(pages.map((page) => page.normalizedText));
   });
 

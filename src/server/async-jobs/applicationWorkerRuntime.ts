@@ -24,6 +24,8 @@ export interface ApplicationAsyncWorkerConfig {
   readonly operationAllowlist: readonly string[];
   readonly procedimentoAllowlist: readonly string[];
   readonly dedicatedMode: boolean;
+  readonly exitOnIdle: boolean;
+  readonly bootstrapTimeWatches: boolean;
   readonly providerExecutionEnabled?: boolean;
 }
 
@@ -232,6 +234,10 @@ export function parseApplicationAsyncWorkerConfig(
     operationAllowlist,
     procedimentoAllowlist,
     dedicatedMode,
+    exitOnIdle: enabled(environment.ASYNC_WORKER_EXIT_ON_IDLE),
+    bootstrapTimeWatches: environment.ASYNC_WORKER_BOOTSTRAP_TIME_WATCHES === undefined
+      ? true
+      : enabled(environment.ASYNC_WORKER_BOOTSTRAP_TIME_WATCHES),
     providerExecutionEnabled,
   });
 }
@@ -308,6 +314,7 @@ export function createApplicationAsyncWorkerRuntime(
               });
               idleReported = true;
             }
+            if (config.exitOnIdle) return;
             if (!shutdownRequested) await wait(config.idleBackoffMs);
             continue;
           }
@@ -318,6 +325,9 @@ export function createApplicationAsyncWorkerRuntime(
             jobId: result.jobId,
             outcome: result.outcome,
           });
+          if (config.exitOnIdle && result.outcome === "RETRY_SCHEDULED" && !shutdownRequested) {
+            await wait(config.retryDelayMs);
+          }
         } catch (error) {
           report({
             event: "ASYNC_WORKER_RECOVERABLE_ERROR",

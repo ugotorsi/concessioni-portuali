@@ -9,6 +9,7 @@
     "worker:async": "tsx src/server/async-jobs/applicationWorkerProcess.ts",
     "worker:document-extraction": "tsx src/server/async-jobs/documentExtractionWorkerProcess.ts",
     "worker:document-ocr": "tsx src/server/async-jobs/documentOcrWorkerProcess.ts",
+    "worker:document-recovery": "tsx src/server/async-jobs/documentWorkerRecoveryProcess.ts",
     "worker:document-extraction-one-shot": "tsx scripts/run-document-extraction-job.ts",
     "worker:readiness": "tsx scripts/runtime/staging-readiness.ts",
     "check": "npm run build",

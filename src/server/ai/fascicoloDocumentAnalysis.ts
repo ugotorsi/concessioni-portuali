@@ -103,7 +103,10 @@ export type FascicoloDocumentAnalysisErrorCode =
   | "INVALID_PROVIDER_OUTPUT";
 
 export class FascicoloDocumentAnalysisError extends Error {
-  constructor(readonly code: FascicoloDocumentAnalysisErrorCode) {
+  constructor(
+    readonly code: FascicoloDocumentAnalysisErrorCode,
+    readonly providerDiagnostics: AiProviderAdapterError["diagnostics"] = null,
+  ) {
     super(code);
     this.name = "FascicoloDocumentAnalysisError";
   }
@@ -111,10 +114,14 @@ export class FascicoloDocumentAnalysisError extends Error {
 
 function mapProviderError(error: AiProviderAdapterError): FascicoloDocumentAnalysisError {
   switch (error.category) {
-    case "CONFIGURATION": return new FascicoloDocumentAnalysisError("AI_CONFIGURATION_ERROR");
-    case "UNAVAILABLE": return new FascicoloDocumentAnalysisError("AI_PROVIDER_UNAVAILABLE");
-    case "TIMEOUT": return new FascicoloDocumentAnalysisError("AI_PROVIDER_TIMEOUT");
-    case "RATE_LIMITED": return new FascicoloDocumentAnalysisError("AI_PROVIDER_RATE_LIMITED");
+    case "CONFIGURATION":
+      return new FascicoloDocumentAnalysisError("AI_CONFIGURATION_ERROR", error.diagnostics);
+    case "UNAVAILABLE":
+      return new FascicoloDocumentAnalysisError("AI_PROVIDER_UNAVAILABLE", error.diagnostics);
+    case "TIMEOUT":
+      return new FascicoloDocumentAnalysisError("AI_PROVIDER_TIMEOUT", error.diagnostics);
+    case "RATE_LIMITED":
+      return new FascicoloDocumentAnalysisError("AI_PROVIDER_RATE_LIMITED", error.diagnostics);
   }
 }
 

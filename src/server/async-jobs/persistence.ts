@@ -727,6 +727,10 @@ export async function retryTerminalAsyncJob(input: {
         correlationId: current.correlationId,
       },
     });
-    return { outcome: "REQUEUED" as const };
+    return {
+      outcome: "REQUEUED" as const,
+      operation: current.operation,
+      procedimentoId: current.procedimentoId,
+    };
   });
 }

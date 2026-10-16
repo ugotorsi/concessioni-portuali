@@ -384,20 +384,35 @@ function extractStructuredPayload(responseBody: unknown): unknown {
   }
 }
 
-function mapHttpError(status: number): Error {
+function mapHttpError(status: number, providerCode: string | null): Error {
+  const diagnostics = { httpStatus: status, providerCode };
   if (status === 429) {
-    return new AiProviderAdapterError("RATE_LIMITED");
+    return new AiProviderAdapterError("RATE_LIMITED", diagnostics);
   }
   if (status === 408) {
-    return new AiProviderAdapterError("TIMEOUT");
+    return new AiProviderAdapterError("TIMEOUT", diagnostics);
   }
   if (status === 401 || status === 403) {
-    return new AiProviderAdapterError("CONFIGURATION");
+    return new AiProviderAdapterError("CONFIGURATION", diagnostics);
   }
   if (status >= 500 && status <= 599) {
-    return new AiProviderAdapterError("UNAVAILABLE");
+    return new AiProviderAdapterError("UNAVAILABLE", diagnostics);
   }
   return new OpenAiProtocolError();
+}
+
+function providerErrorCode(responseBody: unknown): string | null {
+  if (!responseBody || typeof responseBody !== "object" || Array.isArray(responseBody)) {
+    return null;
+  }
+  const error = (responseBody as Record<string, unknown>).error;
+  if (!error || typeof error !== "object" || Array.isArray(error)) {
+    return null;
+  }
+  const code = (error as Record<string, unknown>).code;
+  return typeof code === "string" && /^[A-Za-z0-9_.:-]{1,128}$/.test(code)
+    ? code
+    : null;
 }
 
 export function createOpenAiAnalysisProvider(config: {
@@ -454,7 +469,17 @@ export function createOpenAiAnalysisProvider(config: {
       assertNotTimedOut();
 
       if (!response.ok) {
-        throw mapHttpError(response.status);
+        const errorBody = await readBoundedBody(
+          response,
+          config.maxRawResponseBytes,
+          controller.signal,
+          () => timedOut,
+        );
+        assertNotTimedOut();
+        throw mapHttpError(
+          response.status,
+          providerErrorCode(parseJsonBytes(errorBody)),
+        );
       }
       const body = await readBoundedBody(
         response,

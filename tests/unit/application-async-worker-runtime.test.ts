@@ -43,6 +43,8 @@ const config = {
   operationAllowlist: [],
   procedimentoAllowlist: [],
   dedicatedMode: false,
+  exitOnIdle: false,
+  bootstrapTimeWatches: true,
 };
 
 function harness() {
@@ -79,6 +81,39 @@ describe("Block 3B.7 application async worker runtime", () => {
     expect(applicationWorker.drainOneApplicationAsyncJob).toHaveBeenCalledOnce();
     expect(sleeps).toEqual([config.idleBackoffMs]);
     expect(events.filter((event) => event.event === "ASYNC_WORKER_IDLE")).toHaveLength(1);
+  });
+
+  it("exits after one empty claim without idle polling in one-shot mode", async () => {
+    applicationWorker.drainOneApplicationAsyncJob.mockResolvedValue({ outcome: "IDLE" });
+    const sleep = vi.fn(async () => undefined);
+    const runtime = createApplicationAsyncWorkerRuntime(
+      { ...config, exitOnIdle: true },
+      { sleep },
+    );
+
+    await runtime.run();
+
+    expect(applicationWorker.drainOneApplicationAsyncJob).toHaveBeenCalledOnce();
+    expect(runtimeHealth.heartbeatRuntimeWorker).toHaveBeenCalledOnce();
+    expect(sleep).not.toHaveBeenCalled();
+  });
+
+  it("waits once for a retry scheduled by a one-shot worker", async () => {
+    applicationWorker.drainOneApplicationAsyncJob
+      .mockResolvedValueOnce({ outcome: "RETRY_SCHEDULED", jobId: "job-retry" })
+      .mockResolvedValueOnce({ outcome: "SUCCEEDED", jobId: "job-retry" })
+      .mockResolvedValueOnce({ outcome: "IDLE" });
+    const sleep = vi.fn(async () => undefined);
+    const runtime = createApplicationAsyncWorkerRuntime(
+      { ...config, exitOnIdle: true },
+      { sleep },
+    );
+
+    await runtime.run();
+
+    expect(sleep).toHaveBeenCalledOnce();
+    expect(sleep).toHaveBeenCalledWith(config.retryDelayMs);
+    expect(applicationWorker.drainOneApplicationAsyncJob).toHaveBeenCalledTimes(3);
   });
 
   it("drains available jobs sequentially through the existing application drain", async () => {
@@ -183,6 +218,27 @@ describe("Block 3B.7 application async worker runtime", () => {
     });
 
     expect(order).toEqual(["bootstrap", "runtime"]);
+  });
+
+  it("skips the time-watch bootstrap for a scoped document-analysis one-off", async () => {
+    const runtime = {
+      requestShutdown: vi.fn(),
+      run: vi.fn(async () => undefined),
+    };
+    const bootstrap = vi.fn(async () => undefined);
+
+    await runApplicationAsyncWorkerProcess({
+      parseConfig: () => ({ ...config, bootstrapTimeWatches: false }),
+      createRuntime: () => runtime,
+      installSignalHandlers: () => vi.fn(),
+      bootstrap,
+      disconnect: vi.fn(async () => undefined),
+      reportFatal: vi.fn(),
+      markFailure: vi.fn(),
+    });
+
+    expect(bootstrap).not.toHaveBeenCalled();
+    expect(runtime.run).toHaveBeenCalledOnce();
   });
 
   it("does not start the worker when the time-watch bootstrap fails", async () => {
@@ -389,6 +445,8 @@ describe("Block 3B.7 application async worker runtime", () => {
       operationAllowlist: ["NEUTRAL_INTAKE_EXTRACTION_V1", "FASCICOLO.AUTOMATIC_ANALYSIS_V1"],
       procedimentoAllowlist: ["procedure-canary"],
       dedicatedMode: false,
+      exitOnIdle: false,
+      bootstrapTimeWatches: true,
       providerExecutionEnabled: false,
     });
 

@@ -13,6 +13,7 @@ import { DocumentStorageS3Error } from "@/server/documents/storage/s3StorageAdap
 import type { StoredDocumentObject } from "@/server/documents/storage/types";
 import { validateUploadFile, type ParsedUploadDocumentInput } from "@/server/documents/validation";
 import { ensureDocumentExtractionJob } from "@/server/documents/documentExtractionAdmission";
+import { requestDocumentWorkerActivation } from "@/server/async-jobs/documentWorkerActivation";
 
 const STAGING_PREVIEW_ADMIN_ID = "staging-preview-admin";
 const DOCUMENT_UPLOAD_EXTRACTION_POLICY_DECISION = "DOCUMENT_UPLOAD_EXTRACTION_ADMISSION_V1";
@@ -345,10 +346,21 @@ export async function registerStoredDocument<Result = never>(
 
     return { created: !reusedDocument, document, extensionResult };
   });
+  const finalizeUpload = async (
+    result: Awaited<ReturnType<typeof runAtomicUnit>>,
+  ) => {
+    if (input.procedimentoId && stored.mimeType === "application/pdf") {
+      await requestDocumentWorkerActivation(
+        "DOCUMENT_EXTRACTION",
+        input.procedimentoId,
+      );
+    }
+    return { ...result, storageKey, checksum };
+  };
 
   try {
     const result = await runAtomicUnit(existing);
-    return { ...result, storageKey, checksum };
+    return finalizeUpload(result);
   } catch (error) {
     let sourceFileVersionRace = false;
     try {
@@ -367,7 +379,7 @@ export async function registerStoredDocument<Result = never>(
       throw new Error("Conflitto di idempotenza per il documento richiesto.");
     }
     const retried = await runAtomicUnit(concurrent);
-    return { ...retried, storageKey, checksum };
+    return finalizeUpload(retried);
   }
 }
 

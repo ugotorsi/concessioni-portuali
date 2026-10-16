@@ -352,6 +352,44 @@ describe("AI-01B2A OpenAI Responses adapter", () => {
     });
   });
 
+  it.each([
+    [401, "invalid_api_key"],
+    [403, "project_permission_denied"],
+  ] as const)("preserves safe structured diagnostics for HTTP %s", async (status, code) => {
+    const transport = fakeTransport(jsonResponse({
+      error: {
+        code,
+        message: `sensitive provider detail ${API_KEY}`,
+      },
+    }, { status }));
+    const provider = createOpenAiAnalysisProvider(config(transport));
+
+    await expect(provider.analyze(providerRequestFixture())).rejects.toMatchObject({
+      category: "CONFIGURATION",
+      diagnostics: {
+        httpStatus: status,
+        providerCode: code,
+      },
+    });
+  });
+
+  it("omits an unsafe provider error code from diagnostics", async () => {
+    const provider = createOpenAiAnalysisProvider(config(fakeTransport(jsonResponse({
+      error: {
+        code: `unsafe ${API_KEY}`,
+        message: "not logged",
+      },
+    }, { status: 403 }))));
+
+    await expect(provider.analyze(providerRequestFixture())).rejects.toMatchObject({
+      category: "CONFIGURATION",
+      diagnostics: {
+        httpStatus: 403,
+        providerCode: null,
+      },
+    });
+  });
+
   it("does not overmap unexpected 400 or 422 responses", async () => {
     for (const status of [400, 422]) {
       const provider = createOpenAiAnalysisProvider(config(fakeTransport(new Response("raw detail", { status }))));
