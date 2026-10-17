@@ -55,7 +55,13 @@ async function database() {
       "completedAt" TIMESTAMPTZ,
       "deferredAt" TIMESTAMPTZ,
       "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+      "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "research_mission_state_ck" CHECK (
+        ("status" = 'IN_PROGRESS' AND "claimToken" IS NOT NULL AND "completedAt" IS NULL AND "deferredAt" IS NULL)
+        OR ("status" = 'PENDING' AND "claimToken" IS NULL AND "completedAt" IS NULL AND "deferredAt" IS NULL)
+        OR ("status" IN ('COMPLETED', 'BUDGET_EXHAUSTED', 'REJECTED') AND "claimToken" IS NULL AND "completedAt" IS NOT NULL)
+        OR ("status" = 'DEFERRED' AND "claimToken" IS NULL AND "completedAt" IS NULL AND "deferredAt" IS NOT NULL)
+      )
     );
     CREATE TABLE "ResearchEvidenceBundleRecord" (
       "id" TEXT PRIMARY KEY, "missionId" VARCHAR(96) NOT NULL, "payload" JSONB NOT NULL
@@ -114,6 +120,98 @@ afterEach(async () => {
 
 describe("Lotto 3 research mission lifecycle on PGlite", () => {
   const assignment = { assignedActorId: "actor-1" };
+
+  it("keeps an unassigned system mission deferred without inventing a user", async () => {
+    const db = await database();
+    const ctx = context(db);
+    await setCurrent(db, "revision-unassigned");
+    const result = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-unassigned",
+      assignedActorId: null,
+      plans: [plan("0".repeat(64))],
+    }, ctx);
+
+    expect(result[0]).toMatchObject({
+      operationalStatus: "DEFERRED",
+      assignmentStatus: "REQUIRES_ASSIGNMENT",
+    });
+    const mission = await db.query<{
+      assignedActorId: string | null;
+      status: string;
+      deferredAt: Date | null;
+    }>(
+      'SELECT "assignedActorId", "status", "deferredAt" FROM "ResearchMissionRecord"',
+    );
+    expect(mission.rows).toEqual([{
+      assignedActorId: null,
+      status: "DEFERRED",
+      deferredAt: expect.any(Date),
+    }]);
+  });
+
+  it("assigns and admits an existing unassigned mission idempotently", async () => {
+    const db = await database();
+    const ctx = context(db);
+    await setCurrent(db, "revision-assignment");
+    const plans = [plan("1".repeat(64))];
+    const unassigned = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-assignment",
+      assignedActorId: null,
+      plans,
+    }, ctx);
+
+    const assigned = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-assignment",
+      assignedActorId: "actor-1",
+      plans,
+    }, ctx);
+    const repeated = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-assignment",
+      assignedActorId: "actor-1",
+      plans,
+    }, ctx);
+
+    expect(unassigned[0]).toMatchObject({
+      outcome: "CREATED",
+      operationalStatus: "DEFERRED",
+      assignmentStatus: "REQUIRES_ASSIGNMENT",
+    });
+    expect(assigned[0]).toMatchObject({
+      outcome: "REUSED",
+      operationalStatus: "PENDING",
+      assignmentStatus: "ASSIGNED",
+    });
+    expect(repeated[0]).toMatchObject({
+      missionId: assigned[0].missionId,
+      outcome: "REUSED",
+      operationalStatus: "PENDING",
+      assignmentStatus: "ASSIGNED",
+    });
+    const missions = await db.query<{
+      count: number;
+      assignedActorId: string | null;
+      status: string;
+      deferredAt: Date | null;
+    }>(
+      `SELECT count(*)::int AS "count", min("assignedActorId") AS "assignedActorId",
+        min("status"::text) AS "status", min("deferredAt") AS "deferredAt"
+       FROM "ResearchMissionRecord"`,
+    );
+    expect(missions.rows).toEqual([{
+      count: 1,
+      assignedActorId: "actor-1",
+      status: "PENDING",
+      deferredAt: null,
+    }]);
+  });
 
   it("reuses an invariant fingerprint and creates a new CURRENT mission while preserving the historical bundle when assumptions change", async () => {
     const db = await database();

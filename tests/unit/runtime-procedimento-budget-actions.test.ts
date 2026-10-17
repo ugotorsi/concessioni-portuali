@@ -7,6 +7,7 @@ const requireTenantAccessMock = vi.hoisted(() => vi.fn());
 const provisionMock = vi.hoisted(() => vi.fn());
 const readAuthorizationMock = vi.hoisted(() => vi.fn());
 const auditSuccessMock = vi.hoisted(() => vi.fn());
+const recoverMissionsMock = vi.hoisted(() => vi.fn());
 
 const prismaMock = vi.hoisted(() => ({
   procedimento: { findUnique: vi.fn() },
@@ -26,6 +27,9 @@ vi.mock("@/server/runtime/procedimentoBudgetPolicy", () => ({
   provisionDefaultProcedimentoBudgetPolicy: provisionMock,
   readDefaultProcedimentoBudgetAuthorization: readAuthorizationMock,
 }));
+vi.mock("@/server/fascicolo-knowledge/researchMissionRecovery", () => ({
+  recoverCurrentKnowledgeResearchMissions: recoverMissionsMock,
+}));
 vi.mock("@/server/async-jobs/persistence", () => ({
   retryTerminalAsyncJob: vi.fn(),
 }));
@@ -35,7 +39,10 @@ vi.mock("@/server/async-jobs/documentWorkerActivation", () => ({
 }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
-import { assignDefaultProcedimentoBudgetPolicy } from "@/app/admin/runtime/actions";
+import {
+  assignDefaultProcedimentoBudgetPolicy,
+  recoverCurrentKnowledgeMissions,
+} from "@/app/admin/runtime/actions";
 
 function formData() {
   const data = new FormData();
@@ -78,6 +85,13 @@ describe("assignDefaultProcedimentoBudgetPolicy", () => {
         windowSeconds: 86_400,
       },
     });
+    recoverMissionsMock.mockResolvedValue({
+      revisionId: "revision-1",
+      missionCount: 2,
+      assignedActorId: null,
+      assignmentRequired: true,
+      lifecycle: [],
+    });
   });
 
   it("requires ADMIN and tenant write access before provisioning", async () => {
@@ -98,6 +112,68 @@ describe("assignDefaultProcedimentoBudgetPolicy", () => {
         hardCapAmount: "1.000000",
         windowSeconds: 86_400,
       },
+    });
+  });
+
+  describe("recoverCurrentKnowledgeMissions", () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+      requireRoleMock.mockResolvedValue("ADMIN");
+      getCurrentUserMock.mockResolvedValue({
+        id: "admin-1",
+        email: "admin@example.test",
+        role: "ADMIN",
+      });
+      getCurrentTenantContextMock.mockResolvedValue({
+        userId: "admin-1",
+        role: "ADMIN",
+        isAdmin: true,
+        defaultTenantId: "tenant-1",
+        accessibleTenantIds: ["tenant-1"],
+      });
+      prismaMock.procedimento.findUnique.mockResolvedValue({
+        id: "procedure-1",
+        enteId: "tenant-1",
+      });
+      recoverMissionsMock.mockResolvedValue({
+        revisionId: "revision-1",
+        missionCount: 2,
+        assignedActorId: null,
+        assignmentRequired: true,
+        lifecycle: [],
+      });
+    });
+
+    it("is ADMIN-only, tenant-scoped, audited, and does not invoke a provider", async () => {
+      await recoverCurrentKnowledgeMissions(formData());
+
+      expect(requireRoleMock).toHaveBeenCalledWith(["ADMIN"]);
+      expect(requireTenantAccessMock).toHaveBeenCalledWith(
+        expect.anything(),
+        "tenant-1",
+        { mode: "write", allowWhenEnteMissing: false },
+      );
+      expect(recoverMissionsMock).toHaveBeenCalledWith({
+        tenantId: "tenant-1",
+        procedimentoId: "procedure-1",
+        candidateActorId: null,
+        requireValidCandidate: false,
+      });
+      expect(auditSuccessMock).toHaveBeenCalledWith(expect.objectContaining({
+        metadata: expect.objectContaining({ providerCalled: false }),
+      }));
+    });
+
+    it("requires an explicitly supplied assignee to be valid", async () => {
+      const data = formData();
+      data.set("assignedActorId", "user-1");
+
+      await recoverCurrentKnowledgeMissions(data);
+
+      expect(recoverMissionsMock).toHaveBeenCalledWith(expect.objectContaining({
+        candidateActorId: "user-1",
+        requireValidCandidate: true,
+      }));
     });
   });
 

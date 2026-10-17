@@ -11,6 +11,7 @@ import { readDefaultProcedimentoBudgetAuthorization } from "@/server/runtime/pro
 
 import {
   assignDefaultProcedimentoBudgetPolicy,
+  recoverCurrentKnowledgeMissions,
   retryRuntimeJob,
 } from "./actions";
 
@@ -85,6 +86,36 @@ export default async function RuntimeOperationsPage() {
           <CardContent><Table><TableHeader><TableRow><TableHead>Operazione</TableHead><TableHead>Ambito</TableHead><TableHead>Tentativi</TableHead><TableHead>Codice</TableHead><TableHead>Azione</TableHead></TableRow></TableHeader><TableBody>
             {failedJobs.map((job) => <TableRow key={job.id}><TableCell>{job.operation}</TableCell><TableCell>{job.procedimentoId ?? job.tenantId ?? "Globale"}</TableCell><TableCell>{job.attemptCount}</TableCell><TableCell>{job.failureCode ?? "NON_CLASSIFICATO"}</TableCell><TableCell><form action={retryRuntimeJob}><input type="hidden" name="jobId" value={job.id} /><Button size="sm" variant="outline" type="submit">Riprova</Button></form></TableCell></TableRow>)}
           </TableBody></Table></CardContent>
+        </Card>
+      </section>
+
+      <section className="mt-6">
+        <Card>
+          <CardHeader><CardTitle>Recupero missioni dalla conoscenza corrente</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-slate-600">
+              Riconcilia in modo idempotente le missioni dalla revisione CURRENT senza ripetere l&apos;analisi AI.
+              Senza un utente valido per il tenant, le missioni restano differite e richiedono assegnazione.
+            </p>
+            <form action={recoverCurrentKnowledgeMissions} className="flex flex-wrap items-end gap-3">
+              <label className="grid gap-1 text-sm font-medium text-slate-700">
+                ID procedimento
+                <input
+                  className="h-10 min-w-80 rounded-md border border-slate-300 px-3 text-sm"
+                  name="procedimentoId"
+                  required
+                />
+              </label>
+              <label className="grid gap-1 text-sm font-medium text-slate-700">
+                ID utente assegnatario
+                <input
+                  className="h-10 min-w-80 rounded-md border border-slate-300 px-3 text-sm"
+                  name="assignedActorId"
+                />
+              </label>
+              <Button type="submit">Recupera post-processing</Button>
+            </form>
+          </CardContent>
         </Card>
       </section>
 

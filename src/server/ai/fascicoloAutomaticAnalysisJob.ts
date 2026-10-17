@@ -49,7 +49,9 @@ import {
   type KnowledgeEvidenceCandidate,
   type KnowledgeMissionLifecycleResult,
   type KnowledgeReconciliationResult,
+  type KnowledgeRevisionSnapshot,
 } from "@/server/fascicolo-knowledge";
+import { resolveResearchMissionAssignee } from "@/server/fascicolo-knowledge/researchMissionRecovery";
 import {
   getFascicoloDocumentCorpusForAsyncJob,
   type FascicoloDocumentCorpus,
@@ -159,9 +161,13 @@ export interface FascicoloAutomaticAnalysisDependencies {
     tenantId: string;
     procedimentoId: string;
     knowledgeRevisionId: string;
-    assignedActorId: string;
+    assignedActorId: string | null;
     plans: ReturnType<typeof buildKnowledgeResearchMissionPlans>;
   }): Promise<readonly KnowledgeMissionLifecycleResult[]>;
+  resolveMissionAssignee?(input: {
+    tenantId: string;
+    candidateActorId: string;
+  }): Promise<string | null>;
   researchExecutionWaveLimit?: number;
   persistReport(input: AutomaticFascicoloReport): Promise<{ outcome: "CREATED" | "REUSED"; reportId: string }>;
   persistMission(input: { mission: ResearchMission; actorId: string; tenantId: string }): Promise<unknown>;
@@ -609,6 +615,7 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
     return persistStructuredKnowledgeRevision(input);
   },
   reconcileKnowledgeMissions: (input) => reconcileKnowledgeResearchMissions(input),
+  resolveMissionAssignee: (input) => resolveResearchMissionAssignee(input),
   persistMission: ({ mission, actorId, tenantId }) => createResearchMissionRecord({
     mission,
     actor: { actorId, tenantId },
@@ -621,6 +628,76 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
 
 export function createDefaultFascicoloAutomaticAnalysisDependencies(): FascicoloAutomaticAnalysisDependencies {
   return { ...defaultHandlerDependencies };
+}
+
+async function reconcileStructuredKnowledgeMissions(input: {
+  authority: AutomaticAuthority;
+  revision: KnowledgeRevisionSnapshot;
+  dependencies: FascicoloAutomaticAnalysisDependencies;
+}) {
+  if (!input.dependencies.reconcileKnowledgeMissions) {
+    throw new AsyncJobExecutionError(
+      "PERSISTENCE",
+      "RESEARCH_MISSION_RECONCILIATION_UNAVAILABLE",
+      false,
+    );
+  }
+
+  let plans: ReturnType<typeof buildKnowledgeResearchMissionPlans>;
+  try {
+    plans = buildKnowledgeResearchMissionPlans(input.revision, {
+      maxQuestionsPerWave:
+        input.dependencies.researchExecutionWaveLimit
+        ?? DEFAULT_RESEARCH_EXECUTION_WAVE_LIMIT,
+    });
+  } catch {
+    throw new AsyncJobExecutionError(
+      "PERSISTENCE",
+      "RESEARCH_MISSION_PLANNING_FAILED",
+      false,
+    );
+  }
+
+  let assignedActorId: string | null = input.authority.actorId;
+  if (input.dependencies.resolveMissionAssignee) {
+    try {
+      assignedActorId = await input.dependencies.resolveMissionAssignee({
+        tenantId: input.authority.tenantId,
+        candidateActorId: input.authority.actorId,
+      });
+    } catch {
+      throw new AsyncJobExecutionError(
+        "PERSISTENCE",
+        "RESEARCH_MISSION_ASSIGNEE_RESOLUTION_FAILED",
+        false,
+      );
+    }
+  }
+
+  let lifecycle: readonly KnowledgeMissionLifecycleResult[];
+  try {
+    lifecycle = await input.dependencies.reconcileKnowledgeMissions({
+      tenantId: input.authority.tenantId,
+      procedimentoId: input.authority.procedimentoId,
+      knowledgeRevisionId: input.revision.id,
+      assignedActorId,
+      plans,
+    });
+  } catch {
+    throw new AsyncJobExecutionError(
+      "PERSISTENCE",
+      "RESEARCH_MISSION_RECONCILIATION_FAILED",
+      false,
+    );
+  }
+
+  return {
+    plans,
+    lifecycle,
+    assignmentRequired: lifecycle.some(
+      (mission) => mission.assignmentStatus === "REQUIRES_ASSIGNMENT",
+    ),
+  };
 }
 
 export function createFascicoloAutomaticAnalysisHandler(
@@ -645,6 +722,11 @@ export function createFascicoloAutomaticAnalysisHandler(
           })
         : null;
       if (currentRevision?.corpusFingerprint === authority.corpusFingerprint) {
+        const recovered = await reconcileStructuredKnowledgeMissions({
+          authority,
+          revision: currentRevision,
+          dependencies,
+        });
         return {
           referenceType: "FASCICOLO_KNOWLEDGE_REVISION",
           referenceId: currentRevision.id,
@@ -654,6 +736,11 @@ export function createFascicoloAutomaticAnalysisHandler(
             documentVersionId: authority.extractionAttemptId,
             corpusFingerprint: authority.corpusFingerprint,
             persistenceCode: "REUSED",
+            missionCount: recovered.lifecycle.length,
+            researchJobCount: 0,
+            researchRequirementCode: recovered.assignmentRequired
+              ? "ASSIGNMENT_AND_EXPLICIT_AUTHORIZATION_REQUIRED"
+              : "EXPLICIT_AUTHORIZATION_REQUIRED",
           },
         };
       }
@@ -711,50 +798,49 @@ export function createFascicoloAutomaticAnalysisHandler(
       let structuredMissions: readonly ResearchMission[] | null = null;
       let structuredMissionsToSchedule: readonly ResearchMission[] | null = null;
       let knowledgeRevisionId: string | null = null;
+      let structuredMissionAssignmentRequired = false;
       if (parsed.data.structuredKnowledge) {
         const evidenceByBasisRef = resolveKnowledgeEvidence(authority, excerpts);
         if (evidenceByBasisRef.size !== excerpts.length || !dependencies.persistKnowledge) {
           throw new AsyncJobExecutionError("DOCUMENT", "DOCUMENT_GROUNDING_INVALID", false);
         }
+        let persisted;
         try {
-          const persisted = await dependencies.persistKnowledge({
+          persisted = await dependencies.persistKnowledge({
             tenantId: authority.tenantId,
             procedimentoId: authority.procedimentoId,
             corpusFingerprint: authority.corpusFingerprint,
             knowledge: parsed.data.structuredKnowledge,
             evidenceByBasisRef,
           });
-          const reconciliation = persisted as KnowledgeReconciliationResult;
-          if (!reconciliation?.revision || reconciliation.revision.status !== "CURRENT"
-            || !dependencies.reconcileKnowledgeMissions) {
-            throw new Error("STRUCTURED_KNOWLEDGE_NOT_CURRENT");
-          }
-          knowledgeRevisionId = reconciliation.revision.id;
-          {
-            const plans = buildKnowledgeResearchMissionPlans(reconciliation.revision, {
-              maxQuestionsPerWave: dependencies.researchExecutionWaveLimit ?? DEFAULT_RESEARCH_EXECUTION_WAVE_LIMIT,
-            });
-            const lifecycle = await dependencies.reconcileKnowledgeMissions({
-              tenantId: authority.tenantId,
-              procedimentoId: authority.procedimentoId,
-              knowledgeRevisionId: reconciliation.revision.id,
-              assignedActorId: authority.actorId,
-              plans,
-            });
-            structuredMissions = plans
-              .filter((plan) => plan.mission !== null)
-              .map((plan) => plan.mission!);
-            const schedulableQuestionKeys = new Set(lifecycle
-              .filter((result) => result.operationalStatus === "PENDING")
-              .map((result) => result.questionSemanticKey));
-            structuredMissionsToSchedule = plans
-              .filter((plan) => plan.execution === "ADMITTED" && plan.mission !== null
-                && schedulableQuestionKeys.has(plan.questionSemanticKey))
-              .map((plan) => plan.mission!);
-          }
         } catch {
           throw new AsyncJobExecutionError("PERSISTENCE", "STRUCTURED_KNOWLEDGE_PERSISTENCE_FAILED", false);
         }
+        const reconciliation = persisted as KnowledgeReconciliationResult;
+        if (!reconciliation?.revision || reconciliation.revision.status !== "CURRENT") {
+          throw new AsyncJobExecutionError(
+            "PERSISTENCE",
+            "STRUCTURED_KNOWLEDGE_NOT_CURRENT",
+            false,
+          );
+        }
+        knowledgeRevisionId = reconciliation.revision.id;
+        const recovered = await reconcileStructuredKnowledgeMissions({
+          authority,
+          revision: reconciliation.revision,
+          dependencies,
+        });
+        structuredMissionAssignmentRequired = recovered.assignmentRequired;
+        structuredMissions = recovered.plans
+          .filter((plan) => plan.mission !== null)
+          .map((plan) => plan.mission!);
+        const schedulableQuestionKeys = new Set(recovered.lifecycle
+          .filter((result) => result.operationalStatus === "PENDING")
+          .map((result) => result.questionSemanticKey));
+        structuredMissionsToSchedule = recovered.plans
+          .filter((plan) => plan.execution === "ADMITTED" && plan.mission !== null
+            && schedulableQuestionKeys.has(plan.questionSemanticKey))
+          .map((plan) => plan.mission!);
       }
       if (sourceKind === "DOCUMENT_CORPUS") {
         await context.heartbeat();
@@ -769,7 +855,9 @@ export function createFascicoloAutomaticAnalysisHandler(
             missionCount: structuredMissions?.length ?? 0,
             persistenceCode: "CREATED",
             researchJobCount: 0,
-            researchRequirementCode: "EXPLICIT_AUTHORIZATION_REQUIRED",
+            researchRequirementCode: structuredMissionAssignmentRequired
+              ? "ASSIGNMENT_AND_EXPLICIT_AUTHORIZATION_REQUIRED"
+              : "EXPLICIT_AUTHORIZATION_REQUIRED",
           },
         };
       }

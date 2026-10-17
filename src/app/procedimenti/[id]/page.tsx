@@ -72,6 +72,7 @@ import { getFascicoloProcessingItems } from "@/server/queries/neutral-intake-pro
 import { getAiFascicoloHumanReviewReadModel } from "@/server/queries/ai-fascicolo-human-review";
 import { getAiFascicoloTrustedReviewMaterialsReadModel } from "@/server/queries/ai-fascicolo-trusted-review-materials";
 import { getFascicoloIntakeDetail } from "@/server/queries/fascicolo-intake";
+import { getFascicoloAnalysisReadModel } from "@/server/queries/fascicolo-analysis";
 import { listStructuredFascicoloReportSnapshots } from "@/server/fascicolo-report";
 
 import { PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES } from "@/server/queries/procedimenti";
@@ -197,6 +198,9 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
     : null;
   const analysisCorpus = analysisCorpusModel(documentCorpus);
   const automaticWorkflow = await getFascicoloAutomaticWorkflowReadModel(detail.procedimento.id);
+  const structuredAnalysis = activeSection === "analysis"
+    ? await getFascicoloAnalysisReadModel(detail.procedimento.id)
+    : null;
   const legalSourceCandidates = await getFascicoloLegalSourceCandidates(detail.procedimento.id);
   const fascicoloObservations = await getFascicoloObservations(detail.procedimento.id);
   const fascicoloDocumentRequirements = await getFascicoloDocumentRequirementProposals(detail.procedimento.id);
@@ -276,7 +280,10 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           {activeSection === "istruttoria" ? <FascicoloAutomaticWorkflowPanel model={automaticWorkflow} /> : null}
           {activeSection === "analysis" ? (
             <FascicoloAnalysis
-              model={{
+              model={structuredAnalysis ? {
+                ...structuredAnalysis,
+                corpus: analysisCorpus,
+              } : {
                 questions: [],
                 evidence: detail.documentiPrincipali.map((documento) => ({
                   id: documento.id,

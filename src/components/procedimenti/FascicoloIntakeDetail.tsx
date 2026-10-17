@@ -1,7 +1,10 @@
 import { Paperclip } from "lucide-react";
 
 import { FascicoloDocumentsArchive, type FascicoloDocumentArchiveItem } from "@/components/documents/FascicoloDocumentsArchive";
-import { FascicoloAnalysis } from "@/components/procedimenti/FascicoloAnalysis";
+import {
+  FascicoloAnalysis,
+  type FascicoloAnalysisModel,
+} from "@/components/procedimenti/FascicoloAnalysis";
 import { FascicoloConcession } from "@/components/procedimenti/FascicoloConcession";
 import { FascicoloDeadlines } from "@/components/procedimenti/FascicoloDeadlines";
 import { FascicoloIssues } from "@/components/procedimenti/FascicoloIssues";
@@ -24,6 +27,7 @@ interface FascicoloIntakeDetailProps {
   fascicolo: FascicoloIntakeDetailData;
   canUpload: boolean;
   activeSection: FascicoloSection;
+  analysisModel?: FascicoloAnalysisModel | null;
 }
 
 function Value({ label, value }: { label: string; value: string | null | undefined }) {
@@ -66,7 +70,12 @@ function toArchiveItem(documento: FascicoloIntakeDetailData["documenti"][number]
   };
 }
 
-export function FascicoloIntakeDetail({ fascicolo, canUpload, activeSection }: FascicoloIntakeDetailProps) {
+export function FascicoloIntakeDetail({
+  fascicolo,
+  canUpload,
+  activeSection,
+  analysisModel,
+}: FascicoloIntakeDetailProps) {
   const title = fascicolo.denominazioneBreve || fascicolo.oggettoFascicolo;
   const subjects: FascicoloSubject[] = [];
   if (fascicolo.soggettoAssistito) subjects.push({ name: fascicolo.soggettoAssistito, roles: ["Assistito"], category: "principal" });
@@ -250,7 +259,7 @@ export function FascicoloIntakeDetail({ fascicolo, canUpload, activeSection }: F
 
         {activeSection === "analysis" ? (
           <FascicoloAnalysis
-            model={{
+            model={analysisModel ?? {
               questions: [],
               evidence: [],
               contradictions: [],

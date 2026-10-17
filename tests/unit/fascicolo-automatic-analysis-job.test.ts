@@ -449,6 +449,7 @@ describe("automatic fascicolo analysis job", () => {
   it("recovers idempotently after persistence by reusing the current corpus revision", async () => {
     const deps = dependencies({
       getCurrentRevision: vi.fn(async () => currentReconciliation(structuredKnowledge).revision),
+      reconcileKnowledgeMissions: vi.fn(async () => []),
     });
     const result = await createFascicoloAutomaticAnalysisHandler(deps)
       .execute(reference, context());
@@ -743,6 +744,113 @@ describe("automatic fascicolo analysis job", () => {
       .rejects.toMatchObject({ code: "STRUCTURED_KNOWLEDGE_PERSISTENCE_FAILED", retryable: false });
     expect(failedPersistence.persistReport).not.toHaveBeenCalled();
     expect(failedPersistence.persistMission).not.toHaveBeenCalled();
+  });
+
+  it("reports mission reconciliation separately after preserving CURRENT knowledge", async () => {
+    const reconciliation = currentReconciliation(lotto3Knowledge);
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        documents: authority.documents.map((document) => ({
+          ...document,
+          documentoId: "document-1",
+          documentFileVersionId: "file-version-1",
+        })),
+      })),
+      analyze: vi.fn(async () => ({ ...analysis, structuredKnowledge: lotto3Knowledge })),
+      persistKnowledge: vi.fn(async () => reconciliation),
+      reconcileKnowledgeMissions: vi.fn(async () => {
+        throw new Error("foreign key violation");
+      }),
+    });
+
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context()))
+      .rejects.toMatchObject({
+        code: "RESEARCH_MISSION_RECONCILIATION_FAILED",
+        retryable: false,
+      });
+    expect(deps.persistKnowledge).toHaveBeenCalledOnce();
+    expect(deps.persistReport).not.toHaveBeenCalled();
+  });
+
+  it("defers missions when an AUTHORIZED_SYSTEM actor is not a valid tenant user", async () => {
+    const reconciliation = currentReconciliation(lotto3Knowledge);
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        actorId: "system-actor",
+        documents: authority.documents.map((document) => ({
+          ...document,
+          documentoId: "document-1",
+          documentFileVersionId: "file-version-1",
+        })),
+      })),
+      analyze: vi.fn(async () => ({ ...analysis, structuredKnowledge: lotto3Knowledge })),
+      persistKnowledge: vi.fn(async () => reconciliation),
+      resolveMissionAssignee: vi.fn(async () => null),
+      reconcileKnowledgeMissions: vi.fn(async ({
+        assignedActorId,
+        plans,
+      }: {
+        assignedActorId: string | null;
+        plans: readonly KnowledgeResearchMissionPlan[];
+      }) => {
+        expect(assignedActorId).toBeNull();
+        return plans.filter((plan) => plan.mission !== null).map((plan) => ({
+          missionId: plan.mission!.missionId,
+          missionFingerprint: plan.missionFingerprint,
+          questionSemanticKey: plan.questionSemanticKey,
+          outcome: "CREATED" as const,
+          lifecycleStatus: "CURRENT" as const,
+          operationalStatus: "DEFERRED" as const,
+          assignmentStatus: "REQUIRES_ASSIGNMENT" as const,
+        }));
+      }),
+    });
+
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context()))
+      .resolves.toMatchObject({
+        metadata: {
+          missionCount: 1,
+          researchJobCount: 0,
+          researchRequirementCode: "ASSIGNMENT_AND_EXPLICIT_AUTHORIZATION_REQUIRED",
+        },
+      });
+    expect(deps.scheduleMission).not.toHaveBeenCalled();
+  });
+
+  it("reconciles an existing CURRENT revision without invoking the provider again", async () => {
+    const reconciliation = currentReconciliation(lotto3Knowledge);
+    const deps = dependencies({
+      getCurrentRevision: vi.fn(async () => reconciliation.revision),
+      analyze: vi.fn(),
+      resolveMissionAssignee: vi.fn(async () => "user-1"),
+      reconcileKnowledgeMissions: vi.fn(async ({
+        plans,
+      }: {
+        plans: readonly KnowledgeResearchMissionPlan[];
+      }) => plans
+        .filter((plan) => plan.mission !== null)
+        .map((plan) => ({
+          missionId: plan.mission!.missionId,
+          missionFingerprint: plan.missionFingerprint,
+          questionSemanticKey: plan.questionSemanticKey,
+          outcome: "CREATED" as const,
+          lifecycleStatus: "CURRENT" as const,
+          operationalStatus: "PENDING" as const,
+          assignmentStatus: "ASSIGNED" as const,
+        }))),
+    });
+
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context()))
+      .resolves.toMatchObject({
+        referenceId: reconciliation.revision.id,
+        metadata: { persistenceCode: "REUSED", missionCount: 1 },
+      });
+    expect(deps.analyze).not.toHaveBeenCalled();
+    expect(deps.reconcileKnowledgeMissions).toHaveBeenCalledOnce();
   });
 
   it("reuses the same report and mission identities when execution is repeated", async () => {

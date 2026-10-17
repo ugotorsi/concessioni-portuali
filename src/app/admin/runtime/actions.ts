@@ -15,6 +15,7 @@ import {
   provisionDefaultProcedimentoBudgetPolicy,
   readDefaultProcedimentoBudgetAuthorization,
 } from "@/server/runtime/procedimentoBudgetPolicy";
+import { recoverCurrentKnowledgeResearchMissions } from "@/server/fascicolo-knowledge/researchMissionRecovery";
 
 export async function retryRuntimeJob(formData: FormData): Promise<void> {
   await requireRole(["ADMIN"]);
@@ -88,6 +89,61 @@ export async function assignDefaultProcedimentoBudgetPolicy(
       hardCapAmount: authorization.hardCapAmount,
       windowSeconds: authorization.windowSeconds,
       currency: authorization.currency,
+    },
+  });
+  revalidatePath("/admin/runtime");
+  revalidatePath(`/procedimenti/${procedimento.id}`);
+}
+
+export async function recoverCurrentKnowledgeMissions(
+  formData: FormData,
+): Promise<void> {
+  await requireRole(["ADMIN"]);
+  const currentUser = await getCurrentUser();
+  if (!currentUser) throw new Error("AUTHENTICATION_REQUIRED");
+  const procedimentoId = formData.get("procedimentoId");
+  const assignedActorId = formData.get("assignedActorId");
+  if (typeof procedimentoId !== "string" || !procedimentoId.trim()) {
+    throw new Error("INVALID_PROCEDIMENTO_ID");
+  }
+  if (assignedActorId !== null && typeof assignedActorId !== "string") {
+    throw new Error("INVALID_ASSIGNED_ACTOR_ID");
+  }
+  const candidateActorId = assignedActorId?.trim() || null;
+  const procedimento = await prisma.procedimento.findUnique({
+    where: { id: procedimentoId.trim() },
+    select: { id: true, enteId: true },
+  });
+  if (!procedimento?.enteId) throw new Error("PROCEDIMENTO_NOT_FOUND");
+  const tenantContext = await getCurrentTenantContext();
+  if (!tenantContext) throw new Error("TENANT_CONTEXT_REQUIRED");
+  requireTenantAccess(tenantContext, procedimento.enteId, {
+    mode: "write",
+    allowWhenEnteMissing: false,
+  });
+
+  const result = await recoverCurrentKnowledgeResearchMissions({
+    tenantId: procedimento.enteId,
+    procedimentoId: procedimento.id,
+    candidateActorId,
+    requireValidCandidate: candidateActorId !== null,
+  });
+  await auditSuccess({
+    azione: "FASCICOLO_KNOWLEDGE_MISSION_RECOVER",
+    entita: "FascicoloKnowledgeRevision",
+    entitaId: result.revisionId,
+    enteId: procedimento.enteId,
+    actor: {
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+      userRole: currentUser.role,
+    },
+    metadata: {
+      procedimentoId: procedimento.id,
+      missionCount: result.missionCount,
+      assignmentRequired: result.assignmentRequired,
+      assignedActorId: result.assignedActorId,
+      providerCalled: false,
     },
   });
   revalidatePath("/admin/runtime");
