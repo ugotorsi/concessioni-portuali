@@ -16,6 +16,7 @@ export interface StructuredReportResearchResultInput {
   supportDirection: Direction;
   classificationReviewStatus: "AI_PROPOSED" | "HUMAN_CONFIRMED" | "REJECTED";
   classificationRationale: string | null;
+  relevantPassage?: string | null;
   sourceAssessment: {
     assessmentId: string;
     chainFingerprint: string;
@@ -66,7 +67,9 @@ export interface StructuredReportQuestion {
   nonUsableResults: readonly {
     resultId: string;
     title: string;
+    sourceUrl?: string | null;
     direction: Direction;
+    rationale?: string | null;
     reasons: readonly string[];
   }[];
   gaps: readonly string[];
@@ -165,7 +168,12 @@ function projectQuestion(
   const favorableAuthorities = results.filter((result) => usable(result) && result.supportDirection === "SUPPORTS").map(authority);
   const contraryAuthorities = results.filter((result) => usable(result) && result.supportDirection === "OPPOSES").map(authority);
   const nonUsableResults = results.filter((result) => !usable(result) || !["SUPPORTS", "OPPOSES"].includes(result.supportDirection))
-    .map((result) => ({ resultId: result.resultId, title: result.title, direction: result.supportDirection, reasons: nonUsableReasons(result) }));
+    .map((result) => ({
+      resultId: result.resultId, title: result.title, sourceUrl: result.sourceUrl,
+      direction: result.supportDirection,
+      rationale: result.relevantPassage ?? result.classificationRationale,
+      reasons: nonUsableReasons(result),
+    }));
   const gaps = [...new Set([
     ...(mission?.sourceGaps ?? []),
     ...(mission ? [] : ["CURRENT_RESEARCH_MISSION_MISSING"]),
@@ -244,6 +252,10 @@ export function buildStructuredFascicoloReport(input: {
     coverageStatus: mission.coverageStatus,
     results: [...mission.results].sort(byId).map((result) => ({
       resultId: result.resultId,
+      title: result.title,
+      sourceUrl: result.sourceUrl,
+      provider: result.provider,
+      relevantPassage: result.relevantPassage ?? null,
       direction: result.supportDirection,
       reviewStatus: result.classificationReviewStatus,
       rationale: result.classificationRationale,

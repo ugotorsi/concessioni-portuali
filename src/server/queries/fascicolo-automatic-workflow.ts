@@ -141,6 +141,7 @@ export interface FascicoloAutomaticWorkflowReadModel {
       title: string;
       sourceUrl: string | null;
       provider: string | null;
+      relevantPassage: string | null;
       supportDirection: ResearchResultSupportDirection;
       classificationSource: ResearchResultClassificationSource;
       classificationConfidence: number | null;
@@ -586,6 +587,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
           title: result.candidateSnapshot.title ?? result.candidateSnapshot.officialIdentifier ?? "Risultato di ricerca",
           sourceUrl: safeHttpUrl(result.candidateSnapshot.sourceUrl),
           provider: result.candidateSnapshot.providerId ?? result.candidateSnapshot.toolId ?? null,
+          relevantPassage: text(result.candidateSnapshot.relevantPassage),
           supportDirection: result.supportDirection,
           classificationSource: result.classificationSource,
           classificationConfidence: result.classificationConfidence,
@@ -652,6 +654,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
               title: candidate.title ?? candidate.officialIdentifier ?? "Risultato di ricerca contraria",
               sourceUrl: safeHttpUrl(candidate.sourceUrl),
               provider: candidate.providerId ?? candidate.toolId ?? null,
+              relevantPassage: text(candidate.relevantPassage),
               supportDirection: result.supportDirection,
               classificationReviewStatus: result.classificationReviewStatus,
               classificationRationale: result.classificationRationale,

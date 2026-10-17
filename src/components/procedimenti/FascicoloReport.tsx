@@ -105,6 +105,37 @@ function AuthorityGroup({ title, authorities }: { title: string; authorities: re
   );
 }
 
+function UnverifiedCandidateSources({ question }: { question: StructuredReportQuestion }) {
+  const candidates = question.nonUsableResults.filter((candidate) => !candidate.reasons.includes("CLASSIFICATION_REJECTED"));
+  if (candidates.length === 0) return null;
+  return (
+    <section className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3" aria-label="Fonti candidate da verificare">
+      <h5 className="text-sm font-semibold text-amber-950">Fonti individuate — da verificare</h5>
+      <p className="mt-1 text-xs text-amber-900">
+        Risultati preliminari dei connettori: non sono ancora fonti utilizzabili per conclusioni professionali.
+        Devono essere controllati identità, testo, citazioni e applicabilità temporale.
+      </p>
+      <ul className="mt-2 space-y-3">
+        {candidates.map((candidate) => (
+          <li key={candidate.resultId} className="border-t border-amber-200 pt-2 text-sm text-slate-800">
+            <p className="font-medium [overflow-wrap:anywhere]">{candidate.title}</p>
+            {candidate.rationale ? (
+              <p className="mt-1 leading-6 [overflow-wrap:anywhere]">
+                Rilevanza preliminare segnalata, da riscontrare: {candidate.rationale}
+              </p>
+            ) : null}
+            {candidate.sourceUrl ? (
+              <a href={candidate.sourceUrl} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-[#075985] underline underline-offset-4">
+                Apri il documento <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+              </a>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 function ReportContent({ payload }: { payload: StructuredFascicoloReportPayload }) {
   const framework = payload.documentedFramework;
   const frameworkGroups = [
@@ -146,13 +177,21 @@ function ReportContent({ payload }: { payload: StructuredFascicoloReportPayload 
                 <h4 className="font-medium text-slate-950 [overflow-wrap:anywhere]">{issue.text}</h4>
                 {issue.questions.length > 0 ? (
                   <ul className="mt-2 space-y-1.5 text-sm leading-6 text-slate-700">
-                    {issue.questions.map((question) => <li key={question.knowledgeItemId}>{question.text}</li>)}
+                    {issue.questions.map((question) => (
+                      <li key={question.knowledgeItemId}>
+                        <p>{question.text}</p>
+                        <UnverifiedCandidateSources question={question} />
+                      </li>
+                    ))}
                   </ul>
                 ) : null}
               </article>
             ))}
             {payload.unassignedQuestions.map((question) => (
-              <article key={question.knowledgeItemId} className="border-l-2 border-slate-300 pl-4 text-sm leading-6 text-slate-700">{question.text}</article>
+              <article key={question.knowledgeItemId} className="border-l-2 border-slate-300 pl-4 text-sm leading-6 text-slate-700">
+                <p>{question.text}</p>
+                <UnverifiedCandidateSources question={question} />
+              </article>
             ))}
           </div>
         </ContentSection>
@@ -217,7 +256,7 @@ export function FascicoloReport({ snapshots }: { snapshots: readonly FascicoloRe
           <BookOpen className="h-5 w-5 text-[#173d4f]" aria-hidden="true" />
           <h2 id="report-title" className="text-xl font-semibold text-slate-950">Rapporto</h2>
         </div>
-        <p className="mt-1 text-sm text-slate-600">Sintesi professionale strutturata del fascicolo.</p>
+        <p className="mt-1 text-sm text-slate-600">Bozza istruttoria automatica: richiede verifica e validazione professionale.</p>
       </header>
 
       {report ? (

@@ -73,7 +73,7 @@ import { getAiFascicoloHumanReviewReadModel } from "@/server/queries/ai-fascicol
 import { getAiFascicoloTrustedReviewMaterialsReadModel } from "@/server/queries/ai-fascicolo-trusted-review-materials";
 import { getFascicoloIntakeDetail } from "@/server/queries/fascicolo-intake";
 import { getFascicoloAnalysisReadModel } from "@/server/queries/fascicolo-analysis";
-import { listStructuredFascicoloReportSnapshots } from "@/server/fascicolo-report";
+import { listStructuredFascicoloReportSnapshots, persistStructuredFascicoloReport } from "@/server/fascicolo-report";
 
 import { PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES } from "@/server/queries/procedimenti";
 
@@ -206,6 +206,24 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
   const fascicoloDocumentRequirements = await getFascicoloDocumentRequirementProposals(detail.procedimento.id);
   const checklistEvidenceData = await getChecklistEvidenceData(detail.procedimento.id);
   const hasCanonicalTenant = Boolean(detail.canonicalEnteId);
+  // Repair a derived report snapshot that predates connector evidence.
+  // Only an authorized manager triggers archival; repository is fingerprint-idempotent.
+  if (activeSection === "reports" && canReview && detail.canonicalEnteId && automaticWorkflow?.structuredReport) {
+    const draft = automaticWorkflow.structuredReport;
+    const archivedCurrent = automaticWorkflow.structuredReportSnapshots.some((snapshot) =>
+      snapshot.reportFingerprint === draft.reportFingerprint && snapshot.effectiveStatus === "CURRENT"
+    );
+    if (!archivedCurrent) {
+      try {
+        await persistStructuredFascicoloReport(draft);
+      } catch (error) {
+        console.error("structured_report_auto_refresh_failed", {
+          procedimentoId: detail.procedimento.id,
+          error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
+        });
+      }
+    }
+  }
   const structuredReportSnapshots = activeSection === "reports" && detail.canonicalEnteId
     ? await listStructuredFascicoloReportSnapshots({
         tenantId: detail.canonicalEnteId,

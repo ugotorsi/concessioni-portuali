@@ -25,7 +25,10 @@ function payload(): StructuredFascicoloReportPayload {
     reviewStatus: "HUMAN_CONFIRMED" as const, missionId: "mission-1", missionStatus: "COMPLETED", coverageStatus: "COMPLETE",
     favorableAuthorities: [authority("source-favorable", "Consiglio di Stato, sentenza favorevole", "https://example.test/favorevole")],
     contraryAuthorities: [authority("source-contrary", "TAR, sentenza contraria", "https://example.test/contraria")],
-    nonUsableResults: [{ resultId: "blocked", title: "Fonte non verificata", direction: "SUPPORTS" as const, reasons: ["MISSING_FULL_TEXT"] }],
+    nonUsableResults: [{
+      resultId: "blocked", title: "Fonte non verificata", sourceUrl: "https://example.test/candidate",
+      direction: "SUPPORTS" as const, rationale: "Principio provvisorio da verificare", reasons: ["MISSING_FULL_TEXT"],
+    }],
     gaps: ["UNCOVERED_ELEMENT"], limitations: ["NO_USABLE_CONTRARY_AUTHORITY"],
   };
   return {
@@ -56,7 +59,7 @@ describe("Fascicolo report workspace", () => {
   it("renders the professional current report and only available sections", () => {
     const html = render([snapshot("CURRENT")]);
     expect(html).toContain("Rapporto");
-    expect(html).toContain("Sintesi professionale strutturata del fascicolo.");
+    expect(html).toContain("Bozza istruttoria automatica");
     expect(html).toContain("Corrente");
     expect(html).toContain("01/10/2026");
     expect(html).toContain("Quadro del fascicolo");
@@ -74,14 +77,18 @@ describe("Fascicolo report workspace", () => {
     expect(stale).toContain("Il fascicolo contiene modifiche successive alla generazione di questo rapporto.");
   });
 
-  it("shows favorable and contrary usable sources equally and excludes unusable sources", () => {
+  it("shows usable authorities separately from unverified linked candidate sources", () => {
     const html = render([snapshot("CURRENT")]);
     expect(html).toContain("Fonti utilizzabili");
     expect(html).toContain("Elementi favorevoli");
     expect(html).toContain("Elementi contrari");
     expect(html).toContain("Consiglio di Stato, sentenza favorevole");
     expect(html).toContain("TAR, sentenza contraria");
-    expect(html).not.toContain("Fonte non verificata");
+    expect(html).toContain("Fonti individuate");
+    expect(html).toContain("Fonte non verificata");
+    expect(html).toContain("Principio provvisorio da verificare");
+    expect(html).toContain("https://example.test/candidate");
+    expect(html).toContain("non sono ancora fonti utilizzabili");
     expect(html).toContain('target="_blank"');
     expect(html).toContain('rel="noreferrer"');
   });

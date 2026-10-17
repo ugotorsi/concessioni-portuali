@@ -105,8 +105,9 @@ function mission(overrides: Partial<StructuredReportMissionInput> = {}): Structu
     }, {
       resultId: "blocked-result",
       title: "Fonte non utilizzabile",
-      sourceUrl: null,
+      sourceUrl: "https://example.test/candidate",
       provider: null,
+      relevantPassage: "Principio segnalato dal connettore, da riscontrare",
       supportDirection: "SUPPORTS",
       classificationReviewStatus: "AI_PROPOSED",
       classificationRationale: null,
@@ -148,7 +149,12 @@ describe("deterministic structured fascicolo report", () => {
       missionId: "mission-current",
       favorableAuthorities: [{ resultId: "support-result", citationAnchors: [{ page: 4, paragraph: "12" }] }],
       contraryAuthorities: [{ resultId: "oppose-result", citationAnchors: [{ section: "3" }] }],
-      nonUsableResults: [{ resultId: "blocked-result", reasons: ["CITATION_ANCHOR_REQUIRED", "MISSING_FULL_TEXT"] }],
+      nonUsableResults: [{
+        resultId: "blocked-result",
+        sourceUrl: "https://example.test/candidate",
+        rationale: "Principio segnalato dal connettore, da riscontrare",
+        reasons: ["CITATION_ANCHOR_REQUIRED", "MISSING_FULL_TEXT"],
+      }],
       gaps: ["UNCOVERED_ELEMENT"],
     });
     expect(report.payload.limitations).toContain("DEADLINE_CANDIDATES_ARE_NOT_OPERATIONAL_DEADLINES");
