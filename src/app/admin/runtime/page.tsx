@@ -7,8 +7,12 @@ import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDateIT } from "@/lib/utils";
 import { getRuntimeHealthSnapshot } from "@/server/runtime/health";
+import { readDefaultProcedimentoBudgetAuthorization } from "@/server/runtime/procedimentoBudgetPolicy";
 
-import { retryRuntimeJob } from "./actions";
+import {
+  assignDefaultProcedimentoBudgetPolicy,
+  retryRuntimeJob,
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +30,7 @@ function healthLabel(status: string) {
 
 export default async function RuntimeOperationsPage() {
   await requireRole(["ADMIN"]);
+  const defaultProcedimentoBudget = readDefaultProcedimentoBudgetAuthorization();
   const [health, workers, failedJobs, policies, costs] = await Promise.all([
     getRuntimeHealthSnapshot(),
     prisma.runtimeWorkerHeartbeat.findMany({ orderBy: { lastSeenAt: "desc" }, take: 20 }),
@@ -80,6 +85,40 @@ export default async function RuntimeOperationsPage() {
           <CardContent><Table><TableHeader><TableRow><TableHead>Operazione</TableHead><TableHead>Ambito</TableHead><TableHead>Tentativi</TableHead><TableHead>Codice</TableHead><TableHead>Azione</TableHead></TableRow></TableHeader><TableBody>
             {failedJobs.map((job) => <TableRow key={job.id}><TableCell>{job.operation}</TableCell><TableCell>{job.procedimentoId ?? job.tenantId ?? "Globale"}</TableCell><TableCell>{job.attemptCount}</TableCell><TableCell>{job.failureCode ?? "NON_CLASSIFICATO"}</TableCell><TableCell><form action={retryRuntimeJob}><input type="hidden" name="jobId" value={job.id} /><Button size="sm" variant="outline" type="submit">Riprova</Button></form></TableCell></TableRow>)}
           </TableBody></Table></CardContent>
+        </Card>
+      </section>
+
+      <section className="mt-6">
+        <Card>
+          <CardHeader><CardTitle>Budget predefinito per fascicolo</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            {defaultProcedimentoBudget.authorized ? (
+              <>
+                <p className="text-sm text-slate-600">
+                  Autorizzato: {defaultProcedimentoBudget.hardCapAmount} {defaultProcedimentoBudget.currency}
+                  {" "}ogni {defaultProcedimentoBudget.windowSeconds}s. Le policy esistenti non vengono modificate.
+                </p>
+                <form action={assignDefaultProcedimentoBudgetPolicy} className="flex flex-wrap items-end gap-3">
+                  <label className="grid gap-1 text-sm font-medium text-slate-700">
+                    ID procedimento
+                    <input
+                      className="h-10 min-w-80 rounded-md border border-slate-300 px-3 text-sm"
+                      name="procedimentoId"
+                      required
+                    />
+                  </label>
+                  <Button type="submit">Assegna policy mancante</Button>
+                </form>
+              </>
+            ) : (
+              <p className="text-sm text-slate-600">
+                Creazione automatica non autorizzata. Configurare
+                {" "}RUNTIME_PROCEDIMENTO_BUDGET_DEFAULT_ENABLED,
+                {" "}RUNTIME_PROCEDIMENTO_BUDGET_DEFAULT_CAP_EUR e
+                {" "}RUNTIME_PROCEDIMENTO_BUDGET_DEFAULT_WINDOW_SECONDS.
+              </p>
+            )}
+          </CardContent>
         </Card>
       </section>
 

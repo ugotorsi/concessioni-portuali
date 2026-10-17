@@ -1,6 +1,10 @@
 import { createHash } from "node:crypto";
 
 import { runSerializableTransactionWithRetry } from "@/server/db/serializableTransaction";
+import {
+  ensureDefaultProcedimentoBudgetPolicy,
+  type DefaultProcedimentoBudgetAuthorization,
+} from "@/server/runtime/procedimentoBudgetPolicy";
 
 export class FascicoloIntakeActivationError extends Error {
   constructor(message: string) {
@@ -17,6 +21,7 @@ function procedimentoIdForIntake(fascicoloIntakeId: string): string {
 export async function activateFascicoloIntake(input: {
   fascicoloIntakeId: string;
   tenantId: string;
+  budgetAuthorization?: DefaultProcedimentoBudgetAuthorization;
 }) {
   return runSerializableTransactionWithRetry(async (tx) => {
     const intake = await tx.fascicoloIntake.findUnique({
@@ -43,6 +48,11 @@ export async function activateFascicoloIntake(input: {
       if (!existing || existing.enteId !== intake.enteId || existing.concessioneId !== intake.concessioneId) {
         throw new FascicoloIntakeActivationError("Collegamento operativo del fascicolo non coerente.");
       }
+      await ensureDefaultProcedimentoBudgetPolicy({
+        tenantId: intake.enteId,
+        procedimentoId: existing.id,
+        authorization: input.budgetAuthorization,
+      }, tx);
       return { outcome: "REUSED" as const, procedimento: existing };
     }
 
@@ -93,6 +103,12 @@ export async function activateFascicoloIntake(input: {
     if (linked?.procedimentoId !== procedimentoId) {
       throw new FascicoloIntakeActivationError("Attivazione concorrente del fascicolo non coerente.");
     }
+
+    await ensureDefaultProcedimentoBudgetPolicy({
+      tenantId: intake.enteId,
+      procedimentoId,
+      authorization: input.budgetAuthorization,
+    }, tx);
 
     return { outcome: "CREATED" as const, procedimento };
   });

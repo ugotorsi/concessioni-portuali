@@ -14,6 +14,11 @@ const txMock = vi.hoisted(() => ({
   concessione: {
     findUnique: vi.fn(),
   },
+  runtimeBudgetPolicy: {
+    findFirst: vi.fn(),
+    create: vi.fn(),
+  },
+  $queryRawUnsafe: vi.fn(),
 }));
 
 vi.mock("@/server/db/serializableTransaction", () => ({
@@ -45,6 +50,17 @@ describe("activateFascicoloIntake", () => {
       concessioneId: null,
     });
     txMock.fascicoloIntake.updateMany.mockResolvedValue({ count: 1 });
+    txMock.$queryRawUnsafe.mockResolvedValue([{
+      id: "procedimento-intake-6edc1d4728d330745a8b226b",
+      enteId: "ente-1",
+    }]);
+    txMock.runtimeBudgetPolicy.findFirst.mockResolvedValue(null);
+    txMock.runtimeBudgetPolicy.create.mockResolvedValue({
+      id: "policy-1",
+      enabled: true,
+      hardCapAmount: { toString: () => "1.000000" },
+      windowSeconds: 86_400,
+    });
   });
 
   it("attiva senza concessione preservando il fascicolo e senza avviare job o provider", async () => {
@@ -80,6 +96,37 @@ describe("activateFascicoloIntake", () => {
 
     const source = readFileSync("src/server/fascicolo-intake/activation.ts", "utf8");
     expect(source).not.toMatch(/createNeutralIntake|AsyncJob|provider/i);
+  });
+
+  it("crea la policy di procedimento quando il budget predefinito è autorizzato", async () => {
+    await activateFascicoloIntake({
+      fascicoloIntakeId: "intake-1",
+      tenantId: "ente-1",
+      budgetAuthorization: {
+        authorized: true,
+        currency: "EUR",
+        hardCapAmount: "1.000000",
+        windowSeconds: 86_400,
+      },
+    });
+
+    expect(txMock.runtimeBudgetPolicy.create).toHaveBeenCalledWith({
+      data: {
+        scope: "PROCEDIMENTO",
+        tenantId: "ente-1",
+        procedimentoId: "procedimento-intake-6edc1d4728d330745a8b226b",
+        currency: "EUR",
+        hardCapAmount: "1.000000",
+        windowSeconds: 86_400,
+        enabled: true,
+      },
+      select: {
+        id: true,
+        enabled: true,
+        hardCapAmount: true,
+        windowSeconds: true,
+      },
+    });
   });
 
   it("riusa idempotentemente il collegamento esistente", async () => {
