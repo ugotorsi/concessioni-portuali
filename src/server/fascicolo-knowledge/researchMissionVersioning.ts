@@ -188,7 +188,7 @@ export async function versionResearchMissionBudget(input: {
         AND membership."enteId" = $2
       WHERE actor."id" = $1
         AND actor."attivo" = TRUE
-        AND actor."role" = 'ADMIN'
+        AND actor."ruolo" = 'ADMIN'
       LIMIT 1
     `, [input.actor.userId, source.tenantId]);
     if (authorization.rows.length !== 1) {
