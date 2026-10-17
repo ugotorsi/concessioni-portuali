@@ -245,9 +245,9 @@ export function parseApplicationAsyncWorkerConfig(
     procedimentoAllowlist,
     dedicatedMode,
     exitOnIdle: enabled(environment.ASYNC_WORKER_EXIT_ON_IDLE),
-    maxProcessedJobs: environment.ASYNC_WORKER_MAX_PROCESSED_JOBS === undefined
-      ? undefined
-      : boundedInteger(environment.ASYNC_WORKER_MAX_PROCESSED_JOBS, 1, 1, 1),
+    ...(environment.ASYNC_WORKER_MAX_PROCESSED_JOBS === undefined ? {} : {
+      maxProcessedJobs: boundedInteger(environment.ASYNC_WORKER_MAX_PROCESSED_JOBS, 1, 1, 1),
+    }),
     bootstrapTimeWatches: environment.ASYNC_WORKER_BOOTSTRAP_TIME_WATCHES === undefined
       ? true
       : enabled(environment.ASYNC_WORKER_BOOTSTRAP_TIME_WATCHES),
