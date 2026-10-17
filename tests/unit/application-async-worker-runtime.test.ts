@@ -98,6 +98,44 @@ describe("Block 3B.7 application async worker runtime", () => {
     expect(sleep).not.toHaveBeenCalled();
   });
 
+  it("stops immediately after the first scoped analysis job when maxProcessedJobs is one", async () => {
+    applicationWorker.drainOneApplicationAsyncJob.mockResolvedValue({ outcome: "SUCCEEDED", jobId: "job-only" });
+    const events: ApplicationAsyncWorkerEvent[] = [];
+    const runtime = createApplicationAsyncWorkerRuntime(
+      {
+        ...config, concurrency: 1, maxProcessedJobs: 1, dedicatedMode: true,
+        operationAllowlist: ["FASCICOLO.AUTOMATIC_ANALYSIS_V1"],
+        procedimentoAllowlist: ["case-only"], providerExecutionEnabled: true,
+      },
+      { report: (event) => events.push(event) },
+    );
+    await runtime.run();
+    expect(applicationWorker.drainOneApplicationAsyncJob).toHaveBeenCalledOnce();
+    expect(events).toContainEqual(expect.objectContaining({
+      event: "ASYNC_WORKER_SHUTDOWN_REQUESTED", reason: "MAX_PROCESSED_JOBS_REACHED",
+    }));
+  });
+
+  it("requires a single case and operation for the bounded analysis worker", () => {
+    const env = {
+      DATABASE_URL: "postgresql://server/database",
+      ASYNC_PROVIDER_EXECUTION_ENABLED: "true",
+      ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR: "0.250000",
+      ASYNC_COST_RESEARCH_CALL_ESTIMATE_EUR: "0.050000",
+      ASYNC_WORKER_MAX_PROCESSED_JOBS: "1",
+      ASYNC_WORKER_CONCURRENCY: "1",
+      ASYNC_WORKER_DEDICATED_MODE: "true",
+      ASYNC_WORKER_EXIT_ON_IDLE: "true",
+      ASYNC_WORKER_OPERATION_ALLOWLIST: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+      ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST: "case-only",
+    };
+    expect(parseApplicationAsyncWorkerConfig(env).maxProcessedJobs).toBe(1);
+    expect(() => parseApplicationAsyncWorkerConfig({ ...env, ASYNC_WORKER_CONCURRENCY: "2" }))
+      .toThrowError(expect.objectContaining({ code: "INVALID_CONFIGURATION" }));
+    expect(() => parseApplicationAsyncWorkerConfig({ ...env, ASYNC_WORKER_MAX_PROCESSED_JOBS: "2" }))
+      .toThrowError(expect.objectContaining({ code: "INVALID_CONFIGURATION" }));
+  });
+
   it("waits once for a retry scheduled by a one-shot worker", async () => {
     applicationWorker.drainOneApplicationAsyncJob
       .mockResolvedValueOnce({ outcome: "RETRY_SCHEDULED", jobId: "job-retry" })

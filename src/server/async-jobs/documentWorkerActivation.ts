@@ -97,6 +97,7 @@ function activationSpec(kind: DocumentWorkerKind, procedimentoId: string) {
     startCommand: [
       ...common,
       "ASYNC_WORKER_BOOTSTRAP_TIME_WATCHES=false",
+      "ASYNC_WORKER_MAX_PROCESSED_JOBS=1",
       `ASYNC_WORKER_OPERATION_ALLOWLIST=${DOCUMENT_WORKER_OPERATIONS.documentAnalysis}`,
       "ASYNC_PROVIDER_EXECUTION_ENABLED=true",
       "npm run worker:async",

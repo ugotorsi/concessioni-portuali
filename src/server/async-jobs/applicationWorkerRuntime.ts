@@ -25,6 +25,7 @@ export interface ApplicationAsyncWorkerConfig {
   readonly procedimentoAllowlist: readonly string[];
   readonly dedicatedMode: boolean;
   readonly exitOnIdle: boolean;
+  readonly maxProcessedJobs?: number;
   readonly bootstrapTimeWatches: boolean;
   readonly providerExecutionEnabled?: boolean;
 }
@@ -202,6 +203,15 @@ export function parseApplicationAsyncWorkerConfig(
   }
   const operationAllowlist = allowlist(environment.ASYNC_WORKER_OPERATION_ALLOWLIST);
   const procedimentoAllowlist = allowlist(environment.ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST);
+  if (environment.ASYNC_WORKER_MAX_PROCESSED_JOBS !== undefined
+    && (!dedicatedMode || !providerExecutionEnabled
+      || operationAllowlist.length !== 1
+      || operationAllowlist[0] !== "FASCICOLO.AUTOMATIC_ANALYSIS_V1"
+      || procedimentoAllowlist.length !== 1
+      || environment.ASYNC_WORKER_CONCURRENCY !== "1"
+      || !enabled(environment.ASYNC_WORKER_EXIT_ON_IDLE))) {
+    throw new ApplicationAsyncWorkerConfigurationError("INVALID_CONFIGURATION");
+  }
   if (dedicatedMode && (operationAllowlist.length === 0 || procedimentoAllowlist.length === 0)) {
     throw new ApplicationAsyncWorkerConfigurationError("INVALID_CONFIGURATION");
   }
@@ -235,6 +245,9 @@ export function parseApplicationAsyncWorkerConfig(
     procedimentoAllowlist,
     dedicatedMode,
     exitOnIdle: enabled(environment.ASYNC_WORKER_EXIT_ON_IDLE),
+    maxProcessedJobs: environment.ASYNC_WORKER_MAX_PROCESSED_JOBS === undefined
+      ? undefined
+      : boundedInteger(environment.ASYNC_WORKER_MAX_PROCESSED_JOBS, 1, 1, 1),
     bootstrapTimeWatches: environment.ASYNC_WORKER_BOOTSTRAP_TIME_WATCHES === undefined
       ? true
       : enabled(environment.ASYNC_WORKER_BOOTSTRAP_TIME_WATCHES),
@@ -253,6 +266,7 @@ export function createApplicationAsyncWorkerRuntime(
   const setWorkerStatus = dependencies.setWorkerStatus ?? setRuntimeWorkerStatus;
   let running = false;
   let shutdownRequested = false;
+  let processedJobs = 0;
   const shutdownController = new AbortController();
   let resolveShutdown!: () => void;
   const shutdown = new Promise<void>((resolve) => {
@@ -325,6 +339,11 @@ export function createApplicationAsyncWorkerRuntime(
             jobId: result.jobId,
             outcome: result.outcome,
           });
+          processedJobs += 1;
+          if (config.maxProcessedJobs !== undefined && processedJobs >= config.maxProcessedJobs) {
+            requestShutdown("MAX_PROCESSED_JOBS_REACHED");
+            return;
+          }
           if (config.exitOnIdle && result.outcome === "RETRY_SCHEDULED" && !shutdownRequested) {
             await wait(config.retryDelayMs);
           }

@@ -176,6 +176,9 @@ describe("document worker activation", () => {
     expect(body.startCommand).toContain("ASYNC_WORKER_EXIT_ON_IDLE=true");
     expect(body.startCommand).toContain(command);
     expect(body.startCommand).not.toContain("LEGAL_RESEARCH.EXECUTE_V1");
+    if (kind === "DOCUMENT_ANALYSIS") {
+      expect(body.startCommand).toContain("ASYNC_WORKER_MAX_PROCESSED_JOBS=1");
+    }
   });
 
   it("defers a rejected request without exposing credentials", async () => {
