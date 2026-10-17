@@ -214,6 +214,20 @@ export async function getFascicoloAutomaticWorkflowReadModel(
   } catch {
     return null;
   }
+  return getFascicoloAutomaticWorkflowReadModelForTenant({ tenantId, procedimentoId });
+}
+
+/** Trusted backend projection. The procedure's owning tenant is independently verified. */
+export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
+  tenantId: string;
+  procedimentoId: string;
+}): Promise<FascicoloAutomaticWorkflowReadModel | null> {
+  const { tenantId, procedimentoId } = input;
+  const owner = await prisma.procedimento.findUnique({
+    where: { id: procedimentoId },
+    select: { enteId: true },
+  });
+  if (owner?.enteId !== tenantId) return null;
 
   const [reports, structuredReportSnapshots, candidateJobs, missions, historicalMissionCount, historicalResults, knowledge, operationalProposals, documentCorpus] = await Promise.all([
     prisma.automaticFascicoloReport.findMany({

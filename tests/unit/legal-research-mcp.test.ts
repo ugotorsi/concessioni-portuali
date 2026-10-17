@@ -224,8 +224,9 @@ function service(): ResearchMcpService {
 async function protocolHarness(
   mockService = service(),
   actor = principal,
+  onResearchStateChanged?: (scope: { tenantId: string; procedimentoId: string }) => Promise<unknown>,
 ) {
-  const server = createResearchMcpServer(actor, { service: mockService, logger: vi.fn() });
+  const server = createResearchMcpServer(actor, { service: mockService, logger: vi.fn(), onResearchStateChanged });
   const client = new Client({ name: "research-mcp-test", version: "1.0.0" });
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
   await server.connect(serverTransport);
@@ -239,6 +240,34 @@ function structured(result: Awaited<ReturnType<Client["callTool"]>>) {
 
 describe("Block 3B.13C legal research MCP", () => {
   beforeEach(() => vi.clearAllMocks());
+
+  it("refreshes the bound report when the connector stores evidence and completes a mission", async () => {
+    const refresh = vi.fn(async () => "CREATED");
+    const { client } = await protocolHarness(service(), principal, refresh);
+    const submitted = await client.callTool({
+      name: "research_submit_evidence_bundle",
+      arguments: { bundle: evidenceBundle(), claimToken },
+    });
+    expect(submitted.isError).not.toBe(true);
+    expect(refresh).toHaveBeenCalledWith({ tenantId: "tenant-a", procedimentoId: "case-a" });
+    const completed = await client.callTool({
+      name: "research_complete_mission",
+      arguments: { missionId: mission.missionId, executionId: "execution-a", bundleId: "bundle-a", claimToken },
+    });
+    expect(completed.isError).not.toBe(true);
+    expect(refresh).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not falsely fail an accepted evidence write when report generation fails", async () => {
+    const refresh = vi.fn(async () => { throw new Error("DATABASE_ERROR"); });
+    const { client } = await protocolHarness(service(), principal, refresh);
+    const submitted = await client.callTool({
+      name: "research_submit_evidence_bundle",
+      arguments: { bundle: evidenceBundle(), claimToken },
+    });
+    expect(submitted.isError).not.toBe(true);
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
 
   it("initializes and discovers only the bounded tool surface with accurate annotations", async () => {
     const { client } = await protocolHarness();

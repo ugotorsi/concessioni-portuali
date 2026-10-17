@@ -3,6 +3,7 @@ import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import { trustedAssistedEvidenceSchema } from "./assisted-verification";
+import { refreshStructuredReportAfterResearch } from "@/server/fascicolo-report/auto-refresh";
 
 import {
   CONFIRMED_RESEARCH_TOOL_ROLES,
@@ -343,9 +344,12 @@ export type ResearchMcpLogEvent = Readonly<{
 
 export type ResearchMcpLogger = (event: ResearchMcpLogEvent) => void;
 
+export type ResearchReportRefreshScope = Readonly<{ tenantId: string; procedimentoId: string }>;
+
 export type ResearchMcpServerOptions = Readonly<{
   service?: ResearchMcpService;
   logger?: ResearchMcpLogger;
+  onResearchStateChanged?: (scope: ResearchReportRefreshScope) => Promise<unknown>;
 }>;
 
 const defaultService: ResearchMcpService = {
@@ -464,6 +468,26 @@ export function createResearchMcpServer(
 ): McpServer {
   const service = options.service ?? defaultService;
   const logger = options.logger ?? defaultLogger;
+  const refreshReport = options.onResearchStateChanged
+    ?? (options.service ? null : refreshStructuredReportAfterResearch);
+  const refreshAfterWrite = async (mission: ResearchMission, tool: string) => {
+    if (!refreshReport) return;
+    try {
+      await refreshReport({ tenantId: principal.tenantId, procedimentoId: mission.caseReference.caseId });
+    } catch {
+      // Evidence is already committed; avoid reporting a false write failure.
+      // A stale snapshot remains visible until a subsequent refresh succeeds.
+      logger({
+        tool: `${tool}:report_refresh`,
+        tenantId: principal.tenantId,
+        actorId: principal.actorId,
+        missionId: mission.missionId,
+        result: "ERROR",
+        errorCode: "INTERNAL_ERROR",
+        durationMs: 0,
+      });
+    }
+  };
   const server = new McpServer(
     { name: "concessioni-portuali-legal-research", version: RESEARCH_MCP_SERVER_VERSION },
     {
@@ -665,6 +689,7 @@ export function createResearchMcpServer(
         claimToken,
         actor: actor(principal),
       });
+      await refreshAfterWrite(stored.mission, "research_submit_evidence_bundle");
       return {
         outcome: submitted.outcome === "REUSED" ? "DUPLICATE_OR_IDEMPOTENT_SUCCESS" : "CREATED",
         bundleId: submitted.bundle.id,
@@ -707,6 +732,7 @@ export function createResearchMcpServer(
       if (!result.assistedVerificationFingerprint) {
         throw new ResearchPersistenceError("INVALID_ASSISTED_VERIFICATION");
       }
+      await refreshAfterWrite(stored.mission, "research_submit_documentary_evidence");
       return {
         outcome: persisted.outcome === "REUSED" ? "DUPLICATE_OR_IDEMPOTENT_SUCCESS" : "CREATED",
         recordId: persisted.verification.recordId,
@@ -746,6 +772,7 @@ export function createResearchMcpServer(
         disposition,
         reasonCode,
       });
+      await refreshAfterWrite(current.mission, "research_defer_mission");
       return {
         missionId: stored.mission.missionId,
         fascicoloScopeId: scope.scopeId,
@@ -778,6 +805,7 @@ export function createResearchMcpServer(
         claimToken,
         actor: actor(principal),
       });
+      await refreshAfterWrite(current.mission, "research_complete_mission");
       return {
         outcome: completed.outcome,
         missionId: completed.mission.mission.missionId,
