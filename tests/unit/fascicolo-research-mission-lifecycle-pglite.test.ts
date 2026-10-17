@@ -12,8 +12,14 @@ import {
   type ResearchMissionLifecycleSqlExecutor,
 } from "@/server/fascicolo-knowledge";
 import { createResearchMission, RESEARCH_BRIDGE_VERSION } from "@/server/legal-research/bridge";
+import {
+  versionResearchMissionBudget,
+  type ResearchMissionVersioningContext,
+  type ResearchMissionVersioningSqlExecutor,
+} from "@/server/fascicolo-knowledge/researchMissionVersioning";
 
 const migration = readFileSync(path.join(process.cwd(), "prisma", "migrations", "20260929_fascicolo_research_mission_lifecycle", "migration.sql"), "utf8");
+const versioningMigration = readFileSync(path.join(process.cwd(), "prisma", "migrations", "20261017_research_mission_versioning", "migration.sql"), "utf8");
 const databases: PGlite[] = [];
 
 function executor(sql: { query<T>(query: string, params?: unknown[]): Promise<{ rows: T[] }> }): ResearchMissionLifecycleSqlExecutor {
@@ -27,6 +33,20 @@ function context(db: PGlite): ResearchMissionLifecycleContext {
   };
 }
 
+function versioningContext(
+  db: PGlite,
+  audits: unknown[],
+): ResearchMissionVersioningContext {
+  return {
+    transaction: <T>(operation: (tx: ResearchMissionVersioningSqlExecutor) => Promise<T>) => db.transaction((tx) => operation({
+      query: (query, params = []) => tx.query(query, [...params]),
+      audit: async (input) => {
+        audits.push(input);
+      },
+    })),
+  };
+}
+
 async function database() {
   const db = new PGlite();
   databases.push(db);
@@ -34,6 +54,12 @@ async function database() {
     CREATE TYPE "ResearchMissionStatus" AS ENUM ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'BUDGET_EXHAUSTED', 'DEFERRED', 'REJECTED');
     CREATE TABLE "FascicoloKnowledgeRevision" (
       "id" TEXT PRIMARY KEY, "tenantId" TEXT NOT NULL, "procedimentoId" TEXT NOT NULL, "status" TEXT NOT NULL
+    );
+    CREATE TABLE "User" (
+      "id" TEXT PRIMARY KEY, "attivo" BOOLEAN NOT NULL, "role" TEXT NOT NULL
+    );
+    CREATE TABLE "TenantMembership" (
+      "userId" TEXT NOT NULL, "enteId" TEXT NOT NULL, PRIMARY KEY ("userId", "enteId")
     );
     CREATE TABLE "ResearchMissionRecord" (
       "id" VARCHAR(96) PRIMARY KEY,
@@ -68,6 +94,9 @@ async function database() {
     );
   `);
   await db.exec(migration);
+  await db.exec(versioningMigration);
+  await db.query('INSERT INTO "User" ("id", "attivo", "role") VALUES ($1, TRUE, \'ADMIN\')', ["admin-1"]);
+  await db.query('INSERT INTO "TenantMembership" ("userId", "enteId") VALUES ($1, $2)', ["admin-1", "tenant-1"]);
   return db;
 }
 
@@ -89,7 +118,7 @@ function plan(fingerprint: string, questionSemanticKey = "q".repeat(64), caseId 
     knownCounterArguments: [],
     knownEvidenceGaps: [],
     requiredOutput: { authorityCandidates: true, citationObservations: false, legalResearchSuggestions: false, evidenceGaps: true, fullTextRequired: false },
-    budget: { maxTotalResearchCalls: 2, maxMoonlitCalls: 1, maxSimpliciterCalls: 1, maxLegalDataHunterCalls: 0 },
+    budget: { maxTotalResearchCalls: 6, maxMoonlitCalls: 2, maxSimpliciterCalls: 2, maxLegalDataHunterCalls: 2 },
     status: "PENDING",
     executionPlan: { requiredCapabilities: ["SEMANTIC_DISCOVERY"] },
   });
@@ -184,6 +213,7 @@ describe("Lotto 3 research mission lifecycle on PGlite", () => {
       operationalStatus: "DEFERRED",
       assignmentStatus: "REQUIRES_ASSIGNMENT",
     });
+
     expect(assigned[0]).toMatchObject({
       outcome: "REUSED",
       operationalStatus: "PENDING",
@@ -211,6 +241,151 @@ describe("Lotto 3 research mission lifecycle on PGlite", () => {
       status: "PENDING",
       deferredAt: null,
     }]);
+  });
+
+  it("creates one traceable budget version and keeps reconciliation on the new current mission", async () => {
+    const db = await database();
+    const ctx = context(db);
+    const audits: unknown[] = [];
+    await setCurrent(db, "revision-versioned");
+    const plans = [plan("9".repeat(64))];
+    const [original] = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-versioned",
+      assignedActorId: "actor-1",
+      plans,
+    }, ctx);
+    const budget = {
+      maxTotalResearchCalls: 8,
+      maxMoonlitCalls: 2,
+      maxSimpliciterCalls: 2,
+      maxLegalDataHunterCalls: 6,
+    } as const;
+
+    const created = await versionResearchMissionBudget({
+      sourceMissionId: original.missionId,
+      budget,
+      reason: "Adeguamento autorizzato per registrare le ricerche gia svolte.",
+      actor: { userId: "admin-1", userEmail: "admin@example.test", userRole: "ADMIN" },
+    }, versioningContext(db, audits));
+    const repeated = await versionResearchMissionBudget({
+      sourceMissionId: original.missionId,
+      budget,
+      reason: "Adeguamento autorizzato per registrare le ricerche gia svolte.",
+      actor: { userId: "admin-1", userEmail: "admin@example.test", userRole: "ADMIN" },
+    }, versioningContext(db, audits));
+
+    expect(created.outcome).toBe("CREATED");
+    expect(created.mission.missionId).not.toBe(original.missionId);
+    expect(created.mission.budget).toEqual(budget);
+    expect(repeated).toMatchObject({
+      outcome: "REUSED",
+      previousMissionId: original.missionId,
+      mission: { missionId: created.mission.missionId },
+    });
+    const rows = await db.query<{
+      id: string;
+      assignedActorId: string;
+      lifecycleStatus: string;
+      missionFingerprint: string;
+      knowledgeRevisionId: string;
+      researchQuestionSemanticKey: string;
+      payload: { budget: typeof budget };
+    }>(`
+      SELECT "id", "assignedActorId", "lifecycleStatus", "missionFingerprint",
+        "knowledgeRevisionId", "researchQuestionSemanticKey", "payload"
+      FROM "ResearchMissionRecord"
+      ORDER BY "createdAt", "id"
+    `);
+    expect(rows.rows).toHaveLength(2);
+    expect(rows.rows.find((row) => row.id === original.missionId)).toMatchObject({
+      assignedActorId: "actor-1",
+      lifecycleStatus: "HISTORICAL",
+      missionFingerprint: "9".repeat(64),
+      knowledgeRevisionId: "revision-versioned",
+      researchQuestionSemanticKey: "q".repeat(64),
+      payload: {
+        budget: {
+          maxTotalResearchCalls: 6,
+          maxMoonlitCalls: 2,
+          maxSimpliciterCalls: 2,
+          maxLegalDataHunterCalls: 2,
+        },
+      },
+    });
+    expect(rows.rows.find((row) => row.id === created.mission.missionId)).toMatchObject({
+      assignedActorId: "actor-1",
+      lifecycleStatus: "CURRENT",
+      missionFingerprint: "9".repeat(64),
+      knowledgeRevisionId: "revision-versioned",
+      researchQuestionSemanticKey: "q".repeat(64),
+      payload: { budget },
+    });
+    expect(audits).toHaveLength(1);
+    expect(audits[0]).toMatchObject({
+      azione: "RESEARCH_MISSION_BUDGET_VERSION_CREATED",
+      entitaId: created.mission.missionId,
+      enteId: "tenant-1",
+      metadata: {
+        previousMissionId: original.missionId,
+        missionId: created.mission.missionId,
+        knowledgeRevisionId: "revision-versioned",
+      },
+    });
+
+    const [reconciled] = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-versioned",
+      assignedActorId: "actor-1",
+      plans,
+    }, ctx);
+    expect(reconciled).toMatchObject({
+      outcome: "REUSED",
+      missionId: created.mission.missionId,
+      lifecycleStatus: "CURRENT",
+    });
+    const count = await db.query<{ count: number }>('SELECT count(*)::int AS count FROM "ResearchMissionRecord"');
+    expect(count.rows[0].count).toBe(2);
+  });
+
+  it("rejects versioning by an administrator without membership in the mission tenant", async () => {
+    const db = await database();
+    const ctx = context(db);
+    const audits: unknown[] = [];
+    await setCurrent(db, "revision-forbidden");
+    const [original] = await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-forbidden",
+      assignedActorId: "actor-1",
+      plans: [plan("8".repeat(64))],
+    }, ctx);
+    await db.query('INSERT INTO "User" ("id", "attivo", "role") VALUES ($1, TRUE, \'ADMIN\')', ["admin-without-tenant"]);
+
+    await expect(versionResearchMissionBudget({
+      sourceMissionId: original.missionId,
+      budget: {
+        maxTotalResearchCalls: 8,
+        maxMoonlitCalls: 2,
+        maxSimpliciterCalls: 2,
+        maxLegalDataHunterCalls: 6,
+      },
+      reason: "Tentativo amministrativo privo della necessaria membership tenant.",
+      actor: { userId: "admin-without-tenant", userEmail: "admin@example.test", userRole: "ADMIN" },
+    }, versioningContext(db, audits))).rejects.toMatchObject({
+      code: "TENANT_ACCESS_DENIED",
+    });
+
+    const missions = await db.query<{ id: string; lifecycleStatus: string }>(
+      'SELECT "id", "lifecycleStatus" FROM "ResearchMissionRecord"',
+    );
+    expect(missions.rows).toEqual([{
+      id: original.missionId,
+      lifecycleStatus: "CURRENT",
+    }]);
+    expect(audits).toHaveLength(0);
   });
 
   it("reuses an invariant fingerprint and creates a new CURRENT mission while preserving the historical bundle when assumptions change", async () => {

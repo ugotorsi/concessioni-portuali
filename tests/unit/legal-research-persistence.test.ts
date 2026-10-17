@@ -224,6 +224,9 @@ function createHarness() {
       if (where.fascicoloReference !== undefined) {
         values = values.filter((item) => item.fascicoloReference === where.fascicoloReference);
       }
+      if (where.lifecycleStatus !== undefined) {
+        values = values.filter((item) => item.lifecycleStatus === where.lifecycleStatus);
+      }
       if (where.status?.in) values = values.filter((item) => where.status.in.includes(item.status));
       if (where.OR) {
         values = values.filter((item) => ["PENDING", "DEFERRED"].includes(item.status)
@@ -239,6 +242,7 @@ function createHarness() {
         ...data,
         fascicoloReference: data.fascicoloReference ?? null,
         status: "PENDING",
+        lifecycleStatus: "CURRENT",
         stateVersion: 0,
         claimantId: null,
         claimToken: null,
@@ -844,6 +848,146 @@ describe("Block 3B.13B research mission persistence", () => {
       simpliciterCalls: 3,
       legalDataHunterCalls: 1,
     });
+  });
+
+  it("registers all eight ChatGPT-mediated calls and recovered sources without declaring full completion", async () => {
+    const harness = createHarness();
+    const { mission, claimed } = await createAndClaim(harness, {
+      budget: {
+        maxTotalResearchCalls: 8,
+        maxMoonlitCalls: 2,
+        maxSimpliciterCalls: 2,
+        maxLegalDataHunterCalls: 6,
+      },
+    });
+
+    Object.assign(harness.missions.get(mission.missionId)!, {
+      missionFingerprint: "f".repeat(64),
+      legalIssueSemanticKey: "i".repeat(64),
+      researchQuestionSemanticKey: "q".repeat(64),
+    });
+    const executions = [
+      ...Array.from({ length: 6 }, (_, index) => ({
+        ...toolExecution("LEGAL_DATA_HUNTER"),
+        executionRecordId: `ldh-call-${index + 1}`,
+        resultIdentifiersUsed: [`ldh-result-${index + 1}`],
+        resultCount: 1,
+      })),
+      ...Array.from({ length: 2 }, (_, index) => ({
+        ...toolExecution("SIMPLICITER"),
+        executionRecordId: `simpliciter-call-${index + 1}`,
+        resultIdentifiersUsed: [`simpliciter-result-${index + 1}`],
+        resultCount: 1,
+      })),
+    ];
+    const source = createAuthorityCandidate({
+      kind: "AUTHORITY_CANDIDATE",
+      executionRecordId: "ldh-call-1",
+      toolId: "LEGAL_DATA_HUNTER",
+      providerId: "LEGAL_DATA_HUNTER",
+      title: "Fonte recuperata da sottoporre a verifica",
+      sourceUrl: "https://official.example.test/source-1",
+      providerDocumentId: "ldh-result-1",
+      supportDirection: "UNKNOWN",
+      sourceFamily: "GIUSTIZIA_AMMINISTRATIVA",
+      retrievalMethod: "SEMANTIC_SEARCH",
+      fullTextAvailable: false,
+      verificationState: "OFFICIAL_VERIFICATION_REQUIRED",
+    });
+    const bundle: ResearchEvidenceBundle = {
+      ...evidenceBundle(mission, "execution-1", "BUDGET_EXHAUSTED", executions),
+      authorityCandidates: [source],
+      evidenceGaps: [{
+        gapId: "temporal-validity-source-1",
+        kind: "TEMPORAL_VALIDITY_NOT_RESOLVED",
+        targetId: source.candidateId,
+      }],
+      unresolvedQuestions: ["Verificare vigenza e validita temporale della fonte."],
+    };
+
+    expect(validateResearchEvidenceBundle(mission, bundle)).toEqual([]);
+    const submitted = await submitResearchEvidenceBundle({
+      bundle,
+      claimantId: "chat-session-1",
+      claimToken: claimed.claim.claimToken,
+      actor,
+    }, harness.context);
+    const completed = await completeResearchMission({
+      missionId: mission.missionId,
+      executionId: "execution-1",
+      bundleId: submitted.bundle.id,
+      claimantId: "chat-session-1",
+      claimToken: claimed.claim.claimToken,
+      actor,
+    }, harness.context);
+
+    expect(bundle.researchToolExecutions).toHaveLength(8);
+    expect(harness.attempts.get("execution-1")).toMatchObject({
+      totalCalls: 8,
+      moonlitCalls: 0,
+      simpliciterCalls: 2,
+      legalDataHunterCalls: 6,
+      completionState: "BUDGET_EXHAUSTED",
+    });
+    expect(completed.mission.operational.status).toBe("BUDGET_EXHAUSTED");
+    expect(harness.persistQuestionResults).toHaveBeenCalledWith({
+      missionId: mission.missionId,
+      bundleId: submitted.bundle.id,
+      candidates: [source],
+    });
+  });
+
+  it("lists only the current version and rejects a direct claim of the historical mission", async () => {
+    const harness = createHarness();
+    const historical = researchMission({
+      researchQuestion: "Quale disciplina si applica alla versione storica?",
+      budget: {
+        maxTotalResearchCalls: 6,
+        maxMoonlitCalls: 2,
+        maxSimpliciterCalls: 2,
+        maxLegalDataHunterCalls: 2,
+      },
+    });
+    const current = researchMission({
+      researchQuestion: "Quale disciplina si applica alla versione storica?",
+      budget: {
+        maxTotalResearchCalls: 8,
+        maxMoonlitCalls: 2,
+        maxSimpliciterCalls: 2,
+        maxLegalDataHunterCalls: 6,
+      },
+    });
+    await createResearchMissionRecord({ mission: historical, actor }, harness.context);
+    await createResearchMissionRecord({ mission: current, actor }, harness.context);
+    harness.missions.get(historical.missionId)!.lifecycleStatus = "HISTORICAL";
+
+    const pending = await listPendingResearchMissions(actor, harness.context);
+    expect(pending.map((item) => item.mission.missionId)).toEqual([current.missionId]);
+    expect(harness.missionDelegate.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ lifecycleStatus: "CURRENT" }),
+    }));
+    await expect(claimResearchMission({
+      missionId: historical.missionId,
+      executionId: "historical-claim",
+      executor: { kind: "CHATGPT", claimantId: "chat-session-1" },
+      actor,
+      leaseDurationMs: 60_000,
+    }, harness.context)).rejects.toMatchObject({ code: "INVALID_TRANSITION" });
+    expect(harness.attempts.has("historical-claim")).toBe(false);
+
+    await claimResearchMission({
+      missionId: current.missionId,
+      executionId: "current-claim",
+      executor: { kind: "CHATGPT", claimantId: "chat-session-1" },
+      actor,
+      leaseDurationMs: 60_000,
+    }, harness.context);
+    expect(harness.missionDelegate.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({
+        id: current.missionId,
+        lifecycleStatus: "CURRENT",
+      }),
+    }));
   });
 
   it("rejects a call-budget overrun", async () => {

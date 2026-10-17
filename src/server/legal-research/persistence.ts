@@ -787,6 +787,7 @@ export async function listPendingResearchMissions(
     where: {
       tenantId: actor.tenantId,
       assignedActorId: identifier(actor.actorId),
+      lifecycleStatus: "CURRENT",
       OR: [
         { status: { in: ["PENDING", "DEFERRED"] } },
         { status: "IN_PROGRESS", claimExpiresAt: { lte: now } },
@@ -802,7 +803,8 @@ function leaseMatches(
   input: Readonly<{ executionId: string; claimantId: string; claimToken: string }>,
   now: Date,
 ): boolean {
-  return mission.status === "IN_PROGRESS"
+  return mission.lifecycleStatus === "CURRENT"
+    && mission.status === "IN_PROGRESS"
     && mission.activeExecutionId === input.executionId
     && mission.claimantId === input.claimantId
     && mission.claimToken === input.claimToken
@@ -864,6 +866,9 @@ export async function claimResearchMission(
     const current = await tx.researchMissionRecord.findUnique({ where: { id: missionId } });
     if (!current) throw new ResearchPersistenceError("MISSION_NOT_FOUND");
     authorize(current, input.actor);
+    if (current.lifecycleStatus !== "CURRENT") {
+      throw new ResearchPersistenceError("INVALID_TRANSITION");
+    }
     await requirePreClaimDocumentaryEvidence(missionFrom(current), input.actor, { ...ctx, client: tx });
     const now = ctx.clock.now();
     if (["COMPLETED", "BUDGET_EXHAUSTED", "REJECTED"].includes(current.status)) {
@@ -889,7 +894,12 @@ export async function claimResearchMission(
     const token = claimToken(ctx.claimToken());
     const expiresAt = new Date(now.getTime() + duration);
     const transitioned = await tx.researchMissionRecord.updateMany({
-      where: { id: missionId, stateVersion: current.stateVersion, status: current.status },
+      where: {
+        id: missionId,
+        stateVersion: current.stateVersion,
+        status: current.status,
+        lifecycleStatus: "CURRENT",
+      },
       data: {
         status: "IN_PROGRESS",
         stateVersion: { increment: 1 },

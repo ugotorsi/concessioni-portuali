@@ -2715,7 +2715,7 @@ model ResearchMissionRecord {
   @@index([tenantId, status, createdAt], map: "research_mission_tenant_status_idx")
   @@index([status, claimExpiresAt, createdAt], map: "research_mission_claim_queue_idx")
   @@index([caseId, createdAt], map: "research_mission_case_idx")
-  @@unique([tenantId, caseId, missionFingerprint], map: "research_mission_knowledge_fingerprint_uq")
+  @@index([tenantId, caseId, missionFingerprint], map: "research_mission_knowledge_fingerprint_idx")
   @@index([tenantId, caseId, lifecycleStatus], map: "research_mission_lifecycle_idx")
   @@index([knowledgeRevisionId], map: "research_mission_knowledge_revision_idx")
   @@index([firstKnowledgeRevisionId], map: "research_mission_first_knowledge_revision_idx")

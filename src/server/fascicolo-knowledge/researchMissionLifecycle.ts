@@ -79,6 +79,7 @@ export async function reconcileKnowledgeResearchMissions(input: {
       }>(`
         SELECT "id", "status", "assignedActorId" FROM "ResearchMissionRecord"
         WHERE "tenantId" = $1 AND "caseId" = $2 AND "missionFingerprint" = $3
+          AND "lifecycleStatus" = 'CURRENT'
         FOR UPDATE
       `, [input.tenantId, input.procedimentoId, plan.missionFingerprint]);
       let outcome: "CREATED" | "REUSED";
