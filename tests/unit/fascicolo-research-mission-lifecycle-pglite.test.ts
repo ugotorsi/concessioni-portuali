@@ -56,7 +56,7 @@ async function database() {
       "id" TEXT PRIMARY KEY, "tenantId" TEXT NOT NULL, "procedimentoId" TEXT NOT NULL, "status" TEXT NOT NULL
     );
     CREATE TABLE "User" (
-      "id" TEXT PRIMARY KEY, "attivo" BOOLEAN NOT NULL, "role" TEXT NOT NULL
+      "id" TEXT PRIMARY KEY, "attivo" BOOLEAN NOT NULL, "ruolo" TEXT NOT NULL
     );
     CREATE TABLE "TenantMembership" (
       "userId" TEXT NOT NULL, "enteId" TEXT NOT NULL, PRIMARY KEY ("userId", "enteId")
@@ -95,7 +95,7 @@ async function database() {
   `);
   await db.exec(migration);
   await db.exec(versioningMigration);
-  await db.query('INSERT INTO "User" ("id", "attivo", "role") VALUES ($1, TRUE, \'ADMIN\')', ["admin-1"]);
+  await db.query('INSERT INTO "User" ("id", "attivo", "ruolo") VALUES ($1, TRUE, \'ADMIN\')', ["admin-1"]);
   await db.query('INSERT INTO "TenantMembership" ("userId", "enteId") VALUES ($1, $2)', ["admin-1", "tenant-1"]);
   return db;
 }
@@ -362,7 +362,7 @@ describe("Lotto 3 research mission lifecycle on PGlite", () => {
       assignedActorId: "actor-1",
       plans: [plan("8".repeat(64))],
     }, ctx);
-    await db.query('INSERT INTO "User" ("id", "attivo", "role") VALUES ($1, TRUE, \'ADMIN\')', ["admin-without-tenant"]);
+    await db.query('INSERT INTO "User" ("id", "attivo", "ruolo") VALUES ($1, TRUE, \'ADMIN\')', ["admin-without-tenant"]);
 
     await expect(versionResearchMissionBudget({
       sourceMissionId: original.missionId,

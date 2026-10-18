@@ -74,6 +74,7 @@ const mission = {
 const missionRecord = {
   id: missionId,
   tenantId,
+  assignedActorId: actorId,
   caseId: mission.caseReference.caseId,
   fascicoloReference: mission.caseReference.fascicoloReference,
   payload: mission,
@@ -153,5 +154,26 @@ describe("trusted mission route integration", () => {
     expect(payload.result?.structuredContent?.assistedVerification).toBeNull();
     expect(JSON.stringify(payload)).not.toContain(bearer);
     expect(JSON.stringify(payload)).not.toContain("fg1.");
+  });
+
+  it.each([
+    { assignedActorId: "other-actor" },
+    { assignedActorId: null },
+    { tenantId: "other-tenant" },
+  ])("does not expose a mission outside the authorized assignment: %j", async (override) => {
+    missionFindUniqueMock.mockResolvedValue({ ...missionRecord, ...override });
+    const response = await trustedMissionPost(new Request(
+      "https://staging.example.test/api/legal-research/trusted/mission",
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${bearer}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ missionId }),
+      },
+    ));
+    const payload: unknown = await response.json();
+    expect(JSON.stringify(payload)).not.toContain(mission.researchQuestion);
+    expect(JSON.stringify(payload)).not.toContain(missionRecord.payloadFingerprint);
+    expect(assistedFindFirstMock).not.toHaveBeenCalled();
+    expect(response.status === 403 || JSON.stringify(payload).includes("MISSION_NOT_VISIBLE")).toBe(true);
   });
 });

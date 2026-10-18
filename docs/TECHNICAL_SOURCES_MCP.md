@@ -63,20 +63,21 @@ Then revert the Prisma model and back-relations. The PGlite test `tests/unit/tec
 
 All automated tests use mocked transport and identity. No AI provider is involved.
 
-## Validation of the Stytch M2M correction (2026-10-18)
+## Final acceptance and publication checks (2026-10-18)
 
 - Technical-sources acceptance tests: 20/20 across five files, including the exact token endpoint, JSON request body, response validation, API authorization, UI and isolated migration.
 - TypeScript (`tsc --noEmit --incremental false`) and production build passed; the build used a synthetic, process-local `NEXTAUTH_SECRET`, with no deployed secret changes.
-- Full serial app suite (`vitest run --maxWorkers=1`): 3618 passed, 16 failed, 5 skipped (3639 total).
-- The six failing files were rerun from an isolated archive of base commit `388439885f5dfcd1b362be7aa32b7f376a79e930`, with the same dependencies. All 16 failed test identities and their error classes/messages match the integration run. No new failures were introduced. This does not make the full suite green or prove that the affected workflows are operational.
+- Final full serial app suite (`vitest run --maxWorkers=1`): **3642 passed, 0 failed, 5 skipped** (3647 total).
+- MCP: **35/35 passed**, including separate cryptographic acceptance/rejection of M2M and Connected App tokens; syntax checks passed.
+- Previously, the six failing files were rerun from base commit `388439885f5dfcd1b362be7aa32b7f376a79e930`, with the same dependencies. All 16 failed test identities and error classes/messages matched the integration run. They were not waived: the following corrections close every failure.
 
-| Test file | Failures | Evidence and acceptance impact |
+| Test file | Previous failures | Correction and acceptance evidence |
 | --- | ---: | --- |
-| `fascicolo-document-requirement-ui.test.ts` | 10 | Assertions inspect the old upload form implementation; the form now delegates to `DirectDocumentUploadForm` with `REQUIREMENT_EVIDENCE`. Direct-upload tests (9/9) and requirement-upload tests (30/30) pass. These static assertions are stale, not evidence of a broken M2M or upload operation. |
-| `fascicolo-timeline-workspace.test.ts` | 1 | Static assertion expects the removed overview fragment `model.timeline.slice(0, 3)`; all five timeline-rendering tests pass. Not a blocker for M2M. |
-| `async-job-worker.test.ts` | 1 | Expected result metadata omits the explicit normalized `referenceVersion: null`; the other 18 worker tests pass. No worker activation is part of this release. |
-| `fascicolo-research-mission-lifecycle-pglite.test.ts` | 2 | Fixture defines `User.role`, while the real Prisma schema and authorization query use `User.ruolo`. The SQL error prevents both positive versioning and tenant-denial assertions from being exercised. Acceptance of these essential lifecycle controls remains blocked. |
-| `research-assisted-verification-pglite.test.ts` | 1 | Fixture persistence drops `assignedActorId`, causing `AUTHORIZATION_REQUIRED` before the reviewer journey. This is not an `actor.ruolo` error. End-to-end reviewer acceptance remains blocked. |
-| `trusted-research-mission-integration.test.ts` | 1 | Mock mission omits `assignedActorId`, causing the existing ownership check to return `MISSION_NOT_VISIBLE`. Trusted mission end-to-end acceptance remains blocked. |
+| `fascicolo-document-requirement-ui.test.ts` | 10 | Assertions now follow delegation to `DirectDocumentUploadForm` with `REQUIREMENT_EVIDENCE`, including the hidden proposal ID. Inspection also found real upload defects: missing synchronous double-submit guard, operation ID not reset after small-upload success, absent small-upload success feedback, and raw storage errors exposed for requirement evidence. These are fixed, with controls disabled while pending. Five new behavioral tests exercise small and large uploads, retries, concurrent submissions, neutral success, sanitized failures and the unchanged general-document path using mocked transport. All 91 UI tests, 9 direct-upload service tests and 30 requirement-upload tests pass. |
+| `fascicolo-timeline-workspace.test.ts` | 1 | Removed-overview assertion replaced with the actual Cronologia navigation contract; existing assertions still verify both legacy/intake consumers and the five rendering/order/deduplication/empty-state scenarios. All 6 pass. |
+| `async-job-worker.test.ts` | 1 | Expected bounded result metadata now includes normalized `referenceVersion: null`. All 19 worker tests pass; no worker was activated. |
+| `fascicolo-research-mission-lifecycle-pglite.test.ts` | 2 | Fixture uses the real `User.ruolo` column. All 10 tests pass, including traceable versioning, reconciliation to the new CURRENT mission and rejection of an administrator without tenant membership. Application authorization is unchanged. |
+| `research-assisted-verification-pglite.test.ts` | 1 | Fixture applies the real actor-binding migration to disposable PGlite and persists `assignedActorId`. The journey now explicitly denies another user in the same tenant (GET and POST 403), then uses the assigned reviewer for positive operations. Source attestations remain unchanged on append/correction; cross-tenant/role denials, stale-write conflicts, append-only persistence and pre-claim evidence gates all pass. |
+| `trusted-research-mission-integration.test.ts` | 1 | Mock mission includes its assigned actor. Real trusted transport/grant/MCP handler integration passes; three additional negative cases deny another actor, no assignment and another tenant without disclosing the mission or loading assisted verification. |
 
-The four mission/reviewer failures are pre-existing test-fixture defects, not demonstrated runtime defects, but they cannot be waived as harmless: those essential workflows are **not fully certified** until the fixtures are corrected and the positive and negative paths pass. They are outside the narrowly scoped Stytch M2M correction and were not changed here.
+No real credentials, live AI providers or staging database writes were used. Automated acceptance and an automatically generated Vercel Preview do not replace an authorized application-level staging rehearsal.
