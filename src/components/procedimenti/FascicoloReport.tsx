@@ -136,6 +136,73 @@ function UnverifiedCandidateSources({ question }: { question: StructuredReportQu
   );
 }
 
+function OperationalPlans({ plans }: { plans: NonNullable<StructuredFascicoloReportPayload["operationalPlans"]> }) {
+  if (plans.length === 0) return null;
+  return (
+    <ContentSection title="Percorsi operativi da valutare">
+      <p className="mb-4 text-sm leading-6 text-amber-900">
+        Ipotesi istruttorie preliminari, non pareri conclusivi né atti autorizzati. Il professionista deve
+        verificare titolo, fonti, competenza e termini, quindi scegliere e approvare ogni iniziativa.
+      </p>
+      <div className="space-y-5">
+        {plans.map((plan) => (
+          <article key={plan.issueSemanticKey} className="rounded-lg border border-slate-200 bg-white p-4">
+            <h4 className="font-semibold text-slate-950">{plan.issueText}</h4>
+            <p className="mt-2 text-sm text-slate-700">{plan.recommendedNextStep}</p>
+            <p className="mt-2 text-xs font-medium text-amber-900">
+              {plan.legalSourceStatus === "LEGAL_RESEARCH_REQUIRED"
+                ? "Normativa e giurisprudenza ancora da verificare"
+                : "Fonti collegate: verificare pertinenza e applicabilità prima di procedere"}
+            </p>
+            {plan.outstandingEvidence.length > 0 ? (
+              <div className="mt-3">
+                <h5 className="text-sm font-semibold text-slate-900">Documenti e fatti mancanti</h5>
+                <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700">
+                  {plan.outstandingEvidence.map((gap) => <li key={gap}>{gap}</li>)}
+                </ul>
+              </div>
+            ) : null}
+            <div className="mt-4">
+              <h5 className="text-sm font-semibold text-slate-900">Come procedere</h5>
+              <ol className="mt-2 space-y-3">
+                {plan.steps.map((step) => (
+                  <li key={step.title} className="rounded-md bg-slate-50 p-3">
+                    <p className="text-sm font-semibold text-slate-950">{step.title}</p>
+                    <p className="mt-1 text-sm leading-6 text-slate-700">{step.action}</p>
+                    <p className="mt-2 text-xs text-slate-600">Interlocutore: {step.office}</p>
+                    <p className="mt-1 text-xs font-semibold text-slate-700">Documenti necessari</p>
+                    <ul className="mt-1 list-disc pl-5 text-xs leading-5 text-slate-700">
+                      {step.requiredDocuments.map((document) => <li key={document}>{document}</li>)}
+                    </ul>
+                    <p className="mt-2 text-xs text-slate-600">Condizione per proseguire: {step.completionGate}</p>
+                  </li>
+                ))}
+              </ol>
+            </div>
+            <div className="mt-4">
+              <h5 className="text-sm font-semibold text-slate-900">Alternative giuridico-operative</h5>
+              <div className="mt-2 space-y-3">
+                {plan.alternatives.map((alternative) => (
+                  <div key={alternative.title} className="border-l-2 border-[#0b7285] pl-3">
+                    <p className="text-sm font-semibold text-slate-950">{alternative.title}</p>
+                    <p className="mt-1 text-sm text-slate-700">Quando: {alternative.whenApplicable}</p>
+                    <p className="mt-1 text-sm text-slate-700">Percorso: {alternative.practicalRoute}</p>
+                    <p className="mt-1 text-sm text-amber-900">Rischio: {alternative.riskOrLimit}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <p className="mt-4 text-sm text-slate-700">{plan.deadlineReview}</p>
+            {plan.sourceDocumentRefs.length > 0 ? (
+              <p className="mt-2 text-xs text-slate-500">Riferimenti documentali: {plan.sourceDocumentRefs.join(", ")}</p>
+            ) : null}
+          </article>
+        ))}
+      </div>
+    </ContentSection>
+  );
+}
+
 function ReportContent({ payload }: { payload: StructuredFascicoloReportPayload }) {
   const framework = payload.documentedFramework;
   const frameworkGroups = [
@@ -205,6 +272,8 @@ function ReportContent({ payload }: { payload: StructuredFascicoloReportPayload 
           </div>
         </ContentSection>
       ) : null}
+
+      {payload.operationalPlans?.length ? <OperationalPlans plans={payload.operationalPlans} /> : null}
 
       {framework.contradictions.length > 0 ? <ContentSection title="Criticità"><TextList items={framework.contradictions} /></ContentSection> : null}
 
