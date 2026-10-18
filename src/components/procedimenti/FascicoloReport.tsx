@@ -136,7 +136,7 @@ function UnverifiedCandidateSources({ question }: { question: StructuredReportQu
   );
 }
 
-function OperationalPlans({ plans }: { plans: NonNullable<StructuredFascicoloReportPayload["operationalPlans"]> }) {
+export function OperationalPlans({ plans }: { plans: NonNullable<StructuredFascicoloReportPayload["operationalPlans"]> }) {
   if (plans.length === 0) return null;
   return (
     <ContentSection title="Percorsi operativi da valutare">
