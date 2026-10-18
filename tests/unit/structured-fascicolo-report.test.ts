@@ -144,6 +144,16 @@ describe("deterministic structured fascicolo report", () => {
     });
 
     expect(report.payload.documentedFramework.facts.map((fact) => fact.id)).toEqual(["fact-1"]);
+    expect(report.payload.operationalPlans).toHaveLength(1);
+    expect(report.payload.operationalPlans?.[0]).toMatchObject({
+      issueSemanticKey: sha("issue-1"),
+      legalSourceStatus: "VERIFIED_SOURCES_ATTACHED",
+      professionalStatus: "PRELIMINARY_NOT_APPROVED",
+    });
+    expect(report.payload.operationalPlans?.[0].steps).toHaveLength(3);
+    expect(report.payload.operationalPlans?.[0].alternatives.length).toBeGreaterThan(1);
+    expect(report.payload.operationalPlans?.[0].steps[0].requiredDocuments.length).toBeGreaterThan(0);
+
     expect(report.payload.legalIssues).toHaveLength(1);
     expect(report.payload.legalIssues[0].questions[0]).toMatchObject({
       missionId: "mission-current",
