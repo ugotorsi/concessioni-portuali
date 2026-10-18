@@ -22,7 +22,10 @@ function item(id: string, kind: StructuredKnowledgeReadItem["kind"], status: Str
     confidence: 90,
     status,
     reviewVersion: 1,
-    evidence: [{ basisRef: "DOCUMENT_1.PAGE_1", documentoId: "document-1", documentFileVersionId: "version-1", pageNumber: 1, textSha256: sha("e") }],
+    evidence: [
+      { basisRef: "DOCUMENT_1.PAGE_1", documentoId: "document-1", documentFileVersionId: "version-1", pageNumber: 1, textSha256: sha("e") },
+      { basisRef: null, documentoId: "document-1", documentFileVersionId: "version-1", pageNumber: 1, textSha256: sha("e") },
+    ],
   };
 }
 
@@ -147,6 +150,7 @@ describe("deterministic structured fascicolo report", () => {
     expect(report.payload.operationalPlans).toHaveLength(1);
     expect(report.payload.operationalPlans?.[0]).toMatchObject({
       issueSemanticKey: sha("issue-1"),
+      sourceDocumentRefs: ["DOCUMENT_1.PAGE_1"],
       legalSourceStatus: "VERIFIED_SOURCES_ATTACHED",
       professionalStatus: "PRELIMINARY_NOT_APPROVED",
     });

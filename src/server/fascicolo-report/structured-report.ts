@@ -242,7 +242,9 @@ function buildOperationalPlans(
     const originIds = new Set(issue.originatingItemIds);
     const related = evidenceItems.filter((item) => originIds.has(item.id));
     const sourceDocumentRefs = [...new Set(related.flatMap((item) =>
-      item.evidence.map((evidence) => evidence.basisRef)))].sort();
+      item.evidence
+        .map((evidence) => evidence.basisRef)
+        .filter((basisRef): basisRef is string => basisRef !== null)))].sort();
     const outstandingEvidence = knowledge.gaps.filter((item) =>
       item.status !== "REJECTED" && originIds.has(item.id))
       .map((item) => item.normalizedText).sort();
