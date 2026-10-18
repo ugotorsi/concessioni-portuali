@@ -10,6 +10,7 @@ import {
   succeedAsyncJob,
 } from "./persistence";
 import { asyncJobHandlerRegistry, type AsyncJobHandlerRegistry } from "./registry";
+import { AsyncJobInputError, normalizeAsyncJobResultMetadata } from "./domain";
 
 export class AsyncJobExecutionError extends Error {
   constructor(
@@ -164,7 +165,16 @@ async function executeClaimedAsyncJob(
     await finalizeAsyncJobCancellation(lease());
     return { outcome: "CANCELLED", jobId: claimed.id };
   }
-  await succeedAsyncJob({ ...lease(), resultReference: result ?? {} });
+  let normalizedResult: ReturnType<typeof normalizeAsyncJobResultMetadata>;
+  try {
+    normalizedResult = normalizeAsyncJobResultMetadata(result ?? {});
+  } catch (error) {
+    if (error instanceof AsyncJobInputError) {
+      return failDispatch("VALIDATION", "INVALID_RESULT_REFERENCE");
+    }
+    throw error;
+  }
+  await succeedAsyncJob({ ...lease(), resultReference: normalizedResult });
   return { outcome: "SUCCEEDED", jobId: claimed.id };
 }
 
