@@ -4,6 +4,7 @@ import {
   FascicoloResearchSources,
   type FascicoloResearchSource,
 } from "@/components/procedimenti/FascicoloResearch";
+import { TechnicalSourcesResearchPanel } from "@/components/procedimenti/TechnicalSourcesResearchPanel";
 
 export interface FascicoloAnalysisQuestion {
   id: string;
@@ -83,7 +84,13 @@ function Meta({ label, value }: { label: string; value: string | null | undefine
   return <span className="text-xs text-slate-600"><span className="font-medium text-slate-700">{label}:</span> {text}</span>;
 }
 
-export function FascicoloAnalysis({ model }: { model: FascicoloAnalysisModel }) {
+export function FascicoloAnalysis({
+  model,
+  technicalResearchProcedureId,
+}: {
+  model: FascicoloAnalysisModel;
+  technicalResearchProcedureId?: string;
+}) {
   const hasStructuredAnalysis = model.questions.length > 0
     || model.contradictions.length > 0
     || model.gaps.length > 0
@@ -274,6 +281,9 @@ export function FascicoloAnalysis({ model }: { model: FascicoloAnalysisModel }) 
           ) : null}
         </>
       )}
+      {technicalResearchProcedureId ? (
+        <TechnicalSourcesResearchPanel procedimentoId={technicalResearchProcedureId} variant="analysis" />
+      ) : null}
     </section>
   );
 }

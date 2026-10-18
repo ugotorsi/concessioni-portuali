@@ -562,6 +562,7 @@ export type ProcedimentoWhereInput = {
   asyncJobs?: Prisma.AsyncJobListRelationFilter
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptListRelationFilter
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyListRelationFilter
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordListRelationFilter
   runtimeCostReservations?: Prisma.RuntimeCostReservationListRelationFilter
 }
 
@@ -637,6 +638,7 @@ export type ProcedimentoOrderByWithRelationInput = {
   asyncJobs?: Prisma.AsyncJobOrderByRelationAggregateInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptOrderByRelationAggregateInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyOrderByRelationAggregateInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordOrderByRelationAggregateInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationOrderByRelationAggregateInput
 }
 
@@ -716,6 +718,7 @@ export type ProcedimentoWhereUniqueInput = Prisma.AtLeast<{
   asyncJobs?: Prisma.AsyncJobListRelationFilter
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptListRelationFilter
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyListRelationFilter
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordListRelationFilter
   runtimeCostReservations?: Prisma.RuntimeCostReservationListRelationFilter
 }, "id" | "id_enteId">
 
@@ -892,6 +895,7 @@ export type ProcedimentoCreateInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -964,6 +968,7 @@ export type ProcedimentoUncheckedCreateInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -1036,6 +1041,7 @@ export type ProcedimentoUpdateInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -1108,6 +1114,7 @@ export type ProcedimentoUncheckedUpdateInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -1715,6 +1722,20 @@ export type ProcedimentoUpdateOneRequiredWithoutFascicoloSignalsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProcedimentoUpdateToOneWithWhereWithoutFascicoloSignalsInput, Prisma.ProcedimentoUpdateWithoutFascicoloSignalsInput>, Prisma.ProcedimentoUncheckedUpdateWithoutFascicoloSignalsInput>
 }
 
+export type ProcedimentoCreateNestedOneWithoutTechnicalSourceResearchRecordsInput = {
+  create?: Prisma.XOR<Prisma.ProcedimentoCreateWithoutTechnicalSourceResearchRecordsInput, Prisma.ProcedimentoUncheckedCreateWithoutTechnicalSourceResearchRecordsInput>
+  connectOrCreate?: Prisma.ProcedimentoCreateOrConnectWithoutTechnicalSourceResearchRecordsInput
+  connect?: Prisma.ProcedimentoWhereUniqueInput
+}
+
+export type ProcedimentoUpdateOneRequiredWithoutTechnicalSourceResearchRecordsNestedInput = {
+  create?: Prisma.XOR<Prisma.ProcedimentoCreateWithoutTechnicalSourceResearchRecordsInput, Prisma.ProcedimentoUncheckedCreateWithoutTechnicalSourceResearchRecordsInput>
+  connectOrCreate?: Prisma.ProcedimentoCreateOrConnectWithoutTechnicalSourceResearchRecordsInput
+  upsert?: Prisma.ProcedimentoUpsertWithoutTechnicalSourceResearchRecordsInput
+  connect?: Prisma.ProcedimentoWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProcedimentoUpdateToOneWithWhereWithoutTechnicalSourceResearchRecordsInput, Prisma.ProcedimentoUpdateWithoutTechnicalSourceResearchRecordsInput>, Prisma.ProcedimentoUncheckedUpdateWithoutTechnicalSourceResearchRecordsInput>
+}
+
 export type ProcedimentoCreateNestedOneWithoutFascicoloObservationsInput = {
   create?: Prisma.XOR<Prisma.ProcedimentoCreateWithoutFascicoloObservationsInput, Prisma.ProcedimentoUncheckedCreateWithoutFascicoloObservationsInput>
   connectOrCreate?: Prisma.ProcedimentoCreateOrConnectWithoutFascicoloObservationsInput
@@ -1995,6 +2016,7 @@ export type ProcedimentoCreateWithoutEnteInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -2066,6 +2088,7 @@ export type ProcedimentoUncheckedCreateWithoutEnteInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -2214,6 +2237,7 @@ export type ProcedimentoCreateWithoutConcessioneInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -2285,6 +2309,7 @@ export type ProcedimentoUncheckedCreateWithoutConcessioneInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -2382,6 +2407,7 @@ export type ProcedimentoCreateWithoutCriticitaInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -2453,6 +2479,7 @@ export type ProcedimentoUncheckedCreateWithoutCriticitaInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -2550,6 +2577,7 @@ export type ProcedimentoCreateWithoutFascicoloIntakeInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -2621,6 +2649,7 @@ export type ProcedimentoUncheckedCreateWithoutFascicoloIntakeInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -2708,6 +2737,7 @@ export type ProcedimentoUpdateWithoutFascicoloIntakeInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -2779,6 +2809,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloIntakeInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -2850,6 +2881,7 @@ export type ProcedimentoCreateWithoutResponsabileAssignmentsInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -2921,6 +2953,7 @@ export type ProcedimentoUncheckedCreateWithoutResponsabileAssignmentsInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -3008,6 +3041,7 @@ export type ProcedimentoUpdateWithoutResponsabileAssignmentsInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -3079,6 +3113,7 @@ export type ProcedimentoUncheckedUpdateWithoutResponsabileAssignmentsInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -3150,6 +3185,7 @@ export type ProcedimentoCreateWithoutDocumentiInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -3221,6 +3257,7 @@ export type ProcedimentoUncheckedCreateWithoutDocumentiInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -3308,6 +3345,7 @@ export type ProcedimentoUpdateWithoutDocumentiInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -3379,6 +3417,7 @@ export type ProcedimentoUncheckedUpdateWithoutDocumentiInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -3450,6 +3489,7 @@ export type ProcedimentoCreateWithoutDocumentExtractionAttemptsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutProcedimentoInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -3521,6 +3561,7 @@ export type ProcedimentoUncheckedCreateWithoutDocumentExtractionAttemptsInput = 
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutProcedimentoInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -3608,6 +3649,7 @@ export type ProcedimentoUpdateWithoutDocumentExtractionAttemptsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutProcedimentoNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -3679,6 +3721,7 @@ export type ProcedimentoUncheckedUpdateWithoutDocumentExtractionAttemptsInput = 
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutProcedimentoNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -3750,6 +3793,7 @@ export type ProcedimentoCreateWithoutNeutralIntakeDestinationsInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -3821,6 +3865,7 @@ export type ProcedimentoUncheckedCreateWithoutNeutralIntakeDestinationsInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -3908,6 +3953,7 @@ export type ProcedimentoUpdateWithoutNeutralIntakeDestinationsInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -3979,6 +4025,7 @@ export type ProcedimentoUncheckedUpdateWithoutNeutralIntakeDestinationsInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -4050,6 +4097,7 @@ export type ProcedimentoCreateWithoutAsyncJobsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -4121,6 +4169,7 @@ export type ProcedimentoUncheckedCreateWithoutAsyncJobsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -4208,6 +4257,7 @@ export type ProcedimentoUpdateWithoutAsyncJobsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -4279,6 +4329,7 @@ export type ProcedimentoUncheckedUpdateWithoutAsyncJobsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -4350,6 +4401,7 @@ export type ProcedimentoCreateWithoutRuntimeBudgetPoliciesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutProcedimentoInput
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -4421,6 +4473,7 @@ export type ProcedimentoUncheckedCreateWithoutRuntimeBudgetPoliciesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutProcedimentoInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -4508,6 +4561,7 @@ export type ProcedimentoUpdateWithoutRuntimeBudgetPoliciesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutProcedimentoNestedInput
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -4579,6 +4633,7 @@ export type ProcedimentoUncheckedUpdateWithoutRuntimeBudgetPoliciesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutProcedimentoNestedInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -4651,6 +4706,7 @@ export type ProcedimentoCreateWithoutRuntimeCostReservationsInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoUncheckedCreateWithoutRuntimeCostReservationsInput = {
@@ -4722,6 +4778,7 @@ export type ProcedimentoUncheckedCreateWithoutRuntimeCostReservationsInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
 export type ProcedimentoCreateOrConnectWithoutRuntimeCostReservationsInput = {
@@ -4809,6 +4866,7 @@ export type ProcedimentoUpdateWithoutRuntimeCostReservationsInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoUncheckedUpdateWithoutRuntimeCostReservationsInput = {
@@ -4880,6 +4938,7 @@ export type ProcedimentoUncheckedUpdateWithoutRuntimeCostReservationsInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
 export type ProcedimentoCreateWithoutFascicoloSignalsInput = {
@@ -4950,6 +5009,7 @@ export type ProcedimentoCreateWithoutFascicoloSignalsInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -5021,6 +5081,7 @@ export type ProcedimentoUncheckedCreateWithoutFascicoloSignalsInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -5108,6 +5169,7 @@ export type ProcedimentoUpdateWithoutFascicoloSignalsInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -5170,6 +5232,311 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloSignalsInput = {
   aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutProcedimentoNestedInput
   aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutProcedimentoNestedInput
   neutralIntakeDestinations?: Prisma.NeutralIntakeDestinationUncheckedUpdateManyWithoutProcedimentoNestedInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutProcedimentoNestedInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutProcedimentoNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutProcedimentoNestedInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutProcedimentoNestedInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedUpdateManyWithoutProcedimentoNestedInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutProcedimentoNestedInput
+  asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
+}
+
+export type ProcedimentoCreateWithoutTechnicalSourceResearchRecordsInput = {
+  id?: string
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
+  tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento?: $Enums.OrigineProcedimento
+  procedimentoUfficio?: boolean
+  riferimentoNormativo?: string | null
+  dataAvvio?: Date | string | null
+  dataScadenzaContraddittorio?: Date | string | null
+  dataProvvedimentoFinale?: Date | string | null
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: Date | string | null
+  termineMemorieGiorni?: number | null
+  termineMemorieScadenza?: Date | string | null
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: Date | string | null
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: Date | string | null
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: Date | string | null
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: string | null
+  propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Date | string | null
+  termineOsservazioniPreavviso?: Date | string | null
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: Date | string | null
+  valutazioneOsservazioniPreavviso?: string | null
+  motivazioneMancatoPreavviso?: string | null
+  checklistProfile?: $Enums.ChecklistProfile
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: string | null
+  stato: $Enums.StatoProcedimento
+  noteIstruttorie?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  ente: Prisma.EnteCreateNestedOneWithoutProcedimentiInput
+  concessione?: Prisma.ConcessioneCreateNestedOneWithoutProcedimentiInput
+  fascicoloIntake?: Prisma.FascicoloIntakeCreateNestedOneWithoutProcedimentoInput
+  criticita?: Prisma.CriticitaCreateNestedOneWithoutProcedimentiInput
+  decisioneProcedimento?: Prisma.DecisioneProcedimentoCreateNestedOneWithoutProcedimentoInput
+  responsabileAssignments?: Prisma.ProcedimentoResponsabileAssignmentCreateNestedManyWithoutProcedimentoInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutProcedimentoInput
+  normaImpatti?: Prisma.NormaImpattoCreateNestedManyWithoutProcedimentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutProcedimentoInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutProcedimentoInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutProcedimentoInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutProcedimentoInput
+  neutralIntakeDestinations?: Prisma.NeutralIntakeDestinationCreateNestedManyWithoutProcedimentoInput
+  fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutProcedimentoInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutProcedimentoInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutProcedimentoInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutProcedimentoInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutProcedimentoInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotCreateNestedManyWithoutProcedimentoInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutProcedimentoInput
+  asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
+}
+
+export type ProcedimentoUncheckedCreateWithoutTechnicalSourceResearchRecordsInput = {
+  id?: string
+  enteId: string
+  concessioneId?: string | null
+  criticitaId?: string | null
+  responsabileProcedimentoNome?: string | null
+  responsabileProcedimentoEmail?: string | null
+  unitaOrganizzativaResponsabile?: string | null
+  responsabileAssegnatoAt?: Date | string | null
+  tipologia: $Enums.TipologiaProcedimento
+  origineProcedimento?: $Enums.OrigineProcedimento
+  procedimentoUfficio?: boolean
+  riferimentoNormativo?: string | null
+  dataAvvio?: Date | string | null
+  dataScadenzaContraddittorio?: Date | string | null
+  dataProvvedimentoFinale?: Date | string | null
+  comunicazioneAvvioInviata?: boolean
+  dataComunicazioneAvvio?: Date | string | null
+  termineMemorieGiorni?: number | null
+  termineMemorieScadenza?: Date | string | null
+  memorieRicevute?: boolean
+  dataRicezioneMemorie?: Date | string | null
+  audizioneRichiesta?: boolean
+  audizioneSvolta?: boolean
+  dataAudizione?: Date | string | null
+  sopralluogoIstruttorioSvolto?: boolean
+  contestazioneFormaleInviata?: boolean
+  dataContestazioneFormale?: Date | string | null
+  controdeduzioniValutate?: boolean
+  motivazioneValutazione?: string | null
+  propostaEsitoIstruttorio?: $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: boolean
+  statoPreavvisoRigetto?: $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Date | string | null
+  termineOsservazioniPreavviso?: Date | string | null
+  osservazioniPreavvisoRicevute?: boolean
+  dataOsservazioniPreavviso?: Date | string | null
+  valutazioneOsservazioniPreavviso?: string | null
+  motivazioneMancatoPreavviso?: string | null
+  checklistProfile?: $Enums.ChecklistProfile
+  checklistContraddittorioCompleta?: boolean
+  noteChecklistContraddittorio?: string | null
+  stato: $Enums.StatoProcedimento
+  noteIstruttorie?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  fascicoloIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedOneWithoutProcedimentoInput
+  decisioneProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedOneWithoutProcedimentoInput
+  responsabileAssignments?: Prisma.ProcedimentoResponsabileAssignmentUncheckedCreateNestedManyWithoutProcedimentoInput
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutProcedimentoInput
+  normaImpatti?: Prisma.NormaImpattoUncheckedCreateNestedManyWithoutProcedimentoInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutProcedimentoInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutProcedimentoInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutProcedimentoInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutProcedimentoInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutProcedimentoInput
+  neutralIntakeDestinations?: Prisma.NeutralIntakeDestinationUncheckedCreateNestedManyWithoutProcedimentoInput
+  fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutProcedimentoInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutProcedimentoInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutProcedimentoInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutProcedimentoInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutProcedimentoInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedCreateNestedManyWithoutProcedimentoInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutProcedimentoInput
+  asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
+}
+
+export type ProcedimentoCreateOrConnectWithoutTechnicalSourceResearchRecordsInput = {
+  where: Prisma.ProcedimentoWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProcedimentoCreateWithoutTechnicalSourceResearchRecordsInput, Prisma.ProcedimentoUncheckedCreateWithoutTechnicalSourceResearchRecordsInput>
+}
+
+export type ProcedimentoUpsertWithoutTechnicalSourceResearchRecordsInput = {
+  update: Prisma.XOR<Prisma.ProcedimentoUpdateWithoutTechnicalSourceResearchRecordsInput, Prisma.ProcedimentoUncheckedUpdateWithoutTechnicalSourceResearchRecordsInput>
+  create: Prisma.XOR<Prisma.ProcedimentoCreateWithoutTechnicalSourceResearchRecordsInput, Prisma.ProcedimentoUncheckedCreateWithoutTechnicalSourceResearchRecordsInput>
+  where?: Prisma.ProcedimentoWhereInput
+}
+
+export type ProcedimentoUpdateToOneWithWhereWithoutTechnicalSourceResearchRecordsInput = {
+  where?: Prisma.ProcedimentoWhereInput
+  data: Prisma.XOR<Prisma.ProcedimentoUpdateWithoutTechnicalSourceResearchRecordsInput, Prisma.ProcedimentoUncheckedUpdateWithoutTechnicalSourceResearchRecordsInput>
+}
+
+export type ProcedimentoUpdateWithoutTechnicalSourceResearchRecordsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checklistProfile?: Prisma.EnumChecklistProfileFieldUpdateOperationsInput | $Enums.ChecklistProfile
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
+  noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ente?: Prisma.EnteUpdateOneRequiredWithoutProcedimentiNestedInput
+  concessione?: Prisma.ConcessioneUpdateOneWithoutProcedimentiNestedInput
+  fascicoloIntake?: Prisma.FascicoloIntakeUpdateOneWithoutProcedimentoNestedInput
+  criticita?: Prisma.CriticitaUpdateOneWithoutProcedimentiNestedInput
+  decisioneProcedimento?: Prisma.DecisioneProcedimentoUpdateOneWithoutProcedimentoNestedInput
+  responsabileAssignments?: Prisma.ProcedimentoResponsabileAssignmentUpdateManyWithoutProcedimentoNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutProcedimentoNestedInput
+  normaImpatti?: Prisma.NormaImpattoUpdateManyWithoutProcedimentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutProcedimentoNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutProcedimentoNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutProcedimentoNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutProcedimentoNestedInput
+  neutralIntakeDestinations?: Prisma.NeutralIntakeDestinationUpdateManyWithoutProcedimentoNestedInput
+  fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutProcedimentoNestedInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutProcedimentoNestedInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutProcedimentoNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutProcedimentoNestedInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutProcedimentoNestedInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUpdateManyWithoutProcedimentoNestedInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutProcedimentoNestedInput
+  asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
+}
+
+export type ProcedimentoUncheckedUpdateWithoutTechnicalSourceResearchRecordsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  enteId?: Prisma.StringFieldUpdateOperationsInput | string
+  concessioneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  criticitaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileProcedimentoEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unitaOrganizzativaResponsabile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responsabileAssegnatoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tipologia?: Prisma.EnumTipologiaProcedimentoFieldUpdateOperationsInput | $Enums.TipologiaProcedimento
+  origineProcedimento?: Prisma.EnumOrigineProcedimentoFieldUpdateOperationsInput | $Enums.OrigineProcedimento
+  procedimentoUfficio?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  riferimentoNormativo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dataAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataScadenzaContraddittorio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataProvvedimentoFinale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  comunicazioneAvvioInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataComunicazioneAvvio?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineMemorieGiorni?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  termineMemorieScadenza?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  memorieRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataRicezioneMemorie?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  audizioneRichiesta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  audizioneSvolta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataAudizione?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sopralluogoIstruttorioSvolto?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contestazioneFormaleInviata?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataContestazioneFormale?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  controdeduzioniValutate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  motivazioneValutazione?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propostaEsitoIstruttorio?: Prisma.NullableEnumEsitoIstruttorioProcedimentoFieldUpdateOperationsInput | $Enums.EsitoIstruttorioProcedimento | null
+  preavvisoRigettoApplicabile?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  statoPreavvisoRigetto?: Prisma.EnumStatoPreavvisoRigettoFieldUpdateOperationsInput | $Enums.StatoPreavvisoRigetto
+  dataPreavvisoRigetto?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termineOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  osservazioniPreavvisoRicevute?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataOsservazioniPreavviso?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  valutazioneOsservazioniPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  motivazioneMancatoPreavviso?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checklistProfile?: Prisma.EnumChecklistProfileFieldUpdateOperationsInput | $Enums.ChecklistProfile
+  checklistContraddittorioCompleta?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteChecklistContraddittorio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stato?: Prisma.EnumStatoProcedimentoFieldUpdateOperationsInput | $Enums.StatoProcedimento
+  noteIstruttorie?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fascicoloIntake?: Prisma.FascicoloIntakeUncheckedUpdateOneWithoutProcedimentoNestedInput
+  decisioneProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateOneWithoutProcedimentoNestedInput
+  responsabileAssignments?: Prisma.ProcedimentoResponsabileAssignmentUncheckedUpdateManyWithoutProcedimentoNestedInput
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutProcedimentoNestedInput
+  normaImpatti?: Prisma.NormaImpattoUncheckedUpdateManyWithoutProcedimentoNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutProcedimentoNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutProcedimentoNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutProcedimentoNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutProcedimentoNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutProcedimentoNestedInput
+  neutralIntakeDestinations?: Prisma.NeutralIntakeDestinationUncheckedUpdateManyWithoutProcedimentoNestedInput
+  fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutProcedimentoNestedInput
   fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutProcedimentoNestedInput
@@ -5250,6 +5617,7 @@ export type ProcedimentoCreateWithoutFascicoloObservationsInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -5321,6 +5689,7 @@ export type ProcedimentoUncheckedCreateWithoutFascicoloObservationsInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -5408,6 +5777,7 @@ export type ProcedimentoUpdateWithoutFascicoloObservationsInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -5479,6 +5849,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloObservationsInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -5550,6 +5921,7 @@ export type ProcedimentoCreateWithoutChecklistEvidenceInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -5621,6 +5993,7 @@ export type ProcedimentoUncheckedCreateWithoutChecklistEvidenceInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -5708,6 +6081,7 @@ export type ProcedimentoUpdateWithoutChecklistEvidenceInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -5779,6 +6153,7 @@ export type ProcedimentoUncheckedUpdateWithoutChecklistEvidenceInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -5850,6 +6225,7 @@ export type ProcedimentoCreateWithoutDocumentRequirementProposalsInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -5921,6 +6297,7 @@ export type ProcedimentoUncheckedCreateWithoutDocumentRequirementProposalsInput 
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -6008,6 +6385,7 @@ export type ProcedimentoUpdateWithoutDocumentRequirementProposalsInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -6079,6 +6457,7 @@ export type ProcedimentoUncheckedUpdateWithoutDocumentRequirementProposalsInput 
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -6150,6 +6529,7 @@ export type ProcedimentoCreateWithoutDecisioneProcedimentoInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -6221,6 +6601,7 @@ export type ProcedimentoUncheckedCreateWithoutDecisioneProcedimentoInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -6308,6 +6689,7 @@ export type ProcedimentoUpdateWithoutDecisioneProcedimentoInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -6379,6 +6761,7 @@ export type ProcedimentoUncheckedUpdateWithoutDecisioneProcedimentoInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -6450,6 +6833,7 @@ export type ProcedimentoCreateWithoutNormaImpattiInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -6521,6 +6905,7 @@ export type ProcedimentoUncheckedCreateWithoutNormaImpattiInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -6608,6 +6993,7 @@ export type ProcedimentoUpdateWithoutNormaImpattiInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -6679,6 +7065,7 @@ export type ProcedimentoUncheckedUpdateWithoutNormaImpattiInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -6750,6 +7137,7 @@ export type ProcedimentoCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -6821,6 +7209,7 @@ export type ProcedimentoUncheckedCreateWithoutAiFascicoloTrustedReviewMaterialsI
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -6908,6 +7297,7 @@ export type ProcedimentoUpdateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -6979,6 +7369,7 @@ export type ProcedimentoUncheckedUpdateWithoutAiFascicoloTrustedReviewMaterialsI
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -7050,6 +7441,7 @@ export type ProcedimentoCreateWithoutAutomaticFascicoloReportsInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -7121,6 +7513,7 @@ export type ProcedimentoUncheckedCreateWithoutAutomaticFascicoloReportsInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -7208,6 +7601,7 @@ export type ProcedimentoUpdateWithoutAutomaticFascicoloReportsInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -7279,6 +7673,7 @@ export type ProcedimentoUncheckedUpdateWithoutAutomaticFascicoloReportsInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -7350,6 +7745,7 @@ export type ProcedimentoCreateWithoutFascicoloKnowledgeRevisionsInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -7421,6 +7817,7 @@ export type ProcedimentoUncheckedCreateWithoutFascicoloKnowledgeRevisionsInput =
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -7508,6 +7905,7 @@ export type ProcedimentoUpdateWithoutFascicoloKnowledgeRevisionsInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -7579,6 +7977,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeRevisionsInput =
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -7650,6 +8049,7 @@ export type ProcedimentoCreateWithoutStructuredFascicoloReportsInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -7721,6 +8121,7 @@ export type ProcedimentoUncheckedCreateWithoutStructuredFascicoloReportsInput = 
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -7808,6 +8209,7 @@ export type ProcedimentoUpdateWithoutStructuredFascicoloReportsInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -7879,6 +8281,7 @@ export type ProcedimentoUncheckedUpdateWithoutStructuredFascicoloReportsInput = 
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -7950,6 +8353,7 @@ export type ProcedimentoCreateWithoutFascicoloOperationalProposalsInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -8021,6 +8425,7 @@ export type ProcedimentoUncheckedCreateWithoutFascicoloOperationalProposalsInput
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -8108,6 +8513,7 @@ export type ProcedimentoUpdateWithoutFascicoloOperationalProposalsInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -8179,6 +8585,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloOperationalProposalsInput
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -8250,6 +8657,7 @@ export type ProcedimentoCreateWithoutFascicoloKnowledgeItemsInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -8321,6 +8729,7 @@ export type ProcedimentoUncheckedCreateWithoutFascicoloKnowledgeItemsInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -8408,6 +8817,7 @@ export type ProcedimentoUpdateWithoutFascicoloKnowledgeItemsInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -8479,6 +8889,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeItemsInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -8550,6 +8961,7 @@ export type ProcedimentoCreateWithoutFascicoloKnowledgeEvidenceInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -8621,6 +9033,7 @@ export type ProcedimentoUncheckedCreateWithoutFascicoloKnowledgeEvidenceInput = 
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -8708,6 +9121,7 @@ export type ProcedimentoUpdateWithoutFascicoloKnowledgeEvidenceInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -8779,6 +9193,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeEvidenceInput = 
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -8850,6 +9265,7 @@ export type ProcedimentoCreateWithoutFascicoloKnowledgeRelationsInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -8921,6 +9337,7 @@ export type ProcedimentoUncheckedCreateWithoutFascicoloKnowledgeRelationsInput =
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -9008,6 +9425,7 @@ export type ProcedimentoUpdateWithoutFascicoloKnowledgeRelationsInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -9079,6 +9497,7 @@ export type ProcedimentoUncheckedUpdateWithoutFascicoloKnowledgeRelationsInput =
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -9150,6 +9569,7 @@ export type ProcedimentoCreateWithoutAiFascicoloHumanReviewStatesInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -9221,6 +9641,7 @@ export type ProcedimentoUncheckedCreateWithoutAiFascicoloHumanReviewStatesInput 
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -9308,6 +9729,7 @@ export type ProcedimentoUpdateWithoutAiFascicoloHumanReviewStatesInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -9379,6 +9801,7 @@ export type ProcedimentoUncheckedUpdateWithoutAiFascicoloHumanReviewStatesInput 
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -9450,6 +9873,7 @@ export type ProcedimentoCreateWithoutAiFascicoloHumanReviewEventsInput = {
   asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -9521,6 +9945,7 @@ export type ProcedimentoUncheckedCreateWithoutAiFascicoloHumanReviewEventsInput 
   asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutProcedimentoInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutProcedimentoInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutProcedimentoInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutProcedimentoInput
 }
 
@@ -9608,6 +10033,7 @@ export type ProcedimentoUpdateWithoutAiFascicoloHumanReviewEventsInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -9679,6 +10105,7 @@ export type ProcedimentoUncheckedUpdateWithoutAiFascicoloHumanReviewEventsInput 
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -9797,6 +10224,7 @@ export type ProcedimentoUpdateWithoutEnteInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -9868,6 +10296,7 @@ export type ProcedimentoUncheckedUpdateWithoutEnteInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -10033,6 +10462,7 @@ export type ProcedimentoUpdateWithoutConcessioneInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -10104,6 +10534,7 @@ export type ProcedimentoUncheckedUpdateWithoutConcessioneInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -10269,6 +10700,7 @@ export type ProcedimentoUpdateWithoutCriticitaInput = {
   asyncJobs?: Prisma.AsyncJobUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -10340,6 +10772,7 @@ export type ProcedimentoUncheckedUpdateWithoutCriticitaInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutProcedimentoNestedInput
   documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutProcedimentoNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutProcedimentoNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutProcedimentoNestedInput
 }
 
@@ -10417,6 +10850,7 @@ export type ProcedimentoCountOutputType = {
   asyncJobs: number
   documentExtractionAttempts: number
   runtimeBudgetPolicies: number
+  technicalSourceResearchRecords: number
   runtimeCostReservations: number
 }
 
@@ -10442,6 +10876,7 @@ export type ProcedimentoCountOutputTypeSelect<ExtArgs extends runtime.Types.Exte
   asyncJobs?: boolean | ProcedimentoCountOutputTypeCountAsyncJobsArgs
   documentExtractionAttempts?: boolean | ProcedimentoCountOutputTypeCountDocumentExtractionAttemptsArgs
   runtimeBudgetPolicies?: boolean | ProcedimentoCountOutputTypeCountRuntimeBudgetPoliciesArgs
+  technicalSourceResearchRecords?: boolean | ProcedimentoCountOutputTypeCountTechnicalSourceResearchRecordsArgs
   runtimeCostReservations?: boolean | ProcedimentoCountOutputTypeCountRuntimeCostReservationsArgs
 }
 
@@ -10605,6 +11040,13 @@ export type ProcedimentoCountOutputTypeCountRuntimeBudgetPoliciesArgs<ExtArgs ex
 /**
  * ProcedimentoCountOutputType without action
  */
+export type ProcedimentoCountOutputTypeCountTechnicalSourceResearchRecordsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TechnicalSourceResearchRecordWhereInput
+}
+
+/**
+ * ProcedimentoCountOutputType without action
+ */
 export type ProcedimentoCountOutputTypeCountRuntimeCostReservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.RuntimeCostReservationWhereInput
 }
@@ -10682,6 +11124,7 @@ export type ProcedimentoSelect<ExtArgs extends runtime.Types.Extensions.Internal
   asyncJobs?: boolean | Prisma.Procedimento$asyncJobsArgs<ExtArgs>
   documentExtractionAttempts?: boolean | Prisma.Procedimento$documentExtractionAttemptsArgs<ExtArgs>
   runtimeBudgetPolicies?: boolean | Prisma.Procedimento$runtimeBudgetPoliciesArgs<ExtArgs>
+  technicalSourceResearchRecords?: boolean | Prisma.Procedimento$technicalSourceResearchRecordsArgs<ExtArgs>
   runtimeCostReservations?: boolean | Prisma.Procedimento$runtimeCostReservationsArgs<ExtArgs>
   _count?: boolean | Prisma.ProcedimentoCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["procedimento"]>
@@ -10864,6 +11307,7 @@ export type ProcedimentoInclude<ExtArgs extends runtime.Types.Extensions.Interna
   asyncJobs?: boolean | Prisma.Procedimento$asyncJobsArgs<ExtArgs>
   documentExtractionAttempts?: boolean | Prisma.Procedimento$documentExtractionAttemptsArgs<ExtArgs>
   runtimeBudgetPolicies?: boolean | Prisma.Procedimento$runtimeBudgetPoliciesArgs<ExtArgs>
+  technicalSourceResearchRecords?: boolean | Prisma.Procedimento$technicalSourceResearchRecordsArgs<ExtArgs>
   runtimeCostReservations?: boolean | Prisma.Procedimento$runtimeCostReservationsArgs<ExtArgs>
   _count?: boolean | Prisma.ProcedimentoCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -10907,6 +11351,7 @@ export type $ProcedimentoPayload<ExtArgs extends runtime.Types.Extensions.Intern
     asyncJobs: Prisma.$AsyncJobPayload<ExtArgs>[]
     documentExtractionAttempts: Prisma.$DocumentExtractionAttemptPayload<ExtArgs>[]
     runtimeBudgetPolicies: Prisma.$RuntimeBudgetPolicyPayload<ExtArgs>[]
+    technicalSourceResearchRecords: Prisma.$TechnicalSourceResearchRecordPayload<ExtArgs>[]
     runtimeCostReservations: Prisma.$RuntimeCostReservationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -11375,6 +11820,7 @@ export interface Prisma__ProcedimentoClient<T, Null = never, ExtArgs extends run
   asyncJobs<T extends Prisma.Procedimento$asyncJobsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Procedimento$asyncJobsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AsyncJobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documentExtractionAttempts<T extends Prisma.Procedimento$documentExtractionAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Procedimento$documentExtractionAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentExtractionAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   runtimeBudgetPolicies<T extends Prisma.Procedimento$runtimeBudgetPoliciesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Procedimento$runtimeBudgetPoliciesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RuntimeBudgetPolicyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  technicalSourceResearchRecords<T extends Prisma.Procedimento$technicalSourceResearchRecordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Procedimento$technicalSourceResearchRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TechnicalSourceResearchRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   runtimeCostReservations<T extends Prisma.Procedimento$runtimeCostReservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Procedimento$runtimeCostReservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RuntimeCostReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -12428,6 +12874,30 @@ export type Procedimento$runtimeBudgetPoliciesArgs<ExtArgs extends runtime.Types
   take?: number
   skip?: number
   distinct?: Prisma.RuntimeBudgetPolicyScalarFieldEnum | Prisma.RuntimeBudgetPolicyScalarFieldEnum[]
+}
+
+/**
+ * Procedimento.technicalSourceResearchRecords
+ */
+export type Procedimento$technicalSourceResearchRecordsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TechnicalSourceResearchRecord
+   */
+  select?: Prisma.TechnicalSourceResearchRecordSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TechnicalSourceResearchRecord
+   */
+  omit?: Prisma.TechnicalSourceResearchRecordOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TechnicalSourceResearchRecordInclude<ExtArgs> | null
+  where?: Prisma.TechnicalSourceResearchRecordWhereInput
+  orderBy?: Prisma.TechnicalSourceResearchRecordOrderByWithRelationInput | Prisma.TechnicalSourceResearchRecordOrderByWithRelationInput[]
+  cursor?: Prisma.TechnicalSourceResearchRecordWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TechnicalSourceResearchRecordScalarFieldEnum | Prisma.TechnicalSourceResearchRecordScalarFieldEnum[]
 }
 
 /**

@@ -238,6 +238,7 @@ export type EnteWhereInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalListRelationFilter
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyListRelationFilter
   runtimeCostReservations?: Prisma.RuntimeCostReservationListRelationFilter
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordListRelationFilter
 }
 
 export type EnteOrderByWithRelationInput = {
@@ -288,6 +289,7 @@ export type EnteOrderByWithRelationInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalOrderByRelationAggregateInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyOrderByRelationAggregateInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationOrderByRelationAggregateInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordOrderByRelationAggregateInput
 }
 
 export type EnteWhereUniqueInput = Prisma.AtLeast<{
@@ -341,6 +343,7 @@ export type EnteWhereUniqueInput = Prisma.AtLeast<{
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalListRelationFilter
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyListRelationFilter
   runtimeCostReservations?: Prisma.RuntimeCostReservationListRelationFilter
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordListRelationFilter
 }, "id" | "codice">
 
 export type EnteOrderByWithAggregationInput = {
@@ -417,6 +420,7 @@ export type EnteCreateInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateInput = {
@@ -467,6 +471,7 @@ export type EnteUncheckedCreateInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUpdateInput = {
@@ -517,6 +522,7 @@ export type EnteUpdateInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateInput = {
@@ -567,6 +573,7 @@ export type EnteUncheckedUpdateInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateManyInput = {
@@ -977,6 +984,20 @@ export type EnteUpdateOneWithoutResearchMissionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.EnteUpdateToOneWithWhereWithoutResearchMissionsInput, Prisma.EnteUpdateWithoutResearchMissionsInput>, Prisma.EnteUncheckedUpdateWithoutResearchMissionsInput>
 }
 
+export type EnteCreateNestedOneWithoutTechnicalSourceResearchRecordsInput = {
+  create?: Prisma.XOR<Prisma.EnteCreateWithoutTechnicalSourceResearchRecordsInput, Prisma.EnteUncheckedCreateWithoutTechnicalSourceResearchRecordsInput>
+  connectOrCreate?: Prisma.EnteCreateOrConnectWithoutTechnicalSourceResearchRecordsInput
+  connect?: Prisma.EnteWhereUniqueInput
+}
+
+export type EnteUpdateOneRequiredWithoutTechnicalSourceResearchRecordsNestedInput = {
+  create?: Prisma.XOR<Prisma.EnteCreateWithoutTechnicalSourceResearchRecordsInput, Prisma.EnteUncheckedCreateWithoutTechnicalSourceResearchRecordsInput>
+  connectOrCreate?: Prisma.EnteCreateOrConnectWithoutTechnicalSourceResearchRecordsInput
+  upsert?: Prisma.EnteUpsertWithoutTechnicalSourceResearchRecordsInput
+  connect?: Prisma.EnteWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EnteUpdateToOneWithWhereWithoutTechnicalSourceResearchRecordsInput, Prisma.EnteUpdateWithoutTechnicalSourceResearchRecordsInput>, Prisma.EnteUncheckedUpdateWithoutTechnicalSourceResearchRecordsInput>
+}
+
 export type EnteCreateNestedOneWithoutResearchAssistedVerificationsInput = {
   create?: Prisma.XOR<Prisma.EnteCreateWithoutResearchAssistedVerificationsInput, Prisma.EnteUncheckedCreateWithoutResearchAssistedVerificationsInput>
   connectOrCreate?: Prisma.EnteCreateOrConnectWithoutResearchAssistedVerificationsInput
@@ -1298,6 +1319,7 @@ export type EnteCreateWithoutPortsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutPortsInput = {
@@ -1347,6 +1369,7 @@ export type EnteUncheckedCreateWithoutPortsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutPortsInput = {
@@ -1412,6 +1435,7 @@ export type EnteUpdateWithoutPortsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutPortsInput = {
@@ -1461,6 +1485,7 @@ export type EnteUncheckedUpdateWithoutPortsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutImportRunsInput = {
@@ -1510,6 +1535,7 @@ export type EnteCreateWithoutImportRunsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutImportRunsInput = {
@@ -1559,6 +1585,7 @@ export type EnteUncheckedCreateWithoutImportRunsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutImportRunsInput = {
@@ -1624,6 +1651,7 @@ export type EnteUpdateWithoutImportRunsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutImportRunsInput = {
@@ -1673,6 +1701,7 @@ export type EnteUncheckedUpdateWithoutImportRunsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutLegalSourcesInput = {
@@ -1722,6 +1751,7 @@ export type EnteCreateWithoutLegalSourcesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutLegalSourcesInput = {
@@ -1771,6 +1801,7 @@ export type EnteUncheckedCreateWithoutLegalSourcesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutLegalSourcesInput = {
@@ -1836,6 +1867,7 @@ export type EnteUpdateWithoutLegalSourcesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutLegalSourcesInput = {
@@ -1885,6 +1917,7 @@ export type EnteUncheckedUpdateWithoutLegalSourcesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutLegalSourceAcquisitionsInput = {
@@ -1934,6 +1967,7 @@ export type EnteCreateWithoutLegalSourceAcquisitionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutLegalSourceAcquisitionsInput = {
@@ -1983,6 +2017,7 @@ export type EnteUncheckedCreateWithoutLegalSourceAcquisitionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutLegalSourceAcquisitionsInput = {
@@ -2048,6 +2083,7 @@ export type EnteUpdateWithoutLegalSourceAcquisitionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutLegalSourceAcquisitionsInput = {
@@ -2097,6 +2133,7 @@ export type EnteUncheckedUpdateWithoutLegalSourceAcquisitionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutLegalRulesInput = {
@@ -2146,6 +2183,7 @@ export type EnteCreateWithoutLegalRulesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutLegalRulesInput = {
@@ -2195,6 +2233,7 @@ export type EnteUncheckedCreateWithoutLegalRulesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutLegalRulesInput = {
@@ -2260,6 +2299,7 @@ export type EnteUpdateWithoutLegalRulesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutLegalRulesInput = {
@@ -2309,6 +2349,7 @@ export type EnteUncheckedUpdateWithoutLegalRulesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutDocumentGapsInput = {
@@ -2358,6 +2399,7 @@ export type EnteCreateWithoutDocumentGapsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutDocumentGapsInput = {
@@ -2407,6 +2449,7 @@ export type EnteUncheckedCreateWithoutDocumentGapsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutDocumentGapsInput = {
@@ -2472,6 +2515,7 @@ export type EnteUpdateWithoutDocumentGapsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutDocumentGapsInput = {
@@ -2521,6 +2565,7 @@ export type EnteUncheckedUpdateWithoutDocumentGapsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutMembershipsInput = {
@@ -2570,6 +2615,7 @@ export type EnteCreateWithoutMembershipsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutMembershipsInput = {
@@ -2619,6 +2665,7 @@ export type EnteUncheckedCreateWithoutMembershipsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutMembershipsInput = {
@@ -2684,6 +2731,7 @@ export type EnteUpdateWithoutMembershipsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutMembershipsInput = {
@@ -2733,6 +2781,7 @@ export type EnteUncheckedUpdateWithoutMembershipsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutConcessioniInput = {
@@ -2782,6 +2831,7 @@ export type EnteCreateWithoutConcessioniInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutConcessioniInput = {
@@ -2831,6 +2881,7 @@ export type EnteUncheckedCreateWithoutConcessioniInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutConcessioniInput = {
@@ -2896,6 +2947,7 @@ export type EnteUpdateWithoutConcessioniInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutConcessioniInput = {
@@ -2945,6 +2997,7 @@ export type EnteUncheckedUpdateWithoutConcessioniInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutProcedimentiInput = {
@@ -2994,6 +3047,7 @@ export type EnteCreateWithoutProcedimentiInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutProcedimentiInput = {
@@ -3043,6 +3097,7 @@ export type EnteUncheckedCreateWithoutProcedimentiInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutProcedimentiInput = {
@@ -3108,6 +3163,7 @@ export type EnteUpdateWithoutProcedimentiInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutProcedimentiInput = {
@@ -3157,6 +3213,7 @@ export type EnteUncheckedUpdateWithoutProcedimentiInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutFascicoliIntakeInput = {
@@ -3206,6 +3263,7 @@ export type EnteCreateWithoutFascicoliIntakeInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutFascicoliIntakeInput = {
@@ -3255,6 +3313,7 @@ export type EnteUncheckedCreateWithoutFascicoliIntakeInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutFascicoliIntakeInput = {
@@ -3320,6 +3379,7 @@ export type EnteUpdateWithoutFascicoliIntakeInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutFascicoliIntakeInput = {
@@ -3369,6 +3429,7 @@ export type EnteUncheckedUpdateWithoutFascicoliIntakeInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutDocumentiInput = {
@@ -3418,6 +3479,7 @@ export type EnteCreateWithoutDocumentiInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutDocumentiInput = {
@@ -3467,6 +3529,7 @@ export type EnteUncheckedCreateWithoutDocumentiInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutDocumentiInput = {
@@ -3532,6 +3595,7 @@ export type EnteUpdateWithoutDocumentiInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutDocumentiInput = {
@@ -3581,6 +3645,7 @@ export type EnteUncheckedUpdateWithoutDocumentiInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutDocumentFileVersionsInput = {
@@ -3630,6 +3695,7 @@ export type EnteCreateWithoutDocumentFileVersionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutDocumentFileVersionsInput = {
@@ -3679,6 +3745,7 @@ export type EnteUncheckedCreateWithoutDocumentFileVersionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutDocumentFileVersionsInput = {
@@ -3744,6 +3811,7 @@ export type EnteUpdateWithoutDocumentFileVersionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutDocumentFileVersionsInput = {
@@ -3793,6 +3861,7 @@ export type EnteUncheckedUpdateWithoutDocumentFileVersionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutDocumentExtractionAttemptsInput = {
@@ -3842,6 +3911,7 @@ export type EnteCreateWithoutDocumentExtractionAttemptsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutDocumentExtractionAttemptsInput = {
@@ -3891,6 +3961,7 @@ export type EnteUncheckedCreateWithoutDocumentExtractionAttemptsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutDocumentExtractionAttemptsInput = {
@@ -3956,6 +4027,7 @@ export type EnteUpdateWithoutDocumentExtractionAttemptsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutDocumentExtractionAttemptsInput = {
@@ -4005,6 +4077,7 @@ export type EnteUncheckedUpdateWithoutDocumentExtractionAttemptsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutNeutralIntakesInput = {
@@ -4054,6 +4127,7 @@ export type EnteCreateWithoutNeutralIntakesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutNeutralIntakesInput = {
@@ -4103,6 +4177,7 @@ export type EnteUncheckedCreateWithoutNeutralIntakesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutNeutralIntakesInput = {
@@ -4168,6 +4243,7 @@ export type EnteUpdateWithoutNeutralIntakesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutNeutralIntakesInput = {
@@ -4217,6 +4293,7 @@ export type EnteUncheckedUpdateWithoutNeutralIntakesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutLegalSourceCandidateAdmissionsInput = {
@@ -4266,6 +4343,7 @@ export type EnteCreateWithoutLegalSourceCandidateAdmissionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutLegalSourceCandidateAdmissionsInput = {
@@ -4315,6 +4393,7 @@ export type EnteUncheckedCreateWithoutLegalSourceCandidateAdmissionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutLegalSourceCandidateAdmissionsInput = {
@@ -4380,6 +4459,7 @@ export type EnteUpdateWithoutLegalSourceCandidateAdmissionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutLegalSourceCandidateAdmissionsInput = {
@@ -4429,6 +4509,7 @@ export type EnteUncheckedUpdateWithoutLegalSourceCandidateAdmissionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutAsyncJobsInput = {
@@ -4478,6 +4559,7 @@ export type EnteCreateWithoutAsyncJobsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutAsyncJobsInput = {
@@ -4527,6 +4609,7 @@ export type EnteUncheckedCreateWithoutAsyncJobsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutAsyncJobsInput = {
@@ -4592,6 +4675,7 @@ export type EnteUpdateWithoutAsyncJobsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutAsyncJobsInput = {
@@ -4641,6 +4725,7 @@ export type EnteUncheckedUpdateWithoutAsyncJobsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutRuntimeBudgetPoliciesInput = {
@@ -4690,6 +4775,7 @@ export type EnteCreateWithoutRuntimeBudgetPoliciesInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotCreateNestedManyWithoutTenantInput
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutRuntimeBudgetPoliciesInput = {
@@ -4739,6 +4825,7 @@ export type EnteUncheckedCreateWithoutRuntimeBudgetPoliciesInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedCreateNestedManyWithoutTenantInput
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutRuntimeBudgetPoliciesInput = {
@@ -4804,6 +4891,7 @@ export type EnteUpdateWithoutRuntimeBudgetPoliciesInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUpdateManyWithoutTenantNestedInput
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutRuntimeBudgetPoliciesInput = {
@@ -4853,6 +4941,7 @@ export type EnteUncheckedUpdateWithoutRuntimeBudgetPoliciesInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutRuntimeCostReservationsInput = {
@@ -4902,6 +4991,7 @@ export type EnteCreateWithoutRuntimeCostReservationsInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotCreateNestedManyWithoutTenantInput
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutRuntimeCostReservationsInput = {
@@ -4951,6 +5041,7 @@ export type EnteUncheckedCreateWithoutRuntimeCostReservationsInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedCreateNestedManyWithoutTenantInput
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutRuntimeCostReservationsInput = {
@@ -5016,6 +5107,7 @@ export type EnteUpdateWithoutRuntimeCostReservationsInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUpdateManyWithoutTenantNestedInput
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutRuntimeCostReservationsInput = {
@@ -5065,6 +5157,7 @@ export type EnteUncheckedUpdateWithoutRuntimeCostReservationsInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutFascicoloSignalsInput = {
@@ -5114,6 +5207,7 @@ export type EnteCreateWithoutFascicoloSignalsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutFascicoloSignalsInput = {
@@ -5163,6 +5257,7 @@ export type EnteUncheckedCreateWithoutFascicoloSignalsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutFascicoloSignalsInput = {
@@ -5228,6 +5323,7 @@ export type EnteUpdateWithoutFascicoloSignalsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutFascicoloSignalsInput = {
@@ -5277,6 +5373,7 @@ export type EnteUncheckedUpdateWithoutFascicoloSignalsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutConcessioneExpiryChangeCommandsInput = {
@@ -5326,6 +5423,7 @@ export type EnteCreateWithoutConcessioneExpiryChangeCommandsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutConcessioneExpiryChangeCommandsInput = {
@@ -5375,6 +5473,7 @@ export type EnteUncheckedCreateWithoutConcessioneExpiryChangeCommandsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutConcessioneExpiryChangeCommandsInput = {
@@ -5440,6 +5539,7 @@ export type EnteUpdateWithoutConcessioneExpiryChangeCommandsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutConcessioneExpiryChangeCommandsInput = {
@@ -5489,6 +5589,7 @@ export type EnteUncheckedUpdateWithoutConcessioneExpiryChangeCommandsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutResearchMissionsInput = {
@@ -5538,6 +5639,7 @@ export type EnteCreateWithoutResearchMissionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutResearchMissionsInput = {
@@ -5587,6 +5689,7 @@ export type EnteUncheckedCreateWithoutResearchMissionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutResearchMissionsInput = {
@@ -5652,6 +5755,7 @@ export type EnteUpdateWithoutResearchMissionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutResearchMissionsInput = {
@@ -5684,6 +5788,223 @@ export type EnteUncheckedUpdateWithoutResearchMissionsInput = {
   asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
   fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
   concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedUpdateManyWithoutEnteNestedInput
+  procedimenti?: Prisma.ProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedUpdateManyWithoutEnteNestedInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectUncheckedUpdateManyWithoutTenantNestedInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type EnteCreateWithoutTechnicalSourceResearchRecordsInput = {
+  id?: string
+  nome: string
+  codice: string
+  tipo?: $Enums.EnteTipo
+  stato?: $Enums.EnteStato
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessioni?: Prisma.ConcessioneCreateNestedManyWithoutEnteInput
+  documenti?: Prisma.DocumentoCreateNestedManyWithoutEnteInput
+  report?: Prisma.ReportCreateNestedManyWithoutEnteInput
+  activityLog?: Prisma.ActivityLogCreateNestedManyWithoutEnteInput
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutEnteInput
+  ports?: Prisma.PortCreateNestedManyWithoutEnteInput
+  legalSources?: Prisma.LegalSourceCreateNestedManyWithoutEnteInput
+  legalRules?: Prisma.LegalRuleCreateNestedManyWithoutEnteInput
+  documentGaps?: Prisma.DocumentGapCreateNestedManyWithoutEnteInput
+  importRuns?: Prisma.ImportRunCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoCreateNestedManyWithoutEnteInput
+  fascicoloObservations?: Prisma.FascicoloObservationCreateNestedManyWithoutEnteInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalCreateNestedManyWithoutEnteInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceCreateNestedManyWithoutEnteInput
+  documentFileVersions?: Prisma.DocumentFileVersionCreateNestedManyWithoutEnteInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeCreateNestedManyWithoutEnteInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionCreateNestedManyWithoutEnteInput
+  asyncJobs?: Prisma.AsyncJobCreateNestedManyWithoutTenantInput
+  fascicoloSignals?: Prisma.FascicoloSignalCreateNestedManyWithoutEnteInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandCreateNestedManyWithoutEnteInput
+  researchMissions?: Prisma.ResearchMissionRecordCreateNestedManyWithoutTenantInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutTenantInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialCreateNestedManyWithoutEnteInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportCreateNestedManyWithoutTenantInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptCreateNestedManyWithoutTenantInput
+  fascicoliIntake?: Prisma.FascicoloIntakeCreateNestedManyWithoutEnteInput
+  procedimenti?: Prisma.ProcedimentoCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventCreateNestedManyWithoutEnteInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTenantInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectCreateNestedManyWithoutTenantInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotCreateNestedManyWithoutTenantInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+}
+
+export type EnteUncheckedCreateWithoutTechnicalSourceResearchRecordsInput = {
+  id?: string
+  nome: string
+  codice: string
+  tipo?: $Enums.EnteTipo
+  stato?: $Enums.EnteStato
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  concessioni?: Prisma.ConcessioneUncheckedCreateNestedManyWithoutEnteInput
+  documenti?: Prisma.DocumentoUncheckedCreateNestedManyWithoutEnteInput
+  report?: Prisma.ReportUncheckedCreateNestedManyWithoutEnteInput
+  activityLog?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutEnteInput
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutEnteInput
+  ports?: Prisma.PortUncheckedCreateNestedManyWithoutEnteInput
+  legalSources?: Prisma.LegalSourceUncheckedCreateNestedManyWithoutEnteInput
+  legalRules?: Prisma.LegalRuleUncheckedCreateNestedManyWithoutEnteInput
+  documentGaps?: Prisma.DocumentGapUncheckedCreateNestedManyWithoutEnteInput
+  importRuns?: Prisma.ImportRunUncheckedCreateNestedManyWithoutEnteInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedCreateNestedManyWithoutEnteInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedCreateNestedManyWithoutEnteInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedCreateNestedManyWithoutEnteInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedCreateNestedManyWithoutEnteInput
+  documentFileVersions?: Prisma.DocumentFileVersionUncheckedCreateNestedManyWithoutEnteInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedCreateNestedManyWithoutEnteInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedCreateNestedManyWithoutEnteInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedCreateNestedManyWithoutEnteInput
+  asyncJobs?: Prisma.AsyncJobUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloSignals?: Prisma.FascicoloSignalUncheckedCreateNestedManyWithoutEnteInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedCreateNestedManyWithoutEnteInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedCreateNestedManyWithoutTenantInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutTenantInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedCreateNestedManyWithoutEnteInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedCreateNestedManyWithoutTenantInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUncheckedCreateNestedManyWithoutTenantInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUncheckedCreateNestedManyWithoutEnteInput
+  procedimenti?: Prisma.ProcedimentoUncheckedCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUncheckedCreateNestedManyWithoutEnteInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUncheckedCreateNestedManyWithoutEnteInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectUncheckedCreateNestedManyWithoutTenantInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedCreateNestedManyWithoutTenantInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type EnteCreateOrConnectWithoutTechnicalSourceResearchRecordsInput = {
+  where: Prisma.EnteWhereUniqueInput
+  create: Prisma.XOR<Prisma.EnteCreateWithoutTechnicalSourceResearchRecordsInput, Prisma.EnteUncheckedCreateWithoutTechnicalSourceResearchRecordsInput>
+}
+
+export type EnteUpsertWithoutTechnicalSourceResearchRecordsInput = {
+  update: Prisma.XOR<Prisma.EnteUpdateWithoutTechnicalSourceResearchRecordsInput, Prisma.EnteUncheckedUpdateWithoutTechnicalSourceResearchRecordsInput>
+  create: Prisma.XOR<Prisma.EnteCreateWithoutTechnicalSourceResearchRecordsInput, Prisma.EnteUncheckedCreateWithoutTechnicalSourceResearchRecordsInput>
+  where?: Prisma.EnteWhereInput
+}
+
+export type EnteUpdateToOneWithWhereWithoutTechnicalSourceResearchRecordsInput = {
+  where?: Prisma.EnteWhereInput
+  data: Prisma.XOR<Prisma.EnteUpdateWithoutTechnicalSourceResearchRecordsInput, Prisma.EnteUncheckedUpdateWithoutTechnicalSourceResearchRecordsInput>
+}
+
+export type EnteUpdateWithoutTechnicalSourceResearchRecordsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  codice?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.EnumEnteTipoFieldUpdateOperationsInput | $Enums.EnteTipo
+  stato?: Prisma.EnumEnteStatoFieldUpdateOperationsInput | $Enums.EnteStato
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessioni?: Prisma.ConcessioneUpdateManyWithoutEnteNestedInput
+  documenti?: Prisma.DocumentoUpdateManyWithoutEnteNestedInput
+  report?: Prisma.ReportUpdateManyWithoutEnteNestedInput
+  activityLog?: Prisma.ActivityLogUpdateManyWithoutEnteNestedInput
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutEnteNestedInput
+  ports?: Prisma.PortUpdateManyWithoutEnteNestedInput
+  legalSources?: Prisma.LegalSourceUpdateManyWithoutEnteNestedInput
+  legalRules?: Prisma.LegalRuleUpdateManyWithoutEnteNestedInput
+  documentGaps?: Prisma.DocumentGapUpdateManyWithoutEnteNestedInput
+  importRuns?: Prisma.ImportRunUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUpdateManyWithoutEnteNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUpdateManyWithoutEnteNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUpdateManyWithoutEnteNestedInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUpdateManyWithoutEnteNestedInput
+  documentFileVersions?: Prisma.DocumentFileVersionUpdateManyWithoutEnteNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUpdateManyWithoutEnteNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUpdateManyWithoutEnteNestedInput
+  asyncJobs?: Prisma.AsyncJobUpdateManyWithoutTenantNestedInput
+  fascicoloSignals?: Prisma.FascicoloSignalUpdateManyWithoutEnteNestedInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUpdateManyWithoutEnteNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUpdateManyWithoutTenantNestedInput
+  researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutTenantNestedInput
+  aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUpdateManyWithoutEnteNestedInput
+  automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUpdateManyWithoutTenantNestedInput
+  documentExtractionAttempts?: Prisma.DocumentExtractionAttemptUpdateManyWithoutTenantNestedInput
+  fascicoliIntake?: Prisma.FascicoloIntakeUpdateManyWithoutEnteNestedInput
+  procedimenti?: Prisma.ProcedimentoUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewStates?: Prisma.AiFascicoloHumanReviewStateUpdateManyWithoutEnteNestedInput
+  aiFascicoloHumanReviewEvents?: Prisma.AiFascicoloHumanReviewEventUpdateManyWithoutEnteNestedInput
+  fascicoloKnowledgeRevisions?: Prisma.FascicoloKnowledgeRevisionUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeItems?: Prisma.FascicoloKnowledgeItemUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeEvidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutTenantNestedInput
+  fascicoloKnowledgeRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTenantNestedInput
+  fascicoloSubjects?: Prisma.FascicoloSubjectUpdateManyWithoutTenantNestedInput
+  structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUpdateManyWithoutTenantNestedInput
+  fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
+  runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
+  runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+}
+
+export type EnteUncheckedUpdateWithoutTechnicalSourceResearchRecordsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  codice?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.EnumEnteTipoFieldUpdateOperationsInput | $Enums.EnteTipo
+  stato?: Prisma.EnumEnteStatoFieldUpdateOperationsInput | $Enums.EnteStato
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  concessioni?: Prisma.ConcessioneUncheckedUpdateManyWithoutEnteNestedInput
+  documenti?: Prisma.DocumentoUncheckedUpdateManyWithoutEnteNestedInput
+  report?: Prisma.ReportUncheckedUpdateManyWithoutEnteNestedInput
+  activityLog?: Prisma.ActivityLogUncheckedUpdateManyWithoutEnteNestedInput
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutEnteNestedInput
+  ports?: Prisma.PortUncheckedUpdateManyWithoutEnteNestedInput
+  legalSources?: Prisma.LegalSourceUncheckedUpdateManyWithoutEnteNestedInput
+  legalRules?: Prisma.LegalRuleUncheckedUpdateManyWithoutEnteNestedInput
+  documentGaps?: Prisma.DocumentGapUncheckedUpdateManyWithoutEnteNestedInput
+  importRuns?: Prisma.ImportRunUncheckedUpdateManyWithoutEnteNestedInput
+  decisioniProcedimento?: Prisma.DecisioneProcedimentoUncheckedUpdateManyWithoutEnteNestedInput
+  fascicoloObservations?: Prisma.FascicoloObservationUncheckedUpdateManyWithoutEnteNestedInput
+  checklistEvidence?: Prisma.FascicoloChecklistEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementProposals?: Prisma.FascicoloDocumentRequirementProposalUncheckedUpdateManyWithoutEnteNestedInput
+  documentRequirementEvidence?: Prisma.FascicoloDocumentRequirementEvidenceUncheckedUpdateManyWithoutEnteNestedInput
+  documentFileVersions?: Prisma.DocumentFileVersionUncheckedUpdateManyWithoutEnteNestedInput
+  legalSourceAcquisitions?: Prisma.LegalSourceAcquisitionUncheckedUpdateManyWithoutEnteNestedInput
+  neutralIntakes?: Prisma.NeutralIntakeUncheckedUpdateManyWithoutEnteNestedInput
+  legalSourceCandidateAdmissions?: Prisma.LegalSourceCandidateAdmissionUncheckedUpdateManyWithoutEnteNestedInput
+  asyncJobs?: Prisma.AsyncJobUncheckedUpdateManyWithoutTenantNestedInput
+  fascicoloSignals?: Prisma.FascicoloSignalUncheckedUpdateManyWithoutEnteNestedInput
+  concessioneExpiryChangeCommands?: Prisma.ConcessioneExpiryChangeCommandUncheckedUpdateManyWithoutEnteNestedInput
+  researchMissions?: Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutTenantNestedInput
   researchAssistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutTenantNestedInput
   aiFascicoloTrustedReviewMaterials?: Prisma.AiFascicoloTrustedReviewMaterialUncheckedUpdateManyWithoutEnteNestedInput
   automaticFascicoloReports?: Prisma.AutomaticFascicoloReportUncheckedUpdateManyWithoutTenantNestedInput
@@ -5750,6 +6071,7 @@ export type EnteCreateWithoutResearchAssistedVerificationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutResearchAssistedVerificationsInput = {
@@ -5799,6 +6121,7 @@ export type EnteUncheckedCreateWithoutResearchAssistedVerificationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutResearchAssistedVerificationsInput = {
@@ -5864,6 +6187,7 @@ export type EnteUpdateWithoutResearchAssistedVerificationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutResearchAssistedVerificationsInput = {
@@ -5913,6 +6237,7 @@ export type EnteUncheckedUpdateWithoutResearchAssistedVerificationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutFascicoloObservationsInput = {
@@ -5962,6 +6287,7 @@ export type EnteCreateWithoutFascicoloObservationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutFascicoloObservationsInput = {
@@ -6011,6 +6337,7 @@ export type EnteUncheckedCreateWithoutFascicoloObservationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutFascicoloObservationsInput = {
@@ -6076,6 +6403,7 @@ export type EnteUpdateWithoutFascicoloObservationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutFascicoloObservationsInput = {
@@ -6125,6 +6453,7 @@ export type EnteUncheckedUpdateWithoutFascicoloObservationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutChecklistEvidenceInput = {
@@ -6174,6 +6503,7 @@ export type EnteCreateWithoutChecklistEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutChecklistEvidenceInput = {
@@ -6223,6 +6553,7 @@ export type EnteUncheckedCreateWithoutChecklistEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutChecklistEvidenceInput = {
@@ -6288,6 +6619,7 @@ export type EnteUpdateWithoutChecklistEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutChecklistEvidenceInput = {
@@ -6337,6 +6669,7 @@ export type EnteUncheckedUpdateWithoutChecklistEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutDocumentRequirementProposalsInput = {
@@ -6386,6 +6719,7 @@ export type EnteCreateWithoutDocumentRequirementProposalsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutDocumentRequirementProposalsInput = {
@@ -6435,6 +6769,7 @@ export type EnteUncheckedCreateWithoutDocumentRequirementProposalsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutDocumentRequirementProposalsInput = {
@@ -6500,6 +6835,7 @@ export type EnteUpdateWithoutDocumentRequirementProposalsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutDocumentRequirementProposalsInput = {
@@ -6549,6 +6885,7 @@ export type EnteUncheckedUpdateWithoutDocumentRequirementProposalsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutDocumentRequirementEvidenceInput = {
@@ -6598,6 +6935,7 @@ export type EnteCreateWithoutDocumentRequirementEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutDocumentRequirementEvidenceInput = {
@@ -6647,6 +6985,7 @@ export type EnteUncheckedCreateWithoutDocumentRequirementEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutDocumentRequirementEvidenceInput = {
@@ -6712,6 +7051,7 @@ export type EnteUpdateWithoutDocumentRequirementEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutDocumentRequirementEvidenceInput = {
@@ -6761,6 +7101,7 @@ export type EnteUncheckedUpdateWithoutDocumentRequirementEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutDecisioniProcedimentoInput = {
@@ -6810,6 +7151,7 @@ export type EnteCreateWithoutDecisioniProcedimentoInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutDecisioniProcedimentoInput = {
@@ -6859,6 +7201,7 @@ export type EnteUncheckedCreateWithoutDecisioniProcedimentoInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutDecisioniProcedimentoInput = {
@@ -6924,6 +7267,7 @@ export type EnteUpdateWithoutDecisioniProcedimentoInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutDecisioniProcedimentoInput = {
@@ -6973,6 +7317,7 @@ export type EnteUncheckedUpdateWithoutDecisioniProcedimentoInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutReportInput = {
@@ -7022,6 +7367,7 @@ export type EnteCreateWithoutReportInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutReportInput = {
@@ -7071,6 +7417,7 @@ export type EnteUncheckedCreateWithoutReportInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutReportInput = {
@@ -7136,6 +7483,7 @@ export type EnteUpdateWithoutReportInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutReportInput = {
@@ -7185,6 +7533,7 @@ export type EnteUncheckedUpdateWithoutReportInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutActivityLogInput = {
@@ -7234,6 +7583,7 @@ export type EnteCreateWithoutActivityLogInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutActivityLogInput = {
@@ -7283,6 +7633,7 @@ export type EnteUncheckedCreateWithoutActivityLogInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutActivityLogInput = {
@@ -7348,6 +7699,7 @@ export type EnteUpdateWithoutActivityLogInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutActivityLogInput = {
@@ -7397,6 +7749,7 @@ export type EnteUncheckedUpdateWithoutActivityLogInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
@@ -7446,6 +7799,7 @@ export type EnteCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
@@ -7495,6 +7849,7 @@ export type EnteUncheckedCreateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutAiFascicoloTrustedReviewMaterialsInput = {
@@ -7560,6 +7915,7 @@ export type EnteUpdateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutAiFascicoloTrustedReviewMaterialsInput = {
@@ -7609,6 +7965,7 @@ export type EnteUncheckedUpdateWithoutAiFascicoloTrustedReviewMaterialsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutAutomaticFascicoloReportsInput = {
@@ -7658,6 +8015,7 @@ export type EnteCreateWithoutAutomaticFascicoloReportsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutAutomaticFascicoloReportsInput = {
@@ -7707,6 +8065,7 @@ export type EnteUncheckedCreateWithoutAutomaticFascicoloReportsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutAutomaticFascicoloReportsInput = {
@@ -7772,6 +8131,7 @@ export type EnteUpdateWithoutAutomaticFascicoloReportsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutAutomaticFascicoloReportsInput = {
@@ -7821,6 +8181,7 @@ export type EnteUncheckedUpdateWithoutAutomaticFascicoloReportsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutFascicoloKnowledgeRevisionsInput = {
@@ -7870,6 +8231,7 @@ export type EnteCreateWithoutFascicoloKnowledgeRevisionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutFascicoloKnowledgeRevisionsInput = {
@@ -7919,6 +8281,7 @@ export type EnteUncheckedCreateWithoutFascicoloKnowledgeRevisionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutFascicoloKnowledgeRevisionsInput = {
@@ -7984,6 +8347,7 @@ export type EnteUpdateWithoutFascicoloKnowledgeRevisionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutFascicoloKnowledgeRevisionsInput = {
@@ -8033,6 +8397,7 @@ export type EnteUncheckedUpdateWithoutFascicoloKnowledgeRevisionsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutStructuredFascicoloReportsInput = {
@@ -8082,6 +8447,7 @@ export type EnteCreateWithoutStructuredFascicoloReportsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutStructuredFascicoloReportsInput = {
@@ -8131,6 +8497,7 @@ export type EnteUncheckedCreateWithoutStructuredFascicoloReportsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutStructuredFascicoloReportsInput = {
@@ -8196,6 +8563,7 @@ export type EnteUpdateWithoutStructuredFascicoloReportsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutStructuredFascicoloReportsInput = {
@@ -8245,6 +8613,7 @@ export type EnteUncheckedUpdateWithoutStructuredFascicoloReportsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutFascicoloOperationalProposalsInput = {
@@ -8294,6 +8663,7 @@ export type EnteCreateWithoutFascicoloOperationalProposalsInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutFascicoloOperationalProposalsInput = {
@@ -8343,6 +8713,7 @@ export type EnteUncheckedCreateWithoutFascicoloOperationalProposalsInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutFascicoloOperationalProposalsInput = {
@@ -8408,6 +8779,7 @@ export type EnteUpdateWithoutFascicoloOperationalProposalsInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutFascicoloOperationalProposalsInput = {
@@ -8457,6 +8829,7 @@ export type EnteUncheckedUpdateWithoutFascicoloOperationalProposalsInput = {
   structuredFascicoloReports?: Prisma.StructuredFascicoloReportSnapshotUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutFascicoloSubjectsInput = {
@@ -8506,6 +8879,7 @@ export type EnteCreateWithoutFascicoloSubjectsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutFascicoloSubjectsInput = {
@@ -8555,6 +8929,7 @@ export type EnteUncheckedCreateWithoutFascicoloSubjectsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutFascicoloSubjectsInput = {
@@ -8620,6 +8995,7 @@ export type EnteUpdateWithoutFascicoloSubjectsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutFascicoloSubjectsInput = {
@@ -8669,6 +9045,7 @@ export type EnteUncheckedUpdateWithoutFascicoloSubjectsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutFascicoloKnowledgeItemsInput = {
@@ -8718,6 +9095,7 @@ export type EnteCreateWithoutFascicoloKnowledgeItemsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutFascicoloKnowledgeItemsInput = {
@@ -8767,6 +9145,7 @@ export type EnteUncheckedCreateWithoutFascicoloKnowledgeItemsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutFascicoloKnowledgeItemsInput = {
@@ -8832,6 +9211,7 @@ export type EnteUpdateWithoutFascicoloKnowledgeItemsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutFascicoloKnowledgeItemsInput = {
@@ -8881,6 +9261,7 @@ export type EnteUncheckedUpdateWithoutFascicoloKnowledgeItemsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutFascicoloKnowledgeEvidenceInput = {
@@ -8930,6 +9311,7 @@ export type EnteCreateWithoutFascicoloKnowledgeEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutFascicoloKnowledgeEvidenceInput = {
@@ -8979,6 +9361,7 @@ export type EnteUncheckedCreateWithoutFascicoloKnowledgeEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutFascicoloKnowledgeEvidenceInput = {
@@ -9044,6 +9427,7 @@ export type EnteUpdateWithoutFascicoloKnowledgeEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutFascicoloKnowledgeEvidenceInput = {
@@ -9093,6 +9477,7 @@ export type EnteUncheckedUpdateWithoutFascicoloKnowledgeEvidenceInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutFascicoloKnowledgeRelationsInput = {
@@ -9142,6 +9527,7 @@ export type EnteCreateWithoutFascicoloKnowledgeRelationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutFascicoloKnowledgeRelationsInput = {
@@ -9191,6 +9577,7 @@ export type EnteUncheckedCreateWithoutFascicoloKnowledgeRelationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutFascicoloKnowledgeRelationsInput = {
@@ -9256,6 +9643,7 @@ export type EnteUpdateWithoutFascicoloKnowledgeRelationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutFascicoloKnowledgeRelationsInput = {
@@ -9305,6 +9693,7 @@ export type EnteUncheckedUpdateWithoutFascicoloKnowledgeRelationsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutAiFascicoloHumanReviewStatesInput = {
@@ -9354,6 +9743,7 @@ export type EnteCreateWithoutAiFascicoloHumanReviewStatesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutAiFascicoloHumanReviewStatesInput = {
@@ -9403,6 +9793,7 @@ export type EnteUncheckedCreateWithoutAiFascicoloHumanReviewStatesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutAiFascicoloHumanReviewStatesInput = {
@@ -9468,6 +9859,7 @@ export type EnteUpdateWithoutAiFascicoloHumanReviewStatesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutAiFascicoloHumanReviewStatesInput = {
@@ -9517,6 +9909,7 @@ export type EnteUncheckedUpdateWithoutAiFascicoloHumanReviewStatesInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteCreateWithoutAiFascicoloHumanReviewEventsInput = {
@@ -9566,6 +9959,7 @@ export type EnteCreateWithoutAiFascicoloHumanReviewEventsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutTenantInput
 }
 
 export type EnteUncheckedCreateWithoutAiFascicoloHumanReviewEventsInput = {
@@ -9615,6 +10009,7 @@ export type EnteUncheckedCreateWithoutAiFascicoloHumanReviewEventsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedCreateNestedManyWithoutTenantInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedCreateNestedManyWithoutTenantInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedCreateNestedManyWithoutTenantInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type EnteCreateOrConnectWithoutAiFascicoloHumanReviewEventsInput = {
@@ -9680,6 +10075,7 @@ export type EnteUpdateWithoutAiFascicoloHumanReviewEventsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutTenantNestedInput
 }
 
 export type EnteUncheckedUpdateWithoutAiFascicoloHumanReviewEventsInput = {
@@ -9729,6 +10125,7 @@ export type EnteUncheckedUpdateWithoutAiFascicoloHumanReviewEventsInput = {
   fascicoloOperationalProposals?: Prisma.FascicoloOperationalProposalUncheckedUpdateManyWithoutTenantNestedInput
   runtimeBudgetPolicies?: Prisma.RuntimeBudgetPolicyUncheckedUpdateManyWithoutTenantNestedInput
   runtimeCostReservations?: Prisma.RuntimeCostReservationUncheckedUpdateManyWithoutTenantNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 
@@ -9777,6 +10174,7 @@ export type EnteCountOutputType = {
   fascicoloOperationalProposals: number
   runtimeBudgetPolicies: number
   runtimeCostReservations: number
+  technicalSourceResearchRecords: number
 }
 
 export type EnteCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -9820,6 +10218,7 @@ export type EnteCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   fascicoloOperationalProposals?: boolean | EnteCountOutputTypeCountFascicoloOperationalProposalsArgs
   runtimeBudgetPolicies?: boolean | EnteCountOutputTypeCountRuntimeBudgetPoliciesArgs
   runtimeCostReservations?: boolean | EnteCountOutputTypeCountRuntimeCostReservationsArgs
+  technicalSourceResearchRecords?: boolean | EnteCountOutputTypeCountTechnicalSourceResearchRecordsArgs
 }
 
 /**
@@ -10112,6 +10511,13 @@ export type EnteCountOutputTypeCountRuntimeCostReservationsArgs<ExtArgs extends 
   where?: Prisma.RuntimeCostReservationWhereInput
 }
 
+/**
+ * EnteCountOutputType without action
+ */
+export type EnteCountOutputTypeCountTechnicalSourceResearchRecordsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TechnicalSourceResearchRecordWhereInput
+}
+
 
 export type EnteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -10161,6 +10567,7 @@ export type EnteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   fascicoloOperationalProposals?: boolean | Prisma.Ente$fascicoloOperationalProposalsArgs<ExtArgs>
   runtimeBudgetPolicies?: boolean | Prisma.Ente$runtimeBudgetPoliciesArgs<ExtArgs>
   runtimeCostReservations?: boolean | Prisma.Ente$runtimeCostReservationsArgs<ExtArgs>
+  technicalSourceResearchRecords?: boolean | Prisma.Ente$technicalSourceResearchRecordsArgs<ExtArgs>
   _count?: boolean | Prisma.EnteCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["ente"]>
 
@@ -10236,6 +10643,7 @@ export type EnteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   fascicoloOperationalProposals?: boolean | Prisma.Ente$fascicoloOperationalProposalsArgs<ExtArgs>
   runtimeBudgetPolicies?: boolean | Prisma.Ente$runtimeBudgetPoliciesArgs<ExtArgs>
   runtimeCostReservations?: boolean | Prisma.Ente$runtimeCostReservationsArgs<ExtArgs>
+  technicalSourceResearchRecords?: boolean | Prisma.Ente$technicalSourceResearchRecordsArgs<ExtArgs>
   _count?: boolean | Prisma.EnteCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type EnteIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -10284,6 +10692,7 @@ export type $EntePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     fascicoloOperationalProposals: Prisma.$FascicoloOperationalProposalPayload<ExtArgs>[]
     runtimeBudgetPolicies: Prisma.$RuntimeBudgetPolicyPayload<ExtArgs>[]
     runtimeCostReservations: Prisma.$RuntimeCostReservationPayload<ExtArgs>[]
+    technicalSourceResearchRecords: Prisma.$TechnicalSourceResearchRecordPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -10727,6 +11136,7 @@ export interface Prisma__EnteClient<T, Null = never, ExtArgs extends runtime.Typ
   fascicoloOperationalProposals<T extends Prisma.Ente$fascicoloOperationalProposalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$fascicoloOperationalProposalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloOperationalProposalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   runtimeBudgetPolicies<T extends Prisma.Ente$runtimeBudgetPoliciesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$runtimeBudgetPoliciesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RuntimeBudgetPolicyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   runtimeCostReservations<T extends Prisma.Ente$runtimeCostReservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$runtimeCostReservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RuntimeCostReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  technicalSourceResearchRecords<T extends Prisma.Ente$technicalSourceResearchRecordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ente$technicalSourceResearchRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TechnicalSourceResearchRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -12113,6 +12523,30 @@ export type Ente$runtimeCostReservationsArgs<ExtArgs extends runtime.Types.Exten
   take?: number
   skip?: number
   distinct?: Prisma.RuntimeCostReservationScalarFieldEnum | Prisma.RuntimeCostReservationScalarFieldEnum[]
+}
+
+/**
+ * Ente.technicalSourceResearchRecords
+ */
+export type Ente$technicalSourceResearchRecordsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TechnicalSourceResearchRecord
+   */
+  select?: Prisma.TechnicalSourceResearchRecordSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TechnicalSourceResearchRecord
+   */
+  omit?: Prisma.TechnicalSourceResearchRecordOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TechnicalSourceResearchRecordInclude<ExtArgs> | null
+  where?: Prisma.TechnicalSourceResearchRecordWhereInput
+  orderBy?: Prisma.TechnicalSourceResearchRecordOrderByWithRelationInput | Prisma.TechnicalSourceResearchRecordOrderByWithRelationInput[]
+  cursor?: Prisma.TechnicalSourceResearchRecordWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TechnicalSourceResearchRecordScalarFieldEnum | Prisma.TechnicalSourceResearchRecordScalarFieldEnum[]
 }
 
 /**

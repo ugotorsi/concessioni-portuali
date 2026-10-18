@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BookOpen, CheckCircle2, CircleHelp, Scale } from "lucide-react";
+import { TechnicalSourcesResearchPanel } from "@/components/procedimenti/TechnicalSourcesResearchPanel";
 
 export type ResearchSupportDirection = "SUPPORTS" | "OPPOSES" | "NEUTRAL" | "INCONCLUSIVE" | "UNASSESSED";
 export type ResearchSourceUsability = "USABLE" | "TO_VERIFY" | "NOT_USABLE";
@@ -140,7 +141,13 @@ export function FascicoloResearchSources({ sources }: { sources: readonly Fascic
   return <div className="grid min-w-0 gap-3 lg:grid-cols-2">{sources.map((source) => <SourceCard key={source.id} source={source} />)}</div>;
 }
 
-export function FascicoloResearch({ model }: { model: FascicoloResearchModel }) {
+export function FascicoloResearch({
+  model,
+  technicalResearchProcedureId,
+}: {
+  model: FascicoloResearchModel;
+  technicalResearchProcedureId?: string;
+}) {
   const questionIds = new Set(model.questions.map((question) => question.id));
   const unlinkedSources = model.sources.filter((source) => !source.questionId || !questionIds.has(source.questionId));
   const currentQuestions = model.questions.filter((question) => question.lifecycleStatus !== "HISTORICAL");
@@ -263,6 +270,9 @@ export function FascicoloResearch({ model }: { model: FascicoloResearchModel }) 
           </div>
           <div className="mt-3"><FascicoloResearchSources sources={unlinkedSources} /></div>
         </section>
+      ) : null}
+      {technicalResearchProcedureId ? (
+        <TechnicalSourcesResearchPanel procedimentoId={technicalResearchProcedureId} />
       ) : null}
     </section>
   );

@@ -104,6 +104,7 @@ export const ModelName = {
   FascicoloSignal: 'FascicoloSignal',
   ConcessioneExpiryChangeCommand: 'ConcessioneExpiryChangeCommand',
   ResearchMissionRecord: 'ResearchMissionRecord',
+  TechnicalSourceResearchRecord: 'TechnicalSourceResearchRecord',
   ResearchExecutionAttempt: 'ResearchExecutionAttempt',
   ResearchEvidenceBundleRecord: 'ResearchEvidenceBundleRecord',
   ResearchQuestionResultRecord: 'ResearchQuestionResultRecord',
@@ -1388,6 +1389,24 @@ export const ResearchMissionRecordScalarFieldEnum = {
 } as const
 
 export type ResearchMissionRecordScalarFieldEnum = (typeof ResearchMissionRecordScalarFieldEnum)[keyof typeof ResearchMissionRecordScalarFieldEnum]
+
+
+export const TechnicalSourceResearchRecordScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  missionId: 'missionId',
+  requestedByUserId: 'requestedByUserId',
+  questionSnapshot: 'questionSnapshot',
+  toolName: 'toolName',
+  requestPayload: 'requestPayload',
+  responsePayload: 'responsePayload',
+  serviceVersion: 'serviceVersion',
+  verificationStatus: 'verificationStatus',
+  retrievedAt: 'retrievedAt'
+} as const
+
+export type TechnicalSourceResearchRecordScalarFieldEnum = (typeof TechnicalSourceResearchRecordScalarFieldEnum)[keyof typeof TechnicalSourceResearchRecordScalarFieldEnum]
 
 
 export const ResearchExecutionAttemptScalarFieldEnum = {

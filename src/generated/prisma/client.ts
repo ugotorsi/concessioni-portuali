@@ -307,6 +307,11 @@ export type ConcessioneExpiryChangeCommand = Prisma.ConcessioneExpiryChangeComma
  */
 export type ResearchMissionRecord = Prisma.ResearchMissionRecordModel
 /**
+ * Model TechnicalSourceResearchRecord
+ * 
+ */
+export type TechnicalSourceResearchRecord = Prisma.TechnicalSourceResearchRecordModel
+/**
  * Model ResearchExecutionAttempt
  * 
  */

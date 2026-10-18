@@ -1005,6 +1005,7 @@ model Ente {
   fascicoloOperationalProposals     FascicoloOperationalProposal[]
   runtimeBudgetPolicies             RuntimeBudgetPolicy[]
   runtimeCostReservations           RuntimeCostReservation[]
+  technicalSourceResearchRecords    TechnicalSourceResearchRecord[]
 
   @@index([tipo])
   @@index([stato])
@@ -1474,6 +1475,7 @@ model User {
   documentRequirementEvidenceReviews            FascicoloDocumentRequirementEvidenceReview[] @relation("DocumentRequirementEvidenceReviewedBy")
   aiFascicoloHumanReviewEvents                   AiFascicoloHumanReviewEvent[]
   assignedResearchMissions                       ResearchMissionRecord[]                        @relation("ResearchMissionAssignedActor")
+  technicalSourceResearchRequests                TechnicalSourceResearchRecord[]                @relation("TechnicalSourceResearchRequestedBy")
 
   @@index([ruolo])
   @@index([attivo])
@@ -1753,6 +1755,7 @@ model Procedimento {
   asyncJobs                         AsyncJob[]
   documentExtractionAttempts        DocumentExtractionAttempt[]
   runtimeBudgetPolicies             RuntimeBudgetPolicy[]
+  technicalSourceResearchRecords    TechnicalSourceResearchRecord[]
   runtimeCostReservations           RuntimeCostReservation[]
 
   @@index([enteId])
@@ -2705,6 +2708,7 @@ model ResearchMissionRecord {
   assistedVerifications ResearchAssistedVerificationRecord[]
   questionResults     ResearchQuestionResultRecord[]
   sourceAssessments   ResearchSourceAssessmentRecord[]
+  technicalSourceResearchRecords TechnicalSourceResearchRecord[]
   primaryAdverseRequirements ResearchAdverseRequirement[] @relation("PrimaryAdverseMission")
   adverseMissionRequirement ResearchAdverseRequirement? @relation("AdverseMission")
   knowledgeRevision  FascicoloKnowledgeRevision? @relation("ResearchMissionCurrentKnowledgeRevision", fields: [knowledgeRevisionId], references: [id], onDelete: Restrict)
@@ -2720,6 +2724,29 @@ model ResearchMissionRecord {
   @@index([knowledgeRevisionId], map: "research_mission_knowledge_revision_idx")
   @@index([firstKnowledgeRevisionId], map: "research_mission_first_knowledge_revision_idx")
   @@index([tenantId, caseId, researchQuestionSemanticKey], map: "research_mission_question_idx")
+}
+
+model TechnicalSourceResearchRecord {
+  id                 String   @id @default(cuid()) @db.VarChar(96)
+  tenantId           String
+  procedimentoId     String
+  missionId          String   @db.VarChar(96)
+  requestedByUserId  String
+  questionSnapshot   String   @db.Text
+  toolName           String   @db.VarChar(64)
+  requestPayload     Json
+  responsePayload    Json
+  serviceVersion     String   @db.VarChar(64)
+  verificationStatus String   @default("DA_VERIFICARE_SU_FONTE_ORIGINALE") @db.VarChar(48)
+  retrievedAt        DateTime @default(now())
+
+  tenant       Ente                  @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  procedimento Procedimento          @relation(fields: [procedimentoId, tenantId], references: [id, enteId], onDelete: Restrict, map: "technical_source_research_procedure_fk")
+  mission      ResearchMissionRecord @relation(fields: [missionId, tenantId], references: [id, tenantId], onDelete: Restrict, map: "technical_source_research_mission_fk")
+  requestedBy  User                  @relation("TechnicalSourceResearchRequestedBy", fields: [requestedByUserId], references: [id], onDelete: Restrict, map: "technical_source_research_user_fk")
+
+  @@index([tenantId, procedimentoId, missionId, retrievedAt], map: "technical_source_research_mission_idx")
+  @@index([tenantId, requestedByUserId, retrievedAt], map: "technical_source_research_actor_idx")
 }
 
 model ResearchExecutionAttempt {

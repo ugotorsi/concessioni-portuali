@@ -437,6 +437,7 @@ export const ModelName = {
   FascicoloSignal: 'FascicoloSignal',
   ConcessioneExpiryChangeCommand: 'ConcessioneExpiryChangeCommand',
   ResearchMissionRecord: 'ResearchMissionRecord',
+  TechnicalSourceResearchRecord: 'TechnicalSourceResearchRecord',
   ResearchExecutionAttempt: 'ResearchExecutionAttempt',
   ResearchEvidenceBundleRecord: 'ResearchEvidenceBundleRecord',
   ResearchQuestionResultRecord: 'ResearchQuestionResultRecord',
@@ -486,7 +487,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceTemporalAssessment" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "fascicoloIntake" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "documentExtractionAttempt" | "documentExtractionPage" | "documentOcrRun" | "documentOcrPageCheckpoint" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "legalReferenceMatch" | "legalReferenceOfficialLookup" | "legalReferenceOfficialHit" | "legalReferenceOfficialReconciliation" | "legalReferenceOfficialReconciliationEvidence" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "runtimeWorkerHeartbeat" | "runtimeBudgetPolicy" | "runtimeCostReservation" | "fascicoloSignal" | "concessioneExpiryChangeCommand" | "researchMissionRecord" | "researchExecutionAttempt" | "researchEvidenceBundleRecord" | "researchQuestionResultRecord" | "researchSourceAssessmentRecord" | "researchAdverseRequirement" | "researchAssistedVerificationRecord" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "automaticFascicoloReport" | "automaticFascicoloReportDocument" | "automaticFascicoloReportMission" | "fascicoloKnowledgeRevision" | "structuredFascicoloReportSnapshot" | "fascicoloOperationalProposal" | "fascicoloOperationalProposalReviewEvent" | "fascicoloOperationalProposalMaterialization" | "fascicoloSubject" | "fascicoloSubjectIdentifier" | "fascicoloKnowledgeItem" | "fascicoloKnowledgeEvidence" | "fascicoloKnowledgeRelation" | "fascicoloKnowledgeReviewEvent" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
+    modelProps: "ente" | "authority" | "port" | "portArea" | "importRun" | "legalSource" | "legalExpressionVersion" | "legalSourceTemporalAssessment" | "legalSourceIdentityAssertion" | "legalSourceVersion" | "legalSourceAcquisition" | "sourceRelation" | "legalRule" | "documentGap" | "tenantMembership" | "user" | "concessionario" | "concessione" | "concessioneLegalFramework" | "obbligoConcessorio" | "scadenza" | "criticita" | "procedimento" | "fascicoloIntake" | "procedimentoResponsabileAssignment" | "sopralluogo" | "pagamento" | "documento" | "documentFileVersion" | "documentExtractionAttempt" | "documentExtractionPage" | "documentOcrRun" | "documentOcrPageCheckpoint" | "neutralIntake" | "neutralIntakeExtractionAttempt" | "neutralIntakeExtractionPage" | "legalReferenceMention" | "legalReferenceMatch" | "legalReferenceOfficialLookup" | "legalReferenceOfficialHit" | "legalReferenceOfficialReconciliation" | "legalReferenceOfficialReconciliationEvidence" | "neutralIntakeClassificationAttempt" | "neutralIntakeDestination" | "legalSourceCandidateAdmission" | "legalSourceCandidateResolution" | "asyncJob" | "runtimeWorkerHeartbeat" | "runtimeBudgetPolicy" | "runtimeCostReservation" | "fascicoloSignal" | "concessioneExpiryChangeCommand" | "researchMissionRecord" | "technicalSourceResearchRecord" | "researchExecutionAttempt" | "researchEvidenceBundleRecord" | "researchQuestionResultRecord" | "researchSourceAssessmentRecord" | "researchAdverseRequirement" | "researchAssistedVerificationRecord" | "fascicoloObservation" | "fascicoloChecklistEvidence" | "fascicoloDocumentRequirementProposal" | "fascicoloDocumentRequirementEvidence" | "fascicoloDocumentRequirementEvidenceReview" | "decisioneProcedimento" | "report" | "normaFonte" | "normaVersione" | "normaImpatto" | "activityLog" | "aiFascicoloTrustedReviewMaterial" | "automaticFascicoloReport" | "automaticFascicoloReportDocument" | "automaticFascicoloReportMission" | "fascicoloKnowledgeRevision" | "structuredFascicoloReportSnapshot" | "fascicoloOperationalProposal" | "fascicoloOperationalProposalReviewEvent" | "fascicoloOperationalProposalMaterialization" | "fascicoloSubject" | "fascicoloSubjectIdentifier" | "fascicoloKnowledgeItem" | "fascicoloKnowledgeEvidence" | "fascicoloKnowledgeRelation" | "fascicoloKnowledgeReviewEvent" | "aiFascicoloHumanReviewState" | "aiFascicoloHumanReviewEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -4412,6 +4413,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    TechnicalSourceResearchRecord: {
+      payload: Prisma.$TechnicalSourceResearchRecordPayload<ExtArgs>
+      fields: Prisma.TechnicalSourceResearchRecordFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TechnicalSourceResearchRecordFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicalSourceResearchRecordPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TechnicalSourceResearchRecordFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicalSourceResearchRecordPayload>
+        }
+        findFirst: {
+          args: Prisma.TechnicalSourceResearchRecordFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicalSourceResearchRecordPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TechnicalSourceResearchRecordFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicalSourceResearchRecordPayload>
+        }
+        findMany: {
+          args: Prisma.TechnicalSourceResearchRecordFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicalSourceResearchRecordPayload>[]
+        }
+        create: {
+          args: Prisma.TechnicalSourceResearchRecordCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicalSourceResearchRecordPayload>
+        }
+        createMany: {
+          args: Prisma.TechnicalSourceResearchRecordCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TechnicalSourceResearchRecordCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicalSourceResearchRecordPayload>[]
+        }
+        delete: {
+          args: Prisma.TechnicalSourceResearchRecordDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicalSourceResearchRecordPayload>
+        }
+        update: {
+          args: Prisma.TechnicalSourceResearchRecordUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicalSourceResearchRecordPayload>
+        }
+        deleteMany: {
+          args: Prisma.TechnicalSourceResearchRecordDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TechnicalSourceResearchRecordUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TechnicalSourceResearchRecordUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicalSourceResearchRecordPayload>[]
+        }
+        upsert: {
+          args: Prisma.TechnicalSourceResearchRecordUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TechnicalSourceResearchRecordPayload>
+        }
+        aggregate: {
+          args: Prisma.TechnicalSourceResearchRecordAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTechnicalSourceResearchRecord>
+        }
+        groupBy: {
+          args: Prisma.TechnicalSourceResearchRecordGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TechnicalSourceResearchRecordGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TechnicalSourceResearchRecordCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TechnicalSourceResearchRecordCountAggregateOutputType> | number
+        }
+      }
+    }
     ResearchExecutionAttempt: {
       payload: Prisma.$ResearchExecutionAttemptPayload<ExtArgs>
       fields: Prisma.ResearchExecutionAttemptFieldRefs
@@ -8201,6 +8276,24 @@ export const ResearchMissionRecordScalarFieldEnum = {
 export type ResearchMissionRecordScalarFieldEnum = (typeof ResearchMissionRecordScalarFieldEnum)[keyof typeof ResearchMissionRecordScalarFieldEnum]
 
 
+export const TechnicalSourceResearchRecordScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  procedimentoId: 'procedimentoId',
+  missionId: 'missionId',
+  requestedByUserId: 'requestedByUserId',
+  questionSnapshot: 'questionSnapshot',
+  toolName: 'toolName',
+  requestPayload: 'requestPayload',
+  responsePayload: 'responsePayload',
+  serviceVersion: 'serviceVersion',
+  verificationStatus: 'verificationStatus',
+  retrievedAt: 'retrievedAt'
+} as const
+
+export type TechnicalSourceResearchRecordScalarFieldEnum = (typeof TechnicalSourceResearchRecordScalarFieldEnum)[keyof typeof TechnicalSourceResearchRecordScalarFieldEnum]
+
+
 export const ResearchExecutionAttemptScalarFieldEnum = {
   id: 'id',
   missionId: 'missionId',
@@ -10914,6 +11007,7 @@ export type GlobalOmitConfig = {
   fascicoloSignal?: Prisma.FascicoloSignalOmit
   concessioneExpiryChangeCommand?: Prisma.ConcessioneExpiryChangeCommandOmit
   researchMissionRecord?: Prisma.ResearchMissionRecordOmit
+  technicalSourceResearchRecord?: Prisma.TechnicalSourceResearchRecordOmit
   researchExecutionAttempt?: Prisma.ResearchExecutionAttemptOmit
   researchEvidenceBundleRecord?: Prisma.ResearchEvidenceBundleRecordOmit
   researchQuestionResultRecord?: Prisma.ResearchQuestionResultRecordOmit

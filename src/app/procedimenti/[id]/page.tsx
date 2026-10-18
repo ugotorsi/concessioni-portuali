@@ -343,6 +343,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           {activeSection === "istruttoria" ? <FascicoloAutomaticWorkflowPanel model={automaticWorkflow} /> : null}
           {activeSection === "analysis" ? (
             <FascicoloAnalysis
+              technicalResearchProcedureId={detail.procedimento.id}
               model={{
                 questions: mergeFascicoloAnalysisQuestions([
                   ...(structuredAnalysis?.questions ?? []),
@@ -367,7 +368,12 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               }}
             />
           ) : null}
-          {activeSection === "research" ? <FascicoloResearch model={baseResearchModel} /> : null}
+          {activeSection === "research" ? (
+            <FascicoloResearch
+              model={baseResearchModel}
+              technicalResearchProcedureId={detail.procedimento.id}
+            />
+          ) : null}
           {activeSection === "proposals" ? (
             <section aria-label="Proposte preliminari">
               <h2 className="mb-3 text-xl font-semibold">Proposte operative preliminari</h2>
@@ -753,6 +759,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
         {activeSection === "research" ? (
           <FascicoloResearch
             model={researchModel}
+            technicalResearchProcedureId={detail.procedimento.id}
           />
         ) : null}
 
@@ -805,6 +812,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
 
         {activeSection === "analysis" ? (
           <FascicoloAnalysis
+            technicalResearchProcedureId={detail.procedimento.id}
             model={{
               questions: mergeFascicoloAnalysisQuestions([
                 ...(structuredAnalysis?.questions ?? []),
