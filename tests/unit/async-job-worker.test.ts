@@ -129,6 +129,25 @@ describe("B2C9 generic async job worker", () => {
     expect(persistence.failAsyncJob).not.toHaveBeenCalled();
   });
 
+  it("fails invalid result metadata terminally without leaving the job running", async () => {
+    const registry = new AsyncJobHandlerRegistry([{
+      operation: "GENERIC.TEST",
+      parseInput: (input) => input,
+      execute: async () => ({
+        referenceType: "FIXTURE_RESULT",
+        referenceId: "result-1",
+        metadata: { corpusFingerprint: "c".repeat(64) },
+      }),
+    }]);
+    await expect(drainOneAsyncJob({
+      workerId: "worker-1", leaseDurationMs: 60_000, retryDelayMs: 1_000, registry,
+    })).resolves.toEqual({ outcome: "TERMINAL_FAILED", jobId: "job-1" });
+    expect(persistence.succeedAsyncJob).not.toHaveBeenCalled();
+    expect(persistence.failAsyncJob).toHaveBeenCalledWith(expect.objectContaining({
+      failure: { retryable: false, category: "VALIDATION", code: "INVALID_RESULT_REFERENCE" },
+    }));
+  });
+
   it("forwards an operation terminal hook only to terminal failure persistence", async () => {
     const hook = vi.fn();
     const registry = new AsyncJobHandlerRegistry([{
