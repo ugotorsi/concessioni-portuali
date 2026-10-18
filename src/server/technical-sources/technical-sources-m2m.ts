@@ -13,12 +13,6 @@ const TOKEN_TIMEOUT_MS = 10_000;
 const MAX_TOKEN_RESPONSE_BYTES = 16_384;
 const EXPIRY_SAFETY_MS = 60_000;
 
-function isAllowedTokenHost(hostname: string): boolean {
-  return hostname === "test.stytch.com"
-    || hostname === "api.stytch.com"
-    || /^[a-z0-9-]+\.customers\.stytch\.(dev|com)$/.test(hostname);
-}
-
 /**
  * Returns null when the channel is disabled. Throws when it is enabled but misconfigured,
  * so a partial configuration can never silently fall back to another identity.
@@ -37,14 +31,19 @@ export function readTechnicalSourcesM2MConfig(env: Env = process.env): Technical
   } catch {
     throw new TechnicalSourcesMcpError("M2M_AUTH_NOT_CONFIGURED");
   }
+  const endpoint = /^\/v1\/public\/project-(test|live)-[0-9a-f-]+\/oauth2\/token$/.exec(url.pathname);
+  const environment = endpoint?.[1];
   if (
     url.protocol !== "https:"
     || url.username
     || url.password
     || url.search
     || url.hash
-    || !isAllowedTokenHost(url.hostname)
+    || url.port
+    || !endpoint
+    || url.hostname !== (environment === "test" ? "test.stytch.com" : "api.stytch.com")
     || !/^m2m-client-(test|live)-[0-9a-f-]+$/.test(clientId)
+    || !clientId.startsWith(`m2m-client-${environment}-`)
     || clientSecret.length < 16
     || !/^[a-z0-9:_-]{1,80}$/i.test(scope)
   ) {
@@ -110,14 +109,14 @@ export function createTechnicalSourcesTokenProvider(options: Readonly<{
         method: "POST",
         headers: {
           Accept: "application/json",
-          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Type": "application/json",
         },
-        body: new URLSearchParams({
+        body: JSON.stringify({
           grant_type: "client_credentials",
           client_id: config.clientId,
           client_secret: config.clientSecret,
           scope: config.scope,
-        }).toString(),
+        }),
         cache: "no-store",
         redirect: "error",
         signal: AbortSignal.timeout(TOKEN_TIMEOUT_MS),
