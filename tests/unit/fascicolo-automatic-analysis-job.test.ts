@@ -391,11 +391,13 @@ describe("automatic fascicolo analysis job", () => {
       referenceType: "FASCICOLO_KNOWLEDGE_REVISION",
       referenceId: "revision-current",
       metadata: {
-        corpusFingerprint: "c".repeat(64),
+        corpusHash: "c".repeat(64),
         researchJobCount: 0,
       },
     });
     expect(deps.persistKnowledge).toHaveBeenCalledOnce();
+    const { normalizeAsyncJobResultMetadata } = await import("@/server/async-jobs/domain");
+    expect(() => normalizeAsyncJobResultMetadata(result)).not.toThrow();
     expect(deps.persistReport).not.toHaveBeenCalled();
     expect(deps.scheduleMission).not.toHaveBeenCalled();
   });
