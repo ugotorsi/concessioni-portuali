@@ -76,6 +76,34 @@ export interface StructuredReportQuestion {
   limitations: readonly string[];
 }
 
+export interface StructuredReportOperationalStep {
+  title: string;
+  action: string;
+  office: string;
+  requiredDocuments: readonly string[];
+  completionGate: string;
+}
+
+export interface StructuredReportOperationalAlternative {
+  title: string;
+  whenApplicable: string;
+  practicalRoute: string;
+  riskOrLimit: string;
+}
+
+export interface StructuredReportOperationalPlan {
+  issueSemanticKey: string;
+  issueText: string;
+  sourceDocumentRefs: readonly string[];
+  outstandingEvidence: readonly string[];
+  legalSourceStatus: "VERIFIED_SOURCES_ATTACHED" | "LEGAL_RESEARCH_REQUIRED";
+  professionalStatus: "PRELIMINARY_NOT_APPROVED";
+  recommendedNextStep: string;
+  steps: readonly StructuredReportOperationalStep[];
+  alternatives: readonly StructuredReportOperationalAlternative[];
+  deadlineReview: string;
+}
+
 export interface StructuredFascicoloReportPayload {
   contractVersion: typeof STRUCTURED_FASCICOLO_REPORT_CONTRACT_VERSION;
   tenantId: string;
@@ -105,6 +133,8 @@ export interface StructuredFascicoloReportPayload {
   unassignedQuestions: readonly StructuredReportQuestion[];
   gaps: readonly StructuredKnowledgeReadItem[];
   deadlineCandidates: readonly StructuredKnowledgeReadItem[];
+  /** Additive, read-only guidance. Older archived V1 reports may omit this field. */
+  operationalPlans?: readonly StructuredReportOperationalPlan[];
   limitations: readonly string[];
 }
 
@@ -200,6 +230,115 @@ function projectQuestion(
   };
 }
 
+function buildOperationalPlans(
+  issues: StructuredFascicoloReportPayload["legalIssues"],
+  knowledge: StructuredKnowledgeReadModel,
+): readonly StructuredReportOperationalPlan[] {
+  const evidenceItems = [
+    ...knowledge.facts, ...knowledge.legalActs, ...knowledge.measures,
+    ...knowledge.events, ...knowledge.gaps, ...knowledge.deadlineCandidates,
+  ].filter((item) => item.status !== "REJECTED");
+  return issues.map((issue) => {
+    const originIds = new Set(issue.originatingItemIds);
+    const related = evidenceItems.filter((item) => originIds.has(item.id));
+    const sourceDocumentRefs = [...new Set(related.flatMap((item) =>
+      item.evidence.map((evidence) => evidence.basisRef)))].sort();
+    const outstandingEvidence = knowledge.gaps.filter((item) =>
+      item.status !== "REJECTED" && originIds.has(item.id))
+      .map((item) => item.normalizedText).sort();
+    const sourceReady = issue.questions.length > 0 && issue.questions.every((question) =>
+      question.missionStatus === "COMPLETED"
+      && question.favorableAuthorities.length + question.contraryAuthorities.length > 0);
+    const caseText = [issue.text, ...related.map((item) => item.normalizedText)].join(" ");
+    const concernsInstallation = /container|manufatt|prefabbricat|installazion/i.test(caseText)
+      && /concession|demanial|portual/i.test(caseText);
+    const steps: StructuredReportOperationalStep[] = [
+      {
+        title: "1. Verificare titolo, fatti e provenienza",
+        action: "Confrontare gli atti effettivamente rilasciati con stato dei luoghi, destinazione e cronologia, distinguendo dati documentati da affermazioni ancora da confermare.",
+        office: "Concessionario e ente che ha rilasciato il titolo, da identificare e verificare",
+        requiredDocuments: concernsInstallation
+          ? ["Concessione integrale, allegati, planimetrie e successive modifiche", "Verbale di sopralluogo, fotografie, dati dimensionali e uso del manufatto", "Eventuali assensi demaniali e documentazione tecnico-edilizia"]
+          : ["Titolo o atto rilevante integrale e relativi allegati", "Comunicazioni e provvedimenti successivi", "Documentazione probatoria e cronologia verificabile"],
+        completionGate: "Origine, titolarità, contenuto e completezza degli atti verificati da un professionista",
+      },
+      {
+        title: "2. Qualificare la questione e controllare le fonti",
+        action: concernsInstallation
+          ? "Verificare se l'installazione e l'uso siano già assentiti, se costituiscano modifica della concessione o richiedano altri titoli; controllare la disciplina vigente alla data dei fatti, le competenze e le eventuali prescrizioni."
+          : "Identificare competenza, disciplina applicabile alla data dei fatti, eventuale procedimento già avviato e rimedi astrattamente disponibili, confrontando fonti favorevoli e contrarie.",
+        office: "Ente competente risultante dagli atti; altri uffici solo dopo verifica del relativo potere",
+        requiredDocuments: ["Testi normativi vigenti nel periodo rilevante", "Giurisprudenza pertinente con identificazione e testo verificati", "Eventuali avvisi, contestazioni e comunicazioni ricevute"],
+        completionGate: "Fonti controllate, alternative giuridiche valutate e termini procedimentali verificati",
+      },
+      {
+        title: "3. Scegliere l'alternativa e predisporre l'atto",
+        action: "Redigere una proposta motivata con presupposti, richieste, allegati, rischi e destinatario; nessuna istanza, difesa o comunicazione viene inviata automaticamente.",
+        office: "Ufficio individuato mediante la verifica di competenza nel fascicolo",
+        requiredDocuments: ["Dossier degli atti verificati", "Relazione tecnica, quando necessaria", "Bozza di istanza, memoria o altra iniziativa selezionata"],
+        completionGate: "Scelta e testo approvati dal professionista prima di qualsiasi invio",
+      },
+    ];
+    const alternatives: StructuredReportOperationalAlternative[] = concernsInstallation ? [
+      {
+        title: "Confermare il mantenimento dell'installazione",
+        whenApplicable: "Solo se titolo, allegati e assensi effettivamente verificati coprono manufatto e destinazione d'uso",
+        practicalRoute: "Acquisire gli atti autorizzativi, documentare la corrispondenza allo stato dei luoghi e predisporre un riscontro motivato all'ente, se richiesto.",
+        riskOrLimit: "La mera presenza nel fascicolo di una concessione non dimostra l'autorizzazione del manufatto.",
+      },
+      {
+        title: "Valutare una richiesta di assenso o modifica",
+        whenApplicable: "Solo se la disciplina e l'ente competente consentono il percorso rispetto all'opera e all'uso concreti",
+        practicalRoute: "Predisporre istanza con descrizione, tavole, relazione tecnica e confronto con il titolo; verificare separatamente gli ulteriori atti eventualmente necessari.",
+        riskOrLimit: "Non presumere una sanatoria retroattiva né che la presentazione dell'istanza legittimi l'occupazione preesistente.",
+      },
+      {
+        title: "Valutare adeguamento o ripristino",
+        whenApplicable: "Se l'installazione risulta incompatibile e non emerge un percorso consentito di mantenimento",
+        practicalRoute: "Verificare obblighi e tempi con professionista e autorità, pianificare eventuale rimozione o adeguamento documentando le operazioni.",
+        riskOrLimit: "Costi, conseguenze del titolo e obblighi ripristinatori devono essere accertati prima di decidere.",
+      },
+      {
+        title: "Esercitare difese procedimentali o giurisdizionali",
+        whenApplicable: "Soltanto se esistono contestazioni o provvedimenti e previa verifica del loro contenuto e dei termini",
+        practicalRoute: "Acquisire notifiche e fascicolo amministrativo; valutare osservazioni, accesso agli atti e tutela competente sulla base delle fonti verificate.",
+        riskOrLimit: "Nessun termine di impugnazione o rimedio è qui considerato già accertato.",
+      },
+    ] : [
+      {
+        title: "Confermare la posizione documentata",
+        whenApplicable: "Se gli atti e la disciplina verificata sostengono la situazione rappresentata",
+        practicalRoute: "Completare l'istruttoria e predisporre una valutazione motivata con riferimenti documentali e fonti controllate.",
+        riskOrLimit: "Non è una conclusione sulla fondatezza della posizione finché le verifiche non siano concluse.",
+      },
+      {
+        title: "Richiedere chiarimenti, assenso o adeguamento",
+        whenApplicable: "Se l'istruttoria evidenzia carenze e l'ordinamento prevede un percorso amministrativo utilizzabile",
+        practicalRoute: "Identificare ente competente, procedimento, documenti e condizioni; predisporre la richiesta subordinata a revisione professionale.",
+        riskOrLimit: "Non presupporre che regolarizzazione o modifica siano sempre ammissibili.",
+      },
+      {
+        title: "Valutare osservazioni o rimedi",
+        whenApplicable: "Se una comunicazione o un provvedimento produce effetti sulla posizione del cliente",
+        practicalRoute: "Verificare atto, data di conoscenza, termini, contraddittorio e sede competente prima di redigere osservazioni o tutela.",
+        riskOrLimit: "Termini, rimedi ed effetti richiedono verifica specifica e non sono determinati automaticamente.",
+      },
+    ];
+    return {
+      issueSemanticKey: issue.semanticKey,
+      issueText: issue.text,
+      sourceDocumentRefs,
+      outstandingEvidence,
+      legalSourceStatus: sourceReady ? "VERIFIED_SOURCES_ATTACHED" : "LEGAL_RESEARCH_REQUIRED",
+      professionalStatus: "PRELIMINARY_NOT_APPROVED",
+      recommendedNextStep: "Completare prima l'accertamento documentale; la scelta dell'alternativa richiede verifica delle fonti e approvazione professionale.",
+      steps,
+      alternatives,
+      deadlineReview: "Verificare espressamente scadenze, notifiche e termini applicabili: nessuna data processuale è determinata da questo piano.",
+    };
+  });
+}
+
 export function buildStructuredFascicoloReport(input: {
   tenantId: string;
   procedimentoId: string;
@@ -287,6 +426,7 @@ export function buildStructuredFascicoloReport(input: {
     unassignedQuestions: questions.filter((question) => !assignedQuestionIds.has(question.knowledgeItemId)),
     gaps: visibleItems(input.knowledge.gaps),
     deadlineCandidates: visibleItems(input.knowledge.deadlineCandidates),
+    operationalPlans: buildOperationalPlans(legalIssues, input.knowledge),
     limitations: [...new Set([
       ...input.knowledge.revision.warnings,
       ...(input.knowledge.deadlineCandidates.length ? ["DEADLINE_CANDIDATES_ARE_NOT_OPERATIONAL_DEADLINES"] : []),
