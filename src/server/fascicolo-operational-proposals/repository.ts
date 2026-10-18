@@ -19,7 +19,7 @@ export interface OperationalProposalAuditInput {
   azione: string;
   entitaId: string | null;
   enteId: string;
-  concessioneId: string;
+  concessioneId: string | null;
   metadata: JsonValue;
   actor: { actorId: string; actorEmail: string | null; actorRole: string };
 }
@@ -84,6 +84,7 @@ export class OperationalProposalRepositoryError extends Error {
     | "INVALID_AMENDMENT"
     | "PROPOSAL_NOT_APPROVED"
     | "MANUAL_ACTION_REQUIRED"
+    | "CONCESSION_REQUIRED_FOR_MATERIALIZATION"
     | "UNSUPPORTED_MATERIALIZATION"
     | "DEADLINE_EXACT_DATE_REQUIRED"
     | "SUBJECT_NOT_FOUND"
@@ -102,11 +103,14 @@ function deterministicId(prefix: string, identity: string): string {
   return `${prefix}_${createHash("sha256").update(identity).digest("hex")}`.slice(0, 96);
 }
 
-async function assertAuthority(tx: OperationalProposalSqlExecutor, tenantId: string, procedimentoId: string): Promise<{ concessioneId: string }> {
-  const result = await tx.query<{ concessioneId: string }>(`
+// A procedimento without a concession is a valid living fascicolo; a linked concession must belong to the same tenant.
+async function assertAuthority(tx: OperationalProposalSqlExecutor, tenantId: string, procedimentoId: string): Promise<{ concessioneId: string | null }> {
+  const result = await tx.query<{ concessioneId: string | null }>(`
     SELECT p."concessioneId" FROM "Procedimento" p
-    JOIN "Concessione" c ON c."id" = p."concessioneId"
-    WHERE p."id" = $1 AND c."enteId" = $2
+    LEFT JOIN "Concessione" c ON c."id" = p."concessioneId"
+    WHERE p."id" = $1
+      AND p."enteId" = $2
+      AND (p."concessioneId" IS NULL OR c."enteId" = $2)
   `, [procedimentoId, tenantId]);
   if (!result.rows[0]) throw new OperationalProposalRepositoryError("AUTHORITY_MISMATCH");
   return result.rows[0];
@@ -404,6 +408,8 @@ export async function materializeOperationalProposal(input: {
       || (["DOCUMENT_REQUIREMENT", "CHECKLIST_ITEM", "ACTIVITY", "NOTE"] as const).includes(proposal.proposalType as never)) {
       throw new OperationalProposalRepositoryError("MANUAL_ACTION_REQUIRED");
     }
+    // Scadenza and Criticita require a concession at schema level.
+    if (!concessioneId) throw new OperationalProposalRepositoryError("CONCESSION_REQUIRED_FOR_MATERIALIZATION");
     const target = await materializeTarget(tx, proposal, concessioneId);
     const now = (ctx.now ?? (() => new Date()))();
     await tx.query(`
