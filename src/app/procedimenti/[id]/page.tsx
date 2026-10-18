@@ -20,7 +20,7 @@ import {
 import { FascicoloDeadlines, type FascicoloDeadlineStatus } from "@/components/procedimenti/FascicoloDeadlines";
 import { FascicoloIssues, type FascicoloIssueSeverity, type FascicoloIssueStatus } from "@/components/procedimenti/FascicoloIssues";
 import { FascicoloProposals } from "@/components/procedimenti/FascicoloProposals";
-import { FascicoloReport } from "@/components/procedimenti/FascicoloReport";
+import { FascicoloReport, OperationalPlans } from "@/components/procedimenti/FascicoloReport";
 import { FascicoloResearch } from "@/components/procedimenti/FascicoloResearch";
 import { FascicoloIntakeDetail } from "@/components/procedimenti/FascicoloIntakeDetail";
 import { FascicoloConcession } from "@/components/procedimenti/FascicoloConcession";
@@ -321,6 +321,15 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
             />
           ) : null}
           {activeSection === "research" ? <FascicoloResearch model={{ questions: [], sources: [] }} /> : null}
+          {activeSection === "proposals" ? (
+            <section aria-label="Proposte preliminari">
+              <h2 className="mb-3 text-xl font-semibold">Proposte operative preliminari</h2>
+              {automaticWorkflow?.structuredReport?.payload.operationalPlans?.length ? (
+                <OperationalPlans plans={automaticWorkflow.structuredReport.payload.operationalPlans} />
+              ) : <p className="text-sm text-slate-600">Non sono ancora disponibili percorsi operativi preliminari.</p>}
+              <p className="mt-4 text-sm text-slate-600">Nessun titolo concessorio viene presunto o creato automaticamente. Le proposte richiedono valutazione professionale.</p>
+            </section>
+          ) : null}
           {activeSection === "reports" ? <FascicoloReport snapshots={structuredReportSnapshots} /> : null}
           {activeSection === "concession" ? (
             <Card>
@@ -853,6 +862,10 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           />
 
         </section> : null}
+
+        {activeSection === "proposals" && automaticWorkflow?.structuredReport?.payload.operationalPlans?.length ? (
+          <OperationalPlans plans={automaticWorkflow.structuredReport.payload.operationalPlans} />
+        ) : null}
 
         {activeSection === "proposals" ? (
           <FascicoloProposals
