@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { findManyMissions, countMissions } = vi.hoisted(() => ({
+const { findManyMissions, countMissions, findManyTechnical } = vi.hoisted(() => ({
   findManyMissions: vi.fn(),
   countMissions: vi.fn(),
+  findManyTechnical: vi.fn(),
 }));
 
 vi.mock("@/lib/prisma", () => ({
@@ -17,6 +18,7 @@ vi.mock("@/lib/prisma", () => ({
     structuredFascicoloReportSnapshot: { findMany: vi.fn(async () => []) },
     asyncJob: { findMany: vi.fn(async () => []) },
     researchMissionRecord: { findMany: findManyMissions, count: countMissions },
+    technicalSourceResearchRecord: { findMany: findManyTechnical },
   },
 }));
 
@@ -43,6 +45,7 @@ import { getFascicoloAutomaticWorkflowReadModel } from "@/server/queries/fascico
 describe("Lotto 3A fascicolo automatic workflow read model", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    findManyTechnical.mockResolvedValue([]);
     countMissions.mockResolvedValue(2);
     findManyMissions.mockImplementation(async (query) => {
       expect(query.where).toMatchObject({ tenantId: "tenant-1", caseId: "procedure-1" });
@@ -177,6 +180,21 @@ describe("Lotto 3A fascicolo automatic workflow read model", () => {
         executionAttempts: [],
       }];
     });
+  });
+
+  it("loads MCP technical acquisitions tenant-scoped and tolerates a not-yet-migrated table", async () => {
+    await getFascicoloAutomaticWorkflowReadModel("procedure-1");
+    expect(findManyTechnical).toHaveBeenCalledWith(expect.objectContaining({
+      where: { tenantId: "tenant-1", procedimentoId: "procedure-1" },
+      take: 200,
+    }));
+    expect(findManyTechnical.mock.calls[0][0].select).not.toHaveProperty("requestPayload");
+
+    findManyTechnical.mockRejectedValueOnce(Object.assign(new Error("relation does not exist"), { code: "P2021" }));
+    await expect(getFascicoloAutomaticWorkflowReadModel("procedure-1")).resolves.not.toBeNull();
+
+    findManyTechnical.mockRejectedValueOnce(Object.assign(new Error("connection lost"), { code: "P1001" }));
+    await expect(getFascicoloAutomaticWorkflowReadModel("procedure-1")).rejects.toThrow("connection lost");
   });
 
   it("keeps CURRENT and HISTORICAL mission snapshots separate, including empty historical missions", async () => {

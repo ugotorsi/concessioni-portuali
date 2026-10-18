@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildStructuredFascicoloReport,
   type StructuredReportMissionInput,
+  type StructuredReportTechnicalSourceInput,
 } from "@/server/fascicolo-report";
 import type {
   StructuredKnowledgeReadItem,
@@ -240,5 +241,59 @@ describe("deterministic structured fascicolo report", () => {
       expect.objectContaining({ resultId: "reviewed-not-usable", reasons: ["CITATION_ANCHOR_REQUIRED", "MISSING_FULL_TEXT"] }),
       expect.objectContaining({ resultId: "reviewed-neutral", direction: "NEUTRAL" }),
     ]));
+  });
+
+  describe("MCP technical sources", () => {
+    const technical = (overrides: Partial<StructuredReportTechnicalSourceInput> = {}): StructuredReportTechnicalSourceInput => ({
+      recordId: "tech-1",
+      missionId: "mission-current",
+      toolName: "wms_feature_info",
+      questionSnapshot: "Vincoli paesaggistici sull'area demaniale",
+      verificationStatus: "RISPOSTA_VUOTA_NON_PROBATORIA",
+      serviceVersion: "1.0.0",
+      responseDigest: sha("d"),
+      retrievedAt: new Date("2026-10-18T08:00:00.000Z"),
+      ...overrides,
+    });
+    const base = { tenantId: "tenant-1", procedimentoId: "procedure-1" };
+
+    it("leaves the report unchanged when no technical source exists", () => {
+      const without = buildStructuredFascicoloReport({ ...base, knowledge: knowledge(), missions: [mission()] });
+      const empty = buildStructuredFascicoloReport({ ...base, knowledge: knowledge(), missions: [mission()], technicalSources: [] });
+      expect(empty.reportFingerprint).toBe(without.reportFingerprint);
+      expect(empty.payload.researchStateFingerprint).toBe(without.payload.researchStateFingerprint);
+      expect(empty.payload).not.toHaveProperty("technicalSources");
+    });
+
+    it("includes only CURRENT-mission acquisitions, as non-probative, without creating authorities", () => {
+      const without = buildStructuredFascicoloReport({ ...base, knowledge: knowledge(), missions: [mission()] });
+      const report = buildStructuredFascicoloReport({
+        ...base,
+        knowledge: knowledge(),
+        missions: [mission(), mission({ missionId: "mission-historical", lifecycleStatus: "HISTORICAL", results: [] })],
+        technicalSources: [
+          technical(),
+          technical({ recordId: "tech-historical", missionId: "mission-historical" }),
+          technical({ recordId: "tech-foreign", missionId: "mission-other-procedure" }),
+          technical({ recordId: "tech-unknown", verificationStatus: "VERIFICATO" }),
+        ],
+      });
+
+      expect(report.payload.technicalSources?.map((source) => source.recordId)).toEqual(["tech-1", "tech-unknown"]);
+      expect(report.payload.technicalSources?.every((source) => source.probative === false)).toBe(true);
+      expect(report.payload.technicalSources?.[1].verificationStatus).toBe("DA_VERIFICARE_SU_FONTE_ORIGINALE");
+      expect(report.payload.technicalSources?.[0]).toMatchObject({
+        questionSemanticKey: sha("question-1"),
+        retrievedAt: "2026-10-18T08:00:00.000Z",
+      });
+      expect(report.payload.technicalSources?.[0].requiredVerification).toContain("non prova l'assenza di vincoli");
+      expect(report.payload.legalIssues[0].questions[0].favorableAuthorities)
+        .toEqual(without.payload.legalIssues[0].questions[0].favorableAuthorities);
+      expect(report.payload.operationalPlans?.[0].legalSourceStatus).toBe(without.payload.operationalPlans?.[0].legalSourceStatus);
+      expect(report.payload.operationalPlans?.[0].outstandingEvidence.some((line) => line.includes("MCP (2, non probatori)"))).toBe(true);
+      expect(report.payload.limitations).toContain("TECHNICAL_SOURCES_NOT_PROBATIVE_VERIFY_ORIGINAL");
+      expect(report.payload.researchStateFingerprint).not.toBe(without.payload.researchStateFingerprint);
+      expect(report.reportFingerprint).not.toBe(without.reportFingerprint);
+    });
   });
 });

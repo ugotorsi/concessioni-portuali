@@ -104,6 +104,37 @@ export interface StructuredReportOperationalPlan {
   deadlineReview: string;
 }
 
+export type StructuredReportTechnicalVerificationStatus =
+  | "DA_VERIFICARE_SU_FONTE_ORIGINALE"
+  | "INDICATIVO_DA_VERIFICARE"
+  | "RISPOSTA_VUOTA_NON_PROBATORIA";
+
+export interface StructuredReportTechnicalSourceInput {
+  recordId: string;
+  missionId: string;
+  toolName: string;
+  questionSnapshot: string;
+  verificationStatus: string;
+  serviceVersion: string;
+  responseDigest: string;
+  retrievedAt: Date;
+}
+
+/** MCP technical/urban-planning acquisition: always non-probative, never a usable authority. */
+export interface StructuredReportTechnicalSource {
+  recordId: string;
+  missionId: string;
+  questionSemanticKey: string;
+  toolName: string;
+  question: string;
+  verificationStatus: StructuredReportTechnicalVerificationStatus;
+  probative: false;
+  serviceVersion: string;
+  responseDigest: string;
+  retrievedAt: string;
+  requiredVerification: string;
+}
+
 export interface StructuredFascicoloReportPayload {
   contractVersion: typeof STRUCTURED_FASCICOLO_REPORT_CONTRACT_VERSION;
   tenantId: string;
@@ -135,6 +166,8 @@ export interface StructuredFascicoloReportPayload {
   deadlineCandidates: readonly StructuredKnowledgeReadItem[];
   /** Additive, read-only guidance. Older archived V1 reports may omit this field. */
   operationalPlans?: readonly StructuredReportOperationalPlan[];
+  /** Additive; present only when MCP acquisitions exist for CURRENT missions of this revision. */
+  technicalSources?: readonly StructuredReportTechnicalSource[];
   limitations: readonly string[];
 }
 
@@ -230,9 +263,58 @@ function projectQuestion(
   };
 }
 
+const TECHNICAL_VERIFICATION_STATUSES: readonly StructuredReportTechnicalVerificationStatus[] = [
+  "DA_VERIFICARE_SU_FONTE_ORIGINALE",
+  "INDICATIVO_DA_VERIFICARE",
+  "RISPOSTA_VUOTA_NON_PROBATORIA",
+];
+
+const TECHNICAL_REQUIRED_VERIFICATION: Readonly<Record<StructuredReportTechnicalVerificationStatus, string>> = {
+  DA_VERIFICARE_SU_FONTE_ORIGINALE: "Consultare la fonte originale vigente indicata e acquisirne copia o estremi verificabili prima di qualsiasi uso.",
+  INDICATIVO_DA_VERIFICARE: "Esito WMS indicativo: verificare presso l'ente competente o sugli atti di pianificazione ufficiali; non attesta vincoli né conformità.",
+  RISPOSTA_VUOTA_NON_PROBATORIA: "Risposta WMS vuota: non prova l'assenza di vincoli; richiedere verifica presso l'ente competente.",
+};
+
+function projectTechnicalSources(
+  inputs: readonly StructuredReportTechnicalSourceInput[],
+  missions: readonly StructuredReportMissionInput[],
+): readonly StructuredReportTechnicalSource[] {
+  const questionByMission = new Map(missions.map((mission) => [mission.missionId, mission.researchQuestionSemanticKey!]));
+  return inputs
+    .filter((input) => questionByMission.has(input.missionId))
+    .map((input) => {
+      // Unknown statuses fall back to the strictest non-probative category.
+      const verificationStatus = (TECHNICAL_VERIFICATION_STATUSES as readonly string[]).includes(input.verificationStatus)
+        ? input.verificationStatus as StructuredReportTechnicalVerificationStatus
+        : "DA_VERIFICARE_SU_FONTE_ORIGINALE";
+      return {
+        recordId: input.recordId,
+        missionId: input.missionId,
+        questionSemanticKey: questionByMission.get(input.missionId)!,
+        toolName: input.toolName,
+        question: input.questionSnapshot.slice(0, 2000),
+        verificationStatus,
+        probative: false as const,
+        serviceVersion: input.serviceVersion,
+        responseDigest: input.responseDigest,
+        retrievedAt: input.retrievedAt.toISOString(),
+        requiredVerification: TECHNICAL_REQUIRED_VERIFICATION[verificationStatus],
+      };
+    })
+    .sort((left, right) => left.recordId.localeCompare(right.recordId));
+}
+
+function technicalOutstandingEvidence(sources: readonly StructuredReportTechnicalSource[]): string {
+  const empty = sources.filter((source) => source.verificationStatus === "RISPOSTA_VUOTA_NON_PROBATORIA").length;
+  return `Verificare sulle fonti originali gli esiti tecnico-urbanistici acquisiti tramite MCP (${sources.length}, non probatori)`
+    + (empty ? `; ${empty} risposte WMS vuote non provano l'assenza di vincoli` : "")
+    + ".";
+}
+
 function buildOperationalPlans(
   issues: StructuredFascicoloReportPayload["legalIssues"],
   knowledge: StructuredKnowledgeReadModel,
+  technicalSources: readonly StructuredReportTechnicalSource[] = [],
 ): readonly StructuredReportOperationalPlan[] {
   const evidenceItems = [
     ...knowledge.facts, ...knowledge.legalActs, ...knowledge.measures,
@@ -248,6 +330,11 @@ function buildOperationalPlans(
     const outstandingEvidence = knowledge.gaps.filter((item) =>
       item.status !== "REJECTED" && originIds.has(item.id))
       .map((item) => item.normalizedText).sort();
+    const issueQuestionKeys = new Set(issue.questions.map((question) => question.semanticKey));
+    const issueTechnical = technicalSources.filter((source) => issueQuestionKeys.has(source.questionSemanticKey));
+    if (issueTechnical.length) {
+      outstandingEvidence.push(technicalOutstandingEvidence(issueTechnical));
+    }
     const sourceReady = issue.questions.length > 0 && issue.questions.every((question) =>
       question.missionStatus === "COMPLETED"
       && question.favorableAuthorities.length + question.contraryAuthorities.length > 0);
@@ -365,10 +452,12 @@ export function buildStructuredFascicoloReport(input: {
   procedimentoId: string;
   knowledge: StructuredKnowledgeReadModel;
   missions: readonly StructuredReportMissionInput[];
+  technicalSources?: readonly StructuredReportTechnicalSourceInput[];
 }): BuiltStructuredFascicoloReport {
   const currentMissions = input.missions.filter((mission) => mission.lifecycleStatus === "CURRENT"
     && mission.knowledgeRevisionId === input.knowledge.revision.id
     && mission.researchQuestionSemanticKey !== null).sort(byId);
+  const technicalSources = projectTechnicalSources(input.technicalSources ?? [], currentMissions);
   const groupedMissions = new Map<string, StructuredReportMissionInput[]>();
   for (const mission of currentMissions) {
     const current = groupedMissions.get(mission.researchQuestionSemanticKey!) ?? [];
@@ -433,7 +522,9 @@ export function buildStructuredFascicoloReport(input: {
     knowledgeContractVersion: input.knowledge.revision.contractVersion,
     corpusFingerprint: input.knowledge.revision.corpusFingerprint,
     knowledgeStateFingerprint: fingerprint(knowledgeState),
-    researchStateFingerprint: fingerprint(researchState),
+    researchStateFingerprint: fingerprint(technicalSources.length
+      ? { missions: researchState, technicalSources }
+      : researchState),
     sourceStateFingerprint: fingerprint(sourceState),
     documentedFramework: {
       partyRoles: visibleItems(input.knowledge.partyRoles),
@@ -447,11 +538,13 @@ export function buildStructuredFascicoloReport(input: {
     unassignedQuestions: questions.filter((question) => !assignedQuestionIds.has(question.knowledgeItemId)),
     gaps: visibleItems(input.knowledge.gaps),
     deadlineCandidates: visibleItems(input.knowledge.deadlineCandidates),
-    operationalPlans: buildOperationalPlans(legalIssues, input.knowledge),
+    operationalPlans: buildOperationalPlans(legalIssues, input.knowledge, technicalSources),
+    ...(technicalSources.length ? { technicalSources } : {}),
     limitations: [...new Set([
       ...input.knowledge.revision.warnings,
       ...(input.knowledge.deadlineCandidates.length ? ["DEADLINE_CANDIDATES_ARE_NOT_OPERATIONAL_DEADLINES"] : []),
       ...(questions.length ? [] : ["NO_CURRENT_RESEARCH_QUESTIONS"]),
+      ...(technicalSources.length ? ["TECHNICAL_SOURCES_NOT_PROBATIVE_VERIFY_ORIGINAL"] : []),
     ])].sort(),
   };
   return { reportFingerprint: fingerprint(payload), payload };

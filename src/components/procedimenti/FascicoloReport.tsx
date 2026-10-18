@@ -37,6 +37,7 @@ function professionalNote(value: string): string | null {
     RESEARCH_STATE_CHANGED: "Lo stato delle ricerche è cambiato dopo la generazione.",
     SOURCE_STATE_CHANGED: "Lo stato di utilizzabilità delle fonti è cambiato dopo la generazione.",
     SUPERSEDED_BY_MATERIAL_CHANGE: "Il rapporto è stato superato dopo modifiche rilevanti al fascicolo.",
+    TECHNICAL_SOURCES_NOT_PROBATIVE_VERIFY_ORIGINAL: "Le acquisizioni tecnico-urbanistiche non sono probatorie e vanno verificate sulle fonti originali.",
     UNCOVERED_ELEMENT: "Un elemento della questione non risulta ancora coperto dalle fonti disponibili.",
   };
   if (labels[value]) return labels[value];
@@ -129,6 +130,40 @@ function UnverifiedCandidateSources({ question }: { question: StructuredReportQu
                 Apri il documento <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
               </a>
             ) : null}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+const TECHNICAL_STATUS_LABELS: Readonly<Record<string, string>> = {
+  DA_VERIFICARE_SU_FONTE_ORIGINALE: "Da verificare su fonte originale",
+  INDICATIVO_DA_VERIFICARE: "Indicativo, da verificare",
+  RISPOSTA_VUOTA_NON_PROBATORIA: "Risposta vuota, non probatoria",
+};
+
+export function TechnicalSourcesSection({ sources }: { sources: NonNullable<StructuredFascicoloReportPayload["technicalSources"]> }) {
+  if (sources.length === 0) return null;
+  return (
+    <section className="border-t border-slate-200 pt-5" aria-label="Fonti tecniche e urbanistiche da verificare" data-testid="report-technical-sources">
+      <h3 className="text-base font-semibold text-slate-950">Fonti tecniche e urbanistiche — da verificare</h3>
+      <p className="mt-1 text-xs text-amber-900">
+        Acquisizioni tramite connettore tecnico (MCP): non sono fonti utilizzabili e non attestano vincoli, conformità o assenza di vincoli.
+      </p>
+      <ul className="mt-3 space-y-3">
+        {sources.map((source) => (
+          <li key={source.recordId} className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-slate-800">
+            <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
+              <p className="min-w-0 font-medium [overflow-wrap:anywhere]">{source.question}</p>
+              <span className="shrink-0 rounded-md border border-amber-300 bg-white px-2 py-1 text-xs font-semibold text-amber-950">
+                {TECHNICAL_STATUS_LABELS[source.verificationStatus] ?? "Da verificare"}
+              </span>
+            </div>
+            <p className="mt-1 leading-6">{source.requiredVerification}</p>
+            <p className="mt-1 text-xs text-slate-600">
+              Strumento {source.toolName} · servizio {source.serviceVersion} · acquisito il {new Date(source.retrievedAt).toLocaleString("it-IT")}
+            </p>
           </li>
         ))}
       </ul>
@@ -272,6 +307,8 @@ function ReportContent({ payload }: { payload: StructuredFascicoloReportPayload 
           </div>
         </ContentSection>
       ) : null}
+
+      {payload.technicalSources?.length ? <TechnicalSourcesSection sources={payload.technicalSources} /> : null}
 
       {payload.operationalPlans?.length ? <OperationalPlans plans={payload.operationalPlans} /> : null}
 

@@ -23,6 +23,14 @@ MCP output is never probative. `verificationStatus` records which non-probative 
 
 A WMS answer without an explicit `result` classification is rejected and nothing is stored.
 
+### Inclusion in the structured report and operational proposals
+
+- The fascicolo read model loads, tenant- and procedure-scoped, the latest 200 acquisitions (request/response payloads are not copied; the report carries a SHA-256 digest of the stable-serialized response). If the table does not exist yet (database not migrated, Prisma `P2021`) the report is built without technical sources; any other database error propagates.
+- Only acquisitions linked to a `CURRENT` mission of the current knowledge revision enter the report (`technicalSources`, each with `probative: false`, status and the required verification). Acquisitions of `HISTORICAL` missions stay in the Ricerca history only.
+- Technical sources never become usable authorities and never change `legalSourceStatus`; they add an outstanding-evidence line to the operational plan of the related legal issue and the limitation `TECHNICAL_SOURCES_NOT_PROBATIVE_VERIFY_ORIGINAL`.
+- New or changed acquisitions alter `researchStateFingerprint`, so the report is regenerated; without acquisitions the fingerprint is identical to the previous contract.
+- Operational proposals gain one `CRITICALITY` candidate (category `TECNICA`, severity `MEDIA`, `PROFESSIONAL_REVIEW_REQUIRED`, warning `TECHNICAL_SOURCE_NOT_PROBATIVE`) per question with acquisitions, referencing the record IDs.
+
 ## Machine-to-machine identity
 
 The backend never reuses an interactive ChatGPT/Connected App token and never accepts a caller-supplied bearer token. Live calls are disabled unless **all** of the following server-side variables are set (values only in the approved secret store, never in source, logs or the browser):

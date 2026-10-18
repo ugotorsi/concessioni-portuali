@@ -1,12 +1,15 @@
+import { createHash } from "node:crypto";
+
 import type { AsyncJobStatus, ResearchMissionStatus } from "@/generated/prisma/enums";
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
+import { stableStringify } from "@/server/audit/hash";
 import { FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION } from "@/server/ai/fascicoloAutomaticAnalysisJob";
 import { createRealDataActivationPolicy } from "@/server/ai/realDataActivation";
 import { providerAnalysisPayloadV1Schema } from "@/server/ai/fascicoloAnalysis";
 import { DOCUMENT_EXTRACTION_OPERATION } from "@/server/documents/documentExtractionAdmission";
-import { buildStructuredFascicoloReport, type BuiltStructuredFascicoloReport } from "@/server/fascicolo-report";
+import { buildStructuredFascicoloReport, type BuiltStructuredFascicoloReport, type StructuredReportTechnicalSourceInput } from "@/server/fascicolo-report";
 import { listOperationalProposals, type OperationalProposalRecord } from "@/server/fascicolo-operational-proposals";
 import { RESEARCH_MISSION_EXECUTION_OPERATION } from "@/server/legal-research/persistence";
 import { evaluateAutomaticResearchPolicy } from "@/server/legal-research/automatic-research-policy";
@@ -297,6 +300,48 @@ export interface FascicoloAutomaticWorkflowReadModel {
   historicalMissionCount: number;
 }
 
+const TECHNICAL_SOURCE_REPORT_LIMIT = 200;
+
+/**
+ * MCP acquisitions for the report. A missing table (database not yet migrated) degrades to
+ * "no technical sources" instead of breaking the whole fascicolo page; other errors propagate.
+ */
+async function loadTechnicalSourceReportRows(
+  tenantId: string,
+  procedimentoId: string,
+): Promise<readonly StructuredReportTechnicalSourceInput[]> {
+  try {
+    const rows = await prisma.technicalSourceResearchRecord.findMany({
+      where: { tenantId, procedimentoId },
+      orderBy: [{ retrievedAt: "desc" }, { id: "desc" }],
+      take: TECHNICAL_SOURCE_REPORT_LIMIT,
+      select: {
+        id: true,
+        missionId: true,
+        toolName: true,
+        questionSnapshot: true,
+        verificationStatus: true,
+        serviceVersion: true,
+        responsePayload: true,
+        retrievedAt: true,
+      },
+    });
+    return rows.map((row) => ({
+      recordId: row.id,
+      missionId: row.missionId,
+      toolName: row.toolName,
+      questionSnapshot: row.questionSnapshot,
+      verificationStatus: row.verificationStatus,
+      serviceVersion: row.serviceVersion,
+      responseDigest: createHash("sha256").update(stableStringify(row.responsePayload), "utf8").digest("hex"),
+      retrievedAt: row.retrievedAt,
+    }));
+  } catch (error) {
+    if (record(error)?.code === "P2021") return [];
+    throw error;
+  }
+}
+
 export async function getFascicoloAutomaticWorkflowReadModel(
   procedimentoId: string,
 ): Promise<FascicoloAutomaticWorkflowReadModel | null> {
@@ -339,6 +384,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
     knowledge,
     operationalProposals,
     documentCorpus,
+    technicalSourceRows,
   ] = await Promise.all([
     prisma.automaticFascicoloReport.findMany({
       where: { tenantId, procedimentoId },
@@ -438,6 +484,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
     loadCurrentStructuredKnowledge(tenantId, procedimentoId),
     listOperationalProposals({ tenantId, procedimentoId }),
     getFascicoloDocumentCorpus({ tenantId, procedimentoId }),
+    loadTechnicalSourceReportRows(tenantId, procedimentoId),
   ]);
   if (!documentCorpus) return null;
 
@@ -734,6 +781,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
     tenantId,
     procedimentoId,
     knowledge,
+    technicalSources: technicalSourceRows,
     missions: [
       ...readModel.missions,
       ...adverseMissions.map((mission) => {
