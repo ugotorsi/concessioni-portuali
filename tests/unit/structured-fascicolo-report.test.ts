@@ -154,7 +154,11 @@ describe("deterministic structured fascicolo report", () => {
       legalSourceStatus: "VERIFIED_SOURCES_ATTACHED",
       professionalStatus: "PRELIMINARY_NOT_APPROVED",
     });
-    expect(report.payload.operationalPlans?.[0].steps).toHaveLength(3);
+    expect(report.payload.operationalPlans?.[0].steps).toHaveLength(4);
+    expect(report.payload.operationalPlans?.[0].steps[1].action).toContain("art. 47");
+    expect(report.payload.operationalPlans?.[0].alternatives.some((alternative) => alternative.title.includes("decadenza"))).toBe(true);
+    expect(report.payload.operationalPlans?.[0].alternatives.some((alternative) => alternative.title.includes("ripristino"))).toBe(true);
+    expect(report.payload.operationalPlans?.[0].alternatives.some((alternative) => alternative.title.includes("Archiviare"))).toBe(true);
     expect(report.payload.operationalPlans?.[0].alternatives.length).toBeGreaterThan(1);
     expect(report.payload.operationalPlans?.[0].steps[0].requiredDocuments.length).toBeGreaterThan(0);
 
