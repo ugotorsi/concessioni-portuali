@@ -1,5 +1,9 @@
 import Link from "next/link";
 import { AlertTriangle, CheckCircle2, FileText, HelpCircle, Search } from "lucide-react";
+import {
+  FascicoloResearchSources,
+  type FascicoloResearchSource,
+} from "@/components/procedimenti/FascicoloResearch";
 
 export interface FascicoloAnalysisQuestion {
   id: string;
@@ -60,6 +64,7 @@ export interface FascicoloAnalysisModel {
   contradictions: readonly FascicoloAnalysisContradiction[];
   gaps: readonly FascicoloAnalysisGap[];
   relevantItems: readonly FascicoloAnalysisRelevantItem[];
+  legalSources?: readonly FascicoloResearchSource[];
   analysisStatus?: string | null;
   corpus?: FascicoloAnalysisCorpus | null;
 }
@@ -80,6 +85,7 @@ export function FascicoloAnalysis({ model }: { model: FascicoloAnalysisModel }) 
     || model.contradictions.length > 0
     || model.gaps.length > 0
     || model.relevantItems.length > 0
+    || Boolean(model.legalSources?.length)
     || Boolean(optionalText(model.analysisStatus));
 
   return (
@@ -180,6 +186,19 @@ export function FascicoloAnalysis({ model }: { model: FascicoloAnalysisModel }) 
                   </li>
                 ))}
               </ul>
+            </section>
+          ) : null}
+
+          {model.legalSources && model.legalSources.length > 0 ? (
+            <section aria-labelledby="analysis-legal-sources-title" className="border-t border-slate-200 pt-5">
+              <div className="flex items-center gap-2">
+                <Search className="h-4 w-4 text-[#0b7285]" aria-hidden="true" />
+                <h3 id="analysis-legal-sources-title" className="text-base font-semibold text-slate-950">Fonti giuridiche conservate</h3>
+              </div>
+              <p className="mt-1 text-sm text-slate-600">Fonti verificate e risultati candidati sono distinti in base allo stato di verifica registrato.</p>
+              <div className="mt-3">
+                <FascicoloResearchSources sources={model.legalSources} />
+              </div>
             </section>
           ) : null}
 

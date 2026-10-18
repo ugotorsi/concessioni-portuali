@@ -139,6 +139,10 @@ export interface FascicoloAutomaticWorkflowReadModel {
       missionId: string;
       bundleId: string;
       title: string;
+      authority: string | null;
+      sourceFamily: string | null;
+      officialIdentifier: string | null;
+      documentDate: string | null;
       sourceUrl: string | null;
       provider: string | null;
       relevantPassage: string | null;
@@ -585,6 +589,14 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
           missionId: mission.id,
           bundleId: result.bundleId,
           title: result.candidateSnapshot.title ?? result.candidateSnapshot.officialIdentifier ?? "Risultato di ricerca",
+          authority: result.candidateSnapshot.courtOrBody ?? null,
+          sourceFamily: result.candidateSnapshot.sourceFamily ?? null,
+          officialIdentifier:
+            result.candidateSnapshot.officialIdentifier
+            ?? result.candidateSnapshot.ecli
+            ?? result.candidateSnapshot.celex
+            ?? null,
+          documentDate: result.candidateSnapshot.documentDate ?? null,
           sourceUrl: safeHttpUrl(result.candidateSnapshot.sourceUrl),
           provider: result.candidateSnapshot.providerId ?? result.candidateSnapshot.toolId ?? null,
           relevantPassage: text(result.candidateSnapshot.relevantPassage),

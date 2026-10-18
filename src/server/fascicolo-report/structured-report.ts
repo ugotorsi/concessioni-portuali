@@ -327,7 +327,7 @@ function buildOperationalPlans(
         riskOrLimit: "La decadenza non è conseguenza automatica di qualsiasi irregolarità; distinguere tipicità, prova, partecipazione e proporzionalità.",
       },
       {
-        title: "Valutare misure ripristinatorie o altri interventi",
+        title: "Valutare il ripristino, misure ripristinatorie o altri interventi",
         whenApplicable: "Se i fatti integrano presupposti di occupazione o innovazione abusiva o altra violazione con poteri amministrativi specifici",
         practicalRoute: "Verificare l'autorità competente e le norme applicabili, istruire separatamente il ripristino o le altre misure consentite.",
         riskOrLimit: "Non estendere i poteri dell'ente oltre le competenze stabilite dalla legge.",

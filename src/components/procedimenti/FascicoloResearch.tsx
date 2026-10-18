@@ -98,7 +98,7 @@ function SourceCard({ source }: { source: FascicoloResearchSource }) {
   );
 }
 
-function Sources({ sources }: { sources: readonly FascicoloResearchSource[] }) {
+export function FascicoloResearchSources({ sources }: { sources: readonly FascicoloResearchSource[] }) {
   if (sources.length === 0) {
     return <p className="text-sm text-slate-600">Il quesito è presente, ma non risultano ancora fonti acquisite.</p>;
   }
@@ -170,7 +170,7 @@ export function FascicoloResearch({ model }: { model: FascicoloResearchModel }) 
                       <Scale className="h-4 w-4 text-slate-600" aria-hidden="true" />
                       <h5 className="text-sm font-semibold text-slate-900">Fonti rilevanti</h5>
                     </div>
-                    <Sources sources={sources} />
+                    <FascicoloResearchSources sources={sources} />
                   </section>
 
                   {question.versions && question.versions.length > 0 ? (
@@ -200,7 +200,7 @@ export function FascicoloResearch({ model }: { model: FascicoloResearchModel }) 
             <BookOpen className="h-4 w-4 text-[#0b7285]" aria-hidden="true" />
             <h3 id="research-sources-title" className="text-base font-semibold text-slate-950">Fonti rilevanti</h3>
           </div>
-          <div className="mt-3"><Sources sources={unlinkedSources} /></div>
+          <div className="mt-3"><FascicoloResearchSources sources={unlinkedSources} /></div>
         </section>
       ) : null}
     </section>
