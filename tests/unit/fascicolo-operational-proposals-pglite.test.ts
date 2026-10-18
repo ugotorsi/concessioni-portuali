@@ -11,6 +11,7 @@ import {
   materializeOperationalProposal,
   reconcileOperationalProposals,
   reviewOperationalProposal,
+  toActivityLogAuditActor,
   type OperationalProposalCandidate,
   type OperationalProposalRepositoryContext,
   type OperationalProposalSqlExecutor,
@@ -152,6 +153,26 @@ afterEach(async () => {
 });
 
 describe("Lotto 7 operational proposal persistence", () => {
+  it("never writes a system policy actor into the User-referencing ActivityLog.userId", () => {
+    const system = toActivityLogAuditActor({
+      actor: { actorId: "fascicolo-operational-proposal-policy", actorEmail: null, actorRole: "SYSTEM" },
+      metadata: { procedimentoId: "procedure-a", created: 1 },
+    });
+    expect(system.actor).toEqual({ userId: null, userEmail: null, userRole: "SYSTEM" });
+    expect(system.metadata).toEqual({
+      procedimentoId: "procedure-a",
+      created: 1,
+      systemActorId: "fascicolo-operational-proposal-policy",
+    });
+
+    const human = toActivityLogAuditActor({
+      actor: { actorId: "user-1", actorEmail: "giuridico@example.test", actorRole: "GIURIDICO" },
+      metadata: { procedimentoId: "procedure-a" },
+    });
+    expect(human.actor).toEqual({ userId: "user-1", userEmail: "giuridico@example.test", userRole: "GIURIDICO" });
+    expect(human.metadata).toEqual({ procedimentoId: "procedure-a" });
+  });
+
   it("allows tenant-scoped reads without a concession while preserving tenant and concession authority", async () => {
     const db = await database();
     await expect(listOperationalProposals({

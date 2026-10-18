@@ -30,21 +30,44 @@ export interface OperationalProposalRepositoryContext {
   now?: () => Date;
 }
 
+// ActivityLog.userId references User: system actors are recorded by role and metadata, never as user ids.
+export function toActivityLogAuditActor(input: Pick<OperationalProposalAuditInput, "actor" | "metadata">): {
+  actor: { userId: string | null; userEmail: string | null; userRole: string };
+  metadata: JsonValue;
+} {
+  if (input.actor.actorRole === "SYSTEM") {
+    const base = input.metadata && typeof input.metadata === "object" && !Array.isArray(input.metadata)
+      ? input.metadata
+      : { value: input.metadata };
+    return {
+      actor: { userId: null, userEmail: null, userRole: "SYSTEM" },
+      metadata: { ...base, systemActorId: input.actor.actorId },
+    };
+  }
+  return {
+    actor: { userId: input.actor.actorId, userEmail: input.actor.actorEmail, userRole: input.actor.actorRole },
+    metadata: input.metadata,
+  };
+}
+
 function executor(client: Pick<Prisma.TransactionClient, "$queryRawUnsafe">): OperationalProposalSqlExecutor {
   return {
     async query<T>(sql: string, params: readonly unknown[] = []) {
       return { rows: await client.$queryRawUnsafe<T[]>(sql, ...params) };
     },
-    audit: (input) => createAuditLogInTransaction(client as Prisma.TransactionClient, {
-      azione: input.azione,
-      entita: "FascicoloOperationalProposal",
-      entitaId: input.entitaId,
-      enteId: input.enteId,
-      concessioneId: input.concessioneId,
-      esito: "SUCCESS",
-      metadata: input.metadata as Prisma.InputJsonValue,
-      actor: { userId: input.actor.actorId, userEmail: input.actor.actorEmail, userRole: input.actor.actorRole },
-    }),
+    audit: (input) => {
+      const mapped = toActivityLogAuditActor(input);
+      return createAuditLogInTransaction(client as Prisma.TransactionClient, {
+        azione: input.azione,
+        entita: "FascicoloOperationalProposal",
+        entitaId: input.entitaId,
+        enteId: input.enteId,
+        concessioneId: input.concessioneId,
+        esito: "SUCCESS",
+        metadata: mapped.metadata as Prisma.InputJsonValue,
+        actor: mapped.actor,
+      });
+    },
   };
 }
 
