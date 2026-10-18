@@ -1,9 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { findManyMissions, countMissions, findManyHistoricalResults } = vi.hoisted(() => ({
+const { findManyMissions, countMissions } = vi.hoisted(() => ({
   findManyMissions: vi.fn(),
   countMissions: vi.fn(),
-  findManyHistoricalResults: vi.fn(),
 }));
 
 vi.mock("@/lib/prisma", () => ({
@@ -18,7 +17,6 @@ vi.mock("@/lib/prisma", () => ({
     structuredFascicoloReportSnapshot: { findMany: vi.fn(async () => []) },
     asyncJob: { findMany: vi.fn(async () => []) },
     researchMissionRecord: { findMany: findManyMissions, count: countMissions },
-    researchQuestionResultRecord: { findMany: findManyHistoricalResults },
   },
 }));
 
@@ -45,14 +43,16 @@ import { getFascicoloAutomaticWorkflowReadModel } from "@/server/queries/fascico
 describe("Lotto 3A fascicolo automatic workflow read model", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    countMissions.mockResolvedValue(1);
-    findManyHistoricalResults.mockResolvedValue([{ researchQuestionSemanticKey: "c".repeat(64) }]);
+    countMissions.mockResolvedValue(2);
     findManyMissions.mockImplementation(async (query) => {
-      expect(query.where).toEqual({ tenantId: "tenant-1", caseId: "procedure-1", lifecycleStatus: "CURRENT" });
-      return [{
+      expect(query.where).toMatchObject({ tenantId: "tenant-1", caseId: "procedure-1" });
+      expect(query.take).toBe(51);
+      const currentMission = {
         id: "mission-current",
         payload: { researchQuestion: "Quale disciplina si applica?" },
         referenceDate: new Date("2026-09-01T00:00:00.000Z"),
+        createdAt: new Date("2026-09-02T00:00:00.000Z"),
+        updatedAt: new Date("2026-09-03T00:00:00.000Z"),
         referenceDateBasis: { type: "EVENT_DATE" },
         missionFingerprint: "a".repeat(64),
         legalIssueSemanticKey: "b".repeat(64),
@@ -88,7 +88,11 @@ describe("Lotto 3A fascicolo automatic workflow read model", () => {
           classificationReviewStatus: "AI_PROPOSED",
           coverageElementKeys: ["competenza"],
           unresolvedAspectKeys: ["decadenza"],
+          researchQuestionSemanticKey: "c".repeat(64),
           sourceAssessments: [{
+            id: "assessment-current",
+            chainFingerprint: "d".repeat(64),
+            isCurrent: true,
             retrievalState: "RESOLVED",
             textState: "FULL_TEXT",
             identityState: "VERIFIED",
@@ -118,6 +122,8 @@ describe("Lotto 3A fascicolo automatic workflow read model", () => {
           classificationReviewStatus: "AI_PROPOSED",
           coverageElementKeys: [],
           unresolvedAspectKeys: [],
+          researchQuestionSemanticKey: "c".repeat(64),
+          sourceAssessments: [],
         }],
         executionAttempts: [{
           evidenceBundles: [{
@@ -134,11 +140,46 @@ describe("Lotto 3A fascicolo automatic workflow read model", () => {
             completionState: "COMPLETE",
           }],
         }],
+      };
+      if (query.where.mode === "ADVERSE_SEARCH") {
+        return [{
+          ...currentMission,
+          id: "mission-adverse-search",
+          mode: "ADVERSE_SEARCH",
+          payload: { researchQuestion: "Esistono orientamenti contrari?" },
+        }];
+      }
+      if (query.where.lifecycleStatus === "CURRENT") return [currentMission];
+      return [{
+        ...currentMission,
+        id: "mission-historical",
+        payload: { researchQuestion: "Quale disciplina si applicava nella versione precedente?" },
+        status: "COMPLETED",
+        primaryAdverseRequirements: [],
+        questionResults: [{
+          ...currentMission.questionResults[0],
+          id: "result-historical",
+          candidateId: "candidate-historical",
+          sourceAssessments: [{
+            ...currentMission.questionResults[0].sourceAssessments[0],
+            id: "assessment-historical",
+            isCurrent: true,
+            usable: true,
+          }],
+        }],
+      }, {
+        ...currentMission,
+        id: "mission-historical-empty",
+        payload: { researchQuestion: "Quesito storico senza risultati" },
+        status: "DEFERRED",
+        primaryAdverseRequirements: [],
+        questionResults: [],
+        executionAttempts: [],
       }];
     });
   });
 
-  it("shows only CURRENT missions and their bundles while reporting the HISTORICAL count", async () => {
+  it("keeps CURRENT and HISTORICAL mission snapshots separate, including empty historical missions", async () => {
     const model = await getFascicoloAutomaticWorkflowReadModel("procedure-1");
     expect(model?.missions).toHaveLength(1);
     expect(model?.missions[0]).toMatchObject({
@@ -152,7 +193,7 @@ describe("Lotto 3A fascicolo automatic workflow read model", () => {
       }],
       lifecycleStatus: "CURRENT",
       resultCount: 2,
-      historicalResultCount: 1,
+      displayedHistoricalResultCount: 1,
       coverageStatus: "PARTIAL",
       conflicting: false,
       discoveryCoverageStatus: "DISCOVERED",
@@ -189,13 +230,66 @@ describe("Lotto 3A fascicolo automatic workflow read model", () => {
       manualReviewRequired: true,
     });
     expect(model?.missions.some((mission) => mission.missionId === "mission-historical")).toBe(false);
-    expect(model?.historicalMissionCount).toBe(1);
+    expect(model?.historicalMissions).toHaveLength(2);
+    expect(model?.historicalMissions[0]).toMatchObject({
+      missionId: "mission-historical",
+      lifecycleStatus: "HISTORICAL",
+      resultCount: 1,
+      adverseMission: null,
+      automationRequirementCode: null,
+    });
+    expect(model?.historicalMissions[0].results[0]).toMatchObject({
+      resultId: "result-historical",
+      missionId: "mission-historical",
+      usable: true,
+    });
+    expect(model?.historicalMissions[1]).toMatchObject({
+      missionId: "mission-historical-empty",
+      lifecycleStatus: "HISTORICAL",
+      resultCount: 0,
+      results: [],
+    });
+    expect(model?.historicalMissionCount).toBe(2);
+    expect(model?.missionReadTruncation).toEqual({
+      limitPerLifecycle: 50,
+      current: false,
+      historical: false,
+      adverse: false,
+    });
     expect(countMissions).toHaveBeenCalledWith({
-      where: { tenantId: "tenant-1", caseId: "procedure-1", lifecycleStatus: "HISTORICAL" },
+      where: {
+        tenantId: "tenant-1",
+        caseId: "procedure-1",
+        lifecycleStatus: "HISTORICAL",
+        mode: { not: "ADVERSE_SEARCH" },
+      },
     });
-    expect(findManyHistoricalResults).toHaveBeenCalledWith({
-      where: { tenantId: "tenant-1", caseId: "procedure-1", mission: { lifecycleStatus: "HISTORICAL" } },
-      select: { researchQuestionSemanticKey: true },
-    });
+    expect(findManyMissions).toHaveBeenCalledWith(expect.objectContaining({
+      where: {
+        tenantId: "tenant-1",
+        caseId: "procedure-1",
+        lifecycleStatus: "CURRENT",
+        mode: { not: "ADVERSE_SEARCH" },
+      },
+      take: 51,
+    }));
+    expect(findManyMissions).toHaveBeenCalledWith(expect.objectContaining({
+      where: {
+        tenantId: "tenant-1",
+        caseId: "procedure-1",
+        lifecycleStatus: "CURRENT",
+        mode: "ADVERSE_SEARCH",
+      },
+      take: 51,
+    }));
+    expect(findManyMissions).toHaveBeenCalledWith(expect.objectContaining({
+      where: {
+        tenantId: "tenant-1",
+        caseId: "procedure-1",
+        lifecycleStatus: "HISTORICAL",
+        mode: { not: "ADVERSE_SEARCH" },
+      },
+      take: 51,
+    }));
   });
 });

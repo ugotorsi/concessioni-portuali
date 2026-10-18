@@ -263,7 +263,7 @@ export function FascicoloAutomaticWorkflowPanel({
                                     <span>Fonti utilizzabili: {mission.usableCoverageStatus}</span>
                                     {mission.conflicting ? <Badge variant="danger">Orientamenti in conflitto</Badge> : null}
                                     {mission.conflictingUsableAuthorities ? <Badge variant="danger">Autorità utilizzabili in conflitto</Badge> : null}
-                                    {mission.historicalResultCount > 0 ? <span>Risultati storici: {mission.historicalResultCount}</span> : null}
+                                    {mission.displayedHistoricalResultCount > 0 ? <span>Risultati nelle missioni storiche visualizzate: {mission.displayedHistoricalResultCount}</span> : null}
                                   </div>
                                   {mission.adverseMission ? (
                                     <p className="text-xs text-slate-600">Ricerca contraria: {mission.adverseMission.status}</p>

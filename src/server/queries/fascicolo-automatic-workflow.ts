@@ -1,4 +1,5 @@
 import type { AsyncJobStatus, ResearchMissionStatus } from "@/generated/prisma/enums";
+import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION } from "@/server/ai/fascicoloAutomaticAnalysisJob";
@@ -59,6 +60,188 @@ function texts(value: unknown): readonly string[] {
   return Array.isArray(value) ? value.map(text).filter((item): item is string => item !== null) : [];
 }
 
+const MISSION_READ_LIMIT = 50;
+
+const researchMissionReadSelect = {
+  id: true,
+  payload: true,
+  referenceDate: true,
+  referenceDateBasis: true,
+  missionFingerprint: true,
+  legalIssueSemanticKey: true,
+  researchQuestionSemanticKey: true,
+  knowledgeRevisionId: true,
+  firstKnowledgeRevisionId: true,
+  mode: true,
+  status: true,
+  createdAt: true,
+  updatedAt: true,
+  primaryAdverseRequirements: {
+    where: { status: { not: "HISTORICAL" as const } },
+    take: 1,
+    select: {
+      adverseMission: { select: { id: true, status: true, lifecycleStatus: true } },
+    },
+  },
+  questionResults: {
+    orderBy: [{ createdAt: "asc" as const }, { id: "asc" as const }],
+    select: {
+      id: true,
+      bundleId: true,
+      candidateId: true,
+      candidateSnapshot: true,
+      supportDirection: true,
+      classificationSource: true,
+      classificationConfidence: true,
+      classificationRationale: true,
+      classificationReviewStatus: true,
+      coverageElementKeys: true,
+      unresolvedAspectKeys: true,
+      researchQuestionSemanticKey: true,
+      sourceAssessments: {
+        where: { isCurrent: true },
+        orderBy: { createdAt: "desc" as const },
+        take: 1,
+        select: {
+          id: true,
+          chainFingerprint: true,
+          isCurrent: true,
+          retrievalState: true,
+          textState: true,
+          identityState: true,
+          contentState: true,
+          temporalState: true,
+          adverseState: true,
+          officiality: true,
+          citationAnchors: true,
+          blockingReasons: true,
+          manualReviewRequired: true,
+          manualReviewReason: true,
+          usable: true,
+        },
+      },
+    },
+  },
+  executionAttempts: {
+    where: { evidenceBundles: { some: {} } },
+    orderBy: [{ completedAt: "desc" as const }, { id: "desc" as const }],
+    take: 1,
+    select: {
+      evidenceBundles: {
+        orderBy: [{ createdAt: "desc" as const }, { id: "desc" as const }],
+        take: 1,
+        select: { payload: true, completionState: true },
+      },
+    },
+  },
+} satisfies Prisma.ResearchMissionRecordSelect;
+
+type ResearchMissionReadRow = Prisma.ResearchMissionRecordGetPayload<{
+  select: typeof researchMissionReadSelect;
+}>;
+
+export interface FascicoloResearchResultReadModel {
+  resultId: string;
+  candidateId: string;
+  missionId: string;
+  bundleId: string;
+  title: string;
+  authority: string | null;
+  sourceFamily: string | null;
+  officialIdentifier: string | null;
+  documentDate: string | null;
+  sourceUrl: string | null;
+  provider: string | null;
+  relevantPassage: string | null;
+  supportDirection: ResearchResultSupportDirection;
+  classificationSource: ResearchResultClassificationSource;
+  classificationConfidence: number | null;
+  classificationRationale: string | null;
+  classificationReviewStatus: ResearchResultReviewStatus;
+  sourceVerificationState: ResearchResultSourceState;
+  retrievalState: string;
+  acquisitionState: string;
+  identityVerification: string;
+  contentVerification: string;
+  temporalStatus: string;
+  adverseStatus: string;
+  officiality: string;
+  usable: boolean;
+  blockingReasons: readonly string[];
+  citationAnchors: readonly JsonRecord[];
+  manualReviewRequired: boolean;
+  manualReviewReason: string | null;
+  legacySource: boolean;
+  sourceAssessment: {
+    assessmentId: string;
+    chainFingerprint: string;
+    isCurrent: boolean;
+    usable: boolean;
+    citationAnchors: readonly JsonRecord[];
+    blockingReasons: readonly string[];
+    manualReviewRequired: boolean;
+    manualReviewReason: string | null;
+  } | null;
+}
+
+export interface FascicoloResearchMissionReadModel {
+  missionId: string;
+  question: string;
+  referenceDate: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  referenceDateBasis: JsonRecord | null;
+  missionFingerprint: string | null;
+  legalIssueSemanticKey: string | null;
+  researchQuestionSemanticKey: string | null;
+  knowledgeRevisionId: string | null;
+  lifecycleOutcome: "NEW" | "REUSED" | "LEGACY";
+  lifecycleStatus: "CURRENT" | "HISTORICAL";
+  status: ResearchMissionStatus;
+  researchState: ResearchQuestionExecutionState;
+  coverageStatus: ResearchQuestionCoverageStatus;
+  coverageGaps: readonly ResearchCoverageGap[];
+  coveredElementKeys: readonly string[];
+  conflicting: boolean;
+  resultCount: number;
+  displayedHistoricalResultCount: number;
+  discoveryCoverageStatus: "NO_RESULTS" | "DISCOVERED";
+  usableCoverageStatus: "NO_USABLE_SOURCE" | "USABLE" | "CONFLICTING";
+  usableSupportsCount: number;
+  usableOpposesCount: number;
+  conflictingUsableAuthorities: boolean;
+  sourceGaps: readonly string[];
+  adverseMission: {
+    missionId: string;
+    status: ResearchMissionStatus;
+    lifecycleStatus: "CURRENT";
+  } | null;
+  results: readonly FascicoloResearchResultReadModel[];
+  sources: readonly {
+    title: string;
+    sourceUrl: string | null;
+    documentDate: string | null;
+    supportDirection: string;
+    verificationState: string;
+  }[];
+  gaps: readonly string[];
+  conflicts: readonly string[];
+  suggestions: readonly {
+    suggestionId: string;
+    kind: string;
+    description: string;
+    targetId: string | null;
+  }[];
+  completionState: string | null;
+  execution: {
+    status: AsyncJobStatus | null;
+    failureCode: string | null;
+    attemptCount: number;
+    callCount: number | null;
+  };
+  automationRequirementCode: string | null;
+}
+
 export interface FascicoloAutomaticWorkflowReadModel {
   analysisUpdate: {
     status: "CURRENT" | "UPDATING" | "STALE" | "WAITING_AUTHORIZATION" | "ERROR";
@@ -103,103 +286,14 @@ export interface FascicoloAutomaticWorkflowReadModel {
     failureCode: string | null;
     superseded: boolean;
   }[];
-  missions: readonly {
-    missionId: string;
-    question: string;
-    referenceDate: Date;
-    referenceDateBasis: JsonRecord | null;
-    missionFingerprint: string | null;
-    legalIssueSemanticKey: string | null;
-    researchQuestionSemanticKey: string | null;
-    knowledgeRevisionId: string | null;
-    lifecycleOutcome: "NEW" | "REUSED" | "LEGACY";
-    lifecycleStatus: "CURRENT";
-    status: ResearchMissionStatus;
-    researchState: ResearchQuestionExecutionState;
-    coverageStatus: ResearchQuestionCoverageStatus;
-    coverageGaps: readonly ResearchCoverageGap[];
-    coveredElementKeys: readonly string[];
-    conflicting: boolean;
-    resultCount: number;
-    historicalResultCount: number;
-    discoveryCoverageStatus: "NO_RESULTS" | "DISCOVERED";
-    usableCoverageStatus: "NO_USABLE_SOURCE" | "USABLE" | "CONFLICTING";
-    usableSupportsCount: number;
-    usableOpposesCount: number;
-    conflictingUsableAuthorities: boolean;
-    sourceGaps: readonly string[];
-    adverseMission: {
-      missionId: string;
-      status: ResearchMissionStatus;
-      lifecycleStatus: "CURRENT";
-    } | null;
-    results: readonly {
-      resultId: string;
-      candidateId: string;
-      missionId: string;
-      bundleId: string;
-      title: string;
-      authority: string | null;
-      sourceFamily: string | null;
-      officialIdentifier: string | null;
-      documentDate: string | null;
-      sourceUrl: string | null;
-      provider: string | null;
-      relevantPassage: string | null;
-      supportDirection: ResearchResultSupportDirection;
-      classificationSource: ResearchResultClassificationSource;
-      classificationConfidence: number | null;
-      classificationRationale: string | null;
-      classificationReviewStatus: ResearchResultReviewStatus;
-      sourceVerificationState: ResearchResultSourceState;
-      retrievalState: string;
-      acquisitionState: string;
-      identityVerification: string;
-      contentVerification: string;
-      temporalStatus: string;
-      adverseStatus: string;
-      officiality: string;
-      usable: boolean;
-      blockingReasons: readonly string[];
-      citationAnchors: readonly JsonRecord[];
-      manualReviewRequired: boolean;
-      manualReviewReason: string | null;
-      legacySource: boolean;
-      sourceAssessment: {
-        assessmentId: string;
-        chainFingerprint: string;
-        isCurrent: boolean;
-        usable: boolean;
-        citationAnchors: readonly JsonRecord[];
-        blockingReasons: readonly string[];
-        manualReviewRequired: boolean;
-        manualReviewReason: string | null;
-      } | null;
-    }[];
-    sources: readonly {
-      title: string;
-      sourceUrl: string | null;
-      documentDate: string | null;
-      supportDirection: string;
-      verificationState: string;
-    }[];
-    gaps: readonly string[];
-    conflicts: readonly string[];
-    suggestions: readonly {
-      suggestionId: string;
-      kind: string;
-      description: string;
-      targetId: string | null;
-    }[];
-    completionState: string | null;
-    execution: {
-      status: AsyncJobStatus | null;
-      failureCode: string | null;
-      attemptCount: number;
-      callCount: number | null;
-    };
-    automationRequirementCode: string | null;
-  }[];
+  missions: readonly (FascicoloResearchMissionReadModel & { lifecycleStatus: "CURRENT" })[];
+  historicalMissions: readonly (FascicoloResearchMissionReadModel & { lifecycleStatus: "HISTORICAL" })[];
+  missionReadTruncation: {
+    limitPerLifecycle: number;
+    current: boolean;
+    historical: boolean;
+    adverse: boolean;
+  };
   historicalMissionCount: number;
 }
 
@@ -234,7 +328,18 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
   });
   if (owner?.enteId !== tenantId) return null;
 
-  const [reports, structuredReportSnapshots, candidateJobs, missions, historicalMissionCount, historicalResults, knowledge, operationalProposals, documentCorpus] = await Promise.all([
+  const [
+    reports,
+    structuredReportSnapshots,
+    candidateJobs,
+    currentMissionRows,
+    currentAdverseMissionRows,
+    historicalMissionRows,
+    historicalMissionCount,
+    knowledge,
+    operationalProposals,
+    documentCorpus,
+  ] = await Promise.all([
     prisma.automaticFascicoloReport.findMany({
       where: { tenantId, procedimentoId },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
@@ -290,86 +395,45 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
       },
     }),
     prisma.researchMissionRecord.findMany({
-      where: { tenantId, caseId: procedimentoId, lifecycleStatus: "CURRENT" },
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      take: 50,
-      select: {
-        id: true,
-        payload: true,
-        referenceDate: true,
-        referenceDateBasis: true,
-        missionFingerprint: true,
-        legalIssueSemanticKey: true,
-        researchQuestionSemanticKey: true,
-        knowledgeRevisionId: true,
-        firstKnowledgeRevisionId: true,
-        mode: true,
-        status: true,
-        primaryAdverseRequirements: {
-          where: { status: { not: "HISTORICAL" } },
-          take: 1,
-          select: {
-            adverseMission: { select: { id: true, status: true, lifecycleStatus: true } },
-          },
-        },
-        questionResults: {
-          orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-          select: {
-            id: true,
-            bundleId: true,
-            candidateId: true,
-            candidateSnapshot: true,
-            supportDirection: true,
-            classificationSource: true,
-            classificationConfidence: true,
-            classificationRationale: true,
-            classificationReviewStatus: true,
-            coverageElementKeys: true,
-            unresolvedAspectKeys: true,
-            sourceAssessments: {
-              where: { isCurrent: true },
-              orderBy: { createdAt: "desc" },
-              take: 1,
-              select: {
-                id: true,
-                chainFingerprint: true,
-                isCurrent: true,
-                retrievalState: true,
-                textState: true,
-                identityState: true,
-                contentState: true,
-                temporalState: true,
-                adverseState: true,
-                officiality: true,
-                citationAnchors: true,
-                blockingReasons: true,
-                manualReviewRequired: true,
-                manualReviewReason: true,
-                usable: true,
-              },
-            },
-          },
-        },
-        executionAttempts: {
-          where: { evidenceBundles: { some: {} } },
-          orderBy: [{ completedAt: "desc" }, { id: "desc" }],
-          take: 1,
-          select: {
-            evidenceBundles: {
-              orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-              take: 1,
-              select: { payload: true, completionState: true },
-            },
-          },
-        },
+      where: {
+        tenantId,
+        caseId: procedimentoId,
+        lifecycleStatus: "CURRENT",
+        mode: { not: "ADVERSE_SEARCH" },
       },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: MISSION_READ_LIMIT + 1,
+      select: researchMissionReadSelect,
+    }),
+    prisma.researchMissionRecord.findMany({
+      where: {
+        tenantId,
+        caseId: procedimentoId,
+        lifecycleStatus: "CURRENT",
+        mode: "ADVERSE_SEARCH",
+      },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: MISSION_READ_LIMIT + 1,
+      select: researchMissionReadSelect,
+    }),
+    prisma.researchMissionRecord.findMany({
+      where: {
+        tenantId,
+        caseId: procedimentoId,
+        lifecycleStatus: "HISTORICAL",
+        mode: { not: "ADVERSE_SEARCH" },
+      },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: MISSION_READ_LIMIT + 1,
+      select: researchMissionReadSelect,
     }),
     prisma.researchMissionRecord.count({
-      where: { tenantId, caseId: procedimentoId, lifecycleStatus: "HISTORICAL" },
-    }),
-    prisma.researchQuestionResultRecord.findMany({
-      where: { tenantId, caseId: procedimentoId, mission: { lifecycleStatus: "HISTORICAL" } },
-      select: { researchQuestionSemanticKey: true },
+      where: {
+        tenantId,
+        caseId: procedimentoId,
+        lifecycleStatus: "HISTORICAL",
+        mode: { not: "ADVERSE_SEARCH" },
+      },
     }),
     loadCurrentStructuredKnowledge(tenantId, procedimentoId),
     listOperationalProposals({ tenantId, procedimentoId }),
@@ -377,6 +441,10 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
   ]);
   if (!documentCorpus) return null;
 
+  const missions = currentMissionRows.slice(0, MISSION_READ_LIMIT);
+  const adverseMissions = currentAdverseMissionRows.slice(0, MISSION_READ_LIMIT);
+  const historicalMissions = historicalMissionRows.slice(0, MISSION_READ_LIMIT);
+  const displayedHistoricalResults = historicalMissions.flatMap((mission) => mission.questionResults);
   const analysisJobs = candidateJobs.filter((job) => job.operation === FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION);
   const researchJobs = candidateJobs.filter((job) => job.operation === RESEARCH_MISSION_EXECUTION_OPERATION);
   const extractionJobs = candidateJobs.filter((job) => job.operation === DOCUMENT_EXTRACTION_OPERATION);
@@ -424,6 +492,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
               ? "ERROR" as const
               : "STALE" as const;
   const researchPolicy = evaluateAutomaticResearchPolicy({ tenantId });
+  let projectedHistoricalMissions: (FascicoloResearchMissionReadModel & { lifecycleStatus: "HISTORICAL" })[] = [];
 
   const readModel: Omit<FascicoloAutomaticWorkflowReadModel, "structuredReport" | "structuredReportSnapshots"> = {
     analysisUpdate: {
@@ -493,7 +562,11 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
       superseded: job.corpusFingerprint !== null
         && job.corpusFingerprint !== documentCorpus.corpusFingerprint,
     })),
-    missions: missions.filter((mission) => mission.mode !== "ADVERSE_SEARCH").map((mission) => {
+    missions: (() => {
+      const projectMission = <L extends "CURRENT" | "HISTORICAL">(
+        mission: ResearchMissionReadRow,
+        lifecycleStatus: L,
+      ): FascicoloResearchMissionReadModel & { lifecycleStatus: L } => {
       const payload = record(mission.payload);
       const researchJob = researchJobs.find((job) => record(job.inputReference)?.referenceId === mission.id) ?? null;
       const resultMetadata = record(record(researchJob?.resultReference)?.metadata);
@@ -525,6 +598,8 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
         missionId: mission.id,
         question: text(payload?.researchQuestion) ?? "Quesito non disponibile",
         referenceDate: mission.referenceDate,
+        createdAt: mission.createdAt,
+        updatedAt: mission.updatedAt,
         referenceDateBasis: record(mission.referenceDateBasis),
         missionFingerprint: mission.missionFingerprint,
         legalIssueSemanticKey: mission.legalIssueSemanticKey,
@@ -533,7 +608,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
         lifecycleOutcome: mission.firstKnowledgeRevisionId === null || mission.knowledgeRevisionId === null
           ? "LEGACY" as const
           : mission.firstKnowledgeRevisionId === mission.knowledgeRevisionId ? "NEW" as const : "REUSED" as const,
-        lifecycleStatus: "CURRENT" as const,
+        lifecycleStatus,
         status: mission.status,
         researchState: coverage.executionState,
         coverageStatus: coverage.status,
@@ -541,7 +616,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
         coveredElementKeys: coverage.coveredElementKeys,
         conflicting: coverage.conflicting,
         resultCount: structuredResults.length,
-        historicalResultCount: historicalResults.filter((result) => (
+        displayedHistoricalResultCount: displayedHistoricalResults.filter((result) => (
           result.researchQuestionSemanticKey === mission.researchQuestionSemanticKey
         )).length,
         discoveryCoverageStatus: sourceCoverage.discoveryCoverage,
@@ -550,7 +625,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
         usableOpposesCount: sourceCoverage.usableOpposesCount,
         conflictingUsableAuthorities: sourceCoverage.conflictingUsableAuthorities,
         sourceGaps: sourceCoverage.gaps,
-        adverseMission: adverse?.lifecycleStatus === "CURRENT" ? {
+        adverseMission: lifecycleStatus === "CURRENT" && adverse?.lifecycleStatus === "CURRENT" ? {
           missionId: adverse.id,
           status: adverse.status,
           lifecycleStatus: "CURRENT" as const,
@@ -635,9 +710,25 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
           attemptCount: researchJob?.attemptCount ?? 0,
           callCount: typeof resultMetadata?.callCount === "number" ? resultMetadata.callCount : null,
         },
-        automationRequirementCode: researchJob?.failureCode ?? missionPolicy.requirementCode,
+        automationRequirementCode: lifecycleStatus === "CURRENT"
+          ? researchJob?.failureCode ?? missionPolicy.requirementCode
+          : null,
       };
-    }),
+      };
+      projectedHistoricalMissions = historicalMissions
+        .filter((mission) => mission.mode !== "ADVERSE_SEARCH")
+        .map((mission) => projectMission(mission, "HISTORICAL"));
+      return missions
+        .filter((mission) => mission.mode !== "ADVERSE_SEARCH")
+        .map((mission) => projectMission(mission, "CURRENT"));
+    })(),
+    historicalMissions: projectedHistoricalMissions,
+    missionReadTruncation: {
+      limitPerLifecycle: MISSION_READ_LIMIT,
+      current: currentMissionRows.length > MISSION_READ_LIMIT,
+      historical: historicalMissionRows.length > MISSION_READ_LIMIT,
+      adverse: currentAdverseMissionRows.length > MISSION_READ_LIMIT,
+    },
   };
   const structuredReport = knowledge ? buildStructuredFascicoloReport({
     tenantId,
@@ -645,7 +736,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
     knowledge,
     missions: [
       ...readModel.missions,
-      ...missions.filter((mission) => mission.mode === "ADVERSE_SEARCH").map((mission) => {
+      ...adverseMissions.map((mission) => {
         const payload = record(mission.payload);
         return {
           missionId: mission.id,

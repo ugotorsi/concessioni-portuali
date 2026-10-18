@@ -7,9 +7,12 @@ import {
 
 export interface FascicoloAnalysisQuestion {
   id: string;
+  semanticKey?: string | null;
   title: string;
   description?: string | null;
   status?: string | null;
+  knowledgeStatus?: string | null;
+  operationalStatuses?: readonly string[];
   area?: string | null;
   relevance?: string | null;
   evidence?: readonly string[];
@@ -154,6 +157,16 @@ export function FascicoloAnalysis({ model }: { model: FascicoloAnalysisModel }) 
                       <h4 className="min-w-0 font-semibold text-slate-950 [overflow-wrap:anywhere]">{question.title}</h4>
                       {optionalText(question.status) ? <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">{question.status}</span> : null}
                     </div>
+                    {optionalText(question.knowledgeStatus) || question.operationalStatuses?.length ? (
+                      <dl className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
+                        {optionalText(question.knowledgeStatus) ? (
+                          <div><dt className="inline font-medium text-slate-700">Qualificazione Knowledge:</dt> <dd className="inline">{question.knowledgeStatus}</dd></div>
+                        ) : null}
+                        {question.operationalStatuses && question.operationalStatuses.length > 0 ? (
+                          <div><dt className="inline font-medium text-slate-700">Stato missione:</dt> <dd className="inline">{question.operationalStatuses.join(" · ")}</dd></div>
+                        ) : null}
+                      </dl>
+                    ) : null}
                     {optionalText(question.description) ? <p className="mt-2 text-sm leading-6 text-slate-700">{question.description}</p> : null}
                     <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
                       <Meta label="Tema" value={question.area} />

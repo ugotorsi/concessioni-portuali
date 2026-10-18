@@ -7,6 +7,9 @@ export type ResearchSourceUsability = "USABLE" | "TO_VERIFY" | "NOT_USABLE";
 export interface FascicoloResearchSource {
   id: string;
   questionId?: string | null;
+  missionId?: string | null;
+  resultId?: string | null;
+  lifecycleStatus?: "CURRENT" | "HISTORICAL";
   authority?: string | null;
   sourceType?: string | null;
   identifier?: string | null;
@@ -18,6 +21,7 @@ export interface FascicoloResearchSource {
   note?: string | null;
   direction?: ResearchSupportDirection | null;
   usability?: ResearchSourceUsability | null;
+  latestAssessmentUsability?: ResearchSourceUsability | null;
 }
 
 export interface FascicoloResearchQuestionVersion {
@@ -29,6 +33,7 @@ export interface FascicoloResearchQuestionVersion {
 
 export interface FascicoloResearchQuestion {
   id: string;
+  semanticKey?: string | null;
   text: string;
   theme?: string | null;
   status?: string | null;
@@ -37,12 +42,19 @@ export interface FascicoloResearchQuestion {
   coveredAspects?: readonly string[];
   gaps?: readonly string[];
   needsFurtherResearch?: boolean;
+  lifecycleStatus?: "CURRENT" | "HISTORICAL";
   versions?: readonly FascicoloResearchQuestionVersion[];
 }
 
 export interface FascicoloResearchModel {
   questions: readonly FascicoloResearchQuestion[];
   sources: readonly FascicoloResearchSource[];
+  missionReadTruncation?: {
+    limitPerLifecycle: number;
+    current: boolean;
+    historical: boolean;
+    adverse: boolean;
+  };
 }
 
 export function researchDirectionLabel(value: ResearchSupportDirection): string {
@@ -82,8 +94,22 @@ function SourceCard({ source }: { source: FascicoloResearchSource }) {
           {text(source.authority) ? <p className="mt-1 text-sm text-slate-600">{source.authority}</p> : null}
         </div>
         <div className="flex flex-wrap gap-2">
+          {source.lifecycleStatus ? (
+            <span className={`rounded-md px-2 py-1 text-xs font-semibold ${
+              source.lifecycleStatus === "HISTORICAL"
+                ? "bg-violet-100 text-violet-800"
+                : "bg-sky-100 text-sky-800"
+            }`}>
+              {source.lifecycleStatus === "HISTORICAL" ? "Storica" : "Corrente"}
+            </span>
+          ) : null}
           {source.direction ? <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">{researchDirectionLabel(source.direction)}</span> : null}
-          {source.usability ? <span className="rounded-md border border-slate-200 px-2 py-1 text-xs font-semibold text-slate-800">{researchUsabilityLabel(source.usability)}</span> : null}
+          {source.usability ? <span className="rounded-md border border-slate-200 px-2 py-1 text-xs font-semibold text-slate-800">{source.lifecycleStatus === "HISTORICAL" ? "Stato attuale: " : ""}{researchUsabilityLabel(source.usability)}</span> : null}
+          {source.lifecycleStatus === "HISTORICAL" && source.latestAssessmentUsability ? (
+            <span className="rounded-md border border-violet-200 bg-violet-50 px-2 py-1 text-xs font-semibold text-violet-900">
+              Ultima valutazione registrata: {researchUsabilityLabel(source.latestAssessmentUsability)}
+            </span>
+          ) : null}
         </div>
       </div>
       <dl className="mt-3 grid min-w-0 gap-x-5 gap-y-2 text-xs sm:grid-cols-2">
@@ -91,6 +117,14 @@ function SourceCard({ source }: { source: FascicoloResearchSource }) {
         {text(source.identifier) && source.identifier !== title ? <div><dt className="text-slate-500">Identificativo</dt><dd className="mt-0.5 text-slate-800 [overflow-wrap:anywhere]">{source.identifier}</dd></div> : null}
         {text(source.date) ? <div><dt className="text-slate-500">Data</dt><dd className="mt-0.5 text-slate-800">{source.date}</dd></div> : null}
         {text(source.origin) ? <div><dt className="text-slate-500">Provenienza</dt><dd className="mt-0.5 text-slate-800">{source.origin}</dd></div> : null}
+        {text(source.missionId) ? <div><dt className="text-slate-500">Missione</dt><dd className="mt-0.5 text-slate-800 [overflow-wrap:anywhere]">{source.missionId}</dd></div> : null}
+        {text(source.resultId) ? <div><dt className="text-slate-500">Risultato</dt><dd className="mt-0.5 text-slate-800 [overflow-wrap:anywhere]">{source.resultId}</dd></div> : null}
+        {source.lifecycleStatus === "HISTORICAL" && source.latestAssessmentUsability ? (
+          <div>
+            <dt className="text-slate-500">Ultima valutazione registrata sul risultato storico</dt>
+            <dd className="mt-0.5 text-slate-800">{researchUsabilityLabel(source.latestAssessmentUsability)}</dd>
+          </div>
+        ) : null}
       </dl>
       {text(source.verificationStatus) ? <p className="mt-3 text-xs text-slate-600">{source.verificationStatus}</p> : null}
       {text(source.note) ? <p className="mt-2 text-sm text-slate-700">{source.note}</p> : null}
@@ -109,9 +143,16 @@ export function FascicoloResearchSources({ sources }: { sources: readonly Fascic
 export function FascicoloResearch({ model }: { model: FascicoloResearchModel }) {
   const questionIds = new Set(model.questions.map((question) => question.id));
   const unlinkedSources = model.sources.filter((source) => !source.questionId || !questionIds.has(source.questionId));
-  const usableCount = model.sources.filter((source) => source.usability === "USABLE").length;
-  const toDeepenCount = model.questions.filter((question) => question.needsFurtherResearch === true).length;
-  const hasUsabilityData = model.sources.some((source) => source.usability);
+  const currentQuestions = model.questions.filter((question) => question.lifecycleStatus !== "HISTORICAL");
+  const historicalQuestions = model.questions.filter((question) => question.lifecycleStatus === "HISTORICAL");
+  const questionGroups = [
+    { id: "current", title: "Ricerche correnti", questions: currentQuestions, historical: false },
+    { id: "historical", title: "Ricerche storiche", questions: historicalQuestions, historical: true },
+  ] as const;
+  const currentSources = model.sources.filter((source) => source.lifecycleStatus !== "HISTORICAL");
+  const usableCount = currentSources.filter((source) => source.usability === "USABLE").length;
+  const toDeepenCount = currentQuestions.filter((question) => question.needsFurtherResearch === true).length;
+  const hasUsabilityData = currentSources.some((source) => source.usability);
   const hasIndicators = model.questions.length > 0 || hasUsabilityData;
   const hasStructuredResearch = model.questions.length > 0;
 
@@ -122,25 +163,43 @@ export function FascicoloResearch({ model }: { model: FascicoloResearchModel }) 
         <p className="mt-1 text-sm text-slate-600">Quesiti giuridici, fonti e stato degli approfondimenti.</p>
         {hasIndicators ? (
           <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
-            <div><dt className="inline text-slate-500">Quesiti </dt><dd className="inline font-semibold text-slate-950">{model.questions.length}</dd></div>
-            {hasUsabilityData ? <div><dt className="inline text-slate-500">Fonti utilizzabili </dt><dd className="inline font-semibold text-slate-950">{usableCount}</dd></div> : null}
-            <div><dt className="inline text-slate-500">Da approfondire </dt><dd className="inline font-semibold text-slate-950">{toDeepenCount}</dd></div>
+            <div><dt className="inline text-slate-500">Quesiti correnti </dt><dd className="inline font-semibold text-slate-950">{currentQuestions.length}</dd></div>
+            {historicalQuestions.length > 0 ? <div><dt className="inline text-slate-500">Missioni storiche </dt><dd className="inline font-semibold text-slate-950">{historicalQuestions.length}</dd></div> : null}
+            {hasUsabilityData ? <div><dt className="inline text-slate-500">Fonti correnti utilizzabili </dt><dd className="inline font-semibold text-slate-950">{usableCount}</dd></div> : null}
+            <div><dt className="inline text-slate-500">Da approfondire (correnti) </dt><dd className="inline font-semibold text-slate-950">{toDeepenCount}</dd></div>
           </dl>
         ) : null}
       </header>
+
+      {model.missionReadTruncation?.current || model.missionReadTruncation?.historical || model.missionReadTruncation?.adverse ? (
+        <div className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+          La vista mostra al massimo {model.missionReadTruncation.limitPerLifecycle} missioni per stato.
+          {model.missionReadTruncation.current ? " Esistono ulteriori missioni correnti." : ""}
+          {model.missionReadTruncation.historical ? " Esistono ulteriori missioni storiche." : ""}
+          {model.missionReadTruncation.adverse ? " Esistono ulteriori missioni di ricerca contraria." : ""}
+        </div>
+      ) : null}
 
       {!hasStructuredResearch ? (
         <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-4">
           <p className="text-sm font-medium text-slate-900">Non risultano ancora approfondimenti giuridici strutturati per questo fascicolo.</p>
         </div>
       ) : (
-        <section aria-labelledby="research-questions-title">
-          <div className="flex items-center gap-2">
-            <CircleHelp className="h-4 w-4 text-[#0b7285]" aria-hidden="true" />
-            <h3 id="research-questions-title" className="text-base font-semibold text-slate-950">Quesiti di ricerca</h3>
-          </div>
-          <div className="mt-3 space-y-4">
-            {model.questions.map((question) => {
+        <div className="space-y-6">
+          {questionGroups.map((group) => group.questions.length > 0 ? (
+            <section key={group.id} aria-labelledby={`research-questions-${group.id}-title`}>
+              <div className="flex items-center gap-2">
+                <CircleHelp className="h-4 w-4 text-[#0b7285]" aria-hidden="true" />
+                <h3 id={`research-questions-${group.id}-title`} className="text-base font-semibold text-slate-950">{group.title}</h3>
+              </div>
+              {group.historical ? (
+                <p className="mt-2 text-sm text-slate-600">
+                  Versioni precedenti persistite. Per ogni risultato è mostrata l’ultima valutazione registrata disponibile,
+                  che non costituisce necessariamente una fotografia immutabile alla data della missione e non attesta validità o utilizzabilità attuale.
+                </p>
+              ) : null}
+              <div className="mt-3 space-y-4">
+            {group.questions.map((question) => {
               const sources = model.sources.filter((source) => source.questionId === question.id);
               return (
                 <article key={question.id} className="min-w-0 rounded-md border border-slate-200 p-4">
@@ -190,8 +249,10 @@ export function FascicoloResearch({ model }: { model: FascicoloResearchModel }) 
                 </article>
               );
             })}
-          </div>
-        </section>
+              </div>
+            </section>
+          ) : null)}
+        </div>
       )}
 
       {unlinkedSources.length > 0 ? (

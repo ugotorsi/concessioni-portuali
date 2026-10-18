@@ -7,24 +7,43 @@ import type {
 import type { FascicoloAutomaticWorkflowReadModel } from "@/server/queries/fascicolo-automatic-workflow";
 
 type WorkflowMission = FascicoloAutomaticWorkflowReadModel["missions"][number];
+type HistoricalWorkflowMission = FascicoloAutomaticWorkflowReadModel["historicalMissions"][number];
+type AnyWorkflowMission = WorkflowMission | HistoricalWorkflowMission;
 type WorkflowResult = WorkflowMission["results"][number];
 
 export type FascicoloResearchWorkflowProjection = Readonly<{
   missions: readonly Pick<
-    WorkflowMission,
+    AnyWorkflowMission,
     | "missionId"
     | "question"
     | "referenceDate"
+    | "updatedAt"
+    | "researchQuestionSemanticKey"
+    | "lifecycleStatus"
     | "status"
     | "coverageStatus"
     | "coveredElementKeys"
     | "coverageGaps"
-    | "historicalResultCount"
     | "results"
   >[];
+  historicalMissions?: readonly Pick<
+    AnyWorkflowMission,
+    | "missionId"
+    | "question"
+    | "referenceDate"
+    | "updatedAt"
+    | "researchQuestionSemanticKey"
+    | "lifecycleStatus"
+    | "status"
+    | "coverageStatus"
+    | "coveredElementKeys"
+    | "coverageGaps"
+    | "results"
+  >[];
+  missionReadTruncation?: FascicoloAutomaticWorkflowReadModel["missionReadTruncation"];
 }>;
 
-function missionStatus(status: WorkflowMission["status"]): string {
+function missionStatus(status: AnyWorkflowMission["status"]): string {
   if (status === "COMPLETED") return "Completata";
   if (status === "DEFERRED") return "Differita";
   if (status === "REJECTED") return "Respinta";
@@ -33,7 +52,7 @@ function missionStatus(status: WorkflowMission["status"]): string {
   return "Da eseguire";
 }
 
-function coverageStatus(status: WorkflowMission["coverageStatus"]): string {
+function coverageStatus(status: AnyWorkflowMission["coverageStatus"]): string {
   if (status === "COVERED") return "Copertura completa rispetto al perimetro registrato.";
   if (status === "CONFLICTING") return "Copertura con autorità in conflitto; è necessaria una valutazione professionale.";
   if (status === "RESULTS_UNASSESSED") return "Risultati conservati, ma non ancora valutati.";
@@ -82,7 +101,19 @@ function citationReferences(anchors: readonly Readonly<Record<string, unknown>>[
   });
 }
 
-function verificationStatus(result: WorkflowResult): string {
+function verificationStatus(
+  result: WorkflowResult,
+  lifecycleStatus: AnyWorkflowMission["lifecycleStatus"],
+  latestAssessmentUsability: ResearchSourceUsability,
+): string {
+  if (lifecycleStatus === "HISTORICAL") {
+    const recorded = latestAssessmentUsability === "USABLE"
+      ? "utilizzabile"
+      : latestAssessmentUsability === "NOT_USABLE"
+        ? "non utilizzabile"
+        : "da verificare";
+    return `Risultato storico: ultima valutazione registrata ${recorded}. Non costituisce necessariamente la valutazione esistente alla data della missione; la validità attuale richiede una nuova verifica professionale.`;
+  }
   if (result.usable) {
     return "Fonte verificata e utilizzabile nel perimetro registrato; resta necessaria la valutazione professionale.";
   }
@@ -95,55 +126,55 @@ function verificationStatus(result: WorkflowResult): string {
   return `Risultato candidato, non ancora utilizzabile · ${stages.join(" · ")}.`;
 }
 
-function resultSource(mission: Pick<WorkflowMission, "missionId">, result: WorkflowResult): FascicoloResearchSource {
+function resultSource(
+  mission: Pick<AnyWorkflowMission, "missionId" | "lifecycleStatus">,
+  result: WorkflowResult,
+): FascicoloResearchSource {
   const references = citationReferences(result.citationAnchors);
+  const latestAssessmentUsability = sourceUsability(result);
+  const lifecycleStatus = mission.lifecycleStatus ?? "CURRENT";
   const note = [
     result.relevantPassage,
     references.length > 0 ? `Riferimenti documentali: ${references.join(" · ")}.` : null,
     result.classificationRationale,
   ].filter((part): part is string => Boolean(part));
   return {
-    id: `risultato-${result.resultId}`,
+    id: `risultato-${lifecycleStatus.toLocaleLowerCase("it")}-${mission.missionId}-${result.resultId}`,
     questionId: mission.missionId,
+    missionId: mission.missionId,
+    resultId: result.resultId,
+    lifecycleStatus,
     authority: result.authority,
     sourceType: sourceType(result.sourceFamily),
     identifier: result.officialIdentifier ?? result.candidateId,
     date: result.documentDate,
     title: result.title,
-    origin: result.provider ? `Ricerca archiviata · ${result.provider}` : "Ricerca archiviata",
+    origin: result.provider
+      ? `Ricerca ${lifecycleStatus === "HISTORICAL" ? "storica" : "corrente"} archiviata · ${result.provider}`
+      : `Ricerca ${lifecycleStatus === "HISTORICAL" ? "storica" : "corrente"} archiviata`,
     href: result.sourceUrl,
-    verificationStatus: verificationStatus(result),
+    verificationStatus: verificationStatus(result, lifecycleStatus, latestAssessmentUsability),
     note: note.join(" "),
     direction: sourceDirection(result.supportDirection),
-    usability: sourceUsability(result),
+    usability: lifecycleStatus === "HISTORICAL" ? "TO_VERIFY" : latestAssessmentUsability,
+    latestAssessmentUsability: lifecycleStatus === "HISTORICAL" ? latestAssessmentUsability : undefined,
   };
-}
-
-function deduplicateSources(sources: readonly FascicoloResearchSource[]): FascicoloResearchSource[] {
-  const unique = new Map<string, FascicoloResearchSource>();
-  for (const source of sources) {
-    const key = source.identifier?.trim().toLocaleLowerCase("it")
-      || source.href?.trim().toLocaleLowerCase("it")
-      || `${source.title ?? ""}:${source.authority ?? ""}`.toLocaleLowerCase("it");
-    const previous = unique.get(key);
-    if (!previous || (previous.usability !== "USABLE" && source.usability === "USABLE")) {
-      unique.set(key, previous ? {
-        ...source,
-        questionId: source.questionId ?? previous.questionId,
-      } : source);
-    }
-  }
-  return [...unique.values()];
 }
 
 export function buildFascicoloResearchModel(
   workflow: FascicoloResearchWorkflowProjection | null,
   supplementalSources: readonly FascicoloResearchSource[] = [],
 ): FascicoloResearchModel {
-  const missions = workflow?.missions ?? [];
+  const currentMissions = workflow?.missions ?? [];
+  const historicalMissions = workflow?.historicalMissions ?? [];
+  const missions = [...currentMissions, ...historicalMissions];
+  const persistedSources = missions.flatMap((mission) => (
+    mission.results.map((result) => resultSource(mission, result))
+  ));
   return {
     questions: missions.map((mission) => ({
       id: mission.missionId,
+      semanticKey: mission.researchQuestionSemanticKey,
       text: mission.question,
       status: missionStatus(mission.status),
       referenceDate: mission.referenceDate.toLocaleDateString("it-IT"),
@@ -151,15 +182,22 @@ export function buildFascicoloResearchModel(
       coveredAspects: mission.coveredElementKeys,
       gaps: mission.coverageGaps.map((gap) => gap.key),
       needsFurtherResearch: mission.coverageStatus !== "COVERED",
-      versions: mission.historicalResultCount > 0 ? [{
-        id: `${mission.missionId}-historical-results`,
-        status: "Versioni precedenti conservate",
-        change: `${mission.historicalResultCount} risultati collegati a missioni storiche.`,
-      }] : [],
+      lifecycleStatus: mission.lifecycleStatus ?? "CURRENT",
+      versions: (mission.lifecycleStatus ?? "CURRENT") === "CURRENT"
+        ? historicalMissions
+          .filter((historical) => (
+            historical.researchQuestionSemanticKey !== null
+            && historical.researchQuestionSemanticKey === mission.researchQuestionSemanticKey
+          ))
+          .map((historical) => ({
+            id: historical.missionId,
+            date: historical.updatedAt.toLocaleDateString("it-IT"),
+            status: missionStatus(historical.status),
+            change: `${historical.results.length} risultati nella missione storica ${historical.missionId}.`,
+          }))
+        : [],
     })),
-    sources: deduplicateSources([
-      ...missions.flatMap((mission) => mission.results.map((result) => resultSource(mission, result))),
-      ...supplementalSources,
-    ]),
+    sources: [...persistedSources, ...supplementalSources],
+    missionReadTruncation: workflow?.missionReadTruncation,
   };
 }

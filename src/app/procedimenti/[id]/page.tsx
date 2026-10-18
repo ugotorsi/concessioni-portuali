@@ -17,6 +17,7 @@ import {
   FascicoloAnalysis,
   type FascicoloAnalysisCorpus,
 } from "@/components/procedimenti/FascicoloAnalysis";
+import { mergeFascicoloAnalysisQuestions } from "@/components/procedimenti/fascicolo-analysis-questions";
 import { FascicoloDeadlines, type FascicoloDeadlineStatus } from "@/components/procedimenti/FascicoloDeadlines";
 import { FascicoloIssues, type FascicoloIssueSeverity, type FascicoloIssueStatus } from "@/components/procedimenti/FascicoloIssues";
 import { FascicoloProposals } from "@/components/procedimenti/FascicoloProposals";
@@ -234,11 +235,14 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
     usability: item.resolution?.outcome === "NO_MATCH" ? "NOT_USABLE" as const : "TO_VERIFY" as const,
   }));
   const baseResearchModel = buildFascicoloResearchModel(automaticWorkflow, candidateResearchSources);
-  const workflowAnalysisQuestions = baseResearchModel.questions.map((question) => ({
+  const workflowAnalysisQuestions = baseResearchModel.questions
+  .filter((question) => question.lifecycleStatus !== "HISTORICAL")
+  .map((question) => ({
     id: `ricerca-${question.id}`,
+    semanticKey: question.semanticKey,
     title: question.text,
     description: question.coverage,
-    status: question.status,
+    operationalStatuses: question.status ? [question.status] : [],
     area: "Ricerca normativa e giurisprudenziale",
     relevance: question.needsFurtherResearch ? "Approfondimenti ancora necessari" : "Copertura registrata",
     evidence: question.coveredAspects,
@@ -340,10 +344,10 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
           {activeSection === "analysis" ? (
             <FascicoloAnalysis
               model={{
-                questions: uniqueBy([
+                questions: mergeFascicoloAnalysisQuestions([
                   ...(structuredAnalysis?.questions ?? []),
                   ...workflowAnalysisQuestions,
-                ], (question) => question.title.trim().toLocaleLowerCase("it")),
+                ]),
                 evidence: structuredAnalysis?.evidence ?? detail.documentiPrincipali.map((documento) => ({
                   id: documento.id,
                   title: documento.nome,
@@ -802,7 +806,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
         {activeSection === "analysis" ? (
           <FascicoloAnalysis
             model={{
-              questions: [
+              questions: mergeFascicoloAnalysisQuestions([
                 ...(structuredAnalysis?.questions ?? []),
                 ...workflowAnalysisQuestions,
                 ...(detail.criticitaCollegata && linkedIssueIsOpen ? [{
@@ -822,7 +826,7 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                   relevance: formatEnumLabel(item.gravita),
                   href: `/criticita/${item.id}`,
                 })),
-              ],
+              ]),
               evidence: [
                 ...(structuredAnalysis?.evidence ?? []),
                 {
