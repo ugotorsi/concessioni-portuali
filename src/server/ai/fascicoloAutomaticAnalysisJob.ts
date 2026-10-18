@@ -734,7 +734,7 @@ export function createFascicoloAutomaticAnalysisHandler(
           metadata: {
             procedimentoId: authority.procedimentoId,
             documentVersionId: authority.extractionAttemptId,
-            corpusFingerprint: authority.corpusFingerprint,
+            corpusHash: authority.corpusFingerprint,
             persistenceCode: "REUSED",
             missionCount: recovered.lifecycle.length,
             researchJobCount: 0,
@@ -851,7 +851,7 @@ export function createFascicoloAutomaticAnalysisHandler(
           metadata: {
             procedimentoId: authority.procedimentoId,
             documentVersionId: authority.extractionAttemptId,
-            corpusFingerprint: authority.corpusFingerprint,
+            corpusHash: authority.corpusFingerprint,
             missionCount: structuredMissions?.length ?? 0,
             persistenceCode: "CREATED",
             researchJobCount: 0,
