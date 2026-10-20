@@ -30,7 +30,7 @@ import {
   loadCurrentStructuredKnowledge,
   type StructuredKnowledgeReadModel,
 } from "@/server/queries/fascicolo-knowledge";
-import { getFascicoloDocumentCorpus } from "@/server/queries/fascicolo-document-corpus";
+import { getFascicoloDocumentCorpusForTenant } from "@/server/queries/fascicolo-document-corpus";
 
 type JsonRecord = Readonly<Record<string, unknown>>;
 
@@ -483,7 +483,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
     }),
     loadCurrentStructuredKnowledge(tenantId, procedimentoId),
     listOperationalProposals({ tenantId, procedimentoId }),
-    getFascicoloDocumentCorpus({ tenantId, procedimentoId }),
+    getFascicoloDocumentCorpusForTenant({ tenantId, procedimentoId }),
     loadTechnicalSourceReportRows(tenantId, procedimentoId),
   ]);
   if (!documentCorpus) return null;

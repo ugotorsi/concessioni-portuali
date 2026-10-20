@@ -485,6 +485,16 @@ export function buildStructuredFascicoloReport(input: {
     originatingItemIds: [...issue.originatingItemIds].sort(),
     questions: questions.filter((question) => questionById.get(question.knowledgeItemId)?.legalIssueId === issue.id),
   }));
+  const operationalSubjects = legalIssues.length > 0
+    ? legalIssues
+    : visibleItems(input.knowledge.gaps).map((gap) => ({
+        knowledgeItemId: gap.id,
+        semanticKey: gap.semanticKey,
+        text: gap.normalizedText,
+        reviewStatus: gap.status as "AI_PROPOSED" | "HUMAN_CONFIRMED",
+        originatingItemIds: [gap.id],
+        questions: [],
+      }));
   const assignedQuestionIds = new Set(legalIssues.flatMap((issue) => issue.questions.map((question) => question.knowledgeItemId)));
   const knowledgeState = [
     ...input.knowledge.partyRoles, ...input.knowledge.facts, ...input.knowledge.events,
@@ -538,11 +548,12 @@ export function buildStructuredFascicoloReport(input: {
     unassignedQuestions: questions.filter((question) => !assignedQuestionIds.has(question.knowledgeItemId)),
     gaps: visibleItems(input.knowledge.gaps),
     deadlineCandidates: visibleItems(input.knowledge.deadlineCandidates),
-    operationalPlans: buildOperationalPlans(legalIssues, input.knowledge, technicalSources),
+    operationalPlans: buildOperationalPlans(operationalSubjects, input.knowledge, technicalSources),
     ...(technicalSources.length ? { technicalSources } : {}),
     limitations: [...new Set([
       ...input.knowledge.revision.warnings,
       ...(input.knowledge.deadlineCandidates.length ? ["DEADLINE_CANDIDATES_ARE_NOT_OPERATIONAL_DEADLINES"] : []),
+      ...(legalIssues.length ? [] : ["NO_EXPLICIT_LEGAL_ISSUES_IN_CURRENT_KNOWLEDGE"]),
       ...(questions.length ? [] : ["NO_CURRENT_RESEARCH_QUESTIONS"]),
       ...(technicalSources.length ? ["TECHNICAL_SOURCES_NOT_PROBATIVE_VERIFY_ORIGINAL"] : []),
     ])].sort(),

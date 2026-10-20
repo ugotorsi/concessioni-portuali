@@ -374,6 +374,13 @@ export async function getFascicoloDocumentCorpus(input: {
   return readFascicoloDocumentCorpus(input);
 }
 
+/** Trusted backend projection. Procedure ownership is verified by the scoped read. */
+export async function getFascicoloDocumentCorpusForTenant(
+  input: FascicoloDocumentCorpusScope,
+): Promise<FascicoloDocumentCorpus | null> {
+  return readFascicoloDocumentCorpus(input);
+}
+
 export async function getFascicoloDocumentCorpusForAsyncJob(
   input: FascicoloDocumentCorpusAsyncJobAccess,
 ): Promise<FascicoloDocumentCorpus | null> {

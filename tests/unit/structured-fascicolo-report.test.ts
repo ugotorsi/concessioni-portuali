@@ -206,6 +206,29 @@ describe("deterministic structured fascicolo report", () => {
     expect(changed.payload.sourceStateFingerprint).not.toBe(first.payload.sourceStateFingerprint);
   });
 
+  it("builds preliminary operational plans from documented gaps when no explicit legal issue exists", () => {
+    const withoutIssues = knowledge();
+    withoutIssues.legalIssues = [];
+    withoutIssues.researchQuestions = [];
+
+    const report = buildStructuredFascicoloReport({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledge: withoutIssues,
+      missions: [],
+    });
+
+    expect(report.payload.legalIssues).toEqual([]);
+    expect(report.payload.operationalPlans).toHaveLength(1);
+    expect(report.payload.operationalPlans?.[0]).toMatchObject({
+      issueSemanticKey: sha("gap-1"),
+      sourceDocumentRefs: ["DOCUMENT_1.PAGE_1"],
+      outstandingEvidence: ["Testo gap-1"],
+      professionalStatus: "PRELIMINARY_NOT_APPROVED",
+    });
+    expect(report.payload.limitations).toContain("NO_EXPLICIT_LEGAL_ISSUES_IN_CURRENT_KNOWLEDGE");
+  });
+
   it("projects a reviewed direction only when the existing SourceChain gates are satisfied", () => {
     const report = buildStructuredFascicoloReport({
       tenantId: "tenant-1",

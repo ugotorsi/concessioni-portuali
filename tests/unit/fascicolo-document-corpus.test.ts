@@ -33,6 +33,7 @@ import {
   buildFascicoloDocumentKnowledgeEvidence,
   getFascicoloDocumentCorpus,
   getFascicoloDocumentCorpusForAsyncJob,
+  getFascicoloDocumentCorpusForTenant,
   toFascicoloDocumentAnalysisCorpus,
 } from "@/server/queries/fascicolo-document-corpus";
 
@@ -325,6 +326,22 @@ describe("fascicolo document corpus", () => {
       },
       select: { id: true },
     });
+  });
+
+  it("reads a tenant-scoped corpus for trusted backend projections without an HTTP session", async () => {
+    mocks.getCurrentTenantContext.mockRejectedValue(new Error("NEXTAUTH_SESSION_UNAVAILABLE"));
+
+    const corpus = await getFascicoloDocumentCorpusForTenant({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-a",
+    });
+
+    expect(corpus).not.toBeNull();
+    expect(mocks.procedimentoFindFirst).toHaveBeenCalledWith({
+      where: { id: "procedure-a", enteId: "tenant-a" },
+      select: { id: true },
+    });
+    expect(mocks.getCurrentTenantContext).not.toHaveBeenCalled();
   });
 
   it.each([
