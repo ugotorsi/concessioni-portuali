@@ -167,13 +167,10 @@ describe("TEST-LEGAL-001: deterministic party defenses without OpenAI", () => {
     expect(fascicoloStructuredKnowledgeSchema.safeParse(invalidParty).success).toBe(false);
 
     const nonexistentPage = "DOCUMENT_99.PAGE_1";
-    const projection = projectStructuredKnowledge({
+    expect(() => projectStructuredKnowledge({
       knowledge: fascicoloStructuredKnowledgeSchema.parse(fixtureKnowledge(nonexistentPage)),
       subjectIdsByLocalId: new Map([[subjectLocalId, subjectId]]),
       evidenceByBasisRef: new Map([[basisRef!, evidence(basisRef!)]]),
-    });
-    expect(projection.candidates).toHaveLength(0);
-    expect(projection.warnings).toContain("INVALID_EVIDENCE:defense-1");
-    expect(projection.warnings).toContain("INVALID_EVIDENCE:defense-2");
+    })).toThrowError("STRUCTURED_KNOWLEDGE_NO_VALID_ITEMS");
   });
 });
