@@ -1005,6 +1005,7 @@ model Ente {
   fascicoloOperationalProposals     FascicoloOperationalProposal[]
   runtimeBudgetPolicies             RuntimeBudgetPolicy[]
   runtimeCostReservations           RuntimeCostReservation[]
+  fascicoloAnalysisEvaluationPermits FascicoloAnalysisEvaluationPermit[]
   fascicoloAnalysisEvaluations      FascicoloAnalysisEvaluationArtifact[]
   technicalSourceResearchRecords    TechnicalSourceResearchRecord[]
 
@@ -1475,6 +1476,7 @@ model User {
   concessioneExpiryChangeCommands                ConcessioneExpiryChangeCommand[]              @relation("ConcessioneExpiryChangeActor")
   documentRequirementEvidenceReviews            FascicoloDocumentRequirementEvidenceReview[] @relation("DocumentRequirementEvidenceReviewedBy")
   aiFascicoloHumanReviewEvents                   AiFascicoloHumanReviewEvent[]
+  fascicoloAnalysisEvaluationPermits             FascicoloAnalysisEvaluationPermit[]
   assignedResearchMissions                       ResearchMissionRecord[]                        @relation("ResearchMissionAssignedActor")
   technicalSourceResearchRequests                TechnicalSourceResearchRecord[]                @relation("TechnicalSourceResearchRequestedBy")
 
@@ -1758,6 +1760,7 @@ model Procedimento {
   runtimeBudgetPolicies             RuntimeBudgetPolicy[]
   technicalSourceResearchRecords    TechnicalSourceResearchRecord[]
   runtimeCostReservations           RuntimeCostReservation[]
+  fascicoloAnalysisEvaluationPermits FascicoloAnalysisEvaluationPermit[]
   fascicoloAnalysisEvaluations      FascicoloAnalysisEvaluationArtifact[]
 
   @@index([enteId])
@@ -2520,6 +2523,7 @@ model AsyncJob {
   dependentJobs   AsyncJob[] @relation("AsyncJobDependency")
   initiatingUser   User? @relation("AsyncJobInitiatedBy", fields: [initiatingUserId], references: [id], onDelete: Restrict)
   costReservations            RuntimeCostReservation[]
+  consumedAnalysisEvaluationPermits FascicoloAnalysisEvaluationPermit[]
   fascicoloAnalysisEvaluations FascicoloAnalysisEvaluationArtifact[]
 
   @@index([status, availableAt, createdAt])
@@ -2547,12 +2551,38 @@ model RuntimeWorkerHeartbeat {
   @@index([status, lastSeenAt])
 }
 
+model FascicoloAnalysisEvaluationPermit {
+  permitRef          String    @id @db.VarChar(256)
+  evaluationId       String    @unique @db.VarChar(128)
+  tenantId           String
+  procedimentoId     String
+  corpusFingerprint  String    @db.Char(64)
+  operation          String    @db.VarChar(128)
+  testCaseId         String    @db.VarChar(128)
+  maxCostAmount      Decimal   @db.Decimal(18, 6)
+  authorizedByUserId String
+  authorizedAt       DateTime  @default(now())
+  expiresAt          DateTime
+  consumedByJobId    String?   @unique
+  consumedAt         DateTime?
+  revokedAt          DateTime?
+
+  tenant           Ente       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  procedimento     Procedimento @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  authorizedByUser User       @relation(fields: [authorizedByUserId], references: [id], onDelete: Restrict)
+  consumedByJob    AsyncJob?  @relation(fields: [consumedByJobId], references: [id], onDelete: Restrict)
+  artifact         FascicoloAnalysisEvaluationArtifact?
+
+  @@index([tenantId, procedimentoId, authorizedAt])
+  @@index([expiresAt, consumedAt, revokedAt])
+}
+
 model FascicoloAnalysisEvaluationArtifact {
   evaluationId      String   @id @db.VarChar(128)
   tenantId          String
   procedimentoId    String
   jobId             String   @unique
-  authorizationRef  String   @db.VarChar(256)
+  authorizationRef  String   @unique @db.VarChar(256)
   testCaseId        String   @db.VarChar(128)
   corpusFingerprint String   @db.Char(64)
   contractVersion   String   @db.VarChar(128)
@@ -2567,6 +2597,7 @@ model FascicoloAnalysisEvaluationArtifact {
   tenant       Ente         @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   procedimento Procedimento @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
   job          AsyncJob     @relation(fields: [jobId], references: [id], onDelete: Restrict)
+  permit       FascicoloAnalysisEvaluationPermit @relation(fields: [authorizationRef], references: [permitRef], onDelete: Restrict)
 
   @@index([tenantId, procedimentoId, createdAt])
   @@index([corpusFingerprint])

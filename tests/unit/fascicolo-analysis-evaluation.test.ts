@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
+import type { CurrentTenantContext } from "@/lib/tenant-auth";
 import {
   normalizeAsyncJobAdmission,
   normalizeAsyncJobResultMetadata,
@@ -7,12 +8,17 @@ import {
 import { applicationAsyncJobOperationBlocklist } from "@/server/async-jobs/applicationWorker";
 import {
   buildFascicoloAnalysisEvaluationAdmission,
+  admitFascicoloAnalysisEvaluation,
+  authorizeFascicoloAnalysisEvaluation,
   compareTestLegal001Output,
   createFascicoloAnalysisEvaluationHandler,
   fascicoloAnalysisEvaluationCostRequest,
   FASCICOLO_ANALYSIS_EVALUATION_OPERATION,
 } from "@/server/ai/fascicoloAnalysisEvaluation";
-import type { FascicoloAnalysisEvaluationArtifactInput } from "@/server/ai/fascicoloAnalysisEvaluationRepository";
+import type {
+  FascicoloAnalysisEvaluationArtifactInput,
+  FascicoloAnalysisEvaluationPermit,
+} from "@/server/ai/fascicoloAnalysisEvaluationRepository";
 import type { FascicoloDocumentAnalysisInput } from "@/server/ai/fascicoloDocumentAnalysis";
 import type { ProviderAnalysisPayloadV1 } from "@/server/ai/fascicoloAnalysis";
 import type { FascicoloDocumentCorpus } from "@/server/queries/fascicolo-document-corpus";
@@ -43,8 +49,14 @@ function corpus(): FascicoloDocumentCorpus {
     artifactSha256: document.sourceSha256!,
     pageNumber: 1,
     text: index === 2
-      ? "CONTRODEDUZIONI: il primo container serve per la manutenzione. "
-        + "I materiali commerciali del secondo container sono accessori all'attivita nautica."
+      ? "Titolo: Controdeduzioni del concessionario TEST-LEGAL-001. "
+        + "Il primo container serve per la manutenzione. "
+        + "I materiali commerciali del secondo container sono accessori all'attivita nautica. "
+        + "Marker: NOETRA-LEGAL-ACCEPTANCE-DEFENSES"
+      : index === 3
+        ? "Titolo: Relazione tecnica contraddittoria TEST-LEGAL-001. "
+          + "Il rilievo tecnico contraddice la qualificazione del primo container. "
+          + "Marker: NOETRA-LEGAL-ACCEPTANCE-TECHNICAL"
       : `Contenuto sintetico documento ${index + 1}.`,
     textSha256: String.fromCharCode(97 + index).repeat(64),
     extractionMethod: "DIRECT_TEXT",
@@ -133,14 +145,29 @@ function output(): ProviderAnalysisPayloadV1 {
   };
 }
 
-function admission(evaluationId = "evaluation-test-legal-001-01") {
-  return buildFascicoloAnalysisEvaluationAdmission({
+function evaluationPermit(
+  evaluationId = "evaluation-test-legal-001-01",
+): FascicoloAnalysisEvaluationPermit {
+  return {
+    permitRef: `${authorizationRef}:${evaluationId}`,
     evaluationId,
     tenantId,
     procedimentoId,
     corpusFingerprint,
-    authorizationRef,
-    correlationId: `correlation:${evaluationId}`,
+    operation: FASCICOLO_ANALYSIS_EVALUATION_OPERATION,
+    testCaseId: "TEST-LEGAL-001",
+    maxCostAmount: 0.5,
+    authorizedByUserId: "admin-1",
+    expiresAt: new Date("2099-10-20T18:00:00Z"),
+    consumedByJobId: null,
+    consumedAt: null,
+    revokedAt: null,
+  };
+}
+
+function admission(evaluationId = "evaluation-test-legal-001-01") {
+  return buildFascicoloAnalysisEvaluationAdmission({
+    permit: evaluationPermit(evaluationId),
     actorId: "authorized-evaluation-runner",
     actorEmail: null,
     actorRole: "SYSTEM",
@@ -157,7 +184,7 @@ describe("fascicolo analysis evaluation-only mode", () => {
     expect(first.idempotencyKey).toBe(reused.idempotencyKey);
     expect(distinct.idempotencyKey).not.toBe(first.idempotencyKey);
     expect(first.maxAttempts).toBe(1);
-    expect(first.policyDecisionRef).toBe(authorizationRef);
+    expect(first.policyDecisionRef).toBe(evaluationPermit().permitRef);
     expect(first.admission.admissionType).toBe("AUTHORIZED_SYSTEM");
     expect(first.inputReference).toMatchObject({
       metadata: {
@@ -165,6 +192,7 @@ describe("fascicolo analysis evaluation-only mode", () => {
         expectedDocumentCount: 8,
       },
     });
+
     expect(applicationAsyncJobOperationBlocklist(true))
       .toContain(FASCICOLO_ANALYSIS_EVALUATION_OPERATION);
     expect(applicationAsyncJobOperationBlocklist(false))
@@ -187,6 +215,103 @@ describe("fascicolo analysis evaluation-only mode", () => {
       evaluationId: "evaluation-test-legal-001-01",
       maxCostAmount: 0.51,
     })).toThrow("EVALUATION_COST_LIMIT_INVALID");
+  });
+
+  it("issues a persisted permit only for an authenticated tenant ADMIN and binds it to one evaluation", async () => {
+    const actor = { id: "admin-1", email: "admin@example.test", role: "ADMIN" as const };
+    const tenantContext: CurrentTenantContext = {
+      userId: actor.id,
+      role: actor.role,
+      isAdmin: true,
+      tenantMemberships: [],
+      defaultTenantId: null,
+      accessibleTenantIds: [],
+    };
+    const persistPermit = vi.fn(async (input) => ({
+      outcome: "CREATED" as const,
+      permit: {
+        ...evaluationPermit(input.evaluationId),
+        permitRef: input.permitRef,
+        expiresAt: input.expiresAt,
+      },
+    }));
+    const result = await authorizeFascicoloAnalysisEvaluation({
+      evaluationId: "evaluation-test-legal-001-01",
+      tenantId,
+      procedimentoId,
+      corpusFingerprint,
+      expiresAt: new Date("2026-10-20T17:30:00Z"),
+    }, {
+      getCurrentUser: vi.fn(async () => actor),
+      getCurrentTenantContext: vi.fn(async () => tenantContext),
+      loadCorpus: vi.fn(async () => corpus()),
+      persistPermit,
+      now: () => new Date("2026-10-20T17:00:00Z"),
+    });
+    expect(result.outcome).toBe("CREATED");
+    expect(persistPermit).toHaveBeenCalledWith(expect.objectContaining({
+      evaluationId: "evaluation-test-legal-001-01",
+      tenantId,
+      procedimentoId,
+      corpusFingerprint,
+      maxCostAmount: 0.5,
+      authorizedByUserId: actor.id,
+    }));
+    await expect(authorizeFascicoloAnalysisEvaluation({
+      evaluationId: "evaluation-test-legal-001-02",
+      tenantId,
+      procedimentoId,
+      corpusFingerprint,
+      expiresAt: new Date("2026-10-20T17:30:00Z"),
+    }, {
+      getCurrentUser: vi.fn(async () => ({ ...actor, role: "GIURIDICO" as const })),
+      getCurrentTenantContext: vi.fn(async () => tenantContext),
+      loadCorpus: vi.fn(async () => corpus()),
+      persistPermit,
+      now: () => new Date("2026-10-20T17:00:00Z"),
+    })).rejects.toThrow("EVALUATION_ADMIN_REQUIRED");
+  });
+
+  it("consumes a persisted permit once and rejects reuse for another evaluationId", async () => {
+    const storedPermit = evaluationPermit();
+    const admit = vi.fn(async () => ({
+      outcome: "CREATED" as const,
+      job: { id: "job-evaluation" },
+    })) as never;
+    const consumePermit = vi.fn(async () => ({
+      ...storedPermit,
+      consumedByJobId: "job-evaluation",
+      consumedAt: new Date(),
+    }));
+    await expect(admitFascicoloAnalysisEvaluation({
+      permitRef: storedPermit.permitRef,
+      evaluationId: storedPermit.evaluationId,
+      actorId: "evaluation-runner",
+      actorEmail: null,
+      actorRole: "SYSTEM",
+    }, {
+      loadPermit: vi.fn(async () => storedPermit),
+      admit,
+      consumePermit,
+    })).resolves.toMatchObject({ job: { id: "job-evaluation" } });
+    expect(consumePermit).toHaveBeenCalledWith({
+      permitRef: storedPermit.permitRef,
+      evaluationId: storedPermit.evaluationId,
+      jobId: "job-evaluation",
+    });
+
+    await expect(admitFascicoloAnalysisEvaluation({
+      permitRef: storedPermit.permitRef,
+      evaluationId: "evaluation-test-legal-001-02",
+      actorId: "evaluation-runner",
+      actorEmail: null,
+      actorRole: "SYSTEM",
+    }, {
+      loadPermit: vi.fn(async () => storedPermit),
+      admit,
+      consumePermit,
+    })).rejects.toThrow("EVALUATION_PERMIT_INVALID");
+    expect(admit).toHaveBeenCalledTimes(1);
   });
 
   it("sends all eight real corpus documents and persists only the evaluation artifact", async () => {
@@ -296,5 +421,33 @@ describe("fascicolo analysis evaluation-only mode", () => {
         consideredByLegalIssues: true,
       },
     });
+  });
+
+  it("does not count keyword matches cited to the technical report or duplicated as established facts", () => {
+    const technicalCitation = structuredClone(output());
+    const firstPosition = technicalCitation.structuredKnowledge?.items
+      .find((item) => item.localId === "defense-first");
+    if (!firstPosition || firstPosition.kind !== "PARTY_POSITION") throw new Error("INVALID_TEST_FIXTURE");
+    firstPosition.basisRefs = ["DOCUMENT_4.PAGE_1"];
+    const technicalResult = compareTestLegal001Output(technicalCitation, corpus());
+    expect(technicalResult.passed).toBe(false);
+    expect(technicalResult.checks.citedToDefensePage).toBe(false);
+
+    const factDuplication = structuredClone(output());
+    factDuplication.structuredKnowledge?.items.push({
+      localId: "fact-defense-first",
+      kind: "FACT",
+      confidence: 90,
+      basisRefs: ["DOCUMENT_3.PAGE_1"],
+      payload: {
+        normalizedStatement: "Il primo container e necessario per la manutenzione temporanea.",
+        subjectLocalIds: ["concessionario"],
+        object: null,
+        qualifier: null,
+      },
+    });
+    const factResult = compareTestLegal001Output(factDuplication, corpus());
+    expect(factResult.passed).toBe(false);
+    expect(factResult.checks.separatedFromFactsAndTechnicalFindings).toBe(false);
   });
 });

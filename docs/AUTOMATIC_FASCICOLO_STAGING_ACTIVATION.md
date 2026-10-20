@@ -148,12 +148,16 @@ bundle gia persistiti.
 separato. Non e registrato nel worker applicativo generico e puo essere
 reclamato soltanto per ID tramite `runFascicoloAnalysisEvaluationJobById`.
 
-L'ammissione richiede un `evaluationId` univoco, un `authorizationRef`
-esplicito, tenant, procedimento e fingerprint atteso. Il job ha un solo
-tentativo e un limite fisso di 0,50 EUR. Il runner verifica nuovamente permit,
-tenant, procedimento, fingerprint, stato `READY` e presenza degli otto
-documenti prima di inviare il corpus V5 al provider. Ricerca automatica,
-knowledge revision, missioni e snapshot non sono richiamati.
+L'autorizzazione deve essere emessa da
+`authorizeFascicoloAnalysisEvaluation` per un amministratore autenticato e
+persistita in `FascicoloAnalysisEvaluationPermit`. Il permit e vincolato a
+`evaluationId`, tenant, procedimento, fingerprint, operazione, test case,
+scadenza e limite fisso di 0,50 EUR. `admitFascicoloAnalysisEvaluation` lo
+consuma per un solo job; lo stesso permit non puo autorizzare un secondo
+`evaluationId` o job. Il runner verifica nuovamente permit, consumo, tenant,
+procedimento, fingerprint, stato `READY` e presenza degli otto documenti prima
+di inviare il corpus V5 al provider. Ricerca automatica, knowledge revision,
+missioni e snapshot non sono richiamati.
 
 L'output validato e il confronto post-generazione sono conservati in
 `FascicoloAnalysisEvaluationArtifact`, insieme a fingerprint di input/output e
@@ -163,8 +167,8 @@ provenienza documento/pagina. L'artefatto e append-only e idempotente per
 database di collaudo autorizzato prima della prova.
 
 La preparazione non autorizza l'esecuzione. Prima del singolo one-off occorre
-verificare il budget per una nuova prenotazione da 0,50 EUR, ottenere una nuova
-autorizzazione specifica, ammettere un solo job con
+verificare il budget per una nuova prenotazione da 0,50 EUR, emettere un nuovo
+permit persistito con `authorizeFascicoloAnalysisEvaluation`, ammettere un solo job con
 `admitFascicoloAnalysisEvaluation` ed eseguirne l'ID con i gate AI abilitati
 soltanto nel processo one-off. `AUTOMATIC_RESEARCH_EXECUTION_ENABLED` deve
 rimanere `false`.

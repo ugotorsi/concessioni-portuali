@@ -30,6 +30,7 @@ async function database() {
   databases.push(db);
   await db.exec(`
     CREATE TABLE "Ente" ("id" TEXT PRIMARY KEY);
+    CREATE TABLE "User" ("id" TEXT PRIMARY KEY);
     CREATE TABLE "Procedimento" ("id" TEXT PRIMARY KEY, "enteId" TEXT NOT NULL);
     CREATE TABLE "AsyncJob" (
       "id" TEXT PRIMARY KEY,
@@ -39,6 +40,7 @@ async function database() {
     CREATE TABLE "FascicoloKnowledgeRevision" ("id" TEXT PRIMARY KEY, "status" TEXT NOT NULL);
     CREATE TABLE "StructuredFascicoloReportSnapshot" ("id" TEXT PRIMARY KEY, "status" TEXT NOT NULL);
     INSERT INTO "Ente" VALUES ('tenant-a'), ('tenant-b');
+    INSERT INTO "User" VALUES ('admin-a');
     INSERT INTO "Procedimento" VALUES ('procedure-a', 'tenant-a'), ('procedure-b', 'tenant-b');
     INSERT INTO "AsyncJob" VALUES
       ('job-a', 'tenant-a', 'procedure-a'),
@@ -47,6 +49,18 @@ async function database() {
     INSERT INTO "StructuredFascicoloReportSnapshot" VALUES ('report-current', 'CURRENT');
   `);
   await db.exec(migration);
+  await db.exec(`
+    INSERT INTO "FascicoloAnalysisEvaluationPermit" (
+      "permitRef", "evaluationId", "tenantId", "procedimentoId",
+      "corpusFingerprint", "operation", "testCaseId", "maxCostAmount",
+      "authorizedByUserId", "expiresAt", "consumedByJobId", "consumedAt"
+    ) VALUES (
+      'approval:test-legal-001', 'evaluation-test-legal-001-01',
+      'tenant-a', 'procedure-a', '${"a".repeat(64)}',
+      'FASCICOLO.AUTOMATIC_ANALYSIS_EVALUATION_V1', 'TEST-LEGAL-001',
+      0.500000, 'admin-a', '2099-10-20T18:00:00Z', 'job-a', CURRENT_TIMESTAMP
+    );
+  `);
   return db;
 }
 
@@ -107,6 +121,10 @@ describe("fascicolo analysis evaluation artifact repository", () => {
       }),
       context,
     )).rejects.toEqual(new FascicoloAnalysisEvaluationRepositoryError("EVALUATION_SCOPE_MISMATCH"));
+    await expect(persistFascicoloAnalysisEvaluationArtifact(
+      artifact({ authorizationRef: "approval:unknown" }),
+      context,
+    )).rejects.toEqual(new FascicoloAnalysisEvaluationRepositoryError("EVALUATION_SCOPE_MISMATCH"));
 
     const rows = await db.query<{
       evaluationId: string;
@@ -128,5 +146,33 @@ describe("fascicolo analysis evaluation artifact repository", () => {
       .toEqual([{ id: "revision-current", status: "CURRENT" }]);
     expect((await db.query(`SELECT * FROM "StructuredFascicoloReportSnapshot"`)).rows)
       .toEqual([{ id: "report-current", status: "CURRENT" }]);
+  });
+
+  it("enforces one permit per evaluation and one consuming job per permit", async () => {
+    const db = await database();
+    await expect(db.exec(`
+      INSERT INTO "FascicoloAnalysisEvaluationPermit" (
+        "permitRef", "evaluationId", "tenantId", "procedimentoId",
+        "corpusFingerprint", "operation", "testCaseId", "maxCostAmount",
+        "authorizedByUserId", "expiresAt"
+      ) VALUES (
+        'approval:duplicate-evaluation', 'evaluation-test-legal-001-01',
+        'tenant-a', 'procedure-a', '${"a".repeat(64)}',
+        'FASCICOLO.AUTOMATIC_ANALYSIS_EVALUATION_V1', 'TEST-LEGAL-001',
+        0.500000, 'admin-a', '2099-10-20T18:00:00Z'
+      );
+    `)).rejects.toThrow();
+    await expect(db.exec(`
+      INSERT INTO "FascicoloAnalysisEvaluationPermit" (
+        "permitRef", "evaluationId", "tenantId", "procedimentoId",
+        "corpusFingerprint", "operation", "testCaseId", "maxCostAmount",
+        "authorizedByUserId", "expiresAt", "consumedByJobId", "consumedAt"
+      ) VALUES (
+        'approval:duplicate-job', 'evaluation-test-legal-001-02',
+        'tenant-a', 'procedure-a', '${"a".repeat(64)}',
+        'FASCICOLO.AUTOMATIC_ANALYSIS_EVALUATION_V1', 'TEST-LEGAL-001',
+        0.500000, 'admin-a', '2099-10-20T18:00:00Z', 'job-a', CURRENT_TIMESTAMP
+      );
+    `)).rejects.toThrow();
   });
 });

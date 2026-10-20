@@ -3,7 +3,13 @@ import { hostname } from "node:os";
 
 import { z } from "zod";
 
+import { getCurrentUser, type CurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import {
+  getCurrentTenantContext,
+  requireTenantAccess,
+  type CurrentTenantContext,
+} from "@/lib/tenant-auth";
 import {
   admitAsyncJob,
 } from "@/server/async-jobs/persistence";
@@ -38,13 +44,19 @@ import {
 import {
   buildFascicoloDocumentKnowledgeEvidence,
   getFascicoloDocumentCorpusForAsyncJob,
+  getFascicoloDocumentCorpusForTenant,
   toFascicoloDocumentAnalysisCorpus,
   type FascicoloDocumentCorpus,
 } from "@/server/queries/fascicolo-document-corpus";
 import { withRuntimeCostGate } from "@/server/runtime/cost";
 
 import {
+  consumeFascicoloAnalysisEvaluationPermit,
+  FascicoloAnalysisEvaluationPermitError,
+  loadFascicoloAnalysisEvaluationPermit,
+  persistFascicoloAnalysisEvaluationPermit,
   persistFascicoloAnalysisEvaluationArtifact,
+  type FascicoloAnalysisEvaluationPermit,
   type FascicoloAnalysisEvaluationArtifactInput,
 } from "./fascicoloAnalysisEvaluationRepository";
 
@@ -138,18 +150,34 @@ export function compareTestLegal001Output(
     containsAll(item.payload.normalizedStatement, ["secondo container", "material", "accessor"]));
   const defenses = [first, second].filter((item): item is NonNullable<typeof item> => Boolean(item));
   const defensePageRefs = corpus.excerpts
-    .filter((excerpt) => containsAll(excerpt.text, ["primo container", "secondo container"]))
+    .filter((excerpt) => normalized(excerpt.text).includes("noetra-legal-acceptance-defenses")
+      || normalized(excerpt.text).includes("titolo: controdeduzioni"))
     .map((excerpt) => excerpt.reference);
-  const cited = defenses.length === 2 && defenses.every((item) =>
-    item.basisRefs.some((basisRef) => defensePageRefs.includes(basisRef)));
+  const technicalPageRefs = corpus.excerpts
+    .filter((excerpt) => normalized(excerpt.text).includes("noetra-legal-acceptance-technical")
+      || normalized(excerpt.text).includes("titolo: relazione tecnica"))
+    .map((excerpt) => excerpt.reference);
+  const cited = defensePageRefs.length > 0 && defenses.length === 2 && defenses.every((item) =>
+    item.basisRefs.length > 0
+    && item.basisRefs.every((basisRef) => defensePageRefs.includes(basisRef))
+    && item.basisRefs.every((basisRef) => !technicalPageRefs.includes(basisRef)));
   const attributed = defenses.length === 2 && defenses.every((item) => {
     const subject = subjects.get(item.payload.subjectLocalId);
-    return Boolean(subject && normalized(subject.canonicalName).includes("concession"));
+    return Boolean(subject
+      && subject.subjectType === "ORGANIZATION"
+      && normalized(subject.canonicalName).includes("concession"));
   });
   const facts = knowledge.items.filter((item) => item.kind === "FACT");
-  const separated = defenses.length === 2 && defenses.every((defense) =>
-    !facts.some((fact) => normalized(fact.payload.normalizedStatement)
-      === normalized(defense.payload.normalizedStatement)));
+  const separated = defenses.length === 2 && defenses.every((defense) => {
+    const defenseStatement = normalized(defense.payload.normalizedStatement);
+    return !facts.some((fact) => {
+      const factStatement = normalized(fact.payload.normalizedStatement);
+      return factStatement === defenseStatement
+        || (fact.basisRefs.some((basisRef) => defensePageRefs.includes(basisRef))
+          && ((containsAll(factStatement, ["primo container", "manutenzion"]))
+            || containsAll(factStatement, ["secondo container", "material", "accessor"])));
+    });
+  });
   const considered = defenses.length === 2 && defenses.every((defense) =>
     knowledge.legalIssues.some((issue) => issue.originatingItemLocalIds.includes(defense.localId)));
   const checks = {
@@ -217,26 +245,40 @@ function inputFingerprint(
 
 const defaultDependencies: FascicoloAnalysisEvaluationDependencies = {
   async loadAuthority({ jobId, reference }) {
-    const job = await prisma.asyncJob.findUnique({
-      where: { id: jobId },
-      select: {
-        operation: true,
-        tenantId: true,
-        procedimentoId: true,
-        admissionType: true,
-        policyDecisionRef: true,
-        actorId: true,
-        actorEmail: true,
-        actorRole: true,
-      },
-    });
-    if (!job
+    const [job, evaluationPermit] = await Promise.all([
+      prisma.asyncJob.findUnique({
+        where: { id: jobId },
+        select: {
+          operation: true,
+          tenantId: true,
+          procedimentoId: true,
+          admissionType: true,
+          policyDecisionRef: true,
+          actorId: true,
+          actorEmail: true,
+          actorRole: true,
+        },
+      }),
+      loadFascicoloAnalysisEvaluationPermit(reference.metadata.evaluationPermitRef),
+    ]);
+    if (!job || !evaluationPermit
       || job.operation !== FASCICOLO_ANALYSIS_EVALUATION_OPERATION
       || job.admissionType !== "AUTHORIZED_SYSTEM"
       || !job.policyDecisionRef
       || job.policyDecisionRef !== reference.metadata.evaluationPermitRef
       || job.tenantId !== reference.metadata.tenantId
-      || job.procedimentoId !== reference.metadata.procedimentoId) {
+      || job.procedimentoId !== reference.metadata.procedimentoId
+      || evaluationPermit.evaluationId !== reference.referenceId
+      || evaluationPermit.tenantId !== reference.metadata.tenantId
+      || evaluationPermit.procedimentoId !== reference.metadata.procedimentoId
+      || evaluationPermit.corpusFingerprint !== reference.metadata.corpusHash
+      || evaluationPermit.operation !== FASCICOLO_ANALYSIS_EVALUATION_OPERATION
+      || evaluationPermit.testCaseId !== FASCICOLO_ANALYSIS_EVALUATION_TEST_CASE
+      || evaluationPermit.maxCostAmount !== FASCICOLO_ANALYSIS_EVALUATION_MAX_COST_EUR
+      || evaluationPermit.consumedByJobId !== jobId
+      || !evaluationPermit.consumedAt
+      || evaluationPermit.revokedAt
+      || evaluationPermit.expiresAt <= new Date()) {
       return null;
     }
     const corpus = await getFascicoloDocumentCorpusForAsyncJob({
@@ -406,26 +448,116 @@ export function createFascicoloAnalysisEvaluationHandler(
   };
 }
 
-export function buildFascicoloAnalysisEvaluationAdmission(input: {
+export class FascicoloAnalysisEvaluationAuthorizationError extends Error {
+  constructor(readonly code:
+    | "EVALUATION_AUTHENTICATION_REQUIRED"
+    | "EVALUATION_ADMIN_REQUIRED"
+    | "EVALUATION_AUTHORIZATION_SCOPE_INVALID"
+    | "EVALUATION_AUTHORIZATION_EXPIRY_INVALID"
+    | "EVALUATION_CORPUS_NOT_READY") {
+    super(code);
+    this.name = "FascicoloAnalysisEvaluationAuthorizationError";
+  }
+}
+
+export interface FascicoloAnalysisEvaluationAuthorizationDependencies {
+  getCurrentUser(): Promise<CurrentUser | null>;
+  getCurrentTenantContext(): Promise<CurrentTenantContext | null>;
+  loadCorpus(input: { tenantId: string; procedimentoId: string }): Promise<FascicoloDocumentCorpus | null>;
+  persistPermit: typeof persistFascicoloAnalysisEvaluationPermit;
+  now(): Date;
+}
+
+export async function authorizeFascicoloAnalysisEvaluation(input: {
   evaluationId: string;
   tenantId: string;
   procedimentoId: string;
   corpusFingerprint: string;
-  authorizationRef: string;
-  correlationId: string;
+  expiresAt: Date;
+}, overrides: Partial<FascicoloAnalysisEvaluationAuthorizationDependencies> = {}) {
+  const dependencies: FascicoloAnalysisEvaluationAuthorizationDependencies = {
+    getCurrentUser,
+    getCurrentTenantContext,
+    loadCorpus: getFascicoloDocumentCorpusForTenant,
+    persistPermit: persistFascicoloAnalysisEvaluationPermit,
+    now: () => new Date(),
+    ...overrides,
+  };
+  const actor = await dependencies.getCurrentUser();
+  if (!actor) {
+    throw new FascicoloAnalysisEvaluationAuthorizationError("EVALUATION_AUTHENTICATION_REQUIRED");
+  }
+  if (actor.role !== "ADMIN") {
+    throw new FascicoloAnalysisEvaluationAuthorizationError("EVALUATION_ADMIN_REQUIRED");
+  }
+  const tenantContext = await dependencies.getCurrentTenantContext();
+  if (!tenantContext) {
+    throw new FascicoloAnalysisEvaluationAuthorizationError("EVALUATION_AUTHENTICATION_REQUIRED");
+  }
+  try {
+    requireTenantAccess(tenantContext, input.tenantId, {
+      mode: "write",
+      allowWhenEnteMissing: false,
+    });
+  } catch {
+    throw new FascicoloAnalysisEvaluationAuthorizationError("EVALUATION_AUTHORIZATION_SCOPE_INVALID");
+  }
+  const now = dependencies.now();
+  const ttl = input.expiresAt.getTime() - now.getTime();
+  if (ttl < 60_000 || ttl > 60 * 60 * 1_000) {
+    throw new FascicoloAnalysisEvaluationAuthorizationError("EVALUATION_AUTHORIZATION_EXPIRY_INVALID");
+  }
+  const corpus = await dependencies.loadCorpus({
+    tenantId: input.tenantId,
+    procedimentoId: input.procedimentoId,
+  });
+  if (!corpus
+    || corpus.availability !== "READY"
+    || corpus.corpusFingerprint !== input.corpusFingerprint
+    || corpus.documentCount !== 8
+    || corpus.availableDocumentCount !== 8) {
+    throw new FascicoloAnalysisEvaluationAuthorizationError("EVALUATION_CORPUS_NOT_READY");
+  }
+  const permitRef = fingerprint({
+    operation: FASCICOLO_ANALYSIS_EVALUATION_OPERATION,
+    evaluationId: input.evaluationId,
+    tenantId: input.tenantId,
+    procedimentoId: input.procedimentoId,
+    corpusFingerprint: input.corpusFingerprint,
+    maxCostAmount: FASCICOLO_ANALYSIS_EVALUATION_MAX_COST_EUR,
+    authorizedByUserId: actor.id,
+    expiresAt: input.expiresAt.toISOString(),
+  });
+  return dependencies.persistPermit({
+    permitRef,
+    evaluationId: input.evaluationId,
+    tenantId: input.tenantId,
+    procedimentoId: input.procedimentoId,
+    corpusFingerprint: input.corpusFingerprint,
+    operation: FASCICOLO_ANALYSIS_EVALUATION_OPERATION,
+    testCaseId: FASCICOLO_ANALYSIS_EVALUATION_TEST_CASE,
+    maxCostAmount: FASCICOLO_ANALYSIS_EVALUATION_MAX_COST_EUR,
+    authorizedByUserId: actor.id,
+    expiresAt: input.expiresAt,
+  });
+}
+
+export function buildFascicoloAnalysisEvaluationAdmission(input: {
+  permit: FascicoloAnalysisEvaluationPermit;
   actorId: string;
   actorEmail: string | null;
   actorRole: string;
 }): AsyncJobAdmissionInput {
+  const evaluationPermit = input.permit;
   const reference = evaluationReferenceSchema.parse({
     referenceType: "FASCICOLO_ANALYSIS_EVALUATION",
-    referenceId: input.evaluationId,
+    referenceId: evaluationPermit.evaluationId,
     referenceVersion: "V1",
     metadata: {
-      tenantId: input.tenantId,
-      procedimentoId: input.procedimentoId,
-      corpusHash: input.corpusFingerprint,
-      evaluationPermitRef: input.authorizationRef,
+      tenantId: evaluationPermit.tenantId,
+      procedimentoId: evaluationPermit.procedimentoId,
+      corpusHash: evaluationPermit.corpusFingerprint,
+      evaluationPermitRef: evaluationPermit.permitRef,
       testCaseId: FASCICOLO_ANALYSIS_EVALUATION_TEST_CASE,
       expectedDocumentCount: 8,
       costLimitCode: "EUR_0_50",
@@ -433,25 +565,25 @@ export function buildFascicoloAnalysisEvaluationAdmission(input: {
   });
   const logicalOperationId = fingerprint({
     operation: FASCICOLO_ANALYSIS_EVALUATION_OPERATION,
-    tenantId: input.tenantId,
-    procedimentoId: input.procedimentoId,
-    corpusFingerprint: input.corpusFingerprint,
-    evaluationId: input.evaluationId,
+    tenantId: evaluationPermit.tenantId,
+    procedimentoId: evaluationPermit.procedimentoId,
+    corpusFingerprint: evaluationPermit.corpusFingerprint,
+    evaluationId: evaluationPermit.evaluationId,
   });
   return {
     operation: FASCICOLO_ANALYSIS_EVALUATION_OPERATION,
     logicalOperationId,
     purpose: "FASCICOLO_ANALYSIS_EVALUATION_ONLY",
-    correlationId: input.correlationId,
-    procedimentoId: input.procedimentoId,
+    correlationId: `fascicolo-evaluation:${evaluationPermit.evaluationId}`,
+    procedimentoId: evaluationPermit.procedimentoId,
     priority: "LOW",
-    policyDecisionRef: input.authorizationRef,
+    policyDecisionRef: evaluationPermit.permitRef,
     inputReference: reference,
     maxAttempts: 1,
     availableAt: new Date(0),
     admission: {
       admissionType: "AUTHORIZED_SYSTEM",
-      tenantId: input.tenantId,
+      tenantId: evaluationPermit.tenantId,
       initiatingUserId: null,
       actor: {
         actorId: input.actorId,
@@ -462,10 +594,49 @@ export function buildFascicoloAnalysisEvaluationAdmission(input: {
   };
 }
 
-export async function admitFascicoloAnalysisEvaluation(
-  input: Parameters<typeof buildFascicoloAnalysisEvaluationAdmission>[0],
-) {
-  return admitAsyncJob(buildFascicoloAnalysisEvaluationAdmission(input));
+export interface FascicoloAnalysisEvaluationAdmissionDependencies {
+  loadPermit: typeof loadFascicoloAnalysisEvaluationPermit;
+  admit: typeof admitAsyncJob;
+  consumePermit: typeof consumeFascicoloAnalysisEvaluationPermit;
+}
+
+export async function admitFascicoloAnalysisEvaluation(input: {
+  permitRef: string;
+  evaluationId: string;
+  actorId: string;
+  actorEmail: string | null;
+  actorRole: string;
+}, overrides: Partial<FascicoloAnalysisEvaluationAdmissionDependencies> = {}) {
+  const dependencies: FascicoloAnalysisEvaluationAdmissionDependencies = {
+    loadPermit: loadFascicoloAnalysisEvaluationPermit,
+    admit: admitAsyncJob,
+    consumePermit: consumeFascicoloAnalysisEvaluationPermit,
+    ...overrides,
+  };
+  const evaluationPermit = await dependencies.loadPermit(input.permitRef);
+  if (!evaluationPermit) {
+    throw new FascicoloAnalysisEvaluationPermitError("EVALUATION_PERMIT_NOT_FOUND");
+  }
+  if (evaluationPermit.evaluationId !== input.evaluationId
+    || evaluationPermit.operation !== FASCICOLO_ANALYSIS_EVALUATION_OPERATION
+    || evaluationPermit.testCaseId !== FASCICOLO_ANALYSIS_EVALUATION_TEST_CASE
+    || evaluationPermit.maxCostAmount !== FASCICOLO_ANALYSIS_EVALUATION_MAX_COST_EUR
+    || evaluationPermit.revokedAt
+    || evaluationPermit.expiresAt <= new Date()) {
+    throw new FascicoloAnalysisEvaluationPermitError("EVALUATION_PERMIT_INVALID");
+  }
+  const admitted = await dependencies.admit(buildFascicoloAnalysisEvaluationAdmission({
+    permit: evaluationPermit,
+    actorId: input.actorId,
+    actorEmail: input.actorEmail,
+    actorRole: input.actorRole,
+  }));
+  await dependencies.consumePermit({
+    permitRef: evaluationPermit.permitRef,
+    evaluationId: evaluationPermit.evaluationId,
+    jobId: admitted.job.id,
+  });
+  return admitted;
 }
 
 export async function runFascicoloAnalysisEvaluationJobById(input: {
