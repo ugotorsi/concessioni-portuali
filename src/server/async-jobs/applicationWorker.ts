@@ -6,6 +6,7 @@ import {
   createFascicoloAutomaticAnalysisHandler,
   type FascicoloAutomaticAnalysisDependencies,
 } from "../ai/fascicoloAutomaticAnalysisJob";
+import { FASCICOLO_ANALYSIS_EVALUATION_OPERATION } from "../ai/fascicoloAnalysisEvaluation";
 import { createLegalReferenceDiscoveryHandler } from "../intake/neutralIntakeLegalReferenceDiscoveryJob";
 import { createLegalReferenceMatchingHandler } from "../intake/neutralIntakeLegalReferenceMatchingJob";
 import { createLegalReferenceOfficialLookupHandler } from "../intake/neutralIntakeLegalReferenceOfficialLookupJob";
@@ -29,6 +30,7 @@ const PROVIDER_BACKED_OPERATIONS = [
   "LEGAL_RESEARCH.EXECUTE_V1",
 ] as const;
 const AUTOMATIC_RESEARCH_OPERATION = "LEGAL_RESEARCH.EXECUTE_V1";
+const ISOLATED_OPERATIONS = [FASCICOLO_ANALYSIS_EVALUATION_OPERATION] as const;
 const reconcilePeriodicLegalResearch = createPeriodicLegalResearchScheduler();
 
 export function createApplicationAsyncJobRegistry(input: {
@@ -53,6 +55,15 @@ export function createApplicationAsyncJobRegistry(input: {
 
 export const applicationAsyncJobRegistry = createApplicationAsyncJobRegistry();
 
+export function applicationAsyncJobOperationBlocklist(
+  providerExecutionEnabled: boolean | undefined,
+): readonly string[] {
+  return [
+    ...ISOLATED_OPERATIONS,
+    ...(providerExecutionEnabled === false ? PROVIDER_BACKED_OPERATIONS : []),
+  ];
+}
+
 export async function drainOneApplicationAsyncJob(input: {
   workerId: string;
   retryDelayMs: number;
@@ -71,7 +82,7 @@ export async function drainOneApplicationAsyncJob(input: {
   }
   return drainOneAsyncJob({
     ...input,
-    operationBlocklist: input.providerExecutionEnabled === false ? PROVIDER_BACKED_OPERATIONS : undefined,
+    operationBlocklist: applicationAsyncJobOperationBlocklist(input.providerExecutionEnabled),
     leaseDurationMs: APPLICATION_ASYNC_JOB_LEASE_MS,
     registry: applicationAsyncJobRegistry,
   });

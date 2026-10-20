@@ -142,6 +142,33 @@ mantenere `AI_REAL_DATA_ENABLED=false`. Le variabili modificate richiedono un
 nuovo processo per diventare effettive. Non cancellare job, rapporti, missioni o
 bundle gia persistiti.
 
+## Valutazione isolata TEST-LEGAL-001
+
+`FASCICOLO.AUTOMATIC_ANALYSIS_EVALUATION_V1` e un percorso di collaudo
+separato. Non e registrato nel worker applicativo generico e puo essere
+reclamato soltanto per ID tramite `runFascicoloAnalysisEvaluationJobById`.
+
+L'ammissione richiede un `evaluationId` univoco, un `authorizationRef`
+esplicito, tenant, procedimento e fingerprint atteso. Il job ha un solo
+tentativo e un limite fisso di 0,50 EUR. Il runner verifica nuovamente permit,
+tenant, procedimento, fingerprint, stato `READY` e presenza degli otto
+documenti prima di inviare il corpus V5 al provider. Ricerca automatica,
+knowledge revision, missioni e snapshot non sono richiamati.
+
+L'output validato e il confronto post-generazione sono conservati in
+`FascicoloAnalysisEvaluationArtifact`, insieme a fingerprint di input/output e
+provenienza documento/pagina. L'artefatto e append-only e idempotente per
+`evaluationId` e job. La migrazione
+`20261020_fascicolo_analysis_evaluation` deve essere applicata soltanto al
+database di collaudo autorizzato prima della prova.
+
+La preparazione non autorizza l'esecuzione. Prima del singolo one-off occorre
+verificare il budget per una nuova prenotazione da 0,50 EUR, ottenere una nuova
+autorizzazione specifica, ammettere un solo job con
+`admitFascicoloAnalysisEvaluation` ed eseguirne l'ID con i gate AI abilitati
+soltanto nel processo one-off. `AUTOMATIC_RESEARCH_EXECUTION_ENABLED` deve
+rimanere `false`.
+
 ## Prova di accettazione successiva
 
 La prova live, da autorizzare separatamente, deve usare soltanto documenti e
