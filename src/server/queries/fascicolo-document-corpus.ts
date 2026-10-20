@@ -285,6 +285,7 @@ async function readFascicoloDocumentCorpus(
     where: {
       enteId: input.tenantId,
       procedimentoId: input.procedimentoId,
+      statoDocumento: "ATTIVO",
     },
     orderBy: { id: "asc" },
     select: {

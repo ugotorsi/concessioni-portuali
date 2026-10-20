@@ -201,6 +201,13 @@ describe("fascicolo document corpus", () => {
       procedimentoId: "procedure-a",
     });
 
+    expect(mocks.documentoFindMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: {
+        enteId: "tenant-a",
+        procedimentoId: "procedure-a",
+        statoDocumento: "ATTIVO",
+      },
+    }));
     expect(mocks.extractionFindMany).toHaveBeenCalledWith(expect.objectContaining({
       where: {
         tenantId: "tenant-a",
@@ -224,6 +231,101 @@ describe("fascicolo document corpus", () => {
       "NOT_EXTRACTED",
     ]);
     expect(JSON.stringify(corpus)).not.toContain("version-previous");
+  });
+
+  it("excludes archived documents while preserving their stored versions and attempts", async () => {
+    const activeDocument = {
+      id: "document-active",
+      nome: "Attivo.pdf",
+      currentFileVersionId: "version-active",
+      currentFileVersion: { sha256: "a".repeat(64) },
+    };
+    const archivedDocument = {
+      id: "document-archived",
+      nome: "Archiviato.pdf",
+      currentFileVersionId: "version-archived",
+      currentFileVersion: { sha256: "b".repeat(64) },
+    };
+    const activeAttempt = {
+      id: "attempt-active",
+      documentoId: "document-active",
+      documentFileVersionId: "version-active",
+      outcome: "SUCCEEDED",
+      sourceSha256: "a".repeat(64),
+      failureCode: null,
+      pages: [page(1, "Testo attivo", "0".repeat(64))],
+    };
+    const archivedAttempt = {
+      id: "attempt-archived",
+      documentoId: "document-archived",
+      documentFileVersionId: "version-archived",
+      outcome: "SUCCEEDED",
+      sourceSha256: "b".repeat(64),
+      failureCode: null,
+      pages: [page(1, "Testo storico", "1".repeat(64))],
+    };
+    const storedDocuments = [
+      { ...activeDocument, statoDocumento: "ATTIVO" },
+      { ...archivedDocument, statoDocumento: "ARCHIVIATO" },
+    ];
+    const storedAttempts = [activeAttempt, archivedAttempt];
+
+    mocks.documentoFindMany.mockImplementation(({ where }) => Promise.resolve(
+      storedDocuments
+        .filter((document) => document.statoDocumento === where.statoDocumento)
+        .map(({ statoDocumento: _statoDocumento, ...document }) => document),
+    ));
+    mocks.extractionFindMany.mockImplementation(({ where }) => Promise.resolve(
+      storedAttempts.filter((attempt) => where.OR.some((scope: {
+        documentoId: string;
+        documentFileVersionId: string;
+      }) => scope.documentoId === attempt.documentoId
+        && scope.documentFileVersionId === attempt.documentFileVersionId)),
+    ));
+
+    const corpus = await getFascicoloDocumentCorpus({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-a",
+    });
+    const activeOnly = buildFascicoloDocumentCorpus({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-a",
+      documents: [activeDocument],
+      attempts: [activeAttempt],
+    });
+    const includingArchived = buildFascicoloDocumentCorpus({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-a",
+      documents: [activeDocument, archivedDocument],
+      attempts: storedAttempts,
+    });
+
+    expect(corpus).toMatchObject({
+      availability: "READY",
+      documentCount: 1,
+      availableDocumentCount: 1,
+      textPageCount: 1,
+      corpusFingerprint: activeOnly.corpusFingerprint,
+    });
+    expect(corpus?.corpusFingerprint).not.toBe(includingArchived.corpusFingerprint);
+    expect(corpus?.documents.map((document) => document.documentoId)).toEqual(["document-active"]);
+    expect(mocks.extractionFindMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({
+        tenantId: "tenant-a",
+        procedimentoId: "procedure-a",
+        OR: [{ documentoId: "document-active", documentFileVersionId: "version-active" }],
+      }),
+    }));
+    expect(storedDocuments).toContainEqual(expect.objectContaining({
+      id: "document-archived",
+      currentFileVersionId: "version-archived",
+      statoDocumento: "ARCHIVIATO",
+    }));
+    expect(storedAttempts).toContainEqual(expect.objectContaining({
+      id: "attempt-archived",
+      documentoId: "document-archived",
+      documentFileVersionId: "version-archived",
+    }));
   });
 
   it("classifies a terminal extraction job without a persisted attempt as failed", async () => {
