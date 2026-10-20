@@ -27,7 +27,9 @@ export function fascicoloReportStatusLabel(status: StructuredReportSnapshotStatu
 function professionalNote(value: string): string | null {
   const labels: Readonly<Record<string, string>> = {
     CURRENT_RESEARCH_MISSION_MISSING: "La ricerca non è ancora disponibile per una delle questioni.",
+    ADDITIONAL_DOCUMENTS_REQUIRED: "Sono necessari ulteriori documenti per completare la valutazione.",
     DEADLINE_CANDIDATES_ARE_NOT_OPERATIONAL_DEADLINES: "Le scadenze individuate richiedono verifica prima dell’uso operativo.",
+    DOCUMENTED_SIGNALS_WITHOUT_STRUCTURED_LEGAL_ISSUES: "Il fascicolo contiene segnali documentali che richiedono una valutazione giuridica, ma non risultano ancora questioni giuridiche strutturate.",
     KNOWLEDGE_REVISION_CHANGED: "Il quadro documentale è stato aggiornato dopo la generazione.",
     NO_CURRENT_RESEARCH_QUESTIONS: "Non risultano questioni di ricerca correnti associate al rapporto.",
     NO_USABLE_CONTRARY_AUTHORITY: "Per una o più questioni non risultano fonti contrarie utilizzabili.",
@@ -78,6 +80,34 @@ function ContentSection({ title, children }: { title: string; children: React.Re
       <h3 className="text-base font-semibold text-slate-950">{title}</h3>
       <div className="mt-3">{children}</div>
     </section>
+  );
+}
+
+const LEGAL_COMPLETENESS_LABELS: Readonly<Record<string, string>> = {
+  DOCUMENTED_ISSUES_STRUCTURED: "Le questioni giuridiche documentate risultano strutturate.",
+  NO_ISSUES_EMERGE_FROM_DOCUMENTS: "Dai documenti disponibili non emergono questioni giuridiche da strutturare.",
+  DOCUMENTED_SIGNALS_WITHOUT_STRUCTURED_ISSUES: "Sono presenti segnali documentali senza corrispondenti questioni giuridiche strutturate.",
+  NO_ADDITIONAL_DOCUMENT_NEED_IDENTIFIED: "Non sono state individuate ulteriori esigenze documentali.",
+  ADDITIONAL_DOCUMENTS_REQUIRED: "Sono necessari ulteriori documenti.",
+  RESEARCH_QUESTIONS_STRUCTURED: "I quesiti di ricerca risultano strutturati.",
+  RESEARCH_QUESTIONS_NOT_STRUCTURED: "Le questioni esistono, ma i quesiti di ricerca non risultano strutturati.",
+  ASSESSMENT_REQUIRED_BEFORE_RESEARCH: "È necessaria una valutazione professionale prima di formulare quesiti di ricerca.",
+  NO_RESEARCH_NEED_IDENTIFIED: "Dai documenti disponibili non emerge una necessità di ricerca.",
+};
+
+function LegalCompletenessSection({
+  assessment,
+}: {
+  assessment: NonNullable<StructuredFascicoloReportPayload["legalCompleteness"]>;
+}) {
+  return (
+    <ContentSection title="Controllo di completezza giuridica">
+      <ul className="space-y-2 text-sm leading-6 text-slate-700">
+        <li>{LEGAL_COMPLETENESS_LABELS[assessment.issueCoverage]}</li>
+        <li>{LEGAL_COMPLETENESS_LABELS[assessment.documentNeed]}</li>
+        <li>{LEGAL_COMPLETENESS_LABELS[assessment.researchNeed]}</li>
+      </ul>
+    </ContentSection>
   );
 }
 
@@ -314,6 +344,8 @@ function ReportContent({ payload }: { payload: StructuredFascicoloReportPayload 
 
       {framework.contradictions.length > 0 ? <ContentSection title="Criticità"><TextList items={framework.contradictions} /></ContentSection> : null}
 
+      {payload.legalCompleteness ? <LegalCompletenessSection assessment={payload.legalCompleteness} /> : null}
+
       {payload.gaps.length > 0 || limitations.length > 0 ? (
         <ContentSection title="Limiti e punti da approfondire">
           <ul className="space-y-2 text-sm leading-6 text-slate-700">
@@ -331,20 +363,23 @@ function PreviousVersions({ snapshots }: { snapshots: readonly FascicoloReportSn
   return (
     <details className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
       <summary className="cursor-pointer text-sm font-semibold text-slate-900">Versioni precedenti</summary>
-      <ul className="mt-3 divide-y divide-slate-200 border-t border-slate-200">
+      <div className="mt-3 space-y-3 border-t border-slate-200 pt-3">
         {snapshots.map((snapshot) => {
           const reasons = uniqueNotes(snapshot.staleReasons);
           return (
-            <li key={snapshot.id} className="py-3 text-sm">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <details key={snapshot.id} className="rounded-md border border-slate-200 bg-white px-4 py-3">
+              <summary className="cursor-pointer text-sm">
                 <span className="font-medium text-slate-950">{formatDateIT(snapshot.generatedAt)}</span>
-                <span className="text-slate-600">{fascicoloReportStatusLabel(snapshot.status)}</span>
+                <span className="ml-3 text-slate-600">{fascicoloReportStatusLabel(snapshot.status)}</span>
+              </summary>
+              {reasons.length > 0 ? <p className="mt-2 text-sm text-slate-600">{reasons.join(" ")}</p> : null}
+              <div className="mt-4 border-t border-slate-200 pt-4" aria-label={`Rapporto storico del ${formatDateIT(snapshot.generatedAt)}`}>
+                <ReportContent payload={snapshot.payload} />
               </div>
-              {reasons.length > 0 ? <p className="mt-1 text-slate-600">{reasons.join(" ")}</p> : null}
-            </li>
+            </details>
           );
         })}
-      </ul>
+      </div>
     </details>
   );
 }

@@ -1,6 +1,10 @@
 import { createHash } from "node:crypto";
 
 import { stableStringify } from "@/server/audit/hash";
+import {
+  assessLegalCompleteness,
+  type LegalCompletenessAssessment,
+} from "@/server/fascicolo-knowledge/legalCompleteness";
 import type { StructuredKnowledgeReadItem, StructuredKnowledgeReadModel } from "@/server/queries/fascicolo-knowledge";
 
 export const STRUCTURED_FASCICOLO_REPORT_CONTRACT_VERSION = "STRUCTURED_FASCICOLO_REPORT_V1" as const;
@@ -168,6 +172,8 @@ export interface StructuredFascicoloReportPayload {
   operationalPlans?: readonly StructuredReportOperationalPlan[];
   /** Additive; present only when MCP acquisitions exist for CURRENT missions of this revision. */
   technicalSources?: readonly StructuredReportTechnicalSource[];
+  /** Deterministic coverage check; never creates legal issues or research questions. */
+  legalCompleteness?: LegalCompletenessAssessment;
   limitations: readonly string[];
 }
 
@@ -454,6 +460,7 @@ export function buildStructuredFascicoloReport(input: {
   missions: readonly StructuredReportMissionInput[];
   technicalSources?: readonly StructuredReportTechnicalSourceInput[];
 }): BuiltStructuredFascicoloReport {
+  const legalCompleteness = assessLegalCompleteness(input.knowledge);
   const currentMissions = input.missions.filter((mission) => mission.lifecycleStatus === "CURRENT"
     && mission.knowledgeRevisionId === input.knowledge.revision.id
     && mission.researchQuestionSemanticKey !== null).sort(byId);
@@ -550,12 +557,19 @@ export function buildStructuredFascicoloReport(input: {
     deadlineCandidates: visibleItems(input.knowledge.deadlineCandidates),
     operationalPlans: buildOperationalPlans(operationalSubjects, input.knowledge, technicalSources),
     ...(technicalSources.length ? { technicalSources } : {}),
+    legalCompleteness,
     limitations: [...new Set([
       ...input.knowledge.revision.warnings,
       ...(input.knowledge.deadlineCandidates.length ? ["DEADLINE_CANDIDATES_ARE_NOT_OPERATIONAL_DEADLINES"] : []),
       ...(legalIssues.length ? [] : ["NO_EXPLICIT_LEGAL_ISSUES_IN_CURRENT_KNOWLEDGE"]),
       ...(questions.length ? [] : ["NO_CURRENT_RESEARCH_QUESTIONS"]),
       ...(technicalSources.length ? ["TECHNICAL_SOURCES_NOT_PROBATIVE_VERIFY_ORIGINAL"] : []),
+      ...(legalCompleteness.issueCoverage === "DOCUMENTED_SIGNALS_WITHOUT_STRUCTURED_ISSUES"
+        ? ["DOCUMENTED_SIGNALS_WITHOUT_STRUCTURED_LEGAL_ISSUES"]
+        : []),
+      ...(legalCompleteness.documentNeed === "ADDITIONAL_DOCUMENTS_REQUIRED"
+        ? ["ADDITIONAL_DOCUMENTS_REQUIRED"]
+        : []),
     ])].sort(),
   };
   return { reportFingerprint: fingerprint(payload), payload };

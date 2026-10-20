@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   createFascicoloDocumentAnalysisService,
   FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION,
+  FASCICOLO_DOCUMENT_ANALYSIS_SYSTEM_POLICY,
 } from "@/server/ai/fascicoloDocumentAnalysis";
 import { createOpenAiAnalysisProvider } from "@/server/ai/providers/openai";
 import { createRealDataActivationPolicy } from "@/server/ai/realDataActivation";
@@ -29,6 +30,14 @@ function response(): Response {
 }
 
 describe("worker-safe fascicolo document analysis", () => {
+  it("requires explicit assessment of documented legal signals without inventing conclusions", () => {
+    expect(FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION).toBe("FASCICOLO_DOCUMENT_ANALYSIS_V5");
+    expect(FASCICOLO_DOCUMENT_ANALYSIS_SYSTEM_POLICY.requirements).toEqual(expect.arrayContaining([
+      expect.stringContaining("documented prescription"),
+      expect.stringContaining("grounded GAP"),
+    ]));
+  });
+
   it("sends actual extracted pages as untrusted data without tools or an HTTP session", async () => {
     let body: Record<string, unknown> | null = null;
     const transport = vi.fn(async (_url: string | URL, init?: RequestInit) => {

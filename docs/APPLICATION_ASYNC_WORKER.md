@@ -208,6 +208,23 @@ Before retrying the canary, verify that its operation is exactly
 corrected configuration has been deployed in the base service's latest successful
 build artifact.
 
+### Obsolete queued analysis cancellation
+
+Use `npm run job:cancel-obsolete-analysis --` only for a named
+`FASCICOLO.AUTOMATIC_ANALYSIS_V1` job whose corpus fingerprint is no longer current.
+The command is dry-run by default and requires the exact job, tenant, procedimento,
+obsolete fingerprint, current fingerprint, and actor role. It accepts `--apply` only
+when `--confirm-job-id` repeats the exact job ID.
+
+The apply path rechecks the scope, operation, input reference, zero attempt count,
+queue state, and state version in the same serializable transaction. A successful
+transition sets `CANCELLED`, preserves the row, records cancellation timestamps, and
+writes `ASYNC_JOB_OBSOLETE_CORPUS_CANCELLED` to the hash-chained audit log. Repeating
+the same authorized operation returns `ALREADY_CANCELLED`.
+
+Never use this operation for a current corpus, a running job, a job with attempts, or
+to delete queue history.
+
 The existing E2E service remains unchanged: its command is
 `npm run worker:document-extraction`. The event-driven code does not replace that
 command and does not broaden its document-extraction-only registry or allowlists.

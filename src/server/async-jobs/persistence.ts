@@ -22,8 +22,25 @@ import type {
 const identifier = z.string().trim().min(1).max(256);
 const jobId = identifier;
 const leaseToken = z.string().regex(/^[0-9a-f]{64}$/);
+const sha256 = z.string().regex(/^[0-9a-f]{64}$/);
 const durationMs = z.number().int().min(1_000).max(24 * 60 * 60 * 1_000);
 const retryDelayMs = z.number().int().min(0).max(30 * 24 * 60 * 60 * 1_000);
+
+const obsoleteFascicoloAnalysisCancellationSchema = z.object({
+  jobId,
+  tenantId: identifier,
+  procedimentoId: identifier,
+  obsoleteCorpusFingerprint: sha256,
+  currentCorpusFingerprint: sha256,
+  actor: z.object({
+    userId: z.string().trim().min(1).max(256).nullable(),
+    userEmail: z.string().trim().email().max(320).nullable(),
+    userRole: z.string().trim().min(1).max(128),
+  }).strict(),
+}).strict().refine(
+  (value) => value.obsoleteCorpusFingerprint !== value.currentCorpusFingerprint,
+  { message: "CORPUS_FINGERPRINTS_MUST_DIFFER" },
+);
 
 function json(value: unknown): Prisma.InputJsonValue {
   return value as Prisma.InputJsonValue;
@@ -628,6 +645,106 @@ export async function requestAsyncJobCancellation(id: string) {
     requireTransition(transition);
     const job = await tx.asyncJob.findUniqueOrThrow({ where: { id: current.id } });
     return { outcome: queued ? "CANCELLED" as const : "REQUESTED" as const, job };
+  });
+}
+
+type ObsoleteFascicoloAnalysisCancellationInput = z.input<
+  typeof obsoleteFascicoloAnalysisCancellationSchema
+>;
+
+function referenceRecord(value: Prisma.JsonValue): Record<string, unknown> | null {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
+}
+
+function evaluateObsoleteFascicoloAnalysisJob(
+  current: AsyncJob | null,
+  input: z.output<typeof obsoleteFascicoloAnalysisCancellationSchema>,
+) {
+  if (!current) return { outcome: "NOT_FOUND" as const };
+  if (
+    current.tenantId !== input.tenantId
+    || current.procedimentoId !== input.procedimentoId
+    || current.operation !== "FASCICOLO.AUTOMATIC_ANALYSIS_V1"
+  ) {
+    return { outcome: "SCOPE_MISMATCH" as const, job: current };
+  }
+  const reference = referenceRecord(current.inputReference);
+  const metadata = referenceRecord(reference?.metadata as Prisma.JsonValue);
+  if (
+    reference?.referenceType !== "FASCICOLO_DOCUMENT_CORPUS"
+    || reference.referenceId !== input.obsoleteCorpusFingerprint
+    || metadata?.corpusHash !== input.obsoleteCorpusFingerprint
+    || metadata.procedimentoId !== input.procedimentoId
+  ) {
+    return { outcome: "REFERENCE_MISMATCH" as const, job: current };
+  }
+  if (current.status === "CANCELLED") {
+    return { outcome: "ALREADY_CANCELLED" as const, job: current };
+  }
+  if (["SUCCEEDED", "TERMINAL_FAILED"].includes(current.status)) {
+    return { outcome: "TERMINAL" as const, job: current };
+  }
+  if (!["QUEUED", "RETRY_WAIT"].includes(current.status) || current.attemptCount !== 0) {
+    return { outcome: "NOT_SAFE_TO_CANCEL" as const, job: current };
+  }
+  return { outcome: "READY" as const, job: current };
+}
+
+export async function prepareObsoleteFascicoloAnalysisJobCancellation(
+  rawInput: ObsoleteFascicoloAnalysisCancellationInput,
+) {
+  const input = obsoleteFascicoloAnalysisCancellationSchema.parse(rawInput);
+  const current = await prisma.asyncJob.findUnique({ where: { id: input.jobId } });
+  return evaluateObsoleteFascicoloAnalysisJob(current, input);
+}
+
+export async function cancelObsoleteFascicoloAnalysisJob(
+  rawInput: ObsoleteFascicoloAnalysisCancellationInput,
+) {
+  const input = obsoleteFascicoloAnalysisCancellationSchema.parse(rawInput);
+  return runSerializableTransactionWithRetry(async (tx) => {
+    const current = await tx.asyncJob.findUnique({ where: { id: input.jobId } });
+    const evaluation = evaluateObsoleteFascicoloAnalysisJob(current, input);
+    if (evaluation.outcome !== "READY") return evaluation;
+
+    const transition = await tx.$executeRaw(Prisma.sql`
+      UPDATE "AsyncJob"
+      SET "status" = 'CANCELLED', "cancellationRequestedAt" = CURRENT_TIMESTAMP,
+          "completedAt" = CURRENT_TIMESTAMP, "failureCategory" = NULL, "failureCode" = NULL,
+          "stateVersion" = "stateVersion" + 1, "updatedAt" = CURRENT_TIMESTAMP
+      WHERE "id" = ${input.jobId}
+        AND "tenantId" = ${input.tenantId}
+        AND "procedimentoId" = ${input.procedimentoId}
+        AND "operation" = 'FASCICOLO.AUTOMATIC_ANALYSIS_V1'
+        AND "status" IN ('QUEUED', 'RETRY_WAIT')
+        AND "attemptCount" = 0
+        AND "stateVersion" = ${evaluation.job.stateVersion}
+        AND "inputReference"->>'referenceType' = 'FASCICOLO_DOCUMENT_CORPUS'
+        AND "inputReference"->>'referenceId' = ${input.obsoleteCorpusFingerprint}
+        AND "inputReference"#>>'{metadata,corpusHash}' = ${input.obsoleteCorpusFingerprint}
+        AND "inputReference"#>>'{metadata,procedimentoId}' = ${input.procedimentoId}
+    `);
+    requireTransition(transition);
+    await createAuditLogInTransaction(tx, {
+      azione: "ASYNC_JOB_OBSOLETE_CORPUS_CANCELLED",
+      entita: "AsyncJob",
+      entitaId: evaluation.job.id,
+      enteId: input.tenantId,
+      esito: "SUCCESS",
+      actor: input.actor,
+      metadata: {
+        operation: evaluation.job.operation,
+        procedimentoId: input.procedimentoId,
+        obsoleteCorpusFingerprint: input.obsoleteCorpusFingerprint,
+        currentCorpusFingerprint: input.currentCorpusFingerprint,
+        previousStatus: evaluation.job.status,
+        previousStateVersion: evaluation.job.stateVersion,
+      },
+    });
+    const job = await tx.asyncJob.findUniqueOrThrow({ where: { id: input.jobId } });
+    return { outcome: "CANCELLED" as const, job };
   });
 }
 
