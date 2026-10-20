@@ -57,6 +57,18 @@ const partyRole = z.object({
   payload: z.object({ subjectLocalId: id, role: shortText, context: shortText.nullable().default(null) }).strict(),
 }).strict();
 
+const partyPosition = z.object({
+  ...common,
+  kind: z.literal("PARTY_POSITION"),
+  payload: z.object({
+    subjectLocalId: id,
+    positionType: z.enum(["DEFENSE", "CLAIM", "OBJECTION", "REQUEST"]),
+    normalizedStatement: text,
+    context: shortText.nullable().default(null),
+    relatedItemLocalIds: localIds.default([]),
+  }).strict(),
+}).strict();
+
 const fact = z.object({
   ...common,
   kind: z.literal("FACT"),
@@ -170,7 +182,7 @@ export const researchQuestionCandidateSchema = z.object({
 });
 
 export const structuredKnowledgeItemSchema = z.discriminatedUnion("kind", [
-  partyRole, fact, event, legalAct, measure, contradiction, gap, deadline,
+  partyRole, partyPosition, fact, event, legalAct, measure, contradiction, gap, deadline,
 ]);
 
 export const fascicoloStructuredKnowledgeSchema = z.object({
@@ -189,7 +201,7 @@ export const fascicoloStructuredKnowledgeSchema = z.object({
   if (new Set(issueIds).size !== issueIds.length) context.addIssue({ code: "custom", message: "DUPLICATE_ISSUE_LOCAL_ID" });
   if (new Set(questionIds).size !== questionIds.length) context.addIssue({ code: "custom", message: "DUPLICATE_QUESTION_LOCAL_ID" });
   for (const item of value.items) {
-    const referencedSubjects = item.kind === "PARTY_ROLE" ? [item.payload.subjectLocalId]
+    const referencedSubjects = item.kind === "PARTY_ROLE" || item.kind === "PARTY_POSITION" ? [item.payload.subjectLocalId]
       : item.kind === "FACT" || item.kind === "EVENT" ? item.payload.subjectLocalIds
         : item.kind === "LEGAL_ACT" || item.kind === "MEASURE" ? [item.payload.authoritySubjectLocalId].filter(Boolean)
           : [];
@@ -197,7 +209,7 @@ export const fascicoloStructuredKnowledgeSchema = z.object({
       context.addIssue({ code: "custom", message: `UNKNOWN_SUBJECT_LOCAL_ID:${item.localId}` });
     }
   }
-  const allowedOriginKinds = new Set(["FACT", "EVENT", "LEGAL_ACT", "MEASURE", "CONTRADICTION", "GAP"]);
+  const allowedOriginKinds = new Set(["PARTY_POSITION", "FACT", "EVENT", "LEGAL_ACT", "MEASURE", "CONTRADICTION", "GAP"]);
   for (const issue of value.legalIssues) {
     if (issue.originatingItemLocalIds.some((localId) => {
       const item = value.items.find((candidate) => candidate.localId === localId);

@@ -134,6 +134,17 @@ function structuredKnowledge(overrides: { factText?: string; includeGap?: boolea
         payload: { subjectLocalId: "subject-authority", role: "autorita procedente", context: "procedimento" },
       },
       {
+        localId: "position-authority", kind: "PARTY_POSITION" as const, confidence: 85,
+        basisRefs: ["DOCUMENT_1.PAGE_1"],
+        payload: {
+          subjectLocalId: "subject-authority",
+          positionType: "CLAIM" as const,
+          normalizedStatement: "L'autorita sostiene che la prescrizione non sia stata rispettata",
+          context: "contestazione",
+          relatedItemLocalIds: [],
+        },
+      },
+      {
         localId: "fact-a", kind: "FACT" as const, confidence: 90,
         basisRefs: ["DOCUMENT_1.PAGE_1"],
         payload: { normalizedStatement: overrides.factText ?? "La partenza e avvenuta alle 12:50", subjectLocalIds: ["subject-authority"], object: null, qualifier: null },
@@ -255,7 +266,7 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
       evidenceByBasisRef: new Map([["DOCUMENT_1.PAGE_1", evidence()]]),
     }, context(db));
     expect(new Set(result.revision.items.map((item) => item.kind))).toEqual(new Set([
-      "PARTY_ROLE", "FACT", "EVENT", "LEGAL_ACT", "MEASURE", "CONTRADICTION", "GAP", "DEADLINE_CANDIDATE",
+      "PARTY_ROLE", "PARTY_POSITION", "FACT", "EVENT", "LEGAL_ACT", "MEASURE", "CONTRADICTION", "GAP", "DEADLINE_CANDIDATE",
     ]));
     expect(result.revision.items.every((item) => item.evidence.length === 1)).toBe(true);
     const role = result.revision.items.find((item) => item.kind === "PARTY_ROLE")!;
@@ -275,6 +286,13 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
       .toEqual([result.subjectIdsByLocalId.get("subject-authority")]);
     expect(readModel?.contradictions[0].contradictedItemIds).toHaveLength(2);
     expect(readModel?.gaps).toHaveLength(1);
+    expect(readModel?.partyPositions).toEqual([
+      expect.objectContaining({
+        kind: "PARTY_POSITION",
+        normalizedText: "L'autorita sostiene che la prescrizione non sia stata rispettata",
+        evidence: [expect.objectContaining({ basisRef: "DOCUMENT_1.PAGE_1", pageNumber: 1 })],
+      }),
+    ]);
     expect(readModel?.deadlineCandidates.map((item) => item.payload)).toEqual(expect.arrayContaining([
       expect.objectContaining({
         deadlineType: "EXPLICIT_DATE",

@@ -36,7 +36,7 @@ function sorted(values: readonly string[]): string[] {
 }
 
 function resolvedSubjectIds(item: StructuredKnowledgeItem, subjects: ReadonlyMap<string, string>): readonly string[] {
-  const localIds = item.kind === "PARTY_ROLE" ? [item.payload.subjectLocalId]
+  const localIds = item.kind === "PARTY_ROLE" || item.kind === "PARTY_POSITION" ? [item.payload.subjectLocalId]
     : item.kind === "FACT" || item.kind === "EVENT" ? item.payload.subjectLocalIds
       : item.kind === "LEGAL_ACT" || item.kind === "MEASURE"
         ? [item.payload.authoritySubjectLocalId].filter((value): value is string => value !== null)
@@ -51,6 +51,7 @@ function resolvedSubjectIds(item: StructuredKnowledgeItem, subjects: ReadonlyMap
 function identityFor(item: StructuredKnowledgeItem, subjectIds: readonly string[], dependencies: readonly string[]): string {
   switch (item.kind) {
     case "PARTY_ROLE": return [subjectIds[0], normalized(item.payload.role), normalized(item.payload.context ?? "")].join("|");
+    case "PARTY_POSITION": return [subjectIds[0], item.payload.positionType, normalized(item.payload.normalizedStatement)].join("|");
     case "FACT": return [normalized(item.payload.normalizedStatement), ...subjectIds].join("|");
     case "EVENT": return [normalized(item.payload.normalizedStatement), JSON.stringify(item.payload.date), ...subjectIds].join("|");
     case "LEGAL_ACT":
@@ -93,7 +94,7 @@ export function projectStructuredKnowledge(input: {
     for (let index = pending.length - 1; index >= 0; index -= 1) {
       const item = pending[index];
       const dependencyLocalIds = item.kind === "CONTRADICTION" ? item.payload.conflictingItemLocalIds
-        : item.kind === "EVENT" || item.kind === "GAP" ? item.payload.relatedItemLocalIds : [];
+        : item.kind === "PARTY_POSITION" || item.kind === "EVENT" || item.kind === "GAP" ? item.payload.relatedItemLocalIds : [];
       const dependencyKeys = dependencyLocalIds.map((localId) => semanticKeysByLocalId.get(localId));
       if (dependencyKeys.some((key) => !key)) continue;
       const evidence = item.basisRefs.map((basisRef) => input.evidenceByBasisRef.get(basisRef));

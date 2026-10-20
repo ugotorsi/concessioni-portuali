@@ -272,6 +272,7 @@ function ReportContent({ payload }: { payload: StructuredFascicoloReportPayload 
   const framework = payload.documentedFramework;
   const frameworkGroups = [
     { title: "Ruoli e soggetti", items: framework.partyRoles },
+    { title: "Posizioni e difese delle parti", items: framework.partyPositions ?? [] },
     { title: "Atti rilevanti", items: framework.legalActs },
     { title: "Misure", items: framework.measures },
   ].filter((group) => group.items.length > 0);

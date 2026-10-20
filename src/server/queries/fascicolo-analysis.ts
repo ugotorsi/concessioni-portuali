@@ -52,6 +52,7 @@ export async function getFascicoloAnalysisReadModel(
   const evidence = new Map<string, FascicoloAnalysisModel["evidence"][number]>();
   const allItems = [
     ...knowledge.partyRoles,
+    ...(knowledge.partyPositions ?? []),
     ...knowledge.facts,
     ...knowledge.events,
     ...knowledge.legalActs,
@@ -109,6 +110,7 @@ export async function getFascicoloAnalysisReadModel(
     })),
     ...[
       ...knowledge.partyRoles,
+      ...(knowledge.partyPositions ?? []),
       ...knowledge.facts,
       ...knowledge.timeline,
       ...knowledge.legalActs,

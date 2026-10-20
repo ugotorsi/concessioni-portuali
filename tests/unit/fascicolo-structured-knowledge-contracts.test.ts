@@ -22,6 +22,7 @@ function item(kind: typeof lot2KnowledgeKinds[number], index: number) {
   const common = { localId: `item-${index}`, kind, confidence: 80, basisRefs: ["DOCUMENT_1.PAGE_1"] };
   switch (kind) {
     case "PARTY_ROLE": return { ...common, payload: { subjectLocalId: "subject-1", role: "richiedente", context: null } };
+    case "PARTY_POSITION": return { ...common, payload: { subjectLocalId: "subject-1", positionType: "DEFENSE", normalizedStatement: "Difesa documentata", context: "controdeduzioni", relatedItemLocalIds: [] } };
     case "FACT": return { ...common, payload: { normalizedStatement: "Fatto documentato", subjectLocalIds: ["subject-1"], object: null, qualifier: null } };
     case "EVENT": return { ...common, payload: { title: "Evento", normalizedStatement: "Evento documentato", date: { precision: "EXACT", from: "2026-09-29", to: null, originalText: null, confidence: 90 }, subjectLocalIds: [], relatedItemLocalIds: [] } };
     case "LEGAL_ACT":

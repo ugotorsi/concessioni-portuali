@@ -22,6 +22,7 @@ export const FASCICOLO_DOCUMENT_ANALYSIS_SYSTEM_POLICY = Object.freeze({
     "Use only the supplied extracted document excerpts.",
     "Every factual statement, date, issue, contradiction, gap, and question must cite supplied page references.",
     "Return structuredKnowledge subjects and typed items when the excerpts support them; never invent unresolved evidence references.",
+    "Preserve every material defense, claim, objection, or request as a PARTY_POSITION attributed to its subject and cited to its document page; never convert a party position into a verified FACT or a technical assessment.",
     "Within structuredKnowledge, propose legalIssues only from identified CURRENT-bound items and researchQuestions only from those legal issues with an explicit reference-date basis.",
     "Assess every documented prescription, formal contestation, alleged breach, omission, and contradiction for legalIssues; empty legalIssues are valid only when the excerpts do not support an issue.",
     "When an issue cannot be structured because documents or legal research are missing, return a grounded GAP instead of inventing a legal conclusion or authority.",

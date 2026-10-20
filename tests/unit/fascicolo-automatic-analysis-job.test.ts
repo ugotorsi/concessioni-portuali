@@ -469,6 +469,7 @@ describe("automatic fascicolo analysis job", () => {
     const result = await createFascicoloAutomaticAnalysisHandler(deps)
       .execute(reference, context());
     expect(deps.analyze).toHaveBeenCalledWith(expect.objectContaining({
+      jobId: "job-1",
       documentsAreUntrustedData: true,
       externalToolsAllowed: false,
       documentVersionId: "attempt-1",

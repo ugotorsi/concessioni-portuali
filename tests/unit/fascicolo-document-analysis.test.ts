@@ -35,6 +35,7 @@ describe("worker-safe fascicolo document analysis", () => {
     expect(FASCICOLO_DOCUMENT_ANALYSIS_SYSTEM_POLICY.requirements).toEqual(expect.arrayContaining([
       expect.stringContaining("documented prescription"),
       expect.stringContaining("grounded GAP"),
+      expect.stringContaining("PARTY_POSITION"),
     ]));
   });
 

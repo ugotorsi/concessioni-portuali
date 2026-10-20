@@ -399,6 +399,16 @@ export function FascicoloAutomaticWorkflowPanel({
                   ))}
                 </ul>
               ) : <p className="mt-1 text-sm text-slate-600">Nessun fatto corrente non respinto.</p>}
+              {(structuredReport.payload.documentedFramework.partyPositions ?? []).length > 0 ? (
+                <>
+                  <h5 className="mt-4 text-xs font-semibold uppercase text-slate-600">Posizioni e difese delle parti</h5>
+                  <ul className="mt-2 space-y-1 text-sm text-slate-700">
+                    {(structuredReport.payload.documentedFramework.partyPositions ?? []).map((position) => (
+                      <li key={position.id}>{position.normalizedText} <span className="text-xs text-slate-500">({position.evidence.map((evidence) => evidence.basisRef).filter(Boolean).join(", ")})</span></li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
             </div>
             {structuredReport.payload.legalIssues.map((issue) => (
               <section key={issue.knowledgeItemId} className="space-y-3 border-l-2 border-slate-300 pl-3">

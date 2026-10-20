@@ -91,6 +91,7 @@ type AutomaticReference = z.output<typeof automaticReferenceSchema>;
 
 export type AutomaticDocumentExcerpt = FascicoloDocumentExcerpt;
 export type AutomaticFascicoloAnalysisInput = FascicoloDocumentAnalysisInput & {
+  readonly jobId: string;
   readonly attempt: number;
 };
 
@@ -563,7 +564,7 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
       return await withRuntimeCostGate({
         tenantId: input.tenantId,
         procedimentoId: input.procedimentoId,
-        jobId: null,
+        jobId: input.jobId,
         provider: "OPENAI",
         operationType: FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
         estimatedAmount,
@@ -771,6 +772,7 @@ export function createFascicoloAutomaticAnalysisHandler(
       }
       await context.heartbeat();
       const output = await dependencies.analyze({
+        jobId: context.jobId,
         attempt: context.attempt,
         contractVersion: FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION,
         tenantId: authority.tenantId,

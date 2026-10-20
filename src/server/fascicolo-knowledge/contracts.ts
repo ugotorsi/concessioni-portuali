@@ -6,6 +6,7 @@ export const FASCICOLO_KNOWLEDGE_SEMANTIC_KEY_VERSION = "SEMANTIC_KEY_V1" as con
 export const knowledgeItemKindSchema = z.enum([
   "GENERIC",
   "PARTY_ROLE",
+  "PARTY_POSITION",
   "FACT",
   "EVENT",
   "LEGAL_ACT",

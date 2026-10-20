@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import type { JsonValue, KnowledgeItemReviewStatus } from "@/server/fascicolo-knowledge";
 
-type KnowledgeKind = "PARTY_ROLE" | "FACT" | "EVENT" | "LEGAL_ACT" | "MEASURE" | "CONTRADICTION" | "GAP" | "DEADLINE_CANDIDATE" | "LEGAL_ISSUE" | "RESEARCH_QUESTION";
+type KnowledgeKind = "PARTY_ROLE" | "PARTY_POSITION" | "FACT" | "EVENT" | "LEGAL_ACT" | "MEASURE" | "CONTRADICTION" | "GAP" | "DEADLINE_CANDIDATE" | "LEGAL_ISSUE" | "RESEARCH_QUESTION";
 
 export interface StructuredKnowledgeReadItem {
   id: string;
@@ -36,6 +36,7 @@ export interface StructuredKnowledgeReadModel {
   };
   subjects: readonly { id: string; canonicalName: string; subjectType: string; aliases: readonly string[] }[];
   partyRoles: readonly StructuredKnowledgeReadItem[];
+  partyPositions?: readonly StructuredKnowledgeReadItem[];
   facts: readonly StructuredKnowledgeReadItem[];
   events: readonly StructuredKnowledgeReadItem[];
   legalActs: readonly StructuredKnowledgeReadItem[];
@@ -178,6 +179,7 @@ export async function loadCurrentStructuredKnowledge(
     revision: { ...revision, warnings: strings(revision.warnings) },
     subjects: subjects.map((subject) => ({ ...subject, aliases: strings(subject.aliases) })),
     partyRoles: visibleByKind("PARTY_ROLE"),
+    partyPositions: visibleByKind("PARTY_POSITION"),
     facts: visibleByKind("FACT"),
     events,
     legalActs: visibleByKind("LEGAL_ACT"),

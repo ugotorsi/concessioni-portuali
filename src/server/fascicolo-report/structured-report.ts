@@ -151,6 +151,7 @@ export interface StructuredFascicoloReportPayload {
   sourceStateFingerprint: string;
   documentedFramework: {
     partyRoles: readonly StructuredKnowledgeReadItem[];
+    partyPositions?: readonly StructuredKnowledgeReadItem[];
     facts: readonly StructuredKnowledgeReadItem[];
     timeline: readonly StructuredKnowledgeReadItem[];
     legalActs: readonly StructuredKnowledgeReadItem[];
@@ -504,7 +505,7 @@ export function buildStructuredFascicoloReport(input: {
       }));
   const assignedQuestionIds = new Set(legalIssues.flatMap((issue) => issue.questions.map((question) => question.knowledgeItemId)));
   const knowledgeState = [
-    ...input.knowledge.partyRoles, ...input.knowledge.facts, ...input.knowledge.events,
+    ...input.knowledge.partyRoles, ...(input.knowledge.partyPositions ?? []), ...input.knowledge.facts, ...input.knowledge.events,
     ...input.knowledge.legalActs, ...input.knowledge.measures, ...input.knowledge.contradictions,
     ...input.knowledge.gaps, ...input.knowledge.deadlineCandidates, ...input.knowledge.legalIssues,
     ...input.knowledge.researchQuestions,
@@ -545,6 +546,7 @@ export function buildStructuredFascicoloReport(input: {
     sourceStateFingerprint: fingerprint(sourceState),
     documentedFramework: {
       partyRoles: visibleItems(input.knowledge.partyRoles),
+      partyPositions: visibleItems(input.knowledge.partyPositions ?? []),
       facts: visibleItems(input.knowledge.facts),
       timeline: visibleItems(input.knowledge.timeline),
       legalActs: visibleItems(input.knowledge.legalActs),

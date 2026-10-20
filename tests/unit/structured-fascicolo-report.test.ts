@@ -32,6 +32,7 @@ function item(id: string, kind: StructuredKnowledgeReadItem["kind"], status: Str
 
 function knowledge(): StructuredKnowledgeReadModel {
   const fact = item("fact-1", "FACT");
+  const partyPosition = item("position-1", "PARTY_POSITION");
   const rejectedFact = item("fact-rejected", "FACT", "REJECTED");
   const issue = { ...item("issue-1", "LEGAL_ISSUE"), originatingItemIds: [fact.id] };
   const question = { ...item("question-1", "RESEARCH_QUESTION"), legalIssueId: issue.id };
@@ -46,6 +47,7 @@ function knowledge(): StructuredKnowledgeReadModel {
     },
     subjects: [],
     partyRoles: [],
+    partyPositions: [partyPosition],
     facts: [rejectedFact, fact],
     events: [],
     legalActs: [],
@@ -148,6 +150,7 @@ describe("deterministic structured fascicolo report", () => {
     });
 
     expect(report.payload.documentedFramework.facts.map((fact) => fact.id)).toEqual(["fact-1"]);
+    expect((report.payload.documentedFramework.partyPositions ?? []).map((position) => position.id)).toEqual(["position-1"]);
     expect(report.payload.operationalPlans).toHaveLength(1);
     expect(report.payload.operationalPlans?.[0]).toMatchObject({
       issueSemanticKey: sha("issue-1"),
