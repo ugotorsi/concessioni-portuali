@@ -23,6 +23,7 @@ function env() {
     AI_OPENAI_TIMEOUT_MS: "45000",
     AI_OPENAI_MAX_RAW_RESPONSE_BYTES: "262144",
     AI_OPENAI_MAX_OUTPUT_TOKENS: "8192",
+    AI_OPENAI_MAX_INPUT_TOKENS: "100000",
     AI_MAX_INPUT_BYTES: "262144",
   } as const;
 }
@@ -90,6 +91,7 @@ describe("AI-01B2B2 synthetic OpenAI smoke harness", () => {
       "AI_OPENAI_TIMEOUT_MS",
       "AI_OPENAI_MAX_RAW_RESPONSE_BYTES",
       "AI_OPENAI_MAX_OUTPUT_TOKENS",
+      "AI_OPENAI_MAX_INPUT_TOKENS",
       "AI_MAX_INPUT_BYTES",
     ]) {
       delete childEnv[envName];
@@ -144,6 +146,7 @@ describe("AI-01B2B2 synthetic OpenAI smoke harness", () => {
       timeoutMs: 45000,
       maxRawResponseBytes: 262144,
       maxOutputTokens: 8192,
+      maxInputTokens: 100000,
     }));
     expect(analyze).toHaveBeenCalledOnce();
     if (!result.ok) {

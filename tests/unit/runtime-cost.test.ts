@@ -6,6 +6,7 @@ import {
   RuntimeBudgetExceededError,
   RuntimeBudgetPolicyMissingError,
   RuntimeCostReservationConflictError,
+  RuntimeCostSettlementRequiredError,
   settleRuntimeCost,
   withRuntimeCostGate,
   type RuntimeCostContext,
@@ -111,6 +112,26 @@ describe("Lotto 8 runtime cost gate", () => {
       db,
     )).rejects.toBe(providerFailure);
     expect(String(db.query.mock.calls[6][0])).toContain('"status"=\'RELEASED\'');
+  });
+
+  it("settles a conservative amount once when a sent provider call has an uncertain outcome", async () => {
+    const db = context([
+      [], policies,
+      [{ amount: "0.000000" }], [{ amount: "0.000000" }], [{ amount: "0.000000" }],
+      [],
+      [],
+    ]);
+    const providerFailure = new Error("synthetic uncertain provider failure");
+
+    await expect(withRuntimeCostGate(
+      reservation,
+      async () => {
+        throw new RuntimeCostSettlementRequiredError(0.5, providerFailure);
+      },
+      db,
+    )).rejects.toBe(providerFailure);
+    expect(String(db.query.mock.calls[6][0])).toContain("\"status\"='SETTLED'");
+    expect(String(db.query.mock.calls[6][0])).not.toContain("\"status\"='RELEASED'");
   });
 
   it("rechecks caps before reactivating a released reservation", async () => {

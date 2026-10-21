@@ -81,7 +81,14 @@ Aggiunte a `.env.example` per il percorso automatico:
 - analisi AI: `AI_REAL_DATA_ENABLED`, `AI_REAL_DATA_APPROVAL_ID`,
   `AI_PROVIDER_PROJECT_CLASS`, `AI_OPENAI_API_KEY`, `AI_OPENAI_REGION`,
   `AI_OPENAI_TIMEOUT_MS`, `AI_OPENAI_MAX_RAW_RESPONSE_BYTES`,
-  `AI_OPENAI_MAX_OUTPUT_TOKENS`, `AI_MAX_INPUT_BYTES`;
+  `AI_OPENAI_MAX_OUTPUT_TOKENS`, `AI_OPENAI_MAX_INPUT_TOKENS`,
+  `AI_MAX_INPUT_BYTES`;
+- accounting OpenAI: `AI_OPENAI_USD_TO_EUR_RATE` e
+  `AI_OPENAI_USD_TO_EUR_RATE_DATE` (`YYYY-MM-DD`). Il tasso deve essere il
+  cambio di riferimento BCE USD/EUR della data indicata. Il costo provider
+  resta in USD; il settlement interno in EUR viene arrotondato per eccesso a
+  sei decimali. Le tariffe modello sono versionate nel codice con fonte
+  `https://developers.openai.com/api/docs/models/gpt-5.6-terra`;
 - ricerca automatica: `AUTOMATIC_RESEARCH_EXECUTION_ENABLED`,
   `AUTOMATIC_RESEARCH_TENANT_ALLOWLIST`,
   `AUTOMATIC_RESEARCH_PROCEDIMENTO_ALLOWLIST`,

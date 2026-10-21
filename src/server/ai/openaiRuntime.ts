@@ -13,7 +13,9 @@ import {
 import {
   createOpenAiAnalysisProvider,
   type OpenAiFetch,
+  type OpenAiProviderTelemetry,
   type OpenAiRegion,
+  type OpenAiTokenCounter,
 } from "@/server/ai/providers/openai";
 import {
   assertRealDataActivation,
@@ -27,6 +29,7 @@ export const AI_OPENAI_RUNTIME_ENV_NAMES = [
   "AI_OPENAI_TIMEOUT_MS",
   "AI_OPENAI_MAX_RAW_RESPONSE_BYTES",
   "AI_OPENAI_MAX_OUTPUT_TOKENS",
+  "AI_OPENAI_MAX_INPUT_TOKENS",
   "AI_MAX_INPUT_BYTES",
 ] as const;
 
@@ -51,6 +54,7 @@ interface ParsedOpenAiRuntimeConfig {
   timeoutMs: number;
   maxRawResponseBytes: number;
   maxOutputTokens: number;
+  maxInputTokens: number;
   maxInputBytes: number;
 }
 
@@ -97,13 +101,20 @@ function parseRuntimeConfig(env: OpenAiRuntimeEnv): ParsedOpenAiRuntimeConfig {
     timeoutMs: positiveSafeInteger(env, "AI_OPENAI_TIMEOUT_MS"),
     maxRawResponseBytes: positiveSafeInteger(env, "AI_OPENAI_MAX_RAW_RESPONSE_BYTES"),
     maxOutputTokens: positiveSafeInteger(env, "AI_OPENAI_MAX_OUTPUT_TOKENS"),
+    maxInputTokens: positiveSafeInteger(env, "AI_OPENAI_MAX_INPUT_TOKENS"),
     maxInputBytes: positiveSafeInteger(env, "AI_MAX_INPUT_BYTES"),
   };
 }
 
+interface OpenAiRuntimeDependencies {
+  transport?: OpenAiFetch;
+  tokenCounter?: OpenAiTokenCounter;
+  telemetry?: OpenAiProviderTelemetry;
+}
+
 function createOpenAiFascicoloServiceConfig(
   env: OpenAiRuntimeEnv,
-  dependencies: { transport?: OpenAiFetch },
+  dependencies: OpenAiRuntimeDependencies,
 ) {
   const realDataActivation = createRealDataActivationPolicy(env);
   assertRealDataActivation(realDataActivation);
@@ -113,8 +124,11 @@ function createOpenAiFascicoloServiceConfig(
     timeoutMs: config.timeoutMs,
     maxRawResponseBytes: config.maxRawResponseBytes,
     maxOutputTokens: config.maxOutputTokens,
+    maxInputTokens: config.maxInputTokens,
     region: config.region,
     ...(dependencies.transport ? { transport: dependencies.transport } : {}),
+    ...(dependencies.tokenCounter ? { tokenCounter: dependencies.tokenCounter } : {}),
+    ...(dependencies.telemetry ? { telemetry: dependencies.telemetry } : {}),
   });
   return {
     provider,
@@ -129,14 +143,14 @@ function defaultOpenAiRuntimeEnv(): OpenAiRuntimeEnv {
 
 export function createOpenAiFascicoloRuntimeFromEnv(
   env: OpenAiRuntimeEnv = defaultOpenAiRuntimeEnv(),
-  dependencies: { transport?: OpenAiFetch } = {},
+  dependencies: OpenAiRuntimeDependencies = {},
 ): FascicoloLiveAnalysisService {
   return createFascicoloLiveAnalysisService(createOpenAiFascicoloServiceConfig(env, dependencies));
 }
 
 export function createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv(
   env: OpenAiRuntimeEnv = defaultOpenAiRuntimeEnv(),
-  dependencies: { transport?: OpenAiFetch } = {},
+  dependencies: OpenAiRuntimeDependencies = {},
 ): FascicoloTrustedReviewProductionService {
   return createFascicoloTrustedReviewProductionService(
     createOpenAiFascicoloServiceConfig(env, dependencies),
@@ -145,7 +159,7 @@ export function createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv(
 
 export function createOpenAiFascicoloDocumentRuntimeFromEnv(
   env: OpenAiRuntimeEnv = defaultOpenAiRuntimeEnv(),
-  dependencies: { transport?: OpenAiFetch } = {},
+  dependencies: OpenAiRuntimeDependencies = {},
 ) {
   const config = createOpenAiFascicoloServiceConfig(env, dependencies);
   return createFascicoloDocumentAnalysisService({

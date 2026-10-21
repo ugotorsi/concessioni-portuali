@@ -26,6 +26,16 @@ export class RuntimeBudgetPolicyMissingError extends Error {
   }
 }
 
+export class RuntimeCostSettlementRequiredError extends Error {
+  constructor(
+    readonly actualAmount: number,
+    readonly originalError: unknown,
+  ) {
+    super("RUNTIME_COST_SETTLEMENT_REQUIRED");
+    this.name = "RuntimeCostSettlementRequiredError";
+  }
+}
+
 export interface RuntimeCostContext {
   transaction<T>(operation: (executor: RuntimeSqlExecutor) => Promise<T>): Promise<T>;
 }
@@ -158,6 +168,13 @@ export async function withRuntimeCostGate<T>(
     await settleRuntimeCost({ reservationId: reservation.reservationId, actualAmount: result.actualAmount }, context);
     return result.value;
   } catch (error) {
+    if (error instanceof RuntimeCostSettlementRequiredError) {
+      await settleRuntimeCost({
+        reservationId: reservation.reservationId,
+        actualAmount: error.actualAmount,
+      }, context);
+      throw error.originalError;
+    }
     await releaseRuntimeCost(reservation.reservationId, context);
     throw error;
   }

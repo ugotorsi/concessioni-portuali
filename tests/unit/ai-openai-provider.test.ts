@@ -71,7 +71,15 @@ function validPayload(): ProviderAnalysisPayloadV1 {
 function openAiResponse(payload: unknown = validPayload(), overrides: Record<string, unknown> = {}) {
   return {
     id: "resp-test",
+    model: "gpt-5.6-terra",
     status: "completed",
+    usage: {
+      input_tokens: 120,
+      input_tokens_details: { cached_tokens: 20, cache_write_tokens: 10 },
+      output_tokens: 40,
+      output_tokens_details: { reasoning_tokens: 12 },
+      total_tokens: 160,
+    },
     output: [{
       type: "message",
       role: "assistant",
@@ -93,6 +101,7 @@ function config(transport: OpenAiFetch, overrides: Partial<{
   timeoutMs: number;
   maxRawResponseBytes: number;
   maxOutputTokens: number;
+  maxInputTokens: number;
   region: OpenAiRegion;
 }> = {}) {
   return {
@@ -100,6 +109,7 @@ function config(transport: OpenAiFetch, overrides: Partial<{
     timeoutMs: 1_000,
     maxRawResponseBytes: 100_000,
     maxOutputTokens: 2_000,
+    maxInputTokens: 100_000,
     region: "GLOBAL" as const,
     transport,
     ...overrides,
@@ -141,6 +151,8 @@ describe("AI-01B2A OpenAI Responses adapter", () => {
       { maxOutputTokens: -1 },
       { maxOutputTokens: 1.5 },
       { maxOutputTokens: Number.MAX_SAFE_INTEGER + 1 },
+      { maxInputTokens: 0 },
+      { maxInputTokens: Number.MAX_SAFE_INTEGER + 1 },
       { region: "CUSTOM" as OpenAiRegion },
     ];
     for (const overrides of invalidConfigs) {
@@ -160,6 +172,74 @@ describe("AI-01B2A OpenAI Responses adapter", () => {
       expect(transport.mock.calls[0][1]?.redirect).toBe("error");
     }
     expect(Object.keys(OPENAI_RESPONSES_ENDPOINTS)).toEqual(["GLOBAL", "EU"]);
+  });
+
+  it("reports request submission and validated billable usage through internal telemetry", async () => {
+    const onRequestSent = vi.fn();
+    const onUsage = vi.fn();
+    const transport = fakeTransport(jsonResponse(openAiResponse()));
+    const provider = createOpenAiAnalysisProvider({
+      ...config(transport),
+      telemetry: { onRequestSent, onUsage },
+    });
+
+    await provider.analyze(providerRequestFixture());
+
+    expect(onRequestSent).toHaveBeenCalledOnce();
+    expect(onUsage).toHaveBeenCalledWith({
+      inputTokens: 120,
+      cachedInputTokens: 20,
+      cacheWriteInputTokens: 10,
+      outputTokens: 40,
+      reasoningOutputTokens: 12,
+    });
+  });
+
+  it("requires valid usage when accounting telemetry is enabled", async () => {
+    const transport = fakeTransport(jsonResponse(openAiResponse(validPayload(), {
+      usage: undefined,
+    })));
+    const provider = createOpenAiAnalysisProvider({
+      ...config(transport),
+      telemetry: { onUsage: vi.fn() },
+    });
+
+    await expect(provider.analyze(providerRequestFixture())).rejects.toMatchObject({
+      code: "OPENAI_USAGE_MISSING_OR_INVALID",
+    });
+  });
+
+  it("rejects a response model that does not match the locked tariff", async () => {
+    const transport = fakeTransport(jsonResponse(openAiResponse(validPayload(), {
+      model: "different-model",
+    })));
+    const provider = createOpenAiAnalysisProvider({
+      ...config(transport),
+      telemetry: { onUsage: vi.fn() },
+    });
+
+    await expect(provider.analyze(providerRequestFixture())).rejects.toMatchObject({
+      code: "OPENAI_MODEL_MISMATCH",
+    });
+  });
+
+  it("enforces the tokenized request limit before provider submission", async () => {
+    const onRequestSent = vi.fn();
+    const transport = fakeTransport(jsonResponse(openAiResponse()));
+    const provider = createOpenAiAnalysisProvider({
+      ...config(transport, { maxInputTokens: 9 }),
+      tokenCounter: () => 10,
+      telemetry: { onRequestSent },
+    });
+
+    await expect(provider.analyze(providerRequestFixture())).rejects.toMatchObject({
+      category: "CONFIGURATION",
+      diagnostics: {
+        providerCode: "input_token_limit_exceeded",
+      },
+    });
+    expect(onRequestSent).not.toHaveBeenCalled();
+    expect(transport).not.toHaveBeenCalled();
   });
 
   it("builds the exact locked ephemeral no-tools Responses request", async () => {

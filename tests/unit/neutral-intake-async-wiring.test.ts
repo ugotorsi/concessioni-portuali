@@ -258,6 +258,7 @@ describe("B2C9 Block 3B.2C NeutralIntake async extraction wiring", () => {
       retryDelayMs: 1_000,
       leaseDurationMs: 300_000,
       registry: applicationAsyncJobRegistry,
+      operationBlocklist: ["FASCICOLO.AUTOMATIC_ANALYSIS_EVALUATION_V1"],
     });
   });
 

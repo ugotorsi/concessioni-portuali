@@ -21,6 +21,13 @@ const output = {
 function response(): Response {
   return Response.json({
     status: "completed",
+    usage: {
+      input_tokens: 100,
+      input_tokens_details: { cached_tokens: 0, cache_write_tokens: 0 },
+      output_tokens: 40,
+      output_tokens_details: { reasoning_tokens: 8 },
+      total_tokens: 140,
+    },
     output: [{
       type: "message",
       role: "assistant",
@@ -51,6 +58,7 @@ describe("worker-safe fascicolo document analysis", () => {
         timeoutMs: 1_000,
         maxRawResponseBytes: 64_000,
         maxOutputTokens: 2_000,
+        maxInputTokens: 100_000,
         region: "EU",
         transport,
       }),

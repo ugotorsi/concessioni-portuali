@@ -370,7 +370,10 @@ describe("staging fascicolo evaluation request security", () => {
           AI_OPENAI_TIMEOUT_MS: "91000",
           AI_OPENAI_MAX_RAW_RESPONSE_BYTES: "100000",
           AI_OPENAI_MAX_OUTPUT_TOKENS: "1000",
+          AI_OPENAI_MAX_INPUT_TOKENS: "100000",
           AI_MAX_INPUT_BYTES: "100000",
+          AI_OPENAI_USD_TO_EUR_RATE: "1",
+          AI_OPENAI_USD_TO_EUR_RATE_DATE: "2026-10-21",
         })).toThrowError(expect.objectContaining({
           code: "STAGING_EVALUATION_TIMEOUT_UNSAFE",
         }));
@@ -388,7 +391,10 @@ describe("staging fascicolo evaluation request security", () => {
           AI_OPENAI_TIMEOUT_MS: "45000",
           AI_OPENAI_MAX_RAW_RESPONSE_BYTES: "100000",
           AI_OPENAI_MAX_OUTPUT_TOKENS: "1000",
+          AI_OPENAI_MAX_INPUT_TOKENS: "100000",
           AI_MAX_INPUT_BYTES: "100000",
+          AI_OPENAI_USD_TO_EUR_RATE: "1",
+          AI_OPENAI_USD_TO_EUR_RATE_DATE: "2026-10-21",
         })).toBeTypeOf("function");
         expect({
           enabled: process.env.AI_REAL_DATA_ENABLED,

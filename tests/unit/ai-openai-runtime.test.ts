@@ -40,6 +40,7 @@ function validEnv(overrides: Partial<OpenAiRuntimeEnv> = {}): OpenAiRuntimeEnv {
     AI_OPENAI_TIMEOUT_MS: "45000",
     AI_OPENAI_MAX_RAW_RESPONSE_BYTES: "262144",
     AI_OPENAI_MAX_OUTPUT_TOKENS: "8192",
+    AI_OPENAI_MAX_INPUT_TOKENS: "100000",
     AI_MAX_INPUT_BYTES: "262144",
     AI_REAL_DATA_ENABLED: "true",
     AI_REAL_DATA_APPROVAL_ID: "UNIT-TEST-APPROVAL",
@@ -84,6 +85,7 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
       "AI_OPENAI_TIMEOUT_MS",
       "AI_OPENAI_MAX_RAW_RESPONSE_BYTES",
       "AI_OPENAI_MAX_OUTPUT_TOKENS",
+      "AI_OPENAI_MAX_INPUT_TOKENS",
       "AI_MAX_INPUT_BYTES",
     ]);
     expect(AI_REAL_DATA_ACTIVATION_ENV_NAMES).toEqual([
@@ -111,6 +113,7 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
       timeoutMs: 45000,
       maxRawResponseBytes: 262144,
       maxOutputTokens: 8192,
+      maxInputTokens: 100000,
       transport,
     });
     expect(createTrustedReviewServiceMock).toHaveBeenCalledOnce();
@@ -172,6 +175,7 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
       timeoutMs: 45000,
       maxRawResponseBytes: 262144,
       maxOutputTokens: 8192,
+      maxInputTokens: 100000,
       transport,
     });
     expect(createServiceMock).toHaveBeenCalledOnce();

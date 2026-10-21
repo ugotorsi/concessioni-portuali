@@ -23,11 +23,20 @@ import {
   OpenAiRuntimeConfigurationError,
   type OpenAiRuntimeEnv,
 } from "@/server/ai/openaiRuntime";
+import {
+  assertGpt56TerraMaximumCost,
+  calculateGpt56TerraCost,
+  OpenAiUsageAccountingError,
+  type OpenAiBillableUsage,
+} from "@/server/ai/openaiAccounting";
 import { AiRealDataActivationError } from "@/server/ai/realDataActivation";
 import type { FascicoloAnalysisEvaluationPermit } from "@/server/ai/fascicoloAnalysisEvaluationRepository";
 import { AsyncJobExecutionError, type DrainOneAsyncJobOutcome } from "@/server/async-jobs/worker";
 import type { FascicoloDocumentCorpus } from "@/server/queries/fascicolo-document-corpus";
-import { withRuntimeCostGate } from "@/server/runtime/cost";
+import {
+  RuntimeCostSettlementRequiredError,
+  withRuntimeCostGate,
+} from "@/server/runtime/cost";
 
 export const STAGING_FASCICOLO_EVALUATION = Object.freeze({
   evaluationId: "TEST-LEGAL-001",
@@ -79,7 +88,7 @@ export class StagingFascicoloEvaluationError extends Error {
   }
 }
 
-function requiredEnvironmentValue(env: StagingEnvironment, name: keyof OpenAiRuntimeEnv): string {
+function requiredEnvironmentValue(env: StagingEnvironment, name: string): string {
   const value = env[name]?.trim();
   if (!value || value === "[SENSITIVE]") {
     throw new StagingFascicoloEvaluationError("STAGING_EVALUATION_CONFIGURATION_INVALID");
@@ -97,6 +106,31 @@ export function createStagingFascicoloEvaluationAnalyze(
   if (timeoutMs > (STAGING_FASCICOLO_EVALUATION_MAX_DURATION_SECONDS - 30) * 1_000) {
     throw new StagingFascicoloEvaluationError("STAGING_EVALUATION_TIMEOUT_UNSAFE");
   }
+  const maxInputTokens = Number(requiredEnvironmentValue(env, "AI_OPENAI_MAX_INPUT_TOKENS"));
+  const maxOutputTokens = Number(requiredEnvironmentValue(env, "AI_OPENAI_MAX_OUTPUT_TOKENS"));
+  const usdToEurRate = Number(requiredEnvironmentValue(env, "AI_OPENAI_USD_TO_EUR_RATE"));
+  const usdToEurRateDate = requiredEnvironmentValue(
+    env,
+    "AI_OPENAI_USD_TO_EUR_RATE_DATE",
+  );
+  if (!Number.isSafeInteger(maxInputTokens) || maxInputTokens <= 0
+    || !Number.isSafeInteger(maxOutputTokens) || maxOutputTokens <= 0
+    || !/^\d{4}-\d{2}-\d{2}$/.test(usdToEurRateDate)) {
+    throw new StagingFascicoloEvaluationError("STAGING_EVALUATION_CONFIGURATION_INVALID");
+  }
+  try {
+    assertGpt56TerraMaximumCost({
+      maxInputTokens,
+      maxOutputTokens,
+      usdToEurRate,
+      maxCostEur: FASCICOLO_ANALYSIS_EVALUATION_MAX_COST_EUR,
+    });
+  } catch (error) {
+    if (error instanceof OpenAiUsageAccountingError) {
+      throw new StagingFascicoloEvaluationError("STAGING_EVALUATION_CONFIGURATION_INVALID");
+    }
+    throw error;
+  }
   const scopedEnv: OpenAiRuntimeEnv = {
     AI_OPENAI_API_KEY: requiredEnvironmentValue(env, "AI_OPENAI_API_KEY"),
     AI_OPENAI_REGION: requiredEnvironmentValue(env, "AI_OPENAI_REGION"),
@@ -104,21 +138,83 @@ export function createStagingFascicoloEvaluationAnalyze(
     AI_OPENAI_MAX_RAW_RESPONSE_BYTES:
       requiredEnvironmentValue(env, "AI_OPENAI_MAX_RAW_RESPONSE_BYTES"),
     AI_OPENAI_MAX_OUTPUT_TOKENS:
-      requiredEnvironmentValue(env, "AI_OPENAI_MAX_OUTPUT_TOKENS"),
+      String(maxOutputTokens),
+    AI_OPENAI_MAX_INPUT_TOKENS: String(maxInputTokens),
     AI_MAX_INPUT_BYTES: requiredEnvironmentValue(env, "AI_MAX_INPUT_BYTES"),
     AI_REAL_DATA_ENABLED: "true",
     AI_REAL_DATA_APPROVAL_ID: FASCICOLO_ANALYSIS_EVALUATION_TEST_CASE,
     AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
   };
-  const runtime = createOpenAiFascicoloDocumentRuntimeFromEnv(scopedEnv);
   return async (analysisInput) => {
+    let requestSent = false;
+    let usage: OpenAiBillableUsage | null = null;
+    const runtime = createOpenAiFascicoloDocumentRuntimeFromEnv(scopedEnv, {
+      telemetry: {
+        onRequestSent: () => {
+          requestSent = true;
+        },
+        onUsage: (reportedUsage) => {
+          if (reportedUsage.inputTokens > maxInputTokens
+            || reportedUsage.outputTokens > maxOutputTokens) {
+            throw new OpenAiUsageAccountingError("OPENAI_USAGE_INCONSISTENT");
+          }
+          usage = reportedUsage;
+        },
+      },
+    });
     try {
       return await withRuntimeCostGate(
         fascicoloAnalysisEvaluationCostRequest(analysisInput),
-        async () => ({
-          value: await runtime.analyze(analysisInput),
-          actualAmount: FASCICOLO_ANALYSIS_EVALUATION_MAX_COST_EUR,
-        }),
+        async () => {
+          const accountReportedUsage = (outcome: "SUCCEEDED" | "FAILED") => {
+            if (!usage) return null;
+            const accounting = calculateGpt56TerraCost({ usage, usdToEurRate });
+            console.info({
+              event: "staging_fascicolo_evaluation_openai_cost_accounted",
+              outcome,
+              jobId: analysisInput.jobId,
+              evaluationId: analysisInput.evaluationId,
+              billableUsd: accounting.billableUsd,
+              accountedEur: accounting.accountedEur,
+              usdToEurRate: accounting.usdToEurRate,
+              usdToEurRateDate,
+              pricingEffectiveDate: accounting.pricingEffectiveDate,
+              usage: accounting.usage,
+            });
+            return accounting;
+          };
+          let value: unknown;
+          try {
+            value = await runtime.analyze(analysisInput);
+          } catch (error) {
+            if (requestSent) {
+              const accounting = accountReportedUsage("FAILED");
+              throw new RuntimeCostSettlementRequiredError(
+                accounting?.accountedEur
+                  ?? FASCICOLO_ANALYSIS_EVALUATION_MAX_COST_EUR,
+                error,
+              );
+            }
+            throw error;
+          }
+          if (!usage) {
+            throw new RuntimeCostSettlementRequiredError(
+              FASCICOLO_ANALYSIS_EVALUATION_MAX_COST_EUR,
+              new OpenAiUsageAccountingError("OPENAI_USAGE_MISSING_OR_INVALID"),
+            );
+          }
+          const accounting = accountReportedUsage("SUCCEEDED");
+          if (!accounting) {
+            throw new RuntimeCostSettlementRequiredError(
+              FASCICOLO_ANALYSIS_EVALUATION_MAX_COST_EUR,
+              new OpenAiUsageAccountingError("OPENAI_USAGE_MISSING_OR_INVALID"),
+            );
+          }
+          return {
+            value,
+            actualAmount: accounting.accountedEur,
+          };
+        },
       );
     } catch (error) {
       if (error instanceof OpenAiRuntimeConfigurationError) {
@@ -129,6 +225,9 @@ export function createStagingFascicoloEvaluationAnalyze(
       }
       if (error instanceof FascicoloDocumentAnalysisError) {
         throw new AsyncJobExecutionError("ANALYSIS", error.code, false);
+      }
+      if (error instanceof OpenAiUsageAccountingError) {
+        throw new AsyncJobExecutionError("BUDGET", error.code, false);
       }
       throw error;
     }

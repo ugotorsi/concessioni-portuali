@@ -9,7 +9,13 @@ import type {
   FascicoloDocumentAnalysisProvider,
   FascicoloDocumentProviderRequestV1,
 } from "@/server/ai/fascicoloDocumentAnalysis";
+import {
+  OpenAiUsageAccountingError,
+  parseOpenAiBillableUsage,
+  type OpenAiBillableUsage,
+} from "@/server/ai/openaiAccounting";
 import { fascicoloStructuredKnowledgeSchema } from "@/server/fascicolo-knowledge/structuredContracts";
+import { getEncoding } from "js-tiktoken";
 import { z } from "zod";
 
 export const OPENAI_ANALYSIS_MODEL = "gpt-5.6-terra" as const;
@@ -17,9 +23,22 @@ export const OPENAI_RESPONSES_ENDPOINTS = {
   GLOBAL: "https://api.openai.com/v1/responses",
   EU: "https://eu.api.openai.com/v1/responses",
 } as const;
+export const OPENAI_INPUT_TOKEN_ACCOUNTING_OVERHEAD = 1_024;
 
 export type OpenAiRegion = keyof typeof OPENAI_RESPONSES_ENDPOINTS;
 export type OpenAiFetch = (input: string | URL, init?: RequestInit) => Promise<Response>;
+export type OpenAiTokenCounter = (serializedRequest: string) => number;
+
+export interface OpenAiProviderTelemetry {
+  onRequestSent?(): void;
+  onUsage?(usage: OpenAiBillableUsage): void;
+}
+
+const openAiTokenizer = getEncoding("o200k_base");
+
+function defaultTokenCounter(serializedRequest: string): number {
+  return openAiTokenizer.encode(serializedRequest).length;
+}
 
 type OpenAiAnalysisProviderRequest =
   | AiAnalysisProviderRequestV1
@@ -166,6 +185,7 @@ function assertConfig(config: {
   timeoutMs: number;
   maxRawResponseBytes: number;
   maxOutputTokens: number;
+  maxInputTokens: number;
   region: OpenAiRegion;
 }): void {
   if (typeof config.apiKey !== "string" || config.apiKey.trim().length === 0) {
@@ -174,6 +194,7 @@ function assertConfig(config: {
   assertPositiveSafeInteger(config.timeoutMs);
   assertPositiveSafeInteger(config.maxRawResponseBytes);
   assertPositiveSafeInteger(config.maxOutputTokens);
+  assertPositiveSafeInteger(config.maxInputTokens);
   if (config.region !== "GLOBAL" && config.region !== "EU") {
     throw configurationError();
   }
@@ -420,12 +441,16 @@ export function createOpenAiAnalysisProvider(config: {
   timeoutMs: number;
   maxRawResponseBytes: number;
   maxOutputTokens: number;
+  maxInputTokens: number;
   region: OpenAiRegion;
   transport?: OpenAiFetch;
+  tokenCounter?: OpenAiTokenCounter;
+  telemetry?: OpenAiProviderTelemetry;
 }): AiAnalysisProvider & AiOutboundAnalysisProvider & FascicoloDocumentAnalysisProvider {
   assertConfig(config);
   const endpoint = OPENAI_RESPONSES_ENDPOINTS[config.region];
   const transport = config.transport ?? globalThis.fetch.bind(globalThis);
+  const tokenCounter = config.tokenCounter ?? defaultTokenCounter;
 
   function analyze(request: AiAnalysisProviderRequestV1): Promise<unknown>;
   function analyze(request: AiOutboundAnalysisProviderRequestV1): Promise<unknown>;
@@ -445,15 +470,27 @@ export function createOpenAiAnalysisProvider(config: {
 
     try {
       const requestBody = buildRequestBody(request, config.maxOutputTokens);
+      const serializedRequest = JSON.stringify(requestBody);
+      const inputTokenCount = tokenCounter(serializedRequest)
+        + OPENAI_INPUT_TOKEN_ACCOUNTING_OVERHEAD;
+      if (!Number.isSafeInteger(inputTokenCount)
+        || inputTokenCount < 0
+        || inputTokenCount > config.maxInputTokens) {
+        throw new AiProviderAdapterError("CONFIGURATION", {
+          httpStatus: 0,
+          providerCode: "input_token_limit_exceeded",
+        });
+      }
       let response: Response;
       try {
+        config.telemetry?.onRequestSent?.();
         response = await transport(endpoint, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${config.apiKey}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(requestBody),
+          body: serializedRequest,
           signal: controller.signal,
           redirect: "error",
         });
@@ -488,7 +525,16 @@ export function createOpenAiAnalysisProvider(config: {
         () => timedOut,
       );
       assertNotTimedOut();
-      const payload = extractStructuredPayload(parseJsonBytes(body));
+      const responseBody = parseJsonBytes(body);
+      if (config.telemetry?.onUsage) {
+        if (!responseBody || typeof responseBody !== "object"
+          || Array.isArray(responseBody)
+          || (responseBody as Record<string, unknown>).model !== OPENAI_ANALYSIS_MODEL) {
+          throw new OpenAiUsageAccountingError("OPENAI_MODEL_MISMATCH");
+        }
+        config.telemetry.onUsage(parseOpenAiBillableUsage(responseBody));
+      }
+      const payload = extractStructuredPayload(responseBody);
       assertNotTimedOut();
       return payload;
     } finally {

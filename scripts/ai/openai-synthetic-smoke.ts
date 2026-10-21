@@ -25,6 +25,7 @@ const REQUIRED_ENV_NAMES = [
   "AI_OPENAI_TIMEOUT_MS",
   "AI_OPENAI_MAX_RAW_RESPONSE_BYTES",
   "AI_OPENAI_MAX_OUTPUT_TOKENS",
+  "AI_OPENAI_MAX_INPUT_TOKENS",
   "AI_MAX_INPUT_BYTES",
 ] as const;
 
@@ -36,6 +37,7 @@ type ProviderFactory = (config: {
   timeoutMs: number;
   maxRawResponseBytes: number;
   maxOutputTokens: number;
+  maxInputTokens: number;
   region: OpenAiRegion;
   transport?: OpenAiFetch;
 }) => AiAnalysisProvider;
@@ -46,6 +48,7 @@ interface ParsedSmokeConfig {
   timeoutMs: number;
   maxRawResponseBytes: number;
   maxOutputTokens: number;
+  maxInputTokens: number;
   maxInputBytes: number;
 }
 
@@ -136,6 +139,7 @@ function parseSmokeConfig(env: SmokeEnv): ParsedSmokeConfig {
     timeoutMs: positiveInteger(env, "AI_OPENAI_TIMEOUT_MS"),
     maxRawResponseBytes: positiveInteger(env, "AI_OPENAI_MAX_RAW_RESPONSE_BYTES"),
     maxOutputTokens: positiveInteger(env, "AI_OPENAI_MAX_OUTPUT_TOKENS"),
+    maxInputTokens: positiveInteger(env, "AI_OPENAI_MAX_INPUT_TOKENS"),
     maxInputBytes: positiveInteger(env, "AI_MAX_INPUT_BYTES"),
   };
 }
@@ -417,6 +421,7 @@ export async function runOpenAiSyntheticSmoke(options: {
       timeoutMs: config.timeoutMs,
       maxRawResponseBytes: config.maxRawResponseBytes,
       maxOutputTokens: config.maxOutputTokens,
+      maxInputTokens: config.maxInputTokens,
       region: config.region,
       ...(options.transport ? { transport: options.transport } : {}),
     });
