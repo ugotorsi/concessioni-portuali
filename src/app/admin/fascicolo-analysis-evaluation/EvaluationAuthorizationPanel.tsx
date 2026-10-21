@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
 
@@ -17,6 +17,8 @@ interface EvaluationState {
   state: {
     status: "READY" | "AUTHORIZED" | "ADMITTED";
     jobId: string | null;
+    jobStatus: string | null;
+    attemptCount: number | null;
     expiresAt: string | null;
   };
 }
@@ -24,21 +26,24 @@ interface EvaluationState {
 export function EvaluationAuthorizationPanel() {
   const [state, setState] = useState<EvaluationState | null>(null);
   const [confirmation, setConfirmation] = useState("");
+  const [runConfirmation, setRunConfirmation] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/admin/fascicolo-analysis-evaluation", {
+  const loadState = useCallback(async () => {
+    const response = await fetch("/api/admin/fascicolo-analysis-evaluation", {
       credentials: "same-origin",
       cache: "no-store",
-    })
-      .then(async (response) => {
-        if (!response.ok) throw new Error("Impossibile verificare i vincoli della valutazione.");
-        return response.json() as Promise<EvaluationState>;
-      })
-      .then(setState)
-      .catch((error: Error) => setMessage(error.message));
+    });
+    if (!response.ok) throw new Error("Impossibile verificare i vincoli della valutazione.");
+    const nextState = await response.json() as EvaluationState;
+    setState(nextState);
+    return nextState;
   }, []);
+
+  useEffect(() => {
+    loadState().catch((error: Error) => setMessage(error.message));
+  }, [loadState]);
 
   async function authorize() {
     if (!state || confirmation !== state.evaluation.evaluationId) return;
@@ -66,10 +71,7 @@ export function EvaluationAuthorizationPanel() {
       if (!response.ok || !result.jobId) {
         throw new Error(result.error ?? "Autorizzazione non completata.");
       }
-      setState({
-        ...state,
-        state: { status: "ADMITTED", jobId: result.jobId, expiresAt: null },
-      });
+      await loadState();
       setMessage(
         result.admissionOutcome === "CREATED"
           ? `Job ${result.jobId} ammesso. Nessuna chiamata OpenAI è stata eseguita.`
@@ -77,6 +79,42 @@ export function EvaluationAuthorizationPanel() {
       );
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Autorizzazione non completata.");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function runOnce() {
+    if (!state?.state.jobId || runConfirmation !== "ESEGUI TEST-LEGAL-001") return;
+    setPending(true);
+    setMessage(null);
+    try {
+      const response = await fetch("/api/admin/fascicolo-analysis-evaluation/run", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": state.csrfToken,
+        },
+        body: JSON.stringify({
+          action: "RUN_ONCE",
+          confirmation: runConfirmation,
+          jobId: state.state.jobId,
+          csrfToken: state.csrfToken,
+        }),
+      });
+      const result = await response.json() as {
+        error?: string;
+        outcome?: string;
+        jobId?: string;
+      };
+      if (!response.ok) {
+        throw new Error(result.error ?? "Esecuzione non completata.");
+      }
+      await loadState();
+      setMessage(`Job ${result.jobId} concluso con esito runner ${result.outcome}. Nessun retry è disponibile.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Esecuzione non completata.");
     } finally {
       setPending(false);
     }
@@ -99,8 +137,37 @@ export function EvaluationAuthorizationPanel() {
       </dl>
 
       {state.state.jobId ? (
-        <div className="rounded-md border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-          Job ammesso: <span className="font-mono">{state.state.jobId}</span>. Il runner one-off resta separato.
+        <div className="space-y-3 rounded-md border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+          <p>
+            Job ammesso: <span className="font-mono">{state.state.jobId}</span>.
+            Stato: <span className="font-medium">{state.state.jobStatus ?? "NON DISPONIBILE"}</span>.
+          </p>
+          {state.state.jobStatus === "PENDING" && state.state.attemptCount === 0 ? (
+            <>
+              <p>
+                L'azione seguente esegue il runner una sola volta e può invocare OpenAI.
+                Non sono previsti retry automatici.
+              </p>
+              <label className="grid gap-1 font-medium text-slate-800">
+                Digita ESEGUI TEST-LEGAL-001 per confermare l'esecuzione
+                <input
+                  className="h-10 rounded-md border border-slate-300 bg-white px-3 font-mono text-sm"
+                  value={runConfirmation}
+                  onChange={(event) => setRunConfirmation(event.target.value)}
+                  autoComplete="off"
+                />
+              </label>
+              <Button
+                type="button"
+                onClick={runOnce}
+                disabled={pending || runConfirmation !== "ESEGUI TEST-LEGAL-001"}
+              >
+                {pending
+                  ? "Esecuzione in corso..."
+                  : "Esegui una sola volta TEST-LEGAL-001"}
+              </Button>
+            </>
+          ) : null}
         </div>
       ) : (
         <div className="space-y-3 rounded-md border border-amber-200 bg-amber-50 p-4">

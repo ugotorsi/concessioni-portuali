@@ -11,12 +11,23 @@ import type { AsyncJob } from "@/generated/prisma/client";
 import {
   admitFascicoloAnalysisEvaluation,
   authorizeFascicoloAnalysisEvaluation,
+  fascicoloAnalysisEvaluationCostRequest,
   FASCICOLO_ANALYSIS_EVALUATION_MAX_COST_EUR,
   FASCICOLO_ANALYSIS_EVALUATION_OPERATION,
   FASCICOLO_ANALYSIS_EVALUATION_TEST_CASE,
+  type FascicoloAnalysisEvaluationDependencies,
 } from "@/server/ai/fascicoloAnalysisEvaluation";
+import { FascicoloDocumentAnalysisError } from "@/server/ai/fascicoloDocumentAnalysis";
+import {
+  createOpenAiFascicoloDocumentRuntimeFromEnv,
+  OpenAiRuntimeConfigurationError,
+  type OpenAiRuntimeEnv,
+} from "@/server/ai/openaiRuntime";
+import { AiRealDataActivationError } from "@/server/ai/realDataActivation";
 import type { FascicoloAnalysisEvaluationPermit } from "@/server/ai/fascicoloAnalysisEvaluationRepository";
+import { AsyncJobExecutionError, type DrainOneAsyncJobOutcome } from "@/server/async-jobs/worker";
 import type { FascicoloDocumentCorpus } from "@/server/queries/fascicolo-document-corpus";
+import { withRuntimeCostGate } from "@/server/runtime/cost";
 
 export const STAGING_FASCICOLO_EVALUATION = Object.freeze({
   evaluationId: "TEST-LEGAL-001",
@@ -30,6 +41,7 @@ export const STAGING_FASCICOLO_EVALUATION = Object.freeze({
 
 export const STAGING_FASCICOLO_EVALUATION_CSRF_COOKIE =
   "__Host-noetra-fascicolo-evaluation-csrf";
+export const STAGING_FASCICOLO_EVALUATION_MAX_DURATION_SECONDS = 120;
 
 export const stagingFascicoloEvaluationRequestSchema = z.object({
   action: z.literal("AUTHORIZE_AND_ADMIT"),
@@ -37,7 +49,14 @@ export const stagingFascicoloEvaluationRequestSchema = z.object({
   csrfToken: z.string().min(1).max(2048),
 }).strict();
 
-type StagingEnvironment = Readonly<Record<string, string | undefined>>;
+export const stagingFascicoloEvaluationRunRequestSchema = z.object({
+  action: z.literal("RUN_ONCE"),
+  confirmation: z.literal("ESEGUI TEST-LEGAL-001"),
+  jobId: z.string().trim().min(1).max(256),
+  csrfToken: z.string().min(1).max(2048),
+}).strict();
+
+export type StagingEnvironment = Readonly<Record<string, string | undefined>>;
 
 export class StagingFascicoloEvaluationError extends Error {
   constructor(readonly code:
@@ -48,11 +67,72 @@ export class StagingFascicoloEvaluationError extends Error {
     | "STAGING_EVALUATION_CORPUS_NOT_READY"
     | "STAGING_EVALUATION_PERMIT_CONFLICT"
     | "STAGING_EVALUATION_JOB_CONFLICT"
+    | "STAGING_EVALUATION_JOB_NOT_READY"
+    | "STAGING_EVALUATION_BUDGET_INSUFFICIENT"
+    | "STAGING_EVALUATION_CONFIGURATION_INVALID"
+    | "STAGING_EVALUATION_TIMEOUT_UNSAFE"
+    | "STAGING_EVALUATION_ALREADY_STARTED"
     | "STAGING_EVALUATION_CSRF_INVALID"
     | "STAGING_EVALUATION_ORIGIN_INVALID") {
     super(code);
     this.name = "StagingFascicoloEvaluationError";
   }
+}
+
+function requiredEnvironmentValue(env: StagingEnvironment, name: keyof OpenAiRuntimeEnv): string {
+  const value = env[name]?.trim();
+  if (!value || value === "[SENSITIVE]") {
+    throw new StagingFascicoloEvaluationError("STAGING_EVALUATION_CONFIGURATION_INVALID");
+  }
+  return value;
+}
+
+export function createStagingFascicoloEvaluationAnalyze(
+  env: StagingEnvironment = process.env,
+): FascicoloAnalysisEvaluationDependencies["analyze"] {
+  const timeoutMs = Number(requiredEnvironmentValue(env, "AI_OPENAI_TIMEOUT_MS"));
+  if (!Number.isSafeInteger(timeoutMs) || timeoutMs <= 0) {
+    throw new StagingFascicoloEvaluationError("STAGING_EVALUATION_CONFIGURATION_INVALID");
+  }
+  if (timeoutMs > (STAGING_FASCICOLO_EVALUATION_MAX_DURATION_SECONDS - 30) * 1_000) {
+    throw new StagingFascicoloEvaluationError("STAGING_EVALUATION_TIMEOUT_UNSAFE");
+  }
+  const scopedEnv: OpenAiRuntimeEnv = {
+    AI_OPENAI_API_KEY: requiredEnvironmentValue(env, "AI_OPENAI_API_KEY"),
+    AI_OPENAI_REGION: requiredEnvironmentValue(env, "AI_OPENAI_REGION"),
+    AI_OPENAI_TIMEOUT_MS: String(timeoutMs),
+    AI_OPENAI_MAX_RAW_RESPONSE_BYTES:
+      requiredEnvironmentValue(env, "AI_OPENAI_MAX_RAW_RESPONSE_BYTES"),
+    AI_OPENAI_MAX_OUTPUT_TOKENS:
+      requiredEnvironmentValue(env, "AI_OPENAI_MAX_OUTPUT_TOKENS"),
+    AI_MAX_INPUT_BYTES: requiredEnvironmentValue(env, "AI_MAX_INPUT_BYTES"),
+    AI_REAL_DATA_ENABLED: "true",
+    AI_REAL_DATA_APPROVAL_ID: FASCICOLO_ANALYSIS_EVALUATION_TEST_CASE,
+    AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
+  };
+  const runtime = createOpenAiFascicoloDocumentRuntimeFromEnv(scopedEnv);
+  return async (analysisInput) => {
+    try {
+      return await withRuntimeCostGate(
+        fascicoloAnalysisEvaluationCostRequest(analysisInput),
+        async () => ({
+          value: await runtime.analyze(analysisInput),
+          actualAmount: FASCICOLO_ANALYSIS_EVALUATION_MAX_COST_EUR,
+        }),
+      );
+    } catch (error) {
+      if (error instanceof OpenAiRuntimeConfigurationError) {
+        throw new AsyncJobExecutionError("CONFIGURATION", "AI_CONFIGURATION_ERROR", false);
+      }
+      if (error instanceof AiRealDataActivationError) {
+        throw new AsyncJobExecutionError("CONFIGURATION", "AI_REAL_DATA_DISABLED", false);
+      }
+      if (error instanceof FascicoloDocumentAnalysisError) {
+        throw new AsyncJobExecutionError("ANALYSIS", error.code, false);
+      }
+      throw error;
+    }
+  };
 }
 
 export function isAuthorizedStagingFascicoloEvaluationEnvironment(
@@ -260,6 +340,7 @@ export async function authorizeAndAdmitStagingFascicoloEvaluation(input: {
       jobId: job.id,
     };
   }
+
   if (permit.expiresAt <= input.dependencies.now()) {
     throw new StagingFascicoloEvaluationError("STAGING_EVALUATION_PERMIT_CONFLICT");
   }
@@ -277,4 +358,130 @@ export async function authorizeAndAdmitStagingFascicoloEvaluation(input: {
     permitRef: permit.permitRef,
     jobId: admitted.job.id,
   };
+}
+
+export interface StagingFascicoloEvaluationExecution {
+  jobId: string;
+  status: string;
+  attemptCount: number;
+  maxAttempts: number;
+  tenantId: string | null;
+  procedimentoId: string | null;
+  operation: string;
+  correlationId: string | null;
+  policyDecisionRef: string | null;
+  permitRef: string;
+  evaluationId: string;
+  corpusFingerprint: string;
+  testCaseId: string;
+  maxCostAmount: number;
+  expiresAt: Date;
+  consumedByJobId: string | null;
+  revokedAt: Date | null;
+  artifactCount: number;
+  reservationCount: number;
+}
+
+export interface StagingFascicoloEvaluationRunDependencies {
+  getAuthenticatedUser(): Promise<CurrentUser | null>;
+  getCurrentTenantContext(): Promise<CurrentTenantContext | null>;
+  loadExecution(jobId: string): Promise<StagingFascicoloEvaluationExecution | null>;
+  loadCorpus(input: {
+    tenantId: string;
+    procedimentoId: string;
+  }): Promise<FascicoloDocumentCorpus | null>;
+  hasBudgetHeadroom(input: {
+    tenantId: string;
+    procedimentoId: string;
+    amount: number;
+  }): Promise<boolean>;
+  runJob(input: {
+    jobId: string;
+    analyze: FascicoloAnalysisEvaluationDependencies["analyze"];
+  }): Promise<DrainOneAsyncJobOutcome>;
+  now(): Date;
+}
+
+export async function runStagingFascicoloEvaluationOnce(input: {
+  jobId: string;
+  analyze: FascicoloAnalysisEvaluationDependencies["analyze"];
+  env?: StagingEnvironment;
+  dependencies: StagingFascicoloEvaluationRunDependencies;
+}) {
+  assertAuthorizedStagingFascicoloEvaluationEnvironment(input.env);
+  const actor = await input.dependencies.getAuthenticatedUser();
+  if (!actor) {
+    throw new StagingFascicoloEvaluationError("STAGING_EVALUATION_AUTHENTICATION_REQUIRED");
+  }
+  if (actor.role !== "ADMIN") {
+    throw new StagingFascicoloEvaluationError("STAGING_EVALUATION_ADMIN_REQUIRED");
+  }
+  const tenantContext = await input.dependencies.getCurrentTenantContext();
+  if (!tenantContext) {
+    throw new StagingFascicoloEvaluationError("STAGING_EVALUATION_AUTHENTICATION_REQUIRED");
+  }
+  try {
+    requireTenantAccess(tenantContext, STAGING_FASCICOLO_EVALUATION.tenantId, {
+      mode: "write",
+      allowWhenEnteMissing: false,
+    });
+  } catch {
+    throw new StagingFascicoloEvaluationError("STAGING_EVALUATION_TENANT_FORBIDDEN");
+  }
+  const execution = await input.dependencies.loadExecution(input.jobId);
+  if (!execution
+    || execution.jobId !== input.jobId
+    || execution.tenantId !== STAGING_FASCICOLO_EVALUATION.tenantId
+    || execution.procedimentoId !== STAGING_FASCICOLO_EVALUATION.procedimentoId
+    || execution.operation !== FASCICOLO_ANALYSIS_EVALUATION_OPERATION
+    || execution.correlationId
+      !== `fascicolo-evaluation:${STAGING_FASCICOLO_EVALUATION.evaluationId}`
+    || execution.policyDecisionRef !== execution.permitRef
+    || execution.evaluationId !== STAGING_FASCICOLO_EVALUATION.evaluationId
+    || execution.corpusFingerprint !== STAGING_FASCICOLO_EVALUATION.corpusFingerprint
+    || execution.testCaseId !== FASCICOLO_ANALYSIS_EVALUATION_TEST_CASE
+    || execution.maxCostAmount !== FASCICOLO_ANALYSIS_EVALUATION_MAX_COST_EUR
+    || execution.consumedByJobId !== input.jobId
+    || execution.revokedAt
+    || execution.expiresAt <= input.dependencies.now()) {
+    throw new StagingFascicoloEvaluationError("STAGING_EVALUATION_JOB_CONFLICT");
+  }
+  if (execution.status !== "PENDING"
+    || execution.attemptCount !== 0
+    || execution.maxAttempts !== 1
+    || execution.artifactCount !== 0
+    || execution.reservationCount !== 0) {
+    throw new StagingFascicoloEvaluationError("STAGING_EVALUATION_ALREADY_STARTED");
+  }
+  const corpus = await input.dependencies.loadCorpus({
+    tenantId: STAGING_FASCICOLO_EVALUATION.tenantId,
+    procedimentoId: STAGING_FASCICOLO_EVALUATION.procedimentoId,
+  });
+  if (!corpus
+    || corpus.tenantId !== STAGING_FASCICOLO_EVALUATION.tenantId
+    || corpus.procedimentoId !== STAGING_FASCICOLO_EVALUATION.procedimentoId
+    || corpus.availability !== "READY"
+    || corpus.documentCount !== 8
+    || corpus.availableDocumentCount !== 8
+    || corpus.corpusFingerprint !== STAGING_FASCICOLO_EVALUATION.corpusFingerprint) {
+    throw new StagingFascicoloEvaluationError("STAGING_EVALUATION_CORPUS_NOT_READY");
+  }
+  if (!await input.dependencies.hasBudgetHeadroom({
+    tenantId: STAGING_FASCICOLO_EVALUATION.tenantId,
+    procedimentoId: STAGING_FASCICOLO_EVALUATION.procedimentoId,
+    amount: FASCICOLO_ANALYSIS_EVALUATION_MAX_COST_EUR,
+  })) {
+    throw new StagingFascicoloEvaluationError("STAGING_EVALUATION_BUDGET_INSUFFICIENT");
+  }
+  const result = await input.dependencies.runJob({
+    jobId: input.jobId,
+    analyze: input.analyze,
+  });
+  if (result.outcome === "IDLE") {
+    throw new StagingFascicoloEvaluationError("STAGING_EVALUATION_ALREADY_STARTED");
+  }
+  if (result.outcome === "RETRY_SCHEDULED") {
+    throw new StagingFascicoloEvaluationError("STAGING_EVALUATION_JOB_CONFLICT");
+  }
+  return result;
 }

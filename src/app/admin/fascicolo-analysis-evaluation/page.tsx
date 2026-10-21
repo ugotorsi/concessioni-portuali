@@ -16,11 +16,11 @@ export default async function FascicoloAnalysisEvaluationPage() {
   return (
     <AppShell
       title="Valutazione fascicolo TEST-LEGAL-001"
-      subtitle="Autorizzazione amministrativa isolata; il runner OpenAI non viene avviato da questa pagina"
+      subtitle="Autorizzazione ed esecuzione one-off sono azioni separate e richiedono conferme distinte"
     >
       <Card className="max-w-4xl">
         <CardHeader>
-          <CardTitle>Autorizza e ammetti la valutazione</CardTitle>
+          <CardTitle>Controllo della valutazione</CardTitle>
         </CardHeader>
         <CardContent>
           <EvaluationAuthorizationPanel />

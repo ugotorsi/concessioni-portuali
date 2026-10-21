@@ -140,10 +140,14 @@ export async function GET(): Promise<Response> {
   const existingRows = await prisma.$queryRaw<Array<{
     consumedByJobId: string | null;
     expiresAt: Date;
+    jobStatus: string | null;
+    attemptCount: number | null;
   }>>`
-    SELECT "consumedByJobId","expiresAt"
-    FROM "FascicoloAnalysisEvaluationPermit"
-    WHERE "evaluationId"=${STAGING_FASCICOLO_EVALUATION.evaluationId}
+    SELECT p."consumedByJobId",p."expiresAt",j."status"::text AS "jobStatus",
+      j."attemptCount"
+    FROM "FascicoloAnalysisEvaluationPermit" p
+    LEFT JOIN "AsyncJob" j ON j."id"=p."consumedByJobId"
+    WHERE p."evaluationId"=${STAGING_FASCICOLO_EVALUATION.evaluationId}
   `;
   const existing = existingRows[0];
   return json({
@@ -160,9 +164,17 @@ export async function GET(): Promise<Response> {
       ? {
           status: existing.consumedByJobId ? "ADMITTED" : "AUTHORIZED",
           jobId: existing.consumedByJobId,
+          jobStatus: existing.jobStatus,
+          attemptCount: existing.attemptCount,
           expiresAt: existing.expiresAt.toISOString(),
         }
-      : { status: "READY", jobId: null, expiresAt: null },
+      : {
+          status: "READY",
+          jobId: null,
+          jobStatus: null,
+          attemptCount: null,
+          expiresAt: null,
+        },
   }, 200);
 }
 
