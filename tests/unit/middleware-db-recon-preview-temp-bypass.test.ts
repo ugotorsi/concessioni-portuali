@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 const getTokenMock = vi.hoisted(() => vi.fn());
@@ -34,6 +34,24 @@ describe("middleware sensitive route boundaries", () => {
     });
     getRateLimitHeadersMock.mockReturnValue({});
     getTokenMock.mockResolvedValue(null);
+  });
+
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("uses the same normalized secret as NextAuth when validating an existing session", async () => {
+    const normalizedSecret = "a-secure-nextauth-secret-with-32-characters";
+    vi.stubEnv("NEXTAUTH_SECRET", `  ${normalizedSecret}\r\n`);
+    getTokenMock.mockImplementationOnce(async ({ secret }) => (
+      secret === normalizedSecret ? { role: "ADMIN" } : null
+    ));
+
+    const response = await middleware(makeRequest("/dashboard"));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("location")).toBeNull();
+    expect(getTokenMock).toHaveBeenCalledWith(expect.objectContaining({
+      secret: normalizedSecret,
+    }));
   });
 
   it("protects the retired DB recon path like every admin route", async () => {

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
+import { resolveNextAuthSecret } from "@/lib/next-auth-secret";
 import { buildRateLimitKey, checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 
 const PUBLIC_PATHS = new Set(["/", "/login", "/logout"]);
@@ -150,7 +151,7 @@ export async function middleware(request: NextRequest) {
 
   let token = null;
   try {
-    token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+    token = await getToken({ req: request, secret: resolveNextAuthSecret() });
   } catch {
     token = null;
   }
