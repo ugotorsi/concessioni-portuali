@@ -446,6 +446,7 @@ export function createOpenAiAnalysisProvider(config: {
   transport?: OpenAiFetch;
   tokenCounter?: OpenAiTokenCounter;
   telemetry?: OpenAiProviderTelemetry;
+  authorizeRequest?: () => Promise<void>;
 }): AiAnalysisProvider & AiOutboundAnalysisProvider & FascicoloDocumentAnalysisProvider {
   assertConfig(config);
   const endpoint = OPENAI_RESPONSES_ENDPOINTS[config.region];
@@ -469,6 +470,7 @@ export function createOpenAiAnalysisProvider(config: {
     }, config.timeoutMs);
 
     try {
+      await config.authorizeRequest?.();
       const requestBody = buildRequestBody(request, config.maxOutputTokens);
       const serializedRequest = JSON.stringify(requestBody);
       const inputTokenCount = tokenCounter(serializedRequest)

@@ -115,6 +115,7 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
       maxOutputTokens: 8192,
       maxInputTokens: 100000,
       transport,
+      authorizeRequest: expect.any(Function),
     });
     expect(createTrustedReviewServiceMock).toHaveBeenCalledOnce();
     expect(createTrustedReviewServiceMock).toHaveBeenCalledWith({
@@ -177,6 +178,7 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
       maxOutputTokens: 8192,
       maxInputTokens: 100000,
       transport,
+      authorizeRequest: expect.any(Function),
     });
     expect(createServiceMock).toHaveBeenCalledOnce();
     expect(createServiceMock).toHaveBeenCalledWith({

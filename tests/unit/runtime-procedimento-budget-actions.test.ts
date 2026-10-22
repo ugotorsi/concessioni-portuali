@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const requireRoleMock = vi.hoisted(() => vi.fn());
+const requireAdminWithMfaMock = vi.hoisted(() => vi.fn());
 const getCurrentUserMock = vi.hoisted(() => vi.fn());
 const getCurrentTenantContextMock = vi.hoisted(() => vi.fn());
 const requireTenantAccessMock = vi.hoisted(() => vi.fn());
@@ -8,6 +9,7 @@ const provisionMock = vi.hoisted(() => vi.fn());
 const readAuthorizationMock = vi.hoisted(() => vi.fn());
 const auditSuccessMock = vi.hoisted(() => vi.fn());
 const recoverMissionsMock = vi.hoisted(() => vi.fn());
+const setGlobalAiControlStateMock = vi.hoisted(() => vi.fn());
 
 const prismaMock = vi.hoisted(() => ({
   procedimento: { findUnique: vi.fn() },
@@ -15,6 +17,7 @@ const prismaMock = vi.hoisted(() => ({
 
 vi.mock("@/lib/auth", () => ({
   requireRole: requireRoleMock,
+  requireAdminWithMfa: requireAdminWithMfaMock,
   getCurrentUser: getCurrentUserMock,
 }));
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }));
@@ -30,6 +33,9 @@ vi.mock("@/server/runtime/procedimentoBudgetPolicy", () => ({
 vi.mock("@/server/fascicolo-knowledge/researchMissionRecovery", () => ({
   recoverCurrentKnowledgeResearchMissions: recoverMissionsMock,
 }));
+vi.mock("@/server/ai/globalAiControl", () => ({
+  setGlobalAiControlState: setGlobalAiControlStateMock,
+}));
 vi.mock("@/server/async-jobs/persistence", () => ({
   retryTerminalAsyncJob: vi.fn(),
 }));
@@ -42,6 +48,7 @@ vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 import {
   assignDefaultProcedimentoBudgetPolicy,
   recoverCurrentKnowledgeMissions,
+  updateGlobalAiControl,
 } from "@/app/admin/runtime/actions";
 
 function formData() {
@@ -91,6 +98,53 @@ describe("assignDefaultProcedimentoBudgetPolicy", () => {
       assignedActorId: null,
       assignmentRequired: true,
       lifecycle: [],
+    });
+  });
+
+  describe("updateGlobalAiControl", () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+      requireAdminWithMfaMock.mockResolvedValue({
+        id: "admin-1",
+        email: "admin@example.test",
+        role: "ADMIN",
+        mfaVerified: true,
+      });
+      setGlobalAiControlStateMock.mockResolvedValue({
+        previousEnabled: false,
+        requestedEnabled: true,
+      });
+    });
+
+    it("requires ADMIN with verified MFA before changing state", async () => {
+      requireAdminWithMfaMock.mockRejectedValueOnce(
+        new Error("MFA_VERIFICATION_REQUIRED"),
+      );
+      const data = new FormData();
+      data.set("enabled", "true");
+
+      await expect(updateGlobalAiControl(data)).rejects.toThrow(
+        "MFA_VERIFICATION_REQUIRED",
+      );
+      expect(setGlobalAiControlStateMock).not.toHaveBeenCalled();
+    });
+
+    it("forwards the authenticated ADMIN identity and normalized reason", async () => {
+      const data = new FormData();
+      data.set("enabled", "true");
+      data.set("reason", "  Controlled activation  ");
+
+      await updateGlobalAiControl(data);
+
+      expect(setGlobalAiControlStateMock).toHaveBeenCalledWith({
+        enabled: true,
+        actor: {
+          userId: "admin-1",
+          userEmail: "admin@example.test",
+          userRole: "ADMIN",
+        },
+        reason: "Controlled activation",
+      });
     });
   });
 

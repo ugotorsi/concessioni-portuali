@@ -22,6 +22,7 @@ import { createLocalTrustedResearchClient } from "./local-trusted-research-clien
 import { createTrustedMissionExecutor, type TrustedMissionExecutorResult } from "./trusted-mission-executor";
 import { completeAdverseResearchRequirement, ensureAdverseResearchMission } from "./source-chain-persistence";
 import { verifyOfficialResearchSources } from "./official-source-verification";
+import { assertGlobalAiExecutionAllowed } from "@/server/ai/globalAiControl";
 
 const referenceSchema = z.object({
   referenceType: z.literal("LEGAL_RESEARCH_MISSION"),
@@ -119,6 +120,7 @@ type ExecutionAuthority = Readonly<{
 }>;
 
 export interface AutomaticResearchExecutionDependencies {
+  assertAiExecutionAllowed(): Promise<void>;
   loadAuthority(input: Readonly<{
     jobId: string;
     missionId: string;
@@ -137,6 +139,7 @@ export interface AutomaticResearchExecutionDependencies {
 }
 
 const defaultDependencies: AutomaticResearchExecutionDependencies = {
+  assertAiExecutionAllowed: assertGlobalAiExecutionAllowed,
   async loadAuthority(input) {
     const job = await prisma.asyncJob.findUnique({
       where: { id: input.jobId },
@@ -239,6 +242,7 @@ export function createAutomaticResearchExecutionHandler(
       if (await context.isCancellationRequested()) {
         throw new AsyncJobExecutionError("CANCELLATION", "CANCELLATION_REQUESTED", false);
       }
+      await dependencies.assertAiExecutionAllowed();
       const adapters = await dependencies.createProviderAdapters({
         requestTimeoutMs: authority.decision.providerTimeoutMs!,
       });
@@ -254,6 +258,7 @@ export function createAutomaticResearchExecutionHandler(
         );
       }
       await context.heartbeat();
+      await dependencies.assertAiExecutionAllowed();
       let result: TrustedMissionExecutorResult;
       try {
         result = await dependencies.execute({

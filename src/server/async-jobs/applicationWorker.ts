@@ -23,12 +23,12 @@ import {
 } from "../legal-research/automatic-research-job";
 import { createDocumentExtractionHandler } from "../documents/documentExtractionJob";
 import { createPeriodicLegalResearchScheduler } from "../legal-research/periodic-legal-research";
+import {
+  AI_PROVIDER_BACKED_ASYNC_OPERATIONS,
+  getGlobalAiControlState,
+} from "../ai/globalAiControl";
 
 const APPLICATION_ASYNC_JOB_LEASE_MS = 5 * 60 * 1_000;
-const PROVIDER_BACKED_OPERATIONS = [
-  "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
-  "LEGAL_RESEARCH.EXECUTE_V1",
-] as const;
 const AUTOMATIC_RESEARCH_OPERATION = "LEGAL_RESEARCH.EXECUTE_V1";
 const ISOLATED_OPERATIONS = [FASCICOLO_ANALYSIS_EVALUATION_OPERATION] as const;
 const reconcilePeriodicLegalResearch = createPeriodicLegalResearchScheduler();
@@ -60,7 +60,7 @@ export function applicationAsyncJobOperationBlocklist(
 ): readonly string[] {
   return [
     ...ISOLATED_OPERATIONS,
-    ...(providerExecutionEnabled === false ? PROVIDER_BACKED_OPERATIONS : []),
+    ...(providerExecutionEnabled === false ? AI_PROVIDER_BACKED_ASYNC_OPERATIONS : []),
   ];
 }
 
@@ -71,18 +71,22 @@ export async function drainOneApplicationAsyncJob(input: {
   procedimentoAllowlist?: readonly string[];
   providerExecutionEnabled?: boolean;
 }) {
-  if (!input.procedimentoAllowlist?.length) {
+  const aiControl = await getGlobalAiControlState();
+  const providerExecutionEnabled =
+    input.providerExecutionEnabled === true && aiControl.effectiveEnabled;
+  if (providerExecutionEnabled && !input.procedimentoAllowlist?.length) {
     await reconcilePeriodicLegalResearch();
   }
   if (
-    !input.operationAllowlist?.length
-    || input.operationAllowlist.includes(AUTOMATIC_RESEARCH_OPERATION)
+    providerExecutionEnabled
+    && (!input.operationAllowlist?.length
+      || input.operationAllowlist.includes(AUTOMATIC_RESEARCH_OPERATION))
   ) {
     await reconcilePendingAutomaticResearchExecutions();
   }
   return drainOneAsyncJob({
     ...input,
-    operationBlocklist: applicationAsyncJobOperationBlocklist(input.providerExecutionEnabled),
+    operationBlocklist: applicationAsyncJobOperationBlocklist(providerExecutionEnabled),
     leaseDurationMs: APPLICATION_ASYNC_JOB_LEASE_MS,
     registry: applicationAsyncJobRegistry,
   });

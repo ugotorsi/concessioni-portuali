@@ -2,10 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 
-import { getCurrentUser, requireRole } from "@/lib/auth";
+import { getCurrentUser, requireAdminWithMfa, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
 import { auditSuccess } from "@/server/audit/auditLog";
+import { setGlobalAiControlState } from "@/server/ai/globalAiControl";
 import {
   documentWorkerKindForOperation,
   requestDocumentWorkerActivation,
@@ -33,6 +34,33 @@ export async function retryRuntimeJob(formData: FormData): Promise<void> {
       await requestDocumentWorkerActivation(workerKind, retry.procedimentoId);
     }
   }
+  revalidatePath("/admin/runtime");
+}
+
+export async function updateGlobalAiControl(formData: FormData): Promise<void> {
+  const currentUser = await requireAdminWithMfa();
+  const enabled = formData.get("enabled");
+  const reason = formData.get("reason");
+  if (enabled !== "true" && enabled !== "false") {
+    throw new Error("INVALID_AI_CONTROL_STATE");
+  }
+  if (reason !== null && typeof reason !== "string") {
+    throw new Error("INVALID_AI_CONTROL_REASON");
+  }
+  const normalizedReason = reason?.trim() || null;
+  if (normalizedReason && normalizedReason.length > 500) {
+    throw new Error("INVALID_AI_CONTROL_REASON");
+  }
+
+  await setGlobalAiControlState({
+    enabled: enabled === "true",
+    actor: {
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+      userRole: "ADMIN",
+    },
+    reason: normalizedReason,
+  });
   revalidatePath("/admin/runtime");
 }
 

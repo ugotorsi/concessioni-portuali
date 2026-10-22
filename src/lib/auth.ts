@@ -24,6 +24,7 @@ export interface CurrentUser {
   email: string;
   name?: string | null;
   role: DemoRole;
+  mfaVerified?: boolean;
 }
 
 function isDemoRole(value: string | undefined): value is DemoRole {
@@ -60,10 +61,27 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
       email: session.user.email,
       name: session.user.name,
       role,
+      ...(typeof session.user.mfaVerified === "boolean"
+        ? { mfaVerified: session.user.mfaVerified }
+        : {}),
     };
   }
 
   return null;
+}
+
+export async function requireAdminWithMfa(): Promise<CurrentUser> {
+  const user = await getCurrentUser();
+  if (!user) {
+    throw new Error("AUTHENTICATION_REQUIRED");
+  }
+  if (user.role !== "ADMIN") {
+    throw new Error("ADMIN_REQUIRED");
+  }
+  if (!user.mfaVerified) {
+    throw new Error("MFA_VERIFICATION_REQUIRED");
+  }
+  return user;
 }
 
 export async function requireRole(allowedRoles?: DemoRole[]): Promise<DemoRole> {

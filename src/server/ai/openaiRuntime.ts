@@ -22,6 +22,7 @@ import {
   createRealDataActivationPolicy,
   type RealDataActivationEnv,
 } from "@/server/ai/realDataActivation";
+import { assertGlobalAiExecutionAllowed } from "@/server/ai/globalAiControl";
 
 export const AI_OPENAI_RUNTIME_ENV_NAMES = [
   "AI_OPENAI_API_KEY",
@@ -126,6 +127,7 @@ function createOpenAiFascicoloServiceConfig(
     maxOutputTokens: config.maxOutputTokens,
     maxInputTokens: config.maxInputTokens,
     region: config.region,
+    authorizeRequest: assertGlobalAiExecutionAllowed,
     ...(dependencies.transport ? { transport: dependencies.transport } : {}),
     ...(dependencies.tokenCounter ? { tokenCounter: dependencies.tokenCounter } : {}),
     ...(dependencies.telemetry ? { telemetry: dependencies.telemetry } : {}),

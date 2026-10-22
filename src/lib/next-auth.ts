@@ -276,6 +276,7 @@ export const authOptions: NextAuthOptions = {
           session.user.id = "";
           session.user.role = "";
           session.user.mfaEnrollmentRequired = false;
+          session.user.mfaVerified = false;
         }
         return session;
       }
@@ -302,6 +303,7 @@ export const authOptions: NextAuthOptions = {
           session.user.id = "";
           session.user.role = "";
           session.user.mfaEnrollmentRequired = false;
+          session.user.mfaVerified = false;
         }
         return session;
       }
@@ -310,6 +312,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = typeof token.id === "string" ? token.id : "";
         session.user.role = typeof token.role === "string" ? token.role : "";
         session.user.mfaEnrollmentRequired = token.mfaEnrollmentRequired === true;
+        session.user.mfaVerified = token.mfaVerified === true;
       }
 
       return session;

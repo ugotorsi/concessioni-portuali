@@ -1,11 +1,21 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const worker = vi.hoisted(() => ({ drainOneAsyncJob: vi.fn() }));
+const globalAiControl = vi.hoisted(() => ({ getState: vi.fn() }));
 
 vi.mock("@/server/async-jobs/worker", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/server/async-jobs/worker")>();
   return { ...actual, drainOneAsyncJob: worker.drainOneAsyncJob };
 });
+
+vi.mock("@/server/ai/globalAiControl", () => ({
+  AI_PROVIDER_BACKED_ASYNC_OPERATIONS: [
+    "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+    "LEGAL_RESEARCH.EXECUTE_V1",
+  ],
+  getGlobalAiControlState: globalAiControl.getState,
+  assertGlobalAiExecutionAllowed: vi.fn(async () => undefined),
+}));
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -64,7 +74,10 @@ function dependencies(overrides: Partial<NeutralIntakeExtractionHandlerDependenc
 }
 
 describe("B2C9 Block 3B.2C NeutralIntake async extraction wiring", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    globalAiControl.getState.mockResolvedValue({ effectiveEnabled: true });
+  });
 
   it("registers the server-owned extraction operation in the application registry", () => {
     expect(applicationAsyncJobRegistry.resolve(NEUTRAL_INTAKE_EXTRACTION_OPERATION)).not.toBeNull();
@@ -258,8 +271,32 @@ describe("B2C9 Block 3B.2C NeutralIntake async extraction wiring", () => {
       retryDelayMs: 1_000,
       leaseDurationMs: 300_000,
       registry: applicationAsyncJobRegistry,
-      operationBlocklist: ["FASCICOLO.AUTOMATIC_ANALYSIS_EVALUATION_V1"],
+      operationBlocklist: [
+        "FASCICOLO.AUTOMATIC_ANALYSIS_EVALUATION_V1",
+        "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+        "LEGAL_RESEARCH.EXECUTE_V1",
+      ],
     });
+  });
+
+  it("blocks provider-backed jobs when the persistent global control is OFF", async () => {
+    globalAiControl.getState.mockResolvedValueOnce({ effectiveEnabled: false });
+    worker.drainOneAsyncJob.mockResolvedValueOnce({ outcome: "IDLE" });
+
+    await drainOneApplicationAsyncJob({
+      workerId: "worker-1",
+      retryDelayMs: 1_000,
+      providerExecutionEnabled: true,
+    });
+
+    expect(worker.drainOneAsyncJob).toHaveBeenCalledWith(expect.objectContaining({
+      operationBlocklist: [
+        "FASCICOLO.AUTOMATIC_ANALYSIS_EVALUATION_V1",
+        "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+        "LEGAL_RESEARCH.EXECUTE_V1",
+      ],
+    }));
+    expect(prisma.automaticFascicoloReportMission.findMany).not.toHaveBeenCalled();
   });
 
   it("does not reconcile automatic research for an extraction-only worker", async () => {

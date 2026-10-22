@@ -103,6 +103,7 @@ function config(transport: OpenAiFetch, overrides: Partial<{
   maxOutputTokens: number;
   maxInputTokens: number;
   region: OpenAiRegion;
+  authorizeRequest: () => Promise<void>;
 }> = {}) {
   return {
     apiKey: API_KEY,
@@ -136,6 +137,17 @@ afterEach(() => {
 });
 
 describe("AI-01B2A OpenAI Responses adapter", () => {
+  it("blocks before transport when global AI authorization is denied", async () => {
+    const transport = fakeTransport(jsonResponse(openAiResponse()));
+    const authorizationError = new Error("AI_GLOBALLY_DISABLED");
+    const provider = createOpenAiAnalysisProvider(config(transport, {
+      authorizeRequest: vi.fn().mockRejectedValue(authorizationError),
+    }));
+
+    await expect(provider.analyze(providerRequestFixture())).rejects.toBe(authorizationError);
+    expect(transport).not.toHaveBeenCalled();
+  });
+
   it("rejects invalid configuration before transport", () => {
     const transport = fakeTransport(jsonResponse(openAiResponse()));
     const invalidConfigs = [

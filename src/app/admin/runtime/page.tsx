@@ -3,19 +3,29 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
-import { requireRole } from "@/lib/auth";
+import { requireAdminWithMfa } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDateIT } from "@/lib/utils";
 import { getRuntimeHealthSnapshot } from "@/server/runtime/health";
 import { readDefaultProcedimentoBudgetAuthorization } from "@/server/runtime/procedimentoBudgetPolicy";
+import { getGlobalAiControlState } from "@/server/ai/globalAiControl";
 
 import {
   assignDefaultProcedimentoBudgetPolicy,
   recoverCurrentKnowledgeMissions,
   retryRuntimeJob,
+  updateGlobalAiControl,
 } from "./actions";
+import { GlobalAiControlForm } from "./GlobalAiControlForm";
 
 export const dynamic = "force-dynamic";
+
+const AI_GATE_LABELS = {
+  AI_REAL_DATA_ENABLED: "Dati reali AI",
+  ASYNC_PROVIDER_EXECUTION_ENABLED: "Provider asincroni",
+  AUTOMATIC_RESEARCH_EXECUTION_ENABLED: "Ricerca automatica",
+  AUTOMATIC_OFFICIAL_SOURCE_VERIFICATION_ENABLED: "Verifica automatica fonti",
+} as const;
 
 function healthVariant(status: string): "success" | "warning" | "danger" {
   if (status === "HEALTHY") return "success";
@@ -30,9 +40,10 @@ function healthLabel(status: string) {
 }
 
 export default async function RuntimeOperationsPage() {
-  await requireRole(["ADMIN"]);
+  await requireAdminWithMfa();
   const defaultProcedimentoBudget = readDefaultProcedimentoBudgetAuthorization();
-  const [health, workers, failedJobs, policies, costs] = await Promise.all([
+  const [aiControl, health, workers, failedJobs, policies, costs] = await Promise.all([
+    getGlobalAiControlState(),
     getRuntimeHealthSnapshot(),
     prisma.runtimeWorkerHeartbeat.findMany({ orderBy: { lastSeenAt: "desc" }, take: 20 }),
     prisma.asyncJob.findMany({
@@ -54,6 +65,89 @@ export default async function RuntimeOperationsPage() {
           <p className="mt-1">Stato migrazioni: {health.migrationState}</p>
         </details>
       </div>
+
+      <section aria-labelledby="global-ai-control-title">
+        <Card>
+          <CardHeader>
+            <CardTitle id="global-ai-control-title">CONTROLLO INTELLIGENZA ARTIFICIALE</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <Badge variant={aiControl.effectiveEnabled ? "success" : "danger"}>
+                {aiControl.effectiveEnabled ? "AI OPERATIVE" : "AI NON OPERATIVE"}
+              </Badge>
+              <p className="text-sm text-slate-700">
+                {aiControl.effectiveEnabled
+                  ? "Le elaborazioni intelligenti autorizzate sono disponibili."
+                  : "Non possono partire nuove elaborazioni intelligenti."}
+              </p>
+            </div>
+            <dl className="grid gap-3 text-sm sm:grid-cols-2">
+              <div>
+                <dt className="text-slate-500">Comando richiesto dall&apos;ADMIN</dt>
+                <dd className="font-medium text-slate-900">
+                  {aiControl.requestedEnabled ? "ON" : "OFF"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Stato effettivo</dt>
+                <dd className="font-medium text-slate-900">
+                  {aiControl.effectiveEnabled ? "ON" : "OFF"}
+                </dd>
+              </div>
+            </dl>
+            {aiControl.requestedEnabled && !aiControl.environmentEnabled ? (
+              <p className="text-sm font-medium text-amber-700">
+                Comando ON registrato, ma le AI restano non operative perché tutti i gate ambientali sono disabilitati.
+              </p>
+            ) : null}
+            {aiControl.emergencyDisabled ? (
+              <p className="text-sm font-medium text-red-700">
+                Kill-switch ambientale attivo: il comando amministrativo non può abilitarle.
+              </p>
+            ) : null}
+            <div>
+              <p className="text-sm font-medium text-slate-700">Gate ambientali</p>
+              <ul className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
+                {Object.entries(AI_GATE_LABELS).map(([name, label]) => {
+                  const enabled =
+                    aiControl.environmentGates[name as keyof typeof AI_GATE_LABELS];
+                  return (
+                    <li key={name} className="flex items-center justify-between gap-3 rounded border border-slate-200 px-3 py-2">
+                      <span>{label}</span>
+                      <Badge variant={enabled ? "success" : "danger"}>
+                        {enabled ? "ON" : "OFF"}
+                      </Badge>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+            <dl className="grid gap-3 text-sm sm:grid-cols-2">
+              <div>
+                <dt className="text-slate-500">Ultima modifica</dt>
+                <dd className="font-medium text-slate-900">
+                  {aiControl.updatedAt ? formatDateIT(aiControl.updatedAt) : "Mai (stato iniziale OFF)"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Amministratore</dt>
+                <dd className="font-medium text-slate-900">
+                  {aiControl.updatedBy?.userEmail ?? "Nessuno"}
+                </dd>
+              </div>
+            </dl>
+            <p className="text-xs text-slate-500">
+              I gate ambientali, le autorizzazioni dei provider e i limiti di spesa restano sempre prioritari.
+              Le chiamate già inviate al provider potrebbero non essere annullabili immediatamente.
+            </p>
+            <GlobalAiControlForm
+              enabled={aiControl.requestedEnabled}
+              action={updateGlobalAiControl}
+            />
+          </CardContent>
+        </Card>
+      </section>
 
       <section aria-label="Riepilogo servizi" className="border-y border-slate-200 bg-white px-4 py-3">
         <dl className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
