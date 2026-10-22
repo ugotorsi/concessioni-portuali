@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
-import { requireAdminWithMfa } from "@/lib/auth";
+import { requireAdminWithMfa, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDateIT } from "@/lib/utils";
 import { getRuntimeHealthSnapshot } from "@/server/runtime/health";
@@ -40,6 +40,7 @@ function healthLabel(status: string) {
 }
 
 export default async function RuntimeOperationsPage() {
+  await requireRole(["ADMIN"]);
   await requireAdminWithMfa();
   const defaultProcedimentoBudget = readDefaultProcedimentoBudgetAuthorization();
   const [aiControl, health, workers, failedJobs, policies, costs] = await Promise.all([

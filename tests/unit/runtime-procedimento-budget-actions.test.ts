@@ -50,6 +50,7 @@ import {
   recoverCurrentKnowledgeMissions,
   updateGlobalAiControl,
 } from "@/app/admin/runtime/actions";
+import RuntimeOperationsPage from "@/app/admin/runtime/page";
 
 function formData() {
   const data = new FormData();
@@ -113,6 +114,18 @@ describe("assignDefaultProcedimentoBudgetPolicy", () => {
       setGlobalAiControlStateMock.mockResolvedValue({
         previousEnabled: false,
         requestedEnabled: true,
+      });
+    });
+
+    describe("RuntimeOperationsPage authorization", () => {
+      it("runs the redirecting role guard before the ADMIN MFA assertion", async () => {
+        const redirectError = new Error("NEXT_REDIRECT");
+        requireRoleMock.mockRejectedValueOnce(redirectError);
+
+        await expect(RuntimeOperationsPage()).rejects.toBe(redirectError);
+
+        expect(requireRoleMock).toHaveBeenCalledWith(["ADMIN"]);
+        expect(requireAdminWithMfaMock).not.toHaveBeenCalled();
       });
     });
 
