@@ -41,14 +41,8 @@ function corpus(): FascicoloDocumentCorpus {
     pageCount: 1,
     characterCount: 100,
   }));
-  const excerpts = documents.map((document, index) => ({
-    reference: `DOCUMENT_${index + 1}.PAGE_1`,
-    documentoId: document.documentoId,
-    extractionAttemptId: document.extractionAttemptId!,
-    documentVersionId: document.documentFileVersionId!,
-    artifactSha256: document.sourceSha256!,
-    pageNumber: 1,
-    text: index === 2
+  const excerpts = documents.map((document, index) => {
+    const text = index === 2
       ? "Titolo: Controdeduzioni del concessionario TEST-LEGAL-001. "
         + "Il primo container serve per la manutenzione. "
         + "I materiali commerciali del secondo container sono accessori all'attivita nautica. "
@@ -57,11 +51,21 @@ function corpus(): FascicoloDocumentCorpus {
         ? "Titolo: Relazione tecnica contraddittoria TEST-LEGAL-001. "
           + "Il rilievo tecnico contraddice la qualificazione del primo container. "
           + "Marker: NOETRA-LEGAL-ACCEPTANCE-TECHNICAL"
-      : `Contenuto sintetico documento ${index + 1}.`,
-    textSha256: String.fromCharCode(97 + index).repeat(64),
-    extractionMethod: "DIRECT_TEXT",
-    ocrConfidence: null,
-  }));
+        : `Contenuto sintetico documento ${index + 1}.`;
+    return {
+      reference: `DOCUMENT_${index + 1}.PAGE_1`,
+      documentoId: document.documentoId,
+      extractionAttemptId: document.extractionAttemptId!,
+      documentVersionId: document.documentFileVersionId!,
+      artifactSha256: document.sourceSha256!,
+      pageNumber: 1,
+      text,
+      sourceText: text,
+      textSha256: String.fromCharCode(97 + index).repeat(64),
+      extractionMethod: "DIRECT_TEXT",
+      ocrConfidence: null,
+    };
+  });
   return {
     tenantId,
     procedimentoId,
@@ -118,6 +122,15 @@ function output(): ProviderAnalysisPayloadV1 {
           context: "Controdeduzioni",
           relatedItemLocalIds: [],
         },
+      }],
+      sourceQuotes: [{
+        itemLocalId: "defense-first",
+        basisRef: defenseRef,
+        quote: "Il primo container serve per la manutenzione.",
+      }, {
+        itemLocalId: "defense-second",
+        basisRef: defenseRef,
+        quote: "I materiali commerciali del secondo container sono accessori all'attivita nautica.",
       }],
       legalIssues: [{
         localId: "issue-first",
@@ -429,6 +442,10 @@ describe("fascicolo analysis evaluation-only mode", () => {
       .find((item) => item.localId === "defense-first");
     if (!firstPosition || firstPosition.kind !== "PARTY_POSITION") throw new Error("INVALID_TEST_FIXTURE");
     firstPosition.basisRefs = ["DOCUMENT_4.PAGE_1"];
+    const firstQuote = technicalCitation.structuredKnowledge?.sourceQuotes
+      .find((sourceQuote) => sourceQuote.itemLocalId === "defense-first");
+    if (!firstQuote) throw new Error("INVALID_TEST_FIXTURE");
+    firstQuote.basisRef = "DOCUMENT_4.PAGE_1";
     const technicalResult = compareTestLegal001Output(technicalCitation, corpus());
     expect(technicalResult.passed).toBe(false);
     expect(technicalResult.checks.citedToDefensePage).toBe(false);

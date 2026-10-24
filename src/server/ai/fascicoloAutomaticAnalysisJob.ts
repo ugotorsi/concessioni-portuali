@@ -134,6 +134,7 @@ interface AutomaticAuthority {
     pages: readonly {
       pageNumber: number;
       normalizedText: string;
+      sourceText: string;
       textSha256: string;
       extractionMethod: string;
       ocrConfidence: number | null;
@@ -210,7 +211,7 @@ function boundedExcerpts(authority: AutomaticAuthority): readonly AutomaticDocum
   if (authority.sourceKind === "DOCUMENT_CORPUS") {
     const perDocumentLimit = Math.max(1, Math.floor(MAX_DOCUMENT_EXCERPT_CHARACTERS / authority.documents.length));
     const pageTextLengths = authority.documents.map((document) => document.pages.reduce(
-      (length, page) => length + page.normalizedText.length, 0,
+      (length, page) => length + page.sourceText.length, 0,
     ));
     if (pageTextLengths.some((length) => length > perDocumentLimit)
       || pageTextLengths.reduce((sum, length) => sum + length, 0) > MAX_DOCUMENT_EXCERPT_CHARACTERS) {
@@ -224,7 +225,7 @@ function boundedExcerpts(authority: AutomaticAuthority): readonly AutomaticDocum
     let documentRemaining = Math.min(perDocumentLimit, remaining);
     for (const page of [...document.pages].sort((left, right) => left.pageNumber - right.pageNumber)) {
       if (documentRemaining <= 0 || remaining <= 0) break;
-      const text = page.normalizedText.slice(0, documentRemaining);
+      const text = page.sourceText.slice(0, documentRemaining);
       if (!text.trim()) continue;
       excerpts.push({
         reference: `DOCUMENT_${documentIndex + 1}.PAGE_${page.pageNumber}`,
@@ -297,6 +298,34 @@ function resolveKnowledgeEvidence(
       quoteSha256: null,
       basisRef: excerpt.reference,
     } satisfies KnowledgeEvidenceCandidate] as const];
+  }));
+}
+
+function persistenceErrorType(error: unknown): string {
+  const name = error instanceof Error ? error.name : "UnknownError";
+  return /^[A-Za-z][A-Za-z0-9_.-]{0,127}$/.test(name) ? name : "UnknownError";
+}
+
+function persistenceErrorCode(error: unknown): string {
+  if (typeof error === "object" && error !== null && "code" in error) {
+    const code = Reflect.get(error, "code");
+    if (typeof code === "string" && /^[A-Za-z0-9_.-]{1,128}$/.test(code)) return code;
+  }
+  if (error instanceof z.ZodError) return "ZOD_VALIDATION_FAILED";
+  if (error instanceof Error) {
+    const internalCode = /^([A-Z][A-Z0-9_]{2,127})(?::|$)/.exec(error.message)?.[1];
+    if (internalCode) return internalCode;
+  }
+  return "UNCLASSIFIED_ERROR";
+}
+
+function reportStructuredKnowledgePersistenceFailure(error: unknown): void {
+  console.error(JSON.stringify({
+    event: "STRUCTURED_KNOWLEDGE_PERSISTENCE_FAILURE",
+    phase: "PERSIST_KNOWLEDGE",
+    engine: isCanonicalIdentityV3Enabled() ? "CANONICAL_V3" : "LEGACY",
+    errorType: persistenceErrorType(error),
+    errorCode: persistenceErrorCode(error),
   }));
 }
 
@@ -469,6 +498,7 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
             orderBy: { pageNumber: "asc" },
             select: {
               pageNumber: true,
+              text: true,
               normalizedText: true,
               textSha256: true,
               extractionMethod: true,
@@ -508,6 +538,7 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
               orderBy: { pageNumber: "asc" },
               select: {
                 pageNumber: true,
+                text: true,
                 normalizedText: true,
                 textSha256: true,
                 extractionMethod: true,
@@ -522,7 +553,10 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
       neutralIntakeId: intake.id,
       documentVersionId: version.id,
       artifactSha256: version.artifactSha256,
-      pages: version.pages,
+      pages: version.pages.map((page) => ({
+        ...page,
+        sourceText: page.text,
+      })),
     })));
     const routedDocuments = await prisma.documento.findMany({
       where: {
@@ -825,7 +859,8 @@ export function createFascicoloAutomaticAnalysisHandler(
               excerpt.text,
             ])),
           });
-        } catch {
+        } catch (error) {
+          reportStructuredKnowledgePersistenceFailure(error);
           throw new AsyncJobExecutionError("PERSISTENCE", "STRUCTURED_KNOWLEDGE_PERSISTENCE_FAILED", false);
         }
         const reconciliation = persisted as KnowledgeReconciliationResult;
@@ -986,6 +1021,7 @@ function documentCorpusAuthority(input: {
           .map((excerpt) => ({
             pageNumber: excerpt.pageNumber,
             normalizedText: excerpt.text,
+            sourceText: excerpt.sourceText,
             textSha256: excerpt.textSha256,
             extractionMethod: excerpt.extractionMethod,
             ocrConfidence: excerpt.ocrConfidence,

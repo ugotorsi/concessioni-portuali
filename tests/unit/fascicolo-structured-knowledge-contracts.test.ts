@@ -39,6 +39,7 @@ function item(kind: typeof lot2KnowledgeKinds[number], index: number) {
 }
 
 function validKnowledge() {
+  const items = lot2KnowledgeKinds.map(item);
   return {
     version: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1",
     subjects: [{
@@ -48,7 +49,12 @@ function validKnowledge() {
       strongIdentifiers: [{ type: "PEC", value: "protocollo@pec.example" }],
       aliases: ["AdSP"],
     }],
-    items: lot2KnowledgeKinds.map(item),
+    items,
+    sourceQuotes: items.map((candidate) => ({
+      itemLocalId: candidate.localId,
+      basisRef: "DOCUMENT_1.PAGE_1",
+      quote: `Citazione autentica ${candidate.localId}`,
+    })),
   };
 }
 
@@ -145,6 +151,21 @@ describe("Lotto 2 structured knowledge contracts", () => {
     const malformed = validKnowledge();
     malformed.items[0].basisRefs = ["DOCUMENT_1.PAGE_ONE"];
     expect(fascicoloStructuredKnowledgeSchema.safeParse(malformed).success).toBe(false);
+  });
+
+  it("keeps semantic descriptions separate from validated source quotation candidates", () => {
+    const knowledge = validKnowledge();
+    expect(fascicoloStructuredKnowledgeSchema.safeParse(knowledge).success).toBe(true);
+    expect(fascicoloStructuredKnowledgeSchema.safeParse({
+      ...knowledge,
+      sourceQuotes: [{
+        itemLocalId: "item-1",
+        basisRef: "DOCUMENT_2.PAGE_1",
+        quote: "Citazione fuori evidenza",
+      }],
+    }).success).toBe(false);
+    const { sourceQuotes: _sourceQuotes, ...legacyKnowledge } = knowledge;
+    expect(fascicoloStructuredKnowledgeSchema.parse(legacyKnowledge).sourceQuotes).toEqual([]);
   });
 
   it("keeps structured knowledge optional for backward-compatible provider output", () => {

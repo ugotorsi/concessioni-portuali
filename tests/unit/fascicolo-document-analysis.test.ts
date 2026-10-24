@@ -38,11 +38,13 @@ function response(): Response {
 
 describe("worker-safe fascicolo document analysis", () => {
   it("requires explicit assessment of documented legal signals without inventing conclusions", () => {
-    expect(FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION).toBe("FASCICOLO_DOCUMENT_ANALYSIS_V5");
+    expect(FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION).toBe("FASCICOLO_DOCUMENT_ANALYSIS_V6");
     expect(FASCICOLO_DOCUMENT_ANALYSIS_SYSTEM_POLICY.requirements).toEqual(expect.arrayContaining([
       expect.stringContaining("documented prescription"),
       expect.stringContaining("grounded GAP"),
       expect.stringContaining("PARTY_POSITION"),
+      expect.stringContaining("sourceQuotes"),
+      expect.stringContaining("occurs exactly once"),
     ]));
   });
 
@@ -94,7 +96,22 @@ describe("worker-safe fascicolo document analysis", () => {
     })).resolves.toEqual(output);
 
     expect(transport).toHaveBeenCalledOnce();
-    expect(body).toMatchObject({ store: false, tools: [], tool_choice: "none" });
+    expect(body).toMatchObject({
+      store: false,
+      tools: [],
+      tool_choice: "none",
+      text: {
+        format: {
+          schema: {
+            properties: {
+              structuredKnowledge: {
+                required: expect.arrayContaining(["sourceQuotes"]),
+              },
+            },
+          },
+        },
+      },
+    });
     const serialized = JSON.stringify(body);
     expect(serialized).toContain("BEGIN_UNTRUSTED_DOCUMENT_DATA");
     expect(serialized).toContain("DOCUMENT_1.PAGE_1");

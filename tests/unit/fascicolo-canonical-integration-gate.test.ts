@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   CANONICAL_IDENTITY_V3_PREVIEW_BRANCH,
+  CANONICAL_IDENTITY_V3_PREVIEW_DATABASE_ENDPOINT_ID,
   CANONICAL_IDENTITY_V3_PREVIEW_PROJECT_ID,
   isCanonicalIdentityV3Enabled,
   isCanonicalIdentityRevision,
@@ -58,6 +59,48 @@ describe("canonical identity V3 integration gate", () => {
       ...authorizedPreview,
       NOETRA_CANONICAL_IDENTITY_V3_ENABLED: "false",
     })).toBe(false);
+  });
+
+  it("routes only an isolated one-shot worker targeting the V3 Preview database to canonical", async () => {
+    const authorizedWorker = {
+      NODE_ENV: "production",
+      DATABASE_URL: `postgresql://role:secret@${CANONICAL_IDENTITY_V3_PREVIEW_DATABASE_ENDPOINT_ID}-pooler.c-9.us-east-1.aws.neon.tech/neondb`,
+      NOETRA_CANONICAL_IDENTITY_V3_ENABLED: "true",
+      ASYNC_WORKER_DEDICATED_MODE: "true",
+      ASYNC_PROVIDER_EXECUTION_ENABLED: "true",
+      ASYNC_WORKER_CONCURRENCY: "1",
+      ASYNC_WORKER_MAX_PROCESSED_JOBS: "1",
+      ASYNC_WORKER_EXIT_ON_IDLE: "true",
+      ASYNC_WORKER_BOOTSTRAP_TIME_WATCHES: "false",
+      ASYNC_WORKER_OPERATION_ALLOWLIST: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+      ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST: "procedure-test",
+    };
+    expect(isCanonicalIdentityV3Enabled(authorizedWorker)).toBe(true);
+    expect(isCanonicalIdentityV3Enabled({
+      ...authorizedWorker,
+      DATABASE_URL: "postgresql://role:secret@other-endpoint.neon.tech/neondb",
+    })).toBe(false);
+    expect(isCanonicalIdentityV3Enabled({
+      ...authorizedWorker,
+      ASYNC_WORKER_MAX_PROCESSED_JOBS: "2",
+    })).toBe(false);
+    expect(isCanonicalIdentityV3Enabled({
+      ...authorizedWorker,
+      ASYNC_WORKER_OPERATION_ALLOWLIST: "FASCICOLO.AUTOMATIC_ANALYSIS_V1,OTHER",
+    })).toBe(false);
+    expect(isCanonicalIdentityV3Enabled({
+      ...authorizedWorker,
+      VERCEL_ENV: "preview",
+    })).toBe(false);
+    const legacy = vi.fn(async () => ({ engine: "legacy" })) as never;
+    const canonical = vi.fn(async () => ({ engine: "canonical" })) as never;
+    await expect(persistStructuredKnowledgeForConfiguredEngine(input, {
+      environment: authorizedWorker,
+      legacy,
+      canonical,
+    })).resolves.toEqual({ engine: "canonical" });
+    expect(canonical).toHaveBeenCalledOnce();
+    expect(legacy).not.toHaveBeenCalled();
   });
 
   it("recognizes canonical revisions independently from the runtime gate", () => {

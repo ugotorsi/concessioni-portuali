@@ -702,6 +702,19 @@ postgresDescribe.sequential("canonical identity on PostgreSQL 16", () => {
     const knowledge = (phase: "FIRST" | "SECOND"): FascicoloStructuredKnowledge => ({
       version: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1",
       subjects: [],
+      sourceQuotes: [
+        ["anchor-a", "Atto"],
+        ["anchor-b", "unico"],
+        ["fact-a", "Atto unico"],
+        ["fact-b", "firmato oggi"],
+        ...(phase === "FIRST"
+          ? [["duplicate-one", "firmato"], ["duplicate-two", "unico firmato"]]
+          : [["duplicate-merged", "Atto unico firmato"]]),
+      ].map(([itemLocalId, quote]) => ({
+        itemLocalId,
+        basisRef: "DOCUMENT_1.PAGE_1",
+        quote,
+      })),
       items: [
         {
           localId: "anchor-a",
@@ -987,6 +1000,11 @@ postgresDescribe.sequential("canonical identity on PostgreSQL 16", () => {
     const factKnowledge = (statement: string): FascicoloStructuredKnowledge => ({
       version: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1",
       subjects: [],
+      sourceQuotes: [{
+        itemLocalId: "fact",
+        basisRef: "DOCUMENT_1.PAGE_1",
+        quote: statement,
+      }],
       items: [{
         localId: "fact",
         kind: "FACT",
@@ -1030,6 +1048,163 @@ postgresDescribe.sequential("canonical identity on PostgreSQL 16", () => {
     ]));
   });
 
+  it("persists paraphrased facts and events with explicit quotes and rolls back invalid quote evidence", async () => {
+    const sourceText = pageText;
+    const basisRef = "DOCUMENT_1.PAGE_1";
+    const evidence = (textHash: string): KnowledgeEvidenceCandidate => ({
+      provenanceType: "DOCUMENT_EXTRACTION",
+      documentoId: "document-a",
+      documentFileVersionId: "version-a",
+      extractionAttemptId: "attempt-a",
+      pageNumber: 1,
+      textSha256: textHash,
+      quoteSha256: null,
+      basisRef,
+    });
+    const knowledge = (
+      factQuote: string,
+      eventQuote: string,
+    ): FascicoloStructuredKnowledge => ({
+      version: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1",
+      subjects: [],
+      sourceQuotes: [
+        { itemLocalId: "fact", basisRef, quote: factQuote },
+        { itemLocalId: "event", basisRef, quote: eventQuote },
+      ],
+      items: [{
+        localId: "fact",
+        kind: "FACT",
+        confidence: 95,
+        basisRefs: [basisRef],
+        payload: {
+          normalizedStatement: "Il provvedimento ha sospeso con effetto immediato il rapporto.",
+          subjectLocalIds: [],
+          object: null,
+          qualifier: null,
+          proceedingIdentity: null,
+        },
+      }, {
+        localId: "event",
+        kind: "EVENT",
+        confidence: 95,
+        basisRefs: [basisRef],
+        payload: {
+          title: "Udienza",
+          normalizedStatement: "L'udienza risulta celebrata il 10 gennaio 2026.",
+          date: {
+            precision: "EXACT",
+            from: "2026-01-10",
+            to: null,
+            originalText: "10 gennaio 2026",
+            confidence: 100,
+          },
+          subjectLocalIds: [],
+          relatedItemLocalIds: [],
+          proceedingIdentity: null,
+        },
+      }],
+      legalIssues: [],
+      researchQuestions: [],
+    });
+    const validEvidence = evidence(digest(sourceText));
+    const persisted = await persistCanonicalStructuredKnowledgeRevision({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-a",
+      corpusFingerprint: digest("explicit-source-quotes-positive"),
+      knowledge: knowledge("Atto unico", "firmato oggi"),
+      evidenceByBasisRef: new Map([[basisRef, validEvidence]]),
+      sourceTextByBasisRef: new Map([[basisRef, sourceText]]),
+    }, repositoryContext(primary));
+
+    expect(persisted.revision).toMatchObject({ status: "CURRENT" });
+    expect(persisted.revision.items.map((item) => item.kind).sort()).toEqual(["EVENT", "FACT"]);
+    const spans = await primary.$queryRawUnsafe<Array<{
+      startOffset: number;
+      endOffset: number;
+      quoteSha256: string;
+    }>>(`
+      SELECT span."startOffset", span."endOffset", span."quoteSha256"
+      FROM "FascicoloKnowledgeEvidenceSpan" span
+      JOIN "FascicoloKnowledgeEvidence" evidence ON evidence."id" = span."evidenceId"
+      JOIN "FascicoloKnowledgeItem" item ON item."id" = evidence."itemId"
+      WHERE item."revisionId" = $1
+      ORDER BY span."startOffset"
+    `, persisted.revision.id);
+    expect(spans.map((span) => ({
+      quote: sourceText.slice(span.startOffset, span.endOffset),
+      quoteSha256: span.quoteSha256,
+    }))).toEqual([{
+      quote: "Atto unico",
+      quoteSha256: digest("Atto unico"),
+    }, {
+      quote: "firmato oggi",
+      quoteSha256: digest("firmato oggi"),
+    }]);
+    expect(spans.every((span) => span.endOffset > span.startOffset)).toBe(true);
+    const readModel = await loadCurrentStructuredKnowledge(
+      "tenant-a",
+      "procedure-a",
+      { query: (sql, params) => executor(primary).query(sql, params) },
+    );
+    expect(readModel?.facts).toHaveLength(1);
+    expect(readModel?.events).toHaveLength(1);
+    const report = buildStructuredFascicoloReport({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-a",
+      knowledge: readModel!,
+      missions: [],
+      contractVersion: STRUCTURED_FASCICOLO_REPORT_V2_CONTRACT_VERSION,
+    });
+    expect(report.payload.documentedFramework).toMatchObject({
+      facts: [expect.objectContaining({
+        normalizedText: "Il provvedimento ha sospeso con effetto immediato il rapporto.",
+      })],
+      timeline: [expect.objectContaining({
+        normalizedText: "L'udienza risulta celebrata il 10 gennaio 2026.",
+      })],
+    });
+
+    const invalidCases = [
+      {
+        name: "invented-quote",
+        trustedText: sourceText,
+        itemKnowledge: knowledge("citazione inesistente", "firmato oggi"),
+        itemEvidence: validEvidence,
+        errorCode: "CANONICAL_ITEM_SOURCE_QUOTE_REQUIRED",
+      },
+      {
+        name: "hash-mismatch",
+        trustedText: sourceText,
+        itemKnowledge: knowledge("Atto unico", "firmato oggi"),
+        itemEvidence: evidence("f".repeat(64)),
+        errorCode: "CANONICAL_SOURCE_TEXT_HASH_MISMATCH",
+      },
+      {
+        name: "ambiguous-quote",
+        trustedText: sourceText,
+        itemKnowledge: knowledge("o", "firmato oggi"),
+        itemEvidence: validEvidence,
+        errorCode: "CANONICAL_ITEM_SOURCE_QUOTE_REQUIRED",
+      },
+    ] as const;
+    for (const invalid of invalidCases) {
+      const corpusFingerprint = digest(`explicit-source-quotes-${invalid.name}`);
+      await expect(persistCanonicalStructuredKnowledgeRevision({
+        tenantId: "tenant-a",
+        procedimentoId: "procedure-a",
+        corpusFingerprint,
+        knowledge: invalid.itemKnowledge,
+        evidenceByBasisRef: new Map([[basisRef, invalid.itemEvidence]]),
+        sourceTextByBasisRef: new Map([[basisRef, invalid.trustedText]]),
+      }, repositoryContext(primary))).rejects.toThrow(invalid.errorCode);
+      const revisions = await primary.$queryRawUnsafe<Array<{ count: bigint }>>(
+        `SELECT count(*)::bigint AS count FROM "FascicoloKnowledgeRevision" WHERE "corpusFingerprint" = $1`,
+        corpusFingerprint,
+      );
+      expect(revisions[0].count).toBe(BigInt(0));
+    }
+  });
+
   it("creates a canonical revision when the current legacy revision has the same corpus", async () => {
     const evidence: KnowledgeEvidenceCandidate = {
       provenanceType: "DOCUMENT_EXTRACTION",
@@ -1044,6 +1219,11 @@ postgresDescribe.sequential("canonical identity on PostgreSQL 16", () => {
     const knowledge: FascicoloStructuredKnowledge = {
       version: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1",
       subjects: [],
+      sourceQuotes: [{
+        itemLocalId: "fact",
+        basisRef: evidence.basisRef,
+        quote: "Atto",
+      }],
       items: [{
         localId: "fact",
         kind: "FACT",

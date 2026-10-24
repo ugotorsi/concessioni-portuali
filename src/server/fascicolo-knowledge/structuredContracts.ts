@@ -9,6 +9,11 @@ const id = z.string().trim().min(1).max(256);
 const text = z.string().trim().min(1).max(100_000);
 const shortText = z.string().trim().min(1).max(512);
 const basisRefs = z.array(documentBasisRefSchema).min(1).max(64);
+const sourceQuoteSchema = z.object({
+  itemLocalId: id,
+  basisRef: documentBasisRefSchema,
+  quote: text,
+}).strict();
 const localIds = z.array(id).max(100);
 const confidence = z.number().int().min(0).max(100).nullable().optional().transform((value) => value ?? null);
 const isoDate = z.string().date();
@@ -219,6 +224,7 @@ export const fascicoloStructuredKnowledgeSchema = z.object({
   version: z.literal(FASCICOLO_STRUCTURED_KNOWLEDGE_VERSION),
   subjects: z.array(fascicoloSubjectCandidateSchema).max(500),
   items: z.array(structuredKnowledgeItemSchema).max(10_000),
+  sourceQuotes: z.array(sourceQuoteSchema).max(100_000).default([]),
   legalIssues: z.array(legalIssueCandidateSchema).max(1_000).optional().default([]),
   researchQuestions: z.array(researchQuestionCandidateSchema).max(1_000).optional().default([]),
 }).strict().superRefine((value, context) => {
@@ -230,6 +236,18 @@ export const fascicoloStructuredKnowledgeSchema = z.object({
   if (new Set(itemIds).size !== itemIds.length) context.addIssue({ code: "custom", message: "DUPLICATE_ITEM_LOCAL_ID" });
   if (new Set(issueIds).size !== issueIds.length) context.addIssue({ code: "custom", message: "DUPLICATE_ISSUE_LOCAL_ID" });
   if (new Set(questionIds).size !== questionIds.length) context.addIssue({ code: "custom", message: "DUPLICATE_QUESTION_LOCAL_ID" });
+  const sourceQuoteKeys = value.sourceQuotes.map((sourceQuote) => (
+    `${sourceQuote.itemLocalId}\u001f${sourceQuote.basisRef}\u001f${sourceQuote.quote}`
+  ));
+  if (new Set(sourceQuoteKeys).size !== sourceQuoteKeys.length) {
+    context.addIssue({ code: "custom", message: "DUPLICATE_SOURCE_QUOTE" });
+  }
+  for (const sourceQuote of value.sourceQuotes) {
+    const item = value.items.find((candidate) => candidate.localId === sourceQuote.itemLocalId);
+    if (!item || !item.basisRefs.includes(sourceQuote.basisRef)) {
+      context.addIssue({ code: "custom", message: `INVALID_SOURCE_QUOTE_REFERENCE:${sourceQuote.itemLocalId}` });
+    }
+  }
   for (const item of value.items) {
     const referencedSubjects = item.kind === "PARTY_ROLE" || item.kind === "PARTY_POSITION" ? [item.payload.subjectLocalId]
       : item.kind === "FACT" || item.kind === "EVENT" ? item.payload.subjectLocalIds

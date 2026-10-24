@@ -39,6 +39,7 @@ export interface FascicoloDocumentCorpusDocument {
 export interface FascicoloDocumentCorpusExcerpt extends FascicoloDocumentExcerpt {
   readonly documentoId: string;
   readonly extractionAttemptId: string;
+  readonly sourceText: string;
 }
 
 export interface FascicoloDocumentCorpus {
@@ -69,6 +70,7 @@ interface CorpusAttemptRow {
   readonly failureCode: string | null;
   readonly pages: readonly {
     readonly pageNumber: number;
+    readonly text: string;
     readonly normalizedText: string;
     readonly textSha256: string;
     readonly extractionMethod: string;
@@ -143,6 +145,7 @@ export function buildFascicoloDocumentCorpus(input: {
           documentVersionId: document.currentFileVersionId,
           artifactSha256: succeeded.sourceSha256,
           text: page.normalizedText,
+          sourceText: page.text,
           textSha256: page.textSha256,
           extractionMethod: page.extractionMethod,
           ocrConfidence: page.ocrConfidence,
@@ -322,6 +325,7 @@ async function readFascicoloDocumentCorpus(
             orderBy: { pageNumber: "asc" },
             select: {
               pageNumber: true,
+              text: true,
               normalizedText: true,
               textSha256: true,
               extractionMethod: true,

@@ -124,36 +124,54 @@ function continuityKey(item: Pick<SnapshotItem, "kind" | "structuredPayload"> | 
   return digest(canonicalJson(continuityMaterial(item.kind, payload)));
 }
 
-function sourceSpans(
+export function buildCanonicalSourceSpans(
   candidate: PreparedKnowledgeItemCandidate,
   sourceTextByBasisRef: ReadonlyMap<string, string>,
 ) {
-  return candidate.evidence.map((evidence) => {
+  const payload = candidate.structuredPayload;
+  const sourceQuotes = payload && typeof payload === "object" && !Array.isArray(payload)
+    && Array.isArray(payload.sourceQuotes)
+    ? payload.sourceQuotes.flatMap((sourceQuote) => (
+        sourceQuote
+        && typeof sourceQuote === "object"
+        && !Array.isArray(sourceQuote)
+        && typeof sourceQuote.basisRef === "string"
+        && typeof sourceQuote.quote === "string"
+          ? [{ basisRef: sourceQuote.basisRef, quote: sourceQuote.quote }]
+          : []
+      ))
+    : [];
+  const evidenceBasisRefs = new Set(candidate.evidence.map((evidence) => evidence.basisRef));
+  if (sourceQuotes.some((sourceQuote) => !evidenceBasisRefs.has(sourceQuote.basisRef))) {
+    throw new Error(`CANONICAL_ITEM_SOURCE_QUOTE_REQUIRED:${candidate.semanticKey}`);
+  }
+  return candidate.evidence.flatMap((evidence) => {
     const trustedText = sourceTextByBasisRef.get(evidence.basisRef);
     if (!trustedText) throw new Error(`CANONICAL_SOURCE_TEXT_MISSING:${evidence.basisRef}`);
     if (digest(trustedText) !== evidence.textSha256) {
       throw new Error(`CANONICAL_SOURCE_TEXT_HASH_MISMATCH:${evidence.basisRef}`);
     }
-    const discriminators = candidate.kind === "FACT" || candidate.kind === "EVENT"
-      ? [candidate.normalizedText]
-      : [trustedText];
-    const quote = discriminators.find((value): value is string => (
-      typeof value === "string"
-      && value.length > 0
-      && trustedText.indexOf(value) >= 0
-      && trustedText.indexOf(value) === trustedText.lastIndexOf(value)
-    ));
-    if (!quote) {
+    const quotes = sourceQuotes.filter((sourceQuote) => sourceQuote.basisRef === evidence.basisRef);
+    if (quotes.length === 0) {
       throw new Error(`CANONICAL_ITEM_SOURCE_QUOTE_REQUIRED:${candidate.semanticKey}:${evidence.basisRef}`);
     }
-    const startOffset = trustedText.indexOf(quote);
-    return {
-      basisRef: evidence.basisRef,
-      startOffset,
-      endOffset: startOffset + quote.length,
-      quote,
-      quoteSha256: digest(quote),
-    };
+    return quotes.map(({ quote }) => {
+      const startOffset = trustedText.indexOf(quote);
+      const consumesWholePage = startOffset >= 0
+        && trustedText.slice(0, startOffset).trim().length === 0
+        && trustedText.slice(startOffset + quote.length).trim().length === 0;
+      if (quote.length === 0 || startOffset < 0
+        || startOffset !== trustedText.lastIndexOf(quote) || consumesWholePage) {
+        throw new Error(`CANONICAL_ITEM_SOURCE_QUOTE_REQUIRED:${candidate.semanticKey}:${evidence.basisRef}`);
+      }
+      return {
+        basisRef: evidence.basisRef,
+        startOffset,
+        endOffset: startOffset + quote.length,
+        quote,
+        quoteSha256: digest(quote),
+      };
+    });
   });
 }
 
@@ -239,7 +257,7 @@ export async function persistCanonicalStructuredKnowledgeRevision(input: Knowled
       const predecessors = predecessorsByCandidate[candidateIndex];
       const contestedPredecessor = predecessors.length === 1
         && (predecessorClaimCounts.get(predecessors[0].id) ?? 0) > 1;
-      const spans = sourceSpans(candidate, input.sourceTextByBasisRef);
+      const spans = buildCanonicalSourceSpans(candidate, input.sourceTextByBasisRef);
       const common = {
         tenantId: input.tenantId,
         procedimentoId: input.procedimentoId,

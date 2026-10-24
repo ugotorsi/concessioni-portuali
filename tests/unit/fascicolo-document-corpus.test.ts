@@ -37,9 +37,15 @@ import {
   toFascicoloDocumentAnalysisCorpus,
 } from "@/server/queries/fascicolo-document-corpus";
 
-const page = (pageNumber: number, text: string, textSha256: string) => ({
+const page = (
+  pageNumber: number,
+  text: string,
+  textSha256: string,
+  normalizedText = text,
+) => ({
   pageNumber,
-  normalizedText: text,
+  text,
+  normalizedText,
   textSha256,
   extractionMethod: "DIRECT_TEXT",
   ocrConfidence: null,
@@ -95,7 +101,7 @@ describe("fascicolo document corpus", () => {
           failureCode: null,
           pages: [
             page(2, "Pagina due", "1".repeat(64)),
-            page(1, "Pagina uno", "0".repeat(64)),
+            page(1, "Pagina  uno", "0".repeat(64), "Pagina uno"),
           ],
         },
       ],
@@ -119,6 +125,8 @@ describe("fascicolo document corpus", () => {
       documentVersionId: "version-a",
       extractionAttemptId: "attempt-a",
       artifactSha256: "a".repeat(64),
+      text: "Pagina uno",
+      sourceText: "Pagina  uno",
       textSha256: "0".repeat(64),
     });
     expect(repeated.corpusFingerprint).toBe(corpus.corpusFingerprint);

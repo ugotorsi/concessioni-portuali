@@ -89,6 +89,7 @@ function materialPayload(
   subjectIds: readonly string[],
   dependencyKeys: readonly string[],
   proceedingAnchorSemanticKey: string | null,
+  sourceQuotes: readonly { basisRef: string; quote: string }[],
 ) {
   const payload = { ...item.payload } as Record<string, unknown>;
   const proceedingIdentity = item.kind === "FACT" || item.kind === "EVENT"
@@ -104,6 +105,7 @@ function materialPayload(
     ...payload,
     subjectIds: [...subjectIds],
     relatedSemanticKeys: [...sorted(dependencyKeys)],
+    sourceQuotes: [...sourceQuotes],
     ...(proceedingIdentity && proceedingAnchorSemanticKey ? {
       proceedingIdentity: {
         ...(proceedingIdentity.declaredKey ? { declaredKey: proceedingIdentity.declaredKey } : {}),
@@ -114,6 +116,30 @@ function materialPayload(
     } : {}),
     semanticKeyVersion: FASCICOLO_STRUCTURED_SEMANTIC_KEY_VERSION,
   };
+}
+
+function projectedSourceQuotes(candidate: PreparedKnowledgeItemCandidate) {
+  if (!candidate.structuredPayload || typeof candidate.structuredPayload !== "object"
+    || Array.isArray(candidate.structuredPayload)) return [];
+  const sourceQuotes = candidate.structuredPayload.sourceQuotes;
+  if (!Array.isArray(sourceQuotes)) return [];
+  return sourceQuotes.flatMap((sourceQuote) => (
+    sourceQuote
+    && typeof sourceQuote === "object"
+    && !Array.isArray(sourceQuote)
+    && typeof sourceQuote.basisRef === "string"
+    && typeof sourceQuote.quote === "string"
+      ? [{ basisRef: sourceQuote.basisRef, quote: sourceQuote.quote }]
+      : []
+  ));
+}
+
+function uniqueSourceQuotes(candidates: readonly PreparedKnowledgeItemCandidate[]) {
+  return candidates.flatMap(projectedSourceQuotes).filter((sourceQuote, index, all) => (
+    all.findIndex((candidate) => (
+      candidate.basisRef === sourceQuote.basisRef && candidate.quote === sourceQuote.quote
+    )) === index
+  ));
 }
 
 function hasDocumentedProceedingIdentity(item: StructuredKnowledgeItem): boolean {
@@ -194,6 +220,9 @@ export function projectStructuredKnowledge(input: {
             subjectIds,
             dependencyKeys as string[],
             proceedingAnchorSemanticKey,
+            knowledge.sourceQuotes
+              .filter((sourceQuote) => sourceQuote.itemLocalId === item.localId)
+              .map(({ basisRef, quote }) => ({ basisRef, quote })),
           ),
           confidence: item.confidence,
           evidence: evidence as KnowledgeEvidenceCandidate[],
@@ -265,6 +294,7 @@ export function projectStructuredKnowledge(input: {
         originatingSemanticKeys: sorted(originCandidates.map((origin) => origin.semanticKey)),
         confidence: issue.confidence,
         referenceDateBasis: issue.referenceDateBasis,
+        sourceQuotes: uniqueSourceQuotes(originCandidates),
         ...(issue.targetProceedingIdentity && targetAnchor
           ? {
               targetProceedingIdentity: {
@@ -327,6 +357,7 @@ export function projectStructuredKnowledge(input: {
         },
         requestedCapabilities: sorted(question.requestedCapabilities),
         mode: question.mode,
+        sourceQuotes: projectedSourceQuotes(issue),
         semanticKeyVersion: FASCICOLO_STRUCTURED_SEMANTIC_KEY_VERSION,
       },
       confidence: null,

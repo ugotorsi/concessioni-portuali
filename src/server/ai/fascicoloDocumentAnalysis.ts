@@ -11,7 +11,7 @@ import {
   type RealDataActivationPolicy,
 } from "@/server/ai/realDataActivation";
 
-export const FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION = "FASCICOLO_DOCUMENT_ANALYSIS_V5" as const;
+export const FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION = "FASCICOLO_DOCUMENT_ANALYSIS_V6" as const;
 
 export const FASCICOLO_DOCUMENT_ANALYSIS_SYSTEM_POLICY = Object.freeze({
   role: "DOCUMENT_GROUNDED_FASCICOLO_ANALYST",
@@ -22,6 +22,7 @@ export const FASCICOLO_DOCUMENT_ANALYSIS_SYSTEM_POLICY = Object.freeze({
     "Use only the supplied extracted document excerpts.",
     "Every factual statement, date, issue, contradiction, gap, and question must cite supplied page references.",
     "Return structuredKnowledge subjects and typed items when the excerpts support them; never invent unresolved evidence references.",
+    "For every structuredKnowledge item and every cited basisRef, return sourceQuotes with the item localId, basisRef, and a short authentic verbatim quotation that occurs exactly once on that page. Keep semantic descriptions and normalizedStatement as reconstructions; never use them as quotations unless they are independently verbatim.",
     "Preserve every material defense, claim, objection, or request as a PARTY_POSITION attributed to its subject and cited to its document page; never convert a party position into a verified FACT or a technical assessment.",
     "Within structuredKnowledge, propose legalIssues only from identified CURRENT-bound items and researchQuestions only from those legal issues with an explicit reference-date basis.",
     "Assess every documented prescription, formal contestation, alleged breach, omission, and contradiction for legalIssues; empty legalIssues are valid only when the excerpts do not support an issue.",
