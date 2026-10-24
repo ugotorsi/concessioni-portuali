@@ -42,7 +42,9 @@ describe("middleware sensitive route boundaries", () => {
     const normalizedSecret = "a-secure-nextauth-secret-with-32-characters";
     vi.stubEnv("NEXTAUTH_SECRET", `  ${normalizedSecret}\r\n`);
     getTokenMock.mockImplementationOnce(async ({ secret }) => (
-      secret === normalizedSecret ? { role: "ADMIN" } : null
+      secret === normalizedSecret
+        ? { role: "ADMIN", mfaEnrollmentRequired: false, mfaVerified: true }
+        : null
     ));
 
     const response = await middleware(makeRequest("/dashboard"));
@@ -135,7 +137,11 @@ describe("middleware sensitive route boundaries", () => {
 
     expect(unauthenticated.status).toBe(307);
 
-    getTokenMock.mockResolvedValueOnce({ role: "ADMIN" });
+    getTokenMock.mockResolvedValueOnce({
+      role: "ADMIN",
+      mfaEnrollmentRequired: false,
+      mfaVerified: true,
+    });
     const authenticated = await middleware(makeRequest("/api/admin/normal"));
 
     expect(authenticated.status).toBe(200);
@@ -159,5 +165,39 @@ describe("middleware sensitive route boundaries", () => {
     expect(redirectUrl.searchParams.get("callbackUrl")).toBe(
       "/api/admin/db-recon-preview-temp/extra?x-db-recon-token=preview-token",
     );
+  });
+
+  it.each([
+    "/admin/runtime",
+    "/audit",
+    "/legal-research/assisted-verification",
+    "/legal-sources/source-1/download",
+    "/api/admin/runtime-health",
+  ])("confines direct reserved access to MFA enrollment: %s", async (path) => {
+    getTokenMock.mockResolvedValueOnce({
+      role: "ADMIN",
+      mfaEnrollmentRequired: true,
+      mfaVerified: false,
+    });
+
+    const response = await middleware(makeRequest(path));
+
+    expect(response.status).toBe(307);
+    expect(new URL(response.headers.get("location")!).pathname).toBe("/mfa/enroll");
+  });
+
+  it("rejects a required-role token that is neither verified nor enrolling", async () => {
+    getTokenMock.mockResolvedValueOnce({
+      role: "ADMIN",
+      mfaEnrollmentRequired: false,
+      mfaVerified: false,
+    });
+
+    const response = await middleware(makeRequest("/dashboard"));
+
+    expect(response.status).toBe(307);
+    const location = new URL(response.headers.get("location")!);
+    expect(location.pathname).toBe("/login");
+    expect(location.searchParams.get("callbackUrl")).toBe("/dashboard");
   });
 });

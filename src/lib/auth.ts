@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 
+import { isMfaRequiredRole } from "@/lib/mfa";
+
 export const DEMO_ROLES = [
   "ADMIN",
   "OPERATORE_SOCIETA",
@@ -85,10 +87,19 @@ export async function requireAdminWithMfa(): Promise<CurrentUser> {
 }
 
 export async function requireRole(allowedRoles?: DemoRole[]): Promise<DemoRole> {
-  const role = await getCurrentRole();
+  const session = await loadAuthSession();
+  const user = session?.user;
+  const role = user?.role;
 
-  if (!role) {
+  if (!user || !isDemoRole(role)) {
     redirect("/login");
+  }
+
+  if (
+    isMfaRequiredRole(role)
+    && (user.mfaEnrollmentRequired || !user.mfaVerified)
+  ) {
+    redirect("/mfa/enroll");
   }
 
   if (allowedRoles && !allowedRoles.includes(role)) {

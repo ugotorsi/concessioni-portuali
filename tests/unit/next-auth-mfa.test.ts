@@ -79,7 +79,7 @@ describe("NextAuth MFA enforcement", () => {
     expect(user).toMatchObject({
       role: "ADMIN",
       mfaEnrollmentRequired: true,
-      mfaVerified: true,
+      mfaVerified: false,
     });
   });
 
@@ -140,5 +140,67 @@ describe("NextAuth MFA enforcement", () => {
 
     expect(session.user && "id" in session.user ? session.user.id : undefined).toBe("");
     expect(session.user && "role" in session.user ? session.user.role : undefined).toBe("");
+  });
+
+  it("recomputes enrollment state when MFA is reset after a JWT was issued", async () => {
+    findUniqueMock.mockResolvedValue({
+      attivo: true,
+      ruolo: "ADMIN",
+      lockedUntil: null,
+      mfaEnabled: false,
+    });
+    const { authOptions } = await loadAuth();
+    const sessionCallback = authOptions.callbacks?.session;
+
+    const session = await sessionCallback!({
+      session: {
+        user: { name: "Admin", email: "admin@example.test", image: null },
+        expires: "2099-01-01T00:00:00.000Z",
+      },
+      token: {
+        id: "user-admin",
+        role: "ADMIN",
+        mfaEnrollmentRequired: false,
+        mfaVerified: true,
+      },
+    } as never);
+
+    expect(session.user).toMatchObject({
+      id: "user-admin",
+      role: "ADMIN",
+      mfaEnrollmentRequired: true,
+      mfaVerified: false,
+    });
+  });
+
+  it("invalidates an enrollment JWT after MFA becomes enabled until OTP login", async () => {
+    findUniqueMock.mockResolvedValue({
+      attivo: true,
+      ruolo: "ADMIN",
+      lockedUntil: null,
+      mfaEnabled: true,
+    });
+    const { authOptions } = await loadAuth();
+    const sessionCallback = authOptions.callbacks?.session;
+
+    const session = await sessionCallback!({
+      session: {
+        user: { name: "Admin", email: "admin@example.test", image: null },
+        expires: "2099-01-01T00:00:00.000Z",
+      },
+      token: {
+        id: "user-admin",
+        role: "ADMIN",
+        mfaEnrollmentRequired: true,
+        mfaVerified: false,
+      },
+    } as never);
+
+    expect(session.user).toMatchObject({
+      id: "",
+      role: "",
+      mfaEnrollmentRequired: false,
+      mfaVerified: false,
+    });
   });
 });

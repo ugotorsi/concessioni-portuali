@@ -26,6 +26,10 @@ const PROTECTED_PREFIXES = [
   "/demo-guidata",
   "/ai",
   "/adsp",
+  "/admin",
+  "/audit",
+  "/legal-research",
+  "/legal-sources",
   "/mfa",
   "/export",
   "/api",
@@ -168,6 +172,12 @@ export async function middleware(request: NextRequest) {
   const mfaEnrollmentRequired = token?.mfaEnrollmentRequired === true;
   if (mfaEnrollmentRequired && pathname !== "/mfa/enroll") {
     return withSecurityHeaders(NextResponse.redirect(new URL("/mfa/enroll", request.url)));
+  }
+
+  if (role !== "VIEWER_ADSP" && token?.mfaVerified !== true) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("callbackUrl", `${pathname}${search}`);
+    return withSecurityHeaders(NextResponse.redirect(loginUrl));
   }
 
   if (!mfaEnrollmentRequired && (pathname === "/mfa" || pathname.startsWith("/mfa/"))) {

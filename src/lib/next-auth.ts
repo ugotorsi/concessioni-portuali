@@ -176,8 +176,9 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const mfaEnrollmentRequired = isMfaRequiredRole(user.ruolo) && !user.mfaEnabled;
-        let mfaVerified = !user.mfaEnabled;
+        const mfaRequired = isMfaRequiredRole(user.ruolo);
+        const mfaEnrollmentRequired = mfaRequired && !user.mfaEnabled;
+        let mfaVerified = !mfaRequired;
 
         if (user.mfaEnabled) {
           if (!parsed.data.mfaCode) {
@@ -285,9 +286,10 @@ export const authOptions: NextAuthOptions = {
         where: { id: token.id },
         select: { attivo: true, ruolo: true, lockedUntil: true, mfaEnabled: true },
       });
+      const currentMfaRequired = !!currentUser && isMfaRequiredRole(currentUser.ruolo);
+      const currentMfaEnrollmentRequired = currentMfaRequired && !currentUser.mfaEnabled;
       const operationalMfaMissing =
-        !!currentUser
-        && isMfaRequiredRole(currentUser.ruolo)
+        currentMfaRequired
         && currentUser.mfaEnabled
         && token.mfaVerified !== true;
 
@@ -311,8 +313,10 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = typeof token.id === "string" ? token.id : "";
         session.user.role = typeof token.role === "string" ? token.role : "";
-        session.user.mfaEnrollmentRequired = token.mfaEnrollmentRequired === true;
-        session.user.mfaVerified = token.mfaVerified === true;
+        session.user.mfaEnrollmentRequired = currentMfaEnrollmentRequired;
+        session.user.mfaVerified = currentMfaRequired
+          ? currentUser.mfaEnabled && token.mfaVerified === true
+          : true;
       }
 
       return session;
