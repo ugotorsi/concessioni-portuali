@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 
+import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { discoverItalianLegalReferences } from "@/server/intake/legal-reference-discovery/parser";
 import {
@@ -47,6 +48,7 @@ type AknEvidence = Readonly<{
   expressionDate: string;
   expressionKey: string;
   citationAnchor: Readonly<{ section: string; anchor: string }>;
+  relevantText: string;
   sourceUrl: string;
 }>;
 
@@ -97,6 +99,7 @@ function citationAnchor(xml: string, researchQuestion: string) {
   return {
     section: articleNumber ? `Art. ${articleNumber}` : selected.anchor,
     anchor: selected.anchor,
+    relevantText: selected.text,
   };
 }
 
@@ -200,6 +203,7 @@ async function acquireNormattivaAkn(input: {
       expressionDate: expression[2],
       expressionKey: expression[1],
       citationAnchor: anchor,
+      relevantText: anchor.relevantText,
       sourceUrl: aknUrl.toString(),
     };
   } finally {
@@ -458,6 +462,17 @@ async function persistVerifiedNormattivaSource(input: {
       ? "SOURCE_RETRIEVAL_REVIEW_REQUIRED"
       : identity.reason,
     currentMission: input.mission.lifecycleStatus === "CURRENT",
+  });
+  await prisma.researchQuestionResultRecord.update({
+    where: { id: input.resultId },
+    data: {
+      candidateSnapshot: {
+        ...input.candidate,
+        officialRelevantPassage: input.evidence.relevantText,
+        officialCitationReference: input.evidence.citationAnchor.section,
+        officialContentSha256: input.evidence.contentSha256,
+      } as unknown as Prisma.InputJsonValue,
+    },
   });
   return assessment.usable;
 }

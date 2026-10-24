@@ -48,12 +48,34 @@ function resolvedSubjectIds(item: StructuredKnowledgeItem, subjects: ReadonlyMap
   }));
 }
 
-function identityFor(item: StructuredKnowledgeItem, subjectIds: readonly string[], dependencies: readonly string[]): string {
+function identityFor(
+  item: StructuredKnowledgeItem,
+  subjectIds: readonly string[],
+  dependencies: readonly string[],
+  proceedingAnchorSemanticKey: string | null,
+): string {
   switch (item.kind) {
     case "PARTY_ROLE": return [subjectIds[0], normalized(item.payload.role), normalized(item.payload.context ?? "")].join("|");
     case "PARTY_POSITION": return [subjectIds[0], item.payload.positionType, normalized(item.payload.normalizedStatement)].join("|");
-    case "FACT": return [normalized(item.payload.normalizedStatement), ...subjectIds].join("|");
-    case "EVENT": return [normalized(item.payload.normalizedStatement), JSON.stringify(item.payload.date), ...subjectIds].join("|");
+    case "FACT": return [
+      normalized(item.payload.normalizedStatement),
+      ...subjectIds,
+      ...(proceedingAnchorSemanticKey ? [
+        normalized(item.payload.object ?? ""),
+        normalized(item.payload.qualifier ?? ""),
+        proceedingAnchorSemanticKey,
+      ] : []),
+    ].join("|");
+    case "EVENT": return [
+      normalized(item.payload.normalizedStatement),
+      JSON.stringify(item.payload.date),
+      ...subjectIds,
+      ...(proceedingAnchorSemanticKey ? [
+        normalized(item.payload.title),
+        ...sorted(dependencies),
+        proceedingAnchorSemanticKey,
+      ] : []),
+    ].join("|");
     case "LEGAL_ACT":
     case "MEASURE": return [item.payload.documentBasisRef, normalized(item.payload.actType), subjectIds[0] ?? "", normalized(item.payload.number ?? ""), JSON.stringify(item.payload.date)].join("|");
     case "CONTRADICTION": return sorted(dependencies).join("|");
@@ -62,19 +84,52 @@ function identityFor(item: StructuredKnowledgeItem, subjectIds: readonly string[
   }
 }
 
-function materialPayload(item: StructuredKnowledgeItem, subjectIds: readonly string[], dependencyKeys: readonly string[]) {
+function materialPayload(
+  item: StructuredKnowledgeItem,
+  subjectIds: readonly string[],
+  dependencyKeys: readonly string[],
+  proceedingAnchorSemanticKey: string | null,
+) {
   const payload = { ...item.payload } as Record<string, unknown>;
+  const proceedingIdentity = item.kind === "FACT" || item.kind === "EVENT"
+    ? item.payload.proceedingIdentity
+    : null;
   delete payload.subjectLocalId;
   delete payload.subjectLocalIds;
   delete payload.authoritySubjectLocalId;
   delete payload.relatedItemLocalIds;
   delete payload.conflictingItemLocalIds;
+  delete payload.proceedingIdentity;
   return {
     ...payload,
     subjectIds: [...subjectIds],
     relatedSemanticKeys: [...sorted(dependencyKeys)],
+    ...(proceedingIdentity && proceedingAnchorSemanticKey ? {
+      proceedingIdentity: {
+        ...(proceedingIdentity.declaredKey ? { declaredKey: proceedingIdentity.declaredKey } : {}),
+        canonicalAnchorSemanticKey: proceedingAnchorSemanticKey,
+        kind: proceedingIdentity.kind,
+        evidenceBasisRefs: proceedingIdentity.evidenceBasisRefs,
+      },
+    } : {}),
     semanticKeyVersion: FASCICOLO_STRUCTURED_SEMANTIC_KEY_VERSION,
   };
+}
+
+function hasDocumentedProceedingIdentity(item: StructuredKnowledgeItem): boolean {
+  if (item.kind !== "FACT" && item.kind !== "EVENT") return true;
+  const identity = item.payload.proceedingIdentity;
+  return identity == null || identity.evidenceBasisRefs.every((basisRef) => item.basisRefs.includes(basisRef));
+}
+
+function proceedingAnchorLocalId(item: StructuredKnowledgeItem): string | null {
+  return item.kind === "FACT" || item.kind === "EVENT"
+    ? item.payload.proceedingIdentity?.canonicalAnchorLocalId ?? null
+    : null;
+}
+
+function isCanonicalProceedingAnchor(item: StructuredKnowledgeItem | undefined): boolean {
+  return item?.kind === "LEGAL_ACT" || item?.kind === "MEASURE";
 }
 
 export function projectStructuredKnowledge(input: {
@@ -87,6 +142,7 @@ export function projectStructuredKnowledge(input: {
   const candidates: PreparedKnowledgeItemCandidate[] = [];
   const candidatesByLocalId = new Map<string, PreparedKnowledgeItemCandidate>();
   const semanticKeysByLocalId = new Map<string, string>();
+  const itemsByLocalId = new Map(knowledge.items.map((item) => [item.localId, item]));
   const pending = [...knowledge.items];
   let progressed = true;
   while (pending.length > 0 && progressed) {
@@ -95,18 +151,36 @@ export function projectStructuredKnowledge(input: {
       const item = pending[index];
       const dependencyLocalIds = item.kind === "CONTRADICTION" ? item.payload.conflictingItemLocalIds
         : item.kind === "PARTY_POSITION" || item.kind === "EVENT" || item.kind === "GAP" ? item.payload.relatedItemLocalIds : [];
-      const dependencyKeys = dependencyLocalIds.map((localId) => semanticKeysByLocalId.get(localId));
+      const anchorLocalId = proceedingAnchorLocalId(item);
+      const allDependencyLocalIds = [...new Set([
+        ...dependencyLocalIds,
+        ...(anchorLocalId ? [anchorLocalId] : []),
+      ])];
+      const dependencyKeys = allDependencyLocalIds.map((localId) => semanticKeysByLocalId.get(localId));
       if (dependencyKeys.some((key) => !key)) continue;
+      const relatedDependencyKeys = dependencyLocalIds.map((localId) => semanticKeysByLocalId.get(localId));
+      if (relatedDependencyKeys.some((key) => !key)) continue;
       const evidence = item.basisRefs.map((basisRef) => input.evidenceByBasisRef.get(basisRef));
-      if (evidence.some((entry) => !entry)) {
+      if (evidence.some((entry) => !entry) || !hasDocumentedProceedingIdentity(item)) {
         warnings.push(`INVALID_EVIDENCE:${item.localId}`);
         pending.splice(index, 1);
         progressed = true;
         continue;
       }
       try {
+        if (anchorLocalId && !isCanonicalProceedingAnchor(itemsByLocalId.get(anchorLocalId))) {
+          throw new Error(`INVALID_PROCEEDING_ANCHOR:${anchorLocalId}`);
+        }
+        const proceedingAnchorSemanticKey = anchorLocalId
+          ? semanticKeysByLocalId.get(anchorLocalId) ?? null
+          : null;
         const subjectIds = resolvedSubjectIds(item, input.subjectIdsByLocalId);
-        const normalizedIdentity = identityFor(item, subjectIds, dependencyKeys as string[]);
+        const normalizedIdentity = identityFor(
+          item,
+          subjectIds,
+          relatedDependencyKeys as string[],
+          proceedingAnchorSemanticKey,
+        );
         const candidate: KnowledgeItemCandidate = {
           kind: item.kind,
           normalizedIdentity,
@@ -115,7 +189,12 @@ export function projectStructuredKnowledge(input: {
               : "description" in item.payload ? item.payload.description
                 : "title" in item.payload ? item.payload.title
                   : item.payload.ruleText ?? item.payload.calculationExplanation ?? item.payload.deadlineType,
-          structuredPayload: materialPayload(item, subjectIds, dependencyKeys as string[]),
+          structuredPayload: materialPayload(
+            item,
+            subjectIds,
+            dependencyKeys as string[],
+            proceedingAnchorSemanticKey,
+          ),
           confidence: item.confidence,
           evidence: evidence as KnowledgeEvidenceCandidate[],
         };
@@ -149,7 +228,30 @@ export function projectStructuredKnowledge(input: {
       continue;
     }
     const originCandidates = origins as PreparedKnowledgeItemCandidate[];
-    const normalizedIdentity = normalized(issue.normalizedIssue);
+    const targetIdentity = issue.targetProceedingIdentity;
+    const targetAnchor = targetIdentity
+      ? candidatesByLocalId.get(targetIdentity.canonicalAnchorLocalId)
+      : null;
+    if (targetIdentity && (
+      !targetAnchor
+      || !isCanonicalProceedingAnchor(itemsByLocalId.get(targetIdentity.canonicalAnchorLocalId))
+      || !issue.originatingItemLocalIds.includes(targetIdentity.canonicalAnchorLocalId)
+    )) {
+      warnings.push(`INVALID_PROCEEDING_ANCHOR:${issue.localId}`);
+      continue;
+    }
+    const originBasisRefs = new Set(originCandidates.flatMap((origin) => origin.evidence.map((entry) => entry.basisRef)));
+    if (targetIdentity && !targetIdentity.evidenceBasisRefs.every((basisRef) => originBasisRefs.has(basisRef))) {
+      warnings.push(`INVALID_PROCEEDING_IDENTITY_EVIDENCE:${issue.localId}`);
+      continue;
+    }
+    const normalizedIdentity = [
+      normalized(issue.normalizedIssue),
+      ...(targetAnchor ? [
+        ...sorted(originCandidates.map((origin) => origin.semanticKey)),
+        targetAnchor.semanticKey,
+      ] : []),
+    ].join("|");
     const candidate = prepareKnowledgeItemCandidate({
       kind: "LEGAL_ISSUE",
       normalizedIdentity,
@@ -163,6 +265,18 @@ export function projectStructuredKnowledge(input: {
         originatingSemanticKeys: sorted(originCandidates.map((origin) => origin.semanticKey)),
         confidence: issue.confidence,
         referenceDateBasis: issue.referenceDateBasis,
+        ...(issue.targetProceedingIdentity && targetAnchor
+          ? {
+              targetProceedingIdentity: {
+                ...(issue.targetProceedingIdentity.declaredKey
+                  ? { declaredKey: issue.targetProceedingIdentity.declaredKey }
+                  : {}),
+                canonicalAnchorSemanticKey: targetAnchor.semanticKey,
+                kind: issue.targetProceedingIdentity.kind,
+                evidenceBasisRefs: issue.targetProceedingIdentity.evidenceBasisRefs,
+              },
+            }
+          : {}),
         semanticKeyVersion: FASCICOLO_STRUCTURED_SEMANTIC_KEY_VERSION,
       },
       confidence: issue.confidence,
@@ -252,6 +366,14 @@ export function projectStructuredKnowledge(input: {
       return targetSemanticKey ? [{ sourceSemanticKey, targetSemanticKey, relationType: "ISSUE_DERIVED_FROM" as const }] : [];
     });
   });
+  const proceedingIdentityRelations = knowledge.items.flatMap((item) => {
+    const anchorLocalId = proceedingAnchorLocalId(item);
+    const sourceSemanticKey = semanticKeysByLocalId.get(item.localId);
+    const targetSemanticKey = anchorLocalId ? semanticKeysByLocalId.get(anchorLocalId) : null;
+    return sourceSemanticKey && targetSemanticKey
+      ? [{ sourceSemanticKey, targetSemanticKey, relationType: "RELATED_TO" as const }]
+      : [];
+  });
   const questionRelations = knowledge.researchQuestions.flatMap((question) => {
     const sourceSemanticKey = candidatesByLocalId.get(question.localId)?.semanticKey;
     const targetSemanticKey = issueSemanticKeysByLocalId.get(question.legalIssueLocalId);
@@ -259,6 +381,11 @@ export function projectStructuredKnowledge(input: {
       ? [{ sourceSemanticKey, targetSemanticKey, relationType: "QUESTION_FOR_ISSUE" as const }]
       : [];
   });
-  const relations = [...contradictionRelations, ...issueRelations, ...questionRelations];
+  const relations = [
+    ...contradictionRelations,
+    ...proceedingIdentityRelations,
+    ...issueRelations,
+    ...questionRelations,
+  ];
   return { candidates, relations, warnings };
 }

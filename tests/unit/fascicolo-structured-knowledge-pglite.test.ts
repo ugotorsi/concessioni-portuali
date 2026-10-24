@@ -452,6 +452,228 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
     expect((await getCurrentKnowledgeRevision(scope("procedure-b1", "tenant-b"), ctx))?.id).toBe(tenantB.revision.id);
   });
 
+  it("keeps equal facts distinct when they belong to different administrative proceedings", async () => {
+    const db = await database();
+    const ctx = context(db);
+    const base = structuredKnowledge();
+    const identified = {
+      ...base,
+      items: base.items.map((item) => item.localId === "fact-a" || item.localId === "fact-b"
+        ? {
+            ...item,
+            payload: {
+              ...item.payload,
+              normalizedStatement: "Il procedimento è ancora pendente",
+              subjectLocalIds: ["subject-authority"],
+              proceedingIdentity: {
+                declaredKey: "shared-declared-key",
+                canonicalAnchorLocalId: item.localId === "fact-a" ? "legal-act" : "measure",
+                kind: "ADMINISTRATIVE_ORIGINAL" as const,
+                evidenceBasisRefs: ["DOCUMENT_1.PAGE_1"],
+              },
+            },
+          }
+        : item),
+    };
+    const result = await persistStructuredKnowledgeRevision({
+      ...scope(),
+      corpusFingerprint: "6".repeat(64),
+      knowledge: identified,
+      evidenceByBasisRef: new Map([["DOCUMENT_1.PAGE_1", evidence()]]),
+    }, ctx);
+    const facts = result.revision.items.filter((item) => item.kind === "FACT"
+      && item.normalizedText === "Il procedimento è ancora pendente");
+    expect(facts).toHaveLength(2);
+    expect(new Set(facts.map((item) => item.semanticKey))).toHaveLength(2);
+  });
+
+  it.each([
+    ["object", "Titolo A", "Titolo B", null, null],
+    ["qualifier", null, null, "originale", "integrazione"],
+  ] as const)("keeps anchored facts distinct when %s materially differs", async (
+    _field,
+    firstObject,
+    secondObject,
+    firstQualifier,
+    secondQualifier,
+  ) => {
+    const db = await database();
+    const ctx = context(db);
+    const base = structuredKnowledge();
+    const identified = {
+      ...base,
+      items: base.items.map((item) => item.localId === "fact-a" || item.localId === "fact-b"
+        ? {
+            ...item,
+            payload: {
+              ...item.payload,
+              normalizedStatement: "Il titolo è stato depositato",
+              subjectLocalIds: ["subject-authority"],
+              object: item.localId === "fact-a" ? firstObject : secondObject,
+              qualifier: item.localId === "fact-a" ? firstQualifier : secondQualifier,
+              proceedingIdentity: {
+                canonicalAnchorLocalId: "measure",
+                kind: "ADMINISTRATIVE_ORIGINAL" as const,
+                evidenceBasisRefs: ["DOCUMENT_1.PAGE_1"],
+              },
+            },
+          }
+        : item),
+    };
+    const result = await persistStructuredKnowledgeRevision({
+      ...scope(),
+      corpusFingerprint: "1".repeat(64),
+      knowledge: identified,
+      evidenceByBasisRef: new Map([["DOCUMENT_1.PAGE_1", evidence()]]),
+    }, ctx);
+    const facts = result.revision.items.filter((item) => item.kind === "FACT"
+      && item.normalizedText === "Il titolo è stato depositato");
+    expect(facts).toHaveLength(2);
+    expect(new Set(facts.map((item) => item.semanticKey))).toHaveLength(2);
+  });
+
+  it("keeps anchored events distinct when their titles differ", async () => {
+    const db = await database();
+    const ctx = context(db);
+    const base = structuredKnowledge();
+    const source = base.items.find((item) => item.localId === "event-exact")!;
+    if (source.kind !== "EVENT") throw new Error("Expected event fixture.");
+    const events = ["Avvio", "Conclusione"].map((title, index) => ({
+      ...source,
+      localId: `event-collision-${index}`,
+      payload: {
+        ...source.payload,
+        title,
+        normalizedStatement: "Stato del procedimento registrato",
+        relatedItemLocalIds: ["fact-a"],
+        proceedingIdentity: {
+          canonicalAnchorLocalId: "measure",
+          kind: "ADMINISTRATIVE_ORIGINAL" as const,
+          evidenceBasisRefs: ["DOCUMENT_1.PAGE_1"],
+        },
+      },
+    }));
+    const result = await persistStructuredKnowledgeRevision({
+      ...scope(),
+      corpusFingerprint: "2".repeat(64),
+      knowledge: { ...base, items: [...base.items, ...events] },
+      evidenceByBasisRef: new Map([["DOCUMENT_1.PAGE_1", evidence()]]),
+    }, ctx);
+    const persisted = result.revision.items.filter((item) => item.normalizedText === "Stato del procedimento registrato");
+    expect(persisted).toHaveLength(2);
+    expect(new Set(persisted.map((item) => item.semanticKey))).toHaveLength(2);
+  });
+
+  it("keeps anchored events distinct when their structural relations differ", async () => {
+    const db = await database();
+    const ctx = context(db);
+    const base = structuredKnowledge();
+    const source = base.items.find((item) => item.localId === "event-exact")!;
+    if (source.kind !== "EVENT") throw new Error("Expected event fixture.");
+    const events = ["fact-a", "fact-b"].map((relatedItemLocalId, index) => ({
+      ...source,
+      localId: `event-relation-${index}`,
+      payload: {
+        ...source.payload,
+        title: "Aggiornamento",
+        normalizedStatement: "Aggiornamento del procedimento registrato",
+        relatedItemLocalIds: [relatedItemLocalId],
+        proceedingIdentity: {
+          canonicalAnchorLocalId: "measure",
+          kind: "ADMINISTRATIVE_ORIGINAL" as const,
+          evidenceBasisRefs: ["DOCUMENT_1.PAGE_1"],
+        },
+      },
+    }));
+    const result = await persistStructuredKnowledgeRevision({
+      ...scope(),
+      corpusFingerprint: "3".repeat(64),
+      knowledge: { ...base, items: [...base.items, ...events] },
+      evidenceByBasisRef: new Map([["DOCUMENT_1.PAGE_1", evidence()]]),
+    }, ctx);
+    const persisted = result.revision.items.filter((item) => item.normalizedText === "Aggiornamento del procedimento registrato");
+    expect(persisted).toHaveLength(2);
+    expect(new Set(persisted.map((item) => item.semanticKey))).toHaveLength(2);
+  });
+
+  it("keeps anchored event identity stable across relation order and content-only changes", async () => {
+    const db = await database();
+    const ctx = context(db);
+    const base = structuredKnowledge();
+    const withEvent = (relatedItemLocalIds: readonly string[], confidence: number) => ({
+      ...base,
+      items: base.items.map((item) => item.localId === "event-exact" ? {
+        ...item,
+        confidence,
+        payload: {
+          ...item.payload,
+          relatedItemLocalIds: [...relatedItemLocalIds],
+          proceedingIdentity: {
+            canonicalAnchorLocalId: "measure",
+            kind: "ADMINISTRATIVE_ORIGINAL" as const,
+            evidenceBasisRefs: ["DOCUMENT_1.PAGE_1"],
+          },
+        },
+      } : item),
+    });
+    const first = await persistStructuredKnowledgeRevision({
+      ...scope(),
+      corpusFingerprint: "5".repeat(64),
+      knowledge: withEvent(["fact-a", "fact-b"], 88),
+      evidenceByBasisRef: new Map([["DOCUMENT_1.PAGE_1", evidence()]]),
+    }, ctx);
+    const firstEvent = first.revision.items.find((item) => item.kind === "EVENT"
+      && item.normalizedText === "Partenza registrata")!;
+    const second = await persistStructuredKnowledgeRevision({
+      ...scope(),
+      corpusFingerprint: "7".repeat(64),
+      knowledge: withEvent(["fact-b", "fact-a"], 75),
+      evidenceByBasisRef: new Map([["DOCUMENT_1.PAGE_1", evidence()]]),
+    }, ctx);
+    const secondEvent = second.revision.items.find((item) => item.kind === "EVENT"
+      && item.normalizedText === "Partenza registrata")!;
+    expect(secondEvent.semanticKey).toBe(firstEvent.semanticKey);
+    expect(secondEvent.contentFingerprint).not.toBe(firstEvent.contentFingerprint);
+    expect(second.classifications.find((entry) => entry.semanticKey === firstEvent.semanticKey)).toMatchObject({
+      classification: "MODIFIED",
+      previousItemId: firstEvent.id,
+    });
+  });
+
+  it("keeps legal issues distinct when their documented origins differ", async () => {
+    const db = await database();
+    const ctx = context(db);
+    const base = structuredKnowledge();
+    const issue = (localId: string, originLocalId: string) => ({
+      localId,
+      title: "Disciplina del procedimento",
+      normalizedIssue: "Quale disciplina si applica?",
+      areaOfLaw: "diritto amministrativo",
+      priority: "HIGH" as const,
+      rationale: "La disciplina dipende dai fatti documentati.",
+      originatingItemLocalIds: [originLocalId, "measure"],
+      confidence: 90,
+      referenceDateBasis: null,
+      targetProceedingIdentity: {
+        canonicalAnchorLocalId: "measure",
+        kind: "ADMINISTRATIVE_ORIGINAL" as const,
+        evidenceBasisRefs: ["DOCUMENT_1.PAGE_1"],
+      },
+    });
+    const result = await persistStructuredKnowledgeRevision({
+      ...scope(),
+      corpusFingerprint: "4".repeat(64),
+      knowledge: {
+        ...base,
+        legalIssues: [issue("issue-a", "fact-a"), issue("issue-b", "fact-b")],
+      },
+      evidenceByBasisRef: new Map([["DOCUMENT_1.PAGE_1", evidence()]]),
+    }, ctx);
+    const issues = result.revision.items.filter((item) => item.kind === "LEGAL_ISSUE");
+    expect(issues).toHaveLength(2);
+    expect(new Set(issues.map((item) => item.semanticKey))).toHaveLength(2);
+  });
+
   it("changes content fingerprints for material evidence while keeping semantic keys stable", async () => {
     const db = await database();
     const ctx = context(db);
@@ -477,6 +699,22 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
     const ctx = context(db);
     const lotto3Knowledge = {
       ...structuredKnowledge(),
+      items: structuredKnowledge().items.map((item) => (
+        item.localId === "fact-a" || item.localId === "event-exact"
+          ? {
+              ...item,
+              payload: {
+                ...item.payload,
+                proceedingIdentity: {
+                  declaredKey: "administrative-proceeding-a",
+                  canonicalAnchorLocalId: "measure",
+                  kind: "ADMINISTRATIVE_ORIGINAL" as const,
+                  evidenceBasisRefs: ["DOCUMENT_1.PAGE_1"],
+                },
+              },
+            }
+          : item
+      )),
       legalIssues: [{
         localId: "issue-1",
         title: "Efficacia del decreto",
@@ -487,6 +725,12 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
         originatingItemLocalIds: ["fact-a", "measure", "gap"],
         confidence: 90,
         referenceDateBasis: null,
+        targetProceedingIdentity: {
+          declaredKey: "administrative-proceeding-a",
+          canonicalAnchorLocalId: "measure",
+          kind: "ADMINISTRATIVE_ORIGINAL" as const,
+          evidenceBasisRefs: ["DOCUMENT_1.PAGE_1"],
+        },
       }],
       researchQuestions: [{
         localId: "question-1",
@@ -520,6 +764,12 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
     expect(second.revision.items.find((item) => item.semanticKey === issue.semanticKey)?.status).toBe("HUMAN_CONFIRMED");
     const readModel = await loadCurrentStructuredKnowledge("tenant-a", "procedure-a1", queryExecutor(db));
     expect(readModel?.legalIssues[0]).toMatchObject({ status: "HUMAN_CONFIRMED", originatingItemIds: expect.any(Array) });
+    expect(readModel?.legalIssues[0].payload).toMatchObject({
+      targetProceedingIdentity: { canonicalAnchorSemanticKey: expect.stringMatching(/^[a-f0-9]{64}$/) },
+    });
+    expect(readModel?.facts.find((item) => item.normalizedText.includes("12:50"))?.payload).toMatchObject({
+      proceedingIdentity: { canonicalAnchorSemanticKey: expect.stringMatching(/^[a-f0-9]{64}$/) },
+    });
     expect(readModel?.legalIssues[0].originatingItemIds).toHaveLength(3);
     expect(readModel?.researchQuestions[0]).toMatchObject({ legalIssueId: readModel!.legalIssues[0].id });
   });

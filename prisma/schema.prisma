@@ -115,6 +115,13 @@ enum FascicoloKnowledgeItemStatus {
   REJECTED
 }
 
+enum FascicoloKnowledgeIdentityState {
+  VERIFIED_NEW
+  VERIFIED_CONTINUATION
+  AMBIGUOUS
+  LEGACY_UNVERIFIED
+}
+
 enum FascicoloKnowledgeRelationType {
   RELATED_TO
   SUPERSEDES
@@ -997,7 +1004,8 @@ model Ente {
   aiFascicoloHumanReviewStates      AiFascicoloHumanReviewState[]
   aiFascicoloHumanReviewEvents      AiFascicoloHumanReviewEvent[]
   fascicoloKnowledgeRevisions       FascicoloKnowledgeRevision[]
-  fascicoloKnowledgeItems           FascicoloKnowledgeItem[]
+  fascicoloKnowledgeIdentities       FascicoloKnowledgeIdentity[]
+  fascicoloKnowledgeItems            FascicoloKnowledgeItem[]
   fascicoloKnowledgeEvidence        FascicoloKnowledgeEvidence[]
   fascicoloKnowledgeRelations       FascicoloKnowledgeRelation[]
   fascicoloSubjects                 FascicoloSubject[]
@@ -1750,7 +1758,8 @@ model Procedimento {
   neutralIntakeDestinations         NeutralIntakeDestination[]
   fascicoloSignals                  FascicoloSignal[]
   fascicoloKnowledgeRevisions       FascicoloKnowledgeRevision[]
-  fascicoloKnowledgeItems           FascicoloKnowledgeItem[]
+  fascicoloKnowledgeIdentities       FascicoloKnowledgeIdentity[]
+  fascicoloKnowledgeItems            FascicoloKnowledgeItem[]
   fascicoloKnowledgeEvidence        FascicoloKnowledgeEvidence[]
   fascicoloKnowledgeRelations       FascicoloKnowledgeRelation[]
   structuredFascicoloReports        StructuredFascicoloReportSnapshot[]
@@ -3429,7 +3438,8 @@ model FascicoloKnowledgeRevision {
   tenant         Ente                        @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   procedimento   Procedimento                @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
   items          FascicoloKnowledgeItem[]
-  relations      FascicoloKnowledgeRelation[]
+  createdIdentities     FascicoloKnowledgeIdentity[]
+  relations             FascicoloKnowledgeRelation[]
   researchMissions ResearchMissionRecord[] @relation("ResearchMissionCurrentKnowledgeRevision")
   firstResearchMissions ResearchMissionRecord[] @relation("ResearchMissionFirstKnowledgeRevision")
   structuredReports StructuredFascicoloReportSnapshot[]
@@ -3593,26 +3603,50 @@ model FascicoloSubjectIdentifier {
   @@index([subjectId, tenantId], map: "fascicolo_subject_identifier_subject_idx")
 }
 
+model FascicoloKnowledgeIdentity {
+  id                  String   @id @default(cuid())
+  tenantId            String
+  procedimentoId      String
+  kind                 String   @db.VarChar(64)
+  createdInRevisionId String
+  creationBasis       Json
+  createdAt           DateTime @default(now())
+
+  tenant            Ente                       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  procedimento      Procedimento               @relation(fields: [procedimentoId, tenantId], references: [id, enteId], onDelete: Restrict, onUpdate: NoAction)
+  createdInRevision FascicoloKnowledgeRevision @relation(fields: [createdInRevisionId, tenantId, procedimentoId], references: [id, tenantId, procedimentoId], onDelete: Restrict, onUpdate: NoAction)
+  versions          FascicoloKnowledgeItem[]
+
+  @@unique([id, tenantId, procedimentoId, kind], map: "fascicolo_knowledge_identity_scope_kind_uq")
+  @@index([tenantId, procedimentoId, kind, createdAt], map: "fascicolo_knowledge_identity_scope_kind_idx")
+  @@index([createdInRevisionId], map: "fascicolo_knowledge_identity_created_revision_idx")
+}
+
 model FascicoloKnowledgeItem {
-  id                 String                        @id @default(cuid())
+  id                 String                           @id @default(cuid())
   tenantId           String
   procedimentoId     String
   revisionId         String
-  kind               String                        @db.VarChar(64)
-  semanticKey        String                        @db.Char(64)
-  semanticKeyVersion String                        @db.VarChar(32)
-  contentFingerprint String                        @db.Char(64)
-  normalizedText     String                        @db.Text
+  kind               String                           @db.VarChar(64)
+  semanticKey        String                           @db.Char(64)
+  semanticKeyVersion String                           @db.VarChar(32)
+  contentFingerprint String                           @db.Char(64)
+  normalizedText     String                           @db.Text
   structuredPayload  Json
   confidence         Int?
-  status             FascicoloKnowledgeItemStatus @default(AI_PROPOSED)
-  reviewVersion      Int                           @default(0)
-  createdAt          DateTime                      @default(now())
+  status             FascicoloKnowledgeItemStatus     @default(AI_PROPOSED)
+  reviewVersion      Int                              @default(0)
+  identityId         String?
+  identityState      FascicoloKnowledgeIdentityState?
+  identityBasis      Json?
+  identityCommandFingerprint String?                @db.Char(64)
+  createdAt          DateTime                         @default(now())
   supersededAt       DateTime?
 
-  tenant            Ente                           @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  procedimento      Procedimento                   @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
-  revision          FascicoloKnowledgeRevision     @relation(fields: [revisionId, tenantId, procedimentoId], references: [id, tenantId, procedimentoId], onDelete: Restrict)
+  tenant            Ente                        @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  procedimento      Procedimento                @relation(fields: [procedimentoId], references: [id], onDelete: Restrict)
+  revision          FascicoloKnowledgeRevision  @relation(fields: [revisionId, tenantId, procedimentoId], references: [id, tenantId, procedimentoId], onDelete: Restrict)
+  identity          FascicoloKnowledgeIdentity? @relation(fields: [identityId, tenantId, procedimentoId, kind], references: [id, tenantId, procedimentoId, kind], onDelete: Restrict, onUpdate: NoAction)
   evidence          FascicoloKnowledgeEvidence[]
   outgoingRelations FascicoloKnowledgeRelation[]   @relation("FascicoloKnowledgeRelationSource")
   incomingRelations FascicoloKnowledgeRelation[]   @relation("FascicoloKnowledgeRelationTarget")
@@ -3620,8 +3654,10 @@ model FascicoloKnowledgeItem {
 
   @@unique([id, tenantId, procedimentoId], map: "fascicolo_knowledge_item_scope_uq")
   @@unique([revisionId, semanticKeyVersion, semanticKey], map: "fascicolo_knowledge_item_revision_semantic_uq")
+  @@unique([revisionId, identityId], map: "fascicolo_knowledge_item_revision_identity_uq")
   @@index([tenantId, procedimentoId, revisionId, status], map: "fascicolo_knowledge_item_scope_status_idx")
   @@index([tenantId, procedimentoId, semanticKeyVersion, semanticKey], map: "fascicolo_knowledge_item_semantic_idx")
+  @@index([tenantId, procedimentoId, identityId], map: "fascicolo_knowledge_item_identity_idx")
 }
 
 model FascicoloKnowledgeEvidence {
@@ -3647,12 +3683,30 @@ model FascicoloKnowledgeEvidence {
   documentFileVersion DocumentFileVersion?            @relation(fields: [documentFileVersionId], references: [id], onDelete: Restrict)
   extractionAttempt   NeutralIntakeExtractionAttempt? @relation(fields: [extractionAttemptId], references: [id], onDelete: Restrict)
   documentExtractionAttempt DocumentExtractionAttempt? @relation(fields: [documentExtractionAttemptId], references: [id], onDelete: Restrict)
+  spans                     FascicoloKnowledgeEvidenceSpan[]
 
+  @@unique([id, tenantId, procedimentoId], map: "fascicolo_knowledge_evidence_scope_uq")
   @@unique([itemId, documentoId, documentFileVersionId, extractionAttemptId, documentExtractionAttemptId, pageNumber, textSha256, quoteSha256], map: "fascicolo_knowledge_evidence_identity_uq")
   @@index([tenantId, procedimentoId, itemId], map: "fascicolo_knowledge_evidence_scope_item_idx")
   @@index([documentoId, documentFileVersionId], map: "fascicolo_knowledge_evidence_document_idx")
   @@index([extractionAttemptId], map: "fascicolo_knowledge_evidence_extraction_idx")
   @@index([documentExtractionAttemptId], map: "fascicolo_knowledge_evidence_document_extraction_idx")
+}
+
+model FascicoloKnowledgeEvidenceSpan {
+  id             String   @id @default(cuid())
+  tenantId       String
+  procedimentoId String
+  evidenceId     String
+  startOffset    Int
+  endOffset      Int
+  quoteSha256    String   @db.Char(64)
+  createdAt      DateTime @default(now())
+
+  evidence FascicoloKnowledgeEvidence @relation(fields: [evidenceId, tenantId, procedimentoId], references: [id, tenantId, procedimentoId], onDelete: Restrict, onUpdate: NoAction)
+
+  @@unique([evidenceId, startOffset, endOffset], map: "fascicolo_knowledge_evidence_span_occurrence_uq")
+  @@index([tenantId, procedimentoId, evidenceId], map: "fascicolo_knowledge_evidence_span_scope_idx")
 }
 
 model FascicoloKnowledgeRelation {

@@ -12,6 +12,22 @@ const basisRefs = z.array(documentBasisRefSchema).min(1).max(64);
 const localIds = z.array(id).max(100);
 const confidence = z.number().int().min(0).max(100).nullable().optional().transform((value) => value ?? null);
 const isoDate = z.string().date();
+export const proceedingKindSchema = z.enum([
+  "ADMINISTRATIVE_ORIGINAL",
+  "ADMINISTRATIVE_OTHER",
+  "JUDICIAL_REVIEW",
+  "JUDICIAL_APPEAL",
+  "CRIMINAL",
+  "INTERNAL_INSTRUCTION",
+  "INCIDENTAL",
+  "UNKNOWN",
+]);
+const proceedingIdentitySchema = z.object({
+  declaredKey: id.optional(),
+  canonicalAnchorLocalId: id,
+  kind: proceedingKindSchema,
+  evidenceBasisRefs: basisRefs,
+}).strict();
 
 export const fascicoloSubjectTypeSchema = z.enum([
   "PERSON",
@@ -72,13 +88,26 @@ const partyPosition = z.object({
 const fact = z.object({
   ...common,
   kind: z.literal("FACT"),
-  payload: z.object({ normalizedStatement: text, subjectLocalIds: localIds.default([]), object: shortText.nullable().default(null), qualifier: shortText.nullable().default(null) }).strict(),
+  payload: z.object({
+    normalizedStatement: text,
+    subjectLocalIds: localIds.default([]),
+    object: shortText.nullable().default(null),
+    qualifier: shortText.nullable().default(null),
+    proceedingIdentity: proceedingIdentitySchema.nullable().optional(),
+  }).strict(),
 }).strict();
 
 const event = z.object({
   ...common,
   kind: z.literal("EVENT"),
-  payload: z.object({ title: shortText, normalizedStatement: text, date: structuredDateSchema, subjectLocalIds: localIds.default([]), relatedItemLocalIds: localIds.default([]) }).strict(),
+  payload: z.object({
+    title: shortText,
+    normalizedStatement: text,
+    date: structuredDateSchema,
+    subjectLocalIds: localIds.default([]),
+    relatedItemLocalIds: localIds.default([]),
+    proceedingIdentity: proceedingIdentitySchema.nullable().optional(),
+  }).strict(),
 }).strict();
 
 const actPayload = z.object({
@@ -153,6 +182,7 @@ export const legalIssueCandidateSchema = z.object({
   originatingItemLocalIds: z.array(id).min(1).max(100),
   confidence,
   referenceDateBasis: referenceDateBasisSchema.nullable().default(null),
+  targetProceedingIdentity: proceedingIdentitySchema.nullable().optional(),
 }).strict();
 
 export const researchQuestionCandidateSchema = z.object({

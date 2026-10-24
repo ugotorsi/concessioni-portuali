@@ -21,6 +21,97 @@ export const knowledgeItemKindSchema = z.enum([
 const sha256Schema = z.string().regex(/^[a-f0-9]{64}$/);
 const identifierSchema = z.string().trim().min(1).max(256);
 export const documentBasisRefSchema = z.string().regex(/^DOCUMENT_[1-9]\d*\.PAGE_[1-9]\d*$/);
+export const knowledgeIdentityStateSchema = z.enum([
+  "VERIFIED_NEW",
+  "VERIFIED_CONTINUATION",
+  "AMBIGUOUS",
+  "LEGACY_UNVERIFIED",
+]);
+export const knowledgeSourceSpanSchema = z.object({
+  documentoId: identifierSchema,
+  documentFileVersionId: identifierSchema,
+  pageNumber: z.number().int().positive(),
+  startOffset: z.number().int().nonnegative(),
+  endOffset: z.number().int().positive(),
+  quote: z.string().min(1).max(100_000),
+  textSha256: sha256Schema,
+  quoteSha256: sha256Schema,
+  basisRef: documentBasisRefSchema,
+}).strict().refine((value) => value.endOffset > value.startOffset, {
+  message: "SOURCE_SPAN_END_NOT_AFTER_START",
+});
+const sourceSpanFingerprints = z.array(sha256Schema).min(1).max(1_000)
+  .transform((values) => [...new Set(values)].sort());
+export const knowledgeIdentityBasisSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("SERVER_ASSIGNED_NEW"),
+    sourceSpanFingerprints,
+  }).strict(),
+  z.object({
+    type: z.literal("VERIFIED_SOURCE_SPAN_CONTINUITY"),
+    predecessorItemId: identifierSchema,
+    predecessorRevisionId: identifierSchema,
+    sourceSpanFingerprints,
+  }).strict(),
+  z.object({
+    type: z.literal("AMBIGUOUS_CONTINUITY"),
+    candidatePredecessorItemIds: z.array(identifierSchema).min(1).max(100)
+      .transform((values) => [...new Set(values)].sort()),
+    reasonCodes: z.array(z.enum([
+      "SOURCE_SPAN_MISSING",
+      "SOURCE_SPAN_NOT_UNIQUE",
+      "MULTIPLE_PREDECESSORS",
+      "MULTIPLE_CANDIDATES_FOR_PREDECESSOR",
+      "DOCUMENT_VERSION_CHANGED",
+      "CONTINUITY_CLAIM_UNVERIFIED",
+    ])).min(1).max(20).transform((values) => [...new Set(values)].sort()),
+    sourceSpanFingerprints: z.array(sha256Schema).max(1_000)
+      .transform((values) => [...new Set(values)].sort()),
+  }).strict(),
+]);
+export const canonicalKnowledgeIdentitySchema = z.object({
+  id: identifierSchema,
+  tenantId: identifierSchema,
+  procedimentoId: identifierSchema,
+  kind: knowledgeItemKindSchema,
+  createdInRevisionId: identifierSchema,
+  creationBasis: knowledgeIdentityBasisSchema
+    .refine((basis) => basis.type === "SERVER_ASSIGNED_NEW", "INVALID_CANONICAL_IDENTITY_CREATION_BASIS"),
+}).strict();
+export const persistedKnowledgeIdentitySchema = z.discriminatedUnion("state", [
+  z.object({
+    physicalItemId: identifierSchema,
+    identityId: identifierSchema,
+    state: z.literal("VERIFIED_NEW"),
+    basis: z.null(),
+  }).strict(),
+  z.object({
+    physicalItemId: identifierSchema,
+    identityId: identifierSchema,
+    state: z.literal("VERIFIED_CONTINUATION"),
+    basis: knowledgeIdentityBasisSchema
+      .refine((basis) => basis.type === "VERIFIED_SOURCE_SPAN_CONTINUITY", "INVALID_CONTINUATION_IDENTITY_BASIS"),
+  }).strict(),
+  z.object({
+    physicalItemId: identifierSchema,
+    identityId: z.null(),
+    state: z.literal("AMBIGUOUS"),
+    basis: knowledgeIdentityBasisSchema
+      .refine((basis) => basis.type === "AMBIGUOUS_CONTINUITY", "INVALID_AMBIGUOUS_IDENTITY_BASIS"),
+  }).strict(),
+  z.object({
+    physicalItemId: identifierSchema,
+    identityId: z.null(),
+    state: z.literal("LEGACY_UNVERIFIED"),
+    basis: z.null(),
+  }).strict(),
+]);
+export const KNOWLEDGE_SEMANTIC_CLASSIFICATION_VERSION =
+  "KNOWLEDGE_SEMANTIC_CLASSIFICATION_V1" as const;
+export const knowledgeSemanticClassificationSchema = z.object({
+  version: z.literal(KNOWLEDGE_SEMANTIC_CLASSIFICATION_VERSION),
+  fingerprint: sha256Schema,
+}).strict();
 
 export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 
@@ -86,6 +177,11 @@ export type KnowledgeScope = z.output<typeof knowledgeScopeSchema>;
 export type KnowledgeEvidenceCandidate = z.output<typeof knowledgeEvidenceCandidateSchema>;
 export type KnowledgeItemCandidate = z.output<typeof knowledgeItemCandidateSchema>;
 export type KnowledgeItemKind = z.output<typeof knowledgeItemKindSchema>;
+export type KnowledgeIdentityState = z.output<typeof knowledgeIdentityStateSchema>;
+export type KnowledgeSourceSpan = z.output<typeof knowledgeSourceSpanSchema>;
+export type KnowledgeIdentityBasis = z.output<typeof knowledgeIdentityBasisSchema>;
+export type CanonicalKnowledgeIdentity = z.output<typeof canonicalKnowledgeIdentitySchema>;
+export type PersistedKnowledgeIdentity = z.output<typeof persistedKnowledgeIdentitySchema>;
 
 export type KnowledgeItemReviewStatus = "AI_PROPOSED" | "HUMAN_CONFIRMED" | "REJECTED";
 export type KnowledgeRelationType = "RELATED_TO" | "SUPERSEDES" | "CONTRADICTS" | "ISSUE_DERIVED_FROM" | "QUESTION_FOR_ISSUE";

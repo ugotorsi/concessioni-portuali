@@ -6,8 +6,22 @@ import {
   type LegalCompletenessAssessment,
 } from "@/server/fascicolo-knowledge/legalCompleteness";
 import type { StructuredKnowledgeReadItem, StructuredKnowledgeReadModel } from "@/server/queries/fascicolo-knowledge";
+import {
+  applicabilityDimensionsFromRuleOrchestrator,
+  assessLegalApplicability,
+  type ApplicabilityFactReference,
+  type LegalApplicabilityAssessment,
+  type TransitionalDiscipline,
+  type VerifiedProvisionReference,
+} from "@/server/legal-reasoning/applicability";
+import { documentedProceedingIdentity } from "@/server/legal-reasoning/applicability/proceeding-identity";
+import type { EvaluatedSourceResult } from "@/server/legal-rules/types";
+import type { LegalApplicabilityReview } from "@/server/legal-research/assisted-verification";
+import type { SourceChainSnapshot } from "@/server/legal-research/source-chain";
+import type { TemporalAssessmentResult } from "@/server/legal-sources/temporal";
 
 export const STRUCTURED_FASCICOLO_REPORT_CONTRACT_VERSION = "STRUCTURED_FASCICOLO_REPORT_V1" as const;
+export const STRUCTURED_FASCICOLO_REPORT_V2_CONTRACT_VERSION = "STRUCTURED_FASCICOLO_REPORT_V2" as const;
 
 type JsonRecord = Readonly<Record<string, unknown>>;
 type Direction = "SUPPORTS" | "OPPOSES" | "NEUTRAL" | "INCONCLUSIVE" | "UNASSESSED";
@@ -30,6 +44,14 @@ export interface StructuredReportResearchResultInput {
     blockingReasons: readonly string[];
     manualReviewRequired: boolean;
     manualReviewReason: string | null;
+    sourceFamilyId?: string | null;
+    sourceVersionId?: string | null;
+    acquisitionId?: string | null;
+    temporalAssessmentId?: string | null;
+    sourceChain?: SourceChainSnapshot;
+    temporalAssessment?: TemporalAssessmentResult;
+    authorityKind?: LegalApplicabilityReview["legalAuthorityKind"];
+    provisionReference?: string;
   } | null;
 }
 
@@ -39,12 +61,25 @@ export interface StructuredReportMissionInput {
   missionFingerprint: string | null;
   knowledgeRevisionId: string | null;
   researchQuestionSemanticKey: string | null;
+  legalIssueSemanticKey?: string | null;
   lifecycleStatus: "CURRENT" | "HISTORICAL";
   status: string;
   question: string;
   coverageStatus: string;
   sourceGaps: readonly string[];
   results: readonly StructuredReportResearchResultInput[];
+  legalApplicabilityReviews?: readonly Readonly<{
+    review: LegalApplicabilityReview;
+    recordedByActorId: string | null;
+    orchestratorVerification?: Readonly<{
+      valid: boolean;
+      source: LegalApplicabilityReview["ruleOrchestrator"]["source"] | null;
+      ruleMatched: boolean;
+      resolvedSources?: readonly EvaluatedSourceResult[];
+      matchedSourceIds?: readonly string[];
+    }>;
+  }>[];
+  legalApplicabilityReviewIssues?: readonly string[];
 }
 
 export interface StructuredReportAuthority {
@@ -140,7 +175,7 @@ export interface StructuredReportTechnicalSource {
 }
 
 export interface StructuredFascicoloReportPayload {
-  contractVersion: typeof STRUCTURED_FASCICOLO_REPORT_CONTRACT_VERSION;
+  contractVersion: typeof STRUCTURED_FASCICOLO_REPORT_CONTRACT_VERSION | typeof STRUCTURED_FASCICOLO_REPORT_V2_CONTRACT_VERSION;
   tenantId: string;
   procedimentoId: string;
   knowledgeRevisionId: string;
@@ -175,6 +210,26 @@ export interface StructuredFascicoloReportPayload {
   technicalSources?: readonly StructuredReportTechnicalSource[];
   /** Deterministic coverage check; never creates legal issues or research questions. */
   legalCompleteness?: LegalCompletenessAssessment;
+  /** V2 only. V1 snapshots remain readable and are never rewritten. */
+  legalApplicability?: Readonly<{
+    assessmentVersion: "LEGAL_APPLICABILITY_V1";
+    applications: readonly Readonly<{
+      applicationId: string;
+      resultId: string;
+      legalIssueSemanticKey: string;
+      status: "ASSESSED" | "PRELIMINARY_AI_PROPOSED" | "NOT_EVALUATED" | "TO_VERIFY";
+      outcome: LegalApplicabilityAssessment["conclusion"]["outcome"] | "NOT_EVALUATED";
+      reasonCodes: readonly string[];
+      assessment: LegalApplicabilityAssessment | null;
+      reviewStatus: LegalApplicabilityReview["reviewStatus"] | null;
+      professionalReviewRequired: true;
+    }>[];
+    uncertainties: readonly Readonly<{
+      applicationId: string;
+      reasonCodes: readonly string[];
+      professionalReviewRequired: true;
+    }>[];
+  }>;
   limitations: readonly string[];
 }
 
@@ -196,6 +251,263 @@ function normalizedItem(item: StructuredKnowledgeReadItem): StructuredKnowledgeR
   return { ...item, evidence: [...item.evidence].sort((left, right) => (
     `${left.documentoId}:${left.pageNumber}:${left.textSha256}`.localeCompare(`${right.documentoId}:${right.pageNumber}:${right.textSha256}`)
   )) };
+}
+
+function itemDate(item: StructuredKnowledgeReadItem): string | null {
+  if (item.payload === null || typeof item.payload !== "object" || Array.isArray(item.payload)) return null;
+  const date = item.payload.date;
+  if (date === null || typeof date !== "object" || Array.isArray(date)) return null;
+  if (date.precision !== "EXACT" || typeof date.from !== "string" || item.evidence.length === 0) return null;
+  return date.to === null || date.to === date.from ? date.from : null;
+}
+
+function provision(
+  result: StructuredReportResearchResultInput,
+  reference: string,
+  _authorityKind: LegalApplicabilityReview["legalAuthorityKind"],
+): VerifiedProvisionReference | null {
+  const assessment = result.sourceAssessment;
+  if (!assessment?.sourceChain) return null;
+  return {
+    legalSourceId: assessment.sourceChain.sourceIdentityKey ?? assessment.assessmentId,
+    legalExpressionVersionId: assessment.sourceVersionId ?? assessment.sourceChain.sourceIdentityKey ?? assessment.assessmentId,
+    provisionReference: reference,
+    sourceAssessment: assessment.sourceChain,
+    citationAnchors: assessment.sourceChain.citationAnchors,
+    provenance: {
+      providerId: result.provider,
+      canonicalEvidenceId: assessment.assessmentId,
+      sourceUrl: result.sourceUrl,
+    },
+  };
+}
+
+function projectLegalApplicability(input: {
+  tenantId: string;
+  procedimentoId: string;
+  knowledge: StructuredKnowledgeReadModel;
+  missions: readonly StructuredReportMissionInput[];
+}): NonNullable<StructuredFascicoloReportPayload["legalApplicability"]> {
+  const items = new Map([
+    ...input.knowledge.facts,
+    ...input.knowledge.events,
+    ...input.knowledge.legalActs,
+    ...input.knowledge.measures,
+  ].map((item) => [item.id, item]));
+  const results = new Map(input.missions.flatMap((mission) => mission.results)
+    .flatMap((result) => result.sourceAssessment ? [[result.sourceAssessment.assessmentId, result] as const] : []));
+  const applications: NonNullable<StructuredFascicoloReportPayload["legalApplicability"]>["applications"][number][] = [];
+
+  for (const mission of input.missions) {
+    if (mission.lifecycleStatus !== "CURRENT" || mission.knowledgeRevisionId !== input.knowledge.revision.id) continue;
+    const reviewedAssessmentIds = new Set<string>();
+    for (const envelope of mission.legalApplicabilityReviews ?? []) {
+      const review = envelope.review;
+      reviewedAssessmentIds.add(review.candidateEvidenceSourceId);
+      const result = results.get(review.candidateEvidenceSourceId);
+      const reasonCodes: string[] = [];
+      if (!result?.sourceAssessment?.sourceChain || !result.sourceAssessment.temporalAssessment) reasonCodes.push("SOURCE_CHAIN_OR_TEMPORAL_ASSESSMENT_MISSING");
+      if (result?.sourceAssessment?.sourceChain && (
+        result.sourceAssessment.sourceChain.tenantId !== input.tenantId
+        || result.sourceAssessment.sourceChain.caseId !== input.procedimentoId
+        || result.sourceAssessment.sourceChain.missionId !== mission.missionId
+      )) reasonCodes.push("SOURCE_SCOPE_MISMATCH");
+      if (review.knowledgeRevisionId !== input.knowledge.revision.id) reasonCodes.push("APPLICABILITY_REVIEW_STALE");
+      if (review.legalIssueSemanticKey !== mission.legalIssueSemanticKey) reasonCodes.push("LEGAL_ISSUE_SCOPE_MISMATCH");
+      if (review.candidateSourceVersionId !== result?.sourceAssessment?.sourceVersionId) reasonCodes.push("SOURCE_VERSION_MISMATCH");
+      if (!envelope.orchestratorVerification?.valid) reasonCodes.push("RULE_ORCHESTRATOR_EVIDENCE_UNVERIFIED");
+      if (envelope.recordedByActorId === null
+        || review.reviewerAttestation.reviewedByActorId !== envelope.recordedByActorId) {
+        reasonCodes.push("REVIEWER_IDENTITY_MISMATCH");
+      }
+      const boundItems = review.factBindings.map((binding) => items.get(binding.knowledgeItemId));
+      if (boundItems.some((item) => !item)) reasonCodes.push("KNOWLEDGE_FACT_REFERENCE_INVALID");
+      const legalIssue = input.knowledge.legalIssues.find((item) => (
+        item.semanticKey === review.legalIssueSemanticKey
+      ));
+      const targetProceedingIdentity = legalIssue
+        ? documentedProceedingIdentity(legalIssue, "targetProceedingIdentity")
+        : null;
+      if (stableStringify(review.targetProceedingIdentity ?? null) !== stableStringify(targetProceedingIdentity)) {
+        reasonCodes.push("TARGET_PROCEEDING_IDENTITY_MISMATCH");
+      }
+      if (review.factBindings.some((binding) => {
+        const item = items.get(binding.knowledgeItemId);
+        return item && stableStringify(binding.proceedingIdentity ?? null)
+          !== stableStringify(documentedProceedingIdentity(item, "proceedingIdentity"));
+      })) reasonCodes.push("PROCEEDING_FACT_IDENTITY_MISMATCH");
+      if (review.factualApplicability.decisiveKnowledgeItemIds.some((id) => !items.has(id))) reasonCodes.push("DECISIVE_FACT_REFERENCE_INVALID");
+      if (reasonCodes.length || !result?.sourceAssessment?.sourceChain || !result.sourceAssessment.temporalAssessment) {
+        applications.push({
+          applicationId: review.applicationId,
+          resultId: result?.resultId ?? review.candidateEvidenceSourceId,
+          legalIssueSemanticKey: review.legalIssueSemanticKey,
+          status: "TO_VERIFY",
+          outcome: "TO_VERIFY",
+          reasonCodes: [...new Set(reasonCodes)].sort(),
+          assessment: null,
+          reviewStatus: review.reviewStatus,
+          professionalReviewRequired: true,
+        });
+        continue;
+      }
+      const candidateProvision = provision(result, review.candidateProvisionReference, review.legalAuthorityKind);
+      if (!candidateProvision) continue;
+      const orchestratorVerification = envelope.orchestratorVerification!;
+      const facts: ApplicabilityFactReference[] = review.factBindings.map((binding) => {
+        const item = items.get(binding.knowledgeItemId)!;
+        return {
+          factClaimId: item.id,
+          role: binding.role,
+          statement: item.normalizedText,
+          occurrenceDate: itemDate(item),
+          certainty: itemDate(item) ? "CERTAIN" : "UNCERTAIN",
+          value: binding.value,
+          evidenceLinkIds: item.evidence.map((evidence) => `${evidence.documentoId}:${evidence.pageNumber}:${evidence.textSha256}`),
+          proceedingIdentity: binding.proceedingIdentity ?? null,
+        };
+      });
+      let transitionalDiscipline: TransitionalDiscipline;
+      if (review.transitionalDiscipline.status === "VERIFIED_PRESENT") {
+        const transitionalResult = results.get(review.transitionalDiscipline.evidenceSourceId);
+        const transitionalProvision = transitionalResult && provision(
+          transitionalResult,
+          review.transitionalDiscipline.provisionReference,
+          "LEGISLATION",
+        );
+        const previousResult = review.transitionalDiscipline.previousRegimeEvidenceSourceId
+          ? results.get(review.transitionalDiscipline.previousRegimeEvidenceSourceId)
+          : null;
+        transitionalDiscipline = transitionalProvision ? {
+          ...review.transitionalDiscipline,
+          provision: transitionalProvision,
+          previousRegimeProvision: previousResult
+            ? provision(previousResult, previousResult.sourceAssessment?.provisionReference ?? "regime previgente", "LEGISLATION")
+            : null,
+          status: "VERIFIED_PRESENT",
+        } : {
+          status: "UNAVAILABLE",
+          expectedProvisionReference: review.transitionalDiscipline.provisionReference,
+          rationale: "La fonte della clausola transitoria non e collegata a una source-chain verificata.",
+        };
+      } else if (review.transitionalDiscipline.status === "VERIFIED_ABSENT") {
+        const absenceResult = results.get(review.transitionalDiscipline.evidenceSourceId);
+        const verificationSource = absenceResult && provision(
+          absenceResult,
+          review.candidateProvisionReference,
+          review.legalAuthorityKind,
+        );
+        transitionalDiscipline = verificationSource ? {
+          status: "VERIFIED_ABSENT",
+          verificationSource,
+          absenceAttestation: review.transitionalDiscipline.absenceAttestation,
+          rationale: review.transitionalDiscipline.rationale,
+        } : {
+          status: "UNAVAILABLE",
+          expectedProvisionReference: review.candidateProvisionReference,
+          rationale: "La verifica di assenza non e collegata a una source-chain verificata.",
+        };
+      } else {
+        transitionalDiscipline = review.transitionalDiscipline;
+      }
+      const assessment = assessLegalApplicability({
+        applicationId: review.applicationId,
+        legalAuthorityKind: review.legalAuthorityKind,
+        referenceDate: result.sourceAssessment.temporalAssessment.referenceDate,
+        candidateProvision,
+        chronologicalAssessment: result.sourceAssessment.temporalAssessment,
+        facts,
+        targetProceedingIdentity: review.targetProceedingIdentity ?? null,
+        ...applicabilityDimensionsFromRuleOrchestrator({
+          source: orchestratorVerification.source!,
+          ruleMatched: orchestratorVerification.ruleMatched,
+          decisiveFactClaimIds: review.factualApplicability.decisiveKnowledgeItemIds,
+        }),
+        factualApplicability: {
+          outcome: review.factualApplicability.outcome,
+          rationale: review.factualApplicability.rationale,
+          decisiveFactClaimIds: review.factualApplicability.decisiveKnowledgeItemIds,
+        },
+        transitionalDiscipline,
+        normRelationship: {
+          outcome: review.normRelationship.outcome,
+          rationale: review.normRelationship.rationale,
+          ...review.normRelationship.competingEvidenceSourceId ? (() => {
+            const competing = results.get(review.normRelationship.competingEvidenceSourceId!);
+            const competingSource = orchestratorVerification.resolvedSources?.find(
+              (source) => source.id === competing?.sourceAssessment?.sourceFamilyId,
+            );
+            const competingProvision = competing
+              ? provision(competing, competing.sourceAssessment?.provisionReference ?? "norma speciale", review.legalAuthorityKind)
+              : null;
+            const competingDimensions = competingSource ? applicabilityDimensionsFromRuleOrchestrator({
+              source: competingSource,
+              ruleMatched: orchestratorVerification.matchedSourceIds?.includes(competingSource.id) ?? false,
+              decisiveFactClaimIds: review.factualApplicability.decisiveKnowledgeItemIds,
+            }) : null;
+            return {
+              competingProvision,
+              competingTerritorialApplicability: competingDimensions?.territorialApplicability,
+              competingMaterialApplicability: competingDimensions?.materialApplicability,
+            };
+          })() : { competingProvision: null },
+        },
+      });
+      applications.push({
+        applicationId: review.applicationId,
+        resultId: result.resultId,
+        legalIssueSemanticKey: review.legalIssueSemanticKey,
+        status: review.reviewStatus === "AI_PROPOSED"
+          ? "PRELIMINARY_AI_PROPOSED"
+          : assessment.conclusion.outcome === "TO_VERIFY" ? "TO_VERIFY" : "ASSESSED",
+        outcome: assessment.conclusion.outcome,
+        reasonCodes: review.reviewStatus === "AI_PROPOSED"
+          ? [...new Set([...assessment.conclusion.reasonCodes, "PROFESSIONAL_REVIEW_REQUIRED"])].sort()
+          : assessment.conclusion.reasonCodes,
+        assessment,
+        reviewStatus: review.reviewStatus,
+        professionalReviewRequired: true,
+      });
+    }
+    for (const result of mission.results) {
+      const assessmentId = result.sourceAssessment?.assessmentId;
+      if (!assessmentId || reviewedAssessmentIds.has(assessmentId)) continue;
+      applications.push({
+        applicationId: `not-evaluated:${mission.missionId}:${result.resultId}`,
+        resultId: result.resultId,
+        legalIssueSemanticKey: mission.legalIssueSemanticKey ?? mission.researchQuestionSemanticKey ?? "UNASSIGNED",
+        status: "NOT_EVALUATED",
+        outcome: "NOT_EVALUATED",
+        reasonCodes: ["LEGAL_APPLICABILITY_REVIEW_MISSING"],
+        assessment: null,
+        reviewStatus: null,
+        professionalReviewRequired: true,
+      });
+    }
+    for (const issue of mission.legalApplicabilityReviewIssues ?? []) {
+      applications.push({
+        applicationId: `invalid-review:${mission.missionId}:${issue}`,
+        resultId: mission.missionId,
+        legalIssueSemanticKey: mission.legalIssueSemanticKey ?? mission.researchQuestionSemanticKey ?? "UNASSIGNED",
+        status: "TO_VERIFY",
+        outcome: "TO_VERIFY",
+        reasonCodes: [issue],
+        assessment: null,
+        reviewStatus: null,
+        professionalReviewRequired: true,
+      });
+    }
+  }
+  applications.sort((left, right) => left.applicationId.localeCompare(right.applicationId));
+  return {
+    assessmentVersion: "LEGAL_APPLICABILITY_V1",
+    applications,
+    uncertainties: applications.filter((application) => application.status !== "ASSESSED").map((application) => ({
+      applicationId: application.applicationId,
+      reasonCodes: application.reasonCodes,
+      professionalReviewRequired: true as const,
+    })),
+  };
 }
 
 function visibleItems(items: readonly StructuredKnowledgeReadItem[]): readonly StructuredKnowledgeReadItem[] {
@@ -460,6 +772,7 @@ export function buildStructuredFascicoloReport(input: {
   knowledge: StructuredKnowledgeReadModel;
   missions: readonly StructuredReportMissionInput[];
   technicalSources?: readonly StructuredReportTechnicalSourceInput[];
+  contractVersion?: typeof STRUCTURED_FASCICOLO_REPORT_CONTRACT_VERSION | typeof STRUCTURED_FASCICOLO_REPORT_V2_CONTRACT_VERSION;
 }): BuiltStructuredFascicoloReport {
   const legalCompleteness = assessLegalCompleteness(input.knowledge);
   const currentMissions = input.missions.filter((mission) => mission.lifecycleStatus === "CURRENT"
@@ -528,12 +841,22 @@ export function buildStructuredFascicoloReport(input: {
       rationale: result.classificationRationale,
     })),
   }));
-  const sourceState = currentMissions.flatMap((mission) => mission.results.map((result) => ({
+  const sourceAssessmentState = currentMissions.flatMap((mission) => mission.results.map((result) => ({
     resultId: result.resultId,
     assessment: result.sourceAssessment,
   }))).sort(byId);
+  const contractVersion = input.contractVersion ?? STRUCTURED_FASCICOLO_REPORT_CONTRACT_VERSION;
+  const sourceState = contractVersion === STRUCTURED_FASCICOLO_REPORT_V2_CONTRACT_VERSION ? {
+    sourceAssessments: sourceAssessmentState,
+    legalApplicabilityReviews: currentMissions.flatMap((mission) => mission.legalApplicabilityReviews ?? [])
+      .map((envelope) => envelope.review)
+      .sort((left, right) => left.reviewId.localeCompare(right.reviewId)),
+  } : sourceAssessmentState;
+  const legalApplicability = contractVersion === STRUCTURED_FASCICOLO_REPORT_V2_CONTRACT_VERSION
+    ? projectLegalApplicability({ tenantId: input.tenantId, procedimentoId: input.procedimentoId, knowledge: input.knowledge, missions: currentMissions })
+    : undefined;
   const payload: StructuredFascicoloReportPayload = {
-    contractVersion: STRUCTURED_FASCICOLO_REPORT_CONTRACT_VERSION,
+    contractVersion,
     tenantId: input.tenantId,
     procedimentoId: input.procedimentoId,
     knowledgeRevisionId: input.knowledge.revision.id,
@@ -560,6 +883,7 @@ export function buildStructuredFascicoloReport(input: {
     operationalPlans: buildOperationalPlans(operationalSubjects, input.knowledge, technicalSources),
     ...(technicalSources.length ? { technicalSources } : {}),
     legalCompleteness,
+    ...(legalApplicability ? { legalApplicability } : {}),
     limitations: [...new Set([
       ...input.knowledge.revision.warnings,
       ...(input.knowledge.deadlineCandidates.length ? ["DEADLINE_CANDIDATES_ARE_NOT_OPERATIONAL_DEADLINES"] : []),

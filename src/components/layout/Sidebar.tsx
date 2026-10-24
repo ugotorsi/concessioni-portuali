@@ -4,6 +4,7 @@ import type { ComponentType } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Activity,
   FolderOpen,
   Layers,
   LayoutDashboard,
@@ -38,6 +39,11 @@ const adspNavItems: NavItem[] = [
   { href: "/mappa", label: "Mappa", icon: Map },
 ];
 
+const adminNavItems: NavItem[] = [
+  ...backofficeNavItems,
+  { href: "/admin/runtime", label: "Stato dei servizi", icon: Activity },
+];
+
 interface SidebarProps {
   role: DemoRole;
   roleLabel: string;
@@ -45,7 +51,11 @@ interface SidebarProps {
 
 export function Sidebar({ role, roleLabel }: SidebarProps) {
   const pathname = usePathname();
-  const navItems = role === "VIEWER_ADSP" ? adspNavItems : backofficeNavItems;
+  const navItems = role === "VIEWER_ADSP"
+    ? adspNavItems
+    : role === "ADMIN"
+      ? adminNavItems
+      : backofficeNavItems;
 
   const navigation = (
     <nav className="grid gap-1" aria-label="Navigazione principale">

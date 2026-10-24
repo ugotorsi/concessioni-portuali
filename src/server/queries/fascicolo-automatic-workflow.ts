@@ -9,7 +9,13 @@ import { FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION } from "@/server/ai/fascicoloAut
 import { createRealDataActivationPolicy } from "@/server/ai/realDataActivation";
 import { providerAnalysisPayloadV1Schema } from "@/server/ai/fascicoloAnalysis";
 import { DOCUMENT_EXTRACTION_OPERATION } from "@/server/documents/documentExtractionAdmission";
-import { buildStructuredFascicoloReport, type BuiltStructuredFascicoloReport, type StructuredReportTechnicalSourceInput } from "@/server/fascicolo-report";
+import {
+  buildStructuredFascicoloReport,
+  STRUCTURED_FASCICOLO_REPORT_V2_CONTRACT_VERSION,
+  type BuiltStructuredFascicoloReport,
+  type StructuredReportResearchResultInput,
+  type StructuredReportTechnicalSourceInput,
+} from "@/server/fascicolo-report";
 import { listOperationalProposals, type OperationalProposalRecord } from "@/server/fascicolo-operational-proposals";
 import { RESEARCH_MISSION_EXECUTION_OPERATION } from "@/server/legal-research/persistence";
 import { evaluateAutomaticResearchPolicy } from "@/server/legal-research/automatic-research-policy";
@@ -26,6 +32,17 @@ import {
   type ResearchResultSupportDirection,
 } from "@/server/legal-research/question-results";
 import { deriveSourceCoverage } from "@/server/legal-research/source-chain";
+import type { SourceChainSnapshot } from "@/server/legal-research/source-chain";
+import {
+  assistedVerificationSnapshotSchema,
+  type LegalApplicabilityReview,
+} from "@/server/legal-research/assisted-verification";
+import type { TemporalAssessmentResult } from "@/server/legal-sources/temporal";
+import {
+  OrchestrationInputError,
+  resolveApplicableLegalRules,
+} from "@/server/legal-rules/orchestrator";
+import { verifyRuleResolutionFingerprint } from "@/server/legal-research/legal-applicability-producer";
 import {
   loadCurrentStructuredKnowledge,
   type StructuredKnowledgeReadModel,
@@ -107,7 +124,21 @@ const researchMissionReadSelect = {
         take: 1,
         select: {
           id: true,
+          tenantId: true,
+          caseId: true,
+          missionId: true,
+          researchQuestionSemanticKey: true,
+          missionFingerprint: true,
+          referenceDate: true,
+          referenceDateBasis: true,
+          verificationVersion: true,
+          sourceFamilyId: true,
+          sourceVersionId: true,
+          acquisitionId: true,
+          temporalAssessmentId: true,
           chainFingerprint: true,
+          sourceIdentityKey: true,
+          contentSha256: true,
           isCurrent: true,
           retrievalState: true,
           textState: true,
@@ -121,9 +152,27 @@ const researchMissionReadSelect = {
           manualReviewRequired: true,
           manualReviewReason: true,
           usable: true,
+          temporalAssessment: {
+            select: {
+              assessmentVersion: true,
+              referenceDate: true,
+              validityState: true,
+              temporalWindowState: true,
+              applicabilityState: true,
+              reasonCodes: true,
+              effectiveFromSnapshot: true,
+              effectiveToSnapshot: true,
+              humanReviewRequired: true,
+              confidence: true,
+            },
+          },
         },
       },
     },
+  },
+  assistedVerifications: {
+    orderBy: [{ createdAt: "desc" as const }, { id: "desc" as const }],
+    select: { payload: true, recordedByActorId: true },
   },
   executionAttempts: {
     where: { evidenceBundles: { some: {} } },
@@ -142,7 +191,118 @@ const researchMissionReadSelect = {
 type ResearchMissionReadRow = Prisma.ResearchMissionRecordGetPayload<{
   select: typeof researchMissionReadSelect;
 }>;
+type ResearchSourceAssessmentReadRow = ResearchMissionReadRow["questionResults"][number]["sourceAssessments"][number];
 
+function projectSourceAssessment(
+  assessment: ResearchSourceAssessmentReadRow | undefined,
+): StructuredReportResearchResultInput["sourceAssessment"] {
+  if (!assessment) return null;
+  const base = {
+    assessmentId: assessment.id,
+    chainFingerprint: assessment.chainFingerprint,
+    isCurrent: assessment.isCurrent,
+    usable: assessment.usable,
+    citationAnchors: records(assessment.citationAnchors),
+    blockingReasons: assessment.blockingReasons,
+    manualReviewRequired: assessment.manualReviewRequired,
+    manualReviewReason: assessment.manualReviewReason,
+    sourceFamilyId: assessment.sourceFamilyId,
+    sourceVersionId: assessment.sourceVersionId,
+    acquisitionId: assessment.acquisitionId,
+    temporalAssessmentId: assessment.temporalAssessmentId,
+  };
+  if (!(assessment.referenceDate instanceof Date)
+    || !assessment.tenantId
+    || !assessment.caseId
+    || !assessment.missionId
+    || !assessment.researchQuestionSemanticKey
+    || !assessment.missionFingerprint
+    || !assessment.verificationVersion) return base;
+  const temporal = assessment.temporalAssessment;
+  const sourceChain: SourceChainSnapshot = {
+    resultId: assessment.id,
+    tenantId: assessment.tenantId,
+    caseId: assessment.caseId,
+    missionId: assessment.missionId,
+    researchQuestionSemanticKey: assessment.researchQuestionSemanticKey,
+    missionFingerprint: assessment.missionFingerprint,
+    referenceDate: assessment.referenceDate.toISOString(),
+    referenceDateBasis: record(assessment.referenceDateBasis) ?? {},
+    verificationVersion: assessment.verificationVersion,
+    sourceIdentityKey: assessment.sourceIdentityKey,
+    contentSha256: assessment.contentSha256,
+    retrievalState: assessment.retrievalState,
+    textState: assessment.textState,
+    identityState: assessment.identityState,
+    contentState: assessment.contentState,
+    temporalState: assessment.temporalState,
+    adverseState: assessment.adverseState,
+    officiality: assessment.officiality,
+    citationAnchors: records(assessment.citationAnchors),
+    manualReviewRequired: assessment.manualReviewRequired,
+    manualReviewReason: assessment.manualReviewReason,
+    currentMission: assessment.isCurrent,
+  };
+  const temporalAssessment = temporal ? {
+    assessmentVersion: temporal.assessmentVersion,
+    validityState: temporal.validityState,
+    temporalWindowState: temporal.temporalWindowState,
+    applicabilityState: temporal.applicabilityState,
+    reasonCodes: texts(temporal.reasonCodes),
+    referenceDate: temporal.referenceDate.toISOString(),
+    effectiveInterval: {
+      from: temporal.effectiveFromSnapshot?.toISOString() ?? null,
+      to: temporal.effectiveToSnapshot?.toISOString() ?? null,
+    },
+    humanReviewRequired: temporal.humanReviewRequired,
+    confidence: temporal.confidence,
+  } as TemporalAssessmentResult : undefined;
+  return {
+    ...base,
+    sourceChain,
+    temporalAssessment,
+  };
+}
+
+export function projectApplicabilityReviewHistory(
+  storedHistory: readonly Readonly<{ payload: unknown; recordedByActorId: string }>[],
+): Readonly<{
+  reviews: readonly Readonly<{
+    review: LegalApplicabilityReview;
+    recordedByActorId: string | null;
+  }>[];
+  issues: readonly string[];
+}> {
+  const parsedHistory = storedHistory.map((stored) => {
+    const payload = record(stored.payload);
+    const parsed = assistedVerificationSnapshotSchema.safeParse(payload?.snapshot ?? stored.payload);
+    return parsed.success ? { stored, snapshot: parsed.data } : null;
+  });
+  const current = parsedHistory[0];
+  if (!current) return storedHistory.length === 0 ? { reviews: [], issues: [] } : {
+    reviews: [],
+    issues: ["PERSISTED_APPLICABILITY_REVIEW_INVALID"],
+  };
+  return {
+    reviews: (current.snapshot.legalApplicabilityReviews ?? []).map((review) => {
+      const serializedReview = JSON.stringify(review);
+      const origin = [...parsedHistory].reverse().find((entry) => entry?.snapshot.legalApplicabilityReviews?.some(
+        (historicalReview) => JSON.stringify(historicalReview) === serializedReview,
+      ));
+      return {
+        review,
+        recordedByActorId: origin?.stored.recordedByActorId === review.reviewerAttestation.reviewedByActorId
+          ? origin.stored.recordedByActorId
+          : null,
+      };
+    }),
+    issues: [],
+  };
+}
+
+function projectApplicabilityReviews(mission: ResearchMissionReadRow) {
+  return projectApplicabilityReviewHistory(mission.assistedVerifications ?? []);
+}
 export interface FascicoloResearchResultReadModel {
   resultId: string;
   candidateId: string;
@@ -175,16 +335,7 @@ export interface FascicoloResearchResultReadModel {
   manualReviewRequired: boolean;
   manualReviewReason: string | null;
   legacySource: boolean;
-  sourceAssessment: {
-    assessmentId: string;
-    chainFingerprint: string;
-    isCurrent: boolean;
-    usable: boolean;
-    citationAnchors: readonly JsonRecord[];
-    blockingReasons: readonly string[];
-    manualReviewRequired: boolean;
-    manualReviewReason: string | null;
-  } | null;
+  sourceAssessment: StructuredReportResearchResultInput["sourceAssessment"];
 }
 
 export interface FascicoloResearchMissionReadModel {
@@ -243,6 +394,11 @@ export interface FascicoloResearchMissionReadModel {
     callCount: number | null;
   };
   automationRequirementCode: string | null;
+  legalApplicabilityReviews: readonly Readonly<{
+    review: LegalApplicabilityReview;
+    recordedByActorId: string | null;
+  }>[];
+  legalApplicabilityReviewIssues: readonly string[];
 }
 
 export interface FascicoloAutomaticWorkflowReadModel {
@@ -694,16 +850,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
               manualReviewRequired: assessment?.manualReviewRequired ?? true,
               manualReviewReason: assessment ? assessment.manualReviewReason : "LEGACY_SOURCE_VERIFICATION_REQUIRED",
               legacySource: assessment === undefined,
-              sourceAssessment: assessment ? {
-                assessmentId: assessment.id,
-                chainFingerprint: assessment.chainFingerprint,
-                isCurrent: assessment.isCurrent,
-                usable: assessment.usable,
-                citationAnchors: records(assessment.citationAnchors),
-                blockingReasons: assessment.blockingReasons,
-                manualReviewRequired: assessment.manualReviewRequired,
-                manualReviewReason: assessment.manualReviewReason,
-              } : null,
+              sourceAssessment: projectSourceAssessment(assessment),
             };
           })(),
           resultId: result.id,
@@ -760,6 +907,8 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
         automationRequirementCode: lifecycleStatus === "CURRENT"
           ? researchJob?.failureCode ?? missionPolicy.requirementCode
           : null,
+        legalApplicabilityReviews: projectApplicabilityReviews(mission).reviews,
+        legalApplicabilityReviewIssues: projectApplicabilityReviews(mission).issues,
       };
       };
       projectedHistoricalMissions = historicalMissions
@@ -777,13 +926,54 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
       adverse: currentAdverseMissionRows.length > MISSION_READ_LIMIT,
     },
   };
+  const verifiedReportMissions = await Promise.all(readModel.missions.map(async (mission) => ({
+    ...mission,
+    legalApplicabilityReviews: await Promise.all(mission.legalApplicabilityReviews.map(async (envelope) => {
+      try {
+        const resolution = await resolveApplicableLegalRules(envelope.review.ruleOrchestrator.input);
+        const verification = verifyRuleResolutionFingerprint({
+            review: envelope.review,
+            resolution,
+          });
+        return {
+          ...envelope,
+          orchestratorVerification: {
+            ...verification,
+            resolvedSources: [
+              ...resolution.applicableSources,
+              ...resolution.excludedByTerritory,
+              ...resolution.excludedByDate,
+              ...resolution.historicalSources,
+              ...resolution.supersededSources,
+              ...resolution.partiallySupersededSources,
+              ...resolution.pendingValiditySources,
+              ...resolution.draftOrOngoingSources,
+              ...resolution.caseSpecificSources,
+            ],
+            matchedSourceIds: resolution.applicableRules.map((rule) => rule.source.id),
+          },
+        };
+      } catch (error) {
+        if (!(error instanceof OrchestrationInputError)) throw error;
+        return {
+          ...envelope,
+          orchestratorVerification: {
+            valid: false,
+            source: null,
+            ruleMatched: false,
+          },
+        };
+      }
+    })),
+  })));
   const structuredReport = knowledge ? buildStructuredFascicoloReport({
     tenantId,
     procedimentoId,
     knowledge,
+    contractVersion: STRUCTURED_FASCICOLO_REPORT_V2_CONTRACT_VERSION,
     technicalSources: technicalSourceRows,
     missions: [
-      ...readModel.missions,
+      ...verifiedReportMissions,
       ...adverseMissions.map((mission) => {
         const payload = record(mission.payload);
         return {
@@ -809,16 +999,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
               supportDirection: result.supportDirection,
               classificationReviewStatus: result.classificationReviewStatus,
               classificationRationale: result.classificationRationale,
-              sourceAssessment: assessment ? {
-                assessmentId: assessment.id,
-                chainFingerprint: assessment.chainFingerprint,
-                isCurrent: assessment.isCurrent,
-                usable: assessment.usable,
-                citationAnchors: records(assessment.citationAnchors),
-                blockingReasons: assessment.blockingReasons,
-                manualReviewRequired: assessment.manualReviewRequired,
-                manualReviewReason: assessment.manualReviewReason,
-              } : null,
+              sourceAssessment: projectSourceAssessment(assessment),
             };
           }),
         };

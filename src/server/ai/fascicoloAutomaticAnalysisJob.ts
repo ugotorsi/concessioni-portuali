@@ -44,7 +44,9 @@ import {
   buildKnowledgeResearchMissionPlans,
   DEFAULT_RESEARCH_EXECUTION_WAVE_LIMIT,
   getCurrentKnowledgeRevision,
-  persistStructuredKnowledgeRevision,
+  isCanonicalIdentityRevision,
+  isCanonicalIdentityV3Enabled,
+  persistStructuredKnowledgeForConfiguredEngine,
   reconcileKnowledgeResearchMissions,
   type KnowledgeEvidenceCandidate,
   type KnowledgeMissionLifecycleResult,
@@ -157,6 +159,7 @@ export interface FascicoloAutomaticAnalysisDependencies {
     corpusFingerprint: string;
     knowledge: unknown;
     evidenceByBasisRef: ReadonlyMap<string, KnowledgeEvidenceCandidate>;
+    sourceTextByBasisRef?: ReadonlyMap<string, string>;
   }): Promise<unknown>;
   reconcileKnowledgeMissions?(input: {
     tenantId: string;
@@ -611,9 +614,12 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
       procedimentoId: input.procedimentoId,
     });
     if (current?.corpusFingerprint === input.corpusFingerprint) {
-      return { revision: current, classifications: [] };
+      const currentIsCanonical = isCanonicalIdentityRevision(current);
+      if (!isCanonicalIdentityV3Enabled() || currentIsCanonical) {
+        return { revision: current, classifications: [] };
+      }
     }
-    return persistStructuredKnowledgeRevision(input);
+    return persistStructuredKnowledgeForConfiguredEngine(input);
   },
   reconcileKnowledgeMissions: (input) => reconcileKnowledgeResearchMissions(input),
   resolveMissionAssignee: (input) => resolveResearchMissionAssignee(input),
@@ -814,6 +820,10 @@ export function createFascicoloAutomaticAnalysisHandler(
             corpusFingerprint: authority.corpusFingerprint,
             knowledge: parsed.data.structuredKnowledge,
             evidenceByBasisRef,
+            sourceTextByBasisRef: new Map(excerpts.map((excerpt) => [
+              excerpt.reference,
+              excerpt.text,
+            ])),
           });
         } catch {
           throw new AsyncJobExecutionError("PERSISTENCE", "STRUCTURED_KNOWLEDGE_PERSISTENCE_FAILED", false);

@@ -7,6 +7,11 @@ import {
   lot2KnowledgeKinds,
   structuredDateSchema,
 } from "@/server/fascicolo-knowledge";
+import {
+  canonicalKnowledgeIdentitySchema,
+  knowledgeSourceSpanSchema,
+  persistedKnowledgeIdentitySchema,
+} from "@/server/fascicolo-knowledge/contracts";
 
 const baseAnalysis = {
   summary: { text: "Sintesi documentata.", basisRefs: ["DOCUMENT_1.PAGE_1"] },
@@ -48,6 +53,78 @@ function validKnowledge() {
 }
 
 describe("Lotto 2 structured knowledge contracts", () => {
+  it("requires server-verifiable source spans with ordered offsets", () => {
+    const span = {
+      documentoId: "document-1",
+      documentFileVersionId: "version-1",
+      pageNumber: 1,
+      startOffset: 10,
+      endOffset: 24,
+      quote: "Testo originale",
+      textSha256: "a".repeat(64),
+      quoteSha256: "b".repeat(64),
+      basisRef: "DOCUMENT_1.PAGE_1",
+    };
+    expect(knowledgeSourceSpanSchema.safeParse(span).success).toBe(true);
+    expect(knowledgeSourceSpanSchema.safeParse({ ...span, endOffset: 10 }).success).toBe(false);
+    expect(knowledgeSourceSpanSchema.safeParse({ ...span, quoteSha256: null }).success).toBe(false);
+  });
+
+  it("keeps physical versions separate from verified, ambiguous, and legacy identity", () => {
+    const sourceSpanFingerprint = "c".repeat(64);
+    expect(canonicalKnowledgeIdentitySchema.safeParse({
+      id: "identity-1",
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      kind: "FACT",
+      createdInRevisionId: "revision-1",
+      creationBasis: {
+        type: "SERVER_ASSIGNED_NEW",
+        sourceSpanFingerprints: [sourceSpanFingerprint],
+      },
+    }).success).toBe(true);
+    expect(persistedKnowledgeIdentitySchema.safeParse({
+      physicalItemId: "item-1",
+      identityId: "identity-1",
+      state: "VERIFIED_NEW",
+      basis: null,
+    }).success).toBe(true);
+    expect(persistedKnowledgeIdentitySchema.safeParse({
+      physicalItemId: "item-2",
+      identityId: "identity-1",
+      state: "VERIFIED_CONTINUATION",
+      basis: {
+        type: "VERIFIED_SOURCE_SPAN_CONTINUITY",
+        predecessorItemId: "item-1",
+        predecessorRevisionId: "revision-1",
+        sourceSpanFingerprints: [sourceSpanFingerprint],
+      },
+    }).success).toBe(true);
+    expect(persistedKnowledgeIdentitySchema.safeParse({
+      physicalItemId: "item-3",
+      identityId: null,
+      state: "AMBIGUOUS",
+      basis: {
+        type: "AMBIGUOUS_CONTINUITY",
+        candidatePredecessorItemIds: ["item-1", "item-2"],
+        reasonCodes: ["MULTIPLE_PREDECESSORS"],
+        sourceSpanFingerprints: [sourceSpanFingerprint],
+      },
+    }).success).toBe(true);
+    expect(persistedKnowledgeIdentitySchema.safeParse({
+      physicalItemId: "legacy-1",
+      identityId: null,
+      state: "LEGACY_UNVERIFIED",
+      basis: null,
+    }).success).toBe(true);
+    expect(persistedKnowledgeIdentitySchema.safeParse({
+      physicalItemId: "item-4",
+      identityId: "identity-1",
+      state: "VERIFIED_CONTINUATION",
+      basis: null,
+    }).success).toBe(false);
+  });
+
   it("rejects incomplete document extraction provenance", () => {
     const complete = {
       provenanceType: "DOCUMENT_EXTRACTION",
@@ -80,6 +157,49 @@ describe("Lotto 2 structured knowledge contracts", () => {
       structuredKnowledge: validKnowledge(),
     });
     expect(parsed.structuredKnowledge?.items.map((entry) => entry.kind)).toEqual(lot2KnowledgeKinds);
+  });
+
+  it("accepts documented proceeding identities while preserving legacy payloads", () => {
+    const identified = validKnowledge();
+    const fact = identified.items.find((entry) => entry.kind === "FACT")!;
+    const anchor = identified.items.find((entry) => entry.kind === "LEGAL_ACT")!;
+    if (fact.kind !== "FACT") throw new Error("Expected fact fixture.");
+    const parsed = fascicoloStructuredKnowledgeSchema.parse({
+      ...identified,
+      items: identified.items.map((entry) => entry.kind === "FACT" ? {
+        ...entry,
+        payload: {
+          ...entry.payload,
+          proceedingIdentity: {
+            declaredKey: "administrative-proceeding-a",
+            canonicalAnchorLocalId: anchor.localId,
+            kind: "ADMINISTRATIVE_ORIGINAL",
+            evidenceBasisRefs: ["DOCUMENT_1.PAGE_1"],
+          },
+        },
+      } : entry),
+      legalIssues: [{
+        localId: "issue-1",
+        title: "Disciplina transitoria",
+        normalizedIssue: "Quale disciplina si applica al procedimento A?",
+        areaOfLaw: "diritto amministrativo",
+        priority: "HIGH",
+        rationale: "La questione dipende dallo stato storico del procedimento.",
+        originatingItemLocalIds: [fact.localId, anchor.localId],
+        confidence: 90,
+        referenceDateBasis: null,
+        targetProceedingIdentity: {
+          declaredKey: "administrative-proceeding-a",
+          canonicalAnchorLocalId: anchor.localId,
+          kind: "ADMINISTRATIVE_ORIGINAL",
+          evidenceBasisRefs: ["DOCUMENT_1.PAGE_1"],
+        },
+      }],
+    });
+    expect(parsed.items.find((entry) => entry.kind === "FACT")?.payload).toMatchObject({
+      proceedingIdentity: { canonicalAnchorLocalId: anchor.localId },
+    });
+    expect(fascicoloStructuredKnowledgeSchema.safeParse(validKnowledge()).success).toBe(true);
   });
 
   it("rejects unknown fields, duplicate local identities, and unknown subjects", () => {

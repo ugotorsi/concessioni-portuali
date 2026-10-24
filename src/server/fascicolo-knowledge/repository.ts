@@ -89,6 +89,9 @@ interface ItemRow {
   confidence: number | null;
   status: KnowledgeItemReviewStatus;
   reviewVersion: number;
+  identityId?: string | null;
+  identityState?: "VERIFIED_NEW" | "VERIFIED_CONTINUATION" | "AMBIGUOUS" | "LEGACY_UNVERIFIED" | null;
+  identityBasis?: JsonValue | null;
   createdAt: Date;
   supersededAt: Date | null;
 }

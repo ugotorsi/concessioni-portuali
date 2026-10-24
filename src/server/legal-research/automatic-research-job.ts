@@ -22,6 +22,7 @@ import { createLocalTrustedResearchClient } from "./local-trusted-research-clien
 import { createTrustedMissionExecutor, type TrustedMissionExecutorResult } from "./trusted-mission-executor";
 import { completeAdverseResearchRequirement, ensureAdverseResearchMission } from "./source-chain-persistence";
 import { verifyOfficialResearchSources } from "./official-source-verification";
+import { produceAndPersistAutomaticLegalApplicabilityReviews } from "./legal-applicability-producer";
 import { assertGlobalAiExecutionAllowed } from "@/server/ai/globalAiControl";
 
 const referenceSchema = z.object({
@@ -213,6 +214,12 @@ const defaultDependencies: AutomaticResearchExecutionDependencies = {
     }
     if (process.env.AUTOMATIC_OFFICIAL_SOURCE_VERIFICATION_ENABLED === "true") {
       await verifyOfficialResearchSources({
+        missionId: input.authority.mission.missionId,
+        tenantId: input.authority.tenantId,
+        caseId: input.authority.mission.caseReference.caseId,
+        actorId: input.authority.actorId,
+      });
+      await produceAndPersistAutomaticLegalApplicabilityReviews({
         missionId: input.authority.mission.missionId,
         tenantId: input.authority.tenantId,
         caseId: input.authority.mission.caseReference.caseId,

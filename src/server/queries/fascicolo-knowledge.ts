@@ -1,5 +1,10 @@
 import { prisma } from "@/lib/prisma";
-import type { JsonValue, KnowledgeItemReviewStatus } from "@/server/fascicolo-knowledge";
+import type {
+  JsonValue,
+  KnowledgeIdentityState,
+  KnowledgeItemReviewStatus,
+} from "@/server/fascicolo-knowledge";
+import { isCanonicalIdentityV3Enabled } from "@/server/fascicolo-knowledge/canonicalIntegrationGate";
 
 type KnowledgeKind = "PARTY_ROLE" | "PARTY_POSITION" | "FACT" | "EVENT" | "LEGAL_ACT" | "MEASURE" | "CONTRADICTION" | "GAP" | "DEADLINE_CANDIDATE" | "LEGAL_ISSUE" | "RESEARCH_QUESTION";
 
@@ -13,6 +18,8 @@ export interface StructuredKnowledgeReadItem {
   confidence: number | null;
   status: KnowledgeItemReviewStatus;
   reviewVersion: number;
+  identityId?: string | null;
+  identityState?: KnowledgeIdentityState | null;
   evidence: readonly {
     provenanceType?: "DOCUMENT_EXTRACTION" | "FASCICOLO_DOCUMENT_EXTRACTION";
     basisRef: string | null;
@@ -113,9 +120,13 @@ export async function loadCurrentStructuredKnowledge(
   `, [tenantId, procedimentoId]);
   const revision = revisions.rows[0];
   if (!revision) return null;
+  const identityColumns = isCanonicalIdentityV3Enabled()
+    ? ', "identityId", "identityState"'
+    : "";
   const [itemRows, evidenceRows, relationRows] = await Promise.all([
     executor.query<ItemRow>(`
-      SELECT "id", "kind", "semanticKey", "contentFingerprint", "normalizedText", "structuredPayload", "confidence", "status", "reviewVersion"
+      SELECT "id", "kind", "semanticKey", "contentFingerprint", "normalizedText", "structuredPayload",
+        "confidence", "status", "reviewVersion"${identityColumns}
       FROM "FascicoloKnowledgeItem"
       WHERE "tenantId" = $1 AND "procedimentoId" = $2 AND "revisionId" = $3
         AND "supersededAt" IS NULL
@@ -148,6 +159,8 @@ export async function loadCurrentStructuredKnowledge(
     confidence: item.confidence,
     status: item.status,
     reviewVersion: item.reviewVersion,
+    identityId: item.identityId,
+    identityState: item.identityState,
     evidence: evidenceRows.rows.filter((evidence) => evidence.itemId === item.id).map(({ itemId: _itemId, ...evidence }) => evidence),
   }));
   const subjectIds = [...new Set(items.flatMap((item) => strings(record(item.payload).subjectIds)))];
