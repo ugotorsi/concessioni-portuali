@@ -1,8 +1,12 @@
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { SubmitButtonPending } from "@/components/forms/SubmitButtonPending";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { formatDateIT, formatEnumLabel } from "@/lib/utils";
+import {
+  requestExistingCorpusAnalysisAction,
+} from "@/server/actions/fascicolo-existing-corpus-analysis";
 import {
   generateOperationalProposalsAction,
   materializeOperationalProposalAction,
@@ -152,7 +156,14 @@ function WorkflowSummary({
 
 export function FascicoloAutomaticWorkflowPanel({
   model,
-}: { model: FascicoloAutomaticWorkflowReadModel | null }) {
+  existingCorpusAnalysis,
+}: {
+  model: FascicoloAutomaticWorkflowReadModel | null;
+  existingCorpusAnalysis?: {
+    procedimentoId: string;
+    enabled: boolean;
+  } | null;
+}) {
   if (!model) return null;
   const currentJob = model.jobs.find((job) => !job.superseded) ?? null;
   const currentReport = model.reports.find((report) => report.status !== "SUPERSEDED") ?? null;
@@ -169,6 +180,30 @@ export function FascicoloAutomaticWorkflowPanel({
       </CardHeader>
       <CardContent className="space-y-5">
         <WorkflowSummary model={model} />
+        {existingCorpusAnalysis ? (
+          <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+            <form action={requestExistingCorpusAnalysisAction}>
+              <input
+                type="hidden"
+                name="procedimentoId"
+                value={existingCorpusAnalysis.procedimentoId}
+              />
+              <SubmitButtonPending
+                size="sm"
+                disabled={!existingCorpusAnalysis.enabled}
+                pendingLabel="Richiesta in corso..."
+              >
+                Avvia analisi del fascicolo esistente
+              </SubmitButtonPending>
+            </form>
+            {!existingCorpusAnalysis.enabled ? (
+              <p className="mt-2 text-xs text-slate-600">
+                Il comando sarà disponibile dopo l’autorizzazione real-data e
+                l’abilitazione del worker one-off dedicato.
+              </p>
+            ) : null}
+          </div>
+        ) : null}
         {model.analysisUpdate.status !== "CURRENT" ? (
           <div className={`border-l-2 pl-3 text-sm ${
             model.analysisUpdate.status === "ERROR"

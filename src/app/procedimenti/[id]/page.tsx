@@ -48,6 +48,9 @@ import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { canManageProcedimenti, canRegisterProcedimentoDecision, requireRole } from "@/lib/auth";
 import {
+  isExistingCorpusAnalysisRequestEnabled,
+} from "@/server/ai/fascicoloExistingCorpusAnalysis";
+import {
   getChecklistContraddittorioItems,
   getOrigineProcedimentoLabel,
   getProcedimentoChecklistGuidance,
@@ -212,6 +215,17 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
     : null;
   const analysisCorpus = analysisCorpusModel(documentCorpus);
   const automaticWorkflow = await getFascicoloAutomaticWorkflowReadModel(detail.procedimento.id);
+  const existingCorpusAnalysis = role === "ADMIN"
+    && documentCorpus?.availability === "READY"
+    && documentCorpus.documentCount > 0
+    && documentCorpus.availableDocumentCount === documentCorpus.documentCount
+    && documentCorpus.textPageCount > 0
+    && automaticWorkflow?.analysisUpdate.currentRevisionFingerprint === null
+    ? {
+        procedimentoId: detail.procedimento.id,
+        enabled: isExistingCorpusAnalysisRequestEnabled(process.env),
+      }
+    : null;
   const structuredAnalysis = activeSection === "analysis"
     ? await getFascicoloAnalysisReadModel(detail.procedimento.id)
     : null;
@@ -340,7 +354,12 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               <NeutralIntakeProcessingPanel items={processingItems} />
             </section>
           ) : null}
-          {activeSection === "istruttoria" ? <FascicoloAutomaticWorkflowPanel model={automaticWorkflow} /> : null}
+          {activeSection === "istruttoria" ? (
+            <FascicoloAutomaticWorkflowPanel
+              model={automaticWorkflow}
+              existingCorpusAnalysis={existingCorpusAnalysis}
+            />
+          ) : null}
           {activeSection === "analysis" ? (
             <FascicoloAnalysis
               technicalResearchProcedureId={detail.procedimento.id}
@@ -752,7 +771,10 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
 
         {activeSection === "istruttoria" ? <section className="space-y-4" aria-label="Istruttoria del fascicolo">
           <div>
-            <FascicoloAutomaticWorkflowPanel model={automaticWorkflow} />
+            <FascicoloAutomaticWorkflowPanel
+              model={automaticWorkflow}
+              existingCorpusAnalysis={existingCorpusAnalysis}
+            />
           </div>
         </section> : null}
 
