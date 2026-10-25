@@ -7,6 +7,7 @@ import { requireAdminWithMfa, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDateIT } from "@/lib/utils";
 import { getRuntimeHealthSnapshot } from "@/server/runtime/health";
+import { getDatabaseIdentityDiagnostic } from "@/server/runtime/databaseIdentity";
 import { readDefaultProcedimentoBudgetAuthorization } from "@/server/runtime/procedimentoBudgetPolicy";
 import { getGlobalAiControlState } from "@/server/ai/globalAiControl";
 
@@ -39,13 +40,20 @@ function healthLabel(status: string) {
   return "Non operativo";
 }
 
+function databaseIdentityVariant(outcome: string): "success" | "warning" | "danger" {
+  if (outcome === "MATCH") return "success";
+  if (outcome === "MISMATCH") return "danger";
+  return "warning";
+}
+
 export default async function RuntimeOperationsPage() {
   await requireRole(["ADMIN"]);
   await requireAdminWithMfa();
   const defaultProcedimentoBudget = readDefaultProcedimentoBudgetAuthorization();
-  const [aiControl, health, workers, failedJobs, policies, costs] = await Promise.all([
+  const [aiControl, health, databaseIdentity, workers, failedJobs, policies, costs] = await Promise.all([
     getGlobalAiControlState(),
     getRuntimeHealthSnapshot(),
+    getDatabaseIdentityDiagnostic(),
     prisma.runtimeWorkerHeartbeat.findMany({ orderBy: { lastSeenAt: "desc" }, take: 20 }),
     prisma.asyncJob.findMany({
       where: { status: "TERMINAL_FAILED" },
@@ -66,6 +74,49 @@ export default async function RuntimeOperationsPage() {
           <p className="mt-1">Stato migrazioni: {health.migrationState}</p>
         </details>
       </div>
+
+      {databaseIdentity.available ? (
+        <section aria-labelledby="database-identity-title" className="mb-4">
+          <Card>
+            <CardHeader>
+              <CardTitle id="database-identity-title">Identità database Preview V3</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <Badge variant={databaseIdentityVariant(databaseIdentity.outcome)}>
+                  {databaseIdentity.outcome === "NON_VERIFICABILE"
+                    ? "NON VERIFICABILE"
+                    : databaseIdentity.outcome}
+                </Badge>
+                <span className="text-sm text-slate-700">
+                  PostgreSQL {databaseIdentity.databaseConnected ? "raggiungibile" : "non raggiungibile"}
+                </span>
+              </div>
+              <dl className="grid gap-3 text-sm sm:grid-cols-2">
+                <div>
+                  <dt className="text-slate-500">Endpoint Neon</dt>
+                  <dd className="font-medium text-slate-900">{databaseIdentity.endpointId ?? "Non identificabile"}</dd>
+                </div>
+                <div>
+                  <dt className="text-slate-500">Progetto Neon</dt>
+                  <dd className="font-medium text-slate-900">{databaseIdentity.neonProjectId ?? "Non identificabile"}</dd>
+                </div>
+                <div>
+                  <dt className="text-slate-500">Branch Neon</dt>
+                  <dd className="font-medium text-slate-900">{databaseIdentity.neonBranchId ?? "Non identificabile"}</dd>
+                </div>
+                <div>
+                  <dt className="text-slate-500">Database</dt>
+                  <dd className="font-medium text-slate-900">{databaseIdentity.databaseName ?? "Non identificabile"}</dd>
+                </div>
+              </dl>
+              <p className="text-xs text-slate-500">
+                La diagnostica esegue esclusivamente letture di identità della connessione attiva e non mostra credenziali o contenuti applicativi.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+      ) : null}
 
       <section aria-labelledby="global-ai-control-title">
         <Card>
