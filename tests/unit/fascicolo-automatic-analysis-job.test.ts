@@ -6,6 +6,7 @@ vi.mock("@/lib/prisma", () => ({ prisma: {} }));
 
 import {
   buildFascicoloAutomaticAnalysisAdmission,
+  buildFascicoloAutomaticAnalysisCostIdempotencyKey,
   buildFascicoloDocumentCorpusUpdateAdmission,
   createFascicoloAutomaticAnalysisHandler,
   executeDeferredKnowledgeResearchWave,
@@ -263,6 +264,26 @@ function dependencies(overrides: Partial<FascicoloAutomaticAnalysisDependencies>
 describe("automatic fascicolo analysis job", () => {
   it("is registered in the real application worker", () => {
     expect(applicationAsyncJobRegistry.resolve(FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION)).not.toBeNull();
+  });
+
+  it("scopes cost idempotency to the job while preserving same-attempt determinism", () => {
+    const input = {
+      jobId: "job-1",
+      corpusFingerprint: "c".repeat(64),
+      attempt: 2,
+    };
+    const first = buildFascicoloAutomaticAnalysisCostIdempotencyKey(input);
+    const duplicate = buildFascicoloAutomaticAnalysisCostIdempotencyKey(input);
+    const otherJob = buildFascicoloAutomaticAnalysisCostIdempotencyKey({
+      ...input,
+      jobId: "job-2",
+    });
+
+    expect(duplicate).toBe(first);
+    expect(otherJob).not.toBe(first);
+    expect(first).not.toBe(
+      `${FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION}:${input.corpusFingerprint}:${input.attempt}`,
+    );
   });
 
   it("builds deterministic tenant-scoped admission for the extracted document version", () => {

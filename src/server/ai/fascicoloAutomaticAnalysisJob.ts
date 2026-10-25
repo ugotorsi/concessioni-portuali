@@ -71,6 +71,19 @@ export const FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION = "FASCICOLO.AUTOMATIC_ANALY
 export const FASCICOLO_AUTOMATIC_ANALYSIS_PURPOSE = "FASCICOLO_AUTOMATIC_ANALYSIS" as const;
 const MAX_DOCUMENT_EXCERPT_CHARACTERS = 96_000;
 
+export function buildFascicoloAutomaticAnalysisCostIdempotencyKey(input: {
+  jobId: string;
+  corpusFingerprint: string;
+  attempt: number;
+}): string {
+  return [
+    FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
+    input.jobId,
+    input.corpusFingerprint,
+    input.attempt,
+  ].join(":");
+}
+
 const neutralIntakeReferenceSchema = z.object({
   referenceType: z.literal("FASCICOLO_DOCUMENT_VERSION"),
   referenceId: z.string().trim().min(1).max(256),
@@ -631,8 +644,7 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
         provider: "OPENAI",
         operationType: FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
         estimatedAmount,
-        idempotencyKey:
-          `${FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION}:${input.corpusFingerprint}:${input.attempt}`,
+        idempotencyKey: buildFascicoloAutomaticAnalysisCostIdempotencyKey(input),
       }, async () => ({
         value: await createOpenAiFascicoloDocumentRuntimeFromEnv(
           undefined,
