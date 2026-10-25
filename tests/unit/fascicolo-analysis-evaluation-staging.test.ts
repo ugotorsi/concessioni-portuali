@@ -366,7 +366,7 @@ describe("staging fascicolo evaluation request security", () => {
         }));
         expect(() => createStagingFascicoloEvaluationAnalyze({
           AI_OPENAI_API_KEY: "test-key",
-          AI_OPENAI_REGION: "EU",
+          AI_OPENAI_REGION: "GLOBAL",
           AI_OPENAI_TIMEOUT_MS: "91000",
           AI_OPENAI_MAX_RAW_RESPONSE_BYTES: "100000",
           AI_OPENAI_MAX_OUTPUT_TOKENS: "1000",
@@ -387,7 +387,7 @@ describe("staging fascicolo evaluation request security", () => {
         };
         expect(createStagingFascicoloEvaluationAnalyze({
           AI_OPENAI_API_KEY: "test-key",
-          AI_OPENAI_REGION: "EU",
+          AI_OPENAI_REGION: "GLOBAL",
           AI_OPENAI_TIMEOUT_MS: "45000",
           AI_OPENAI_MAX_RAW_RESPONSE_BYTES: "100000",
           AI_OPENAI_MAX_OUTPUT_TOKENS: "1000",

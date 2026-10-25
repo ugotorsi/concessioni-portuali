@@ -175,15 +175,18 @@ describe("AI-01B2A OpenAI Responses adapter", () => {
     expect(transport).not.toHaveBeenCalled();
   });
 
-  it("maps GLOBAL and EU only to their fixed Responses endpoints", async () => {
-    for (const region of ["GLOBAL", "EU"] as const) {
-      const transport = fakeTransport(jsonResponse(openAiResponse()));
-      const provider = createOpenAiAnalysisProvider(config(transport, { region }));
-      await provider.analyze(providerRequestFixture());
-      expect(transport).toHaveBeenCalledWith(OPENAI_RESPONSES_ENDPOINTS[region], expect.anything());
-      expect(transport.mock.calls[0][1]?.redirect).toBe("error");
-    }
-    expect(Object.keys(OPENAI_RESPONSES_ENDPOINTS)).toEqual(["GLOBAL", "EU"]);
+  it("uses only the fixed GLOBAL Responses endpoint", async () => {
+    const transport = fakeTransport(jsonResponse(openAiResponse()));
+    const provider = createOpenAiAnalysisProvider(config(transport));
+    await provider.analyze(providerRequestFixture());
+    expect(transport).toHaveBeenCalledWith(
+      "https://api.openai.com/v1/responses",
+      expect.anything(),
+    );
+    expect(transport.mock.calls[0][1]?.redirect).toBe("error");
+    expect(OPENAI_RESPONSES_ENDPOINTS).toEqual({
+      GLOBAL: "https://api.openai.com/v1/responses",
+    });
   });
 
   it("reports request submission and validated billable usage through internal telemetry", async () => {

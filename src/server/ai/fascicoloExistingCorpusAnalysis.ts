@@ -9,6 +9,12 @@ import {
 } from "@/server/ai/fascicoloAutomaticAnalysisJob";
 import { getGlobalAiControlState } from "@/server/ai/globalAiControl";
 import { createRealDataActivationPolicy } from "@/server/ai/realDataActivation";
+import {
+  assertSelvaraPilotAuthorization,
+  isSelvaraPilotApprovalId,
+  SELVARA_PILOT_AUTHORIZATION,
+  SelvaraPilotAuthorizationError,
+} from "@/server/ai/selvaraPilotAuthorization";
 import { getCurrentKnowledgeRevision } from "@/server/fascicolo-knowledge";
 import {
   getFascicoloDocumentCorpusForTenant,
@@ -55,7 +61,8 @@ export class ExistingCorpusAnalysisRequestError extends Error {
     | "ANALYSIS_ACTIVATION_DISABLED"
     | "CORPUS_NOT_READY"
     | "KNOWLEDGE_REVISION_ALREADY_EXISTS"
-    | "AI_GLOBALLY_DISABLED") {
+    | "AI_GLOBALLY_DISABLED"
+    | "SELVARA_PILOT_AUTHORIZATION_MISMATCH") {
     super(code);
     this.name = "ExistingCorpusAnalysisRequestError";
   }
@@ -70,6 +77,7 @@ export function isExistingCorpusAnalysisRequestEnabled(
     )
     && Boolean(environment.RENDER_WORKER_API_KEY?.trim())
     && environment.AI_GLOBAL_EMERGENCY_DISABLED?.trim().toLowerCase() !== "true"
+    && isSelvaraPilotApprovalId(environment)
     && createRealDataActivationPolicy({
       AI_REAL_DATA_ENABLED: environment.AI_REAL_DATA_ENABLED,
       AI_REAL_DATA_APPROVAL_ID: environment.AI_REAL_DATA_APPROVAL_ID,
@@ -107,6 +115,20 @@ export async function requestExistingCorpusAnalysis(input: {
   if (!isExistingCorpusAnalysisRequestEnabled(environment)) {
     throw new ExistingCorpusAnalysisRequestError("ANALYSIS_ACTIVATION_DISABLED");
   }
+  try {
+    assertSelvaraPilotAuthorization(environment, {
+      tenantId: input.tenantId,
+      procedimentoId: input.procedimentoId,
+      corpusFingerprint: SELVARA_PILOT_AUTHORIZATION.corpusFingerprint,
+      purpose: FASCICOLO_EXISTING_CORPUS_ANALYSIS_PURPOSE,
+      operation: FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
+    });
+  } catch (error) {
+    if (error instanceof SelvaraPilotAuthorizationError) {
+      throw new ExistingCorpusAnalysisRequestError("SELVARA_PILOT_AUTHORIZATION_MISMATCH");
+    }
+    throw error;
+  }
   const aiControl = await dependencies.loadGlobalAiControl(environment);
   if (!aiControl.effectiveEnabled) {
     throw new ExistingCorpusAnalysisRequestError("AI_GLOBALLY_DISABLED");
@@ -123,6 +145,20 @@ export async function requestExistingCorpusAnalysis(input: {
     || corpus.textPageCount === 0
   ) {
     throw new ExistingCorpusAnalysisRequestError("CORPUS_NOT_READY");
+  }
+  try {
+    assertSelvaraPilotAuthorization(environment, {
+      tenantId: input.tenantId,
+      procedimentoId: input.procedimentoId,
+      corpusFingerprint: corpus.corpusFingerprint,
+      purpose: FASCICOLO_EXISTING_CORPUS_ANALYSIS_PURPOSE,
+      operation: FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
+    });
+  } catch (error) {
+    if (error instanceof SelvaraPilotAuthorizationError) {
+      throw new ExistingCorpusAnalysisRequestError("SELVARA_PILOT_AUTHORIZATION_MISMATCH");
+    }
+    throw error;
   }
   const currentRevision = await dependencies.loadCurrentRevision({
     tenantId: input.tenantId,

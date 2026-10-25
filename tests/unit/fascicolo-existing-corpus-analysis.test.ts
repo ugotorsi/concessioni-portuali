@@ -10,20 +10,21 @@ import {
   isExistingCorpusAnalysisRequestEnabled,
   requestExistingCorpusAnalysis,
 } from "@/server/ai/fascicoloExistingCorpusAnalysis";
+import { SELVARA_PILOT_AUTHORIZATION } from "@/server/ai/selvaraPilotAuthorization";
 
 const enabledEnvironment = {
   DOCUMENT_WORKER_ACTIVATION_MODE: "RENDER_ONE_OFF",
   RENDER_APPLICATION_WORKER_SERVICE_ID: "srv-previewv3",
   RENDER_WORKER_API_KEY: "protected-render-key",
   AI_REAL_DATA_ENABLED: "true",
-  AI_REAL_DATA_APPROVAL_ID: "SELVARA-MANUAL-ANALYSIS",
+  AI_REAL_DATA_APPROVAL_ID: SELVARA_PILOT_AUTHORIZATION.approvalId,
   AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
 };
 
 const corpus = {
-  tenantId: "tenant-a",
-  procedimentoId: "procedure-a",
-  corpusFingerprint: "c".repeat(64),
+  tenantId: SELVARA_PILOT_AUTHORIZATION.tenantId,
+  procedimentoId: SELVARA_PILOT_AUTHORIZATION.procedimentoId,
+  corpusFingerprint: SELVARA_PILOT_AUTHORIZATION.corpusFingerprint,
   availability: "READY" as const,
   documentCount: 1,
   availableDocumentCount: 1,
@@ -49,8 +50,8 @@ function dependencies() {
 }
 
 const request = {
-  tenantId: "tenant-a",
-  procedimentoId: "procedure-a",
+  tenantId: SELVARA_PILOT_AUTHORIZATION.tenantId,
+  procedimentoId: SELVARA_PILOT_AUTHORIZATION.procedimentoId,
   actor: {
     id: "admin-a",
     email: "admin-a@example.test",
@@ -89,29 +90,62 @@ describe("existing fascicolo corpus analysis", () => {
     });
 
     expect(deps.loadCorpus).toHaveBeenCalledWith({
-      tenantId: "tenant-a",
-      procedimentoId: "procedure-a",
+      tenantId: SELVARA_PILOT_AUTHORIZATION.tenantId,
+      procedimentoId: SELVARA_PILOT_AUTHORIZATION.procedimentoId,
     });
     expect(deps.admitJob).toHaveBeenCalledWith(expect.objectContaining({
       operation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
       purpose: "FASCICOLO_EXISTING_CORPUS_ANALYSIS",
-      procedimentoId: "procedure-a",
+      procedimentoId: SELVARA_PILOT_AUTHORIZATION.procedimentoId,
       inputReference: {
         referenceType: "FASCICOLO_DOCUMENT_CORPUS",
-        referenceId: "c".repeat(64),
+        referenceId: SELVARA_PILOT_AUTHORIZATION.corpusFingerprint,
         referenceVersion: "V1",
         metadata: {
-          procedimentoId: "procedure-a",
-          corpusHash: "c".repeat(64),
+          procedimentoId: SELVARA_PILOT_AUTHORIZATION.procedimentoId,
+          corpusHash: SELVARA_PILOT_AUTHORIZATION.corpusFingerprint,
         },
       },
     }));
     expect(deps.activateWorker).toHaveBeenCalledWith({
       kind: "DOCUMENT_ANALYSIS",
       applicationJobId: "analysis-job-a",
-      tenantId: "tenant-a",
-      procedimentoId: "procedure-a",
+      tenantId: SELVARA_PILOT_AUTHORIZATION.tenantId,
+      procedimentoId: SELVARA_PILOT_AUTHORIZATION.procedimentoId,
     });
+  });
+
+  it.each([
+    ["approval", {
+      environment: {
+        ...enabledEnvironment,
+        AI_REAL_DATA_APPROVAL_ID: "OTHER-APPROVAL",
+      },
+    }],
+    ["tenant", { tenantId: "tenant-other" }],
+    ["procedimento", { procedimentoId: "procedure-other" }],
+  ])("rejects a mismatched %s before admission", async (_field, override) => {
+    const deps = dependencies();
+    await expect(requestExistingCorpusAnalysis({
+      ...request,
+      ...override,
+    }, deps)).rejects.toBeInstanceOf(ExistingCorpusAnalysisRequestError);
+    expect(deps.admitJob).not.toHaveBeenCalled();
+    expect(deps.activateWorker).not.toHaveBeenCalled();
+  });
+
+  it("rejects a corpus fingerprint mismatch before admission", async () => {
+    const deps = dependencies();
+    deps.loadCorpus.mockResolvedValue({
+      ...corpus,
+      corpusFingerprint: "f".repeat(64),
+    });
+
+    await expect(requestExistingCorpusAnalysis(request, deps)).rejects.toEqual(
+      new ExistingCorpusAnalysisRequestError("SELVARA_PILOT_AUTHORIZATION_MISMATCH"),
+    );
+    expect(deps.admitJob).not.toHaveBeenCalled();
+    expect(deps.activateWorker).not.toHaveBeenCalled();
   });
 
   it("does not admit a job when a knowledge revision already exists", async () => {

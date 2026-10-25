@@ -83,6 +83,10 @@ Aggiunte a `.env.example` per il percorso automatico:
   `AI_OPENAI_TIMEOUT_MS`, `AI_OPENAI_MAX_RAW_RESPONSE_BYTES`,
   `AI_OPENAI_MAX_OUTPUT_TOKENS`, `AI_OPENAI_MAX_INPUT_TOKENS`,
   `AI_MAX_INPUT_BYTES`;
+- regione OpenAI: NOETRA usa esclusivamente `AI_OPENAI_REGION=GLOBAL`, con
+  endpoint `https://api.openai.com/v1/responses`. Se la variabile non e
+  definita il runtime applica `GLOBAL`; qualsiasi altro valore, incluso `EU`,
+  viene rifiutato prima della costruzione del provider;
 - accounting OpenAI: `AI_OPENAI_USD_TO_EUR_RATE` e
   `AI_OPENAI_USD_TO_EUR_RATE_DATE` (`YYYY-MM-DD`). Il tasso deve essere il
   cambio di riferimento BCE USD/EUR della data indicata. Il costo provider

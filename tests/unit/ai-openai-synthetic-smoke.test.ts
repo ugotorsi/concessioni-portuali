@@ -130,6 +130,33 @@ describe("AI-01B2B2 synthetic OpenAI smoke harness", () => {
     expect(Buffer.byteLength(JSON.stringify(snapshot.content), "utf8")).toBeLessThan(262144);
   });
 
+  it("defaults to GLOBAL and rejects every explicit non-GLOBAL region", async () => {
+    const { AI_OPENAI_REGION: _region, ...withoutRegion } = env();
+    const defaulted = providerFactory();
+    await expect(runOpenAiSyntheticSmoke({
+      env: withoutRegion,
+      providerFactory: defaulted.factory,
+    })).resolves.toMatchObject({
+      ok: true,
+      summary: { region: "GLOBAL" },
+    });
+    expect(defaulted.factory).toHaveBeenCalledWith(expect.objectContaining({
+      region: "GLOBAL",
+    }));
+
+    for (const region of ["EU", "global", "CUSTOM", ""]) {
+      const rejected = providerFactory();
+      await expect(runOpenAiSyntheticSmoke({
+        env: { ...env(), AI_OPENAI_REGION: region },
+        providerFactory: rejected.factory,
+      })).resolves.toMatchObject({
+        ok: false,
+        summary: { errorCategory: "AI_CONFIGURATION_ERROR" },
+      });
+      expect(rejected.factory).not.toHaveBeenCalled();
+    }
+  });
+
   it("produces a safe PASS summary after exactly one validated provider call", async () => {
     const { factory, analyze } = providerFactory();
     const result = await runOpenAiSyntheticSmoke({

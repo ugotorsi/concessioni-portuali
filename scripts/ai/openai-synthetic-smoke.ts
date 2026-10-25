@@ -11,6 +11,7 @@ import {
 import { AiProviderAdapterError } from "@/server/ai/providerErrors";
 import {
   OPENAI_ANALYSIS_MODEL,
+  OPENAI_DEFAULT_REGION,
   createOpenAiAnalysisProvider,
   type OpenAiFetch,
   type OpenAiRegion,
@@ -129,8 +130,11 @@ function positiveInteger(env: SmokeEnv, envName: RequiredEnvName): number {
 }
 
 function parseSmokeConfig(env: SmokeEnv): ParsedSmokeConfig {
-  const region = requiredString(env, "AI_OPENAI_REGION");
-  if (region !== "GLOBAL" && region !== "EU") {
+  const configuredRegion = env.AI_OPENAI_REGION;
+  const region = configuredRegion === undefined
+    ? OPENAI_DEFAULT_REGION
+    : configuredRegion.trim();
+  if (region !== OPENAI_DEFAULT_REGION) {
     return failConfig("AI_OPENAI_REGION");
   }
   return {

@@ -61,7 +61,7 @@ describe("worker-safe fascicolo document analysis", () => {
         maxRawResponseBytes: 64_000,
         maxOutputTokens: 2_000,
         maxInputTokens: 100_000,
-        region: "EU",
+        region: "GLOBAL",
         transport,
       }),
       maxInputBytes: 64_000,

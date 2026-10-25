@@ -19,9 +19,9 @@ import { getEncoding } from "js-tiktoken";
 import { z } from "zod";
 
 export const OPENAI_ANALYSIS_MODEL = "gpt-5.6-terra" as const;
+export const OPENAI_DEFAULT_REGION = "GLOBAL" as const;
 export const OPENAI_RESPONSES_ENDPOINTS = {
   GLOBAL: "https://api.openai.com/v1/responses",
-  EU: "https://eu.api.openai.com/v1/responses",
 } as const;
 export const OPENAI_INPUT_TOKEN_ACCOUNTING_OVERHEAD = 1_024;
 
@@ -195,7 +195,7 @@ function assertConfig(config: {
   assertPositiveSafeInteger(config.maxRawResponseBytes);
   assertPositiveSafeInteger(config.maxOutputTokens);
   assertPositiveSafeInteger(config.maxInputTokens);
-  if (config.region !== "GLOBAL" && config.region !== "EU") {
+  if (config.region !== OPENAI_DEFAULT_REGION) {
     throw configurationError();
   }
 }

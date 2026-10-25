@@ -12,6 +12,7 @@ import {
 } from "@/server/ai/fascicoloDocumentAnalysis";
 import {
   createOpenAiAnalysisProvider,
+  OPENAI_DEFAULT_REGION,
   type OpenAiFetch,
   type OpenAiProviderTelemetry,
   type OpenAiRegion,
@@ -23,6 +24,10 @@ import {
   type RealDataActivationEnv,
 } from "@/server/ai/realDataActivation";
 import { assertGlobalAiExecutionAllowed } from "@/server/ai/globalAiControl";
+import {
+  assertSelvaraPilotScopeForConfiguredApproval,
+  type SelvaraPilotAuthorizationScope,
+} from "@/server/ai/selvaraPilotAuthorization";
 
 export const AI_OPENAI_RUNTIME_ENV_NAMES = [
   "AI_OPENAI_API_KEY",
@@ -88,8 +93,12 @@ function positiveSafeInteger(env: OpenAiRuntimeEnv, envName: OpenAiRuntimeEnvNam
 }
 
 function parseRegion(env: OpenAiRuntimeEnv): OpenAiRegion {
-  const value = requiredTrimmedString(env, "AI_OPENAI_REGION");
-  if (value !== "GLOBAL" && value !== "EU") {
+  const configured = env.AI_OPENAI_REGION;
+  if (configured === undefined) {
+    return OPENAI_DEFAULT_REGION;
+  }
+  const value = configured.trim();
+  if (value !== OPENAI_DEFAULT_REGION) {
     return invalid("AI_OPENAI_REGION");
   }
   return value;
@@ -116,9 +125,11 @@ interface OpenAiRuntimeDependencies {
 function createOpenAiFascicoloServiceConfig(
   env: OpenAiRuntimeEnv,
   dependencies: OpenAiRuntimeDependencies,
+  authorizationScope?: SelvaraPilotAuthorizationScope,
 ) {
   const realDataActivation = createRealDataActivationPolicy(env);
   assertRealDataActivation(realDataActivation);
+  assertSelvaraPilotScopeForConfiguredApproval(env, authorizationScope);
   const config = parseRuntimeConfig(env);
   const provider = createOpenAiAnalysisProvider({
     apiKey: config.apiKey,
@@ -162,8 +173,9 @@ export function createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv(
 export function createOpenAiFascicoloDocumentRuntimeFromEnv(
   env: OpenAiRuntimeEnv = defaultOpenAiRuntimeEnv(),
   dependencies: OpenAiRuntimeDependencies = {},
+  authorizationScope?: SelvaraPilotAuthorizationScope,
 ) {
-  const config = createOpenAiFascicoloServiceConfig(env, dependencies);
+  const config = createOpenAiFascicoloServiceConfig(env, dependencies, authorizationScope);
   return createFascicoloDocumentAnalysisService({
     provider: config.provider as typeof config.provider & FascicoloDocumentAnalysisProvider,
     maxInputBytes: config.maxInputBytes,

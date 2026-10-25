@@ -34,6 +34,12 @@ import { OpenAiRuntimeConfigurationError } from "@/server/ai/openaiRuntime";
 import { withRuntimeCostGate } from "@/server/runtime/cost";
 import { runtimeCostEstimate } from "@/server/runtime/costConfig";
 import {
+  assertSelvaraPilotAuthorization,
+  isSelvaraPilotApprovalId,
+  SelvaraPilotAuthorizationError,
+  type SelvaraPilotAuthorizationScope,
+} from "@/server/ai/selvaraPilotAuthorization";
+import {
   AutomaticFascicoloReportRepositoryError,
   findAutomaticFascicoloReportByVersion,
   persistAutomaticFascicoloReport,
@@ -597,6 +603,26 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
   findExistingReport: findAutomaticFascicoloReportByVersion,
   async analyze(input) {
     try {
+      let authorizationScope: SelvaraPilotAuthorizationScope | undefined;
+      if (isSelvaraPilotApprovalId(process.env)) {
+        const job = await prisma.asyncJob.findUnique({
+          where: { id: input.jobId },
+          select: {
+            tenantId: true,
+            procedimentoId: true,
+            purpose: true,
+            operation: true,
+          },
+        });
+        authorizationScope = {
+          tenantId: job?.tenantId ?? "",
+          procedimentoId: job?.procedimentoId ?? "",
+          corpusFingerprint: input.corpusFingerprint,
+          purpose: job?.purpose ?? "",
+          operation: job?.operation ?? "",
+        };
+        assertSelvaraPilotAuthorization(process.env, authorizationScope);
+      }
       const estimatedAmount = runtimeCostEstimate("ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR");
       return await withRuntimeCostGate({
         tenantId: input.tenantId,
@@ -608,7 +634,11 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
         idempotencyKey:
           `${FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION}:${input.corpusFingerprint}:${input.attempt}`,
       }, async () => ({
-        value: await createOpenAiFascicoloDocumentRuntimeFromEnv().analyze(input),
+        value: await createOpenAiFascicoloDocumentRuntimeFromEnv(
+          undefined,
+          {},
+          authorizationScope,
+        ).analyze(input),
         actualAmount: estimatedAmount,
       }));
     } catch (error) {
@@ -619,6 +649,13 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
       }
       if (error instanceof AiRealDataActivationError) {
         throw new AsyncJobExecutionError("CONFIGURATION", "AI_REAL_DATA_DISABLED", false);
+      }
+      if (error instanceof SelvaraPilotAuthorizationError) {
+        throw new AsyncJobExecutionError(
+          "AUTHORIZATION",
+          "SELVARA_PILOT_AUTHORIZATION_MISMATCH",
+          false,
+        );
       }
       if (error instanceof FascicoloDocumentAnalysisError) {
         const retryable = [
