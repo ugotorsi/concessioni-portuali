@@ -14,11 +14,16 @@ const harness = vi.hoisted(() => ({
     $queryRaw: vi.fn(),
   },
   createAuditLogInTransaction: vi.fn(),
+  resetDocumentAnalysisActivationInTransaction: vi.fn(),
 }));
 
 vi.mock("@/lib/prisma", () => ({ prisma: harness.prisma }));
 vi.mock("@/server/audit/auditLog", () => ({
   createAuditLogInTransaction: harness.createAuditLogInTransaction,
+}));
+vi.mock("@/server/async-jobs/documentAnalysisActivationPersistence", () => ({
+  resetDocumentAnalysisActivationInTransaction:
+    harness.resetDocumentAnalysisActivationInTransaction,
 }));
 vi.mock("@/server/db/serializableTransaction", () => ({
   runSerializableTransactionWithRetry: vi.fn((callback: (tx: typeof harness.tx) => unknown) => callback(harness.tx)),
@@ -164,6 +169,41 @@ describe("B2C9 generic async job persistence", () => {
     expect(sql).not.toContain("LIMIT 1");
   });
 
+  it("claims a targeted analysis only when tenant, procedimento, and authority match", async () => {
+    const job = running({
+      id: "analysis-job",
+      operation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+    });
+    harness.tx.$queryRaw.mockResolvedValueOnce([job]);
+
+    await expect(claimAsyncJobById({
+      jobId: "analysis-job",
+      expectedOperation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+      expectedTenantId: "tenant-1",
+      expectedProcedimentoId: "procedure-1",
+      workerId: "one-shot-worker",
+      leaseDurationMs: 60_000,
+    })).resolves.toBe(job);
+
+    const query = harness.tx.$queryRaw.mock.calls[0]?.[0] as { strings: readonly string[] };
+    const sql = query.strings.join(" ");
+    expect(sql).toContain('AND "tenantId" =');
+    expect(sql).toContain('AND "procedimentoId" =');
+    expect(sql).toContain(`"inputReference"#>>'{metadata,procedimentoId}'`);
+    expect(sql).toContain(`"admissionType" = 'AUTHENTICATED_USER'`);
+    expect(sql).toContain(`"admissionType" = 'AUTHORIZED_SYSTEM'`);
+  });
+
+  it("rejects targeted analysis claims without exact tenant and procedimento", async () => {
+    await expect(claimAsyncJobById({
+      jobId: "analysis-job",
+      expectedOperation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+      workerId: "one-shot-worker",
+      leaseDurationMs: 60_000,
+    })).rejects.toMatchObject({ code: "INVALID_ADMISSION" });
+    expect(harness.tx.$queryRaw).not.toHaveBeenCalled();
+  });
+
   it("does not make a queued job claimable before availableAt", async () => {
     harness.tx.$executeRaw.mockResolvedValue(0);
     harness.tx.$queryRaw.mockResolvedValue([]);
@@ -287,6 +327,7 @@ describe("B2C9 generic async job persistence", () => {
       status: "TERMINAL_FAILED",
       attemptCount: 3,
       operation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+      tenantId: "tenant-1",
       procedimentoId: "procedure-1",
     })]);
     harness.tx.$executeRaw.mockResolvedValue(1);
@@ -295,7 +336,9 @@ describe("B2C9 generic async job persistence", () => {
       actor: { userId: "operator-1", userEmail: "operator@example.test", userRole: "ADMIN" },
     })).resolves.toEqual({
       outcome: "REQUEUED",
+      jobId: "job-1",
       operation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+      tenantId: "tenant-1",
       procedimentoId: "procedure-1",
     });
     const retryQuery = harness.tx.$executeRaw.mock.calls[0][0] as { strings: readonly string[] };
@@ -306,6 +349,8 @@ describe("B2C9 generic async job persistence", () => {
       azione: "ASYNC_JOB_MANUAL_RETRY",
       entitaId: "job-1",
     }));
+    expect(harness.resetDocumentAnalysisActivationInTransaction)
+      .toHaveBeenCalledWith(harness.tx, expect.objectContaining({ id: "job-1" }));
   });
 
   it("terminally fails when retry attempts are exhausted", async () => {

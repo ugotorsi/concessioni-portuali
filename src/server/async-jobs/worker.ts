@@ -36,6 +36,8 @@ export interface DrainOneAsyncJobInput {
 export interface DrainAsyncJobByIdInput {
   jobId: string;
   expectedOperation: string;
+  expectedTenantId?: string;
+  expectedProcedimentoId?: string;
   workerId: string;
   leaseDurationMs: number;
   retryDelayMs: number;
@@ -187,6 +189,12 @@ export async function drainAsyncJobById(
   const claimed = await claimAsyncJobById({
     jobId: input.jobId,
     expectedOperation: input.expectedOperation,
+    ...(input.expectedTenantId === undefined ? {} : {
+      expectedTenantId: input.expectedTenantId,
+    }),
+    ...(input.expectedProcedimentoId === undefined ? {} : {
+      expectedProcedimentoId: input.expectedProcedimentoId,
+    }),
     workerId: input.workerId,
     leaseDurationMs: input.leaseDurationMs,
   });

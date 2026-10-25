@@ -28,6 +28,8 @@ export interface ApplicationAsyncWorkerConfig {
   readonly maxProcessedJobs?: number;
   readonly bootstrapTimeWatches: boolean;
   readonly providerExecutionEnabled?: boolean;
+  readonly targetJobId?: string;
+  readonly targetTenantId?: string;
 }
 
 export type ApplicationAsyncWorkerEvent =
@@ -63,6 +65,8 @@ type Drain = (input: {
   operationAllowlist: readonly string[];
   procedimentoAllowlist: readonly string[];
   providerExecutionEnabled?: boolean;
+  targetJobId?: string;
+  targetTenantId?: string;
 }) => Promise<DrainOneAsyncJobOutcome>;
 
 interface ApplicationAsyncWorkerDependencies {
@@ -102,6 +106,15 @@ function allowlist(value: string | undefined): readonly string[] {
   if (value === undefined || value.trim() === "") return [];
   const parsed = [...new Set(value.split(/[,\r\n]+/).map((item) => item.trim()).filter(Boolean))];
   if (parsed.some((item) => item.length > 256)) {
+    throw new ApplicationAsyncWorkerConfigurationError("INVALID_CONFIGURATION");
+  }
+  return parsed;
+}
+
+function targetIdentifier(value: string | undefined): string | undefined {
+  if (value === undefined) return undefined;
+  const parsed = value.trim();
+  if (!/^[A-Za-z0-9_-]{1,256}$/.test(parsed)) {
     throw new ApplicationAsyncWorkerConfigurationError("INVALID_CONFIGURATION");
   }
   return parsed;
@@ -175,6 +188,16 @@ const defaultDrain: Drain = async (input) => {
       diagnosticSource: applicationWorkerLoadErrorSource(error),
     });
   }
+  if (input.targetJobId && input.targetTenantId) {
+    return applicationWorker.drainTargetedFascicoloAnalysisJob({
+      jobId: input.targetJobId,
+      tenantId: input.targetTenantId,
+      procedimentoId: input.procedimentoAllowlist[0]!,
+      workerId: input.workerId,
+      retryDelayMs: input.retryDelayMs,
+      providerExecutionEnabled: input.providerExecutionEnabled,
+    });
+  }
   return applicationWorker.drainOneApplicationAsyncJob(input);
 };
 
@@ -203,16 +226,34 @@ export function parseApplicationAsyncWorkerConfig(
   }
   const operationAllowlist = allowlist(environment.ASYNC_WORKER_OPERATION_ALLOWLIST);
   const procedimentoAllowlist = allowlist(environment.ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST);
+  const targetJobId = targetIdentifier(environment.ASYNC_WORKER_TARGET_JOB_ID);
+  const targetTenantId = targetIdentifier(environment.ASYNC_WORKER_TARGET_TENANT_ID);
+  if ((targetJobId === undefined) !== (targetTenantId === undefined)) {
+    throw new ApplicationAsyncWorkerConfigurationError("INVALID_CONFIGURATION");
+  }
   if (environment.ASYNC_WORKER_MAX_PROCESSED_JOBS !== undefined
     && (!dedicatedMode || !providerExecutionEnabled
       || operationAllowlist.length !== 1
       || operationAllowlist[0] !== "FASCICOLO.AUTOMATIC_ANALYSIS_V1"
       || procedimentoAllowlist.length !== 1
+      || targetJobId === undefined
+      || targetTenantId === undefined
       || environment.ASYNC_WORKER_CONCURRENCY !== "1"
       || !enabled(environment.ASYNC_WORKER_EXIT_ON_IDLE))) {
     throw new ApplicationAsyncWorkerConfigurationError("INVALID_CONFIGURATION");
   }
   if (dedicatedMode && (operationAllowlist.length === 0 || procedimentoAllowlist.length === 0)) {
+    throw new ApplicationAsyncWorkerConfigurationError("INVALID_CONFIGURATION");
+  }
+  if (
+    targetJobId !== undefined
+    && (
+      !dedicatedMode
+      || operationAllowlist.length !== 1
+      || operationAllowlist[0] !== "FASCICOLO.AUTOMATIC_ANALYSIS_V1"
+      || procedimentoAllowlist.length !== 1
+    )
+  ) {
     throw new ApplicationAsyncWorkerConfigurationError("INVALID_CONFIGURATION");
   }
   return Object.freeze({
@@ -252,6 +293,7 @@ export function parseApplicationAsyncWorkerConfig(
       ? true
       : enabled(environment.ASYNC_WORKER_BOOTSTRAP_TIME_WATCHES),
     providerExecutionEnabled,
+    ...(targetJobId === undefined ? {} : { targetJobId, targetTenantId: targetTenantId! }),
   });
 }
 
@@ -318,6 +360,8 @@ export function createApplicationAsyncWorkerRuntime(
             operationAllowlist: config.operationAllowlist,
             procedimentoAllowlist: config.procedimentoAllowlist,
             providerExecutionEnabled: config.providerExecutionEnabled,
+            targetJobId: config.targetJobId,
+            targetTenantId: config.targetTenantId,
           });
           if (result.outcome === "IDLE") {
             if (!idleReported) {

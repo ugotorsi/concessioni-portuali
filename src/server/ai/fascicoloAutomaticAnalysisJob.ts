@@ -1239,10 +1239,12 @@ export async function ensureFascicoloDocumentCorpusUpdateJob(
     actorEmail: sourceJob.actorEmail,
     actorRole: sourceJob.actorRole,
   }));
-  await requestDocumentWorkerActivation(
-    "DOCUMENT_ANALYSIS",
-    sourceJob.procedimentoId,
-  );
+  await requestDocumentWorkerActivation({
+    kind: "DOCUMENT_ANALYSIS",
+    applicationJobId: admission.job.id,
+    tenantId: sourceJob.tenantId,
+    procedimentoId: sourceJob.procedimentoId,
+  });
   return admission;
 }
 
@@ -1290,7 +1292,7 @@ export async function ensureFascicoloAutomaticAnalysisJob(input: FascicoloAutoma
   ) {
     throw new Error("FASCICOLO_AUTOMATIC_ANALYSIS_AUTHORITY_MISMATCH");
   }
-  return admitAsyncJob(buildFascicoloAutomaticAnalysisAdmission({
+  const admission = await admitAsyncJob(buildFascicoloAutomaticAnalysisAdmission({
     tenantId: sourceJob.tenantId,
     procedimentoId: destination.procedimentoId,
     neutralIntakeId: intake.id,
@@ -1303,4 +1305,11 @@ export async function ensureFascicoloAutomaticAnalysisJob(input: FascicoloAutoma
     actorEmail: sourceJob.actorEmail,
     actorRole: sourceJob.actorRole,
   }));
+  await requestDocumentWorkerActivation({
+    kind: "DOCUMENT_ANALYSIS",
+    applicationJobId: admission.job.id,
+    tenantId: sourceJob.tenantId,
+    procedimentoId: destination.procedimentoId,
+  });
+  return admission;
 }

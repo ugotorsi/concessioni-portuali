@@ -31,7 +31,20 @@ export async function retryRuntimeJob(formData: FormData): Promise<void> {
   if (retry.outcome === "REQUEUED" && retry.procedimentoId) {
     const workerKind = documentWorkerKindForOperation(retry.operation);
     if (workerKind) {
-      await requestDocumentWorkerActivation(workerKind, retry.procedimentoId);
+      if (workerKind === "DOCUMENT_ANALYSIS") {
+        if (!retry.tenantId) throw new Error("DOCUMENT_ANALYSIS_TARGET_AUTHORITY_MISMATCH");
+        await requestDocumentWorkerActivation({
+          kind: workerKind,
+          applicationJobId: retry.jobId,
+          tenantId: retry.tenantId,
+          procedimentoId: retry.procedimentoId,
+        });
+      } else {
+        await requestDocumentWorkerActivation({
+          kind: workerKind,
+          procedimentoId: retry.procedimentoId,
+        });
+      }
     }
   }
   revalidatePath("/admin/runtime");

@@ -72,6 +72,8 @@ describe("canonical identity V3 integration gate", () => {
       ASYNC_WORKER_MAX_PROCESSED_JOBS: "1",
       ASYNC_WORKER_EXIT_ON_IDLE: "true",
       ASYNC_WORKER_BOOTSTRAP_TIME_WATCHES: "false",
+      ASYNC_WORKER_TARGET_JOB_ID: "analysis-job-only",
+      ASYNC_WORKER_TARGET_TENANT_ID: "tenant-only",
       ASYNC_WORKER_OPERATION_ALLOWLIST: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
       ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST: "procedure-test",
     };

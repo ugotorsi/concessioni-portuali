@@ -1,11 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const worker = vi.hoisted(() => ({ drainOneAsyncJob: vi.fn() }));
+const worker = vi.hoisted(() => ({
+  drainOneAsyncJob: vi.fn(),
+  drainAsyncJobById: vi.fn(),
+}));
 const globalAiControl = vi.hoisted(() => ({ getState: vi.fn() }));
 
 vi.mock("@/server/async-jobs/worker", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/server/async-jobs/worker")>();
-  return { ...actual, drainOneAsyncJob: worker.drainOneAsyncJob };
+  return {
+    ...actual,
+    drainOneAsyncJob: worker.drainOneAsyncJob,
+    drainAsyncJobById: worker.drainAsyncJobById,
+  };
 });
 
 vi.mock("@/server/ai/globalAiControl", () => ({
@@ -28,6 +35,7 @@ vi.mock("@/lib/prisma", () => ({
 import {
   applicationAsyncJobRegistry,
   drainOneApplicationAsyncJob,
+  drainTargetedFascicoloAnalysisJob,
 } from "@/server/async-jobs/applicationWorker";
 import { prisma } from "@/lib/prisma";
 import { normalizeAsyncJobAdmission } from "@/server/async-jobs/domain";
@@ -297,6 +305,46 @@ describe("B2C9 Block 3B.2C NeutralIntake async extraction wiring", () => {
       ],
     }));
     expect(prisma.automaticFascicoloReportMission.findMany).not.toHaveBeenCalled();
+  });
+
+  it("claims only the exact targeted analysis when the global control is ON", async () => {
+    worker.drainAsyncJobById.mockResolvedValueOnce({ outcome: "IDLE" });
+
+    await expect(drainTargetedFascicoloAnalysisJob({
+      jobId: "analysis-job-1",
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      workerId: "worker-1",
+      retryDelayMs: 1_000,
+      providerExecutionEnabled: true,
+    })).resolves.toEqual({ outcome: "IDLE" });
+
+    expect(worker.drainAsyncJobById).toHaveBeenCalledWith({
+      jobId: "analysis-job-1",
+      expectedOperation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+      expectedTenantId: "tenant-1",
+      expectedProcedimentoId: "procedure-1",
+      workerId: "worker-1",
+      leaseDurationMs: 300_000,
+      retryDelayMs: 1_000,
+      registry: applicationAsyncJobRegistry,
+    });
+    expect(worker.drainOneAsyncJob).not.toHaveBeenCalled();
+  });
+
+  it("does not claim a targeted analysis when the global control is OFF", async () => {
+    globalAiControl.getState.mockResolvedValueOnce({ effectiveEnabled: false });
+
+    await expect(drainTargetedFascicoloAnalysisJob({
+      jobId: "analysis-job-1",
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      workerId: "worker-1",
+      retryDelayMs: 1_000,
+      providerExecutionEnabled: true,
+    })).resolves.toEqual({ outcome: "IDLE" });
+
+    expect(worker.drainAsyncJobById).not.toHaveBeenCalled();
   });
 
   it("does not reconcile automatic research for an extraction-only worker", async () => {

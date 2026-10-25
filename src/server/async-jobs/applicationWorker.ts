@@ -1,5 +1,5 @@
 import { AsyncJobHandlerRegistry } from "./registry";
-import { drainOneAsyncJob } from "./worker";
+import { drainAsyncJobById, drainOneAsyncJob } from "./worker";
 import { createNeutralIntakeClassificationHandler } from "../intake/neutralIntakeClassificationJob";
 import { createNeutralIntakeExtractionHandler } from "../intake/neutralIntakeExtractionJob";
 import {
@@ -88,6 +88,30 @@ export async function drainOneApplicationAsyncJob(input: {
     ...input,
     operationBlocklist: applicationAsyncJobOperationBlocklist(providerExecutionEnabled),
     leaseDurationMs: APPLICATION_ASYNC_JOB_LEASE_MS,
+    registry: applicationAsyncJobRegistry,
+  });
+}
+
+export async function drainTargetedFascicoloAnalysisJob(input: {
+  jobId: string;
+  tenantId: string;
+  procedimentoId: string;
+  workerId: string;
+  retryDelayMs: number;
+  providerExecutionEnabled?: boolean;
+}) {
+  const aiControl = await getGlobalAiControlState();
+  if (input.providerExecutionEnabled !== true || !aiControl.effectiveEnabled) {
+    return { outcome: "IDLE" as const };
+  }
+  return drainAsyncJobById({
+    jobId: input.jobId,
+    expectedOperation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+    expectedTenantId: input.tenantId,
+    expectedProcedimentoId: input.procedimentoId,
+    workerId: input.workerId,
+    leaseDurationMs: APPLICATION_ASYNC_JOB_LEASE_MS,
+    retryDelayMs: input.retryDelayMs,
     registry: applicationAsyncJobRegistry,
   });
 }

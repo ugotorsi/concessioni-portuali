@@ -8,6 +8,7 @@ import { createAuditLogInTransaction } from "@/server/audit/auditLog";
 import { runSerializableTransactionWithRetry } from "@/server/db/serializableTransaction";
 
 import {
+  AsyncJobInputError,
   type AsyncJobAdmissionInput,
   type AsyncJobFailure,
   normalizeAsyncJobAdmission,
@@ -18,6 +19,7 @@ import type {
   AsyncJobTerminalFailureHook,
   AsyncJobTerminalFailureResolution,
 } from "./registry";
+import { resetDocumentAnalysisActivationInTransaction } from "./documentAnalysisActivationPersistence";
 
 const identifier = z.string().trim().min(1).max(256);
 const jobId = identifier;
@@ -158,6 +160,8 @@ export interface AsyncJobClaimInput {
 export interface AsyncJobClaimByIdInput {
   jobId: string;
   expectedOperation: string;
+  expectedTenantId?: string;
+  expectedProcedimentoId?: string;
   workerId: string;
   leaseDurationMs: number;
 }
@@ -448,9 +452,42 @@ export async function claimNextAsyncJob(input: AsyncJobClaimInput): Promise<Asyn
 export async function claimAsyncJobById(input: AsyncJobClaimByIdInput): Promise<AsyncJob | null> {
   const parsedJobId = jobId.parse(input.jobId);
   const expectedOperation = identifier.parse(input.expectedOperation);
+  const expectedTenantId = input.expectedTenantId === undefined
+    ? undefined
+    : identifier.parse(input.expectedTenantId);
+  const expectedProcedimentoId = input.expectedProcedimentoId === undefined
+    ? undefined
+    : identifier.parse(input.expectedProcedimentoId);
+  const targetedAnalysis = expectedOperation === "FASCICOLO.AUTOMATIC_ANALYSIS_V1";
+  if (
+    targetedAnalysis
+    && (expectedTenantId === undefined || expectedProcedimentoId === undefined)
+  ) {
+    throw new AsyncJobInputError("INVALID_ADMISSION");
+  }
   const workerId = identifier.parse(input.workerId);
   const leaseMs = durationMs.parse(input.leaseDurationMs);
   const token = randomBytes(32).toString("hex");
+  const targetScope = targetedAnalysis
+    ? Prisma.sql`
+        AND "tenantId" = ${expectedTenantId!}
+        AND "procedimentoId" = ${expectedProcedimentoId!}
+        AND "inputReference"#>>'{metadata,procedimentoId}' = ${expectedProcedimentoId!}
+        AND (
+          (
+            "admissionType" = 'AUTHENTICATED_USER'
+            AND "initiatingUserId" IS NOT NULL
+            AND "actorId" = "initiatingUserId"
+          )
+          OR
+          (
+            "admissionType" = 'AUTHORIZED_SYSTEM'
+            AND "initiatingUserId" IS NULL
+            AND "policyDecisionRef" IS NOT NULL
+          )
+        )
+      `
+    : Prisma.empty;
 
   return runSerializableTransactionWithRetry(async (tx) => {
     const claimed = await tx.$queryRaw<AsyncJob[]>(Prisma.sql`
@@ -459,6 +496,7 @@ export async function claimAsyncJobById(input: AsyncJobClaimByIdInput): Promise<
         FROM "AsyncJob"
         WHERE "id" = ${parsedJobId}
           AND "operation" = ${expectedOperation}
+          ${targetScope}
           AND "attemptCount" < "maxAttempts"
           AND ("dependsOnJobId" IS NULL OR EXISTS (
             SELECT 1 FROM "AsyncJob" AS dependency
@@ -844,9 +882,12 @@ export async function retryTerminalAsyncJob(input: {
         correlationId: current.correlationId,
       },
     });
+    await resetDocumentAnalysisActivationInTransaction(tx, current);
     return {
       outcome: "REQUEUED" as const,
+      jobId: current.id,
       operation: current.operation,
+      tenantId: current.tenantId,
       procedimentoId: current.procedimentoId,
     };
   });

@@ -23,6 +23,10 @@ function targetsCanonicalV3Database(databaseUrl: string | undefined): boolean {
   }
 }
 
+function isBoundedIdentifier(value: string | undefined): boolean {
+  return value !== undefined && /^[A-Za-z0-9_-]{1,256}$/.test(value);
+}
+
 function isAuthorizedDedicatedWorker(
   environment: Readonly<Record<string, string | undefined>>,
 ): boolean {
@@ -38,6 +42,8 @@ function isAuthorizedDedicatedWorker(
     && environment.ASYNC_WORKER_MAX_PROCESSED_JOBS === "1"
     && environment.ASYNC_WORKER_EXIT_ON_IDLE === "true"
     && environment.ASYNC_WORKER_BOOTSTRAP_TIME_WATCHES === "false"
+    && isBoundedIdentifier(environment.ASYNC_WORKER_TARGET_JOB_ID)
+    && isBoundedIdentifier(environment.ASYNC_WORKER_TARGET_TENANT_ID)
     && operationAllowlist.length === 1
     && operationAllowlist[0] === "FASCICOLO.AUTOMATIC_ANALYSIS_V1"
     && procedimentoAllowlist.length === 1
