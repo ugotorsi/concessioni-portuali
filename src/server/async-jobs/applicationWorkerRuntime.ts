@@ -213,10 +213,27 @@ export function parseApplicationAsyncWorkerConfig(
   }
   const providerExecutionEnabled = enabled(environment.ASYNC_PROVIDER_EXECUTION_ENABLED);
   const dedicatedMode = enabled(environment.ASYNC_WORKER_DEDICATED_MODE);
+  const operationAllowlist = allowlist(environment.ASYNC_WORKER_OPERATION_ALLOWLIST);
+  const procedimentoAllowlist = allowlist(environment.ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST);
   if (providerExecutionEnabled) {
+    const hasUnknownOrUnscopedOperation = operationAllowlist.length === 0
+      || operationAllowlist.some((operation) => (
+        operation !== "FASCICOLO.AUTOMATIC_ANALYSIS_V1"
+        && operation !== "LEGAL_RESEARCH.EXECUTE_V1"
+      ));
     try {
-      runtimeCostEstimate("ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR", environment);
-      runtimeCostEstimate("ASYNC_COST_RESEARCH_CALL_ESTIMATE_EUR", environment);
+      if (
+        hasUnknownOrUnscopedOperation
+        || operationAllowlist.includes("FASCICOLO.AUTOMATIC_ANALYSIS_V1")
+      ) {
+        runtimeCostEstimate("ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR", environment);
+      }
+      if (
+        hasUnknownOrUnscopedOperation
+        || operationAllowlist.includes("LEGAL_RESEARCH.EXECUTE_V1")
+      ) {
+        runtimeCostEstimate("ASYNC_COST_RESEARCH_CALL_ESTIMATE_EUR", environment);
+      }
     } catch (error) {
       if (error instanceof RuntimeCostConfigurationError) {
         throw new ApplicationAsyncWorkerConfigurationError("INVALID_CONFIGURATION");
@@ -224,8 +241,6 @@ export function parseApplicationAsyncWorkerConfig(
       throw error;
     }
   }
-  const operationAllowlist = allowlist(environment.ASYNC_WORKER_OPERATION_ALLOWLIST);
-  const procedimentoAllowlist = allowlist(environment.ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST);
   const targetJobId = targetIdentifier(environment.ASYNC_WORKER_TARGET_JOB_ID);
   const targetTenantId = targetIdentifier(environment.ASYNC_WORKER_TARGET_TENANT_ID);
   if ((targetJobId === undefined) !== (targetTenantId === undefined)) {

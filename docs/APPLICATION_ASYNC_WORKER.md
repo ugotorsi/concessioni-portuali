@@ -28,8 +28,8 @@ The readiness command is read-only. It checks database connectivity, the Lotto 8
 | `ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST` | empty | comma-separated canary scope |
 | `ASYNC_WORKER_DEDICATED_MODE` | `false` | when `true`, both allowlists are required and non-empty |
 | `ASYNC_PROVIDER_EXECUTION_ENABLED` | `false` | blocks provider-backed claims when false |
-| `ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR` | required when providers enabled | positive decimal, max 6 decimals |
-| `ASYNC_COST_RESEARCH_CALL_ESTIMATE_EUR` | required when providers enabled | positive decimal, max 6 decimals |
+| `ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR` | required for generic workers or an allowlist containing `FASCICOLO.AUTOMATIC_ANALYSIS_V1` | positive decimal, max 6 decimals |
+| `ASYNC_COST_RESEARCH_CALL_ESTIMATE_EUR` | required for generic workers or an allowlist containing `LEGAL_RESEARCH.EXECUTE_V1` | positive decimal, max 6 decimals |
 | `ASYNC_READINESS_REQUIRE_LIVE_WORKER` | `false` | set true for post-start readiness |
 | `DOCUMENT_WORKER_ACTIVATION_MODE` | `DISABLED` | `DISABLED` or `RENDER_ONE_OFF` |
 | `DOCUMENT_WORKER_ACTIVATION_TIMEOUT_MS` | `10000` | 1000-30000 ms |
@@ -39,6 +39,25 @@ The readiness command is read-only. It checks database connectivity, the Lotto 8
 | `DOCUMENT_WORKER_RECOVERY_PROCEDIMENTO_ALLOWLIST` | empty | required scoped recovery procedures |
 
 Provider credentials are validated by their adapters only when the corresponding workload is eligible. Never print environment values.
+
+## Selvara failed one-off recovery
+
+`recoverSelvaraFailedDocumentAnalysisActivation` is a server-only, incident-specific
+recovery function. It is not exposed through a route, action, or generic retry, and its
+caller supplies only the administrator identity. Every invocation reads the dedicated
+service, exact one-off, complete paginated job list, and complete paginated job logs
+directly from the official Render API. It requires the service to remain suspended and
+all execution gates to remain off. The verified `failed` job must have the exact original
+command and a terminal timestamp, with no other one-off targeting the application job.
+The complete logs must prove the exact fatal configuration event after process startup
+and before the runtime-created event; missing, incomplete, contradictory, or unparseable
+evidence fails closed before database access.
+
+After remote verification, the function revalidates the immutable Selvara authorization
+and unchanged application job under a serializable transaction and row lock, rejects
+competing application work, and appends a reconciled `NOT_REQUESTED` ledger entry with
+the independently produced evidence and administrator identity. It never updates the
+`AsyncJob` row.
 
 ## Staging Rollout
 

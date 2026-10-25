@@ -123,7 +123,6 @@ describe("Block 3B.7 application async worker runtime", () => {
       DATABASE_URL: "postgresql://server/database",
       ASYNC_PROVIDER_EXECUTION_ENABLED: "true",
       ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR: "0.250000",
-      ASYNC_COST_RESEARCH_CALL_ESTIMATE_EUR: "0.050000",
       ASYNC_WORKER_MAX_PROCESSED_JOBS: "1",
       ASYNC_WORKER_CONCURRENCY: "1",
       ASYNC_WORKER_DEDICATED_MODE: "true",
@@ -142,6 +141,40 @@ describe("Block 3B.7 application async worker runtime", () => {
       ...env,
       ASYNC_WORKER_TARGET_TENANT_ID: undefined,
     })).toThrowError(expect.objectContaining({ code: "INVALID_CONFIGURATION" }));
+    expect(() => parseApplicationAsyncWorkerConfig({
+      ...env,
+      ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR: undefined,
+    })).toThrowError(expect.objectContaining({ code: "INVALID_CONFIGURATION" }));
+  });
+
+  it("requires only costs used by scoped provider workers and both costs for generic workers", () => {
+    const common = {
+      DATABASE_URL: "postgresql://server/database",
+      ASYNC_PROVIDER_EXECUTION_ENABLED: "true",
+      ASYNC_WORKER_DEDICATED_MODE: "true",
+      ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST: "case-only",
+    };
+    expect(() => parseApplicationAsyncWorkerConfig({
+      ...common,
+      ASYNC_WORKER_OPERATION_ALLOWLIST: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+      ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR: "0.250000",
+    })).not.toThrow();
+    expect(() => parseApplicationAsyncWorkerConfig({
+      ...common,
+      ASYNC_WORKER_OPERATION_ALLOWLIST: "LEGAL_RESEARCH.EXECUTE_V1",
+      ASYNC_COST_RESEARCH_CALL_ESTIMATE_EUR: "0.050000",
+    })).not.toThrow();
+    expect(() => parseApplicationAsyncWorkerConfig({
+      ...common,
+      ASYNC_WORKER_OPERATION_ALLOWLIST:
+        "FASCICOLO.AUTOMATIC_ANALYSIS_V1,LEGAL_RESEARCH.EXECUTE_V1",
+      ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR: "0.250000",
+    })).toThrowError(expect.objectContaining({ code: "INVALID_CONFIGURATION" }));
+    expect(() => parseApplicationAsyncWorkerConfig({
+      DATABASE_URL: "postgresql://server/database",
+      ASYNC_PROVIDER_EXECUTION_ENABLED: "true",
+      ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR: "0.250000",
+    })).toThrowError(expect.objectContaining({ code: "INVALID_CONFIGURATION" }));
   });
 
   it("drains only the explicitly targeted analysis job", async () => {
@@ -150,7 +183,6 @@ describe("Block 3B.7 application async worker runtime", () => {
       DATABASE_URL: "postgresql://server/database",
       ASYNC_PROVIDER_EXECUTION_ENABLED: "true",
       ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR: "0.250000",
-      ASYNC_COST_RESEARCH_CALL_ESTIMATE_EUR: "0.050000",
       ASYNC_WORKER_MAX_PROCESSED_JOBS: "1",
       ASYNC_WORKER_CONCURRENCY: "1",
       ASYNC_WORKER_DEDICATED_MODE: "true",
@@ -316,6 +348,31 @@ describe("Block 3B.7 application async worker runtime", () => {
 
     expect(bootstrap).not.toHaveBeenCalled();
     expect(runtime.run).toHaveBeenCalledOnce();
+  });
+
+  it("reports configuration failure before constructing the runtime or touching dependencies", async () => {
+    const failure = new ApplicationAsyncWorkerConfigurationError("INVALID_CONFIGURATION");
+    const createRuntime = vi.fn();
+    const bootstrap = vi.fn();
+    const disconnect = vi.fn();
+    const reportFatal = vi.fn();
+    const markFailure = vi.fn();
+
+    await runApplicationAsyncWorkerProcess({
+      parseConfig: () => { throw failure; },
+      createRuntime,
+      installSignalHandlers: vi.fn(),
+      bootstrap,
+      disconnect,
+      reportFatal,
+      markFailure,
+    });
+
+    expect(createRuntime).not.toHaveBeenCalled();
+    expect(bootstrap).not.toHaveBeenCalled();
+    expect(disconnect).not.toHaveBeenCalled();
+    expect(reportFatal).toHaveBeenCalledWith(failure);
+    expect(markFailure).toHaveBeenCalledOnce();
   });
 
   it("does not start the worker when the time-watch bootstrap fails", async () => {
