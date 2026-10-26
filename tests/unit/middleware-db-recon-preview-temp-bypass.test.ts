@@ -186,6 +186,55 @@ describe("middleware sensitive route boundaries", () => {
     expect(new URL(response.headers.get("location")!).pathname).toBe("/mfa/enroll");
   });
 
+  it("allows an authenticated ADMIN awaiting enrollment to open only the enrollment page", async () => {
+    getTokenMock.mockResolvedValue({
+      role: "ADMIN",
+      mfaEnrollmentRequired: true,
+      mfaVerified: false,
+    });
+
+    const enrollment = await middleware(makeRequest("/mfa/enroll"));
+    expect(enrollment.status).toBe(200);
+    expect(enrollment.headers.get("location")).toBeNull();
+
+    const dashboard = await middleware(makeRequest("/dashboard"));
+    expect(dashboard.status).toBe(307);
+    expect(new URL(dashboard.headers.get("location")!).pathname).toBe("/mfa/enroll");
+  });
+
+  it("does not expose the enrollment page without an authenticated session", async () => {
+    const response = await middleware(makeRequest("/mfa/enroll"));
+
+    expect(response.status).toBe(307);
+    const location = new URL(response.headers.get("location")!);
+    expect(location.pathname).toBe("/login");
+    expect(location.searchParams.get("callbackUrl")).toBe("/mfa/enroll");
+  });
+
+  it.each([
+    "/api/auth/mfa/enrollment",
+    "/api/auth/signout",
+  ])("leaves the required authenticated auth flow available: %s", async (path) => {
+    const response = await middleware(makeRequest(path));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("location")).toBeNull();
+    expect(getTokenMock).not.toHaveBeenCalled();
+  });
+
+  it("redirects a fully verified ADMIN away from enrollment to the ordinary application", async () => {
+    getTokenMock.mockResolvedValueOnce({
+      role: "ADMIN",
+      mfaEnrollmentRequired: false,
+      mfaVerified: true,
+    });
+
+    const response = await middleware(makeRequest("/mfa/enroll"));
+
+    expect(response.status).toBe(307);
+    expect(new URL(response.headers.get("location")!).pathname).toBe("/dashboard");
+  });
+
   it("rejects a required-role token that is neither verified nor enrolling", async () => {
     getTokenMock.mockResolvedValueOnce({
       role: "ADMIN",

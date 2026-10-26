@@ -170,7 +170,11 @@ export async function middleware(request: NextRequest) {
   }
 
   const mfaEnrollmentRequired = token?.mfaEnrollmentRequired === true;
-  if (mfaEnrollmentRequired && pathname !== "/mfa/enroll") {
+  if (mfaEnrollmentRequired) {
+    if (pathname === "/mfa/enroll") {
+      return withSecurityHeaders(NextResponse.next());
+    }
+
     return withSecurityHeaders(NextResponse.redirect(new URL("/mfa/enroll", request.url)));
   }
 
