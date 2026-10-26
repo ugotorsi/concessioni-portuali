@@ -14,7 +14,7 @@ import {
   parseOpenAiBillableUsage,
   type OpenAiBillableUsage,
 } from "@/server/ai/openaiAccounting";
-import { fascicoloStructuredKnowledgeSchema } from "@/server/fascicolo-knowledge/structuredContracts";
+import { fascicoloDocumentStructuredKnowledgeSchema } from "@/server/fascicolo-knowledge/structuredContracts";
 import { getEncoding } from "js-tiktoken";
 import { z } from "zod";
 
@@ -149,7 +149,27 @@ function stripGeneratedSchemaMetadata(value: unknown): unknown {
   );
 }
 
-const OPENAI_PROVIDER_DOCUMENT_ANALYSIS_JSON_SCHEMA = {
+function makeOpenAiStrictSchema(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(makeOpenAiStrictSchema);
+  if (!value || typeof value !== "object") return value;
+  const entries = Object.entries(value).map(([key, item]) => [
+    key,
+    makeOpenAiStrictSchema(item),
+  ]);
+  const schema = Object.fromEntries(entries) as Record<string, unknown>;
+  if (Array.isArray(schema.oneOf)) {
+    schema.anyOf = schema.oneOf;
+    delete schema.oneOf;
+  }
+  if (schema.type === "object" && schema.properties
+    && typeof schema.properties === "object" && !Array.isArray(schema.properties)) {
+    schema.additionalProperties = false;
+    schema.required = Object.keys(schema.properties);
+  }
+  return schema;
+}
+
+export const OPENAI_PROVIDER_DOCUMENT_ANALYSIS_JSON_SCHEMA = makeOpenAiStrictSchema({
   ...OPENAI_PROVIDER_ANALYSIS_JSON_SCHEMA,
   required: [
     ...OPENAI_PROVIDER_ANALYSIS_JSON_SCHEMA.required,
@@ -158,10 +178,10 @@ const OPENAI_PROVIDER_DOCUMENT_ANALYSIS_JSON_SCHEMA = {
   properties: {
     ...OPENAI_PROVIDER_ANALYSIS_JSON_SCHEMA.properties,
     structuredKnowledge: stripGeneratedSchemaMetadata(
-      z.toJSONSchema(fascicoloStructuredKnowledgeSchema, { unrepresentable: "any" }),
+      z.toJSONSchema(fascicoloDocumentStructuredKnowledgeSchema, { unrepresentable: "any" }),
     ),
   },
-} as const;
+});
 
 class OpenAiProtocolError extends Error {
   constructor() {
@@ -269,7 +289,7 @@ function buildRequestBody(request: OpenAiAnalysisProviderRequest, maxOutputToken
         schema: documentAnalysis
           ? OPENAI_PROVIDER_DOCUMENT_ANALYSIS_JSON_SCHEMA
           : OPENAI_PROVIDER_ANALYSIS_JSON_SCHEMA,
-        strict: !documentAnalysis,
+        strict: true,
       },
     },
   };

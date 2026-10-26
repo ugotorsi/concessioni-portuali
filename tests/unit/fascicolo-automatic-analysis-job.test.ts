@@ -160,11 +160,18 @@ const controlledV7Reference = {
 
 const controlledV7Knowledge = {
   ...lotto3Knowledge,
-  sourceQuotes: [{
-    itemLocalId: "fact-1",
-    basisRef: "DOCUMENT_1.PAGE_1",
-    quote: "scadenza al 31 dicembre 2026",
-  }],
+  sourceQuotes: [
+    {
+      itemLocalId: "fact-1",
+      basisRef: "DOCUMENT_1.PAGE_1",
+      quote: "scadenza al 31 dicembre 2026",
+    },
+    {
+      itemLocalId: "event-1",
+      basisRef: "DOCUMENT_1.PAGE_1",
+      quote: "richiama l'articolo 18",
+    },
+  ],
   documentInventory: [{
     localId: "document-1",
     basisRefs: ["DOCUMENT_1.PAGE_1"],
@@ -624,7 +631,25 @@ describe("automatic fascicolo analysis job", () => {
       ...analysis,
       structuredKnowledge: controlledV7Knowledge,
     }));
-    const persistKnowledge = vi.fn(async () => buildingReconciliation(lotto3Knowledge));
+    const persistKnowledge = vi.fn(async (input: Parameters<NonNullable<
+      FascicoloAutomaticAnalysisDependencies["persistKnowledge"]
+    >>[0]) => {
+      const projection = projectStructuredKnowledge({
+        knowledge: fascicoloStructuredKnowledgeSchema.parse(input.knowledge),
+        subjectIdsByLocalId: new Map(),
+        evidenceByBasisRef: input.evidenceByBasisRef,
+        sourceTextByBasisRef: input.sourceTextByBasisRef,
+      });
+      assertStructuredKnowledgeQuality(projection.quality);
+      expect(projection.quality).toMatchObject({
+        validCitationCount: 2,
+        invalidCitationCount: 0,
+        lostLegalIssueCount: 0,
+        lostRelationCount: 0,
+        blockingReasons: [],
+      });
+      return buildingReconciliation(lotto3Knowledge);
+    });
     const prior = currentReconciliation(lotto3Knowledge).revision;
     const finalizeControlledV7 = vi.fn(async () => ({
       revision: {

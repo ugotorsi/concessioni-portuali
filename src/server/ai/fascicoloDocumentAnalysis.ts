@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 
 import {
   AI_FASCICOLO_ANALYSIS_V1_SCHEMA_VERSION,
-  providerAnalysisPayloadV1Schema,
+  fascicoloDocumentAnalysisPayloadV1Schema,
   type ProviderAnalysisPayloadV1,
 } from "@/server/ai/fascicoloAnalysis";
 import { AiProviderAdapterError } from "@/server/ai/providerErrors";
@@ -10,6 +10,10 @@ import {
   assertRealDataActivation,
   type RealDataActivationPolicy,
 } from "@/server/ai/realDataActivation";
+import {
+  FASCICOLO_STRUCTURED_KNOWLEDGE_SEMANTIC_RULES,
+  structuredKnowledgeValidationCode,
+} from "@/server/fascicolo-knowledge/structuredContracts";
 
 export const FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION = "FASCICOLO_DOCUMENT_ANALYSIS_V7" as const;
 
@@ -28,6 +32,9 @@ export const FASCICOLO_DOCUMENT_ANALYSIS_SYSTEM_POLICY = Object.freeze({
     "For every structuredKnowledge item and every cited basisRef, return sourceQuotes with the item localId, basisRef, and a short authentic verbatim quotation that occurs exactly once on that page. Keep semantic descriptions and normalizedStatement as reconstructions; never use them as quotations unless they are independently verbatim.",
     "Preserve every material defense, claim, objection, or request as a PARTY_POSITION attributed to its subject and cited to its document page; never convert a party position into a verified FACT or a technical assessment.",
     "Within structuredKnowledge, propose legalIssues only from identified CURRENT-bound items and researchQuestions only from those legal issues with an explicit reference-date basis.",
+    "Use unique localId values within each structuredKnowledge collection and unique itemLocalId, basisRef, quote tuples in sourceQuotes.",
+    "Every structuredKnowledge cross-reference must resolve: subject references to subjects, item references to items, sourceQuotes to an item whose basisRefs contain the quoted basisRef, legal questions to legalIssues, MATERIAL documents to at least one item, and UNCERTAIN documents to at least one GAP item.",
+    "legalIssues may originate only from PARTY_POSITION, FACT, EVENT, LEGAL_ACT, MEASURE, CONTRADICTION, or GAP items; each researchQuestion reference-date basis must be internally consistent and reference an existing item when itemLocalId is present.",
     "Assess every documented prescription, formal contestation, alleged breach, omission, and contradiction for legalIssues; empty legalIssues are valid only when the excerpts do not support an issue.",
     "When an issue cannot be structured because documents or legal research are missing, return a grounded GAP instead of inventing a legal conclusion or authority.",
     "Separate recorded facts from signals requiring verification.",
@@ -94,6 +101,8 @@ export interface FascicoloDocumentProviderRequestV1 {
     ];
     readonly signalTypes: readonly ["INFO", "VERIFY"];
     readonly basisRefsMeaning: "EXTRACTED_DOCUMENT_PAGE_REFERENCE_ONLY";
+    readonly structuredKnowledgeSemanticRules:
+      typeof FASCICOLO_STRUCTURED_KNOWLEDGE_SEMANTIC_RULES;
   };
 }
 
@@ -173,6 +182,7 @@ export function buildFascicoloDocumentProviderRequest(
       ],
       signalTypes: ["INFO", "VERIFY"],
       basisRefsMeaning: "EXTRACTED_DOCUMENT_PAGE_REFERENCE_ONLY",
+      structuredKnowledgeSemanticRules: FASCICOLO_STRUCTURED_KNOWLEDGE_SEMANTIC_RULES,
     },
   };
 }
@@ -191,6 +201,21 @@ function normalizeDocumentProviderOutput(output: unknown): unknown {
         : event;
     }),
   };
+}
+
+export function summarizeFascicoloDocumentValidationIssues(
+  issues: readonly {
+    readonly code: string;
+    readonly message: string;
+    readonly path: readonly PropertyKey[];
+  }[],
+) {
+  return issues.slice(0, 20).map((issue) => ({
+    code: issue.path[0] === "structuredKnowledge"
+      ? structuredKnowledgeValidationCode(issue)
+      : `ZOD_${issue.code.toUpperCase()}`,
+    path: issue.path.map(String).join("."),
+  }));
 }
 
 export function createFascicoloDocumentAnalysisService(config: {
@@ -215,15 +240,14 @@ export function createFascicoloDocumentAnalysisService(config: {
         if (error instanceof AiProviderAdapterError) throw mapProviderError(error);
         throw error;
       }
-      const parsed = providerAnalysisPayloadV1Schema.safeParse(normalizeDocumentProviderOutput(output));
+      const parsed = fascicoloDocumentAnalysisPayloadV1Schema.safeParse(
+        normalizeDocumentProviderOutput(output),
+      );
       if (!parsed.success) {
         console.error({
           event: "fascicolo_document_analysis_invalid_provider_output",
           outputKind: output === null ? "null" : Array.isArray(output) ? "array" : typeof output,
-          issues: parsed.error.issues.slice(0, 20).map((issue) => ({
-            code: issue.code,
-            path: issue.path.join("."),
-          })),
+          issues: summarizeFascicoloDocumentValidationIssues(parsed.error.issues),
         });
         throw new FascicoloDocumentAnalysisError("INVALID_PROVIDER_OUTPUT");
       }

@@ -302,6 +302,13 @@ For OpenAI document-analysis failures, logs expose only:
   responses.
 
 Provider messages, response bodies, API keys, and environment values are not logged.
+Document analysis uses a strict Responses JSON Schema for all structurally representable
+constraints. Cross-collection constraints that JSON Schema cannot express are supplied
+as versioned semantic rules and enforced again by the document-specific Zod contract
+before persistence. Invalid-output logs contain only allowlisted semantic codes and
+structural paths; they never contain provider output or document text. Citation
+existence, uniqueness, page recovery, and material coverage remain deterministic
+quality-gate checks against trusted extracted text.
 Before retrying the canary, verify that its operation is exactly
 `FASCICOLO.AUTOMATIC_ANALYSIS_V1`, its procedimento is the authorized canary, and the
 corrected configuration has been deployed in the base service's latest successful

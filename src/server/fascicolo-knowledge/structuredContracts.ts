@@ -4,6 +4,54 @@ import { documentBasisRefSchema, knowledgeItemKindSchema } from "./contracts";
 
 export const FASCICOLO_STRUCTURED_KNOWLEDGE_VERSION = "FASCICOLO_STRUCTURED_KNOWLEDGE_V1" as const;
 export const FASCICOLO_STRUCTURED_SEMANTIC_KEY_VERSION = "SEMANTIC_KEY_V2" as const;
+export const FASCICOLO_STRUCTURED_KNOWLEDGE_SEMANTIC_RULES = Object.freeze([
+  { code: "INTERVAL_FROM_AFTER_TO", requirement: "An interval start date must not be after its end date." },
+  { code: "UNKNOWN_REFERENCE_DATE_MUST_BE_EMPTY", requirement: "An UNKNOWN reference-date basis must not contain a date, item, or user-confirmed source." },
+  { code: "USER_CONFIRMED_DATE_INVALID", requirement: "A USER_CONFIRMED reference-date basis must contain a matching confirmed date and no item reference." },
+  { code: "REFERENCE_DATE_BASIS_INCOMPLETE", requirement: "Every other reference-date basis must contain a date and an existing item reference, with no user-confirmed source." },
+  { code: "DUPLICATE_SUBJECT_LOCAL_ID", requirement: "Subject localId values must be unique." },
+  { code: "DUPLICATE_ITEM_LOCAL_ID", requirement: "Item localId values must be unique." },
+  { code: "DUPLICATE_ISSUE_LOCAL_ID", requirement: "Legal-issue localId values must be unique." },
+  { code: "DUPLICATE_QUESTION_LOCAL_ID", requirement: "Research-question localId values must be unique." },
+  { code: "DUPLICATE_DOCUMENT_INVENTORY_LOCAL_ID", requirement: "Document-inventory localId values must be unique." },
+  { code: "DUPLICATE_SOURCE_QUOTE", requirement: "The itemLocalId, basisRef, and quote tuple must be unique." },
+  { code: "INVALID_SOURCE_QUOTE_REFERENCE", requirement: "Every source quote must reference an existing item and one of that item's basisRefs." },
+  { code: "MISSING_SOURCE_QUOTE", requirement: "Every item basisRef must have at least one matching source quote." },
+  { code: "UNKNOWN_SUBJECT_LOCAL_ID", requirement: "Every subject reference must resolve to an existing subject." },
+  { code: "UNRESOLVED_REQUIRED_ITEM_REFERENCE", requirement: "Every contradiction and proceeding-identity dependency must resolve without a self-reference." },
+  { code: "INVALID_PROCEEDING_ANCHOR", requirement: "Every proceeding anchor must resolve to a LEGAL_ACT or MEASURE; a legal-issue anchor must also be one of its origins." },
+  { code: "INVALID_PROCEEDING_IDENTITY_EVIDENCE", requirement: "Proceeding-identity evidence must be included in the item or legal-issue origin evidence." },
+  { code: "INVALID_ISSUE_ORIGIN", requirement: "Every legal-issue origin must resolve to a compatible PARTY_POSITION, FACT, EVENT, LEGAL_ACT, MEASURE, CONTRADICTION, or GAP item." },
+  { code: "UNKNOWN_LEGAL_ISSUE", requirement: "Every research question must reference an existing legal issue." },
+  { code: "UNKNOWN_REFERENCE_DATE_ITEM", requirement: "Every non-null reference-date itemLocalId must reference an existing item." },
+  { code: "REFERENCE_DATE_ITEM_NOT_ISSUE_ORIGIN", requirement: "A reference-date item must be one of the referenced legal issue's origins." },
+  { code: "REFERENCE_DATE_BASIS_KIND_INVALID", requirement: "EVENT_DATE requires an EVENT, MEASURE_DATE requires a MEASURE, and CHALLENGED_ACT_DATE requires a challenged LEGAL_ACT or MEASURE." },
+  { code: "REFERENCE_DATE_MISMATCH", requirement: "A research-question referenceDate must equal the exact date on its referenced item." },
+  { code: "REFERENCE_DATE_BASIS_TYPE_UNSUPPORTED", requirement: "Provider-generated questions may use EVENT_DATE, MEASURE_DATE, CHALLENGED_ACT_DATE, USER_CONFIRMED, or UNKNOWN only." },
+  { code: "UNKNOWN_DOCUMENT_INVENTORY_ITEM", requirement: "Every document-inventory relatedItemLocalId must reference an existing item." },
+  { code: "MATERIAL_DOCUMENT_REQUIRES_ITEMS", requirement: "Every MATERIAL document must reference at least one knowledge item." },
+  { code: "MATERIAL_DOCUMENT_BASIS_UNCOVERED", requirement: "Every basisRef of a MATERIAL document must also ground at least one of its related items." },
+  { code: "UNCERTAIN_DOCUMENT_REQUIRES_GAP", requirement: "Every UNCERTAIN document must reference at least one GAP item." },
+] as const);
+
+export type FascicoloStructuredKnowledgeSemanticCode =
+  typeof FASCICOLO_STRUCTURED_KNOWLEDGE_SEMANTIC_RULES[number]["code"];
+
+const structuredKnowledgeSemanticCodes = new Set<string>(
+  FASCICOLO_STRUCTURED_KNOWLEDGE_SEMANTIC_RULES.map((rule) => rule.code),
+);
+
+export function structuredKnowledgeValidationCode(issue: {
+  readonly code: string;
+  readonly message: string;
+}): FascicoloStructuredKnowledgeSemanticCode | `ZOD_${string}` | "UNCLASSIFIED_SEMANTIC_VIOLATION" {
+  if (issue.code === "custom") {
+    return structuredKnowledgeSemanticCodes.has(issue.message)
+      ? issue.message as FascicoloStructuredKnowledgeSemanticCode
+      : "UNCLASSIFIED_SEMANTIC_VIOLATION";
+  }
+  return `ZOD_${issue.code.toUpperCase()}`;
+}
 
 const id = z.string().trim().min(1).max(256);
 const text = z.string().trim().min(1).max(100_000);
@@ -60,7 +108,7 @@ export const proceedingKindSchema = z.enum([
   "UNKNOWN",
 ]);
 const proceedingIdentitySchema = z.object({
-  declaredKey: id.optional(),
+  declaredKey: id.nullable().default(null),
   canonicalAnchorLocalId: id,
   kind: proceedingKindSchema,
   evidenceBasisRefs: basisRefs,
@@ -93,7 +141,7 @@ export const structuredDateSchema = z.discriminatedUnion("precision", [
   z.object({ precision: z.literal("MONTH"), from: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/), to: z.null().default(null), originalText: shortText.nullable().default(null), confidence }).strict(),
   z.object({ precision: z.literal("YEAR"), from: z.string().regex(/^\d{4}$/), to: z.null().default(null), originalText: shortText.nullable().default(null), confidence }).strict(),
   z.object({ precision: z.literal("INTERVAL"), from: isoDate, to: isoDate, originalText: shortText.nullable().default(null), confidence }).strict()
-    .refine((value) => value.from <= value.to, { message: "INTERVAL_FROM_AFTER_TO" }),
+    .refine((value) => value.from <= value.to, { message: "INTERVAL_FROM_AFTER_TO", path: ["from"] }),
   z.object({ precision: z.literal("UNCERTAIN"), from: isoDate.nullable().default(null), to: isoDate.nullable().default(null), originalText: shortText, confidence }).strict(),
   z.object({ precision: z.literal("UNKNOWN"), from: z.null().default(null), to: z.null().default(null), originalText: shortText.nullable().default(null), confidence }).strict(),
 ]);
@@ -235,16 +283,16 @@ export const researchQuestionCandidateSchema = z.object({
   if (value.referenceDateBasis.type === "UNKNOWN") {
     if (value.referenceDate !== null || value.referenceDateBasis.itemLocalId !== null
       || value.referenceDateBasis.userConfirmedDateSource !== null) {
-      context.addIssue({ code: "custom", message: "UNKNOWN_REFERENCE_DATE_MUST_BE_EMPTY" });
+      context.addIssue({ code: "custom", path: ["referenceDateBasis"], message: "UNKNOWN_REFERENCE_DATE_MUST_BE_EMPTY" });
     }
   } else if (value.referenceDateBasis.type === "USER_CONFIRMED") {
     if (value.referenceDate === null || value.referenceDateBasis.itemLocalId !== null
       || value.referenceDateBasis.userConfirmedDateSource?.confirmedDate !== value.referenceDate) {
-      context.addIssue({ code: "custom", message: "USER_CONFIRMED_DATE_INVALID" });
+      context.addIssue({ code: "custom", path: ["referenceDateBasis"], message: "USER_CONFIRMED_DATE_INVALID" });
     }
   } else if (value.referenceDate === null || value.referenceDateBasis.itemLocalId === null
     || value.referenceDateBasis.userConfirmedDateSource !== null) {
-    context.addIssue({ code: "custom", message: "REFERENCE_DATE_BASIS_INCOMPLETE" });
+    context.addIssue({ code: "custom", path: ["referenceDateBasis"], message: "REFERENCE_DATE_BASIS_INCOMPLETE" });
   }
 });
 
@@ -266,62 +314,146 @@ export const fascicoloStructuredKnowledgeSchema = z.object({
   const issueIds = value.legalIssues.map((issue) => issue.localId);
   const questionIds = value.researchQuestions.map((question) => question.localId);
   const inventoryIds = (value.documentInventory ?? []).map((document) => document.localId);
-  if (new Set(subjectIds).size !== subjectIds.length) context.addIssue({ code: "custom", message: "DUPLICATE_SUBJECT_LOCAL_ID" });
-  if (new Set(itemIds).size !== itemIds.length) context.addIssue({ code: "custom", message: "DUPLICATE_ITEM_LOCAL_ID" });
-  if (new Set(issueIds).size !== issueIds.length) context.addIssue({ code: "custom", message: "DUPLICATE_ISSUE_LOCAL_ID" });
-  if (new Set(questionIds).size !== questionIds.length) context.addIssue({ code: "custom", message: "DUPLICATE_QUESTION_LOCAL_ID" });
-  if (new Set(inventoryIds).size !== inventoryIds.length) context.addIssue({ code: "custom", message: "DUPLICATE_DOCUMENT_INVENTORY_LOCAL_ID" });
+  if (new Set(subjectIds).size !== subjectIds.length) context.addIssue({ code: "custom", path: ["subjects"], message: "DUPLICATE_SUBJECT_LOCAL_ID" });
+  if (new Set(itemIds).size !== itemIds.length) context.addIssue({ code: "custom", path: ["items"], message: "DUPLICATE_ITEM_LOCAL_ID" });
+  if (new Set(issueIds).size !== issueIds.length) context.addIssue({ code: "custom", path: ["legalIssues"], message: "DUPLICATE_ISSUE_LOCAL_ID" });
+  if (new Set(questionIds).size !== questionIds.length) context.addIssue({ code: "custom", path: ["researchQuestions"], message: "DUPLICATE_QUESTION_LOCAL_ID" });
+  if (new Set(inventoryIds).size !== inventoryIds.length) context.addIssue({ code: "custom", path: ["documentInventory"], message: "DUPLICATE_DOCUMENT_INVENTORY_LOCAL_ID" });
   const sourceQuoteKeys = value.sourceQuotes.map((sourceQuote) => (
     `${sourceQuote.itemLocalId}\u001f${sourceQuote.basisRef}\u001f${sourceQuote.quote}`
   ));
   if (new Set(sourceQuoteKeys).size !== sourceQuoteKeys.length) {
-    context.addIssue({ code: "custom", message: "DUPLICATE_SOURCE_QUOTE" });
+    context.addIssue({ code: "custom", path: ["sourceQuotes"], message: "DUPLICATE_SOURCE_QUOTE" });
   }
-  for (const sourceQuote of value.sourceQuotes) {
+  for (const [index, sourceQuote] of value.sourceQuotes.entries()) {
     const item = value.items.find((candidate) => candidate.localId === sourceQuote.itemLocalId);
     if (!item || !item.basisRefs.includes(sourceQuote.basisRef)) {
-      context.addIssue({ code: "custom", message: `INVALID_SOURCE_QUOTE_REFERENCE:${sourceQuote.itemLocalId}` });
+      context.addIssue({ code: "custom", path: ["sourceQuotes", index], message: "INVALID_SOURCE_QUOTE_REFERENCE" });
     }
   }
-  for (const item of value.items) {
+  for (const [index, item] of value.items.entries()) {
     const referencedSubjects = item.kind === "PARTY_ROLE" || item.kind === "PARTY_POSITION" ? [item.payload.subjectLocalId]
       : item.kind === "FACT" || item.kind === "EVENT" ? item.payload.subjectLocalIds
         : item.kind === "LEGAL_ACT" || item.kind === "MEASURE" ? [item.payload.authoritySubjectLocalId].filter(Boolean)
           : [];
     if (referencedSubjects.some((subjectId) => !subjectIds.includes(subjectId!))) {
-      context.addIssue({ code: "custom", message: `UNKNOWN_SUBJECT_LOCAL_ID:${item.localId}` });
+      context.addIssue({ code: "custom", path: ["items", index, "payload"], message: "UNKNOWN_SUBJECT_LOCAL_ID" });
+    }
+    const requiredItemReferences = item.kind === "CONTRADICTION"
+      ? item.payload.conflictingItemLocalIds
+      : [];
+    if (requiredItemReferences.some((localId) => localId === item.localId || !itemIds.includes(localId))) {
+      context.addIssue({ code: "custom", path: ["items", index, "payload"], message: "UNRESOLVED_REQUIRED_ITEM_REFERENCE" });
+    }
+    if (item.kind === "FACT" || item.kind === "EVENT") {
+      const identity = item.payload.proceedingIdentity;
+      if (identity) {
+        const anchor = value.items.find((candidate) => (
+          candidate.localId === identity.canonicalAnchorLocalId
+        ));
+        if (!anchor || (anchor.kind !== "LEGAL_ACT" && anchor.kind !== "MEASURE")) {
+          context.addIssue({ code: "custom", path: ["items", index, "payload", "proceedingIdentity", "canonicalAnchorLocalId"], message: "INVALID_PROCEEDING_ANCHOR" });
+        }
+        if (identity.evidenceBasisRefs.some((basisRef) => !item.basisRefs.includes(basisRef))) {
+          context.addIssue({ code: "custom", path: ["items", index, "payload", "proceedingIdentity", "evidenceBasisRefs"], message: "INVALID_PROCEEDING_IDENTITY_EVIDENCE" });
+        }
+      }
     }
   }
   const allowedOriginKinds = new Set(["PARTY_POSITION", "FACT", "EVENT", "LEGAL_ACT", "MEASURE", "CONTRADICTION", "GAP"]);
-  for (const issue of value.legalIssues) {
+  for (const [index, issue] of value.legalIssues.entries()) {
     if (issue.originatingItemLocalIds.some((localId) => {
       const item = value.items.find((candidate) => candidate.localId === localId);
       return !item || !allowedOriginKinds.has(item.kind);
-    })) context.addIssue({ code: "custom", message: `INVALID_ISSUE_ORIGIN:${issue.localId}` });
+    })) context.addIssue({ code: "custom", path: ["legalIssues", index, "originatingItemLocalIds"], message: "INVALID_ISSUE_ORIGIN" });
+    const targetIdentity = issue.targetProceedingIdentity;
+    if (targetIdentity) {
+      const anchor = value.items.find((candidate) => (
+        candidate.localId === targetIdentity.canonicalAnchorLocalId
+      ));
+      if (!anchor || (anchor.kind !== "LEGAL_ACT" && anchor.kind !== "MEASURE")
+        || !issue.originatingItemLocalIds.includes(targetIdentity.canonicalAnchorLocalId)) {
+        context.addIssue({ code: "custom", path: ["legalIssues", index, "targetProceedingIdentity", "canonicalAnchorLocalId"], message: "INVALID_PROCEEDING_ANCHOR" });
+      }
+      const originBasisRefs = new Set(issue.originatingItemLocalIds.flatMap((localId) => (
+        value.items.find((candidate) => candidate.localId === localId)?.basisRefs ?? []
+      )));
+      if (targetIdentity.evidenceBasisRefs.some((basisRef) => !originBasisRefs.has(basisRef))) {
+        context.addIssue({ code: "custom", path: ["legalIssues", index, "targetProceedingIdentity", "evidenceBasisRefs"], message: "INVALID_PROCEEDING_IDENTITY_EVIDENCE" });
+      }
+    }
   }
-  for (const question of value.researchQuestions) {
+  for (const [index, question] of value.researchQuestions.entries()) {
     if (!issueIds.includes(question.legalIssueLocalId)) {
-      context.addIssue({ code: "custom", message: `UNKNOWN_LEGAL_ISSUE:${question.localId}` });
+      context.addIssue({ code: "custom", path: ["researchQuestions", index, "legalIssueLocalId"], message: "UNKNOWN_LEGAL_ISSUE" });
     }
     const basisItemId = question.referenceDateBasis.itemLocalId;
     if (basisItemId !== null && !itemIds.includes(basisItemId)) {
-      context.addIssue({ code: "custom", message: `UNKNOWN_REFERENCE_DATE_ITEM:${question.localId}` });
+      context.addIssue({ code: "custom", path: ["researchQuestions", index, "referenceDateBasis", "itemLocalId"], message: "UNKNOWN_REFERENCE_DATE_ITEM" });
     }
   }
-  for (const document of value.documentInventory ?? []) {
+  for (const [index, document] of (value.documentInventory ?? []).entries()) {
     if (document.relatedItemLocalIds.some((localId) => !itemIds.includes(localId))) {
-      context.addIssue({ code: "custom", message: `UNKNOWN_DOCUMENT_INVENTORY_ITEM:${document.localId}` });
+      context.addIssue({ code: "custom", path: ["documentInventory", index, "relatedItemLocalIds"], message: "UNKNOWN_DOCUMENT_INVENTORY_ITEM" });
     }
     if (document.classification === "MATERIAL" && document.relatedItemLocalIds.length === 0) {
-      context.addIssue({ code: "custom", message: `MATERIAL_DOCUMENT_REQUIRES_ITEMS:${document.localId}` });
+      context.addIssue({ code: "custom", path: ["documentInventory", index, "relatedItemLocalIds"], message: "MATERIAL_DOCUMENT_REQUIRES_ITEMS" });
     }
     if (document.classification === "UNCERTAIN" && !document.relatedItemLocalIds.some((localId) => (
       value.items.find((item) => item.localId === localId)?.kind === "GAP"
     ))) {
-      context.addIssue({ code: "custom", message: `UNCERTAIN_DOCUMENT_REQUIRES_GAP:${document.localId}` });
+      context.addIssue({ code: "custom", path: ["documentInventory", index, "relatedItemLocalIds"], message: "UNCERTAIN_DOCUMENT_REQUIRES_GAP" });
     }
   }
 });
+
+export const fascicoloDocumentStructuredKnowledgeSchema =
+  fascicoloStructuredKnowledgeSchema.superRefine((value, context) => {
+    for (const [index, item] of value.items.entries()) {
+      if (item.basisRefs.some((basisRef) => !value.sourceQuotes.some((sourceQuote) => (
+        sourceQuote.itemLocalId === item.localId && sourceQuote.basisRef === basisRef
+      )))) {
+        context.addIssue({ code: "custom", path: ["items", index, "basisRefs"], message: "MISSING_SOURCE_QUOTE" });
+      }
+    }
+    for (const [index, question] of value.researchQuestions.entries()) {
+      const issue = value.legalIssues.find((candidate) => (
+        candidate.localId === question.legalIssueLocalId
+      ));
+      const basisItemId = question.referenceDateBasis.itemLocalId;
+      const basisItem = basisItemId === null
+        ? undefined
+        : value.items.find((candidate) => candidate.localId === basisItemId);
+      if (basisItem && issue && !issue.originatingItemLocalIds.includes(basisItem.localId)) {
+        context.addIssue({ code: "custom", path: ["researchQuestions", index, "referenceDateBasis", "itemLocalId"], message: "REFERENCE_DATE_ITEM_NOT_ISSUE_ORIGIN" });
+      }
+      const basisType = question.referenceDateBasis.type;
+      const basisKindValid = (basisType === "EVENT_DATE" && basisItem?.kind === "EVENT")
+        || (basisType === "MEASURE_DATE" && basisItem?.kind === "MEASURE")
+        || (basisType === "CHALLENGED_ACT_DATE"
+          && (basisItem?.kind === "LEGAL_ACT" || basisItem?.kind === "MEASURE")
+          && basisItem.payload.proceduralRole === "CHALLENGED_ACT")
+        || basisType === "USER_CONFIRMED"
+        || basisType === "UNKNOWN";
+      if (!basisKindValid) {
+        context.addIssue({
+          code: "custom",
+          path: ["researchQuestions", index, "referenceDateBasis", "type"],
+          message: ["FACT_DATE", "APPLICATION_DATE", "CONCESSION_PERIOD"].includes(basisType)
+            ? "REFERENCE_DATE_BASIS_TYPE_UNSUPPORTED"
+            : "REFERENCE_DATE_BASIS_KIND_INVALID",
+        });
+      }
+      if (basisItem && (basisItem.kind === "EVENT"
+        || basisItem.kind === "LEGAL_ACT"
+        || basisItem.kind === "MEASURE")) {
+        const itemDate = basisItem.payload.date;
+        if (itemDate.precision !== "EXACT" || itemDate.from !== question.referenceDate) {
+          context.addIssue({ code: "custom", path: ["researchQuestions", index, "referenceDate"], message: "REFERENCE_DATE_MISMATCH" });
+        }
+      }
+    }
+  });
 
 export type FascicoloSubjectCandidate = z.output<typeof fascicoloSubjectCandidateSchema>;
 export type FascicoloStrongIdentifier = z.output<typeof fascicoloStrongIdentifierSchema>;
