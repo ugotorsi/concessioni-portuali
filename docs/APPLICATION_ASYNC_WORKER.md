@@ -78,14 +78,18 @@ the recovery and the V3 approval does not authorize V7 admission or provider spe
 
 ## NOETRA V7 controlled Selvara collaudo
 
-The V7 Selvara path is a distinct, single-attempt admission. Its logical identity binds
-the V7 document-analysis contract, corpus fingerprint, and
-`NOETRA-V7-SELVARA-2026-10-26-CONTROLLED-ONE-SHOT` approval. Repeating the same
-admission reuses the same job. Changing the approved preflight after admission causes
+The first V7 Selvara attempt used approval
+`NOETRA-V7-SELVARA-2026-10-26-CONTROLLED-ONE-SHOT` and terminal job
+`cmvpei5gt0000c0ud3f9txqil`; that historical identity is immutable. The prepared
+second single-attempt admission binds the V7 document-analysis contract, corpus
+fingerprint, and `NOETRA-V7-SELVARA-2026-10-26-CONTROLLED-ONE-SHOT-02` approval.
+Repeating the same admission reuses the same job. Changing the approved preflight after admission causes
 an idempotency conflict instead of creating a second attempt. The job has
 `maxAttempts=1`; provider timeouts, rate limits, unavailable responses, malformed or
 incomplete output, and knowledge-quality failures are terminal. Manual retry is
-disabled for this purpose.
+disabled for this purpose. The targeted one-off uses a 15-minute lease so a configured
+600-second provider timeout cannot expire the claim; non-targeted application workers
+retain their five-minute lease.
 
 Admission requires a local preflight with all of these values:
 

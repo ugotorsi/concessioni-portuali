@@ -325,7 +325,7 @@ describe("B2C9 Block 3B.2C NeutralIntake async extraction wiring", () => {
       expectedTenantId: "tenant-1",
       expectedProcedimentoId: "procedure-1",
       workerId: "worker-1",
-      leaseDurationMs: 300_000,
+      leaseDurationMs: 900_000,
       retryDelayMs: 1_000,
       registry: applicationAsyncJobRegistry,
     });

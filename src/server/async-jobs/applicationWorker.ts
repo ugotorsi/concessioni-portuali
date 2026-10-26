@@ -29,6 +29,7 @@ import {
 } from "../ai/globalAiControl";
 
 const APPLICATION_ASYNC_JOB_LEASE_MS = 5 * 60 * 1_000;
+const TARGETED_FASCICOLO_ANALYSIS_LEASE_MS = 15 * 60 * 1_000;
 const AUTOMATIC_RESEARCH_OPERATION = "LEGAL_RESEARCH.EXECUTE_V1";
 const ISOLATED_OPERATIONS = [FASCICOLO_ANALYSIS_EVALUATION_OPERATION] as const;
 const reconcilePeriodicLegalResearch = createPeriodicLegalResearchScheduler();
@@ -110,7 +111,7 @@ export async function drainTargetedFascicoloAnalysisJob(input: {
     expectedTenantId: input.tenantId,
     expectedProcedimentoId: input.procedimentoId,
     workerId: input.workerId,
-    leaseDurationMs: APPLICATION_ASYNC_JOB_LEASE_MS,
+    leaseDurationMs: TARGETED_FASCICOLO_ANALYSIS_LEASE_MS,
     retryDelayMs: input.retryDelayMs,
     registry: applicationAsyncJobRegistry,
   });
