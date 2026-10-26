@@ -27,6 +27,7 @@ const leaseToken = z.string().regex(/^[0-9a-f]{64}$/);
 const sha256 = z.string().regex(/^[0-9a-f]{64}$/);
 const durationMs = z.number().int().min(1_000).max(24 * 60 * 60 * 1_000);
 const retryDelayMs = z.number().int().min(0).max(30 * 24 * 60 * 60 * 1_000);
+const SINGLE_ATTEMPT_V7_PURPOSE = "FASCICOLO_EXISTING_CORPUS_ANALYSIS_V7_CONTROLLED";
 
 const obsoleteFascicoloAnalysisCancellationSchema = z.object({
   jobId,
@@ -858,6 +859,9 @@ export async function retryTerminalAsyncJob(input: {
     const current = rows[0];
     if (!current) return { outcome: "NOT_FOUND" as const };
     if (current.status !== "TERMINAL_FAILED") {
+      return { outcome: "NOT_RETRYABLE" as const, job: current };
+    }
+    if (current.purpose === SINGLE_ATTEMPT_V7_PURPOSE) {
       return { outcome: "NOT_RETRYABLE" as const, job: current };
     }
     const count = await tx.$executeRaw(Prisma.sql`

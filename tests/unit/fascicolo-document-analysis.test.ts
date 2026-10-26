@@ -38,13 +38,15 @@ function response(): Response {
 
 describe("worker-safe fascicolo document analysis", () => {
   it("requires explicit assessment of documented legal signals without inventing conclusions", () => {
-    expect(FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION).toBe("FASCICOLO_DOCUMENT_ANALYSIS_V6");
+    expect(FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION).toBe("FASCICOLO_DOCUMENT_ANALYSIS_V7");
     expect(FASCICOLO_DOCUMENT_ANALYSIS_SYSTEM_POLICY.requirements).toEqual(expect.arrayContaining([
       expect.stringContaining("documented prescription"),
       expect.stringContaining("grounded GAP"),
       expect.stringContaining("PARTY_POSITION"),
       expect.stringContaining("sourceQuotes"),
       expect.stringContaining("occurs exactly once"),
+      expect.stringContaining("documentInventory"),
+      expect.stringContaining("NOT_MATERIAL"),
     ]));
   });
 

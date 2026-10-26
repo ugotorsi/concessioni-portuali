@@ -45,6 +45,7 @@ import {
 import { verifyRuleResolutionFingerprint } from "@/server/legal-research/legal-applicability-producer";
 import {
   loadCurrentStructuredKnowledge,
+  loadStructuredKnowledgeRevision,
   type StructuredKnowledgeReadModel,
 } from "@/server/queries/fascicolo-knowledge";
 import { getFascicoloDocumentCorpusForTenant } from "@/server/queries/fascicolo-document-corpus";
@@ -521,6 +522,7 @@ export async function getFascicoloAutomaticWorkflowReadModel(
 export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
   tenantId: string;
   procedimentoId: string;
+  knowledgeRevisionId?: string;
 }): Promise<FascicoloAutomaticWorkflowReadModel | null> {
   const { tenantId, procedimentoId } = input;
   const owner = await prisma.procedimento.findUnique({
@@ -637,7 +639,13 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
         mode: { not: "ADVERSE_SEARCH" },
       },
     }),
-    loadCurrentStructuredKnowledge(tenantId, procedimentoId),
+    input.knowledgeRevisionId
+      ? loadStructuredKnowledgeRevision(
+          tenantId,
+          procedimentoId,
+          input.knowledgeRevisionId,
+        )
+      : loadCurrentStructuredKnowledge(tenantId, procedimentoId),
     listOperationalProposals({ tenantId, procedimentoId }),
     getFascicoloDocumentCorpusForTenant({ tenantId, procedimentoId }),
     loadTechnicalSourceReportRows(tenantId, procedimentoId),

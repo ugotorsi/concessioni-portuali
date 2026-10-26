@@ -30,7 +30,7 @@ import {
   SelvaraActivationRecoveryVerificationError,
   SELVARA_FAILED_ACTIVATION_RECOVERY,
 } from "@/server/async-jobs/documentAnalysisActivationPersistence";
-import { SELVARA_PILOT_AUTHORIZATION } from "@/server/ai/selvaraPilotAuthorization";
+import { SELVARA_V3_RECOVERY_AUTHORIZATION } from "@/server/ai/selvaraPilotAuthorization";
 
 const target = {
   applicationJobId: "analysis-job-1",
@@ -84,15 +84,15 @@ function activationLog(
 function selvaraJob(overrides: Record<string, unknown> = {}) {
   return eligibleJob({
     id: SELVARA_FAILED_ACTIVATION_RECOVERY.applicationJobId,
-    tenantId: SELVARA_PILOT_AUTHORIZATION.tenantId,
-    procedimentoId: SELVARA_PILOT_AUTHORIZATION.procedimentoId,
-    purpose: SELVARA_PILOT_AUTHORIZATION.purpose,
+    tenantId: SELVARA_V3_RECOVERY_AUTHORIZATION.tenantId,
+    procedimentoId: SELVARA_V3_RECOVERY_AUTHORIZATION.procedimentoId,
+    purpose: SELVARA_V3_RECOVERY_AUTHORIZATION.purpose,
     inputReference: {
       referenceType: "FASCICOLO_DOCUMENT_CORPUS",
-      referenceId: SELVARA_PILOT_AUTHORIZATION.corpusFingerprint,
+      referenceId: SELVARA_V3_RECOVERY_AUTHORIZATION.corpusFingerprint,
       metadata: {
-        procedimentoId: SELVARA_PILOT_AUTHORIZATION.procedimentoId,
-        corpusHash: SELVARA_PILOT_AUTHORIZATION.corpusFingerprint,
+        procedimentoId: SELVARA_V3_RECOVERY_AUTHORIZATION.procedimentoId,
+        corpusHash: SELVARA_V3_RECOVERY_AUTHORIZATION.corpusFingerprint,
       },
     },
     startedAt: null,
@@ -401,6 +401,7 @@ describe("document analysis activation persistence", () => {
           renderJobId: SELVARA_FAILED_ACTIVATION_RECOVERY.renderJobId,
           failureCode: SELVARA_FAILED_ACTIVATION_RECOVERY.failureCode,
           recoveryEvidence: expect.objectContaining({
+            approvalId: SELVARA_V3_RECOVERY_AUTHORIZATION.approvalId,
             renderServiceId: SELVARA_FAILED_ACTIVATION_RECOVERY.renderServiceId,
             renderJobId: SELVARA_FAILED_ACTIVATION_RECOVERY.renderJobId,
             renderStatus: "failed",
@@ -420,7 +421,7 @@ describe("document analysis activation persistence", () => {
   it.each([
     ["claimed application job", { attemptCount: 1, status: "RUNNING" }],
     ["wrong tenant", { tenantId: "tenant-other" }],
-    ["wrong purpose", { purpose: "FASCICOLO_AUTOMATIC_ANALYSIS" }],
+    ["V7 purpose", { purpose: "FASCICOLO_EXISTING_CORPUS_ANALYSIS_V7_CONTROLLED" }],
   ])("rejects recovery with %s", async (_label, jobOverrides) => {
     harness.tx.$queryRaw.mockResolvedValue([selvaraJob(jobOverrides)]);
     harness.tx.activityLog.findMany.mockResolvedValue([

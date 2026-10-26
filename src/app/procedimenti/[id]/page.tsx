@@ -220,7 +220,6 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
     && documentCorpus.documentCount > 0
     && documentCorpus.availableDocumentCount === documentCorpus.documentCount
     && documentCorpus.textPageCount > 0
-    && automaticWorkflow?.analysisUpdate.currentRevisionFingerprint === null
     ? {
         procedimentoId: detail.procedimento.id,
         enabled: isExistingCorpusAnalysisRequestEnabled(process.env),

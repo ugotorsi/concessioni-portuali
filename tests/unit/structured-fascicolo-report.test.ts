@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  adaptAdministrativeActToInternalTemplate,
   buildStructuredFascicoloReport,
   type StructuredReportMissionInput,
   type StructuredReportTechnicalSourceInput,
@@ -167,6 +168,30 @@ describe("deterministic structured fascicolo report", () => {
     expect(report.payload.operationalPlans?.[0].alternatives.some((alternative) => alternative.title.includes("Archiviare"))).toBe(true);
     expect(report.payload.operationalPlans?.[0].alternatives.length).toBeGreaterThan(1);
     expect(report.payload.operationalPlans?.[0].steps[0].requiredDocuments.length).toBeGreaterThan(0);
+    expect(report.payload.operationalPlans?.[0].administrativeActs).toHaveLength(1);
+    expect(report.payload.operationalPlans?.[0].administrativeActs).toEqual([
+      expect.objectContaining({
+        actType: "RELAZIONE_ISTRUTTORIA_CONCLUSIVA",
+        necessity: "REQUIRED_IF_PROCEEDING_STARTED",
+        sequence: 1,
+        templateSource: "INTERNAL_TEMPLATE_REQUIRED_IF_AVAILABLE",
+        automaticExecutionProhibited: true,
+        sections: expect.objectContaining({
+          heading: expect.stringContaining("Bozza istruttoria modificabile"),
+          subject: expect.stringContaining("Testo issue-1"),
+          premises: expect.any(Array),
+          documentedFacts: expect.any(Array),
+          investigation: expect.any(Array),
+          reasoning: expect.any(Array),
+          legalReferences: ["[FONDAMENTO SOSTANZIALE, PROCEDIMENTALE E SULLA COMPETENZA DA VERIFICARE]"],
+          operativePart: expect.any(Array),
+          communications: expect.any(Array),
+          signature: expect.stringContaining("FIRMA"),
+        }),
+      }),
+    ]);
+    expect(report.payload.operationalPlans?.[0].administrativeActs[0].adaptationInstructions)
+      .toContain("schema interno dell'Ente");
 
     expect(report.payload.legalIssues).toHaveLength(1);
     expect(report.payload.legalIssues[0].questions[0]).toMatchObject({
@@ -181,8 +206,96 @@ describe("deterministic structured fascicolo report", () => {
       }],
       gaps: ["UNCOVERED_ELEMENT"],
     });
+
     expect(report.payload.limitations).toContain("DEADLINE_CANDIDATES_ARE_NOT_OPERATIONAL_DEADLINES");
+    const narrative = report.payload.professionalNarrative!;
+    expect(narrative).toMatchObject({
+      status: "PRELIMINARY_DOCUMENT_BASED",
+      documentaryReferences: ["DOCUMENT_1.PAGE_1"],
+    });
+    expect(narrative.reconstruction).toContain(
+      "Testo fact-1 [DOCUMENT_1.PAGE_1]",
+    );
+    expect(narrative.complianceAndAllegedBreaches[0])
+      .toContain("Allegazione della parte, non assunta come fatto accertato");
+    expect(narrative.legalResearchStatus)
+      .toContain("Norme e giurisprudenza");
     expect(JSON.stringify(report.payload)).not.toContain("analysisPayload");
+  });
+
+  it("generates differentiated concrete acts and adapts a copy to an internal test template", () => {
+    const accountingBase = knowledge();
+    const accountingKnowledge: StructuredKnowledgeReadModel = {
+      ...accountingBase,
+      legalIssues: accountingBase.legalIssues.map((issue, index) => index === 0 ? {
+        ...issue,
+        normalizedText: "Ricostruire canoni, pagamenti, imputazioni di Tesoreria e proposta di ripiano.",
+      } : issue),
+      facts: accountingBase.facts.map((fact, index) => index === 1 ? {
+        ...fact,
+        normalizedText: "Pagamento documentato di euro 20.000 sulla rata di euro 48.000.",
+      } : fact),
+    };
+    const technicalBase = knowledge();
+    const technicalKnowledge: StructuredKnowledgeReadModel = {
+      ...technicalBase,
+      legalIssues: technicalBase.legalIssues.map((issue, index) => index === 0 ? {
+        ...issue,
+        normalizedText: "Accertare portanza strutturale, carichi delle gru e sicurezza degli impianti.",
+      } : issue),
+      facts: technicalBase.facts.map((fact, index) => index === 1 ? {
+        ...fact,
+        normalizedText: "La portanza attuale non e attestata e i carichi puntuali non sono determinati.",
+      } : fact),
+    };
+
+    const accounting = buildStructuredFascicoloReport({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledge: accountingKnowledge,
+      missions: [],
+    }).payload.operationalPlans![0];
+    const technical = buildStructuredFascicoloReport({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledge: technicalKnowledge,
+      missions: [],
+    }).payload.operationalPlans![0];
+
+    expect(accounting.administrativeActs.map((act) => act.actType)).toEqual([
+      "ACQUISIZIONE_PARTITARIO_E_ATTESTAZIONE_TESORERIA",
+      "RICHIESTA_DOCUMENTI_CONTABILI_AL_CONCESSIONARIO",
+      "PROVVEDIMENTO_SU_RIPIANO_O_REGOLARIZZAZIONE",
+    ]);
+    expect(technical.administrativeActs.map((act) => act.actType)).toEqual([
+      "RICHIESTA_ACCERTAMENTO_SPECIALISTICO_STRUTTURALE_E_IMPIANTISTICO",
+      "DISPOSIZIONE_E_VERBALE_DI_SOPRALLUOGO_TECNICO",
+      "PRESCRIZIONE_TECNICA_MOTIVATA",
+    ]);
+    expect(accounting.administrativeActs[0].sections.documentedFacts.join(" ")).toContain("euro 20.000");
+    expect(accounting.administrativeActs[0].sections.investigation.join(" ")).toContain("partitario ufficiale");
+    expect(technical.administrativeActs[0].sections.documentedFacts.join(" ")).toContain("portanza attuale");
+    expect(technical.administrativeActs[0].sections.investigation.join(" ")).toContain("carichi");
+
+    const internalTemplate = {
+      templateId: "test-entity-accounting-act",
+      templateVersion: "1",
+      heading: "ENTE DI TEST - AREA FINANZIARIA",
+      sectionOrder: ["heading", "subject", "premises", "documentedFacts", "investigation", "reasoning", "legalReferences", "operativePart", "communications", "signature"] as const,
+      lockedClauses: ["Informativa privacy dell'Ente di test"],
+    };
+    const adapted = adaptAdministrativeActToInternalTemplate(
+      accounting.administrativeActs[0],
+      internalTemplate,
+    );
+
+    expect(adapted.originalTemplate).toEqual(internalTemplate);
+    expect(adapted.originalTemplate).not.toBe(internalTemplate);
+    expect(adapted.adaptedSections.heading).toBe("ENTE DI TEST - AREA FINANZIARIA");
+    expect(adapted.lockedClausesPreserved).toEqual(internalTemplate.lockedClauses);
+    expect(adapted.proposedIntegrations.map((integration) => integration.section))
+      .toEqual(internalTemplate.sectionOrder);
+    expect(adapted.humanApprovalRequired).toBe(true);
   });
 
   it("is stable across input order and changes when CURRENT source state changes", () => {

@@ -113,11 +113,26 @@ export async function loadCurrentStructuredKnowledge(
   procedimentoId: string,
   executor: StructuredKnowledgeQueryExecutor = defaultExecutor,
 ): Promise<StructuredKnowledgeReadModel | null> {
+  return loadStructuredKnowledgeRevision(
+    tenantId,
+    procedimentoId,
+    null,
+    executor,
+  );
+}
+
+export async function loadStructuredKnowledgeRevision(
+  tenantId: string,
+  procedimentoId: string,
+  revisionId: string | null,
+  executor: StructuredKnowledgeQueryExecutor = defaultExecutor,
+): Promise<StructuredKnowledgeReadModel | null> {
   const revisions = await executor.query<RevisionRow>(`
     SELECT "id", "corpusFingerprint", "contractVersion", "createdAt", "completedAt", "warnings"
     FROM "FascicoloKnowledgeRevision"
-    WHERE "tenantId" = $1 AND "procedimentoId" = $2 AND "status" = 'CURRENT'
-  `, [tenantId, procedimentoId]);
+    WHERE "tenantId" = $1 AND "procedimentoId" = $2
+      AND (($3::text IS NULL AND "status" = 'CURRENT') OR "id" = $3)
+  `, [tenantId, procedimentoId, revisionId]);
   const revision = revisions.rows[0];
   if (!revision) return null;
   const identityColumns = isCanonicalIdentityV3Enabled()

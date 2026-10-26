@@ -42,13 +42,16 @@ export const AI_OPENAI_RUNTIME_ENV_NAMES = [
 export { AI_REAL_DATA_ACTIVATION_ENV_NAMES } from "@/server/ai/realDataActivation";
 
 type OpenAiRuntimeEnvName = (typeof AI_OPENAI_RUNTIME_ENV_NAMES)[number];
+type OpenAiConfigurationEnvName =
+  | OpenAiRuntimeEnvName
+  | "AI_OPENAI_USD_TO_EUR_RATE";
 export type OpenAiRuntimeEnv = Partial<Record<OpenAiRuntimeEnvName, string | undefined>>
   & RealDataActivationEnv;
 
 export class OpenAiRuntimeConfigurationError extends Error {
   readonly code = "AI_CONFIGURATION_ERROR" as const;
 
-  constructor(readonly envName: OpenAiRuntimeEnvName) {
+  constructor(readonly envName: OpenAiConfigurationEnvName) {
     super(`AI_CONFIGURATION_ERROR: ${envName} is invalid`);
     this.name = "OpenAiRuntimeConfigurationError";
   }

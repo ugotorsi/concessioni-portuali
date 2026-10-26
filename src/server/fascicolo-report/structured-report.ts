@@ -26,6 +26,12 @@ export const STRUCTURED_FASCICOLO_REPORT_V2_CONTRACT_VERSION = "STRUCTURED_FASCI
 type JsonRecord = Readonly<Record<string, unknown>>;
 type Direction = "SUPPORTS" | "OPPOSES" | "NEUTRAL" | "INCONCLUSIVE" | "UNASSESSED";
 
+function jsonRecord(value: unknown): JsonRecord {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+    ? value as JsonRecord
+    : {};
+}
+
 export interface StructuredReportResearchResultInput {
   resultId: string;
   title: string;
@@ -130,16 +136,89 @@ export interface StructuredReportOperationalAlternative {
   riskOrLimit: string;
 }
 
+export interface StructuredReportAdministrativeActDraft {
+  actType: string;
+  necessity: "REQUIRED_IF_PROCEEDING_STARTED" | "EVENTUAL" | "OPTIONAL";
+  sequence: number;
+  competentOffice: string;
+  legalBasis: string;
+  participationGuarantees: readonly string[];
+  subsequentCommunications: readonly string[];
+  templateSource: "INTERNAL_TEMPLATE_REQUIRED_IF_AVAILABLE" | "STANDARD_ADAPTABLE";
+  adaptationInstructions: string;
+  automaticExecutionProhibited: true;
+  sections: {
+    heading: string;
+    subject: string;
+    premises: readonly string[];
+    documentedFacts: readonly string[];
+    investigation: readonly string[];
+    reasoning: readonly string[];
+    legalReferences: readonly string[];
+    operativePart: readonly string[];
+    communications: readonly string[];
+    signature: string;
+  };
+}
+
+export interface AdministrativeActInternalTemplate {
+  templateId: string;
+  templateVersion: string;
+  heading: string;
+  sectionOrder: readonly (keyof StructuredReportAdministrativeActDraft["sections"])[];
+  lockedClauses: readonly string[];
+}
+
+export interface AdaptedAdministrativeActDraft {
+  originalTemplate: AdministrativeActInternalTemplate;
+  adaptedSections: StructuredReportAdministrativeActDraft["sections"];
+  proposedIntegrations: readonly {
+    section: keyof StructuredReportAdministrativeActDraft["sections"];
+    content: string | readonly string[];
+  }[];
+  lockedClausesPreserved: readonly string[];
+  humanApprovalRequired: true;
+}
+
+export function adaptAdministrativeActToInternalTemplate(
+  draft: StructuredReportAdministrativeActDraft,
+  template: AdministrativeActInternalTemplate,
+): AdaptedAdministrativeActDraft {
+  const originalTemplate = structuredClone(template);
+  const adaptedSections = {
+    ...draft.sections,
+    heading: template.heading,
+  };
+  return {
+    originalTemplate,
+    adaptedSections,
+    proposedIntegrations: template.sectionOrder.map((section) => ({
+      section,
+      content: adaptedSections[section],
+    })),
+    lockedClausesPreserved: [...template.lockedClauses],
+    humanApprovalRequired: true,
+  };
+}
+
 export interface StructuredReportOperationalPlan {
   issueSemanticKey: string;
   issueText: string;
+  problem: string;
+  evidence: readonly string[];
+  legalQualification: string;
   sourceDocumentRefs: readonly string[];
   outstandingEvidence: readonly string[];
   legalSourceStatus: "VERIFIED_SOURCES_ATTACHED" | "LEGAL_RESEARCH_REQUIRED";
   professionalStatus: "PRELIMINARY_NOT_APPROVED";
   recommendedNextStep: string;
+  proposedSolution: string;
+  investigationActivities: readonly string[];
+  actsToForm: readonly string[];
+  modelsAvailable: readonly string[];
   steps: readonly StructuredReportOperationalStep[];
   alternatives: readonly StructuredReportOperationalAlternative[];
+  administrativeActs: readonly StructuredReportAdministrativeActDraft[];
   deadlineReview: string;
 }
 
@@ -204,6 +283,21 @@ export interface StructuredFascicoloReportPayload {
   unassignedQuestions: readonly StructuredReportQuestion[];
   gaps: readonly StructuredKnowledgeReadItem[];
   deadlineCandidates: readonly StructuredKnowledgeReadItem[];
+  /** Generated for new reports; archived V1 snapshots remain readable without it. */
+  professionalNarrative?: {
+    status: "PRELIMINARY_DOCUMENT_BASED";
+    reconstruction: readonly string[];
+    chronology: readonly string[];
+    titlesObligationsAndDeadlines: readonly string[];
+    complianceAndAllegedBreaches: readonly string[];
+    contradictionsAndEvidenceGaps: readonly string[];
+    technicalAdministrativeAndLegalProfiles: readonly string[];
+    favorableArguments: readonly string[];
+    contraryArguments: readonly string[];
+    questionsForFurtherReview: readonly string[];
+    documentaryReferences: readonly string[];
+    legalResearchStatus: string;
+  };
   /** Additive, read-only guidance. Older archived V1 reports may omit this field. */
   operationalPlans?: readonly StructuredReportOperationalPlan[];
   /** Additive; present only when MCP acquisitions exist for CURRENT missions of this revision. */
@@ -240,6 +334,83 @@ export interface BuiltStructuredFascicoloReport {
 
 function fingerprint(value: unknown): string {
   return createHash("sha256").update(stableStringify(value), "utf8").digest("hex");
+}
+
+function itemBasisRefs(item: StructuredKnowledgeReadItem): readonly string[] {
+  return [...new Set(item.evidence.flatMap((evidence) => (
+    evidence.basisRef ? [evidence.basisRef] : []
+  )))].sort();
+}
+
+function narrativeLine(item: StructuredKnowledgeReadItem): string {
+  const refs = itemBasisRefs(item);
+  return `${item.normalizedText}${refs.length ? ` [${refs.join("; ")}]` : " [riferimento documentale non disponibile]"}`;
+}
+
+function buildProfessionalNarrative(
+  knowledge: StructuredKnowledgeReadModel,
+): NonNullable<StructuredFascicoloReportPayload["professionalNarrative"]> {
+  const visible = (items: readonly StructuredKnowledgeReadItem[]) => (
+    items.filter((item) => item.status !== "REJECTED")
+  );
+  const positions = visible(knowledge.partyPositions ?? []);
+  const facts = visible(knowledge.facts);
+  const events = visible(knowledge.events);
+  const acts = visible([...knowledge.legalActs, ...knowledge.measures]);
+  const deadlines = visible(knowledge.deadlineCandidates);
+  const gaps = visible(knowledge.gaps);
+  const issues = visible(knowledge.legalIssues);
+  const questions = visible(knowledge.researchQuestions);
+  const references = [...new Set([
+    ...positions,
+    ...facts,
+    ...events,
+    ...acts,
+    ...deadlines,
+    ...gaps,
+    ...issues,
+    ...questions,
+  ].flatMap(itemBasisRefs))].sort();
+  return {
+    status: "PRELIMINARY_DOCUMENT_BASED",
+    reconstruction: [
+      ...knowledge.subjects.map((subject) => (
+        `${subject.canonicalName}: soggetto documentale qualificato come ${subject.subjectType}.`
+      )),
+      ...visible(knowledge.partyRoles).map(narrativeLine),
+      ...facts.map(narrativeLine),
+    ],
+    chronology: events.map(narrativeLine),
+    titlesObligationsAndDeadlines: [...acts, ...deadlines].map(narrativeLine),
+    complianceAndAllegedBreaches: positions.map((item) => (
+      `Allegazione della parte, non assunta come fatto accertato: ${narrativeLine(item)}`
+    )),
+    contradictionsAndEvidenceGaps: [
+      ...visible(knowledge.contradictions).map(narrativeLine),
+      ...gaps.map(narrativeLine),
+    ],
+    technicalAdministrativeAndLegalProfiles: issues.map((item) => (
+      `Questione preliminare ricavata dal fascicolo: ${narrativeLine(item)}`
+    )),
+    favorableArguments: positions
+      .filter((item) => {
+        const positionType = String(jsonRecord(item.payload).positionType ?? "");
+        return positionType === "CLAIM" || positionType === "REQUEST";
+      })
+      .map((item) => `Argomento della parte da verificare: ${narrativeLine(item)}`),
+    contraryArguments: positions
+      .filter((item) => {
+        const positionType = String(jsonRecord(item.payload).positionType ?? "");
+        return positionType === "DEFENSE" || positionType === "OBJECTION";
+      })
+      .map((item) => `Difesa o obiezione da verificare: ${narrativeLine(item)}`),
+    questionsForFurtherReview: [
+      ...questions.map(narrativeLine),
+      ...gaps.map((item) => `Lacuna probatoria: ${narrativeLine(item)}`),
+    ],
+    documentaryReferences: references,
+    legalResearchStatus: "Le ricostruzioni derivano esclusivamente dai documenti. Norme e giurisprudenza non accompagnate da fonti verificate restano da ricercare e non costituiscono conclusioni giuridiche definitive.",
+  };
 }
 
 function byId<T extends { id?: string; resultId?: string; missionId?: string; semanticKey?: string }>(left: T, right: T): number {
@@ -630,6 +801,184 @@ function technicalOutstandingEvidence(sources: readonly StructuredReportTechnica
     + ".";
 }
 
+function administrativeActDrafts(input: {
+  issueText: string;
+  sourceDocumentRefs: readonly string[];
+  outstandingEvidence: readonly string[];
+  documentedFacts: readonly string[];
+}): readonly StructuredReportAdministrativeActDraft[] {
+  const refs = input.sourceDocumentRefs.length
+    ? input.sourceDocumentRefs.join("; ")
+    : "[RIFERIMENTI DOCUMENTALI DA INSERIRE]";
+  const missing = input.outstandingEvidence.length
+    ? input.outstandingEvidence
+    : ["[DOCUMENTAZIONE MANCANTE DA INDIVIDUARE]"];
+  const common = {
+    competentOffice: "[UFFICIO/AUTORITA COMPETENTE DA VERIFICARE]",
+    legalBasis: "[FONDAMENTO GIURIDICO DA VERIFICARE DALL'UFFICIO]",
+    participationGuarantees: [
+      "Garantire accesso, partecipazione e contraddittorio nella misura applicabile al procedimento verificato.",
+      "Non anticipare decadenza, revoca o sanzioni prima dell'accertamento di presupposti e competenza.",
+    ],
+    subsequentCommunications: [
+      "[DESTINATARI E MODALITA DI COMUNICAZIONE DA VERIFICARE]",
+      "Registrare esito, ricevute e adempimenti successivi senza invio automatico.",
+    ],
+    templateSource: "INTERNAL_TEMPLATE_REQUIRED_IF_AVAILABLE" as const,
+    adaptationInstructions: "Usare prioritariamente lo schema interno dell'Ente senza modificarne l'originale; applicare queste sezioni in una copia e marcare ogni integrazione proposta. In assenza di schema interno, il presente modello standard richiede verifica dell'ufficio.",
+    automaticExecutionProhibited: true as const,
+  };
+  const caseText = input.issueText.toLowerCase();
+  const facts = input.documentedFacts.length
+    ? input.documentedFacts.map((fact) => `${fact} [fonti: ${refs}]`)
+    : [`Criticita documentata: ${input.issueText}. [fonti: ${refs}]`];
+  const actSpecs = /canoni|pagament|tesoreria|ripiano/.test(caseText) ? [
+    {
+      actType: "ACQUISIZIONE_PARTITARIO_E_ATTESTAZIONE_TESORERIA",
+      necessity: "REQUIRED_IF_PROCEEDING_STARTED" as const,
+      purpose: "Ricostruire per ciascuna rata importo, scadenza, pagamento, valuta, imputazione, interessi e saldo certificato.",
+      investigation: ["Acquisire partitario ufficiale, quietanze analitiche, reversali e criteri di imputazione.", "Separare pagamenti documentati, importi non imputati e residui ancora da accertare."],
+      operativePart: ["Disporre a [UFFICIO TESORERIA/RAGIONERIA VERIFICATO] di produrre attestazione analitica.", "Allegare una tabella rata-pagamento-imputazione-interessi-saldo e indicare i dati non verificati."],
+    },
+    {
+      actType: "RICHIESTA_DOCUMENTI_CONTABILI_AL_CONCESSIONARIO",
+      necessity: "EVENTUAL" as const,
+      purpose: "Acquisire contabili, quietanze, causali e osservazioni sulla proposta di ripiano o compensazione.",
+      investigation: ["Confrontare i documenti della parte con l'attestazione della Tesoreria.", ...missing.map((entry) => `Chiarire: ${entry}.`)],
+      operativePart: ["Richiedere a [CONCESSIONARIO] le prove analitiche dei pagamenti e il fondamento dell'eventuale compensazione.", "Assegnare [TERMINE VERIFICATO] senza riconoscere automaticamente ripiano o compensazione."],
+    },
+    {
+      actType: "PROVVEDIMENTO_SU_RIPIANO_O_REGOLARIZZAZIONE",
+      necessity: "OPTIONAL" as const,
+      purpose: "Accogliere, modificare o respingere motivatamente la proposta dopo riconciliazione e contraddittorio.",
+      investigation: ["Valutare saldo certificato, sostenibilita, disciplina applicabile, interessi, garanzie e alternative.", "Dare conto delle deduzioni e delle ragioni di proporzionalita."],
+      operativePart: ["[ACCOGLIERE/MODIFICARE/RESPINGERE] la proposta nei limiti consentiti dalla disciplina verificata.", "Definire rate, scadenze, interessi, decadenza dal beneficio e controlli soltanto se giuridicamente ammessi."],
+    },
+  ] : /portanza|struttural|sicurezza|impianto|mezzi/.test(caseText) ? [
+    {
+      actType: "RICHIESTA_ACCERTAMENTO_SPECIALISTICO_STRUTTURALE_E_IMPIANTISTICO",
+      necessity: "REQUIRED_IF_PROCEEDING_STARTED" as const,
+      purpose: "Accertare portanza, carichi distribuiti e puntuali, stato delle opere, documentazione delle gru e conformita impiantistica.",
+      investigation: ["Acquisire progetti, collaudi, classificazione delle aree, configurazioni e reazioni degli stabilizzatori.", "Formulare quesiti su fessure, copriferro, carichi ammissibili, I1 e documentazione M1/M2."],
+      operativePart: ["Conferire a [TECNICO/STRUTTURA COMPETENTE] l'accertamento sui quesiti indicati.", "Vietare conclusioni di dissesto o conformita non sostenute da prove specialistiche."],
+    },
+    {
+      actType: "DISPOSIZIONE_E_VERBALE_DI_SOPRALLUOGO_TECNICO",
+      necessity: "EVENTUAL" as const,
+      purpose: "Documentare stato dei luoghi, mezzi, impianti, aree di sicurezza e corrispondenza con titolo e planimetrie.",
+      investigation: ["Identificare partecipanti, strumenti, fotografie originali, misure e documenti esibiti.", ...missing.map((entry) => `Verificare in sopralluogo: ${entry}.`)],
+      operativePart: ["Disporre sopralluogo in data [DATA] con contraddittorio tecnico ove applicabile.", "Redigere verbale con rilievi distinti da valutazioni e raccogliere osservazioni dei presenti."],
+    },
+    {
+      actType: "PRESCRIZIONE_TECNICA_MOTIVATA",
+      necessity: "OPTIONAL" as const,
+      purpose: "Imporre esclusivamente le misure tecniche risultate necessarie e proporzionate dagli accertamenti.",
+      investigation: ["Individuare rischio, competenza, urgenza, misura praticabile e termine tecnicamente congruo.", "Valutare misure meno restrittive e osservazioni della parte."],
+      operativePart: ["Prescrivere [MISURA TECNICA ACCERTATA] entro [TERMINE VERIFICATO].", "Programmare verifica di adempimento senza anticipare ulteriori conseguenze non istruite."],
+    },
+  ] : /terzi|magazzini|subconcess|affidamento/.test(caseText) ? [
+    {
+      actType: "RICHIESTA_DOCUMENTAZIONE_RAPPORTO_CON_OPERATORE_TERZO",
+      necessity: "EVENTUAL" as const,
+      purpose: "Acquisire contratto, autorizzazioni, planimetrie, turni, chiavi, custodia, personale e attivita effettivamente svolte.",
+      investigation: ["Distinguere servizio, affidamento di segmento operativo, uso esclusivo di area e possibile subconcessione.", ...missing.map((entry) => `Acquisire o chiarire: ${entry}.`)],
+      operativePart: ["Richiedere a [CONCESSIONARIO E OPERATORE TERZO] i documenti indicati.", "Precisare che il contratto privato non prova da solo la qualificazione pubblicistica."],
+    },
+    {
+      actType: "VERBALE_DI_SOPRALLUOGO_SU_SPAZI_E_OPERAZIONI",
+      necessity: "EVENTUAL" as const,
+      purpose: "Accertare uso dei 180 m2, cartellonistica, accessi, custodia, mezzi, personale e operazioni svolte.",
+      investigation: ["Confrontare M4, zona L, titolo, planimetrie e autorizzazioni.", "Registrare eventuali variazioni temporanee e fatti favorevoli alla parte."],
+      operativePart: ["Eseguire sopralluogo con rilievo planimetrico e fotografico verificabile.", "Acquisire dichiarazioni senza assumerle automaticamente come fatti accertati."],
+    },
+    {
+      actType: "COMUNICAZIONE_DI_AVVIO_E_CONTESTAZIONE_SPECIFICA",
+      necessity: "REQUIRED_IF_PROCEEDING_STARTED" as const,
+      purpose: "Contestare soltanto i fatti accertati, indicare la possibile qualificazione e consentire deduzioni.",
+      investigation: ["Verificare disciplina, competenza, autorizzazioni e concreta organizzazione del servizio.", "Considerare alternative, regolarizzazione consentita e archiviazione."],
+      operativePart: ["Comunicare fatti, prove e possibili qualificazioni a [DESTINATARI VERIFICATI].", "Consentire memorie e documenti entro [TERMINE VERIFICATO] senza anticipare l'esito."],
+    },
+  ] : /ambient|drenaggio|scarico|rifiut/.test(caseText) ? [
+    {
+      actType: "ACQUISIZIONE_TITOLI_E_PARERE_TECNICO_AMBIENTALE",
+      necessity: "REQUIRED_IF_PROCEEDING_STARTED" as const,
+      purpose: "Verificare progetto I4, separatore, collaudo, titolo allo scarico, registri rifiuti e attendibilita dei campionamenti.",
+      investigation: ["Acquisire progetto approvato, titolo allo scarico, formulari, registri e catena di custodia.", "Non inferire conformita o illecito dal solo campione isolato."],
+      operativePart: ["Richiedere a [UFFICIO/ENTE COMPETENTE] riscontro documentale e tecnico.", "Indicare separatamente documenti mancanti, non rinvenuti e accertati inesistenti."],
+    },
+    {
+      actType: "DISPOSIZIONE_DI_SOPRALLUOGO_E_CAMPIONAMENTO",
+      necessity: "EVENTUAL" as const,
+      purpose: "Verificare opere di drenaggio, punto di scarico, contenitori e condizioni operative con metodo tracciabile.",
+      investigation: ["Definire punti, metodo, catena di custodia, laboratorio e disciplina territoriale applicabile.", ...missing.map((entry) => `Verificare: ${entry}.`)],
+      operativePart: ["Disporre sopralluogo e, se competente e necessario, campionamento tracciato.", "Redigere verbale e attendere esiti verificati prima di qualificare violazioni."],
+    },
+  ] : /traffici|moviment/.test(caseText) ? [
+    {
+      actType: "RELAZIONE_DI_RICONCILIAZIONE_TRAFFICI",
+      necessity: "REQUIRED_IF_PROCEEDING_STARTED" as const,
+      purpose: "Riconciliare traffici dichiarati, manifesti nave, registri di scalo e trasferimenti interni.",
+      investigation: ["Separare sbarco/imbarco da trasferimenti e ricondizionamenti.", "Verificare cause esterne mediante dati meteo, ordinanze e disponibilita degli ormeggi."],
+      operativePart: ["Predisporre prospetto annuale con fonte, criterio di eleggibilita e scostamento.", "Evidenziare dati certificati, allegazioni e valori non verificati."],
+    },
+    {
+      actType: "RICHIESTA_DEDUZIONI_SU_SCOSTAMENTO_TRAFFICI",
+      necessity: "EVENTUAL" as const,
+      purpose: "Consentire alla concessionaria di documentare cause esterne e criteri di computo.",
+      investigation: ["Acquisire manifesti, registri, ordinanze, orari nave e serie statistiche confrontabili.", ...missing.map((entry) => `Chiarire: ${entry}.`)],
+      operativePart: ["Comunicare lo scostamento provvisorio e i criteri utilizzati.", "Richiedere deduzioni entro [TERMINE VERIFICATO] prima di ogni valutazione conclusiva."],
+    },
+  ] : /formazione|efficacia|titolo|presuppost/.test(caseText) ? [
+    {
+      actType: "RELAZIONE_ISTRUTTORIA_SU_FORMAZIONE_ED_EFFICACIA_DEL_TITOLO",
+      necessity: "REQUIRED_IF_PROCEEDING_STARTED" as const,
+      purpose: "Ricostruire avviso, offerta, comparazione, aggiudicazione, garanzia, concessione, disciplinare e consegna.",
+      investigation: ["Verificare sequenza, condizioni di efficacia, allegati incorporati e atti modificativi.", "Distinguere titolo, atti presupposti e documenti privati successivi."],
+      operativePart: ["Formare indice cronologico degli atti e delle condizioni adempiute o da verificare.", "Indicare gli effetti giuridici soltanto dopo verifica professionale delle fonti."],
+    },
+    {
+      actType: "ACQUISIZIONE_ATTI_E_VERIFICA_CONDIZIONI_DI_EFFICACIA",
+      necessity: "EVENTUAL" as const,
+      purpose: "Acquisire originali, pubblicazioni, comunicazioni, garanzia e verbale di consegna.",
+      investigation: ["Verificare autenticita, completezza, collegamenti e vigenza degli atti.", ...missing.map((entry) => `Acquisire: ${entry}.`)],
+      operativePart: ["Richiedere agli uffici detentori gli originali e attestare le verifiche compiute.", "Segnalare separatamente ogni documento non valutabile o ambiguo."],
+    },
+  ] : [
+    {
+      actType: "RELAZIONE_ISTRUTTORIA_CONCLUSIVA",
+      necessity: "REQUIRED_IF_PROCEEDING_STARTED" as const,
+      purpose: "Ricostruire fatti, allegazioni, lacune, disciplina, alternative e proposta motivata.",
+      investigation: ["Acquisire documenti e verificare competenza, termini e contraddittorio.", ...missing.map((entry) => `Chiarire: ${entry}.`)],
+      operativePart: ["Proporre [ARCHIVIAZIONE/PRESCRIZIONE/ALTRO PROVVEDIMENTO VERIFICATO].", "Motivare proporzionalita, alternative e conseguenze successive."],
+    },
+  ];
+  return actSpecs.map((spec, index) => ({
+    ...common,
+    actType: spec.actType,
+    necessity: spec.necessity,
+    sequence: index + 1,
+    sections: {
+      heading: "[DENOMINAZIONE ENTE] - [UFFICIO COMPETENTE] - Bozza istruttoria modificabile",
+      subject: `${spec.actType.replaceAll("_", " ")} — ${input.issueText}`,
+      premises: [
+        `Esaminati i documenti ${refs}.`,
+        `Rilevata la necessita di ${spec.purpose.toLowerCase()}`,
+        "Dato atto che allegazioni, valutazioni private e documenti mancanti non sono assunti come fatti accertati.",
+      ],
+      documentedFacts: facts,
+      investigation: spec.investigation,
+      reasoning: [
+        spec.purpose,
+        "La soluzione deve essere necessaria, proporzionata e adottata dall'autorita competente dopo il contraddittorio applicabile.",
+      ],
+      legalReferences: ["[FONDAMENTO SOSTANZIALE, PROCEDIMENTALE E SULLA COMPETENZA DA VERIFICARE]"],
+      operativePart: spec.operativePart,
+      communications: [...common.subsequentCommunications],
+      signature: "[NOME, QUALIFICA E FIRMA DEL SOGGETTO COMPETENTE]",
+    },
+  }));
+}
+
 function buildOperationalPlans(
   issues: StructuredFascicoloReportPayload["legalIssues"],
   knowledge: StructuredKnowledgeReadModel,
@@ -672,16 +1021,22 @@ function buildOperationalPlans(
       },
       {
         title: "2. Qualificare le violazioni e valutare i procedimenti conseguenti",
-        action: concernsInstallation
+        action: !sourceReady
+          ? "Verificare sulle fonti vigenti le fattispecie, i presupposti, i poteri tipizzati e le competenze applicabili. Separare ogni possibile procedimento e non presumere decadenza, revoca, ripristino o sanzioni prima della verifica professionale."
+          : concernsInstallation
           ? "Verificare separatamente se ricorrono i presupposti di decadenza ex art. 47 cod. nav. (in particolare lett. f per inadempimento di obblighi, lett. c solo se vi e mutamento sostanziale non autorizzato dello scopo) e di intervento sulle innovazioni abusive ex art. 54 cod. nav. Accertare l'autorità competente, incluse le distinte competenze degli artt. 48 e 54, e la normativa applicabile nel tempo."
           : "Esaminare le ipotesi di decadenza ex art. 47 cod. nav. pertinenti alla violazione, eventuali obblighi di ripristino e altri poteri tipizzati. Separare presupposti, competenze e conseguenze di ogni procedimento; non presupporre che la decadenza sia automatica.",
-        office: "Autorità concedente per l'eventuale decadenza (art. 48 cod. nav.); autorità marittima competente per gli eventuali poteri di cui all'art. 54",
+        office: sourceReady
+          ? "Autorità concedente per l'eventuale decadenza (art. 48 cod. nav.); autorità marittima competente per gli eventuali poteri di cui all'art. 54"
+          : "[UFFICIO O AUTORITA COMPETENTE DA VERIFICARE SULLE FONTI VIGENTI]",
         requiredDocuments: ["Prescrizioni e obblighi del titolo e loro contestazioni", "Testi normativi applicabili alla data dei fatti", "Precedenti amministrativi e fonti giurisprudenziali verificabili", "Documenti idonei a dimostrare gravità, durata e conseguenze della condotta"],
         completionGate: "Distinta qualificazione giuridica dei possibili procedimenti, verificata da un professionista",
       },
       {
         title: "3. Garantire contestazione e contraddittorio",
-        action: "Se sussistono presupposti sufficienti, predisporre gli atti di avvio e di contestazione di competenza dell'ente; garantire accesso, partecipazione e valutazione delle deduzioni. Per la decadenza rispettare il termine assegnato alle deduzioni dall'art. 47 cod. nav. e verificare le altre garanzie applicabili.",
+        action: sourceReady
+          ? "Se sussistono presupposti sufficienti, predisporre gli atti di avvio e di contestazione di competenza dell'ente; garantire accesso, partecipazione e valutazione delle deduzioni. Per la decadenza rispettare il termine assegnato alle deduzioni dall'art. 47 cod. nav. e verificare le altre garanzie applicabili."
+          : "Se sussistono presupposti sufficienti, predisporre gli atti di avvio e di contestazione dell'autorita competente; garantire accesso, partecipazione e valutazione delle deduzioni. Inserire termini e garanzie soltanto dopo la verifica delle fonti applicabili.",
         office: "Responsabile del procedimento dell'autorità effettivamente competente",
         requiredDocuments: ["Relazione istruttoria e atti probatori", "Bozza di contestazione e comunicazioni procedimentali", "Deduzioni, osservazioni e documenti del concessionario", "Verifica delle notificazioni e dei termini concretamente applicabili"],
         completionGate: "Contraddittorio effettivo e documentato; nessun provvedimento anticipato prima dell'istruttoria dovuta",
@@ -751,16 +1106,53 @@ function buildOperationalPlans(
         riskOrLimit: "L'archiviazione non deve precludere accertamenti futuri su fatti nuovi.",
       },
     ];
+    const reportAlternatives = sourceReady ? alternatives : [
+      {
+        title: "Completare l'istruttoria prima di scegliere il procedimento",
+        whenApplicable: "Quando prove, competenza, disciplina applicabile o consistenza dell'inadempimento non sono ancora verificate",
+        practicalRoute: "Acquisire originali, riscontri d'ufficio, verbali e valutazioni tecniche; sottoporre le fonti giuridiche a verifica professionale.",
+        riskOrLimit: "L'istruttoria non deve essere presentata come accertamento definitivo ne ritardare termini che l'ufficio abbia previamente verificato.",
+      },
+      {
+        title: "Valutare contestazione, prescrizioni o altro procedimento tipizzato",
+        whenApplicable: "Soltanto dopo avere verificato presupposti, competenza, disciplina e proporzionalita della misura",
+        practicalRoute: "Separare i procedimenti ipotizzabili, garantire il contraddittorio e motivare la soluzione sulla base degli accertamenti.",
+        riskOrLimit: "Nessuna decadenza, revoca, misura ripristinatoria o sanzione e automatica.",
+      },
+      {
+        title: "Archiviare motivatamente la specifica criticita",
+        whenApplicable: "Se l'istruttoria non conferma i fatti o i presupposti della misura ipotizzata",
+        practicalRoute: "Documentare verifiche, deduzioni e ragioni dell'archiviazione, distinguendo eventuali controlli ancora aperti.",
+        riskOrLimit: "L'archiviazione non equivale a convalidare fatti o titoli non esaminati.",
+      },
+    ];
+    const recommendedNextStep = "Priorita per l'ente concedente: completare l'istruttoria su fatti, obblighi, competenza e disciplina; solo dopo valutare il procedimento e la misura proporzionata, senza automatismi.";
+    const administrativeActs = administrativeActDrafts({
+      issueText: issue.text,
+      sourceDocumentRefs,
+      outstandingEvidence,
+      documentedFacts: related.map((item) => item.normalizedText),
+    });
     return {
       issueSemanticKey: issue.semanticKey,
       issueText: issue.text,
+      problem: issue.text,
+      evidence: sourceDocumentRefs,
+      legalQualification: sourceReady
+        ? "Qualificazione preliminare fondata sulle fonti giuridiche verificate allegate; resta necessaria l'approvazione professionale."
+        : "Ipotesi giuridiche da verificare sulle fonti vigenti: nessuna qualificazione definitiva, competenza o conseguenza e presunta.",
       sourceDocumentRefs,
       outstandingEvidence,
       legalSourceStatus: sourceReady ? "VERIFIED_SOURCES_ATTACHED" : "LEGAL_RESEARCH_REQUIRED",
       professionalStatus: "PRELIMINARY_NOT_APPROVED",
-      recommendedNextStep: "Priorita per l'ente concedente: accertare gli obblighi violati e valutare tutti i procedimenti conseguenti, inclusi decadenza e ripristino quando ne ricorrano i presupposti; nessuna misura e automatica.",
+      recommendedNextStep,
+      proposedSolution: recommendedNextStep,
+      investigationActivities: steps.map((step) => step.action),
+      actsToForm: administrativeActs.map((act) => act.actType),
+      modelsAvailable: administrativeActs.map((act) => act.actType),
       steps,
-      alternatives,
+      alternatives: reportAlternatives,
+      administrativeActs,
       deadlineReview: "Verificare espressamente scadenze, notifiche e termini applicabili: nessuna data processuale è determinata da questo piano.",
     };
   });
@@ -880,6 +1272,7 @@ export function buildStructuredFascicoloReport(input: {
     unassignedQuestions: questions.filter((question) => !assignedQuestionIds.has(question.knowledgeItemId)),
     gaps: visibleItems(input.knowledge.gaps),
     deadlineCandidates: visibleItems(input.knowledge.deadlineCandidates),
+    professionalNarrative: buildProfessionalNarrative(input.knowledge),
     operationalPlans: buildOperationalPlans(operationalSubjects, input.knowledge, technicalSources),
     ...(technicalSources.length ? { technicalSources } : {}),
     legalCompleteness,

@@ -134,6 +134,28 @@ describe("Lotto 8 runtime cost gate", () => {
     expect(String(db.query.mock.calls[6][0])).not.toContain("\"status\"='RELEASED'");
   });
 
+  it("keeps the settled provider cost when a downstream quality gate fails", async () => {
+    const db = context([
+      [], policies,
+      [{ amount: "0.000000" }], [{ amount: "0.000000" }], [{ amount: "0.000000" }],
+      [],
+      [],
+    ]);
+    const qualityFailure = new Error("synthetic quality gate failure");
+
+    await expect((async () => {
+      await withRuntimeCostGate(
+        reservation,
+        async () => ({ value: "provider-output", actualAmount: 1.25 }),
+        db,
+      );
+      throw qualityFailure;
+    })()).rejects.toBe(qualityFailure);
+    expect(String(db.query.mock.calls[6][0])).toContain("\"status\"='SETTLED'");
+    expect(db.query.mock.calls.filter(([sql]) =>
+      String(sql).includes("\"status\"='RELEASED'"))).toHaveLength(0);
+  });
+
   it("rechecks caps before reactivating a released reservation", async () => {
     const db = context([
       [{ id: "reservation-existing", status: "RELEASED", active: false }],

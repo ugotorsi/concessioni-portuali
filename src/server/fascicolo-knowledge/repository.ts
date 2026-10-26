@@ -408,6 +408,7 @@ export async function reconcileAndPromoteKnowledgeRevision(
   rawInput: KnowledgeScope & {
     revisionId: string;
     expectedCurrentRevisionId: string | null;
+    deferPromotion?: boolean;
     candidates: readonly (KnowledgeItemCandidate | PreparedKnowledgeItemCandidate)[];
     relations?: readonly {
       sourceSemanticKey: string;
@@ -419,6 +420,7 @@ export async function reconcileAndPromoteKnowledgeRevision(
 ): Promise<KnowledgeReconciliationResult> {
   const input = scopedRevisionSchema.extend({
     expectedCurrentRevisionId: z.string().trim().min(1).max(256).nullable(),
+    deferPromotion: z.boolean().optional().default(false),
     candidates: z.array(z.union([knowledgeItemCandidateSchema, preparedKnowledgeItemCandidateSchema])).max(10_000),
     relations: z.array(z.object({
       sourceSemanticKey: sha256Schema,
@@ -523,6 +525,12 @@ export async function reconcileAndPromoteKnowledgeRevision(
           sourceItemId, targetItemId, relation.relationType]);
       }
     }
+    if (input.deferPromotion) {
+      return {
+        revision: await loadRevisionSnapshot(tx, target),
+        classifications,
+      };
+    }
     if (current) {
       await tx.query(`
         UPDATE "FascicoloKnowledgeItem" SET "supersededAt" = $4
@@ -548,6 +556,71 @@ export async function reconcileAndPromoteKnowledgeRevision(
       revision: await loadRevisionSnapshot(tx, promoted.rows[0]),
       classifications,
     };
+  });
+}
+
+export async function promotePreparedKnowledgeRevision(
+  rawInput: KnowledgeScope & {
+    revisionId: string;
+    expectedCurrentRevisionId: string | null;
+  },
+  overrides: Partial<FascicoloKnowledgeRepositoryContext> = {},
+): Promise<KnowledgeRevisionSnapshot> {
+  const input = scopedRevisionSchema.extend({
+    expectedCurrentRevisionId: z.string().trim().min(1).max(256).nullable(),
+  }).strict().parse(rawInput);
+  const ctx = context(overrides);
+  const now = (ctx.now ?? (() => new Date()))();
+  return ctx.transaction(async (tx) => {
+    await assertProcedureAuthority(tx, input);
+    const targetResult = await tx.query<RevisionRow>(`
+      SELECT * FROM "FascicoloKnowledgeRevision"
+      WHERE "id" = $1 AND "tenantId" = $2 AND "procedimentoId" = $3
+      FOR UPDATE
+    `, [input.revisionId, input.tenantId, input.procedimentoId]);
+    const target = targetResult.rows[0];
+    if (!target) throw new FascicoloKnowledgeRepositoryError("REVISION_NOT_FOUND");
+    if (target.status !== "BUILDING") {
+      throw new FascicoloKnowledgeRepositoryError("REVISION_NOT_BUILDING");
+    }
+    const currentResult = await tx.query<RevisionRow>(`
+      SELECT * FROM "FascicoloKnowledgeRevision"
+      WHERE "tenantId" = $1 AND "procedimentoId" = $2 AND "status" = 'CURRENT'
+      FOR UPDATE
+    `, [input.tenantId, input.procedimentoId]);
+    const current = currentResult.rows[0] ?? null;
+    if ((current?.id ?? null) !== input.expectedCurrentRevisionId) {
+      throw new FascicoloKnowledgeRepositoryError("STALE_CURRENT_REVISION");
+    }
+    if (current) {
+      await tx.query(`
+        UPDATE "FascicoloKnowledgeItem" SET "supersededAt" = $4
+        WHERE "tenantId" = $1 AND "procedimentoId" = $2 AND "revisionId" = $3
+          AND "supersededAt" IS NULL
+      `, [input.tenantId, input.procedimentoId, current.id, now]);
+      const superseded = await tx.query<{ id: string }>(`
+        UPDATE "FascicoloKnowledgeRevision"
+        SET "status" = 'SUPERSEDED', "supersededAt" = $4
+        WHERE "id" = $1 AND "tenantId" = $2 AND "procedimentoId" = $3
+          AND "status" = 'CURRENT'
+        RETURNING "id"
+      `, [current.id, input.tenantId, input.procedimentoId, now]);
+      if (superseded.rows.length !== 1) {
+        throw new FascicoloKnowledgeRepositoryError("CONCURRENT_PROMOTION");
+      }
+    }
+    await ctx.beforeCurrentPromotion?.(tx);
+    const promoted = await tx.query<RevisionRow>(`
+      UPDATE "FascicoloKnowledgeRevision"
+      SET "status" = 'CURRENT', "completedAt" = $4
+      WHERE "id" = $1 AND "tenantId" = $2 AND "procedimentoId" = $3
+        AND "status" = 'BUILDING'
+      RETURNING *
+    `, [target.id, input.tenantId, input.procedimentoId, now]);
+    if (promoted.rows.length !== 1) {
+      throw new FascicoloKnowledgeRepositoryError("CONCURRENT_PROMOTION");
+    }
+    return loadRevisionSnapshot(tx, promoted.rows[0]);
   });
 }
 

@@ -4,7 +4,9 @@ import { z } from "zod";
 
 import { Prisma, type AsyncJob } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
-import { SELVARA_PILOT_AUTHORIZATION } from "@/server/ai/selvaraPilotAuthorization";
+import {
+  SELVARA_V3_RECOVERY_AUTHORIZATION,
+} from "@/server/async-jobs/selvaraV3RecoveryAuthorization";
 import { createAuditLogInTransaction } from "@/server/audit/auditLog";
 import { runSerializableTransactionWithRetry } from "@/server/db/serializableTransaction";
 
@@ -42,8 +44,8 @@ const selvaraRecoveryInputSchema = z.object({
 }).strict();
 
 const selvaraRecoveryEvidenceSchema = z.object({
-  approvalId: z.literal(SELVARA_PILOT_AUTHORIZATION.approvalId),
-  corpusFingerprint: z.literal(SELVARA_PILOT_AUTHORIZATION.corpusFingerprint),
+  approvalId: z.literal(SELVARA_V3_RECOVERY_AUTHORIZATION.approvalId),
+  corpusFingerprint: z.literal(SELVARA_V3_RECOVERY_AUTHORIZATION.corpusFingerprint),
   renderServiceId: z.literal(SELVARA_FAILED_ACTIVATION_RECOVERY.renderServiceId),
   renderJobId: z.literal(SELVARA_FAILED_ACTIVATION_RECOVERY.renderJobId),
   renderStatus: z.literal("failed"),
@@ -368,12 +370,12 @@ function assertSelvaraRecoveryScope(
 ): void {
   if (
     job.id !== SELVARA_FAILED_ACTIVATION_RECOVERY.applicationJobId
-    || job.tenantId !== SELVARA_PILOT_AUTHORIZATION.tenantId
-    || job.procedimentoId !== SELVARA_PILOT_AUTHORIZATION.procedimentoId
-    || job.operation !== SELVARA_PILOT_AUTHORIZATION.operation
-    || job.purpose !== SELVARA_PILOT_AUTHORIZATION.purpose
-    || corpusFingerprint(job) !== SELVARA_PILOT_AUTHORIZATION.corpusFingerprint
-    || evidence.corpusFingerprint !== SELVARA_PILOT_AUTHORIZATION.corpusFingerprint
+    || job.tenantId !== SELVARA_V3_RECOVERY_AUTHORIZATION.tenantId
+    || job.procedimentoId !== SELVARA_V3_RECOVERY_AUTHORIZATION.procedimentoId
+    || job.operation !== SELVARA_V3_RECOVERY_AUTHORIZATION.operation
+    || job.purpose !== SELVARA_V3_RECOVERY_AUTHORIZATION.purpose
+    || corpusFingerprint(job) !== SELVARA_V3_RECOVERY_AUTHORIZATION.corpusFingerprint
+    || evidence.corpusFingerprint !== SELVARA_V3_RECOVERY_AUTHORIZATION.corpusFingerprint
   ) {
     throw new DocumentAnalysisActivationTargetError("RECOVERY_SCOPE_MISMATCH");
   }
@@ -402,8 +404,8 @@ function hasSameCorpus(
   job: Pick<AsyncJob, "id" | "purpose" | "inputReference">,
 ): boolean {
   return job.id !== SELVARA_FAILED_ACTIVATION_RECOVERY.applicationJobId
-    && job.purpose === SELVARA_PILOT_AUTHORIZATION.purpose
-    && corpusFingerprint(job) === SELVARA_PILOT_AUTHORIZATION.corpusFingerprint;
+    && job.purpose === SELVARA_V3_RECOVERY_AUTHORIZATION.purpose
+    && corpusFingerprint(job) === SELVARA_V3_RECOVERY_AUTHORIZATION.corpusFingerprint;
 }
 
 export async function beginDocumentAnalysisActivation(
@@ -692,8 +694,8 @@ function verifyConfigurationFailureLogs(
     return renderVerificationError();
   }
   return selvaraRecoveryEvidenceSchema.parse({
-    approvalId: SELVARA_PILOT_AUTHORIZATION.approvalId,
-    corpusFingerprint: SELVARA_PILOT_AUTHORIZATION.corpusFingerprint,
+    approvalId: SELVARA_V3_RECOVERY_AUTHORIZATION.approvalId,
+    corpusFingerprint: SELVARA_V3_RECOVERY_AUTHORIZATION.corpusFingerprint,
     renderServiceId: SELVARA_FAILED_ACTIVATION_RECOVERY.renderServiceId,
     renderJobId: SELVARA_FAILED_ACTIVATION_RECOVERY.renderJobId,
     renderStatus: "failed",
@@ -771,8 +773,8 @@ async function persistVerifiedSelvaraFailedActivationRecovery(input: {
 }) {
   const target = documentAnalysisActivationTargetSchema.parse({
     applicationJobId: SELVARA_FAILED_ACTIVATION_RECOVERY.applicationJobId,
-    tenantId: SELVARA_PILOT_AUTHORIZATION.tenantId,
-    procedimentoId: SELVARA_PILOT_AUTHORIZATION.procedimentoId,
+    tenantId: SELVARA_V3_RECOVERY_AUTHORIZATION.tenantId,
+    procedimentoId: SELVARA_V3_RECOVERY_AUTHORIZATION.procedimentoId,
   });
   return runSerializableTransactionWithRetry(async (tx) => {
     const { job } = await lockTarget(tx, target);
@@ -788,9 +790,9 @@ async function persistVerifiedSelvaraFailedActivationRecovery(input: {
     }
     const activeCandidates = await tx.asyncJob.findMany({
       where: {
-        tenantId: SELVARA_PILOT_AUTHORIZATION.tenantId,
-        procedimentoId: SELVARA_PILOT_AUTHORIZATION.procedimentoId,
-        operation: SELVARA_PILOT_AUTHORIZATION.operation,
+        tenantId: SELVARA_V3_RECOVERY_AUTHORIZATION.tenantId,
+        procedimentoId: SELVARA_V3_RECOVERY_AUTHORIZATION.procedimentoId,
+        operation: SELVARA_V3_RECOVERY_AUTHORIZATION.operation,
         status: { in: ["QUEUED", "RETRY_WAIT", "RUNNING"] },
       },
       select: {

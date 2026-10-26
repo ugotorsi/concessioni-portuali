@@ -57,7 +57,9 @@ After remote verification, the function revalidates the immutable Selvara author
 and unchanged application job under a serializable transaction and row lock, rejects
 competing application work, and appends a reconciled `NOT_REQUESTED` ledger entry with
 the independently produced evidence and administrator identity. It never updates the
-`AsyncJob` row.
+`AsyncJob` row. This recovery retains the original V3 purpose and
+`NOETRA-V3-SELVARA-2026-10-25-ONE-SHOT` approval. The V7 approval is not accepted by
+the recovery and the V3 approval does not authorize V7 admission or provider spend.
 
 ## Staging Rollout
 
@@ -73,6 +75,80 @@ the independently produced evidence and administrator identity. It never updates
 10. Configure enabled EUR budget policies for GLOBAL, TENANT, and PROCEDIMENTO scopes.
 11. Only after separate authorization, configure provider credentials, positive cost estimates, and enable provider execution.
 12. Remove canary allowlists only after queue, failure, latency, and cost observations are accepted.
+
+## NOETRA V7 controlled Selvara collaudo
+
+The V7 Selvara path is a distinct, single-attempt admission. Its logical identity binds
+the V7 document-analysis contract, corpus fingerprint, and
+`NOETRA-V7-SELVARA-2026-10-26-CONTROLLED-ONE-SHOT` approval. Repeating the same
+admission reuses the same job. Changing the approved preflight after admission causes
+an idempotency conflict instead of creating a second attempt. The job has
+`maxAttempts=1`; provider timeouts, rate limits, unavailable responses, malformed or
+incomplete output, and knowledge-quality failures are terminal. Manual retry is
+disabled for this purpose.
+
+Admission requires a local preflight with all of these values:
+
+- `AI_V7_PREFLIGHT_APPROVAL_ID`;
+- `AI_V7_APPROVED_MAX_OUTPUT_TOKENS`;
+- `AI_V7_APPROVED_MAX_COST_EUR`;
+- `AI_OPENAI_MAX_INPUT_TOKENS`, `AI_OPENAI_MAX_OUTPUT_TOKENS`;
+- `AI_MAX_INPUT_BYTES`, `AI_OPENAI_MAX_RAW_RESPONSE_BYTES`;
+- `AI_OPENAI_TIMEOUT_MS`;
+- `AI_OPENAI_USD_TO_EUR_RATE`, `AI_OPENAI_USD_TO_EUR_RATE_DATE`,
+  `AI_OPENAI_USD_TO_EUR_RATE_SOURCE`;
+- `ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR`, equal to the computed worst-case EUR
+  amount so the runtime reserves the full approved execution maximum.
+
+The controlled V7 path requires `NOETRA_CANONICAL_IDENTITY_V3_ENABLED=false`. It writes
+a distinct `FASCICOLO_STRUCTURED_KNOWLEDGE_V7` revision contract so the verified V7
+result cannot be confused with the existing same-corpus V1 revision. Canonical identity
+V3 requires a separate future compatibility decision and is rejected before admission.
+The V7 revision remains `BUILDING` while missions are reconciled and its structured
+report is prepared from that exact revision. Promotion to `CURRENT`, supersession of
+the prior current revision, and report persistence are the final transaction. A
+reconciliation, report, or finalization failure is terminal, leaves the prior revision
+current, and never exposes the incomplete report as definitive.
+
+The preflight measures the serialized provider request, includes reasoning tokens in
+the billable output ceiling, applies the versioned model tariff, and checks every
+enabled GLOBAL, TENANT, and PROCEDIMENTO budget window. Missing limits, missing budget
+scopes, insufficient headroom, an unapproved output ceiling, or an unapproved monetary
+maximum prevents admission.
+
+Immediately before provider submission, the worker recognizes the controlled V7
+purpose independently of the current approval configuration. It reloads the durable
+job identity, requires `maxAttempts=1`, verifies tenant, procedimento, corpus,
+operation, V7 contract, exact approval and deterministic logical operation ID, then
+rebuilds the complete economic preflight from the acquired corpus and current runtime
+configuration. The rebuilt fingerprint must equal the `trialPreflightHash` stored at
+admission. Missing or replaced approval, changed limits, pricing, FX, timeout, budget
+state, reservation amount or fingerprint terminates the job before provider dispatch
+and is not retryable.
+
+The OpenAI transport marks an attempt as potentially dispatched immediately before
+calling the HTTP transport. A failure before that point releases the reservation. If
+the request was or may have been dispatched and reliable usage is unavailable, the
+runtime settles the full reserved maximum conservatively instead of releasing it.
+Reliable provider usage is internally accounted at the versioned tariff, but the
+provider-billed amount remains `NOT_VERIFIED` until independently reconciled. A later
+output-completeness or knowledge-quality failure does not undo the settlement and
+cannot schedule another V7 attempt.
+
+For a later authorized release, preserve the dirty source worktree and `.tmp/`. Do not
+use `git add -A`. Select only the reviewed V7 source, test, fixture, and documentation
+paths; inspect the staged list and run `git diff --cached --check` before creating an
+immutable commit. Open the release against `staging-operativo`, require the staging
+workflow, TypeScript, focused tests, and production build to pass, then deploy web and
+the application-worker base service from the same SHA.
+
+Keep `AI_REAL_DATA_ENABLED=false`, `ASYNC_PROVIDER_EXECUTION_ENABLED=false`,
+`DOCUMENT_WORKER_ACTIVATION_MODE=DISABLED`, and
+`AUTOMATIC_RESEARCH_EXECUTION_ENABLED=false` through deployment and readiness.
+Enabling the exact V7 approval and one-off activation requires a separate authorization.
+After the one job reaches `SUCCEEDED` or `TERMINAL_FAILED`, restore those disabled
+values, restart the affected processes, keep the worker suspended, and retain the job,
+cost ledger, diagnostics, knowledge revision, and report artifacts.
 
 ## Document Extraction Activation
 

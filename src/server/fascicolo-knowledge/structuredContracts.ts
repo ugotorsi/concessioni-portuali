@@ -14,6 +14,38 @@ const sourceQuoteSchema = z.object({
   basisRef: documentBasisRefSchema,
   quote: text,
 }).strict();
+export const documentInventoryClassificationSchema = z.enum([
+  "MATERIAL",
+  "NOT_MATERIAL",
+  "UNCERTAIN",
+]);
+export const documentInventoryProfileSchema = z.enum([
+  "PROCEDURAL",
+  "LEGAL",
+  "ACCOUNTING",
+  "TECHNICAL",
+  "ENVIRONMENTAL",
+  "SAFETY",
+  "EVIDENTIARY",
+  "OTHER",
+]);
+export const documentInventoryEntrySchema = z.object({
+  localId: id,
+  basisRefs: z.array(documentBasisRefSchema).min(1).max(512),
+  documentType: shortText,
+  documentDate: shortText.nullable().default(null),
+  issuer: shortText.nullable().default(null),
+  recipients: z.array(shortText).max(100).default([]),
+  proceduralPhase: shortText.nullable().default(null),
+  subject: shortText,
+  summary: text,
+  referencedActs: z.array(shortText).max(100).default([]),
+  attachments: z.array(shortText).max(100).default([]),
+  materialProfiles: z.array(documentInventoryProfileSchema).min(1).max(8),
+  classification: documentInventoryClassificationSchema,
+  rationale: text,
+  relatedItemLocalIds: z.array(id).max(200).default([]),
+}).strict();
 const localIds = z.array(id).max(100);
 const confidence = z.number().int().min(0).max(100).nullable().optional().transform((value) => value ?? null);
 const isoDate = z.string().date();
@@ -225,6 +257,7 @@ export const fascicoloStructuredKnowledgeSchema = z.object({
   subjects: z.array(fascicoloSubjectCandidateSchema).max(500),
   items: z.array(structuredKnowledgeItemSchema).max(10_000),
   sourceQuotes: z.array(sourceQuoteSchema).max(100_000).default([]),
+  documentInventory: z.array(documentInventoryEntrySchema).max(10_000).optional(),
   legalIssues: z.array(legalIssueCandidateSchema).max(1_000).optional().default([]),
   researchQuestions: z.array(researchQuestionCandidateSchema).max(1_000).optional().default([]),
 }).strict().superRefine((value, context) => {
@@ -232,10 +265,12 @@ export const fascicoloStructuredKnowledgeSchema = z.object({
   const itemIds = value.items.map((item) => item.localId);
   const issueIds = value.legalIssues.map((issue) => issue.localId);
   const questionIds = value.researchQuestions.map((question) => question.localId);
+  const inventoryIds = (value.documentInventory ?? []).map((document) => document.localId);
   if (new Set(subjectIds).size !== subjectIds.length) context.addIssue({ code: "custom", message: "DUPLICATE_SUBJECT_LOCAL_ID" });
   if (new Set(itemIds).size !== itemIds.length) context.addIssue({ code: "custom", message: "DUPLICATE_ITEM_LOCAL_ID" });
   if (new Set(issueIds).size !== issueIds.length) context.addIssue({ code: "custom", message: "DUPLICATE_ISSUE_LOCAL_ID" });
   if (new Set(questionIds).size !== questionIds.length) context.addIssue({ code: "custom", message: "DUPLICATE_QUESTION_LOCAL_ID" });
+  if (new Set(inventoryIds).size !== inventoryIds.length) context.addIssue({ code: "custom", message: "DUPLICATE_DOCUMENT_INVENTORY_LOCAL_ID" });
   const sourceQuoteKeys = value.sourceQuotes.map((sourceQuote) => (
     `${sourceQuote.itemLocalId}\u001f${sourceQuote.basisRef}\u001f${sourceQuote.quote}`
   ));
@@ -273,6 +308,19 @@ export const fascicoloStructuredKnowledgeSchema = z.object({
       context.addIssue({ code: "custom", message: `UNKNOWN_REFERENCE_DATE_ITEM:${question.localId}` });
     }
   }
+  for (const document of value.documentInventory ?? []) {
+    if (document.relatedItemLocalIds.some((localId) => !itemIds.includes(localId))) {
+      context.addIssue({ code: "custom", message: `UNKNOWN_DOCUMENT_INVENTORY_ITEM:${document.localId}` });
+    }
+    if (document.classification === "MATERIAL" && document.relatedItemLocalIds.length === 0) {
+      context.addIssue({ code: "custom", message: `MATERIAL_DOCUMENT_REQUIRES_ITEMS:${document.localId}` });
+    }
+    if (document.classification === "UNCERTAIN" && !document.relatedItemLocalIds.some((localId) => (
+      value.items.find((item) => item.localId === localId)?.kind === "GAP"
+    ))) {
+      context.addIssue({ code: "custom", message: `UNCERTAIN_DOCUMENT_REQUIRES_GAP:${document.localId}` });
+    }
+  }
 });
 
 export type FascicoloSubjectCandidate = z.output<typeof fascicoloSubjectCandidateSchema>;
@@ -282,5 +330,6 @@ export type StructuredKnowledgeItem = z.output<typeof structuredKnowledgeItemSch
 export type StructuredDate = z.output<typeof structuredDateSchema>;
 export type LegalIssueCandidate = z.output<typeof legalIssueCandidateSchema>;
 export type ResearchQuestionCandidate = z.output<typeof researchQuestionCandidateSchema>;
+export type DocumentInventoryEntry = z.output<typeof documentInventoryEntrySchema>;
 
 export const lot2KnowledgeKinds = knowledgeItemKindSchema.exclude(["GENERIC", "LEGAL_ISSUE", "RESEARCH_QUESTION"]).options;

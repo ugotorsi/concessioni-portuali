@@ -19,6 +19,18 @@ const enabledEnvironment = {
   AI_REAL_DATA_ENABLED: "true",
   AI_REAL_DATA_APPROVAL_ID: SELVARA_PILOT_AUTHORIZATION.approvalId,
   AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
+  AI_V7_PREFLIGHT_APPROVAL_ID: SELVARA_PILOT_AUTHORIZATION.approvalId,
+  AI_V7_APPROVED_MAX_OUTPUT_TOKENS: "64000",
+  AI_V7_APPROVED_MAX_COST_EUR: "1.00",
+  AI_OPENAI_MAX_INPUT_TOKENS: "100000",
+  AI_OPENAI_MAX_OUTPUT_TOKENS: "64000",
+  AI_MAX_INPUT_BYTES: "1000000",
+  AI_OPENAI_MAX_RAW_RESPONSE_BYTES: "1000000",
+  AI_OPENAI_TIMEOUT_MS: "90000",
+  AI_OPENAI_USD_TO_EUR_RATE: "0.90",
+  AI_OPENAI_USD_TO_EUR_RATE_DATE: "2026-10-26",
+  AI_OPENAI_USD_TO_EUR_RATE_SOURCE: "ECB reference rate",
+  ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR: "1.00",
 };
 
 const corpus = {
@@ -29,15 +41,37 @@ const corpus = {
   documentCount: 1,
   availableDocumentCount: 1,
   textPageCount: 40,
-  documents: [],
-  excerpts: [],
+  documents: [{
+    documentoId: "document-1",
+    documentFileVersionId: "version-1",
+    extractionAttemptId: "attempt-1",
+    sourceSha256: "a".repeat(64),
+    status: "AVAILABLE" as const,
+  }],
+  excerpts: [{
+    reference: "DOCUMENT_1.PAGE_1",
+    documentoId: "document-1",
+    documentFileVersionId: "version-1",
+    pageNumber: 1,
+    text: "Testo documentale.",
+    sourceText: "Testo documentale.",
+    textSha256: "b".repeat(64),
+    extractionMethod: "PDFJS",
+    ocrConfidence: null,
+  }],
 };
 
 function dependencies() {
   return {
     loadCorpus: vi.fn().mockResolvedValue(corpus),
-    loadCurrentRevision: vi.fn().mockResolvedValue(null),
     loadGlobalAiControl: vi.fn().mockResolvedValue({ effectiveEnabled: true }),
+    inspectBudgetCompatibility: vi.fn().mockResolvedValue({
+      compatible: true,
+      scopes: [],
+    }),
+    createPreflight: vi.fn().mockReturnValue({
+      preflightFingerprint: "p".repeat(64),
+    }),
     admitJob: vi.fn().mockResolvedValue({
       outcome: "CREATED",
       job: { id: "analysis-job-a" },
@@ -95,7 +129,8 @@ describe("existing fascicolo corpus analysis", () => {
     });
     expect(deps.admitJob).toHaveBeenCalledWith(expect.objectContaining({
       operation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
-      purpose: "FASCICOLO_EXISTING_CORPUS_ANALYSIS",
+      purpose: "FASCICOLO_EXISTING_CORPUS_ANALYSIS_V7_CONTROLLED",
+      maxAttempts: 1,
       procedimentoId: SELVARA_PILOT_AUTHORIZATION.procedimentoId,
       inputReference: {
         referenceType: "FASCICOLO_DOCUMENT_CORPUS",
@@ -104,6 +139,9 @@ describe("existing fascicolo corpus analysis", () => {
         metadata: {
           procedimentoId: SELVARA_PILOT_AUTHORIZATION.procedimentoId,
           corpusHash: SELVARA_PILOT_AUTHORIZATION.corpusFingerprint,
+          trialContractVersion: "FASCICOLO_DOCUMENT_ANALYSIS_V7",
+          trialApprovalRef: SELVARA_PILOT_AUTHORIZATION.approvalId,
+          trialPreflightHash: "p".repeat(64),
         },
       },
     }));
@@ -148,13 +186,13 @@ describe("existing fascicolo corpus analysis", () => {
     expect(deps.activateWorker).not.toHaveBeenCalled();
   });
 
-  it("does not admit a job when a knowledge revision already exists", async () => {
+  it("does not admit a job when the economic preflight fails", async () => {
     const deps = dependencies();
-    deps.loadCurrentRevision.mockResolvedValue({ id: "revision-a" });
+    deps.createPreflight.mockImplementation(() => {
+      throw new Error("PREFLIGHT_FAILED");
+    });
 
-    await expect(requestExistingCorpusAnalysis(request, deps)).rejects.toEqual(
-      new ExistingCorpusAnalysisRequestError("KNOWLEDGE_REVISION_ALREADY_EXISTS"),
-    );
+    await expect(requestExistingCorpusAnalysis(request, deps)).rejects.toThrow("PREFLIGHT_FAILED");
     expect(deps.admitJob).not.toHaveBeenCalled();
   });
 
@@ -163,6 +201,7 @@ describe("existing fascicolo corpus analysis", () => {
       tenantId: "tenant-a",
       procedimentoId: "procedure-a",
       corpusFingerprint: "c".repeat(64),
+      preflightFingerprint: "p".repeat(64),
     };
     const manualOne = normalizeAsyncJobAdmission(
       buildFascicoloExistingCorpusAnalysisAdmission({
@@ -174,6 +213,14 @@ describe("existing fascicolo corpus analysis", () => {
     const manualTwo = normalizeAsyncJobAdmission(
       buildFascicoloExistingCorpusAnalysisAdmission({
         ...input,
+        initiatingUserId: "admin-a",
+        actorEmail: "admin-a@example.test",
+      }),
+    );
+    const changedPreflight = normalizeAsyncJobAdmission(
+      buildFascicoloExistingCorpusAnalysisAdmission({
+        ...input,
+        preflightFingerprint: "q".repeat(64),
         initiatingUserId: "admin-a",
         actorEmail: "admin-a@example.test",
       }),
@@ -193,6 +240,9 @@ describe("existing fascicolo corpus analysis", () => {
 
     expect(manualOne.idempotencyKey).toBe(manualTwo.idempotencyKey);
     expect(manualOne.requestFingerprint).toBe(manualTwo.requestFingerprint);
+    expect(manualOne.maxAttempts).toBe(1);
+    expect(changedPreflight.idempotencyKey).toBe(manualOne.idempotencyKey);
+    expect(changedPreflight.requestFingerprint).not.toBe(manualOne.requestFingerprint);
     expect(manualOne.idempotencyKey).not.toBe(automatic.idempotencyKey);
   });
 });

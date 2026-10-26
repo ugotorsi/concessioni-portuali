@@ -193,7 +193,7 @@ export function FascicoloAutomaticWorkflowPanel({
                 disabled={!existingCorpusAnalysis.enabled}
                 pendingLabel="Richiesta in corso..."
               >
-                Avvia analisi del fascicolo esistente
+                Prepara collaudo V7 a tentativo unico
               </SubmitButtonPending>
             </form>
             {!existingCorpusAnalysis.enabled ? (

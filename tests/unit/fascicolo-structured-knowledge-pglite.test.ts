@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
@@ -5,19 +6,35 @@ import { PGlite } from "@electric-sql/pglite";
 import { afterEach, describe, expect, it } from "vitest";
 
 import {
+  buildCanonicalSourceSpans,
+  fascicoloStructuredKnowledgeSchema,
   getCurrentKnowledgeRevision,
   listKnowledgeRevisionHistory,
   persistStructuredKnowledgeRevision,
+  promotePreparedKnowledgeRevision,
   resolveKnowledgeSubjects,
   reviewCurrentKnowledgeItem,
   type FascicoloKnowledgeRepositoryContext,
   type KnowledgeEvidenceCandidate,
   type KnowledgeSqlExecutor,
+  projectStructuredKnowledge,
 } from "@/server/fascicolo-knowledge";
+import {
+  buildStructuredFascicoloReport,
+  persistStructuredFascicoloReport,
+  type StructuredReportRepositoryContext,
+  type StructuredReportSqlExecutor,
+} from "@/server/fascicolo-report";
 import {
   loadCurrentStructuredKnowledge,
   type StructuredKnowledgeQueryExecutor,
 } from "@/server/queries/fascicolo-knowledge";
+import {
+  selvaraOfflineCorpusMetadata,
+  selvaraOfflinePages,
+  selvaraOfflineStructuredKnowledge,
+  selvaraOfflineStructuredKnowledgeBaseline,
+} from "../fixtures/selvara-offline-corpus";
 
 const migrations = [
   "20260928_fascicolo_knowledge_foundation",
@@ -27,6 +44,13 @@ const documentEvidenceMigrations = [
   "20261010_fascicolo_document_evidence_provenance",
   "20261010_fascicolo_document_knowledge_evidence",
 ].map((name) => readFileSync(path.join(process.cwd(), "prisma", "migrations", name, "migration.sql"), "utf8"));
+const structuredReportMigration = readFileSync(path.join(
+  process.cwd(),
+  "prisma",
+  "migrations",
+  "20260929_structured_fascicolo_report",
+  "migration.sql",
+), "utf8");
 const databases: PGlite[] = [];
 const hashA = "a".repeat(64);
 const hashB = "b".repeat(64);
@@ -47,6 +71,15 @@ function context(db: PGlite): FascicoloKnowledgeRepositoryContext {
   };
 }
 
+function reportContext(db: PGlite): StructuredReportRepositoryContext {
+  const reportExecutor = executor(db) as StructuredReportSqlExecutor;
+  return {
+    read: reportExecutor,
+    transaction: (operation) => db.transaction((tx) => operation(executor(tx) as StructuredReportSqlExecutor)),
+    now: () => new Date("2026-10-25T20:00:00.000Z"),
+  };
+}
+
 async function database() {
   const db = new PGlite();
   databases.push(db);
@@ -60,7 +93,21 @@ async function database() {
     CREATE TABLE "NeutralIntakeDestination" ("neutralIntakeId" TEXT PRIMARY KEY, "procedimentoId" TEXT NOT NULL);
     CREATE TABLE "NeutralIntakeExtractionAttempt" ("id" TEXT PRIMARY KEY, "neutralIntakeId" TEXT NOT NULL, "artifactSha256" TEXT NOT NULL, "outcome" TEXT NOT NULL);
     CREATE TABLE "NeutralIntakeExtractionPage" ("id" TEXT PRIMARY KEY, "extractionAttemptId" TEXT NOT NULL, "pageNumber" INTEGER NOT NULL, "textSha256" TEXT NOT NULL);
-    CREATE TABLE "DocumentExtractionAttempt" ("id" TEXT PRIMARY KEY);
+    CREATE TABLE "DocumentExtractionAttempt" (
+      "id" TEXT PRIMARY KEY,
+      "documentoId" TEXT,
+      "documentFileVersionId" TEXT,
+      "tenantId" TEXT,
+      "procedimentoId" TEXT,
+      "sourceSha256" TEXT,
+      "outcome" TEXT
+    );
+    CREATE TABLE "DocumentExtractionPage" (
+      "id" TEXT PRIMARY KEY,
+      "extractionAttemptId" TEXT NOT NULL,
+      "pageNumber" INTEGER NOT NULL,
+      "textSha256" TEXT NOT NULL
+    );
     CREATE TABLE "Scadenza" ("id" TEXT PRIMARY KEY);
     INSERT INTO "Ente" VALUES ('tenant-a'), ('tenant-b');
     INSERT INTO "Concessione" VALUES ('concession-a1', 'tenant-a'), ('concession-a2', 'tenant-a'), ('concession-b1', 'tenant-b');
@@ -96,6 +143,7 @@ async function database() {
   for (const documentEvidenceMigration of documentEvidenceMigrations) {
     await db.exec(documentEvidenceMigration);
   }
+  await db.exec(structuredReportMigration);
   return db;
 }
 
@@ -282,6 +330,7 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
       number: "7",
       date: { precision: "EXACT", from: "2026-08-25" },
     });
+
     expect((readModel?.measures[0].payload as { subjectIds: string[] }).subjectIds)
       .toEqual([result.subjectIdsByLocalId.get("subject-authority")]);
     expect(readModel?.contradictions[0].contradictedItemIds).toHaveLength(2);
@@ -311,17 +360,111 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
     expect(scadenze.rows[0].count).toBe(0);
   });
 
-  it("excludes an item with unresolved evidence but persists auditable warnings when the revision remains coherent", async () => {
+  it("persists a controlled V7 revision for an unchanged corpus without reusing the V1 revision", async () => {
     const db = await database();
-    const result = await persistStructuredKnowledgeRevision({
+    const input = {
+      ...scope(),
+      corpusFingerprint: "7".repeat(64),
+      knowledge: structuredKnowledge(),
+      evidenceByBasisRef: new Map([["DOCUMENT_1.PAGE_1", evidence()]]),
+    };
+    const first = await persistStructuredKnowledgeRevision(input, context(db));
+    const second = await persistStructuredKnowledgeRevision({
+      ...input,
+      revisionContractVersion: "FASCICOLO_STRUCTURED_KNOWLEDGE_V7",
+    }, context(db));
+
+    expect(second.revision.id).not.toBe(first.revision.id);
+    expect(second.revision).toMatchObject({
+      contractVersion: "FASCICOLO_STRUCTURED_KNOWLEDGE_V7",
+      corpusFingerprint: "7".repeat(64),
+      status: "CURRENT",
+    });
+
+    const revisions = await db.query<{
+      id: string;
+      status: string;
+      contractVersion: string;
+    }>(`
+      SELECT "id", "status", "contractVersion"
+      FROM "FascicoloKnowledgeRevision"
+      WHERE "tenantId"='tenant-a' AND "procedimentoId"='procedure-a1'
+      ORDER BY "createdAt", "id"
+    `);
+    expect(revisions.rows).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: first.revision.id, status: "SUPERSEDED" }),
+      expect.objectContaining({
+        id: second.revision.id,
+        status: "CURRENT",
+        contractVersion: "FASCICOLO_STRUCTURED_KNOWLEDGE_V7",
+      }),
+    ]));
+  });
+
+  it("keeps V7 BUILDING and preserves the previous CURRENT until final promotion succeeds", async () => {
+    const db = await database();
+    const ctx = context(db);
+    const first = await persistStructuredKnowledgeRevision({
+      ...scope(),
+      corpusFingerprint: "a".repeat(64),
+      knowledge: structuredKnowledge(),
+      evidenceByBasisRef: new Map([["DOCUMENT_1.PAGE_1", evidence()]]),
+    }, ctx);
+    const prepared = await persistStructuredKnowledgeRevision({
+      ...scope(),
+      corpusFingerprint: "b".repeat(64),
+      knowledge: structuredKnowledge(),
+      evidenceByBasisRef: new Map([["DOCUMENT_1.PAGE_1", evidence()]]),
+      revisionContractVersion: "FASCICOLO_STRUCTURED_KNOWLEDGE_V7",
+      deferPromotion: true,
+    }, ctx);
+
+    expect(prepared.revision.status).toBe("BUILDING");
+    expect((await getCurrentKnowledgeRevision(scope(), ctx))?.id).toBe(first.revision.id);
+
+    await expect(promotePreparedKnowledgeRevision({
+      ...scope(),
+      revisionId: prepared.revision.id,
+      expectedCurrentRevisionId: first.revision.id,
+    }, {
+      ...ctx,
+      beforeCurrentPromotion: async () => {
+        throw new Error("SYNTHETIC_FINALIZATION_FAILURE");
+      },
+    })).rejects.toThrow("SYNTHETIC_FINALIZATION_FAILURE");
+    expect((await getCurrentKnowledgeRevision(scope(), ctx))?.id).toBe(first.revision.id);
+
+    const promoted = await promotePreparedKnowledgeRevision({
+      ...scope(),
+      revisionId: prepared.revision.id,
+      expectedCurrentRevisionId: first.revision.id,
+    }, ctx);
+    expect(promoted.status).toBe("CURRENT");
+    expect((await getCurrentKnowledgeRevision(scope(), ctx))?.id).toBe(prepared.revision.id);
+  });
+
+  it("blocks CURRENT when one material event loses its evidence even if most proposals remain valid", async () => {
+    const db = await database();
+    const ctx = context(db);
+    await expect(persistStructuredKnowledgeRevision({
       ...scope(), corpusFingerprint: "2".repeat(64),
       knowledge: structuredKnowledge({ eventEvidence: "DOCUMENT_99.PAGE_1" }),
       evidenceByBasisRef: new Map([["DOCUMENT_1.PAGE_1", evidence()]]),
-    }, context(db));
-    expect(result.warnings).toContain("INVALID_EVIDENCE:event-exact");
-    expect(result.revision.items.some((item) => item.normalizedText === "Partenza registrata")).toBe(false);
-    const stored = await db.query<{ warnings: string[] }>('SELECT "warnings" FROM "FascicoloKnowledgeRevision" WHERE "id" = $1', [result.revision.id]);
-    expect(stored.rows[0].warnings).toContain("INVALID_EVIDENCE:event-exact");
+    }, ctx)).rejects.toMatchObject({
+      assessment: expect.objectContaining({
+        blockingReasons: expect.arrayContaining([
+          "EVIDENCE_COVERAGE_LOST",
+          "MATERIAL_ITEMS_LOST",
+        ]),
+        rejections: expect.arrayContaining([
+          expect.objectContaining({
+            localId: "event-exact",
+            reason: "INVALID_EVIDENCE",
+          }),
+        ]),
+      }),
+    });
+    expect(await getCurrentKnowledgeRevision(scope(), ctx)).toBeNull();
   });
 
   it("fails closed on wholly invalid evidence and preserves the previous CURRENT revision", async () => {
@@ -772,5 +915,390 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
     });
     expect(readModel?.legalIssues[0].originatingItemIds).toHaveLength(3);
     expect(readModel?.researchQuestions[0]).toMatchObject({ legalIssueId: readModel!.legalIssues[0].id });
+  });
+
+  it("rejects the frozen Selvara baseline because formally valid citations do not prove corpus completeness", () => {
+    const sourceTextByBasisRef = new Map(selvaraOfflinePages.map((page) => [page.reference, page.text]));
+    const evidenceByBasisRef = new Map(selvaraOfflinePages.map((page) => [page.reference, {
+      provenanceType: "FASCICOLO_DOCUMENT_EXTRACTION" as const,
+      documentoId: "document-a1",
+      documentFileVersionId: "version-a1",
+      documentExtractionAttemptId: "attempt-selvara-offline",
+      pageNumber: page.pageNumber,
+      textSha256: createHash("sha256").update(page.text, "utf8").digest("hex"),
+      quoteSha256: null,
+      basisRef: page.reference,
+    } satisfies KnowledgeEvidenceCandidate]));
+    const baseline = fascicoloStructuredKnowledgeSchema.parse(selvaraOfflineStructuredKnowledgeBaseline);
+    const projection = projectStructuredKnowledge({
+      knowledge: baseline,
+      subjectIdsByLocalId: new Map([
+        ["subject-concessionaria", "subject-offline-concessionaria"],
+        ["subject-authority", "subject-offline-authority"],
+        ["subject-third-operator", "subject-offline-third-operator"],
+      ]),
+      evidenceByBasisRef,
+      sourceTextByBasisRef,
+    });
+
+    expect(projection.quality).toMatchObject({
+      proposedCount: 35,
+      acceptedCount: 35,
+      exactCitationCount: 24,
+      ambiguousCitationCount: 0,
+      nonexistentCitationCount: 0,
+      corpusDocumentCount: 0,
+      missingInventoryBasisRefCount: 40,
+      blockingReasons: ["DOCUMENT_INVENTORY_INCOMPLETE"],
+    });
+  });
+
+  it.each([
+    [6, "determinazione di aggiudicazione"],
+    [8, "seconda parte del titolo"],
+    [11, "fideiussione"],
+    [17, "pagamento"],
+    [20, "richiesta di riprogrammazione"],
+    [37, "difesa favorevole"],
+    [27, "batimetria"],
+    [28, "documentazione strutturale"],
+    [39, "planimetria M4"],
+  ])("blocks CURRENT when page %i (%s) is not inventoried", (pageNumber) => {
+    const incomplete = structuredClone(selvaraOfflineStructuredKnowledge);
+    incomplete.documentInventory = incomplete.documentInventory.filter((document) => (
+      !document.basisRefs.includes(`DOCUMENT_1.PAGE_${pageNumber}`)
+    ));
+    const parsed = fascicoloStructuredKnowledgeSchema.parse(incomplete);
+    const sourceTextByBasisRef = new Map(selvaraOfflinePages.map((page) => [page.reference, page.text]));
+    const evidenceByBasisRef = new Map(selvaraOfflinePages.map((page) => [page.reference, {
+      provenanceType: "FASCICOLO_DOCUMENT_EXTRACTION" as const,
+      documentoId: "document-a1",
+      documentFileVersionId: "version-a1",
+      documentExtractionAttemptId: "attempt-selvara-offline",
+      pageNumber: page.pageNumber,
+      textSha256: createHash("sha256").update(page.text, "utf8").digest("hex"),
+      quoteSha256: null,
+      basisRef: page.reference,
+    } satisfies KnowledgeEvidenceCandidate]));
+    const projection = projectStructuredKnowledge({
+      knowledge: parsed,
+      subjectIdsByLocalId: new Map([
+        ["subject-concessionaria", "subject-offline-concessionaria"],
+        ["subject-authority", "subject-offline-authority"],
+        ["subject-third-operator", "subject-offline-third-operator"],
+      ]),
+      evidenceByBasisRef,
+      sourceTextByBasisRef,
+    });
+
+    expect(projection.quality.blockingReasons).toContain("DOCUMENT_INVENTORY_INCOMPLETE");
+    expect(projection.quality.missingInventoryBasisRefCount).toBe(1);
+  });
+
+  it("applies the same inventory gate to a different two-document procurement dossier", () => {
+    const sourceTextByBasisRef = new Map([
+      ["DOCUMENT_2.PAGE_1", "Determina 9/2026. Il Comune aggiudica la fornitura per euro 80.000."],
+      ["DOCUMENT_2.PAGE_2", "Fattura 44/2026. Il fornitore richiede euro 80.000; il collaudo non e allegato."],
+    ]);
+    const evidenceByBasisRef = new Map([...sourceTextByBasisRef].map(([basisRef, text], index) => [basisRef, {
+      provenanceType: "FASCICOLO_DOCUMENT_EXTRACTION" as const,
+      documentoId: "document-procurement",
+      documentFileVersionId: "version-procurement",
+      documentExtractionAttemptId: "attempt-procurement",
+      pageNumber: index + 1,
+      textSha256: createHash("sha256").update(text, "utf8").digest("hex"),
+      quoteSha256: null,
+      basisRef,
+    } satisfies KnowledgeEvidenceCandidate]));
+    const complete = fascicoloStructuredKnowledgeSchema.parse({
+      version: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1",
+      subjects: [],
+      items: [{
+        localId: "procurement-award",
+        kind: "FACT",
+        confidence: 100,
+        basisRefs: ["DOCUMENT_2.PAGE_1"],
+        payload: {
+          normalizedStatement: "Il Comune ha aggiudicato la fornitura per euro 80.000.",
+          subjectLocalIds: [],
+          object: "aggiudicazione",
+          qualifier: "determina",
+        },
+      }, {
+        localId: "procurement-invoice-gap",
+        kind: "GAP",
+        confidence: 100,
+        basisRefs: ["DOCUMENT_2.PAGE_2"],
+        payload: {
+          gapType: "COLLAUDO_MISSING",
+          description: "La fattura richiede euro 80.000 ma il collaudo non e allegato.",
+          impact: "La liquidabilita richiede verifica.",
+          relatedItemLocalIds: ["procurement-award"],
+        },
+      }],
+      sourceQuotes: [{
+        itemLocalId: "procurement-award",
+        basisRef: "DOCUMENT_2.PAGE_1",
+        quote: "Il Comune aggiudica la fornitura per euro 80.000.",
+      }, {
+        itemLocalId: "procurement-invoice-gap",
+        basisRef: "DOCUMENT_2.PAGE_2",
+        quote: "Il fornitore richiede euro 80.000; il collaudo non e allegato.",
+      }],
+      documentInventory: [{
+        localId: "procurement-document-1",
+        basisRefs: ["DOCUMENT_2.PAGE_1"],
+        documentType: "determinazione",
+        documentDate: null,
+        issuer: "Comune",
+        recipients: [],
+        proceduralPhase: "aggiudicazione",
+        subject: "aggiudicazione fornitura",
+        summary: "Atto di aggiudicazione.",
+        referencedActs: [],
+        attachments: [],
+        materialProfiles: ["PROCEDURAL", "ACCOUNTING"],
+        classification: "MATERIAL",
+        rationale: "Definisce titolo e importo.",
+        relatedItemLocalIds: ["procurement-award"],
+      }, {
+        localId: "procurement-document-2",
+        basisRefs: ["DOCUMENT_2.PAGE_2"],
+        documentType: "fattura",
+        documentDate: null,
+        issuer: "Fornitore",
+        recipients: ["Comune"],
+        proceduralPhase: "esecuzione",
+        subject: "richiesta di pagamento",
+        summary: "Fattura priva di collaudo allegato.",
+        referencedActs: [],
+        attachments: [],
+        materialProfiles: ["ACCOUNTING", "EVIDENTIARY"],
+        classification: "MATERIAL",
+        rationale: "Incide sulla liquidabilita.",
+        relatedItemLocalIds: ["procurement-invoice-gap"],
+      }],
+      legalIssues: [],
+      researchQuestions: [],
+    });
+    const projection = projectStructuredKnowledge({
+      knowledge: complete,
+      subjectIdsByLocalId: new Map(),
+      evidenceByBasisRef,
+      sourceTextByBasisRef,
+    });
+    expect(projection.quality).toMatchObject({
+      corpusDocumentCount: 2,
+      reviewedDocumentCount: 2,
+      materialDocumentCount: 2,
+      uncoveredMaterialDocumentCount: 0,
+      missingInventoryBasisRefCount: 0,
+      blockingReasons: [],
+    });
+  });
+
+  it("collates the 40-page Selvara fixture through revision and professional report without live providers", async () => {
+    const db = await database();
+    const sourceTextByBasisRef = new Map(selvaraOfflinePages.map((page) => [page.reference, page.text]));
+    const evidenceByBasisRef = new Map(selvaraOfflinePages.map((page) => {
+      const textSha256 = createHash("sha256").update(page.text, "utf8").digest("hex");
+      return [page.reference, {
+        provenanceType: "FASCICOLO_DOCUMENT_EXTRACTION" as const,
+        documentoId: "document-a1",
+        documentFileVersionId: "version-a1",
+        documentExtractionAttemptId: "attempt-selvara-offline",
+        pageNumber: page.pageNumber,
+        textSha256,
+        quoteSha256: null,
+        basisRef: page.reference,
+      } satisfies KnowledgeEvidenceCandidate] as const;
+    }));
+    await db.query(`
+      UPDATE "DocumentFileVersion"
+      SET "sha256" = $1
+      WHERE "id" = 'version-a1'
+    `, [selvaraOfflineCorpusMetadata.sourcePdfSha256]);
+    await db.query(`
+      INSERT INTO "DocumentExtractionAttempt"
+        ("id", "documentoId", "documentFileVersionId", "tenantId", "procedimentoId", "sourceSha256", "outcome")
+      VALUES ('attempt-selvara-offline', 'document-a1', 'version-a1', 'tenant-a', 'procedure-a1', $1, 'SUCCEEDED')
+    `, [selvaraOfflineCorpusMetadata.sourcePdfSha256]);
+    for (const page of selvaraOfflinePages) {
+      await db.query(`
+        INSERT INTO "DocumentExtractionPage"
+          ("id", "extractionAttemptId", "pageNumber", "textSha256")
+        VALUES ($1, 'attempt-selvara-offline', $2, $3)
+      `, [
+        `selvara-page-${page.pageNumber}`,
+        page.pageNumber,
+        createHash("sha256").update(page.text, "utf8").digest("hex"),
+      ]);
+    }
+    const parsedKnowledge = fascicoloStructuredKnowledgeSchema.parse(
+      selvaraOfflineStructuredKnowledge,
+    );
+    const projection = projectStructuredKnowledge({
+      knowledge: parsedKnowledge,
+      subjectIdsByLocalId: new Map([
+        ["subject-concessionaria", "subject-offline-concessionaria"],
+        ["subject-authority", "subject-offline-authority"],
+        ["subject-third-operator", "subject-offline-third-operator"],
+      ]),
+      evidenceByBasisRef,
+      sourceTextByBasisRef,
+    });
+    for (const candidate of projection.candidates) {
+      expect(buildCanonicalSourceSpans(candidate, sourceTextByBasisRef).length)
+        .toBeGreaterThan(0);
+    }
+
+    const persisted = await persistStructuredKnowledgeRevision({
+      ...scope(),
+      corpusFingerprint: "c9f04d508174cba8e7939704da11921963c60656660df988ee4cb5fdd25cdd5f",
+      knowledge: parsedKnowledge,
+      evidenceByBasisRef,
+      sourceTextByBasisRef,
+    }, context(db));
+    const readModel = await loadCurrentStructuredKnowledge(
+      "tenant-a",
+      "procedure-a1",
+      queryExecutor(db),
+    );
+    expect(readModel).not.toBeNull();
+    const report = buildStructuredFascicoloReport({
+      tenantId: "tenant-a",
+      procedimentoId: "procedure-a1",
+      knowledge: readModel!,
+      missions: [],
+    });
+    const archived = await persistStructuredFascicoloReport(report, reportContext(db));
+
+    expect(selvaraOfflinePages).toHaveLength(40);
+    expect(selvaraOfflineCorpusMetadata).toMatchObject({
+      sourcePdfSha256: "644e04331c5482d28729b2efd91798b404da9940cc4487ee36ad056167c2741c",
+      pageCount: 40,
+      pageHashScope: "OFFLINE_PDFJS_TEXT_NOT_NEON_CANONICAL",
+      canonicalNeonTextHashesAvailable: false,
+    });
+    expect(selvaraOfflinePages[27]).toMatchObject({
+      pageNumber: 28,
+      offlineTextSha256: "1aedb653e24eb3b3f05386229be176cd8464f85c1ff4402a4ac2c23230f15b51",
+      hashScope: "OFFLINE_PDFJS_TEXT_NOT_NEON_CANONICAL",
+    });
+    expect(selvaraOfflinePages[27].text).toContain("Portanza attuale non attestabile da\nquesto rapporto");
+    expect(selvaraOfflinePages[27].text).toContain("Il valore 40 kN/m² non è un’autorizzazione all’uso con qualsiasi combinazione di carichi.");
+    expect(persisted.quality).toMatchObject({
+      proposedCount: 59,
+      acceptedCount: 59,
+      correctedCount: 0,
+      rejectedCount: 0,
+      evidenceCoverage: 1,
+      exactCitationCount: 46,
+      recoveredCitationCount: 0,
+      optionalMissingRelationCount: 0,
+      unresolvedRequiredDependencyCount: 0,
+      ambiguousCitationCount: 0,
+      nonexistentCitationCount: 0,
+      lostLegalIssueCount: 0,
+      lostRelationCount: 0,
+      corpusDocumentCount: 40,
+      reviewedDocumentCount: 40,
+      materialDocumentCount: 39,
+      nonMaterialDocumentCount: 1,
+      uncertainDocumentCount: 0,
+      uncoveredMaterialDocumentCount: 0,
+      missingInventoryBasisRefCount: 0,
+      blockingReasons: [],
+    });
+    expect(readModel).toMatchObject({
+      facts: { length: 12 },
+      events: { length: 8 },
+      legalActs: { length: 4 },
+      measures: { length: 0 },
+      contradictions: { length: 1 },
+      gaps: { length: 11 },
+      legalIssues: { length: 7 },
+      researchQuestions: { length: 6 },
+    });
+    expect(readModel!.revision.warnings).toHaveLength(40);
+    expect(readModel!.revision.warnings.every((warning) => warning.startsWith("DOCUMENT_INVENTORY:"))).toBe(true);
+    expect(readModel!.revision.warnings).toContain(
+      "DOCUMENT_INVENTORY:document-page-1:NOT_MATERIAL:DOCUMENT_1.PAGE_1:Documento di indice privo di autonomi fatti, obblighi o provvedimenti.",
+    );
+    expect(archived).toMatchObject({
+      outcome: "CREATED",
+      snapshot: { status: "CURRENT" },
+    });
+    const narrative = report.payload.professionalNarrative!;
+    expect(narrative).toMatchObject({
+      status: "PRELIMINARY_DOCUMENT_BASED",
+      documentaryReferences: expect.arrayContaining([
+        "DOCUMENT_1.PAGE_7",
+        "DOCUMENT_1.PAGE_16",
+        "DOCUMENT_1.PAGE_28",
+        "DOCUMENT_1.PAGE_40",
+      ]),
+    });
+    expect(narrative.complianceAndAllegedBreaches)
+      .toHaveLength(6);
+    expect(narrative.technicalAdministrativeAndLegalProfiles)
+      .toHaveLength(7);
+    expect(narrative.legalResearchStatus)
+      .toContain("non costituiscono conclusioni giuridiche definitive");
+    expect(report.payload.operationalPlans).toHaveLength(7);
+    const canoniPlan = report.payload.operationalPlans?.find((plan) =>
+      plan.evidence.includes("DOCUMENT_1.PAGE_36"));
+    const structuralPlan = report.payload.operationalPlans?.find((plan) =>
+      plan.evidence.includes("DOCUMENT_1.PAGE_28"));
+    for (const plan of [canoniPlan, structuralPlan]) {
+      expect(plan).toMatchObject({
+        professionalStatus: "PRELIMINARY_NOT_APPROVED",
+        legalSourceStatus: "LEGAL_RESEARCH_REQUIRED",
+        actsToForm: expect.any(Array),
+        modelsAvailable: expect.any(Array),
+      });
+      expect(plan!.problem).toBe(plan!.issueText);
+      expect(plan!.evidence.length).toBeGreaterThan(0);
+      expect(plan!.legalQualification).toContain("nessuna qualificazione definitiva");
+      expect(plan!.investigationActivities).toHaveLength(4);
+      expect(plan!.alternatives.length).toBeGreaterThan(1);
+      expect(plan!.administrativeActs.length).toBeGreaterThanOrEqual(2);
+      for (const draft of plan!.administrativeActs) {
+        expect(draft).toMatchObject({
+          templateSource: "INTERNAL_TEMPLATE_REQUIRED_IF_AVAILABLE",
+          automaticExecutionProhibited: true,
+          sections: {
+            heading: expect.any(String),
+            subject: expect.any(String),
+            premises: expect.any(Array),
+            documentedFacts: expect.any(Array),
+            investigation: expect.any(Array),
+            reasoning: expect.any(Array),
+            legalReferences: expect.any(Array),
+            operativePart: expect.any(Array),
+            communications: expect.any(Array),
+            signature: expect.stringContaining("FIRMA"),
+          },
+        });
+      }
+    }
+    expect(canoniPlan!.administrativeActs.map((act) => act.actType)).toEqual([
+      "ACQUISIZIONE_PARTITARIO_E_ATTESTAZIONE_TESORERIA",
+      "RICHIESTA_DOCUMENTI_CONTABILI_AL_CONCESSIONARIO",
+      "PROVVEDIMENTO_SU_RIPIANO_O_REGOLARIZZAZIONE",
+    ]);
+    expect(canoniPlan!.administrativeActs[0].sections.documentedFacts.join(" ")).toContain("euro 20.000");
+    expect(canoniPlan!.administrativeActs[0].sections.documentedFacts.join(" ")).toContain("euro 15.000");
+    expect(canoniPlan!.administrativeActs[0].sections.documentedFacts.join(" ")).toContain("euro 30.000");
+    expect(canoniPlan!.administrativeActs[0].sections.investigation.join(" ")).toContain("partitario ufficiale");
+    expect(structuralPlan!.administrativeActs.map((act) => act.actType)).toEqual([
+      "RICHIESTA_ACCERTAMENTO_SPECIALISTICO_STRUTTURALE_E_IMPIANTISTICO",
+      "DISPOSIZIONE_E_VERBALE_DI_SOPRALLUOGO_TECNICO",
+      "PRESCRIZIONE_TECNICA_MOTIVATA",
+    ]);
+    expect(structuralPlan!.administrativeActs[0].sections.documentedFacts.join(" ")).toContain("portanza");
+    expect(structuralPlan!.administrativeActs[0].sections.investigation.join(" ")).toContain("carichi");
+    expect(JSON.stringify(report.payload.operationalPlans)).not.toContain("art. 48 cod. nav.");
+    expect(JSON.stringify(report.payload.operationalPlans)).not.toContain("art. 54 cod. nav.");
   });
 });

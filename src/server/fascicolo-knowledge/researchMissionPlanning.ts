@@ -11,6 +11,7 @@ export const DEFAULT_RESEARCH_EXECUTION_WAVE_LIMIT = 5;
 
 export interface ResearchExecutionPolicy {
   maxQuestionsPerWave: number;
+  allowBuildingRevision?: boolean;
 }
 
 export interface KnowledgeResearchMissionPlan {
@@ -80,7 +81,10 @@ export function buildKnowledgeResearchMissionPlans(
   if (!Number.isInteger(policy.maxQuestionsPerWave) || policy.maxQuestionsPerWave < 0) {
     throw new Error("INVALID_RESEARCH_EXECUTION_POLICY");
   }
-  if (revision.status !== "CURRENT") throw new Error("KNOWLEDGE_REVISION_NOT_CURRENT");
+  if (revision.status !== "CURRENT"
+    && !(policy.allowBuildingRevision && revision.status === "BUILDING")) {
+    throw new Error("KNOWLEDGE_REVISION_NOT_CURRENT");
+  }
   const itemById = new Map(revision.items.map((item) => [item.id, item]));
   const itemBySemanticKey = new Map(revision.items.map((item) => [item.semanticKey, item]));
   const issueByQuestion = new Map(revision.relations

@@ -275,6 +275,27 @@ function buildRequestBody(request: OpenAiAnalysisProviderRequest, maxOutputToken
   };
 }
 
+export function estimateOpenAiAnalysisRequest(
+  request: OpenAiAnalysisProviderRequest,
+  maxOutputTokens: number,
+  tokenCounter: OpenAiTokenCounter = defaultTokenCounter,
+) {
+  assertPositiveSafeInteger(maxOutputTokens);
+  const serializedRequest = JSON.stringify(buildRequestBody(request, maxOutputTokens));
+  const rawInputTokens = tokenCounter(serializedRequest);
+  const inputTokens = rawInputTokens + OPENAI_INPUT_TOKEN_ACCOUNTING_OVERHEAD;
+  if (!Number.isSafeInteger(rawInputTokens) || rawInputTokens < 0
+    || !Number.isSafeInteger(inputTokens)) {
+    throw configurationError();
+  }
+  return Object.freeze({
+    requestBytes: Buffer.byteLength(serializedRequest, "utf8"),
+    rawInputTokens,
+    inputTokens,
+    accountingOverheadTokens: OPENAI_INPUT_TOKEN_ACCOUNTING_OVERHEAD,
+  });
+}
+
 async function cancelReaderBestEffort(reader: ReadableStreamDefaultReader<Uint8Array>): Promise<void> {
   try {
     await reader.cancel();
@@ -473,8 +494,11 @@ export function createOpenAiAnalysisProvider(config: {
       await config.authorizeRequest?.();
       const requestBody = buildRequestBody(request, config.maxOutputTokens);
       const serializedRequest = JSON.stringify(requestBody);
-      const inputTokenCount = tokenCounter(serializedRequest)
-        + OPENAI_INPUT_TOKEN_ACCOUNTING_OVERHEAD;
+      const inputTokenCount = estimateOpenAiAnalysisRequest(
+        request,
+        config.maxOutputTokens,
+        tokenCounter,
+      ).inputTokens;
       if (!Number.isSafeInteger(inputTokenCount)
         || inputTokenCount < 0
         || inputTokenCount > config.maxInputTokens) {

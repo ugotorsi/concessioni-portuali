@@ -8,6 +8,8 @@ export interface RoutedStructuredKnowledgePersistenceInput extends KnowledgeScop
   knowledge: unknown;
   evidenceByBasisRef: ReadonlyMap<string, KnowledgeEvidenceCandidate>;
   sourceTextByBasisRef?: ReadonlyMap<string, string>;
+  revisionContractVersion?: string;
+  deferPromotion?: boolean;
 }
 
 interface StructuredPersistenceRouterDependencies {

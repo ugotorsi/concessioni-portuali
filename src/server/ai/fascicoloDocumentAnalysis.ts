@@ -11,7 +11,7 @@ import {
   type RealDataActivationPolicy,
 } from "@/server/ai/realDataActivation";
 
-export const FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION = "FASCICOLO_DOCUMENT_ANALYSIS_V6" as const;
+export const FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION = "FASCICOLO_DOCUMENT_ANALYSIS_V7" as const;
 
 export const FASCICOLO_DOCUMENT_ANALYSIS_SYSTEM_POLICY = Object.freeze({
   role: "DOCUMENT_GROUNDED_FASCICOLO_ANALYST",
@@ -22,6 +22,9 @@ export const FASCICOLO_DOCUMENT_ANALYSIS_SYSTEM_POLICY = Object.freeze({
     "Use only the supplied extracted document excerpts.",
     "Every factual statement, date, issue, contradiction, gap, and question must cite supplied page references.",
     "Return structuredKnowledge subjects and typed items when the excerpts support them; never invent unresolved evidence references.",
+    "Return one structuredKnowledge.documentInventory entry for every supplied page reference, grouping references that belong to the same document when justified.",
+    "Classify each inventoried document as MATERIAL, NOT_MATERIAL, or UNCERTAIN; explain every classification and link MATERIAL documents to grounded knowledge items and UNCERTAIN documents to a GAP.",
+    "Do not omit a page because it repeats or qualifies another document: record the relationship, late or partial performance, defenses, payments, notices, technical limits, and evidentiary status whenever material.",
     "For every structuredKnowledge item and every cited basisRef, return sourceQuotes with the item localId, basisRef, and a short authentic verbatim quotation that occurs exactly once on that page. Keep semantic descriptions and normalizedStatement as reconstructions; never use them as quotations unless they are independently verbatim.",
     "Preserve every material defense, claim, objection, or request as a PARTY_POSITION attributed to its subject and cited to its document page; never convert a party position into a verified FACT or a technical assessment.",
     "Within structuredKnowledge, propose legalIssues only from identified CURRENT-bound items and researchQuestions only from those legal issues with an explicit reference-date basis.",
@@ -139,7 +142,9 @@ function contentHash(input: FascicoloDocumentAnalysisInput): string {
   }), "utf8").digest("hex");
 }
 
-function providerRequest(input: FascicoloDocumentAnalysisInput): FascicoloDocumentProviderRequestV1 {
+export function buildFascicoloDocumentProviderRequest(
+  input: FascicoloDocumentAnalysisInput,
+): FascicoloDocumentProviderRequestV1 {
   return {
     systemPolicy: FASCICOLO_DOCUMENT_ANALYSIS_SYSTEM_POLICY,
     documentData: {
@@ -199,7 +204,7 @@ export function createFascicoloDocumentAnalysisService(config: {
   return {
     async analyze(input) {
       assertRealDataActivation(config.realDataActivation);
-      const request = providerRequest(input);
+      const request = buildFascicoloDocumentProviderRequest(input);
       if (Buffer.byteLength(JSON.stringify(request), "utf8") > config.maxInputBytes) {
         throw new FascicoloDocumentAnalysisError("AI_INPUT_TOO_LARGE");
       }

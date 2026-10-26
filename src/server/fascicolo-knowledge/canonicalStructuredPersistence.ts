@@ -31,7 +31,10 @@ import {
 import {
   fascicoloStructuredKnowledgeSchema,
 } from "./structuredContracts";
-import { projectStructuredKnowledge } from "./structuredProjection";
+import {
+  assertStructuredKnowledgeQuality,
+  projectStructuredKnowledge,
+} from "./structuredProjection";
 import type { StructuredKnowledgePersistenceResult } from "./structuredPersistence";
 
 type SnapshotItem = NonNullable<Awaited<ReturnType<typeof getCurrentKnowledgeRevision>>>["items"][number];
@@ -224,7 +227,9 @@ export async function persistCanonicalStructuredKnowledgeRevision(input: Knowled
       knowledge,
       subjectIdsByLocalId,
       evidenceByBasisRef: input.evidenceByBasisRef,
+      sourceTextByBasisRef: input.sourceTextByBasisRef,
     });
+    assertStructuredKnowledgeQuality(projection.quality);
     const current = await getCurrentKnowledgeRevision({
       tenantId: input.tenantId,
       procedimentoId: input.procedimentoId,
@@ -364,6 +369,7 @@ export async function persistCanonicalStructuredKnowledgeRevision(input: Knowled
       classifications,
       warnings: projection.warnings,
       subjectIdsByLocalId,
+      quality: projection.quality,
     };
   }, overrides);
 }

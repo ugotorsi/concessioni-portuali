@@ -25,7 +25,9 @@ describe("Trusted research report auto-refresh", () => {
   it("persists an idempotent unvalidated snapshot of the current research state", async () => {
     const draft = { reportFingerprint: "a".repeat(64), payload: {} };
     getModel.mockResolvedValue({ structuredReport: draft });
-    saveSnapshot.mockResolvedValueOnce({ outcome: "CREATED" }).mockResolvedValueOnce({ outcome: "REUSED" });
+    saveSnapshot
+      .mockResolvedValueOnce({ outcome: "CREATED", snapshot: { id: "snapshot-1" } })
+      .mockResolvedValueOnce({ outcome: "REUSED", snapshot: { id: "snapshot-1" } });
     expect(await refreshStructuredReportAfterResearch(scope)).toBe("CREATED");
     expect(await refreshStructuredReportAfterResearch(scope)).toBe("REUSED");
     expect(saveSnapshot).toHaveBeenNthCalledWith(1, draft);

@@ -364,6 +364,49 @@ describe("B2C9 generic async job persistence", () => {
     expect(result.outcome).toBe("TERMINAL_FAILED");
   });
 
+  it.each([
+    ["AI_PROVIDER_TIMEOUT", true],
+    ["AI_PROVIDER_RATE_LIMITED", true],
+    ["AI_PROVIDER_UNAVAILABLE", true],
+    ["INVALID_PROVIDER_OUTPUT", false],
+    ["V7_OUTPUT_INCOMPLETE", false],
+    ["STRUCTURED_KNOWLEDGE_MATERIALLY_INCOMPLETE", false],
+  ])("terminally fails V7 collaudo error %s after its only attempt", async (code, retryable) => {
+    harness.tx.$queryRaw.mockResolvedValue([{
+      ...running({
+        purpose: "FASCICOLO_EXISTING_CORPUS_ANALYSIS_V7_CONTROLLED",
+        attemptCount: 1,
+        maxAttempts: 1,
+      }),
+    }]);
+    harness.tx.$executeRaw.mockResolvedValue(1);
+
+    await expect(failAsyncJob({
+      jobId: "job-1",
+      workerId: "worker-1",
+      leaseToken: "c".repeat(64),
+      failure: { retryable, category: "ANALYSIS", code },
+      retryDelayMs: 5_000,
+    })).resolves.toEqual({ outcome: "TERMINAL_FAILED" });
+  });
+
+  it("does not allow an operator retry of the controlled V7 collaudo", async () => {
+    const job = running({
+      status: "TERMINAL_FAILED",
+      purpose: "FASCICOLO_EXISTING_CORPUS_ANALYSIS_V7_CONTROLLED",
+      attemptCount: 1,
+      maxAttempts: 1,
+    });
+    harness.tx.$queryRaw.mockResolvedValue([job]);
+
+    await expect(retryTerminalAsyncJob({
+      jobId: job.id,
+      actor: { userId: "operator-1", userEmail: "operator@example.test", userRole: "ADMIN" },
+    })).resolves.toMatchObject({ outcome: "NOT_RETRYABLE" });
+    expect(harness.tx.$executeRaw).not.toHaveBeenCalled();
+    expect(harness.resetDocumentAnalysisActivationInTransaction).not.toHaveBeenCalled();
+  });
+
   it("runs an optional terminal hook in the failure transaction", async () => {
     const job = running({ attemptCount: 2, maxAttempts: 2 });
     const hook = vi.fn(async (tx) => {

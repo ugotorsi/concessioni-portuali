@@ -25,6 +25,59 @@ export interface StructuredKnowledgeProjection {
   candidates: readonly PreparedKnowledgeItemCandidate[];
   relations: readonly StructuredKnowledgeRelationPlan[];
   warnings: readonly string[];
+  quality: StructuredKnowledgeQualityAssessment;
+}
+
+export interface StructuredKnowledgeEvidenceCorrection {
+  itemLocalId: string;
+  fromBasisRef: string;
+  toBasisRef: string;
+  quote: string;
+}
+
+export interface StructuredKnowledgeRejection {
+  localId: string;
+  kind: string;
+  reason: string;
+}
+
+export interface StructuredKnowledgeQualityAssessment {
+  proposedCount: number;
+  acceptedCount: number;
+  correctedCount: number;
+  rejectedCount: number;
+  proposedEvidenceRefCount: number;
+  acceptedEvidenceRefCount: number;
+  evidenceCoverage: number;
+  proposedKinds: readonly string[];
+  acceptedKinds: readonly string[];
+  lostLegalIssueCount: number;
+  lostRelationCount: number;
+  exactCitationCount: number;
+  recoveredCitationCount: number;
+  ambiguousCitationCount: number;
+  nonexistentCitationCount: number;
+  optionalMissingRelationCount: number;
+  unresolvedRequiredDependencyCount: number;
+  corpusDocumentCount: number;
+  reviewedDocumentCount: number;
+  materialDocumentCount: number;
+  nonMaterialDocumentCount: number;
+  uncertainDocumentCount: number;
+  uncoveredMaterialDocumentCount: number;
+  missingInventoryBasisRefCount: number;
+  validCitationCount: number;
+  invalidCitationCount: number;
+  corrections: readonly StructuredKnowledgeEvidenceCorrection[];
+  rejections: readonly StructuredKnowledgeRejection[];
+  blockingReasons: readonly string[];
+}
+
+export class StructuredKnowledgeQualityError extends Error {
+  constructor(readonly assessment: StructuredKnowledgeQualityAssessment) {
+    super("STRUCTURED_KNOWLEDGE_MATERIALLY_INCOMPLETE");
+    this.name = "StructuredKnowledgeQualityError";
+  }
 }
 
 function normalized(value: string): string {
@@ -158,13 +211,154 @@ function isCanonicalProceedingAnchor(item: StructuredKnowledgeItem | undefined):
   return item?.kind === "LEGAL_ACT" || item?.kind === "MEASURE";
 }
 
+function uniqueQuotePage(
+  quote: string,
+  sourceTextByBasisRef: ReadonlyMap<string, string>,
+): string | null {
+  const matches = [...sourceTextByBasisRef].filter(([, text]) => {
+    const first = text.indexOf(quote);
+    return quote.length > 0 && first >= 0 && first === text.lastIndexOf(quote);
+  });
+  return matches.length === 1 ? matches[0][0] : null;
+}
+
+function quoteOccurrences(
+  quote: string,
+  sourceTextByBasisRef: ReadonlyMap<string, string>,
+): readonly string[] {
+  if (quote.length === 0) return [];
+  return [...sourceTextByBasisRef].flatMap(([basisRef, text]) => {
+    let count = 0;
+    let offset = 0;
+    while (offset <= text.length) {
+      const index = text.indexOf(quote, offset);
+      if (index < 0) break;
+      count += 1;
+      offset = index + Math.max(quote.length, 1);
+    }
+    return Array.from({ length: count }, () => basisRef);
+  });
+}
+
+function replaceBasisRef<T>(value: T, from: string, to: string): T {
+  if (value === from) return to as T;
+  if (Array.isArray(value)) {
+    return value.map((entry) => replaceBasisRef(entry, from, to)) as T;
+  }
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([key, entry]) => [
+      key,
+      replaceBasisRef(entry, from, to),
+    ])) as T;
+  }
+  return value;
+}
+
+export function normalizeStructuredKnowledgeEvidenceRefs(input: {
+  knowledge: FascicoloStructuredKnowledge;
+  sourceTextByBasisRef?: ReadonlyMap<string, string>;
+}): {
+  knowledge: FascicoloStructuredKnowledge;
+  corrections: readonly StructuredKnowledgeEvidenceCorrection[];
+} {
+  if (!input.sourceTextByBasisRef) return { knowledge: input.knowledge, corrections: [] };
+  let knowledge = structuredClone(input.knowledge);
+  const corrections: StructuredKnowledgeEvidenceCorrection[] = [];
+  for (const sourceQuote of knowledge.sourceQuotes) {
+    const currentText = input.sourceTextByBasisRef.get(sourceQuote.basisRef);
+    const currentStart = currentText?.indexOf(sourceQuote.quote) ?? -1;
+    if (currentStart >= 0 && currentStart === currentText!.lastIndexOf(sourceQuote.quote)) continue;
+    const recovered = uniqueQuotePage(sourceQuote.quote, input.sourceTextByBasisRef);
+    if (!recovered || recovered === sourceQuote.basisRef) continue;
+    const conflicting = corrections.find((correction) => (
+      correction.itemLocalId === sourceQuote.itemLocalId
+      && correction.fromBasisRef === sourceQuote.basisRef
+      && correction.toBasisRef !== recovered
+    ));
+    if (conflicting) continue;
+    const correction = {
+      itemLocalId: sourceQuote.itemLocalId,
+      fromBasisRef: sourceQuote.basisRef,
+      toBasisRef: recovered,
+      quote: sourceQuote.quote,
+    };
+    corrections.push(correction);
+    knowledge = {
+      ...knowledge,
+      items: knowledge.items.map((item) => (
+        item.localId === correction.itemLocalId
+          ? replaceBasisRef(item, correction.fromBasisRef, correction.toBasisRef)
+          : item
+      )),
+      sourceQuotes: knowledge.sourceQuotes.map((quote) => (
+        quote.itemLocalId === correction.itemLocalId
+          && quote.basisRef === correction.fromBasisRef
+          ? { ...quote, basisRef: correction.toBasisRef }
+          : quote
+      )),
+    };
+  }
+  return {
+    knowledge: fascicoloStructuredKnowledgeSchema.parse(knowledge),
+    corrections,
+  };
+}
+
+export function assertStructuredKnowledgeQuality(
+  assessment: StructuredKnowledgeQualityAssessment,
+): void {
+  if (assessment.blockingReasons.length > 0) {
+    throw new StructuredKnowledgeQualityError(assessment);
+  }
+}
+
 export function projectStructuredKnowledge(input: {
   knowledge: FascicoloStructuredKnowledge;
   subjectIdsByLocalId: ReadonlyMap<string, string>;
   evidenceByBasisRef: ReadonlyMap<string, KnowledgeEvidenceCandidate>;
+  sourceTextByBasisRef?: ReadonlyMap<string, string>;
 }): StructuredKnowledgeProjection {
-  const knowledge = fascicoloStructuredKnowledgeSchema.parse(input.knowledge);
+  const normalizedKnowledge = normalizeStructuredKnowledgeEvidenceRefs({
+    knowledge: fascicoloStructuredKnowledgeSchema.parse(input.knowledge),
+    sourceTextByBasisRef: input.sourceTextByBasisRef,
+  });
+  const knowledge = normalizedKnowledge.knowledge;
   const warnings: string[] = [];
+  const rejections: StructuredKnowledgeRejection[] = [];
+  let exactCitationCount = 0;
+  let ambiguousCitationCount = 0;
+  let nonexistentCitationCount = 0;
+  let validCitationCount = 0;
+  let invalidCitationCount = 0;
+  const documentInventory = knowledge.documentInventory ?? [];
+  for (const document of documentInventory) {
+    warnings.push(
+      `DOCUMENT_INVENTORY:${document.localId}:${document.classification}:${document.basisRefs.join(",")}:${document.rationale}`,
+    );
+  }
+  if (input.sourceTextByBasisRef) {
+    const recoveredQuotes = new Set(normalizedKnowledge.corrections.map((correction) => (
+      `${correction.itemLocalId}:${correction.toBasisRef}:${correction.quote}`
+    )));
+    for (const sourceQuote of knowledge.sourceQuotes) {
+      const occurrences = quoteOccurrences(sourceQuote.quote, input.sourceTextByBasisRef);
+      if (occurrences.length === 0) {
+        nonexistentCitationCount += 1;
+      } else if (occurrences.length > 1) {
+        ambiguousCitationCount += 1;
+      } else if (
+        occurrences[0] === sourceQuote.basisRef
+        && !recoveredQuotes.has(`${sourceQuote.itemLocalId}:${sourceQuote.basisRef}:${sourceQuote.quote}`)
+      ) {
+        exactCitationCount += 1;
+      }
+    }
+  }
+  for (const correction of normalizedKnowledge.corrections) {
+    warnings.push(
+      `EVIDENCE_REF_CORRECTED:${correction.itemLocalId}:${correction.fromBasisRef}:${correction.toBasisRef}`,
+    );
+  }
   const candidates: PreparedKnowledgeItemCandidate[] = [];
   const candidatesByLocalId = new Map<string, PreparedKnowledgeItemCandidate>();
   const semanticKeysByLocalId = new Map<string, string>();
@@ -175,23 +369,59 @@ export function projectStructuredKnowledge(input: {
     progressed = false;
     for (let index = pending.length - 1; index >= 0; index -= 1) {
       const item = pending[index];
-      const dependencyLocalIds = item.kind === "CONTRADICTION" ? item.payload.conflictingItemLocalIds
-        : item.kind === "PARTY_POSITION" || item.kind === "EVENT" || item.kind === "GAP" ? item.payload.relatedItemLocalIds : [];
+      const dependencyLocalIds = item.kind === "CONTRADICTION"
+        ? item.payload.conflictingItemLocalIds
+        : [];
+      const optionalDependencyLocalIds = item.kind === "PARTY_POSITION"
+        || item.kind === "EVENT"
+        || item.kind === "GAP"
+        ? item.payload.relatedItemLocalIds
+        : [];
+      const existingOptionalDependencyLocalIds = optionalDependencyLocalIds.filter((localId) => (
+        itemsByLocalId.has(localId)
+      ));
       const anchorLocalId = proceedingAnchorLocalId(item);
       const allDependencyLocalIds = [...new Set([
         ...dependencyLocalIds,
+        ...existingOptionalDependencyLocalIds,
         ...(anchorLocalId ? [anchorLocalId] : []),
       ])];
       const dependencyKeys = allDependencyLocalIds.map((localId) => semanticKeysByLocalId.get(localId));
       if (dependencyKeys.some((key) => !key)) continue;
-      const relatedDependencyKeys = dependencyLocalIds.map((localId) => semanticKeysByLocalId.get(localId));
-      if (relatedDependencyKeys.some((key) => !key)) continue;
+      const relatedDependencyKeys = optionalDependencyLocalIds.flatMap((localId) => {
+        const key = semanticKeysByLocalId.get(localId);
+        if (key) return [key];
+        if (!itemsByLocalId.has(localId)) {
+          warnings.push(`UNRESOLVED_OPTIONAL_RELATION:${item.localId}:${localId}`);
+        }
+        return [];
+      });
       const evidence = item.basisRefs.map((basisRef) => input.evidenceByBasisRef.get(basisRef));
       if (evidence.some((entry) => !entry) || !hasDocumentedProceedingIdentity(item)) {
         warnings.push(`INVALID_EVIDENCE:${item.localId}`);
+        rejections.push({ localId: item.localId, kind: item.kind, reason: "INVALID_EVIDENCE" });
         pending.splice(index, 1);
         progressed = true;
         continue;
+      }
+      if (input.sourceTextByBasisRef) {
+        const quotes = knowledge.sourceQuotes.filter((quote) => quote.itemLocalId === item.localId);
+        const invalidBasisRefs = item.basisRefs.filter((basisRef) => !quotes.some((sourceQuote) => {
+          if (sourceQuote.basisRef !== basisRef) return false;
+          const sourceText = input.sourceTextByBasisRef!.get(basisRef);
+          if (!sourceText) return false;
+          const start = sourceText.indexOf(sourceQuote.quote);
+          return start >= 0 && start === sourceText.lastIndexOf(sourceQuote.quote);
+        }));
+        if (invalidBasisRefs.length > 0) {
+          invalidCitationCount += invalidBasisRefs.length;
+          warnings.push(`INVALID_SOURCE_QUOTE:${item.localId}:${invalidBasisRefs.join(",")}`);
+          rejections.push({ localId: item.localId, kind: item.kind, reason: "INVALID_SOURCE_QUOTE" });
+          pending.splice(index, 1);
+          progressed = true;
+          continue;
+        }
+        validCitationCount += item.basisRefs.length;
       }
       try {
         if (anchorLocalId && !isCanonicalProceedingAnchor(itemsByLocalId.get(anchorLocalId))) {
@@ -204,7 +434,9 @@ export function projectStructuredKnowledge(input: {
         const normalizedIdentity = identityFor(
           item,
           subjectIds,
-          relatedDependencyKeys as string[],
+          (item.kind === "CONTRADICTION"
+            ? dependencyKeys
+            : relatedDependencyKeys) as string[],
           proceedingAnchorSemanticKey,
         );
         const candidate: KnowledgeItemCandidate = {
@@ -243,17 +475,30 @@ export function projectStructuredKnowledge(input: {
         semanticKeysByLocalId.set(item.localId, semanticKey);
       } catch {
         warnings.push(`INVALID_SUBJECT:${item.localId}`);
+        rejections.push({ localId: item.localId, kind: item.kind, reason: "INVALID_SUBJECT" });
       }
       pending.splice(index, 1);
       progressed = true;
     }
   }
-  for (const item of pending) warnings.push(`UNRESOLVED_DEPENDENCY:${item.localId}`);
+  for (const item of pending) {
+    warnings.push(`UNRESOLVED_REQUIRED_DEPENDENCY:${item.localId}`);
+    rejections.push({
+      localId: item.localId,
+      kind: item.kind,
+      reason: "UNRESOLVED_REQUIRED_DEPENDENCY",
+    });
+  }
+  for (const item of pending) {
+    warnings.push(`UNRESOLVED_DEPENDENCY:${item.localId}`);
+    rejections.push({ localId: item.localId, kind: item.kind, reason: "UNRESOLVED_DEPENDENCY" });
+  }
   const issueSemanticKeysByLocalId = new Map<string, string>();
   for (const issue of knowledge.legalIssues) {
     const origins = issue.originatingItemLocalIds.map((localId) => candidatesByLocalId.get(localId));
     if (origins.some((origin) => !origin)) {
       warnings.push(`INVALID_ISSUE_ORIGIN:${issue.localId}`);
+      rejections.push({ localId: issue.localId, kind: "LEGAL_ISSUE", reason: "INVALID_ISSUE_ORIGIN" });
       continue;
     }
     const originCandidates = origins as PreparedKnowledgeItemCandidate[];
@@ -267,11 +512,17 @@ export function projectStructuredKnowledge(input: {
       || !issue.originatingItemLocalIds.includes(targetIdentity.canonicalAnchorLocalId)
     )) {
       warnings.push(`INVALID_PROCEEDING_ANCHOR:${issue.localId}`);
+      rejections.push({ localId: issue.localId, kind: "LEGAL_ISSUE", reason: "INVALID_PROCEEDING_ANCHOR" });
       continue;
     }
     const originBasisRefs = new Set(originCandidates.flatMap((origin) => origin.evidence.map((entry) => entry.basisRef)));
     if (targetIdentity && !targetIdentity.evidenceBasisRefs.every((basisRef) => originBasisRefs.has(basisRef))) {
       warnings.push(`INVALID_PROCEEDING_IDENTITY_EVIDENCE:${issue.localId}`);
+      rejections.push({
+        localId: issue.localId,
+        kind: "LEGAL_ISSUE",
+        reason: "INVALID_PROCEEDING_IDENTITY_EVIDENCE",
+      });
       continue;
     }
     const normalizedIdentity = [
@@ -330,6 +581,11 @@ export function projectStructuredKnowledge(input: {
     const issue = candidatesByLocalId.get(question.legalIssueLocalId);
     if (!issue) {
       warnings.push(`INVALID_QUESTION_ISSUE:${question.localId}`);
+      rejections.push({
+        localId: question.localId,
+        kind: "RESEARCH_QUESTION",
+        reason: "INVALID_QUESTION_ISSUE",
+      });
       continue;
     }
     const basisItemSemanticKey = question.referenceDateBasis.itemLocalId
@@ -337,6 +593,11 @@ export function projectStructuredKnowledge(input: {
       : null;
     if (question.referenceDateBasis.itemLocalId && !basisItemSemanticKey) {
       warnings.push(`INVALID_REFERENCE_DATE_BASIS:${question.localId}`);
+      rejections.push({
+        localId: question.localId,
+        kind: "RESEARCH_QUESTION",
+        reason: "INVALID_REFERENCE_DATE_BASIS",
+      });
       continue;
     }
     const normalizedIdentity = [issue.semanticKey, normalized(question.canonicalQuestion)].join("|");
@@ -376,7 +637,8 @@ export function projectStructuredKnowledge(input: {
     candidatesByLocalId.set(question.localId, prepared);
   }
   if ((knowledge.items.length > 0 || knowledge.legalIssues.length > 0 || knowledge.researchQuestions.length > 0)
-    && candidates.length === 0) throw new Error("STRUCTURED_KNOWLEDGE_NO_VALID_ITEMS");
+    && candidates.length === 0
+    && !input.sourceTextByBasisRef) throw new Error("STRUCTURED_KNOWLEDGE_NO_VALID_ITEMS");
   const included = new Set(candidates.map((candidate) => candidate.semanticKey));
   const contradictionRelations = knowledge.items.flatMap((item) => {
     if (item.kind !== "CONTRADICTION") return [];
@@ -418,5 +680,123 @@ export function projectStructuredKnowledge(input: {
     ...issueRelations,
     ...questionRelations,
   ];
-  return { candidates, relations, warnings };
+  const proposedKinds = [
+    ...knowledge.items.map((item) => item.kind),
+    ...knowledge.legalIssues.map(() => "LEGAL_ISSUE"),
+    ...knowledge.researchQuestions.map(() => "RESEARCH_QUESTION"),
+  ];
+  const proposedEvidenceRefs = new Set([
+    ...knowledge.items.flatMap((item) => item.basisRefs),
+    ...knowledge.legalIssues.flatMap((issue) => issue.originatingItemLocalIds.flatMap((localId) => (
+      itemsByLocalId.get(localId)?.basisRefs ?? []
+    ))),
+  ]);
+  const acceptedEvidenceRefs = new Set(candidates.flatMap((candidate) => (
+    candidate.evidence.map((entry) => entry.basisRef)
+  )));
+  const expectedRelationCount = knowledge.items
+    .filter((item) => item.kind === "CONTRADICTION")
+    .reduce((count, item) => count + item.payload.conflictingItemLocalIds.length, 0)
+    + knowledge.legalIssues.reduce((count, issue) => count + issue.originatingItemLocalIds.length, 0)
+    + knowledge.researchQuestions.length;
+  const materialKinds = new Set([
+    "PARTY_ROLE",
+    "PARTY_POSITION",
+    "FACT",
+    "EVENT",
+    "LEGAL_ACT",
+    "MEASURE",
+    "CONTRADICTION",
+    "GAP",
+    "DEADLINE_CANDIDATE",
+    "LEGAL_ISSUE",
+    "RESEARCH_QUESTION",
+  ]);
+  const materialRejections = rejections.filter((rejection) => materialKinds.has(rejection.kind));
+  const optionalMissingRelationCount = new Set(warnings.filter((warning) => (
+    warning.startsWith("UNRESOLVED_OPTIONAL_RELATION:")
+  ))).size;
+  const unresolvedRequiredDependencyCount = rejections.filter((rejection) => (
+    rejection.reason === "UNRESOLVED_REQUIRED_DEPENDENCY"
+  )).length;
+  const corpusBasisRefs = new Set(input.sourceTextByBasisRef?.keys() ?? []);
+  const inventoriedBasisRefs = new Set(documentInventory.flatMap((document) => document.basisRefs));
+  const missingInventoryBasisRefCount = [...corpusBasisRefs].filter((basisRef) => (
+    !inventoriedBasisRefs.has(basisRef)
+  )).length;
+  const materialDocuments = documentInventory.filter((document) => document.classification === "MATERIAL");
+  const itemsForInventory = new Map(knowledge.items.map((item) => [item.localId, item]));
+  const uncoveredMaterialDocuments = materialDocuments.filter((document) => (
+    document.relatedItemLocalIds.length === 0
+    || document.basisRefs.some((basisRef) => !document.relatedItemLocalIds.some((localId) => (
+      itemsForInventory.get(localId)?.basisRefs.includes(basisRef)
+    )))
+  ));
+  const uncertainDocumentsWithoutGap = documentInventory.filter((document) => (
+    document.classification === "UNCERTAIN"
+    && !document.relatedItemLocalIds.some((localId) => itemsForInventory.get(localId)?.kind === "GAP")
+  ));
+  const inventoryRequired = corpusBasisRefs.size > 1;
+  const blockingReasons = [
+    ...(materialRejections.length > 0
+      ? ["MATERIAL_ITEMS_LOST"]
+      : []),
+    ...(acceptedEvidenceRefs.size < proposedEvidenceRefs.size
+      ? ["EVIDENCE_COVERAGE_LOST"]
+      : []),
+    ...(ambiguousCitationCount > 0 ? ["AMBIGUOUS_CITATIONS"] : []),
+    ...(nonexistentCitationCount > 0 ? ["NONEXISTENT_CITATIONS"] : []),
+    ...(unresolvedRequiredDependencyCount > 0
+      ? ["REQUIRED_DEPENDENCIES_UNRESOLVED"]
+      : []),
+    ...(knowledge.legalIssues.length > issueSemanticKeysByLocalId.size
+      ? ["LEGAL_ISSUES_LOST"]
+      : []),
+    ...(relations.length < expectedRelationCount
+      ? ["REQUIRED_RELATIONS_LOST"]
+      : []),
+    ...(inventoryRequired && (documentInventory.length === 0 || missingInventoryBasisRefCount > 0)
+      ? ["DOCUMENT_INVENTORY_INCOMPLETE"]
+      : []),
+    ...(uncoveredMaterialDocuments.length > 0
+      ? ["MATERIAL_DOCUMENTS_UNCOVERED"]
+      : []),
+    ...(uncertainDocumentsWithoutGap.length > 0
+      ? ["UNCERTAIN_DOCUMENTS_WITHOUT_ANOMALY"]
+      : []),
+  ];
+  const quality: StructuredKnowledgeQualityAssessment = {
+    proposedCount: proposedKinds.length,
+    acceptedCount: candidates.length,
+    correctedCount: normalizedKnowledge.corrections.length,
+    rejectedCount: rejections.length,
+    proposedEvidenceRefCount: proposedEvidenceRefs.size,
+    acceptedEvidenceRefCount: acceptedEvidenceRefs.size,
+    evidenceCoverage: proposedEvidenceRefs.size === 0
+      ? 1
+      : acceptedEvidenceRefs.size / proposedEvidenceRefs.size,
+    proposedKinds: [...new Set(proposedKinds)].sort(),
+    acceptedKinds: [...new Set(candidates.map((candidate) => candidate.kind))].sort(),
+    lostLegalIssueCount: knowledge.legalIssues.length - issueSemanticKeysByLocalId.size,
+    lostRelationCount: Math.max(0, expectedRelationCount - relations.length),
+    exactCitationCount,
+    recoveredCitationCount: normalizedKnowledge.corrections.length,
+    ambiguousCitationCount,
+    nonexistentCitationCount,
+    optionalMissingRelationCount,
+    unresolvedRequiredDependencyCount,
+    corpusDocumentCount: documentInventory.length,
+    reviewedDocumentCount: documentInventory.length,
+    materialDocumentCount: materialDocuments.length,
+    nonMaterialDocumentCount: documentInventory.filter((document) => document.classification === "NOT_MATERIAL").length,
+    uncertainDocumentCount: documentInventory.filter((document) => document.classification === "UNCERTAIN").length,
+    uncoveredMaterialDocumentCount: uncoveredMaterialDocuments.length,
+    missingInventoryBasisRefCount,
+    validCitationCount,
+    invalidCitationCount,
+    corrections: normalizedKnowledge.corrections,
+    rejections,
+    blockingReasons: [...new Set(blockingReasons)].sort(),
+  };
+  return { candidates, relations, warnings, quality };
 }
