@@ -17,6 +17,7 @@ import type {
 import { AI_FASCICOLO_SNAPSHOT_V1_SCHEMA_VERSION } from "@/server/ai/fascicoloSnapshotContract";
 import type { buildAiFascicoloSnapshotV1 } from "@/server/ai/fascicoloSnapshot";
 import {
+  fascicoloDocumentKnowledgeProposalSchema,
   fascicoloDocumentStructuredKnowledgeSchema,
   fascicoloStructuredKnowledgeSchema,
 } from "@/server/fascicolo-knowledge/structuredContracts";
@@ -220,8 +221,16 @@ export type ProviderAnalysisPayloadV1 = z.infer<typeof providerAnalysisPayloadV1
 export const fascicoloDocumentAnalysisPayloadV1Schema = providerAnalysisPayloadV1Schema.extend({
   structuredKnowledge: fascicoloDocumentStructuredKnowledgeSchema,
 });
+export const fascicoloDocumentProposalPayloadV1Schema = providerAnalysisPayloadV1Schema
+  .omit({ structuredKnowledge: true })
+  .extend({
+    structuredKnowledge: fascicoloDocumentKnowledgeProposalSchema,
+  });
 export type FascicoloDocumentAnalysisPayloadV1 = z.infer<
   typeof fascicoloDocumentAnalysisPayloadV1Schema
+>;
+export type FascicoloDocumentProposalPayloadV1 = z.infer<
+  typeof fascicoloDocumentProposalPayloadV1Schema
 >;
 type AiFascicoloSnapshotV1 = Awaited<ReturnType<typeof buildAiFascicoloSnapshotV1>>;
 

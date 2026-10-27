@@ -3,10 +3,11 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 
 import { PGlite } from "@electric-sql/pglite";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   buildCanonicalSourceSpans,
+  fascicoloDocumentKnowledgeProposalSchema,
   fascicoloStructuredKnowledgeSchema,
   getCurrentKnowledgeRevision,
   listKnowledgeRevisionHistory,
@@ -20,13 +21,26 @@ import {
   projectStructuredKnowledge,
 } from "@/server/fascicolo-knowledge";
 import {
+  createFascicoloAutomaticAnalysisHandler,
+  FASCICOLO_V7_KNOWLEDGE_REVISION_CONTRACT,
+  type FascicoloAutomaticAnalysisDependencies,
+} from "@/server/ai/fascicoloAutomaticAnalysisJob";
+import {
+  createFascicoloDocumentAnalysisService,
+  FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION,
+} from "@/server/ai/fascicoloDocumentAnalysis";
+import { createRealDataActivationPolicy } from "@/server/ai/realDataActivation";
+import { SELVARA_PILOT_AUTHORIZATION } from "@/server/ai/selvaraPilotAuthorization";
+import {
   buildStructuredFascicoloReport,
+  listStructuredFascicoloReportSnapshots,
   persistStructuredFascicoloReport,
   type StructuredReportRepositoryContext,
   type StructuredReportSqlExecutor,
 } from "@/server/fascicolo-report";
 import {
   loadCurrentStructuredKnowledge,
+  loadStructuredKnowledgeRevision,
   type StructuredKnowledgeQueryExecutor,
 } from "@/server/queries/fascicolo-knowledge";
 import {
@@ -54,6 +68,10 @@ const structuredReportMigration = readFileSync(path.join(
 const databases: PGlite[] = [];
 const hashA = "a".repeat(64);
 const hashB = "b".repeat(64);
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value && typeof value === "object" && !Array.isArray(value));
+}
 
 function executor(sql: { query<T>(query: string, params?: unknown[]): Promise<{ rows: T[] }> }): KnowledgeSqlExecutor {
   return { query: (query, params = []) => sql.query(query, [...params]) };
@@ -1097,22 +1115,8 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
     });
   });
 
-  it("collates the 40-page Selvara fixture through revision and professional report without live providers", async () => {
+  it("compiles raw Selvara provider output through the V7 job to a current readable report", async () => {
     const db = await database();
-    const sourceTextByBasisRef = new Map(selvaraOfflinePages.map((page) => [page.reference, page.text]));
-    const evidenceByBasisRef = new Map(selvaraOfflinePages.map((page) => {
-      const textSha256 = createHash("sha256").update(page.text, "utf8").digest("hex");
-      return [page.reference, {
-        provenanceType: "FASCICOLO_DOCUMENT_EXTRACTION" as const,
-        documentoId: "document-a1",
-        documentFileVersionId: "version-a1",
-        documentExtractionAttemptId: "attempt-selvara-offline",
-        pageNumber: page.pageNumber,
-        textSha256,
-        quoteSha256: null,
-        basisRef: page.reference,
-      } satisfies KnowledgeEvidenceCandidate] as const;
-    }));
     await db.query(`
       UPDATE "DocumentFileVersion"
       SET "sha256" = $1
@@ -1134,44 +1138,235 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
         createHash("sha256").update(page.text, "utf8").digest("hex"),
       ]);
     }
-    const parsedKnowledge = fascicoloStructuredKnowledgeSchema.parse(
-      selvaraOfflineStructuredKnowledge,
-    );
-    const projection = projectStructuredKnowledge({
-      knowledge: parsedKnowledge,
-      subjectIdsByLocalId: new Map([
-        ["subject-concessionaria", "subject-offline-concessionaria"],
-        ["subject-authority", "subject-offline-authority"],
-        ["subject-third-operator", "subject-offline-third-operator"],
-      ]),
-      evidenceByBasisRef,
-      sourceTextByBasisRef,
+    const recoverableSelvaraProposal = {
+      ...structuredClone(selvaraOfflineStructuredKnowledge),
+      items: selvaraOfflineStructuredKnowledge.items.map((item) => {
+        if (item.kind !== "FACT" && item.kind !== "EVENT") return structuredClone(item);
+        return {
+          ...structuredClone(item),
+          payload: {
+            ...structuredClone(item.payload),
+            proceedingIdentityHint: null,
+          },
+        };
+      }),
+      legalIssues: selvaraOfflineStructuredKnowledge.legalIssues.map((issue) => (
+        issue.localId === "issue-canoni"
+          ? {
+              localId: issue.localId,
+              title: issue.title,
+              normalizedIssue: issue.normalizedIssue,
+              areaOfLaw: issue.areaOfLaw,
+              priority: issue.priority,
+              rationale: issue.rationale,
+              originatingItemLocalIds: [...issue.originatingItemLocalIds, "act-concession"],
+              confidence: issue.confidence,
+              referenceDateBasis: issue.referenceDateBasis,
+              targetProceedingHint: {
+                declaredKey: "concessione-demariale-17-2023",
+                candidateAnchorLocalId: "provider-missing-anchor",
+                kind: "ADMINISTRATIVE_ORIGINAL" as const,
+                evidenceBasisRefs: ["DOCUMENT_1.PAGE_40"],
+              },
+            }
+          : {
+              localId: issue.localId,
+              title: issue.title,
+              normalizedIssue: issue.normalizedIssue,
+              areaOfLaw: issue.areaOfLaw,
+              priority: issue.priority,
+              rationale: issue.rationale,
+              originatingItemLocalIds: [...issue.originatingItemLocalIds],
+              confidence: issue.confidence,
+              referenceDateBasis: issue.referenceDateBasis,
+              targetProceedingHint: null,
+            }
+      )),
+    };
+    const providerOutput = {
+      summary: {
+        text: "Il fascicolo documenta concessione, esecuzione e criticita.",
+        basisRefs: ["DOCUMENT_1.PAGE_7"],
+      },
+      timeline: [{
+        recordedAt: "2023-07-14T00:00:00.000Z",
+        text: "Rilascio della concessione.",
+        basisRefs: ["DOCUMENT_1.PAGE_7"],
+      }],
+      recordedState: [{
+        text: "Il fascicolo contiene quaranta pagine estratte.",
+        basisRefs: ["DOCUMENT_1.PAGE_1"],
+      }],
+      signals: [{
+        type: "VERIFY" as const,
+        text: "Verificare le lacune documentali censite.",
+        basisRefs: ["DOCUMENT_1.PAGE_28"],
+      }],
+      investigativeQuestions: [{
+        text: "Acquisire gli atti mancanti.",
+        basisRefs: ["DOCUMENT_1.PAGE_28"],
+      }],
+      suggestedActivities: [{
+        text: "Completare l'istruttoria documentale.",
+        basisRefs: ["DOCUMENT_1.PAGE_28"],
+      }],
+      legalResearchQuestions: [{
+        text: "Verificare la disciplina applicabile.",
+        basisRefs: ["DOCUMENT_1.PAGE_7"],
+      }],
+      structuredKnowledge: fascicoloDocumentKnowledgeProposalSchema.parse(
+        recoverableSelvaraProposal,
+      ),
+    };
+    const analysisService = createFascicoloDocumentAnalysisService({
+      provider: { analyze: vi.fn(async () => providerOutput) },
+      maxInputBytes: 200_000,
+      realDataActivation: createRealDataActivationPolicy({
+        AI_REAL_DATA_ENABLED: "true",
+        AI_REAL_DATA_APPROVAL_ID: "offline-selvara-integration",
+        AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
+      }),
     });
-    for (const candidate of projection.candidates) {
-      expect(buildCanonicalSourceSpans(candidate, sourceTextByBasisRef).length)
-        .toBeGreaterThan(0);
-    }
-
-    const persisted = await persistStructuredKnowledgeRevision({
-      ...scope(),
-      corpusFingerprint: "c9f04d508174cba8e7939704da11921963c60656660df988ee4cb5fdd25cdd5f",
-      knowledge: parsedKnowledge,
-      evidenceByBasisRef,
-      sourceTextByBasisRef,
-    }, context(db));
+    const captured: {
+      persisted?: Awaited<ReturnType<typeof persistStructuredKnowledgeRevision>>;
+      report?: ReturnType<typeof buildStructuredFascicoloReport>;
+      archived?: Awaited<ReturnType<typeof persistStructuredFascicoloReport>>;
+    } = {};
+    const dependencies: FascicoloAutomaticAnalysisDependencies = {
+      loadAuthority: async () => ({
+        sourceKind: "DOCUMENT_CORPUS",
+        tenantId: "tenant-a",
+        procedimentoId: "procedure-a1",
+        extractionAttemptId: "attempt-selvara-offline",
+        artifactSha256: selvaraOfflineCorpusMetadata.sourcePdfSha256,
+        corpusFingerprint:
+          "c9f04d508174cba8e7939704da11921963c60656660df988ee4cb5fdd25cdd5f",
+        actorId: "offline-actor",
+        documents: [{
+          neutralIntakeId: "",
+          documentVersionId: "attempt-selvara-offline",
+          artifactSha256: selvaraOfflineCorpusMetadata.sourcePdfSha256,
+          documentoId: "document-a1",
+          documentFileVersionId: "version-a1",
+          pages: selvaraOfflinePages.map((page) => ({
+            pageNumber: page.pageNumber,
+            normalizedText: page.text,
+            sourceText: page.text,
+            textSha256: createHash("sha256").update(page.text, "utf8").digest("hex"),
+            extractionMethod: "DIRECT_TEXT",
+            ocrConfidence: null,
+          })),
+        }],
+      }),
+      validateControlledV7Preflight: async () => undefined,
+      getCurrentRevision: (input) => getCurrentKnowledgeRevision(input, context(db)),
+      findExistingReport: async () => null,
+      analyze: (input) => analysisService.analyze(input),
+      async persistKnowledge(input) {
+        captured.persisted = await persistStructuredKnowledgeRevision({
+          tenantId: input.tenantId,
+          procedimentoId: input.procedimentoId,
+          corpusFingerprint: input.corpusFingerprint,
+          knowledge: input.knowledge,
+          evidenceByBasisRef: input.evidenceByBasisRef,
+          sourceTextByBasisRef: input.sourceTextByBasisRef,
+          revisionContractVersion: input.forceNewRevision
+            ? FASCICOLO_V7_KNOWLEDGE_REVISION_CONTRACT
+            : undefined,
+          deferPromotion: input.deferPromotion,
+        }, context(db));
+        return captured.persisted;
+      },
+      async prepareStructuredReport(input) {
+        const knowledge = await loadStructuredKnowledgeRevision(
+          input.tenantId,
+          input.procedimentoId,
+          input.knowledgeRevisionId,
+          queryExecutor(db),
+        );
+        if (!knowledge) return null;
+        captured.report = buildStructuredFascicoloReport({
+          tenantId: input.tenantId,
+          procedimentoId: input.procedimentoId,
+          knowledge,
+          missions: [],
+        });
+        return captured.report;
+      },
+      async finalizeControlledV7(input) {
+        const revision = await promotePreparedKnowledgeRevision({
+          tenantId: input.tenantId,
+          procedimentoId: input.procedimentoId,
+          revisionId: input.knowledgeRevisionId,
+          expectedCurrentRevisionId: input.expectedCurrentRevisionId,
+        }, context(db));
+        captured.archived = await persistStructuredFascicoloReport(
+          input.report,
+          reportContext(db),
+        );
+        return {
+          revision,
+          outcome: captured.archived.outcome,
+          snapshotId: captured.archived.snapshot.id,
+        };
+      },
+      reconcileKnowledgeMissions: async () => [],
+      resolveMissionAssignee: async () => "offline-actor",
+      persistReport: async () => {
+        throw new Error("Unexpected legacy report persistence.");
+      },
+      persistMission: async () => {
+        throw new Error("Unexpected mission persistence.");
+      },
+      scheduleMission: async () => {
+        throw new Error("Unexpected mission scheduling.");
+      },
+      listPriorReportIds: async () => [],
+    };
+    const handler = createFascicoloAutomaticAnalysisHandler(dependencies);
+    const reference = handler.parseInput({
+      referenceType: "FASCICOLO_DOCUMENT_CORPUS",
+      referenceId:
+        "c9f04d508174cba8e7939704da11921963c60656660df988ee4cb5fdd25cdd5f",
+      referenceVersion: "V1",
+      metadata: {
+        procedimentoId: "procedure-a1",
+        corpusHash:
+          "c9f04d508174cba8e7939704da11921963c60656660df988ee4cb5fdd25cdd5f",
+        trialContractVersion: FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION,
+        trialApprovalRef: SELVARA_PILOT_AUTHORIZATION.approvalId,
+        trialPreflightHash: "d".repeat(64),
+      },
+    });
+    await expect(handler.execute(reference, {
+      jobId: "offline-selvara-v7-job",
+      correlationId: "offline-selvara-v7-correlation",
+      attempt: 1,
+      isCancellationRequested: async () => false,
+      heartbeat: async () => undefined,
+    })).resolves.toMatchObject({
+      referenceType: "FASCICOLO_KNOWLEDGE_REVISION",
+      metadata: {
+        persistenceCode: "CREATED",
+        structuredReportPersistenceCode: "CREATED",
+      },
+    });
     const readModel = await loadCurrentStructuredKnowledge(
       "tenant-a",
       "procedure-a1",
       queryExecutor(db),
     );
     expect(readModel).not.toBeNull();
-    const report = buildStructuredFascicoloReport({
-      tenantId: "tenant-a",
-      procedimentoId: "procedure-a1",
-      knowledge: readModel!,
-      missions: [],
-    });
-    const archived = await persistStructuredFascicoloReport(report, reportContext(db));
+    const reportSnapshots = await listStructuredFascicoloReportSnapshots(
+      scope(),
+      reportContext(db),
+    );
+    if (!captured.persisted || !captured.report || !captured.archived) {
+      throw new Error("Expected V7 persistence, finalization, and report archival.");
+    }
+    const persisted = captured.persisted;
+    const report = captured.report;
+    const archived = captured.archived;
 
     expect(selvaraOfflinePages).toHaveLength(40);
     expect(selvaraOfflineCorpusMetadata).toMatchObject({
@@ -1190,7 +1385,7 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
     expect(persisted.quality).toMatchObject({
       proposedCount: 59,
       acceptedCount: 59,
-      correctedCount: 0,
+      correctedCount: 2,
       rejectedCount: 0,
       evidenceCoverage: 1,
       exactCitationCount: 46,
@@ -1220,14 +1415,68 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
       legalIssues: { length: 7 },
       researchQuestions: { length: 6 },
     });
-    expect(readModel!.revision.warnings).toHaveLength(40);
-    expect(readModel!.revision.warnings.every((warning) => warning.startsWith("DOCUMENT_INVENTORY:"))).toBe(true);
+    const reconciledIssueIdentity = readModel!.legalIssues.flatMap((issue) => {
+      if (!isRecord(issue.payload)) return [];
+      const resolution = issue.payload.targetProceedingResolution;
+      if (!isRecord(resolution) || !isRecord(resolution.providerClaim)
+        || resolution.providerClaim.declaredKey !== "concessione-demariale-17-2023") {
+        return [];
+      }
+      const target = issue.payload.targetProceedingIdentity;
+      return isRecord(target)
+        ? [{ target, resolution }]
+        : [];
+    })[0];
+    expect(reconciledIssueIdentity).toMatchObject({
+      target: {
+        canonicalAnchorSemanticKey: expect.stringMatching(/^[a-f0-9]{64}$/),
+        evidenceBasisRefs: ["DOCUMENT_1.PAGE_7"],
+      },
+      resolution: {
+        status: "VERIFIED",
+        action: "REBUILT",
+        providerClaim: { declaredKey: "concessione-demariale-17-2023" },
+      },
+    });
+    expect(reconciledIssueIdentity!.target).not.toHaveProperty("declaredKey");
+    expect(readModel!.revision.warnings).toHaveLength(47);
+    expect(readModel!.revision.warnings.filter((warning) => (
+      warning.startsWith("DOCUMENT_INVENTORY:")
+    ))).toHaveLength(40);
+    expect(readModel!.revision.warnings.filter((warning) => (
+      warning.startsWith("PROCEEDING_IDENTITY:")
+    ))).toHaveLength(7);
+    expect(readModel!.revision.warnings).toContain(
+      "PROCEEDING_IDENTITY:REBUILT:VERIFIED:issue-canoni",
+    );
     expect(readModel!.revision.warnings).toContain(
       "DOCUMENT_INVENTORY:document-page-1:NOT_MATERIAL:DOCUMENT_1.PAGE_1:Documento di indice privo di autonomi fatti, obblighi o provvedimenti.",
     );
     expect(archived).toMatchObject({
       outcome: "CREATED",
       snapshot: { status: "CURRENT" },
+    });
+    expect(reportSnapshots).toHaveLength(1);
+    expect(reportSnapshots[0]).toMatchObject({
+      status: "CURRENT",
+      payload: {
+        knowledgeRevisionId: readModel!.revision.id,
+        legalIssues: expect.arrayContaining([
+          expect.objectContaining({
+            proceedingIdentity: expect.objectContaining({
+              status: "VERIFIED",
+              action: "REBUILT",
+              linkedAnchor: expect.objectContaining({
+                kind: "LEGAL_ACT",
+              }),
+              evidenceBasisRefs: ["DOCUMENT_1.PAGE_7"],
+              providerClaim: expect.objectContaining({
+                declaredKey: "concessione-demariale-17-2023",
+              }),
+            }),
+          }),
+        ]),
+      },
     });
     const narrative = report.payload.professionalNarrative!;
     expect(narrative).toMatchObject({

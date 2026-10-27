@@ -9,6 +9,7 @@ export * from "./researchMissionPlanning";
 export * from "./researchMissionLifecycle";
 export * from "./repository";
 export * from "./structuredContracts";
+export * from "./proceedingIdentityReconciliation";
 export * from "./structuredProjection";
 export * from "./structuredPersistence";
 export * from "./subjects";

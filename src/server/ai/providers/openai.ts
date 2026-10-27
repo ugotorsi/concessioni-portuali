@@ -14,7 +14,7 @@ import {
   parseOpenAiBillableUsage,
   type OpenAiBillableUsage,
 } from "@/server/ai/openaiAccounting";
-import { fascicoloDocumentStructuredKnowledgeSchema } from "@/server/fascicolo-knowledge/structuredContracts";
+import { fascicoloDocumentKnowledgeProposalSchema } from "@/server/fascicolo-knowledge/structuredContracts";
 import { getEncoding } from "js-tiktoken";
 import { z } from "zod";
 
@@ -178,7 +178,7 @@ export const OPENAI_PROVIDER_DOCUMENT_ANALYSIS_JSON_SCHEMA = makeOpenAiStrictSch
   properties: {
     ...OPENAI_PROVIDER_ANALYSIS_JSON_SCHEMA.properties,
     structuredKnowledge: stripGeneratedSchemaMetadata(
-      z.toJSONSchema(fascicoloDocumentStructuredKnowledgeSchema, { unrepresentable: "any" }),
+      z.toJSONSchema(fascicoloDocumentKnowledgeProposalSchema, { unrepresentable: "any" }),
     ),
   },
 });

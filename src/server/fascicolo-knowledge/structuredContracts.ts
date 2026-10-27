@@ -21,6 +21,7 @@ export const FASCICOLO_STRUCTURED_KNOWLEDGE_SEMANTIC_RULES = Object.freeze([
   { code: "UNRESOLVED_REQUIRED_ITEM_REFERENCE", requirement: "Every contradiction and proceeding-identity dependency must resolve without a self-reference." },
   { code: "INVALID_PROCEEDING_ANCHOR", requirement: "Every proceeding anchor must resolve to a LEGAL_ACT or MEASURE; a legal-issue anchor must also be one of its origins." },
   { code: "INVALID_PROCEEDING_IDENTITY_EVIDENCE", requirement: "Proceeding-identity evidence must be included in the item or legal-issue origin evidence." },
+  { code: "INVALID_PROCEEDING_RESOLUTION", requirement: "A verified proceeding resolution must have a matching canonical identity; unresolved resolutions must not contain one." },
   { code: "INVALID_ISSUE_ORIGIN", requirement: "Every legal-issue origin must resolve to a compatible PARTY_POSITION, FACT, EVENT, LEGAL_ACT, MEASURE, CONTRADICTION, or GAP item." },
   { code: "UNKNOWN_LEGAL_ISSUE", requirement: "Every research question must reference an existing legal issue." },
   { code: "UNKNOWN_REFERENCE_DATE_ITEM", requirement: "Every non-null reference-date itemLocalId must reference an existing item." },
@@ -113,6 +114,31 @@ const proceedingIdentitySchema = z.object({
   kind: proceedingKindSchema,
   evidenceBasisRefs: basisRefs,
 }).strict();
+export const proceedingIdentityHintSchema = z.object({
+  declaredKey: id.nullable(),
+  kind: proceedingKindSchema,
+  candidateAnchorLocalId: id.nullable(),
+  evidenceBasisRefs: basisRefs,
+}).strict();
+export const proceedingIdentityResolutionSchema = z.object({
+  status: z.enum([
+    "VERIFIED",
+    "NOT_DOCUMENTED",
+    "AMBIGUOUS",
+    "INSUFFICIENT_EVIDENCE",
+    "UNVERIFIED_CLAIM",
+  ]),
+  action: z.enum(["PRESERVED", "REBUILT", "MARKED_UNRESOLVED"]),
+  reason: z.enum([
+    "MODEL_DID_NOT_DECLARE",
+    "NO_DOCUMENTED_ANCHOR",
+    "MULTIPLE_DOCUMENTED_ANCHORS",
+    "ANCHOR_EVIDENCE_NOT_AUTHENTIC",
+    "MODEL_CLAIM_NOT_VERIFIABLE",
+  ]).nullable(),
+  providerClaim: proceedingIdentityHintSchema.nullable(),
+  candidateAnchorLocalIds: z.array(id).max(100),
+}).strict();
 
 export const fascicoloSubjectTypeSchema = z.enum([
   "PERSON",
@@ -179,6 +205,7 @@ const fact = z.object({
     object: shortText.nullable().default(null),
     qualifier: shortText.nullable().default(null),
     proceedingIdentity: proceedingIdentitySchema.nullable().optional(),
+    proceedingIdentityResolution: proceedingIdentityResolutionSchema.nullable().optional(),
   }).strict(),
 }).strict();
 
@@ -192,6 +219,29 @@ const event = z.object({
     subjectLocalIds: localIds.default([]),
     relatedItemLocalIds: localIds.default([]),
     proceedingIdentity: proceedingIdentitySchema.nullable().optional(),
+    proceedingIdentityResolution: proceedingIdentityResolutionSchema.nullable().optional(),
+  }).strict(),
+}).strict();
+
+const proposalFact = z.object({
+  ...common,
+  kind: z.literal("FACT"),
+  payload: fact.shape.payload.omit({
+    proceedingIdentity: true,
+    proceedingIdentityResolution: true,
+  }).extend({
+    proceedingIdentityHint: proceedingIdentityHintSchema.nullable(),
+  }).strict(),
+}).strict();
+
+const proposalEvent = z.object({
+  ...common,
+  kind: z.literal("EVENT"),
+  payload: event.shape.payload.omit({
+    proceedingIdentity: true,
+    proceedingIdentityResolution: true,
+  }).extend({
+    proceedingIdentityHint: proceedingIdentityHintSchema.nullable(),
   }).strict(),
 }).strict();
 
@@ -268,6 +318,14 @@ export const legalIssueCandidateSchema = z.object({
   confidence,
   referenceDateBasis: referenceDateBasisSchema.nullable().default(null),
   targetProceedingIdentity: proceedingIdentitySchema.nullable().optional(),
+  targetProceedingResolution: proceedingIdentityResolutionSchema.nullable().optional(),
+}).strict();
+
+export const legalIssueProposalSchema = legalIssueCandidateSchema.omit({
+  targetProceedingIdentity: true,
+  targetProceedingResolution: true,
+}).extend({
+  targetProceedingHint: proceedingIdentityHintSchema.nullable(),
 }).strict();
 
 export const researchQuestionCandidateSchema = z.object({
@@ -298,6 +356,17 @@ export const researchQuestionCandidateSchema = z.object({
 
 export const structuredKnowledgeItemSchema = z.discriminatedUnion("kind", [
   partyRole, partyPosition, fact, event, legalAct, measure, contradiction, gap, deadline,
+]);
+export const structuredKnowledgeProposalItemSchema = z.discriminatedUnion("kind", [
+  partyRole,
+  partyPosition,
+  proposalFact,
+  proposalEvent,
+  legalAct,
+  measure,
+  contradiction,
+  gap,
+  deadline,
 ]);
 
 export const fascicoloStructuredKnowledgeSchema = z.object({
@@ -347,6 +416,7 @@ export const fascicoloStructuredKnowledgeSchema = z.object({
     }
     if (item.kind === "FACT" || item.kind === "EVENT") {
       const identity = item.payload.proceedingIdentity;
+      const resolution = item.payload.proceedingIdentityResolution;
       if (identity) {
         const anchor = value.items.find((candidate) => (
           candidate.localId === identity.canonicalAnchorLocalId
@@ -358,6 +428,13 @@ export const fascicoloStructuredKnowledgeSchema = z.object({
           context.addIssue({ code: "custom", path: ["items", index, "payload", "proceedingIdentity", "evidenceBasisRefs"], message: "INVALID_PROCEEDING_IDENTITY_EVIDENCE" });
         }
       }
+      if (resolution && (
+        (resolution.status === "VERIFIED" && (!identity
+          || !resolution.candidateAnchorLocalIds.includes(identity.canonicalAnchorLocalId)))
+        || (resolution.status !== "VERIFIED" && identity != null)
+      )) {
+        context.addIssue({ code: "custom", path: ["items", index, "payload", "proceedingIdentityResolution"], message: "INVALID_PROCEEDING_RESOLUTION" });
+      }
     }
   }
   const allowedOriginKinds = new Set(["PARTY_POSITION", "FACT", "EVENT", "LEGAL_ACT", "MEASURE", "CONTRADICTION", "GAP"]);
@@ -367,6 +444,7 @@ export const fascicoloStructuredKnowledgeSchema = z.object({
       return !item || !allowedOriginKinds.has(item.kind);
     })) context.addIssue({ code: "custom", path: ["legalIssues", index, "originatingItemLocalIds"], message: "INVALID_ISSUE_ORIGIN" });
     const targetIdentity = issue.targetProceedingIdentity;
+    const targetResolution = issue.targetProceedingResolution;
     if (targetIdentity) {
       const anchor = value.items.find((candidate) => (
         candidate.localId === targetIdentity.canonicalAnchorLocalId
@@ -381,6 +459,13 @@ export const fascicoloStructuredKnowledgeSchema = z.object({
       if (targetIdentity.evidenceBasisRefs.some((basisRef) => !originBasisRefs.has(basisRef))) {
         context.addIssue({ code: "custom", path: ["legalIssues", index, "targetProceedingIdentity", "evidenceBasisRefs"], message: "INVALID_PROCEEDING_IDENTITY_EVIDENCE" });
       }
+    }
+    if (targetResolution && (
+      (targetResolution.status === "VERIFIED" && (!targetIdentity
+        || !targetResolution.candidateAnchorLocalIds.includes(targetIdentity.canonicalAnchorLocalId)))
+      || (targetResolution.status !== "VERIFIED" && targetIdentity != null)
+    )) {
+      context.addIssue({ code: "custom", path: ["legalIssues", index, "targetProceedingResolution"], message: "INVALID_PROCEEDING_RESOLUTION" });
     }
   }
   for (const [index, question] of value.researchQuestions.entries()) {
@@ -455,10 +540,30 @@ export const fascicoloDocumentStructuredKnowledgeSchema =
     }
   });
 
+export const fascicoloDocumentKnowledgeProposalSchema = z.object({
+  version: z.literal(FASCICOLO_STRUCTURED_KNOWLEDGE_VERSION),
+  subjects: z.array(fascicoloSubjectCandidateSchema).max(500),
+  items: z.array(structuredKnowledgeProposalItemSchema).max(10_000),
+  sourceQuotes: z.array(sourceQuoteSchema).max(100_000),
+  documentInventory: z.array(documentInventoryEntrySchema).max(10_000),
+  legalIssues: z.array(legalIssueProposalSchema).max(1_000),
+  researchQuestions: z.array(researchQuestionCandidateSchema).max(1_000),
+}).strict();
+
 export type FascicoloSubjectCandidate = z.output<typeof fascicoloSubjectCandidateSchema>;
 export type FascicoloStrongIdentifier = z.output<typeof fascicoloStrongIdentifierSchema>;
 export type FascicoloStructuredKnowledge = z.output<typeof fascicoloStructuredKnowledgeSchema>;
+export type FascicoloDocumentKnowledgeProposal = z.output<
+  typeof fascicoloDocumentKnowledgeProposalSchema
+>;
 export type StructuredKnowledgeItem = z.output<typeof structuredKnowledgeItemSchema>;
+export type StructuredKnowledgeProposalItem = z.output<
+  typeof structuredKnowledgeProposalItemSchema
+>;
+export type ProceedingIdentityHint = z.output<typeof proceedingIdentityHintSchema>;
+export type ProceedingIdentityResolution = z.output<
+  typeof proceedingIdentityResolutionSchema
+>;
 export type StructuredDate = z.output<typeof structuredDateSchema>;
 export type LegalIssueCandidate = z.output<typeof legalIssueCandidateSchema>;
 export type ResearchQuestionCandidate = z.output<typeof researchQuestionCandidateSchema>;

@@ -4,9 +4,12 @@ import { providerAnalysisPayloadV1Schema } from "@/server/ai/fascicoloAnalysis";
 import {
   fascicoloStructuredKnowledgeSchema,
   fascicoloDocumentStructuredKnowledgeSchema,
+  fascicoloDocumentKnowledgeProposalSchema,
   structuredKnowledgeValidationCode,
   knowledgeEvidenceCandidateSchema,
   lot2KnowledgeKinds,
+  compileFascicoloDocumentKnowledgeProposal,
+  DocumentKnowledgeCompilationError,
   structuredDateSchema,
 } from "@/server/fascicolo-knowledge";
 import {
@@ -414,6 +417,267 @@ describe("Lotto 2 structured knowledge contracts", () => {
       code: "REFERENCE_DATE_ITEM_NOT_ISSUE_ORIGIN",
       path: "researchQuestions.0.referenceDateBasis.itemLocalId",
     });
+  });
+
+  it("strictly validates proceeding anchors while reconciling only uniquely documented origins", () => {
+    const base = validKnowledge();
+    const legalAct = base.items.find((candidate) => candidate.kind === "LEGAL_ACT");
+    const measure = base.items.find((candidate) => candidate.kind === "MEASURE");
+    const fact = base.items.find((candidate) => candidate.kind === "FACT");
+    if (!legalAct || !measure || !fact) throw new Error("Expected proceeding identity fixtures.");
+    const issue = (
+      originatingItemLocalIds: string[],
+      canonicalAnchorLocalId: string,
+      evidenceBasisRefs = ["DOCUMENT_1.PAGE_1"],
+    ) => ({
+      localId: "issue-proceeding",
+      title: "Identita del procedimento",
+      normalizedIssue: "Quale procedimento e documentato?",
+      areaOfLaw: "diritto amministrativo",
+      priority: "HIGH",
+      rationale: "L'identita deve derivare dagli atti documentati.",
+      originatingItemLocalIds,
+      confidence: 90,
+      referenceDateBasis: null,
+      targetProceedingIdentity: {
+        declaredKey: "procedimento-dichiarato",
+        canonicalAnchorLocalId,
+        kind: "ADMINISTRATIVE_ORIGINAL",
+        evidenceBasisRefs,
+      },
+    });
+    const knowledge = (legalIssue: ReturnType<typeof issue>) => ({
+      ...structuredClone(base),
+      legalIssues: [legalIssue],
+      researchQuestions: [],
+      documentInventory: [],
+    });
+    const proposal = (
+      originatingItemLocalIds: string[],
+      candidateAnchorLocalId: string,
+      evidenceBasisRefs = ["DOCUMENT_1.PAGE_1"],
+    ) => {
+      const {
+        targetProceedingIdentity: _targetProceedingIdentity,
+        ...proposalIssue
+      } = issue(originatingItemLocalIds, candidateAnchorLocalId, evidenceBasisRefs);
+      return fascicoloDocumentKnowledgeProposalSchema.parse({
+        ...structuredClone(base),
+        items: base.items.map((candidate) => (
+          candidate.kind === "FACT" || candidate.kind === "EVENT"
+            ? {
+                ...structuredClone(candidate),
+                payload: {
+                  ...structuredClone(candidate.payload),
+                  proceedingIdentityHint: null,
+                },
+              }
+            : structuredClone(candidate)
+        )),
+        legalIssues: [{
+          ...proposalIssue,
+          targetProceedingHint: {
+            declaredKey: "procedimento-dichiarato",
+            candidateAnchorLocalId,
+            kind: "ADMINISTRATIVE_ORIGINAL",
+            evidenceBasisRefs,
+          },
+        }],
+        researchQuestions: [],
+        documentInventory: [],
+      });
+    };
+
+    expect(fascicoloDocumentStructuredKnowledgeSchema.safeParse(
+      knowledge(issue([legalAct.localId], legalAct.localId)),
+    ).success).toBe(true);
+    expect(fascicoloDocumentStructuredKnowledgeSchema.safeParse(
+      knowledge(issue([measure.localId], measure.localId)),
+    ).success).toBe(true);
+
+    const invalidCases = [
+      knowledge(issue([legalAct.localId], "missing-anchor")),
+      knowledge(issue([fact.localId], fact.localId)),
+      knowledge(issue([measure.localId], legalAct.localId)),
+    ];
+    for (const invalid of invalidCases) {
+      expect(semanticIssues(invalid)).toContainEqual({
+        code: "INVALID_PROCEEDING_ANCHOR",
+        path: "legalIssues.0.targetProceedingIdentity.canonicalAnchorLocalId",
+      });
+    }
+    expect(semanticIssues(
+      knowledge(issue([legalAct.localId], legalAct.localId, ["DOCUMENT_1.PAGE_99"])),
+    )).toContainEqual({
+      code: "INVALID_PROCEEDING_IDENTITY_EVIDENCE",
+      path: "legalIssues.0.targetProceedingIdentity.evidenceBasisRefs",
+    });
+
+    const repaired = compileFascicoloDocumentKnowledgeProposal({
+      proposal: proposal(
+        [legalAct.localId],
+        "missing-anchor",
+        ["DOCUMENT_1.PAGE_99"],
+      ),
+      sourceTextByBasisRef: new Map([[
+        "DOCUMENT_1.PAGE_1",
+        base.sourceQuotes.map((quote) => quote.quote).join("\n"),
+      ]]),
+    }).knowledge;
+    expect(repaired.legalIssues[0].targetProceedingIdentity).toMatchObject({
+      declaredKey: null,
+      canonicalAnchorLocalId: legalAct.localId,
+      evidenceBasisRefs: ["DOCUMENT_1.PAGE_1"],
+    });
+    expect(repaired.legalIssues[0].targetProceedingResolution).toMatchObject({
+      status: "VERIFIED",
+      action: "REBUILT",
+      providerClaim: { declaredKey: "procedimento-dichiarato" },
+    });
+
+    const ambiguous = compileFascicoloDocumentKnowledgeProposal({
+      proposal: proposal([legalAct.localId, measure.localId], "missing-anchor"),
+      sourceTextByBasisRef: new Map([[
+        "DOCUMENT_1.PAGE_1",
+        base.sourceQuotes.map((quote) => quote.quote).join("\n"),
+      ]]),
+    }).knowledge;
+    expect(ambiguous.legalIssues[0].targetProceedingIdentity).toBeNull();
+
+    const unidentified = compileFascicoloDocumentKnowledgeProposal({
+      proposal: proposal([fact.localId], "missing-anchor"),
+      sourceTextByBasisRef: new Map([[
+        "DOCUMENT_1.PAGE_1",
+        base.sourceQuotes.map((quote) => quote.quote).join("\n"),
+      ]]),
+    }).knowledge;
+    expect(unidentified.legalIssues[0]).toMatchObject({
+      localId: "issue-proceeding",
+      originatingItemLocalIds: [fact.localId],
+      targetProceedingIdentity: null,
+    });
+  });
+
+  it("compiles FACT and EVENT identities, propagates evidence corrections, and blocks false quotes", () => {
+    const base = validKnowledge();
+    const legalAct = base.items.find((candidate) => candidate.kind === "LEGAL_ACT");
+    if (!legalAct) throw new Error("Expected a legal act fixture.");
+    const proposal = fascicoloDocumentKnowledgeProposalSchema.parse({
+      ...structuredClone(base),
+      items: base.items.map((candidate) => {
+        if (candidate.kind !== "FACT" && candidate.kind !== "EVENT") {
+          return structuredClone(candidate);
+        }
+        return {
+          ...structuredClone(candidate),
+          payload: {
+            ...structuredClone(candidate.payload),
+            proceedingIdentityHint: {
+              declaredKey: "procedimento-documentato",
+              candidateAnchorLocalId: legalAct.localId,
+              kind: "ADMINISTRATIVE_ORIGINAL",
+              evidenceBasisRefs: ["DOCUMENT_1.PAGE_1"],
+            },
+          },
+        };
+      }),
+      legalIssues: [],
+      researchQuestions: [],
+      documentInventory: [],
+    });
+    const authenticText = base.sourceQuotes.map((quote) => quote.quote).join("\n");
+    const compiled = compileFascicoloDocumentKnowledgeProposal({
+      proposal,
+      sourceTextByBasisRef: new Map([["DOCUMENT_1.PAGE_1", authenticText]]),
+    });
+    const factAndEvent = compiled.knowledge.items.filter((candidate) => (
+      candidate.kind === "FACT" || candidate.kind === "EVENT"
+    ));
+    expect(factAndEvent).toHaveLength(2);
+    for (const candidate of factAndEvent) {
+      expect(candidate.payload.proceedingIdentity).toMatchObject({
+        declaredKey: "procedimento-documentato",
+        canonicalAnchorLocalId: legalAct.localId,
+        evidenceBasisRefs: ["DOCUMENT_1.PAGE_1"],
+      });
+      expect(candidate.payload.proceedingIdentityResolution).toMatchObject({
+        status: "VERIFIED",
+        action: "PRESERVED",
+      });
+    }
+
+    const correctedProposal = structuredClone(proposal);
+    const correctedAct = correctedProposal.items.find((candidate) => candidate.localId === legalAct.localId);
+    const correctedQuote = correctedProposal.sourceQuotes.find((quote) => quote.itemLocalId === legalAct.localId);
+    if (!correctedAct || (correctedAct.kind !== "LEGAL_ACT" && correctedAct.kind !== "MEASURE") || !correctedQuote) {
+      throw new Error("Expected mutable legal act proposal fixtures.");
+    }
+    correctedAct.basisRefs = ["DOCUMENT_1.PAGE_99"];
+    correctedAct.payload.documentBasisRef = "DOCUMENT_1.PAGE_99";
+    correctedQuote.basisRef = "DOCUMENT_1.PAGE_99";
+    correctedProposal.legalIssues = [{
+      localId: "issue-corrected-evidence",
+      title: "Identita del procedimento",
+      normalizedIssue: "Quale procedimento e documentato?",
+      areaOfLaw: "diritto amministrativo",
+      priority: "HIGH",
+      rationale: "L'identita dipende dall'atto documentato.",
+      originatingItemLocalIds: [legalAct.localId],
+      confidence: 90,
+      referenceDateBasis: null,
+      targetProceedingHint: {
+        declaredKey: "procedimento-documentato",
+        candidateAnchorLocalId: legalAct.localId,
+        kind: "ADMINISTRATIVE_ORIGINAL",
+        evidenceBasisRefs: ["DOCUMENT_1.PAGE_99"],
+      },
+    }];
+    const corrected = compileFascicoloDocumentKnowledgeProposal({
+      proposal: correctedProposal,
+      sourceTextByBasisRef: new Map([["DOCUMENT_1.PAGE_1", authenticText]]),
+    });
+    expect(corrected.knowledge.legalIssues[0]).toMatchObject({
+      targetProceedingIdentity: {
+        declaredKey: "procedimento-documentato",
+        canonicalAnchorLocalId: legalAct.localId,
+        evidenceBasisRefs: ["DOCUMENT_1.PAGE_1"],
+      },
+      targetProceedingResolution: {
+        status: "VERIFIED",
+        action: "PRESERVED",
+      },
+    });
+    expect(corrected.diagnostics).toContainEqual({
+      code: "BASIS_REF_CORRECTED",
+      path: expect.stringMatching(/^sourceQuotes\.\d+\.basisRef$/),
+      action: "REBUILT",
+    });
+
+    const nonexistentQuote = structuredClone(proposal);
+    nonexistentQuote.sourceQuotes[0].quote = "Citazione non presente nel corpus";
+    expect(() => compileFascicoloDocumentKnowledgeProposal({
+      proposal: nonexistentQuote,
+      sourceTextByBasisRef: new Map([["DOCUMENT_1.PAGE_1", authenticText]]),
+    })).toThrowError(DocumentKnowledgeCompilationError);
+
+    const duplicatedQuote = proposal.sourceQuotes[0].quote;
+    try {
+      compileFascicoloDocumentKnowledgeProposal({
+        proposal,
+        sourceTextByBasisRef: new Map([[
+          "DOCUMENT_1.PAGE_1",
+          `${authenticText}\n${duplicatedQuote}`,
+        ]]),
+      });
+      throw new Error("Expected ambiguous source quote compilation to fail.");
+    } catch (error) {
+      expect(error).toBeInstanceOf(DocumentKnowledgeCompilationError);
+      expect((error as DocumentKnowledgeCompilationError).diagnostics).toContainEqual({
+        code: "AMBIGUOUS_SOURCE_QUOTE",
+        path: "sourceQuotes.0.quote",
+        action: "BLOCKED",
+      });
+    }
   });
 
   it("represents exact, partial, interval, uncertain, and unknown dates without inventing precision", () => {

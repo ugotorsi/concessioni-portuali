@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 
 import {
   AI_FASCICOLO_ANALYSIS_V1_SCHEMA_VERSION,
+  fascicoloDocumentProposalPayloadV1Schema,
   fascicoloDocumentAnalysisPayloadV1Schema,
   type ProviderAnalysisPayloadV1,
 } from "@/server/ai/fascicoloAnalysis";
@@ -14,6 +15,10 @@ import {
   FASCICOLO_STRUCTURED_KNOWLEDGE_SEMANTIC_RULES,
   structuredKnowledgeValidationCode,
 } from "@/server/fascicolo-knowledge/structuredContracts";
+import {
+  compileFascicoloDocumentKnowledgeProposal,
+  DocumentKnowledgeCompilationError,
+} from "@/server/fascicolo-knowledge/proceedingIdentityReconciliation";
 
 export const FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION = "FASCICOLO_DOCUMENT_ANALYSIS_V7" as const;
 
@@ -34,6 +39,7 @@ export const FASCICOLO_DOCUMENT_ANALYSIS_SYSTEM_POLICY = Object.freeze({
     "Within structuredKnowledge, propose legalIssues only from identified CURRENT-bound items and researchQuestions only from those legal issues with an explicit reference-date basis.",
     "Use unique localId values within each structuredKnowledge collection and unique itemLocalId, basisRef, quote tuples in sourceQuotes.",
     "Every structuredKnowledge cross-reference must resolve: subject references to subjects, item references to items, sourceQuotes to an item whose basisRefs contain the quoted basisRef, legal questions to legalIssues, MATERIAL documents to at least one item, and UNCERTAIN documents to at least one GAP item.",
+    "For FACT, EVENT, and legalIssue proceeding identity, return only a nullable proceedingIdentityHint or targetProceedingHint. Candidate references are proposals; the server determines canonical anchors and verified evidence.",
     "legalIssues may originate only from PARTY_POSITION, FACT, EVENT, LEGAL_ACT, MEASURE, CONTRADICTION, or GAP items; each researchQuestion reference-date basis must be internally consistent and reference an existing item when itemLocalId is present.",
     "Assess every documented prescription, formal contestation, alleged breach, omission, and contradiction for legalIssues; empty legalIssues are valid only when the excerpts do not support an issue.",
     "When an issue cannot be structured because documents or legal research are missing, return a grounded GAP instead of inventing a legal conclusion or authority.",
@@ -101,8 +107,10 @@ export interface FascicoloDocumentProviderRequestV1 {
     ];
     readonly signalTypes: readonly ["INFO", "VERIFY"];
     readonly basisRefsMeaning: "EXTRACTED_DOCUMENT_PAGE_REFERENCE_ONLY";
-    readonly structuredKnowledgeSemanticRules:
-      typeof FASCICOLO_STRUCTURED_KNOWLEDGE_SEMANTIC_RULES;
+    readonly structuredKnowledgeSemanticRules: readonly {
+      readonly code: string;
+      readonly requirement: string;
+    }[];
   };
 }
 
@@ -182,7 +190,8 @@ export function buildFascicoloDocumentProviderRequest(
       ],
       signalTypes: ["INFO", "VERIFY"],
       basisRefsMeaning: "EXTRACTED_DOCUMENT_PAGE_REFERENCE_ONLY",
-      structuredKnowledgeSemanticRules: FASCICOLO_STRUCTURED_KNOWLEDGE_SEMANTIC_RULES,
+      structuredKnowledgeSemanticRules: FASCICOLO_STRUCTURED_KNOWLEDGE_SEMANTIC_RULES
+        .filter((rule) => !rule.code.startsWith("INVALID_PROCEEDING_")),
     },
   };
 }
@@ -190,16 +199,17 @@ export function buildFascicoloDocumentProviderRequest(
 function normalizeDocumentProviderOutput(output: unknown): unknown {
   if (!output || typeof output !== "object" || Array.isArray(output)) return output;
   const record = output as Record<string, unknown>;
-  if (!Array.isArray(record.timeline)) return output;
   return {
     ...record,
-    timeline: record.timeline.map((item) => {
-      if (!item || typeof item !== "object" || Array.isArray(item)) return item;
-      const event = item as Record<string, unknown>;
-      return typeof event.recordedAt === "string" && /^\d{4}-\d{2}-\d{2}$/.test(event.recordedAt)
-        ? { ...event, recordedAt: `${event.recordedAt}T00:00:00.000Z` }
-        : event;
-    }),
+    ...(Array.isArray(record.timeline) ? {
+      timeline: record.timeline.map((item) => {
+        if (!item || typeof item !== "object" || Array.isArray(item)) return item;
+        const event = item as Record<string, unknown>;
+        return typeof event.recordedAt === "string" && /^\d{4}-\d{2}-\d{2}$/.test(event.recordedAt)
+          ? { ...event, recordedAt: `${event.recordedAt}T00:00:00.000Z` }
+          : event;
+      }),
+    } : {}),
   };
 }
 
@@ -240,16 +250,49 @@ export function createFascicoloDocumentAnalysisService(config: {
         if (error instanceof AiProviderAdapterError) throw mapProviderError(error);
         throw error;
       }
-      const parsed = fascicoloDocumentAnalysisPayloadV1Schema.safeParse(
-        normalizeDocumentProviderOutput(output),
-      );
-      if (!parsed.success) {
+      const normalizedOutput = normalizeDocumentProviderOutput(output);
+      const proposal = fascicoloDocumentProposalPayloadV1Schema.safeParse(normalizedOutput);
+      if (!proposal.success) {
         console.error({
           event: "fascicolo_document_analysis_invalid_provider_output",
           outputKind: output === null ? "null" : Array.isArray(output) ? "array" : typeof output,
+          issues: summarizeFascicoloDocumentValidationIssues(proposal.error.issues),
+        });
+        throw new FascicoloDocumentAnalysisError("INVALID_PROVIDER_OUTPUT");
+      }
+      let compiled;
+      try {
+        compiled = compileFascicoloDocumentKnowledgeProposal({
+          proposal: proposal.data.structuredKnowledge,
+          sourceTextByBasisRef: new Map(input.excerpts.map((excerpt) => [
+            excerpt.reference,
+            excerpt.text,
+          ])),
+        });
+      } catch (error) {
+        if (!(error instanceof DocumentKnowledgeCompilationError)) throw error;
+        console.error({
+          event: "fascicolo_document_analysis_compilation_blocked",
+          diagnostics: error.diagnostics.slice(0, 20),
+        });
+        throw new FascicoloDocumentAnalysisError("INVALID_PROVIDER_OUTPUT");
+      }
+      const parsed = fascicoloDocumentAnalysisPayloadV1Schema.safeParse({
+        ...proposal.data,
+        structuredKnowledge: compiled.knowledge,
+      });
+      if (!parsed.success) {
+        console.error({
+          event: "fascicolo_document_analysis_invalid_canonical_output",
           issues: summarizeFascicoloDocumentValidationIssues(parsed.error.issues),
         });
         throw new FascicoloDocumentAnalysisError("INVALID_PROVIDER_OUTPUT");
+      }
+      if (compiled.diagnostics.length > 0) {
+        console.info({
+          event: "fascicolo_document_analysis_compiled",
+          diagnostics: compiled.diagnostics.slice(0, 100),
+        });
       }
       return parsed.data;
     },

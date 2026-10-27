@@ -32,6 +32,12 @@ function jsonRecord(value: unknown): JsonRecord {
     : {};
 }
 
+function stringValues(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === "string")
+    : [];
+}
+
 export interface StructuredReportResearchResultInput {
   resultId: string;
   title: string;
@@ -278,6 +284,19 @@ export interface StructuredFascicoloReportPayload {
     text: string;
     reviewStatus: "AI_PROPOSED" | "HUMAN_CONFIRMED";
     originatingItemIds: readonly string[];
+    proceedingIdentity?: {
+      status: string;
+      action: string;
+      reason: string | null;
+      linkedAnchor: {
+        semanticKey: string;
+        kind: "LEGAL_ACT" | "MEASURE";
+        text: string;
+      } | null;
+      evidenceBasisRefs: readonly string[];
+      providerClaim: JsonRecord | null;
+      candidateAnchorSemanticKeys: readonly string[];
+    };
     questions: readonly StructuredReportQuestion[];
   }[];
   unassignedQuestions: readonly StructuredReportQuestion[];
@@ -390,7 +409,15 @@ function buildProfessionalNarrative(
       ...gaps.map(narrativeLine),
     ],
     technicalAdministrativeAndLegalProfiles: issues.map((item) => (
-      `Questione preliminare ricavata dal fascicolo: ${narrativeLine(item)}`
+      (() => {
+        const resolution = jsonRecord(jsonRecord(item.payload).targetProceedingResolution);
+        const identityStatus = typeof resolution.status === "string"
+          ? resolution.status === "VERIFIED"
+            ? "identita del procedimento verificata"
+            : `identita del procedimento incerta (${String(resolution.reason ?? resolution.status)})`
+          : "identita del procedimento non classificata";
+        return `Questione preliminare ricavata dal fascicolo; ${identityStatus}: ${narrativeLine(item)}`;
+      })()
     )),
     favorableArguments: positions
       .filter((item) => {
@@ -1190,14 +1217,56 @@ export function buildStructuredFascicoloReport(input: {
   }));
   const questions = visibleItems(input.knowledge.researchQuestions).map((item) => projectQuestion(item, missionsByQuestion));
   const questionById = new Map(input.knowledge.researchQuestions.map((item) => [item.id, item]));
-  const legalIssues = input.knowledge.legalIssues.filter((item) => item.status !== "REJECTED").sort(byId).map((issue) => ({
-    knowledgeItemId: issue.id,
-    semanticKey: issue.semanticKey,
-    text: issue.normalizedText,
-    reviewStatus: issue.status as "AI_PROPOSED" | "HUMAN_CONFIRMED",
-    originatingItemIds: [...issue.originatingItemIds].sort(),
-    questions: questions.filter((question) => questionById.get(question.knowledgeItemId)?.legalIssueId === issue.id),
-  }));
+  const proceedingAnchors = new Map(
+    [...input.knowledge.legalActs, ...input.knowledge.measures]
+      .map((item) => [item.semanticKey, item] as const),
+  );
+  const legalIssues = input.knowledge.legalIssues
+    .filter((item) => item.status !== "REJECTED")
+    .sort(byId)
+    .map((issue) => {
+      const payload = jsonRecord(issue.payload);
+      const identity = jsonRecord(payload.targetProceedingIdentity);
+      const resolution = jsonRecord(payload.targetProceedingResolution);
+      const anchorSemanticKey = typeof identity.canonicalAnchorSemanticKey === "string"
+        ? identity.canonicalAnchorSemanticKey
+        : null;
+      const anchor = anchorSemanticKey
+        ? proceedingAnchors.get(anchorSemanticKey) ?? null
+        : null;
+      const hasResolution = typeof resolution.status === "string";
+      return {
+        knowledgeItemId: issue.id,
+        semanticKey: issue.semanticKey,
+        text: issue.normalizedText,
+        reviewStatus: issue.status as "AI_PROPOSED" | "HUMAN_CONFIRMED",
+        originatingItemIds: [...issue.originatingItemIds].sort(),
+        ...(hasResolution ? {
+          proceedingIdentity: {
+            status: String(resolution.status),
+            action: String(resolution.action ?? ""),
+            reason: typeof resolution.reason === "string" ? resolution.reason : null,
+            linkedAnchor: anchor && (anchor.kind === "LEGAL_ACT" || anchor.kind === "MEASURE")
+              ? {
+                  semanticKey: anchor.semanticKey,
+                  kind: anchor.kind,
+                  text: anchor.normalizedText,
+                }
+              : null,
+            evidenceBasisRefs: stringValues(identity.evidenceBasisRefs),
+            providerClaim: Object.keys(jsonRecord(resolution.providerClaim)).length > 0
+              ? jsonRecord(resolution.providerClaim)
+              : null,
+            candidateAnchorSemanticKeys: stringValues(
+              resolution.candidateAnchorSemanticKeys,
+            ),
+          },
+        } : {}),
+        questions: questions.filter((question) => (
+          questionById.get(question.knowledgeItemId)?.legalIssueId === issue.id
+        )),
+      };
+    });
   const operationalSubjects = legalIssues.length > 0
     ? legalIssues
     : visibleItems(input.knowledge.gaps).map((gap) => ({
