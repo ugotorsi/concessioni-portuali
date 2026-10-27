@@ -16,6 +16,12 @@ import {
   structuredKnowledgeValidationCode,
 } from "@/server/fascicolo-knowledge/structuredContracts";
 import {
+  buildFascicoloEvidenceSpanCatalog,
+  evidenceSpanCatalogFingerprint,
+  FASCICOLO_EVIDENCE_SPAN_CATALOG_VERSION,
+  type FascicoloEvidenceSpan,
+} from "@/server/fascicolo-knowledge/evidenceSpanCatalog";
+import {
   compileFascicoloDocumentKnowledgeProposal,
   DocumentKnowledgeCompilationError,
 } from "@/server/fascicolo-knowledge/proceedingIdentityReconciliation";
@@ -34,11 +40,11 @@ export const FASCICOLO_DOCUMENT_ANALYSIS_SYSTEM_POLICY = Object.freeze({
     "Return one structuredKnowledge.documentInventory entry for every supplied page reference, grouping references that belong to the same document when justified.",
     "Classify each inventoried document as MATERIAL, NOT_MATERIAL, or UNCERTAIN; explain every classification and link MATERIAL documents to grounded knowledge items and UNCERTAIN documents to a GAP.",
     "Do not omit a page because it repeats or qualifies another document: record the relationship, late or partial performance, defenses, payments, notices, technical limits, and evidentiary status whenever material.",
-    "For every structuredKnowledge item and every cited basisRef, return sourceQuotes with the item localId, basisRef, and a short authentic verbatim quotation that occurs exactly once on that page. Keep semantic descriptions and normalizedStatement as reconstructions; never use them as quotations unless they are independently verbatim.",
+    "For every structuredKnowledge item, select one or more supplied evidence span identifiers in structuredKnowledge.evidenceCandidates. Never generate, transcribe, or alter quotations; the server constructs canonical quotations from the selected spans.",
     "Preserve every material defense, claim, objection, or request as a PARTY_POSITION attributed to its subject and cited to its document page; never convert a party position into a verified FACT or a technical assessment.",
     "Within structuredKnowledge, propose legalIssues only from identified CURRENT-bound items and researchQuestions only from those legal issues with an explicit reference-date basis.",
-    "Use unique localId values within each structuredKnowledge collection and unique itemLocalId, basisRef, quote tuples in sourceQuotes.",
-    "Every structuredKnowledge cross-reference must resolve: subject references to subjects, item references to items, sourceQuotes to an item whose basisRefs contain the quoted basisRef, legal questions to legalIssues, MATERIAL documents to at least one item, and UNCERTAIN documents to at least one GAP item.",
+    "Use unique localId values within each structuredKnowledge collection and unique itemLocalId, evidenceSpanId tuples in evidenceCandidates.",
+    "Every structuredKnowledge cross-reference must resolve: subject references to subjects, item references to items, evidenceCandidates to supplied evidence spans, legal questions to legalIssues, MATERIAL documents to at least one item, and UNCERTAIN documents to at least one GAP item.",
     "For FACT, EVENT, and legalIssue proceeding identity, return only a nullable proceedingIdentityHint or targetProceedingHint. Candidate references are proposals; the server determines canonical anchors and verified evidence.",
     "legalIssues may originate only from PARTY_POSITION, FACT, EVENT, LEGAL_ACT, MEASURE, CONTRADICTION, or GAP items; each researchQuestion reference-date basis must be internally consistent and reference an existing item when itemLocalId is present.",
     "Assess every documented prescription, formal contestation, alleged breach, omission, and contradiction for legalIssues; empty legalIssues are valid only when the excerpts do not support an issue.",
@@ -88,8 +94,11 @@ export interface FascicoloDocumentProviderRequestV1 {
       readonly documentVersionId: string;
       readonly artifactSha256: string;
       readonly corpusFingerprint: string;
+      readonly evidenceSpanCatalogVersion: typeof FASCICOLO_EVIDENCE_SPAN_CATALOG_VERSION;
+      readonly evidenceSpanCatalogFingerprint: string;
       readonly documents: readonly FascicoloDocumentDescriptor[];
-      readonly excerpts: readonly FascicoloDocumentExcerpt[];
+      readonly excerpts: readonly Omit<FascicoloDocumentExcerpt, "text">[];
+      readonly evidenceSpans: readonly FascicoloEvidenceSpan[];
     };
   };
   readonly requestedOutputContract: {
@@ -150,18 +159,23 @@ function mapProviderError(error: AiProviderAdapterError): FascicoloDocumentAnaly
 }
 
 function contentHash(input: FascicoloDocumentAnalysisInput): string {
+  const evidenceSpans = buildFascicoloEvidenceSpanCatalog(input.excerpts);
   return createHash("sha256").update(JSON.stringify({
     documentVersionId: input.documentVersionId,
     artifactSha256: input.artifactSha256,
     corpusFingerprint: input.corpusFingerprint,
     documents: input.documents,
-    excerpts: input.excerpts,
+    excerpts: input.excerpts.map(({ text: _text, ...excerpt }) => excerpt),
+    evidenceSpanCatalogVersion: FASCICOLO_EVIDENCE_SPAN_CATALOG_VERSION,
+    evidenceSpanCatalogFingerprint: evidenceSpanCatalogFingerprint(evidenceSpans),
+    evidenceSpans,
   }), "utf8").digest("hex");
 }
 
 export function buildFascicoloDocumentProviderRequest(
   input: FascicoloDocumentAnalysisInput,
 ): FascicoloDocumentProviderRequestV1 {
+  const evidenceSpans = buildFascicoloEvidenceSpanCatalog(input.excerpts);
   return {
     systemPolicy: FASCICOLO_DOCUMENT_ANALYSIS_SYSTEM_POLICY,
     documentData: {
@@ -171,8 +185,11 @@ export function buildFascicoloDocumentProviderRequest(
         documentVersionId: input.documentVersionId,
         artifactSha256: input.artifactSha256,
         corpusFingerprint: input.corpusFingerprint,
+        evidenceSpanCatalogVersion: FASCICOLO_EVIDENCE_SPAN_CATALOG_VERSION,
+        evidenceSpanCatalogFingerprint: evidenceSpanCatalogFingerprint(evidenceSpans),
         documents: input.documents,
-        excerpts: input.excerpts,
+        excerpts: input.excerpts.map(({ text: _text, ...excerpt }) => excerpt),
+        evidenceSpans,
       },
     },
     requestedOutputContract: {
@@ -264,10 +281,7 @@ export function createFascicoloDocumentAnalysisService(config: {
       try {
         compiled = compileFascicoloDocumentKnowledgeProposal({
           proposal: proposal.data.structuredKnowledge,
-          sourceTextByBasisRef: new Map(input.excerpts.map((excerpt) => [
-            excerpt.reference,
-            excerpt.text,
-          ])),
+          evidenceSpans: request.documentData.content.evidenceSpans,
         });
       } catch (error) {
         if (!(error instanceof DocumentKnowledgeCompilationError)) throw error;
@@ -280,6 +294,11 @@ export function createFascicoloDocumentAnalysisService(config: {
       const parsed = fascicoloDocumentAnalysisPayloadV1Schema.safeParse({
         ...proposal.data,
         structuredKnowledge: compiled.knowledge,
+        structuredKnowledgeCompilation: {
+          promotable: compiled.promotable,
+          quarantinedItemLocalIds: compiled.quarantinedItemLocalIds,
+          diagnostics: compiled.diagnostics,
+        },
       });
       if (!parsed.success) {
         console.error({

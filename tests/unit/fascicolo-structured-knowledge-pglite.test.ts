@@ -7,6 +7,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   buildCanonicalSourceSpans,
+  buildFascicoloEvidenceSpanCatalog,
+  fascicoloDocumentKnowledgeCandidateProposalSchema,
   fascicoloDocumentKnowledgeProposalSchema,
   fascicoloStructuredKnowledgeSchema,
   getCurrentKnowledgeRevision,
@@ -34,6 +36,7 @@ import { SELVARA_PILOT_AUTHORIZATION } from "@/server/ai/selvaraPilotAuthorizati
 import {
   buildStructuredFascicoloReport,
   listStructuredFascicoloReportSnapshots,
+  persistDraftStructuredFascicoloReport,
   persistStructuredFascicoloReport,
   type StructuredReportRepositoryContext,
   type StructuredReportSqlExecutor,
@@ -1183,6 +1186,19 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
             }
       )),
     };
+    const selvaraEvidenceSpans = buildFascicoloEvidenceSpanCatalog(
+      selvaraOfflinePages.map((page) => ({
+        reference: `DOCUMENT_1.PAGE_${page.pageNumber}`,
+        pageNumber: page.pageNumber,
+        documentVersionId: "attempt-selvara-offline",
+        text: page.text,
+        textSha256: createHash("sha256").update(page.text, "utf8").digest("hex"),
+      })),
+    );
+    const {
+      sourceQuotes: recoverableSourceQuotes,
+      ...recoverableCandidateProposal
+    } = recoverableSelvaraProposal;
     const providerOutput = {
       summary: {
         text: "Il fascicolo documenta concessione, esecuzione e criticita.",
@@ -1214,9 +1230,19 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
         text: "Verificare la disciplina applicabile.",
         basisRefs: ["DOCUMENT_1.PAGE_7"],
       }],
-      structuredKnowledge: fascicoloDocumentKnowledgeProposalSchema.parse(
-        recoverableSelvaraProposal,
-      ),
+      structuredKnowledge: fascicoloDocumentKnowledgeCandidateProposalSchema.parse({
+        ...recoverableCandidateProposal,
+        evidenceCandidates: recoverableSourceQuotes.map((sourceQuote) => {
+          const span = selvaraEvidenceSpans.find((candidate) => (
+            candidate.basisRef === sourceQuote.basisRef
+          ));
+          if (!span) throw new Error(`Missing Selvara evidence span for ${sourceQuote.itemLocalId}`);
+          return {
+            itemLocalId: sourceQuote.itemLocalId,
+            evidenceSpanId: span.id,
+          };
+        }),
+      }),
     };
     const analysisService = createFascicoloDocumentAnalysisService({
       provider: { analyze: vi.fn(async () => providerOutput) },
@@ -1231,6 +1257,7 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
       persisted?: Awaited<ReturnType<typeof persistStructuredKnowledgeRevision>>;
       report?: ReturnType<typeof buildStructuredFascicoloReport>;
       archived?: Awaited<ReturnType<typeof persistStructuredFascicoloReport>>;
+      draftArchived?: Awaited<ReturnType<typeof persistDraftStructuredFascicoloReport>>;
     } = {};
     const dependencies: FascicoloAutomaticAnalysisDependencies = {
       loadAuthority: async () => ({
@@ -1274,6 +1301,8 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
             ? FASCICOLO_V7_KNOWLEDGE_REVISION_CONTRACT
             : undefined,
           deferPromotion: input.deferPromotion,
+          preserveDraftOnQualityFailure: input.preserveDraftOnQualityFailure,
+          compilation: input.compilation,
         }, context(db));
         return captured.persisted;
       },
@@ -1308,6 +1337,16 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
           revision,
           outcome: captured.archived.outcome,
           snapshotId: captured.archived.snapshot.id,
+        };
+      },
+      async persistDraftStructuredReport(input) {
+        captured.draftArchived = await persistDraftStructuredFascicoloReport(
+          input.report,
+          reportContext(db),
+        );
+        return {
+          outcome: captured.draftArchived.outcome,
+          snapshotId: captured.draftArchived.snapshot.id,
         };
       },
       reconcileKnowledgeMissions: async () => [],
@@ -1439,12 +1478,15 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
       },
     });
     expect(reconciledIssueIdentity!.target).not.toHaveProperty("declaredKey");
-    expect(readModel!.revision.warnings).toHaveLength(47);
+    expect(readModel!.revision.warnings).toHaveLength(54);
     expect(readModel!.revision.warnings.filter((warning) => (
       warning.startsWith("DOCUMENT_INVENTORY:")
     ))).toHaveLength(40);
     expect(readModel!.revision.warnings.filter((warning) => (
       warning.startsWith("PROCEEDING_IDENTITY:")
+    ))).toHaveLength(7);
+    expect(readModel!.revision.warnings.filter((warning) => (
+      warning.startsWith("COMPILATION:")
     ))).toHaveLength(7);
     expect(readModel!.revision.warnings).toContain(
       "PROCEEDING_IDENTITY:REBUILT:VERIFIED:issue-canoni",
@@ -1549,5 +1591,98 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
     expect(structuralPlan!.administrativeActs[0].sections.investigation.join(" ")).toContain("carichi");
     expect(JSON.stringify(report.payload.operationalPlans)).not.toContain("art. 48 cod. nav.");
     expect(JSON.stringify(report.payload.operationalPlans)).not.toContain("art. 54 cod. nav.");
+
+    const insufficientOutput = structuredClone(providerOutput);
+    insufficientOutput.structuredKnowledge.evidenceCandidates =
+      insufficientOutput.structuredKnowledge.evidenceCandidates.filter((candidate) => (
+        candidate.itemLocalId !== "act-concession"
+      ));
+    const insufficientAnalysisService = createFascicoloDocumentAnalysisService({
+      provider: { analyze: vi.fn(async () => insufficientOutput) },
+      maxInputBytes: 200_000,
+      realDataActivation: createRealDataActivationPolicy({
+        AI_REAL_DATA_ENABLED: "true",
+        AI_REAL_DATA_APPROVAL_ID: "offline-selvara-integration",
+        AI_PROVIDER_PROJECT_CLASS: "REAL_DATA_APPROVED",
+      }),
+    });
+    const draftCorpusFingerprint = "e".repeat(64);
+    const draftDependencies: FascicoloAutomaticAnalysisDependencies = {
+      ...dependencies,
+      loadAuthority: async () => ({
+        ...(await dependencies.loadAuthority({
+          jobId: "offline-selvara-v7-draft-job",
+          reference,
+        }))!,
+        corpusFingerprint: draftCorpusFingerprint,
+      }),
+      analyze: (input) => insufficientAnalysisService.analyze(input),
+    };
+    const draftHandler = createFascicoloAutomaticAnalysisHandler(draftDependencies);
+    const draftReference = draftHandler.parseInput({
+      referenceType: "FASCICOLO_DOCUMENT_CORPUS",
+      referenceId: draftCorpusFingerprint,
+      referenceVersion: "V1",
+      metadata: {
+        procedimentoId: "procedure-a1",
+        corpusHash: draftCorpusFingerprint,
+        trialContractVersion: FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION,
+        trialApprovalRef: SELVARA_PILOT_AUTHORIZATION.approvalId,
+        trialPreflightHash: "f".repeat(64),
+      },
+    });
+    await expect(draftHandler.execute(draftReference, {
+      jobId: "offline-selvara-v7-draft-job",
+      correlationId: "offline-selvara-v7-draft-correlation",
+      attempt: 1,
+      isCancellationRequested: async () => false,
+      heartbeat: async () => undefined,
+    })).rejects.toMatchObject({
+      category: "ANALYSIS",
+      code: "STRUCTURED_KNOWLEDGE_MATERIALLY_INCOMPLETE",
+      retryable: false,
+    });
+    const revisions = await db.query<{
+      id: string;
+      status: string;
+      warnings: string[];
+    }>(`
+      SELECT "id", "status", "warnings"
+      FROM "FascicoloKnowledgeRevision"
+      WHERE "tenantId" = 'tenant-a' AND "procedimentoId" = 'procedure-a1'
+      ORDER BY "createdAt", "id"
+    `);
+    const draftRevision = revisions.rows.find((revision) => revision.status === "BUILDING");
+    expect(draftRevision).toBeDefined();
+    expect(draftRevision!.warnings.some((warning) => (
+      warning.includes("ITEM_EVIDENCE_NOT_VERIFIED")
+    ))).toBe(true);
+    const currentAfterDraft = await loadCurrentStructuredKnowledge(
+      "tenant-a",
+      "procedure-a1",
+      queryExecutor(db),
+    );
+    expect(currentAfterDraft?.revision.id).toBe(readModel!.revision.id);
+    const snapshotsAfterDraft = await listStructuredFascicoloReportSnapshots(
+      scope(),
+      reportContext(db),
+    );
+    expect(snapshotsAfterDraft).toHaveLength(2);
+    expect(snapshotsAfterDraft).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        status: "CURRENT",
+        knowledgeRevisionId: readModel!.revision.id,
+      }),
+      expect.objectContaining({
+        status: "STALE",
+        knowledgeRevisionId: draftRevision!.id,
+        staleReasons: ["KNOWLEDGE_DRAFT_NOT_PROMOTED"],
+        payload: expect.objectContaining({
+          limitations: expect.arrayContaining([
+            expect.stringContaining("ITEM_EVIDENCE_NOT_VERIFIED"),
+          ]),
+        }),
+      }),
+    ]));
   });
 });

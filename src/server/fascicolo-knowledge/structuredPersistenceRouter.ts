@@ -10,6 +10,16 @@ export interface RoutedStructuredKnowledgePersistenceInput extends KnowledgeScop
   sourceTextByBasisRef?: ReadonlyMap<string, string>;
   revisionContractVersion?: string;
   deferPromotion?: boolean;
+  preserveDraftOnQualityFailure?: boolean;
+  compilation?: {
+    promotable: boolean;
+    quarantinedItemLocalIds: readonly string[];
+    diagnostics: readonly {
+      code: string;
+      path: string;
+      action: "PRESERVED" | "REBUILT" | "MARKED_UNRESOLVED" | "BLOCKED";
+    }[];
+  };
 }
 
 interface StructuredPersistenceRouterDependencies {

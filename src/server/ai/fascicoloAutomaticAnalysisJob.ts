@@ -254,12 +254,25 @@ export interface FascicoloAutomaticAnalysisDependencies {
     sourceTextByBasisRef?: ReadonlyMap<string, string>;
     forceNewRevision?: boolean;
     deferPromotion?: boolean;
+    preserveDraftOnQualityFailure?: boolean;
+    compilation?: {
+      promotable: boolean;
+      quarantinedItemLocalIds: readonly string[];
+      diagnostics: readonly {
+        code: string;
+        path: string;
+        action: "PRESERVED" | "REBUILT" | "MARKED_UNRESOLVED" | "BLOCKED";
+      }[];
+    };
   }): Promise<unknown>;
   prepareStructuredReport?(input: {
     tenantId: string;
     procedimentoId: string;
     knowledgeRevisionId: string;
   }): Promise<BuiltStructuredFascicoloReport | null>;
+  persistDraftStructuredReport?(input: {
+    report: BuiltStructuredFascicoloReport;
+  }): Promise<{ outcome: "CREATED" | "REUSED"; snapshotId: string }>;
   finalizeControlledV7?(input: {
     tenantId: string;
     procedimentoId: string;
@@ -949,6 +962,12 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
     );
     return buildStructuredReportForRevision(input);
   },
+  async persistDraftStructuredReport(input) {
+    const { archiveDraftStructuredReport } = await import(
+      "@/server/fascicolo-report/auto-refresh"
+    );
+    return archiveDraftStructuredReport(input.report);
+  },
   async finalizeControlledV7(input) {
     const { finalizeStructuredKnowledgeAndReport } = await import(
       "@/server/fascicolo-report/auto-refresh"
@@ -1208,6 +1227,8 @@ export function createFascicoloAutomaticAnalysisHandler(
             ])),
             forceNewRevision: controlledV7,
             deferPromotion: controlledV7,
+            preserveDraftOnQualityFailure: controlledV7,
+            compilation: parsed.data.structuredKnowledgeCompilation,
           });
         } catch (error) {
           reportStructuredKnowledgePersistenceFailure(error);
@@ -1269,6 +1290,34 @@ export function createFascicoloAutomaticAnalysisHandler(
           });
         }
         knowledgeRevisionId = reconciliation.revision.id;
+        const promotable = (persisted as { promotable?: boolean }).promotable ?? true;
+        if (controlledV7 && !promotable) {
+          if (!dependencies.prepareStructuredReport || !dependencies.persistDraftStructuredReport) {
+            throw new AsyncJobExecutionError(
+              "PERSISTENCE",
+              "STRUCTURED_KNOWLEDGE_DRAFT_REPORT_UNAVAILABLE",
+              false,
+            );
+          }
+          const draftReport = await dependencies.prepareStructuredReport({
+            tenantId: authority.tenantId,
+            procedimentoId: authority.procedimentoId,
+            knowledgeRevisionId,
+          });
+          if (!draftReport) {
+            throw new AsyncJobExecutionError(
+              "PERSISTENCE",
+              "STRUCTURED_KNOWLEDGE_DRAFT_REPORT_UNAVAILABLE",
+              false,
+            );
+          }
+          await dependencies.persistDraftStructuredReport({ report: draftReport });
+          throw new AsyncJobExecutionError(
+            "ANALYSIS",
+            "STRUCTURED_KNOWLEDGE_MATERIALLY_INCOMPLETE",
+            false,
+          );
+        }
         const recovered = await reconcileStructuredKnowledgeMissions({
           authority,
           revision: reconciliation.revision,

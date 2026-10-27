@@ -140,7 +140,23 @@ export function buildCanonicalSourceSpans(
         && !Array.isArray(sourceQuote)
         && typeof sourceQuote.basisRef === "string"
         && typeof sourceQuote.quote === "string"
-          ? [{ basisRef: sourceQuote.basisRef, quote: sourceQuote.quote }]
+          ? [{
+              basisRef: sourceQuote.basisRef,
+              quote: sourceQuote.quote,
+              span: sourceQuote.span && typeof sourceQuote.span === "object"
+                && !Array.isArray(sourceQuote.span)
+                && typeof sourceQuote.span.startOffset === "number"
+                && typeof sourceQuote.span.endOffset === "number"
+                && typeof sourceQuote.span.textSha256 === "string"
+                && typeof sourceQuote.span.quoteSha256 === "string"
+                ? {
+                    startOffset: sourceQuote.span.startOffset,
+                    endOffset: sourceQuote.span.endOffset,
+                    textSha256: sourceQuote.span.textSha256,
+                    quoteSha256: sourceQuote.span.quoteSha256,
+                  }
+                : null,
+            }]
           : []
       ))
     : [];
@@ -158,7 +174,17 @@ export function buildCanonicalSourceSpans(
     if (quotes.length === 0) {
       throw new Error(`CANONICAL_ITEM_SOURCE_QUOTE_REQUIRED:${candidate.semanticKey}:${evidence.basisRef}`);
     }
-    return quotes.map(({ quote }) => {
+    return quotes.map(({ quote, span }) => {
+      if (span) {
+        const { startOffset, endOffset, textSha256, quoteSha256 } = span;
+        if (textSha256 !== evidence.textSha256
+          || quoteSha256 !== digest(quote)
+          || endOffset <= startOffset
+          || trustedText.slice(startOffset, endOffset) !== quote) {
+          throw new Error(`CANONICAL_ITEM_SOURCE_QUOTE_REQUIRED:${candidate.semanticKey}:${evidence.basisRef}`);
+        }
+        return { basisRef: evidence.basisRef, startOffset, endOffset, quote, quoteSha256 };
+      }
       const startOffset = trustedText.indexOf(quote);
       const consumesWholePage = startOffset >= 0
         && trustedText.slice(0, startOffset).trim().length === 0
@@ -214,6 +240,17 @@ export async function persistCanonicalStructuredKnowledgeRevision(input: Knowled
   knowledge: unknown;
   evidenceByBasisRef: ReadonlyMap<string, KnowledgeEvidenceCandidate>;
   sourceTextByBasisRef: ReadonlyMap<string, string>;
+  deferPromotion?: boolean;
+  preserveDraftOnQualityFailure?: boolean;
+  compilation?: {
+    promotable: boolean;
+    quarantinedItemLocalIds: readonly string[];
+    diagnostics: readonly {
+      code: string;
+      path: string;
+      action: "PRESERVED" | "REBUILT" | "MARKED_UNRESOLVED" | "BLOCKED";
+    }[];
+  };
 }, overrides: Partial<FascicoloKnowledgeRepositoryContext> = {}): Promise<StructuredKnowledgePersistenceResult> {
   const knowledge = fascicoloStructuredKnowledgeSchema.parse(input.knowledge);
   return runInFascicoloKnowledgeTransaction(async (transactionContext) => {
@@ -229,7 +266,24 @@ export async function persistCanonicalStructuredKnowledgeRevision(input: Knowled
       evidenceByBasisRef: input.evidenceByBasisRef,
       sourceTextByBasisRef: input.sourceTextByBasisRef,
     });
-    assertStructuredKnowledgeQuality(projection.quality);
+    const quality = {
+      ...projection.quality,
+      proposedCount: projection.quality.proposedCount
+        + (input.compilation?.quarantinedItemLocalIds.length ?? 0),
+      rejectedCount: projection.quality.rejectedCount
+        + (input.compilation?.quarantinedItemLocalIds.length ?? 0),
+      blockingReasons: [...new Set([
+        ...projection.quality.blockingReasons,
+        ...(input.compilation?.promotable === false ? ["UNVERIFIED_PROVIDER_ITEMS"] : []),
+      ])].sort(),
+    };
+    const promotable = quality.blockingReasons.length === 0;
+    if (!promotable && !input.preserveDraftOnQualityFailure) {
+      assertStructuredKnowledgeQuality(quality);
+    }
+    const compilationWarnings = input.compilation?.diagnostics.map((diagnostic) => (
+      `COMPILATION:${diagnostic.action}:${diagnostic.code}:${diagnostic.path}`
+    )) ?? [];
     const current = await getCurrentKnowledgeRevision({
       tenantId: input.tenantId,
       procedimentoId: input.procedimentoId,
@@ -239,7 +293,7 @@ export async function persistCanonicalStructuredKnowledgeRevision(input: Knowled
       procedimentoId: input.procedimentoId,
       corpusFingerprint: input.corpusFingerprint,
       contractVersion: CANONICAL_IDENTITY_V3_CONTRACT_VERSION,
-      warnings: [...projection.warnings],
+      warnings: [...projection.warnings, ...compilationWarnings],
     }, transactionContext);
     const serviceContext: Partial<CanonicalIdentityServiceContext> = {
       transaction: transactionContext.transaction,
@@ -363,13 +417,15 @@ export async function persistCanonicalStructuredKnowledgeRevision(input: Knowled
       expectedCurrentRevisionId: current?.id ?? null,
       candidates: [],
       relations: projection.relations,
+      deferPromotion: input.deferPromotion || !promotable,
     }, transactionContext);
     return {
       ...promoted,
       classifications,
-      warnings: projection.warnings,
+      warnings: [...projection.warnings, ...compilationWarnings],
       subjectIdsByLocalId,
-      quality: projection.quality,
+      quality,
+      promotable,
     };
   }, overrides);
 }

@@ -156,7 +156,18 @@ function materialPayload(
   dependencyKeys: readonly string[],
   proceedingAnchorSemanticKey: string | null,
   proceedingResolutionCandidateSemanticKeys: readonly string[],
-  sourceQuotes: readonly { basisRef: string; quote: string }[],
+  sourceQuotes: readonly {
+    basisRef: string;
+    quote: string;
+    span?: {
+      id: string;
+      documentVersionId: string;
+      startOffset: number;
+      endOffset: number;
+      textSha256: string;
+      quoteSha256: string;
+    } | null;
+  }[],
 ) {
   const payload = { ...item.payload } as Record<string, unknown>;
   const proceedingIdentity = item.kind === "FACT" || item.kind === "EVENT"
@@ -206,7 +217,11 @@ function projectedSourceQuotes(candidate: PreparedKnowledgeItemCandidate) {
     && !Array.isArray(sourceQuote)
     && typeof sourceQuote.basisRef === "string"
     && typeof sourceQuote.quote === "string"
-      ? [{ basisRef: sourceQuote.basisRef, quote: sourceQuote.quote }]
+      ? [{
+          basisRef: sourceQuote.basisRef,
+          quote: sourceQuote.quote,
+          ...("span" in sourceQuote ? { span: sourceQuote.span } : {}),
+        }]
       : []
   ));
 }
@@ -260,8 +275,20 @@ function quoteOccurrences(
       count += 1;
       offset = index + Math.max(quote.length, 1);
     }
+
     return Array.from({ length: count }, () => basisRef);
   });
+}
+
+function sourceQuoteMatchesDeclaredSpan(
+  sourceQuote: FascicoloStructuredKnowledge["sourceQuotes"][number],
+  sourceTextByBasisRef: ReadonlyMap<string, string>,
+): boolean {
+  if (!sourceQuote.span) return false;
+  const sourceText = sourceTextByBasisRef.get(sourceQuote.basisRef);
+  return Boolean(sourceText
+    && sourceQuote.span.endOffset <= sourceText.length
+    && sourceText.slice(sourceQuote.span.startOffset, sourceQuote.span.endOffset) === sourceQuote.quote);
 }
 
 function replaceBasisRef<T>(value: T, from: string, to: string): T {
@@ -289,6 +316,7 @@ export function normalizeStructuredKnowledgeEvidenceRefs(input: {
   let knowledge = structuredClone(input.knowledge);
   const corrections: StructuredKnowledgeEvidenceCorrection[] = [];
   for (const sourceQuote of knowledge.sourceQuotes) {
+    if (sourceQuoteMatchesDeclaredSpan(sourceQuote, input.sourceTextByBasisRef)) continue;
     const currentText = input.sourceTextByBasisRef.get(sourceQuote.basisRef);
     const currentStart = currentText?.indexOf(sourceQuote.quote) ?? -1;
     if (currentStart >= 0 && currentStart === currentText!.lastIndexOf(sourceQuote.quote)) continue;
@@ -365,6 +393,10 @@ export function projectStructuredKnowledge(input: {
       `${correction.itemLocalId}:${correction.toBasisRef}:${correction.quote}`
     )));
     for (const sourceQuote of knowledge.sourceQuotes) {
+      if (sourceQuoteMatchesDeclaredSpan(sourceQuote, input.sourceTextByBasisRef)) {
+        exactCitationCount += 1;
+        continue;
+      }
       const occurrences = quoteOccurrences(sourceQuote.quote, input.sourceTextByBasisRef);
       if (occurrences.length === 0) {
         nonexistentCitationCount += 1;
@@ -436,6 +468,7 @@ export function projectStructuredKnowledge(input: {
         const quotes = knowledge.sourceQuotes.filter((quote) => quote.itemLocalId === item.localId);
         const invalidBasisRefs = item.basisRefs.filter((basisRef) => !quotes.some((sourceQuote) => {
           if (sourceQuote.basisRef !== basisRef) return false;
+          if (sourceQuoteMatchesDeclaredSpan(sourceQuote, input.sourceTextByBasisRef!)) return true;
           const sourceText = input.sourceTextByBasisRef!.get(basisRef);
           if (!sourceText) return false;
           const start = sourceText.indexOf(sourceQuote.quote);

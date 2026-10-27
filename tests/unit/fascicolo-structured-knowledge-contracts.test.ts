@@ -638,13 +638,13 @@ describe("Lotto 2 structured knowledge contracts", () => {
     });
     expect(corrected.knowledge.legalIssues[0]).toMatchObject({
       targetProceedingIdentity: {
-        declaredKey: "procedimento-documentato",
+        declaredKey: null,
         canonicalAnchorLocalId: legalAct.localId,
         evidenceBasisRefs: ["DOCUMENT_1.PAGE_1"],
       },
       targetProceedingResolution: {
         status: "VERIFIED",
-        action: "PRESERVED",
+        action: "REBUILT",
       },
     });
     expect(corrected.diagnostics).toContainEqual({

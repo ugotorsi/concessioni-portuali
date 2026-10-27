@@ -6,6 +6,7 @@ import {
   type ProceedingIdentityResolution,
   type StructuredKnowledgeProposalItem,
 } from "./structuredContracts";
+import type { FascicoloEvidenceSpan } from "./evidenceSpanCatalog";
 
 export type KnowledgeCompilationDiagnosticAction =
   | "PRESERVED"
@@ -31,212 +32,261 @@ export class DocumentKnowledgeCompilationError extends Error {
 export interface CompiledDocumentKnowledge {
   readonly knowledge: FascicoloStructuredKnowledge;
   readonly diagnostics: readonly KnowledgeCompilationDiagnostic[];
+  readonly promotable: boolean;
+  readonly quarantinedItemLocalIds: readonly string[];
 }
 
-interface BasisRefCorrection {
-  readonly itemLocalId: string;
-  readonly fromBasisRef: string;
-  readonly toBasisRef: string;
-}
-
-function quoteOccurrences(
-  quote: string,
-  sourceTextByBasisRef: ReadonlyMap<string, string>,
-): readonly string[] {
-  if (quote.length === 0) return [];
-  return [...sourceTextByBasisRef].flatMap(([basisRef, text]) => {
-    const occurrences: string[] = [];
-    let offset = 0;
-    while (offset <= text.length) {
-      const index = text.indexOf(quote, offset);
-      if (index < 0) break;
-      occurrences.push(basisRef);
-      offset = index + quote.length;
-    }
-    return occurrences;
-  });
-}
-
-function correctionKey(itemLocalId: string, basisRef: string): string {
-  return `${itemLocalId}\u001f${basisRef}`;
-}
-
-function authenticateSourceQuotes(
-  proposal: FascicoloDocumentKnowledgeProposal,
-  sourceTextByBasisRef: ReadonlyMap<string, string>,
-): {
-  readonly corrections: ReadonlyMap<string, BasisRefCorrection>;
-  readonly diagnostics: readonly KnowledgeCompilationDiagnostic[];
-} {
-  const corrections = new Map<string, BasisRefCorrection>();
-  const diagnostics: KnowledgeCompilationDiagnostic[] = [];
-  for (const [index, sourceQuote] of proposal.sourceQuotes.entries()) {
-    const occurrences = quoteOccurrences(sourceQuote.quote, sourceTextByBasisRef);
-    const declaredOccurrences = occurrences.filter((basisRef) => basisRef === sourceQuote.basisRef);
-    if (occurrences.length === 1 && declaredOccurrences.length === 1) continue;
-    if (occurrences.length === 1) {
-      const key = correctionKey(sourceQuote.itemLocalId, sourceQuote.basisRef);
-      const correction = {
-        itemLocalId: sourceQuote.itemLocalId,
-        fromBasisRef: sourceQuote.basisRef,
-        toBasisRef: occurrences[0],
-      };
-      const existing = corrections.get(key);
-      if (existing && existing.toBasisRef !== correction.toBasisRef) {
-        diagnostics.push({
-          code: "CONFLICTING_BASIS_REF_CORRECTION",
-          path: `sourceQuotes.${index}.basisRef`,
-          action: "BLOCKED",
-        });
-      } else {
-        corrections.set(key, correction);
-        diagnostics.push({
-          code: "BASIS_REF_CORRECTED",
-          path: `sourceQuotes.${index}.basisRef`,
-          action: "REBUILT",
-        });
-      }
-      continue;
-    }
-    diagnostics.push({
-      code: occurrences.length === 0
-        ? "NONEXISTENT_SOURCE_QUOTE"
-        : "AMBIGUOUS_SOURCE_QUOTE",
-      path: `sourceQuotes.${index}.quote`,
-      action: "BLOCKED",
-    });
-  }
-  return { corrections, diagnostics };
-}
-
-function correctedBasisRef(
-  itemLocalId: string,
-  basisRef: string,
-  corrections: ReadonlyMap<string, BasisRefCorrection>,
-): string {
-  return corrections.get(correctionKey(itemLocalId, basisRef))?.toBasisRef ?? basisRef;
-}
-
-function correctedHint(
-  itemLocalId: string,
-  hint: ProceedingIdentityHint | null,
-  corrections: ReadonlyMap<string, BasisRefCorrection>,
-): ProceedingIdentityHint | null {
-  return hint
-    ? {
-        ...hint,
-        evidenceBasisRefs: hint.evidenceBasisRefs.map((basisRef) => (
-          correctedBasisRef(itemLocalId, basisRef, corrections)
-        )),
-      }
-    : null;
-}
-
-function correctedDependentHint(
-  originItemLocalIds: readonly string[],
-  hint: ProceedingIdentityHint | null,
-  corrections: ReadonlyMap<string, BasisRefCorrection>,
-): ProceedingIdentityHint | null {
-  if (!hint) return null;
-  const correctionOwners = hint.candidateAnchorLocalId
-    && originItemLocalIds.includes(hint.candidateAnchorLocalId)
-    ? [hint.candidateAnchorLocalId]
-    : originItemLocalIds;
-  return {
-    ...hint,
-    evidenceBasisRefs: hint.evidenceBasisRefs.map((basisRef) => {
-      const correctedRefs = new Set(correctionOwners.flatMap((itemLocalId) => {
-        const corrected = corrections.get(correctionKey(itemLocalId, basisRef));
-        return corrected ? [corrected.toBasisRef] : [];
-      }));
-      return correctedRefs.size === 1 ? [...correctedRefs][0] : basisRef;
-    }),
-  };
-}
-
-function correctProposalEvidence(
-  proposal: FascicoloDocumentKnowledgeProposal,
-  corrections: ReadonlyMap<string, BasisRefCorrection>,
-): FascicoloDocumentKnowledgeProposal {
-  return {
-    ...proposal,
-    items: proposal.items.map((item) => {
-      const basisRefs = item.basisRefs.map((basisRef) => (
-        correctedBasisRef(item.localId, basisRef, corrections)
-      ));
-      if (item.kind === "FACT") {
-        return {
-          ...item,
-          basisRefs,
-          payload: {
-            ...item.payload,
-            proceedingIdentityHint: correctedHint(
-              item.localId,
-              item.payload.proceedingIdentityHint,
-              corrections,
-            ),
-          },
-        };
-      }
-      if (item.kind === "EVENT") {
-        return {
-          ...item,
-          basisRefs,
-          payload: {
-            ...item.payload,
-            proceedingIdentityHint: correctedHint(
-              item.localId,
-              item.payload.proceedingIdentityHint,
-              corrections,
-            ),
-          },
-        };
-      }
-      if (item.kind === "LEGAL_ACT" || item.kind === "MEASURE") {
-        return {
-          ...item,
-          basisRefs,
-          payload: {
-            ...item.payload,
-            documentBasisRef: correctedBasisRef(
-              item.localId,
-              item.payload.documentBasisRef,
-              corrections,
-            ),
-          },
-        };
-      }
-      return { ...item, basisRefs };
-    }),
-    sourceQuotes: proposal.sourceQuotes.map((sourceQuote) => ({
-      ...sourceQuote,
-      basisRef: correctedBasisRef(
-        sourceQuote.itemLocalId,
-        sourceQuote.basisRef,
-        corrections,
-      ),
-    })),
-    legalIssues: proposal.legalIssues.map((issue) => ({
-      ...issue,
-      targetProceedingHint: correctedDependentHint(
-        issue.originatingItemLocalIds,
-        issue.targetProceedingHint,
-        corrections,
-      ),
-    })),
-  };
-}
-
-function documentedBasisRefs(
-  proposal: FascicoloDocumentKnowledgeProposal,
-): ReadonlyMap<string, ReadonlySet<string>> {
+function documentedBasisRefs(input: {
+  sourceQuotes: readonly { itemLocalId: string; basisRef: string }[];
+}): ReadonlyMap<string, ReadonlySet<string>> {
   const refs = new Map<string, Set<string>>();
-  for (const sourceQuote of proposal.sourceQuotes) {
+  for (const sourceQuote of input.sourceQuotes) {
     const current = refs.get(sourceQuote.itemLocalId) ?? new Set<string>();
     current.add(sourceQuote.basisRef);
     refs.set(sourceQuote.itemLocalId, current);
   }
   return refs;
+}
+
+function unique<T>(values: readonly T[]): T[] {
+  return [...new Set(values)];
+}
+
+type CandidateProposal = Extract<FascicoloDocumentKnowledgeProposal, {
+  evidenceCandidates: readonly unknown[];
+}>;
+
+function digest(value: string): string {
+  return createHash("sha256").update(value, "utf8").digest("hex");
+}
+
+function adaptLegacyProposal(input: {
+  proposal: FascicoloDocumentKnowledgeProposal;
+  evidenceSpans?: readonly FascicoloEvidenceSpan[];
+  sourceTextByBasisRef?: ReadonlyMap<string, string>;
+}): {
+  proposal: CandidateProposal;
+  evidenceSpans: readonly FascicoloEvidenceSpan[];
+  diagnostics: readonly KnowledgeCompilationDiagnostic[];
+} {
+  if ("evidenceCandidates" in input.proposal) {
+    return {
+      proposal: input.proposal,
+      evidenceSpans: input.evidenceSpans ?? [],
+      diagnostics: [],
+    };
+  }
+  if (!input.sourceTextByBasisRef) {
+    throw new DocumentKnowledgeCompilationError([{
+      code: "EVIDENCE_SPAN_CATALOG_REQUIRED",
+      path: "evidenceCandidates",
+      action: "BLOCKED",
+    }]);
+  }
+  const diagnostics: KnowledgeCompilationDiagnostic[] = [];
+  const evidenceSpans: FascicoloEvidenceSpan[] = [];
+  const evidenceCandidates: { itemLocalId: string; evidenceSpanId: string }[] = [];
+  for (const [index, sourceQuote] of input.proposal.sourceQuotes.entries()) {
+    const matches = [...input.sourceTextByBasisRef].flatMap(([basisRef, text]) => {
+      const offsets: { basisRef: string; startOffset: number; text: string }[] = [];
+      let cursor = 0;
+      while (cursor <= text.length) {
+        const startOffset = text.indexOf(sourceQuote.quote, cursor);
+        if (startOffset < 0) break;
+        offsets.push({ basisRef, startOffset, text });
+        cursor = startOffset + Math.max(sourceQuote.quote.length, 1);
+      }
+      return offsets;
+    });
+    if (matches.length !== 1) {
+      diagnostics.push({
+        code: matches.length === 0 ? "NONEXISTENT_SOURCE_QUOTE" : "AMBIGUOUS_SOURCE_QUOTE",
+        path: `sourceQuotes.${index}.quote`,
+        action: "BLOCKED",
+      });
+      continue;
+    }
+    const match = matches[0];
+    if (match.basisRef !== sourceQuote.basisRef) {
+      diagnostics.push({
+        code: "BASIS_REF_CORRECTED",
+        path: `sourceQuotes.${index}.basisRef`,
+        action: "REBUILT",
+      });
+    }
+    const endOffset = match.startOffset + sourceQuote.quote.length;
+    const quoteSha256 = digest(sourceQuote.quote);
+    const span: FascicoloEvidenceSpan = {
+      id: `LEGACY_EVIDENCE_${digest(`${match.basisRef}\u001f${match.startOffset}\u001f${quoteSha256}`)}`,
+      basisRef: match.basisRef,
+      documentVersionId: "LEGACY_PROVIDER_PROPOSAL",
+      pageNumber: Number(match.basisRef.match(/\.PAGE_(\d+)$/)?.[1] ?? "1"),
+      startOffset: match.startOffset,
+      endOffset,
+      text: sourceQuote.quote,
+      textSha256: digest(match.text),
+      quoteSha256,
+    };
+    evidenceSpans.push(span);
+    evidenceCandidates.push({
+      itemLocalId: sourceQuote.itemLocalId,
+      evidenceSpanId: span.id,
+    });
+  }
+  if (diagnostics.some((diagnostic) => diagnostic.action === "BLOCKED")) {
+    throw new DocumentKnowledgeCompilationError(diagnostics);
+  }
+  const { sourceQuotes: _sourceQuotes, ...proposal } = input.proposal;
+  return {
+    proposal: { ...proposal, evidenceCandidates },
+    evidenceSpans,
+    diagnostics,
+  };
+}
+
+function rebuildItemEvidence(
+  item: StructuredKnowledgeProposalItem,
+  spans: readonly FascicoloEvidenceSpan[],
+  retainedItemLocalIds: ReadonlySet<string>,
+): StructuredKnowledgeProposalItem {
+  const basisRefs = unique(spans.map((span) => span.basisRef));
+  switch (item.kind) {
+    case "PARTY_POSITION":
+      return {
+        ...item,
+        basisRefs,
+        payload: {
+          ...item.payload,
+          relatedItemLocalIds: item.payload.relatedItemLocalIds.filter((id) => retainedItemLocalIds.has(id)),
+        },
+      };
+    case "EVENT":
+      return {
+        ...item,
+        basisRefs,
+        payload: {
+          ...item.payload,
+          relatedItemLocalIds: item.payload.relatedItemLocalIds.filter((id) => retainedItemLocalIds.has(id)),
+        },
+      };
+    case "GAP":
+      return {
+        ...item,
+        basisRefs,
+        payload: {
+          ...item.payload,
+          relatedItemLocalIds: item.payload.relatedItemLocalIds.filter((id) => retainedItemLocalIds.has(id)),
+        },
+      };
+    case "CONTRADICTION":
+      return {
+        ...item,
+        basisRefs,
+        payload: {
+          ...item.payload,
+          conflictingItemLocalIds: item.payload.conflictingItemLocalIds.filter((id) => retainedItemLocalIds.has(id)),
+        },
+      };
+    case "LEGAL_ACT":
+    case "MEASURE":
+      return {
+        ...item,
+        basisRefs,
+        payload: {
+          ...item.payload,
+          documentBasisRef: basisRefs[0],
+        },
+      };
+    default:
+      return { ...item, basisRefs };
+  }
+}
+
+function compileEvidenceCandidates(input: {
+  proposal: CandidateProposal;
+  evidenceSpans: readonly FascicoloEvidenceSpan[];
+}) {
+  const spansById = new Map(input.evidenceSpans.map((span) => [span.id, span]));
+  const proposedItemIds = new Set(input.proposal.items.map((item) => item.localId));
+  const spansByItem = new Map<string, FascicoloEvidenceSpan[]>();
+  const diagnostics: KnowledgeCompilationDiagnostic[] = [];
+  for (const [index, candidate] of input.proposal.evidenceCandidates.entries()) {
+    if (!proposedItemIds.has(candidate.itemLocalId)) {
+      diagnostics.push({
+        code: "UNKNOWN_EVIDENCE_ITEM",
+        path: `evidenceCandidates.${index}.itemLocalId`,
+        action: "MARKED_UNRESOLVED",
+      });
+      continue;
+    }
+    const span = spansById.get(candidate.evidenceSpanId);
+    if (!span) {
+      diagnostics.push({
+        code: "UNKNOWN_EVIDENCE_SPAN",
+        path: `evidenceCandidates.${index}.evidenceSpanId`,
+        action: "MARKED_UNRESOLVED",
+      });
+      continue;
+    }
+    const current = spansByItem.get(candidate.itemLocalId) ?? [];
+    if (!current.some((entry) => entry.id === span.id)) current.push(span);
+    spansByItem.set(candidate.itemLocalId, current);
+  }
+
+  const retainedItemLocalIds = new Set(input.proposal.items
+    .filter((item) => (spansByItem.get(item.localId)?.length ?? 0) > 0)
+    .map((item) => item.localId));
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const item of input.proposal.items) {
+      if (!retainedItemLocalIds.has(item.localId) || item.kind !== "CONTRADICTION") continue;
+      const retainedConflicts = item.payload.conflictingItemLocalIds.filter((id) => retainedItemLocalIds.has(id));
+      if (retainedConflicts.length < 2) {
+        retainedItemLocalIds.delete(item.localId);
+        changed = true;
+      }
+    }
+  }
+  const quarantinedItemLocalIds = input.proposal.items
+    .filter((item) => !retainedItemLocalIds.has(item.localId))
+    .map((item) => item.localId);
+  for (const itemLocalId of quarantinedItemLocalIds) {
+    diagnostics.push({
+      code: "ITEM_EVIDENCE_NOT_VERIFIED",
+      path: `items.${input.proposal.items.findIndex((item) => item.localId === itemLocalId)}`,
+      action: "MARKED_UNRESOLVED",
+    });
+  }
+  const items = input.proposal.items
+    .filter((item) => retainedItemLocalIds.has(item.localId))
+    .map((item) => rebuildItemEvidence(
+      item,
+      spansByItem.get(item.localId) ?? [],
+      retainedItemLocalIds,
+    ));
+  const sourceQuotes = items.flatMap((item) => (
+    (spansByItem.get(item.localId) ?? []).map((span) => ({
+      itemLocalId: item.localId,
+      basisRef: span.basisRef,
+      quote: span.text,
+      span: {
+        id: span.id,
+        documentVersionId: span.documentVersionId,
+        startOffset: span.startOffset,
+        endOffset: span.endOffset,
+        textSha256: span.textSha256,
+        quoteSha256: span.quoteSha256,
+      },
+    }))
+  ));
+  return {
+    items,
+    sourceQuotes,
+    diagnostics,
+    quarantinedItemLocalIds,
+    retainedItemLocalIds,
+  };
 }
 
 function isDocumentedAnchor(
@@ -441,23 +491,22 @@ function resolveItemIdentity(input: {
 
 export function compileFascicoloDocumentKnowledgeProposal(input: {
   proposal: FascicoloDocumentKnowledgeProposal;
-  sourceTextByBasisRef: ReadonlyMap<string, string>;
+  evidenceSpans?: readonly FascicoloEvidenceSpan[];
+  sourceTextByBasisRef?: ReadonlyMap<string, string>;
 }): CompiledDocumentKnowledge {
-  const authenticated = authenticateSourceQuotes(
-    input.proposal,
-    input.sourceTextByBasisRef,
-  );
-  if (authenticated.diagnostics.some((diagnostic) => diagnostic.action === "BLOCKED")) {
-    throw new DocumentKnowledgeCompilationError(authenticated.diagnostics);
-  }
-  const proposal = correctProposalEvidence(input.proposal, authenticated.corrections);
-  const documented = documentedBasisRefs(proposal);
-  const itemsByLocalId = new Map(proposal.items.map((item) => [item.localId, item]));
-  const anchors = proposal.items.filter((item) => (
+  const adapted = adaptLegacyProposal(input);
+  const proposal = adapted.proposal;
+  const evidence = compileEvidenceCandidates({
+    proposal,
+    evidenceSpans: adapted.evidenceSpans,
+  });
+  const documented = documentedBasisRefs(evidence);
+  const itemsByLocalId = new Map(evidence.items.map((item) => [item.localId, item]));
+  const anchors = evidence.items.filter((item) => (
     item.kind === "LEGAL_ACT" || item.kind === "MEASURE"
   ));
-  const diagnostics = [...authenticated.diagnostics];
-  const items = proposal.items.map((item, itemIndex) => {
+  const diagnostics = [...adapted.diagnostics, ...evidence.diagnostics];
+  const items = evidence.items.map((item, itemIndex) => {
     if (item.kind !== "FACT" && item.kind !== "EVENT") return item;
     const resolved = resolveItemIdentity({
       item,
@@ -476,11 +525,29 @@ export function compileFascicoloDocumentKnowledgeProposal(input: {
       },
     };
   });
-  const legalIssues = proposal.legalIssues.map((issue, issueIndex) => {
+  const legalIssues = proposal.legalIssues.flatMap((issue, issueIndex) => {
+    const originatingItemLocalIds = issue.originatingItemLocalIds.filter((localId) => (
+      evidence.retainedItemLocalIds.has(localId)
+    ));
+    if (originatingItemLocalIds.length === 0) {
+      diagnostics.push({
+        code: "LEGAL_ISSUE_ORIGINS_NOT_VERIFIED",
+        path: `legalIssues.${issueIndex}`,
+        action: "MARKED_UNRESOLVED",
+      });
+      return [];
+    }
+    if (originatingItemLocalIds.length !== issue.originatingItemLocalIds.length) {
+      diagnostics.push({
+        code: "LEGAL_ISSUE_ORIGINS_PARTIALLY_VERIFIED",
+        path: `legalIssues.${issueIndex}.originatingItemLocalIds`,
+        action: "MARKED_UNRESOLVED",
+      });
+    }
     const resolved = resolveIssueIdentity({
       issueIndex,
       hint: issue.targetProceedingHint,
-      originLocalIds: issue.originatingItemLocalIds,
+      originLocalIds: originatingItemLocalIds,
       itemsByLocalId,
       documented,
     });
@@ -488,14 +555,55 @@ export function compileFascicoloDocumentKnowledgeProposal(input: {
     const { targetProceedingHint: _hint, ...candidate } = issue;
     return {
       ...candidate,
+      originatingItemLocalIds,
       targetProceedingIdentity: resolved.identity,
       targetProceedingResolution: resolved.resolution,
-    };
+    } as const;
   });
+  const retainedIssueIds = new Set(legalIssues.map((issue) => issue.localId));
+  const retainedItemsByLocalId = new Map(items.map((item) => [item.localId, item]));
+  const researchQuestions = proposal.researchQuestions.filter((question, index) => {
+    const basisItemLocalId = question.referenceDateBasis.itemLocalId;
+    const retained = retainedIssueIds.has(question.legalIssueLocalId)
+      && (basisItemLocalId === null || retainedItemsByLocalId.has(basisItemLocalId));
+    if (!retained) {
+      diagnostics.push({
+        code: "RESEARCH_QUESTION_BASIS_NOT_VERIFIED",
+        path: `researchQuestions.${index}`,
+        action: "MARKED_UNRESOLVED",
+      });
+    }
+    return retained;
+  });
+  const documentInventory = proposal.documentInventory.flatMap((document, index) => {
+    if (document.classification === "NOT_MATERIAL") return [document];
+    const relatedItemLocalIds = document.relatedItemLocalIds.filter((localId) => (
+      retainedItemsByLocalId.has(localId)
+    ));
+    const basisRefs = document.basisRefs.filter((basisRef) => relatedItemLocalIds.some((localId) => (
+      retainedItemsByLocalId.get(localId)?.basisRefs.includes(basisRef)
+    )));
+    const hasRequiredRelation = document.classification === "MATERIAL"
+      ? relatedItemLocalIds.length > 0 && basisRefs.length > 0
+      : relatedItemLocalIds.some((localId) => retainedItemsByLocalId.get(localId)?.kind === "GAP");
+    if (!hasRequiredRelation) {
+      diagnostics.push({
+        code: "DOCUMENT_INVENTORY_EVIDENCE_NOT_VERIFIED",
+        path: `documentInventory.${index}`,
+        action: "MARKED_UNRESOLVED",
+      });
+      return [];
+    }
+    return [{ ...document, basisRefs, relatedItemLocalIds }];
+  });
+  const { evidenceCandidates: _evidenceCandidates, ...proposalWithoutEvidenceCandidates } = proposal;
   const parsed = fascicoloDocumentStructuredKnowledgeSchema.safeParse({
-    ...proposal,
+    ...proposalWithoutEvidenceCandidates,
     items,
+    sourceQuotes: evidence.sourceQuotes,
+    documentInventory,
     legalIssues,
+    researchQuestions,
   });
   if (!parsed.success) {
     throw new DocumentKnowledgeCompilationError([
@@ -507,5 +615,18 @@ export function compileFascicoloDocumentKnowledgeProposal(input: {
       })),
     ]);
   }
-  return { knowledge: parsed.data, diagnostics };
+  const promotable = evidence.quarantinedItemLocalIds.length === 0
+    && legalIssues.length === proposal.legalIssues.length
+    && researchQuestions.length === proposal.researchQuestions.length
+    && documentInventory.length === proposal.documentInventory.length
+    && !diagnostics.some((diagnostic) => (
+      diagnostic.code === "LEGAL_ISSUE_ORIGINS_PARTIALLY_VERIFIED"
+    ));
+  return {
+    knowledge: parsed.data,
+    diagnostics,
+    promotable,
+    quarantinedItemLocalIds: evidence.quarantinedItemLocalIds,
+  };
 }
+import { createHash } from "node:crypto";

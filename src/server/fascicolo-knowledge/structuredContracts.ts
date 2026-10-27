@@ -62,6 +62,18 @@ const sourceQuoteSchema = z.object({
   itemLocalId: id,
   basisRef: documentBasisRefSchema,
   quote: text,
+  span: z.object({
+    id,
+    documentVersionId: id,
+    startOffset: z.number().int().nonnegative(),
+    endOffset: z.number().int().positive(),
+    textSha256: z.string().regex(/^[a-f0-9]{64}$/),
+    quoteSha256: z.string().regex(/^[a-f0-9]{64}$/),
+  }).strict().nullable().optional(),
+}).strict();
+export const evidenceCandidateSchema = z.object({
+  itemLocalId: id,
+  evidenceSpanId: id,
 }).strict();
 export const documentInventoryClassificationSchema = z.enum([
   "MATERIAL",
@@ -540,6 +552,16 @@ export const fascicoloDocumentStructuredKnowledgeSchema =
     }
   });
 
+export const fascicoloDocumentKnowledgeCandidateProposalSchema = z.object({
+  version: z.literal(FASCICOLO_STRUCTURED_KNOWLEDGE_VERSION),
+  subjects: z.array(fascicoloSubjectCandidateSchema).max(500),
+  items: z.array(structuredKnowledgeProposalItemSchema).max(10_000),
+  evidenceCandidates: z.array(evidenceCandidateSchema).max(100_000),
+  documentInventory: z.array(documentInventoryEntrySchema).max(10_000),
+  legalIssues: z.array(legalIssueProposalSchema).max(1_000),
+  researchQuestions: z.array(researchQuestionCandidateSchema).max(1_000),
+}).strict();
+
 export const fascicoloDocumentKnowledgeProposalSchema = z.object({
   version: z.literal(FASCICOLO_STRUCTURED_KNOWLEDGE_VERSION),
   subjects: z.array(fascicoloSubjectCandidateSchema).max(500),
@@ -554,8 +576,8 @@ export type FascicoloSubjectCandidate = z.output<typeof fascicoloSubjectCandidat
 export type FascicoloStrongIdentifier = z.output<typeof fascicoloStrongIdentifierSchema>;
 export type FascicoloStructuredKnowledge = z.output<typeof fascicoloStructuredKnowledgeSchema>;
 export type FascicoloDocumentKnowledgeProposal = z.output<
-  typeof fascicoloDocumentKnowledgeProposalSchema
->;
+  typeof fascicoloDocumentKnowledgeCandidateProposalSchema
+> | z.output<typeof fascicoloDocumentKnowledgeProposalSchema>;
 export type StructuredKnowledgeItem = z.output<typeof structuredKnowledgeItemSchema>;
 export type StructuredKnowledgeProposalItem = z.output<
   typeof structuredKnowledgeProposalItemSchema

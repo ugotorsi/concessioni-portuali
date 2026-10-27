@@ -3,9 +3,16 @@ import {
   runInFascicoloKnowledgeTransaction,
   type KnowledgeRevisionSnapshot,
 } from "@/server/fascicolo-knowledge/repository";
-import { persistStructuredFascicoloReport } from "@/server/fascicolo-report/repository";
-import type { BuiltStructuredFascicoloReport } from "@/server/fascicolo-report/structured-report";
+import {
+  persistDraftStructuredFascicoloReport,
+  persistStructuredFascicoloReport,
+} from "@/server/fascicolo-report/repository";
+import {
+  buildStructuredFascicoloReport,
+  type BuiltStructuredFascicoloReport,
+} from "@/server/fascicolo-report/structured-report";
 import { getFascicoloAutomaticWorkflowReadModelForTenant } from "@/server/queries/fascicolo-automatic-workflow";
+import { loadStructuredKnowledgeRevision } from "@/server/queries/fascicolo-knowledge";
 
 export async function buildStructuredReportForRevision(input: {
   tenantId: string;
@@ -13,14 +20,22 @@ export async function buildStructuredReportForRevision(input: {
   knowledgeRevisionId: string;
 }): Promise<BuiltStructuredFascicoloReport | null> {
   const model = await getFascicoloAutomaticWorkflowReadModelForTenant(input);
-  if (
-    !model?.structuredReport
-    || model.structuredReport.payload.knowledgeRevisionId
-      !== input.knowledgeRevisionId
-  ) {
-    return null;
+  if (model?.structuredReport?.payload.knowledgeRevisionId === input.knowledgeRevisionId) {
+    return model.structuredReport;
   }
-  return model.structuredReport;
+  const knowledge = await loadStructuredKnowledgeRevision(
+    input.tenantId,
+    input.procedimentoId,
+    input.knowledgeRevisionId,
+  );
+  return knowledge
+    ? buildStructuredFascicoloReport({
+        tenantId: input.tenantId,
+        procedimentoId: input.procedimentoId,
+        knowledge,
+        missions: [],
+      })
+    : null;
 }
 
 export async function finalizeStructuredKnowledgeAndReport(input: {
@@ -51,6 +66,13 @@ export async function finalizeStructuredKnowledgeAndReport(input: {
       snapshotId: saved.snapshot.id,
     };
   });
+}
+
+export async function archiveDraftStructuredReport(
+  report: BuiltStructuredFascicoloReport,
+): Promise<{ outcome: "CREATED" | "REUSED"; snapshotId: string }> {
+  const saved = await persistDraftStructuredFascicoloReport(report);
+  return { outcome: saved.outcome, snapshotId: saved.snapshot.id };
 }
 
 /** Rebuild and archive an unvalidated draft using existing current evidence, without providers. */
