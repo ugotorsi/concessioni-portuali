@@ -80,9 +80,11 @@ the recovery and the V3 approval does not authorize V7 admission or provider spe
 
 The first V7 Selvara attempt used approval
 `NOETRA-V7-SELVARA-2026-10-26-CONTROLLED-ONE-SHOT` and terminal job
-`cmvpei5gt0000c0ud3f9txqil`; that historical identity is immutable. The prepared
-second single-attempt admission binds the V7 document-analysis contract, corpus
-fingerprint, and `NOETRA-V7-SELVARA-2026-10-26-CONTROLLED-ONE-SHOT-02` approval.
+`cmvpei5gt0000c0ud3f9txqil`. The second used approval
+`NOETRA-V7-SELVARA-2026-10-26-CONTROLLED-ONE-SHOT-02` and terminal job
+`cmvpfm50p000010udtpjtrfn3`; both historical identities are immutable. The prepared
+third single-attempt admission binds the V7 document-analysis contract, corpus
+fingerprint, and `NOETRA-V7-SELVARA-2026-10-27-CONTROLLED-ONE-SHOT-03` approval.
 Repeating the same admission reuses the same job. Changing the approved preflight after admission causes
 an idempotency conflict instead of creating a second attempt. The job has
 `maxAttempts=1`; provider timeouts, rate limits, unavailable responses, malformed or

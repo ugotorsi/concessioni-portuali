@@ -153,7 +153,7 @@ const controlledV7Reference = {
     procedimentoId: "procedimento-1",
     corpusHash: "c".repeat(64),
     trialContractVersion: "FASCICOLO_DOCUMENT_ANALYSIS_V7",
-    trialApprovalRef: "NOETRA-V7-SELVARA-2026-10-26-CONTROLLED-ONE-SHOT-02",
+    trialApprovalRef: "NOETRA-V7-SELVARA-2026-10-27-CONTROLLED-ONE-SHOT-03",
     trialPreflightHash: "f".repeat(64),
   },
 } as const;
