@@ -325,6 +325,7 @@ export interface FascicoloAutomaticAnalysisDependencies {
     knowledgeRevisionId: string;
     assignedActorId: string | null;
     plans: ReturnType<typeof buildKnowledgeResearchMissionPlans>;
+    allowBuildingRevision?: boolean;
   }): Promise<readonly KnowledgeMissionLifecycleResult[]>;
   resolveMissionAssignee?(input: {
     tenantId: string;
@@ -1087,6 +1088,7 @@ async function reconcileStructuredKnowledgeMissions(input: {
       knowledgeRevisionId: input.revision.id,
       assignedActorId,
       plans,
+      allowBuildingRevision: input.allowBuildingRevision,
     });
   } catch {
     throw new AsyncJobExecutionError(

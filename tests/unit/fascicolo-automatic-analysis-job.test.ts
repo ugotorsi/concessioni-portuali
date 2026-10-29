@@ -699,6 +699,9 @@ describe("automatic fascicolo analysis job", () => {
       forceNewRevision: true,
       deferPromotion: true,
     }));
+    expect(deps.reconcileKnowledgeMissions).toHaveBeenCalledWith(
+      expect.objectContaining({ allowBuildingRevision: true }),
+    );
     expect(finalizeControlledV7).toHaveBeenCalledWith(expect.objectContaining({
       knowledgeRevisionId: "revision-building",
       expectedCurrentRevisionId: prior.id,

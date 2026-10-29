@@ -143,12 +143,39 @@ async function setCurrent(db: PGlite, id: string, tenantId = "tenant-1", procedi
   await db.query('INSERT INTO "FascicoloKnowledgeRevision" ("id", "tenantId", "procedimentoId", "status") VALUES ($1, $2, $3, \'CURRENT\')', [id, tenantId, procedimentoId]);
 }
 
+async function setBuilding(db: PGlite, id: string) {
+  await db.query(
+    'INSERT INTO "FascicoloKnowledgeRevision" ("id", "tenantId", "procedimentoId", "status") VALUES ($1, $2, $3, \'BUILDING\')',
+    [id, "tenant-1", "procedure-1"],
+  );
+}
+
 afterEach(async () => {
   await Promise.all(databases.splice(0).map((db) => db.close()));
 });
 
 describe("Lotto 3 research mission lifecycle on PGlite", () => {
   const assignment = { assignedActorId: "actor-1" };
+
+  it("reconciles a controlled BUILDING revision only when explicitly allowed", async () => {
+    const db = await database();
+    const ctx = context(db);
+    await setBuilding(db, "revision-building");
+    const input = {
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-building",
+      assignedActorId: null,
+      plans: [plan("b".repeat(64))],
+    };
+
+    await expect(reconcileKnowledgeResearchMissions(input, ctx))
+      .rejects.toThrow("KNOWLEDGE_REVISION_NOT_CURRENT");
+    await expect(reconcileKnowledgeResearchMissions({
+      ...input,
+      allowBuildingRevision: true,
+    }, ctx)).resolves.toHaveLength(1);
+  });
 
   it("keeps an unassigned system mission deferred without inventing a user", async () => {
     const db = await database();
