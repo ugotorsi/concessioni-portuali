@@ -217,7 +217,11 @@ async function insertPromotionGraph(
         }
       }
       for (const foreignKey of metadata.foreignKeys.filter(
-        (key) => key.childTable === selected.table && key.parentTable !== "User",
+        (key) => (
+          key.childTable === selected.table
+          && key.parentTable !== "User"
+          && !EXCLUDED_OPERATIONAL_TABLES.has(key.parentTable)
+        ),
       )) {
         for (const column of foreignKey.childColumns) {
           if (
