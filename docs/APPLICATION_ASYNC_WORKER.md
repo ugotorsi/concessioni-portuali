@@ -110,6 +110,16 @@ deterministic compiler now downgrades incompatible dates to `UNKNOWN` and rebuil
 inventory relations only from retained items with authenticated overlapping
 evidence. No retry was performed; any later paid attempt requires a new explicit
 authorization and immutable identity.
+The prepared seventh identity is
+`NOETRA-V7-SELVARA-2026-10-29-CONTROLLED-ONE-SHOT-07`. It binds the same authenticated
+40-page corpus to the structurally separated provider contract: the provider proposes
+only interpretive items and evidence-span selections, while the server owns document
+inventory, provenance, canonical quotations, proceeding anchors, reference dates, and
+verified relationships. The request estimates 37,077 input tokens and at most EUR
+0.752726 with the unchanged 64,000-token output ceiling. The existing EUR 0.758624
+runtime reservation and EUR 0.762000 approved ceiling remain unchanged. No application
+job or Render one-off exists for this identity until a new explicit authorization is
+recorded.
 Repeating the same admission reuses the same job. Changing the approved preflight after admission causes
 an idempotency conflict instead of creating a second attempt. The job has
 `maxAttempts=1`; provider timeouts, rate limits, unavailable responses, malformed or
