@@ -8,6 +8,8 @@ export const VERCEL_PREVIEW_DEPLOYMENT = Object.freeze({
   organizationId: "team_jT8QBufySulc3clxzIl6RqnL",
   scope: "ugotorsis-projects",
   target: "preview",
+  gitBranch: "feat/noetra-legal-applicability-e4447",
+  githubRepositoryId: 1288038811,
 } as const);
 
 export class VercelPreviewDeployError extends Error {
@@ -18,9 +20,12 @@ export class VercelPreviewDeployError extends Error {
     | "PRODUCTION_TARGET_FORBIDDEN"
     | "TARGET_OVERRIDE_FORBIDDEN"
     | "PROJECT_OVERRIDE_FORBIDDEN"
+    | "UNSUPPORTED_ARGUMENT"
     | "VERCEL_IDENTITY_MISMATCH"
     | "GIT_HEAD_READ_FAILED"
     | "GIT_HEAD_MISMATCH"
+    | "GIT_BRANCH_READ_FAILED"
+    | "GIT_BRANCH_MISMATCH"
     | "VERCEL_DEPLOY_FAILED") {
     super(code);
     this.name = "VercelPreviewDeployError";
@@ -29,7 +34,6 @@ export class VercelPreviewDeployError extends Error {
 
 export interface VercelPreviewDeployArgs {
   readonly expectedCommit: string;
-  readonly passthrough: readonly string[];
 }
 
 function isProductionArgument(argument: string): boolean {
@@ -43,7 +47,6 @@ function isProductionArgument(argument: string): boolean {
 
 export function parseVercelPreviewDeployArgs(argv: readonly string[]): VercelPreviewDeployArgs {
   let expectedCommit: string | undefined;
-  const passthrough: string[] = [];
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === "--expected-commit") {
@@ -83,7 +86,7 @@ export function parseVercelPreviewDeployArgs(argv: readonly string[]): VercelPre
     ) {
       throw new VercelPreviewDeployError("PROJECT_OVERRIDE_FORBIDDEN");
     }
-    passthrough.push(argument);
+    throw new VercelPreviewDeployError("UNSUPPORTED_ARGUMENT");
   }
   if (!expectedCommit) {
     throw new VercelPreviewDeployError("EXPECTED_COMMIT_REQUIRED");
@@ -91,7 +94,7 @@ export function parseVercelPreviewDeployArgs(argv: readonly string[]): VercelPre
   if (!/^[a-f0-9]{40}$/.test(expectedCommit)) {
     throw new VercelPreviewDeployError("EXPECTED_COMMIT_INVALID");
   }
-  return { expectedCommit, passthrough };
+  return { expectedCommit };
 }
 
 export function createVercelPreviewDeploySpec(
@@ -112,17 +115,38 @@ export function createVercelPreviewDeploySpec(
     throw new VercelPreviewDeployError("VERCEL_IDENTITY_MISMATCH");
   }
   const vercelArgs = [
-    "deploy",
-    "--target=preview",
+    "api",
+    "/v13/deployments",
+    "-X",
+    "POST",
     `--scope=${VERCEL_PREVIEW_DEPLOYMENT.scope}`,
-    "--yes",
-    ...input.passthrough,
+    "--input",
+    "-",
+    "--raw",
   ];
   return {
     executable: platform === "win32" ? environment.ComSpec ?? "cmd.exe" : "vercel",
     args: platform === "win32"
       ? ["/d", "/s", "/c", "vercel.cmd", ...vercelArgs]
       : vercelArgs,
+    input: JSON.stringify({
+      name: VERCEL_PREVIEW_DEPLOYMENT.projectName,
+      project: VERCEL_PREVIEW_DEPLOYMENT.projectId,
+      gitSource: {
+        type: "github",
+        repoId: VERCEL_PREVIEW_DEPLOYMENT.githubRepositoryId,
+        ref: VERCEL_PREVIEW_DEPLOYMENT.gitBranch,
+        sha: input.expectedCommit,
+      },
+      projectSettings: {
+        commandForIgnoringBuildStep: "exit 1",
+      },
+      meta: {
+        noetraApprovedCommit: input.expectedCommit,
+        githubCommitSha: input.expectedCommit,
+        githubCommitRef: VERCEL_PREVIEW_DEPLOYMENT.gitBranch,
+      },
+    }),
     environment: {
       ...environment,
       VERCEL_PROJECT_ID: VERCEL_PREVIEW_DEPLOYMENT.projectId,
@@ -147,16 +171,79 @@ export function runVercelPreviewDeploy(
   if (git.stdout.trim() !== input.expectedCommit) {
     throw new VercelPreviewDeployError("GIT_HEAD_MISMATCH");
   }
+  const remoteBranch = spawnSync("git", [
+    "ls-remote",
+    "--exit-code",
+    "origin",
+    `refs/heads/${VERCEL_PREVIEW_DEPLOYMENT.gitBranch}`,
+  ], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "inherit"],
+  });
+  if (remoteBranch.status !== 0 || !remoteBranch.stdout.trim()) {
+    throw new VercelPreviewDeployError("GIT_BRANCH_READ_FAILED");
+  }
+  if (remoteBranch.stdout.trim().split(/\s+/, 1)[0] !== input.expectedCommit) {
+    throw new VercelPreviewDeployError("GIT_BRANCH_MISMATCH");
+  }
   const spec = createVercelPreviewDeploySpec(input, environment);
   const deployment = spawnSync(spec.executable, spec.args, {
     cwd: process.cwd(),
     env: spec.environment,
-    stdio: "inherit",
+    input: spec.input,
+    encoding: "utf8",
+    stdio: ["pipe", "pipe", "inherit"],
   });
-  if (deployment.status !== 0) {
+  if (deployment.status !== 0 || !deployment.stdout.trim()) {
     if (deployment.error) console.error(deployment.error.message);
     throw new VercelPreviewDeployError("VERCEL_DEPLOY_FAILED");
   }
+  let created: { id?: string };
+  try {
+    created = JSON.parse(deployment.stdout) as { id?: string };
+  } catch {
+    throw new VercelPreviewDeployError("VERCEL_DEPLOY_FAILED");
+  }
+  if (!created.id) {
+    throw new VercelPreviewDeployError("VERCEL_DEPLOY_FAILED");
+  }
+  for (let attempt = 0; attempt < 120; attempt += 1) {
+    const statusArgs = [
+      "api",
+      `/v13/deployments/${created.id}`,
+      `--scope=${VERCEL_PREVIEW_DEPLOYMENT.scope}`,
+      "--raw",
+    ];
+    const status = spawnSync(
+      spec.executable,
+      process.platform === "win32"
+        ? ["/d", "/s", "/c", "vercel.cmd", ...statusArgs]
+        : statusArgs,
+      {
+        cwd: process.cwd(),
+        env: spec.environment,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "inherit"],
+      },
+    );
+    if (status.status !== 0 || !status.stdout.trim()) {
+      throw new VercelPreviewDeployError("VERCEL_DEPLOY_FAILED");
+    }
+    const current = JSON.parse(status.stdout) as {
+      readyState?: string;
+      url?: string;
+    };
+    if (current.readyState === "READY") {
+      process.stdout.write(`${JSON.stringify(current, null, 2)}\n`);
+      return;
+    }
+    if (current.readyState === "ERROR" || current.readyState === "CANCELED") {
+      throw new VercelPreviewDeployError("VERCEL_DEPLOY_FAILED");
+    }
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 5_000);
+  }
+  throw new VercelPreviewDeployError("VERCEL_DEPLOY_FAILED");
 }
 
 const invokedPath = process.argv[1] ? pathToFileURL(path.resolve(process.argv[1])).href : null;

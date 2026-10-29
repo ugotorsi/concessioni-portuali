@@ -35,10 +35,15 @@ Nota: impostare `NEXTAUTH_URL` al dominio cloud pubblico della demo, mai `localh
 ## 5. Procedura deploy Vercel
 1. Usare esclusivamente `npm run deploy:vercel:preview -- --expected-commit <SHA_COMPLETO>`.
 2. Il comando fissa il progetto `concessioni-portuali-demo`, l'organizzazione
-   `ugotorsis-projects` e il target `preview`; rifiuta override di progetto,
-   organizzazione o ambiente e qualsiasi opzione Production.
+   `ugotorsis-projects`, il target `preview` e il branch
+   `feat/noetra-legal-applicability-e4447`; rifiuta argomenti aggiuntivi,
+   override di progetto, organizzazione o ambiente e qualsiasi opzione Production.
 3. Il comando verifica che `HEAD` coincida con lo SHA completo autorizzato prima
-   di invocare Vercel.
+   di invocare Vercel e che lo stesso SHA sia la testa remota del branch fissato.
+   Il deployment viene creato dalla sorgente GitHub, non da un upload CLI, affinché
+   Vercel applichi le variabili Preview specifiche del branch. Il comando forza
+   l'esecuzione del build soltanto per il deployment richiesto, senza modificare
+   permanentemente la regola Ignored Build Step del progetto.
 4. Verificare framework `Next.js` rilevato automaticamente.
 5. Configurare le environment variables richieste esclusivamente per Preview.
 6. Controllare i build logs e risolvere eventuali env mancanti.

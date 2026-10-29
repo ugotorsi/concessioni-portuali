@@ -14,22 +14,36 @@ describe("Vercel Preview deployment guard", () => {
     const parsed = parseVercelPreviewDeployArgs([
       "--expected-commit",
       COMMIT,
-      "--force",
     ]);
     const spec = createVercelPreviewDeploySpec(parsed, { NODE_ENV: "test" }, "linux");
 
     expect(spec).toMatchObject({
       executable: "vercel",
       args: [
-        "deploy",
-        "--target=preview",
+        "api",
+        "/v13/deployments",
+        "-X",
+        "POST",
         `--scope=${VERCEL_PREVIEW_DEPLOYMENT.scope}`,
-        "--yes",
-        "--force",
+        "--input",
+        "-",
+        "--raw",
       ],
       environment: {
         VERCEL_PROJECT_ID: VERCEL_PREVIEW_DEPLOYMENT.projectId,
         VERCEL_ORG_ID: VERCEL_PREVIEW_DEPLOYMENT.organizationId,
+      },
+    });
+    expect(JSON.parse(spec.input)).toMatchObject({
+      project: VERCEL_PREVIEW_DEPLOYMENT.projectId,
+      gitSource: {
+        type: "github",
+        repoId: VERCEL_PREVIEW_DEPLOYMENT.githubRepositoryId,
+        ref: VERCEL_PREVIEW_DEPLOYMENT.gitBranch,
+        sha: COMMIT,
+      },
+      projectSettings: {
+        commandForIgnoringBuildStep: "exit 1",
       },
     });
   });
@@ -38,7 +52,6 @@ describe("Vercel Preview deployment guard", () => {
     const parsed = parseVercelPreviewDeployArgs([
       "--expected-commit",
       COMMIT,
-      "--force",
     ]);
     const spec = createVercelPreviewDeploySpec(parsed, {
       NODE_ENV: "test",
@@ -52,11 +65,14 @@ describe("Vercel Preview deployment guard", () => {
         "/s",
         "/c",
         "vercel.cmd",
-        "deploy",
-        "--target=preview",
+        "api",
+        "/v13/deployments",
+        "-X",
+        "POST",
         `--scope=${VERCEL_PREVIEW_DEPLOYMENT.scope}`,
-        "--yes",
-        "--force",
+        "--input",
+        "-",
+        "--raw",
       ],
     });
   });
@@ -83,6 +99,18 @@ describe("Vercel Preview deployment guard", () => {
       COMMIT,
       ...arguments_,
     ])).toThrow(new VercelPreviewDeployError("TARGET_OVERRIDE_FORBIDDEN"));
+  });
+
+  it.each([
+    ["--force"],
+    ["--meta", `githubCommitSha=${COMMIT}`],
+    ["--env", "DATABASE_URL=forbidden"],
+  ])("rejects unsupported deployment arguments: %j", (...arguments_) => {
+    expect(() => parseVercelPreviewDeployArgs([
+      "--expected-commit",
+      COMMIT,
+      ...arguments_,
+    ])).toThrow(new VercelPreviewDeployError("UNSUPPORTED_ARGUMENT"));
   });
 
   it.each([
