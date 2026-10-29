@@ -132,6 +132,14 @@ retain their existing default. The 40-page offline integration test enforces no 
 than 25 knowledge-persistence query calls for 60 accepted items. No retry or eighth
 paid attempt was performed.
 
+The prepared eighth identity is
+`NOETRA-V7-SELVARA-2026-10-29-CONTROLLED-ONE-SHOT-08`. It is distinct from the
+terminal seventh job and binds the same tenant, proceeding, authenticated 40-page
+corpus fingerprint, controlled V7 purpose, operation, contract, and economic
+preflight. Admission remains single-attempt (`maxAttempts=1`) and is not authorized
+until a new explicit approval is given. Preparing this identity does not admit a
+job, enable a gate, or call a provider.
+
 The isolated database proof is fail-closed and uses an in-memory fixture provider,
 never a configured AI provider. Run it only against an explicitly approved,
 non-production database with all worker/provider gates disabled:
