@@ -153,14 +153,12 @@ async function main(): Promise<void> {
     persistKnowledge: async (input) => {
       const knowledge = input.knowledge as {
         items?: readonly unknown[];
-        relations?: readonly unknown[];
       };
       if (
         input.tenantId !== job.tenantId
         || input.procedimentoId !== job.procedimentoId
         || input.corpusFingerprint !== binding.corpusFingerprint
         || knowledge.items?.length !== buildingRevision.items.length
-        || knowledge.relations?.length !== buildingRevision.relations.length
       ) {
         throw new Error("Recoverable BUILDING revision content mismatch.");
       }
