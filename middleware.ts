@@ -68,6 +68,10 @@ function getRateLimitPolicy(pathname: string): { limit: number; scope: string } 
     return { limit: 10, scope: "mfa-enrollment" };
   }
 
+  if (pathname === "/api/auth/bootstrap-admin") {
+    return { limit: 5, scope: "admin-bootstrap" };
+  }
+
   if (pathname.startsWith("/export/")) {
     return { limit: 25, scope: "export" };
   }
