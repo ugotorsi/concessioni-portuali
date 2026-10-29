@@ -11,6 +11,9 @@ const EXCLUDED_OPERATIONAL_TABLES = new Set([
   "RuntimeBudgetPolicy",
   "RuntimeCostReservation",
 ]);
+const EXCLUDED_REFERENCE_COLUMNS = new Map([
+  ["FascicoloKnowledgeEvidence", new Set(["documentExtractionAttemptId"])],
+]);
 
 interface ForeignKey {
   childTable: string;
@@ -216,19 +219,11 @@ async function insertPromotionGraph(
           insertRow[column] = null;
         }
       }
-      for (const foreignKey of metadata.foreignKeys.filter(
-        (key) => (
-          key.childTable === selected.table
-          && (key.parentTable === "User" || EXCLUDED_OPERATIONAL_TABLES.has(key.parentTable))
-        ),
-      )) {
-        for (const column of foreignKey.childColumns) {
-          if (insertRow[column] == null) continue;
-          if (!metadata.nullableColumns.has(`${selected.table}.${column}`)) {
-            throw new Error(`PROMOTION_REQUIRED_EXCLUDED_REFERENCE:${selected.table}.${column}`);
-          }
-          insertRow[column] = null;
+      for (const column of EXCLUDED_REFERENCE_COLUMNS.get(selected.table) ?? []) {
+        if (!metadata.nullableColumns.has(`${selected.table}.${column}`)) {
+          throw new Error(`PROMOTION_REQUIRED_EXCLUDED_REFERENCE:${selected.table}.${column}`);
         }
+        insertRow[column] = null;
       }
       for (const foreignKey of metadata.foreignKeys.filter(
         (key) => (
