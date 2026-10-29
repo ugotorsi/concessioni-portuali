@@ -3,6 +3,7 @@ import {
   createDefaultFascicoloAutomaticAnalysisDependencies,
   createFascicoloAutomaticAnalysisHandler,
   FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
+  FASCICOLO_V7_KNOWLEDGE_REVISION_CONTRACT,
   FASCICOLO_V7_CONTROLLED_ANALYSIS_PURPOSE,
 } from "../../src/server/ai/fascicoloAutomaticAnalysisJob";
 import {
@@ -13,6 +14,7 @@ import {
   loadV7ProviderOutputRecoveryArtifact,
 } from "../../src/server/ai/v7ProviderOutputRecovery";
 import { auditSuccess } from "../../src/server/audit/auditLog";
+import { getBuildingKnowledgeRevision } from "../../src/server/fascicolo-knowledge/repository";
 
 const CONFIRMATION = "PERSIST_ONLY_WITHOUT_PROVIDER_CALL";
 
@@ -55,6 +57,8 @@ async function main(): Promise<void> {
       failureCategory: true,
       failureCode: true,
       resultReference: true,
+      startedAt: true,
+      completedAt: true,
     },
   });
   if (
@@ -67,6 +71,8 @@ async function main(): Promise<void> {
     || job.attemptCount !== 1
     || job.maxAttempts !== 1
     || job.failureCategory !== "PERSISTENCE"
+    || !job.startedAt
+    || !job.completedAt
   ) {
     throw new Error("Job is not eligible for persistence-only recovery.");
   }
@@ -92,6 +98,45 @@ async function main(): Promise<void> {
     approvalId,
   };
   const recovered = await loadV7ProviderOutputRecoveryArtifact({ binding });
+  const draft = await prisma.fascicoloKnowledgeRevision.findFirst({
+    where: {
+      tenantId: job.tenantId,
+      procedimentoId: job.procedimentoId,
+      corpusFingerprint: binding.corpusFingerprint,
+      contractVersion: FASCICOLO_V7_KNOWLEDGE_REVISION_CONTRACT,
+      status: "BUILDING",
+      createdAt: { gte: job.startedAt, lte: job.completedAt },
+    },
+    select: {
+      id: true,
+      _count: {
+        select: {
+          items: true,
+          researchMissions: true,
+          structuredReports: true,
+          operationalProposals: true,
+        },
+      },
+    },
+  });
+  if (
+    !draft
+    || draft._count.items === 0
+    || draft._count.researchMissions !== 0
+    || draft._count.structuredReports !== 0
+    || draft._count.operationalProposals !== 0
+  ) {
+    throw new Error("Recoverable BUILDING revision not found or not isolated.");
+  }
+  const buildingRevision = await getBuildingKnowledgeRevision({
+    tenantId: job.tenantId,
+    procedimentoId: job.procedimentoId,
+    corpusFingerprint: binding.corpusFingerprint,
+    contractVersion: FASCICOLO_V7_KNOWLEDGE_REVISION_CONTRACT,
+  });
+  if (!buildingRevision || buildingRevision.id !== draft.id) {
+    throw new Error("Recoverable BUILDING revision binding mismatch.");
+  }
   const defaults = createDefaultFascicoloAutomaticAnalysisDependencies();
   const handler = createFascicoloAutomaticAnalysisHandler({
     ...defaults,
@@ -105,6 +150,26 @@ async function main(): Promise<void> {
     }),
     auditProviderOutputRecovery: async () => undefined,
     deleteProviderOutputRecovery: async () => undefined,
+    persistKnowledge: async (input) => {
+      const knowledge = input.knowledge as {
+        items?: readonly unknown[];
+        relations?: readonly unknown[];
+      };
+      if (
+        input.tenantId !== job.tenantId
+        || input.procedimentoId !== job.procedimentoId
+        || input.corpusFingerprint !== binding.corpusFingerprint
+        || knowledge.items?.length !== buildingRevision.items.length
+        || knowledge.relations?.length !== buildingRevision.relations.length
+      ) {
+        throw new Error("Recoverable BUILDING revision content mismatch.");
+      }
+      return {
+        revision: buildingRevision,
+        classifications: [],
+        promotable: true,
+      };
+    },
   });
   const parsedReference = handler.parseInput(job.inputReference);
   const result = await handler.execute(parsedReference, {

@@ -341,6 +341,33 @@ export async function getCurrentKnowledgeRevision(
   return result.rows[0] ? loadRevisionSnapshot(ctx.read, result.rows[0]) : null;
 }
 
+export async function getBuildingKnowledgeRevision(
+  rawScope: KnowledgeScope & {
+    corpusFingerprint: string;
+    contractVersion: string;
+  },
+  overrides: Partial<FascicoloKnowledgeRepositoryContext> = {},
+): Promise<KnowledgeRevisionSnapshot | null> {
+  const scope = knowledgeScopeSchema.extend({
+    corpusFingerprint: sha256Schema,
+    contractVersion: z.string().trim().min(1).max(64),
+  }).parse(rawScope);
+  const ctx = context(overrides);
+  await assertProcedureAuthority(ctx.read, scope);
+  const result = await ctx.read.query<RevisionRow>(`
+    SELECT * FROM "FascicoloKnowledgeRevision"
+    WHERE "tenantId" = $1 AND "procedimentoId" = $2
+      AND "corpusFingerprint" = $3 AND "contractVersion" = $4
+      AND "status" = 'BUILDING'
+  `, [
+    scope.tenantId,
+    scope.procedimentoId,
+    scope.corpusFingerprint,
+    scope.contractVersion,
+  ]);
+  return result.rows[0] ? loadRevisionSnapshot(ctx.read, result.rows[0]) : null;
+}
+
 export async function listKnowledgeRevisionHistory(
   rawScope: KnowledgeScope,
   overrides: Partial<FascicoloKnowledgeRepositoryContext> = {},
