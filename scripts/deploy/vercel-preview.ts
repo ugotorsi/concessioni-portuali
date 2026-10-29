@@ -111,15 +111,18 @@ export function createVercelPreviewDeploySpec(
   ) {
     throw new VercelPreviewDeployError("VERCEL_IDENTITY_MISMATCH");
   }
+  const vercelArgs = [
+    "deploy",
+    "--target=preview",
+    `--scope=${VERCEL_PREVIEW_DEPLOYMENT.scope}`,
+    "--yes",
+    ...input.passthrough,
+  ];
   return {
-    executable: platform === "win32" ? "vercel.cmd" : "vercel",
-    args: [
-      "deploy",
-      "--target=preview",
-      `--scope=${VERCEL_PREVIEW_DEPLOYMENT.scope}`,
-      "--yes",
-      ...input.passthrough,
-    ],
+    executable: platform === "win32" ? environment.ComSpec ?? "cmd.exe" : "vercel",
+    args: platform === "win32"
+      ? ["/d", "/s", "/c", "vercel.cmd", ...vercelArgs]
+      : vercelArgs,
     environment: {
       ...environment,
       VERCEL_PROJECT_ID: VERCEL_PREVIEW_DEPLOYMENT.projectId,
@@ -151,6 +154,7 @@ export function runVercelPreviewDeploy(
     stdio: "inherit",
   });
   if (deployment.status !== 0) {
+    if (deployment.error) console.error(deployment.error.message);
     throw new VercelPreviewDeployError("VERCEL_DEPLOY_FAILED");
   }
 }

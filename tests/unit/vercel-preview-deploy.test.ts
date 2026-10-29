@@ -34,6 +34,33 @@ describe("Vercel Preview deployment guard", () => {
     });
   });
 
+  it("launches the Vercel command through cmd.exe on Windows", () => {
+    const parsed = parseVercelPreviewDeployArgs([
+      "--expected-commit",
+      COMMIT,
+      "--force",
+    ]);
+    const spec = createVercelPreviewDeploySpec(parsed, {
+      NODE_ENV: "test",
+      ComSpec: "C:\\Windows\\System32\\cmd.exe",
+    }, "win32");
+
+    expect(spec).toMatchObject({
+      executable: "C:\\Windows\\System32\\cmd.exe",
+      args: [
+        "/d",
+        "/s",
+        "/c",
+        "vercel.cmd",
+        "deploy",
+        "--target=preview",
+        `--scope=${VERCEL_PREVIEW_DEPLOYMENT.scope}`,
+        "--yes",
+        "--force",
+      ],
+    });
+  });
+
   it.each([
     ["--prod"],
     ["--target=production"],
