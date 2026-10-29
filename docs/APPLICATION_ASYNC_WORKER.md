@@ -225,6 +225,22 @@ After the one job reaches `SUCCEEDED` or `TERMINAL_FAILED`, restore those disabl
 values, restart the affected processes, keep the worker suspended, and retain the job,
 cost ledger, diagnostics, knowledge revision, and report artifacts.
 
+For the controlled V7 run, a valid and grounded provider output is encrypted with
+AES-256-GCM and written to the configured S3/R2 storage before structured knowledge
+persistence begins. The artifact is bound to the immutable job, tenant, procedimento,
+corpus fingerprint, and approval identifier, and is deleted after successful atomic
+finalization. If the original single-attempt job terminates in the `PERSISTENCE`
+category, an operator may temporarily enable
+`AI_PROVIDER_OUTPUT_RECOVERY_ENABLED=true` and run:
+
+`npm run runtime:recover-v7-provider-output -- --job-id <JOB_ID> --approval-id <APPROVAL_ID> --confirm PERSIST_ONLY_WITHOUT_PROVIDER_CALL`
+
+The recovery command refuses non-terminal, multi-attempt, non-V7, non-persistence, or
+misbound jobs. It decrypts the authenticated artifact, re-runs validation and only the
+knowledge/report persistence path, audits the recovery, preserves the failed job's
+historical status, makes no provider call, and deletes the artifact after success.
+Keep the recovery gate false unless this explicitly authorized path is required.
+
 ## Document Extraction Activation
 
 PDF uploads linked to a procedimento admit `DOCUMENT_EXTRACTION_V1` atomically with the

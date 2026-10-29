@@ -7,6 +7,7 @@ import { admitAsyncJob } from "@/server/async-jobs/persistence";
 import { requestDocumentWorkerActivation } from "@/server/async-jobs/documentWorkerActivation";
 import type { AsyncJobHandler, AsyncJobHandlerContext } from "@/server/async-jobs/registry";
 import { AsyncJobExecutionError } from "@/server/async-jobs/worker";
+import { auditSuccess } from "@/server/audit/auditLog";
 import {
   providerAnalysisPayloadV1Schema,
   type ProviderAnalysisPayloadV1,
@@ -50,6 +51,11 @@ import {
   SelvaraPilotAuthorizationError,
   type SelvaraPilotAuthorizationScope,
 } from "@/server/ai/selvaraPilotAuthorization";
+import {
+  deleteV7ProviderOutputRecoveryArtifact,
+  persistV7ProviderOutputRecoveryArtifact,
+  type V7ProviderOutputRecoveryArtifact,
+} from "@/server/ai/v7ProviderOutputRecovery";
 import {
   AutomaticFascicoloReportRepositoryError,
   findAutomaticFascicoloReportByVersion,
@@ -245,6 +251,31 @@ export interface FascicoloAutomaticAnalysisDependencies {
     corpusFingerprint: string;
   }): Promise<AutomaticFascicoloReportReference | null>;
   analyze(input: AutomaticFascicoloAnalysisInput): Promise<unknown>;
+  persistProviderOutputRecovery?(input: {
+    binding: {
+      jobId: string;
+      tenantId: string;
+      procedimentoId: string;
+      corpusFingerprint: string;
+      approvalId: string;
+    };
+    output: unknown;
+  }): Promise<V7ProviderOutputRecoveryArtifact>;
+  auditProviderOutputRecovery?(input: {
+    jobId: string;
+    tenantId: string;
+    procedimentoId: string;
+    artifact: V7ProviderOutputRecoveryArtifact;
+  }): Promise<void>;
+  deleteProviderOutputRecovery?(input: {
+    binding: {
+      jobId: string;
+      tenantId: string;
+      procedimentoId: string;
+      corpusFingerprint: string;
+      approvalId: string;
+    };
+  }): Promise<void>;
   persistKnowledge?(input: {
     tenantId: string;
     procedimentoId: string;
@@ -917,6 +948,24 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
       throw error;
     }
   },
+  persistProviderOutputRecovery: persistV7ProviderOutputRecoveryArtifact,
+  auditProviderOutputRecovery: async (input) => {
+    await auditSuccess({
+      azione: "FASCICOLO_V7_PROVIDER_OUTPUT_RECOVERY_PERSISTED",
+      entita: "AsyncJob",
+      entitaId: input.jobId,
+      enteId: input.tenantId,
+      actor: { userId: null, userRole: "SYSTEM" },
+      metadata: {
+        procedimentoId: input.procedimentoId,
+        approvalId: SELVARA_PILOT_AUTHORIZATION.approvalId,
+        outputFingerprint: input.artifact.outputFingerprint,
+        storageKey: input.artifact.storageKey,
+        encrypted: true,
+      },
+    });
+  },
+  deleteProviderOutputRecovery: deleteV7ProviderOutputRecoveryArtifact,
   async persistReport(report) {
     try {
       const persisted = await persistAutomaticFascicoloReport(report);
@@ -1187,6 +1236,50 @@ export function createFascicoloAutomaticAnalysisHandler(
       if (controlledV7) {
         assertControlledV7OutputComplete(parsed.data, excerpts);
       }
+      const recoveryBinding = controlledV7 ? {
+        jobId: context.jobId,
+        tenantId: authority.tenantId,
+        procedimentoId: authority.procedimentoId,
+        corpusFingerprint: authority.corpusFingerprint,
+        approvalId: SELVARA_PILOT_AUTHORIZATION.approvalId,
+      } : null;
+      if (recoveryBinding) {
+        if (
+          !dependencies.persistProviderOutputRecovery
+          || !dependencies.auditProviderOutputRecovery
+        ) {
+          throw new AsyncJobExecutionError(
+            "PERSISTENCE",
+            "PROVIDER_OUTPUT_RECOVERY_UNAVAILABLE",
+            false,
+          );
+        }
+        try {
+          const artifact = await dependencies.persistProviderOutputRecovery({
+            binding: recoveryBinding,
+            output: parsed.data,
+          });
+          console.info({
+            event: "fascicolo_v7_provider_output_recovery_persisted",
+            jobId: context.jobId,
+            storageKey: artifact.storageKey,
+            outputFingerprint: artifact.outputFingerprint,
+            sizeBytes: artifact.sizeBytes,
+          });
+          await dependencies.auditProviderOutputRecovery({
+            jobId: context.jobId,
+            tenantId: authority.tenantId,
+            procedimentoId: authority.procedimentoId,
+            artifact,
+          });
+        } catch {
+          throw new AsyncJobExecutionError(
+            "PERSISTENCE",
+            "PROVIDER_OUTPUT_RECOVERY_PERSISTENCE_FAILED",
+            false,
+          );
+        }
+      }
       if (sourceKind === "DOCUMENT_CORPUS" && !parsed.data.structuredKnowledge) {
         throw new AsyncJobExecutionError("ANALYSIS", "NO_STRUCTURED_KNOWLEDGE", false);
       }
@@ -1385,6 +1478,16 @@ export function createFascicoloAutomaticAnalysisHandler(
             "STRUCTURED_FASCICOLO_REPORT_NOT_CREATED",
             false,
           );
+        }
+        if (recoveryBinding && dependencies.deleteProviderOutputRecovery) {
+          try {
+            await dependencies.deleteProviderOutputRecovery({ binding: recoveryBinding });
+          } catch {
+            console.warn({
+              event: "fascicolo_v7_provider_output_recovery_cleanup_failed",
+              jobId: context.jobId,
+            });
+          }
         }
         await context.heartbeat();
         return {

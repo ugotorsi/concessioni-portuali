@@ -326,6 +326,13 @@ function dependencies(overrides: Partial<FascicoloAutomaticAnalysisDependencies>
     validateControlledV7Preflight: vi.fn(async () => undefined),
     findExistingReport: vi.fn(async () => null),
     analyze: vi.fn(async () => analysis),
+    persistProviderOutputRecovery: vi.fn(async () => ({
+      storageKey: "ai-provider-output-recovery/v1/test/provider-output.enc",
+      outputFingerprint: "a".repeat(64),
+      sizeBytes: 1_024,
+    })),
+    auditProviderOutputRecovery: vi.fn(async () => undefined),
+    deleteProviderOutputRecovery: vi.fn(async () => undefined),
     persistReport: vi.fn(async (report: AutomaticFascicoloReport) => {
       const outcome = reports.has(report.reportId) ? "REUSED" as const : "CREATED" as const;
       reports.set(report.reportId, report);

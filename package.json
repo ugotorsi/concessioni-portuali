@@ -14,6 +14,8 @@
     "worker:readiness": "tsx scripts/runtime/staging-readiness.ts",
     "test:persistence:e2e": "tsx scripts/runtime/verify-fascicolo-persistence-e2e.ts",
     "deploy:vercel:preview": "tsx scripts/deploy/vercel-preview.ts",
+    "runtime:recover-v7-provider-output": "tsx scripts/runtime/recover-v7-provider-output.ts",
+    "runtime:verify-v7-provider-output-recovery": "tsx scripts/runtime/verify-v7-provider-output-recovery.ts",
     "job:cancel-obsolete-analysis": "tsx scripts/cancel-obsolete-fascicolo-analysis-job.ts",
     "check": "npm run build",
     "test": "vitest run",
