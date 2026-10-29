@@ -327,9 +327,10 @@ function dependencies(overrides: Partial<FascicoloAutomaticAnalysisDependencies>
     findExistingReport: vi.fn(async () => null),
     analyze: vi.fn(async () => analysis),
     persistProviderOutputRecovery: vi.fn(async () => ({
-      storageKey: "ai-provider-output-recovery/v1/test/provider-output.enc",
+      artifactRef: "V7ProviderOutputRecoveryArtifact:test",
       outputFingerprint: "a".repeat(64),
       sizeBytes: 1_024,
+      expiresAt: new Date("2026-11-05T00:00:00Z"),
     })),
     auditProviderOutputRecovery: vi.fn(async () => undefined),
     deleteProviderOutputRecovery: vi.fn(async () => undefined),

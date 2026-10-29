@@ -226,11 +226,11 @@ values, restart the affected processes, keep the worker suspended, and retain th
 cost ledger, diagnostics, knowledge revision, and report artifacts.
 
 For the controlled V7 run, a valid and grounded provider output is encrypted with
-AES-256-GCM and written to the configured S3/R2 storage before structured knowledge
+AES-256-GCM and written to a dedicated Neon recovery table before structured knowledge
 persistence begins. The artifact is bound to the immutable job, tenant, procedimento,
-corpus fingerprint, and approval identifier, and is deleted after successful atomic
-finalization. If the original single-attempt job terminates in the `PERSISTENCE`
-category, an operator may temporarily enable
+corpus fingerprint, and approval identifier, expires after seven days, and is deleted
+after successful atomic finalization. If the original single-attempt job terminates in
+the `PERSISTENCE` category, an operator may temporarily enable
 `AI_PROVIDER_OUTPUT_RECOVERY_ENABLED=true` and run:
 
 `npm run runtime:recover-v7-provider-output -- --job-id <JOB_ID> --approval-id <APPROVAL_ID> --confirm PERSIST_ONLY_WITHOUT_PROVIDER_CALL`

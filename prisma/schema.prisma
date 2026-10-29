@@ -2546,6 +2546,23 @@ model AsyncJob {
   @@index([operation, createdAt])
 }
 
+model V7ProviderOutputRecoveryArtifact {
+  id                String   @id @default(cuid())
+  jobId             String   @unique
+  tenantId          String
+  procedimentoId    String
+  corpusFingerprint String   @db.Char(64)
+  approvalId        String   @db.VarChar(256)
+  outputFingerprint String   @db.Char(64)
+  encryptedPayload  String   @db.Text
+  sizeBytes         Int
+  expiresAt         DateTime
+  createdAt         DateTime @default(now())
+
+  @@index([tenantId, procedimentoId, createdAt])
+  @@index([expiresAt])
+}
+
 model RuntimeWorkerHeartbeat {
   id                       String              @id @default(cuid())
   workerId                 String              @unique @db.VarChar(256)

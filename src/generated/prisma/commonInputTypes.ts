@@ -2530,6 +2530,13 @@ export type EnumFascicoloKnowledgeItemStatusFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumFascicoloKnowledgeItemStatusFilter<$PrismaModel> | $Enums.FascicoloKnowledgeItemStatus
 }
 
+export type EnumFascicoloKnowledgeIdentityStateNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloKnowledgeIdentityState | Prisma.EnumFascicoloKnowledgeIdentityStateFieldRefInput<$PrismaModel> | null
+  in?: $Enums.FascicoloKnowledgeIdentityState[] | Prisma.ListEnumFascicoloKnowledgeIdentityStateFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.FascicoloKnowledgeIdentityState[] | Prisma.ListEnumFascicoloKnowledgeIdentityStateFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumFascicoloKnowledgeIdentityStateNullableFilter<$PrismaModel> | $Enums.FascicoloKnowledgeIdentityState | null
+}
+
 export type EnumFascicoloKnowledgeItemStatusWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.FascicoloKnowledgeItemStatus | Prisma.EnumFascicoloKnowledgeItemStatusFieldRefInput<$PrismaModel>
   in?: $Enums.FascicoloKnowledgeItemStatus[] | Prisma.ListEnumFascicoloKnowledgeItemStatusFieldRefInput<$PrismaModel>
@@ -2538,6 +2545,16 @@ export type EnumFascicoloKnowledgeItemStatusWithAggregatesFilter<$PrismaModel = 
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumFascicoloKnowledgeItemStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumFascicoloKnowledgeItemStatusFilter<$PrismaModel>
+}
+
+export type EnumFascicoloKnowledgeIdentityStateNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloKnowledgeIdentityState | Prisma.EnumFascicoloKnowledgeIdentityStateFieldRefInput<$PrismaModel> | null
+  in?: $Enums.FascicoloKnowledgeIdentityState[] | Prisma.ListEnumFascicoloKnowledgeIdentityStateFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.FascicoloKnowledgeIdentityState[] | Prisma.ListEnumFascicoloKnowledgeIdentityStateFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumFascicoloKnowledgeIdentityStateNullableWithAggregatesFilter<$PrismaModel> | $Enums.FascicoloKnowledgeIdentityState | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFascicoloKnowledgeIdentityStateNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFascicoloKnowledgeIdentityStateNullableFilter<$PrismaModel>
 }
 
 export type EnumFascicoloKnowledgeProvenanceTypeFilter<$PrismaModel = never> = {
@@ -5072,6 +5089,13 @@ export type NestedEnumFascicoloKnowledgeItemStatusFilter<$PrismaModel = never> =
   not?: Prisma.NestedEnumFascicoloKnowledgeItemStatusFilter<$PrismaModel> | $Enums.FascicoloKnowledgeItemStatus
 }
 
+export type NestedEnumFascicoloKnowledgeIdentityStateNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloKnowledgeIdentityState | Prisma.EnumFascicoloKnowledgeIdentityStateFieldRefInput<$PrismaModel> | null
+  in?: $Enums.FascicoloKnowledgeIdentityState[] | Prisma.ListEnumFascicoloKnowledgeIdentityStateFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.FascicoloKnowledgeIdentityState[] | Prisma.ListEnumFascicoloKnowledgeIdentityStateFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumFascicoloKnowledgeIdentityStateNullableFilter<$PrismaModel> | $Enums.FascicoloKnowledgeIdentityState | null
+}
+
 export type NestedEnumFascicoloKnowledgeItemStatusWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.FascicoloKnowledgeItemStatus | Prisma.EnumFascicoloKnowledgeItemStatusFieldRefInput<$PrismaModel>
   in?: $Enums.FascicoloKnowledgeItemStatus[] | Prisma.ListEnumFascicoloKnowledgeItemStatusFieldRefInput<$PrismaModel>
@@ -5080,6 +5104,16 @@ export type NestedEnumFascicoloKnowledgeItemStatusWithAggregatesFilter<$PrismaMo
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumFascicoloKnowledgeItemStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumFascicoloKnowledgeItemStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumFascicoloKnowledgeIdentityStateNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FascicoloKnowledgeIdentityState | Prisma.EnumFascicoloKnowledgeIdentityStateFieldRefInput<$PrismaModel> | null
+  in?: $Enums.FascicoloKnowledgeIdentityState[] | Prisma.ListEnumFascicoloKnowledgeIdentityStateFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.FascicoloKnowledgeIdentityState[] | Prisma.ListEnumFascicoloKnowledgeIdentityStateFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumFascicoloKnowledgeIdentityStateNullableWithAggregatesFilter<$PrismaModel> | $Enums.FascicoloKnowledgeIdentityState | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFascicoloKnowledgeIdentityStateNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFascicoloKnowledgeIdentityStateNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumFascicoloKnowledgeProvenanceTypeFilter<$PrismaModel = never> = {

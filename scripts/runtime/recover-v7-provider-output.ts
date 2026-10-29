@@ -98,9 +98,10 @@ async function main(): Promise<void> {
     validateControlledV7Preflight: async () => undefined,
     analyze: async () => recovered.output,
     persistProviderOutputRecovery: async () => ({
-      storageKey: recovered.storageKey,
+      artifactRef: recovered.artifactRef,
       outputFingerprint: recovered.outputFingerprint,
       sizeBytes: 0,
+      expiresAt: recovered.expiresAt,
     }),
     auditProviderOutputRecovery: async () => undefined,
     deleteProviderOutputRecovery: async () => undefined,

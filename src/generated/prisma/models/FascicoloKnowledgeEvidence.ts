@@ -295,6 +295,7 @@ export type FascicoloKnowledgeEvidenceWhereInput = {
   documentFileVersion?: Prisma.XOR<Prisma.DocumentFileVersionNullableScalarRelationFilter, Prisma.DocumentFileVersionWhereInput> | null
   extractionAttempt?: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptNullableScalarRelationFilter, Prisma.NeutralIntakeExtractionAttemptWhereInput> | null
   documentExtractionAttempt?: Prisma.XOR<Prisma.DocumentExtractionAttemptNullableScalarRelationFilter, Prisma.DocumentExtractionAttemptWhereInput> | null
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanListRelationFilter
 }
 
 export type FascicoloKnowledgeEvidenceOrderByWithRelationInput = {
@@ -319,10 +320,12 @@ export type FascicoloKnowledgeEvidenceOrderByWithRelationInput = {
   documentFileVersion?: Prisma.DocumentFileVersionOrderByWithRelationInput
   extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptOrderByWithRelationInput
   documentExtractionAttempt?: Prisma.DocumentExtractionAttemptOrderByWithRelationInput
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanOrderByRelationAggregateInput
 }
 
 export type FascicoloKnowledgeEvidenceWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  id_tenantId_procedimentoId?: Prisma.FascicoloKnowledgeEvidenceIdTenantIdProcedimentoIdCompoundUniqueInput
   itemId_documentoId_documentFileVersionId_extractionAttemptId_documentExtractionAttemptId_pageNumber_textSha256_quoteSha256?: Prisma.FascicoloKnowledgeEvidenceItemIdDocumentoIdDocumentFileVersionIdExtractionAttemptIdDocumentExtractionAttemptIdPageNumberTextSha256QuoteSha256CompoundUniqueInput
   AND?: Prisma.FascicoloKnowledgeEvidenceWhereInput | Prisma.FascicoloKnowledgeEvidenceWhereInput[]
   OR?: Prisma.FascicoloKnowledgeEvidenceWhereInput[]
@@ -347,7 +350,8 @@ export type FascicoloKnowledgeEvidenceWhereUniqueInput = Prisma.AtLeast<{
   documentFileVersion?: Prisma.XOR<Prisma.DocumentFileVersionNullableScalarRelationFilter, Prisma.DocumentFileVersionWhereInput> | null
   extractionAttempt?: Prisma.XOR<Prisma.NeutralIntakeExtractionAttemptNullableScalarRelationFilter, Prisma.NeutralIntakeExtractionAttemptWhereInput> | null
   documentExtractionAttempt?: Prisma.XOR<Prisma.DocumentExtractionAttemptNullableScalarRelationFilter, Prisma.DocumentExtractionAttemptWhereInput> | null
-}, "id" | "itemId_documentoId_documentFileVersionId_extractionAttemptId_documentExtractionAttemptId_pageNumber_textSha256_quoteSha256">
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanListRelationFilter
+}, "id" | "id_tenantId_procedimentoId" | "itemId_documentoId_documentFileVersionId_extractionAttemptId_documentExtractionAttemptId_pageNumber_textSha256_quoteSha256">
 
 export type FascicoloKnowledgeEvidenceOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -406,6 +410,7 @@ export type FascicoloKnowledgeEvidenceCreateInput = {
   documentFileVersion?: Prisma.DocumentFileVersionCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
   extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
   documentExtractionAttempt?: Prisma.DocumentExtractionAttemptCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanCreateNestedManyWithoutEvidenceInput
 }
 
 export type FascicoloKnowledgeEvidenceUncheckedCreateInput = {
@@ -423,6 +428,7 @@ export type FascicoloKnowledgeEvidenceUncheckedCreateInput = {
   quoteSha256?: string | null
   basisRef?: string | null
   createdAt?: Date | string
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUncheckedCreateNestedManyWithoutEvidenceInput
 }
 
 export type FascicoloKnowledgeEvidenceUpdateInput = {
@@ -440,6 +446,7 @@ export type FascicoloKnowledgeEvidenceUpdateInput = {
   documentFileVersion?: Prisma.DocumentFileVersionUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
   extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
   documentExtractionAttempt?: Prisma.DocumentExtractionAttemptUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUpdateManyWithoutEvidenceNestedInput
 }
 
 export type FascicoloKnowledgeEvidenceUncheckedUpdateInput = {
@@ -457,6 +464,7 @@ export type FascicoloKnowledgeEvidenceUncheckedUpdateInput = {
   quoteSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   basisRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUncheckedUpdateManyWithoutEvidenceNestedInput
 }
 
 export type FascicoloKnowledgeEvidenceCreateManyInput = {
@@ -511,6 +519,12 @@ export type FascicoloKnowledgeEvidenceListRelationFilter = {
 
 export type FascicoloKnowledgeEvidenceOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type FascicoloKnowledgeEvidenceIdTenantIdProcedimentoIdCompoundUniqueInput = {
+  id: string
+  tenantId: string
+  procedimentoId: string
 }
 
 export type FascicoloKnowledgeEvidenceItemIdDocumentoIdDocumentFileVersionIdExtractionAttemptIdDocumentExtractionAttemptIdPageNumberTextSha256QuoteSha256CompoundUniqueInput = {
@@ -581,6 +595,11 @@ export type FascicoloKnowledgeEvidenceMinOrderByAggregateInput = {
 
 export type FascicoloKnowledgeEvidenceSumOrderByAggregateInput = {
   pageNumber?: Prisma.SortOrder
+}
+
+export type FascicoloKnowledgeEvidenceScalarRelationFilter = {
+  is?: Prisma.FascicoloKnowledgeEvidenceWhereInput
+  isNot?: Prisma.FascicoloKnowledgeEvidenceWhereInput
 }
 
 export type FascicoloKnowledgeEvidenceCreateNestedManyWithoutTenantInput = {
@@ -881,6 +900,20 @@ export type EnumFascicoloKnowledgeProvenanceTypeFieldUpdateOperationsInput = {
   set?: $Enums.FascicoloKnowledgeProvenanceType
 }
 
+export type FascicoloKnowledgeEvidenceCreateNestedOneWithoutSpansInput = {
+  create?: Prisma.XOR<Prisma.FascicoloKnowledgeEvidenceCreateWithoutSpansInput, Prisma.FascicoloKnowledgeEvidenceUncheckedCreateWithoutSpansInput>
+  connectOrCreate?: Prisma.FascicoloKnowledgeEvidenceCreateOrConnectWithoutSpansInput
+  connect?: Prisma.FascicoloKnowledgeEvidenceWhereUniqueInput
+}
+
+export type FascicoloKnowledgeEvidenceUpdateOneRequiredWithoutSpansNestedInput = {
+  create?: Prisma.XOR<Prisma.FascicoloKnowledgeEvidenceCreateWithoutSpansInput, Prisma.FascicoloKnowledgeEvidenceUncheckedCreateWithoutSpansInput>
+  connectOrCreate?: Prisma.FascicoloKnowledgeEvidenceCreateOrConnectWithoutSpansInput
+  upsert?: Prisma.FascicoloKnowledgeEvidenceUpsertWithoutSpansInput
+  connect?: Prisma.FascicoloKnowledgeEvidenceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.FascicoloKnowledgeEvidenceUpdateToOneWithWhereWithoutSpansInput, Prisma.FascicoloKnowledgeEvidenceUpdateWithoutSpansInput>, Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateWithoutSpansInput>
+}
+
 export type FascicoloKnowledgeEvidenceCreateWithoutTenantInput = {
   id?: string
   provenanceType?: $Enums.FascicoloKnowledgeProvenanceType
@@ -895,6 +928,7 @@ export type FascicoloKnowledgeEvidenceCreateWithoutTenantInput = {
   documentFileVersion?: Prisma.DocumentFileVersionCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
   extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
   documentExtractionAttempt?: Prisma.DocumentExtractionAttemptCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanCreateNestedManyWithoutEvidenceInput
 }
 
 export type FascicoloKnowledgeEvidenceUncheckedCreateWithoutTenantInput = {
@@ -911,6 +945,7 @@ export type FascicoloKnowledgeEvidenceUncheckedCreateWithoutTenantInput = {
   quoteSha256?: string | null
   basisRef?: string | null
   createdAt?: Date | string
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUncheckedCreateNestedManyWithoutEvidenceInput
 }
 
 export type FascicoloKnowledgeEvidenceCreateOrConnectWithoutTenantInput = {
@@ -973,6 +1008,7 @@ export type FascicoloKnowledgeEvidenceCreateWithoutProcedimentoInput = {
   documentFileVersion?: Prisma.DocumentFileVersionCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
   extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
   documentExtractionAttempt?: Prisma.DocumentExtractionAttemptCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanCreateNestedManyWithoutEvidenceInput
 }
 
 export type FascicoloKnowledgeEvidenceUncheckedCreateWithoutProcedimentoInput = {
@@ -989,6 +1025,7 @@ export type FascicoloKnowledgeEvidenceUncheckedCreateWithoutProcedimentoInput = 
   quoteSha256?: string | null
   basisRef?: string | null
   createdAt?: Date | string
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUncheckedCreateNestedManyWithoutEvidenceInput
 }
 
 export type FascicoloKnowledgeEvidenceCreateOrConnectWithoutProcedimentoInput = {
@@ -1031,6 +1068,7 @@ export type FascicoloKnowledgeEvidenceCreateWithoutDocumentoInput = {
   documentFileVersion?: Prisma.DocumentFileVersionCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
   extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
   documentExtractionAttempt?: Prisma.DocumentExtractionAttemptCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanCreateNestedManyWithoutEvidenceInput
 }
 
 export type FascicoloKnowledgeEvidenceUncheckedCreateWithoutDocumentoInput = {
@@ -1047,6 +1085,7 @@ export type FascicoloKnowledgeEvidenceUncheckedCreateWithoutDocumentoInput = {
   quoteSha256?: string | null
   basisRef?: string | null
   createdAt?: Date | string
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUncheckedCreateNestedManyWithoutEvidenceInput
 }
 
 export type FascicoloKnowledgeEvidenceCreateOrConnectWithoutDocumentoInput = {
@@ -1089,6 +1128,7 @@ export type FascicoloKnowledgeEvidenceCreateWithoutDocumentFileVersionInput = {
   documento: Prisma.DocumentoCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
   extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
   documentExtractionAttempt?: Prisma.DocumentExtractionAttemptCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanCreateNestedManyWithoutEvidenceInput
 }
 
 export type FascicoloKnowledgeEvidenceUncheckedCreateWithoutDocumentFileVersionInput = {
@@ -1105,6 +1145,7 @@ export type FascicoloKnowledgeEvidenceUncheckedCreateWithoutDocumentFileVersionI
   quoteSha256?: string | null
   basisRef?: string | null
   createdAt?: Date | string
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUncheckedCreateNestedManyWithoutEvidenceInput
 }
 
 export type FascicoloKnowledgeEvidenceCreateOrConnectWithoutDocumentFileVersionInput = {
@@ -1147,6 +1188,7 @@ export type FascicoloKnowledgeEvidenceCreateWithoutDocumentExtractionAttemptInpu
   documento: Prisma.DocumentoCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
   documentFileVersion?: Prisma.DocumentFileVersionCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
   extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanCreateNestedManyWithoutEvidenceInput
 }
 
 export type FascicoloKnowledgeEvidenceUncheckedCreateWithoutDocumentExtractionAttemptInput = {
@@ -1163,6 +1205,7 @@ export type FascicoloKnowledgeEvidenceUncheckedCreateWithoutDocumentExtractionAt
   quoteSha256?: string | null
   basisRef?: string | null
   createdAt?: Date | string
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUncheckedCreateNestedManyWithoutEvidenceInput
 }
 
 export type FascicoloKnowledgeEvidenceCreateOrConnectWithoutDocumentExtractionAttemptInput = {
@@ -1205,6 +1248,7 @@ export type FascicoloKnowledgeEvidenceCreateWithoutExtractionAttemptInput = {
   documento: Prisma.DocumentoCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
   documentFileVersion?: Prisma.DocumentFileVersionCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
   documentExtractionAttempt?: Prisma.DocumentExtractionAttemptCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanCreateNestedManyWithoutEvidenceInput
 }
 
 export type FascicoloKnowledgeEvidenceUncheckedCreateWithoutExtractionAttemptInput = {
@@ -1221,6 +1265,7 @@ export type FascicoloKnowledgeEvidenceUncheckedCreateWithoutExtractionAttemptInp
   quoteSha256?: string | null
   basisRef?: string | null
   createdAt?: Date | string
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUncheckedCreateNestedManyWithoutEvidenceInput
 }
 
 export type FascicoloKnowledgeEvidenceCreateOrConnectWithoutExtractionAttemptInput = {
@@ -1263,6 +1308,7 @@ export type FascicoloKnowledgeEvidenceCreateWithoutItemInput = {
   documentFileVersion?: Prisma.DocumentFileVersionCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
   extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
   documentExtractionAttempt?: Prisma.DocumentExtractionAttemptCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanCreateNestedManyWithoutEvidenceInput
 }
 
 export type FascicoloKnowledgeEvidenceUncheckedCreateWithoutItemInput = {
@@ -1277,6 +1323,7 @@ export type FascicoloKnowledgeEvidenceUncheckedCreateWithoutItemInput = {
   quoteSha256?: string | null
   basisRef?: string | null
   createdAt?: Date | string
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUncheckedCreateNestedManyWithoutEvidenceInput
 }
 
 export type FascicoloKnowledgeEvidenceCreateOrConnectWithoutItemInput = {
@@ -1303,6 +1350,90 @@ export type FascicoloKnowledgeEvidenceUpdateWithWhereUniqueWithoutItemInput = {
 export type FascicoloKnowledgeEvidenceUpdateManyWithWhereWithoutItemInput = {
   where: Prisma.FascicoloKnowledgeEvidenceScalarWhereInput
   data: Prisma.XOR<Prisma.FascicoloKnowledgeEvidenceUpdateManyMutationInput, Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutItemInput>
+}
+
+export type FascicoloKnowledgeEvidenceCreateWithoutSpansInput = {
+  id?: string
+  provenanceType?: $Enums.FascicoloKnowledgeProvenanceType
+  pageNumber: number
+  textSha256: string
+  quoteSha256?: string | null
+  basisRef?: string | null
+  createdAt?: Date | string
+  tenant: Prisma.EnteCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
+  procedimento: Prisma.ProcedimentoCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
+  item: Prisma.FascicoloKnowledgeItemCreateNestedOneWithoutEvidenceInput
+  documento: Prisma.DocumentoCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
+  documentFileVersion?: Prisma.DocumentFileVersionCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
+  extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
+  documentExtractionAttempt?: Prisma.DocumentExtractionAttemptCreateNestedOneWithoutFascicoloKnowledgeEvidenceInput
+}
+
+export type FascicoloKnowledgeEvidenceUncheckedCreateWithoutSpansInput = {
+  id?: string
+  tenantId: string
+  procedimentoId: string
+  itemId: string
+  provenanceType?: $Enums.FascicoloKnowledgeProvenanceType
+  documentoId: string
+  documentFileVersionId?: string | null
+  extractionAttemptId?: string | null
+  documentExtractionAttemptId?: string | null
+  pageNumber: number
+  textSha256: string
+  quoteSha256?: string | null
+  basisRef?: string | null
+  createdAt?: Date | string
+}
+
+export type FascicoloKnowledgeEvidenceCreateOrConnectWithoutSpansInput = {
+  where: Prisma.FascicoloKnowledgeEvidenceWhereUniqueInput
+  create: Prisma.XOR<Prisma.FascicoloKnowledgeEvidenceCreateWithoutSpansInput, Prisma.FascicoloKnowledgeEvidenceUncheckedCreateWithoutSpansInput>
+}
+
+export type FascicoloKnowledgeEvidenceUpsertWithoutSpansInput = {
+  update: Prisma.XOR<Prisma.FascicoloKnowledgeEvidenceUpdateWithoutSpansInput, Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateWithoutSpansInput>
+  create: Prisma.XOR<Prisma.FascicoloKnowledgeEvidenceCreateWithoutSpansInput, Prisma.FascicoloKnowledgeEvidenceUncheckedCreateWithoutSpansInput>
+  where?: Prisma.FascicoloKnowledgeEvidenceWhereInput
+}
+
+export type FascicoloKnowledgeEvidenceUpdateToOneWithWhereWithoutSpansInput = {
+  where?: Prisma.FascicoloKnowledgeEvidenceWhereInput
+  data: Prisma.XOR<Prisma.FascicoloKnowledgeEvidenceUpdateWithoutSpansInput, Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateWithoutSpansInput>
+}
+
+export type FascicoloKnowledgeEvidenceUpdateWithoutSpansInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  provenanceType?: Prisma.EnumFascicoloKnowledgeProvenanceTypeFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeProvenanceType
+  pageNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  textSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  quoteSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  basisRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.EnteUpdateOneRequiredWithoutFascicoloKnowledgeEvidenceNestedInput
+  procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutFascicoloKnowledgeEvidenceNestedInput
+  item?: Prisma.FascicoloKnowledgeItemUpdateOneRequiredWithoutEvidenceNestedInput
+  documento?: Prisma.DocumentoUpdateOneRequiredWithoutFascicoloKnowledgeEvidenceNestedInput
+  documentFileVersion?: Prisma.DocumentFileVersionUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
+  extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
+  documentExtractionAttempt?: Prisma.DocumentExtractionAttemptUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
+}
+
+export type FascicoloKnowledgeEvidenceUncheckedUpdateWithoutSpansInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  procedimentoId?: Prisma.StringFieldUpdateOperationsInput | string
+  itemId?: Prisma.StringFieldUpdateOperationsInput | string
+  provenanceType?: Prisma.EnumFascicoloKnowledgeProvenanceTypeFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeProvenanceType
+  documentoId?: Prisma.StringFieldUpdateOperationsInput | string
+  documentFileVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extractionAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentExtractionAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pageNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  textSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  quoteSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  basisRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type FascicoloKnowledgeEvidenceCreateManyTenantInput = {
@@ -1335,6 +1466,7 @@ export type FascicoloKnowledgeEvidenceUpdateWithoutTenantInput = {
   documentFileVersion?: Prisma.DocumentFileVersionUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
   extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
   documentExtractionAttempt?: Prisma.DocumentExtractionAttemptUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUpdateManyWithoutEvidenceNestedInput
 }
 
 export type FascicoloKnowledgeEvidenceUncheckedUpdateWithoutTenantInput = {
@@ -1351,6 +1483,7 @@ export type FascicoloKnowledgeEvidenceUncheckedUpdateWithoutTenantInput = {
   quoteSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   basisRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUncheckedUpdateManyWithoutEvidenceNestedInput
 }
 
 export type FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutTenantInput = {
@@ -1399,6 +1532,7 @@ export type FascicoloKnowledgeEvidenceUpdateWithoutProcedimentoInput = {
   documentFileVersion?: Prisma.DocumentFileVersionUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
   extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
   documentExtractionAttempt?: Prisma.DocumentExtractionAttemptUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUpdateManyWithoutEvidenceNestedInput
 }
 
 export type FascicoloKnowledgeEvidenceUncheckedUpdateWithoutProcedimentoInput = {
@@ -1415,6 +1549,7 @@ export type FascicoloKnowledgeEvidenceUncheckedUpdateWithoutProcedimentoInput = 
   quoteSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   basisRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUncheckedUpdateManyWithoutEvidenceNestedInput
 }
 
 export type FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutProcedimentoInput = {
@@ -1463,6 +1598,7 @@ export type FascicoloKnowledgeEvidenceUpdateWithoutDocumentoInput = {
   documentFileVersion?: Prisma.DocumentFileVersionUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
   extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
   documentExtractionAttempt?: Prisma.DocumentExtractionAttemptUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUpdateManyWithoutEvidenceNestedInput
 }
 
 export type FascicoloKnowledgeEvidenceUncheckedUpdateWithoutDocumentoInput = {
@@ -1479,6 +1615,7 @@ export type FascicoloKnowledgeEvidenceUncheckedUpdateWithoutDocumentoInput = {
   quoteSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   basisRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUncheckedUpdateManyWithoutEvidenceNestedInput
 }
 
 export type FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutDocumentoInput = {
@@ -1527,6 +1664,7 @@ export type FascicoloKnowledgeEvidenceUpdateWithoutDocumentFileVersionInput = {
   documento?: Prisma.DocumentoUpdateOneRequiredWithoutFascicoloKnowledgeEvidenceNestedInput
   extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
   documentExtractionAttempt?: Prisma.DocumentExtractionAttemptUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUpdateManyWithoutEvidenceNestedInput
 }
 
 export type FascicoloKnowledgeEvidenceUncheckedUpdateWithoutDocumentFileVersionInput = {
@@ -1543,6 +1681,7 @@ export type FascicoloKnowledgeEvidenceUncheckedUpdateWithoutDocumentFileVersionI
   quoteSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   basisRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUncheckedUpdateManyWithoutEvidenceNestedInput
 }
 
 export type FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutDocumentFileVersionInput = {
@@ -1591,6 +1730,7 @@ export type FascicoloKnowledgeEvidenceUpdateWithoutDocumentExtractionAttemptInpu
   documento?: Prisma.DocumentoUpdateOneRequiredWithoutFascicoloKnowledgeEvidenceNestedInput
   documentFileVersion?: Prisma.DocumentFileVersionUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
   extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUpdateManyWithoutEvidenceNestedInput
 }
 
 export type FascicoloKnowledgeEvidenceUncheckedUpdateWithoutDocumentExtractionAttemptInput = {
@@ -1607,6 +1747,7 @@ export type FascicoloKnowledgeEvidenceUncheckedUpdateWithoutDocumentExtractionAt
   quoteSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   basisRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUncheckedUpdateManyWithoutEvidenceNestedInput
 }
 
 export type FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutDocumentExtractionAttemptInput = {
@@ -1655,6 +1796,7 @@ export type FascicoloKnowledgeEvidenceUpdateWithoutExtractionAttemptInput = {
   documento?: Prisma.DocumentoUpdateOneRequiredWithoutFascicoloKnowledgeEvidenceNestedInput
   documentFileVersion?: Prisma.DocumentFileVersionUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
   documentExtractionAttempt?: Prisma.DocumentExtractionAttemptUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUpdateManyWithoutEvidenceNestedInput
 }
 
 export type FascicoloKnowledgeEvidenceUncheckedUpdateWithoutExtractionAttemptInput = {
@@ -1671,6 +1813,7 @@ export type FascicoloKnowledgeEvidenceUncheckedUpdateWithoutExtractionAttemptInp
   quoteSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   basisRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUncheckedUpdateManyWithoutEvidenceNestedInput
 }
 
 export type FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutExtractionAttemptInput = {
@@ -1717,6 +1860,7 @@ export type FascicoloKnowledgeEvidenceUpdateWithoutItemInput = {
   documentFileVersion?: Prisma.DocumentFileVersionUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
   extractionAttempt?: Prisma.NeutralIntakeExtractionAttemptUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
   documentExtractionAttempt?: Prisma.DocumentExtractionAttemptUpdateOneWithoutFascicoloKnowledgeEvidenceNestedInput
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUpdateManyWithoutEvidenceNestedInput
 }
 
 export type FascicoloKnowledgeEvidenceUncheckedUpdateWithoutItemInput = {
@@ -1731,6 +1875,7 @@ export type FascicoloKnowledgeEvidenceUncheckedUpdateWithoutItemInput = {
   quoteSha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   basisRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  spans?: Prisma.FascicoloKnowledgeEvidenceSpanUncheckedUpdateManyWithoutEvidenceNestedInput
 }
 
 export type FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutItemInput = {
@@ -1747,6 +1892,35 @@ export type FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutItemInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+
+/**
+ * Count Type FascicoloKnowledgeEvidenceCountOutputType
+ */
+
+export type FascicoloKnowledgeEvidenceCountOutputType = {
+  spans: number
+}
+
+export type FascicoloKnowledgeEvidenceCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  spans?: boolean | FascicoloKnowledgeEvidenceCountOutputTypeCountSpansArgs
+}
+
+/**
+ * FascicoloKnowledgeEvidenceCountOutputType without action
+ */
+export type FascicoloKnowledgeEvidenceCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FascicoloKnowledgeEvidenceCountOutputType
+   */
+  select?: Prisma.FascicoloKnowledgeEvidenceCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * FascicoloKnowledgeEvidenceCountOutputType without action
+ */
+export type FascicoloKnowledgeEvidenceCountOutputTypeCountSpansArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FascicoloKnowledgeEvidenceSpanWhereInput
+}
 
 
 export type FascicoloKnowledgeEvidenceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1771,6 +1945,8 @@ export type FascicoloKnowledgeEvidenceSelect<ExtArgs extends runtime.Types.Exten
   documentFileVersion?: boolean | Prisma.FascicoloKnowledgeEvidence$documentFileVersionArgs<ExtArgs>
   extractionAttempt?: boolean | Prisma.FascicoloKnowledgeEvidence$extractionAttemptArgs<ExtArgs>
   documentExtractionAttempt?: boolean | Prisma.FascicoloKnowledgeEvidence$documentExtractionAttemptArgs<ExtArgs>
+  spans?: boolean | Prisma.FascicoloKnowledgeEvidence$spansArgs<ExtArgs>
+  _count?: boolean | Prisma.FascicoloKnowledgeEvidenceCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["fascicoloKnowledgeEvidence"]>
 
 export type FascicoloKnowledgeEvidenceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1847,6 +2023,8 @@ export type FascicoloKnowledgeEvidenceInclude<ExtArgs extends runtime.Types.Exte
   documentFileVersion?: boolean | Prisma.FascicoloKnowledgeEvidence$documentFileVersionArgs<ExtArgs>
   extractionAttempt?: boolean | Prisma.FascicoloKnowledgeEvidence$extractionAttemptArgs<ExtArgs>
   documentExtractionAttempt?: boolean | Prisma.FascicoloKnowledgeEvidence$documentExtractionAttemptArgs<ExtArgs>
+  spans?: boolean | Prisma.FascicoloKnowledgeEvidence$spansArgs<ExtArgs>
+  _count?: boolean | Prisma.FascicoloKnowledgeEvidenceCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type FascicoloKnowledgeEvidenceIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.EnteDefaultArgs<ExtArgs>
@@ -1877,6 +2055,7 @@ export type $FascicoloKnowledgeEvidencePayload<ExtArgs extends runtime.Types.Ext
     documentFileVersion: Prisma.$DocumentFileVersionPayload<ExtArgs> | null
     extractionAttempt: Prisma.$NeutralIntakeExtractionAttemptPayload<ExtArgs> | null
     documentExtractionAttempt: Prisma.$DocumentExtractionAttemptPayload<ExtArgs> | null
+    spans: Prisma.$FascicoloKnowledgeEvidenceSpanPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2294,6 +2473,7 @@ export interface Prisma__FascicoloKnowledgeEvidenceClient<T, Null = never, ExtAr
   documentFileVersion<T extends Prisma.FascicoloKnowledgeEvidence$documentFileVersionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FascicoloKnowledgeEvidence$documentFileVersionArgs<ExtArgs>>): Prisma.Prisma__DocumentFileVersionClient<runtime.Types.Result.GetResult<Prisma.$DocumentFileVersionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   extractionAttempt<T extends Prisma.FascicoloKnowledgeEvidence$extractionAttemptArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FascicoloKnowledgeEvidence$extractionAttemptArgs<ExtArgs>>): Prisma.Prisma__NeutralIntakeExtractionAttemptClient<runtime.Types.Result.GetResult<Prisma.$NeutralIntakeExtractionAttemptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   documentExtractionAttempt<T extends Prisma.FascicoloKnowledgeEvidence$documentExtractionAttemptArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FascicoloKnowledgeEvidence$documentExtractionAttemptArgs<ExtArgs>>): Prisma.Prisma__DocumentExtractionAttemptClient<runtime.Types.Result.GetResult<Prisma.$DocumentExtractionAttemptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  spans<T extends Prisma.FascicoloKnowledgeEvidence$spansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FascicoloKnowledgeEvidence$spansArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloKnowledgeEvidenceSpanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2792,6 +2972,30 @@ export type FascicoloKnowledgeEvidence$documentExtractionAttemptArgs<ExtArgs ext
    */
   include?: Prisma.DocumentExtractionAttemptInclude<ExtArgs> | null
   where?: Prisma.DocumentExtractionAttemptWhereInput
+}
+
+/**
+ * FascicoloKnowledgeEvidence.spans
+ */
+export type FascicoloKnowledgeEvidence$spansArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FascicoloKnowledgeEvidenceSpan
+   */
+  select?: Prisma.FascicoloKnowledgeEvidenceSpanSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FascicoloKnowledgeEvidenceSpan
+   */
+  omit?: Prisma.FascicoloKnowledgeEvidenceSpanOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FascicoloKnowledgeEvidenceSpanInclude<ExtArgs> | null
+  where?: Prisma.FascicoloKnowledgeEvidenceSpanWhereInput
+  orderBy?: Prisma.FascicoloKnowledgeEvidenceSpanOrderByWithRelationInput | Prisma.FascicoloKnowledgeEvidenceSpanOrderByWithRelationInput[]
+  cursor?: Prisma.FascicoloKnowledgeEvidenceSpanWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FascicoloKnowledgeEvidenceSpanScalarFieldEnum | Prisma.FascicoloKnowledgeEvidenceSpanScalarFieldEnum[]
 }
 
 /**

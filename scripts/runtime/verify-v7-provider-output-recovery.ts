@@ -42,7 +42,7 @@ async function main(): Promise<void> {
     }
     console.info(JSON.stringify({
       outcome: "RECOVERY_PROBE_SUCCEEDED",
-      storageBackend: "s3",
+      storageBackend: "neon",
       encryptedAtRestByApplication: true,
       outputFingerprint: artifact.outputFingerprint,
       sizeBytes: artifact.sizeBytes,

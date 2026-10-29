@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import type {
-  DocumentStorageCreateResult,
-  DocumentStorageReadResult,
-} from "@/server/documents/storage/types";
 import {
   deleteV7ProviderOutputRecoveryArtifact,
   loadV7ProviderOutputRecoveryArtifact,
@@ -11,59 +7,33 @@ import {
   V7ProviderOutputRecoveryError,
 } from "@/server/ai/v7ProviderOutputRecovery";
 
-function memoryStorage() {
-  const objects = new Map<string, Buffer>();
+function memoryRepository() {
+  type Row = {
+    id: string;
+    jobId: string;
+    tenantId: string;
+    procedimentoId: string;
+    corpusFingerprint: string;
+    approvalId: string;
+    outputFingerprint: string;
+    encryptedPayload: string;
+    sizeBytes: number;
+    expiresAt: Date;
+  };
+  const rows = new Map<string, Row>();
   return {
-    objects,
-    storage: {
-      async createIfAbsent(input: {
-        storageKey: string;
-        body: Buffer;
-        mimeType: string;
-        originalName: string;
-        sha256: string;
-        sizeBytes: number;
-      }): Promise<DocumentStorageCreateResult> {
-        if (objects.has(input.storageKey)) {
-          return {
-            disposition: "ALREADY_EXISTS",
-            ownedByAttempt: false,
-            object: {
-              storageProvider: "s3",
-              storageKey: input.storageKey,
-              fileName: input.originalName,
-              bucket: "test",
-              sizeBytes: input.sizeBytes,
-              sha256: input.sha256,
-              mimeType: input.mimeType,
-              originalName: input.originalName,
-            },
-          };
-        }
-        objects.set(input.storageKey, Buffer.from(input.body));
-        return {
-          disposition: "CREATED",
-          ownedByAttempt: true,
-          object: {
-            storageProvider: "s3",
-            storageKey: input.storageKey,
-            fileName: input.originalName,
-            bucket: "test",
-            sizeBytes: input.sizeBytes,
-            sha256: input.sha256,
-            mimeType: input.mimeType,
-            originalName: input.originalName,
-          },
-        };
+    rows,
+    repository: {
+      async create(input: Omit<Row, "id">): Promise<Row> {
+        const row = { id: "artifact-1", ...input };
+        rows.set(input.jobId, row);
+        return row;
       },
-      async readBounded(storageKey: string, maxBytes: number): Promise<DocumentStorageReadResult> {
-        const body = objects.get(storageKey);
-        if (!body) return { disposition: "MISSING" };
-        if (body.length > maxBytes) throw new Error("limit");
-        return { disposition: "FOUND", body: Buffer.from(body) };
+      async findByJobId(jobId: string): Promise<Row | null> {
+        return rows.get(jobId) ?? null;
       },
-      async delete(storageKey: string): Promise<void> {
-        objects.delete(storageKey);
+      async deleteByBinding(input: { jobId: string }): Promise<void> {
+        rows.delete(input.jobId);
       },
     },
   };
@@ -77,66 +47,73 @@ const binding = {
   approvalId: "NOETRA-V7-SELVARA-2026-10-29-CONTROLLED-ONE-SHOT-08",
 };
 const key = Buffer.alloc(32, 17);
+const now = new Date("2026-10-29T12:00:00Z");
 
 describe("V7 provider output recovery", () => {
   it("round-trips a protected output and deletes it after successful persistence", async () => {
-    const { storage, objects } = memoryStorage();
+    const { repository, rows } = memoryRepository();
     const output = { chronology: [{ fact: "verified" }], citations: ["doc:1"] };
 
     const artifact = await persistV7ProviderOutputRecoveryArtifact({
       binding,
       output,
-      storage,
+      repository,
       encryptionKey: key,
+      now,
     });
     const recovered = await loadV7ProviderOutputRecoveryArtifact({
       binding,
-      storage,
+      repository,
       encryptionKey: key,
+      now,
     });
 
     expect(recovered.output).toEqual(output);
     expect(recovered.outputFingerprint).toBe(artifact.outputFingerprint);
-    expect(objects.get(artifact.storageKey)?.toString("utf8")).not.toContain("verified");
+    expect(rows.get(binding.jobId)?.encryptedPayload).not.toContain("verified");
 
-    await deleteV7ProviderOutputRecoveryArtifact({ binding, storage });
+    await deleteV7ProviderOutputRecoveryArtifact({ binding, repository });
     await expect(loadV7ProviderOutputRecoveryArtifact({
       binding,
-      storage,
+      repository,
       encryptionKey: key,
+      now,
     })).rejects.toMatchObject({ code: "RECOVERY_ARTIFACT_MISSING" });
   });
 
   it("rejects decryption under a different authorization binding", async () => {
-    const { storage } = memoryStorage();
+    const { repository } = memoryRepository();
     await persistV7ProviderOutputRecoveryArtifact({
       binding,
       output: { facts: ["paid output"] },
-      storage,
+      repository,
       encryptionKey: key,
+      now,
     });
 
     await expect(loadV7ProviderOutputRecoveryArtifact({
       binding: { ...binding, approvalId: "different-approval" },
-      storage,
+      repository,
       encryptionKey: key,
+      now,
     })).rejects.toBeInstanceOf(V7ProviderOutputRecoveryError);
   });
 
-  it("rejects a conflicting second output for the same one-shot job", async () => {
-    const { storage } = memoryStorage();
+  it("rejects an expired artifact", async () => {
+    const { repository } = memoryRepository();
     await persistV7ProviderOutputRecoveryArtifact({
       binding,
-      output: { result: "first" },
-      storage,
+      output: { facts: ["paid output"] },
+      repository,
       encryptionKey: key,
+      now,
     });
 
-    await expect(persistV7ProviderOutputRecoveryArtifact({
+    await expect(loadV7ProviderOutputRecoveryArtifact({
       binding,
-      output: { result: "second" },
-      storage,
+      repository,
       encryptionKey: key,
-    })).rejects.toMatchObject({ code: "RECOVERY_ARTIFACT_CONFLICT" });
+      now: new Date("2026-11-06T12:00:00Z"),
+    })).rejects.toMatchObject({ code: "RECOVERY_ARTIFACT_EXPIRED" });
   });
 });

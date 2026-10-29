@@ -960,7 +960,7 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
         procedimentoId: input.procedimentoId,
         approvalId: SELVARA_PILOT_AUTHORIZATION.approvalId,
         outputFingerprint: input.artifact.outputFingerprint,
-        storageKey: input.artifact.storageKey,
+        artifactRef: input.artifact.artifactRef,
         encrypted: true,
       },
     });
@@ -1262,7 +1262,7 @@ export function createFascicoloAutomaticAnalysisHandler(
           console.info({
             event: "fascicolo_v7_provider_output_recovery_persisted",
             jobId: context.jobId,
-            storageKey: artifact.storageKey,
+            artifactRef: artifact.artifactRef,
             outputFingerprint: artifact.outputFingerprint,
             sizeBytes: artifact.sizeBytes,
           });
