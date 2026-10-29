@@ -239,6 +239,24 @@ The recovery command refuses non-terminal, multi-attempt, non-V7, non-persistenc
 misbound jobs. It decrypts the authenticated artifact, re-runs validation and only the
 knowledge/report persistence path, audits the recovery, preserves the failed job's
 historical status, makes no provider call, and deletes the artifact after success.
+
+## Infrastructure service center
+
+`/admin/runtime` is the ADMIN + MFA control center for the services used by NOETRA.
+It distinguishes informational notices, required interventions, and blocking problems
+for AI, Render, Vercel, Neon, S3-compatible document storage (including Cloudflare R2),
+and configured connectors.
+
+Cost totals and forecasts use settled or reserved NOETRA runtime records. Provider
+credits, renewals, failed payments, subscription limits, and storage/compute usage are
+reported only when an authorized API exposes them; otherwise the interface explicitly
+marks the data as unavailable and provides a guided provider-console action. It must
+never infer or fabricate provider billing data.
+
+The Render worker can be resumed or suspended from the service center only when the
+authorized service ID and API key are configured. Both operations require ADMIN + MFA,
+use Render's explicit service-control API, and are audited. They never authorize a
+purchase, renewal, plan change, or provider call.
 Keep the recovery gate false unless this explicitly authorized path is required.
 
 ## Document Extraction Activation

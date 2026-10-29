@@ -9,12 +9,14 @@ import { formatDateIT } from "@/lib/utils";
 import { getRuntimeHealthSnapshot } from "@/server/runtime/health";
 import { getDatabaseIdentityDiagnostic } from "@/server/runtime/databaseIdentity";
 import { readDefaultProcedimentoBudgetAuthorization } from "@/server/runtime/procedimentoBudgetPolicy";
+import { buildServiceCenterSnapshot } from "@/server/runtime/serviceCenter";
 import { getGlobalAiControlState } from "@/server/ai/globalAiControl";
 
 import {
   assignDefaultProcedimentoBudgetPolicy,
   recoverCurrentKnowledgeMissions,
   retryRuntimeJob,
+  setRenderWorkerState,
   updateGlobalAiControl,
 } from "./actions";
 import { GlobalAiControlForm } from "./GlobalAiControlForm";
@@ -50,7 +52,9 @@ export default async function RuntimeOperationsPage() {
   await requireRole(["ADMIN"]);
   await requireAdminWithMfa();
   const defaultProcedimentoBudget = readDefaultProcedimentoBudgetAuthorization();
-  const [aiControl, health, databaseIdentity, workers, failedJobs, policies, costs] = await Promise.all([
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const [aiControl, health, databaseIdentity, workers, failedJobs, policies, costs, cost30Days, cost7Days, reservedCosts] = await Promise.all([
     getGlobalAiControlState(),
     getRuntimeHealthSnapshot(),
     getDatabaseIdentityDiagnostic(),
@@ -62,7 +66,28 @@ export default async function RuntimeOperationsPage() {
     }),
     prisma.runtimeBudgetPolicy.findMany({ where: { enabled: true }, orderBy: [{ scope: "asc" }, { effectiveFrom: "desc" }] }),
     prisma.runtimeCostReservation.findMany({ orderBy: { createdAt: "desc" }, take: 25 }),
+    prisma.runtimeCostReservation.aggregate({
+      where: { status: "SETTLED", settledAt: { gte: thirtyDaysAgo } },
+      _sum: { actualAmount: true },
+    }),
+    prisma.runtimeCostReservation.aggregate({
+      where: { status: "SETTLED", settledAt: { gte: sevenDaysAgo } },
+      _sum: { actualAmount: true },
+    }),
+    prisma.runtimeCostReservation.aggregate({
+      where: { status: "RESERVED" },
+      _sum: { reservedAmount: true },
+    }),
   ]);
+  const serviceCenter = buildServiceCenterSnapshot({
+    health,
+    databaseIdentity,
+    costs: {
+      actualLast30DaysEur: cost30Days._sum.actualAmount?.toNumber() ?? 0,
+      actualLast7DaysEur: cost7Days._sum.actualAmount?.toNumber() ?? 0,
+      reservedEur: reservedCosts._sum.reservedAmount?.toNumber() ?? 0,
+    },
+  });
 
   return (
     <AppShell title="Stato dei servizi" subtitle="Controllo delle elaborazioni automatiche e degli eventuali interventi richiesti">
@@ -208,6 +233,70 @@ export default async function RuntimeOperationsPage() {
           <div><dt className="text-xs text-slate-500">In elaborazione</dt><dd className="mt-1 text-xl font-semibold text-slate-900">{health.runningJobs}</dd></div>
           <div><dt className="text-xs text-slate-500">Da recuperare</dt><dd className="mt-1 text-xl font-semibold text-slate-900">{health.staleLeases}</dd></div>
         </dl>
+      </section>
+
+      <section className="mt-6" aria-labelledby="service-center-title">
+        <Card>
+          <CardHeader>
+            <CardTitle id="service-center-title">Centro gestione infrastruttura</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <div className="flex flex-wrap gap-3 text-sm">
+              <Badge variant={serviceCenter.blockingCount ? "danger" : "success"}>
+                {serviceCenter.blockingCount} problemi bloccanti
+              </Badge>
+              <Badge variant={serviceCenter.actionRequiredCount ? "warning" : "success"}>
+                {serviceCenter.actionRequiredCount} interventi necessari
+              </Badge>
+              <span className="text-slate-500">Aggiornato {formatDateIT(serviceCenter.generatedAt)}</span>
+            </div>
+            <div className="grid gap-4 xl:grid-cols-2">
+              {serviceCenter.services.map((service) => (
+                <article key={service.id} className="rounded-lg border border-slate-200 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h3 className="font-semibold text-slate-900">{service.name}</h3>
+                    <Badge variant={service.severity === "BLOCKING" ? "danger" : service.severity === "ACTION_REQUIRED" ? "warning" : "success"}>
+                      {service.severity === "BLOCKING" ? "Bloccante" : service.severity === "ACTION_REQUIRED" ? "Intervento necessario" : "Informazione"}
+                    </Badge>
+                  </div>
+                  <p className="mt-2 text-sm text-slate-700">{service.summary}</p>
+                  <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+                    {service.metrics.map((metric) => (
+                      <div key={metric.label}>
+                        <dt className="text-slate-500">{metric.label}</dt>
+                        <dd className="font-medium text-slate-900">{metric.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                  {service.alerts.length ? (
+                    <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-amber-800">
+                      {service.alerts.map((alert) => <li key={alert}>{alert}</li>)}
+                    </ul>
+                  ) : null}
+                  {service.guidedAction ? <p className="mt-3 text-sm font-medium text-slate-700">Azione guidata: {service.guidedAction}</p> : null}
+                  <p className="mt-3 text-xs text-slate-500">Fonte: {service.dataSource}</p>
+                  {service.id === "render" && service.controllable ? (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <form action={setRenderWorkerState}>
+                        <input type="hidden" name="desiredState" value="RUNNING" />
+                        <input type="hidden" name="confirmation" value="RESUME_RENDER_WORKER" />
+                        <Button type="submit" size="sm">Attiva worker</Button>
+                      </form>
+                      <form action={setRenderWorkerState}>
+                        <input type="hidden" name="desiredState" value="SUSPENDED" />
+                        <input type="hidden" name="confirmation" value="SUSPEND_RENDER_WORKER" />
+                        <Button type="submit" size="sm" variant="outline">Sospendi worker</Button>
+                      </form>
+                    </div>
+                  ) : null}
+                </article>
+              ))}
+            </div>
+            <p className="text-xs text-slate-500">
+              NOETRA non acquista, rinnova o amplia abbonamenti. I dati non disponibili tramite API autorizzate sono indicati come non verificabili e richiedono un controllo guidato.
+            </p>
+          </CardContent>
+        </Card>
       </section>
 
       <section className="mt-6 grid gap-6 xl:grid-cols-2">

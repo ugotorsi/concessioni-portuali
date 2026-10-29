@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { getCurrentUser, requireAdminWithMfa, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth";
-import { auditSuccess } from "@/server/audit/auditLog";
+import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 import { setGlobalAiControlState } from "@/server/ai/globalAiControl";
 import {
   documentWorkerKindForOperation,
@@ -17,6 +17,70 @@ import {
   readDefaultProcedimentoBudgetAuthorization,
 } from "@/server/runtime/procedimentoBudgetPolicy";
 import { recoverCurrentKnowledgeResearchMissions } from "@/server/fascicolo-knowledge/researchMissionRecovery";
+
+const RENDER_SERVICE_ID_PATTERN = /^srv-[a-z0-9]+$/;
+
+export async function setRenderWorkerState(formData: FormData): Promise<void> {
+  const currentUser = await requireAdminWithMfa();
+  const desiredState = formData.get("desiredState");
+  if (desiredState !== "SUSPENDED" && desiredState !== "RUNNING") {
+    throw new Error("INVALID_RENDER_WORKER_STATE");
+  }
+  const confirmation = formData.get("confirmation");
+  const expectedConfirmation = desiredState === "SUSPENDED"
+    ? "SUSPEND_RENDER_WORKER"
+    : "RESUME_RENDER_WORKER";
+  if (confirmation !== expectedConfirmation) {
+    throw new Error("RENDER_WORKER_CONFIRMATION_REQUIRED");
+  }
+  const serviceId = process.env.RENDER_APPLICATION_WORKER_SERVICE_ID?.trim() ?? "";
+  const apiKey = process.env.RENDER_WORKER_API_KEY?.trim() ?? "";
+  if (!RENDER_SERVICE_ID_PATTERN.test(serviceId) || !apiKey) {
+    throw new Error("RENDER_CONTROL_NOT_CONFIGURED");
+  }
+
+  const operation = desiredState === "SUSPENDED" ? "suspend" : "resume";
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10_000);
+  let response: Response;
+  try {
+    response = await fetch(`https://api.render.com/v1/services/${serviceId}/${operation}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}` },
+      signal: controller.signal,
+      cache: "no-store",
+    });
+  } catch (error) {
+    await auditFailure({
+      azione: "RUNTIME_RENDER_WORKER_CONTROL_FAILURE",
+      entita: "RenderService",
+      entitaId: serviceId,
+      actor: { userId: currentUser.id, userEmail: currentUser.email, userRole: currentUser.role },
+      metadata: { desiredState, reason: error instanceof Error ? error.name : "REQUEST_FAILED" },
+    });
+    throw new Error("RENDER_CONTROL_REQUEST_FAILED");
+  } finally {
+    clearTimeout(timeout);
+  }
+  if (!response.ok) {
+    await auditFailure({
+      azione: "RUNTIME_RENDER_WORKER_CONTROL_FAILURE",
+      entita: "RenderService",
+      entitaId: serviceId,
+      actor: { userId: currentUser.id, userEmail: currentUser.email, userRole: currentUser.role },
+      metadata: { desiredState, status: response.status },
+    });
+    throw new Error(`RENDER_CONTROL_REJECTED_${response.status}`);
+  }
+  await auditSuccess({
+    azione: "RUNTIME_RENDER_WORKER_CONTROL",
+    entita: "RenderService",
+    entitaId: serviceId,
+    actor: { userId: currentUser.id, userEmail: currentUser.email, userRole: currentUser.role },
+    metadata: { desiredState, purchasesAuthorized: false, subscriptionChangesAuthorized: false },
+  });
+  revalidatePath("/admin/runtime");
+}
 
 export async function retryRuntimeJob(formData: FormData): Promise<void> {
   await requireRole(["ADMIN"]);
