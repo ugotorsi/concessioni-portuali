@@ -215,6 +215,7 @@ async function seedIsolatedCorpus(): Promise<void> {
   }, { timeout: 30_000 });
 }
 
+async function main(): Promise<void> {
 await measured("setup", seedIsolatedCorpus);
 
 const authority = {
@@ -512,3 +513,10 @@ console.log(JSON.stringify({
   },
 }, null, 2));
 await prisma.$disconnect();
+}
+
+void main().catch(async (error: unknown) => {
+  console.error(error);
+  await prisma.$disconnect();
+  process.exitCode = 1;
+});
