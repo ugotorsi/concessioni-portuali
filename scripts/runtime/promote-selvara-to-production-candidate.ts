@@ -29,6 +29,7 @@ async function loadMetadata(client: PoolClient): Promise<{
   foreignKeys: ForeignKey[];
   primaryKeys: Map<string, string>;
   nullableColumns: Set<string>;
+  jsonColumns: Set<string>;
   insertableColumns: Map<string, string[]>;
 }> {
   const [foreignKeysResult, primaryKeysResult, columnsResult] = await Promise.all([
@@ -68,8 +69,9 @@ async function loadMetadata(client: PoolClient): Promise<{
       column_name: string;
       is_nullable: "YES" | "NO";
       is_generated: "ALWAYS" | "NEVER";
+      data_type: string;
     }>(`
-      SELECT table_name, column_name, is_nullable, is_generated
+      SELECT table_name, column_name, is_nullable, is_generated, data_type
       FROM information_schema.columns
       WHERE table_schema = 'public'
       ORDER BY table_name, ordinal_position
@@ -80,6 +82,11 @@ async function loadMetadata(client: PoolClient): Promise<{
   const nullableColumns = new Set(
     columnsResult.rows
       .filter((row) => row.is_nullable === "YES")
+      .map((row) => `${row.table_name}.${row.column_name}`),
+  );
+  const jsonColumns = new Set(
+    columnsResult.rows
+      .filter((row) => row.data_type === "json" || row.data_type === "jsonb")
       .map((row) => `${row.table_name}.${row.column_name}`),
   );
   const insertableColumns = new Map<string, string[]>();
@@ -93,6 +100,7 @@ async function loadMetadata(client: PoolClient): Promise<{
     foreignKeys: foreignKeysResult.rows,
     primaryKeys,
     nullableColumns,
+    jsonColumns,
     insertableColumns,
   };
 }
@@ -176,6 +184,12 @@ async function insertPromotionGraph(
   const pending = [...selectedRows.values()];
   const inserted = new Map<string, number>();
   const blockedReasons = new Map<string, Set<string>>();
+  const restorations = new Map<string, {
+    table: string;
+    primaryKey: string;
+    primaryValue: unknown;
+    values: Map<string, unknown>;
+  }>();
   let pass = 0;
   while (pending.length > 0) {
     pass += 1;
@@ -184,15 +198,43 @@ async function insertPromotionGraph(
     for (let index = pending.length - 1; index >= 0; index -= 1) {
       const selected = pending[index];
       const columns = metadata.insertableColumns.get(selected.table) ?? [];
+      const insertRow = { ...selected.row };
       for (const column of columns) {
         if (
           column.toLowerCase().endsWith("userid")
           && metadata.nullableColumns.has(`${selected.table}.${column}`)
         ) {
-          selected.row[column] = null;
+          insertRow[column] = null;
         }
       }
-      const values = columns.map((column) => selected.row[column]);
+      for (const foreignKey of metadata.foreignKeys.filter(
+        (key) => key.childTable === selected.table && key.parentTable !== "User",
+      )) {
+        for (const column of foreignKey.childColumns) {
+          if (
+            insertRow[column] == null
+            || !metadata.nullableColumns.has(`${selected.table}.${column}`)
+          ) {
+            continue;
+          }
+          const key = rowKey(selected.table, selected.primaryKey, selected.row);
+          const restoration = restorations.get(key) ?? {
+            table: selected.table,
+            primaryKey: selected.primaryKey,
+            primaryValue: selected.row[selected.primaryKey],
+            values: new Map<string, unknown>(),
+          };
+          restoration.values.set(column, insertRow[column]);
+          restorations.set(key, restoration);
+          insertRow[column] = null;
+        }
+      }
+      const values = columns.map((column) => {
+        const value = insertRow[column];
+        return value != null && metadata.jsonColumns.has(`${selected.table}.${column}`)
+          ? JSON.stringify(value)
+          : value;
+      });
       const placeholders = columns.map((_column, valueIndex) => `$${valueIndex + 1}`);
       await client.query("SAVEPOINT promotion_row");
       try {
@@ -238,6 +280,19 @@ async function insertPromotionGraph(
         })),
       )}`);
     }
+  }
+  for (const restoration of restorations.values()) {
+    const entries = [...restoration.values.entries()];
+    if (entries.length === 0) continue;
+    const assignments = entries.map(
+      ([column], index) => `${quoteIdentifier(column)} = $${index + 1}`,
+    );
+    await client.query(
+      `UPDATE ${quoteIdentifier(restoration.table)}
+       SET ${assignments.join(", ")}
+       WHERE ${quoteIdentifier(restoration.primaryKey)} = $${entries.length + 1}`,
+      [...entries.map(([, value]) => value), restoration.primaryValue],
+    );
   }
   return inserted;
 }
