@@ -585,6 +585,7 @@ describe("Lotto 2 structured knowledge contracts", () => {
       researchQuestions: [],
       documentInventory: [],
     });
+
     const authenticText = base.sourceQuotes.map((quote) => quote.quote).join("\n");
     const compiled = compileFascicoloDocumentKnowledgeProposal({
       proposal,
@@ -678,6 +679,100 @@ describe("Lotto 2 structured knowledge contracts", () => {
         action: "BLOCKED",
       });
     }
+  });
+
+  it("rebuilds inventory relations and safely downgrades invalid research dates", () => {
+    const base = validKnowledge();
+    const event = base.items.find((candidate) => candidate.kind === "EVENT");
+    if (!event) throw new Error("Expected an event fixture.");
+    const proposal = fascicoloDocumentKnowledgeProposalSchema.parse({
+      ...structuredClone(base),
+      items: base.items.map((candidate) => (
+        candidate.kind === "FACT" || candidate.kind === "EVENT"
+          ? {
+              ...structuredClone(candidate),
+              payload: {
+                ...structuredClone(candidate.payload),
+                proceedingIdentityHint: null,
+              },
+            }
+          : structuredClone(candidate)
+      )),
+      legalIssues: [{
+        localId: "issue-reference-date",
+        title: "Data di riferimento",
+        normalizedIssue: "Quale data regola la ricerca?",
+        areaOfLaw: "diritto amministrativo",
+        priority: "HIGH",
+        rationale: "La data deve essere verificata deterministicamente.",
+        originatingItemLocalIds: [event.localId],
+        confidence: 80,
+        referenceDateBasis: null,
+        targetProceedingHint: null,
+      }],
+      researchQuestions: [{
+        localId: "question-reference-date",
+        legalIssueLocalId: "issue-reference-date",
+        canonicalQuestion: "Quale disciplina era vigente?",
+        priority: "HIGH",
+        referenceDate: "2026-09-29",
+        referenceDateBasis: {
+          type: "MEASURE_DATE",
+          itemLocalId: event.localId,
+          rationale: "Il modello ha collegato un evento come misura.",
+          userConfirmedDateSource: null,
+        },
+        requestedCapabilities: ["SEMANTIC_DISCOVERY"],
+        mode: "PRIMARY",
+      }],
+      documentInventory: [{
+        localId: "document-rebuilt",
+        basisRefs: ["DOCUMENT_1.PAGE_1"],
+        documentType: "provvedimento",
+        documentDate: null,
+        issuer: null,
+        recipients: [],
+        proceduralPhase: null,
+        subject: "Documento del fascicolo",
+        summary: "Documento materiale.",
+        referencedActs: [],
+        attachments: [],
+        materialProfiles: ["PROCEDURAL"],
+        classification: "MATERIAL",
+        rationale: "Il documento supporta gli elementi strutturati.",
+        relatedItemLocalIds: ["model-invented-item"],
+      }],
+    });
+
+    const compiled = compileFascicoloDocumentKnowledgeProposal({
+      proposal,
+      sourceTextByBasisRef: new Map([[
+        "DOCUMENT_1.PAGE_1",
+        base.sourceQuotes.map((quote) => quote.quote).join("\n"),
+      ]]),
+    });
+
+    expect(compiled.promotable).toBe(true);
+    expect(compiled.knowledge.researchQuestions[0]).toMatchObject({
+      referenceDate: null,
+      referenceDateBasis: {
+        type: "UNKNOWN",
+        itemLocalId: null,
+        userConfirmedDateSource: null,
+      },
+    });
+    expect(compiled.knowledge.documentInventory?.[0].relatedItemLocalIds)
+      .toEqual(base.items.map((candidate) => candidate.localId));
+    expect(compiled.diagnostics).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        code: "RESEARCH_QUESTION_REFERENCE_DATE_MARKED_UNKNOWN",
+        action: "MARKED_UNRESOLVED",
+      }),
+      expect.objectContaining({
+        code: "DOCUMENT_INVENTORY_RELATIONS_REBUILT",
+        action: "REBUILT",
+      }),
+    ]));
   });
 
   it("represents exact, partial, interval, uncertain, and unknown dates without inventing precision", () => {

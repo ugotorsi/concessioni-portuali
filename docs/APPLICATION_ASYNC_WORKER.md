@@ -100,9 +100,16 @@ to be non-empty and the runtime now distinguishes empty required sections from
 incomplete document-inventory coverage. For the unchanged 40-page corpus, the
 corrected schema estimates 40,376 input tokens and EUR 0.758624 maximum cost, still
 within the existing EUR 0.762000 approval ceiling. Any future paid attempt requires
-a new explicit authorization. The prepared, inert sixth identity is
-`NOETRA-V7-SELVARA-2026-10-29-CONTROLLED-ONE-SHOT-06`; it does not authorize or
-admit a job while the real-data and worker-activation gates remain disabled.
+a new explicit authorization. The sixth identity
+`NOETRA-V7-SELVARA-2026-10-29-CONTROLLED-ONE-SHOT-06` was executed once as job
+`cmvtheqez0000koudqkfrg9c4`. It failed terminally with `INVALID_PROVIDER_OUTPUT`
+before persistence, settled EUR 0.176573, and released EUR 0.582051. Safe
+diagnostics established that the provider proposed incompatible research
+reference-date item kinds and unverifiable inventory-to-item relations. The
+deterministic compiler now downgrades incompatible dates to `UNKNOWN` and rebuilds
+inventory relations only from retained items with authenticated overlapping
+evidence. No retry was performed; any later paid attempt requires a new explicit
+authorization and immutable identity.
 Repeating the same admission reuses the same job. Changing the approved preflight after admission causes
 an idempotency conflict instead of creating a second attempt. The job has
 `maxAttempts=1`; provider timeouts, rate limits, unavailable responses, malformed or

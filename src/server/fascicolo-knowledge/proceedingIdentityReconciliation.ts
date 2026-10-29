@@ -562,7 +562,7 @@ export function compileFascicoloDocumentKnowledgeProposal(input: {
   });
   const retainedIssueIds = new Set(legalIssues.map((issue) => issue.localId));
   const retainedItemsByLocalId = new Map(items.map((item) => [item.localId, item]));
-  const researchQuestions = proposal.researchQuestions.filter((question, index) => {
+  const researchQuestions = proposal.researchQuestions.flatMap((question, index) => {
     const basisItemLocalId = question.referenceDateBasis.itemLocalId;
     const retained = retainedIssueIds.has(question.legalIssueLocalId)
       && (basisItemLocalId === null || retainedItemsByLocalId.has(basisItemLocalId));
@@ -572,14 +572,49 @@ export function compileFascicoloDocumentKnowledgeProposal(input: {
         path: `researchQuestions.${index}`,
         action: "MARKED_UNRESOLVED",
       });
+      return [];
     }
-    return retained;
+    const basisItem = basisItemLocalId === null
+      ? undefined
+      : retainedItemsByLocalId.get(basisItemLocalId);
+    const basisType = question.referenceDateBasis.type;
+    const basisKindValid = (basisType === "EVENT_DATE" && basisItem?.kind === "EVENT")
+      || (basisType === "MEASURE_DATE" && basisItem?.kind === "MEASURE")
+      || (basisType === "CHALLENGED_ACT_DATE"
+        && (basisItem?.kind === "LEGAL_ACT" || basisItem?.kind === "MEASURE")
+        && basisItem.payload.proceduralRole === "CHALLENGED_ACT")
+      || basisType === "USER_CONFIRMED"
+      || basisType === "UNKNOWN";
+    let dateMatches = true;
+    if (basisItem && "date" in basisItem.payload) {
+      dateMatches = basisItem.payload.date.precision === "EXACT"
+        && basisItem.payload.date.from === question.referenceDate;
+    }
+    if (basisKindValid && dateMatches) return [question];
+    diagnostics.push({
+      code: "RESEARCH_QUESTION_REFERENCE_DATE_MARKED_UNKNOWN",
+      path: `researchQuestions.${index}.referenceDateBasis`,
+      action: "MARKED_UNRESOLVED",
+    });
+    return [{
+      ...question,
+      referenceDate: null,
+      referenceDateBasis: {
+        type: "UNKNOWN" as const,
+        itemLocalId: null,
+        rationale: question.referenceDateBasis.rationale,
+        userConfirmedDateSource: null,
+      },
+    }];
   });
   const documentInventory = proposal.documentInventory.flatMap((document, index) => {
-    if (document.classification === "NOT_MATERIAL") return [document];
-    const relatedItemLocalIds = document.relatedItemLocalIds.filter((localId) => (
-      retainedItemsByLocalId.has(localId)
-    ));
+    if (document.classification === "NOT_MATERIAL") {
+      return [{ ...document, relatedItemLocalIds: [] }];
+    }
+    const relatedItems = items.filter((item) => item.basisRefs.some((basisRef) => (
+      document.basisRefs.includes(basisRef)
+    )));
+    const relatedItemLocalIds = relatedItems.map((item) => item.localId);
     const basisRefs = document.basisRefs.filter((basisRef) => relatedItemLocalIds.some((localId) => (
       retainedItemsByLocalId.get(localId)?.basisRefs.includes(basisRef)
     )));
@@ -593,6 +628,14 @@ export function compileFascicoloDocumentKnowledgeProposal(input: {
         action: "MARKED_UNRESOLVED",
       });
       return [];
+    }
+    if (relatedItemLocalIds.length !== document.relatedItemLocalIds.length
+      || relatedItemLocalIds.some((localId) => !document.relatedItemLocalIds.includes(localId))) {
+      diagnostics.push({
+        code: "DOCUMENT_INVENTORY_RELATIONS_REBUILT",
+        path: `documentInventory.${index}.relatedItemLocalIds`,
+        action: "REBUILT",
+      });
     }
     return [{ ...document, basisRefs, relatedItemLocalIds }];
   });
