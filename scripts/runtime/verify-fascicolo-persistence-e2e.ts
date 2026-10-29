@@ -429,15 +429,28 @@ const rollbackRevisionCount = await sharedContext.read.query<{ count: bigint }>(
     createHash("sha256").update(`${corpusFingerprint}:rollback-probe`, "utf8").digest("hex"),
   ],
 );
+const invariantDiagnostics = {
+  providerCallCount,
+  currentBeforeRollbackId: currentBeforeRollback?.id ?? null,
+  currentAfterRollbackId: currentAfterRollback?.id ?? null,
+  rollbackRevisionCount: rollbackRevisionCount.rows[0]?.count.toString() ?? null,
+  rollbackError,
+  isolatedSnapshotCount: isolatedSnapshots.length,
+  idempotentReportOutcome: idempotentReport.outcome,
+};
 if (
-  providerCallCount !== 1
-  || currentBeforeRollback?.id !== currentAfterRollback?.id
-  || rollbackRevisionCount.rows[0]?.count !== BigInt(0)
-  || !rollbackError.includes("EVIDENCE_SCOPE_MISMATCH")
-  || isolatedSnapshots.length !== 0
-  || idempotentReport.outcome !== "REUSED"
+  invariantDiagnostics.providerCallCount !== 1
+  || invariantDiagnostics.currentBeforeRollbackId !== invariantDiagnostics.currentAfterRollbackId
+  || invariantDiagnostics.rollbackRevisionCount !== "0"
+  || !invariantDiagnostics.rollbackError.includes("EVIDENCE_SCOPE_MISMATCH")
+  || invariantDiagnostics.isolatedSnapshotCount !== 0
+  || invariantDiagnostics.idempotentReportOutcome !== "REUSED"
 ) {
-  throw new Error("Rollback, idempotency, provider isolation, or tenant isolation invariant failed.");
+  throw new Error(
+    `Rollback, idempotency, provider isolation, or tenant isolation invariant failed: ${
+      JSON.stringify(invariantDiagnostics)
+    }`,
+  );
 }
 
 const payload = structuredReport.payload;
