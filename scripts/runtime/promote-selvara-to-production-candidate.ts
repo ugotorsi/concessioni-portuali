@@ -179,10 +179,19 @@ async function insertPromotionGraph(
   let pass = 0;
   while (pending.length > 0) {
     pass += 1;
+    blockedReasons.clear();
     let progress = 0;
     for (let index = pending.length - 1; index >= 0; index -= 1) {
       const selected = pending[index];
       const columns = metadata.insertableColumns.get(selected.table) ?? [];
+      for (const column of columns) {
+        if (
+          column.toLowerCase().endsWith("userid")
+          && metadata.nullableColumns.has(`${selected.table}.${column}`)
+        ) {
+          selected.row[column] = null;
+        }
+      }
       const values = columns.map((column) => selected.row[column]);
       const placeholders = columns.map((_column, valueIndex) => `$${valueIndex + 1}`);
       await client.query("SAVEPOINT promotion_row");
@@ -200,10 +209,20 @@ async function insertPromotionGraph(
         progress += 1;
       } catch (error) {
         await client.query("ROLLBACK TO SAVEPOINT promotion_row");
-        const databaseError = error as { code?: unknown; constraint?: unknown };
+        const databaseError = error as {
+          code?: unknown;
+          constraint?: unknown;
+          where?: unknown;
+        };
+        const parameterMatch = typeof databaseError.where === "string"
+          ? databaseError.where.match(/parameter \$(\d+)/)
+          : null;
+        const parameterIndex = parameterMatch ? Number(parameterMatch[1]) - 1 : -1;
+        const column = parameterIndex >= 0 ? columns[parameterIndex] : undefined;
         const reason = [
           typeof databaseError.code === "string" ? databaseError.code : "UNKNOWN",
           typeof databaseError.constraint === "string" ? databaseError.constraint : "NO_CONSTRAINT",
+          column ?? "NO_COLUMN",
         ].join(":");
         const reasons = blockedReasons.get(selected.table) ?? new Set<string>();
         reasons.add(reason);
