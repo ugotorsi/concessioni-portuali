@@ -29,6 +29,7 @@ import {
   listStructuredFascicoloReportSnapshots,
   persistDraftStructuredFascicoloReport,
   persistStructuredFascicoloReport,
+  type BuiltStructuredFascicoloReport,
   type StructuredReportRepositoryContext,
   type StructuredReportSqlExecutor,
 } from "@/server/fascicolo-report";
@@ -258,6 +259,7 @@ const analysisService = createFascicoloDocumentAnalysisService({
 });
 let capturedKnowledge: unknown;
 let capturedEvidence: ReadonlyMap<string, KnowledgeEvidenceCandidate> | undefined;
+let capturedReport: BuiltStructuredFascicoloReport | undefined;
 const dependencies: FascicoloAutomaticAnalysisDependencies = {
   loadAuthority: async () => authority,
   validateControlledV7Preflight: async () => undefined,
@@ -290,14 +292,14 @@ const dependencies: FascicoloAutomaticAnalysisDependencies = {
         input.knowledgeRevisionId,
         sharedContext.read,
       );
-      return knowledge
-        ? buildStructuredFascicoloReport({
-            tenantId: input.tenantId,
-            procedimentoId: input.procedimentoId,
-            knowledge,
-            missions: [],
-          })
-        : null;
+      if (!knowledge) return null;
+      capturedReport = buildStructuredFascicoloReport({
+        tenantId: input.tenantId,
+        procedimentoId: input.procedimentoId,
+        knowledge,
+        missions: [],
+      });
+      return capturedReport;
     });
   },
   async finalizeControlledV7(input) {
@@ -360,10 +362,11 @@ const execution = await measured("totalPipeline", () => handler.execute(referenc
   heartbeat: async () => undefined,
 }));
 
-if (!capturedKnowledge || !capturedEvidence) {
+if (!capturedKnowledge || !capturedEvidence || !capturedReport) {
   throw new Error("The controlled pipeline did not reach structured persistence.");
 }
 const persistedEvidence = capturedEvidence;
+const finalizedReport = capturedReport;
 const current = await measured("rereadKnowledge", () => loadCurrentStructuredKnowledge(
   tenantId,
   procedimentoId,
@@ -385,7 +388,7 @@ if (!current || !applicationModel?.structuredReport || snapshots.length !== 1) {
 }
 const structuredReport = applicationModel.structuredReport;
 const idempotentReport = await measured("idempotentReport", () => (
-  persistStructuredFascicoloReport(structuredReport, sharedContext)
+  persistStructuredFascicoloReport(finalizedReport, sharedContext)
 ));
 const currentBeforeRollback = await getCurrentKnowledgeRevision(
   { tenantId, procedimentoId },
