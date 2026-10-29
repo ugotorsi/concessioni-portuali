@@ -18,6 +18,7 @@
     "runtime:verify-v7-provider-output-recovery": "tsx scripts/runtime/verify-v7-provider-output-recovery.ts",
     "runtime:verify-v7-one-shot-08-preflight": "tsx scripts/runtime/verify-v7-one-shot-08-preflight.ts",
     "runtime:verify-production-readiness": "tsx scripts/runtime/verify-production-readiness.ts",
+    "runtime:inventory-selvara-promotion": "tsx scripts/runtime/inventory-selvara-promotion.ts",
     "job:cancel-obsolete-analysis": "tsx scripts/cancel-obsolete-fascicolo-analysis-job.ts",
     "check": "npm run build",
     "test": "vitest run",
