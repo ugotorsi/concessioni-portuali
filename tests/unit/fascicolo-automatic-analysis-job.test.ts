@@ -19,6 +19,7 @@ import {
 import { FascicoloDocumentAnalysisError } from "@/server/ai/fascicoloDocumentAnalysis";
 import { OpenAiRuntimeConfigurationError } from "@/server/ai/openaiRuntime";
 import { FascicoloV7PreflightError } from "@/server/ai/fascicoloV7Preflight";
+import { SELVARA_PILOT_AUTHORIZATION } from "@/server/ai/selvaraPilotAuthorization";
 import { applicationAsyncJobRegistry } from "@/server/async-jobs/applicationWorker";
 import { normalizeAsyncJobAdmission } from "@/server/async-jobs/domain";
 import { AsyncJobExecutionError } from "@/server/async-jobs/worker";
@@ -153,7 +154,7 @@ const controlledV7Reference = {
     procedimentoId: "procedimento-1",
     corpusHash: "c".repeat(64),
     trialContractVersion: "FASCICOLO_DOCUMENT_ANALYSIS_V7",
-    trialApprovalRef: "NOETRA-V7-SELVARA-2026-10-27-CONTROLLED-ONE-SHOT-04",
+    trialApprovalRef: SELVARA_PILOT_AUTHORIZATION.approvalId,
     trialPreflightHash: "f".repeat(64),
   },
 } as const;
