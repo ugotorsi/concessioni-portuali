@@ -140,7 +140,6 @@ async function seedIsolatedCorpus(): Promise<void> {
       data: {
         id: procedimentoId,
         enteId: tenantId,
-        oggetto: `NOETRA E2E synthetic legal report ${runId}`,
         tipologia: "ALTRO",
         stato: "IN_CORSO",
         dataAvvio: new Date("2026-10-29T00:00:00.000Z"),
