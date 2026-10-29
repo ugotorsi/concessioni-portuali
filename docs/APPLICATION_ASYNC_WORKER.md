@@ -117,9 +117,15 @@ only interpretive items and evidence-span selections, while the server owns docu
 inventory, provenance, canonical quotations, proceeding anchors, reference dates, and
 verified relationships. The request estimates 37,077 input tokens and at most EUR
 0.752726 with the unchanged 64,000-token output ceiling. The existing EUR 0.758624
-runtime reservation and EUR 0.762000 approved ceiling remain unchanged. No application
-job or Render one-off exists for this identity until a new explicit authorization is
-recorded.
+runtime reservation and EUR 0.762000 approved ceiling remain unchanged. The seventh
+identity was executed once as application job `cmvtkqcav0000pcudris24p6p` and Render
+one-off `job-dbhkhj8ae00c73e0rlg0`. The provider call completed with EUR 0.140966
+internally accounted cost, but the application job failed terminally before report
+persistence with Prisma `P2028` while persisting structured knowledge. The root cause
+was the default 5-second interactive transaction timeout on a multi-statement
+persistence transaction that took about 6.5 seconds. Fascicolo knowledge persistence
+now uses a bounded 30-second transaction timeout; other serializable transactions
+retain their existing default. No retry or eighth paid attempt was performed.
 Repeating the same admission reuses the same job. Changing the approved preflight after admission causes
 an idempotency conflict instead of creating a second attempt. The job has
 `maxAttempts=1`; provider timeouts, rate limits, unavailable responses, malformed or

@@ -5,6 +5,7 @@ const MAX_ATTEMPTS = 3;
 
 export interface SerializableTransactionRetryOptions {
   isRetryableError?: (error: unknown) => boolean;
+  timeoutMs?: number;
 }
 
 export async function runSerializableTransactionWithRetry<T>(
@@ -15,6 +16,7 @@ export async function runSerializableTransactionWithRetry<T>(
     try {
       return await prisma.$transaction(callback, {
         isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        ...(options.timeoutMs === undefined ? {} : { timeout: options.timeoutMs }),
       });
     } catch (error) {
       const retryable =

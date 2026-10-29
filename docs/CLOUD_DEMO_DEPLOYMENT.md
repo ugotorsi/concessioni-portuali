@@ -33,13 +33,17 @@ Questo ambiente e progettato per presentazioni istituzionali e pilot preview. De
 Nota: impostare `NEXTAUTH_URL` al dominio cloud pubblico della demo, mai `localhost`.
 
 ## 5. Procedura deploy Vercel
-1. Collegare il repository GitHub a Vercel.
-2. Importare il project.
-3. Verificare framework `Next.js` rilevato automaticamente.
-4. Configurare tutte le environment variables richieste (Production e Preview secondo necessita demo).
-5. Avviare il deploy.
+1. Usare esclusivamente `npm run deploy:vercel:preview -- --expected-commit <SHA_COMPLETO>`.
+2. Il comando fissa il progetto `concessioni-portuali-demo`, l'organizzazione
+   `ugotorsis-projects` e il target `preview`; rifiuta override di progetto,
+   organizzazione o ambiente e qualsiasi opzione Production.
+3. Il comando verifica che `HEAD` coincida con lo SHA completo autorizzato prima
+   di invocare Vercel.
+4. Verificare framework `Next.js` rilevato automaticamente.
+5. Configurare le environment variables richieste esclusivamente per Preview.
 6. Controllare i build logs e risolvere eventuali env mancanti.
-7. Aprire il dominio assegnato e testare login + percorsi demo principali.
+7. Aprire soltanto il dominio Preview assegnato e testare login + percorsi demo
+   principali. Il comando non deve essere usato per `app.noetra.it`.
 
 ## 6. Procedura database
 1. Creare un database PostgreSQL gestito (Prisma Postgres/Vercel o Supabase).
@@ -117,4 +121,3 @@ Mitigazione per questa fase:
 - mantenere sempre un fallback (PDF/screenshot/video/local demo).
 
 Evoluzione consigliata (fase successiva): object storage dedicato (S3, Supabase Storage o Vercel Blob) con persistenza stabile.
-

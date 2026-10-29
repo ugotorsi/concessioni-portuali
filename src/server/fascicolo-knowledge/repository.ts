@@ -23,6 +23,7 @@ import { resolveFascicoloSubjects, type FascicoloSubjectRecord } from "./subject
 import type { FascicoloSubjectCandidate } from "./structuredContracts";
 
 const sha256Schema = z.string().regex(/^[a-f0-9]{64}$/);
+const FASCICOLO_KNOWLEDGE_TRANSACTION_TIMEOUT_MS = 30_000;
 const revisionInputSchema = knowledgeScopeSchema.extend({
   corpusFingerprint: sha256Schema,
   contractVersion: z.string().trim().min(1).max(64).default(FASCICOLO_KNOWLEDGE_CONTRACT_VERSION),
@@ -151,7 +152,10 @@ function prismaExecutor(client: Pick<Prisma.TransactionClient, "$queryRawUnsafe"
 
 const defaultContext: FascicoloKnowledgeRepositoryContext = {
   read: prismaExecutor(prisma),
-  transaction: (operation) => runSerializableTransactionWithRetry((tx) => operation(prismaExecutor(tx))),
+  transaction: (operation) => runSerializableTransactionWithRetry(
+    (tx) => operation(prismaExecutor(tx)),
+    { timeoutMs: FASCICOLO_KNOWLEDGE_TRANSACTION_TIMEOUT_MS },
+  ),
 };
 
 function context(overrides: Partial<FascicoloKnowledgeRepositoryContext>): FascicoloKnowledgeRepositoryContext {
