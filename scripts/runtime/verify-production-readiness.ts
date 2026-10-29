@@ -11,7 +11,7 @@ async function main(): Promise<void> {
 
   const now = new Date();
   const recentThreshold = new Date(now.getTime() - 30 * 60 * 1000);
-  const [admins, currentKnowledgeRevisions, currentStructuredReports, recentAuthFailures] = await Promise.all([
+  const [admins, schemaTables, recentAuthFailures] = await Promise.all([
     prisma.user.findMany({
       where: { ruolo: "ADMIN" },
       select: {
@@ -22,8 +22,14 @@ async function main(): Promise<void> {
         mfaSecret: true,
       },
     }),
-    prisma.fascicoloKnowledgeRevision.count({ where: { status: "CURRENT" } }),
-    prisma.structuredFascicoloReportSnapshot.count({ where: { status: "CURRENT" } }),
+    prisma.$queryRaw<Array<{
+      knowledgeRevisionTable: string | null;
+      structuredReportTable: string | null;
+    }>>`
+      SELECT
+        to_regclass('"FascicoloKnowledgeRevision"')::text AS "knowledgeRevisionTable",
+        to_regclass('"StructuredFascicoloReportSnapshot"')::text AS "structuredReportTable"
+    `,
     prisma.activityLog.findMany({
       where: {
         azione: { in: ["AUTH_LOGIN_FAILURE", "AUTH_MFA_FAILURE", "AUTH_ACCOUNT_LOCKED"] },
@@ -33,6 +39,16 @@ async function main(): Promise<void> {
       orderBy: { createdAt: "desc" },
       take: 20,
     }),
+  ]);
+  const knowledgeRevisionTableAvailable = Boolean(schemaTables[0]?.knowledgeRevisionTable);
+  const structuredReportTableAvailable = Boolean(schemaTables[0]?.structuredReportTable);
+  const [currentKnowledgeRevisions, currentStructuredReports] = await Promise.all([
+    knowledgeRevisionTableAvailable
+      ? prisma.fascicoloKnowledgeRevision.count({ where: { status: "CURRENT" } })
+      : Promise.resolve(0),
+    structuredReportTableAvailable
+      ? prisma.structuredFascicoloReportSnapshot.count({ where: { status: "CURRENT" } })
+      : Promise.resolve(0),
   ]);
   const readiness = {
     adminTotal: admins.length,
@@ -47,6 +63,8 @@ async function main(): Promise<void> {
     adminUnlocked: admins.filter((admin) => !admin.lockedUntil || admin.lockedUntil <= now).length,
     adminWithPassword: admins.filter((admin) => Boolean(admin.passwordHash)).length,
     adminWithMfa: admins.filter((admin) => admin.mfaEnabled && Boolean(admin.mfaSecret)).length,
+    knowledgeRevisionTableAvailable,
+    structuredReportTableAvailable,
     currentKnowledgeRevisions,
     currentStructuredReports,
     recentAuthFailureReasons: recentAuthFailures.map((entry) => {
