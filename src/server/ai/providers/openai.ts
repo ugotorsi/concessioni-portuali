@@ -244,9 +244,20 @@ function buildOutboundInput(request: AiOutboundAnalysisProviderRequestV1): strin
 }
 
 function buildDocumentInput(request: FascicoloDocumentProviderRequestV1): string {
+  const providerDocumentData = {
+    ...request.documentData,
+    content: {
+      ...request.documentData.content,
+      evidenceSpans: request.documentData.content.evidenceSpans.map((span) => ({
+        id: span.id,
+        basisRef: span.basisRef,
+        text: span.text,
+      })),
+    },
+  };
   return [
     "BEGIN_UNTRUSTED_DOCUMENT_DATA",
-    JSON.stringify(request.documentData),
+    JSON.stringify(providerDocumentData),
     "END_UNTRUSTED_DOCUMENT_DATA",
   ].join("\n");
 }
