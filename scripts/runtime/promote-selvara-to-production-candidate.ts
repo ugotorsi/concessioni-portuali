@@ -3,6 +3,14 @@ import { Pool, type PoolClient } from "pg";
 
 const PROCEDURE_ID = "procedimento-intake-9e04f4d4cdbf092845b57c66";
 const APPROVAL = "NOETRA-V7-PRODUCTION-SELVARA-PROMOTION-2026-10-29";
+const EXCLUDED_OPERATIONAL_TABLES = new Set([
+  "AsyncJob",
+  "DocumentExtractionAttempt",
+  "DocumentExtractionPage",
+  "DocumentOcrRun",
+  "RuntimeBudgetPolicy",
+  "RuntimeCostReservation",
+]);
 
 interface ForeignKey {
   childTable: string;
@@ -119,7 +127,7 @@ async function selectPromotionGraph(client: PoolClient): Promise<{
   `);
 
   const addRows = (table: string, candidates: Record<string, unknown>[]): void => {
-    if (table === "User") return;
+    if (table === "User" || EXCLUDED_OPERATIONAL_TABLES.has(table)) return;
     const primaryKey = metadata.primaryKeys.get(table);
     if (!primaryKey) throw new Error(`PROMOTION_PRIMARY_KEY_UNSUPPORTED:${table}`);
     for (const row of candidates) {
@@ -135,6 +143,7 @@ async function selectPromotionGraph(client: PoolClient): Promise<{
   addRows("Procedimento", procedureResult.rows);
 
   for (const entry of procedureTablesResult.rows) {
+    if (EXCLUDED_OPERATIONAL_TABLES.has(entry.table_name)) continue;
     const result = await client.query<Record<string, unknown>>(
       `SELECT * FROM ${quoteIdentifier(entry.table_name)} WHERE "procedimentoId" = $1`,
       [PROCEDURE_ID],
