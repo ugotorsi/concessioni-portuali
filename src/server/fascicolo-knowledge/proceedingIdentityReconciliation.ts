@@ -2,6 +2,7 @@ import {
   fascicoloDocumentStructuredKnowledgeSchema,
   type FascicoloDocumentKnowledgeProposal,
   type FascicoloStructuredKnowledge,
+  type DocumentInventoryEntry,
   type ProceedingIdentityHint,
   type ProceedingIdentityResolution,
   type StructuredKnowledgeProposalItem,
@@ -289,6 +290,101 @@ function compileEvidenceCandidates(input: {
   };
 }
 
+type DeterministicCoverageGap = Extract<
+  FascicoloStructuredKnowledge["items"][number],
+  { kind: "GAP" }
+>;
+
+function buildDeterministicDocumentCoverage<
+  TItem extends { localId: string; kind: string; basisRefs: string[] },
+>(input: {
+  items: readonly TItem[];
+  sourceQuotes: readonly FascicoloStructuredKnowledge["sourceQuotes"][number][];
+  evidenceSpans: readonly FascicoloEvidenceSpan[];
+}): {
+  items: (TItem | DeterministicCoverageGap)[];
+  sourceQuotes: FascicoloStructuredKnowledge["sourceQuotes"];
+  documentInventory: DocumentInventoryEntry[];
+  diagnostics: KnowledgeCompilationDiagnostic[];
+} {
+  const items: (TItem | DeterministicCoverageGap)[] = [...input.items];
+  const sourceQuotes = [...input.sourceQuotes];
+  const diagnostics: KnowledgeCompilationDiagnostic[] = [];
+  const spansByBasisRef = new Map<string, FascicoloEvidenceSpan[]>();
+  for (const span of input.evidenceSpans) {
+    const current = spansByBasisRef.get(span.basisRef) ?? [];
+    current.push(span);
+    spansByBasisRef.set(span.basisRef, current);
+  }
+  const documentInventory: DocumentInventoryEntry[] = [...spansByBasisRef.entries()]
+    .sort(([left], [right]) => left.localeCompare(right, undefined, { numeric: true }))
+    .map(([basisRef, spans], index) => {
+      let relatedItems: (TItem | DeterministicCoverageGap)[] = items.filter(
+        (item) => item.basisRefs.includes(basisRef),
+      );
+      let classification: DocumentInventoryEntry["classification"] = "MATERIAL";
+      if (relatedItems.length === 0) {
+        const firstSpan = spans[0];
+        const localId = `server-coverage-gap-${digest(basisRef).slice(0, 32)}`;
+        const gap: DeterministicCoverageGap = {
+          localId,
+          kind: "GAP",
+          confidence: 100,
+          basisRefs: [basisRef],
+          payload: {
+            gapType: "UNREVIEWED_DOCUMENT_CONTENT",
+            description: `Nessuna informazione interpretativa verificata e stata estratta da ${basisRef}.`,
+            impact: "La pagina resta acquisita e localizzabile, ma richiede revisione umana prima di escluderne la rilevanza.",
+            relatedItemLocalIds: [],
+          },
+        };
+        items.push(gap);
+        sourceQuotes.push({
+          itemLocalId: localId,
+          basisRef,
+          quote: firstSpan.text,
+          span: {
+            id: firstSpan.id,
+            documentVersionId: firstSpan.documentVersionId,
+            startOffset: firstSpan.startOffset,
+            endOffset: firstSpan.endOffset,
+            textSha256: firstSpan.textSha256,
+            quoteSha256: firstSpan.quoteSha256,
+          },
+        });
+        relatedItems = [gap];
+        classification = "UNCERTAIN";
+        diagnostics.push({
+          code: "DOCUMENT_COVERAGE_GAP_ADDED",
+          path: `documentInventory.${index}`,
+          action: "REBUILT",
+        });
+      }
+      return {
+        localId: `server-inventory-${digest(basisRef).slice(0, 32)}`,
+        basisRefs: [basisRef],
+        documentType: "pagina documentale autenticata",
+        documentDate: null,
+        issuer: null,
+        recipients: [],
+        proceduralPhase: null,
+        subject: `Copertura documentale ${basisRef}`,
+        summary: classification === "MATERIAL"
+          ? `Pagina collegata a ${relatedItems.length} elemento/i interpretativo/i verificato/i.`
+          : "Pagina acquisita senza elementi interpretativi verificati.",
+        referencedActs: [],
+        attachments: [],
+        materialProfiles: ["EVIDENTIARY"],
+        classification,
+        rationale: classification === "MATERIAL"
+          ? "Classificazione server-side basata sulla presenza di elementi con evidenza autenticata sulla pagina."
+          : "Classificazione server-side prudenziale: la pagina non e esclusa come non materiale in assenza di analisi verificata.",
+        relatedItemLocalIds: relatedItems.map((item) => item.localId),
+      };
+    });
+  return { items, sourceQuotes, documentInventory, diagnostics };
+}
+
 function isDocumentedAnchor(
   item: StructuredKnowledgeProposalItem,
   documented: ReadonlyMap<string, ReadonlySet<string>>,
@@ -506,7 +602,7 @@ export function compileFascicoloDocumentKnowledgeProposal(input: {
     item.kind === "LEGAL_ACT" || item.kind === "MEASURE"
   ));
   const diagnostics = [...adapted.diagnostics, ...evidence.diagnostics];
-  const items = evidence.items.map((item, itemIndex) => {
+  const interpretedItems = evidence.items.map((item, itemIndex) => {
     if (item.kind !== "FACT" && item.kind !== "EVENT") return item;
     const resolved = resolveItemIdentity({
       item,
@@ -525,6 +621,13 @@ export function compileFascicoloDocumentKnowledgeProposal(input: {
       },
     };
   });
+  const coverage = buildDeterministicDocumentCoverage({
+    items: interpretedItems,
+    sourceQuotes: evidence.sourceQuotes,
+    evidenceSpans: adapted.evidenceSpans,
+  });
+  const items = coverage.items;
+  diagnostics.push(...coverage.diagnostics);
   const legalIssues = proposal.legalIssues.flatMap((issue, issueIndex) => {
     const originatingItemLocalIds = issue.originatingItemLocalIds.filter((localId) => (
       evidence.retainedItemLocalIds.has(localId)
@@ -574,6 +677,56 @@ export function compileFascicoloDocumentKnowledgeProposal(input: {
       });
       return [];
     }
+    if (question.referenceDateBasis.type === "UNKNOWN") {
+      const issue = legalIssues.find((candidate) => (
+        candidate.localId === question.legalIssueLocalId
+      ));
+      const candidates = (issue?.originatingItemLocalIds ?? []).flatMap((localId) => {
+        const item = retainedItemsByLocalId.get(localId);
+        if (!item || (item.kind !== "EVENT" && item.kind !== "MEASURE"
+          && item.kind !== "LEGAL_ACT") || !("date" in item.payload)
+          || item.payload.date.precision !== "EXACT"
+          || !item.payload.date.from) return [];
+        const type = item.kind === "EVENT"
+          ? "EVENT_DATE" as const
+          : item.payload.proceduralRole === "CHALLENGED_ACT"
+            ? "CHALLENGED_ACT_DATE" as const
+            : item.kind === "MEASURE"
+              ? "MEASURE_DATE" as const
+              : null;
+        return type ? [{
+          type,
+          itemLocalId: item.localId,
+          referenceDate: item.payload.date.from,
+        }] : [];
+      });
+      const uniqueCandidates = candidates.filter((candidate, candidateIndex) => (
+        candidates.findIndex((other) => (
+          other.type === candidate.type
+          && other.itemLocalId === candidate.itemLocalId
+          && other.referenceDate === candidate.referenceDate
+        )) === candidateIndex
+      ));
+      if (uniqueCandidates.length === 1) {
+        const candidate = uniqueCandidates[0];
+        diagnostics.push({
+          code: "RESEARCH_QUESTION_REFERENCE_DATE_REBUILT",
+          path: `researchQuestions.${index}.referenceDateBasis`,
+          action: "REBUILT",
+        });
+        return [{
+          ...question,
+          referenceDate: candidate.referenceDate,
+          referenceDateBasis: {
+            type: candidate.type,
+            itemLocalId: candidate.itemLocalId,
+            rationale: "Determinata dal server da un'unica data esatta tra gli elementi originari verificati.",
+            userConfirmedDateSource: null,
+          },
+        }];
+      }
+      return [question];
+    }
     const basisItem = basisItemLocalId === null
       ? undefined
       : retainedItemsByLocalId.get(basisItemLocalId);
@@ -583,8 +736,7 @@ export function compileFascicoloDocumentKnowledgeProposal(input: {
       || (basisType === "CHALLENGED_ACT_DATE"
         && (basisItem?.kind === "LEGAL_ACT" || basisItem?.kind === "MEASURE")
         && basisItem.payload.proceduralRole === "CHALLENGED_ACT")
-      || basisType === "USER_CONFIRMED"
-      || basisType === "UNKNOWN";
+      || basisType === "USER_CONFIRMED";
     let dateMatches = true;
     if (basisItem && "date" in basisItem.payload) {
       dateMatches = basisItem.payload.date.precision === "EXACT"
@@ -607,43 +759,12 @@ export function compileFascicoloDocumentKnowledgeProposal(input: {
       },
     }];
   });
-  const documentInventory = proposal.documentInventory.flatMap((document, index) => {
-    if (document.classification === "NOT_MATERIAL") {
-      return [{ ...document, relatedItemLocalIds: [] }];
-    }
-    const relatedItems = items.filter((item) => item.basisRefs.some((basisRef) => (
-      document.basisRefs.includes(basisRef)
-    )));
-    const relatedItemLocalIds = relatedItems.map((item) => item.localId);
-    const basisRefs = document.basisRefs.filter((basisRef) => relatedItemLocalIds.some((localId) => (
-      retainedItemsByLocalId.get(localId)?.basisRefs.includes(basisRef)
-    )));
-    const hasRequiredRelation = document.classification === "MATERIAL"
-      ? relatedItemLocalIds.length > 0 && basisRefs.length > 0
-      : relatedItemLocalIds.some((localId) => retainedItemsByLocalId.get(localId)?.kind === "GAP");
-    if (!hasRequiredRelation) {
-      diagnostics.push({
-        code: "DOCUMENT_INVENTORY_EVIDENCE_NOT_VERIFIED",
-        path: `documentInventory.${index}`,
-        action: "MARKED_UNRESOLVED",
-      });
-      return [];
-    }
-    if (relatedItemLocalIds.length !== document.relatedItemLocalIds.length
-      || relatedItemLocalIds.some((localId) => !document.relatedItemLocalIds.includes(localId))) {
-      diagnostics.push({
-        code: "DOCUMENT_INVENTORY_RELATIONS_REBUILT",
-        path: `documentInventory.${index}.relatedItemLocalIds`,
-        action: "REBUILT",
-      });
-    }
-    return [{ ...document, basisRefs, relatedItemLocalIds }];
-  });
+  const documentInventory = coverage.documentInventory;
   const { evidenceCandidates: _evidenceCandidates, ...proposalWithoutEvidenceCandidates } = proposal;
   const parsed = fascicoloDocumentStructuredKnowledgeSchema.safeParse({
     ...proposalWithoutEvidenceCandidates,
     items,
-    sourceQuotes: evidence.sourceQuotes,
+    sourceQuotes: coverage.sourceQuotes,
     documentInventory,
     legalIssues,
     researchQuestions,
@@ -658,10 +779,11 @@ export function compileFascicoloDocumentKnowledgeProposal(input: {
       })),
     ]);
   }
-  const promotable = evidence.quarantinedItemLocalIds.length === 0
+  const isolatedQuarantineAcceptable = evidence.quarantinedItemLocalIds.length === 0
+    || (evidence.quarantinedItemLocalIds.length === 1 && evidence.items.length > 0);
+  const promotable = isolatedQuarantineAcceptable
     && legalIssues.length === proposal.legalIssues.length
     && researchQuestions.length === proposal.researchQuestions.length
-    && documentInventory.length === proposal.documentInventory.length
     && !diagnostics.some((diagnostic) => (
       diagnostic.code === "LEGAL_ISSUE_ORIGINS_PARTIALLY_VERIFIED"
     ));

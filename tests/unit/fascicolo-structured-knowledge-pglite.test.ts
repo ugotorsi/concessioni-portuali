@@ -1197,8 +1197,33 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
     );
     const {
       sourceQuotes: recoverableSourceQuotes,
+      documentInventory: _serverOwnedDocumentInventory,
       ...recoverableCandidateProposal
     } = recoverableSelvaraProposal;
+    const interpretiveCandidateProposal = {
+      ...recoverableCandidateProposal,
+      items: recoverableCandidateProposal.items.map((item) => {
+        if (item.kind !== "FACT" && item.kind !== "EVENT") return item;
+        const { proceedingIdentityHint: _serverOwnedIdentity, ...payload } = item.payload;
+        return { ...item, payload };
+      }),
+      legalIssues: recoverableCandidateProposal.legalIssues.map((issue) => {
+        const {
+          referenceDateBasis: _serverOwnedReferenceDate,
+          targetProceedingHint: _serverOwnedProceeding,
+          ...interpretiveIssue
+        } = issue;
+        return interpretiveIssue;
+      }),
+      researchQuestions: recoverableCandidateProposal.researchQuestions.map((question) => {
+        const {
+          referenceDate: _serverOwnedDate,
+          referenceDateBasis: _serverOwnedDateBasis,
+          ...interpretiveQuestion
+        } = question;
+        return interpretiveQuestion;
+      }),
+    };
     const providerOutput = {
       summary: {
         text: "Il fascicolo documenta concessione, esecuzione e criticita.",
@@ -1230,8 +1255,8 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
         text: "Verificare la disciplina applicabile.",
         basisRefs: ["DOCUMENT_1.PAGE_7"],
       }],
-      structuredKnowledge: fascicoloDocumentKnowledgeCandidateProposalSchema.parse({
-        ...recoverableCandidateProposal,
+      structuredKnowledge: {
+        ...interpretiveCandidateProposal,
         evidenceCandidates: recoverableSourceQuotes.map((sourceQuote) => {
           const span = selvaraEvidenceSpans.find((candidate) => (
             candidate.basisRef === sourceQuote.basisRef
@@ -1242,7 +1267,7 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
             evidenceSpanId: span.id,
           };
         }),
-      }),
+      },
     };
     const analysisService = createFascicoloDocumentAnalysisService({
       provider: { analyze: vi.fn(async () => providerOutput) },
@@ -1422,12 +1447,12 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
     expect(selvaraOfflinePages[27].text).toContain("Portanza attuale non attestabile da\nquesto rapporto");
     expect(selvaraOfflinePages[27].text).toContain("Il valore 40 kN/m² non è un’autorizzazione all’uso con qualsiasi combinazione di carichi.");
     expect(persisted.quality).toMatchObject({
-      proposedCount: 59,
-      acceptedCount: 59,
+      proposedCount: 60,
+      acceptedCount: 60,
       correctedCount: 2,
       rejectedCount: 0,
       evidenceCoverage: 1,
-      exactCitationCount: 46,
+      exactCitationCount: 47,
       recoveredCitationCount: 0,
       optionalMissingRelationCount: 0,
       unresolvedRequiredDependencyCount: 0,
@@ -1438,8 +1463,8 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
       corpusDocumentCount: 40,
       reviewedDocumentCount: 40,
       materialDocumentCount: 39,
-      nonMaterialDocumentCount: 1,
-      uncertainDocumentCount: 0,
+      nonMaterialDocumentCount: 0,
+      uncertainDocumentCount: 1,
       uncoveredMaterialDocumentCount: 0,
       missingInventoryBasisRefCount: 0,
       blockingReasons: [],
@@ -1450,18 +1475,19 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
       legalActs: { length: 4 },
       measures: { length: 0 },
       contradictions: { length: 1 },
-      gaps: { length: 11 },
+      gaps: { length: 12 },
       legalIssues: { length: 7 },
       researchQuestions: { length: 6 },
     });
     const reconciledIssueIdentity = readModel!.legalIssues.flatMap((issue) => {
       if (!isRecord(issue.payload)) return [];
       const resolution = issue.payload.targetProceedingResolution;
-      if (!isRecord(resolution) || !isRecord(resolution.providerClaim)
-        || resolution.providerClaim.declaredKey !== "concessione-demariale-17-2023") {
+      const target = issue.payload.targetProceedingIdentity;
+      if (!isRecord(resolution) || !isRecord(target)
+        || !Array.isArray(target.evidenceBasisRefs)
+        || !target.evidenceBasisRefs.includes("DOCUMENT_1.PAGE_7")) {
         return [];
       }
-      const target = issue.payload.targetProceedingIdentity;
       return isRecord(target)
         ? [{ target, resolution }]
         : [];
@@ -1474,11 +1500,11 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
       resolution: {
         status: "VERIFIED",
         action: "REBUILT",
-        providerClaim: { declaredKey: "concessione-demariale-17-2023" },
+        providerClaim: null,
       },
     });
     expect(reconciledIssueIdentity!.target).not.toHaveProperty("declaredKey");
-    expect(readModel!.revision.warnings).toHaveLength(54);
+    expect(readModel!.revision.warnings).toHaveLength(58);
     expect(readModel!.revision.warnings.filter((warning) => (
       warning.startsWith("DOCUMENT_INVENTORY:")
     ))).toHaveLength(40);
@@ -1487,13 +1513,14 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
     ))).toHaveLength(7);
     expect(readModel!.revision.warnings.filter((warning) => (
       warning.startsWith("COMPILATION:")
-    ))).toHaveLength(7);
+    ))).toHaveLength(11);
     expect(readModel!.revision.warnings).toContain(
       "PROCEEDING_IDENTITY:REBUILT:VERIFIED:issue-canoni",
     );
-    expect(readModel!.revision.warnings).toContain(
-      "DOCUMENT_INVENTORY:document-page-1:NOT_MATERIAL:DOCUMENT_1.PAGE_1:Documento di indice privo di autonomi fatti, obblighi o provvedimenti.",
-    );
+    expect(readModel!.revision.warnings.some((warning) => (
+      warning.startsWith("DOCUMENT_INVENTORY:server-inventory-")
+      && warning.includes(":UNCERTAIN:DOCUMENT_1.PAGE_1:")
+    ))).toBe(true);
     expect(archived).toMatchObject({
       outcome: "CREATED",
       snapshot: { status: "CURRENT" },
@@ -1512,9 +1539,7 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
                 kind: "LEGAL_ACT",
               }),
               evidenceBasisRefs: ["DOCUMENT_1.PAGE_7"],
-              providerClaim: expect.objectContaining({
-                declaredKey: "concessione-demariale-17-2023",
-              }),
+              providerClaim: null,
             }),
           }),
         ]),

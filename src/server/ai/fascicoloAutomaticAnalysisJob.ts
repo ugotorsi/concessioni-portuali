@@ -383,18 +383,8 @@ function assertControlledV7OutputComplete(
   excerpts: readonly AutomaticDocumentExcerpt[],
 ): void {
   const knowledge = analysis.structuredKnowledge;
-  const narrativeSections = [
-    analysis.timeline,
-    analysis.recordedState,
-    analysis.signals,
-    analysis.investigativeQuestions,
-    analysis.suggestedActivities,
-    analysis.legalResearchQuestions,
-  ];
   if (!knowledge
-    || narrativeSections.some((section) => section.length === 0)
     || knowledge.items.length === 0
-    || knowledge.legalIssues.length === 0
     || !knowledge.documentInventory
     || knowledge.documentInventory.length === 0) {
     throw new AsyncJobExecutionError("ANALYSIS", "V7_OUTPUT_REQUIRED_SECTIONS_EMPTY", false);

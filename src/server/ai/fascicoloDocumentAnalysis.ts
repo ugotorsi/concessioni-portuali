@@ -37,16 +37,14 @@ export const FASCICOLO_DOCUMENT_ANALYSIS_SYSTEM_POLICY = Object.freeze({
     "Use only the supplied extracted document excerpts.",
     "Every factual statement, date, issue, contradiction, gap, and question must cite supplied page references.",
     "Return structuredKnowledge subjects and typed items when the excerpts support them; never invent unresolved evidence references.",
-    "Return one structuredKnowledge.documentInventory entry for every supplied page reference, grouping references that belong to the same document when justified.",
-    "Classify each inventoried document as MATERIAL, NOT_MATERIAL, or UNCERTAIN; explain every classification and link MATERIAL documents to grounded knowledge items and UNCERTAIN documents to a GAP.",
-    "Do not omit a page because it repeats or qualifies another document: record the relationship, late or partial performance, defenses, payments, notices, technical limits, and evidentiary status whenever material.",
+    "Do not produce document inventory, canonical identifiers, provenance attestations, proceeding anchors, or reference-date links; the server derives those deterministically from the authenticated corpus.",
+    "Do not omit a supported relationship, late or partial performance, defense, payment, notice, technical limit, or evidentiary qualification merely to simplify the proposal.",
     "For every structuredKnowledge item, select one or more supplied evidence span identifiers in structuredKnowledge.evidenceCandidates. Never generate, transcribe, or alter quotations; the server constructs canonical quotations from the selected spans.",
     "Preserve every material defense, claim, objection, or request as a PARTY_POSITION attributed to its subject and cited to its document page; never convert a party position into a verified FACT or a technical assessment.",
-    "Within structuredKnowledge, propose legalIssues only from identified CURRENT-bound items and researchQuestions only from those legal issues with an explicit reference-date basis.",
+    "Within structuredKnowledge, propose legalIssues only from identified items and researchQuestions only from those legal issues; the server determines reference-date bases when documentary support is unambiguous.",
     "Use unique localId values within each structuredKnowledge collection and unique itemLocalId, evidenceSpanId tuples in evidenceCandidates.",
-    "Every structuredKnowledge cross-reference must resolve: subject references to subjects, item references to items, evidenceCandidates to supplied evidence spans, legal questions to legalIssues, MATERIAL documents to at least one item, and UNCERTAIN documents to at least one GAP item.",
-    "For FACT, EVENT, and legalIssue proceeding identity, return only a nullable proceedingIdentityHint or targetProceedingHint. Candidate references are proposals; the server determines canonical anchors and verified evidence.",
-    "legalIssues may originate only from PARTY_POSITION, FACT, EVENT, LEGAL_ACT, MEASURE, CONTRADICTION, or GAP items; each researchQuestion reference-date basis must be internally consistent and reference an existing item when itemLocalId is present.",
+    "Every interpretive cross-reference must resolve: subject references to subjects, item references to items, evidenceCandidates to supplied evidence spans, and legal questions to legalIssues.",
+    "legalIssues may originate only from PARTY_POSITION, FACT, EVENT, LEGAL_ACT, MEASURE, CONTRADICTION, or GAP items.",
     "Assess every documented prescription, formal contestation, alleged breach, omission, and contradiction for legalIssues; empty legalIssues are valid only when the excerpts do not support an issue.",
     "When an issue cannot be structured because documents or legal research are missing, return a grounded GAP instead of inventing a legal conclusion or authority.",
     "Separate recorded facts from signals requiring verification.",
@@ -208,7 +206,8 @@ export function buildFascicoloDocumentProviderRequest(
       signalTypes: ["INFO", "VERIFY"],
       basisRefsMeaning: "EXTRACTED_DOCUMENT_PAGE_REFERENCE_ONLY",
       structuredKnowledgeSemanticRules: FASCICOLO_STRUCTURED_KNOWLEDGE_SEMANTIC_RULES
-        .filter((rule) => !rule.code.startsWith("INVALID_PROCEEDING_")),
+        .filter((rule) => !/(?:PROCEEDING|DOCUMENT|REFERENCE_DATE|SOURCE_QUOTE)/u
+          .test(rule.code)),
     },
   };
 }
@@ -216,8 +215,63 @@ export function buildFascicoloDocumentProviderRequest(
 function normalizeDocumentProviderOutput(output: unknown): unknown {
   if (!output || typeof output !== "object" || Array.isArray(output)) return output;
   const record = output as Record<string, unknown>;
+  const rawKnowledge = record.structuredKnowledge;
+  const structuredKnowledge = rawKnowledge && typeof rawKnowledge === "object"
+    && !Array.isArray(rawKnowledge)
+    ? rawKnowledge as Record<string, unknown>
+    : null;
+  const normalizedKnowledge = structuredKnowledge
+    ? {
+        ...structuredKnowledge,
+        documentInventory: [],
+        items: Array.isArray(structuredKnowledge.items)
+          ? structuredKnowledge.items.map((item) => {
+              if (!item || typeof item !== "object" || Array.isArray(item)) return item;
+              const candidate = item as Record<string, unknown>;
+              if ((candidate.kind !== "FACT" && candidate.kind !== "EVENT")
+                || !candidate.payload || typeof candidate.payload !== "object"
+                || Array.isArray(candidate.payload)) return candidate;
+              return {
+                ...candidate,
+                payload: {
+                  ...(candidate.payload as Record<string, unknown>),
+                  proceedingIdentityHint: null,
+                },
+              };
+            })
+          : structuredKnowledge.items,
+        legalIssues: Array.isArray(structuredKnowledge.legalIssues)
+          ? structuredKnowledge.legalIssues.map((issue) => (
+              issue && typeof issue === "object" && !Array.isArray(issue)
+                ? {
+                    ...(issue as Record<string, unknown>),
+                    referenceDateBasis: null,
+                    targetProceedingHint: null,
+                  }
+                : issue
+            ))
+          : structuredKnowledge.legalIssues,
+        researchQuestions: Array.isArray(structuredKnowledge.researchQuestions)
+          ? structuredKnowledge.researchQuestions.map((question) => (
+              question && typeof question === "object" && !Array.isArray(question)
+                ? {
+                    ...(question as Record<string, unknown>),
+                    referenceDate: null,
+                    referenceDateBasis: {
+                      type: "UNKNOWN",
+                      itemLocalId: null,
+                      rationale: "Determinazione server-side in base alle evidenze autenticate.",
+                      userConfirmedDateSource: null,
+                    },
+                  }
+                : question
+            ))
+          : structuredKnowledge.researchQuestions,
+      }
+    : rawKnowledge;
   return {
     ...record,
+    structuredKnowledge: normalizedKnowledge,
     ...(Array.isArray(record.timeline) ? {
       timeline: record.timeline.map((item) => {
         if (!item || typeof item !== "object" || Array.isArray(item)) return item;

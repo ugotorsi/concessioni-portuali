@@ -336,6 +336,38 @@ before persistence. Invalid-output logs contain only allowlisted semantic codes 
 structural paths; they never contain provider output or document text. Citation
 existence, uniqueness, page recovery, and material coverage remain deterministic
 quality-gate checks against trusted extracted text.
+
+The V7 provider contract keeps deterministic corpus authority out of the probabilistic
+response. The provider proposes interpretive items, legal issues, research questions,
+and evidence-span selections. It does not return document inventory, canonical
+provenance, proceeding anchors, literal quotations, or reference-date links. The
+server:
+
+- constructs one authenticated inventory entry for every corpus page;
+- derives inventory-to-item relationships from verified evidence-span overlap;
+- adds an explicit `UNCERTAIN` coverage gap when a page has no verified interpretive
+  item instead of declaring the page non-material;
+- reconstructs unique proceeding anchors and exact research dates when the authenticated
+  origins make them unambiguous; and
+- quarantines an isolated unverified claim without discarding an otherwise complete
+  report, while still blocking promotion when a legal origin, required relation, or
+  material evidence dependency is lost.
+
+Regression fixtures for ONE-SHOT-01 through ONE-SHOT-06 are synthetic reconstructions
+of the recorded failure classes and diagnostic paths; original provider payloads were
+not retained and the fixtures must not be represented as verbatim outputs. The offline
+Selvara acceptance runs all 40 pages through request construction, provider-boundary
+parsing, deterministic compilation, PGlite persistence, CURRENT promotion, report
+archival, and report query. It also removes an essential concession-act evidence
+candidate and verifies that the resulting revision/report remain non-current while the
+previous CURRENT remains available.
+
+With the same 64,000-token output ceiling and EUR/USD rate `0.89381`, the reduced V7
+wire contract estimates 37,077 input tokens and a maximum of EUR `0.752726` for the
+offline 40-page Selvara corpus. The existing EUR `0.758624` runtime reservation and
+EUR `0.762000` approved ceiling remain conservative; this contract change does not
+increase or authorize either amount.
+
 Before retrying the canary, verify that its operation is exactly
 `FASCICOLO.AUTOMATIC_ANALYSIS_V1`, its procedimento is the authorized canary, and the
 corrected configuration has been deployed in the base service's latest successful

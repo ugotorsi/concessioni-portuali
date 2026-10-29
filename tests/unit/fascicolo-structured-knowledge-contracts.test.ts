@@ -681,7 +681,7 @@ describe("Lotto 2 structured knowledge contracts", () => {
     }
   });
 
-  it("rebuilds inventory relations and safely downgrades invalid research dates", () => {
+  it("builds inventory server-side and safely downgrades invalid research dates", () => {
     const base = validKnowledge();
     const event = base.items.find((candidate) => candidate.kind === "EVENT");
     if (!event) throw new Error("Expected an event fixture.");
@@ -763,15 +763,20 @@ describe("Lotto 2 structured knowledge contracts", () => {
     });
     expect(compiled.knowledge.documentInventory?.[0].relatedItemLocalIds)
       .toEqual(base.items.map((candidate) => candidate.localId));
+    expect(compiled.knowledge.documentInventory?.[0]).toMatchObject({
+      localId: expect.stringMatching(/^server-inventory-/),
+      basisRefs: ["DOCUMENT_1.PAGE_1"],
+      classification: "MATERIAL",
+      materialProfiles: ["EVIDENTIARY"],
+    });
     expect(compiled.diagnostics).toEqual(expect.arrayContaining([
       expect.objectContaining({
         code: "RESEARCH_QUESTION_REFERENCE_DATE_MARKED_UNKNOWN",
         action: "MARKED_UNRESOLVED",
       }),
-      expect.objectContaining({
-        code: "DOCUMENT_INVENTORY_RELATIONS_REBUILT",
-        action: "REBUILT",
-      }),
+    ]));
+    expect(compiled.diagnostics).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: "DOCUMENT_INVENTORY_RELATIONS_REBUILT" }),
     ]));
   });
 

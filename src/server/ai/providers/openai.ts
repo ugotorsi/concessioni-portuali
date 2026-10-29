@@ -149,6 +149,31 @@ function stripGeneratedSchemaMetadata(value: unknown): unknown {
   );
 }
 
+const SERVER_OWNED_DOCUMENT_FIELDS = new Set([
+  "documentInventory",
+  "proceedingIdentityHint",
+  "targetProceedingHint",
+  "referenceDate",
+  "referenceDateBasis",
+]);
+
+function stripServerOwnedDocumentFields(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(stripServerOwnedDocumentFields);
+  if (!value || typeof value !== "object") return value;
+  const record = value as Record<string, unknown>;
+  const stripped = Object.fromEntries(
+    Object.entries(record)
+      .filter(([key]) => !SERVER_OWNED_DOCUMENT_FIELDS.has(key))
+      .map(([key, item]) => [key, stripServerOwnedDocumentFields(item)]),
+  ) as Record<string, unknown>;
+  if (Array.isArray(stripped.required)) {
+    stripped.required = stripped.required.filter((key) => (
+      typeof key !== "string" || !SERVER_OWNED_DOCUMENT_FIELDS.has(key)
+    ));
+  }
+  return stripped;
+}
+
 function makeOpenAiStrictSchema(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(makeOpenAiStrictSchema);
   if (!value || typeof value !== "object") return value;
@@ -203,20 +228,15 @@ export const OPENAI_PROVIDER_DOCUMENT_ANALYSIS_JSON_SCHEMA = requireNonEmptySche
   ],
   properties: {
     ...OPENAI_PROVIDER_ANALYSIS_JSON_SCHEMA.properties,
-    structuredKnowledge: stripGeneratedSchemaMetadata(
-      z.toJSONSchema(fascicoloDocumentKnowledgeCandidateProposalSchema, { unrepresentable: "any" }),
+    structuredKnowledge: stripServerOwnedDocumentFields(
+      stripGeneratedSchemaMetadata(
+        z.toJSONSchema(fascicoloDocumentKnowledgeCandidateProposalSchema, { unrepresentable: "any" }),
+      ),
     ),
   },
 }, [
-  ["timeline"],
-  ["recordedState"],
-  ["signals"],
-  ["investigativeQuestions"],
-  ["suggestedActivities"],
-  ["legalResearchQuestions"],
   ["structuredKnowledge", "items"],
-  ["structuredKnowledge", "documentInventory"],
-  ["structuredKnowledge", "legalIssues"],
+  ["structuredKnowledge", "evidenceCandidates"],
 ]);
 
 class OpenAiProtocolError extends Error {
