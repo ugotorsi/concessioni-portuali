@@ -175,6 +175,7 @@ async function insertPromotionGraph(
 ): Promise<Map<string, number>> {
   const pending = [...selectedRows.values()];
   const inserted = new Map<string, number>();
+  const blockedReasons = new Map<string, Set<string>>();
   let pass = 0;
   while (pending.length > 0) {
     pass += 1;
@@ -197,13 +198,26 @@ async function insertPromotionGraph(
         inserted.set(selected.table, (inserted.get(selected.table) ?? 0) + (result.rowCount ?? 0));
         pending.splice(index, 1);
         progress += 1;
-      } catch {
+      } catch (error) {
         await client.query("ROLLBACK TO SAVEPOINT promotion_row");
+        const databaseError = error as { code?: unknown; constraint?: unknown };
+        const reason = [
+          typeof databaseError.code === "string" ? databaseError.code : "UNKNOWN",
+          typeof databaseError.constraint === "string" ? databaseError.constraint : "NO_CONSTRAINT",
+        ].join(":");
+        const reasons = blockedReasons.get(selected.table) ?? new Set<string>();
+        reasons.add(reason);
+        blockedReasons.set(selected.table, reasons);
       }
     }
     if (progress === 0 || pass > selectedRows.size + 1) {
       const blockedTables = [...new Set(pending.map((row) => row.table))].sort();
-      throw new Error(`PROMOTION_FOREIGN_KEY_BLOCKED:${blockedTables.join(",")}`);
+      throw new Error(`PROMOTION_FOREIGN_KEY_BLOCKED:${JSON.stringify(
+        blockedTables.map((table) => ({
+          table,
+          reasons: [...(blockedReasons.get(table) ?? [])].sort(),
+        })),
+      )}`);
     }
   }
   return inserted;
@@ -263,7 +277,8 @@ async function main(): Promise<void> {
       fingerprint: createHash("sha256").update(JSON.stringify(summary)).digest("hex"),
     })}`);
   } catch (error) {
-    await Promise.allSettled([source.query("ROLLBACK"), target.query("ROLLBACK")]);
+    await source.query("ROLLBACK").catch(() => undefined);
+    await target.query("ROLLBACK").catch(() => undefined);
     throw error;
   } finally {
     source.release();
