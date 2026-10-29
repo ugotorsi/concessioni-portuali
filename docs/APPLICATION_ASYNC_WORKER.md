@@ -85,8 +85,15 @@ The first V7 Selvara attempt used approval
 `cmvpfm50p000010udtpjtrfn3`. The third used approval
 `NOETRA-V7-SELVARA-2026-10-27-CONTROLLED-ONE-SHOT-03` and terminal job
 `cmvqkf4ow0000vcudzvjcfdy7`; all historical identities are immutable. The prepared
-fourth single-attempt admission binds the V7 document-analysis contract, corpus
+fourth single-attempt admission bound the V7 document-analysis contract, corpus
 fingerprint, and `NOETRA-V7-SELVARA-2026-10-27-CONTROLLED-ONE-SHOT-04` approval.
+The prepared fifth admission uses the distinct
+`NOETRA-V7-SELVARA-2026-10-29-CONTROLLED-ONE-SHOT-05` identity and remains
+inert until the real-data gates are explicitly enabled. Its deterministic logical
+operation ID is
+`42135b9b107af8c93a6336f4086502c5b90744d296653bac7e8076d342f5253d`.
+The 40-page corpus preflight estimates 40,339 input tokens, reserves EUR 0.758557,
+and retains the existing EUR 0.762000 approval ceiling.
 Repeating the same admission reuses the same job. Changing the approved preflight after admission causes
 an idempotency conflict instead of creating a second attempt. The job has
 `maxAttempts=1`; provider timeouts, rate limits, unavailable responses, malformed or
