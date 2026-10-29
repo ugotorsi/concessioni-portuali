@@ -397,13 +397,13 @@ function assertControlledV7OutputComplete(
     || knowledge.legalIssues.length === 0
     || !knowledge.documentInventory
     || knowledge.documentInventory.length === 0) {
-    throw new AsyncJobExecutionError("ANALYSIS", "V7_OUTPUT_INCOMPLETE", false);
+    throw new AsyncJobExecutionError("ANALYSIS", "V7_OUTPUT_REQUIRED_SECTIONS_EMPTY", false);
   }
   const inventoried = new Set(
     knowledge.documentInventory.flatMap((document) => document.basisRefs),
   );
   if (excerpts.some((excerpt) => !inventoried.has(excerpt.reference))) {
-    throw new AsyncJobExecutionError("ANALYSIS", "V7_OUTPUT_INCOMPLETE", false);
+    throw new AsyncJobExecutionError("ANALYSIS", "V7_DOCUMENT_INVENTORY_INCOMPLETE", false);
   }
 }
 

@@ -87,13 +87,20 @@ The first V7 Selvara attempt used approval
 `cmvqkf4ow0000vcudzvjcfdy7`; all historical identities are immutable. The prepared
 fourth single-attempt admission bound the V7 document-analysis contract, corpus
 fingerprint, and `NOETRA-V7-SELVARA-2026-10-27-CONTROLLED-ONE-SHOT-04` approval.
-The prepared fifth admission uses the distinct
-`NOETRA-V7-SELVARA-2026-10-29-CONTROLLED-ONE-SHOT-05` identity and remains
-inert until the real-data gates are explicitly enabled. Its deterministic logical
-operation ID is
+The fifth admission used the distinct
+`NOETRA-V7-SELVARA-2026-10-29-CONTROLLED-ONE-SHOT-05` identity. Its deterministic
+logical operation ID is
 `42135b9b107af8c93a6336f4086502c5b90744d296653bac7e8076d342f5253d`.
-The 40-page corpus preflight estimates 40,339 input tokens, reserves EUR 0.758557,
-and retains the existing EUR 0.762000 approval ceiling.
+Job `cmvtfse9c0000lkud7rga99sp` made its single provider call, then failed terminally
+with `V7_OUTPUT_INCOMPLETE` before persistence. It settled EUR 0.193852 and released
+EUR 0.564705. No retry was performed. The failure exposed a mismatch between the
+strict provider schema, which allowed empty required collections, and the V7
+post-response completeness gate. The corrected schema requires those collections
+to be non-empty and the runtime now distinguishes empty required sections from
+incomplete document-inventory coverage. For the unchanged 40-page corpus, the
+corrected schema estimates 40,376 input tokens and EUR 0.758624 maximum cost, still
+within the existing EUR 0.762000 approval ceiling. Any future paid attempt requires
+a new explicit authorization and immutable identity.
 Repeating the same admission reuses the same job. Changing the approved preflight after admission causes
 an idempotency conflict instead of creating a second attempt. The job has
 `maxAttempts=1`; provider timeouts, rate limits, unavailable responses, malformed or

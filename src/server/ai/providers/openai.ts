@@ -169,7 +169,33 @@ function makeOpenAiStrictSchema(value: unknown): unknown {
   return schema;
 }
 
-export const OPENAI_PROVIDER_DOCUMENT_ANALYSIS_JSON_SCHEMA = makeOpenAiStrictSchema({
+function requireNonEmptySchemaArrays(
+  value: unknown,
+  paths: readonly (readonly string[])[],
+): unknown {
+  const schema = makeOpenAiStrictSchema(value);
+  for (const path of paths) {
+    let current = schema;
+    for (const segment of path) {
+      if (!current || typeof current !== "object" || Array.isArray(current)) {
+        throw new Error("OPENAI_DOCUMENT_SCHEMA_PATH_INVALID");
+      }
+      const properties = (current as Record<string, unknown>).properties;
+      if (!properties || typeof properties !== "object" || Array.isArray(properties)) {
+        throw new Error("OPENAI_DOCUMENT_SCHEMA_PATH_INVALID");
+      }
+      current = (properties as Record<string, unknown>)[segment];
+    }
+    if (!current || typeof current !== "object" || Array.isArray(current)
+      || (current as Record<string, unknown>).type !== "array") {
+      throw new Error("OPENAI_DOCUMENT_SCHEMA_PATH_INVALID");
+    }
+    (current as Record<string, unknown>).minItems = 1;
+  }
+  return schema;
+}
+
+export const OPENAI_PROVIDER_DOCUMENT_ANALYSIS_JSON_SCHEMA = requireNonEmptySchemaArrays({
   ...OPENAI_PROVIDER_ANALYSIS_JSON_SCHEMA,
   required: [
     ...OPENAI_PROVIDER_ANALYSIS_JSON_SCHEMA.required,
@@ -181,7 +207,17 @@ export const OPENAI_PROVIDER_DOCUMENT_ANALYSIS_JSON_SCHEMA = makeOpenAiStrictSch
       z.toJSONSchema(fascicoloDocumentKnowledgeCandidateProposalSchema, { unrepresentable: "any" }),
     ),
   },
-});
+}, [
+  ["timeline"],
+  ["recordedState"],
+  ["signals"],
+  ["investigativeQuestions"],
+  ["suggestedActivities"],
+  ["legalResearchQuestions"],
+  ["structuredKnowledge", "items"],
+  ["structuredKnowledge", "documentInventory"],
+  ["structuredKnowledge", "legalIssues"],
+]);
 
 class OpenAiProtocolError extends Error {
   constructor() {

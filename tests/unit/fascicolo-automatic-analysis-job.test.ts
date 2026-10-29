@@ -866,7 +866,47 @@ describe("automatic fascicolo analysis job", () => {
       context(),
     )).rejects.toEqual(new AsyncJobExecutionError(
       "ANALYSIS",
-      "V7_OUTPUT_INCOMPLETE",
+      "V7_OUTPUT_REQUIRED_SECTIONS_EMPTY",
+      false,
+    ));
+    expect(analyze).toHaveBeenCalledOnce();
+    expect(persistKnowledge).not.toHaveBeenCalled();
+    expect(deps.persistStructuredReport).not.toHaveBeenCalled();
+  });
+
+  it("distinguishes incomplete V7 document inventory coverage before persistence", async () => {
+    const analyze = vi.fn(async () => ({
+      ...analysis,
+      structuredKnowledge: {
+        ...controlledV7Knowledge,
+        documentInventory: controlledV7Knowledge.documentInventory.map((document) => ({
+          ...document,
+          basisRefs: ["DOCUMENT_1.PAGE_999"],
+        })),
+      },
+    }));
+    const persistKnowledge = vi.fn();
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        documents: authority.documents.map((document) => ({
+          ...document,
+          documentoId: "document-1",
+          documentFileVersionId: "file-version-1",
+        })),
+      })),
+      getCurrentRevision: vi.fn(async () => currentReconciliation(lotto3Knowledge).revision),
+      analyze,
+      persistKnowledge,
+    });
+
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(
+      controlledV7Reference,
+      context(),
+    )).rejects.toEqual(new AsyncJobExecutionError(
+      "ANALYSIS",
+      "V7_DOCUMENT_INVENTORY_INCOMPLETE",
       false,
     ));
     expect(analyze).toHaveBeenCalledOnce();

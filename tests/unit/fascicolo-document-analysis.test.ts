@@ -247,6 +247,12 @@ describe("worker-safe fascicolo document analysis", () => {
           schema: {
             required: expect.arrayContaining(["structuredKnowledge"]),
             properties: {
+              timeline: { minItems: 1 },
+              recordedState: { minItems: 1 },
+              signals: { minItems: 1 },
+              investigativeQuestions: { minItems: 1 },
+              suggestedActivities: { minItems: 1 },
+              legalResearchQuestions: { minItems: 1 },
               structuredKnowledge: {
                 required: expect.arrayContaining([
                   "subjects",
@@ -256,6 +262,11 @@ describe("worker-safe fascicolo document analysis", () => {
                   "legalIssues",
                   "researchQuestions",
                 ]),
+                properties: {
+                  items: { minItems: 1 },
+                  documentInventory: { minItems: 1 },
+                  legalIssues: { minItems: 1 },
+                },
               },
             },
           },

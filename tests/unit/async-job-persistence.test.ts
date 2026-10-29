@@ -370,6 +370,8 @@ describe("B2C9 generic async job persistence", () => {
     ["AI_PROVIDER_UNAVAILABLE", true],
     ["INVALID_PROVIDER_OUTPUT", false],
     ["V7_OUTPUT_INCOMPLETE", false],
+    ["V7_OUTPUT_REQUIRED_SECTIONS_EMPTY", false],
+    ["V7_DOCUMENT_INVENTORY_INCOMPLETE", false],
     ["STRUCTURED_KNOWLEDGE_MATERIALLY_INCOMPLETE", false],
   ])("terminally fails V7 collaudo error %s after its only attempt", async (code, retryable) => {
     harness.tx.$queryRaw.mockResolvedValue([{
