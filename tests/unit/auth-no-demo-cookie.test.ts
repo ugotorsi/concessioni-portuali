@@ -39,6 +39,7 @@ describe("no demo cookie fallback", () => {
     const deletedCookieNames = cookieDeleteMock.mock.calls.map((call) => call[0]);
 
     expect(deletedCookieNames).not.toContain("cp_demo_role");
+    expect(deletedCookieNames).toContain("__Secure-noetra-preview.session-token");
     expect(deletedCookieNames).toContain("next-auth.session-token");
     expect(deletedCookieNames).toContain("__Secure-next-auth.session-token");
   });

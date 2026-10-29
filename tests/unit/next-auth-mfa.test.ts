@@ -70,6 +70,16 @@ describe("NextAuth MFA enforcement", () => {
 
   afterEach(() => vi.unstubAllEnvs());
 
+  it("isolates Preview sessions from cookies issued by other deployments", async () => {
+    vi.stubEnv("VERCEL_ENV", "preview");
+    vi.stubEnv("NODE_ENV", "production");
+
+    const { authOptions } = await loadAuth();
+
+    expect(authOptions.cookies?.sessionToken?.name)
+      .toBe("__Secure-noetra-preview.session-token");
+  });
+
   it("issues only an enrollment-limited identity to an ADMIN without MFA", async () => {
     findUniqueMock.mockResolvedValue(userRecord());
     const { authorize } = await loadAuth();
