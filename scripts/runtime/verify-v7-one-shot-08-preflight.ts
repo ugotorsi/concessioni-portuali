@@ -67,7 +67,7 @@ async function main(): Promise<void> {
   });
   if (
     preflight.maximumCostEur !== EXPECTED_MAXIMUM_COST_EUR
-    || preflight.approvedMaximumCostEur !== EXPECTED_MAXIMUM_COST_EUR
+    || preflight.approvedMaximumCostEur !== ABSOLUTE_COST_LIMIT_EUR
     || preflight.runtimeReservedCostEur !== EXPECTED_MAXIMUM_COST_EUR
     || preflight.maximumCostEur > ABSOLUTE_COST_LIMIT_EUR
     || !preflight.budgetCompatibility.compatible
