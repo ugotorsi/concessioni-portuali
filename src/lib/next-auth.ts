@@ -4,6 +4,7 @@ import { getServerSession, type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { z } from "zod";
 
+import { resolveAuthSessionCookieName } from "@/lib/auth-session-cookie";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { decryptMfaSecret, isMfaRequiredRole, verifyMfaCode } from "@/lib/mfa";
 import { resolveNextAuthSecret } from "@/lib/next-auth-secret";
@@ -11,8 +12,6 @@ import { prisma } from "@/lib/prisma";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 
 const DUMMY_PASSWORD_HASH = "$2a$10$7x44xI7qxyfGeQ8YV6f8wum8Iat3A80efjhbj4AtNQ35n4NQH6aQW";
-const PREVIEW_SESSION_COOKIE = "__Secure-noetra-preview.session-token";
-
 const credentialsSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
@@ -69,11 +68,7 @@ export const authOptions: NextAuthOptions = {
   },
   cookies: {
     sessionToken: {
-      name: process.env.VERCEL_ENV === "preview"
-        ? PREVIEW_SESSION_COOKIE
-        : process.env.NODE_ENV === "production"
-          ? "__Secure-next-auth.session-token"
-          : "next-auth.session-token",
+      name: resolveAuthSessionCookieName(),
       options: {
         httpOnly: true,
         sameSite: "lax",

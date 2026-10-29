@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
+import { resolveAuthSessionCookieName } from "@/lib/auth-session-cookie";
 import { resolveNextAuthSecret } from "@/lib/next-auth-secret";
 import { buildRateLimitKey, checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 
@@ -155,7 +156,11 @@ export async function middleware(request: NextRequest) {
 
   let token = null;
   try {
-    token = await getToken({ req: request, secret: resolveNextAuthSecret() });
+    token = await getToken({
+      req: request,
+      secret: resolveNextAuthSecret(),
+      cookieName: resolveAuthSessionCookieName(),
+    });
   } catch {
     token = null;
   }

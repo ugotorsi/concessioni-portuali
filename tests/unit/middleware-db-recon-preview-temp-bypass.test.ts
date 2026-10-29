@@ -25,6 +25,7 @@ function makeRequest(path: string) {
 describe("middleware sensitive route boundaries", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    getTokenMock.mockReset();
     buildRateLimitKeyMock.mockReturnValue("rate-limit-key");
     checkRateLimitMock.mockResolvedValue({
       allowed: true,
@@ -53,6 +54,24 @@ describe("middleware sensitive route boundaries", () => {
     expect(response.headers.get("location")).toBeNull();
     expect(getTokenMock).toHaveBeenCalledWith(expect.objectContaining({
       secret: normalizedSecret,
+    }));
+  });
+
+  it("reads the isolated Preview session cookie issued by NextAuth", async () => {
+    vi.stubEnv("NEXTAUTH_SECRET", "a-secure-nextauth-secret-with-32-characters");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    vi.stubEnv("NODE_ENV", "production");
+    getTokenMock.mockResolvedValueOnce({
+      role: "ADMIN",
+      mfaEnrollmentRequired: false,
+      mfaVerified: true,
+    });
+
+    const response = await middleware(makeRequest("/dashboard"));
+
+    expect(response.status).toBe(200);
+    expect(getTokenMock).toHaveBeenCalledWith(expect.objectContaining({
+      cookieName: "__Secure-noetra-preview.session-token",
     }));
   });
 
