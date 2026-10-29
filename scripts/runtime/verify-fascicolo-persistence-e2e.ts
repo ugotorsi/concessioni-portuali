@@ -160,7 +160,7 @@ async function seedIsolatedCorpus(): Promise<void> {
         id: documentFileVersionId,
         documentId: documentoId,
         canonicalEnteId: tenantId,
-        storageProvider: "NOETRA_E2E_OFFLINE",
+        storageProvider: "local",
         storageKey: `e2e/${runId}/offline-synthetic.pdf`,
         mimeType: "application/pdf",
         sizeBytes: selvaraOfflinePages.reduce(
