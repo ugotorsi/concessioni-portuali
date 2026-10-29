@@ -212,46 +212,98 @@ async function validateEvidenceScope(
   scope: KnowledgeScope,
   candidates: readonly KnowledgeItemCandidate[],
 ): Promise<void> {
-  for (const candidate of candidates) {
-    for (const evidence of candidate.evidence) {
-      const page = evidence.provenanceType === "DOCUMENT_EXTRACTION"
-        ? await tx.query<{ id: string }>(`
-        SELECT p."id"
-        FROM "Documento" d
-        INNER JOIN "DocumentFileVersion" v
-          ON v."id" = $4 AND v."documentId" = d."id" AND v."canonicalEnteId" = d."enteId"
-        INNER JOIN "NeutralIntakeExtractionAttempt" a
-          ON a."id" = $5 AND a."artifactSha256" = v."sha256" AND a."outcome" = 'SUCCEEDED'
-        INNER JOIN "NeutralIntake" n
-          ON n."id" = a."neutralIntakeId" AND n."enteId" = d."enteId"
-        INNER JOIN "NeutralIntakeDestination" destination
-          ON destination."neutralIntakeId" = n."id" AND destination."procedimentoId" = d."procedimentoId"
-        INNER JOIN "NeutralIntakeExtractionPage" p
-          ON p."extractionAttemptId" = a."id" AND p."pageNumber" = $6 AND p."textSha256" = $7
-        WHERE d."id" = $1 AND d."enteId" = $2 AND d."procedimentoId" = $3
-          AND d."currentFileVersionId" = v."id"
-      `, [evidence.documentoId, scope.tenantId, scope.procedimentoId, evidence.documentFileVersionId,
-          evidence.extractionAttemptId ?? null, evidence.pageNumber, evidence.textSha256])
-        : await tx.query<{ id: string }>(`
-        SELECT p."id"
-        FROM "Documento" d
-        INNER JOIN "DocumentFileVersion" v
-          ON v."id" = $4 AND v."documentId" = d."id" AND v."canonicalEnteId" = d."enteId"
-        INNER JOIN "DocumentExtractionAttempt" a
-          ON a."id" = $5
-          AND a."documentoId" = d."id"
-          AND a."documentFileVersionId" = v."id"
-          AND a."tenantId" = d."enteId"
-          AND a."procedimentoId" = d."procedimentoId"
-          AND a."sourceSha256" = v."sha256"
-          AND a."outcome" = 'SUCCEEDED'
-        INNER JOIN "DocumentExtractionPage" p
-          ON p."extractionAttemptId" = a."id" AND p."pageNumber" = $6 AND p."textSha256" = $7
-        WHERE d."id" = $1 AND d."enteId" = $2 AND d."procedimentoId" = $3
-          AND d."currentFileVersionId" = v."id"
-      `, [evidence.documentoId, scope.tenantId, scope.procedimentoId, evidence.documentFileVersionId,
-          evidence.documentExtractionAttemptId ?? null, evidence.pageNumber, evidence.textSha256]);
-      if (page.rows.length !== 1) throw new FascicoloKnowledgeRepositoryError("EVIDENCE_SCOPE_MISMATCH");
+  const evidence = [...new Map(candidates.flatMap((candidate) => candidate.evidence).map((item) => [
+    JSON.stringify(item),
+    item,
+  ])).values()];
+  const neutralIntakeEvidence = evidence.filter((item) =>
+    item.provenanceType === "DOCUMENT_EXTRACTION");
+  const fascicoloEvidence = evidence.filter((item) =>
+    item.provenanceType === "FASCICOLO_DOCUMENT_EXTRACTION");
+  if (neutralIntakeEvidence.length > 0) {
+    const invalid = await tx.query<{ invalid: number }>(`
+      WITH expected AS (
+        SELECT *
+        FROM jsonb_to_recordset($3::jsonb) AS e(
+          "documentoId" text,
+          "documentFileVersionId" text,
+          "extractionAttemptId" text,
+          "pageNumber" integer,
+          "textSha256" text
+        )
+      )
+      SELECT 1 AS "invalid"
+      FROM expected e
+      LEFT JOIN "Documento" d
+        ON d."id" = e."documentoId"
+        AND d."enteId" = $1
+        AND d."procedimentoId" = $2
+        AND d."currentFileVersionId" = e."documentFileVersionId"
+      LEFT JOIN "DocumentFileVersion" v
+        ON v."id" = e."documentFileVersionId"
+        AND v."documentId" = d."id"
+        AND v."canonicalEnteId" = d."enteId"
+      LEFT JOIN "NeutralIntakeExtractionAttempt" a
+        ON a."id" = e."extractionAttemptId"
+        AND a."artifactSha256" = v."sha256"
+        AND a."outcome" = 'SUCCEEDED'
+      LEFT JOIN "NeutralIntake" n
+        ON n."id" = a."neutralIntakeId"
+        AND n."enteId" = d."enteId"
+      LEFT JOIN "NeutralIntakeDestination" destination
+        ON destination."neutralIntakeId" = n."id"
+        AND destination."procedimentoId" = d."procedimentoId"
+      LEFT JOIN "NeutralIntakeExtractionPage" p
+        ON p."extractionAttemptId" = a."id"
+        AND p."pageNumber" = e."pageNumber"
+        AND p."textSha256" = e."textSha256"
+      WHERE p."id" IS NULL
+      LIMIT 1
+    `, [scope.tenantId, scope.procedimentoId, JSON.stringify(neutralIntakeEvidence)]);
+    if (invalid.rows.length > 0) {
+      throw new FascicoloKnowledgeRepositoryError("EVIDENCE_SCOPE_MISMATCH");
+    }
+  }
+  if (fascicoloEvidence.length > 0) {
+    const invalid = await tx.query<{ invalid: number }>(`
+      WITH expected AS (
+        SELECT *
+        FROM jsonb_to_recordset($3::jsonb) AS e(
+          "documentoId" text,
+          "documentFileVersionId" text,
+          "documentExtractionAttemptId" text,
+          "pageNumber" integer,
+          "textSha256" text
+        )
+      )
+      SELECT 1 AS "invalid"
+      FROM expected e
+      LEFT JOIN "Documento" d
+        ON d."id" = e."documentoId"
+        AND d."enteId" = $1
+        AND d."procedimentoId" = $2
+        AND d."currentFileVersionId" = e."documentFileVersionId"
+      LEFT JOIN "DocumentFileVersion" v
+        ON v."id" = e."documentFileVersionId"
+        AND v."documentId" = d."id"
+        AND v."canonicalEnteId" = d."enteId"
+      LEFT JOIN "DocumentExtractionAttempt" a
+        ON a."id" = e."documentExtractionAttemptId"
+        AND a."documentoId" = d."id"
+        AND a."documentFileVersionId" = v."id"
+        AND a."tenantId" = d."enteId"
+        AND a."procedimentoId" = d."procedimentoId"
+        AND a."sourceSha256" = v."sha256"
+        AND a."outcome" = 'SUCCEEDED'
+      LEFT JOIN "DocumentExtractionPage" p
+        ON p."extractionAttemptId" = a."id"
+        AND p."pageNumber" = e."pageNumber"
+        AND p."textSha256" = e."textSha256"
+      WHERE p."id" IS NULL
+      LIMIT 1
+    `, [scope.tenantId, scope.procedimentoId, JSON.stringify(fascicoloEvidence)]);
+    if (invalid.rows.length > 0) {
+      throw new FascicoloKnowledgeRepositoryError("EVIDENCE_SCOPE_MISMATCH");
     }
   }
 }
@@ -462,6 +514,10 @@ export async function reconcileAndPromoteKnowledgeRevision(
     const reconciliation = reconcileKnowledgeItems(priorItems, input.candidates);
     await validateEvidenceScope(tx, input, input.candidates);
     const classifications: Array<KnowledgeReconciliationResult["classifications"][number]> = [];
+    const itemRows: Array<Record<string, unknown>> = [];
+    const evidenceRows: Array<Record<string, unknown>> = [];
+    const relationRows: Array<Record<string, unknown>> = [];
+    const itemIdBySemanticKey = new Map<string, string>();
     for (const entry of reconciliation) {
       if (!entry.candidate || !entry.nextStatus) {
         classifications.push({
@@ -473,34 +529,52 @@ export async function reconcileAndPromoteKnowledgeRevision(
         continue;
       }
       const itemId = (ctx.id ?? randomUUID)();
-      await tx.query(`
-        INSERT INTO "FascicoloKnowledgeItem" (
-          "id", "tenantId", "procedimentoId", "revisionId", "kind", "semanticKey",
-          "semanticKeyVersion", "contentFingerprint", "normalizedText", "structuredPayload", "confidence", "status"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11, $12::"FascicoloKnowledgeItemStatus")
-      `, [itemId, input.tenantId, input.procedimentoId, input.revisionId, entry.candidate.kind,
-        entry.candidate.semanticKey, entry.candidate.semanticKeyVersion, entry.candidate.contentFingerprint,
-        entry.candidate.normalizedText, JSON.stringify(entry.candidate.structuredPayload),
-        entry.candidate.confidence, entry.nextStatus]);
+      itemIdBySemanticKey.set(entry.candidate.semanticKey, itemId);
+      itemRows.push({
+        id: itemId,
+        tenantId: input.tenantId,
+        procedimentoId: input.procedimentoId,
+        revisionId: input.revisionId,
+        kind: entry.candidate.kind,
+        semanticKey: entry.candidate.semanticKey,
+        semanticKeyVersion: entry.candidate.semanticKeyVersion,
+        contentFingerprint: entry.candidate.contentFingerprint,
+        normalizedText: entry.candidate.normalizedText,
+        structuredPayload: entry.candidate.structuredPayload,
+        confidence: entry.candidate.confidence,
+        status: entry.nextStatus,
+      });
       for (const evidence of entry.candidate.evidence) {
-        await tx.query(`
-          INSERT INTO "FascicoloKnowledgeEvidence" (
-            "id", "tenantId", "procedimentoId", "itemId", "provenanceType", "documentoId",
-            "documentFileVersionId", "extractionAttemptId", "documentExtractionAttemptId",
-            "pageNumber", "textSha256", "quoteSha256", "basisRef"
-          ) VALUES ($1, $2, $3, $4, $5::"FascicoloKnowledgeProvenanceType", $6, $7, $8, $9, $10, $11, $12, $13)
-        `, [(ctx.id ?? randomUUID)(), input.tenantId, input.procedimentoId, itemId, evidence.provenanceType,
-          evidence.documentoId, evidence.documentFileVersionId,
-          evidence.provenanceType === "DOCUMENT_EXTRACTION" ? evidence.extractionAttemptId ?? null : null,
-          evidence.provenanceType === "FASCICOLO_DOCUMENT_EXTRACTION" ? evidence.documentExtractionAttemptId ?? null : null,
-          evidence.pageNumber, evidence.textSha256, evidence.quoteSha256, evidence.basisRef]);
+        evidenceRows.push({
+          id: (ctx.id ?? randomUUID)(),
+          tenantId: input.tenantId,
+          procedimentoId: input.procedimentoId,
+          itemId,
+          provenanceType: evidence.provenanceType,
+          documentoId: evidence.documentoId,
+          documentFileVersionId: evidence.documentFileVersionId,
+          extractionAttemptId: evidence.provenanceType === "DOCUMENT_EXTRACTION"
+            ? evidence.extractionAttemptId ?? null
+            : null,
+          documentExtractionAttemptId: evidence.provenanceType === "FASCICOLO_DOCUMENT_EXTRACTION"
+            ? evidence.documentExtractionAttemptId ?? null
+            : null,
+          pageNumber: evidence.pageNumber,
+          textSha256: evidence.textSha256,
+          quoteSha256: evidence.quoteSha256,
+          basisRef: evidence.basisRef,
+        });
       }
       if (entry.classification === "MODIFIED" && entry.previousItemId) {
-        await tx.query(`
-          INSERT INTO "FascicoloKnowledgeRelation" (
-            "id", "tenantId", "procedimentoId", "revisionId", "sourceItemId", "targetItemId", "relationType"
-          ) VALUES ($1, $2, $3, $4, $5, $6, 'SUPERSEDES')
-        `, [(ctx.id ?? randomUUID)(), input.tenantId, input.procedimentoId, input.revisionId, itemId, entry.previousItemId]);
+        relationRows.push({
+          id: (ctx.id ?? randomUUID)(),
+          tenantId: input.tenantId,
+          procedimentoId: input.procedimentoId,
+          revisionId: input.revisionId,
+          sourceItemId: itemId,
+          targetItemId: entry.previousItemId,
+          relationType: "SUPERSEDES",
+        });
       }
       classifications.push({
         classification: entry.classification,
@@ -509,25 +583,94 @@ export async function reconcileAndPromoteKnowledgeRevision(
         nextItemId: itemId,
       });
     }
+    if (itemRows.length > 0) {
+      await tx.query(`
+        INSERT INTO "FascicoloKnowledgeItem" (
+          "id", "tenantId", "procedimentoId", "revisionId", "kind", "semanticKey",
+          "semanticKeyVersion", "contentFingerprint", "normalizedText", "structuredPayload", "confidence", "status"
+        )
+        SELECT r."id", r."tenantId", r."procedimentoId", r."revisionId", r."kind",
+          r."semanticKey", r."semanticKeyVersion", r."contentFingerprint", r."normalizedText",
+          r."structuredPayload", r."confidence", r."status"::"FascicoloKnowledgeItemStatus"
+        FROM jsonb_to_recordset($1::jsonb) AS r(
+          "id" text,
+          "tenantId" text,
+          "procedimentoId" text,
+          "revisionId" text,
+          "kind" text,
+          "semanticKey" text,
+          "semanticKeyVersion" text,
+          "contentFingerprint" text,
+          "normalizedText" text,
+          "structuredPayload" jsonb,
+          "confidence" integer,
+          "status" text
+        )
+      `, [JSON.stringify(itemRows)]);
+    }
+    if (evidenceRows.length > 0) {
+      await tx.query(`
+        INSERT INTO "FascicoloKnowledgeEvidence" (
+          "id", "tenantId", "procedimentoId", "itemId", "provenanceType", "documentoId",
+          "documentFileVersionId", "extractionAttemptId", "documentExtractionAttemptId",
+          "pageNumber", "textSha256", "quoteSha256", "basisRef"
+        )
+        SELECT r."id", r."tenantId", r."procedimentoId", r."itemId",
+          r."provenanceType"::"FascicoloKnowledgeProvenanceType", r."documentoId",
+          r."documentFileVersionId", r."extractionAttemptId", r."documentExtractionAttemptId",
+          r."pageNumber", r."textSha256", r."quoteSha256", r."basisRef"
+        FROM jsonb_to_recordset($1::jsonb) AS r(
+          "id" text,
+          "tenantId" text,
+          "procedimentoId" text,
+          "itemId" text,
+          "provenanceType" text,
+          "documentoId" text,
+          "documentFileVersionId" text,
+          "extractionAttemptId" text,
+          "documentExtractionAttemptId" text,
+          "pageNumber" integer,
+          "textSha256" text,
+          "quoteSha256" text,
+          "basisRef" text
+        )
+      `, [JSON.stringify(evidenceRows)]);
+    }
     if (input.relations.length > 0) {
-      const relationItems = await tx.query<{ id: string; semanticKey: string }>(`
-        SELECT "id", "semanticKey" FROM "FascicoloKnowledgeItem"
-        WHERE "tenantId" = $1 AND "procedimentoId" = $2 AND "revisionId" = $3
-      `, [input.tenantId, input.procedimentoId, input.revisionId]);
-      const itemIdBySemanticKey = new Map(relationItems.rows.map((item) => [item.semanticKey, item.id]));
       for (const relation of input.relations) {
         const sourceItemId = itemIdBySemanticKey.get(relation.sourceSemanticKey);
         const targetItemId = itemIdBySemanticKey.get(relation.targetSemanticKey);
         if (!sourceItemId || !targetItemId) {
           throw new FascicoloKnowledgeRepositoryError("RELATION_SCOPE_MISMATCH");
         }
-        await tx.query(`
-          INSERT INTO "FascicoloKnowledgeRelation" (
-            "id", "tenantId", "procedimentoId", "revisionId", "sourceItemId", "targetItemId", "relationType"
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7::"FascicoloKnowledgeRelationType")
-        `, [(ctx.id ?? randomUUID)(), input.tenantId, input.procedimentoId, input.revisionId,
-          sourceItemId, targetItemId, relation.relationType]);
+        relationRows.push({
+          id: (ctx.id ?? randomUUID)(),
+          tenantId: input.tenantId,
+          procedimentoId: input.procedimentoId,
+          revisionId: input.revisionId,
+          sourceItemId,
+          targetItemId,
+          relationType: relation.relationType,
+        });
       }
+    }
+    if (relationRows.length > 0) {
+      await tx.query(`
+        INSERT INTO "FascicoloKnowledgeRelation" (
+          "id", "tenantId", "procedimentoId", "revisionId", "sourceItemId", "targetItemId", "relationType"
+        )
+        SELECT r."id", r."tenantId", r."procedimentoId", r."revisionId",
+          r."sourceItemId", r."targetItemId", r."relationType"::"FascicoloKnowledgeRelationType"
+        FROM jsonb_to_recordset($1::jsonb) AS r(
+          "id" text,
+          "tenantId" text,
+          "procedimentoId" text,
+          "revisionId" text,
+          "sourceItemId" text,
+          "targetItemId" text,
+          "relationType" text
+        )
+      `, [JSON.stringify(relationRows)]);
     }
     if (input.deferPromotion) {
       return {

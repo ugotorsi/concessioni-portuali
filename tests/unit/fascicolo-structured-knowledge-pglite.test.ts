@@ -1120,6 +1120,20 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
 
   it("compiles raw Selvara provider output through the V7 job to a current readable report", async () => {
     const db = await database();
+    let persistenceQueryCount = 0;
+    const persistenceContext: FascicoloKnowledgeRepositoryContext = {
+      read: executor(db),
+      transaction: <T>(operation: (tx: KnowledgeSqlExecutor) => Promise<T>) => db.transaction((tx) => {
+        const countedExecutor: KnowledgeSqlExecutor = {
+          async query<R>(sql: string, params: readonly unknown[] = []) {
+            persistenceQueryCount += 1;
+            return executor(tx).query<R>(sql, params);
+          },
+        };
+        return operation(countedExecutor);
+      }),
+      now: () => new Date("2026-09-29T12:00:00.000Z"),
+    };
     await db.query(`
       UPDATE "DocumentFileVersion"
       SET "sha256" = $1
@@ -1328,7 +1342,7 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
           deferPromotion: input.deferPromotion,
           preserveDraftOnQualityFailure: input.preserveDraftOnQualityFailure,
           compilation: input.compilation,
-        }, context(db));
+        }, persistenceContext);
         return captured.persisted;
       },
       async prepareStructuredReport(input) {
@@ -1469,6 +1483,8 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
       missingInventoryBasisRefCount: 0,
       blockingReasons: [],
     });
+    expect(persistenceQueryCount).toBeGreaterThan(0);
+    expect(persistenceQueryCount).toBeLessThanOrEqual(25);
     expect(readModel).toMatchObject({
       facts: { length: 12 },
       events: { length: 8 },

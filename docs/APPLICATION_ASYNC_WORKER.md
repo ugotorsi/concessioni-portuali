@@ -121,11 +121,31 @@ runtime reservation and EUR 0.762000 approved ceiling remain unchanged. The seve
 identity was executed once as application job `cmvtkqcav0000pcudris24p6p` and Render
 one-off `job-dbhkhj8ae00c73e0rlg0`. The provider call completed with EUR 0.140966
 internally accounted cost, but the application job failed terminally before report
-persistence with Prisma `P2028` while persisting structured knowledge. The root cause
-was the default 5-second interactive transaction timeout on a multi-statement
-persistence transaction that took about 6.5 seconds. Fascicolo knowledge persistence
-now uses a bounded 30-second transaction timeout; other serializable transactions
-retain their existing default. No retry or eighth paid attempt was performed.
+persistence with Prisma `P2028` while persisting structured knowledge. The immediate
+failure was the default 5-second interactive transaction timeout on a persistence
+transaction that took about 6.5 seconds. The structural cause was an N+1 pattern:
+evidence authorization and item, evidence, and relation writes incurred one Neon
+round-trip per row. These operations are now performed with bounded JSON recordset
+validation and batch inserts. Fascicolo knowledge persistence also uses a bounded
+30-second transaction timeout as a safety margin; other serializable transactions
+retain their existing default. The 40-page offline integration test enforces no more
+than 25 knowledge-persistence query calls for 60 accepted items. No retry or eighth
+paid attempt was performed.
+
+The isolated database proof is fail-closed and uses an in-memory fixture provider,
+never a configured AI provider. Run it only against an explicitly approved,
+non-production database with all worker/provider gates disabled:
+
+```bash
+PERSISTENCE_E2E_ALLOWED=true npm run test:persistence:e2e -- \
+  --execute-isolated-e2e --run-id <isolated-run-id>
+```
+
+The harness creates unique synthetic tenant, procedure, document, extraction, and
+40-page records; compiles and authenticates structured knowledge; persists and
+promotes the revision and report atomically; reads it through the application query;
+checks report idempotency and tenant isolation; and proves an invalid-evidence
+transaction leaves no revision while preserving the prior `CURRENT` revision.
 Repeating the same admission reuses the same job. Changing the approved preflight after admission causes
 an idempotency conflict instead of creating a second attempt. The job has
 `maxAttempts=1`; provider timeouts, rate limits, unavailable responses, malformed or
