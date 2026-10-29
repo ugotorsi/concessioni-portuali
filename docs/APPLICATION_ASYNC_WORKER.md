@@ -100,7 +100,9 @@ to be non-empty and the runtime now distinguishes empty required sections from
 incomplete document-inventory coverage. For the unchanged 40-page corpus, the
 corrected schema estimates 40,376 input tokens and EUR 0.758624 maximum cost, still
 within the existing EUR 0.762000 approval ceiling. Any future paid attempt requires
-a new explicit authorization and immutable identity.
+a new explicit authorization. The prepared, inert sixth identity is
+`NOETRA-V7-SELVARA-2026-10-29-CONTROLLED-ONE-SHOT-06`; it does not authorize or
+admit a job while the real-data and worker-activation gates remain disabled.
 Repeating the same admission reuses the same job. Changing the approved preflight after admission causes
 an idempotency conflict instead of creating a second attempt. The job has
 `maxAttempts=1`; provider timeouts, rate limits, unavailable responses, malformed or

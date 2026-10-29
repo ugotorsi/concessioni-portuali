@@ -32,8 +32,14 @@ export const SELVARA_V7_FOURTH_ATTEMPT_AUTHORIZATION = Object.freeze({
   ...SELVARA_V7_SCOPE,
 } as const);
 
-export const SELVARA_PILOT_AUTHORIZATION = Object.freeze({
+export const SELVARA_V7_FIFTH_ATTEMPT_AUTHORIZATION = Object.freeze({
   approvalId: "NOETRA-V7-SELVARA-2026-10-29-CONTROLLED-ONE-SHOT-05",
+  jobId: "cmvtfse9c0000lkud7rga99sp",
+  ...SELVARA_V7_SCOPE,
+} as const);
+
+export const SELVARA_PILOT_AUTHORIZATION = Object.freeze({
+  approvalId: "NOETRA-V7-SELVARA-2026-10-29-CONTROLLED-ONE-SHOT-06",
   ...SELVARA_V7_SCOPE,
 } as const);
 
