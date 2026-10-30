@@ -7,6 +7,12 @@ import { buildRateLimitKey, checkRateLimit, getRateLimitHeaders } from "@/lib/ra
 
 const PUBLIC_PATHS = new Set(["/", "/login", "/logout"]);
 const MCP_PATH = "/api/mcp";
+const MCP_PROTECTED_RESOURCE_METADATA_PATH = "/.well-known/oauth-protected-resource";
+const MCP_DEDICATED_PREVIEW_HOST = "concessioni-portuali-demo-v7-mcp-preview.vercel.app";
+const MCP_DEDICATED_ALLOWED_PATHS = new Set([
+  MCP_PATH,
+  MCP_PROTECTED_RESOURCE_METADATA_PATH,
+]);
 const TRUSTED_RESEARCH_MISSION_PATH = "/api/legal-research/trusted/mission";
 const TRUSTED_RESEARCH_MISSION_ACTION_PATH = "/api/legal-research/trusted/mission/action";
 const PROTECTED_PREFIXES = [
@@ -109,8 +115,23 @@ function withSecurityHeaders(response: NextResponse): NextResponse {
   return response;
 }
 
+function isDedicatedMcpHost(request: NextRequest): boolean {
+  return request.nextUrl.hostname.toLowerCase() === MCP_DEDICATED_PREVIEW_HOST;
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
+
+  if (isDedicatedMcpHost(request) && !MCP_DEDICATED_ALLOWED_PATHS.has(pathname)) {
+    return withSecurityHeaders(NextResponse.json(
+      { error: "NOT_FOUND" },
+      {
+        status: 404,
+        headers: { "Cache-Control": "no-store" },
+      },
+    ));
+  }
+
   const rateLimitPolicy = getRateLimitPolicy(pathname);
 
   if (rateLimitPolicy) {
@@ -206,6 +227,13 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    {
+      source: "/:path*",
+      has: [{
+        type: "host",
+        value: "concessioni-portuali-demo-v7-mcp-preview.vercel.app",
+      }],
+    },
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|map|txt|woff|woff2)$).*)",
   ],
 };

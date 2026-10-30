@@ -37,6 +37,12 @@ Requisiti:
 
 - `WORKOS_AUTHKIT_ISSUER` e `MCP_RESOURCE_URI` devono essere URL HTTPS senza query, frammenti o credenziali.
 - `MCP_RESOURCE_URI` deve coincidere esattamente con il resource indicator configurato in WorkOS e richiesto da ChatGPT.
+- L'alias dedicato NOETRA Preview
+  `concessioni-portuali-demo-v7-mcp-preview.vercel.app` consente esclusivamente
+  `/api/mcp` e `/.well-known/oauth-protected-resource`; qualsiasi altro percorso,
+  incluse pagine, API applicative e asset statici, risponde `404` senza redirect.
+- L'hostname dedicato non sostituisce OAuth: `/api/mcp` continua a richiedere un token
+  WorkOS valido e le autorizzazioni locali su attore, tenant e missione.
 - Non committare valori reali.
 
 ## Binding server-side attore-missione

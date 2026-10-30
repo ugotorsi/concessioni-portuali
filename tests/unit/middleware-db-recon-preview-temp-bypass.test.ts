@@ -18,8 +18,8 @@ vi.mock("@/lib/rate-limit", () => ({
 
 import { middleware } from "../../middleware";
 
-function makeRequest(path: string) {
-  return new NextRequest(`https://example.test${path}`);
+function makeRequest(path: string, host = "example.test") {
+  return new NextRequest(`https://${host}${path}`);
 }
 
 describe("middleware sensitive route boundaries", () => {
@@ -38,6 +38,49 @@ describe("middleware sensitive route boundaries", () => {
   });
 
   afterEach(() => vi.unstubAllEnvs());
+
+  it.each([
+    "/",
+    "/login",
+    "/procedimenti/procedure-1",
+    "/api/admin/runtime-health",
+    "/_next/static/chunks/app.js",
+    "/favicon.ico",
+  ])("denies non-MCP paths on the dedicated MCP host: %s", async (path) => {
+    const response = await middleware(makeRequest(
+      path,
+      "concessioni-portuali-demo-v7-mcp-preview.vercel.app",
+    ));
+
+    expect(response.status).toBe(404);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(response.headers.get("x-frame-options")).toBe("DENY");
+    expect(getTokenMock).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    "/api/mcp",
+    "/.well-known/oauth-protected-resource",
+  ])("allows only the MCP boundary on the dedicated MCP host: %s", async (path) => {
+    const response = await middleware(makeRequest(
+      path,
+      "concessioni-portuali-demo-v7-mcp-preview.vercel.app",
+    ));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("location")).toBeNull();
+    expect(getTokenMock).not.toHaveBeenCalled();
+  });
+
+  it("does not apply the dedicated-host restriction to normal Preview or Production hosts", async () => {
+    for (const host of [
+      "concessioni-portuali-demo-v7-preview.vercel.app",
+      "app.noetra.it",
+    ]) {
+      const response = await middleware(makeRequest("/login", host));
+      expect(response.status).toBe(200);
+    }
+  });
 
   it("uses the same normalized secret as NextAuth when validating an existing session", async () => {
     const normalizedSecret = "a-secure-nextauth-secret-with-32-characters";
