@@ -91,13 +91,15 @@ async function main(): Promise<void> {
   const statusRows = await prisma.$queryRawUnsafe<{
   caseId: string;
   status: string;
+  tenantId: string | null;
+  assignedActorId: string | null;
   count: number;
 }[]>(`
-  SELECT "caseId", "status"::text, count(*)::int AS "count"
-  FROM "ResearchMissionRecord"
-  WHERE "lifecycleStatus" = 'CURRENT'
-  GROUP BY "caseId", "status"
-  ORDER BY "caseId", "status"
+SELECT "caseId", "status"::text, "tenantId", "assignedActorId", count(*)::int AS "count"
+FROM "ResearchMissionRecord"
+WHERE "lifecycleStatus" = 'CURRENT'
+GROUP BY "caseId", "status", "tenantId", "assignedActorId"
+ORDER BY "caseId", "status", "assignedActorId"
 `);
 
   console.log(JSON.stringify({
@@ -132,6 +134,8 @@ async function main(): Promise<void> {
   currentMissionInventory: statusRows.map((row) => ({
     caseId: row.caseId,
     status: row.status,
+    tenantDigest: digest(row.tenantId),
+    assignedActorDigest: digest(row.assignedActorId),
     count: row.count,
   })),
   }, null, 2));
