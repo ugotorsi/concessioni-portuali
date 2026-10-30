@@ -93,12 +93,36 @@ describe("Vercel Preview deployment guard", () => {
         buildCommand: `npm run runtime:diagnose-research-missions -- ${procedimentoId} && npm run build`,
       },
     });
+
     expect(() => parseVercelPreviewDeployArgs([
       "--expected-commit",
       COMMIT,
       "--diagnose-research-procedure",
       "procedure-unsafe;echo",
     ])).toThrow(new VercelPreviewDeployError("DIAGNOSTIC_PROCEDURE_INVALID"));
+  });
+
+  it("pins WorkOS resource registration to the exact Selvara Preview MCP URI", () => {
+    const parsed = parseVercelPreviewDeployArgs([
+      "--expected-commit",
+      COMMIT,
+      "--configure-workos-resource",
+    ]);
+    const spec = createVercelPreviewDeploySpec(parsed, { NODE_ENV: "test" }, "linux");
+    const payload = JSON.parse(spec.input);
+
+    expect(payload.projectSettings.buildCommand).toBe(
+      "npm run runtime:configure-workos-mcp-resource -- "
+      + "--resource https://concessioni-portuali-demo-v7-mcp-preview.vercel.app/api/mcp "
+      + "--apply --confirm-resource https://concessioni-portuali-demo-v7-mcp-preview.vercel.app/api/mcp "
+      + "&& npm run build",
+    );
+    expect(() => parseVercelPreviewDeployArgs([
+      "--expected-commit",
+      COMMIT,
+      "--configure-workos-resource",
+      "--configure-workos-resource",
+    ])).toThrow(new VercelPreviewDeployError("DUPLICATE_WORKOS_RESOURCE_CONFIGURATION"));
   });
 
   it.each([

@@ -45,6 +45,17 @@ Requisiti:
   WorkOS valido e le autorizzazioni locali su attore, tenant e missione.
 - Non committare valori reali.
 
+Il valore esatto di `MCP_RESOURCE_URI` deve essere registrato anche in WorkOS AuthKit,
+Connect -> Configuration -> Resource Indicators. La registrazione Preview protetta usa:
+
+```powershell
+npm run runtime:configure-workos-mcp-resource -- --resource https://concessioni-portuali-demo-v7-mcp-preview.vercel.app/api/mcp --apply --confirm-resource https://concessioni-portuali-demo-v7-mcp-preview.vercel.app/api/mcp
+```
+
+Il comando accetta soltanto tale URI esatto, rifiuta wildcard e ambienti AuthKit non
+Staging, conserva tutti gli indicatori esistenti e verifica la postcondizione mediante
+una nuova lettura API.
+
 ## Binding server-side attore-missione
 
 OAuth identifica l'attore e il tenant; l'accesso a una missione richiede inoltre un'assegnazione persistita e immutabile della `ResearchMission` al `User.id` locale esposto nella claim firmata `urn:concessioni-portuali:actor_id`.

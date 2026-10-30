@@ -2,6 +2,8 @@ import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
+import { SELVARA_PREVIEW_MCP_RESOURCE } from "../runtime/configure-workos-mcp-resource";
+
 export const VERCEL_PREVIEW_DEPLOYMENT = Object.freeze({
   projectName: "concessioni-portuali-demo",
   projectId: "prj_Dg5N94gGCa5DmJbI44bS0TOwcJiu",
@@ -19,6 +21,7 @@ export class VercelPreviewDeployError extends Error {
     | "DUPLICATE_EXPECTED_COMMIT"
     | "DUPLICATE_DIAGNOSTIC_PROCEDURE"
     | "DIAGNOSTIC_PROCEDURE_INVALID"
+    | "DUPLICATE_WORKOS_RESOURCE_CONFIGURATION"
     | "PRODUCTION_TARGET_FORBIDDEN"
     | "TARGET_OVERRIDE_FORBIDDEN"
     | "PROJECT_OVERRIDE_FORBIDDEN"
@@ -37,6 +40,7 @@ export class VercelPreviewDeployError extends Error {
 export interface VercelPreviewDeployArgs {
   readonly expectedCommit: string;
   readonly diagnosticProcedureId?: string;
+  readonly configureWorkosResource?: boolean;
 }
 
 function isProductionArgument(argument: string): boolean {
@@ -51,6 +55,7 @@ function isProductionArgument(argument: string): boolean {
 export function parseVercelPreviewDeployArgs(argv: readonly string[]): VercelPreviewDeployArgs {
   let expectedCommit: string | undefined;
   let diagnosticProcedureId: string | undefined;
+  let configureWorkosResource = false;
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === "--expected-commit") {
@@ -75,6 +80,13 @@ export function parseVercelPreviewDeployArgs(argv: readonly string[]): VercelPre
       }
       diagnosticProcedureId = value;
       index += 1;
+      continue;
+    }
+    if (argument === "--configure-workos-resource") {
+      if (configureWorkosResource) {
+        throw new VercelPreviewDeployError("DUPLICATE_WORKOS_RESOURCE_CONFIGURATION");
+      }
+      configureWorkosResource = true;
       continue;
     }
     if (isProductionArgument(argument)) {
@@ -110,7 +122,7 @@ export function parseVercelPreviewDeployArgs(argv: readonly string[]): VercelPre
   if (!/^[a-f0-9]{40}$/.test(expectedCommit)) {
     throw new VercelPreviewDeployError("EXPECTED_COMMIT_INVALID");
   }
-  return { expectedCommit, diagnosticProcedureId };
+  return { expectedCommit, diagnosticProcedureId, configureWorkosResource };
 }
 
 export function createVercelPreviewDeploySpec(
@@ -140,6 +152,15 @@ export function createVercelPreviewDeploySpec(
     "-",
     "--raw",
   ];
+  const buildCommands = [
+    ...(input.configureWorkosResource ? [
+      `npm run runtime:configure-workos-mcp-resource -- --resource ${SELVARA_PREVIEW_MCP_RESOURCE} --apply --confirm-resource ${SELVARA_PREVIEW_MCP_RESOURCE}`,
+    ] : []),
+    ...(input.diagnosticProcedureId ? [
+      `npm run runtime:diagnose-research-missions -- ${input.diagnosticProcedureId}`,
+    ] : []),
+    "npm run build",
+  ];
   return {
     executable: platform === "win32" ? environment.ComSpec ?? "cmd.exe" : "vercel",
     args: platform === "win32"
@@ -156,8 +177,8 @@ export function createVercelPreviewDeploySpec(
       },
       projectSettings: {
         commandForIgnoringBuildStep: "exit 1",
-        ...(input.diagnosticProcedureId ? {
-          buildCommand: `npm run runtime:diagnose-research-missions -- ${input.diagnosticProcedureId} && npm run build`,
+        ...(input.configureWorkosResource || input.diagnosticProcedureId ? {
+          buildCommand: buildCommands.join(" && "),
         } : {}),
       },
       meta: {
