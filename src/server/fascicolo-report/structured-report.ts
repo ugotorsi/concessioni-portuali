@@ -102,6 +102,7 @@ export interface StructuredReportAuthority {
   assessmentId: string;
   sourceChainFingerprint: string;
   citationAnchors: readonly JsonRecord[];
+  relevantPassage?: string | null;
   rationale: string | null;
 }
 
@@ -228,6 +229,46 @@ export interface StructuredReportOperationalPlan {
   deadlineReview: string;
 }
 
+export interface StructuredReportLegalAnalysis {
+  issueSemanticKey: string;
+  issueText: string;
+  status: "RESEARCH_REQUIRED" | "PARTIAL" | "ASSESSED" | "CONTESTED";
+  documentedFacts: readonly {
+    statement: string;
+    documentReferences: readonly string[];
+  }[];
+  questions: readonly string[];
+  verifiedSources: readonly {
+    resultId: string;
+    title: string;
+    sourceUrl: string | null;
+    provider: string | null;
+    direction: "SUPPORTS" | "OPPOSES";
+    relevantPassage: string | null;
+    rationale: string | null;
+    citationAnchors: readonly JsonRecord[];
+  }[];
+  applications: readonly {
+    applicationId: string;
+    outcome: "APPLICABLE" | "NOT_APPLICABLE" | "TO_VERIFY" | "NOT_EVALUATED";
+    checks: readonly {
+      criterion: string;
+      outcome: "SATISFIED" | "NOT_SATISFIED" | "TO_VERIFY";
+      rationale: string;
+      decisiveFacts: readonly string[];
+    }[];
+    conclusion: string;
+  }[];
+  competingArguments: {
+    supporting: readonly string[];
+    opposing: readonly string[];
+  };
+  assessment: string;
+  missingEvidence: readonly string[];
+  recommendedActions: readonly string[];
+  professionalReviewRequired: true;
+}
+
 export type StructuredReportTechnicalVerificationStatus =
   | "DA_VERIFICARE_SU_FONTE_ORIGINALE"
   | "INDICATIVO_DA_VERIFICARE"
@@ -319,6 +360,8 @@ export interface StructuredFascicoloReportPayload {
   };
   /** Additive, read-only guidance. Older archived V1 reports may omit this field. */
   operationalPlans?: readonly StructuredReportOperationalPlan[];
+  /** Source-grounded issue analysis. Absent from archived snapshots created before this compiler version. */
+  legalAnalyses?: readonly StructuredReportLegalAnalysis[];
   /** Additive; present only when MCP acquisitions exist for CURRENT missions of this revision. */
   technicalSources?: readonly StructuredReportTechnicalSource[];
   /** Deterministic coverage check; never creates legal issues or research questions. */
@@ -722,6 +765,7 @@ function authority(result: StructuredReportResearchResultInput): StructuredRepor
     assessmentId: assessment.assessmentId,
     sourceChainFingerprint: assessment.chainFingerprint,
     citationAnchors: [...assessment.citationAnchors],
+    relevantPassage: result.relevantPassage ?? null,
     rationale: result.classificationRationale,
   };
 }
@@ -778,6 +822,142 @@ function projectQuestion(
     gaps,
     limitations,
   };
+}
+
+const APPLICABILITY_CHECK_LABELS = [
+  ["Vigenza temporale", "chronologicalCheck"],
+  ["Autenticità e utilizzabilità della fonte", "sourceVerificationCheck"],
+  ["Ambito territoriale", "territorialCheck"],
+  ["Ambito materiale", "materialCheck"],
+  ["Presupposti fattuali", "factualCheck"],
+  ["Specialità e rapporto tra norme", "specialityCheck"],
+  ["Disciplina transitoria", "transitionalCheck"],
+] as const;
+
+function buildLegalAnalyses(input: {
+  issues: StructuredFascicoloReportPayload["legalIssues"];
+  knowledge: StructuredKnowledgeReadModel;
+  applicability: StructuredFascicoloReportPayload["legalApplicability"];
+}): readonly StructuredReportLegalAnalysis[] {
+  const evidenceItems = [
+    ...(input.knowledge.partyPositions ?? []),
+    ...input.knowledge.facts,
+    ...input.knowledge.events,
+    ...input.knowledge.legalActs,
+    ...input.knowledge.measures,
+    ...input.knowledge.contradictions,
+    ...input.knowledge.gaps,
+    ...input.knowledge.deadlineCandidates,
+  ].filter((item) => item.status !== "REJECTED");
+  const itemById = new Map(evidenceItems.map((item) => [item.id, item]));
+
+  return input.issues.map((issue) => {
+    const related = issue.originatingItemIds
+      .map((id) => itemById.get(id))
+      .filter((item): item is StructuredKnowledgeReadItem => item !== undefined);
+    const sources = issue.questions.flatMap((question) => [
+      ...question.favorableAuthorities.map((source) => ({ ...source, direction: "SUPPORTS" as const })),
+      ...question.contraryAuthorities.map((source) => ({ ...source, direction: "OPPOSES" as const })),
+    ]);
+    const uniqueSources = [...new Map(sources.map((source) => [source.resultId, source])).values()];
+    const applications = (input.applicability?.applications ?? [])
+      .filter((application) => application.legalIssueSemanticKey === issue.semanticKey)
+      .map((application) => {
+        const assessment = application.assessment;
+        return {
+          applicationId: application.applicationId,
+          outcome: application.outcome,
+          checks: assessment ? APPLICABILITY_CHECK_LABELS.map(([criterion, key]) => {
+            const check = assessment[key];
+            return {
+              criterion,
+              outcome: check.outcome,
+              rationale: check.rationale,
+              decisiveFacts: check.decisiveFactClaimIds.map((id) => (
+                itemById.get(id)?.normalizedText ?? id
+              )),
+            };
+          }) : [],
+          conclusion: assessment?.conclusion.rationale
+            ?? "L'applicabilità della fonte non è stata ancora verificata rispetto ai fatti documentati.",
+        };
+      });
+    const supporting = uniqueSources
+      .filter((source) => source.direction === "SUPPORTS")
+      .map((source) => source.relevantPassage ?? source.rationale ?? source.title);
+    const opposing = uniqueSources
+      .filter((source) => source.direction === "OPPOSES")
+      .map((source) => source.relevantPassage ?? source.rationale ?? source.title);
+    const missingEvidence = [...new Set([
+      ...related.filter((item) => item.kind === "GAP").map((item) => item.normalizedText),
+      ...issue.questions.flatMap((question) => question.gaps),
+      ...applications.flatMap((application) => application.checks
+        .filter((check) => check.outcome === "TO_VERIFY")
+        .map((check) => `${check.criterion}: ${check.rationale}`)),
+    ])];
+    const assessed = applications.filter((application) => application.outcome !== "NOT_EVALUATED");
+    const applicable = assessed.filter((application) => application.outcome === "APPLICABLE");
+    const notApplicable = assessed.filter((application) => application.outcome === "NOT_APPLICABLE");
+    const hasSupporting = supporting.length > 0;
+    const hasOpposing = opposing.length > 0;
+    const status: StructuredReportLegalAnalysis["status"] = uniqueSources.length === 0
+      ? "RESEARCH_REQUIRED"
+      : hasSupporting && hasOpposing
+        ? "CONTESTED"
+        : assessed.length === 0 || assessed.some((application) => application.outcome === "TO_VERIFY")
+          ? "PARTIAL"
+          : "ASSESSED";
+    const assessment = uniqueSources.length === 0
+      ? "Le fonti necessarie non sono ancora disponibili: non è formulabile una conclusione giuridica verificata."
+      : applicable.length > 0 && notApplicable.length === 0
+        ? `Le fonti verificate risultano applicabili ai fatti esaminati in ${applicable.length} valutazioni; la conclusione resta soggetta alla verifica professionale delle obiezioni e delle lacune indicate.`
+        : applicable.length > 0 && notApplicable.length > 0
+          ? "Le verifiche di applicabilità conducono a esiti divergenti. La conclusione dipende dal rapporto tra le fonti e dai fatti decisivi indicati per ciascuna valutazione."
+          : assessed.length > 0
+            ? "Le fonti sono state collegate alla questione, ma le verifiche disponibili non consentono di sostenerne l'applicabilità ai fatti esaminati."
+            : "Le fonti sono verificate, ma manca ancora una valutazione strutturata della loro applicabilità ai fatti documentati.";
+    const recommendedActions = [...new Set([
+      ...(uniqueSources.length === 0
+        ? issue.questions.map((question) => `Completare la ricerca e la verifica delle fonti per il quesito: ${question.text}`)
+        : []),
+      ...(hasSupporting && !hasOpposing
+        ? ["Ricercare precedenti e interpretazioni contrari sulla medesima fattispecie, senza assumere esaustiva la sola tesi favorevole."]
+        : []),
+      ...(applications.length === 0 && uniqueSources.length > 0
+        ? ["Sottoporre le fonti verificate alla valutazione di applicabilità temporale, territoriale, materiale e fattuale."]
+        : []),
+      ...missingEvidence.map((gap) => `Acquisire o verificare l'elemento decisivo: ${gap}`),
+    ])];
+
+    return {
+      issueSemanticKey: issue.semanticKey,
+      issueText: issue.text,
+      status,
+      documentedFacts: related
+        .filter((item) => item.kind !== "GAP")
+        .map((item) => ({
+          statement: item.normalizedText,
+          documentReferences: itemBasisRefs(item),
+        })),
+      questions: issue.questions.map((question) => question.text),
+      verifiedSources: uniqueSources.map((source) => ({
+        resultId: source.resultId,
+        title: source.title,
+        sourceUrl: source.sourceUrl,
+        provider: source.provider,
+        direction: source.direction,
+        relevantPassage: source.relevantPassage ?? null,
+        rationale: source.rationale,
+        citationAnchors: source.citationAnchors,
+      })),
+      applications,
+      competingArguments: { supporting, opposing },
+      assessment,
+      missingEvidence,
+      recommendedActions,
+      professionalReviewRequired: true,
+    };
+  });
 }
 
 const TECHNICAL_VERIFICATION_STATUSES: readonly StructuredReportTechnicalVerificationStatus[] = [
@@ -1316,6 +1496,11 @@ export function buildStructuredFascicoloReport(input: {
   const legalApplicability = contractVersion === STRUCTURED_FASCICOLO_REPORT_V2_CONTRACT_VERSION
     ? projectLegalApplicability({ tenantId: input.tenantId, procedimentoId: input.procedimentoId, knowledge: input.knowledge, missions: currentMissions })
     : undefined;
+  const legalAnalyses = buildLegalAnalyses({
+    issues: legalIssues,
+    knowledge: input.knowledge,
+    applicability: legalApplicability,
+  });
   const payload: StructuredFascicoloReportPayload = {
     contractVersion,
     tenantId: input.tenantId,
@@ -1343,6 +1528,7 @@ export function buildStructuredFascicoloReport(input: {
     deadlineCandidates: visibleItems(input.knowledge.deadlineCandidates),
     professionalNarrative: buildProfessionalNarrative(input.knowledge),
     operationalPlans: buildOperationalPlans(operationalSubjects, input.knowledge, technicalSources),
+    legalAnalyses,
     ...(technicalSources.length ? { technicalSources } : {}),
     legalCompleteness,
     ...(legalApplicability ? { legalApplicability } : {}),

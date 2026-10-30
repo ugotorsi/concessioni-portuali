@@ -159,6 +159,26 @@ describe("deterministic structured fascicolo report", () => {
       legalSourceStatus: "VERIFIED_SOURCES_ATTACHED",
       professionalStatus: "PRELIMINARY_NOT_APPROVED",
     });
+    expect(report.payload.legalAnalyses).toEqual([
+      expect.objectContaining({
+        issueSemanticKey: sha("issue-1"),
+        status: "CONTESTED",
+        documentedFacts: [{
+          statement: "Testo fact-1",
+          documentReferences: ["DOCUMENT_1.PAGE_1"],
+        }],
+        questions: ["Testo question-1"],
+        competingArguments: {
+          supporting: ["Passaggio favorevole"],
+          opposing: ["Passaggio contrario"],
+        },
+        professionalReviewRequired: true,
+      }),
+    ]);
+    expect(report.payload.legalAnalyses?.[0].verifiedSources).toEqual([
+      expect.objectContaining({ title: "Autorita favorevole", direction: "SUPPORTS" }),
+      expect.objectContaining({ title: "Autorita contraria", direction: "OPPOSES" }),
+    ]);
     expect(report.payload.operationalPlans?.[0].steps).toHaveLength(4);
     expect(report.payload.operationalPlans?.[0].steps[1].action).toContain("art. 47");
     expect(report.payload.operationalPlans?.[0].steps[2].title).toContain("contraddittorio");

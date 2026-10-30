@@ -451,6 +451,26 @@ Before retrying the canary, verify that its operation is exactly
 corrected configuration has been deployed in the base service's latest successful
 build artifact.
 
+### Research bridge to legal report
+
+`RESEARCH_BRIDGE_V1` is executed by an authorized ChatGPT-side executor. The NOETRA
+server exposes, leases, validates, and stores missions and evidence bundles; it does
+not invoke ChatGPT-only connectors by itself.
+
+Submitting a bundle for a canonically linked mission projects its authority candidates
+idempotently into the question-result and source-assessment records. Completion then
+revalidates the accepted bundle and refreshes the structured report. Missions without
+tenant, case, legal-issue, research-question, mission-fingerprint, and current
+knowledge-revision linkage are not treated as report research; partial, deferred, and
+budget-exhausted missions are never presented as completed research.
+
+New report snapshots use verified, current source assessments as inputs to an
+issue-specific legal analysis. The report keeps candidate sources separate from usable
+sources and connects each issue to documented facts, source passages, favorable and
+contrary authorities, applicability checks, decisive facts, remaining gaps, and
+targeted follow-up actions. Technical diagnostics and internal status codes remain in
+the administrative workflow and are not rendered as professional conclusions.
+
 ### Obsolete queued analysis cancellation
 
 Use `npm run job:cancel-obsolete-analysis --` only for a named

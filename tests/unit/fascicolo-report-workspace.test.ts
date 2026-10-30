@@ -106,6 +106,65 @@ describe("Fascicolo report workspace", () => {
     expect(html).toContain('rel="noreferrer"');
   });
 
+  it("renders verified sources as the basis of issue-specific legal reasoning", () => {
+    const current = snapshot("CURRENT");
+    const html = render([{
+      ...current,
+      payload: {
+        ...current.payload,
+        legalAnalyses: [{
+          issueSemanticKey: "issue-key",
+          issueText: "Conformità dell’occupazione",
+          status: "CONTESTED",
+          documentedFacts: [{
+            statement: "Occupazione rilevata oltre la superficie assentita",
+            documentReferences: ["DOCUMENT_1.PAGE_4"],
+          }],
+          questions: ["Quale disciplina si applica?"],
+          verifiedSources: [{
+            resultId: "source-favorable",
+            title: "Consiglio di Stato, sentenza favorevole",
+            sourceUrl: "https://example.test/favorevole",
+            provider: "Moonlit",
+            direction: "SUPPORTS",
+            relevantPassage: "La misura richiede la verifica concreta dei presupposti.",
+            rationale: "Principio pertinente alla fattispecie.",
+            citationAnchors: [{ paragraph: 12 }],
+          }],
+          applications: [{
+            applicationId: "application-1",
+            outcome: "APPLICABLE",
+            checks: [{
+              criterion: "Presupposti fattuali",
+              outcome: "SATISFIED",
+              rationale: "Il verbale documenta l’occupazione oltre il titolo.",
+              decisiveFacts: ["Occupazione rilevata oltre la superficie assentita"],
+            }],
+            conclusion: "La fonte è applicabile al fatto documentato, ferma la verifica professionale.",
+          }],
+          competingArguments: {
+            supporting: ["La misura richiede la verifica concreta dei presupposti."],
+            opposing: ["La rimozione spontanea può incidere sulla proporzionalità."],
+          },
+          assessment: "La tesi è sostenibile, ma deve confrontarsi con la proporzionalità.",
+          missingEvidence: ["Planimetria aggiornata"],
+          recommendedActions: ["Acquisire la planimetria aggiornata e confrontarla con il titolo."],
+          professionalReviewRequired: true,
+        }],
+      },
+    }]);
+
+    expect(html).toContain("Analisi giuridica");
+    expect(html).toContain("Fatti documentati rilevanti");
+    expect(html).toContain("DOCUMENT_1.PAGE_4");
+    expect(html).toContain("Fonti verificate");
+    expect(html).toContain("Applicazione ai fatti");
+    expect(html).toContain("Presupposti fattuali");
+    expect(html).toContain("Valutazione conclusiva");
+    expect(html).toContain("Iniziative mirate");
+    expect(html).not.toContain("COMPILATION:REBUILT");
+  });
+
   it("renders professional limitations and previous versions without internal data", () => {
     const html = render([snapshot("CURRENT"), snapshot("SUPERSEDED", "old-report")]);
     expect(html).toContain("Limiti e punti da approfondire");

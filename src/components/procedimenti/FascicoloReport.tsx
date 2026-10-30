@@ -268,6 +268,123 @@ export function OperationalPlans({ plans }: { plans: NonNullable<StructuredFasci
   );
 }
 
+const LEGAL_ANALYSIS_STATUS_LABELS = {
+  RESEARCH_REQUIRED: "Ricerca giuridica necessaria",
+  PARTIAL: "Analisi parziale",
+  ASSESSED: "Valutazione completata sulle fonti disponibili",
+  CONTESTED: "Tesi controverse",
+} as const;
+
+function LegalAnalyses({
+  analyses,
+}: {
+  analyses: NonNullable<StructuredFascicoloReportPayload["legalAnalyses"]>;
+}) {
+  if (analyses.length === 0) return null;
+  return (
+    <ContentSection title="Analisi giuridica">
+      <div className="space-y-6">
+        {analyses.map((analysis) => (
+          <article key={analysis.issueSemanticKey} className="rounded-lg border border-slate-200 bg-white p-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <h4 className="font-semibold text-slate-950">{analysis.issueText}</h4>
+              <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-semibold text-slate-700">
+                {LEGAL_ANALYSIS_STATUS_LABELS[analysis.status]}
+              </span>
+            </div>
+
+            {analysis.documentedFacts.length > 0 ? (
+              <section className="mt-4" aria-label="Fatti documentati rilevanti">
+                <h5 className="text-sm font-semibold text-slate-900">Fatti documentati rilevanti</h5>
+                <ul className="mt-2 space-y-2 text-sm leading-6 text-slate-700">
+                  {analysis.documentedFacts.map((fact, index) => (
+                    <li key={`${fact.statement}-${index}`}>
+                      <p>{fact.statement}</p>
+                      {fact.documentReferences.length > 0 ? (
+                        <p className="text-xs text-slate-500">
+                          Riscontro: {fact.documentReferences.join(", ")}
+                        </p>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+
+            {analysis.verifiedSources.length > 0 ? (
+              <section className="mt-4" aria-label="Fonti verificate applicate alla questione">
+                <h5 className="text-sm font-semibold text-slate-900">Fonti verificate</h5>
+                <div className="mt-2 space-y-3">
+                  {analysis.verifiedSources.map((source) => (
+                    <div key={source.resultId} className="border-l-2 border-[#0b7285] pl-3">
+                      <p className="text-sm font-semibold text-slate-950">{source.title}</p>
+                      <p className="mt-1 text-xs font-medium text-slate-600">
+                        {source.direction === "SUPPORTS" ? "Tesi favorevole" : "Tesi contraria"}
+                        {source.provider ? ` · reperita tramite ${source.provider}` : ""}
+                      </p>
+                      {source.relevantPassage ? (
+                        <blockquote className="mt-2 text-sm leading-6 text-slate-700">
+                          {source.relevantPassage}
+                        </blockquote>
+                      ) : null}
+                      {source.rationale ? <p className="mt-1 text-sm text-slate-600">{source.rationale}</p> : null}
+                      {source.sourceUrl ? (
+                        <a href={source.sourceUrl} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-[#075985] underline underline-offset-4">
+                          Apri la fonte <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                        </a>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {analysis.applications.length > 0 ? (
+              <section className="mt-4" aria-label="Applicazione delle fonti ai fatti">
+                <h5 className="text-sm font-semibold text-slate-900">Applicazione ai fatti</h5>
+                <div className="mt-2 space-y-4">
+                  {analysis.applications.map((application) => (
+                    <div key={application.applicationId} className="rounded-md bg-slate-50 p-3">
+                      <ul className="space-y-2 text-sm leading-6 text-slate-700">
+                        {application.checks.map((check) => (
+                          <li key={check.criterion}>
+                            <span className="font-semibold text-slate-900">{check.criterion}:</span>{" "}
+                            {check.rationale}
+                            {check.decisiveFacts.length > 0 ? (
+                              <span className="block text-xs text-slate-500">
+                                Fatti decisivi: {check.decisiveFacts.join("; ")}
+                              </span>
+                            ) : null}
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="mt-3 text-sm font-medium leading-6 text-slate-900">{application.conclusion}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            <section className="mt-4" aria-label="Valutazione conclusiva">
+              <h5 className="text-sm font-semibold text-slate-900">Valutazione conclusiva</h5>
+              <p className="mt-1 text-sm leading-6 text-slate-700">{analysis.assessment}</p>
+            </section>
+
+            {analysis.recommendedActions.length > 0 ? (
+              <section className="mt-4" aria-label="Iniziative mirate">
+                <h5 className="text-sm font-semibold text-slate-900">Iniziative mirate</h5>
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
+                  {analysis.recommendedActions.map((action) => <li key={action}>{action}</li>)}
+                </ul>
+              </section>
+            ) : null}
+          </article>
+        ))}
+      </div>
+    </ContentSection>
+  );
+}
+
 function ReportContent({ payload }: { payload: StructuredFascicoloReportPayload }) {
   const framework = payload.documentedFramework;
   const frameworkGroups = [
@@ -341,7 +458,9 @@ function ReportContent({ payload }: { payload: StructuredFascicoloReportPayload 
 
       {payload.technicalSources?.length ? <TechnicalSourcesSection sources={payload.technicalSources} /> : null}
 
-      {payload.operationalPlans?.length ? <OperationalPlans plans={payload.operationalPlans} /> : null}
+      {payload.legalAnalyses?.length ? <LegalAnalyses analyses={payload.legalAnalyses} /> : null}
+
+      {!payload.legalAnalyses && payload.operationalPlans?.length ? <OperationalPlans plans={payload.operationalPlans} /> : null}
 
       {framework.contradictions.length > 0 ? <ContentSection title="Criticità"><TextList items={framework.contradictions} /></ContentSection> : null}
 

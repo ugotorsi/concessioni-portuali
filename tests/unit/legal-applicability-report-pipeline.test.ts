@@ -317,6 +317,20 @@ describe("offline legal applicability report pipeline", () => {
       "proceeding-2025",
     ]);
     expect(application?.assessment?.sourcesUsed[0].citationAnchors).toEqual([{ section: "art. 30" }]);
+    expect(built.payload.legalAnalyses?.[0]).toMatchObject({
+      status: "ASSESSED",
+      applications: [{
+        outcome: "NOT_APPLICABLE",
+        conclusion: expect.stringContaining("applicabilita"),
+        checks: expect.arrayContaining([
+          expect.objectContaining({
+            criterion: "Disciplina transitoria",
+            outcome: "NOT_SATISFIED",
+          }),
+        ]),
+      }],
+      professionalReviewRequired: true,
+    });
   });
 
   it("renders a documented AI proposal as preliminary and requiring professional review", () => {
