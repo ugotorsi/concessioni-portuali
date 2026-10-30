@@ -77,6 +77,30 @@ describe("Vercel Preview deployment guard", () => {
     });
   });
 
+  it("allows only a validated read-only research diagnostic in the Preview build", () => {
+    const procedimentoId = "procedimento-intake-9e04f4d4cdbf092845b57c66";
+    const parsed = parseVercelPreviewDeployArgs([
+      "--expected-commit",
+      COMMIT,
+      "--diagnose-research-procedure",
+      procedimentoId,
+    ]);
+    const spec = createVercelPreviewDeploySpec(parsed, { NODE_ENV: "test" }, "linux");
+
+    expect(JSON.parse(spec.input)).toMatchObject({
+      projectSettings: {
+        commandForIgnoringBuildStep: "exit 1",
+        buildCommand: `npm run runtime:diagnose-research-missions -- ${procedimentoId} && npm run build`,
+      },
+    });
+    expect(() => parseVercelPreviewDeployArgs([
+      "--expected-commit",
+      COMMIT,
+      "--diagnose-research-procedure",
+      "procedure-unsafe;echo",
+    ])).toThrow(new VercelPreviewDeployError("DIAGNOSTIC_PROCEDURE_INVALID"));
+  });
+
   it.each([
     ["--prod"],
     ["--target=production"],

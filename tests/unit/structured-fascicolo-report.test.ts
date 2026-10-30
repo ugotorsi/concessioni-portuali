@@ -133,6 +133,56 @@ function mission(overrides: Partial<StructuredReportMissionInput> = {}): Structu
   };
 }
 
+function legalContribution() {
+  const grounded = (text: string) => ({
+    text,
+    sourceCandidateIds: ["support-result"],
+    factBasisRefs: ["DOCUMENT_1.PAGE_1"],
+  });
+  return {
+    version: "LEGAL_ANALYSIS_CONTRIBUTION_V1" as const,
+    contributionId: "contribution-issue-1",
+    legalIssueSemanticKey: sha("issue-1"),
+    researchQuestionSemanticKey: sha("question-1"),
+    issueStatement: "Occorre stabilire se il fatto documentato integri i presupposti della disciplina verificata.",
+    ruleApplications: [{
+      title: "Applicazione della regola verificata",
+      rule: "La disposizione richiede la compresenza dei presupposti materiali e procedimentali indicati dalla fonte.",
+      sourceCandidateIds: ["support-result"],
+      relevantFacts: "Il fatto risulta documentato nel fascicolo e riferito alla questione corrente.",
+      factBasisRefs: ["DOCUMENT_1.PAGE_1"],
+      application: "Il fatto soddisfa il presupposto materiale, mentre il presupposto procedimentale richiede ancora verifica.",
+      outcome: "La tesi è sostenibile limitatamente al presupposto materiale già documentato.",
+    }],
+    supportingArguments: [grounded("Il fatto documentato coincide con il presupposto materiale descritto dalla fonte favorevole verificata.")],
+    contraryArguments: [{
+      text: "La fonte contraria impone di verificare separatamente il presupposto procedimentale prima di concludere.",
+      sourceCandidateIds: ["oppose-result"],
+      factBasisRefs: ["DOCUMENT_1.PAGE_1"],
+    }],
+    evidenceAssessment: {
+      strengths: [grounded("Il fatto decisivo è sostenuto da un riferimento documentale autenticato del fascicolo corrente.")],
+      weaknesses: [grounded("Il fascicolo non documenta ancora integralmente il presupposto procedimentale richiesto dalla fonte.")],
+      missingEvidence: ["Acquisire l'atto che documenta il completamento del presupposto procedimentale."],
+    },
+    reasonedConclusion: {
+      text: "La tesi favorevole è sostenibile sul piano materiale, ma non è ancora conclusiva sul piano procedimentale.",
+      confidence: "MEDIUM" as const,
+      decisiveSourceCandidateIds: ["support-result", "oppose-result"],
+      decisiveFactBasisRefs: ["DOCUMENT_1.PAGE_1"],
+      conditions: ["Verificare documentalmente il presupposto procedimentale mancante."],
+    },
+    strategies: [{
+      title: "Completare l'istruttoria sul presupposto procedimentale",
+      rationale: "L'acquisizione dell'atto mancante consente di scegliere tra prosecuzione e archiviazione con motivazione specifica.",
+      sourceCandidateIds: ["support-result", "oppose-result"],
+      factBasisRefs: ["DOCUMENT_1.PAGE_1"],
+      risks: ["Una conclusione anticipata esporrebbe la decisione alla contestazione fondata sulla fonte contraria."],
+    }],
+    uncertainties: ["Resta incerta la data di perfezionamento del presupposto procedimentale."],
+  };
+}
+
 describe("deterministic structured fascicolo report", () => {
   it("projects only CURRENT knowledge and citable USABLE authorities into professional sections", () => {
     const report = buildStructuredFascicoloReport({
@@ -162,16 +212,14 @@ describe("deterministic structured fascicolo report", () => {
     expect(report.payload.legalAnalyses).toEqual([
       expect.objectContaining({
         issueSemanticKey: sha("issue-1"),
-        status: "CONTESTED",
+        status: "MOTIVATION_REQUIRED",
         documentedFacts: [{
           statement: "Testo fact-1",
           documentReferences: ["DOCUMENT_1.PAGE_1"],
         }],
         questions: ["Testo question-1"],
-        competingArguments: {
-          supporting: ["Passaggio favorevole"],
-          opposing: ["Passaggio contrario"],
-        },
+        competingArguments: { supporting: [], opposing: [] },
+        professionalReasoning: null,
         professionalReviewRequired: true,
       }),
     ]);
@@ -179,6 +227,7 @@ describe("deterministic structured fascicolo report", () => {
       expect.objectContaining({ title: "Autorita favorevole", direction: "SUPPORTS" }),
       expect.objectContaining({ title: "Autorita contraria", direction: "OPPOSES" }),
     ]);
+    expect(report.payload.legalAnalyses?.[0].assessment).toContain("motivazione argomentata");
     expect(report.payload.operationalPlans?.[0].steps).toHaveLength(4);
     expect(report.payload.operationalPlans?.[0].steps[1].action).toContain("art. 47");
     expect(report.payload.operationalPlans?.[0].steps[2].title).toContain("contraddittorio");
@@ -241,6 +290,44 @@ describe("deterministic structured fascicolo report", () => {
     expect(narrative.legalResearchStatus)
       .toContain("Norme e giurisprudenza");
     expect(JSON.stringify(report.payload)).not.toContain("analysisPayload");
+  });
+
+  it("accepts a specific motivation only when every cited source and fact belongs to the issue", () => {
+    const valid = buildStructuredFascicoloReport({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledge: knowledge(),
+      missions: [mission({ legalAnalysisContributions: [legalContribution()] })],
+    });
+    expect(valid.payload.legalAnalyses?.[0]).toMatchObject({
+      status: "CONTESTED",
+      assessment: "La tesi favorevole è sostenibile sul piano materiale, ma non è ancora conclusiva sul piano procedimentale.",
+      professionalReasoning: {
+        contributionId: "contribution-issue-1",
+        ruleApplications: [expect.objectContaining({
+          application: expect.stringContaining("presupposto materiale"),
+        })],
+      },
+    });
+
+    const invalid = buildStructuredFascicoloReport({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledge: knowledge(),
+      missions: [mission({
+        legalAnalysisContributions: [{
+          ...legalContribution(),
+          reasonedConclusion: {
+            ...legalContribution().reasonedConclusion,
+            decisiveFactBasisRefs: ["DOCUMENT_99.PAGE_1"],
+          },
+        }],
+      })],
+    });
+    expect(invalid.payload.legalAnalyses?.[0]).toMatchObject({
+      status: "MOTIVATION_REQUIRED",
+      professionalReasoning: null,
+    });
   });
 
   it("generates differentiated concrete acts and adapts a copy to an internal test template", () => {

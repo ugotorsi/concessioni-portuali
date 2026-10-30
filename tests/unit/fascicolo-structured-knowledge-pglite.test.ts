@@ -1328,6 +1328,14 @@ describe("fascicolo structured knowledge on disposable PGlite", () => {
       getCurrentRevision: (input) => getCurrentKnowledgeRevision(input, context(db)),
       findExistingReport: async () => null,
       analyze: (input) => analysisService.analyze(input),
+      persistProviderOutputRecovery: async () => ({
+        artifactRef: "V7ProviderOutputRecoveryArtifact:offline-selvara",
+        outputFingerprint: "a".repeat(64),
+        sizeBytes: 1_024,
+        expiresAt: new Date("2026-11-05T00:00:00Z"),
+      }),
+      auditProviderOutputRecovery: async () => undefined,
+      deleteProviderOutputRecovery: async () => undefined,
       async persistKnowledge(input) {
         captured.persisted = await persistStructuredKnowledgeRevision({
           tenantId: input.tenantId,

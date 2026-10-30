@@ -17,6 +17,8 @@ export class VercelPreviewDeployError extends Error {
     | "EXPECTED_COMMIT_REQUIRED"
     | "EXPECTED_COMMIT_INVALID"
     | "DUPLICATE_EXPECTED_COMMIT"
+    | "DUPLICATE_DIAGNOSTIC_PROCEDURE"
+    | "DIAGNOSTIC_PROCEDURE_INVALID"
     | "PRODUCTION_TARGET_FORBIDDEN"
     | "TARGET_OVERRIDE_FORBIDDEN"
     | "PROJECT_OVERRIDE_FORBIDDEN"
@@ -34,6 +36,7 @@ export class VercelPreviewDeployError extends Error {
 
 export interface VercelPreviewDeployArgs {
   readonly expectedCommit: string;
+  readonly diagnosticProcedureId?: string;
 }
 
 function isProductionArgument(argument: string): boolean {
@@ -47,6 +50,7 @@ function isProductionArgument(argument: string): boolean {
 
 export function parseVercelPreviewDeployArgs(argv: readonly string[]): VercelPreviewDeployArgs {
   let expectedCommit: string | undefined;
+  let diagnosticProcedureId: string | undefined;
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === "--expected-commit") {
@@ -58,6 +62,18 @@ export function parseVercelPreviewDeployArgs(argv: readonly string[]): VercelPre
         throw new VercelPreviewDeployError("EXPECTED_COMMIT_REQUIRED");
       }
       expectedCommit = value;
+      index += 1;
+      continue;
+    }
+    if (argument === "--diagnose-research-procedure") {
+      if (diagnosticProcedureId !== undefined) {
+        throw new VercelPreviewDeployError("DUPLICATE_DIAGNOSTIC_PROCEDURE");
+      }
+      const value = argv[index + 1];
+      if (!value || !/^procedimento-intake-[a-f0-9]{24}$/.test(value)) {
+        throw new VercelPreviewDeployError("DIAGNOSTIC_PROCEDURE_INVALID");
+      }
+      diagnosticProcedureId = value;
       index += 1;
       continue;
     }
@@ -94,7 +110,7 @@ export function parseVercelPreviewDeployArgs(argv: readonly string[]): VercelPre
   if (!/^[a-f0-9]{40}$/.test(expectedCommit)) {
     throw new VercelPreviewDeployError("EXPECTED_COMMIT_INVALID");
   }
-  return { expectedCommit };
+  return { expectedCommit, diagnosticProcedureId };
 }
 
 export function createVercelPreviewDeploySpec(
@@ -140,6 +156,9 @@ export function createVercelPreviewDeploySpec(
       },
       projectSettings: {
         commandForIgnoringBuildStep: "exit 1",
+        ...(input.diagnosticProcedureId ? {
+          buildCommand: `npm run runtime:diagnose-research-missions -- ${input.diagnosticProcedureId} && npm run build`,
+        } : {}),
       },
       meta: {
         noetraApprovedCommit: input.expectedCommit,

@@ -318,7 +318,7 @@ describe("offline legal applicability report pipeline", () => {
     ]);
     expect(application?.assessment?.sourcesUsed[0].citationAnchors).toEqual([{ section: "art. 30" }]);
     expect(built.payload.legalAnalyses?.[0]).toMatchObject({
-      status: "ASSESSED",
+      status: "MOTIVATION_REQUIRED",
       applications: [{
         outcome: "NOT_APPLICABLE",
         conclusion: expect.stringContaining("applicabilita"),
@@ -329,6 +329,7 @@ describe("offline legal applicability report pipeline", () => {
           }),
         ]),
       }],
+      professionalReasoning: null,
       professionalReviewRequired: true,
     });
   });

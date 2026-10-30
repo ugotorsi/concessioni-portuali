@@ -270,8 +270,8 @@ export function OperationalPlans({ plans }: { plans: NonNullable<StructuredFasci
 
 const LEGAL_ANALYSIS_STATUS_LABELS = {
   RESEARCH_REQUIRED: "Ricerca giuridica necessaria",
-  PARTIAL: "Analisi parziale",
-  ASSESSED: "Valutazione completata sulle fonti disponibili",
+  MOTIVATION_REQUIRED: "Motivazione argomentata da acquisire",
+  ARGUED: "Motivazione argomentata disponibile",
   CONTESTED: "Tesi controverse",
 } as const;
 
@@ -365,9 +365,65 @@ function LegalAnalyses({
               </section>
             ) : null}
 
+            {analysis.professionalReasoning ? (
+              <section className="mt-4" aria-label="Motivazione giuridica specifica">
+                <h5 className="text-sm font-semibold text-slate-900">Motivazione giuridica specifica</h5>
+                <div className="mt-2 space-y-4">
+                  {analysis.professionalReasoning.ruleApplications.map((application) => (
+                    <article key={application.title} className="rounded-md border border-slate-200 p-3">
+                      <h6 className="text-sm font-semibold text-slate-950">{application.title}</h6>
+                      <p className="mt-2 text-sm leading-6 text-slate-700"><strong>Regola:</strong> {application.rule}</p>
+                      <p className="mt-2 text-sm leading-6 text-slate-700"><strong>Fatti rilevanti:</strong> {application.relevantFacts}</p>
+                      <p className="mt-2 text-sm leading-6 text-slate-700"><strong>Applicazione:</strong> {application.application}</p>
+                      <p className="mt-2 text-sm font-medium leading-6 text-slate-900"><strong>Esito:</strong> {application.outcome}</p>
+                      <p className="mt-2 text-xs text-slate-500">
+                        Fonti: {application.sourceCandidateIds.join(", ")} · Documenti: {application.factBasisRefs.join(", ")}
+                      </p>
+                    </article>
+                  ))}
+                </div>
+
+                <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                  <div>
+                    <h6 className="text-sm font-semibold text-slate-900">Argomenti favorevoli</h6>
+                    <ul className="mt-2 space-y-2 text-sm leading-6 text-slate-700">
+                      {analysis.professionalReasoning.supportingArguments.map((argument) => (
+                        <li key={argument.text}>{argument.text}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h6 className="text-sm font-semibold text-slate-900">Argomenti contrari</h6>
+                    <ul className="mt-2 space-y-2 text-sm leading-6 text-slate-700">
+                      {analysis.professionalReasoning.contraryArguments.map((argument) => (
+                        <li key={argument.text}>{argument.text}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <h6 className="text-sm font-semibold text-slate-900">Valutazione delle prove</h6>
+                  <ul className="mt-2 space-y-2 text-sm leading-6 text-slate-700">
+                    {analysis.professionalReasoning.evidenceAssessment.strengths.map((item) => (
+                      <li key={`strength-${item.text}`}><strong>Punto di forza:</strong> {item.text}</li>
+                    ))}
+                    {analysis.professionalReasoning.evidenceAssessment.weaknesses.map((item) => (
+                      <li key={`weakness-${item.text}`}><strong>Punto di debolezza:</strong> {item.text}</li>
+                    ))}
+                  </ul>
+                </div>
+              </section>
+            ) : null}
+
             <section className="mt-4" aria-label="Valutazione conclusiva">
               <h5 className="text-sm font-semibold text-slate-900">Valutazione conclusiva</h5>
               <p className="mt-1 text-sm leading-6 text-slate-700">{analysis.assessment}</p>
+              {analysis.professionalReasoning ? (
+                <p className="mt-2 text-xs font-medium text-slate-600">
+                  Confidenza dichiarata: {analysis.professionalReasoning.reasonedConclusion.confidence}
+                </p>
+              ) : null}
             </section>
 
             {analysis.recommendedActions.length > 0 ? (

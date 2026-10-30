@@ -134,11 +134,73 @@ function bundle(
   };
 }
 
+function legalContribution(sourceCandidateId = candidate().candidateId) {
+  const grounded = {
+    text: "The verified authority is applied to the documented fact identified by the cited basis reference.",
+    sourceCandidateIds: [sourceCandidateId],
+    factBasisRefs: ["DOCUMENT_1.PAGE_1"],
+  };
+  return {
+    version: "LEGAL_ANALYSIS_CONTRIBUTION_V1" as const,
+    contributionId: "contribution-1",
+    legalIssueSemanticKey: "a".repeat(64),
+    researchQuestionSemanticKey: "b".repeat(64),
+    issueStatement: "Determine whether the documented fact satisfies the verified legal prerequisites.",
+    ruleApplications: [{
+      title: "Application of the verified rule",
+      rule: "The verified authority requires both the material and procedural prerequisites.",
+      sourceCandidateIds: [sourceCandidateId],
+      relevantFacts: "The dossier documents the material fact but does not yet prove the procedural prerequisite.",
+      factBasisRefs: ["DOCUMENT_1.PAGE_1"],
+      application: "The material prerequisite is supported, while the procedural prerequisite remains unproven.",
+      outcome: "The position is supportable only within the limits of the documented material prerequisite.",
+    }],
+    supportingArguments: [grounded],
+    contraryArguments: [grounded],
+    evidenceAssessment: {
+      strengths: [grounded],
+      weaknesses: [grounded],
+      missingEvidence: ["Obtain the document proving that the procedural prerequisite was completed."],
+    },
+    reasonedConclusion: {
+      text: "The position is materially supportable but remains conditional on proof of the procedural prerequisite.",
+      confidence: "MEDIUM" as const,
+      decisiveSourceCandidateIds: [sourceCandidateId],
+      decisiveFactBasisRefs: ["DOCUMENT_1.PAGE_1"],
+      conditions: ["Verify the missing procedural evidence before adopting a final conclusion."],
+    },
+    strategies: [{
+      title: "Complete the procedural evidence",
+      rationale: "The missing document is necessary to distinguish a supportable position from a premature conclusion.",
+      sourceCandidateIds: [sourceCandidateId],
+      factBasisRefs: ["DOCUMENT_1.PAGE_1"],
+      risks: ["Proceeding without the missing evidence would leave the conclusion open to a documented challenge."],
+    }],
+    uncertainties: ["The date on which the procedural prerequisite was completed remains uncertain."],
+  };
+}
+
 function codes(errors: ReturnType<typeof validateResearchEvidenceBundle>): string[] {
   return errors.map((item) => item.code);
 }
 
 describe("Block 3B.13A chat legal research bridge", () => {
+  it("accepts source-grounded legal analysis contributions and rejects invalid references or duplicates", () => {
+    const researchMission = mission();
+    const contribution = legalContribution();
+    expect(validateResearchEvidenceBundle(researchMission, bundle(researchMission, {
+      legalAnalysisContributions: [contribution],
+    }))).toEqual([]);
+
+    expect(codes(validateResearchEvidenceBundle(researchMission, bundle(researchMission, {
+      legalAnalysisContributions: [legalContribution("unknown-candidate")],
+    })))).toContain("LEGAL_ANALYSIS_SOURCE_REFERENCE_INVALID");
+
+    expect(codes(validateResearchEvidenceBundle(researchMission, bundle(researchMission, {
+      legalAnalysisContributions: [contribution, contribution],
+    })))).toContain("DUPLICATE_LEGAL_ANALYSIS_CONTRIBUTION");
+  });
+
   it("accepts a minimal provider-neutral discovery mission", () => {
     const value = mission();
     expect(validateResearchMission(value)).toEqual([]);

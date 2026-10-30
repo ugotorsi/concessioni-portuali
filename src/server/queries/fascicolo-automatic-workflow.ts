@@ -21,6 +21,10 @@ import { RESEARCH_MISSION_EXECUTION_OPERATION } from "@/server/legal-research/pe
 import { evaluateAutomaticResearchPolicy } from "@/server/legal-research/automatic-research-policy";
 import type { AuthorityCandidate, ResearchMission } from "@/server/legal-research/bridge";
 import {
+  legalAnalysisContributionSchema,
+  type LegalAnalysisContribution,
+} from "@/server/legal-research/legal-synthesis";
+import {
   deriveResearchQuestionCoverage,
   deriveResearchResultSourceState,
   type ResearchCoverageGap,
@@ -395,6 +399,7 @@ export interface FascicoloResearchMissionReadModel {
     callCount: number | null;
   };
   automationRequirementCode: string | null;
+  legalAnalysisContributions: readonly LegalAnalysisContribution[];
   legalApplicabilityReviews: readonly Readonly<{
     review: LegalApplicabilityReview;
     recordedByActorId: string | null;
@@ -915,6 +920,10 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
         automationRequirementCode: lifecycleStatus === "CURRENT"
           ? researchJob?.failureCode ?? missionPolicy.requirementCode
           : null,
+        legalAnalysisContributions: records(bundle?.legalAnalysisContributions).flatMap((contribution) => {
+          const parsed = legalAnalysisContributionSchema.safeParse(contribution);
+          return parsed.success ? [parsed.data] : [];
+        }),
         legalApplicabilityReviews: projectApplicabilityReviews(mission).reviews,
         legalApplicabilityReviewIssues: projectApplicabilityReviews(mission).issues,
       };
@@ -1000,6 +1009,7 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
             const assessment = result.sourceAssessments[0];
             return {
               resultId: result.id,
+              candidateId: result.candidateId,
               title: candidate.title ?? candidate.officialIdentifier ?? "Risultato di ricerca contraria",
               sourceUrl: safeHttpUrl(candidate.sourceUrl),
               provider: candidate.providerId ?? candidate.toolId ?? null,

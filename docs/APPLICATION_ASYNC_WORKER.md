@@ -464,12 +464,24 @@ tenant, case, legal-issue, research-question, mission-fingerprint, and current
 knowledge-revision linkage are not treated as report research; partial, deferred, and
 budget-exhausted missions are never presented as completed research.
 
-New report snapshots use verified, current source assessments as inputs to an
-issue-specific legal analysis. The report keeps candidate sources separate from usable
-sources and connects each issue to documented facts, source passages, favorable and
-contrary authorities, applicability checks, decisive facts, remaining gaps, and
-targeted follow-up actions. Technical diagnostics and internal status codes remain in
-the administrative workflow and are not rendered as professional conclusions.
+New report snapshots keep candidate sources separate from usable sources. Applicability
+checks establish whether a source may be used; they do not generate a legal conclusion.
+An issue-specific professional analysis is adopted only from a
+`LEGAL_ANALYSIS_CONTRIBUTION_V1` included in the accepted evidence bundle. The
+ChatGPT-side executor must provide rule-to-fact applications, favorable and contrary
+arguments, an evidence assessment, a reasoned conclusion, strategies, and uncertainties.
+Every substantive passage must cite authority `candidateId` values from that bundle and
+documentary `basisRef` values from the linked issue.
+
+The bridge rejects malformed contributions, duplicate contribution IDs, and source
+references absent from the bundle. During report compilation NOETRA additionally
+requires every cited candidate to be a usable current source for that question and
+every cited basis reference to belong to the issue's documented facts. Exactly one
+valid contribution may support a question. Otherwise the sources and applicability
+checks remain visible, the report uses `MOTIVATION_REQUIRED`, and no standard or
+status-derived conclusion is manufactured. Technical diagnostics and internal status
+codes remain in the administrative workflow and are not rendered as professional
+conclusions.
 
 ### Obsolete queued analysis cancellation
 

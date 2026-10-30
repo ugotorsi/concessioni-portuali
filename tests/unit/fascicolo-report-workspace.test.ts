@@ -17,7 +17,7 @@ function payload(label: string = "corrente"): StructuredFascicoloReportPayload {
     payload: {}, confidence: 90, status: "HUMAN_CONFIRMED" as const, reviewVersion: 1, evidence: [],
   });
   const authority = (resultId: string, title: string, sourceUrl: string) => ({
-    resultId, title, sourceUrl, provider: "hidden-provider", assessmentId: `assessment-${resultId}`,
+    resultId, candidateId: `candidate-${resultId}`, title, sourceUrl, provider: "hidden-provider", assessmentId: `assessment-${resultId}`,
     sourceChainFingerprint: `chain-${resultId}`, citationAnchors: [{ page: 1 }], rationale: `Valutazione ${title}`,
   });
   const question = {
@@ -145,6 +145,60 @@ describe("Fascicolo report workspace", () => {
           competingArguments: {
             supporting: ["La misura richiede la verifica concreta dei presupposti."],
             opposing: ["La rimozione spontanea può incidere sulla proporzionalità."],
+          },
+          professionalReasoning: {
+            version: "LEGAL_ANALYSIS_CONTRIBUTION_V1",
+            contributionId: "contribution-1",
+            legalIssueSemanticKey: "a".repeat(64),
+            researchQuestionSemanticKey: "b".repeat(64),
+            issueStatement: "Occorre valutare la conformità dell’occupazione rispetto al titolo concessorio.",
+            ruleApplications: [{
+              title: "Presupposti della misura",
+              rule: "La misura richiede la verifica concreta dei presupposti previsti dalla disciplina applicabile.",
+              sourceCandidateIds: ["candidate-source-favorable"],
+              relevantFacts: "Il verbale documenta l’occupazione oltre la superficie assentita dal titolo.",
+              factBasisRefs: ["DOCUMENT_1.PAGE_4"],
+              application: "Il fatto documentato integra il presupposto materiale, salvo verifica della planimetria vigente.",
+              outcome: "Il presupposto appare integrato in via preliminare, con riserva sulla delimitazione assentita.",
+            }],
+            supportingArguments: [{
+              text: "La difformità documentata sostiene l’esercizio del potere previsto dalla disciplina verificata.",
+              sourceCandidateIds: ["candidate-source-favorable"],
+              factBasisRefs: ["DOCUMENT_1.PAGE_4"],
+            }],
+            contraryArguments: [{
+              text: "La rimozione spontanea può incidere sulla proporzionalità della misura conclusiva.",
+              sourceCandidateIds: ["candidate-source-favorable"],
+              factBasisRefs: ["DOCUMENT_1.PAGE_4"],
+            }],
+            evidenceAssessment: {
+              strengths: [{
+                text: "Il verbale individua la consistenza materiale e la collocazione dell’occupazione.",
+                sourceCandidateIds: ["candidate-source-favorable"],
+                factBasisRefs: ["DOCUMENT_1.PAGE_4"],
+              }],
+              weaknesses: [{
+                text: "Manca ancora il confronto con la planimetria allegata al titolo vigente.",
+                sourceCandidateIds: ["candidate-source-favorable"],
+                factBasisRefs: ["DOCUMENT_1.PAGE_4"],
+              }],
+              missingEvidence: ["Acquisire la planimetria aggiornata allegata al titolo concessorio vigente."],
+            },
+            reasonedConclusion: {
+              text: "La tesi è sostenibile in via preliminare, ma dipende dal confronto con la planimetria vigente.",
+              confidence: "MEDIUM",
+              decisiveSourceCandidateIds: ["candidate-source-favorable"],
+              decisiveFactBasisRefs: ["DOCUMENT_1.PAGE_4"],
+              conditions: ["Confermare la delimitazione assentita dal titolo vigente."],
+            },
+            strategies: [{
+              title: "Confronto tecnico-documentale",
+              rationale: "Acquisire la planimetria vigente prima di definire la qualificazione giuridica della difformità.",
+              sourceCandidateIds: ["candidate-source-favorable"],
+              factBasisRefs: ["DOCUMENT_1.PAGE_4"],
+              risks: ["Una planimetria diversa potrebbe escludere o ridimensionare la difformità contestata."],
+            }],
+            uncertainties: ["La delimitazione esatta dell’area assentita richiede verifica documentale."],
           },
           assessment: "La tesi è sostenibile, ma deve confrontarsi con la proporzionalità.",
           missingEvidence: ["Planimetria aggiornata"],

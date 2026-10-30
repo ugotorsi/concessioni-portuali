@@ -18,6 +18,11 @@ import { documentedProceedingIdentity } from "@/server/legal-reasoning/applicabi
 import type { EvaluatedSourceResult } from "@/server/legal-rules/types";
 import type { LegalApplicabilityReview } from "@/server/legal-research/assisted-verification";
 import type { SourceChainSnapshot } from "@/server/legal-research/source-chain";
+import {
+  contributionBasisRefs,
+  contributionCandidateIds,
+  type LegalAnalysisContribution,
+} from "@/server/legal-research/legal-synthesis";
 import type { TemporalAssessmentResult } from "@/server/legal-sources/temporal";
 
 export const STRUCTURED_FASCICOLO_REPORT_CONTRACT_VERSION = "STRUCTURED_FASCICOLO_REPORT_V1" as const;
@@ -40,6 +45,7 @@ function stringValues(value: unknown): string[] {
 
 export interface StructuredReportResearchResultInput {
   resultId: string;
+  candidateId?: string;
   title: string;
   sourceUrl: string | null;
   provider: string | null;
@@ -80,6 +86,7 @@ export interface StructuredReportMissionInput {
   coverageStatus: string;
   sourceGaps: readonly string[];
   results: readonly StructuredReportResearchResultInput[];
+  legalAnalysisContributions?: readonly LegalAnalysisContribution[];
   legalApplicabilityReviews?: readonly Readonly<{
     review: LegalApplicabilityReview;
     recordedByActorId: string | null;
@@ -96,6 +103,7 @@ export interface StructuredReportMissionInput {
 
 export interface StructuredReportAuthority {
   resultId: string;
+  candidateId: string;
   title: string;
   sourceUrl: string | null;
   provider: string | null;
@@ -232,7 +240,7 @@ export interface StructuredReportOperationalPlan {
 export interface StructuredReportLegalAnalysis {
   issueSemanticKey: string;
   issueText: string;
-  status: "RESEARCH_REQUIRED" | "PARTIAL" | "ASSESSED" | "CONTESTED";
+  status: "RESEARCH_REQUIRED" | "MOTIVATION_REQUIRED" | "ARGUED" | "CONTESTED";
   documentedFacts: readonly {
     statement: string;
     documentReferences: readonly string[];
@@ -263,6 +271,7 @@ export interface StructuredReportLegalAnalysis {
     supporting: readonly string[];
     opposing: readonly string[];
   };
+  professionalReasoning: LegalAnalysisContribution | null;
   assessment: string;
   missingEvidence: readonly string[];
   recommendedActions: readonly string[];
@@ -759,6 +768,7 @@ function authority(result: StructuredReportResearchResultInput): StructuredRepor
   const assessment = result.sourceAssessment!;
   return {
     resultId: result.resultId,
+    candidateId: result.candidateId ?? result.resultId,
     title: result.title,
     sourceUrl: result.sourceUrl,
     provider: result.provider,
@@ -838,6 +848,7 @@ function buildLegalAnalyses(input: {
   issues: StructuredFascicoloReportPayload["legalIssues"];
   knowledge: StructuredKnowledgeReadModel;
   applicability: StructuredFascicoloReportPayload["legalApplicability"];
+  contributions: readonly LegalAnalysisContribution[];
 }): readonly StructuredReportLegalAnalysis[] {
   const evidenceItems = [
     ...(input.knowledge.partyPositions ?? []),
@@ -860,6 +871,16 @@ function buildLegalAnalyses(input: {
       ...question.contraryAuthorities.map((source) => ({ ...source, direction: "OPPOSES" as const })),
     ]);
     const uniqueSources = [...new Map(sources.map((source) => [source.resultId, source])).values()];
+    const usableCandidateIds = new Set(uniqueSources.map((source) => source.candidateId));
+    const relatedBasisRefs = new Set(related.flatMap(itemBasisRefs));
+    const questionSemanticKeys = new Set(issue.questions.map((question) => question.semanticKey));
+    const validContributions = input.contributions.filter((contribution) => (
+      contribution.legalIssueSemanticKey === issue.semanticKey
+      && questionSemanticKeys.has(contribution.researchQuestionSemanticKey)
+      && contributionCandidateIds(contribution).every((candidateId) => usableCandidateIds.has(candidateId))
+      && contributionBasisRefs(contribution).every((basisRef) => relatedBasisRefs.has(basisRef))
+    )).sort((left, right) => left.contributionId.localeCompare(right.contributionId));
+    const professionalReasoning = validContributions.length === 1 ? validContributions[0] : null;
     const applications = (input.applicability?.applications ?? [])
       .filter((application) => application.legalIssueSemanticKey === issue.semanticKey)
       .map((application) => {
@@ -882,12 +903,8 @@ function buildLegalAnalyses(input: {
             ?? "L'applicabilità della fonte non è stata ancora verificata rispetto ai fatti documentati.",
         };
       });
-    const supporting = uniqueSources
-      .filter((source) => source.direction === "SUPPORTS")
-      .map((source) => source.relevantPassage ?? source.rationale ?? source.title);
-    const opposing = uniqueSources
-      .filter((source) => source.direction === "OPPOSES")
-      .map((source) => source.relevantPassage ?? source.rationale ?? source.title);
+    const supporting = professionalReasoning?.supportingArguments.map((argument) => argument.text) ?? [];
+    const opposing = professionalReasoning?.contraryArguments.map((argument) => argument.text) ?? [];
     const missingEvidence = [...new Set([
       ...related.filter((item) => item.kind === "GAP").map((item) => item.normalizedText),
       ...issue.questions.flatMap((question) => question.gaps),
@@ -895,38 +912,25 @@ function buildLegalAnalyses(input: {
         .filter((check) => check.outcome === "TO_VERIFY")
         .map((check) => `${check.criterion}: ${check.rationale}`)),
     ])];
-    const assessed = applications.filter((application) => application.outcome !== "NOT_EVALUATED");
-    const applicable = assessed.filter((application) => application.outcome === "APPLICABLE");
-    const notApplicable = assessed.filter((application) => application.outcome === "NOT_APPLICABLE");
-    const hasSupporting = supporting.length > 0;
-    const hasOpposing = opposing.length > 0;
     const status: StructuredReportLegalAnalysis["status"] = uniqueSources.length === 0
       ? "RESEARCH_REQUIRED"
-      : hasSupporting && hasOpposing
-        ? "CONTESTED"
-        : assessed.length === 0 || assessed.some((application) => application.outcome === "TO_VERIFY")
-          ? "PARTIAL"
-          : "ASSESSED";
+      : professionalReasoning === null
+        ? "MOTIVATION_REQUIRED"
+        : professionalReasoning.contraryArguments.length > 0
+          ? "CONTESTED"
+          : "ARGUED";
     const assessment = uniqueSources.length === 0
-      ? "Le fonti necessarie non sono ancora disponibili: non è formulabile una conclusione giuridica verificata."
-      : applicable.length > 0 && notApplicable.length === 0
-        ? `Le fonti verificate risultano applicabili ai fatti esaminati in ${applicable.length} valutazioni; la conclusione resta soggetta alla verifica professionale delle obiezioni e delle lacune indicate.`
-        : applicable.length > 0 && notApplicable.length > 0
-          ? "Le verifiche di applicabilità conducono a esiti divergenti. La conclusione dipende dal rapporto tra le fonti e dai fatti decisivi indicati per ciascuna valutazione."
-          : assessed.length > 0
-            ? "Le fonti sono state collegate alla questione, ma le verifiche disponibili non consentono di sostenerne l'applicabilità ai fatti esaminati."
-            : "Le fonti sono verificate, ma manca ancora una valutazione strutturata della loro applicabilità ai fatti documentati.";
+      ? "La ricerca non ha ancora prodotto fonti utilizzabili; nessuna conclusione giuridica è formulata."
+      : professionalReasoning?.reasonedConclusion.text
+        ?? "Le fonti sono disponibili, ma non è stata acquisita una motivazione argomentata e integralmente riferita ai fatti e alle fonti verificate.";
     const recommendedActions = [...new Set([
       ...(uniqueSources.length === 0
         ? issue.questions.map((question) => `Completare la ricerca e la verifica delle fonti per il quesito: ${question.text}`)
         : []),
-      ...(hasSupporting && !hasOpposing
-        ? ["Ricercare precedenti e interpretazioni contrari sulla medesima fattispecie, senza assumere esaustiva la sola tesi favorevole."]
+      ...(uniqueSources.length > 0 && professionalReasoning === null
+        ? ["Acquisire dall'esecutore autorizzato una motivazione specifica che citi esclusivamente le fonti e i fatti verificati della questione."]
         : []),
-      ...(applications.length === 0 && uniqueSources.length > 0
-        ? ["Sottoporre le fonti verificate alla valutazione di applicabilità temporale, territoriale, materiale e fattuale."]
-        : []),
-      ...missingEvidence.map((gap) => `Acquisire o verificare l'elemento decisivo: ${gap}`),
+      ...(professionalReasoning?.strategies.map((strategy) => `${strategy.title}: ${strategy.rationale}`) ?? []),
     ])];
 
     return {
@@ -952,8 +956,12 @@ function buildLegalAnalyses(input: {
       })),
       applications,
       competingArguments: { supporting, opposing },
+      professionalReasoning,
       assessment,
-      missingEvidence,
+      missingEvidence: [...new Set([
+        ...missingEvidence,
+        ...(professionalReasoning?.evidenceAssessment.missingEvidence ?? []),
+      ])],
       recommendedActions,
       professionalReviewRequired: true,
     };
@@ -1393,6 +1401,9 @@ export function buildStructuredFascicoloReport(input: {
       status: questionMissions.every((mission) => mission.status === "COMPLETED") ? "COMPLETED" : primary.status,
       sourceGaps: [...new Set(questionMissions.flatMap((mission) => mission.sourceGaps))].sort(),
       results,
+      legalAnalysisContributions: questionMissions.flatMap((mission) => (
+        mission.status === "COMPLETED" ? mission.legalAnalysisContributions ?? [] : []
+      )),
     }];
   }));
   const questions = visibleItems(input.knowledge.researchQuestions).map((item) => projectQuestion(item, missionsByQuestion));
@@ -1500,6 +1511,9 @@ export function buildStructuredFascicoloReport(input: {
     issues: legalIssues,
     knowledge: input.knowledge,
     applicability: legalApplicability,
+    contributions: [...missionsByQuestion.values()].flatMap((mission) => (
+      mission.legalAnalysisContributions ?? []
+    )),
   });
   const payload: StructuredFascicoloReportPayload = {
     contractVersion,
