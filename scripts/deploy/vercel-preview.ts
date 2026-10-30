@@ -21,6 +21,8 @@ export class VercelPreviewDeployError extends Error {
     | "DUPLICATE_EXPECTED_COMMIT"
     | "DUPLICATE_DIAGNOSTIC_PROCEDURE"
     | "DIAGNOSTIC_PROCEDURE_INVALID"
+    | "DUPLICATE_AUTH_DIAGNOSTIC"
+    | "AUTH_DIAGNOSTIC_MISSION_INVALID"
     | "DUPLICATE_WORKOS_RESOURCE_CONFIGURATION"
     | "PRODUCTION_TARGET_FORBIDDEN"
     | "TARGET_OVERRIDE_FORBIDDEN"
@@ -40,6 +42,7 @@ export class VercelPreviewDeployError extends Error {
 export interface VercelPreviewDeployArgs {
   readonly expectedCommit: string;
   readonly diagnosticProcedureId?: string;
+  readonly diagnosticAuthMissionId?: string;
   readonly configureWorkosResource?: boolean;
 }
 
@@ -55,6 +58,7 @@ function isProductionArgument(argument: string): boolean {
 export function parseVercelPreviewDeployArgs(argv: readonly string[]): VercelPreviewDeployArgs {
   let expectedCommit: string | undefined;
   let diagnosticProcedureId: string | undefined;
+  let diagnosticAuthMissionId: string | undefined;
   let configureWorkosResource = false;
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
@@ -87,6 +91,18 @@ export function parseVercelPreviewDeployArgs(argv: readonly string[]): VercelPre
         throw new VercelPreviewDeployError("DUPLICATE_WORKOS_RESOURCE_CONFIGURATION");
       }
       configureWorkosResource = true;
+      continue;
+    }
+    if (argument === "--diagnose-research-auth") {
+      if (diagnosticAuthMissionId !== undefined) {
+        throw new VercelPreviewDeployError("DUPLICATE_AUTH_DIAGNOSTIC");
+      }
+      const value = argv[index + 1];
+      if (!value || !/^research-mission:[a-f0-9]{64}$/.test(value)) {
+        throw new VercelPreviewDeployError("AUTH_DIAGNOSTIC_MISSION_INVALID");
+      }
+      diagnosticAuthMissionId = value;
+      index += 1;
       continue;
     }
     if (isProductionArgument(argument)) {
@@ -122,7 +138,12 @@ export function parseVercelPreviewDeployArgs(argv: readonly string[]): VercelPre
   if (!/^[a-f0-9]{40}$/.test(expectedCommit)) {
     throw new VercelPreviewDeployError("EXPECTED_COMMIT_INVALID");
   }
-  return { expectedCommit, diagnosticProcedureId, configureWorkosResource };
+  return {
+    expectedCommit,
+    diagnosticProcedureId,
+    diagnosticAuthMissionId,
+    configureWorkosResource,
+  };
 }
 
 export function createVercelPreviewDeploySpec(
@@ -159,6 +180,9 @@ export function createVercelPreviewDeploySpec(
     ...(input.diagnosticProcedureId ? [
       `npm run runtime:diagnose-research-missions -- ${input.diagnosticProcedureId}`,
     ] : []),
+    ...(input.diagnosticAuthMissionId ? [
+      `npm run runtime:diagnose-research-auth -- ${input.diagnosticAuthMissionId}`,
+    ] : []),
     "npm run build",
   ];
   return {
@@ -177,7 +201,9 @@ export function createVercelPreviewDeploySpec(
       },
       projectSettings: {
         commandForIgnoringBuildStep: "exit 1",
-        ...(input.configureWorkosResource || input.diagnosticProcedureId ? {
+        ...(input.configureWorkosResource
+          || input.diagnosticProcedureId
+          || input.diagnosticAuthMissionId ? {
           buildCommand: buildCommands.join(" && "),
         } : {}),
       },

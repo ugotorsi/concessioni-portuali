@@ -125,6 +125,30 @@ describe("Vercel Preview deployment guard", () => {
     ])).toThrow(new VercelPreviewDeployError("DUPLICATE_WORKOS_RESOURCE_CONFIGURATION"));
   });
 
+  it("allows a sanitized assigned-actor auth diagnostic for one exact mission", () => {
+    const missionId = `research-mission:${"a".repeat(64)}`;
+    const parsed = parseVercelPreviewDeployArgs([
+      "--expected-commit",
+      COMMIT,
+      "--diagnose-research-auth",
+      missionId,
+    ]);
+    const spec = createVercelPreviewDeploySpec(parsed, { NODE_ENV: "test" }, "linux");
+
+    expect(JSON.parse(spec.input)).toMatchObject({
+      projectSettings: {
+        commandForIgnoringBuildStep: "exit 1",
+        buildCommand: `npm run runtime:diagnose-research-auth -- ${missionId} && npm run build`,
+      },
+    });
+    expect(() => parseVercelPreviewDeployArgs([
+      "--expected-commit",
+      COMMIT,
+      "--diagnose-research-auth",
+      "research-mission:unsafe",
+    ])).toThrow(new VercelPreviewDeployError("AUTH_DIAGNOSTIC_MISSION_INVALID"));
+  });
+
   it.each([
     ["--prod"],
     ["--target=production"],
