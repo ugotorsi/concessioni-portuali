@@ -49,6 +49,8 @@ async function main(): Promise<void> {
           ruolo: true,
           attivo: true,
           passwordHash: true,
+          passwordChangedAt: true,
+          lastLoginAt: true,
           failedLoginAttempts: true,
           lockedUntil: true,
           mfaEnabled: true,
@@ -92,6 +94,9 @@ async function main(): Promise<void> {
 
   const now = new Date();
   const actor = mission?.assignedActor ?? null;
+  const passwordHashMatch = actor?.passwordHash
+    ? actor.passwordHash.match(/^\$(2[abxy])\$(\d{2})\$[./A-Za-z0-9]{53}$/)
+    : null;
   const matchingMemberships = actor?.tenantMemberships.filter(
     (membership) => membership.enteId === mission?.tenantId,
   ) ?? [];
@@ -125,6 +130,11 @@ async function main(): Promise<void> {
       active: actor.attivo,
       role: actor.ruolo,
       passwordHashPresent: actor.passwordHash !== null,
+      passwordHashFormatValid: passwordHashMatch !== null,
+      passwordHashAlgorithm: passwordHashMatch?.[1] ?? null,
+      passwordHashCost: passwordHashMatch ? Number.parseInt(passwordHashMatch[2], 10) : null,
+      passwordChangedAt: actor.passwordChangedAt?.toISOString() ?? null,
+      lastLoginAt: actor.lastLoginAt?.toISOString() ?? null,
       mfaEnabled: actor.mfaEnabled,
       mfaSecretPresent: actor.mfaSecret !== null,
       mustChangePassword: actor.mustChangePassword,
