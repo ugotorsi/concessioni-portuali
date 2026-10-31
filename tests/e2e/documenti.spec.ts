@@ -9,6 +9,7 @@ test("admin uploads and downloads a fascicolo document", async ({ page }, testIn
 
   await page.goto("/documenti");
   await expect(page.getByRole("heading", { name: "Fascicolo documentale" }).first()).toBeVisible();
+  await page.getByText("Carica documento", { exact: true }).click();
 
   const uniqueToken = `${Date.now()}-w${testInfo.workerIndex}-r${testInfo.retry}`;
   const tmpDir = await mkdtemp(path.join(tmpdir(), "cp-doc-e2e-"));
@@ -17,8 +18,8 @@ test("admin uploads and downloads a fascicolo document", async ({ page }, testIn
   const metadataDescription = `Descrizione E2E ${uniqueToken}`;
   await writeFile(filePath, "Documento E2E baseline fascicolo");
 
-  const uploadForm = page.locator("form", {
-    has: page.getByRole("button", { name: "Carica documento" }),
+  const uploadForm = page.locator("form").filter({
+    has: page.locator('input[name="file"]'),
   }).first();
 
   await uploadForm.locator('input[name="file"]').setInputFiles(filePath);
@@ -54,7 +55,7 @@ test("admin uploads and downloads a fascicolo document", async ({ page }, testIn
       },
       { timeout: 20000 },
     ),
-    uploadForm.getByRole("button", { name: "Carica documento" }).click(),
+    uploadForm.getByRole("button", { name: "Conferma caricamento" }).click(),
   ]);
 
   await expect(page).toHaveURL(/\/documenti$/);
@@ -62,12 +63,12 @@ test("admin uploads and downloads a fascicolo document", async ({ page }, testIn
   await page.getByRole("button", { name: "Applica" }).click();
   const uploadedRow = page.locator("tr", { hasText: uniqueTitle }).first();
   await expect(uploadedRow).toBeVisible({ timeout: 20000 });
-  await expect(uploadedRow).toContainText("Warning PEC");
+  await expect(uploadedRow).toContainText("Ricevuta PEC da verificare");
   await expect(uploadedRow.locator('[name="descrizione"]')).toHaveValue(metadataDescription);
 
   const [download] = await Promise.all([
     page.waitForEvent("download"),
-    uploadedRow.getByRole("link", { name: "Scarica" }).click(),
+    uploadedRow.getByRole("link", { name: "Apri documento" }).click(),
   ]);
 
   expect(download.suggestedFilename().toLowerCase()).toContain("verbale");

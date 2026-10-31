@@ -4,6 +4,11 @@ import {
   citationObservationIdentity,
   type CitationObservation,
 } from "@/server/legal-reasoning/authority-treatment";
+import {
+  contributionCandidateIds,
+  legalAnalysisContributionSchema,
+  type LegalAnalysisContribution,
+} from "@/server/legal-research/legal-synthesis";
 
 export const RESEARCH_BRIDGE_VERSION = "RESEARCH_BRIDGE_V1" as const;
 
@@ -49,6 +54,10 @@ export type ResearchMissionStatus =
   | "DEFERRED"
   | "REJECTED";
 
+export type ResearchExecutionChannel =
+  | "CHATGPT_CONNECTOR"
+  | "SERVER_AUTONOMOUS";
+
 export type ResearchCaseReference = Readonly<{
   caseId: string;
   fascicoloReference?: string;
@@ -83,6 +92,7 @@ export type ResearchExecutionPlan = Readonly<{
 export type ResearchMissionInput = Readonly<{
   kind: "RESEARCH_MISSION";
   version: typeof RESEARCH_BRIDGE_VERSION;
+  executionChannel?: ResearchExecutionChannel;
   caseReference: ResearchCaseReference;
   legalIssueIds: readonly string[];
   legalPropositionIds: readonly string[];
@@ -277,6 +287,7 @@ export type ResearchEvidenceBundle = Readonly<{
   completedAt?: string;
   researchToolExecutions: readonly ResearchToolExecution[];
   authorityCandidates: readonly AuthorityCandidate[];
+  legalAnalysisContributions?: readonly LegalAnalysisContribution[];
   citationObservations: readonly CitationObservation[];
   legalResearchSuggestions: readonly LegalResearchSuggestion[];
   evidenceGaps: readonly ResearchGap[];
@@ -299,6 +310,7 @@ export type ResearchBridgeValidationErrorCode =
   | "CREDENTIAL_FIELD_FORBIDDEN"
   | "DUPLICATE_AUTHORITY_REFERENCE"
   | "DUPLICATE_CANDIDATE_ID"
+  | "DUPLICATE_LEGAL_ANALYSIS_CONTRIBUTION"
   | "DUPLICATE_CITATION_OBSERVATION"
   | "DUPLICATE_ENTITY_ID"
   | "DUPLICATE_VALUE"
@@ -308,8 +320,11 @@ export type ResearchBridgeValidationErrorCode =
   | "INVALID_BUDGET"
   | "INVALID_CASE_REFERENCE"
   | "INVALID_DATE"
+  | "INVALID_EXECUTION_CHANNEL"
   | "INVALID_ID"
   | "INVALID_MISSION_REFERENCE"
+  | "LEGAL_ANALYSIS_CONTRIBUTION_INVALID"
+  | "LEGAL_ANALYSIS_SOURCE_REFERENCE_INVALID"
   | "INVALID_RESEARCH_QUESTION"
   | "PROFILE_FIELD_FORBIDDEN"
   | "UNKNOWN_EXECUTION_REFERENCE";
@@ -441,8 +456,18 @@ export function researchMissionIdentity(input: ResearchMissionInput): string {
   return deterministicIdentity("research-mission", identityInput);
 }
 
+export function researchMissionExecutionChannel(
+  mission: Pick<ResearchMissionInput, "executionChannel">,
+): ResearchExecutionChannel {
+  return mission.executionChannel ?? "CHATGPT_CONNECTOR";
+}
+
 export function createResearchMission(input: ResearchMissionInput): ResearchMission {
-  return { ...input, missionId: researchMissionIdentity(input) };
+  const normalized = {
+    ...input,
+    executionChannel: researchMissionExecutionChannel(input),
+  };
+  return { ...normalized, missionId: researchMissionIdentity(normalized) };
 }
 
 export function authorityCandidateIdentity(input: AuthorityCandidateInput): string {
@@ -465,6 +490,11 @@ function missionInput(mission: ResearchMission): ResearchMissionInput {
 
 export function validateResearchMission(mission: ResearchMission): readonly ResearchBridgeValidationError[] {
   const errors: ResearchBridgeValidationError[] = [];
+  if (mission.executionChannel !== undefined
+    && mission.executionChannel !== "CHATGPT_CONNECTOR"
+    && mission.executionChannel !== "SERVER_AUTONOMOUS") {
+    errors.push(error("INVALID_EXECUTION_CHANNEL", "executionChannel", mission.missionId));
+  }
   if (!validId(mission.missionId) || mission.missionId !== researchMissionIdentity(missionInput(mission))) {
     errors.push(error("INVALID_ID", "missionId", mission.missionId));
   }
@@ -708,6 +738,36 @@ export function validateResearchEvidenceBundle(
     }
     if (!executionIds.has(candidate.executionRecordId)) {
       errors.push(error("UNKNOWN_EXECUTION_REFERENCE", "authorityCandidates.executionRecordId", candidate.candidateId, candidate.executionRecordId));
+    }
+  }
+  const contributionIds = new Set<string>();
+  for (const contribution of bundle.legalAnalysisContributions ?? []) {
+    const parsed = legalAnalysisContributionSchema.safeParse(contribution);
+    if (!parsed.success) {
+      errors.push(error(
+        "LEGAL_ANALYSIS_CONTRIBUTION_INVALID",
+        "legalAnalysisContributions",
+        String((contribution as { contributionId?: unknown }).contributionId ?? bundle.executionId),
+      ));
+      continue;
+    }
+    if (contributionIds.has(parsed.data.contributionId)) {
+      errors.push(error(
+        "DUPLICATE_LEGAL_ANALYSIS_CONTRIBUTION",
+        "legalAnalysisContributions",
+        parsed.data.contributionId,
+      ));
+    }
+    contributionIds.add(parsed.data.contributionId);
+    for (const candidateId of contributionCandidateIds(parsed.data)) {
+      if (!candidateIds.has(candidateId)) {
+        errors.push(error(
+          "LEGAL_ANALYSIS_SOURCE_REFERENCE_INVALID",
+          "legalAnalysisContributions.sourceCandidateIds",
+          parsed.data.contributionId,
+          candidateId,
+        ));
+      }
     }
   }
   const observationIds = new Set<string>();

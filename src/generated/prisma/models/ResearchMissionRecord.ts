@@ -391,6 +391,7 @@ export type ResearchMissionRecordWhereInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordListRelationFilter
   questionResults?: Prisma.ResearchQuestionResultRecordListRelationFilter
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordListRelationFilter
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordListRelationFilter
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementListRelationFilter
   adverseMissionRequirement?: Prisma.XOR<Prisma.ResearchAdverseRequirementNullableScalarRelationFilter, Prisma.ResearchAdverseRequirementWhereInput> | null
   knowledgeRevision?: Prisma.XOR<Prisma.FascicoloKnowledgeRevisionNullableScalarRelationFilter, Prisma.FascicoloKnowledgeRevisionWhereInput> | null
@@ -432,6 +433,7 @@ export type ResearchMissionRecordOrderByWithRelationInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordOrderByRelationAggregateInput
   questionResults?: Prisma.ResearchQuestionResultRecordOrderByRelationAggregateInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordOrderByRelationAggregateInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordOrderByRelationAggregateInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementOrderByRelationAggregateInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementOrderByWithRelationInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionOrderByWithRelationInput
@@ -443,7 +445,6 @@ export type ResearchMissionRecordWhereUniqueInput = Prisma.AtLeast<{
   payloadFingerprint?: string
   activeExecutionId?: string
   id_tenantId?: Prisma.ResearchMissionRecordIdTenantIdCompoundUniqueInput
-  tenantId_caseId_missionFingerprint?: Prisma.ResearchMissionRecordTenantIdCaseIdMissionFingerprintCompoundUniqueInput
   AND?: Prisma.ResearchMissionRecordWhereInput | Prisma.ResearchMissionRecordWhereInput[]
   OR?: Prisma.ResearchMissionRecordWhereInput[]
   NOT?: Prisma.ResearchMissionRecordWhereInput | Prisma.ResearchMissionRecordWhereInput[]
@@ -478,11 +479,12 @@ export type ResearchMissionRecordWhereUniqueInput = Prisma.AtLeast<{
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordListRelationFilter
   questionResults?: Prisma.ResearchQuestionResultRecordListRelationFilter
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordListRelationFilter
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordListRelationFilter
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementListRelationFilter
   adverseMissionRequirement?: Prisma.XOR<Prisma.ResearchAdverseRequirementNullableScalarRelationFilter, Prisma.ResearchAdverseRequirementWhereInput> | null
   knowledgeRevision?: Prisma.XOR<Prisma.FascicoloKnowledgeRevisionNullableScalarRelationFilter, Prisma.FascicoloKnowledgeRevisionWhereInput> | null
   firstKnowledgeRevision?: Prisma.XOR<Prisma.FascicoloKnowledgeRevisionNullableScalarRelationFilter, Prisma.FascicoloKnowledgeRevisionWhereInput> | null
-}, "id" | "payloadFingerprint" | "activeExecutionId" | "id_tenantId" | "tenantId_caseId_missionFingerprint">
+}, "id" | "payloadFingerprint" | "activeExecutionId" | "id_tenantId">
 
 export type ResearchMissionRecordOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -583,6 +585,7 @@ export type ResearchMissionRecordCreateInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordCreateNestedManyWithoutMissionInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutMissionInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementCreateNestedManyWithoutPrimaryMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
@@ -622,6 +625,7 @@ export type ResearchMissionRecordUncheckedCreateInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordUncheckedCreateNestedManyWithoutMissionInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutMissionInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedManyWithoutPrimaryMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedOneWithoutAdverseMissionInput
 }
@@ -657,6 +661,7 @@ export type ResearchMissionRecordUpdateInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUpdateManyWithoutMissionNestedInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutMissionNestedInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUpdateManyWithoutPrimaryMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
@@ -696,6 +701,7 @@ export type ResearchMissionRecordUncheckedUpdateInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUncheckedUpdateManyWithoutMissionNestedInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutMissionNestedInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedUpdateManyWithoutPrimaryMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedUpdateOneWithoutAdverseMissionNestedInput
 }
@@ -799,12 +805,6 @@ export type ResearchMissionRecordOrderByRelationAggregateInput = {
 export type ResearchMissionRecordIdTenantIdCompoundUniqueInput = {
   id: string
   tenantId: string
-}
-
-export type ResearchMissionRecordTenantIdCaseIdMissionFingerprintCompoundUniqueInput = {
-  tenantId: string
-  caseId: string
-  missionFingerprint: string
 }
 
 export type ResearchMissionRecordCountOrderByAggregateInput = {
@@ -1001,6 +1001,20 @@ export type EnumResearchMissionLifecycleStatusFieldUpdateOperationsInput = {
 
 export type EnumResearchMissionStatusFieldUpdateOperationsInput = {
   set?: $Enums.ResearchMissionStatus
+}
+
+export type ResearchMissionRecordCreateNestedOneWithoutTechnicalSourceResearchRecordsInput = {
+  create?: Prisma.XOR<Prisma.ResearchMissionRecordCreateWithoutTechnicalSourceResearchRecordsInput, Prisma.ResearchMissionRecordUncheckedCreateWithoutTechnicalSourceResearchRecordsInput>
+  connectOrCreate?: Prisma.ResearchMissionRecordCreateOrConnectWithoutTechnicalSourceResearchRecordsInput
+  connect?: Prisma.ResearchMissionRecordWhereUniqueInput
+}
+
+export type ResearchMissionRecordUpdateOneRequiredWithoutTechnicalSourceResearchRecordsNestedInput = {
+  create?: Prisma.XOR<Prisma.ResearchMissionRecordCreateWithoutTechnicalSourceResearchRecordsInput, Prisma.ResearchMissionRecordUncheckedCreateWithoutTechnicalSourceResearchRecordsInput>
+  connectOrCreate?: Prisma.ResearchMissionRecordCreateOrConnectWithoutTechnicalSourceResearchRecordsInput
+  upsert?: Prisma.ResearchMissionRecordUpsertWithoutTechnicalSourceResearchRecordsInput
+  connect?: Prisma.ResearchMissionRecordWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ResearchMissionRecordUpdateToOneWithWhereWithoutTechnicalSourceResearchRecordsInput, Prisma.ResearchMissionRecordUpdateWithoutTechnicalSourceResearchRecordsInput>, Prisma.ResearchMissionRecordUncheckedUpdateWithoutTechnicalSourceResearchRecordsInput>
 }
 
 export type ResearchMissionRecordCreateNestedOneWithoutExecutionAttemptsInput = {
@@ -1217,6 +1231,7 @@ export type ResearchMissionRecordCreateWithoutTenantInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordCreateNestedManyWithoutMissionInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutMissionInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementCreateNestedManyWithoutPrimaryMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
@@ -1255,6 +1270,7 @@ export type ResearchMissionRecordUncheckedCreateWithoutTenantInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordUncheckedCreateNestedManyWithoutMissionInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutMissionInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedManyWithoutPrimaryMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedOneWithoutAdverseMissionInput
 }
@@ -1348,6 +1364,7 @@ export type ResearchMissionRecordCreateWithoutAssignedActorInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordCreateNestedManyWithoutMissionInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutMissionInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementCreateNestedManyWithoutPrimaryMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
@@ -1386,6 +1403,7 @@ export type ResearchMissionRecordUncheckedCreateWithoutAssignedActorInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordUncheckedCreateNestedManyWithoutMissionInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutMissionInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedManyWithoutPrimaryMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedOneWithoutAdverseMissionInput
 }
@@ -1414,6 +1432,170 @@ export type ResearchMissionRecordUpdateWithWhereUniqueWithoutAssignedActorInput 
 export type ResearchMissionRecordUpdateManyWithWhereWithoutAssignedActorInput = {
   where: Prisma.ResearchMissionRecordScalarWhereInput
   data: Prisma.XOR<Prisma.ResearchMissionRecordUpdateManyMutationInput, Prisma.ResearchMissionRecordUncheckedUpdateManyWithoutAssignedActorInput>
+}
+
+export type ResearchMissionRecordCreateWithoutTechnicalSourceResearchRecordsInput = {
+  id: string
+  contractVersion: string
+  caseId: string
+  fascicoloReference?: string | null
+  referenceDate: Date | string
+  mode: string
+  payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  payloadFingerprint: string
+  missionFingerprint?: string | null
+  legalIssueSemanticKey?: string | null
+  researchQuestionSemanticKey?: string | null
+  referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lifecycleStatus?: $Enums.ResearchMissionLifecycleStatus
+  status?: $Enums.ResearchMissionStatus
+  stateVersion?: number
+  claimantId?: string | null
+  claimToken?: string | null
+  claimExpiresAt?: Date | string | null
+  activeExecutionId?: string | null
+  completedAt?: Date | string | null
+  deferredAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant?: Prisma.EnteCreateNestedOneWithoutResearchMissionsInput
+  assignedActor?: Prisma.UserCreateNestedOneWithoutAssignedResearchMissionsInput
+  executionAttempts?: Prisma.ResearchExecutionAttemptCreateNestedManyWithoutMissionInput
+  automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionCreateNestedManyWithoutMissionInput
+  assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
+  questionResults?: Prisma.ResearchQuestionResultRecordCreateNestedManyWithoutMissionInput
+  sourceAssessments?: Prisma.ResearchSourceAssessmentRecordCreateNestedManyWithoutMissionInput
+  primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementCreateNestedManyWithoutPrimaryMissionInput
+  adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
+  knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
+  firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutFirstResearchMissionsInput
+}
+
+export type ResearchMissionRecordUncheckedCreateWithoutTechnicalSourceResearchRecordsInput = {
+  id: string
+  tenantId?: string | null
+  assignedActorId?: string | null
+  contractVersion: string
+  caseId: string
+  fascicoloReference?: string | null
+  referenceDate: Date | string
+  mode: string
+  payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  payloadFingerprint: string
+  missionFingerprint?: string | null
+  knowledgeRevisionId?: string | null
+  firstKnowledgeRevisionId?: string | null
+  legalIssueSemanticKey?: string | null
+  researchQuestionSemanticKey?: string | null
+  referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lifecycleStatus?: $Enums.ResearchMissionLifecycleStatus
+  status?: $Enums.ResearchMissionStatus
+  stateVersion?: number
+  claimantId?: string | null
+  claimToken?: string | null
+  claimExpiresAt?: Date | string | null
+  activeExecutionId?: string | null
+  completedAt?: Date | string | null
+  deferredAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  executionAttempts?: Prisma.ResearchExecutionAttemptUncheckedCreateNestedManyWithoutMissionInput
+  automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUncheckedCreateNestedManyWithoutMissionInput
+  assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutMissionInput
+  questionResults?: Prisma.ResearchQuestionResultRecordUncheckedCreateNestedManyWithoutMissionInput
+  sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedCreateNestedManyWithoutMissionInput
+  primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedManyWithoutPrimaryMissionInput
+  adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedOneWithoutAdverseMissionInput
+}
+
+export type ResearchMissionRecordCreateOrConnectWithoutTechnicalSourceResearchRecordsInput = {
+  where: Prisma.ResearchMissionRecordWhereUniqueInput
+  create: Prisma.XOR<Prisma.ResearchMissionRecordCreateWithoutTechnicalSourceResearchRecordsInput, Prisma.ResearchMissionRecordUncheckedCreateWithoutTechnicalSourceResearchRecordsInput>
+}
+
+export type ResearchMissionRecordUpsertWithoutTechnicalSourceResearchRecordsInput = {
+  update: Prisma.XOR<Prisma.ResearchMissionRecordUpdateWithoutTechnicalSourceResearchRecordsInput, Prisma.ResearchMissionRecordUncheckedUpdateWithoutTechnicalSourceResearchRecordsInput>
+  create: Prisma.XOR<Prisma.ResearchMissionRecordCreateWithoutTechnicalSourceResearchRecordsInput, Prisma.ResearchMissionRecordUncheckedCreateWithoutTechnicalSourceResearchRecordsInput>
+  where?: Prisma.ResearchMissionRecordWhereInput
+}
+
+export type ResearchMissionRecordUpdateToOneWithWhereWithoutTechnicalSourceResearchRecordsInput = {
+  where?: Prisma.ResearchMissionRecordWhereInput
+  data: Prisma.XOR<Prisma.ResearchMissionRecordUpdateWithoutTechnicalSourceResearchRecordsInput, Prisma.ResearchMissionRecordUncheckedUpdateWithoutTechnicalSourceResearchRecordsInput>
+}
+
+export type ResearchMissionRecordUpdateWithoutTechnicalSourceResearchRecordsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  caseId?: Prisma.StringFieldUpdateOperationsInput | string
+  fascicoloReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  referenceDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mode?: Prisma.StringFieldUpdateOperationsInput | string
+  payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  payloadFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lifecycleStatus?: Prisma.EnumResearchMissionLifecycleStatusFieldUpdateOperationsInput | $Enums.ResearchMissionLifecycleStatus
+  status?: Prisma.EnumResearchMissionStatusFieldUpdateOperationsInput | $Enums.ResearchMissionStatus
+  stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  claimantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  activeExecutionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deferredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.EnteUpdateOneWithoutResearchMissionsNestedInput
+  assignedActor?: Prisma.UserUpdateOneWithoutAssignedResearchMissionsNestedInput
+  executionAttempts?: Prisma.ResearchExecutionAttemptUpdateManyWithoutMissionNestedInput
+  automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUpdateManyWithoutMissionNestedInput
+  assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
+  questionResults?: Prisma.ResearchQuestionResultRecordUpdateManyWithoutMissionNestedInput
+  sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUpdateManyWithoutMissionNestedInput
+  primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUpdateManyWithoutPrimaryMissionNestedInput
+  adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
+  knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
+  firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutFirstResearchMissionsNestedInput
+}
+
+export type ResearchMissionRecordUncheckedUpdateWithoutTechnicalSourceResearchRecordsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedActorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contractVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  caseId?: Prisma.StringFieldUpdateOperationsInput | string
+  fascicoloReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  referenceDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mode?: Prisma.StringFieldUpdateOperationsInput | string
+  payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  payloadFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  missionFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  knowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstKnowledgeRevisionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalIssueSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  researchQuestionSemanticKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  referenceDateBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lifecycleStatus?: Prisma.EnumResearchMissionLifecycleStatusFieldUpdateOperationsInput | $Enums.ResearchMissionLifecycleStatus
+  status?: Prisma.EnumResearchMissionStatusFieldUpdateOperationsInput | $Enums.ResearchMissionStatus
+  stateVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  claimantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  activeExecutionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deferredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  executionAttempts?: Prisma.ResearchExecutionAttemptUncheckedUpdateManyWithoutMissionNestedInput
+  automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUncheckedUpdateManyWithoutMissionNestedInput
+  assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutMissionNestedInput
+  questionResults?: Prisma.ResearchQuestionResultRecordUncheckedUpdateManyWithoutMissionNestedInput
+  sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedUpdateManyWithoutMissionNestedInput
+  primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedUpdateManyWithoutPrimaryMissionNestedInput
+  adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedUpdateOneWithoutAdverseMissionNestedInput
 }
 
 export type ResearchMissionRecordCreateWithoutExecutionAttemptsInput = {
@@ -1446,6 +1628,7 @@ export type ResearchMissionRecordCreateWithoutExecutionAttemptsInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordCreateNestedManyWithoutMissionInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutMissionInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementCreateNestedManyWithoutPrimaryMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
@@ -1484,6 +1667,7 @@ export type ResearchMissionRecordUncheckedCreateWithoutExecutionAttemptsInput = 
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordUncheckedCreateNestedManyWithoutMissionInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutMissionInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedManyWithoutPrimaryMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedOneWithoutAdverseMissionInput
 }
@@ -1534,6 +1718,7 @@ export type ResearchMissionRecordUpdateWithoutExecutionAttemptsInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUpdateManyWithoutMissionNestedInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutMissionNestedInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUpdateManyWithoutPrimaryMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
@@ -1572,6 +1757,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutExecutionAttemptsInput = 
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUncheckedUpdateManyWithoutMissionNestedInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutMissionNestedInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedUpdateManyWithoutPrimaryMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedUpdateOneWithoutAdverseMissionNestedInput
 }
@@ -1606,6 +1792,7 @@ export type ResearchMissionRecordCreateWithoutQuestionResultsInput = {
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionCreateNestedManyWithoutMissionInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutMissionInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementCreateNestedManyWithoutPrimaryMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
@@ -1644,6 +1831,7 @@ export type ResearchMissionRecordUncheckedCreateWithoutQuestionResultsInput = {
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUncheckedCreateNestedManyWithoutMissionInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutMissionInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutMissionInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedManyWithoutPrimaryMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedOneWithoutAdverseMissionInput
 }
@@ -1694,6 +1882,7 @@ export type ResearchMissionRecordUpdateWithoutQuestionResultsInput = {
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUpdateManyWithoutMissionNestedInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutMissionNestedInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUpdateManyWithoutPrimaryMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
@@ -1732,6 +1921,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutQuestionResultsInput = {
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUncheckedUpdateManyWithoutMissionNestedInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutMissionNestedInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutMissionNestedInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedUpdateManyWithoutPrimaryMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedUpdateOneWithoutAdverseMissionNestedInput
 }
@@ -1766,6 +1956,7 @@ export type ResearchMissionRecordCreateWithoutSourceAssessmentsInput = {
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionCreateNestedManyWithoutMissionInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutMissionInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementCreateNestedManyWithoutPrimaryMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
@@ -1804,6 +1995,7 @@ export type ResearchMissionRecordUncheckedCreateWithoutSourceAssessmentsInput = 
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUncheckedCreateNestedManyWithoutMissionInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordUncheckedCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutMissionInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedManyWithoutPrimaryMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedOneWithoutAdverseMissionInput
 }
@@ -1854,6 +2046,7 @@ export type ResearchMissionRecordUpdateWithoutSourceAssessmentsInput = {
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUpdateManyWithoutMissionNestedInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutMissionNestedInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUpdateManyWithoutPrimaryMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
@@ -1892,6 +2085,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutSourceAssessmentsInput = 
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUncheckedUpdateManyWithoutMissionNestedInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUncheckedUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutMissionNestedInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedUpdateManyWithoutPrimaryMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedUpdateOneWithoutAdverseMissionNestedInput
 }
@@ -1927,6 +2121,7 @@ export type ResearchMissionRecordCreateWithoutPrimaryAdverseRequirementsInput = 
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordCreateNestedManyWithoutMissionInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutFirstResearchMissionsInput
@@ -1965,6 +2160,7 @@ export type ResearchMissionRecordUncheckedCreateWithoutPrimaryAdverseRequirement
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordUncheckedCreateNestedManyWithoutMissionInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedOneWithoutAdverseMissionInput
 }
 
@@ -2004,6 +2200,7 @@ export type ResearchMissionRecordCreateWithoutAdverseMissionRequirementInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordCreateNestedManyWithoutMissionInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutMissionInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementCreateNestedManyWithoutPrimaryMissionInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutFirstResearchMissionsInput
@@ -2042,6 +2239,7 @@ export type ResearchMissionRecordUncheckedCreateWithoutAdverseMissionRequirement
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordUncheckedCreateNestedManyWithoutMissionInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutMissionInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedManyWithoutPrimaryMissionInput
 }
 
@@ -2092,6 +2290,7 @@ export type ResearchMissionRecordUpdateWithoutPrimaryAdverseRequirementsInput = 
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUpdateManyWithoutMissionNestedInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutFirstResearchMissionsNestedInput
@@ -2130,6 +2329,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutPrimaryAdverseRequirement
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUncheckedUpdateManyWithoutMissionNestedInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedUpdateOneWithoutAdverseMissionNestedInput
 }
 
@@ -2175,6 +2375,7 @@ export type ResearchMissionRecordUpdateWithoutAdverseMissionRequirementInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUpdateManyWithoutMissionNestedInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutMissionNestedInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUpdateManyWithoutPrimaryMissionNestedInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutFirstResearchMissionsNestedInput
@@ -2213,6 +2414,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutAdverseMissionRequirement
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUncheckedUpdateManyWithoutMissionNestedInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutMissionNestedInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedUpdateManyWithoutPrimaryMissionNestedInput
 }
 
@@ -2246,6 +2448,7 @@ export type ResearchMissionRecordCreateWithoutAssistedVerificationsInput = {
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordCreateNestedManyWithoutMissionInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutMissionInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementCreateNestedManyWithoutPrimaryMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
@@ -2284,6 +2487,7 @@ export type ResearchMissionRecordUncheckedCreateWithoutAssistedVerificationsInpu
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUncheckedCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordUncheckedCreateNestedManyWithoutMissionInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutMissionInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedManyWithoutPrimaryMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedOneWithoutAdverseMissionInput
 }
@@ -2334,6 +2538,7 @@ export type ResearchMissionRecordUpdateWithoutAssistedVerificationsInput = {
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUpdateManyWithoutMissionNestedInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutMissionNestedInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUpdateManyWithoutPrimaryMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
@@ -2372,6 +2577,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutAssistedVerificationsInpu
   automaticReportLinks?: Prisma.AutomaticFascicoloReportMissionUncheckedUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUncheckedUpdateManyWithoutMissionNestedInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutMissionNestedInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedUpdateManyWithoutPrimaryMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedUpdateOneWithoutAdverseMissionNestedInput
 }
@@ -2406,6 +2612,7 @@ export type ResearchMissionRecordCreateWithoutAutomaticReportLinksInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordCreateNestedManyWithoutMissionInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutMissionInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementCreateNestedManyWithoutPrimaryMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
@@ -2444,6 +2651,7 @@ export type ResearchMissionRecordUncheckedCreateWithoutAutomaticReportLinksInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordUncheckedCreateNestedManyWithoutMissionInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutMissionInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedManyWithoutPrimaryMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedOneWithoutAdverseMissionInput
 }
@@ -2494,6 +2702,7 @@ export type ResearchMissionRecordUpdateWithoutAutomaticReportLinksInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUpdateManyWithoutMissionNestedInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutMissionNestedInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUpdateManyWithoutPrimaryMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
@@ -2532,6 +2741,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutAutomaticReportLinksInput
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUncheckedUpdateManyWithoutMissionNestedInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutMissionNestedInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedUpdateManyWithoutPrimaryMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedUpdateOneWithoutAdverseMissionNestedInput
 }
@@ -2567,6 +2777,7 @@ export type ResearchMissionRecordCreateWithoutKnowledgeRevisionInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordCreateNestedManyWithoutMissionInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutMissionInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementCreateNestedManyWithoutPrimaryMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutFirstResearchMissionsInput
@@ -2604,6 +2815,7 @@ export type ResearchMissionRecordUncheckedCreateWithoutKnowledgeRevisionInput = 
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordUncheckedCreateNestedManyWithoutMissionInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutMissionInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedManyWithoutPrimaryMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedOneWithoutAdverseMissionInput
 }
@@ -2649,6 +2861,7 @@ export type ResearchMissionRecordCreateWithoutFirstKnowledgeRevisionInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordCreateNestedManyWithoutMissionInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordCreateNestedManyWithoutMissionInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementCreateNestedManyWithoutPrimaryMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementCreateNestedOneWithoutAdverseMissionInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutResearchMissionsInput
@@ -2686,6 +2899,7 @@ export type ResearchMissionRecordUncheckedCreateWithoutFirstKnowledgeRevisionInp
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedCreateNestedManyWithoutMissionInput
   questionResults?: Prisma.ResearchQuestionResultRecordUncheckedCreateNestedManyWithoutMissionInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedCreateNestedManyWithoutMissionInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedCreateNestedManyWithoutMissionInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedManyWithoutPrimaryMissionInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedCreateNestedOneWithoutAdverseMissionInput
 }
@@ -2791,6 +3005,7 @@ export type ResearchMissionRecordUpdateWithoutTenantInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUpdateManyWithoutMissionNestedInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutMissionNestedInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUpdateManyWithoutPrimaryMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
@@ -2829,6 +3044,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutTenantInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUncheckedUpdateManyWithoutMissionNestedInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutMissionNestedInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedUpdateManyWithoutPrimaryMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedUpdateOneWithoutAdverseMissionNestedInput
 }
@@ -2921,6 +3137,7 @@ export type ResearchMissionRecordUpdateWithoutAssignedActorInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUpdateManyWithoutMissionNestedInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutMissionNestedInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUpdateManyWithoutPrimaryMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
@@ -2959,6 +3176,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutAssignedActorInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUncheckedUpdateManyWithoutMissionNestedInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutMissionNestedInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedUpdateManyWithoutPrimaryMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedUpdateOneWithoutAdverseMissionNestedInput
 }
@@ -3081,6 +3299,7 @@ export type ResearchMissionRecordUpdateWithoutKnowledgeRevisionInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUpdateManyWithoutMissionNestedInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutMissionNestedInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUpdateManyWithoutPrimaryMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
   firstKnowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutFirstResearchMissionsNestedInput
@@ -3118,6 +3337,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutKnowledgeRevisionInput = 
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUncheckedUpdateManyWithoutMissionNestedInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutMissionNestedInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedUpdateManyWithoutPrimaryMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedUpdateOneWithoutAdverseMissionNestedInput
 }
@@ -3182,6 +3402,7 @@ export type ResearchMissionRecordUpdateWithoutFirstKnowledgeRevisionInput = {
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUpdateManyWithoutMissionNestedInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUpdateManyWithoutMissionNestedInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUpdateManyWithoutPrimaryMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUpdateOneWithoutAdverseMissionNestedInput
   knowledgeRevision?: Prisma.FascicoloKnowledgeRevisionUpdateOneWithoutResearchMissionsNestedInput
@@ -3219,6 +3440,7 @@ export type ResearchMissionRecordUncheckedUpdateWithoutFirstKnowledgeRevisionInp
   assistedVerifications?: Prisma.ResearchAssistedVerificationRecordUncheckedUpdateManyWithoutMissionNestedInput
   questionResults?: Prisma.ResearchQuestionResultRecordUncheckedUpdateManyWithoutMissionNestedInput
   sourceAssessments?: Prisma.ResearchSourceAssessmentRecordUncheckedUpdateManyWithoutMissionNestedInput
+  technicalSourceResearchRecords?: Prisma.TechnicalSourceResearchRecordUncheckedUpdateManyWithoutMissionNestedInput
   primaryAdverseRequirements?: Prisma.ResearchAdverseRequirementUncheckedUpdateManyWithoutPrimaryMissionNestedInput
   adverseMissionRequirement?: Prisma.ResearchAdverseRequirementUncheckedUpdateOneWithoutAdverseMissionNestedInput
 }
@@ -3263,6 +3485,7 @@ export type ResearchMissionRecordCountOutputType = {
   assistedVerifications: number
   questionResults: number
   sourceAssessments: number
+  technicalSourceResearchRecords: number
   primaryAdverseRequirements: number
 }
 
@@ -3272,6 +3495,7 @@ export type ResearchMissionRecordCountOutputTypeSelect<ExtArgs extends runtime.T
   assistedVerifications?: boolean | ResearchMissionRecordCountOutputTypeCountAssistedVerificationsArgs
   questionResults?: boolean | ResearchMissionRecordCountOutputTypeCountQuestionResultsArgs
   sourceAssessments?: boolean | ResearchMissionRecordCountOutputTypeCountSourceAssessmentsArgs
+  technicalSourceResearchRecords?: boolean | ResearchMissionRecordCountOutputTypeCountTechnicalSourceResearchRecordsArgs
   primaryAdverseRequirements?: boolean | ResearchMissionRecordCountOutputTypeCountPrimaryAdverseRequirementsArgs
 }
 
@@ -3323,6 +3547,13 @@ export type ResearchMissionRecordCountOutputTypeCountSourceAssessmentsArgs<ExtAr
 /**
  * ResearchMissionRecordCountOutputType without action
  */
+export type ResearchMissionRecordCountOutputTypeCountTechnicalSourceResearchRecordsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TechnicalSourceResearchRecordWhereInput
+}
+
+/**
+ * ResearchMissionRecordCountOutputType without action
+ */
 export type ResearchMissionRecordCountOutputTypeCountPrimaryAdverseRequirementsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ResearchAdverseRequirementWhereInput
 }
@@ -3363,6 +3594,7 @@ export type ResearchMissionRecordSelect<ExtArgs extends runtime.Types.Extensions
   assistedVerifications?: boolean | Prisma.ResearchMissionRecord$assistedVerificationsArgs<ExtArgs>
   questionResults?: boolean | Prisma.ResearchMissionRecord$questionResultsArgs<ExtArgs>
   sourceAssessments?: boolean | Prisma.ResearchMissionRecord$sourceAssessmentsArgs<ExtArgs>
+  technicalSourceResearchRecords?: boolean | Prisma.ResearchMissionRecord$technicalSourceResearchRecordsArgs<ExtArgs>
   primaryAdverseRequirements?: boolean | Prisma.ResearchMissionRecord$primaryAdverseRequirementsArgs<ExtArgs>
   adverseMissionRequirement?: boolean | Prisma.ResearchMissionRecord$adverseMissionRequirementArgs<ExtArgs>
   knowledgeRevision?: boolean | Prisma.ResearchMissionRecord$knowledgeRevisionArgs<ExtArgs>
@@ -3477,6 +3709,7 @@ export type ResearchMissionRecordInclude<ExtArgs extends runtime.Types.Extension
   assistedVerifications?: boolean | Prisma.ResearchMissionRecord$assistedVerificationsArgs<ExtArgs>
   questionResults?: boolean | Prisma.ResearchMissionRecord$questionResultsArgs<ExtArgs>
   sourceAssessments?: boolean | Prisma.ResearchMissionRecord$sourceAssessmentsArgs<ExtArgs>
+  technicalSourceResearchRecords?: boolean | Prisma.ResearchMissionRecord$technicalSourceResearchRecordsArgs<ExtArgs>
   primaryAdverseRequirements?: boolean | Prisma.ResearchMissionRecord$primaryAdverseRequirementsArgs<ExtArgs>
   adverseMissionRequirement?: boolean | Prisma.ResearchMissionRecord$adverseMissionRequirementArgs<ExtArgs>
   knowledgeRevision?: boolean | Prisma.ResearchMissionRecord$knowledgeRevisionArgs<ExtArgs>
@@ -3506,6 +3739,7 @@ export type $ResearchMissionRecordPayload<ExtArgs extends runtime.Types.Extensio
     assistedVerifications: Prisma.$ResearchAssistedVerificationRecordPayload<ExtArgs>[]
     questionResults: Prisma.$ResearchQuestionResultRecordPayload<ExtArgs>[]
     sourceAssessments: Prisma.$ResearchSourceAssessmentRecordPayload<ExtArgs>[]
+    technicalSourceResearchRecords: Prisma.$TechnicalSourceResearchRecordPayload<ExtArgs>[]
     primaryAdverseRequirements: Prisma.$ResearchAdverseRequirementPayload<ExtArgs>[]
     adverseMissionRequirement: Prisma.$ResearchAdverseRequirementPayload<ExtArgs> | null
     knowledgeRevision: Prisma.$FascicoloKnowledgeRevisionPayload<ExtArgs> | null
@@ -3940,6 +4174,7 @@ export interface Prisma__ResearchMissionRecordClient<T, Null = never, ExtArgs ex
   assistedVerifications<T extends Prisma.ResearchMissionRecord$assistedVerificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResearchMissionRecord$assistedVerificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResearchAssistedVerificationRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   questionResults<T extends Prisma.ResearchMissionRecord$questionResultsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResearchMissionRecord$questionResultsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResearchQuestionResultRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sourceAssessments<T extends Prisma.ResearchMissionRecord$sourceAssessmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResearchMissionRecord$sourceAssessmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResearchSourceAssessmentRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  technicalSourceResearchRecords<T extends Prisma.ResearchMissionRecord$technicalSourceResearchRecordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResearchMissionRecord$technicalSourceResearchRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TechnicalSourceResearchRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   primaryAdverseRequirements<T extends Prisma.ResearchMissionRecord$primaryAdverseRequirementsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResearchMissionRecord$primaryAdverseRequirementsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResearchAdverseRequirementPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   adverseMissionRequirement<T extends Prisma.ResearchMissionRecord$adverseMissionRequirementArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResearchMissionRecord$adverseMissionRequirementArgs<ExtArgs>>): Prisma.Prisma__ResearchAdverseRequirementClient<runtime.Types.Result.GetResult<Prisma.$ResearchAdverseRequirementPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   knowledgeRevision<T extends Prisma.ResearchMissionRecord$knowledgeRevisionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResearchMissionRecord$knowledgeRevisionArgs<ExtArgs>>): Prisma.Prisma__FascicoloKnowledgeRevisionClient<runtime.Types.Result.GetResult<Prisma.$FascicoloKnowledgeRevisionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -4556,6 +4791,30 @@ export type ResearchMissionRecord$sourceAssessmentsArgs<ExtArgs extends runtime.
   take?: number
   skip?: number
   distinct?: Prisma.ResearchSourceAssessmentRecordScalarFieldEnum | Prisma.ResearchSourceAssessmentRecordScalarFieldEnum[]
+}
+
+/**
+ * ResearchMissionRecord.technicalSourceResearchRecords
+ */
+export type ResearchMissionRecord$technicalSourceResearchRecordsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TechnicalSourceResearchRecord
+   */
+  select?: Prisma.TechnicalSourceResearchRecordSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TechnicalSourceResearchRecord
+   */
+  omit?: Prisma.TechnicalSourceResearchRecordOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TechnicalSourceResearchRecordInclude<ExtArgs> | null
+  where?: Prisma.TechnicalSourceResearchRecordWhereInput
+  orderBy?: Prisma.TechnicalSourceResearchRecordOrderByWithRelationInput | Prisma.TechnicalSourceResearchRecordOrderByWithRelationInput[]
+  cursor?: Prisma.TechnicalSourceResearchRecordWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TechnicalSourceResearchRecordScalarFieldEnum | Prisma.TechnicalSourceResearchRecordScalarFieldEnum[]
 }
 
 /**

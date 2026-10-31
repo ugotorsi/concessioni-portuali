@@ -30,6 +30,18 @@ describe("runSerializableTransactionWithRetry", () => {
     });
   });
 
+  it("passes a bounded timeout override to Prisma", async () => {
+    const callback = vi.fn().mockResolvedValue("done");
+
+    await expect(runSerializableTransactionWithRetry(callback, {
+      timeoutMs: 30_000,
+    })).resolves.toBe("done");
+    expect(prismaMock.$transaction).toHaveBeenCalledWith(callback, {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      timeout: 30_000,
+    });
+  });
+
   it.each([
     { conflicts: 1, attempts: 2 },
     { conflicts: 2, attempts: 3 },

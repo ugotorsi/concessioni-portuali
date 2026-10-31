@@ -106,6 +106,6 @@ describe("Fascicolo timeline workspace", () => {
     expect(timelineSource).not.toContain("<Table");
     expect(detailSource).toContain("events={timelineEvents}");
     expect(intakeSource).toContain("events={timelineEvents}");
-    expect(shellSource).toContain("model.timeline.slice(0, 3)");
+    expect(shellSource).toContain('["timeline", "Cronologia"]');
   });
 });

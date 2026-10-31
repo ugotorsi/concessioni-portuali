@@ -10,6 +10,7 @@ import {
 } from "@/components/legal-research/reviewer-view-model";
 import { InitialVerificationForm } from "@/components/legal-research/InitialVerificationForm";
 import { AdverseSearchForm } from "@/components/legal-research/AdverseSearchForm";
+import { LegalApplicabilityReviewPanel } from "@/components/legal-research/LegalApplicabilityReviewPanel";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -349,6 +350,7 @@ export function LegalReviewerClient({ initialMissionId = "" }: Readonly<{ initia
 
       {verification ? (
         <>
+          <LegalApplicabilityReviewPanel verification={verification} onUpdated={setVerification} />
           <Card>
             <CardHeader className="flex flex-row items-start justify-between gap-4">
               <div>

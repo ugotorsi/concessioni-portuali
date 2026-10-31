@@ -350,10 +350,10 @@ export async function registerStoredDocument<Result = never>(
     result: Awaited<ReturnType<typeof runAtomicUnit>>,
   ) => {
     if (input.procedimentoId && stored.mimeType === "application/pdf") {
-      await requestDocumentWorkerActivation(
-        "DOCUMENT_EXTRACTION",
-        input.procedimentoId,
-      );
+      await requestDocumentWorkerActivation({
+        kind: "DOCUMENT_EXTRACTION",
+        procedimentoId: input.procedimentoId,
+      });
     }
     return { ...result, storageKey, checksum };
   };

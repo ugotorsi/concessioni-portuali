@@ -88,7 +88,7 @@ describe("B2C9 generic async job worker", () => {
       workerId: "worker-1", leaseDurationMs: 60_000, retryDelayMs: 1_000, registry,
     })).resolves.toEqual({ outcome: "SUCCEEDED", jobId: "job-1" });
     expect(persistence.succeedAsyncJob).toHaveBeenCalledWith(expect.objectContaining({
-      resultReference: { referenceType: "FIXTURE_RESULT", referenceId: "fixture-1", metadata: { attemptCount: 1 } },
+      resultReference: { referenceType: "FIXTURE_RESULT", referenceId: "fixture-1", referenceVersion: null, metadata: { attemptCount: 1 } },
     }));
   });
 

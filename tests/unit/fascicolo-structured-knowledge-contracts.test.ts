@@ -3,10 +3,20 @@ import { describe, expect, it } from "vitest";
 import { providerAnalysisPayloadV1Schema } from "@/server/ai/fascicoloAnalysis";
 import {
   fascicoloStructuredKnowledgeSchema,
+  fascicoloDocumentStructuredKnowledgeSchema,
+  fascicoloDocumentKnowledgeProposalSchema,
+  structuredKnowledgeValidationCode,
   knowledgeEvidenceCandidateSchema,
   lot2KnowledgeKinds,
+  compileFascicoloDocumentKnowledgeProposal,
+  DocumentKnowledgeCompilationError,
   structuredDateSchema,
 } from "@/server/fascicolo-knowledge";
+import {
+  canonicalKnowledgeIdentitySchema,
+  knowledgeSourceSpanSchema,
+  persistedKnowledgeIdentitySchema,
+} from "@/server/fascicolo-knowledge/contracts";
 
 const baseAnalysis = {
   summary: { text: "Sintesi documentata.", basisRefs: ["DOCUMENT_1.PAGE_1"] },
@@ -22,6 +32,7 @@ function item(kind: typeof lot2KnowledgeKinds[number], index: number) {
   const common = { localId: `item-${index}`, kind, confidence: 80, basisRefs: ["DOCUMENT_1.PAGE_1"] };
   switch (kind) {
     case "PARTY_ROLE": return { ...common, payload: { subjectLocalId: "subject-1", role: "richiedente", context: null } };
+    case "PARTY_POSITION": return { ...common, payload: { subjectLocalId: "subject-1", positionType: "DEFENSE", normalizedStatement: "Difesa documentata", context: "controdeduzioni", relatedItemLocalIds: [] } };
     case "FACT": return { ...common, payload: { normalizedStatement: "Fatto documentato", subjectLocalIds: ["subject-1"], object: null, qualifier: null } };
     case "EVENT": return { ...common, payload: { title: "Evento", normalizedStatement: "Evento documentato", date: { precision: "EXACT", from: "2026-09-29", to: null, originalText: null, confidence: 90 }, subjectLocalIds: [], relatedItemLocalIds: [] } };
     case "LEGAL_ACT":
@@ -33,6 +44,7 @@ function item(kind: typeof lot2KnowledgeKinds[number], index: number) {
 }
 
 function validKnowledge() {
+  const items = lot2KnowledgeKinds.map(item);
   return {
     version: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1",
     subjects: [{
@@ -42,11 +54,106 @@ function validKnowledge() {
       strongIdentifiers: [{ type: "PEC", value: "protocollo@pec.example" }],
       aliases: ["AdSP"],
     }],
-    items: lot2KnowledgeKinds.map(item),
+    items,
+    sourceQuotes: items.map((candidate) => ({
+      itemLocalId: candidate.localId,
+      basisRef: "DOCUMENT_1.PAGE_1",
+      quote: `Citazione autentica ${candidate.localId}`,
+    })),
   };
 }
 
+function semanticIssues(knowledge: unknown) {
+  const parsed = fascicoloStructuredKnowledgeSchema.safeParse(knowledge);
+  if (parsed.success) return [];
+  return parsed.error.issues.map((issue) => ({
+    code: structuredKnowledgeValidationCode(issue),
+    path: issue.path.join("."),
+  }));
+}
+
+function documentSemanticIssues(knowledge: unknown) {
+  const parsed = fascicoloDocumentStructuredKnowledgeSchema.safeParse(knowledge);
+  if (parsed.success) return [];
+  return parsed.error.issues.map((issue) => ({
+    code: structuredKnowledgeValidationCode(issue),
+    path: issue.path.join("."),
+  }));
+}
+
 describe("Lotto 2 structured knowledge contracts", () => {
+  it("requires server-verifiable source spans with ordered offsets", () => {
+    const span = {
+      documentoId: "document-1",
+      documentFileVersionId: "version-1",
+      pageNumber: 1,
+      startOffset: 10,
+      endOffset: 24,
+      quote: "Testo originale",
+      textSha256: "a".repeat(64),
+      quoteSha256: "b".repeat(64),
+      basisRef: "DOCUMENT_1.PAGE_1",
+    };
+    expect(knowledgeSourceSpanSchema.safeParse(span).success).toBe(true);
+    expect(knowledgeSourceSpanSchema.safeParse({ ...span, endOffset: 10 }).success).toBe(false);
+    expect(knowledgeSourceSpanSchema.safeParse({ ...span, quoteSha256: null }).success).toBe(false);
+  });
+
+  it("keeps physical versions separate from verified, ambiguous, and legacy identity", () => {
+    const sourceSpanFingerprint = "c".repeat(64);
+    expect(canonicalKnowledgeIdentitySchema.safeParse({
+      id: "identity-1",
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      kind: "FACT",
+      createdInRevisionId: "revision-1",
+      creationBasis: {
+        type: "SERVER_ASSIGNED_NEW",
+        sourceSpanFingerprints: [sourceSpanFingerprint],
+      },
+    }).success).toBe(true);
+    expect(persistedKnowledgeIdentitySchema.safeParse({
+      physicalItemId: "item-1",
+      identityId: "identity-1",
+      state: "VERIFIED_NEW",
+      basis: null,
+    }).success).toBe(true);
+    expect(persistedKnowledgeIdentitySchema.safeParse({
+      physicalItemId: "item-2",
+      identityId: "identity-1",
+      state: "VERIFIED_CONTINUATION",
+      basis: {
+        type: "VERIFIED_SOURCE_SPAN_CONTINUITY",
+        predecessorItemId: "item-1",
+        predecessorRevisionId: "revision-1",
+        sourceSpanFingerprints: [sourceSpanFingerprint],
+      },
+    }).success).toBe(true);
+    expect(persistedKnowledgeIdentitySchema.safeParse({
+      physicalItemId: "item-3",
+      identityId: null,
+      state: "AMBIGUOUS",
+      basis: {
+        type: "AMBIGUOUS_CONTINUITY",
+        candidatePredecessorItemIds: ["item-1", "item-2"],
+        reasonCodes: ["MULTIPLE_PREDECESSORS"],
+        sourceSpanFingerprints: [sourceSpanFingerprint],
+      },
+    }).success).toBe(true);
+    expect(persistedKnowledgeIdentitySchema.safeParse({
+      physicalItemId: "legacy-1",
+      identityId: null,
+      state: "LEGACY_UNVERIFIED",
+      basis: null,
+    }).success).toBe(true);
+    expect(persistedKnowledgeIdentitySchema.safeParse({
+      physicalItemId: "item-4",
+      identityId: "identity-1",
+      state: "VERIFIED_CONTINUATION",
+      basis: null,
+    }).success).toBe(false);
+  });
+
   it("rejects incomplete document extraction provenance", () => {
     const complete = {
       provenanceType: "DOCUMENT_EXTRACTION",
@@ -69,6 +176,21 @@ describe("Lotto 2 structured knowledge contracts", () => {
     expect(fascicoloStructuredKnowledgeSchema.safeParse(malformed).success).toBe(false);
   });
 
+  it("keeps semantic descriptions separate from validated source quotation candidates", () => {
+    const knowledge = validKnowledge();
+    expect(fascicoloStructuredKnowledgeSchema.safeParse(knowledge).success).toBe(true);
+    expect(fascicoloStructuredKnowledgeSchema.safeParse({
+      ...knowledge,
+      sourceQuotes: [{
+        itemLocalId: "item-1",
+        basisRef: "DOCUMENT_2.PAGE_1",
+        quote: "Citazione fuori evidenza",
+      }],
+    }).success).toBe(false);
+    const { sourceQuotes: _sourceQuotes, ...legacyKnowledge } = knowledge;
+    expect(fascicoloStructuredKnowledgeSchema.parse(legacyKnowledge).sourceQuotes).toEqual([]);
+  });
+
   it("keeps structured knowledge optional for backward-compatible provider output", () => {
     expect(providerAnalysisPayloadV1Schema.parse(baseAnalysis)).toEqual(baseAnalysis);
   });
@@ -81,6 +203,49 @@ describe("Lotto 2 structured knowledge contracts", () => {
     expect(parsed.structuredKnowledge?.items.map((entry) => entry.kind)).toEqual(lot2KnowledgeKinds);
   });
 
+  it("accepts documented proceeding identities while preserving legacy payloads", () => {
+    const identified = validKnowledge();
+    const fact = identified.items.find((entry) => entry.kind === "FACT")!;
+    const anchor = identified.items.find((entry) => entry.kind === "LEGAL_ACT")!;
+    if (fact.kind !== "FACT") throw new Error("Expected fact fixture.");
+    const parsed = fascicoloStructuredKnowledgeSchema.parse({
+      ...identified,
+      items: identified.items.map((entry) => entry.kind === "FACT" ? {
+        ...entry,
+        payload: {
+          ...entry.payload,
+          proceedingIdentity: {
+            declaredKey: "administrative-proceeding-a",
+            canonicalAnchorLocalId: anchor.localId,
+            kind: "ADMINISTRATIVE_ORIGINAL",
+            evidenceBasisRefs: ["DOCUMENT_1.PAGE_1"],
+          },
+        },
+      } : entry),
+      legalIssues: [{
+        localId: "issue-1",
+        title: "Disciplina transitoria",
+        normalizedIssue: "Quale disciplina si applica al procedimento A?",
+        areaOfLaw: "diritto amministrativo",
+        priority: "HIGH",
+        rationale: "La questione dipende dallo stato storico del procedimento.",
+        originatingItemLocalIds: [fact.localId, anchor.localId],
+        confidence: 90,
+        referenceDateBasis: null,
+        targetProceedingIdentity: {
+          declaredKey: "administrative-proceeding-a",
+          canonicalAnchorLocalId: anchor.localId,
+          kind: "ADMINISTRATIVE_ORIGINAL",
+          evidenceBasisRefs: ["DOCUMENT_1.PAGE_1"],
+        },
+      }],
+    });
+    expect(parsed.items.find((entry) => entry.kind === "FACT")?.payload).toMatchObject({
+      proceedingIdentity: { canonicalAnchorLocalId: anchor.localId },
+    });
+    expect(fascicoloStructuredKnowledgeSchema.safeParse(validKnowledge()).success).toBe(true);
+  });
+
   it("rejects unknown fields, duplicate local identities, and unknown subjects", () => {
     expect(fascicoloStructuredKnowledgeSchema.safeParse({ ...validKnowledge(), unexpected: true }).success).toBe(false);
     const duplicate = validKnowledge();
@@ -90,6 +255,529 @@ describe("Lotto 2 structured knowledge contracts", () => {
     const fact = unknownSubject.items.find((entry) => entry.kind === "FACT")!;
     if (fact.kind === "FACT") fact.payload.subjectLocalIds = ["unknown-subject"];
     expect(fascicoloStructuredKnowledgeSchema.safeParse(unknownSubject).success).toBe(false);
+  });
+
+  it("reports exact safe semantic codes and paths for cross-field violations", () => {
+    const base = {
+      ...structuredClone(validKnowledge()),
+      documentInventory: [{
+        localId: "document-1",
+        basisRefs: ["DOCUMENT_1.PAGE_1"],
+        documentType: "provvedimento",
+        documentDate: null,
+        issuer: null,
+        recipients: [],
+        proceduralPhase: null,
+        subject: "Atto principale",
+        summary: "Documento materiale.",
+        referencedActs: [],
+        attachments: [],
+        materialProfiles: ["LEGAL"],
+        classification: "MATERIAL",
+        rationale: "Contiene fatti rilevanti.",
+        relatedItemLocalIds: ["item-3"],
+      }],
+      legalIssues: [{
+        localId: "issue-1",
+        title: "Questione",
+        normalizedIssue: "Questione giuridica documentata.",
+        areaOfLaw: "diritto amministrativo",
+        priority: "HIGH",
+        rationale: "Origina da un fatto documentato.",
+        originatingItemLocalIds: ["item-3"],
+        confidence: 80,
+        referenceDateBasis: null,
+        targetProceedingIdentity: null,
+      }],
+      researchQuestions: [{
+        localId: "question-1",
+        legalIssueLocalId: "issue-1",
+        canonicalQuestion: "Quale disciplina si applica?",
+        priority: "HIGH",
+        referenceDate: "2026-09-29",
+        referenceDateBasis: {
+          type: "EVENT_DATE",
+          itemLocalId: "item-3",
+          rationale: "Data del fatto.",
+          userConfirmedDateSource: null,
+        },
+        requestedCapabilities: ["SEMANTIC_DISCOVERY"],
+        mode: "PRIMARY",
+      }],
+    };
+    expect(fascicoloStructuredKnowledgeSchema.safeParse(base).success).toBe(true);
+
+    const duplicate = structuredClone(base);
+    duplicate.items[1].localId = duplicate.items[0].localId;
+    expect(semanticIssues(duplicate)).toContainEqual({
+      code: "DUPLICATE_ITEM_LOCAL_ID",
+      path: "items",
+    });
+
+    const invalidQuote = structuredClone(base);
+    invalidQuote.sourceQuotes[0].basisRef = "DOCUMENT_2.PAGE_1";
+    expect(semanticIssues(invalidQuote)).toContainEqual({
+      code: "INVALID_SOURCE_QUOTE_REFERENCE",
+      path: "sourceQuotes.0",
+    });
+
+    const invalidOrigin = structuredClone(base);
+    invalidOrigin.legalIssues[0].originatingItemLocalIds = ["item-9"];
+    expect(semanticIssues(invalidOrigin)).toContainEqual({
+      code: "INVALID_ISSUE_ORIGIN",
+      path: "legalIssues.0.originatingItemLocalIds",
+    });
+
+    const invalidQuestion = structuredClone(base);
+    invalidQuestion.researchQuestions[0].legalIssueLocalId = "issue-missing";
+    invalidQuestion.researchQuestions[0].referenceDateBasis.itemLocalId = "item-missing";
+    expect(semanticIssues(invalidQuestion)).toEqual(expect.arrayContaining([
+      { code: "UNKNOWN_LEGAL_ISSUE", path: "researchQuestions.0.legalIssueLocalId" },
+      { code: "UNKNOWN_REFERENCE_DATE_ITEM", path: "researchQuestions.0.referenceDateBasis.itemLocalId" },
+    ]));
+
+    const invalidInventory = structuredClone(base);
+    invalidInventory.documentInventory[0].classification = "UNCERTAIN";
+    expect(semanticIssues(invalidInventory)).toContainEqual({
+      code: "UNCERTAIN_DOCUMENT_REQUIRES_GAP",
+      path: "documentInventory.0.relatedItemLocalIds",
+    });
+
+    const unresolvedDependency = structuredClone(base);
+    const contradiction = unresolvedDependency.items.find((entry) => (
+      entry.kind === "CONTRADICTION"
+    ));
+    if (contradiction?.kind !== "CONTRADICTION") throw new Error("Expected contradiction.");
+    contradiction.payload.conflictingItemLocalIds = ["item-missing", "item-2"];
+    expect(semanticIssues(unresolvedDependency)).toContainEqual({
+      code: "UNRESOLVED_REQUIRED_ITEM_REFERENCE",
+      path: `items.${unresolvedDependency.items.indexOf(contradiction)}.payload`,
+    });
+  });
+
+  it("aligns document-only citation and research-date rules with V7 persistence", () => {
+    const base = {
+      ...structuredClone(validKnowledge()),
+      legalIssues: [{
+        localId: "issue-1",
+        title: "Questione",
+        normalizedIssue: "Questione fondata sull'evento.",
+        areaOfLaw: "diritto amministrativo",
+        priority: "HIGH",
+        rationale: "L'evento determina la data di riferimento.",
+        originatingItemLocalIds: ["item-3"],
+        confidence: 80,
+        referenceDateBasis: null,
+        targetProceedingIdentity: null,
+      }],
+      researchQuestions: [{
+        localId: "question-1",
+        legalIssueLocalId: "issue-1",
+        canonicalQuestion: "Quale disciplina era vigente?",
+        priority: "HIGH",
+        referenceDate: "2026-09-29",
+        referenceDateBasis: {
+          type: "EVENT_DATE",
+          itemLocalId: "item-3",
+          rationale: "Data esatta dell'evento.",
+          userConfirmedDateSource: null,
+        },
+        requestedCapabilities: ["SEMANTIC_DISCOVERY"],
+        mode: "PRIMARY",
+      }],
+    };
+    expect(fascicoloDocumentStructuredKnowledgeSchema.safeParse(base).success).toBe(true);
+
+    const missingQuote = structuredClone(base);
+    missingQuote.sourceQuotes = missingQuote.sourceQuotes.filter((quote) => (
+      quote.itemLocalId !== "item-3"
+    ));
+    expect(documentSemanticIssues(missingQuote)).toContainEqual({
+      code: "MISSING_SOURCE_QUOTE",
+      path: "items.3.basisRefs",
+    });
+
+    const unsupportedBasis = structuredClone(base);
+    unsupportedBasis.researchQuestions[0].referenceDateBasis.type = "FACT_DATE";
+    expect(documentSemanticIssues(unsupportedBasis)).toContainEqual({
+      code: "REFERENCE_DATE_BASIS_TYPE_UNSUPPORTED",
+      path: "researchQuestions.0.referenceDateBasis.type",
+    });
+
+    const mismatchedDate = structuredClone(base);
+    mismatchedDate.researchQuestions[0].referenceDate = "2026-09-30";
+    expect(documentSemanticIssues(mismatchedDate)).toContainEqual({
+      code: "REFERENCE_DATE_MISMATCH",
+      path: "researchQuestions.0.referenceDate",
+    });
+
+    const unrelatedBasis = structuredClone(base);
+    unrelatedBasis.legalIssues[0].originatingItemLocalIds = ["item-2"];
+    expect(documentSemanticIssues(unrelatedBasis)).toContainEqual({
+      code: "REFERENCE_DATE_ITEM_NOT_ISSUE_ORIGIN",
+      path: "researchQuestions.0.referenceDateBasis.itemLocalId",
+    });
+  });
+
+  it("strictly validates proceeding anchors while reconciling only uniquely documented origins", () => {
+    const base = validKnowledge();
+    const legalAct = base.items.find((candidate) => candidate.kind === "LEGAL_ACT");
+    const measure = base.items.find((candidate) => candidate.kind === "MEASURE");
+    const fact = base.items.find((candidate) => candidate.kind === "FACT");
+    if (!legalAct || !measure || !fact) throw new Error("Expected proceeding identity fixtures.");
+    const issue = (
+      originatingItemLocalIds: string[],
+      canonicalAnchorLocalId: string,
+      evidenceBasisRefs = ["DOCUMENT_1.PAGE_1"],
+    ) => ({
+      localId: "issue-proceeding",
+      title: "Identita del procedimento",
+      normalizedIssue: "Quale procedimento e documentato?",
+      areaOfLaw: "diritto amministrativo",
+      priority: "HIGH",
+      rationale: "L'identita deve derivare dagli atti documentati.",
+      originatingItemLocalIds,
+      confidence: 90,
+      referenceDateBasis: null,
+      targetProceedingIdentity: {
+        declaredKey: "procedimento-dichiarato",
+        canonicalAnchorLocalId,
+        kind: "ADMINISTRATIVE_ORIGINAL",
+        evidenceBasisRefs,
+      },
+    });
+    const knowledge = (legalIssue: ReturnType<typeof issue>) => ({
+      ...structuredClone(base),
+      legalIssues: [legalIssue],
+      researchQuestions: [],
+      documentInventory: [],
+    });
+    const proposal = (
+      originatingItemLocalIds: string[],
+      candidateAnchorLocalId: string,
+      evidenceBasisRefs = ["DOCUMENT_1.PAGE_1"],
+    ) => {
+      const {
+        targetProceedingIdentity: _targetProceedingIdentity,
+        ...proposalIssue
+      } = issue(originatingItemLocalIds, candidateAnchorLocalId, evidenceBasisRefs);
+      return fascicoloDocumentKnowledgeProposalSchema.parse({
+        ...structuredClone(base),
+        items: base.items.map((candidate) => (
+          candidate.kind === "FACT" || candidate.kind === "EVENT"
+            ? {
+                ...structuredClone(candidate),
+                payload: {
+                  ...structuredClone(candidate.payload),
+                  proceedingIdentityHint: null,
+                },
+              }
+            : structuredClone(candidate)
+        )),
+        legalIssues: [{
+          ...proposalIssue,
+          targetProceedingHint: {
+            declaredKey: "procedimento-dichiarato",
+            candidateAnchorLocalId,
+            kind: "ADMINISTRATIVE_ORIGINAL",
+            evidenceBasisRefs,
+          },
+        }],
+        researchQuestions: [],
+        documentInventory: [],
+      });
+    };
+
+    expect(fascicoloDocumentStructuredKnowledgeSchema.safeParse(
+      knowledge(issue([legalAct.localId], legalAct.localId)),
+    ).success).toBe(true);
+    expect(fascicoloDocumentStructuredKnowledgeSchema.safeParse(
+      knowledge(issue([measure.localId], measure.localId)),
+    ).success).toBe(true);
+
+    const invalidCases = [
+      knowledge(issue([legalAct.localId], "missing-anchor")),
+      knowledge(issue([fact.localId], fact.localId)),
+      knowledge(issue([measure.localId], legalAct.localId)),
+    ];
+    for (const invalid of invalidCases) {
+      expect(semanticIssues(invalid)).toContainEqual({
+        code: "INVALID_PROCEEDING_ANCHOR",
+        path: "legalIssues.0.targetProceedingIdentity.canonicalAnchorLocalId",
+      });
+    }
+    expect(semanticIssues(
+      knowledge(issue([legalAct.localId], legalAct.localId, ["DOCUMENT_1.PAGE_99"])),
+    )).toContainEqual({
+      code: "INVALID_PROCEEDING_IDENTITY_EVIDENCE",
+      path: "legalIssues.0.targetProceedingIdentity.evidenceBasisRefs",
+    });
+
+    const repaired = compileFascicoloDocumentKnowledgeProposal({
+      proposal: proposal(
+        [legalAct.localId],
+        "missing-anchor",
+        ["DOCUMENT_1.PAGE_99"],
+      ),
+      sourceTextByBasisRef: new Map([[
+        "DOCUMENT_1.PAGE_1",
+        base.sourceQuotes.map((quote) => quote.quote).join("\n"),
+      ]]),
+    }).knowledge;
+    expect(repaired.legalIssues[0].targetProceedingIdentity).toMatchObject({
+      declaredKey: null,
+      canonicalAnchorLocalId: legalAct.localId,
+      evidenceBasisRefs: ["DOCUMENT_1.PAGE_1"],
+    });
+    expect(repaired.legalIssues[0].targetProceedingResolution).toMatchObject({
+      status: "VERIFIED",
+      action: "REBUILT",
+      providerClaim: { declaredKey: "procedimento-dichiarato" },
+    });
+
+    const ambiguous = compileFascicoloDocumentKnowledgeProposal({
+      proposal: proposal([legalAct.localId, measure.localId], "missing-anchor"),
+      sourceTextByBasisRef: new Map([[
+        "DOCUMENT_1.PAGE_1",
+        base.sourceQuotes.map((quote) => quote.quote).join("\n"),
+      ]]),
+    }).knowledge;
+    expect(ambiguous.legalIssues[0].targetProceedingIdentity).toBeNull();
+
+    const unidentified = compileFascicoloDocumentKnowledgeProposal({
+      proposal: proposal([fact.localId], "missing-anchor"),
+      sourceTextByBasisRef: new Map([[
+        "DOCUMENT_1.PAGE_1",
+        base.sourceQuotes.map((quote) => quote.quote).join("\n"),
+      ]]),
+    }).knowledge;
+    expect(unidentified.legalIssues[0]).toMatchObject({
+      localId: "issue-proceeding",
+      originatingItemLocalIds: [fact.localId],
+      targetProceedingIdentity: null,
+    });
+  });
+
+  it("compiles FACT and EVENT identities, propagates evidence corrections, and blocks false quotes", () => {
+    const base = validKnowledge();
+    const legalAct = base.items.find((candidate) => candidate.kind === "LEGAL_ACT");
+    if (!legalAct) throw new Error("Expected a legal act fixture.");
+    const proposal = fascicoloDocumentKnowledgeProposalSchema.parse({
+      ...structuredClone(base),
+      items: base.items.map((candidate) => {
+        if (candidate.kind !== "FACT" && candidate.kind !== "EVENT") {
+          return structuredClone(candidate);
+        }
+        return {
+          ...structuredClone(candidate),
+          payload: {
+            ...structuredClone(candidate.payload),
+            proceedingIdentityHint: {
+              declaredKey: "procedimento-documentato",
+              candidateAnchorLocalId: legalAct.localId,
+              kind: "ADMINISTRATIVE_ORIGINAL",
+              evidenceBasisRefs: ["DOCUMENT_1.PAGE_1"],
+            },
+          },
+        };
+      }),
+      legalIssues: [],
+      researchQuestions: [],
+      documentInventory: [],
+    });
+
+    const authenticText = base.sourceQuotes.map((quote) => quote.quote).join("\n");
+    const compiled = compileFascicoloDocumentKnowledgeProposal({
+      proposal,
+      sourceTextByBasisRef: new Map([["DOCUMENT_1.PAGE_1", authenticText]]),
+    });
+    const factAndEvent = compiled.knowledge.items.filter((candidate) => (
+      candidate.kind === "FACT" || candidate.kind === "EVENT"
+    ));
+    expect(factAndEvent).toHaveLength(2);
+    for (const candidate of factAndEvent) {
+      expect(candidate.payload.proceedingIdentity).toMatchObject({
+        declaredKey: "procedimento-documentato",
+        canonicalAnchorLocalId: legalAct.localId,
+        evidenceBasisRefs: ["DOCUMENT_1.PAGE_1"],
+      });
+      expect(candidate.payload.proceedingIdentityResolution).toMatchObject({
+        status: "VERIFIED",
+        action: "PRESERVED",
+      });
+    }
+
+    const correctedProposal = structuredClone(proposal);
+    const correctedAct = correctedProposal.items.find((candidate) => candidate.localId === legalAct.localId);
+    const correctedQuote = correctedProposal.sourceQuotes.find((quote) => quote.itemLocalId === legalAct.localId);
+    if (!correctedAct || (correctedAct.kind !== "LEGAL_ACT" && correctedAct.kind !== "MEASURE") || !correctedQuote) {
+      throw new Error("Expected mutable legal act proposal fixtures.");
+    }
+    correctedAct.basisRefs = ["DOCUMENT_1.PAGE_99"];
+    correctedAct.payload.documentBasisRef = "DOCUMENT_1.PAGE_99";
+    correctedQuote.basisRef = "DOCUMENT_1.PAGE_99";
+    correctedProposal.legalIssues = [{
+      localId: "issue-corrected-evidence",
+      title: "Identita del procedimento",
+      normalizedIssue: "Quale procedimento e documentato?",
+      areaOfLaw: "diritto amministrativo",
+      priority: "HIGH",
+      rationale: "L'identita dipende dall'atto documentato.",
+      originatingItemLocalIds: [legalAct.localId],
+      confidence: 90,
+      referenceDateBasis: null,
+      targetProceedingHint: {
+        declaredKey: "procedimento-documentato",
+        candidateAnchorLocalId: legalAct.localId,
+        kind: "ADMINISTRATIVE_ORIGINAL",
+        evidenceBasisRefs: ["DOCUMENT_1.PAGE_99"],
+      },
+    }];
+    const corrected = compileFascicoloDocumentKnowledgeProposal({
+      proposal: correctedProposal,
+      sourceTextByBasisRef: new Map([["DOCUMENT_1.PAGE_1", authenticText]]),
+    });
+    expect(corrected.knowledge.legalIssues[0]).toMatchObject({
+      targetProceedingIdentity: {
+        declaredKey: null,
+        canonicalAnchorLocalId: legalAct.localId,
+        evidenceBasisRefs: ["DOCUMENT_1.PAGE_1"],
+      },
+      targetProceedingResolution: {
+        status: "VERIFIED",
+        action: "REBUILT",
+      },
+    });
+    expect(corrected.diagnostics).toContainEqual({
+      code: "BASIS_REF_CORRECTED",
+      path: expect.stringMatching(/^sourceQuotes\.\d+\.basisRef$/),
+      action: "REBUILT",
+    });
+
+    const nonexistentQuote = structuredClone(proposal);
+    nonexistentQuote.sourceQuotes[0].quote = "Citazione non presente nel corpus";
+    expect(() => compileFascicoloDocumentKnowledgeProposal({
+      proposal: nonexistentQuote,
+      sourceTextByBasisRef: new Map([["DOCUMENT_1.PAGE_1", authenticText]]),
+    })).toThrowError(DocumentKnowledgeCompilationError);
+
+    const duplicatedQuote = proposal.sourceQuotes[0].quote;
+    try {
+      compileFascicoloDocumentKnowledgeProposal({
+        proposal,
+        sourceTextByBasisRef: new Map([[
+          "DOCUMENT_1.PAGE_1",
+          `${authenticText}\n${duplicatedQuote}`,
+        ]]),
+      });
+      throw new Error("Expected ambiguous source quote compilation to fail.");
+    } catch (error) {
+      expect(error).toBeInstanceOf(DocumentKnowledgeCompilationError);
+      expect((error as DocumentKnowledgeCompilationError).diagnostics).toContainEqual({
+        code: "AMBIGUOUS_SOURCE_QUOTE",
+        path: "sourceQuotes.0.quote",
+        action: "BLOCKED",
+      });
+    }
+  });
+
+  it("builds inventory server-side and safely downgrades invalid research dates", () => {
+    const base = validKnowledge();
+    const event = base.items.find((candidate) => candidate.kind === "EVENT");
+    if (!event) throw new Error("Expected an event fixture.");
+    const proposal = fascicoloDocumentKnowledgeProposalSchema.parse({
+      ...structuredClone(base),
+      items: base.items.map((candidate) => (
+        candidate.kind === "FACT" || candidate.kind === "EVENT"
+          ? {
+              ...structuredClone(candidate),
+              payload: {
+                ...structuredClone(candidate.payload),
+                proceedingIdentityHint: null,
+              },
+            }
+          : structuredClone(candidate)
+      )),
+      legalIssues: [{
+        localId: "issue-reference-date",
+        title: "Data di riferimento",
+        normalizedIssue: "Quale data regola la ricerca?",
+        areaOfLaw: "diritto amministrativo",
+        priority: "HIGH",
+        rationale: "La data deve essere verificata deterministicamente.",
+        originatingItemLocalIds: [event.localId],
+        confidence: 80,
+        referenceDateBasis: null,
+        targetProceedingHint: null,
+      }],
+      researchQuestions: [{
+        localId: "question-reference-date",
+        legalIssueLocalId: "issue-reference-date",
+        canonicalQuestion: "Quale disciplina era vigente?",
+        priority: "HIGH",
+        referenceDate: "2026-09-29",
+        referenceDateBasis: {
+          type: "MEASURE_DATE",
+          itemLocalId: event.localId,
+          rationale: "Il modello ha collegato un evento come misura.",
+          userConfirmedDateSource: null,
+        },
+        requestedCapabilities: ["SEMANTIC_DISCOVERY"],
+        mode: "PRIMARY",
+      }],
+      documentInventory: [{
+        localId: "document-rebuilt",
+        basisRefs: ["DOCUMENT_1.PAGE_1"],
+        documentType: "provvedimento",
+        documentDate: null,
+        issuer: null,
+        recipients: [],
+        proceduralPhase: null,
+        subject: "Documento del fascicolo",
+        summary: "Documento materiale.",
+        referencedActs: [],
+        attachments: [],
+        materialProfiles: ["PROCEDURAL"],
+        classification: "MATERIAL",
+        rationale: "Il documento supporta gli elementi strutturati.",
+        relatedItemLocalIds: ["model-invented-item"],
+      }],
+    });
+
+    const compiled = compileFascicoloDocumentKnowledgeProposal({
+      proposal,
+      sourceTextByBasisRef: new Map([[
+        "DOCUMENT_1.PAGE_1",
+        base.sourceQuotes.map((quote) => quote.quote).join("\n"),
+      ]]),
+    });
+
+    expect(compiled.promotable).toBe(true);
+    expect(compiled.knowledge.researchQuestions[0]).toMatchObject({
+      referenceDate: null,
+      referenceDateBasis: {
+        type: "UNKNOWN",
+        itemLocalId: null,
+        userConfirmedDateSource: null,
+      },
+    });
+    expect(compiled.knowledge.documentInventory?.[0].relatedItemLocalIds)
+      .toEqual(base.items.map((candidate) => candidate.localId));
+    expect(compiled.knowledge.documentInventory?.[0]).toMatchObject({
+      localId: expect.stringMatching(/^server-inventory-/),
+      basisRefs: ["DOCUMENT_1.PAGE_1"],
+      classification: "MATERIAL",
+      materialProfiles: ["EVIDENTIARY"],
+    });
+    expect(compiled.diagnostics).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        code: "RESEARCH_QUESTION_REFERENCE_DATE_MARKED_UNKNOWN",
+        action: "MARKED_UNRESOLVED",
+      }),
+    ]));
+    expect(compiled.diagnostics).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: "DOCUMENT_INVENTORY_RELATIONS_REBUILT" }),
+    ]));
   });
 
   it("represents exact, partial, interval, uncertain, and unknown dates without inventing precision", () => {

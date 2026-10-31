@@ -7,7 +7,9 @@ test("audit page access and report validation audit events", async ({ page }) =>
   await loginAndExpectLanding(page, "admin@demo.local", "admin123", /\/dashboard$/);
 
   await page.goto("/report");
-  await page.getByRole("link", { name: "Apri report" }).first().click();
+  const reportHref = await page.locator('main a[href^="/report/"]').first().getAttribute("href");
+  expect(reportHref).toBeTruthy();
+  await page.goto(reportHref as string);
 
   const validateButton = page.getByRole("button", { name: "Valida report" });
   const unvalidateButton = page.getByRole("button", { name: "Rimuovi validazione" });
@@ -27,6 +29,7 @@ test("audit page access and report validation audit events", async ({ page }) =>
     ]);
   }
 
+  await page.locator("summary").filter({ hasText: /^Altro$/ }).first().click();
   const [download] = await Promise.all([
     page.waitForEvent("download"),
     page.getByRole("link", { name: "Scarica PDF istituzionale" }).click(),

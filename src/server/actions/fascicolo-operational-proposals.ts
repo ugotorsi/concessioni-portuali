@@ -30,7 +30,7 @@ const reviewSchema = proposalSchema.extend({
 interface AuthorizedScope {
   tenantId: string;
   procedimentoId: string;
-  concessioneId: string;
+  concessioneId: string | null;
   role: DemoRole;
   actor: { actorId: string; actorEmail: string | null; actorRole: string };
 }
@@ -47,7 +47,6 @@ async function authorizedScope(procedimentoId: string): Promise<AuthorizedScope>
   ]);
   const tenantId = procedimento?.enteId;
   if (!user || !tenantContext || !tenantId || !procedimento) throw new Error("Procedimento, attore o tenant non disponibile.");
-  if (!procedimento.concessioneId) throw new Error("Titolo concessorio necessario per questa proposta operativa.");
   requireTenantAccess(tenantContext, tenantId, { mode: "write", allowWhenEnteMissing: false });
   return {
     tenantId,

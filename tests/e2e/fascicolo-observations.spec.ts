@@ -17,8 +17,8 @@ test("admin refreshes and reviews a PEC receipt observation without changing cor
     if (!row?.enteId) throw new Error("Missing tenant-scoped concessione fixture.");
 
     await pool.query(
-      'INSERT INTO "Procedimento" ("id", "concessioneId", "tipologia", "stato", "createdAt", "updatedAt") VALUES ($1, $2, $3, $4, NOW(), NOW())',
-      [procedimentoId, row.id, "DIFFIDA", "IN_CORSO"],
+      'INSERT INTO "Procedimento" ("id", "enteId", "concessioneId", "tipologia", "stato", "createdAt", "updatedAt") VALUES ($1, $2, $3, $4, $5, NOW(), NOW())',
+      [procedimentoId, row.enteId, row.id, "DIFFIDA", "IN_CORSO"],
     );
     await pool.query(
       'INSERT INTO "Documento" ("id", "nome", "tipologia", "statoDocumento", "canale", "pecWarningMancataRicevuta", "enteId", "concessioneId", "procedimentoId", "createdAt", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())',
@@ -26,11 +26,12 @@ test("admin refreshes and reviews a PEC receipt observation without changing cor
     );
 
     await loginAndExpectLanding(page, "admin@demo.local", "admin123", /\/dashboard$/);
-    await page.goto(`/procedimenti/${procedimentoId}`);
+    await page.goto(`/procedimenti/${procedimentoId}?section=istruttoria`);
     await page.getByRole("button", { name: "Aggiorna osservazioni" }).click();
     await expect(page.getByText("Ricevuta PEC non registrata nel fascicolo")).toBeVisible();
     await page.getByRole("button", { name: "Valida" }).click();
-    await expect(page.getByText("VALIDATO")).toBeVisible();
+    await page.goto(`/procedimenti/${procedimentoId}?section=istruttoria`);
+    await expect(page.getByText("Validata")).toBeVisible();
 
     const core = await pool.query(
       'SELECT "stato" FROM "Procedimento" WHERE "id" = $1',

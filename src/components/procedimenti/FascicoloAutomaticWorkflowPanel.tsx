@@ -1,8 +1,12 @@
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { SubmitButtonPending } from "@/components/forms/SubmitButtonPending";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { formatDateIT, formatEnumLabel } from "@/lib/utils";
+import {
+  requestExistingCorpusAnalysisAction,
+} from "@/server/actions/fascicolo-existing-corpus-analysis";
 import {
   generateOperationalProposalsAction,
   materializeOperationalProposalAction,
@@ -152,7 +156,14 @@ function WorkflowSummary({
 
 export function FascicoloAutomaticWorkflowPanel({
   model,
-}: { model: FascicoloAutomaticWorkflowReadModel | null }) {
+  existingCorpusAnalysis,
+}: {
+  model: FascicoloAutomaticWorkflowReadModel | null;
+  existingCorpusAnalysis?: {
+    procedimentoId: string;
+    enabled: boolean;
+  } | null;
+}) {
   if (!model) return null;
   const currentJob = model.jobs.find((job) => !job.superseded) ?? null;
   const currentReport = model.reports.find((report) => report.status !== "SUPERSEDED") ?? null;
@@ -169,6 +180,30 @@ export function FascicoloAutomaticWorkflowPanel({
       </CardHeader>
       <CardContent className="space-y-5">
         <WorkflowSummary model={model} />
+        {existingCorpusAnalysis ? (
+          <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+            <form action={requestExistingCorpusAnalysisAction}>
+              <input
+                type="hidden"
+                name="procedimentoId"
+                value={existingCorpusAnalysis.procedimentoId}
+              />
+              <SubmitButtonPending
+                size="sm"
+                disabled={!existingCorpusAnalysis.enabled}
+                pendingLabel="Richiesta in corso..."
+              >
+                Prepara collaudo V7 a tentativo unico
+              </SubmitButtonPending>
+            </form>
+            {!existingCorpusAnalysis.enabled ? (
+              <p className="mt-2 text-xs text-slate-600">
+                Il comando sarà disponibile dopo l’autorizzazione real-data e
+                l’abilitazione del worker one-off dedicato.
+              </p>
+            ) : null}
+          </div>
+        ) : null}
         {model.analysisUpdate.status !== "CURRENT" ? (
           <div className={`border-l-2 pl-3 text-sm ${
             model.analysisUpdate.status === "ERROR"
@@ -263,7 +298,7 @@ export function FascicoloAutomaticWorkflowPanel({
                                     <span>Fonti utilizzabili: {mission.usableCoverageStatus}</span>
                                     {mission.conflicting ? <Badge variant="danger">Orientamenti in conflitto</Badge> : null}
                                     {mission.conflictingUsableAuthorities ? <Badge variant="danger">Autorità utilizzabili in conflitto</Badge> : null}
-                                    {mission.historicalResultCount > 0 ? <span>Risultati storici: {mission.historicalResultCount}</span> : null}
+                                    {mission.displayedHistoricalResultCount > 0 ? <span>Risultati nelle missioni storiche visualizzate: {mission.displayedHistoricalResultCount}</span> : null}
                                   </div>
                                   {mission.adverseMission ? (
                                     <p className="text-xs text-slate-600">Ricerca contraria: {mission.adverseMission.status}</p>
@@ -399,6 +434,16 @@ export function FascicoloAutomaticWorkflowPanel({
                   ))}
                 </ul>
               ) : <p className="mt-1 text-sm text-slate-600">Nessun fatto corrente non respinto.</p>}
+              {(structuredReport.payload.documentedFramework.partyPositions ?? []).length > 0 ? (
+                <>
+                  <h5 className="mt-4 text-xs font-semibold uppercase text-slate-600">Posizioni e difese delle parti</h5>
+                  <ul className="mt-2 space-y-1 text-sm text-slate-700">
+                    {(structuredReport.payload.documentedFramework.partyPositions ?? []).map((position) => (
+                      <li key={position.id}>{position.normalizedText} <span className="text-xs text-slate-500">({position.evidence.map((evidence) => evidence.basisRef).filter(Boolean).join(", ")})</span></li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
             </div>
             {structuredReport.payload.legalIssues.map((issue) => (
               <section key={issue.knowledgeItemId} className="space-y-3 border-l-2 border-slate-300 pl-3">

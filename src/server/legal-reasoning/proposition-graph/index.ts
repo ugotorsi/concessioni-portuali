@@ -2,6 +2,7 @@ import type {
   TemporalApplicabilityState,
   TemporalWindowState,
 } from "@/server/legal-sources/temporal";
+import type { LegalApplicabilityAssessment } from "@/server/legal-reasoning/applicability";
 
 export const LEGAL_PROPOSITION_GRAPH_VERSION = "LEGAL_PROPOSITION_GRAPH_V1" as const;
 
@@ -62,6 +63,7 @@ export type Application = Readonly<{
   statement: string;
   factClaimIds: readonly string[];
   legalPropositionIds: readonly string[];
+  applicabilityAssessment?: LegalApplicabilityAssessment;
 }>;
 
 export type AuthorityTargetKind =
@@ -187,6 +189,8 @@ export type LegalPropositionGraph = Readonly<{
 
 export type GraphValidationErrorCode =
   | "APPLICATION_FACT_REQUIRED"
+  | "APPLICATION_ASSESSMENT_ID_MISMATCH"
+  | "APPLICATION_ASSESSMENT_FACT_NOT_LINKED"
   | "APPLICATION_PROPOSITION_REQUIRED"
   | "AUTHORITY_REFERENCE_DATE_REQUIRED"
   | "CONCLUSION_APPLICATION_REQUIRED"
@@ -392,6 +396,27 @@ export function validateLegalPropositionGraph(
     }
     for (const id of application.legalPropositionIds) {
       pushDangling(graph, errors, application, "legalPropositionIds", "LEGAL_PROPOSITION", id);
+    }
+    const assessment = application.applicabilityAssessment;
+    if (assessment && assessment.applicationId !== application.id) {
+      errors.push({
+        code: "APPLICATION_ASSESSMENT_ID_MISMATCH",
+        entityKind: application.kind,
+        entityId: application.id,
+        path: "applicabilityAssessment.applicationId",
+        referencedId: assessment.applicationId,
+      });
+    }
+    for (const fact of assessment?.decisiveFacts ?? []) {
+      if (!application.factClaimIds.includes(fact.factClaimId)) {
+        errors.push({
+          code: "APPLICATION_ASSESSMENT_FACT_NOT_LINKED",
+          entityKind: application.kind,
+          entityId: application.id,
+          path: "applicabilityAssessment.decisiveFacts",
+          referencedId: fact.factClaimId,
+        });
+      }
     }
   }
   for (const authority of graph.authorityRelations) {

@@ -165,6 +165,16 @@ export const FascicoloKnowledgeItemStatus = {
 export type FascicoloKnowledgeItemStatus = (typeof FascicoloKnowledgeItemStatus)[keyof typeof FascicoloKnowledgeItemStatus]
 
 
+export const FascicoloKnowledgeIdentityState = {
+  VERIFIED_NEW: 'VERIFIED_NEW',
+  VERIFIED_CONTINUATION: 'VERIFIED_CONTINUATION',
+  AMBIGUOUS: 'AMBIGUOUS',
+  LEGACY_UNVERIFIED: 'LEGACY_UNVERIFIED'
+} as const
+
+export type FascicoloKnowledgeIdentityState = (typeof FascicoloKnowledgeIdentityState)[keyof typeof FascicoloKnowledgeIdentityState]
+
+
 export const FascicoloKnowledgeRelationType = {
   RELATED_TO: 'RELATED_TO',
   SUPERSEDES: 'SUPERSEDES',

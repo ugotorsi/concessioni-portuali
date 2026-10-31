@@ -88,6 +88,7 @@ vi.mock("@/server/queries/fascicolo-automatic-workflow", () => ({
 
 vi.mock("@/server/queries/fascicolo-document-corpus", () => ({
   getFascicoloDocumentCorpus: vi.fn().mockResolvedValue(null),
+  getFascicoloDocumentCorpusForTenant: vi.fn().mockResolvedValue(null),
 }));
 
 import {

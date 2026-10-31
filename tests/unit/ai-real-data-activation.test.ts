@@ -86,7 +86,7 @@ describe("AI-01C1 real-data activation policy", () => {
     const unrelated = {
       NEXT_PUBLIC_AI_REAL_DATA_ENABLED: "true",
       AI_OPENAI_API_KEY: API_KEY_SENTINEL,
-      AI_OPENAI_REGION: "EU",
+      AI_OPENAI_REGION: "GLOBAL",
       SYNTHETIC_SMOKE_STATUS: "PASS",
     } as RealDataActivationEnv & Record<string, string>;
     expectDisabled(unrelated);

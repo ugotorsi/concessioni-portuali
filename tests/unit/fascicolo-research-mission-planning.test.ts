@@ -36,6 +36,15 @@ function knowledge(options: {
   return {
     version: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1",
     subjects: [],
+    sourceQuotes: [{
+      itemLocalId: "fact-1",
+      basisRef: evidence.basisRef,
+      quote: "La concessione",
+    }, {
+      itemLocalId: "basis-1",
+      basisRef: evidence.basisRef,
+      quote: "Istanza",
+    }],
     items: [
       {
         localId: "fact-1", kind: "FACT", confidence: 90, basisRefs: [evidence.basisRef],

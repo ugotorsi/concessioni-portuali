@@ -56,7 +56,7 @@ async function database() {
       "id" TEXT PRIMARY KEY, "tenantId" TEXT NOT NULL, "procedimentoId" TEXT NOT NULL, "status" TEXT NOT NULL
     );
     CREATE TABLE "User" (
-      "id" TEXT PRIMARY KEY, "attivo" BOOLEAN NOT NULL, "role" TEXT NOT NULL
+      "id" TEXT PRIMARY KEY, "attivo" BOOLEAN NOT NULL, "ruolo" TEXT NOT NULL
     );
     CREATE TABLE "TenantMembership" (
       "userId" TEXT NOT NULL, "enteId" TEXT NOT NULL, PRIMARY KEY ("userId", "enteId")
@@ -95,15 +95,21 @@ async function database() {
   `);
   await db.exec(migration);
   await db.exec(versioningMigration);
-  await db.query('INSERT INTO "User" ("id", "attivo", "role") VALUES ($1, TRUE, \'ADMIN\')', ["admin-1"]);
+  await db.query('INSERT INTO "User" ("id", "attivo", "ruolo") VALUES ($1, TRUE, \'ADMIN\')', ["admin-1"]);
   await db.query('INSERT INTO "TenantMembership" ("userId", "enteId") VALUES ($1, $2)', ["admin-1", "tenant-1"]);
   return db;
 }
 
-function plan(fingerprint: string, questionSemanticKey = "q".repeat(64), caseId = "procedure-1"): KnowledgeResearchMissionPlan {
+function plan(
+  fingerprint: string,
+  questionSemanticKey = "q".repeat(64),
+  caseId = "procedure-1",
+  executionChannel: "CHATGPT_CONNECTOR" | "SERVER_AUTONOMOUS" = "CHATGPT_CONNECTOR",
+): KnowledgeResearchMissionPlan {
   const mission = createResearchMission({
     kind: "RESEARCH_MISSION",
     version: RESEARCH_BRIDGE_VERSION,
+    executionChannel,
     caseReference: { caseId, fascicoloReference: caseId },
     legalIssueIds: ["i".repeat(64)],
     legalPropositionIds: [],
@@ -143,12 +149,39 @@ async function setCurrent(db: PGlite, id: string, tenantId = "tenant-1", procedi
   await db.query('INSERT INTO "FascicoloKnowledgeRevision" ("id", "tenantId", "procedimentoId", "status") VALUES ($1, $2, $3, \'CURRENT\')', [id, tenantId, procedimentoId]);
 }
 
+async function setBuilding(db: PGlite, id: string) {
+  await db.query(
+    'INSERT INTO "FascicoloKnowledgeRevision" ("id", "tenantId", "procedimentoId", "status") VALUES ($1, $2, $3, \'BUILDING\')',
+    [id, "tenant-1", "procedure-1"],
+  );
+}
+
 afterEach(async () => {
   await Promise.all(databases.splice(0).map((db) => db.close()));
 });
 
 describe("Lotto 3 research mission lifecycle on PGlite", () => {
   const assignment = { assignedActorId: "actor-1" };
+
+  it("reconciles a controlled BUILDING revision only when explicitly allowed", async () => {
+    const db = await database();
+    const ctx = context(db);
+    await setBuilding(db, "revision-building");
+    const input = {
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-building",
+      assignedActorId: null,
+      plans: [plan("b".repeat(64))],
+    };
+
+    await expect(reconcileKnowledgeResearchMissions(input, ctx))
+      .rejects.toThrow("KNOWLEDGE_REVISION_NOT_CURRENT");
+    await expect(reconcileKnowledgeResearchMissions({
+      ...input,
+      allowBuildingRevision: true,
+    }, ctx)).resolves.toHaveLength(1);
+  });
 
   it("keeps an unassigned system mission deferred without inventing a user", async () => {
     const db = await database();
@@ -362,7 +395,7 @@ describe("Lotto 3 research mission lifecycle on PGlite", () => {
       assignedActorId: "actor-1",
       plans: [plan("8".repeat(64))],
     }, ctx);
-    await db.query('INSERT INTO "User" ("id", "attivo", "role") VALUES ($1, TRUE, \'ADMIN\')', ["admin-without-tenant"]);
+    await db.query('INSERT INTO "User" ("id", "attivo", "ruolo") VALUES ($1, TRUE, \'ADMIN\')', ["admin-without-tenant"]);
 
     await expect(versionResearchMissionBudget({
       sourceMissionId: original.missionId,
@@ -450,7 +483,7 @@ describe("Lotto 3 research mission lifecycle on PGlite", () => {
     ]);
   });
 
-  it("persists seven missions, defers two, and admits the residual wave without duplicates", async () => {
+  it("keeps deferred ChatGPT missions outside the autonomous residual wave", async () => {
     const db = await database();
     const ctx = context(db);
     await setCurrent(db, "revision-wave");
@@ -465,10 +498,38 @@ describe("Lotto 3 research mission lifecycle on PGlite", () => {
     const firstWave = await db.query<{ status: string; count: number }>('SELECT "status", count(*)::int AS "count" FROM "ResearchMissionRecord" GROUP BY "status" ORDER BY "status"');
     expect(firstWave.rows).toEqual(expect.arrayContaining([{ status: "DEFERRED", count: 2 }, { status: "PENDING", count: 5 }]));
     const secondWave = await admitDeferredKnowledgeResearchMissionWave({ tenantId: "tenant-1", procedimentoId: "procedure-1", limit: 5 }, ctx);
-    expect(secondWave).toHaveLength(2);
+    expect(secondWave).toHaveLength(0);
     expect(await admitDeferredKnowledgeResearchMissionWave({ tenantId: "tenant-1", procedimentoId: "procedure-1", limit: 5 }, ctx)).toHaveLength(0);
-    const final = await db.query<{ count: number }>('SELECT count(*)::int AS "count" FROM "ResearchMissionRecord" WHERE "status" = \'PENDING\'');
-    expect(final.rows[0].count).toBe(7);
+    const final = await db.query<{ status: string; count: number }>('SELECT "status", count(*)::int AS "count" FROM "ResearchMissionRecord" GROUP BY "status" ORDER BY "status"');
+    expect(final.rows).toEqual(expect.arrayContaining([{ status: "DEFERRED", count: 2 }, { status: "PENDING", count: 5 }]));
+  });
+
+  it("admits only an explicitly autonomous deferred mission", async () => {
+    const db = await database();
+    const ctx = context(db);
+    await setCurrent(db, "revision-autonomous-wave");
+    const autonomous = {
+      ...plan("a".repeat(64), "a".repeat(64), "procedure-1", "SERVER_AUTONOMOUS"),
+      execution: "DEFERRED_BY_POLICY" as const,
+      blockReason: "EXECUTION_WAVE_LIMIT",
+    };
+    await reconcileKnowledgeResearchMissions({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-autonomous-wave",
+      ...assignment,
+      plans: [autonomous],
+    }, ctx);
+    await expect(admitDeferredKnowledgeResearchMissionWave({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      limit: 5,
+    }, ctx)).resolves.toHaveLength(1);
+    await expect(admitDeferredKnowledgeResearchMissionWave({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      limit: 5,
+    }, ctx)).resolves.toHaveLength(0);
   });
 
   it("moves all structured missions to history when the CURRENT revision has zero questions and preserves bundles", async () => {

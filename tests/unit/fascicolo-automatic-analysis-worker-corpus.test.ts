@@ -56,7 +56,7 @@ describe("fascicolo automatic analysis worker corpus authorization", () => {
     mocks.admitAsyncJob.mockResolvedValue({ outcome: "CREATED", job: { id: "analysis-job" } });
     mocks.requestDocumentWorkerActivation.mockResolvedValue({
       outcome: "REQUESTED",
-      jobId: "job-render-analysis",
+      renderJobId: "job-render-analysis",
     });
   });
 
@@ -84,8 +84,12 @@ describe("fascicolo automatic analysis worker corpus authorization", () => {
       procedimentoId: "procedure-a",
     }));
     expect(mocks.requestDocumentWorkerActivation).toHaveBeenCalledWith(
-      "DOCUMENT_ANALYSIS",
-      "procedure-a",
+      {
+        kind: "DOCUMENT_ANALYSIS",
+        applicationJobId: "analysis-job",
+        tenantId: "tenant-a",
+        procedimentoId: "procedure-a",
+      },
     );
   });
 

@@ -19,7 +19,7 @@ test("auth + role redirects baseline", async ({ page, context }) => {
       response.request().method() === "POST"
       && response.url().includes("/api/auth/signout"),
   );
-  await page.getByTestId("logout-link").click();
+  await page.getByTestId("logout-link").last().click();
   const signOutResponse = await signOutResponsePromise;
   expect(signOutResponse.ok()).toBe(true);
   await expect(page).toHaveURL(/\/login$/);

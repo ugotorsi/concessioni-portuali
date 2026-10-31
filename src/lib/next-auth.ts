@@ -4,6 +4,7 @@ import { getServerSession, type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { z } from "zod";
 
+import { resolveAuthSessionCookieName } from "@/lib/auth-session-cookie";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { decryptMfaSecret, isMfaRequiredRole, verifyMfaCode } from "@/lib/mfa";
 import { resolveNextAuthSecret } from "@/lib/next-auth-secret";
@@ -11,7 +12,6 @@ import { prisma } from "@/lib/prisma";
 import { auditFailure, auditSuccess } from "@/server/audit/auditLog";
 
 const DUMMY_PASSWORD_HASH = "$2a$10$7x44xI7qxyfGeQ8YV6f8wum8Iat3A80efjhbj4AtNQ35n4NQH6aQW";
-
 const credentialsSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
@@ -68,9 +68,7 @@ export const authOptions: NextAuthOptions = {
   },
   cookies: {
     sessionToken: {
-      name: process.env.NODE_ENV === "production"
-        ? "__Secure-next-auth.session-token"
-        : "next-auth.session-token",
+      name: resolveAuthSessionCookieName(),
       options: {
         httpOnly: true,
         sameSite: "lax",
@@ -116,6 +114,7 @@ export const authOptions: NextAuthOptions = {
             mfaEnabled: true,
             mfaSecret: true,
             mustChangePassword: true,
+            passwordChangedAt: true,
           },
         });
 
@@ -176,8 +175,9 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const mfaEnrollmentRequired = isMfaRequiredRole(user.ruolo) && !user.mfaEnabled;
-        let mfaVerified = !user.mfaEnabled;
+        const mfaRequired = isMfaRequiredRole(user.ruolo);
+        const mfaEnrollmentRequired = mfaRequired && !user.mfaEnabled;
+        let mfaVerified = !mfaRequired;
 
         if (user.mfaEnabled) {
           if (!parsed.data.mfaCode) {
@@ -255,6 +255,7 @@ export const authOptions: NextAuthOptions = {
           role: user.ruolo,
           mfaEnrollmentRequired,
           mfaVerified,
+          authVersion: user.passwordChangedAt?.toISOString() ?? "",
         };
       },
     }),
@@ -266,6 +267,7 @@ export const authOptions: NextAuthOptions = {
         token.role = user.role;
         token.mfaEnrollmentRequired = user.mfaEnrollmentRequired === true;
         token.mfaVerified = user.mfaVerified === true;
+        token.authVersion = user.authVersion ?? "";
       }
 
       return token;
@@ -276,17 +278,25 @@ export const authOptions: NextAuthOptions = {
           session.user.id = "";
           session.user.role = "";
           session.user.mfaEnrollmentRequired = false;
+          session.user.mfaVerified = false;
         }
         return session;
       }
 
       const currentUser = await prisma.user.findUnique({
         where: { id: token.id },
-        select: { attivo: true, ruolo: true, lockedUntil: true, mfaEnabled: true },
+        select: {
+          attivo: true,
+          ruolo: true,
+          lockedUntil: true,
+          mfaEnabled: true,
+          passwordChangedAt: true,
+        },
       });
+      const currentMfaRequired = !!currentUser && isMfaRequiredRole(currentUser.ruolo);
+      const currentMfaEnrollmentRequired = currentMfaRequired && !currentUser.mfaEnabled;
       const operationalMfaMissing =
-        !!currentUser
-        && isMfaRequiredRole(currentUser.ruolo)
+        currentMfaRequired
         && currentUser.mfaEnabled
         && token.mfaVerified !== true;
 
@@ -295,6 +305,7 @@ export const authOptions: NextAuthOptions = {
         || !currentUser.attivo
         || (currentUser.lockedUntil && currentUser.lockedUntil > new Date())
         || currentUser.ruolo !== token.role
+        || (currentUser.passwordChangedAt?.toISOString() ?? "") !== token.authVersion
         || operationalMfaMissing
       ) {
         token.invalidated = true;
@@ -302,6 +313,7 @@ export const authOptions: NextAuthOptions = {
           session.user.id = "";
           session.user.role = "";
           session.user.mfaEnrollmentRequired = false;
+          session.user.mfaVerified = false;
         }
         return session;
       }
@@ -309,7 +321,10 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = typeof token.id === "string" ? token.id : "";
         session.user.role = typeof token.role === "string" ? token.role : "";
-        session.user.mfaEnrollmentRequired = token.mfaEnrollmentRequired === true;
+        session.user.mfaEnrollmentRequired = currentMfaEnrollmentRequired;
+        session.user.mfaVerified = currentMfaRequired
+          ? currentUser.mfaEnabled && token.mfaVerified === true
+          : true;
       }
 
       return session;

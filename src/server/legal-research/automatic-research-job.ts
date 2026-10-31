@@ -11,7 +11,10 @@ import {
   getResearchMission,
   RESEARCH_MISSION_EXECUTION_OPERATION,
 } from "./persistence";
-import type { ResearchMission } from "./bridge";
+import {
+  researchMissionExecutionChannel,
+  type ResearchMission,
+} from "./bridge";
 import {
   evaluateAutomaticResearchPolicy,
   type AutomaticResearchPolicyDecision,
@@ -22,6 +25,8 @@ import { createLocalTrustedResearchClient } from "./local-trusted-research-clien
 import { createTrustedMissionExecutor, type TrustedMissionExecutorResult } from "./trusted-mission-executor";
 import { completeAdverseResearchRequirement, ensureAdverseResearchMission } from "./source-chain-persistence";
 import { verifyOfficialResearchSources } from "./official-source-verification";
+import { produceAndPersistAutomaticLegalApplicabilityReviews } from "./legal-applicability-producer";
+import { assertGlobalAiExecutionAllowed } from "@/server/ai/globalAiControl";
 
 const referenceSchema = z.object({
   referenceType: z.literal("LEGAL_RESEARCH_MISSION"),
@@ -100,6 +105,7 @@ export async function reconcilePendingAutomaticResearchExecutions(limit = 25): P
   let admitted = 0;
   for (const link of links) {
     const mission = link.mission.payload as unknown as ResearchMission;
+    if (researchMissionExecutionChannel(mission) !== "SERVER_AUTONOMOUS") continue;
     const result = await ensureAutomaticResearchExecution({
       mission,
       tenantId: link.report.tenantId,
@@ -119,6 +125,7 @@ type ExecutionAuthority = Readonly<{
 }>;
 
 export interface AutomaticResearchExecutionDependencies {
+  assertAiExecutionAllowed(): Promise<void>;
   loadAuthority(input: Readonly<{
     jobId: string;
     missionId: string;
@@ -137,6 +144,7 @@ export interface AutomaticResearchExecutionDependencies {
 }
 
 const defaultDependencies: AutomaticResearchExecutionDependencies = {
+  assertAiExecutionAllowed: assertGlobalAiExecutionAllowed,
   async loadAuthority(input) {
     const job = await prisma.asyncJob.findUnique({
       where: { id: input.jobId },
@@ -209,7 +217,17 @@ const defaultDependencies: AutomaticResearchExecutionDependencies = {
       return;
     }
     if (process.env.AUTOMATIC_OFFICIAL_SOURCE_VERIFICATION_ENABLED === "true") {
+      if (input.authority.decision.maxOfficialSourceAcquisitions === null) {
+        throw new Error("AUTOMATIC_OFFICIAL_SOURCE_ACQUISITION_LIMIT_MISSING");
+      }
       await verifyOfficialResearchSources({
+        missionId: input.authority.mission.missionId,
+        tenantId: input.authority.tenantId,
+        caseId: input.authority.mission.caseReference.caseId,
+        actorId: input.authority.actorId,
+        maxAcquisitions: input.authority.decision.maxOfficialSourceAcquisitions,
+      });
+      await produceAndPersistAutomaticLegalApplicabilityReviews({
         missionId: input.authority.mission.missionId,
         tenantId: input.authority.tenantId,
         caseId: input.authority.mission.caseReference.caseId,
@@ -239,6 +257,7 @@ export function createAutomaticResearchExecutionHandler(
       if (await context.isCancellationRequested()) {
         throw new AsyncJobExecutionError("CANCELLATION", "CANCELLATION_REQUESTED", false);
       }
+      await dependencies.assertAiExecutionAllowed();
       const adapters = await dependencies.createProviderAdapters({
         requestTimeoutMs: authority.decision.providerTimeoutMs!,
       });
@@ -254,6 +273,7 @@ export function createAutomaticResearchExecutionHandler(
         );
       }
       await context.heartbeat();
+      await dependencies.assertAiExecutionAllowed();
       let result: TrustedMissionExecutorResult;
       try {
         result = await dependencies.execute({

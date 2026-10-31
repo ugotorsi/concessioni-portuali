@@ -61,6 +61,7 @@ const missionSchema = z.object({
   kind: z.literal("RESEARCH_MISSION"),
   version: z.literal(RESEARCH_BRIDGE_VERSION),
   missionId: missionIdSchema,
+  executionChannel: z.enum(["CHATGPT_CONNECTOR", "SERVER_AUTONOMOUS"]),
   caseReference: z.object({
     caseId: z.string().min(1),
     fascicoloReference: z.string().min(1).optional(),
@@ -154,6 +155,23 @@ const operationalSchema = z.object({
 const missionResultSchema = z.object({
   mission: missionSchema,
   operational: operationalSchema,
+  connectorExecutionGuidance: z.object({
+    query: z.string(),
+    queryEncoding: z.literal("JSON_STRING"),
+    moonlit: z.object({
+      semanticTool: z.literal("search_legal_documents"),
+      keywordTool: z.literal("search_legal_documents_by_keyword"),
+      queryArgument: z.literal("query"),
+      passQueryAsString: z.literal(true),
+      useLiveToolSchema: z.literal(true),
+      omitUnsupportedOptionalArguments: z.literal(true),
+    }).strict(),
+    evidenceBundle: z.object({
+      recordFailedCallsWithErrorState: z.literal(true),
+      preserveSuccessfulProviderSources: z.literal(true),
+      candidateIdMayBeOmitted: z.literal(true),
+    }).passthrough(),
+  }).strict().optional(),
   fascicoloContext: z.unknown(),
   assistedVerification: trustedAssistedEvidenceSchema.nullable().optional(),
 }).strict();
@@ -172,6 +190,7 @@ const submitResultSchema = z.object({
   fascicoloScopeId: z.string(),
   executionId: executionIdSchema,
   completionState: z.enum(["COMPLETE", "PARTIAL", "BUDGET_EXHAUSTED", "FAILED", "HUMAN_DECISION_REQUIRED"]),
+  authorityCandidateIds: z.array(z.string()).optional(),
 }).strict();
 const dispositionResultSchema = z.object({
   missionId: missionIdSchema,
@@ -190,6 +209,7 @@ const completeResultSchema = z.object({
 export type TrustedMissionSnapshot = Readonly<{
   mission: ResearchMission;
   operational: z.infer<typeof operationalSchema>;
+  connectorExecutionGuidance?: NonNullable<z.infer<typeof missionResultSchema>["connectorExecutionGuidance"]>;
   fascicoloContext: unknown;
   assistedVerification?: z.infer<typeof trustedAssistedEvidenceSchema> | null;
 }>;

@@ -1,9 +1,10 @@
 import { createHash } from "node:crypto";
 
-import type {
-  ResearchCaseReference,
-  ResearchEvidenceBundle,
-  ResearchMission,
+import {
+  researchMissionExecutionChannel,
+  type ResearchCaseReference,
+  type ResearchEvidenceBundle,
+  type ResearchMission,
 } from "./bridge";
 
 export const FASCICOLO_CONTEXT_SCOPE_VERSION = "FASCICOLO_CONTEXT_SCOPE_V1" as const;
@@ -133,6 +134,7 @@ export function projectResearchMissionForMcp(mission: ResearchMission): Research
     kind: mission.kind,
     version: mission.version,
     missionId: mission.missionId,
+    executionChannel: researchMissionExecutionChannel(mission),
     caseReference: {
       caseId: mission.caseReference.caseId,
       ...(mission.caseReference.fascicoloReference

@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  adaptAdministrativeActToInternalTemplate,
   buildStructuredFascicoloReport,
   type StructuredReportMissionInput,
+  type StructuredReportTechnicalSourceInput,
 } from "@/server/fascicolo-report";
 import type {
   StructuredKnowledgeReadItem,
@@ -31,6 +33,7 @@ function item(id: string, kind: StructuredKnowledgeReadItem["kind"], status: Str
 
 function knowledge(): StructuredKnowledgeReadModel {
   const fact = item("fact-1", "FACT");
+  const partyPosition = item("position-1", "PARTY_POSITION");
   const rejectedFact = item("fact-rejected", "FACT", "REJECTED");
   const issue = { ...item("issue-1", "LEGAL_ISSUE"), originatingItemIds: [fact.id] };
   const question = { ...item("question-1", "RESEARCH_QUESTION"), legalIssueId: issue.id };
@@ -45,6 +48,7 @@ function knowledge(): StructuredKnowledgeReadModel {
     },
     subjects: [],
     partyRoles: [],
+    partyPositions: [partyPosition],
     facts: [rejectedFact, fact],
     events: [],
     legalActs: [],
@@ -129,6 +133,56 @@ function mission(overrides: Partial<StructuredReportMissionInput> = {}): Structu
   };
 }
 
+function legalContribution() {
+  const grounded = (text: string) => ({
+    text,
+    sourceCandidateIds: ["support-result"],
+    factBasisRefs: ["DOCUMENT_1.PAGE_1"],
+  });
+  return {
+    version: "LEGAL_ANALYSIS_CONTRIBUTION_V1" as const,
+    contributionId: "contribution-issue-1",
+    legalIssueSemanticKey: sha("issue-1"),
+    researchQuestionSemanticKey: sha("question-1"),
+    issueStatement: "Occorre stabilire se il fatto documentato integri i presupposti della disciplina verificata.",
+    ruleApplications: [{
+      title: "Applicazione della regola verificata",
+      rule: "La disposizione richiede la compresenza dei presupposti materiali e procedimentali indicati dalla fonte.",
+      sourceCandidateIds: ["support-result"],
+      relevantFacts: "Il fatto risulta documentato nel fascicolo e riferito alla questione corrente.",
+      factBasisRefs: ["DOCUMENT_1.PAGE_1"],
+      application: "Il fatto soddisfa il presupposto materiale, mentre il presupposto procedimentale richiede ancora verifica.",
+      outcome: "La tesi è sostenibile limitatamente al presupposto materiale già documentato.",
+    }],
+    supportingArguments: [grounded("Il fatto documentato coincide con il presupposto materiale descritto dalla fonte favorevole verificata.")],
+    contraryArguments: [{
+      text: "La fonte contraria impone di verificare separatamente il presupposto procedimentale prima di concludere.",
+      sourceCandidateIds: ["oppose-result"],
+      factBasisRefs: ["DOCUMENT_1.PAGE_1"],
+    }],
+    evidenceAssessment: {
+      strengths: [grounded("Il fatto decisivo è sostenuto da un riferimento documentale autenticato del fascicolo corrente.")],
+      weaknesses: [grounded("Il fascicolo non documenta ancora integralmente il presupposto procedimentale richiesto dalla fonte.")],
+      missingEvidence: ["Acquisire l'atto che documenta il completamento del presupposto procedimentale."],
+    },
+    reasonedConclusion: {
+      text: "La tesi favorevole è sostenibile sul piano materiale, ma non è ancora conclusiva sul piano procedimentale.",
+      confidence: "MEDIUM" as const,
+      decisiveSourceCandidateIds: ["support-result", "oppose-result"],
+      decisiveFactBasisRefs: ["DOCUMENT_1.PAGE_1"],
+      conditions: ["Verificare documentalmente il presupposto procedimentale mancante."],
+    },
+    strategies: [{
+      title: "Completare l'istruttoria sul presupposto procedimentale",
+      rationale: "L'acquisizione dell'atto mancante consente di scegliere tra prosecuzione e archiviazione con motivazione specifica.",
+      sourceCandidateIds: ["support-result", "oppose-result"],
+      factBasisRefs: ["DOCUMENT_1.PAGE_1"],
+      risks: ["Una conclusione anticipata esporrebbe la decisione alla contestazione fondata sulla fonte contraria."],
+    }],
+    uncertainties: ["Resta incerta la data di perfezionamento del presupposto procedimentale."],
+  };
+}
+
 describe("deterministic structured fascicolo report", () => {
   it("projects only CURRENT knowledge and citable USABLE authorities into professional sections", () => {
     const report = buildStructuredFascicoloReport({
@@ -147,6 +201,7 @@ describe("deterministic structured fascicolo report", () => {
     });
 
     expect(report.payload.documentedFramework.facts.map((fact) => fact.id)).toEqual(["fact-1"]);
+    expect((report.payload.documentedFramework.partyPositions ?? []).map((position) => position.id)).toEqual(["position-1"]);
     expect(report.payload.operationalPlans).toHaveLength(1);
     expect(report.payload.operationalPlans?.[0]).toMatchObject({
       issueSemanticKey: sha("issue-1"),
@@ -154,13 +209,58 @@ describe("deterministic structured fascicolo report", () => {
       legalSourceStatus: "VERIFIED_SOURCES_ATTACHED",
       professionalStatus: "PRELIMINARY_NOT_APPROVED",
     });
+    expect(report.payload.legalAnalyses).toEqual([
+      expect.objectContaining({
+        issueSemanticKey: sha("issue-1"),
+        status: "MOTIVATION_REQUIRED",
+        documentedFacts: [{
+          statement: "Testo fact-1",
+          documentReferences: ["DOCUMENT_1.PAGE_1"],
+        }],
+        questions: ["Testo question-1"],
+        competingArguments: { supporting: [], opposing: [] },
+        professionalReasoning: null,
+        professionalReviewRequired: true,
+      }),
+    ]);
+    expect(report.payload.legalAnalyses?.[0].verifiedSources).toEqual([
+      expect.objectContaining({ title: "Autorita favorevole", direction: "SUPPORTS" }),
+      expect.objectContaining({ title: "Autorita contraria", direction: "OPPOSES" }),
+    ]);
+    expect(report.payload.legalAnalyses?.[0].assessment).toContain("motivazione argomentata");
     expect(report.payload.operationalPlans?.[0].steps).toHaveLength(4);
     expect(report.payload.operationalPlans?.[0].steps[1].action).toContain("art. 47");
+    expect(report.payload.operationalPlans?.[0].steps[2].title).toContain("contraddittorio");
     expect(report.payload.operationalPlans?.[0].alternatives.some((alternative) => alternative.title.includes("decadenza"))).toBe(true);
     expect(report.payload.operationalPlans?.[0].alternatives.some((alternative) => alternative.title.includes("ripristino"))).toBe(true);
+    expect(report.payload.operationalPlans?.[0].alternatives.some((alternative) => alternative.title.includes("prescrizioni"))).toBe(true);
     expect(report.payload.operationalPlans?.[0].alternatives.some((alternative) => alternative.title.includes("Archiviare"))).toBe(true);
     expect(report.payload.operationalPlans?.[0].alternatives.length).toBeGreaterThan(1);
     expect(report.payload.operationalPlans?.[0].steps[0].requiredDocuments.length).toBeGreaterThan(0);
+    expect(report.payload.operationalPlans?.[0].administrativeActs).toHaveLength(1);
+    expect(report.payload.operationalPlans?.[0].administrativeActs).toEqual([
+      expect.objectContaining({
+        actType: "RELAZIONE_ISTRUTTORIA_CONCLUSIVA",
+        necessity: "REQUIRED_IF_PROCEEDING_STARTED",
+        sequence: 1,
+        templateSource: "INTERNAL_TEMPLATE_REQUIRED_IF_AVAILABLE",
+        automaticExecutionProhibited: true,
+        sections: expect.objectContaining({
+          heading: expect.stringContaining("Bozza istruttoria modificabile"),
+          subject: expect.stringContaining("Testo issue-1"),
+          premises: expect.any(Array),
+          documentedFacts: expect.any(Array),
+          investigation: expect.any(Array),
+          reasoning: expect.any(Array),
+          legalReferences: ["[FONDAMENTO SOSTANZIALE, PROCEDIMENTALE E SULLA COMPETENZA DA VERIFICARE]"],
+          operativePart: expect.any(Array),
+          communications: expect.any(Array),
+          signature: expect.stringContaining("FIRMA"),
+        }),
+      }),
+    ]);
+    expect(report.payload.operationalPlans?.[0].administrativeActs[0].adaptationInstructions)
+      .toContain("schema interno dell'Ente");
 
     expect(report.payload.legalIssues).toHaveLength(1);
     expect(report.payload.legalIssues[0].questions[0]).toMatchObject({
@@ -175,8 +275,134 @@ describe("deterministic structured fascicolo report", () => {
       }],
       gaps: ["UNCOVERED_ELEMENT"],
     });
+
     expect(report.payload.limitations).toContain("DEADLINE_CANDIDATES_ARE_NOT_OPERATIONAL_DEADLINES");
+    const narrative = report.payload.professionalNarrative!;
+    expect(narrative).toMatchObject({
+      status: "PRELIMINARY_DOCUMENT_BASED",
+      documentaryReferences: ["DOCUMENT_1.PAGE_1"],
+    });
+    expect(narrative.reconstruction).toContain(
+      "Testo fact-1 [DOCUMENT_1.PAGE_1]",
+    );
+    expect(narrative.complianceAndAllegedBreaches[0])
+      .toContain("Allegazione della parte, non assunta come fatto accertato");
+    expect(narrative.legalResearchStatus)
+      .toContain("Norme e giurisprudenza");
     expect(JSON.stringify(report.payload)).not.toContain("analysisPayload");
+  });
+
+  it("accepts a specific motivation only when every cited source and fact belongs to the issue", () => {
+    const valid = buildStructuredFascicoloReport({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledge: knowledge(),
+      missions: [mission({ legalAnalysisContributions: [legalContribution()] })],
+    });
+    expect(valid.payload.legalAnalyses?.[0]).toMatchObject({
+      status: "CONTESTED",
+      assessment: "La tesi favorevole è sostenibile sul piano materiale, ma non è ancora conclusiva sul piano procedimentale.",
+      professionalReasoning: {
+        contributionId: "contribution-issue-1",
+        ruleApplications: [expect.objectContaining({
+          application: expect.stringContaining("presupposto materiale"),
+        })],
+      },
+    });
+
+    const invalid = buildStructuredFascicoloReport({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledge: knowledge(),
+      missions: [mission({
+        legalAnalysisContributions: [{
+          ...legalContribution(),
+          reasonedConclusion: {
+            ...legalContribution().reasonedConclusion,
+            decisiveFactBasisRefs: ["DOCUMENT_99.PAGE_1"],
+          },
+        }],
+      })],
+    });
+    expect(invalid.payload.legalAnalyses?.[0]).toMatchObject({
+      status: "MOTIVATION_REQUIRED",
+      professionalReasoning: null,
+    });
+  });
+
+  it("generates differentiated concrete acts and adapts a copy to an internal test template", () => {
+    const accountingBase = knowledge();
+    const accountingKnowledge: StructuredKnowledgeReadModel = {
+      ...accountingBase,
+      legalIssues: accountingBase.legalIssues.map((issue, index) => index === 0 ? {
+        ...issue,
+        normalizedText: "Ricostruire canoni, pagamenti, imputazioni di Tesoreria e proposta di ripiano.",
+      } : issue),
+      facts: accountingBase.facts.map((fact, index) => index === 1 ? {
+        ...fact,
+        normalizedText: "Pagamento documentato di euro 20.000 sulla rata di euro 48.000.",
+      } : fact),
+    };
+    const technicalBase = knowledge();
+    const technicalKnowledge: StructuredKnowledgeReadModel = {
+      ...technicalBase,
+      legalIssues: technicalBase.legalIssues.map((issue, index) => index === 0 ? {
+        ...issue,
+        normalizedText: "Accertare portanza strutturale, carichi delle gru e sicurezza degli impianti.",
+      } : issue),
+      facts: technicalBase.facts.map((fact, index) => index === 1 ? {
+        ...fact,
+        normalizedText: "La portanza attuale non e attestata e i carichi puntuali non sono determinati.",
+      } : fact),
+    };
+
+    const accounting = buildStructuredFascicoloReport({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledge: accountingKnowledge,
+      missions: [],
+    }).payload.operationalPlans![0];
+    const technical = buildStructuredFascicoloReport({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledge: technicalKnowledge,
+      missions: [],
+    }).payload.operationalPlans![0];
+
+    expect(accounting.administrativeActs.map((act) => act.actType)).toEqual([
+      "ACQUISIZIONE_PARTITARIO_E_ATTESTAZIONE_TESORERIA",
+      "RICHIESTA_DOCUMENTI_CONTABILI_AL_CONCESSIONARIO",
+      "PROVVEDIMENTO_SU_RIPIANO_O_REGOLARIZZAZIONE",
+    ]);
+    expect(technical.administrativeActs.map((act) => act.actType)).toEqual([
+      "RICHIESTA_ACCERTAMENTO_SPECIALISTICO_STRUTTURALE_E_IMPIANTISTICO",
+      "DISPOSIZIONE_E_VERBALE_DI_SOPRALLUOGO_TECNICO",
+      "PRESCRIZIONE_TECNICA_MOTIVATA",
+    ]);
+    expect(accounting.administrativeActs[0].sections.documentedFacts.join(" ")).toContain("euro 20.000");
+    expect(accounting.administrativeActs[0].sections.investigation.join(" ")).toContain("partitario ufficiale");
+    expect(technical.administrativeActs[0].sections.documentedFacts.join(" ")).toContain("portanza attuale");
+    expect(technical.administrativeActs[0].sections.investigation.join(" ")).toContain("carichi");
+
+    const internalTemplate = {
+      templateId: "test-entity-accounting-act",
+      templateVersion: "1",
+      heading: "ENTE DI TEST - AREA FINANZIARIA",
+      sectionOrder: ["heading", "subject", "premises", "documentedFacts", "investigation", "reasoning", "legalReferences", "operativePart", "communications", "signature"] as const,
+      lockedClauses: ["Informativa privacy dell'Ente di test"],
+    };
+    const adapted = adaptAdministrativeActToInternalTemplate(
+      accounting.administrativeActs[0],
+      internalTemplate,
+    );
+
+    expect(adapted.originalTemplate).toEqual(internalTemplate);
+    expect(adapted.originalTemplate).not.toBe(internalTemplate);
+    expect(adapted.adaptedSections.heading).toBe("ENTE DI TEST - AREA FINANZIARIA");
+    expect(adapted.lockedClausesPreserved).toEqual(internalTemplate.lockedClauses);
+    expect(adapted.proposedIntegrations.map((integration) => integration.section))
+      .toEqual(internalTemplate.sectionOrder);
+    expect(adapted.humanApprovalRequired).toBe(true);
   });
 
   it("is stable across input order and changes when CURRENT source state changes", () => {
@@ -201,6 +427,29 @@ describe("deterministic structured fascicolo report", () => {
     expect(reordered.reportFingerprint).toBe(first.reportFingerprint);
     expect(changed.reportFingerprint).not.toBe(first.reportFingerprint);
     expect(changed.payload.sourceStateFingerprint).not.toBe(first.payload.sourceStateFingerprint);
+  });
+
+  it("builds preliminary operational plans from documented gaps when no explicit legal issue exists", () => {
+    const withoutIssues = knowledge();
+    withoutIssues.legalIssues = [];
+    withoutIssues.researchQuestions = [];
+
+    const report = buildStructuredFascicoloReport({
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledge: withoutIssues,
+      missions: [],
+    });
+
+    expect(report.payload.legalIssues).toEqual([]);
+    expect(report.payload.operationalPlans).toHaveLength(1);
+    expect(report.payload.operationalPlans?.[0]).toMatchObject({
+      issueSemanticKey: sha("gap-1"),
+      sourceDocumentRefs: ["DOCUMENT_1.PAGE_1"],
+      outstandingEvidence: ["Testo gap-1"],
+      professionalStatus: "PRELIMINARY_NOT_APPROVED",
+    });
+    expect(report.payload.limitations).toContain("NO_EXPLICIT_LEGAL_ISSUES_IN_CURRENT_KNOWLEDGE");
   });
 
   it("projects a reviewed direction only when the existing SourceChain gates are satisfied", () => {
@@ -238,5 +487,59 @@ describe("deterministic structured fascicolo report", () => {
       expect.objectContaining({ resultId: "reviewed-not-usable", reasons: ["CITATION_ANCHOR_REQUIRED", "MISSING_FULL_TEXT"] }),
       expect.objectContaining({ resultId: "reviewed-neutral", direction: "NEUTRAL" }),
     ]));
+  });
+
+  describe("MCP technical sources", () => {
+    const technical = (overrides: Partial<StructuredReportTechnicalSourceInput> = {}): StructuredReportTechnicalSourceInput => ({
+      recordId: "tech-1",
+      missionId: "mission-current",
+      toolName: "wms_feature_info",
+      questionSnapshot: "Vincoli paesaggistici sull'area demaniale",
+      verificationStatus: "RISPOSTA_VUOTA_NON_PROBATORIA",
+      serviceVersion: "1.0.0",
+      responseDigest: sha("d"),
+      retrievedAt: new Date("2026-10-18T08:00:00.000Z"),
+      ...overrides,
+    });
+    const base = { tenantId: "tenant-1", procedimentoId: "procedure-1" };
+
+    it("leaves the report unchanged when no technical source exists", () => {
+      const without = buildStructuredFascicoloReport({ ...base, knowledge: knowledge(), missions: [mission()] });
+      const empty = buildStructuredFascicoloReport({ ...base, knowledge: knowledge(), missions: [mission()], technicalSources: [] });
+      expect(empty.reportFingerprint).toBe(without.reportFingerprint);
+      expect(empty.payload.researchStateFingerprint).toBe(without.payload.researchStateFingerprint);
+      expect(empty.payload).not.toHaveProperty("technicalSources");
+    });
+
+    it("includes only CURRENT-mission acquisitions, as non-probative, without creating authorities", () => {
+      const without = buildStructuredFascicoloReport({ ...base, knowledge: knowledge(), missions: [mission()] });
+      const report = buildStructuredFascicoloReport({
+        ...base,
+        knowledge: knowledge(),
+        missions: [mission(), mission({ missionId: "mission-historical", lifecycleStatus: "HISTORICAL", results: [] })],
+        technicalSources: [
+          technical(),
+          technical({ recordId: "tech-historical", missionId: "mission-historical" }),
+          technical({ recordId: "tech-foreign", missionId: "mission-other-procedure" }),
+          technical({ recordId: "tech-unknown", verificationStatus: "VERIFICATO" }),
+        ],
+      });
+
+      expect(report.payload.technicalSources?.map((source) => source.recordId)).toEqual(["tech-1", "tech-unknown"]);
+      expect(report.payload.technicalSources?.every((source) => source.probative === false)).toBe(true);
+      expect(report.payload.technicalSources?.[1].verificationStatus).toBe("DA_VERIFICARE_SU_FONTE_ORIGINALE");
+      expect(report.payload.technicalSources?.[0]).toMatchObject({
+        questionSemanticKey: sha("question-1"),
+        retrievedAt: "2026-10-18T08:00:00.000Z",
+      });
+      expect(report.payload.technicalSources?.[0].requiredVerification).toContain("non prova l'assenza di vincoli");
+      expect(report.payload.legalIssues[0].questions[0].favorableAuthorities)
+        .toEqual(without.payload.legalIssues[0].questions[0].favorableAuthorities);
+      expect(report.payload.operationalPlans?.[0].legalSourceStatus).toBe(without.payload.operationalPlans?.[0].legalSourceStatus);
+      expect(report.payload.operationalPlans?.[0].outstandingEvidence.some((line) => line.includes("MCP (2, non probatori)"))).toBe(true);
+      expect(report.payload.limitations).toContain("TECHNICAL_SOURCES_NOT_PROBATIVE_VERIFY_ORIGINAL");
+      expect(report.payload.researchStateFingerprint).not.toBe(without.payload.researchStateFingerprint);
+      expect(report.reportFingerprint).not.toBe(without.reportFingerprint);
+    });
   });
 });

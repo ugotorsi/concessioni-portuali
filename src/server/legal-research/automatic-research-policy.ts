@@ -1,6 +1,10 @@
 import { createHash } from "node:crypto";
 
-import type { ResearchCapability, ResearchMission } from "./bridge";
+import {
+  researchMissionExecutionChannel,
+  type ResearchCapability,
+  type ResearchMission,
+} from "./bridge";
 
 export const AUTOMATIC_RESEARCH_POLICY_ENV_NAMES = [
   "AUTOMATIC_RESEARCH_EXECUTION_ENABLED",
@@ -11,6 +15,8 @@ export const AUTOMATIC_RESEARCH_POLICY_ENV_NAMES = [
   "AUTOMATIC_RESEARCH_WORKER_ACTOR_ID",
   "AUTOMATIC_RESEARCH_LEASE_MS",
   "AUTOMATIC_RESEARCH_PROVIDER_TIMEOUT_MS",
+  "AUTOMATIC_OFFICIAL_SOURCE_VERIFICATION_ENABLED",
+  "AUTOMATIC_OFFICIAL_SOURCE_MAX_ACQUISITIONS",
 ] as const;
 
 const capabilities = new Set<ResearchCapability>([
@@ -24,6 +30,7 @@ const capabilities = new Set<ResearchCapability>([
 ]);
 
 export type AutomaticResearchPolicyRequirement =
+  | "AUTOMATIC_RESEARCH_EXECUTION_CHANNEL_NOT_ALLOWED"
   | "AUTOMATIC_RESEARCH_POLICY_DISABLED"
   | "AUTOMATIC_RESEARCH_TENANT_NOT_ALLOWED"
   | "AUTOMATIC_RESEARCH_PROCEDIMENTO_NOT_ALLOWED"
@@ -38,6 +45,7 @@ export type AutomaticResearchPolicyDecision = Readonly<{
   workerActorId: string | null;
   leaseDurationMs: number | null;
   providerTimeoutMs: number | null;
+  maxOfficialSourceAcquisitions: number | null;
   allowedCapabilities: readonly ResearchCapability[];
 }>;
 
@@ -66,6 +74,7 @@ function denied(
     workerActorId: null,
     leaseDurationMs: null,
     providerTimeoutMs: null,
+    maxOfficialSourceAcquisitions: null,
     allowedCapabilities,
   };
 }
@@ -76,6 +85,9 @@ export function evaluateAutomaticResearchPolicy(input: Readonly<{
   env?: AutomaticResearchPolicyEnv | NodeJS.ProcessEnv;
 }>): AutomaticResearchPolicyDecision {
   const env = input.env ?? process.env;
+  if (input.mission && researchMissionExecutionChannel(input.mission) !== "SERVER_AUTONOMOUS") {
+    return denied("AUTOMATIC_RESEARCH_EXECUTION_CHANNEL_NOT_ALLOWED");
+  }
   if (env.AUTOMATIC_RESEARCH_EXECUTION_ENABLED?.trim().toLowerCase() !== "true") {
     return denied("AUTOMATIC_RESEARCH_POLICY_DISABLED");
   }
@@ -95,8 +107,14 @@ export function evaluateAutomaticResearchPolicy(input: Readonly<{
   const maximumCalls = integer(env.AUTOMATIC_RESEARCH_MAX_CALLS, 0, 100);
   const leaseDurationMs = integer(env.AUTOMATIC_RESEARCH_LEASE_MS, 1_000, 86_400_000);
   const providerTimeoutMs = integer(env.AUTOMATIC_RESEARCH_PROVIDER_TIMEOUT_MS, 1_000, 300_000);
+  const officialSourceVerificationEnabled =
+    env.AUTOMATIC_OFFICIAL_SOURCE_VERIFICATION_ENABLED?.trim().toLowerCase() === "true";
+  const maxOfficialSourceAcquisitions = officialSourceVerificationEnabled
+    ? integer(env.AUTOMATIC_OFFICIAL_SOURCE_MAX_ACQUISITIONS, 0, 100)
+    : null;
   const workerActorId = env.AUTOMATIC_RESEARCH_WORKER_ACTOR_ID?.trim() ?? "";
   if (maximumCalls === null || leaseDurationMs === null || providerTimeoutMs === null
+    || (officialSourceVerificationEnabled && maxOfficialSourceAcquisitions === null)
     || !workerActorId || workerActorId.length > 256) {
     return denied("AUTOMATIC_RESEARCH_POLICY_INVALID", allowedCapabilities);
   }
@@ -117,6 +135,8 @@ export function evaluateAutomaticResearchPolicy(input: Readonly<{
     workerActorId,
     leaseDurationMs,
     providerTimeoutMs,
+    officialSourceVerificationEnabled,
+    maxOfficialSourceAcquisitions,
   };
   return {
     authorized: true,
@@ -126,6 +146,7 @@ export function evaluateAutomaticResearchPolicy(input: Readonly<{
     workerActorId,
     leaseDurationMs,
     providerTimeoutMs,
+    maxOfficialSourceAcquisitions,
     allowedCapabilities,
   };
 }

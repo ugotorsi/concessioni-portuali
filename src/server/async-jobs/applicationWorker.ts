@@ -1,11 +1,12 @@
 import { AsyncJobHandlerRegistry } from "./registry";
-import { drainOneAsyncJob } from "./worker";
+import { drainAsyncJobById, drainOneAsyncJob } from "./worker";
 import { createNeutralIntakeClassificationHandler } from "../intake/neutralIntakeClassificationJob";
 import { createNeutralIntakeExtractionHandler } from "../intake/neutralIntakeExtractionJob";
 import {
   createFascicoloAutomaticAnalysisHandler,
   type FascicoloAutomaticAnalysisDependencies,
 } from "../ai/fascicoloAutomaticAnalysisJob";
+import { FASCICOLO_ANALYSIS_EVALUATION_OPERATION } from "../ai/fascicoloAnalysisEvaluation";
 import { createLegalReferenceDiscoveryHandler } from "../intake/neutralIntakeLegalReferenceDiscoveryJob";
 import { createLegalReferenceMatchingHandler } from "../intake/neutralIntakeLegalReferenceMatchingJob";
 import { createLegalReferenceOfficialLookupHandler } from "../intake/neutralIntakeLegalReferenceOfficialLookupJob";
@@ -22,13 +23,15 @@ import {
 } from "../legal-research/automatic-research-job";
 import { createDocumentExtractionHandler } from "../documents/documentExtractionJob";
 import { createPeriodicLegalResearchScheduler } from "../legal-research/periodic-legal-research";
+import {
+  AI_PROVIDER_BACKED_ASYNC_OPERATIONS,
+  getGlobalAiControlState,
+} from "../ai/globalAiControl";
 
 const APPLICATION_ASYNC_JOB_LEASE_MS = 5 * 60 * 1_000;
-const PROVIDER_BACKED_OPERATIONS = [
-  "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
-  "LEGAL_RESEARCH.EXECUTE_V1",
-] as const;
+const TARGETED_FASCICOLO_ANALYSIS_LEASE_MS = 15 * 60 * 1_000;
 const AUTOMATIC_RESEARCH_OPERATION = "LEGAL_RESEARCH.EXECUTE_V1";
+const ISOLATED_OPERATIONS = [FASCICOLO_ANALYSIS_EVALUATION_OPERATION] as const;
 const reconcilePeriodicLegalResearch = createPeriodicLegalResearchScheduler();
 
 export function createApplicationAsyncJobRegistry(input: {
@@ -53,6 +56,15 @@ export function createApplicationAsyncJobRegistry(input: {
 
 export const applicationAsyncJobRegistry = createApplicationAsyncJobRegistry();
 
+export function applicationAsyncJobOperationBlocklist(
+  providerExecutionEnabled: boolean | undefined,
+): readonly string[] {
+  return [
+    ...ISOLATED_OPERATIONS,
+    ...(providerExecutionEnabled === false ? AI_PROVIDER_BACKED_ASYNC_OPERATIONS : []),
+  ];
+}
+
 export async function drainOneApplicationAsyncJob(input: {
   workerId: string;
   retryDelayMs: number;
@@ -60,19 +72,47 @@ export async function drainOneApplicationAsyncJob(input: {
   procedimentoAllowlist?: readonly string[];
   providerExecutionEnabled?: boolean;
 }) {
-  if (!input.procedimentoAllowlist?.length) {
+  const aiControl = await getGlobalAiControlState();
+  const providerExecutionEnabled =
+    input.providerExecutionEnabled === true && aiControl.effectiveEnabled;
+  if (providerExecutionEnabled && !input.procedimentoAllowlist?.length) {
     await reconcilePeriodicLegalResearch();
   }
   if (
-    !input.operationAllowlist?.length
-    || input.operationAllowlist.includes(AUTOMATIC_RESEARCH_OPERATION)
+    providerExecutionEnabled
+    && (!input.operationAllowlist?.length
+      || input.operationAllowlist.includes(AUTOMATIC_RESEARCH_OPERATION))
   ) {
     await reconcilePendingAutomaticResearchExecutions();
   }
   return drainOneAsyncJob({
     ...input,
-    operationBlocklist: input.providerExecutionEnabled === false ? PROVIDER_BACKED_OPERATIONS : undefined,
+    operationBlocklist: applicationAsyncJobOperationBlocklist(providerExecutionEnabled),
     leaseDurationMs: APPLICATION_ASYNC_JOB_LEASE_MS,
+    registry: applicationAsyncJobRegistry,
+  });
+}
+
+export async function drainTargetedFascicoloAnalysisJob(input: {
+  jobId: string;
+  tenantId: string;
+  procedimentoId: string;
+  workerId: string;
+  retryDelayMs: number;
+  providerExecutionEnabled?: boolean;
+}) {
+  const aiControl = await getGlobalAiControlState();
+  if (input.providerExecutionEnabled !== true || !aiControl.effectiveEnabled) {
+    return { outcome: "IDLE" as const };
+  }
+  return drainAsyncJobById({
+    jobId: input.jobId,
+    expectedOperation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+    expectedTenantId: input.tenantId,
+    expectedProcedimentoId: input.procedimentoId,
+    workerId: input.workerId,
+    leaseDurationMs: TARGETED_FASCICOLO_ANALYSIS_LEASE_MS,
+    retryDelayMs: input.retryDelayMs,
     registry: applicationAsyncJobRegistry,
   });
 }

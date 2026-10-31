@@ -89,4 +89,30 @@ describe("Lotto 7 operational proposal generation", () => {
     empty.legalIssues = [];
     expect(generate(empty)).toEqual([]);
   });
+
+  it("turns MCP technical acquisitions into a non-probative TECNICA verification proposal", () => {
+    const withTechnical = report();
+    withTechnical.technicalSources = [{
+      recordId: "tech-1", missionId: "mission-1", questionSemanticKey: sha("q"), toolName: "wms_feature_info",
+      question: "Vincoli?", verificationStatus: "RISPOSTA_VUOTA_NON_PROBATORIA", probative: false,
+      serviceVersion: "1.0.0", responseDigest: sha("d"), retrievedAt: "2026-10-18T08:00:00.000Z",
+      requiredVerification: "Verificare presso l'ente competente.",
+    }, {
+      recordId: "tech-orphan", missionId: "mission-x", questionSemanticKey: sha("unknown"), toolName: "search",
+      question: "Altro", verificationStatus: "DA_VERIFICARE_SU_FONTE_ORIGINALE", probative: false,
+      serviceVersion: "1.0.0", responseDigest: sha("e"), retrievedAt: "2026-10-18T08:00:00.000Z",
+      requiredVerification: "Consultare la fonte originale.",
+    }];
+    const technical = generate(withTechnical).filter((candidate) => candidate.warningCodes.includes("TECHNICAL_SOURCE_NOT_PROBATIVE"));
+    expect(technical).toHaveLength(1);
+    expect(technical[0]).toMatchObject({
+      proposalType: "CRITICALITY",
+      originatingQuestionSemanticKeys: [sha("q")],
+      originatingIssueSemanticKeys: [sha("i")],
+      relevantResultIds: [],
+      proposedPayload: { category: "TECNICA", severity: "MEDIA", technicalSourceRecordIds: ["tech-1"] },
+    });
+    expect(operationalProposalCandidateSchema.safeParse(technical[0]).success).toBe(true);
+    expect(generate(withTechnical)).toHaveLength(generate().length + 1);
+  });
 });

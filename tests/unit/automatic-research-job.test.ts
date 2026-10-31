@@ -15,6 +15,7 @@ import { RESEARCH_MISSION_EXECUTION_OPERATION } from "@/server/legal-research/pe
 const mission = createResearchMission({
   kind: "RESEARCH_MISSION",
   version: RESEARCH_BRIDGE_VERSION,
+  executionChannel: "SERVER_AUTONOMOUS",
   caseReference: { caseId: "procedure-1", fascicoloReference: "procedure-1" },
   legalIssueIds: ["issue-1"],
   legalPropositionIds: [],
@@ -89,6 +90,25 @@ describe("automatic research queue job", () => {
     });
   });
 
+  it("never admits a ChatGPT connector mission even when autonomous policy is enabled", async () => {
+    const { missionId: _missionId, ...missionInput } = mission;
+    const chatGptMission = createResearchMission({
+      ...missionInput,
+      executionChannel: "CHATGPT_CONNECTOR",
+    });
+    await expect(ensureAutomaticResearchExecution({
+      mission: chatGptMission,
+      tenantId: "tenant-1",
+      actorId: "actor-1",
+      correlationId: "correlation-1",
+      env,
+    })).resolves.toEqual({
+      outcome: "NOT_AUTHORIZED",
+      requirementCode: "AUTOMATIC_RESEARCH_EXECUTION_CHANNEL_NOT_ALLOWED",
+      jobId: null,
+    });
+  });
+
   it("rejects tenant, capability, and budget outside the explicit policy", () => {
     expect(evaluateAutomaticResearchPolicy({ tenantId: "tenant-2", mission, env }).requirementCode)
       .toBe("AUTOMATIC_RESEARCH_TENANT_NOT_ALLOWED");
@@ -109,6 +129,39 @@ describe("automatic research queue job", () => {
     }).requirementCode).toBe("AUTOMATIC_RESEARCH_BUDGET_NOT_ALLOWED");
   });
 
+  it("requires and fingerprints a bounded official-source acquisition policy", () => {
+    expect(evaluateAutomaticResearchPolicy({
+      tenantId: "tenant-1",
+      mission,
+      env: { ...env, AUTOMATIC_OFFICIAL_SOURCE_VERIFICATION_ENABLED: "true" },
+    }).requirementCode).toBe("AUTOMATIC_RESEARCH_POLICY_INVALID");
+
+    const bounded = evaluateAutomaticResearchPolicy({
+      tenantId: "tenant-1",
+      mission,
+      env: {
+        ...env,
+        AUTOMATIC_OFFICIAL_SOURCE_VERIFICATION_ENABLED: "true",
+        AUTOMATIC_OFFICIAL_SOURCE_MAX_ACQUISITIONS: "12",
+      },
+    });
+    const narrower = evaluateAutomaticResearchPolicy({
+      tenantId: "tenant-1",
+      mission,
+      env: {
+        ...env,
+        AUTOMATIC_OFFICIAL_SOURCE_VERIFICATION_ENABLED: "true",
+        AUTOMATIC_OFFICIAL_SOURCE_MAX_ACQUISITIONS: "11",
+      },
+    });
+
+    expect(bounded).toMatchObject({
+      authorized: true,
+      maxOfficialSourceAcquisitions: 12,
+    });
+    expect(narrower.policyDecisionRef).not.toBe(bounded.policyDecisionRef);
+  });
+
   it("completes through the handler with one accounted execution", async () => {
     const execute = vi.fn(async () => ({
       status: "COMPLETED" as const,
@@ -120,6 +173,7 @@ describe("automatic research queue job", () => {
     }));
     const orchestrateSourceChain = vi.fn(async () => undefined);
     const handler = createAutomaticResearchExecutionHandler({
+      assertAiExecutionAllowed: vi.fn(async () => undefined),
       loadAuthority: vi.fn(async () => ({ mission, tenantId: "tenant-1", actorId: "actor-1", decision })),
       createProviderAdapters: vi.fn(async () => [{ capability: "SEMANTIC_DISCOVERY" } as never]),
       execute,
@@ -133,6 +187,28 @@ describe("automatic research queue job", () => {
     expect(orchestrateSourceChain).toHaveBeenCalledWith(expect.objectContaining({ result: expect.objectContaining({ bundleId: "bundle-1" }) }));
   });
 
+  it("stops before creating provider adapters when global AI is OFF", async () => {
+    const createProviderAdapters = vi.fn();
+    const execute = vi.fn();
+    const handler = createAutomaticResearchExecutionHandler({
+      assertAiExecutionAllowed: vi.fn(async () => {
+        throw new Error("AI_GLOBALLY_DISABLED");
+      }),
+      loadAuthority: vi.fn(async () => ({
+        mission,
+        tenantId: "tenant-1",
+        actorId: "actor-1",
+        decision,
+      })),
+      createProviderAdapters,
+      execute,
+    });
+
+    await expect(handler.execute(reference, context)).rejects.toThrow("AI_GLOBALLY_DISABLED");
+    expect(createProviderAdapters).not.toHaveBeenCalled();
+    expect(execute).not.toHaveBeenCalled();
+  });
+
   it("marks a lost trusted response terminal and never requests an automatic retry", async () => {
     const execute = vi.fn(async () => ({
       status: "RECOVERY_REQUIRED" as const,
@@ -142,6 +218,7 @@ describe("automatic research queue job", () => {
       blockerCodes: ["SUBMIT_OUTCOME_UNCERTAIN"],
     }));
     const handler = createAutomaticResearchExecutionHandler({
+      assertAiExecutionAllowed: vi.fn(async () => undefined),
       loadAuthority: vi.fn(async () => ({ mission, tenantId: "tenant-1", actorId: "actor-1", decision })),
       createProviderAdapters: vi.fn(async () => [{ capability: "SEMANTIC_DISCOVERY" } as never]),
       execute,

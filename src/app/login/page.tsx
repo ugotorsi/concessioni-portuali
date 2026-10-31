@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { LoginCredentialsForm } from "@/components/forms/LoginCredentialsForm";
 import { getCurrentRole, type DemoRole } from "@/lib/auth";
 import { resolveWorkosLoginCallback } from "@/server/auth/workos-login-callback";
+import { isPreviewPasswordRecoveryEnabled } from "@/server/auth/preview-password-recovery";
 
 function getPostLoginPath(role: DemoRole): string {
   return role === "VIEWER_ADSP" ? "/adsp" : "/dashboard";
@@ -61,6 +62,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <LoginCredentialsForm
             initialErrorMessage={errorMessage}
             callbackUrl={trustedWorkosCallback ?? undefined}
+            passwordRecoveryEnabled={isPreviewPasswordRecoveryEnabled()}
           />
         </section>
 
