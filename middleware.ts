@@ -12,6 +12,13 @@ const MCP_DEDICATED_PREVIEW_HOST = "concessioni-portuali-demo-v7-mcp-preview.ver
 const MCP_DEDICATED_ALLOWED_PATHS = new Set([
   MCP_PATH,
   MCP_PROTECTED_RESOURCE_METADATA_PATH,
+  "/login",
+  "/api/auth/workos/complete",
+  "/api/auth/providers",
+  "/api/auth/csrf",
+  "/api/auth/session",
+  "/api/auth/callback/credentials",
+  "/api/auth/error",
 ]);
 const TRUSTED_RESEARCH_MISSION_PATH = "/api/legal-research/trusted/mission";
 const TRUSTED_RESEARCH_MISSION_ACTION_PATH = "/api/legal-research/trusted/mission/action";

@@ -41,9 +41,10 @@ describe("middleware sensitive route boundaries", () => {
 
   it.each([
     "/",
-    "/login",
     "/procedimenti/procedure-1",
     "/api/admin/runtime-health",
+    "/api/auth/password-recovery",
+    "/api/auth/mfa/enrollment",
     "/_next/static/chunks/app.js",
     "/favicon.ico",
   ])("denies non-MCP paths on the dedicated MCP host: %s", async (path) => {
@@ -61,7 +62,14 @@ describe("middleware sensitive route boundaries", () => {
   it.each([
     "/api/mcp",
     "/.well-known/oauth-protected-resource",
-  ])("allows only the MCP boundary on the dedicated MCP host: %s", async (path) => {
+    "/login",
+    "/api/auth/workos/complete",
+    "/api/auth/providers",
+    "/api/auth/csrf",
+    "/api/auth/session",
+    "/api/auth/callback/credentials",
+    "/api/auth/error",
+  ])("allows the MCP and Standalone Connect boundaries on the dedicated MCP host: %s", async (path) => {
     const response = await middleware(makeRequest(
       path,
       "concessioni-portuali-demo-v7-mcp-preview.vercel.app",
