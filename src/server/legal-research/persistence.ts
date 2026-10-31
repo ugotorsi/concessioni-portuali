@@ -18,6 +18,7 @@ import { persistResearchQuestionResults } from "./question-results";
 import {
   RESEARCH_BRIDGE_VERSION,
   assessResearchBudget,
+  researchMissionExecutionChannel,
   validateResearchEvidenceBundle,
   validateResearchMission,
   type ResearchCompletionState,
@@ -859,8 +860,22 @@ async function requirePreClaimDocumentaryEvidence(
   actor: ResearchServiceActor,
   ctx: ResearchPersistenceContext,
 ): Promise<void> {
+  if (researchMissionExecutionChannel(mission) === "CHATGPT_CONNECTOR") return;
   if (mission.mode === "EXACT_SOURCE_RECOVERY") return;
   await requireDocumentaryEvidence(mission, actor, ctx);
+}
+
+function requireExecutorChannel(
+  mission: ResearchMission,
+  executorKind: ResearchExecutorIdentity["kind"],
+): void {
+  const channel = researchMissionExecutionChannel(mission);
+  if (
+    (channel === "CHATGPT_CONNECTOR" && executorKind === "AUTHORIZED_WORKER")
+    || (channel === "SERVER_AUTONOMOUS" && executorKind !== "AUTHORIZED_WORKER")
+  ) {
+    throw new ResearchPersistenceError("INVALID_TRANSITION");
+  }
 }
 
 export async function claimResearchMission(
@@ -885,7 +900,9 @@ export async function claimResearchMission(
     if (current.lifecycleStatus !== "CURRENT") {
       throw new ResearchPersistenceError("INVALID_TRANSITION");
     }
-    await requirePreClaimDocumentaryEvidence(missionFrom(current), input.actor, { ...ctx, client: tx });
+    const mission = missionFrom(current);
+    requireExecutorChannel(mission, input.executor.kind);
+    await requirePreClaimDocumentaryEvidence(mission, input.actor, { ...ctx, client: tx });
     const now = ctx.clock.now();
     if (["COMPLETED", "BUDGET_EXHAUSTED", "REJECTED"].includes(current.status)) {
       throw new ResearchPersistenceError("INVALID_TRANSITION");
@@ -963,7 +980,9 @@ export async function claimResearchMission(
       throw cause;
     }
     authorize(current, input.actor);
-    await requirePreClaimDocumentaryEvidence(missionFrom(current), input.actor, ctx);
+    const mission = missionFrom(current);
+    requireExecutorChannel(mission, input.executor.kind);
+    await requirePreClaimDocumentaryEvidence(mission, input.actor, ctx);
     return {
       outcome: "REUSED",
       claim: { mission: storedMission(current), execution: repeated, claimToken: repeated.claimToken },

@@ -92,6 +92,12 @@ La superficie admin di creazione assegna la missione a un attore attivo e deriva
 
 Il percorso operativo e: Concessioni Portuali crea e assegna la missione -> ChatGPT personale la prende tramite MCP -> ChatGPT usa i propri connettori autorizzati -> ChatGPT restituisce e completa il bundle tramite MCP. Non sono richiesti client provider programmatici nel backend.
 
+Le missioni create per questo percorso hanno `executionChannel=CHATGPT_CONNECTOR`.
+L'assenza del campo nelle missioni legacy equivale allo stesso valore. Soltanto una
+missione creata esplicitamente con `executionChannel=SERVER_AUTONOMOUS` puo essere
+ammessa dagli scheduler di ricerca automatica. I gate ambientali non possono
+convertire una missione ChatGPT in una missione autonoma.
+
 Il `fascicoloScopeId` continua a essere derivato dal server usando tenant e case reference della missione persistita. La separazione delle conversazioni ChatGPT per fascicolo resta difesa in profondita e non sostituisce l'assegnazione applicativa.
 
 ## Limiti di attivazione ChatGPT

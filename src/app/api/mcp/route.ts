@@ -5,6 +5,11 @@ import {
   researchMcpAuthResponse,
 } from "@/server/legal-research/mcp-auth";
 import { handleAuthenticatedResearchMcpRequest } from "@/server/legal-research/mcp";
+import {
+  RESEARCH_FASCICOLO_ACCESS_GRANT_HEADER,
+  ResearchFascicoloAccessGrantError,
+  verifyResearchFascicoloAccessGrant,
+} from "@/server/legal-research/fascicolo-access-grant";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,8 +23,20 @@ async function handle(request: Request): Promise<Response> {
         invalidToken: request.headers.has("authorization"),
       });
     }
-    return handleAuthenticatedResearchMcpRequest(request, principal);
+    const grant = request.headers.get(RESEARCH_FASCICOLO_ACCESS_GRANT_HEADER);
+    const trustedWorkerMissionId = grant
+      ? verifyResearchFascicoloAccessGrant(grant, principal).originMissionId
+      : undefined;
+    return handleAuthenticatedResearchMcpRequest(request, principal, {
+      ...(trustedWorkerMissionId ? { trustedWorkerMissionId } : {}),
+    });
   } catch (error) {
+    if (error instanceof ResearchFascicoloAccessGrantError) {
+      return Response.json({ error: "FORBIDDEN" }, {
+        status: 403,
+        headers: { "Cache-Control": "no-store" },
+      });
+    }
     if (error instanceof ResearchMcpAuthError) {
       return researchMcpAuthResponse(config, {
         status: error.status,

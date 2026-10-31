@@ -18,6 +18,7 @@
     "runtime:verify-v7-provider-output-recovery": "tsx scripts/runtime/verify-v7-provider-output-recovery.ts",
     "runtime:verify-v7-one-shot-08-preflight": "tsx scripts/runtime/verify-v7-one-shot-08-preflight.ts",
     "runtime:verify-v7-one-shot-08-recovered-state": "tsx scripts/runtime/verify-v7-one-shot-08-recovered-state.ts",
+    "runtime:verify-selvara-chatgpt-research-preflight": "tsx scripts/runtime/verify-selvara-chatgpt-research-preflight.ts",
     "runtime:verify-automatic-research-connectors": "tsx scripts/runtime/verify-automatic-research-connectors.ts",
     "runtime:verify-production-readiness": "tsx scripts/runtime/verify-production-readiness.ts",
     "runtime:inventory-selvara-promotion": "tsx scripts/runtime/inventory-selvara-promotion.ts",

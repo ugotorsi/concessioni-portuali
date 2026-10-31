@@ -61,6 +61,7 @@ const missionSchema = z.object({
   kind: z.literal("RESEARCH_MISSION"),
   version: z.literal(RESEARCH_BRIDGE_VERSION),
   missionId: missionIdSchema,
+  executionChannel: z.enum(["CHATGPT_CONNECTOR", "SERVER_AUTONOMOUS"]),
   caseReference: z.object({
     caseId: z.string().min(1),
     fascicoloReference: z.string().min(1).optional(),

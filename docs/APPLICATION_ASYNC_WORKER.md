@@ -457,6 +457,13 @@ build artifact.
 server exposes, leases, validates, and stores missions and evidence bundles; it does
 not invoke ChatGPT-only connectors by itself.
 
+ChatGPT-side missions use `executionChannel=CHATGPT_CONNECTOR` and are excluded from
+automatic admission, residual-wave scheduling, and worker reconciliation. Missing
+channels on legacy missions are interpreted as `CHATGPT_CONNECTOR`. The optional
+backend executor is available only for an immutable, explicit
+`executionChannel=SERVER_AUTONOMOUS`; environment gates alone never authorize a
+ChatGPT mission for backend execution.
+
 Submitting a bundle for a canonically linked mission projects its authority candidates
 idempotently into the question-result and source-assessment records. Completion then
 revalidates the accepted bundle and refreshes the structured report. Missions without

@@ -11,7 +11,10 @@ import {
   getResearchMission,
   RESEARCH_MISSION_EXECUTION_OPERATION,
 } from "./persistence";
-import type { ResearchMission } from "./bridge";
+import {
+  researchMissionExecutionChannel,
+  type ResearchMission,
+} from "./bridge";
 import {
   evaluateAutomaticResearchPolicy,
   type AutomaticResearchPolicyDecision,
@@ -102,6 +105,7 @@ export async function reconcilePendingAutomaticResearchExecutions(limit = 25): P
   let admitted = 0;
   for (const link of links) {
     const mission = link.mission.payload as unknown as ResearchMission;
+    if (researchMissionExecutionChannel(mission) !== "SERVER_AUTONOMOUS") continue;
     const result = await ensureAutomaticResearchExecution({
       mission,
       tenantId: link.report.tenantId,

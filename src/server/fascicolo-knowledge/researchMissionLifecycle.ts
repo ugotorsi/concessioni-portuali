@@ -186,6 +186,7 @@ export async function admitDeferredKnowledgeResearchMissionWave(input: {
       FROM "ResearchMissionRecord"
       WHERE "tenantId" = $1 AND "caseId" = $2
         AND "lifecycleStatus" = 'CURRENT' AND "status" = 'DEFERRED'
+        AND "payload" ->> 'executionChannel' = 'SERVER_AUTONOMOUS'
         AND "researchQuestionSemanticKey" IS NOT NULL
       ORDER BY "researchQuestionSemanticKey", "id"
       FOR UPDATE

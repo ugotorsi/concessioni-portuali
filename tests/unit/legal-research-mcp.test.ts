@@ -488,6 +488,7 @@ describe("Block 3B.13C legal research MCP", () => {
     }));
     expect(listed.missions[0]).toMatchObject({
       missionId: mission.missionId,
+      executionChannel: "CHATGPT_CONNECTOR",
       referenceDate: mission.referenceDate,
       mode: mission.mode,
     });
@@ -501,6 +502,7 @@ describe("Block 3B.13C legal research MCP", () => {
       arguments: { missionId: mission.missionId },
     }));
     expect(fetched.mission.referenceDate).toBe(mission.referenceDate);
+    expect(fetched.mission.executionChannel).toBe("CHATGPT_CONNECTOR");
     expect(fetched.mission.researchQuestion).toContain("hidden_admin_tool");
   });
 

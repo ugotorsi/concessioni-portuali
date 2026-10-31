@@ -42,17 +42,21 @@ DOCUMENT_WORKER_ACTIVATION_MODE=DISABLED
 
 Sono inoltre obbligatori:
 
-1. Preview e worker sullo stesso commit approvato.
+1. Preview Vercel sul commit approvato; il worker Render resta sospeso.
 2. Database e storage non-production identificati.
 3. Identita, tenant, procedimento, missione e corpus verificati in sola lettura.
 4. Nessun job precedente ammesso o claimable per la stessa approvazione.
-5. Preflight V7 positivo eseguito con
-   `npm run runtime:verify-v7-one-shot-08-preflight`.
-6. Budget GLOBAL, TENANT e PROCEDIMENTO capienti per l'intero massimo riservato.
-7. Inventario del pack locale eseguito con `npm run legal:audit:adsp-mtc`.
+5. Stato storico one-shot verificato con
+   `npm run runtime:verify-v7-one-shot-08-recovered-state`.
+6. Preflight ricerca ChatGPT-side positivo eseguito con
+   `npm run runtime:verify-selvara-chatgpt-research-preflight`. Il preflight verifica
+   missione, assegnazione, lifecycle, budget e gate autonomi chiusi. Non legge e non
+   richiede credenziali autonome Moonlit, Simpliciter o Legal Data Hunter.
+7. Budget GLOBAL, TENANT e PROCEDIMENTO capienti per l'intero massimo riservato.
+8. Inventario del pack locale eseguito con `npm run legal:audit:adsp-mtc`.
    Un corpus locale incompleto deve essere dichiarato e non puo essere presentato come
    verifica ufficiale delle fonti mancanti.
-8. Nuova autorizzazione esplicita dell'utente che riporti approvazione, limiti e
+9. Nuova autorizzazione esplicita dell'utente che riporti approvazione, limiti e
    commit esatti.
 
 ## Limiti inderogabili
@@ -62,9 +66,9 @@ Sono inoltre obbligatori:
 - Missioni di ricerca eseguite: massimo **1**, esclusivamente quella indicata sopra.
 - Richieste a provider di ricerca: massimo **6** complessive.
 - Acquisizioni read-only di fonti ufficiali: massimo **12**.
-- La policy del worker deve fissare
-  `AUTOMATIC_OFFICIAL_SOURCE_MAX_ACQUISITIONS=12`; il valore e incluso nel
-  fingerprint della policy e limita il numero di acquisizioni eseguite.
+- ChatGPT deve rispettare il budget immutabile della missione: massimo due chiamate
+  Moonlit, due Simpliciter e due Legal Data Hunter. NOETRA convalida i contatori del
+  bundle e rifiuta ogni superamento.
 - Budget complessivo: massimo **EUR 2,00**, inclusi analisi e ricerca.
 - Il massimo calcolato dal preflight e tutte le riserve runtime devono essere minori
   o uguali al tetto complessivo. In caso contrario non si esegue il collaudo.
@@ -77,20 +81,20 @@ Sono inoltre obbligatori:
    tenant, procedimento, missione, corpus e budget disponibili.
 2. Eseguire il preflight economico e conservare fingerprint, modello, limiti token,
    massimo EUR, tasso di cambio e data della tariffa.
-3. Abilitare soltanto il processo one-shot e la sua allowlist esatta. La ricerca
-   automatica generale resta disabilitata.
-4. Ammettere una volta il job AI vincolato all'approvazione e osservarlo fino a
-   `SUCCEEDED` o `TERMINAL_FAILED`.
-5. Verificare acquisizione dei documenti, questioni giuridiche, riferimenti temporali,
-   affermazioni supportate, evidenze persistite e rapporto strutturato.
-6. Solo se il risultato AI e valido, autorizzare nel medesimo budget la singola
-   missione di ricerca gia esistente. Non creare o eseguire altre missioni.
+3. Mantenere disabilitati worker, AI backend e ricerca automatica.
+4. Nella sessione ChatGPT autenticata, acquisire esclusivamente la missione assegnata
+   mediante il connettore NOETRA Selvara Preview.
+5. Usare esclusivamente i connettori personali ChatGPT autorizzati e rispettare il
+   budget immutabile della missione.
+6. Trasmettere testi verificabili con `research_submit_documentary_evidence`, quindi
+   il bundle con `research_submit_evidence_bundle` e infine completare tramite
+   `research_complete_mission`.
 7. Verificare per ogni conclusione rilevante almeno una fonte ufficiale, la data di
    efficacia, eventuali fonti contrarie e la distinzione tra fatto, regola e inferenza.
 8. Verificare che evidenze, relazioni, revisione e rapporto appartengano al tenant e
    al fascicolo autorizzati e che il rapporto derivi dalla revisione verificata.
-9. Disabilitare immediatamente tutti i gate, arrestare il worker one-shot e
-   riconciliare chiamate, token, costi e artefatti.
+9. Verificare che i gate autonomi siano rimasti disabilitati e riconciliare i
+   contatori delle chiamate dichiarati nel bundle e gli artefatti persistiti.
 
 ## Arresto immediato
 
@@ -131,6 +135,6 @@ contatori chiamate/token, costo riservato e consuntivo, fonti con URL e data di
 accesso, esito dei controlli di qualita, ID revisione e rapporto. Non conservare
 segreti, token o contenuti di autenticazione.
 
-Il rollback operativo consiste nel ripristino dei gate disabilitati, arresto del
-worker e conservazione immutata degli artefatti diagnostici. Non eliminare risultati,
-missioni o ledger di costo per mascherare un fallimento.
+Il rollback operativo consiste nel rilasciare o differire la claim ChatGPT e conservare
+immutati gli artefatti diagnostici. Il worker resta sospeso. Non eliminare risultati,
+missioni o ledger per mascherare un fallimento.

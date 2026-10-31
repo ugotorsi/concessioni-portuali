@@ -54,6 +54,10 @@ export type ResearchMissionStatus =
   | "DEFERRED"
   | "REJECTED";
 
+export type ResearchExecutionChannel =
+  | "CHATGPT_CONNECTOR"
+  | "SERVER_AUTONOMOUS";
+
 export type ResearchCaseReference = Readonly<{
   caseId: string;
   fascicoloReference?: string;
@@ -88,6 +92,7 @@ export type ResearchExecutionPlan = Readonly<{
 export type ResearchMissionInput = Readonly<{
   kind: "RESEARCH_MISSION";
   version: typeof RESEARCH_BRIDGE_VERSION;
+  executionChannel?: ResearchExecutionChannel;
   caseReference: ResearchCaseReference;
   legalIssueIds: readonly string[];
   legalPropositionIds: readonly string[];
@@ -315,6 +320,7 @@ export type ResearchBridgeValidationErrorCode =
   | "INVALID_BUDGET"
   | "INVALID_CASE_REFERENCE"
   | "INVALID_DATE"
+  | "INVALID_EXECUTION_CHANNEL"
   | "INVALID_ID"
   | "INVALID_MISSION_REFERENCE"
   | "LEGAL_ANALYSIS_CONTRIBUTION_INVALID"
@@ -450,8 +456,18 @@ export function researchMissionIdentity(input: ResearchMissionInput): string {
   return deterministicIdentity("research-mission", identityInput);
 }
 
+export function researchMissionExecutionChannel(
+  mission: Pick<ResearchMissionInput, "executionChannel">,
+): ResearchExecutionChannel {
+  return mission.executionChannel ?? "CHATGPT_CONNECTOR";
+}
+
 export function createResearchMission(input: ResearchMissionInput): ResearchMission {
-  return { ...input, missionId: researchMissionIdentity(input) };
+  const normalized = {
+    ...input,
+    executionChannel: researchMissionExecutionChannel(input),
+  };
+  return { ...normalized, missionId: researchMissionIdentity(normalized) };
 }
 
 export function authorityCandidateIdentity(input: AuthorityCandidateInput): string {
@@ -474,6 +490,11 @@ function missionInput(mission: ResearchMission): ResearchMissionInput {
 
 export function validateResearchMission(mission: ResearchMission): readonly ResearchBridgeValidationError[] {
   const errors: ResearchBridgeValidationError[] = [];
+  if (mission.executionChannel !== undefined
+    && mission.executionChannel !== "CHATGPT_CONNECTOR"
+    && mission.executionChannel !== "SERVER_AUTONOMOUS") {
+    errors.push(error("INVALID_EXECUTION_CHANNEL", "executionChannel", mission.missionId));
+  }
   if (!validId(mission.missionId) || mission.missionId !== researchMissionIdentity(missionInput(mission))) {
     errors.push(error("INVALID_ID", "missionId", mission.missionId));
   }

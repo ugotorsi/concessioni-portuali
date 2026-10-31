@@ -1,6 +1,10 @@
 import { createHash } from "node:crypto";
 
-import type { ResearchCapability, ResearchMission } from "./bridge";
+import {
+  researchMissionExecutionChannel,
+  type ResearchCapability,
+  type ResearchMission,
+} from "./bridge";
 
 export const AUTOMATIC_RESEARCH_POLICY_ENV_NAMES = [
   "AUTOMATIC_RESEARCH_EXECUTION_ENABLED",
@@ -26,6 +30,7 @@ const capabilities = new Set<ResearchCapability>([
 ]);
 
 export type AutomaticResearchPolicyRequirement =
+  | "AUTOMATIC_RESEARCH_EXECUTION_CHANNEL_NOT_ALLOWED"
   | "AUTOMATIC_RESEARCH_POLICY_DISABLED"
   | "AUTOMATIC_RESEARCH_TENANT_NOT_ALLOWED"
   | "AUTOMATIC_RESEARCH_PROCEDIMENTO_NOT_ALLOWED"
@@ -80,6 +85,9 @@ export function evaluateAutomaticResearchPolicy(input: Readonly<{
   env?: AutomaticResearchPolicyEnv | NodeJS.ProcessEnv;
 }>): AutomaticResearchPolicyDecision {
   const env = input.env ?? process.env;
+  if (input.mission && researchMissionExecutionChannel(input.mission) !== "SERVER_AUTONOMOUS") {
+    return denied("AUTOMATIC_RESEARCH_EXECUTION_CHANNEL_NOT_ALLOWED");
+  }
   if (env.AUTOMATIC_RESEARCH_EXECUTION_ENABLED?.trim().toLowerCase() !== "true") {
     return denied("AUTOMATIC_RESEARCH_POLICY_DISABLED");
   }

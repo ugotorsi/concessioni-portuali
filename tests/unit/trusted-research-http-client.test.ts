@@ -30,6 +30,7 @@ function missionSnapshot() {
       kind: "RESEARCH_MISSION",
       version: RESEARCH_BRIDGE_VERSION,
       missionId,
+      executionChannel: "SERVER_AUTONOMOUS",
       caseReference: { caseId: "case-a", fascicoloReference: "fascicolo-a" },
       legalIssueIds: ["issue-a"],
       legalPropositionIds: ["proposition-a"],

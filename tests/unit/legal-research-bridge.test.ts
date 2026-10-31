@@ -185,6 +185,14 @@ function codes(errors: ReturnType<typeof validateResearchEvidenceBundle>): strin
 }
 
 describe("Block 3B.13A chat legal research bridge", () => {
+  it("defaults new missions to the ChatGPT connector and fingerprints autonomous opt-in separately", () => {
+    const chatGptMission = mission();
+    const autonomousMission = mission({ executionChannel: "SERVER_AUTONOMOUS" });
+    expect(chatGptMission.executionChannel).toBe("CHATGPT_CONNECTOR");
+    expect(autonomousMission.executionChannel).toBe("SERVER_AUTONOMOUS");
+    expect(autonomousMission.missionId).not.toBe(chatGptMission.missionId);
+  });
+
   it("accepts source-grounded legal analysis contributions and rejects invalid references or duplicates", () => {
     const researchMission = mission();
     const contribution = legalContribution();

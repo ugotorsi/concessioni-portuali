@@ -406,6 +406,50 @@ describe("Block 3B.13B research mission persistence", () => {
     expect(harness.missions.get(mission.missionId)?.payload).toEqual(mission);
   });
 
+  it("allows ChatGPT to claim before submitting required documentary evidence", async () => {
+    const harness = createHarness();
+    const mission = researchMission({
+      requiredOutput: {
+        authorityCandidates: true,
+        citationObservations: true,
+        legalResearchSuggestions: true,
+        evidenceGaps: true,
+        fullTextRequired: true,
+      },
+    });
+    await createResearchMissionRecord({ mission, actor }, harness.context);
+    await expect(claimResearchMission({
+      missionId: mission.missionId,
+      executionId: "chatgpt-documentary-execution",
+      executor: { kind: "CHATGPT", claimantId: "chat-session-documentary" },
+      actor,
+      leaseDurationMs: 60_000,
+    }, harness.context)).resolves.toMatchObject({
+      outcome: "CLAIMED",
+      claim: {
+        execution: {
+          id: "chatgpt-documentary-execution",
+          executorKind: "CHATGPT",
+        },
+      },
+    });
+  });
+
+  it("prevents an authorized worker from claiming a ChatGPT connector mission", async () => {
+    const harness = createHarness();
+    const mission = researchMission();
+    await createResearchMissionRecord({ mission, actor }, harness.context);
+    await expect(claimResearchMission({
+      missionId: mission.missionId,
+      executionId: "wrong-channel-worker",
+      executor: { kind: "AUTHORIZED_WORKER", claimantId: "worker-a" },
+      actor,
+      leaseDurationMs: 60_000,
+    }, harness.context)).rejects.toMatchObject({ code: "INVALID_TRANSITION" });
+    expect(harness.attempts).toHaveLength(0);
+    expect(harness.missions.get(mission.missionId)?.status).toBe("PENDING");
+  });
+
   it("reuses the same mission idempotently", async () => {
     const harness = createHarness();
     const mission = researchMission();
@@ -1332,6 +1376,7 @@ describe("Block 3B.13B research mission persistence", () => {
     async (change) => {
       const harness = createHarness();
       const mission = researchMission({
+        executionChannel: "SERVER_AUTONOMOUS",
         mode: "ADVERSE_SEARCH", missingSourceFamilies: [],
         requiredOutput: { authorityCandidates: true, citationObservations: true, legalResearchSuggestions: false, evidenceGaps: true, fullTextRequired: true },
         executionPlan: { requiredCapabilities: ["FULL_TEXT_RETRIEVAL", "CITATION_NETWORK", "ADVERSE_AUTHORITY_DISCOVERY"] },
@@ -1450,9 +1495,14 @@ describe("Block 3B.13B research mission persistence", () => {
   );
 
   it.each(["complete", "missing", "tampered", "superseded", "invalidated", "lease", "budget", "exact-mismatch", "bundle-mismatch", "http-valid", "http-altered", "http-missing", "http-stale", "negative-valid", "negative-stale", "negative-absent", "negative-unreviewed", "negative-inconclusive", "negative-scope", "negative-forged", "negative-tenant", "negative-missing", "negative-altered"] as const)(
-    "runs the unchanged original mission through real services with synthetic evidence: %s", async (scenario) => {
+    "runs an explicitly autonomous mission through real services with synthetic evidence: %s", async (scenario) => {
       const harness = createHarness();
-      const mission = createLiveAcceptanceMission("2026-09-26T00:00:00.000Z");
+      const acceptanceMission = createLiveAcceptanceMission("2026-09-26T00:00:00.000Z");
+      const { missionId: _missionId, ...acceptanceInput } = acceptanceMission;
+      const mission = createResearchMission({
+        ...acceptanceInput,
+        executionChannel: "SERVER_AUTONOMOUS",
+      });
       const originalMission = structuredClone(mission);
       const negativeSearch = scenario.startsWith("negative-");
       const blockedSearch = negativeSearch && scenario !== "negative-valid" && scenario !== "negative-stale";
@@ -1879,9 +1929,17 @@ describe("Block 3B.13B research mission persistence", () => {
 
   it("rechecks documentary evidence at completion and rejects complete bundles with gaps", async () => {
     const harness = createHarness();
-    const mission = researchMission({ missingSourceFamilies: [], requiredOutput: {
-      authorityCandidates: false, citationObservations: false, legalResearchSuggestions: false, evidenceGaps: true, fullTextRequired: true,
-    } });
+    const mission = researchMission({
+      executionChannel: "SERVER_AUTONOMOUS",
+      missingSourceFamilies: [],
+      requiredOutput: {
+        authorityCandidates: false,
+        citationObservations: false,
+        legalResearchSuggestions: false,
+        evidenceGaps: true,
+        fullTextRequired: true,
+      },
+    });
     const source = officialSource({ fullText: { available: true, documentId: "document-a", fileVersionId: "file-a", contentSha256: "a".repeat(64) } });
     const readDocuments = vi.fn(async () => [{ evidenceSourceId: source.evidenceSourceId, documentId: "document-a", fileVersionId: "file-a", contentSha256: "a".repeat(64) }]);
     const documentContext = { ...harness.context, readAssistedDocuments: readDocuments };
@@ -1908,6 +1966,7 @@ describe("Block 3B.13B research mission persistence", () => {
   it("completes exact-source recovery after claimed connector evidence is verified and persisted", async () => {
     const harness = createHarness();
     const mission = researchMission({
+      executionChannel: "SERVER_AUTONOMOUS",
       mode: "EXACT_SOURCE_RECOVERY",
       missingSourceFamilies: [],
       requiredOutput: {

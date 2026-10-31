@@ -37,7 +37,7 @@ import {
 } from "@/server/legal-research/mcp-auth";
 import { RESEARCH_MCP_WRITE_ARGUMENT_SCHEMAS } from "@/server/legal-research/mcp-write-contracts";
 
-export const RESEARCH_MCP_SERVER_VERSION = "3B.14G-1" as const;
+export const RESEARCH_MCP_SERVER_VERSION = "3B.14G-2" as const;
 export const RESEARCH_MCP_ROUTE = "/api/mcp" as const;
 export const RESEARCH_MCP_MAX_PENDING_LIMIT = 50;
 export const RESEARCH_MCP_DEFAULT_PENDING_LIMIT = 20;
@@ -128,6 +128,7 @@ const researchMissionOutputSchema = z.object({
   kind: z.literal("RESEARCH_MISSION"),
   version: z.literal(RESEARCH_BRIDGE_VERSION),
   missionId: z.string(),
+  executionChannel: z.enum(["CHATGPT_CONNECTOR", "SERVER_AUTONOMOUS"]),
   caseReference: caseReferenceSchema,
   legalIssueIds: z.array(z.string()),
   legalPropositionIds: z.array(z.string()),
@@ -246,6 +247,7 @@ export const RESEARCH_MCP_OUTPUT_SCHEMAS = {
   research_list_pending: z.object({
     missions: z.array(z.object({
       missionId: z.string(),
+      executionChannel: z.enum(["CHATGPT_CONNECTOR", "SERVER_AUTONOMOUS"]),
       fascicoloScopeId: z.string(),
       status: z.enum(RESEARCH_MISSION_STATUSES),
       referenceDate: z.string(),
@@ -350,6 +352,7 @@ export type ResearchMcpServerOptions = Readonly<{
   service?: ResearchMcpService;
   logger?: ResearchMcpLogger;
   onResearchStateChanged?: (scope: ResearchReportRefreshScope) => Promise<unknown>;
+  trustedWorkerMissionId?: string;
 }>;
 
 const defaultService: ResearchMcpService = {
@@ -497,6 +500,9 @@ export function createResearchMcpServer(
   );
 
   const requireMissionScope = (mission: ResearchMission) => {
+    if (options.trustedWorkerMissionId && mission.missionId !== options.trustedWorkerMissionId) {
+      throw new ResearchPersistenceError("AUTHORIZATION_REQUIRED");
+    }
     return scopeFor(principal, mission);
   };
 
@@ -582,6 +588,7 @@ export function createResearchMcpServer(
     return {
       missions: missions.slice(0, limit).map((stored) => ({
         missionId: stored.mission.missionId,
+        executionChannel: projectResearchMissionForMcp(stored.mission).executionChannel,
         fascicoloScopeId: scopeFor(principal, stored.mission).scopeId,
         status: stored.operational.status,
         referenceDate: stored.mission.referenceDate,
@@ -654,7 +661,10 @@ export function createResearchMcpServer(
         missionId,
         executionId,
         leaseDurationMs,
-        executor: { kind: "CHATGPT", claimantId: principal.claimantId },
+        executor: {
+          kind: options.trustedWorkerMissionId ? "AUTHORIZED_WORKER" : "CHATGPT",
+          claimantId: principal.claimantId,
+        },
         actor: actor(principal),
       });
       return {

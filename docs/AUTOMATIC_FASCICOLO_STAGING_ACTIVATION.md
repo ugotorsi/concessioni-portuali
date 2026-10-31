@@ -3,6 +3,12 @@
 Data di preparazione: 28 settembre 2026. Questo documento non autorizza
 operazioni remote.
 
+> Questo runbook riguarda soltanto missioni create esplicitamente con
+> `executionChannel=SERVER_AUTONOMOUS`. Non e il preflight Selvara ChatGPT-side.
+> Le missioni `CHATGPT_CONNECTOR`, incluse quelle legacy prive del campo, sono escluse
+> dal worker anche se tutti i gate autonomi fossero abilitati. Selvara non richiede
+> credenziali provider backend ne storage OAuth del worker.
+
 > Nota per il primo rilascio operativo: la ricerca giuridica automatica descritta in
 > questo documento storico non fa parte del canary. Usare la procedura event-driven in
 > `APPLICATION_ASYNC_WORKER.md`, con la sola analisi

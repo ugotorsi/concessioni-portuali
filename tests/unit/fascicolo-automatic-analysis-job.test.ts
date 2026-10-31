@@ -1284,7 +1284,7 @@ describe("automatic fascicolo analysis job", () => {
     expect(result).toMatchObject({ metadata: { missionCount: 0 } });
   });
 
-  it("creates structured missions only after CURRENT promotion and uses explicit reference-date basis", async () => {
+  it("creates ChatGPT connector missions after CURRENT promotion without autonomous scheduling", async () => {
     const order: string[] = [];
     const reconciliation = currentReconciliation(lotto3Knowledge);
     const deps = dependencies({
@@ -1305,9 +1305,12 @@ describe("automatic fascicolo analysis job", () => {
       scheduleMission: vi.fn(async () => { order.push("SCHEDULE"); return { outcome: "ADMITTED" as const, requirementCode: null, jobId: "research-job" }; }),
     });
     const result = await createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context());
-    expect(order).toEqual(["CURRENT", "MISSIONS", "REPORT", "SCHEDULE"]);
+    expect(order).toEqual(["CURRENT", "MISSIONS", "REPORT"]);
     expect(deps.persistMission).not.toHaveBeenCalled();
-    expect(result).toMatchObject({ metadata: { missionCount: 1, researchJobCount: 1 } });
+    expect(deps.scheduleMission).not.toHaveBeenCalled();
+    expect(vi.mocked(deps.persistReport).mock.calls[0][0].missions[0].executionChannel)
+      .toBe("CHATGPT_CONNECTOR");
+    expect(result).toMatchObject({ metadata: { missionCount: 1, researchJobCount: 0 } });
   });
 
   it("keeps an uncertain structured question blocked without epoch fallback or scheduling", async () => {
@@ -1338,7 +1341,7 @@ describe("automatic fascicolo analysis job", () => {
     expect(result).toMatchObject({ metadata: { missionCount: 0, researchJobCount: 0 } });
   });
 
-  it("links and idempotently reschedules a reused structured mission that is still pending", async () => {
+  it("links a reused pending ChatGPT connector mission without autonomous scheduling", async () => {
     const reconciliation = currentReconciliation(lotto3Knowledge);
     const deps = dependencies({
       loadAuthority: vi.fn(async () => ({
@@ -1358,8 +1361,8 @@ describe("automatic fascicolo analysis job", () => {
     });
     const result = await createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context());
     expect(vi.mocked(deps.persistReport).mock.calls[0][0].missions).toHaveLength(1);
-    expect(deps.scheduleMission).toHaveBeenCalledOnce();
-    expect(result).toMatchObject({ metadata: { missionCount: 1, researchJobCount: 1 } });
+    expect(deps.scheduleMission).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ metadata: { missionCount: 1, researchJobCount: 0 } });
   });
 
   it("links a reused completed structured mission without scheduling it again", async () => {
@@ -1386,7 +1389,7 @@ describe("automatic fascicolo analysis job", () => {
     expect(result).toMatchObject({ metadata: { missionCount: 1, researchJobCount: 0 } });
   });
 
-  it("schedules five of seven structured questions in wave one and the two admitted by wave two", async () => {
+  it("keeps every structured ChatGPT mission outside both autonomous scheduling waves", async () => {
     const sevenQuestions = {
       ...lotto3Knowledge,
       researchQuestions: Array.from({ length: 7 }, (_, index) => ({
@@ -1413,17 +1416,17 @@ describe("automatic fascicolo analysis job", () => {
       }))),
     });
     const firstWave = await createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context());
-    expect(deps.scheduleMission).toHaveBeenCalledTimes(5);
+    expect(deps.scheduleMission).not.toHaveBeenCalled();
     expect(vi.mocked(deps.persistReport).mock.calls[0][0].missions).toHaveLength(7);
-    expect(firstWave).toMatchObject({ metadata: { missionCount: 7, researchJobCount: 5 } });
+    expect(firstWave).toMatchObject({ metadata: { missionCount: 7, researchJobCount: 0 } });
 
     const deferred = vi.mocked(deps.persistReport).mock.calls[0][0].missions.slice(5);
     const schedule = vi.fn(async () => ({ outcome: "ADMITTED" as const, requirementCode: null, jobId: "wave-2-job" }));
     const secondWave = await executeDeferredKnowledgeResearchWave({
       tenantId: "tenant-1", procedimentoId: "procedimento-1", actorId: "user-1", correlationId: "wave-2",
     }, { admit: vi.fn(async () => deferred.map((mission) => ({ mission }))), schedule });
-    expect(secondWave).toHaveLength(2);
-    expect(schedule).toHaveBeenCalledTimes(2);
+    expect(secondWave).toEqual([]);
+    expect(schedule).not.toHaveBeenCalled();
   });
 
   it("does not create or enqueue structured missions for rejected issues or questions", async () => {

@@ -15,6 +15,7 @@ import { RESEARCH_MISSION_EXECUTION_OPERATION } from "@/server/legal-research/pe
 const mission = createResearchMission({
   kind: "RESEARCH_MISSION",
   version: RESEARCH_BRIDGE_VERSION,
+  executionChannel: "SERVER_AUTONOMOUS",
   caseReference: { caseId: "procedure-1", fascicoloReference: "procedure-1" },
   legalIssueIds: ["issue-1"],
   legalPropositionIds: [],
@@ -85,6 +86,25 @@ describe("automatic research queue job", () => {
     })).resolves.toEqual({
       outcome: "NOT_AUTHORIZED",
       requirementCode: "AUTOMATIC_RESEARCH_POLICY_DISABLED",
+      jobId: null,
+    });
+  });
+
+  it("never admits a ChatGPT connector mission even when autonomous policy is enabled", async () => {
+    const { missionId: _missionId, ...missionInput } = mission;
+    const chatGptMission = createResearchMission({
+      ...missionInput,
+      executionChannel: "CHATGPT_CONNECTOR",
+    });
+    await expect(ensureAutomaticResearchExecution({
+      mission: chatGptMission,
+      tenantId: "tenant-1",
+      actorId: "actor-1",
+      correlationId: "correlation-1",
+      env,
+    })).resolves.toEqual({
+      outcome: "NOT_AUTHORIZED",
+      requirementCode: "AUTOMATIC_RESEARCH_EXECUTION_CHANNEL_NOT_ALLOWED",
       jobId: null,
     });
   });

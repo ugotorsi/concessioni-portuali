@@ -15,6 +15,7 @@ import {
 import {
   createResearchMission,
   RESEARCH_BRIDGE_VERSION,
+  researchMissionExecutionChannel,
   type ResearchMission,
 } from "@/server/legal-research/bridge";
 import { createResearchMissionRecord } from "@/server/legal-research/persistence";
@@ -619,7 +620,10 @@ export async function executeDeferredKnowledgeResearchWave(input: {
     procedimentoId: input.procedimentoId,
     limit: input.limit ?? DEFAULT_RESEARCH_EXECUTION_WAVE_LIMIT,
   });
-  return Promise.all(admitted.map(({ mission }) => dependencies.schedule({
+  const autonomousMissions = admitted.filter(
+    ({ mission }) => researchMissionExecutionChannel(mission) === "SERVER_AUTONOMOUS",
+  );
+  return Promise.all(autonomousMissions.map(({ mission }) => dependencies.schedule({
     mission,
     actorId: input.actorId,
     tenantId: input.tenantId,
@@ -1561,6 +1565,7 @@ export function createFascicoloAutomaticAnalysisHandler(
       });
       const scheduling = [];
       for (const mission of structuredMissionsToSchedule ?? missions) {
+        if (researchMissionExecutionChannel(mission) !== "SERVER_AUTONOMOUS") continue;
         scheduling.push(await dependencies.scheduleMission({
           mission,
           actorId: authority.actorId,
