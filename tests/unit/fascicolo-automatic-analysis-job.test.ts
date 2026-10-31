@@ -1,22 +1,30 @@
+import { createHash } from "node:crypto";
+
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/prisma", () => ({ prisma: {} }));
 
 import {
   buildFascicoloAutomaticAnalysisAdmission,
+  buildFascicoloAutomaticAnalysisCostIdempotencyKey,
   buildFascicoloDocumentCorpusUpdateAdmission,
   createFascicoloAutomaticAnalysisHandler,
   executeDeferredKnowledgeResearchWave,
   fascicoloAutomaticAnalysisDiagnostic,
   FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
+  rethrowAutomaticAnalysisProviderFailure,
   type AutomaticFascicoloReport,
   type FascicoloAutomaticAnalysisDependencies,
 } from "@/server/ai/fascicoloAutomaticAnalysisJob";
 import { FascicoloDocumentAnalysisError } from "@/server/ai/fascicoloDocumentAnalysis";
 import { OpenAiRuntimeConfigurationError } from "@/server/ai/openaiRuntime";
+import { FascicoloV7PreflightError } from "@/server/ai/fascicoloV7Preflight";
+import { SELVARA_PILOT_AUTHORIZATION } from "@/server/ai/selvaraPilotAuthorization";
 import { applicationAsyncJobRegistry } from "@/server/async-jobs/applicationWorker";
 import { normalizeAsyncJobAdmission } from "@/server/async-jobs/domain";
 import { AsyncJobExecutionError } from "@/server/async-jobs/worker";
+import { RuntimeCostSettlementRequiredError } from "@/server/runtime/cost";
+import { buildCanonicalSourceSpans } from "@/server/fascicolo-knowledge/canonicalStructuredPersistence";
 import {
   createAuthorityCandidate,
   type ResearchEvidenceBundle,
@@ -25,9 +33,12 @@ import {
 import type { ResearchProviderAdapter } from "@/server/legal-research/provider-research-adapters";
 import type { TrustedResearchHttpClient } from "@/server/legal-research/trusted-research-http-client";
 import { createTrustedMissionExecutor } from "@/server/legal-research/trusted-mission-executor";
+import type { BuiltStructuredFascicoloReport } from "@/server/fascicolo-report/structured-report";
 import {
   fascicoloStructuredKnowledgeSchema,
+  assertStructuredKnowledgeQuality,
   projectStructuredKnowledge,
+  StructuredKnowledgeQualityError,
   type KnowledgeEvidenceCandidate,
   type KnowledgeResearchMissionPlan,
   type KnowledgeReconciliationResult,
@@ -59,6 +70,7 @@ const authority = {
     pages: [{
       pageNumber: 1,
       normalizedText: "Il provvedimento indica la scadenza al 31 dicembre 2026 e richiama l'articolo 18.",
+      sourceText: "Il provvedimento indica la scadenza al 31 dicembre 2026 e richiama l'articolo 18.",
       textSha256: "b".repeat(64),
       extractionMethod: "DIRECT_TEXT",
       ocrConfidence: null,
@@ -134,6 +146,52 @@ const lotto3Knowledge = {
   }],
 } as const;
 
+const controlledV7Reference = {
+  referenceType: "FASCICOLO_DOCUMENT_CORPUS",
+  referenceId: "c".repeat(64),
+  referenceVersion: "V1",
+  metadata: {
+    procedimentoId: "procedimento-1",
+    corpusHash: "c".repeat(64),
+    trialContractVersion: "FASCICOLO_DOCUMENT_ANALYSIS_V7",
+    trialApprovalRef: SELVARA_PILOT_AUTHORIZATION.approvalId,
+    trialPreflightHash: "f".repeat(64),
+  },
+} as const;
+
+const controlledV7Knowledge = {
+  ...lotto3Knowledge,
+  sourceQuotes: [
+    {
+      itemLocalId: "fact-1",
+      basisRef: "DOCUMENT_1.PAGE_1",
+      quote: "scadenza al 31 dicembre 2026",
+    },
+    {
+      itemLocalId: "event-1",
+      basisRef: "DOCUMENT_1.PAGE_1",
+      quote: "richiama l'articolo 18",
+    },
+  ],
+  documentInventory: [{
+    localId: "document-1",
+    basisRefs: ["DOCUMENT_1.PAGE_1"],
+    documentType: "provvedimento",
+    documentDate: null,
+    issuer: null,
+    recipients: [],
+    proceduralPhase: null,
+    subject: "scadenza",
+    summary: "Provvedimento che documenta la scadenza.",
+    referencedActs: [],
+    attachments: [],
+    materialProfiles: ["LEGAL"],
+    classification: "MATERIAL",
+    rationale: "Contiene un termine e una questione giuridica rilevanti.",
+    relatedItemLocalIds: ["fact-1", "event-1"],
+  }],
+} as const;
+
 function currentReconciliation(knowledge: unknown): KnowledgeReconciliationResult {
   const documentEvidence: KnowledgeEvidenceCandidate = {
     provenanceType: "DOCUMENT_EXTRACTION",
@@ -198,6 +256,33 @@ function currentReconciliation(knowledge: unknown): KnowledgeReconciliationResul
   };
 }
 
+function buildingReconciliation(knowledge: unknown): KnowledgeReconciliationResult {
+  const current = currentReconciliation(knowledge);
+  return {
+    ...current,
+    revision: {
+      ...current.revision,
+      id: "revision-building",
+      contractVersion: "FASCICOLO_STRUCTURED_KNOWLEDGE_V7",
+      status: "BUILDING",
+      completedAt: null,
+      items: current.revision.items.map((item) => ({
+        ...item,
+        revisionId: "revision-building",
+      })),
+      relations: current.revision.relations.map((relation) => ({
+        ...relation,
+        revisionId: "revision-building",
+      })),
+    },
+  };
+}
+
+const preparedStructuredReport = {
+  reportFingerprint: "d".repeat(64),
+  payload: { knowledgeRevisionId: "revision-building" },
+} as unknown as BuiltStructuredFascicoloReport;
+
 function context() {
   return {
     jobId: "job-1",
@@ -238,14 +323,27 @@ function dependencies(overrides: Partial<FascicoloAutomaticAnalysisDependencies>
   const reports = new Map<string, AutomaticFascicoloReport>();
   return {
     loadAuthority: vi.fn(async () => authority),
+    validateControlledV7Preflight: vi.fn(async () => undefined),
     findExistingReport: vi.fn(async () => null),
     analyze: vi.fn(async () => analysis),
+    persistProviderOutputRecovery: vi.fn(async () => ({
+      artifactRef: "V7ProviderOutputRecoveryArtifact:test",
+      outputFingerprint: "a".repeat(64),
+      sizeBytes: 1_024,
+      expiresAt: new Date("2026-11-05T00:00:00Z"),
+    })),
+    auditProviderOutputRecovery: vi.fn(async () => undefined),
+    deleteProviderOutputRecovery: vi.fn(async () => undefined),
     persistReport: vi.fn(async (report: AutomaticFascicoloReport) => {
       const outcome = reports.has(report.reportId) ? "REUSED" as const : "CREATED" as const;
       reports.set(report.reportId, report);
       return { outcome, reportId: report.reportId };
     }),
     persistMission: vi.fn(async () => ({ outcome: "CREATED" as const })),
+    persistStructuredReport: vi.fn(async () => ({
+      outcome: "CREATED" as const,
+      snapshotId: "structured-report-1",
+    })),
     scheduleMission: vi.fn(async () => ({
       outcome: "ADMITTED" as const,
       requirementCode: null,
@@ -257,8 +355,240 @@ function dependencies(overrides: Partial<FascicoloAutomaticAnalysisDependencies>
 }
 
 describe("automatic fascicolo analysis job", () => {
+  it("recovers a uniquely quoted page reference and preserves optional unresolved relations", () => {
+    const page1 = "Il canone annuale documentato ammonta a euro 12.000.";
+    const page2 = "Pagina tecnica priva della citazione contabile.";
+    const evidence = (pageNumber: number): KnowledgeEvidenceCandidate => ({
+      provenanceType: "DOCUMENT_EXTRACTION",
+      documentoId: "document-1",
+      documentFileVersionId: "version-1",
+      extractionAttemptId: "attempt-1",
+      pageNumber,
+      textSha256: createHash("sha256").update(pageNumber === 1 ? page1 : page2).digest("hex"),
+      quoteSha256: null,
+      basisRef: `DOCUMENT_1.PAGE_${pageNumber}`,
+    });
+    const projected = projectStructuredKnowledge({
+      knowledge: fascicoloStructuredKnowledgeSchema.parse({
+        version: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1",
+        subjects: [],
+        items: [{
+          localId: "event-payment",
+          kind: "EVENT",
+          confidence: 90,
+          basisRefs: ["DOCUMENT_1.PAGE_2"],
+          payload: {
+            title: "Canone documentato",
+            normalizedStatement: "Il canone annuale e pari a euro 12.000.",
+            date: {
+              precision: "YEAR",
+              from: "2026",
+              to: null,
+              originalText: "anno 2026",
+              confidence: 80,
+            },
+            subjectLocalIds: [],
+            relatedItemLocalIds: ["optional-missing-item"],
+          },
+        }],
+        sourceQuotes: [{
+          itemLocalId: "event-payment",
+          basisRef: "DOCUMENT_1.PAGE_2",
+          quote: "Il canone annuale documentato ammonta a euro 12.000.",
+        }],
+        documentInventory: [{
+          localId: "document-accounting",
+          basisRefs: ["DOCUMENT_1.PAGE_1"],
+          documentType: "prospetto contabile",
+          documentDate: null,
+          issuer: null,
+          recipients: [],
+          proceduralPhase: null,
+          subject: "canone annuale",
+          summary: "Documento materiale sul canone.",
+          referencedActs: [],
+          attachments: [],
+          materialProfiles: ["ACCOUNTING"],
+          classification: "MATERIAL",
+          rationale: "Contiene importo rilevante.",
+          relatedItemLocalIds: ["event-payment"],
+        }, {
+          localId: "document-technical-index",
+          basisRefs: ["DOCUMENT_1.PAGE_2"],
+          documentType: "pagina tecnica",
+          documentDate: null,
+          issuer: null,
+          recipients: [],
+          proceduralPhase: null,
+          subject: "pagina priva di contenuto materiale",
+          summary: "Pagina esaminata senza fatti autonomi.",
+          referencedActs: [],
+          attachments: [],
+          materialProfiles: ["OTHER"],
+          classification: "NOT_MATERIAL",
+          rationale: "Non contiene fatti, obblighi o questioni autonome.",
+          relatedItemLocalIds: [],
+        }],
+      }),
+      subjectIdsByLocalId: new Map(),
+      evidenceByBasisRef: new Map([
+        ["DOCUMENT_1.PAGE_1", evidence(1)],
+        ["DOCUMENT_1.PAGE_2", evidence(2)],
+      ]),
+      sourceTextByBasisRef: new Map([
+        ["DOCUMENT_1.PAGE_1", page1],
+        ["DOCUMENT_1.PAGE_2", page2],
+      ]),
+    });
+
+    expect(projected.candidates).toHaveLength(1);
+    expect(projected.candidates[0].evidence[0].basisRef).toBe("DOCUMENT_1.PAGE_1");
+    expect(projected.quality).toMatchObject({
+      proposedCount: 1,
+      acceptedCount: 1,
+      correctedCount: 1,
+      rejectedCount: 0,
+      blockingReasons: [],
+    });
+    expect(projected.warnings).toContain(
+      "UNRESOLVED_OPTIONAL_RELATION:event-payment:optional-missing-item",
+    );
+  });
+
+  it("blocks material incompleteness instead of promoting a false success", () => {
+    const page = "Il titolo concessorio e presente, ma non contiene la citazione proposta.";
+    const evidence: KnowledgeEvidenceCandidate = {
+      provenanceType: "DOCUMENT_EXTRACTION",
+      documentoId: "document-1",
+      documentFileVersionId: "version-1",
+      extractionAttemptId: "attempt-1",
+      pageNumber: 1,
+      textSha256: createHash("sha256").update(page).digest("hex"),
+      quoteSha256: null,
+      basisRef: "DOCUMENT_1.PAGE_1",
+    };
+    const projected = projectStructuredKnowledge({
+      knowledge: fascicoloStructuredKnowledgeSchema.parse({
+        version: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1",
+        subjects: [],
+        items: [{
+          localId: "fact-unverified",
+          kind: "FACT",
+          confidence: 60,
+          basisRefs: ["DOCUMENT_1.PAGE_1"],
+          payload: {
+            normalizedStatement: "Presunto inadempimento non verificabile.",
+            subjectLocalIds: [],
+            object: null,
+            qualifier: "allegato mancante",
+          },
+        }],
+        sourceQuotes: [{
+          itemLocalId: "fact-unverified",
+          basisRef: "DOCUMENT_1.PAGE_1",
+          quote: "Citazione inesistente nel corpus.",
+        }],
+      }),
+      subjectIdsByLocalId: new Map(),
+      evidenceByBasisRef: new Map([[evidence.basisRef, evidence]]),
+      sourceTextByBasisRef: new Map([[evidence.basisRef, page]]),
+    });
+
+    expect(projected.quality).toMatchObject({
+      proposedCount: 1,
+      acceptedCount: 0,
+      rejectedCount: 1,
+      invalidCitationCount: 1,
+      blockingReasons: [
+        "EVIDENCE_COVERAGE_LOST",
+        "MATERIAL_ITEMS_LOST",
+        "NONEXISTENT_CITATIONS",
+      ],
+    });
+    expect(() => assertStructuredKnowledgeQuality(projected.quality))
+      .toThrow(StructuredKnowledgeQualityError);
+  });
+
   it("is registered in the real application worker", () => {
     expect(applicationAsyncJobRegistry.resolve(FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION)).not.toBeNull();
+  });
+
+  it("scopes cost idempotency to the job while preserving same-attempt determinism", () => {
+    const input = {
+      jobId: "job-1",
+      corpusFingerprint: "c".repeat(64),
+      attempt: 2,
+    };
+    const first = buildFascicoloAutomaticAnalysisCostIdempotencyKey(input);
+    const duplicate = buildFascicoloAutomaticAnalysisCostIdempotencyKey(input);
+    const otherJob = buildFascicoloAutomaticAnalysisCostIdempotencyKey({
+      ...input,
+      jobId: "job-2",
+    });
+
+    expect(duplicate).toBe(first);
+    expect(otherJob).not.toBe(first);
+    expect(first).not.toBe(
+      `${FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION}:${input.corpusFingerprint}:${input.attempt}`,
+    );
+  });
+
+  it.each([
+    "timeout after dispatch",
+    "truncated output after dispatch",
+    "missing usage after dispatch",
+    "invalid usage after dispatch",
+    "model mismatch after dispatch",
+  ])("settles the full reservation conservatively for %s", (message) => {
+    const error = new Error(message);
+    expect(() => rethrowAutomaticAnalysisProviderFailure({
+      error,
+      usage: null,
+      requestSent: true,
+      estimatedAmount: 0.84,
+      usdToEurRate: 0.9,
+    })).toThrow(expect.objectContaining({
+      name: "RuntimeCostSettlementRequiredError",
+      actualAmount: 0.84,
+      originalError: error,
+    }));
+  });
+
+  it("releases only a failure proven to have occurred before dispatch", () => {
+    const error = new Error("pre-dispatch authorization failure");
+    expect(() => rethrowAutomaticAnalysisProviderFailure({
+      error,
+      usage: null,
+      requestSent: false,
+      estimatedAmount: 0.84,
+      usdToEurRate: 0.9,
+    })).toThrow(error);
+  });
+
+  it("settles verified usage instead of the maximum without marking provider billing verified", () => {
+    const error = new Error("quality failure after usage");
+    let settlement: RuntimeCostSettlementRequiredError | null = null;
+    try {
+      rethrowAutomaticAnalysisProviderFailure({
+        error,
+        usage: {
+          inputTokens: 1_000,
+          cachedInputTokens: 0,
+          cacheWriteInputTokens: 0,
+          outputTokens: 500,
+          reasoningOutputTokens: 100,
+        },
+        requestSent: true,
+        estimatedAmount: 0.84,
+        usdToEurRate: 0.9,
+      });
+    } catch (caught) {
+      if (caught instanceof RuntimeCostSettlementRequiredError) settlement = caught;
+    }
+    expect(settlement).not.toBeNull();
+    expect(settlement?.actualAmount).toBeGreaterThan(0);
+    expect(settlement?.actualAmount).toBeLessThan(0.84);
+    expect(settlement?.originalError).toBe(error);
   });
 
   it("builds deterministic tenant-scoped admission for the extracted document version", () => {
@@ -305,6 +635,304 @@ describe("automatic fascicolo analysis job", () => {
     expect(new Set(admissions.map((item) => item.logicalOperationId)).size).toBe(10);
   });
 
+  it("executes the controlled V7 output instead of reusing a prior current revision", async () => {
+    const analyze = vi.fn(async () => ({
+      ...analysis,
+      structuredKnowledge: controlledV7Knowledge,
+    }));
+    const persistKnowledge = vi.fn(async (input: Parameters<NonNullable<
+      FascicoloAutomaticAnalysisDependencies["persistKnowledge"]
+    >>[0]) => {
+      const projection = projectStructuredKnowledge({
+        knowledge: fascicoloStructuredKnowledgeSchema.parse(input.knowledge),
+        subjectIdsByLocalId: new Map(),
+        evidenceByBasisRef: input.evidenceByBasisRef,
+        sourceTextByBasisRef: input.sourceTextByBasisRef,
+      });
+      assertStructuredKnowledgeQuality(projection.quality);
+      expect(projection.quality).toMatchObject({
+        validCitationCount: 2,
+        invalidCitationCount: 0,
+        lostLegalIssueCount: 0,
+        lostRelationCount: 0,
+        blockingReasons: [],
+      });
+      return buildingReconciliation(lotto3Knowledge);
+    });
+    const prior = currentReconciliation(lotto3Knowledge).revision;
+    const finalizeControlledV7 = vi.fn(async () => ({
+      revision: {
+        ...buildingReconciliation(lotto3Knowledge).revision,
+        status: "CURRENT" as const,
+        completedAt: new Date("2026-10-26T12:00:00Z"),
+      },
+      outcome: "CREATED" as const,
+      snapshotId: "structured-report-1",
+    }));
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        documents: authority.documents.map((document) => ({
+          ...document,
+          documentoId: "document-1",
+          documentFileVersionId: "file-version-1",
+        })),
+      })),
+      getCurrentRevision: vi.fn(async () => prior),
+      analyze,
+      persistKnowledge,
+      reconcileKnowledgeMissions: vi.fn(async () => []),
+      prepareStructuredReport: vi.fn(async () => preparedStructuredReport),
+      finalizeControlledV7,
+    });
+
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(
+      controlledV7Reference,
+      context(),
+    )).resolves.toMatchObject({
+      referenceType: "FASCICOLO_KNOWLEDGE_REVISION",
+      metadata: { structuredReportId: "structured-report-1" },
+    });
+    expect(analyze).toHaveBeenCalledOnce();
+    expect(persistKnowledge).toHaveBeenCalledWith(expect.objectContaining({
+      forceNewRevision: true,
+      deferPromotion: true,
+    }));
+    expect(deps.reconcileKnowledgeMissions).toHaveBeenCalledWith(
+      expect.objectContaining({ allowBuildingRevision: true }),
+    );
+    expect(finalizeControlledV7).toHaveBeenCalledWith(expect.objectContaining({
+      knowledgeRevisionId: "revision-building",
+      expectedCurrentRevisionId: prior.id,
+      report: preparedStructuredReport,
+    }));
+  });
+
+  it("keeps the previous revision current when V7 mission reconciliation fails", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const prior = currentReconciliation(lotto3Knowledge).revision;
+    const prepareStructuredReport = vi.fn();
+    const finalizeControlledV7 = vi.fn();
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        documents: authority.documents.map((document) => ({
+          ...document,
+          documentoId: "document-1",
+          documentFileVersionId: "file-version-1",
+        })),
+      })),
+      getCurrentRevision: vi.fn(async () => prior),
+      analyze: vi.fn(async () => ({
+        ...analysis,
+        structuredKnowledge: controlledV7Knowledge,
+      })),
+      persistKnowledge: vi.fn(async () => buildingReconciliation(lotto3Knowledge)),
+      reconcileKnowledgeMissions: vi.fn(async () => {
+        throw Object.assign(new Error("MISSION_RECONCILIATION_FAILED"), {
+          code: "40P01",
+        });
+      }),
+      prepareStructuredReport,
+      finalizeControlledV7,
+    });
+
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(
+      controlledV7Reference,
+      context(),
+    )).rejects.toMatchObject({
+      category: "PERSISTENCE",
+      code: "RESEARCH_MISSION_RECONCILIATION_FAILED",
+      retryable: false,
+    });
+    expect(prepareStructuredReport).not.toHaveBeenCalled();
+    expect(finalizeControlledV7).not.toHaveBeenCalled();
+    expect(prior.status).toBe("CURRENT");
+    expect(consoleError).toHaveBeenCalledWith(expect.objectContaining({
+      event: "fascicolo_research_mission_reconciliation_failed",
+      databaseCode: "40P01",
+    }));
+    consoleError.mockRestore();
+  });
+
+  it("keeps the previous revision current when the V7 report cannot be prepared", async () => {
+    const prior = currentReconciliation(lotto3Knowledge).revision;
+    const finalizeControlledV7 = vi.fn();
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        documents: authority.documents.map((document) => ({
+          ...document,
+          documentoId: "document-1",
+          documentFileVersionId: "file-version-1",
+        })),
+      })),
+      getCurrentRevision: vi.fn(async () => prior),
+      analyze: vi.fn(async () => ({
+        ...analysis,
+        structuredKnowledge: controlledV7Knowledge,
+      })),
+      persistKnowledge: vi.fn(async () => buildingReconciliation(lotto3Knowledge)),
+      reconcileKnowledgeMissions: vi.fn(async () => []),
+      prepareStructuredReport: vi.fn(async () => null),
+      finalizeControlledV7,
+    });
+
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(
+      controlledV7Reference,
+      context(),
+    )).rejects.toMatchObject({
+      code: "STRUCTURED_FASCICOLO_REPORT_NOT_CREATED",
+      retryable: false,
+    });
+    expect(finalizeControlledV7).not.toHaveBeenCalled();
+    expect(prior.status).toBe("CURRENT");
+  });
+
+  it("keeps the previous revision current when atomic V7 finalization fails", async () => {
+    const prior = currentReconciliation(lotto3Knowledge).revision;
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        documents: authority.documents.map((document) => ({
+          ...document,
+          documentoId: "document-1",
+          documentFileVersionId: "file-version-1",
+        })),
+      })),
+      getCurrentRevision: vi.fn(async () => prior),
+      analyze: vi.fn(async () => ({
+        ...analysis,
+        structuredKnowledge: controlledV7Knowledge,
+      })),
+      persistKnowledge: vi.fn(async () => buildingReconciliation(lotto3Knowledge)),
+      reconcileKnowledgeMissions: vi.fn(async () => []),
+      prepareStructuredReport: vi.fn(async () => preparedStructuredReport),
+      finalizeControlledV7: vi.fn(async () => {
+        throw new Error("ATOMIC_FINALIZATION_FAILED");
+      }),
+    });
+
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(
+      controlledV7Reference,
+      context(),
+    )).rejects.toEqual(new AsyncJobExecutionError(
+      "PERSISTENCE",
+      "V7_FINALIZATION_FAILED",
+      false,
+    ));
+    expect(prior.status).toBe("CURRENT");
+  });
+
+  it.each([
+    "V7_PREFLIGHT_APPROVAL_MISMATCH",
+    "V7_PREFLIGHT_IDENTITY_MISMATCH",
+    "V7_PREFLIGHT_FINGERPRINT_MISMATCH",
+    "V7_PREFLIGHT_CONFIGURATION_INVALID",
+  ] as const)("blocks controlled V7 before the provider when runtime revalidation fails with %s", async (code) => {
+    const analyze = vi.fn();
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+      })),
+      validateControlledV7Preflight: vi.fn(async () => {
+        throw new FascicoloV7PreflightError(code);
+      }),
+      analyze,
+    });
+
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(
+      controlledV7Reference,
+      context(),
+    )).rejects.toEqual(new AsyncJobExecutionError("AUTHORIZATION", code, false));
+    expect(analyze).not.toHaveBeenCalled();
+    expect(deps.persistKnowledge).toBeUndefined();
+    expect(deps.persistStructuredReport).not.toHaveBeenCalled();
+  });
+
+  it("fails the controlled V7 job before persistence when narrative or inventory is incomplete", async () => {
+    const analyze = vi.fn(async () => ({
+      ...analysis,
+      suggestedActivities: [],
+      structuredKnowledge: {
+        ...controlledV7Knowledge,
+        documentInventory: [],
+      },
+    }));
+    const persistKnowledge = vi.fn();
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        documents: authority.documents.map((document) => ({
+          ...document,
+          documentoId: "document-1",
+          documentFileVersionId: "file-version-1",
+        })),
+      })),
+      getCurrentRevision: vi.fn(async () => currentReconciliation(lotto3Knowledge).revision),
+      analyze,
+      persistKnowledge,
+    });
+
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(
+      controlledV7Reference,
+      context(),
+    )).rejects.toEqual(new AsyncJobExecutionError(
+      "ANALYSIS",
+      "V7_OUTPUT_REQUIRED_SECTIONS_EMPTY",
+      false,
+    ));
+    expect(analyze).toHaveBeenCalledOnce();
+    expect(persistKnowledge).not.toHaveBeenCalled();
+    expect(deps.persistStructuredReport).not.toHaveBeenCalled();
+  });
+
+  it("distinguishes incomplete V7 document inventory coverage before persistence", async () => {
+    const analyze = vi.fn(async () => ({
+      ...analysis,
+      structuredKnowledge: {
+        ...controlledV7Knowledge,
+        documentInventory: controlledV7Knowledge.documentInventory.map((document) => ({
+          ...document,
+          basisRefs: ["DOCUMENT_1.PAGE_999"],
+        })),
+      },
+    }));
+    const persistKnowledge = vi.fn();
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => ({
+        ...authority,
+        sourceKind: "DOCUMENT_CORPUS" as const,
+        documents: authority.documents.map((document) => ({
+          ...document,
+          documentoId: "document-1",
+          documentFileVersionId: "file-version-1",
+        })),
+      })),
+      getCurrentRevision: vi.fn(async () => currentReconciliation(lotto3Knowledge).revision),
+      analyze,
+      persistKnowledge,
+    });
+
+    await expect(createFascicoloAutomaticAnalysisHandler(deps).execute(
+      controlledV7Reference,
+      context(),
+    )).rejects.toEqual(new AsyncJobExecutionError(
+      "ANALYSIS",
+      "V7_DOCUMENT_INVENTORY_INCOMPLETE",
+      false,
+    ));
+    expect(analyze).toHaveBeenCalledOnce();
+    expect(persistKnowledge).not.toHaveBeenCalled();
+    expect(deps.persistStructuredReport).not.toHaveBeenCalled();
+  });
+
   it("passes all 21 OCR pages through to document-only analysis without truncation", async () => {
     const directReference = {
       referenceType: "FASCICOLO_DOCUMENT_CORPUS",
@@ -312,11 +940,15 @@ describe("automatic fascicolo analysis job", () => {
       referenceVersion: "V1",
       metadata: { procedimentoId: "procedimento-1", corpusHash: "c".repeat(64) },
     } as const;
-    const pages = Array.from({ length: 21 }, (_, index) => ({
-      ...authority.documents[0].pages[0],
-      pageNumber: index + 1,
-      normalizedText: `Pagina ${index + 1}: ` + "x".repeat(3400),
-    }));
+    const pages = Array.from({ length: 21 }, (_, index) => {
+      const text = `Pagina ${index + 1}: ` + "x".repeat(3400);
+      return {
+        ...authority.documents[0].pages[0],
+        pageNumber: index + 1,
+        normalizedText: text.replaceAll("  ", " "),
+        sourceText: text,
+      };
+    });
     const analyze = vi.fn(async (_input: unknown) => ({ ...analysis, structuredKnowledge }));
     const deps = dependencies({
       loadAuthority: vi.fn(async () => ({
@@ -333,7 +965,7 @@ describe("automatic fascicolo analysis job", () => {
     const excerpts = (analyze.mock.calls[0]?.[0] as { excerpts: { text: string }[] } | undefined)?.excerpts;
     expect(excerpts).toHaveLength(21);
     if (!excerpts) throw new Error("EXPECTED_ANALYSIS_EXCERPTS");
-    expect(excerpts.map((excerpt) => excerpt.text)).toEqual(pages.map((page) => page.normalizedText));
+    expect(excerpts.map((excerpt) => excerpt.text)).toEqual(pages.map((page) => page.sourceText));
   });
 
   it("rejects oversized OCR corpus before charging the analysis provider", async () => {
@@ -349,7 +981,11 @@ describe("automatic fascicolo analysis job", () => {
         ...authority,
         sourceKind: "DOCUMENT_CORPUS" as const,
         documents: [{ ...authority.documents[0], documentoId: "document-1", documentFileVersionId: "file-version-1", pages: [
-          { ...authority.documents[0].pages[0], normalizedText: "x".repeat(96_001) },
+          {
+            ...authority.documents[0].pages[0],
+            normalizedText: "x".repeat(96_001),
+            sourceText: "x".repeat(96_001),
+          },
         ] }],
       })),
       getCurrentRevision: vi.fn(async () => null),
@@ -403,6 +1039,9 @@ describe("automatic fascicolo analysis job", () => {
   });
 
   it("maps direct document corpus evidence to the fascicolo extraction attempt", async () => {
+    const sourceText = "Il  provvedimento indica la scadenza al 31 dicembre 2026.";
+    const normalizedText = "Il provvedimento indica la scadenza al 31 dicembre 2026.";
+    const textSha256 = createHash("sha256").update(sourceText, "utf8").digest("hex");
     const directReference = {
       referenceType: "FASCICOLO_DOCUMENT_CORPUS",
       referenceId: "c".repeat(64),
@@ -421,10 +1060,15 @@ describe("automatic fascicolo analysis job", () => {
         documentFileVersionId: "file-version-1",
         documentExtractionAttemptId: "attempt-1",
         pageNumber: 1,
-        textSha256: "b".repeat(64),
+        textSha256,
         quoteSha256: null,
         basisRef: "DOCUMENT_1.PAGE_1",
       }]);
+      expect(input.sourceTextByBasisRef?.get("DOCUMENT_1.PAGE_1")).toBe(sourceText);
+      expect(createHash("sha256").update(
+        input.sourceTextByBasisRef!.get("DOCUMENT_1.PAGE_1")!,
+        "utf8",
+      ).digest("hex")).toBe(textSha256);
       return currentReconciliation(structuredKnowledge);
     });
     const deps = dependencies({
@@ -435,6 +1079,12 @@ describe("automatic fascicolo analysis job", () => {
           ...document,
           documentoId: "document-1",
           documentFileVersionId: "file-version-1",
+          pages: document.pages.map((page) => ({
+            ...page,
+            normalizedText,
+            sourceText,
+            textSha256,
+          })),
         })),
       })),
       getCurrentRevision: vi.fn(async () => null),
@@ -446,6 +1096,109 @@ describe("automatic fascicolo analysis job", () => {
     await createFascicoloAutomaticAnalysisHandler(deps).execute(directReference, context());
 
     expect(persistKnowledge).toHaveBeenCalledOnce();
+  });
+
+  it("runs the synthetic canonical path through facts, events, citations, reconciliation, and report persistence", async () => {
+    const sourceText = "Fatto autentico. Evento autentico.";
+    const textSha256 = createHash("sha256").update(sourceText, "utf8").digest("hex");
+    const knowledge = {
+      version: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1",
+      subjects: [],
+      sourceQuotes: [
+        {
+          itemLocalId: "fact-authentic",
+          basisRef: "DOCUMENT_1.PAGE_1",
+          quote: "Fatto autentico",
+        },
+        {
+          itemLocalId: "event-authentic",
+          basisRef: "DOCUMENT_1.PAGE_1",
+          quote: "Evento autentico",
+        },
+      ],
+      items: [
+        {
+          localId: "fact-authentic",
+          kind: "FACT",
+          confidence: 95,
+          basisRefs: ["DOCUMENT_1.PAGE_1"],
+          payload: {
+            normalizedStatement: "Il documento attesta il fatto rilevante.",
+            subjectLocalIds: [],
+            object: null,
+            qualifier: null,
+          },
+        },
+        {
+          localId: "event-authentic",
+          kind: "EVENT",
+          confidence: 95,
+          basisRefs: ["DOCUMENT_1.PAGE_1"],
+          payload: {
+            title: "Evento",
+            normalizedStatement: "L'evento risulta essersi verificato.",
+            date: {
+              precision: "EXACT",
+              from: "2026-10-24",
+              to: null,
+              originalText: null,
+              confidence: 100,
+            },
+            subjectLocalIds: [],
+            relatedItemLocalIds: [],
+          },
+        },
+      ],
+      legalIssues: [],
+      researchQuestions: [],
+    } as const;
+    const syntheticAuthority = {
+      ...authority,
+      documents: authority.documents.map((document) => ({
+        ...document,
+        documentoId: "document-1",
+        documentFileVersionId: "file-version-1",
+        pages: document.pages.map((page) => ({
+          ...page,
+          normalizedText: sourceText,
+          sourceText,
+          textSha256,
+        })),
+      })),
+    };
+    const persistKnowledge = vi.fn(async (input: Parameters<NonNullable<
+      FascicoloAutomaticAnalysisDependencies["persistKnowledge"]
+    >>[0]) => {
+      const projection = projectStructuredKnowledge({
+        knowledge: fascicoloStructuredKnowledgeSchema.parse(input.knowledge),
+        subjectIdsByLocalId: new Map(),
+        evidenceByBasisRef: input.evidenceByBasisRef,
+      });
+      const spans = projection.candidates.flatMap((candidate) => (
+        buildCanonicalSourceSpans(candidate, input.sourceTextByBasisRef!)
+      ));
+      expect(spans.map((span) => span.quote)).toHaveLength(2);
+      expect(spans.map((span) => span.quote)).toEqual(expect.arrayContaining([
+        "Fatto autentico",
+        "Evento autentico",
+      ]));
+      return currentReconciliation(knowledge);
+    });
+    const deps = dependencies({
+      loadAuthority: vi.fn(async () => syntheticAuthority),
+      analyze: vi.fn(async () => ({ ...analysis, structuredKnowledge: knowledge })),
+      persistKnowledge,
+      reconcileKnowledgeMissions: vi.fn(async () => []),
+    });
+
+    const result = await createFascicoloAutomaticAnalysisHandler(deps).execute(reference, context());
+
+    expect(persistKnowledge).toHaveBeenCalledOnce();
+    expect(deps.persistReport).toHaveBeenCalledOnce();
+    expect(result).toMatchObject({
+      referenceType: "FASCICOLO_AUTOMATIC_REPORT",
+      metadata: { missionCount: 0, researchJobCount: 0 },
+    });
   });
 
   it("recovers idempotently after persistence by reusing the current corpus revision", async () => {
@@ -469,6 +1222,7 @@ describe("automatic fascicolo analysis job", () => {
     const result = await createFascicoloAutomaticAnalysisHandler(deps)
       .execute(reference, context());
     expect(deps.analyze).toHaveBeenCalledWith(expect.objectContaining({
+      jobId: "job-1",
       documentsAreUntrustedData: true,
       externalToolsAllowed: false,
       documentVersionId: "attempt-1",
@@ -730,6 +1484,11 @@ describe("automatic fascicolo analysis job", () => {
     expect(missingProvenance.persistReport).not.toHaveBeenCalled();
     expect(missingProvenance.persistMission).not.toHaveBeenCalled();
 
+    const diagnostic = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const persistenceError = Object.assign(new Error("reserved document text"), {
+      name: "SyntheticPersistenceError",
+      code: "23505",
+    });
     const failedPersistence = dependencies({
       loadAuthority: vi.fn(async () => ({
         ...authority,
@@ -740,10 +1499,19 @@ describe("automatic fascicolo analysis job", () => {
         })),
       })),
       analyze: vi.fn(async () => ({ ...analysis, structuredKnowledge })),
-      persistKnowledge: vi.fn(async () => { throw new Error("reconciliation failed"); }),
+      persistKnowledge: vi.fn(async () => { throw persistenceError; }),
     });
     await expect(createFascicoloAutomaticAnalysisHandler(failedPersistence).execute(reference, context()))
       .rejects.toMatchObject({ code: "STRUCTURED_KNOWLEDGE_PERSISTENCE_FAILED", retryable: false });
+    expect(diagnostic).toHaveBeenCalledWith(JSON.stringify({
+      event: "STRUCTURED_KNOWLEDGE_PERSISTENCE_FAILURE",
+      phase: "PERSIST_KNOWLEDGE",
+      engine: "LEGACY",
+      errorType: "SyntheticPersistenceError",
+      errorCode: "23505",
+    }));
+    expect(JSON.stringify(diagnostic.mock.calls)).not.toContain("reserved document text");
+    diagnostic.mockRestore();
     expect(failedPersistence.persistReport).not.toHaveBeenCalled();
     expect(failedPersistence.persistMission).not.toHaveBeenCalled();
   });
@@ -817,9 +1585,15 @@ describe("automatic fascicolo analysis job", () => {
         metadata: {
           missionCount: 1,
           researchJobCount: 0,
+          structuredReportId: "structured-report-1",
+          structuredReportPersistenceCode: "CREATED",
           researchRequirementCode: "ASSIGNMENT_AND_EXPLICIT_AUTHORIZATION_REQUIRED",
         },
       });
+    expect(deps.persistStructuredReport).toHaveBeenCalledWith({
+      tenantId: "tenant-1",
+      procedimentoId: "procedimento-1",
+    });
     expect(deps.scheduleMission).not.toHaveBeenCalled();
   });
 

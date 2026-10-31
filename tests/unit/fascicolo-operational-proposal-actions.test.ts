@@ -97,6 +97,13 @@ describe("Lotto 7 operational proposal server actions", () => {
     expect(mocks.materialize).not.toHaveBeenCalled();
   });
 
+  it("generates proposals for a procedimento without a concession under the same tenant write check", async () => {
+    mocks.findProcedure.mockResolvedValue({ enteId: "tenant-1", concessioneId: null });
+    await generateOperationalProposalsAction(form({ procedimentoId: "procedure-1" }));
+    expect(mocks.requireTenantAccess).toHaveBeenCalledWith(expect.anything(), "tenant-1", expect.objectContaining({ mode: "write" }));
+    expect(mocks.reconcile).toHaveBeenCalledOnce();
+  });
+
   it("passes explicit human actor, action and review version to review only", async () => {
     await reviewOperationalProposalAction(form({
       procedimentoId: "procedure-1", proposalId: "proposal-1", action: "APPROVE", reviewVersion: "0",

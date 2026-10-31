@@ -81,7 +81,18 @@ Aggiunte a `.env.example` per il percorso automatico:
 - analisi AI: `AI_REAL_DATA_ENABLED`, `AI_REAL_DATA_APPROVAL_ID`,
   `AI_PROVIDER_PROJECT_CLASS`, `AI_OPENAI_API_KEY`, `AI_OPENAI_REGION`,
   `AI_OPENAI_TIMEOUT_MS`, `AI_OPENAI_MAX_RAW_RESPONSE_BYTES`,
-  `AI_OPENAI_MAX_OUTPUT_TOKENS`, `AI_MAX_INPUT_BYTES`;
+  `AI_OPENAI_MAX_OUTPUT_TOKENS`, `AI_OPENAI_MAX_INPUT_TOKENS`,
+  `AI_MAX_INPUT_BYTES`;
+- regione OpenAI: NOETRA usa esclusivamente `AI_OPENAI_REGION=GLOBAL`, con
+  endpoint `https://api.openai.com/v1/responses`. Se la variabile non e
+  definita il runtime applica `GLOBAL`; qualsiasi altro valore, incluso `EU`,
+  viene rifiutato prima della costruzione del provider;
+- accounting OpenAI: `AI_OPENAI_USD_TO_EUR_RATE` e
+  `AI_OPENAI_USD_TO_EUR_RATE_DATE` (`YYYY-MM-DD`). Il tasso deve essere il
+  cambio di riferimento BCE USD/EUR della data indicata. Il costo provider
+  resta in USD; il settlement interno in EUR viene arrotondato per eccesso a
+  sei decimali. Le tariffe modello sono versionate nel codice con fonte
+  `https://developers.openai.com/api/docs/models/gpt-5.6-terra`;
 - ricerca automatica: `AUTOMATIC_RESEARCH_EXECUTION_ENABLED`,
   `AUTOMATIC_RESEARCH_TENANT_ALLOWLIST`,
   `AUTOMATIC_RESEARCH_PROCEDIMENTO_ALLOWLIST`,
@@ -89,9 +100,17 @@ Aggiunte a `.env.example` per il percorso automatico:
   `AUTOMATIC_RESEARCH_WORKER_ACTOR_ID`, `AUTOMATIC_RESEARCH_LEASE_MS`,
   `AUTOMATIC_RESEARCH_PROVIDER_TIMEOUT_MS`,
   `AUTOMATIC_OFFICIAL_SOURCE_VERIFICATION_ENABLED` (abilita il pass bounded di
-  verifica identity/full-text/temporal sulle fonti ufficiali dopo la discovery);
+  verifica identity/full-text/temporal sulle fonti ufficiali dopo la discovery),
+  `AUTOMATIC_OFFICIAL_SOURCE_MAX_ACQUISITIONS` (limite intero obbligatorio quando
+  la verifica ufficiale e abilitata e incluso nel fingerprint della policy);
 - provider: `LEGAL_DATA_HUNTER_API_KEY`, `MOONLIT_OAUTH_STORAGE_PATH`,
   `SIMPLICITER_OAUTH_STORAGE_PATH`.
+
+Prima di abilitare la ricerca automatica, eseguire sul worker persistente
+`npm run runtime:verify-automatic-research-connectors`. Il controllo non effettua
+chiamate di rete e non stampa credenziali; richiede percorsi assoluti e token
+OAuth gia presenti per Moonlit e Simpliciter, oltre alla presenza della
+credenziale Legal Data Hunter.
 
 OCR e parsing PDF usano le dipendenze incluse nella release (`tesseract.js`,
 dati italiani e `pdfjs-dist`): non leggono credenziali o variabili OCR.
@@ -141,6 +160,37 @@ dell'iterazione attiva, lasciare il servizio a zero istanze e mantenere
 mantenere `AI_REAL_DATA_ENABLED=false`. Le variabili modificate richiedono un
 nuovo processo per diventare effettive. Non cancellare job, rapporti, missioni o
 bundle gia persistiti.
+
+## Valutazione isolata TEST-LEGAL-001
+
+`FASCICOLO.AUTOMATIC_ANALYSIS_EVALUATION_V1` e un percorso di collaudo
+separato. Non e registrato nel worker applicativo generico e puo essere
+reclamato soltanto per ID tramite `runFascicoloAnalysisEvaluationJobById`.
+
+L'autorizzazione deve essere emessa da
+`authorizeFascicoloAnalysisEvaluation` per un amministratore autenticato e
+persistita in `FascicoloAnalysisEvaluationPermit`. Il permit e vincolato a
+`evaluationId`, tenant, procedimento, fingerprint, operazione, test case,
+scadenza e limite fisso di 0,50 EUR. `admitFascicoloAnalysisEvaluation` lo
+consuma per un solo job; lo stesso permit non puo autorizzare un secondo
+`evaluationId` o job. Il runner verifica nuovamente permit, consumo, tenant,
+procedimento, fingerprint, stato `READY` e presenza degli otto documenti prima
+di inviare il corpus V5 al provider. Ricerca automatica, knowledge revision,
+missioni e snapshot non sono richiamati.
+
+L'output validato e il confronto post-generazione sono conservati in
+`FascicoloAnalysisEvaluationArtifact`, insieme a fingerprint di input/output e
+provenienza documento/pagina. L'artefatto e append-only e idempotente per
+`evaluationId` e job. La migrazione
+`20261020_fascicolo_analysis_evaluation` deve essere applicata soltanto al
+database di collaudo autorizzato prima della prova.
+
+La preparazione non autorizza l'esecuzione. Prima del singolo one-off occorre
+verificare il budget per una nuova prenotazione da 0,50 EUR, emettere un nuovo
+permit persistito con `authorizeFascicoloAnalysisEvaluation`, ammettere un solo job con
+`admitFascicoloAnalysisEvaluation` ed eseguirne l'ID con i gate AI abilitati
+soltanto nel processo one-off. `AUTOMATIC_RESEARCH_EXECUTION_ENABLED` deve
+rimanere `false`.
 
 ## Prova di accettazione successiva
 

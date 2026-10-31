@@ -78,6 +78,7 @@ export function DirectDocumentUploadForm({
 }: DirectDocumentUploadFormProps) {
   const router = useRouter();
   const operationIdRef = useRef<string | null>(null);
+  const submittingRef = useRef(false);
   const [pending, setPending] = useState(false);
   const [progress, setProgress] = useState<number | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -85,7 +86,7 @@ export function DirectDocumentUploadForm({
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (pending) return;
+    if (submittingRef.current) return;
     const form = event.currentTarget;
     const formData = new FormData(form);
     const file = formData.get("file");
@@ -94,6 +95,7 @@ export function DirectDocumentUploadForm({
       return;
     }
 
+    submittingRef.current = true;
     setPending(true);
     setError(null);
     setMessage(null);
@@ -117,7 +119,9 @@ export function DirectDocumentUploadForm({
             descrizione: String(formData.get("descrizione") ?? "").trim() || undefined,
             dataDocumento: String(formData.get("dataDocumento") ?? "").trim() || undefined,
           });
+          operationIdRef.current = null;
           form.reset();
+          setMessage("Documento caricato e associato.");
           router.refresh();
         }
         return;
@@ -151,12 +155,17 @@ export function DirectDocumentUploadForm({
       operationIdRef.current = null;
       form.reset();
       setProgress(100);
-      setMessage("Documento caricato, verificato e registrato.");
+      setMessage(purpose === "REQUIREMENT_EVIDENCE"
+        ? "Documento caricato e associato."
+        : "Documento caricato, verificato e registrato.");
       if (completed.procedimentoId) router.push(`/procedimenti/${completed.procedimentoId}`);
       else router.refresh();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Caricamento non completato. Riprovare.");
+      setError(purpose === "REQUIREMENT_EVIDENCE"
+        ? "Caricamento non completato. Verificare i dati e riprovare."
+        : cause instanceof Error ? cause.message : "Caricamento non completato. Riprovare.");
     } finally {
+      submittingRef.current = false;
       setPending(false);
     }
   }
@@ -165,7 +174,7 @@ export function DirectDocumentUploadForm({
     <form
       onSubmit={submit}
       onChange={(event) => {
-        if (!pending && event.target instanceof HTMLInputElement && event.target.name === "file") {
+        if (!submittingRef.current && event.target instanceof HTMLInputElement && event.target.name === "file") {
           operationIdRef.current = null;
           setProgress(null);
           setMessage(null);
@@ -174,21 +183,24 @@ export function DirectDocumentUploadForm({
       }}
       className={className}
     >
-      {children}
-      <div className="md:col-span-full">
-        <Button type="submit" disabled={pending}>
-          {pending ? "Caricamento in corso..." : submitLabel}
-        </Button>
-        {progress !== null ? (
-          <div className="mt-2" aria-live="polite">
-            <div className="h-2 overflow-hidden rounded bg-slate-200">
-              <div className="h-full bg-[#173d4f] transition-[width]" style={{ width: `${progress}%` }} />
+      <fieldset disabled={pending} className="contents">
+        {children}
+        <div className="md:col-span-full">
+          <Button type="submit" disabled={pending}>
+            {pending ? "Caricamento in corso..." : submitLabel}
+          </Button>
+          {progress !== null ? (
+            <div className="mt-2" aria-live="polite">
+              <div className="h-2 overflow-hidden rounded bg-slate-200">
+                <div className="h-full bg-[#173d4f] transition-[width]" style={{ width: `${progress}%` }} />
+              </div>
+              <p className="mt-1 text-xs text-slate-600">{progress}% · {message}</p>
             </div>
-            <p className="mt-1 text-xs text-slate-600">{progress}% · {message}</p>
-          </div>
-        ) : null}
-        {error ? <p role="alert" className="mt-2 text-sm text-rose-700">{error}</p> : null}
-      </div>
+          ) : null}
+          {progress === null && message ? <p role="status" className="mt-2 text-sm text-slate-700">{message}</p> : null}
+          {error ? <p role="alert" className="mt-2 text-sm text-rose-700">{error}</p> : null}
+        </div>
+      </fieldset>
     </form>
   );
 }

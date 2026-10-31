@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { createResearchMission, RESEARCH_BRIDGE_VERSION, type ResearchCapability, type ResearchMission } from "@/server/legal-research/bridge";
 
 import { canonicalJson } from "./canonicalization";
+import { isCanonicalIdentityV3Enabled } from "./canonicalIntegrationGate";
 import type { JsonValue, KnowledgeItemReviewStatus } from "./contracts";
 import type { KnowledgeRevisionSnapshot } from "./repository";
 
@@ -10,6 +11,7 @@ export const DEFAULT_RESEARCH_EXECUTION_WAVE_LIMIT = 5;
 
 export interface ResearchExecutionPolicy {
   maxQuestionsPerWave: number;
+  allowBuildingRevision?: boolean;
 }
 
 export interface KnowledgeResearchMissionPlan {
@@ -66,6 +68,12 @@ function statusAllowsMission(status: KnowledgeItemReviewStatus): boolean {
   return status !== "REJECTED";
 }
 
+function identityAllowsMission(item: SnapshotItem): boolean {
+  return !isCanonicalIdentityV3Enabled()
+    || item.identityState === "VERIFIED_NEW"
+    || item.identityState === "VERIFIED_CONTINUATION";
+}
+
 export function buildKnowledgeResearchMissionPlans(
   revision: KnowledgeRevisionSnapshot,
   policy: ResearchExecutionPolicy = { maxQuestionsPerWave: DEFAULT_RESEARCH_EXECUTION_WAVE_LIMIT },
@@ -73,7 +81,10 @@ export function buildKnowledgeResearchMissionPlans(
   if (!Number.isInteger(policy.maxQuestionsPerWave) || policy.maxQuestionsPerWave < 0) {
     throw new Error("INVALID_RESEARCH_EXECUTION_POLICY");
   }
-  if (revision.status !== "CURRENT") throw new Error("KNOWLEDGE_REVISION_NOT_CURRENT");
+  if (revision.status !== "CURRENT"
+    && !(policy.allowBuildingRevision && revision.status === "BUILDING")) {
+    throw new Error("KNOWLEDGE_REVISION_NOT_CURRENT");
+  }
   const itemById = new Map(revision.items.map((item) => [item.id, item]));
   const itemBySemanticKey = new Map(revision.items.map((item) => [item.semanticKey, item]));
   const issueByQuestion = new Map(revision.relations
@@ -106,7 +117,12 @@ export function buildKnowledgeResearchMissionPlans(
       "EXACT_RETRIEVAL",
     ])].sort() as ResearchCapability[];
     const canonicalQuestion = string(payload.canonicalQuestion) ?? question.normalizedText;
-    const issueValid = issue?.kind === "LEGAL_ISSUE" && statusAllowsMission(issue.status) && origins.length === originIds.length && origins.length > 0;
+    const issueValid = issue?.kind === "LEGAL_ISSUE"
+      && statusAllowsMission(issue.status)
+      && identityAllowsMission(issue)
+      && origins.length === originIds.length
+      && origins.length > 0
+      && origins.every(identityAllowsMission);
     const basisLinkedToIssue = basisItem !== undefined && originIds.includes(basisItem.id);
     const basisPayload = basisItem ? object(basisItem.structuredPayload) : {};
     const basisKindValid = (basisType === "EVENT_DATE" && basisItem?.kind === "EVENT" && basisLinkedToIssue)
@@ -144,6 +160,9 @@ export function buildKnowledgeResearchMissionPlans(
     if (!statusAllowsMission(question.status)) {
       execution = "REJECTED";
       blockReason = "QUESTION_REJECTED";
+    } else if (!identityAllowsMission(question)) {
+      execution = "BLOCKED_FOR_REVIEW";
+      blockReason = "KNOWLEDGE_IDENTITY_UNVERIFIED";
     } else if (!issueValid) {
       execution = "BLOCKED_FOR_REVIEW";
       blockReason = "ISSUE_OR_ORIGIN_INVALID";

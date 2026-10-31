@@ -57,14 +57,21 @@ export async function reconcileKnowledgeResearchMissions(input: {
   knowledgeRevisionId: string;
   assignedActorId: string | null;
   plans: readonly KnowledgeResearchMissionPlan[];
+  allowBuildingRevision?: boolean;
 }, overrides: Partial<ResearchMissionLifecycleContext> = {}): Promise<readonly KnowledgeMissionLifecycleResult[]> {
   const context = { ...defaultContext, ...overrides };
   return context.transaction(async (tx) => {
     const revision = await tx.query<{ id: string }>(`
       SELECT "id" FROM "FascicoloKnowledgeRevision"
-      WHERE "id" = $1 AND "tenantId" = $2 AND "procedimentoId" = $3 AND "status" = 'CURRENT'
+      WHERE "id" = $1 AND "tenantId" = $2 AND "procedimentoId" = $3
+        AND ("status" = 'CURRENT' OR ($4::boolean AND "status" = 'BUILDING'))
       FOR UPDATE
-    `, [input.knowledgeRevisionId, input.tenantId, input.procedimentoId]);
+    `, [
+      input.knowledgeRevisionId,
+      input.tenantId,
+      input.procedimentoId,
+      input.allowBuildingRevision === true,
+    ]);
     if (revision.rows.length !== 1) throw new Error("KNOWLEDGE_REVISION_NOT_CURRENT");
     const executablePlans = input.plans.filter((plan) => plan.mission !== null
       && (plan.execution === "ADMITTED" || plan.execution === "DEFERRED_BY_POLICY"));

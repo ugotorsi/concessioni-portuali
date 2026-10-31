@@ -104,4 +104,29 @@ describe("credentials login MFA errors", () => {
       "Troppi tentativi MFA. Attendi prima di riprovare.",
     );
   });
+  it("reports a network failure and restores the submit button", async () => {
+    const setIsSubmitting = vi.fn();
+    const setErrorMessage = vi.fn();
+    useStateMock
+      .mockReturnValueOnce([false, setIsSubmitting])
+      .mockReturnValueOnce([null, setErrorMessage])
+      .mockReturnValueOnce([false, vi.fn()]);
+    signInMock.mockRejectedValueOnce(new Error("Network unavailable"));
+
+    const form = LoginCredentialsForm({ initialErrorMessage: null });
+    const formElement = findElement(form, "form");
+    await (formElement?.props as {
+      onSubmit: (event: { preventDefault: () => void; currentTarget: HTMLFormElement }) => Promise<void>;
+    }).onSubmit({
+      preventDefault: vi.fn(),
+      currentTarget: {} as HTMLFormElement,
+    });
+
+    expect(setIsSubmitting).toHaveBeenNthCalledWith(1, true);
+    expect(setIsSubmitting).toHaveBeenLastCalledWith(false);
+    expect(setErrorMessage).toHaveBeenCalledWith(
+      "Impossibile completare l’accesso. Verifica la connessione e riprova.",
+    );
+  });
+
 });

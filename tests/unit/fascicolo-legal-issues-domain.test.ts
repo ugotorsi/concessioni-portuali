@@ -70,6 +70,53 @@ function project(value = knowledge()) {
 }
 
 describe("Lotto 3 legal issue and research question domain", () => {
+  it("preserves a documented defense as an attributed party position with provenance", () => {
+    const value = {
+      version: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1" as const,
+      subjects: [{
+        localId: "concessionaire",
+        canonicalName: "Concessionario sintetico",
+        subjectType: "ORGANIZATION" as const,
+        strongIdentifiers: [],
+        aliases: [],
+      }],
+      items: [{
+        localId: "defense-1",
+        kind: "PARTY_POSITION" as const,
+        confidence: 95,
+        basisRefs: [evidence.basisRef],
+        payload: {
+          subjectLocalId: "concessionaire",
+          positionType: "DEFENSE" as const,
+          normalizedStatement: "Il primo container e necessario alla manutenzione temporanea.",
+          context: "Controdeduzioni",
+          relatedItemLocalIds: [],
+        },
+      }],
+      legalIssues: [],
+      researchQuestions: [],
+    };
+
+    const result = projectStructuredKnowledge({
+      knowledge: fascicoloStructuredKnowledgeSchema.parse(value),
+      subjectIdsByLocalId: new Map([["concessionaire", "subject-1"]]),
+      evidenceByBasisRef: new Map([[evidence.basisRef, evidence]]),
+    });
+
+    expect(result.candidates).toEqual([
+      expect.objectContaining({
+        kind: "PARTY_POSITION",
+        normalizedText: "Il primo container e necessario alla manutenzione temporanea.",
+        structuredPayload: expect.objectContaining({
+          positionType: "DEFENSE",
+          subjectIds: ["subject-1"],
+        }),
+        evidence: [expect.objectContaining({ basisRef: evidence.basisRef, pageNumber: 1 })],
+      }),
+    ]);
+    expect(result.candidates.some((candidate) => candidate.kind === "FACT")).toBe(false);
+  });
+
   it("projects issues from FACT, MEASURE, GAP and CONTRADICTION with traceable evidence", () => {
     const result = project();
     const issues = result.candidates.filter((candidate) => candidate.kind === "LEGAL_ISSUE");

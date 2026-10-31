@@ -20,7 +20,10 @@ describe("frontend UX contract", () => {
       expect(source).not.toContain(`label: "${group}"`);
     }
     expect(source).toContain('<details className="group sticky top-0');
-    expect(source).toContain('role === "VIEWER_ADSP" ? adspNavItems : backofficeNavItems');
+    expect(source).toContain('role === "VIEWER_ADSP"');
+    expect(source).toContain('? adspNavItems');
+    expect(source).toContain('role === "ADMIN"');
+    expect(source).toContain('? adminNavItems');
     expect(source).toContain('label: "Portale AdSP"');
     expect(source).toContain('aria-current={isActive ? "page" : undefined}');
     expect(source.match(/<LogoutButton \/>/g)).toHaveLength(2);

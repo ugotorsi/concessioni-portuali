@@ -119,6 +119,13 @@ function outboundRequestFixture(): AiOutboundAnalysisProviderRequestV1 {
 function openAiResponse(payload: unknown = VALID_PROVIDER_PAYLOAD): Response {
   return new Response(JSON.stringify({
     status: "completed",
+    usage: {
+      input_tokens: 100,
+      input_tokens_details: { cached_tokens: 0, cache_write_tokens: 0 },
+      output_tokens: 40,
+      output_tokens_details: { reasoning_tokens: 8 },
+      total_tokens: 140,
+    },
     output: [{
       type: "message",
       role: "assistant",
@@ -169,6 +176,7 @@ function createConfig(transport: OpenAiFetch, maxRawResponseBytes = 64_000) {
     timeoutMs: 1_000,
     maxRawResponseBytes,
     maxOutputTokens: MAX_OUTPUT_TOKENS,
+    maxInputTokens: 100_000,
     region: "GLOBAL" as const,
     transport,
   };

@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/layout/AppShell";
+import { ResumeDemoBanner } from "@/components/demo-guidata/ResumeDemoBanner";
 import { DirectDocumentUploadForm } from "@/components/documents/DirectDocumentUploadForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
@@ -66,6 +67,7 @@ export default async function DocumentiPage({ searchParams }: DocumentiPageProps
       subtitle="Consulta e gestisci i documenti collegati alle attività istruttorie"
     >
       <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-4">
+        <ResumeDemoBanner />
         {params.ocr === "queued" ? (
           <div role="status" className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
             Elaborazione OCR autorizzata e aggiunta alla coda.

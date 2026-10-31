@@ -12,6 +12,7 @@ const trustedReviewExecuteMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/server/ai/providers/openai", () => ({
   createOpenAiAnalysisProvider: createProviderMock,
+  OPENAI_DEFAULT_REGION: "GLOBAL",
 }));
 vi.mock("@/server/ai/fascicoloLiveAnalysis", () => ({
   createFascicoloLiveAnalysisService: createServiceMock,
@@ -24,12 +25,17 @@ import {
   AI_OPENAI_RUNTIME_ENV_NAMES,
   AI_REAL_DATA_ACTIVATION_ENV_NAMES,
   OpenAiRuntimeConfigurationError,
+  createOpenAiFascicoloDocumentRuntimeFromEnv,
   createOpenAiFascicoloRuntimeFromEnv,
   createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv,
   type OpenAiRuntimeEnv,
 } from "@/server/ai/openaiRuntime";
 import type { OpenAiFetch } from "@/server/ai/providers/openai";
 import { AiRealDataActivationError } from "@/server/ai/realDataActivation";
+import {
+  SELVARA_PILOT_AUTHORIZATION,
+  SelvaraPilotAuthorizationError,
+} from "@/server/ai/selvaraPilotAuthorization";
 
 const SECRET = "sk-runtime-DO-NOT-LEAK";
 
@@ -40,6 +46,7 @@ function validEnv(overrides: Partial<OpenAiRuntimeEnv> = {}): OpenAiRuntimeEnv {
     AI_OPENAI_TIMEOUT_MS: "45000",
     AI_OPENAI_MAX_RAW_RESPONSE_BYTES: "262144",
     AI_OPENAI_MAX_OUTPUT_TOKENS: "8192",
+    AI_OPENAI_MAX_INPUT_TOKENS: "100000",
     AI_MAX_INPUT_BYTES: "262144",
     AI_REAL_DATA_ENABLED: "true",
     AI_REAL_DATA_APPROVAL_ID: "UNIT-TEST-APPROVAL",
@@ -84,6 +91,7 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
       "AI_OPENAI_TIMEOUT_MS",
       "AI_OPENAI_MAX_RAW_RESPONSE_BYTES",
       "AI_OPENAI_MAX_OUTPUT_TOKENS",
+      "AI_OPENAI_MAX_INPUT_TOKENS",
       "AI_MAX_INPUT_BYTES",
     ]);
     expect(AI_REAL_DATA_ACTIVATION_ENV_NAMES).toEqual([
@@ -111,7 +119,9 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
       timeoutMs: 45000,
       maxRawResponseBytes: 262144,
       maxOutputTokens: 8192,
+      maxInputTokens: 100000,
       transport,
+      authorizeRequest: expect.any(Function),
     });
     expect(createTrustedReviewServiceMock).toHaveBeenCalledOnce();
     expect(createTrustedReviewServiceMock).toHaveBeenCalledWith({
@@ -126,7 +136,7 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
   });
 
   it("keeps live and trusted-review runtime configuration behaviorally aligned", () => {
-    const runtimeEnv = validEnv({ AI_OPENAI_REGION: "EU", AI_MAX_INPUT_BYTES: "131072" });
+    const runtimeEnv = validEnv({ AI_MAX_INPUT_BYTES: "131072" });
 
     createOpenAiFascicoloRuntimeFromEnv(runtimeEnv);
     const liveConfig = createServiceMock.mock.calls[0][0];
@@ -135,8 +145,8 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
 
     expect(trustedReviewConfig).toEqual(liveConfig);
     expect(createProviderMock).toHaveBeenCalledTimes(2);
-    expect(createProviderMock).toHaveBeenNthCalledWith(1, expect.objectContaining({ region: "EU" }));
-    expect(createProviderMock).toHaveBeenNthCalledWith(2, expect.objectContaining({ region: "EU" }));
+    expect(createProviderMock).toHaveBeenNthCalledWith(1, expect.objectContaining({ region: "GLOBAL" }));
+    expect(createProviderMock).toHaveBeenNthCalledWith(2, expect.objectContaining({ region: "GLOBAL" }));
     expect(liveConfig.maxInputBytes).toBe(131072);
     expect(trustedReviewConfig.maxInputBytes).toBe(131072);
   });
@@ -172,7 +182,9 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
       timeoutMs: 45000,
       maxRawResponseBytes: 262144,
       maxOutputTokens: 8192,
+      maxInputTokens: 100000,
       transport,
+      authorizeRequest: expect.any(Function),
     });
     expect(createServiceMock).toHaveBeenCalledOnce();
     expect(createServiceMock).toHaveBeenCalledWith({
@@ -185,11 +197,54 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
     expect(serviceAnalyzeMock).not.toHaveBeenCalled();
   });
 
-  it("accepts EU structurally without claiming runtime eligibility", () => {
+  it("defaults to GLOBAL when the region variable is absent", () => {
     const transport = fakeTransport();
-    createOpenAiFascicoloRuntimeFromEnv(validEnv({ AI_OPENAI_REGION: "EU" }), { transport });
-    expect(createProviderMock).toHaveBeenCalledWith(expect.objectContaining({ region: "EU" }));
+    const runtimeEnv = validEnv();
+    delete runtimeEnv.AI_OPENAI_REGION;
+    createOpenAiFascicoloRuntimeFromEnv(runtimeEnv, { transport });
+    expect(createProviderMock).toHaveBeenCalledWith(expect.objectContaining({ region: "GLOBAL" }));
     expect(transport).not.toHaveBeenCalled();
+  });
+
+  it("allows the Selvara approval only with the exact provider scope", () => {
+    const runtimeEnv = validEnv({
+      AI_REAL_DATA_APPROVAL_ID: SELVARA_PILOT_AUTHORIZATION.approvalId,
+    });
+    expect(() => createOpenAiFascicoloRuntimeFromEnv(runtimeEnv)).toThrow(
+      SelvaraPilotAuthorizationError,
+    );
+    expect(() => createOpenAiFascicoloTrustedReviewProductionRuntimeFromEnv(runtimeEnv)).toThrow(
+      SelvaraPilotAuthorizationError,
+    );
+    expect(() => createOpenAiFascicoloDocumentRuntimeFromEnv(
+      runtimeEnv,
+      {},
+      SELVARA_PILOT_AUTHORIZATION,
+    )).not.toThrow();
+    expect(createProviderMock).toHaveBeenCalledOnce();
+  });
+
+  it.each([
+    ["tenantId", "tenant-other"],
+    ["procedimentoId", "procedure-other"],
+    ["corpusFingerprint", "f".repeat(64)],
+    ["purpose", "FASCICOLO_AUTOMATIC_ANALYSIS"],
+    ["operation", "OTHER.OPERATION"],
+  ] as const)("rejects the Selvara approval for a mismatched %s before provider creation", (
+    field,
+    value,
+  ) => {
+    expect(() => createOpenAiFascicoloDocumentRuntimeFromEnv(
+      validEnv({
+        AI_REAL_DATA_APPROVAL_ID: SELVARA_PILOT_AUTHORIZATION.approvalId,
+      }),
+      {},
+      {
+        ...SELVARA_PILOT_AUTHORIZATION,
+        [field]: value,
+      },
+    )).toThrow(SelvaraPilotAuthorizationError);
+    expect(createProviderMock).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -228,8 +283,8 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
     expect(transport).not.toHaveBeenCalled();
   });
 
-  it("rejects invalid region and lowercase coercion", () => {
-    for (const region of ["global", "eu", "CUSTOM", ""] ) {
+  it("rejects every explicit non-GLOBAL region", () => {
+    for (const region of ["global", "EU", "eu", "CUSTOM", ""] ) {
       expectConfigurationError(
         () => createOpenAiFascicoloRuntimeFromEnv(validEnv({ AI_OPENAI_REGION: region })),
         "AI_OPENAI_REGION",
@@ -239,6 +294,7 @@ describe("AI-01B2B1 OpenAI runtime wiring", () => {
 
   it("requires every exact environment variable individually", () => {
     for (const envName of AI_OPENAI_RUNTIME_ENV_NAMES) {
+      if (envName === "AI_OPENAI_REGION") continue;
       const env = validEnv();
       delete env[envName];
       expectConfigurationError(() => createOpenAiFascicoloRuntimeFromEnv(env), envName);

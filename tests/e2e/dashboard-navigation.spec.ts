@@ -1,13 +1,13 @@
 import { expect, test } from "playwright/test";
 import { loginAndExpectLanding } from "./helpers/auth";
 
-test("backoffice navigation exposes only the five primary destinations", async ({ page }) => {
+test("backoffice navigation exposes the primary destinations", async ({ page }) => {
   await loginAndExpectLanding(page, "admin.demo@concessioni.local", "admin123", /\/dashboard$/);
 
   const navigation = page.getByRole("navigation", { name: "Navigazione principale" });
-  await expect(navigation.getByRole("link")).toHaveCount(5);
+  await expect(navigation.getByRole("link")).toHaveCount(6);
 
-  for (const label of ["Dashboard", "Fascicoli", "Verticali", "Mappa", "Concessionari"]) {
+  for (const label of ["Dashboard", "Fascicoli", "Verticali", "Mappa", "Concessionari", "Stato dei servizi"]) {
     await expect(navigation.getByRole("link", { name: label, exact: true })).toBeVisible();
   }
 
@@ -22,7 +22,7 @@ test("dashboard attention cards are accessible links to filtered operational vie
   await expect(page.getByRole("link", { name: /^Scadenza entro 90 giorni:/ })).toHaveAttribute("href", "/scadenze?periodo=ENTRO_90_GIORNI");
   await expect(page.getByRole("link", { name: /^Criticità urgenti:/ })).toHaveAttribute("href", "/criticita?gravita=URGENTE");
   await expect(page.getByRole("link", { name: /^Morosità aperte:/ })).toHaveAttribute("href", "/pagamenti?criticita=MOROSITA");
-  await expect(page.getByRole("link", { name: /^Procedimenti in corso:/ })).toHaveAttribute("href", "/procedimenti?stato=IN_CORSO");
+  await expect(page.getByRole("link", { name: /^Fascicoli in corso:/ })).toHaveAttribute("href", "/procedimenti?stato=IN_CORSO");
 
   for (const removedSection of ["Criticità prioritarie", "Scadenze imminenti", "Morosità e pagamenti critici", "Azioni consigliate"]) {
     await expect(page.getByText(removedSection, { exact: true })).toHaveCount(0);

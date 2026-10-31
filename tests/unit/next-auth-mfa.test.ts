@@ -46,6 +46,7 @@ function userRecord(overrides: Record<string, unknown> = {}) {
     mfaEnabled: false,
     mfaSecret: null,
     mustChangePassword: false,
+    passwordChangedAt: new Date("2026-10-01T00:00:00.000Z"),
     ...overrides,
   };
 }
@@ -70,6 +71,16 @@ describe("NextAuth MFA enforcement", () => {
 
   afterEach(() => vi.unstubAllEnvs());
 
+  it("isolates Preview sessions from cookies issued by other deployments", async () => {
+    vi.stubEnv("VERCEL_ENV", "preview");
+    vi.stubEnv("NODE_ENV", "production");
+
+    const { authOptions } = await loadAuth();
+
+    expect(authOptions.cookies?.sessionToken?.name)
+      .toBe("__Secure-noetra-preview.session-token");
+  });
+
   it("issues only an enrollment-limited identity to an ADMIN without MFA", async () => {
     findUniqueMock.mockResolvedValue(userRecord());
     const { authorize } = await loadAuth();
@@ -79,7 +90,7 @@ describe("NextAuth MFA enforcement", () => {
     expect(user).toMatchObject({
       role: "ADMIN",
       mfaEnrollmentRequired: true,
-      mfaVerified: true,
+      mfaVerified: false,
     });
   });
 
@@ -126,6 +137,7 @@ describe("NextAuth MFA enforcement", () => {
       ruolo: "ADMIN",
       lockedUntil: null,
       mfaEnabled: true,
+      passwordChangedAt: new Date("2026-10-01T00:00:00.000Z"),
     });
     const { authOptions } = await loadAuth();
     const sessionCallback = authOptions.callbacks?.session;
@@ -135,10 +147,112 @@ describe("NextAuth MFA enforcement", () => {
         user: { name: "Admin", email: "admin@example.test", image: null },
         expires: "2099-01-01T00:00:00.000Z",
       },
-      token: { id: "user-admin", role: "ADMIN", mfaVerified: true },
+      token: {
+        id: "user-admin",
+        role: "ADMIN",
+        mfaVerified: true,
+        authVersion: "2026-10-01T00:00:00.000Z",
+      },
     } as never);
 
     expect(session.user && "id" in session.user ? session.user.id : undefined).toBe("");
     expect(session.user && "role" in session.user ? session.user.role : undefined).toBe("");
+  });
+
+  it("recomputes enrollment state when MFA is reset after a JWT was issued", async () => {
+    findUniqueMock.mockResolvedValue({
+      attivo: true,
+      ruolo: "ADMIN",
+      lockedUntil: null,
+      mfaEnabled: false,
+      passwordChangedAt: new Date("2026-10-01T00:00:00.000Z"),
+    });
+    const { authOptions } = await loadAuth();
+    const sessionCallback = authOptions.callbacks?.session;
+
+    const session = await sessionCallback!({
+      session: {
+        user: { name: "Admin", email: "admin@example.test", image: null },
+        expires: "2099-01-01T00:00:00.000Z",
+      },
+      token: {
+        id: "user-admin",
+        role: "ADMIN",
+        mfaEnrollmentRequired: false,
+        mfaVerified: true,
+        authVersion: "2026-10-01T00:00:00.000Z",
+      },
+    } as never);
+
+    expect(session.user).toMatchObject({
+      id: "user-admin",
+      role: "ADMIN",
+      mfaEnrollmentRequired: true,
+      mfaVerified: false,
+    });
+  });
+
+  it("invalidates an enrollment JWT after MFA becomes enabled until OTP login", async () => {
+    findUniqueMock.mockResolvedValue({
+      attivo: true,
+      ruolo: "ADMIN",
+      lockedUntil: null,
+      mfaEnabled: true,
+      passwordChangedAt: new Date("2026-10-01T00:00:00.000Z"),
+    });
+    const { authOptions } = await loadAuth();
+    const sessionCallback = authOptions.callbacks?.session;
+
+    const session = await sessionCallback!({
+      session: {
+        user: { name: "Admin", email: "admin@example.test", image: null },
+        expires: "2099-01-01T00:00:00.000Z",
+      },
+      token: {
+        id: "user-admin",
+        role: "ADMIN",
+        mfaEnrollmentRequired: true,
+        mfaVerified: false,
+        authVersion: "2026-10-01T00:00:00.000Z",
+      },
+    } as never);
+
+    expect(session.user).toMatchObject({
+      id: "",
+      role: "",
+      mfaEnrollmentRequired: false,
+      mfaVerified: false,
+    });
+  });
+
+  it("invalidates existing sessions after a password recovery", async () => {
+    findUniqueMock.mockResolvedValue({
+      attivo: true,
+      ruolo: "ADMIN",
+      lockedUntil: null,
+      mfaEnabled: true,
+      passwordChangedAt: new Date("2026-10-31T08:00:00.000Z"),
+    });
+    const { authOptions } = await loadAuth();
+    const sessionCallback = authOptions.callbacks?.session;
+
+    const session = await sessionCallback!({
+      session: {
+        user: { name: "Admin", email: "admin@example.test", image: null },
+        expires: "2099-01-01T00:00:00.000Z",
+      },
+      token: {
+        id: "user-admin",
+        role: "ADMIN",
+        mfaVerified: true,
+        authVersion: "2026-10-01T00:00:00.000Z",
+      },
+    } as never);
+
+    expect(session.user).toMatchObject({
+      id: "",
+      role: "",
+      mfaVerified: false,
+    });
   });
 });

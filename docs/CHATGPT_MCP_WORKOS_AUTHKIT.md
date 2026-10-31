@@ -37,7 +37,52 @@ Requisiti:
 
 - `WORKOS_AUTHKIT_ISSUER` e `MCP_RESOURCE_URI` devono essere URL HTTPS senza query, frammenti o credenziali.
 - `MCP_RESOURCE_URI` deve coincidere esattamente con il resource indicator configurato in WorkOS e richiesto da ChatGPT.
+- L'alias dedicato NOETRA Preview
+  `concessioni-portuali-demo-v7-mcp-preview.vercel.app` consente esclusivamente
+  `/api/mcp` e `/.well-known/oauth-protected-resource`; qualsiasi altro percorso,
+  incluse pagine, API applicative e asset statici, risponde `404` senza redirect.
+- L'hostname dedicato non sostituisce OAuth: `/api/mcp` continua a richiedere un token
+  WorkOS valido e le autorizzazioni locali su attore, tenant e missione.
 - Non committare valori reali.
+
+Il valore esatto di `MCP_RESOURCE_URI` deve essere registrato anche in WorkOS AuthKit,
+Connect -> Configuration -> Resource Indicators. La registrazione Preview protetta usa:
+
+```powershell
+npm run runtime:configure-workos-mcp-resource -- --resource https://concessioni-portuali-demo-v7-mcp-preview.vercel.app/api/mcp --apply --confirm-resource https://concessioni-portuali-demo-v7-mcp-preview.vercel.app/api/mcp
+```
+
+Il comando accetta soltanto tale URI esatto, rifiuta wildcard e ambienti AuthKit non
+Staging, conserva tutti gli indicatori esistenti e verifica la postcondizione mediante
+una nuova lettura API.
+
+## Recupero password Preview
+
+Il recupero password locale e disponibile soltanto su Vercel Preview e resta disabilitato
+per default:
+
+```dotenv
+PREVIEW_PASSWORD_RECOVERY_ENABLED="true"
+WORKOS_CLIENT_ID="<client-id-non-production>"
+```
+
+`WORKOS_API_KEY` deve appartenere allo stesso ambiente non-production del `WORKOS_CLIENT_ID`.
+Le email automatiche Magic Auth devono essere abilitate in WorkOS. Production non deve
+ricevere queste variabili con il recupero attivo.
+
+La procedura:
+
+1. trova l'utente locale esistente tramite email, senza creare account;
+2. richiede a WorkOS l'utente con `external_id` uguale all'immutabile `User.id`;
+3. richiede email verificata e corrispondenza esatta dell'indirizzo;
+4. invia un codice Magic Auth monouso tramite WorkOS;
+5. verifica nuovamente email ed `external_id` quando il codice viene presentato;
+6. aggiorna soltanto hash password, timestamp password e stato lockout;
+7. conserva `User.id`, membership, tenant, ruolo, MFA, recovery codes e assegnazioni;
+8. invalida le sessioni JWT emesse prima del cambio password.
+
+Gli account con MFA non configurata non sono recuperabili da questa superficie. Dopo il
+reset, il normale login continua a richiedere il TOTP gia associato all'utente.
 
 ## Binding server-side attore-missione
 

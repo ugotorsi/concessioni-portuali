@@ -11,6 +11,7 @@ import {
   materializeOperationalProposal,
   reconcileOperationalProposals,
   reviewOperationalProposal,
+  toActivityLogAuditActor,
   type OperationalProposalCandidate,
   type OperationalProposalRepositoryContext,
   type OperationalProposalSqlExecutor,
@@ -152,6 +153,26 @@ afterEach(async () => {
 });
 
 describe("Lotto 7 operational proposal persistence", () => {
+  it("never writes a system policy actor into the User-referencing ActivityLog.userId", () => {
+    const system = toActivityLogAuditActor({
+      actor: { actorId: "fascicolo-operational-proposal-policy", actorEmail: null, actorRole: "SYSTEM" },
+      metadata: { procedimentoId: "procedure-a", created: 1 },
+    });
+    expect(system.actor).toEqual({ userId: null, userEmail: null, userRole: "SYSTEM" });
+    expect(system.metadata).toEqual({
+      procedimentoId: "procedure-a",
+      created: 1,
+      systemActorId: "fascicolo-operational-proposal-policy",
+    });
+
+    const human = toActivityLogAuditActor({
+      actor: { actorId: "user-1", actorEmail: "giuridico@example.test", actorRole: "GIURIDICO" },
+      metadata: { procedimentoId: "procedure-a" },
+    });
+    expect(human.actor).toEqual({ userId: "user-1", userEmail: "giuridico@example.test", userRole: "GIURIDICO" });
+    expect(human.metadata).toEqual({ procedimentoId: "procedure-a" });
+  });
+
   it("allows tenant-scoped reads without a concession while preserving tenant and concession authority", async () => {
     const db = await database();
     await expect(listOperationalProposals({
@@ -172,17 +193,45 @@ describe("Lotto 7 operational proposal persistence", () => {
     }, repositoryContext(db))).rejects.toMatchObject({ code: "AUTHORITY_MISMATCH" });
   });
 
-  it("keeps write authority restricted to procedimenti with a tenant-consistent concession", async () => {
+  it("lets a procedimento without a concession generate and review proposals but not materialize them", async () => {
     const db = await database();
-    const neutralCandidate = candidate("DEADLINE", { procedimentoId: "procedure-neutral" });
-    await expect(reconcileOperationalProposals({
+    await db.exec(`
+      INSERT INTO "FascicoloKnowledgeRevision" VALUES ('revision-neutral','tenant-a','procedure-neutral','CURRENT');
+      INSERT INTO "StructuredFascicoloReportSnapshot" VALUES
+        ('report-neutral','tenant-a','procedure-neutral','revision-neutral','${reportFingerprint}','CURRENT');
+    `);
+    const scope = { procedimentoId: "procedure-neutral", knowledgeRevisionId: "revision-neutral", structuredReportId: "report-neutral" };
+    const result = await reconcileOperationalProposals({
       tenantId: "tenant-a",
-      procedimentoId: "procedure-neutral",
-      knowledgeRevisionId: "revision-a",
-      structuredReportId: "report-a",
+      ...scope,
       structuredReportFingerprint: reportFingerprint,
-      candidates: [neutralCandidate],
-    }, repositoryContext(db))).rejects.toMatchObject({ code: "AUTHORITY_MISMATCH" });
+      candidates: [candidate("DEADLINE", scope)],
+    }, repositoryContext(db));
+    expect(result).toMatchObject({ created: 1 });
+    const approved = await reviewOperationalProposal({
+      tenantId: "tenant-a", procedimentoId: "procedure-neutral", proposalId: result.proposals[0].id, action: "APPROVE",
+      expectedReviewVersion: 0, reviewNote: "Verifica umana completata",
+      actor: { actorId: "reviewer-1", actorEmail: "reviewer@example.test", actorRole: "RESPONSABILE_UFFICIO" },
+    }, repositoryContext(db));
+    expect(approved.status).toBe("APPROVED");
+    await expect(materializeOperationalProposal({
+      tenantId: "tenant-a", procedimentoId: "procedure-neutral", proposalId: approved.id, actor: materializationActor,
+    }, repositoryContext(db))).rejects.toMatchObject({ code: "CONCESSION_REQUIRED_FOR_MATERIALIZATION" });
+    expect((await db.query('SELECT 1 FROM "Scadenza"')).rows).toHaveLength(0);
+  });
+
+  it("keeps write authority tenant-scoped and rejects concessions of another tenant", async () => {
+    const db = await database();
+    for (const [tenantId, procedimentoId] of [["tenant-b", "procedure-neutral"], ["tenant-a", "procedure-inconsistent"], ["tenant-b", "procedure-a"]]) {
+      await expect(reconcileOperationalProposals({
+        tenantId,
+        procedimentoId,
+        knowledgeRevisionId: "revision-a",
+        structuredReportId: "report-a",
+        structuredReportFingerprint: reportFingerprint,
+        candidates: [candidate("DEADLINE", { tenantId, procedimentoId })],
+      }, repositoryContext(db))).rejects.toMatchObject({ code: "AUTHORITY_MISMATCH" });
+    }
   });
 
   it("reuses an unchanged proposal with its review and supersedes an approved changed proposal", async () => {

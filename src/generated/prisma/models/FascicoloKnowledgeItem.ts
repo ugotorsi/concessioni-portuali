@@ -49,6 +49,9 @@ export type FascicoloKnowledgeItemMinAggregateOutputType = {
   confidence: number | null
   status: $Enums.FascicoloKnowledgeItemStatus | null
   reviewVersion: number | null
+  identityId: string | null
+  identityState: $Enums.FascicoloKnowledgeIdentityState | null
+  identityCommandFingerprint: string | null
   createdAt: Date | null
   supersededAt: Date | null
 }
@@ -66,6 +69,9 @@ export type FascicoloKnowledgeItemMaxAggregateOutputType = {
   confidence: number | null
   status: $Enums.FascicoloKnowledgeItemStatus | null
   reviewVersion: number | null
+  identityId: string | null
+  identityState: $Enums.FascicoloKnowledgeIdentityState | null
+  identityCommandFingerprint: string | null
   createdAt: Date | null
   supersededAt: Date | null
 }
@@ -84,6 +90,10 @@ export type FascicoloKnowledgeItemCountAggregateOutputType = {
   confidence: number
   status: number
   reviewVersion: number
+  identityId: number
+  identityState: number
+  identityBasis: number
+  identityCommandFingerprint: number
   createdAt: number
   supersededAt: number
   _all: number
@@ -113,6 +123,9 @@ export type FascicoloKnowledgeItemMinAggregateInputType = {
   confidence?: true
   status?: true
   reviewVersion?: true
+  identityId?: true
+  identityState?: true
+  identityCommandFingerprint?: true
   createdAt?: true
   supersededAt?: true
 }
@@ -130,6 +143,9 @@ export type FascicoloKnowledgeItemMaxAggregateInputType = {
   confidence?: true
   status?: true
   reviewVersion?: true
+  identityId?: true
+  identityState?: true
+  identityCommandFingerprint?: true
   createdAt?: true
   supersededAt?: true
 }
@@ -148,6 +164,10 @@ export type FascicoloKnowledgeItemCountAggregateInputType = {
   confidence?: true
   status?: true
   reviewVersion?: true
+  identityId?: true
+  identityState?: true
+  identityBasis?: true
+  identityCommandFingerprint?: true
   createdAt?: true
   supersededAt?: true
   _all?: true
@@ -253,6 +273,10 @@ export type FascicoloKnowledgeItemGroupByOutputType = {
   confidence: number | null
   status: $Enums.FascicoloKnowledgeItemStatus
   reviewVersion: number
+  identityId: string | null
+  identityState: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis: runtime.JsonValue | null
+  identityCommandFingerprint: string | null
   createdAt: Date
   supersededAt: Date | null
   _count: FascicoloKnowledgeItemCountAggregateOutputType | null
@@ -294,11 +318,16 @@ export type FascicoloKnowledgeItemWhereInput = {
   confidence?: Prisma.IntNullableFilter<"FascicoloKnowledgeItem"> | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFilter<"FascicoloKnowledgeItem"> | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFilter<"FascicoloKnowledgeItem"> | number
+  identityId?: Prisma.StringNullableFilter<"FascicoloKnowledgeItem"> | string | null
+  identityState?: Prisma.EnumFascicoloKnowledgeIdentityStateNullableFilter<"FascicoloKnowledgeItem"> | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.JsonNullableFilter<"FascicoloKnowledgeItem">
+  identityCommandFingerprint?: Prisma.StringNullableFilter<"FascicoloKnowledgeItem"> | string | null
   createdAt?: Prisma.DateTimeFilter<"FascicoloKnowledgeItem"> | Date | string
   supersededAt?: Prisma.DateTimeNullableFilter<"FascicoloKnowledgeItem"> | Date | string | null
   tenant?: Prisma.XOR<Prisma.EnteScalarRelationFilter, Prisma.EnteWhereInput>
   procedimento?: Prisma.XOR<Prisma.ProcedimentoScalarRelationFilter, Prisma.ProcedimentoWhereInput>
   revision?: Prisma.XOR<Prisma.FascicoloKnowledgeRevisionScalarRelationFilter, Prisma.FascicoloKnowledgeRevisionWhereInput>
+  identity?: Prisma.XOR<Prisma.FascicoloKnowledgeIdentityNullableScalarRelationFilter, Prisma.FascicoloKnowledgeIdentityWhereInput> | null
   evidence?: Prisma.FascicoloKnowledgeEvidenceListRelationFilter
   outgoingRelations?: Prisma.FascicoloKnowledgeRelationListRelationFilter
   incomingRelations?: Prisma.FascicoloKnowledgeRelationListRelationFilter
@@ -319,11 +348,16 @@ export type FascicoloKnowledgeItemOrderByWithRelationInput = {
   confidence?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   reviewVersion?: Prisma.SortOrder
+  identityId?: Prisma.SortOrderInput | Prisma.SortOrder
+  identityState?: Prisma.SortOrderInput | Prisma.SortOrder
+  identityBasis?: Prisma.SortOrderInput | Prisma.SortOrder
+  identityCommandFingerprint?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   supersededAt?: Prisma.SortOrderInput | Prisma.SortOrder
   tenant?: Prisma.EnteOrderByWithRelationInput
   procedimento?: Prisma.ProcedimentoOrderByWithRelationInput
   revision?: Prisma.FascicoloKnowledgeRevisionOrderByWithRelationInput
+  identity?: Prisma.FascicoloKnowledgeIdentityOrderByWithRelationInput
   evidence?: Prisma.FascicoloKnowledgeEvidenceOrderByRelationAggregateInput
   outgoingRelations?: Prisma.FascicoloKnowledgeRelationOrderByRelationAggregateInput
   incomingRelations?: Prisma.FascicoloKnowledgeRelationOrderByRelationAggregateInput
@@ -334,6 +368,7 @@ export type FascicoloKnowledgeItemWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   id_tenantId_procedimentoId?: Prisma.FascicoloKnowledgeItemIdTenantIdProcedimentoIdCompoundUniqueInput
   revisionId_semanticKeyVersion_semanticKey?: Prisma.FascicoloKnowledgeItemRevisionIdSemanticKeyVersionSemanticKeyCompoundUniqueInput
+  revisionId_identityId?: Prisma.FascicoloKnowledgeItemRevisionIdIdentityIdCompoundUniqueInput
   AND?: Prisma.FascicoloKnowledgeItemWhereInput | Prisma.FascicoloKnowledgeItemWhereInput[]
   OR?: Prisma.FascicoloKnowledgeItemWhereInput[]
   NOT?: Prisma.FascicoloKnowledgeItemWhereInput | Prisma.FascicoloKnowledgeItemWhereInput[]
@@ -349,16 +384,21 @@ export type FascicoloKnowledgeItemWhereUniqueInput = Prisma.AtLeast<{
   confidence?: Prisma.IntNullableFilter<"FascicoloKnowledgeItem"> | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFilter<"FascicoloKnowledgeItem"> | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFilter<"FascicoloKnowledgeItem"> | number
+  identityId?: Prisma.StringNullableFilter<"FascicoloKnowledgeItem"> | string | null
+  identityState?: Prisma.EnumFascicoloKnowledgeIdentityStateNullableFilter<"FascicoloKnowledgeItem"> | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.JsonNullableFilter<"FascicoloKnowledgeItem">
+  identityCommandFingerprint?: Prisma.StringNullableFilter<"FascicoloKnowledgeItem"> | string | null
   createdAt?: Prisma.DateTimeFilter<"FascicoloKnowledgeItem"> | Date | string
   supersededAt?: Prisma.DateTimeNullableFilter<"FascicoloKnowledgeItem"> | Date | string | null
   tenant?: Prisma.XOR<Prisma.EnteScalarRelationFilter, Prisma.EnteWhereInput>
   procedimento?: Prisma.XOR<Prisma.ProcedimentoScalarRelationFilter, Prisma.ProcedimentoWhereInput>
   revision?: Prisma.XOR<Prisma.FascicoloKnowledgeRevisionScalarRelationFilter, Prisma.FascicoloKnowledgeRevisionWhereInput>
+  identity?: Prisma.XOR<Prisma.FascicoloKnowledgeIdentityNullableScalarRelationFilter, Prisma.FascicoloKnowledgeIdentityWhereInput> | null
   evidence?: Prisma.FascicoloKnowledgeEvidenceListRelationFilter
   outgoingRelations?: Prisma.FascicoloKnowledgeRelationListRelationFilter
   incomingRelations?: Prisma.FascicoloKnowledgeRelationListRelationFilter
   reviewEvents?: Prisma.FascicoloKnowledgeReviewEventListRelationFilter
-}, "id" | "id_tenantId_procedimentoId" | "revisionId_semanticKeyVersion_semanticKey">
+}, "id" | "id_tenantId_procedimentoId" | "revisionId_semanticKeyVersion_semanticKey" | "revisionId_identityId">
 
 export type FascicoloKnowledgeItemOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -374,6 +414,10 @@ export type FascicoloKnowledgeItemOrderByWithAggregationInput = {
   confidence?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   reviewVersion?: Prisma.SortOrder
+  identityId?: Prisma.SortOrderInput | Prisma.SortOrder
+  identityState?: Prisma.SortOrderInput | Prisma.SortOrder
+  identityBasis?: Prisma.SortOrderInput | Prisma.SortOrder
+  identityCommandFingerprint?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   supersededAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.FascicoloKnowledgeItemCountOrderByAggregateInput
@@ -400,13 +444,16 @@ export type FascicoloKnowledgeItemScalarWhereWithAggregatesInput = {
   confidence?: Prisma.IntNullableWithAggregatesFilter<"FascicoloKnowledgeItem"> | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusWithAggregatesFilter<"FascicoloKnowledgeItem"> | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntWithAggregatesFilter<"FascicoloKnowledgeItem"> | number
+  identityId?: Prisma.StringNullableWithAggregatesFilter<"FascicoloKnowledgeItem"> | string | null
+  identityState?: Prisma.EnumFascicoloKnowledgeIdentityStateNullableWithAggregatesFilter<"FascicoloKnowledgeItem"> | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.JsonNullableWithAggregatesFilter<"FascicoloKnowledgeItem">
+  identityCommandFingerprint?: Prisma.StringNullableWithAggregatesFilter<"FascicoloKnowledgeItem"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"FascicoloKnowledgeItem"> | Date | string
   supersededAt?: Prisma.DateTimeNullableWithAggregatesFilter<"FascicoloKnowledgeItem"> | Date | string | null
 }
 
 export type FascicoloKnowledgeItemCreateInput = {
   id?: string
-  kind: string
   semanticKey: string
   semanticKeyVersion: string
   contentFingerprint: string
@@ -415,11 +462,15 @@ export type FascicoloKnowledgeItemCreateInput = {
   confidence?: number | null
   status?: $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: number
+  identityState?: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: string | null
   createdAt?: Date | string
   supersededAt?: Date | string | null
   tenant: Prisma.EnteCreateNestedOneWithoutFascicoloKnowledgeItemsInput
   procedimento: Prisma.ProcedimentoCreateNestedOneWithoutFascicoloKnowledgeItemsInput
   revision: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutItemsInput
+  identity?: Prisma.FascicoloKnowledgeIdentityCreateNestedOneWithoutVersionsInput
   evidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutItemInput
   outgoingRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutSourceItemInput
   incomingRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTargetItemInput
@@ -440,6 +491,10 @@ export type FascicoloKnowledgeItemUncheckedCreateInput = {
   confidence?: number | null
   status?: $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: number
+  identityId?: string | null
+  identityState?: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: string | null
   createdAt?: Date | string
   supersededAt?: Date | string | null
   evidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutItemInput
@@ -450,7 +505,6 @@ export type FascicoloKnowledgeItemUncheckedCreateInput = {
 
 export type FascicoloKnowledgeItemUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  kind?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKeyVersion?: Prisma.StringFieldUpdateOperationsInput | string
   contentFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
@@ -459,11 +513,15 @@ export type FascicoloKnowledgeItemUpdateInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenant?: Prisma.EnteUpdateOneRequiredWithoutFascicoloKnowledgeItemsNestedInput
   procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutFascicoloKnowledgeItemsNestedInput
   revision?: Prisma.FascicoloKnowledgeRevisionUpdateOneRequiredWithoutItemsNestedInput
+  identity?: Prisma.FascicoloKnowledgeIdentityUpdateOneWithoutVersionsNestedInput
   evidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutItemNestedInput
   outgoingRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutSourceItemNestedInput
   incomingRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTargetItemNestedInput
@@ -484,6 +542,10 @@ export type FascicoloKnowledgeItemUncheckedUpdateInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   evidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutItemNestedInput
@@ -506,13 +568,16 @@ export type FascicoloKnowledgeItemCreateManyInput = {
   confidence?: number | null
   status?: $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: number
+  identityId?: string | null
+  identityState?: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: string | null
   createdAt?: Date | string
   supersededAt?: Date | string | null
 }
 
 export type FascicoloKnowledgeItemUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  kind?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKeyVersion?: Prisma.StringFieldUpdateOperationsInput | string
   contentFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
@@ -521,6 +586,9 @@ export type FascicoloKnowledgeItemUpdateManyMutationInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -539,6 +607,10 @@ export type FascicoloKnowledgeItemUncheckedUpdateManyInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -565,6 +637,11 @@ export type FascicoloKnowledgeItemRevisionIdSemanticKeyVersionSemanticKeyCompoun
   semanticKey: string
 }
 
+export type FascicoloKnowledgeItemRevisionIdIdentityIdCompoundUniqueInput = {
+  revisionId: string
+  identityId: string
+}
+
 export type FascicoloKnowledgeItemCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
@@ -579,6 +656,10 @@ export type FascicoloKnowledgeItemCountOrderByAggregateInput = {
   confidence?: Prisma.SortOrder
   status?: Prisma.SortOrder
   reviewVersion?: Prisma.SortOrder
+  identityId?: Prisma.SortOrder
+  identityState?: Prisma.SortOrder
+  identityBasis?: Prisma.SortOrder
+  identityCommandFingerprint?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   supersededAt?: Prisma.SortOrder
 }
@@ -601,6 +682,9 @@ export type FascicoloKnowledgeItemMaxOrderByAggregateInput = {
   confidence?: Prisma.SortOrder
   status?: Prisma.SortOrder
   reviewVersion?: Prisma.SortOrder
+  identityId?: Prisma.SortOrder
+  identityState?: Prisma.SortOrder
+  identityCommandFingerprint?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   supersededAt?: Prisma.SortOrder
 }
@@ -618,6 +702,9 @@ export type FascicoloKnowledgeItemMinOrderByAggregateInput = {
   confidence?: Prisma.SortOrder
   status?: Prisma.SortOrder
   reviewVersion?: Prisma.SortOrder
+  identityId?: Prisma.SortOrder
+  identityState?: Prisma.SortOrder
+  identityCommandFingerprint?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   supersededAt?: Prisma.SortOrder
 }
@@ -758,8 +845,54 @@ export type FascicoloKnowledgeItemUncheckedUpdateManyWithoutRevisionNestedInput 
   deleteMany?: Prisma.FascicoloKnowledgeItemScalarWhereInput | Prisma.FascicoloKnowledgeItemScalarWhereInput[]
 }
 
+export type FascicoloKnowledgeItemCreateNestedManyWithoutIdentityInput = {
+  create?: Prisma.XOR<Prisma.FascicoloKnowledgeItemCreateWithoutIdentityInput, Prisma.FascicoloKnowledgeItemUncheckedCreateWithoutIdentityInput> | Prisma.FascicoloKnowledgeItemCreateWithoutIdentityInput[] | Prisma.FascicoloKnowledgeItemUncheckedCreateWithoutIdentityInput[]
+  connectOrCreate?: Prisma.FascicoloKnowledgeItemCreateOrConnectWithoutIdentityInput | Prisma.FascicoloKnowledgeItemCreateOrConnectWithoutIdentityInput[]
+  createMany?: Prisma.FascicoloKnowledgeItemCreateManyIdentityInputEnvelope
+  connect?: Prisma.FascicoloKnowledgeItemWhereUniqueInput | Prisma.FascicoloKnowledgeItemWhereUniqueInput[]
+}
+
+export type FascicoloKnowledgeItemUncheckedCreateNestedManyWithoutIdentityInput = {
+  create?: Prisma.XOR<Prisma.FascicoloKnowledgeItemCreateWithoutIdentityInput, Prisma.FascicoloKnowledgeItemUncheckedCreateWithoutIdentityInput> | Prisma.FascicoloKnowledgeItemCreateWithoutIdentityInput[] | Prisma.FascicoloKnowledgeItemUncheckedCreateWithoutIdentityInput[]
+  connectOrCreate?: Prisma.FascicoloKnowledgeItemCreateOrConnectWithoutIdentityInput | Prisma.FascicoloKnowledgeItemCreateOrConnectWithoutIdentityInput[]
+  createMany?: Prisma.FascicoloKnowledgeItemCreateManyIdentityInputEnvelope
+  connect?: Prisma.FascicoloKnowledgeItemWhereUniqueInput | Prisma.FascicoloKnowledgeItemWhereUniqueInput[]
+}
+
+export type FascicoloKnowledgeItemUpdateManyWithoutIdentityNestedInput = {
+  create?: Prisma.XOR<Prisma.FascicoloKnowledgeItemCreateWithoutIdentityInput, Prisma.FascicoloKnowledgeItemUncheckedCreateWithoutIdentityInput> | Prisma.FascicoloKnowledgeItemCreateWithoutIdentityInput[] | Prisma.FascicoloKnowledgeItemUncheckedCreateWithoutIdentityInput[]
+  connectOrCreate?: Prisma.FascicoloKnowledgeItemCreateOrConnectWithoutIdentityInput | Prisma.FascicoloKnowledgeItemCreateOrConnectWithoutIdentityInput[]
+  upsert?: Prisma.FascicoloKnowledgeItemUpsertWithWhereUniqueWithoutIdentityInput | Prisma.FascicoloKnowledgeItemUpsertWithWhereUniqueWithoutIdentityInput[]
+  createMany?: Prisma.FascicoloKnowledgeItemCreateManyIdentityInputEnvelope
+  set?: Prisma.FascicoloKnowledgeItemWhereUniqueInput | Prisma.FascicoloKnowledgeItemWhereUniqueInput[]
+  disconnect?: Prisma.FascicoloKnowledgeItemWhereUniqueInput | Prisma.FascicoloKnowledgeItemWhereUniqueInput[]
+  delete?: Prisma.FascicoloKnowledgeItemWhereUniqueInput | Prisma.FascicoloKnowledgeItemWhereUniqueInput[]
+  connect?: Prisma.FascicoloKnowledgeItemWhereUniqueInput | Prisma.FascicoloKnowledgeItemWhereUniqueInput[]
+  update?: Prisma.FascicoloKnowledgeItemUpdateWithWhereUniqueWithoutIdentityInput | Prisma.FascicoloKnowledgeItemUpdateWithWhereUniqueWithoutIdentityInput[]
+  updateMany?: Prisma.FascicoloKnowledgeItemUpdateManyWithWhereWithoutIdentityInput | Prisma.FascicoloKnowledgeItemUpdateManyWithWhereWithoutIdentityInput[]
+  deleteMany?: Prisma.FascicoloKnowledgeItemScalarWhereInput | Prisma.FascicoloKnowledgeItemScalarWhereInput[]
+}
+
+export type FascicoloKnowledgeItemUncheckedUpdateManyWithoutIdentityNestedInput = {
+  create?: Prisma.XOR<Prisma.FascicoloKnowledgeItemCreateWithoutIdentityInput, Prisma.FascicoloKnowledgeItemUncheckedCreateWithoutIdentityInput> | Prisma.FascicoloKnowledgeItemCreateWithoutIdentityInput[] | Prisma.FascicoloKnowledgeItemUncheckedCreateWithoutIdentityInput[]
+  connectOrCreate?: Prisma.FascicoloKnowledgeItemCreateOrConnectWithoutIdentityInput | Prisma.FascicoloKnowledgeItemCreateOrConnectWithoutIdentityInput[]
+  upsert?: Prisma.FascicoloKnowledgeItemUpsertWithWhereUniqueWithoutIdentityInput | Prisma.FascicoloKnowledgeItemUpsertWithWhereUniqueWithoutIdentityInput[]
+  createMany?: Prisma.FascicoloKnowledgeItemCreateManyIdentityInputEnvelope
+  set?: Prisma.FascicoloKnowledgeItemWhereUniqueInput | Prisma.FascicoloKnowledgeItemWhereUniqueInput[]
+  disconnect?: Prisma.FascicoloKnowledgeItemWhereUniqueInput | Prisma.FascicoloKnowledgeItemWhereUniqueInput[]
+  delete?: Prisma.FascicoloKnowledgeItemWhereUniqueInput | Prisma.FascicoloKnowledgeItemWhereUniqueInput[]
+  connect?: Prisma.FascicoloKnowledgeItemWhereUniqueInput | Prisma.FascicoloKnowledgeItemWhereUniqueInput[]
+  update?: Prisma.FascicoloKnowledgeItemUpdateWithWhereUniqueWithoutIdentityInput | Prisma.FascicoloKnowledgeItemUpdateWithWhereUniqueWithoutIdentityInput[]
+  updateMany?: Prisma.FascicoloKnowledgeItemUpdateManyWithWhereWithoutIdentityInput | Prisma.FascicoloKnowledgeItemUpdateManyWithWhereWithoutIdentityInput[]
+  deleteMany?: Prisma.FascicoloKnowledgeItemScalarWhereInput | Prisma.FascicoloKnowledgeItemScalarWhereInput[]
+}
+
 export type EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput = {
   set?: $Enums.FascicoloKnowledgeItemStatus
+}
+
+export type NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput = {
+  set?: $Enums.FascicoloKnowledgeIdentityState | null
 }
 
 export type FascicoloKnowledgeItemCreateNestedOneWithoutEvidenceInput = {
@@ -820,7 +953,6 @@ export type FascicoloKnowledgeItemUpdateOneRequiredWithoutReviewEventsNestedInpu
 
 export type FascicoloKnowledgeItemCreateWithoutTenantInput = {
   id?: string
-  kind: string
   semanticKey: string
   semanticKeyVersion: string
   contentFingerprint: string
@@ -829,10 +961,14 @@ export type FascicoloKnowledgeItemCreateWithoutTenantInput = {
   confidence?: number | null
   status?: $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: number
+  identityState?: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: string | null
   createdAt?: Date | string
   supersededAt?: Date | string | null
   procedimento: Prisma.ProcedimentoCreateNestedOneWithoutFascicoloKnowledgeItemsInput
   revision: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutItemsInput
+  identity?: Prisma.FascicoloKnowledgeIdentityCreateNestedOneWithoutVersionsInput
   evidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutItemInput
   outgoingRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutSourceItemInput
   incomingRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTargetItemInput
@@ -852,6 +988,10 @@ export type FascicoloKnowledgeItemUncheckedCreateWithoutTenantInput = {
   confidence?: number | null
   status?: $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: number
+  identityId?: string | null
+  identityState?: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: string | null
   createdAt?: Date | string
   supersededAt?: Date | string | null
   evidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutItemInput
@@ -903,13 +1043,16 @@ export type FascicoloKnowledgeItemScalarWhereInput = {
   confidence?: Prisma.IntNullableFilter<"FascicoloKnowledgeItem"> | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFilter<"FascicoloKnowledgeItem"> | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFilter<"FascicoloKnowledgeItem"> | number
+  identityId?: Prisma.StringNullableFilter<"FascicoloKnowledgeItem"> | string | null
+  identityState?: Prisma.EnumFascicoloKnowledgeIdentityStateNullableFilter<"FascicoloKnowledgeItem"> | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.JsonNullableFilter<"FascicoloKnowledgeItem">
+  identityCommandFingerprint?: Prisma.StringNullableFilter<"FascicoloKnowledgeItem"> | string | null
   createdAt?: Prisma.DateTimeFilter<"FascicoloKnowledgeItem"> | Date | string
   supersededAt?: Prisma.DateTimeNullableFilter<"FascicoloKnowledgeItem"> | Date | string | null
 }
 
 export type FascicoloKnowledgeItemCreateWithoutProcedimentoInput = {
   id?: string
-  kind: string
   semanticKey: string
   semanticKeyVersion: string
   contentFingerprint: string
@@ -918,10 +1061,14 @@ export type FascicoloKnowledgeItemCreateWithoutProcedimentoInput = {
   confidence?: number | null
   status?: $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: number
+  identityState?: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: string | null
   createdAt?: Date | string
   supersededAt?: Date | string | null
   tenant: Prisma.EnteCreateNestedOneWithoutFascicoloKnowledgeItemsInput
   revision: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutItemsInput
+  identity?: Prisma.FascicoloKnowledgeIdentityCreateNestedOneWithoutVersionsInput
   evidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutItemInput
   outgoingRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutSourceItemInput
   incomingRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTargetItemInput
@@ -941,6 +1088,10 @@ export type FascicoloKnowledgeItemUncheckedCreateWithoutProcedimentoInput = {
   confidence?: number | null
   status?: $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: number
+  identityId?: string | null
+  identityState?: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: string | null
   createdAt?: Date | string
   supersededAt?: Date | string | null
   evidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutItemInput
@@ -977,7 +1128,6 @@ export type FascicoloKnowledgeItemUpdateManyWithWhereWithoutProcedimentoInput = 
 
 export type FascicoloKnowledgeItemCreateWithoutRevisionInput = {
   id?: string
-  kind: string
   semanticKey: string
   semanticKeyVersion: string
   contentFingerprint: string
@@ -986,10 +1136,14 @@ export type FascicoloKnowledgeItemCreateWithoutRevisionInput = {
   confidence?: number | null
   status?: $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: number
+  identityState?: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: string | null
   createdAt?: Date | string
   supersededAt?: Date | string | null
   tenant: Prisma.EnteCreateNestedOneWithoutFascicoloKnowledgeItemsInput
   procedimento: Prisma.ProcedimentoCreateNestedOneWithoutFascicoloKnowledgeItemsInput
+  identity?: Prisma.FascicoloKnowledgeIdentityCreateNestedOneWithoutVersionsInput
   evidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutItemInput
   outgoingRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutSourceItemInput
   incomingRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTargetItemInput
@@ -1007,6 +1161,10 @@ export type FascicoloKnowledgeItemUncheckedCreateWithoutRevisionInput = {
   confidence?: number | null
   status?: $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: number
+  identityId?: string | null
+  identityState?: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: string | null
   createdAt?: Date | string
   supersededAt?: Date | string | null
   evidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutItemInput
@@ -1041,9 +1199,8 @@ export type FascicoloKnowledgeItemUpdateManyWithWhereWithoutRevisionInput = {
   data: Prisma.XOR<Prisma.FascicoloKnowledgeItemUpdateManyMutationInput, Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutRevisionInput>
 }
 
-export type FascicoloKnowledgeItemCreateWithoutEvidenceInput = {
+export type FascicoloKnowledgeItemCreateWithoutIdentityInput = {
   id?: string
-  kind: string
   semanticKey: string
   semanticKeyVersion: string
   contentFingerprint: string
@@ -1052,11 +1209,87 @@ export type FascicoloKnowledgeItemCreateWithoutEvidenceInput = {
   confidence?: number | null
   status?: $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: number
+  identityState?: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: string | null
   createdAt?: Date | string
   supersededAt?: Date | string | null
   tenant: Prisma.EnteCreateNestedOneWithoutFascicoloKnowledgeItemsInput
   procedimento: Prisma.ProcedimentoCreateNestedOneWithoutFascicoloKnowledgeItemsInput
   revision: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutItemsInput
+  evidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutItemInput
+  outgoingRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutSourceItemInput
+  incomingRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTargetItemInput
+  reviewEvents?: Prisma.FascicoloKnowledgeReviewEventCreateNestedManyWithoutItemInput
+}
+
+export type FascicoloKnowledgeItemUncheckedCreateWithoutIdentityInput = {
+  id?: string
+  revisionId: string
+  semanticKey: string
+  semanticKeyVersion: string
+  contentFingerprint: string
+  normalizedText: string
+  structuredPayload: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  confidence?: number | null
+  status?: $Enums.FascicoloKnowledgeItemStatus
+  reviewVersion?: number
+  identityState?: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: string | null
+  createdAt?: Date | string
+  supersededAt?: Date | string | null
+  evidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutItemInput
+  outgoingRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutSourceItemInput
+  incomingRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutTargetItemInput
+  reviewEvents?: Prisma.FascicoloKnowledgeReviewEventUncheckedCreateNestedManyWithoutItemInput
+}
+
+export type FascicoloKnowledgeItemCreateOrConnectWithoutIdentityInput = {
+  where: Prisma.FascicoloKnowledgeItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.FascicoloKnowledgeItemCreateWithoutIdentityInput, Prisma.FascicoloKnowledgeItemUncheckedCreateWithoutIdentityInput>
+}
+
+export type FascicoloKnowledgeItemCreateManyIdentityInputEnvelope = {
+  data: Prisma.FascicoloKnowledgeItemCreateManyIdentityInput | Prisma.FascicoloKnowledgeItemCreateManyIdentityInput[]
+  skipDuplicates?: boolean
+}
+
+export type FascicoloKnowledgeItemUpsertWithWhereUniqueWithoutIdentityInput = {
+  where: Prisma.FascicoloKnowledgeItemWhereUniqueInput
+  update: Prisma.XOR<Prisma.FascicoloKnowledgeItemUpdateWithoutIdentityInput, Prisma.FascicoloKnowledgeItemUncheckedUpdateWithoutIdentityInput>
+  create: Prisma.XOR<Prisma.FascicoloKnowledgeItemCreateWithoutIdentityInput, Prisma.FascicoloKnowledgeItemUncheckedCreateWithoutIdentityInput>
+}
+
+export type FascicoloKnowledgeItemUpdateWithWhereUniqueWithoutIdentityInput = {
+  where: Prisma.FascicoloKnowledgeItemWhereUniqueInput
+  data: Prisma.XOR<Prisma.FascicoloKnowledgeItemUpdateWithoutIdentityInput, Prisma.FascicoloKnowledgeItemUncheckedUpdateWithoutIdentityInput>
+}
+
+export type FascicoloKnowledgeItemUpdateManyWithWhereWithoutIdentityInput = {
+  where: Prisma.FascicoloKnowledgeItemScalarWhereInput
+  data: Prisma.XOR<Prisma.FascicoloKnowledgeItemUpdateManyMutationInput, Prisma.FascicoloKnowledgeItemUncheckedUpdateManyWithoutIdentityInput>
+}
+
+export type FascicoloKnowledgeItemCreateWithoutEvidenceInput = {
+  id?: string
+  semanticKey: string
+  semanticKeyVersion: string
+  contentFingerprint: string
+  normalizedText: string
+  structuredPayload: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  confidence?: number | null
+  status?: $Enums.FascicoloKnowledgeItemStatus
+  reviewVersion?: number
+  identityState?: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: string | null
+  createdAt?: Date | string
+  supersededAt?: Date | string | null
+  tenant: Prisma.EnteCreateNestedOneWithoutFascicoloKnowledgeItemsInput
+  procedimento: Prisma.ProcedimentoCreateNestedOneWithoutFascicoloKnowledgeItemsInput
+  revision: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutItemsInput
+  identity?: Prisma.FascicoloKnowledgeIdentityCreateNestedOneWithoutVersionsInput
   outgoingRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutSourceItemInput
   incomingRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTargetItemInput
   reviewEvents?: Prisma.FascicoloKnowledgeReviewEventCreateNestedManyWithoutItemInput
@@ -1076,6 +1309,10 @@ export type FascicoloKnowledgeItemUncheckedCreateWithoutEvidenceInput = {
   confidence?: number | null
   status?: $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: number
+  identityId?: string | null
+  identityState?: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: string | null
   createdAt?: Date | string
   supersededAt?: Date | string | null
   outgoingRelations?: Prisma.FascicoloKnowledgeRelationUncheckedCreateNestedManyWithoutSourceItemInput
@@ -1101,7 +1338,6 @@ export type FascicoloKnowledgeItemUpdateToOneWithWhereWithoutEvidenceInput = {
 
 export type FascicoloKnowledgeItemUpdateWithoutEvidenceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  kind?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKeyVersion?: Prisma.StringFieldUpdateOperationsInput | string
   contentFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1110,11 +1346,15 @@ export type FascicoloKnowledgeItemUpdateWithoutEvidenceInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenant?: Prisma.EnteUpdateOneRequiredWithoutFascicoloKnowledgeItemsNestedInput
   procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutFascicoloKnowledgeItemsNestedInput
   revision?: Prisma.FascicoloKnowledgeRevisionUpdateOneRequiredWithoutItemsNestedInput
+  identity?: Prisma.FascicoloKnowledgeIdentityUpdateOneWithoutVersionsNestedInput
   outgoingRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutSourceItemNestedInput
   incomingRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTargetItemNestedInput
   reviewEvents?: Prisma.FascicoloKnowledgeReviewEventUpdateManyWithoutItemNestedInput
@@ -1134,6 +1374,10 @@ export type FascicoloKnowledgeItemUncheckedUpdateWithoutEvidenceInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   outgoingRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutSourceItemNestedInput
@@ -1143,7 +1387,6 @@ export type FascicoloKnowledgeItemUncheckedUpdateWithoutEvidenceInput = {
 
 export type FascicoloKnowledgeItemCreateWithoutOutgoingRelationsInput = {
   id?: string
-  kind: string
   semanticKey: string
   semanticKeyVersion: string
   contentFingerprint: string
@@ -1152,11 +1395,15 @@ export type FascicoloKnowledgeItemCreateWithoutOutgoingRelationsInput = {
   confidence?: number | null
   status?: $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: number
+  identityState?: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: string | null
   createdAt?: Date | string
   supersededAt?: Date | string | null
   tenant: Prisma.EnteCreateNestedOneWithoutFascicoloKnowledgeItemsInput
   procedimento: Prisma.ProcedimentoCreateNestedOneWithoutFascicoloKnowledgeItemsInput
   revision: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutItemsInput
+  identity?: Prisma.FascicoloKnowledgeIdentityCreateNestedOneWithoutVersionsInput
   evidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutItemInput
   incomingRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTargetItemInput
   reviewEvents?: Prisma.FascicoloKnowledgeReviewEventCreateNestedManyWithoutItemInput
@@ -1176,6 +1423,10 @@ export type FascicoloKnowledgeItemUncheckedCreateWithoutOutgoingRelationsInput =
   confidence?: number | null
   status?: $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: number
+  identityId?: string | null
+  identityState?: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: string | null
   createdAt?: Date | string
   supersededAt?: Date | string | null
   evidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutItemInput
@@ -1190,7 +1441,6 @@ export type FascicoloKnowledgeItemCreateOrConnectWithoutOutgoingRelationsInput =
 
 export type FascicoloKnowledgeItemCreateWithoutIncomingRelationsInput = {
   id?: string
-  kind: string
   semanticKey: string
   semanticKeyVersion: string
   contentFingerprint: string
@@ -1199,11 +1449,15 @@ export type FascicoloKnowledgeItemCreateWithoutIncomingRelationsInput = {
   confidence?: number | null
   status?: $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: number
+  identityState?: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: string | null
   createdAt?: Date | string
   supersededAt?: Date | string | null
   tenant: Prisma.EnteCreateNestedOneWithoutFascicoloKnowledgeItemsInput
   procedimento: Prisma.ProcedimentoCreateNestedOneWithoutFascicoloKnowledgeItemsInput
   revision: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutItemsInput
+  identity?: Prisma.FascicoloKnowledgeIdentityCreateNestedOneWithoutVersionsInput
   evidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutItemInput
   outgoingRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutSourceItemInput
   reviewEvents?: Prisma.FascicoloKnowledgeReviewEventCreateNestedManyWithoutItemInput
@@ -1223,6 +1477,10 @@ export type FascicoloKnowledgeItemUncheckedCreateWithoutIncomingRelationsInput =
   confidence?: number | null
   status?: $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: number
+  identityId?: string | null
+  identityState?: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: string | null
   createdAt?: Date | string
   supersededAt?: Date | string | null
   evidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutItemInput
@@ -1248,7 +1506,6 @@ export type FascicoloKnowledgeItemUpdateToOneWithWhereWithoutOutgoingRelationsIn
 
 export type FascicoloKnowledgeItemUpdateWithoutOutgoingRelationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  kind?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKeyVersion?: Prisma.StringFieldUpdateOperationsInput | string
   contentFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1257,11 +1514,15 @@ export type FascicoloKnowledgeItemUpdateWithoutOutgoingRelationsInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenant?: Prisma.EnteUpdateOneRequiredWithoutFascicoloKnowledgeItemsNestedInput
   procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutFascicoloKnowledgeItemsNestedInput
   revision?: Prisma.FascicoloKnowledgeRevisionUpdateOneRequiredWithoutItemsNestedInput
+  identity?: Prisma.FascicoloKnowledgeIdentityUpdateOneWithoutVersionsNestedInput
   evidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutItemNestedInput
   incomingRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTargetItemNestedInput
   reviewEvents?: Prisma.FascicoloKnowledgeReviewEventUpdateManyWithoutItemNestedInput
@@ -1281,6 +1542,10 @@ export type FascicoloKnowledgeItemUncheckedUpdateWithoutOutgoingRelationsInput =
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   evidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutItemNestedInput
@@ -1301,7 +1566,6 @@ export type FascicoloKnowledgeItemUpdateToOneWithWhereWithoutIncomingRelationsIn
 
 export type FascicoloKnowledgeItemUpdateWithoutIncomingRelationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  kind?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKeyVersion?: Prisma.StringFieldUpdateOperationsInput | string
   contentFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1310,11 +1574,15 @@ export type FascicoloKnowledgeItemUpdateWithoutIncomingRelationsInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenant?: Prisma.EnteUpdateOneRequiredWithoutFascicoloKnowledgeItemsNestedInput
   procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutFascicoloKnowledgeItemsNestedInput
   revision?: Prisma.FascicoloKnowledgeRevisionUpdateOneRequiredWithoutItemsNestedInput
+  identity?: Prisma.FascicoloKnowledgeIdentityUpdateOneWithoutVersionsNestedInput
   evidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutItemNestedInput
   outgoingRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutSourceItemNestedInput
   reviewEvents?: Prisma.FascicoloKnowledgeReviewEventUpdateManyWithoutItemNestedInput
@@ -1334,6 +1602,10 @@ export type FascicoloKnowledgeItemUncheckedUpdateWithoutIncomingRelationsInput =
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   evidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutItemNestedInput
@@ -1343,7 +1615,6 @@ export type FascicoloKnowledgeItemUncheckedUpdateWithoutIncomingRelationsInput =
 
 export type FascicoloKnowledgeItemCreateWithoutReviewEventsInput = {
   id?: string
-  kind: string
   semanticKey: string
   semanticKeyVersion: string
   contentFingerprint: string
@@ -1352,11 +1623,15 @@ export type FascicoloKnowledgeItemCreateWithoutReviewEventsInput = {
   confidence?: number | null
   status?: $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: number
+  identityState?: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: string | null
   createdAt?: Date | string
   supersededAt?: Date | string | null
   tenant: Prisma.EnteCreateNestedOneWithoutFascicoloKnowledgeItemsInput
   procedimento: Prisma.ProcedimentoCreateNestedOneWithoutFascicoloKnowledgeItemsInput
   revision: Prisma.FascicoloKnowledgeRevisionCreateNestedOneWithoutItemsInput
+  identity?: Prisma.FascicoloKnowledgeIdentityCreateNestedOneWithoutVersionsInput
   evidence?: Prisma.FascicoloKnowledgeEvidenceCreateNestedManyWithoutItemInput
   outgoingRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutSourceItemInput
   incomingRelations?: Prisma.FascicoloKnowledgeRelationCreateNestedManyWithoutTargetItemInput
@@ -1376,6 +1651,10 @@ export type FascicoloKnowledgeItemUncheckedCreateWithoutReviewEventsInput = {
   confidence?: number | null
   status?: $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: number
+  identityId?: string | null
+  identityState?: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: string | null
   createdAt?: Date | string
   supersededAt?: Date | string | null
   evidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedCreateNestedManyWithoutItemInput
@@ -1401,7 +1680,6 @@ export type FascicoloKnowledgeItemUpdateToOneWithWhereWithoutReviewEventsInput =
 
 export type FascicoloKnowledgeItemUpdateWithoutReviewEventsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  kind?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKeyVersion?: Prisma.StringFieldUpdateOperationsInput | string
   contentFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1410,11 +1688,15 @@ export type FascicoloKnowledgeItemUpdateWithoutReviewEventsInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenant?: Prisma.EnteUpdateOneRequiredWithoutFascicoloKnowledgeItemsNestedInput
   procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutFascicoloKnowledgeItemsNestedInput
   revision?: Prisma.FascicoloKnowledgeRevisionUpdateOneRequiredWithoutItemsNestedInput
+  identity?: Prisma.FascicoloKnowledgeIdentityUpdateOneWithoutVersionsNestedInput
   evidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutItemNestedInput
   outgoingRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutSourceItemNestedInput
   incomingRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTargetItemNestedInput
@@ -1434,6 +1716,10 @@ export type FascicoloKnowledgeItemUncheckedUpdateWithoutReviewEventsInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   evidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutItemNestedInput
@@ -1454,13 +1740,16 @@ export type FascicoloKnowledgeItemCreateManyTenantInput = {
   confidence?: number | null
   status?: $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: number
+  identityId?: string | null
+  identityState?: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: string | null
   createdAt?: Date | string
   supersededAt?: Date | string | null
 }
 
 export type FascicoloKnowledgeItemUpdateWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  kind?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKeyVersion?: Prisma.StringFieldUpdateOperationsInput | string
   contentFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1469,10 +1758,14 @@ export type FascicoloKnowledgeItemUpdateWithoutTenantInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutFascicoloKnowledgeItemsNestedInput
   revision?: Prisma.FascicoloKnowledgeRevisionUpdateOneRequiredWithoutItemsNestedInput
+  identity?: Prisma.FascicoloKnowledgeIdentityUpdateOneWithoutVersionsNestedInput
   evidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutItemNestedInput
   outgoingRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutSourceItemNestedInput
   incomingRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTargetItemNestedInput
@@ -1492,6 +1785,10 @@ export type FascicoloKnowledgeItemUncheckedUpdateWithoutTenantInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   evidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutItemNestedInput
@@ -1513,6 +1810,10 @@ export type FascicoloKnowledgeItemUncheckedUpdateManyWithoutTenantInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -1530,13 +1831,16 @@ export type FascicoloKnowledgeItemCreateManyProcedimentoInput = {
   confidence?: number | null
   status?: $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: number
+  identityId?: string | null
+  identityState?: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: string | null
   createdAt?: Date | string
   supersededAt?: Date | string | null
 }
 
 export type FascicoloKnowledgeItemUpdateWithoutProcedimentoInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  kind?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKeyVersion?: Prisma.StringFieldUpdateOperationsInput | string
   contentFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1545,10 +1849,14 @@ export type FascicoloKnowledgeItemUpdateWithoutProcedimentoInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenant?: Prisma.EnteUpdateOneRequiredWithoutFascicoloKnowledgeItemsNestedInput
   revision?: Prisma.FascicoloKnowledgeRevisionUpdateOneRequiredWithoutItemsNestedInput
+  identity?: Prisma.FascicoloKnowledgeIdentityUpdateOneWithoutVersionsNestedInput
   evidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutItemNestedInput
   outgoingRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutSourceItemNestedInput
   incomingRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTargetItemNestedInput
@@ -1568,6 +1876,10 @@ export type FascicoloKnowledgeItemUncheckedUpdateWithoutProcedimentoInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   evidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutItemNestedInput
@@ -1589,6 +1901,10 @@ export type FascicoloKnowledgeItemUncheckedUpdateManyWithoutProcedimentoInput = 
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -1604,13 +1920,16 @@ export type FascicoloKnowledgeItemCreateManyRevisionInput = {
   confidence?: number | null
   status?: $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: number
+  identityId?: string | null
+  identityState?: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: string | null
   createdAt?: Date | string
   supersededAt?: Date | string | null
 }
 
 export type FascicoloKnowledgeItemUpdateWithoutRevisionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  kind?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
   semanticKeyVersion?: Prisma.StringFieldUpdateOperationsInput | string
   contentFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1619,10 +1938,14 @@ export type FascicoloKnowledgeItemUpdateWithoutRevisionInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenant?: Prisma.EnteUpdateOneRequiredWithoutFascicoloKnowledgeItemsNestedInput
   procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutFascicoloKnowledgeItemsNestedInput
+  identity?: Prisma.FascicoloKnowledgeIdentityUpdateOneWithoutVersionsNestedInput
   evidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutItemNestedInput
   outgoingRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutSourceItemNestedInput
   incomingRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTargetItemNestedInput
@@ -1640,6 +1963,10 @@ export type FascicoloKnowledgeItemUncheckedUpdateWithoutRevisionInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   evidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutItemNestedInput
@@ -1659,6 +1986,92 @@ export type FascicoloKnowledgeItemUncheckedUpdateManyWithoutRevisionInput = {
   confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
   reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type FascicoloKnowledgeItemCreateManyIdentityInput = {
+  id?: string
+  revisionId: string
+  semanticKey: string
+  semanticKeyVersion: string
+  contentFingerprint: string
+  normalizedText: string
+  structuredPayload: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  confidence?: number | null
+  status?: $Enums.FascicoloKnowledgeItemStatus
+  reviewVersion?: number
+  identityState?: $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: string | null
+  createdAt?: Date | string
+  supersededAt?: Date | string | null
+}
+
+export type FascicoloKnowledgeItemUpdateWithoutIdentityInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
+  semanticKeyVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  contentFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  normalizedText?: Prisma.StringFieldUpdateOperationsInput | string
+  structuredPayload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
+  reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tenant?: Prisma.EnteUpdateOneRequiredWithoutFascicoloKnowledgeItemsNestedInput
+  procedimento?: Prisma.ProcedimentoUpdateOneRequiredWithoutFascicoloKnowledgeItemsNestedInput
+  revision?: Prisma.FascicoloKnowledgeRevisionUpdateOneRequiredWithoutItemsNestedInput
+  evidence?: Prisma.FascicoloKnowledgeEvidenceUpdateManyWithoutItemNestedInput
+  outgoingRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutSourceItemNestedInput
+  incomingRelations?: Prisma.FascicoloKnowledgeRelationUpdateManyWithoutTargetItemNestedInput
+  reviewEvents?: Prisma.FascicoloKnowledgeReviewEventUpdateManyWithoutItemNestedInput
+}
+
+export type FascicoloKnowledgeItemUncheckedUpdateWithoutIdentityInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  revisionId?: Prisma.StringFieldUpdateOperationsInput | string
+  semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
+  semanticKeyVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  contentFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  normalizedText?: Prisma.StringFieldUpdateOperationsInput | string
+  structuredPayload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
+  reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  evidence?: Prisma.FascicoloKnowledgeEvidenceUncheckedUpdateManyWithoutItemNestedInput
+  outgoingRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutSourceItemNestedInput
+  incomingRelations?: Prisma.FascicoloKnowledgeRelationUncheckedUpdateManyWithoutTargetItemNestedInput
+  reviewEvents?: Prisma.FascicoloKnowledgeReviewEventUncheckedUpdateManyWithoutItemNestedInput
+}
+
+export type FascicoloKnowledgeItemUncheckedUpdateManyWithoutIdentityInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  revisionId?: Prisma.StringFieldUpdateOperationsInput | string
+  semanticKey?: Prisma.StringFieldUpdateOperationsInput | string
+  semanticKeyVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  contentFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  normalizedText?: Prisma.StringFieldUpdateOperationsInput | string
+  structuredPayload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  confidence?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumFascicoloKnowledgeItemStatusFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeItemStatus
+  reviewVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  identityState?: Prisma.NullableEnumFascicoloKnowledgeIdentityStateFieldUpdateOperationsInput | $Enums.FascicoloKnowledgeIdentityState | null
+  identityBasis?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  identityCommandFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   supersededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -1735,11 +2148,16 @@ export type FascicoloKnowledgeItemSelect<ExtArgs extends runtime.Types.Extension
   confidence?: boolean
   status?: boolean
   reviewVersion?: boolean
+  identityId?: boolean
+  identityState?: boolean
+  identityBasis?: boolean
+  identityCommandFingerprint?: boolean
   createdAt?: boolean
   supersededAt?: boolean
   tenant?: boolean | Prisma.EnteDefaultArgs<ExtArgs>
   procedimento?: boolean | Prisma.ProcedimentoDefaultArgs<ExtArgs>
   revision?: boolean | Prisma.FascicoloKnowledgeRevisionDefaultArgs<ExtArgs>
+  identity?: boolean | Prisma.FascicoloKnowledgeItem$identityArgs<ExtArgs>
   evidence?: boolean | Prisma.FascicoloKnowledgeItem$evidenceArgs<ExtArgs>
   outgoingRelations?: boolean | Prisma.FascicoloKnowledgeItem$outgoingRelationsArgs<ExtArgs>
   incomingRelations?: boolean | Prisma.FascicoloKnowledgeItem$incomingRelationsArgs<ExtArgs>
@@ -1761,11 +2179,16 @@ export type FascicoloKnowledgeItemSelectCreateManyAndReturn<ExtArgs extends runt
   confidence?: boolean
   status?: boolean
   reviewVersion?: boolean
+  identityId?: boolean
+  identityState?: boolean
+  identityBasis?: boolean
+  identityCommandFingerprint?: boolean
   createdAt?: boolean
   supersededAt?: boolean
   tenant?: boolean | Prisma.EnteDefaultArgs<ExtArgs>
   procedimento?: boolean | Prisma.ProcedimentoDefaultArgs<ExtArgs>
   revision?: boolean | Prisma.FascicoloKnowledgeRevisionDefaultArgs<ExtArgs>
+  identity?: boolean | Prisma.FascicoloKnowledgeItem$identityArgs<ExtArgs>
 }, ExtArgs["result"]["fascicoloKnowledgeItem"]>
 
 export type FascicoloKnowledgeItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1782,11 +2205,16 @@ export type FascicoloKnowledgeItemSelectUpdateManyAndReturn<ExtArgs extends runt
   confidence?: boolean
   status?: boolean
   reviewVersion?: boolean
+  identityId?: boolean
+  identityState?: boolean
+  identityBasis?: boolean
+  identityCommandFingerprint?: boolean
   createdAt?: boolean
   supersededAt?: boolean
   tenant?: boolean | Prisma.EnteDefaultArgs<ExtArgs>
   procedimento?: boolean | Prisma.ProcedimentoDefaultArgs<ExtArgs>
   revision?: boolean | Prisma.FascicoloKnowledgeRevisionDefaultArgs<ExtArgs>
+  identity?: boolean | Prisma.FascicoloKnowledgeItem$identityArgs<ExtArgs>
 }, ExtArgs["result"]["fascicoloKnowledgeItem"]>
 
 export type FascicoloKnowledgeItemSelectScalar = {
@@ -1803,15 +2231,20 @@ export type FascicoloKnowledgeItemSelectScalar = {
   confidence?: boolean
   status?: boolean
   reviewVersion?: boolean
+  identityId?: boolean
+  identityState?: boolean
+  identityBasis?: boolean
+  identityCommandFingerprint?: boolean
   createdAt?: boolean
   supersededAt?: boolean
 }
 
-export type FascicoloKnowledgeItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "procedimentoId" | "revisionId" | "kind" | "semanticKey" | "semanticKeyVersion" | "contentFingerprint" | "normalizedText" | "structuredPayload" | "confidence" | "status" | "reviewVersion" | "createdAt" | "supersededAt", ExtArgs["result"]["fascicoloKnowledgeItem"]>
+export type FascicoloKnowledgeItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "procedimentoId" | "revisionId" | "kind" | "semanticKey" | "semanticKeyVersion" | "contentFingerprint" | "normalizedText" | "structuredPayload" | "confidence" | "status" | "reviewVersion" | "identityId" | "identityState" | "identityBasis" | "identityCommandFingerprint" | "createdAt" | "supersededAt", ExtArgs["result"]["fascicoloKnowledgeItem"]>
 export type FascicoloKnowledgeItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.EnteDefaultArgs<ExtArgs>
   procedimento?: boolean | Prisma.ProcedimentoDefaultArgs<ExtArgs>
   revision?: boolean | Prisma.FascicoloKnowledgeRevisionDefaultArgs<ExtArgs>
+  identity?: boolean | Prisma.FascicoloKnowledgeItem$identityArgs<ExtArgs>
   evidence?: boolean | Prisma.FascicoloKnowledgeItem$evidenceArgs<ExtArgs>
   outgoingRelations?: boolean | Prisma.FascicoloKnowledgeItem$outgoingRelationsArgs<ExtArgs>
   incomingRelations?: boolean | Prisma.FascicoloKnowledgeItem$incomingRelationsArgs<ExtArgs>
@@ -1822,11 +2255,13 @@ export type FascicoloKnowledgeItemIncludeCreateManyAndReturn<ExtArgs extends run
   tenant?: boolean | Prisma.EnteDefaultArgs<ExtArgs>
   procedimento?: boolean | Prisma.ProcedimentoDefaultArgs<ExtArgs>
   revision?: boolean | Prisma.FascicoloKnowledgeRevisionDefaultArgs<ExtArgs>
+  identity?: boolean | Prisma.FascicoloKnowledgeItem$identityArgs<ExtArgs>
 }
 export type FascicoloKnowledgeItemIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.EnteDefaultArgs<ExtArgs>
   procedimento?: boolean | Prisma.ProcedimentoDefaultArgs<ExtArgs>
   revision?: boolean | Prisma.FascicoloKnowledgeRevisionDefaultArgs<ExtArgs>
+  identity?: boolean | Prisma.FascicoloKnowledgeItem$identityArgs<ExtArgs>
 }
 
 export type $FascicoloKnowledgeItemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1835,6 +2270,7 @@ export type $FascicoloKnowledgeItemPayload<ExtArgs extends runtime.Types.Extensi
     tenant: Prisma.$EntePayload<ExtArgs>
     procedimento: Prisma.$ProcedimentoPayload<ExtArgs>
     revision: Prisma.$FascicoloKnowledgeRevisionPayload<ExtArgs>
+    identity: Prisma.$FascicoloKnowledgeIdentityPayload<ExtArgs> | null
     evidence: Prisma.$FascicoloKnowledgeEvidencePayload<ExtArgs>[]
     outgoingRelations: Prisma.$FascicoloKnowledgeRelationPayload<ExtArgs>[]
     incomingRelations: Prisma.$FascicoloKnowledgeRelationPayload<ExtArgs>[]
@@ -1854,6 +2290,10 @@ export type $FascicoloKnowledgeItemPayload<ExtArgs extends runtime.Types.Extensi
     confidence: number | null
     status: $Enums.FascicoloKnowledgeItemStatus
     reviewVersion: number
+    identityId: string | null
+    identityState: $Enums.FascicoloKnowledgeIdentityState | null
+    identityBasis: runtime.JsonValue | null
+    identityCommandFingerprint: string | null
     createdAt: Date
     supersededAt: Date | null
   }, ExtArgs["result"]["fascicoloKnowledgeItem"]>
@@ -2253,6 +2693,7 @@ export interface Prisma__FascicoloKnowledgeItemClient<T, Null = never, ExtArgs e
   tenant<T extends Prisma.EnteDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EnteDefaultArgs<ExtArgs>>): Prisma.Prisma__EnteClient<runtime.Types.Result.GetResult<Prisma.$EntePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   procedimento<T extends Prisma.ProcedimentoDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProcedimentoDefaultArgs<ExtArgs>>): Prisma.Prisma__ProcedimentoClient<runtime.Types.Result.GetResult<Prisma.$ProcedimentoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   revision<T extends Prisma.FascicoloKnowledgeRevisionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FascicoloKnowledgeRevisionDefaultArgs<ExtArgs>>): Prisma.Prisma__FascicoloKnowledgeRevisionClient<runtime.Types.Result.GetResult<Prisma.$FascicoloKnowledgeRevisionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  identity<T extends Prisma.FascicoloKnowledgeItem$identityArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FascicoloKnowledgeItem$identityArgs<ExtArgs>>): Prisma.Prisma__FascicoloKnowledgeIdentityClient<runtime.Types.Result.GetResult<Prisma.$FascicoloKnowledgeIdentityPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   evidence<T extends Prisma.FascicoloKnowledgeItem$evidenceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FascicoloKnowledgeItem$evidenceArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloKnowledgeEvidencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   outgoingRelations<T extends Prisma.FascicoloKnowledgeItem$outgoingRelationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FascicoloKnowledgeItem$outgoingRelationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloKnowledgeRelationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   incomingRelations<T extends Prisma.FascicoloKnowledgeItem$incomingRelationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FascicoloKnowledgeItem$incomingRelationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FascicoloKnowledgeRelationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2299,6 +2740,10 @@ export interface FascicoloKnowledgeItemFieldRefs {
   readonly confidence: Prisma.FieldRef<"FascicoloKnowledgeItem", 'Int'>
   readonly status: Prisma.FieldRef<"FascicoloKnowledgeItem", 'FascicoloKnowledgeItemStatus'>
   readonly reviewVersion: Prisma.FieldRef<"FascicoloKnowledgeItem", 'Int'>
+  readonly identityId: Prisma.FieldRef<"FascicoloKnowledgeItem", 'String'>
+  readonly identityState: Prisma.FieldRef<"FascicoloKnowledgeItem", 'FascicoloKnowledgeIdentityState'>
+  readonly identityBasis: Prisma.FieldRef<"FascicoloKnowledgeItem", 'Json'>
+  readonly identityCommandFingerprint: Prisma.FieldRef<"FascicoloKnowledgeItem", 'String'>
   readonly createdAt: Prisma.FieldRef<"FascicoloKnowledgeItem", 'DateTime'>
   readonly supersededAt: Prisma.FieldRef<"FascicoloKnowledgeItem", 'DateTime'>
 }
@@ -2699,6 +3144,25 @@ export type FascicoloKnowledgeItemDeleteManyArgs<ExtArgs extends runtime.Types.E
    * Limit how many FascicoloKnowledgeItems to delete.
    */
   limit?: number
+}
+
+/**
+ * FascicoloKnowledgeItem.identity
+ */
+export type FascicoloKnowledgeItem$identityArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FascicoloKnowledgeIdentity
+   */
+  select?: Prisma.FascicoloKnowledgeIdentitySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FascicoloKnowledgeIdentity
+   */
+  omit?: Prisma.FascicoloKnowledgeIdentityOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FascicoloKnowledgeIdentityInclude<ExtArgs> | null
+  where?: Prisma.FascicoloKnowledgeIdentityWhereInput
 }
 
 /**

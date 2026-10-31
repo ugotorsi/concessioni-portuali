@@ -227,6 +227,48 @@ function sourceGapCandidates(input: GenerationInput): OperationalProposalCandida
   ];
 }
 
+function technicalSourceCandidates(input: GenerationInput): OperationalProposalCandidate[] {
+  const sources = input.report.technicalSources ?? [];
+  if (sources.length === 0) return [];
+  const questions = new Map<string, { question: StructuredReportQuestion; issueSemanticKey: string | null }>();
+  for (const issue of input.report.legalIssues) {
+    for (const question of issue.questions) questions.set(question.semanticKey, { question, issueSemanticKey: issue.semanticKey });
+  }
+  for (const question of input.report.unassignedQuestions) {
+    if (!questions.has(question.semanticKey)) questions.set(question.semanticKey, { question, issueSemanticKey: null });
+  }
+  const byQuestion = new Map<string, typeof sources[number][]>();
+  for (const source of sources) {
+    byQuestion.set(source.questionSemanticKey, [...(byQuestion.get(source.questionSemanticKey) ?? []), source]);
+  }
+  return [...byQuestion.entries()].flatMap(([questionSemanticKey, questionSources]) => {
+    const owner = questions.get(questionSemanticKey);
+    if (!owner) return [];
+    const recordIds = unique(questionSources.map((source) => source.recordId));
+    const statuses = unique(questionSources.map((source) => source.verificationStatus));
+    return [buildCandidate({
+      ...input,
+      knowledgeRevisionId: input.report.knowledgeRevisionId,
+      proposalType: "CRITICALITY",
+      title: `Verifica tecnico-urbanistica da completare: ${owner.question.text}`,
+      description: "Acquisizioni tecniche MCP non probatorie: verificare su fonte originale prima di ogni conclusione su vincoli o conformità.",
+      proposedPayload: {
+        severity: "MEDIA",
+        category: "TECNICA",
+        description: owner.question.text,
+        rationale: `TECHNICAL_SOURCES_NOT_PROBATIVE:${statuses.join(",")}`,
+        technicalSourceRecordIds: recordIds,
+        blockingEffect: "PROFESSIONAL_REVIEW_REQUIRED",
+      },
+      originatingKnowledgeItemIds: [owner.question.knowledgeItemId],
+      originatingIssueSemanticKeys: owner.issueSemanticKey ? [owner.issueSemanticKey] : [],
+      originatingQuestionSemanticKeys: [questionSemanticKey],
+      rationale: "Fonti tecnico-urbanistiche acquisite ma non verificate: richiedono riscontro sulla fonte originale.",
+      warningCodes: ["PROFESSIONAL_REVIEW_REQUIRED", "TECHNICAL_SOURCE_NOT_PROBATIVE"],
+    })];
+  });
+}
+
 export interface GenerationInput {
   tenantId: string;
   procedimentoId: string;
@@ -244,5 +286,6 @@ export function generateOperationalProposalCandidates(input: GenerationInput): r
     ...documentRequirementCandidates(input),
     ...contradictionCandidates(input),
     ...sourceGapCandidates(input),
+    ...technicalSourceCandidates(input),
   ].sort((left, right) => left.proposalFingerprint.localeCompare(right.proposalFingerprint));
 }

@@ -14,11 +14,16 @@ const harness = vi.hoisted(() => ({
     $queryRaw: vi.fn(),
   },
   createAuditLogInTransaction: vi.fn(),
+  resetDocumentAnalysisActivationInTransaction: vi.fn(),
 }));
 
 vi.mock("@/lib/prisma", () => ({ prisma: harness.prisma }));
 vi.mock("@/server/audit/auditLog", () => ({
   createAuditLogInTransaction: harness.createAuditLogInTransaction,
+}));
+vi.mock("@/server/async-jobs/documentAnalysisActivationPersistence", () => ({
+  resetDocumentAnalysisActivationInTransaction:
+    harness.resetDocumentAnalysisActivationInTransaction,
 }));
 vi.mock("@/server/db/serializableTransaction", () => ({
   runSerializableTransactionWithRetry: vi.fn((callback: (tx: typeof harness.tx) => unknown) => callback(harness.tx)),
@@ -31,10 +36,12 @@ import {
   admitAsyncJobInTransaction,
   claimAsyncJobById,
   claimNextAsyncJob,
+  cancelObsoleteFascicoloAnalysisJob,
   failAsyncJob,
   heartbeatAsyncJob,
   reconcileAsyncJobCancellationAfterLeaseConflict,
   requestAsyncJobCancellation,
+  prepareObsoleteFascicoloAnalysisJobCancellation,
   retryTerminalAsyncJob,
   succeedAsyncJob,
 } from "@/server/async-jobs/persistence";
@@ -162,6 +169,41 @@ describe("B2C9 generic async job persistence", () => {
     expect(sql).not.toContain("LIMIT 1");
   });
 
+  it("claims a targeted analysis only when tenant, procedimento, and authority match", async () => {
+    const job = running({
+      id: "analysis-job",
+      operation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+    });
+    harness.tx.$queryRaw.mockResolvedValueOnce([job]);
+
+    await expect(claimAsyncJobById({
+      jobId: "analysis-job",
+      expectedOperation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+      expectedTenantId: "tenant-1",
+      expectedProcedimentoId: "procedure-1",
+      workerId: "one-shot-worker",
+      leaseDurationMs: 60_000,
+    })).resolves.toBe(job);
+
+    const query = harness.tx.$queryRaw.mock.calls[0]?.[0] as { strings: readonly string[] };
+    const sql = query.strings.join(" ");
+    expect(sql).toContain('AND "tenantId" =');
+    expect(sql).toContain('AND "procedimentoId" =');
+    expect(sql).toContain(`"inputReference"#>>'{metadata,procedimentoId}'`);
+    expect(sql).toContain(`"admissionType" = 'AUTHENTICATED_USER'`);
+    expect(sql).toContain(`"admissionType" = 'AUTHORIZED_SYSTEM'`);
+  });
+
+  it("rejects targeted analysis claims without exact tenant and procedimento", async () => {
+    await expect(claimAsyncJobById({
+      jobId: "analysis-job",
+      expectedOperation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+      workerId: "one-shot-worker",
+      leaseDurationMs: 60_000,
+    })).rejects.toMatchObject({ code: "INVALID_ADMISSION" });
+    expect(harness.tx.$queryRaw).not.toHaveBeenCalled();
+  });
+
   it("does not make a queued job claimable before availableAt", async () => {
     harness.tx.$executeRaw.mockResolvedValue(0);
     harness.tx.$queryRaw.mockResolvedValue([]);
@@ -285,6 +327,7 @@ describe("B2C9 generic async job persistence", () => {
       status: "TERMINAL_FAILED",
       attemptCount: 3,
       operation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+      tenantId: "tenant-1",
       procedimentoId: "procedure-1",
     })]);
     harness.tx.$executeRaw.mockResolvedValue(1);
@@ -293,7 +336,9 @@ describe("B2C9 generic async job persistence", () => {
       actor: { userId: "operator-1", userEmail: "operator@example.test", userRole: "ADMIN" },
     })).resolves.toEqual({
       outcome: "REQUEUED",
+      jobId: "job-1",
       operation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+      tenantId: "tenant-1",
       procedimentoId: "procedure-1",
     });
     const retryQuery = harness.tx.$executeRaw.mock.calls[0][0] as { strings: readonly string[] };
@@ -304,6 +349,8 @@ describe("B2C9 generic async job persistence", () => {
       azione: "ASYNC_JOB_MANUAL_RETRY",
       entitaId: "job-1",
     }));
+    expect(harness.resetDocumentAnalysisActivationInTransaction)
+      .toHaveBeenCalledWith(harness.tx, expect.objectContaining({ id: "job-1" }));
   });
 
   it("terminally fails when retry attempts are exhausted", async () => {
@@ -315,6 +362,51 @@ describe("B2C9 generic async job persistence", () => {
       retryDelayMs: 5_000,
     });
     expect(result.outcome).toBe("TERMINAL_FAILED");
+  });
+
+  it.each([
+    ["AI_PROVIDER_TIMEOUT", true],
+    ["AI_PROVIDER_RATE_LIMITED", true],
+    ["AI_PROVIDER_UNAVAILABLE", true],
+    ["INVALID_PROVIDER_OUTPUT", false],
+    ["V7_OUTPUT_INCOMPLETE", false],
+    ["V7_OUTPUT_REQUIRED_SECTIONS_EMPTY", false],
+    ["V7_DOCUMENT_INVENTORY_INCOMPLETE", false],
+    ["STRUCTURED_KNOWLEDGE_MATERIALLY_INCOMPLETE", false],
+  ])("terminally fails V7 collaudo error %s after its only attempt", async (code, retryable) => {
+    harness.tx.$queryRaw.mockResolvedValue([{
+      ...running({
+        purpose: "FASCICOLO_EXISTING_CORPUS_ANALYSIS_V7_CONTROLLED",
+        attemptCount: 1,
+        maxAttempts: 1,
+      }),
+    }]);
+    harness.tx.$executeRaw.mockResolvedValue(1);
+
+    await expect(failAsyncJob({
+      jobId: "job-1",
+      workerId: "worker-1",
+      leaseToken: "c".repeat(64),
+      failure: { retryable, category: "ANALYSIS", code },
+      retryDelayMs: 5_000,
+    })).resolves.toEqual({ outcome: "TERMINAL_FAILED" });
+  });
+
+  it("does not allow an operator retry of the controlled V7 collaudo", async () => {
+    const job = running({
+      status: "TERMINAL_FAILED",
+      purpose: "FASCICOLO_EXISTING_CORPUS_ANALYSIS_V7_CONTROLLED",
+      attemptCount: 1,
+      maxAttempts: 1,
+    });
+    harness.tx.$queryRaw.mockResolvedValue([job]);
+
+    await expect(retryTerminalAsyncJob({
+      jobId: job.id,
+      actor: { userId: "operator-1", userEmail: "operator@example.test", userRole: "ADMIN" },
+    })).resolves.toMatchObject({ outcome: "NOT_RETRYABLE" });
+    expect(harness.tx.$executeRaw).not.toHaveBeenCalled();
+    expect(harness.resetDocumentAnalysisActivationInTransaction).not.toHaveBeenCalled();
   });
 
   it("runs an optional terminal hook in the failure transaction", async () => {
@@ -400,6 +492,124 @@ describe("B2C9 generic async job persistence", () => {
     harness.tx.$executeRaw.mockResolvedValue(1);
     harness.tx.asyncJob.findUniqueOrThrow.mockResolvedValue(running({ status: outcome }));
     await expect(requestAsyncJobCancellation("job-1")).resolves.toMatchObject({ outcome });
+  });
+
+  it("prepares only an exact zero-attempt obsolete fascicolo analysis job", async () => {
+    harness.prisma.asyncJob.findUnique.mockResolvedValue(running({
+      id: "obsolete-job",
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      operation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+      status: "QUEUED",
+      attemptCount: 0,
+      inputReference: {
+        referenceType: "FASCICOLO_DOCUMENT_CORPUS",
+        referenceId: "a".repeat(64),
+        metadata: { corpusHash: "a".repeat(64), procedimentoId: "procedure-1" },
+      },
+    }));
+
+    await expect(prepareObsoleteFascicoloAnalysisJobCancellation({
+      jobId: "obsolete-job",
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      obsoleteCorpusFingerprint: "a".repeat(64),
+      currentCorpusFingerprint: "b".repeat(64),
+      actor: { userId: null, userEmail: null, userRole: "SYSTEM" },
+    })).resolves.toMatchObject({ outcome: "READY" });
+  });
+
+  it("cancels an exact obsolete job atomically and records the actor in the audit chain", async () => {
+    const queued = running({
+      id: "obsolete-job",
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      operation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+      status: "QUEUED",
+      attemptCount: 0,
+      inputReference: {
+        referenceType: "FASCICOLO_DOCUMENT_CORPUS",
+        referenceId: "a".repeat(64),
+        metadata: { corpusHash: "a".repeat(64), procedimentoId: "procedure-1" },
+      },
+    });
+    harness.tx.asyncJob.findUnique.mockResolvedValue(queued);
+    harness.tx.$executeRaw.mockResolvedValue(1);
+    harness.tx.asyncJob.findUniqueOrThrow.mockResolvedValue({ ...queued, status: "CANCELLED", stateVersion: 3 });
+
+    await expect(cancelObsoleteFascicoloAnalysisJob({
+      jobId: "obsolete-job",
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      obsoleteCorpusFingerprint: "a".repeat(64),
+      currentCorpusFingerprint: "b".repeat(64),
+      actor: { userId: "operator-1", userEmail: "operator@example.test", userRole: "ADMIN" },
+    })).resolves.toMatchObject({ outcome: "CANCELLED" });
+    expect(harness.createAuditLogInTransaction).toHaveBeenCalledWith(harness.tx, expect.objectContaining({
+      azione: "ASYNC_JOB_OBSOLETE_CORPUS_CANCELLED",
+      entitaId: "obsolete-job",
+      enteId: "tenant-1",
+      actor: { userId: "operator-1", userEmail: "operator@example.test", userRole: "ADMIN" },
+    }));
+  });
+
+  it("is idempotent for the same already-cancelled obsolete job", async () => {
+    harness.tx.asyncJob.findUnique.mockResolvedValue(running({
+      id: "obsolete-job",
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      operation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+      status: "CANCELLED",
+      attemptCount: 0,
+      inputReference: {
+        referenceType: "FASCICOLO_DOCUMENT_CORPUS",
+        referenceId: "a".repeat(64),
+        metadata: { corpusHash: "a".repeat(64), procedimentoId: "procedure-1" },
+      },
+    }));
+
+    await expect(cancelObsoleteFascicoloAnalysisJob({
+      jobId: "obsolete-job",
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      obsoleteCorpusFingerprint: "a".repeat(64),
+      currentCorpusFingerprint: "b".repeat(64),
+      actor: { userId: null, userEmail: null, userRole: "SYSTEM" },
+    })).resolves.toMatchObject({ outcome: "ALREADY_CANCELLED" });
+    expect(harness.tx.$executeRaw).not.toHaveBeenCalled();
+    expect(harness.createAuditLogInTransaction).not.toHaveBeenCalled();
+  });
+
+  it("refuses cancellation when scope, reference, state, or attempt safety does not match", async () => {
+    const base = {
+      jobId: "obsolete-job",
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      obsoleteCorpusFingerprint: "a".repeat(64),
+      currentCorpusFingerprint: "b".repeat(64),
+      actor: { userId: null, userEmail: null, userRole: "SYSTEM" },
+    };
+    harness.tx.asyncJob.findUnique
+      .mockResolvedValueOnce(running({ id: "obsolete-job", tenantId: "tenant-other" }))
+      .mockResolvedValueOnce(running({
+        id: "obsolete-job", tenantId: "tenant-1", procedimentoId: "procedure-1",
+        operation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+        inputReference: { referenceType: "FASCICOLO_DOCUMENT_CORPUS", referenceId: "c".repeat(64) },
+      }))
+      .mockResolvedValueOnce(running({
+        id: "obsolete-job", tenantId: "tenant-1", procedimentoId: "procedure-1",
+        operation: "FASCICOLO.AUTOMATIC_ANALYSIS_V1", status: "RUNNING", attemptCount: 1,
+        inputReference: {
+          referenceType: "FASCICOLO_DOCUMENT_CORPUS",
+          referenceId: "a".repeat(64),
+          metadata: { corpusHash: "a".repeat(64), procedimentoId: "procedure-1" },
+        },
+      }));
+
+    await expect(cancelObsoleteFascicoloAnalysisJob(base)).resolves.toMatchObject({ outcome: "SCOPE_MISMATCH" });
+    await expect(cancelObsoleteFascicoloAnalysisJob(base)).resolves.toMatchObject({ outcome: "REFERENCE_MISMATCH" });
+    await expect(cancelObsoleteFascicoloAnalysisJob(base)).resolves.toMatchObject({ outcome: "NOT_SAFE_TO_CANCEL" });
+    expect(harness.tx.$executeRaw).not.toHaveBeenCalled();
   });
 
   it.each([

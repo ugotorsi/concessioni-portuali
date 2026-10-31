@@ -52,6 +52,7 @@ export async function getFascicoloAnalysisReadModel(
   const evidence = new Map<string, FascicoloAnalysisModel["evidence"][number]>();
   const allItems = [
     ...knowledge.partyRoles,
+    ...(knowledge.partyPositions ?? []),
     ...knowledge.facts,
     ...knowledge.events,
     ...knowledge.legalActs,
@@ -78,9 +79,10 @@ export async function getFascicoloAnalysisReadModel(
       const payload = record(item.payload);
       return {
         id: item.id,
+        semanticKey: item.semanticKey,
         title: text(payload.title) ?? item.normalizedText,
         description: text(payload.rationale),
-        status: "Questione giuridica",
+        knowledgeStatus: "Questione giuridica",
         area: text(payload.areaOfLaw),
         relevance: text(payload.priority),
         evidence: evidenceLabels(item),
@@ -90,9 +92,10 @@ export async function getFascicoloAnalysisReadModel(
       const payload = record(item.payload);
       return {
         id: item.id,
+        semanticKey: item.semanticKey,
         title: text(payload.canonicalQuestion) ?? item.normalizedText,
         description: text(payload.rationale),
-        status: "Ricerca da pianificare",
+        knowledgeStatus: "Ricerca da pianificare",
         area: "Ricerca normativa e giurisprudenziale",
         relevance: text(payload.priority),
         evidence: evidenceLabels(item),
@@ -107,6 +110,7 @@ export async function getFascicoloAnalysisReadModel(
     })),
     ...[
       ...knowledge.partyRoles,
+      ...(knowledge.partyPositions ?? []),
       ...knowledge.facts,
       ...knowledge.timeline,
       ...knowledge.legalActs,

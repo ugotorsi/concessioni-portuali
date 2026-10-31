@@ -16,7 +16,11 @@ import type {
 } from "@/server/ai/fascicoloOutboundProjection";
 import { AI_FASCICOLO_SNAPSHOT_V1_SCHEMA_VERSION } from "@/server/ai/fascicoloSnapshotContract";
 import type { buildAiFascicoloSnapshotV1 } from "@/server/ai/fascicoloSnapshot";
-import { fascicoloStructuredKnowledgeSchema } from "@/server/fascicolo-knowledge/structuredContracts";
+import {
+  fascicoloDocumentKnowledgeCandidateProposalSchema,
+  fascicoloDocumentStructuredKnowledgeSchema,
+  fascicoloStructuredKnowledgeSchema,
+} from "@/server/fascicolo-knowledge/structuredContracts";
 
 export const AI_FASCICOLO_ANALYSIS_V1_SCHEMA_VERSION = "ai-fascicolo-analysis/v1" as const;
 
@@ -202,6 +206,16 @@ const signalSchema = z.object({
   basisRefs: requiredBasisRefsSchema,
 }).strict();
 
+const structuredKnowledgeCompilationSchema = z.object({
+  promotable: z.boolean(),
+  quarantinedItemLocalIds: z.array(z.string().trim().min(1).max(256)).max(10_000),
+  diagnostics: z.array(z.object({
+    code: z.string().trim().min(1).max(128),
+    path: z.string().trim().min(1).max(512),
+    action: z.enum(["PRESERVED", "REBUILT", "MARKED_UNRESOLVED", "BLOCKED"]),
+  }).strict()).max(100_000),
+}).strict();
+
 export const providerAnalysisPayloadV1Schema = z.object({
   summary: groundedStatementSchema,
   timeline: z.array(timelineEventSchema).max(100),
@@ -211,9 +225,25 @@ export const providerAnalysisPayloadV1Schema = z.object({
   suggestedActivities: z.array(optionalGroundingStatementSchema).max(100),
   legalResearchQuestions: z.array(optionalGroundingStatementSchema).max(100),
   structuredKnowledge: fascicoloStructuredKnowledgeSchema.optional(),
+  structuredKnowledgeCompilation: structuredKnowledgeCompilationSchema.optional(),
 }).strict();
 
 export type ProviderAnalysisPayloadV1 = z.infer<typeof providerAnalysisPayloadV1Schema>;
+export const fascicoloDocumentAnalysisPayloadV1Schema = providerAnalysisPayloadV1Schema.extend({
+  structuredKnowledge: fascicoloDocumentStructuredKnowledgeSchema,
+  structuredKnowledgeCompilation: structuredKnowledgeCompilationSchema,
+});
+export const fascicoloDocumentProposalPayloadV1Schema = providerAnalysisPayloadV1Schema
+  .omit({ structuredKnowledge: true, structuredKnowledgeCompilation: true })
+  .extend({
+    structuredKnowledge: fascicoloDocumentKnowledgeCandidateProposalSchema,
+  });
+export type FascicoloDocumentAnalysisPayloadV1 = z.infer<
+  typeof fascicoloDocumentAnalysisPayloadV1Schema
+>;
+export type FascicoloDocumentProposalPayloadV1 = z.infer<
+  typeof fascicoloDocumentProposalPayloadV1Schema
+>;
 type AiFascicoloSnapshotV1 = Awaited<ReturnType<typeof buildAiFascicoloSnapshotV1>>;
 
 type AnalysisErrorCode =

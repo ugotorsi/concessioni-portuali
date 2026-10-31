@@ -17,11 +17,15 @@ import {
   FascicoloAnalysis,
   type FascicoloAnalysisCorpus,
 } from "@/components/procedimenti/FascicoloAnalysis";
+import { mergeFascicoloAnalysisQuestions } from "@/components/procedimenti/fascicolo-analysis-questions";
 import { FascicoloDeadlines, type FascicoloDeadlineStatus } from "@/components/procedimenti/FascicoloDeadlines";
 import { FascicoloIssues, type FascicoloIssueSeverity, type FascicoloIssueStatus } from "@/components/procedimenti/FascicoloIssues";
 import { FascicoloProposals } from "@/components/procedimenti/FascicoloProposals";
 import { FascicoloReport, OperationalPlans } from "@/components/procedimenti/FascicoloReport";
-import { FascicoloResearch } from "@/components/procedimenti/FascicoloResearch";
+import {
+  FascicoloResearch,
+  type FascicoloResearchSource,
+} from "@/components/procedimenti/FascicoloResearch";
 import { FascicoloIntakeDetail } from "@/components/procedimenti/FascicoloIntakeDetail";
 import { FascicoloConcession } from "@/components/procedimenti/FascicoloConcession";
 import { FascicoloShell, resolveFascicoloSection, type FascicoloOverviewModel } from "@/components/procedimenti/FascicoloShell";
@@ -43,6 +47,9 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { canManageProcedimenti, canRegisterProcedimentoDecision, requireRole } from "@/lib/auth";
+import {
+  isExistingCorpusAnalysisRequestEnabled,
+} from "@/server/ai/fascicoloExistingCorpusAnalysis";
 import {
   getChecklistContraddittorioItems,
   getOrigineProcedimentoLabel,
@@ -73,6 +80,7 @@ import { getAiFascicoloHumanReviewReadModel } from "@/server/queries/ai-fascicol
 import { getAiFascicoloTrustedReviewMaterialsReadModel } from "@/server/queries/ai-fascicolo-trusted-review-materials";
 import { getFascicoloIntakeDetail } from "@/server/queries/fascicolo-intake";
 import { getFascicoloAnalysisReadModel } from "@/server/queries/fascicolo-analysis";
+import { buildFascicoloResearchModel } from "@/server/queries/fascicolo-research";
 import { listStructuredFascicoloReportSnapshots, persistStructuredFascicoloReport } from "@/server/fascicolo-report";
 
 import { PROCEDIMENTO_ESITO_ISTRUTTORIO_VALUES } from "@/server/queries/procedimenti";
@@ -164,6 +172,15 @@ function analysisCorpusModel(corpus: FascicoloDocumentCorpus | null): FascicoloA
   };
 }
 
+function uniqueBy<T>(items: readonly T[], key: (item: T) => string): T[] {
+  const unique = new Map<string, T>();
+  for (const item of items) {
+    const itemKey = key(item);
+    if (!unique.has(itemKey)) unique.set(itemKey, item);
+  }
+  return [...unique.values()];
+}
+
 export default async function ProcedimentoDetailPage({ params, searchParams }: ProcedimentoDetailPageProps) {
   const role = await requireRole();
   const canReview = canManageProcedimenti(role);
@@ -198,10 +215,51 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
     : null;
   const analysisCorpus = analysisCorpusModel(documentCorpus);
   const automaticWorkflow = await getFascicoloAutomaticWorkflowReadModel(detail.procedimento.id);
+  const existingCorpusAnalysis = role === "ADMIN"
+    && documentCorpus?.availability === "READY"
+    && documentCorpus.documentCount > 0
+    && documentCorpus.availableDocumentCount === documentCorpus.documentCount
+    && documentCorpus.textPageCount > 0
+    ? {
+        procedimentoId: detail.procedimento.id,
+        enabled: isExistingCorpusAnalysisRequestEnabled(process.env),
+      }
+    : null;
   const structuredAnalysis = activeSection === "analysis"
     ? await getFascicoloAnalysisReadModel(detail.procedimento.id)
     : null;
   const legalSourceCandidates = await getFascicoloLegalSourceCandidates(detail.procedimento.id);
+  const candidateResearchSources: FascicoloResearchSource[] = legalSourceCandidates.map((item) => ({
+    id: `candidato-${item.id}`,
+    title: item.resolution?.legalSource?.title ?? item.originalName ?? "Fonte acquisita",
+    identifier: item.resolution?.legalSource?.sourceNumber
+      ?? item.resolution?.legalSource?.stableKey
+      ?? item.originalName,
+    authority: item.resolution?.legalSource?.issuingBody,
+    sourceType: item.mimeType,
+    date: formatDateIT(item.admittedAt),
+    origin: "Documento acquisito al fascicolo",
+    verificationStatus: item.resolution?.outcome === "LINKED"
+      ? "Identità della fonte collegata; contenuto e applicabilità temporale da verificare."
+      : item.resolution?.outcome === "NO_MATCH"
+        ? "Nessuna fonte ufficiale corrispondente individuata."
+        : "Verifica della fonte in attesa.",
+    note: item.resolution?.reviewNote,
+    usability: item.resolution?.outcome === "NO_MATCH" ? "NOT_USABLE" as const : "TO_VERIFY" as const,
+  }));
+  const baseResearchModel = buildFascicoloResearchModel(automaticWorkflow, candidateResearchSources);
+  const workflowAnalysisQuestions = baseResearchModel.questions
+  .filter((question) => question.lifecycleStatus !== "HISTORICAL")
+  .map((question) => ({
+    id: `ricerca-${question.id}`,
+    semanticKey: question.semanticKey,
+    title: question.text,
+    description: question.coverage,
+    operationalStatuses: question.status ? [question.status] : [],
+    area: "Ricerca normativa e giurisprudenziale",
+    relevance: question.needsFurtherResearch ? "Approfondimenti ancora necessari" : "Copertura registrata",
+    evidence: question.coveredAspects,
+  }));
   const fascicoloObservations = await getFascicoloObservations(detail.procedimento.id);
   const fascicoloDocumentRequirements = await getFascicoloDocumentRequirementProposals(detail.procedimento.id);
   const checklistEvidenceData = await getChecklistEvidenceData(detail.procedimento.id);
@@ -295,32 +353,45 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
               <NeutralIntakeProcessingPanel items={processingItems} />
             </section>
           ) : null}
-          {activeSection === "istruttoria" ? <FascicoloAutomaticWorkflowPanel model={automaticWorkflow} /> : null}
+          {activeSection === "istruttoria" ? (
+            <FascicoloAutomaticWorkflowPanel
+              model={automaticWorkflow}
+              existingCorpusAnalysis={existingCorpusAnalysis}
+            />
+          ) : null}
           {activeSection === "analysis" ? (
             <FascicoloAnalysis
-              model={structuredAnalysis ? {
-                ...structuredAnalysis,
-                corpus: analysisCorpus,
-              } : {
-                questions: [],
-                evidence: detail.documentiPrincipali.map((documento) => ({
+              technicalResearchProcedureId={detail.procedimento.id}
+              model={{
+                questions: mergeFascicoloAnalysisQuestions([
+                  ...(structuredAnalysis?.questions ?? []),
+                  ...workflowAnalysisQuestions,
+                ]),
+                evidence: structuredAnalysis?.evidence ?? detail.documentiPrincipali.map((documento) => ({
                   id: documento.id,
                   title: documento.nome,
                   detail: formatEnumLabel(documento.tipologia),
                   href: documento.isFileAvailable ? documento.url : null,
                 })),
-                contradictions: [],
-                gaps: detail.documentiPrincipali.length === 0 ? [{
+                contradictions: structuredAnalysis?.contradictions ?? [],
+                gaps: structuredAnalysis?.gaps ?? (detail.documentiPrincipali.length === 0 ? [{
                   id: "documenti-mancanti",
                   title: "Documentazione da acquisire",
                   requestedItem: "Carica gli atti disponibili per avviare estrazione e analisi.",
-                }] : [],
-                relevantItems: [],
+                }] : []),
+                relevantItems: structuredAnalysis?.relevantItems ?? [],
+                legalSources: baseResearchModel.sources,
+                analysisStatus: structuredAnalysis?.analysisStatus,
                 corpus: analysisCorpus,
               }}
             />
           ) : null}
-          {activeSection === "research" ? <FascicoloResearch model={{ questions: [], sources: [] }} /> : null}
+          {activeSection === "research" ? (
+            <FascicoloResearch
+              model={baseResearchModel}
+              technicalResearchProcedureId={detail.procedimento.id}
+            />
+          ) : null}
           {activeSection === "proposals" ? (
             <section aria-label="Proposte preliminari">
               <h2 className="mb-3 text-xl font-semibold">Proposte operative preliminari</h2>
@@ -382,6 +453,17 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
     giorniRitardoContraddittorio: detail.procedimento.giorniRitardoContraddittorio,
   });
   const normeCollegate = await getNormeForProcedimento(detail.procedimento.id);
+  const researchModel = buildFascicoloResearchModel(automaticWorkflow, [
+    ...normeCollegate.map((item) => ({
+      id: `norma-${item.id}`,
+      title: item.titolo,
+      identifier: item.codice,
+      sourceType: formatEnumLabel(item.ambito),
+      origin: "Normativa collegata al fascicolo",
+      note: `${formatEnumLabel(item.severita)} · ${item.descrizione}`,
+    })),
+    ...candidateResearchSources,
+  ]);
   const decisionRules = getDecisionRulePreviewForTipologia(detail.procedimento.tipologia);
   const hasDecision = detail.procedimento.decisioneConclusiva !== null;
   const decisioneConclusiva = detail.procedimento.decisioneConclusiva;
@@ -688,43 +770,17 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
 
         {activeSection === "istruttoria" ? <section className="space-y-4" aria-label="Istruttoria del fascicolo">
           <div>
-            <FascicoloAutomaticWorkflowPanel model={automaticWorkflow} />
+            <FascicoloAutomaticWorkflowPanel
+              model={automaticWorkflow}
+              existingCorpusAnalysis={existingCorpusAnalysis}
+            />
           </div>
         </section> : null}
 
         {activeSection === "research" ? (
           <FascicoloResearch
-            model={{
-              questions: [],
-              sources: [
-                ...normeCollegate.map((item) => ({
-                  id: `norma-${item.id}`,
-                  title: item.titolo,
-                  identifier: item.codice,
-                  sourceType: formatEnumLabel(item.ambito),
-                  origin: "Normativa collegata al fascicolo",
-                  note: `${formatEnumLabel(item.severita)} · ${item.descrizione}`,
-                })),
-                ...legalSourceCandidates.map((item) => ({
-                  id: `candidato-${item.id}`,
-                  title: item.resolution?.legalSource?.title ?? item.originalName ?? "Fonte acquisita",
-                  identifier: item.resolution?.legalSource?.sourceNumber
-                    ?? item.resolution?.legalSource?.stableKey
-                    ?? item.originalName,
-                  authority: item.resolution?.legalSource?.issuingBody,
-                  sourceType: item.mimeType,
-                  date: formatDateIT(item.admittedAt),
-                  origin: "Documento acquisito al fascicolo",
-                  verificationStatus: item.resolution?.outcome === "LINKED"
-                    ? "Identità della fonte collegata; contenuto e applicabilità temporale da verificare."
-                    : item.resolution?.outcome === "NO_MATCH"
-                      ? "Nessuna fonte ufficiale corrispondente individuata."
-                      : "Verifica della fonte in attesa.",
-                  note: item.resolution?.reviewNote,
-                  usability: item.resolution?.outcome === "NO_MATCH" ? "NOT_USABLE" as const : "TO_VERIFY" as const,
-                })),
-              ],
-            }}
+            model={researchModel}
+            technicalResearchProcedureId={detail.procedimento.id}
           />
         ) : null}
 
@@ -777,8 +833,11 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
 
         {activeSection === "analysis" ? (
           <FascicoloAnalysis
+            technicalResearchProcedureId={detail.procedimento.id}
             model={{
-              questions: [
+              questions: mergeFascicoloAnalysisQuestions([
+                ...(structuredAnalysis?.questions ?? []),
+                ...workflowAnalysisQuestions,
                 ...(detail.criticitaCollegata && linkedIssueIsOpen ? [{
                   id: detail.criticitaCollegata.id,
                   title: formatEnumLabel(detail.criticitaCollegata.tipologia),
@@ -796,8 +855,9 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                   relevance: formatEnumLabel(item.gravita),
                   href: `/criticita/${item.id}`,
                 })),
-              ],
+              ]),
               evidence: [
+                ...(structuredAnalysis?.evidence ?? []),
                 {
                   id: `concessione-${detail.concessione.id}`,
                   title: `Titolo concessorio ${detail.concessione.numeroAtto}`,
@@ -811,8 +871,10 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                   href: documento.isFileAvailable ? documento.url : null,
                 })),
               ],
-              contradictions: [],
-              gaps: fascicoloDocumentRequirements.proposals
+              contradictions: structuredAnalysis?.contradictions ?? [],
+              gaps: uniqueBy([
+                ...(structuredAnalysis?.gaps ?? []),
+                ...fascicoloDocumentRequirements.proposals
                 .filter((proposal) => proposal.status !== "RIFIUTATO")
                 .map((proposal) => ({
                   id: proposal.id,
@@ -820,7 +882,9 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                   relevance: proposal.gapDescriptionSnapshot,
                   status: proposal.status === "VALIDATO" ? "Confermata" : "Da verificare",
                 })),
+              ], (gap) => gap.id),
               relevantItems: [
+                ...(structuredAnalysis?.relevantItems ?? []),
                 ...fascicoloObservations
                   .filter((observation) => observation.status !== "RIFIUTATO")
                   .map((observation) => ({
@@ -831,6 +895,8 @@ export default async function ProcedimentoDetailPage({ params, searchParams }: P
                     href: `/documenti/${observation.documento.id}/download`,
                   })),
               ],
+              legalSources: researchModel.sources,
+              analysisStatus: structuredAnalysis?.analysisStatus,
               corpus: analysisCorpus,
             }}
           />

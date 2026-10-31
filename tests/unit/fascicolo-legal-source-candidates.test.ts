@@ -255,7 +255,9 @@ describe("Fascicolo legal-source candidates", () => {
     expect(detailSource).toContain('title="Documenti del Fascicolo"');
     expect(detailSource).toContain("<NeutralIntakeProcessingPanel items={processingItems} />");
     expect(detailSource).toContain("<FascicoloResearch");
-    expect(detailSource).toContain("...legalSourceCandidates.map");
+    expect(detailSource).toContain("legalSourceCandidates.map");
+    expect(detailSource).toContain("candidateResearchSources");
+    expect(detailSource).toContain("buildFascicoloResearchModel");
     expect(detailSource).toContain('item.resolution?.outcome === "NO_MATCH" ? "NOT_USABLE"');
     expect(detailSource).not.toContain("<LegalSourceCandidatesPanel");
     expect(detailSource).toContain("getFascicoloLegalSourceCandidates(detail.procedimento.id)");

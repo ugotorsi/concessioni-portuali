@@ -56,7 +56,7 @@ async function database() {
       "id" TEXT PRIMARY KEY, "tenantId" TEXT NOT NULL, "procedimentoId" TEXT NOT NULL, "status" TEXT NOT NULL
     );
     CREATE TABLE "User" (
-      "id" TEXT PRIMARY KEY, "attivo" BOOLEAN NOT NULL, "role" TEXT NOT NULL
+      "id" TEXT PRIMARY KEY, "attivo" BOOLEAN NOT NULL, "ruolo" TEXT NOT NULL
     );
     CREATE TABLE "TenantMembership" (
       "userId" TEXT NOT NULL, "enteId" TEXT NOT NULL, PRIMARY KEY ("userId", "enteId")
@@ -95,7 +95,7 @@ async function database() {
   `);
   await db.exec(migration);
   await db.exec(versioningMigration);
-  await db.query('INSERT INTO "User" ("id", "attivo", "role") VALUES ($1, TRUE, \'ADMIN\')', ["admin-1"]);
+  await db.query('INSERT INTO "User" ("id", "attivo", "ruolo") VALUES ($1, TRUE, \'ADMIN\')', ["admin-1"]);
   await db.query('INSERT INTO "TenantMembership" ("userId", "enteId") VALUES ($1, $2)', ["admin-1", "tenant-1"]);
   return db;
 }
@@ -143,12 +143,39 @@ async function setCurrent(db: PGlite, id: string, tenantId = "tenant-1", procedi
   await db.query('INSERT INTO "FascicoloKnowledgeRevision" ("id", "tenantId", "procedimentoId", "status") VALUES ($1, $2, $3, \'CURRENT\')', [id, tenantId, procedimentoId]);
 }
 
+async function setBuilding(db: PGlite, id: string) {
+  await db.query(
+    'INSERT INTO "FascicoloKnowledgeRevision" ("id", "tenantId", "procedimentoId", "status") VALUES ($1, $2, $3, \'BUILDING\')',
+    [id, "tenant-1", "procedure-1"],
+  );
+}
+
 afterEach(async () => {
   await Promise.all(databases.splice(0).map((db) => db.close()));
 });
 
 describe("Lotto 3 research mission lifecycle on PGlite", () => {
   const assignment = { assignedActorId: "actor-1" };
+
+  it("reconciles a controlled BUILDING revision only when explicitly allowed", async () => {
+    const db = await database();
+    const ctx = context(db);
+    await setBuilding(db, "revision-building");
+    const input = {
+      tenantId: "tenant-1",
+      procedimentoId: "procedure-1",
+      knowledgeRevisionId: "revision-building",
+      assignedActorId: null,
+      plans: [plan("b".repeat(64))],
+    };
+
+    await expect(reconcileKnowledgeResearchMissions(input, ctx))
+      .rejects.toThrow("KNOWLEDGE_REVISION_NOT_CURRENT");
+    await expect(reconcileKnowledgeResearchMissions({
+      ...input,
+      allowBuildingRevision: true,
+    }, ctx)).resolves.toHaveLength(1);
+  });
 
   it("keeps an unassigned system mission deferred without inventing a user", async () => {
     const db = await database();
@@ -362,7 +389,7 @@ describe("Lotto 3 research mission lifecycle on PGlite", () => {
       assignedActorId: "actor-1",
       plans: [plan("8".repeat(64))],
     }, ctx);
-    await db.query('INSERT INTO "User" ("id", "attivo", "role") VALUES ($1, TRUE, \'ADMIN\')', ["admin-without-tenant"]);
+    await db.query('INSERT INTO "User" ("id", "attivo", "ruolo") VALUES ($1, TRUE, \'ADMIN\')', ["admin-without-tenant"]);
 
     await expect(versionResearchMissionBudget({
       sourceMissionId: original.missionId,

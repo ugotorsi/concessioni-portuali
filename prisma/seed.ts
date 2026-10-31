@@ -11,6 +11,7 @@ import {
 } from "../src/lib/concession-vertical";
 import { resolveDemoEnteCodeForConcessione } from "../src/lib/tenant";
 import { assertDemoSeedAllowed } from "../src/lib/demo-seed-guard";
+import { encryptMfaSecret, isMfaRequiredRole } from "../src/lib/mfa";
 import {
   GAP_KEY,
   RULE_CODE,
@@ -106,7 +107,11 @@ async function clearDemoData() {
   await prisma.normaFonte.deleteMany();
   await prisma.activityLog.deleteMany();
   await prisma.report.deleteMany();
+  await prisma.decisioneProcedimento.deleteMany();
+  await prisma.documento.updateMany({ data: { currentFileVersionId: null } });
+  await prisma.documentFileVersion.deleteMany();
   await prisma.documento.deleteMany();
+  await prisma.fascicoloIntake.deleteMany();
   await prisma.pagamento.deleteMany();
   await prisma.sopralluogo.deleteMany();
   await prisma.procedimento.deleteMany();
@@ -123,6 +128,7 @@ async function clearDemoData() {
 async function main() {
   assertDemoSeedAllowed(process.env);
   await clearDemoData();
+  const e2eMfaSecret = process.env.E2E_MFA_SECRET?.trim() || null;
 
   const demoCredentials: Array<{
     nome: string;
@@ -201,21 +207,25 @@ async function main() {
   ];
 
   const hashedCredentials = await Promise.all(
-    demoCredentials.map(async (item) => ({
-      nome: item.nome,
-      email: item.email,
-      ruolo: item.role,
-      passwordHash: await bcrypt.hash(item.password, 10),
-      failedLoginAttempts: 0,
-      lockedUntil: null,
-      lastFailedLoginAt: null,
-      lastLoginAt: null,
-      passwordChangedAt: new Date(),
-      mustChangePassword: false,
-      mfaEnabled: false,
-      mfaSecret: null,
-      mfaVerifiedAt: null,
-    })),
+    demoCredentials.map(async (item) => {
+      const seedMfa = e2eMfaSecret !== null && isMfaRequiredRole(item.role);
+      return {
+        nome: item.nome,
+        email: item.email,
+        ruolo: item.role,
+        passwordHash: await bcrypt.hash(item.password, 10),
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+        lastFailedLoginAt: null,
+        lastLoginAt: null,
+        passwordChangedAt: new Date(),
+        mustChangePassword: false,
+        mfaEnabled: seedMfa,
+        mfaSecret: seedMfa ? encryptMfaSecret(e2eMfaSecret) : null,
+        mfaRecoveryCodes: seedMfa ? [] : undefined,
+        mfaVerifiedAt: seedMfa ? new Date() : null,
+      };
+    }),
   );
 
   await prisma.user.createMany({
@@ -1608,6 +1618,29 @@ async function main() {
           "Verificare invio comunicazione di avvio procedimento, termine per controdeduzioni e documentazione fotografica.",
       },
     ],
+  });
+
+  await prisma.fascicoloIntake.create({
+    data: {
+      id: "fascicolo-intake-e2e-preparazione",
+      enteId: defaultDemoEnteId,
+      tipologiaConcessione: "PORTUALE_ADSP",
+      oggettoFascicolo: "Istruttoria preliminare per concessione portuale",
+      denominazioneBreve: "Fascicolo intake E2E",
+      concessionario: "Operatore portuale in verifica",
+      enteConcedente: "Autorita di Sistema Portuale Demo",
+      autoritaCompetente: "Autorita di Sistema Portuale Demo",
+      numeroConcessione: "INTAKE-E2E-001",
+      dataRilascio: daysAgo(365),
+      decorrenza: daysAgo(365),
+      scadenza: daysFromNow(365),
+      oggettoConcessione: "Area portuale destinata a servizi logistici",
+      beneAreaServizio: "Area operativa E2E",
+      localita: "Porto demo",
+      soggettoAssistito: "Operatore portuale in verifica",
+      controparteAmministrazione: "Autorita di Sistema Portuale Demo",
+      contestoIniziale: "Fixture deterministica priva di job AI e chiamate provider.",
+    },
   });
 
   const concessioniRowsForFrameworks = await prisma.concessione.findMany({

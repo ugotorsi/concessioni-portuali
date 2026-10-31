@@ -43,6 +43,35 @@ const validAnalysis = {
   legalResearchQuestions: [{ text: "Quale disciplina si applica alla scadenza ai sensi dell'articolo 18?", basisRefs: ["DOCUMENT_1.PAGE_1"] }],
 } as const;
 
+const canonicalAnalysis = {
+  ...validAnalysis,
+  legalResearchQuestions: [],
+  structuredKnowledge: {
+    version: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1",
+    subjects: [],
+    sourceQuotes: [{
+      itemLocalId: "fact-1",
+      basisRef: "DOCUMENT_1.PAGE_1",
+      quote: "scadenza 31 dicembre 2026",
+    }],
+    items: [{
+      localId: "fact-1",
+      kind: "FACT",
+      confidence: 95,
+      basisRefs: ["DOCUMENT_1.PAGE_1"],
+      payload: {
+        normalizedStatement: "Il provvedimento fissa la scadenza alla fine del 2026.",
+        subjectLocalIds: [],
+        object: null,
+        qualifier: null,
+        proceedingIdentity: null,
+      },
+    }],
+    legalIssues: [],
+    researchQuestions: [],
+  },
+} as const;
+
 run("automatic fascicolo persistence on temporary PostgreSQL", () => {
   const suffix = randomUUID();
   const tenantId = `tenant-${suffix}`;
@@ -71,6 +100,14 @@ run("automatic fascicolo persistence on temporary PostgreSQL", () => {
     });
     await prisma.ente.create({
       data: { id: tenantId, nome: "Ente sintetico", codice: `SYN-${suffix}` },
+    });
+    await prisma.user.create({
+      data: {
+        id: actorId,
+        nome: "Worker sintetico",
+        email: `${actorId}@example.test`,
+        ruolo: "ADMIN",
+      },
     });
     await prisma.concessione.create({
       data: {
@@ -139,6 +176,7 @@ run("automatic fascicolo persistence on temporary PostgreSQL", () => {
       }
       return validAnalysis;
     }
+    if (text.includes("CONTROLLO CANONICAL V6")) return canonicalAnalysis;
     return text.includes("RISPOSTA INCERTA")
       ? { summary: "not-structured" }
       : validAnalysis;
@@ -240,6 +278,111 @@ run("automatic fascicolo persistence on temporary PostgreSQL", () => {
     }
     throw new Error("RESEARCH_JOB_DID_NOT_REACH_TERMINAL_STATE");
   }
+
+  it("persists and rereads an automatic report without executing research missions", async () => {
+    process.env.NOETRA_CANONICAL_IDENTITY_V3_ENABLED = "true";
+    try {
+      const intake = await upload(
+        "CONTROLLO CANONICAL V6. Il provvedimento indica scadenza 31 dicembre 2026.",
+        `upload-report-only-${suffix}`,
+      );
+      expect(intake.outcome).toBe("CREATED");
+      const intakeId = intake.intake?.id;
+      if (!intakeId) throw new Error("INTAKE_REQUIRED");
+
+      await expect(drainOneAsyncJob({
+        workerId: `extraction-worker-${suffix}`,
+        leaseDurationMs: 60_000,
+        retryDelayMs: 0,
+        operationAllowlist: ["NEUTRAL_INTAKE_EXTRACTION_V1"],
+        procedimentoAllowlist: [procedimentoId],
+        registry,
+      })).resolves.toMatchObject({ outcome: "SUCCEEDED" });
+      const extraction = await prisma.neutralIntakeExtractionAttempt.findFirstOrThrow({
+        where: { neutralIntakeId: intakeId, outcome: "SUCCEEDED" },
+      });
+      const document = await prisma.documento.create({
+        data: {
+          nome: "Documento canonical sintetico",
+          tipologia: "ALTRO",
+          mimeType: "application/pdf",
+          dimensioneBytes: 1,
+          sha256: extraction.artifactSha256,
+          enteId: tenantId,
+          procedimentoId,
+        },
+      });
+      const fileVersion = await prisma.documentFileVersion.create({
+        data: {
+          documentId: document.id,
+          canonicalEnteId: tenantId,
+          storageProvider: "local",
+          storageKey: `canonical-v6-${suffix}`,
+          mimeType: "application/pdf",
+          sizeBytes: 1,
+          sha256: extraction.artifactSha256,
+          createdByActorId: actorId,
+          createdByRole: "AUTHORIZED_TEST_WORKER",
+        },
+      });
+      await prisma.documento.update({
+        where: { id: document.id },
+        data: { currentFileVersionId: fileVersion.id },
+      });
+
+      const terminal = await drainUntilAutomaticTerminal(intakeId);
+      expect(terminal.status).toBe("SUCCEEDED");
+
+      const report = await prisma.automaticFascicoloReport.findFirstOrThrow({
+        where: { tenantId, procedimentoId, neutralIntakeId: intakeId },
+        include: { missionLinks: true, corpusDocuments: true },
+      });
+      expect(report).toMatchObject({
+        status: "ANALYSIS_COMPLETE",
+        documentVersionId: expect.any(String),
+      });
+      expect(report.missionLinks).toHaveLength(0);
+      expect(report.corpusDocuments).toHaveLength(1);
+
+      const revision = await prisma.fascicoloKnowledgeRevision.findFirstOrThrow({
+        where: { tenantId, procedimentoId, corpusFingerprint: report.corpusFingerprint },
+        include: {
+          items: {
+            include: {
+              evidence: true,
+            },
+          },
+        },
+      });
+      expect(revision).toMatchObject({
+        status: "CURRENT",
+        contractVersion: "FASCICOLO_STRUCTURED_KNOWLEDGE_V1_CANONICAL_V3",
+      });
+      expect(revision.items).toHaveLength(1);
+      const spans = await prisma.$queryRaw<Array<{ quoteSha256: string }>>`
+        SELECT span."quoteSha256"
+        FROM "FascicoloKnowledgeEvidenceSpan" span
+        JOIN "FascicoloKnowledgeEvidence" evidence ON evidence."id" = span."evidenceId"
+        JOIN "FascicoloKnowledgeItem" item ON item."id" = evidence."itemId"
+        WHERE item."revisionId" = ${revision.id}
+      `;
+      expect(spans).toEqual([{
+        quoteSha256: expect.stringMatching(/^[a-f0-9]{64}$/),
+      }]);
+
+      const model = await getFascicoloAutomaticWorkflowReadModel(procedimentoId);
+      expect(model?.reports.some((candidate) => (
+        candidate.reportId === report.id
+        && candidate.summary.text === validAnalysis.summary.text
+      ))).toBe(true);
+      expect(await prisma.asyncJob.count({
+        where: { operation: RESEARCH_MISSION_EXECUTION_OPERATION, tenantId, procedimentoId },
+      })).toBe(0);
+      expect(providerCall).not.toHaveBeenCalled();
+    } finally {
+      delete process.env.NOETRA_CANONICAL_IDENTITY_V3_ENABLED;
+    }
+  });
 
   it("runs upload, extraction, worker analysis, repository, mission generation, restart read, and dossier view", async () => {
     const first = await upload(

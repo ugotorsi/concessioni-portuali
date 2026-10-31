@@ -5,6 +5,7 @@ import {
   submittedDocumentEvidenceSchema,
 } from "@/server/legal-research/assisted-verification";
 import { RESEARCH_BRIDGE_VERSION } from "@/server/legal-research/bridge";
+import { legalAnalysisContributionSchema } from "@/server/legal-research/legal-synthesis";
 
 const COMPLETION_STATES = [
   "COMPLETE",
@@ -28,6 +29,7 @@ export const researchEvidenceBundleInputSchema = z.object({
   completedAt: z.string().optional(),
   researchToolExecutions: z.array(z.unknown()),
   authorityCandidates: z.array(z.unknown()),
+  legalAnalysisContributions: z.array(legalAnalysisContributionSchema).max(32).optional(),
   citationObservations: z.array(z.unknown()),
   legalResearchSuggestions: z.array(z.unknown()),
   evidenceGaps: z.array(z.unknown()),

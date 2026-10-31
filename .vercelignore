@@ -1,0 +1,7 @@
+.tmp/
+*.tsbuildinfo
+artifacts/
+blob-report/
+coverage/
+playwright-report/
+test-results/

@@ -1,7 +1,12 @@
 import { prisma } from "@/lib/prisma";
-import type { JsonValue, KnowledgeItemReviewStatus } from "@/server/fascicolo-knowledge";
+import type {
+  JsonValue,
+  KnowledgeIdentityState,
+  KnowledgeItemReviewStatus,
+} from "@/server/fascicolo-knowledge";
+import { isCanonicalIdentityV3Enabled } from "@/server/fascicolo-knowledge/canonicalIntegrationGate";
 
-type KnowledgeKind = "PARTY_ROLE" | "FACT" | "EVENT" | "LEGAL_ACT" | "MEASURE" | "CONTRADICTION" | "GAP" | "DEADLINE_CANDIDATE" | "LEGAL_ISSUE" | "RESEARCH_QUESTION";
+type KnowledgeKind = "PARTY_ROLE" | "PARTY_POSITION" | "FACT" | "EVENT" | "LEGAL_ACT" | "MEASURE" | "CONTRADICTION" | "GAP" | "DEADLINE_CANDIDATE" | "LEGAL_ISSUE" | "RESEARCH_QUESTION";
 
 export interface StructuredKnowledgeReadItem {
   id: string;
@@ -13,6 +18,8 @@ export interface StructuredKnowledgeReadItem {
   confidence: number | null;
   status: KnowledgeItemReviewStatus;
   reviewVersion: number;
+  identityId?: string | null;
+  identityState?: KnowledgeIdentityState | null;
   evidence: readonly {
     provenanceType?: "DOCUMENT_EXTRACTION" | "FASCICOLO_DOCUMENT_EXTRACTION";
     basisRef: string | null;
@@ -36,6 +43,7 @@ export interface StructuredKnowledgeReadModel {
   };
   subjects: readonly { id: string; canonicalName: string; subjectType: string; aliases: readonly string[] }[];
   partyRoles: readonly StructuredKnowledgeReadItem[];
+  partyPositions?: readonly StructuredKnowledgeReadItem[];
   facts: readonly StructuredKnowledgeReadItem[];
   events: readonly StructuredKnowledgeReadItem[];
   legalActs: readonly StructuredKnowledgeReadItem[];
@@ -105,16 +113,35 @@ export async function loadCurrentStructuredKnowledge(
   procedimentoId: string,
   executor: StructuredKnowledgeQueryExecutor = defaultExecutor,
 ): Promise<StructuredKnowledgeReadModel | null> {
+  return loadStructuredKnowledgeRevision(
+    tenantId,
+    procedimentoId,
+    null,
+    executor,
+  );
+}
+
+export async function loadStructuredKnowledgeRevision(
+  tenantId: string,
+  procedimentoId: string,
+  revisionId: string | null,
+  executor: StructuredKnowledgeQueryExecutor = defaultExecutor,
+): Promise<StructuredKnowledgeReadModel | null> {
   const revisions = await executor.query<RevisionRow>(`
     SELECT "id", "corpusFingerprint", "contractVersion", "createdAt", "completedAt", "warnings"
     FROM "FascicoloKnowledgeRevision"
-    WHERE "tenantId" = $1 AND "procedimentoId" = $2 AND "status" = 'CURRENT'
-  `, [tenantId, procedimentoId]);
+    WHERE "tenantId" = $1 AND "procedimentoId" = $2
+      AND (($3::text IS NULL AND "status" = 'CURRENT') OR "id" = $3)
+  `, [tenantId, procedimentoId, revisionId]);
   const revision = revisions.rows[0];
   if (!revision) return null;
+  const identityColumns = isCanonicalIdentityV3Enabled()
+    ? ', "identityId", "identityState"'
+    : "";
   const [itemRows, evidenceRows, relationRows] = await Promise.all([
     executor.query<ItemRow>(`
-      SELECT "id", "kind", "semanticKey", "contentFingerprint", "normalizedText", "structuredPayload", "confidence", "status", "reviewVersion"
+      SELECT "id", "kind", "semanticKey", "contentFingerprint", "normalizedText", "structuredPayload",
+        "confidence", "status", "reviewVersion"${identityColumns}
       FROM "FascicoloKnowledgeItem"
       WHERE "tenantId" = $1 AND "procedimentoId" = $2 AND "revisionId" = $3
         AND "supersededAt" IS NULL
@@ -147,6 +174,8 @@ export async function loadCurrentStructuredKnowledge(
     confidence: item.confidence,
     status: item.status,
     reviewVersion: item.reviewVersion,
+    identityId: item.identityId,
+    identityState: item.identityState,
     evidence: evidenceRows.rows.filter((evidence) => evidence.itemId === item.id).map(({ itemId: _itemId, ...evidence }) => evidence),
   }));
   const subjectIds = [...new Set(items.flatMap((item) => strings(record(item.payload).subjectIds)))];
@@ -178,6 +207,7 @@ export async function loadCurrentStructuredKnowledge(
     revision: { ...revision, warnings: strings(revision.warnings) },
     subjects: subjects.map((subject) => ({ ...subject, aliases: strings(subject.aliases) })),
     partyRoles: visibleByKind("PARTY_ROLE"),
+    partyPositions: visibleByKind("PARTY_POSITION"),
     facts: visibleByKind("FACT"),
     events,
     legalActs: visibleByKind("LEGAL_ACT"),

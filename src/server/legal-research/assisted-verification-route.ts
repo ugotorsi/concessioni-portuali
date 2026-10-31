@@ -9,7 +9,11 @@ import {
   canWriteTenantResource,
   getCurrentTenantContext,
 } from "@/lib/tenant-auth";
-import { createAssistedVerificationSnapshot } from "@/server/legal-research/assisted-verification";
+import {
+  createAssistedVerificationSnapshot,
+  legalApplicabilityReviewSchema,
+  type LegalApplicabilityReview,
+} from "@/server/legal-research/assisted-verification";
 import {
   ResearchPersistenceError,
   getLatestAssistedVerification,
@@ -102,6 +106,105 @@ const adverseSearchCommandSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("SAVE_ADVERSE_SEARCH"), missionId: missionIdSchema, recordId: identifierSchema, search: adverseSearchSchema }).strict(),
   z.object({ action: z.literal("REVIEW_ADVERSE_SEARCH"), missionId: missionIdSchema, recordId: identifierSchema }).strict(),
 ]);
+const legalApplicabilityReviewCommandSchema = z.object({
+  action: z.literal("CONFIRM_LEGAL_APPLICABILITY"),
+  missionId: missionIdSchema,
+  recordId: identifierSchema,
+  review: legalApplicabilityReviewSchema,
+  correctionRationale: rationaleSchema,
+}).strict();
+
+function applyProfessionalApplicabilityCorrections(
+  proposal: LegalApplicabilityReview,
+  submitted: LegalApplicabilityReview,
+): LegalApplicabilityReview | null {
+  const structuralFieldsMatch = [
+    "version",
+    "reviewId",
+    "applicationId",
+    "knowledgeRevisionId",
+    "legalIssueSemanticKey",
+    "candidateEvidenceSourceId",
+    "candidateSourceVersionId",
+    "candidateProvisionReference",
+    "legalAuthorityKind",
+    "targetProceedingIdentity",
+    "factBindings",
+    "ruleOrchestrator",
+  ].every((field) => isDeepStrictEqual(
+    proposal[field as keyof LegalApplicabilityReview],
+    submitted[field as keyof LegalApplicabilityReview],
+  ));
+  if (!structuralFieldsMatch
+    || submitted.reviewStatus !== "AI_PROPOSED"
+    || !isDeepStrictEqual(
+      proposal.factualApplicability.decisiveKnowledgeItemIds,
+      submitted.factualApplicability.decisiveKnowledgeItemIds,
+    )
+    || proposal.normRelationship.competingEvidenceSourceId
+      !== submitted.normRelationship.competingEvidenceSourceId
+    || proposal.transitionalDiscipline.status !== submitted.transitionalDiscipline.status) {
+    return null;
+  }
+
+  let transitionalDiscipline: LegalApplicabilityReview["transitionalDiscipline"];
+  if (proposal.transitionalDiscipline.status === "VERIFIED_PRESENT"
+    && submitted.transitionalDiscipline.status === "VERIFIED_PRESENT") {
+    const evidenceFieldsMatch =
+      proposal.transitionalDiscipline.evidenceSourceId === submitted.transitionalDiscipline.evidenceSourceId
+      && proposal.transitionalDiscipline.provisionReference === submitted.transitionalDiscipline.provisionReference
+      && proposal.transitionalDiscipline.effectiveFrom === submitted.transitionalDiscipline.effectiveFrom
+      && proposal.transitionalDiscipline.determiningFactRole === submitted.transitionalDiscipline.determiningFactRole
+      && proposal.transitionalDiscipline.previousRegimeEvidenceSourceId
+        === submitted.transitionalDiscipline.previousRegimeEvidenceSourceId
+      && isDeepStrictEqual(proposal.transitionalDiscipline.exceptions, submitted.transitionalDiscipline.exceptions);
+    if (!evidenceFieldsMatch) return null;
+    transitionalDiscipline = {
+      ...proposal.transitionalDiscipline,
+      effect: submitted.transitionalDiscipline.effect,
+      interpretationRationale: submitted.transitionalDiscipline.interpretationRationale,
+    };
+  } else if (proposal.transitionalDiscipline.status === "VERIFIED_ABSENT"
+    && submitted.transitionalDiscipline.status === "VERIFIED_ABSENT") {
+    if (proposal.transitionalDiscipline.evidenceSourceId !== submitted.transitionalDiscipline.evidenceSourceId
+      || !isDeepStrictEqual(
+        proposal.transitionalDiscipline.absenceAttestation,
+        submitted.transitionalDiscipline.absenceAttestation,
+      )) return null;
+    transitionalDiscipline = {
+      ...proposal.transitionalDiscipline,
+      rationale: submitted.transitionalDiscipline.rationale,
+    };
+  } else if ((proposal.transitionalDiscipline.status === "UNAVAILABLE"
+      || proposal.transitionalDiscipline.status === "AMBIGUOUS")
+    && proposal.transitionalDiscipline.status === submitted.transitionalDiscipline.status
+    && (submitted.transitionalDiscipline.status === "UNAVAILABLE"
+      || submitted.transitionalDiscipline.status === "AMBIGUOUS")) {
+    if (proposal.transitionalDiscipline.expectedProvisionReference
+      !== submitted.transitionalDiscipline.expectedProvisionReference) return null;
+    transitionalDiscipline = {
+      ...proposal.transitionalDiscipline,
+      rationale: submitted.transitionalDiscipline.rationale,
+    };
+  } else {
+    return null;
+  }
+
+  return legalApplicabilityReviewSchema.parse({
+    ...proposal,
+    factualApplicability: {
+      ...proposal.factualApplicability,
+      outcome: submitted.factualApplicability.outcome,
+      rationale: submitted.factualApplicability.rationale,
+    },
+    normRelationship: {
+      ...proposal.normRelationship,
+      outcome: submitted.normRelationship.outcome,
+      rationale: submitted.normRelationship.rationale,
+    },
+    transitionalDiscipline,
+  });
+}
 
 export type AssistedVerificationRouteDependencies = Readonly<{
   getCurrentTenantContext: typeof getCurrentTenantContext;
@@ -343,7 +446,11 @@ async function postHandler(
   } catch {
     return jsonError("INVALID_REQUEST", 400);
   }
-  const input = z.union([reviewInputSchema, adverseSearchCommandSchema]).safeParse(body);
+  const input = z.union([
+    reviewInputSchema,
+    adverseSearchCommandSchema,
+    legalApplicabilityReviewCommandSchema,
+  ]).safeParse(body);
   if (!input.success) return jsonError("INVALID_REQUEST", 400);
   try {
     const current = await dependencies.getLatestAssistedVerification(
@@ -352,6 +459,44 @@ async function postHandler(
     );
     if (current && current.recordId !== input.data.recordId) {
       return jsonError("ASSISTED_VERIFICATION_CONFLICT", 409);
+    }
+    if ("action" in input.data && input.data.action === "CONFIRM_LEGAL_APPLICABILITY") {
+      const command = input.data;
+      const proposal = current?.snapshot.legalApplicabilityReviews?.find((review) => (
+        review.reviewId === command.review.reviewId
+        && review.reviewStatus === "AI_PROPOSED"
+      ));
+      if (!current || !proposal) return jsonError("NOT_FOUND", 404);
+      const corrected = applyProfessionalApplicabilityCorrections(proposal, command.review);
+      if (!corrected) return jsonError("LEGAL_APPLICABILITY_CORRECTION_NOT_ALLOWED", 422);
+      const reviewedAt = dependencies.now().toISOString();
+      const confirmed = {
+        ...corrected,
+        reviewStatus: "HUMAN_CONFIRMED" as const,
+        reviewerAttestation: {
+          reviewedByActorId: authorization.actor.actorId,
+          reviewedAt,
+          rationale: command.correctionRationale,
+        },
+      };
+      const snapshot = createAssistedVerificationSnapshot({
+        ...current.snapshot,
+        legalApplicabilityReviews: [
+          ...(current.snapshot.legalApplicabilityReviews ?? []).filter((review) => (
+            review.reviewId !== confirmed.reviewId
+          )),
+          confirmed,
+        ],
+      });
+      const persisted = await dependencies.persistAssistedVerification({
+        snapshot,
+        actor: authorization.actor,
+        expectedPreviousRecordId: current.recordId,
+      });
+      return NextResponse.json(persisted, {
+        status: persisted.outcome === "CREATED" ? 201 : 200,
+        headers: { "Cache-Control": "no-store" },
+      });
     }
     if ("action" in input.data) {
       if (!current) return jsonError("NOT_FOUND", 404);
@@ -421,4 +566,3 @@ export function createAssistedVerificationRouteHandlers(
     POST: (request: Request) => postHandler(request, dependencies),
   };
 }
-

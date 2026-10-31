@@ -28,8 +28,8 @@ The readiness command is read-only. It checks database connectivity, the Lotto 8
 | `ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST` | empty | comma-separated canary scope |
 | `ASYNC_WORKER_DEDICATED_MODE` | `false` | when `true`, both allowlists are required and non-empty |
 | `ASYNC_PROVIDER_EXECUTION_ENABLED` | `false` | blocks provider-backed claims when false |
-| `ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR` | required when providers enabled | positive decimal, max 6 decimals |
-| `ASYNC_COST_RESEARCH_CALL_ESTIMATE_EUR` | required when providers enabled | positive decimal, max 6 decimals |
+| `ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR` | required for generic workers or an allowlist containing `FASCICOLO.AUTOMATIC_ANALYSIS_V1` | positive decimal, max 6 decimals |
+| `ASYNC_COST_RESEARCH_CALL_ESTIMATE_EUR` | required for generic workers or an allowlist containing `LEGAL_RESEARCH.EXECUTE_V1` | positive decimal, max 6 decimals |
 | `ASYNC_READINESS_REQUIRE_LIVE_WORKER` | `false` | set true for post-start readiness |
 | `DOCUMENT_WORKER_ACTIVATION_MODE` | `DISABLED` | `DISABLED` or `RENDER_ONE_OFF` |
 | `DOCUMENT_WORKER_ACTIVATION_TIMEOUT_MS` | `10000` | 1000-30000 ms |
@@ -39,6 +39,27 @@ The readiness command is read-only. It checks database connectivity, the Lotto 8
 | `DOCUMENT_WORKER_RECOVERY_PROCEDIMENTO_ALLOWLIST` | empty | required scoped recovery procedures |
 
 Provider credentials are validated by their adapters only when the corresponding workload is eligible. Never print environment values.
+
+## Selvara failed one-off recovery
+
+`recoverSelvaraFailedDocumentAnalysisActivation` is a server-only, incident-specific
+recovery function. It is not exposed through a route, action, or generic retry, and its
+caller supplies only the administrator identity. Every invocation reads the dedicated
+service, exact one-off, complete paginated job list, and complete paginated job logs
+directly from the official Render API. It requires the service to remain suspended and
+all execution gates to remain off. The verified `failed` job must have the exact original
+command and a terminal timestamp, with no other one-off targeting the application job.
+The complete logs must prove the exact fatal configuration event after process startup
+and before the runtime-created event; missing, incomplete, contradictory, or unparseable
+evidence fails closed before database access.
+
+After remote verification, the function revalidates the immutable Selvara authorization
+and unchanged application job under a serializable transaction and row lock, rejects
+competing application work, and appends a reconciled `NOT_REQUESTED` ledger entry with
+the independently produced evidence and administrator identity. It never updates the
+`AsyncJob` row. This recovery retains the original V3 purpose and
+`NOETRA-V3-SELVARA-2026-10-25-ONE-SHOT` approval. The V7 approval is not accepted by
+the recovery and the V3 approval does not authorize V7 admission or provider spend.
 
 ## Staging Rollout
 
@@ -54,6 +75,189 @@ Provider credentials are validated by their adapters only when the corresponding
 10. Configure enabled EUR budget policies for GLOBAL, TENANT, and PROCEDIMENTO scopes.
 11. Only after separate authorization, configure provider credentials, positive cost estimates, and enable provider execution.
 12. Remove canary allowlists only after queue, failure, latency, and cost observations are accepted.
+
+## NOETRA V7 controlled Selvara collaudo
+
+The first V7 Selvara attempt used approval
+`NOETRA-V7-SELVARA-2026-10-26-CONTROLLED-ONE-SHOT` and terminal job
+`cmvpei5gt0000c0ud3f9txqil`. The second used approval
+`NOETRA-V7-SELVARA-2026-10-26-CONTROLLED-ONE-SHOT-02` and terminal job
+`cmvpfm50p000010udtpjtrfn3`. The third used approval
+`NOETRA-V7-SELVARA-2026-10-27-CONTROLLED-ONE-SHOT-03` and terminal job
+`cmvqkf4ow0000vcudzvjcfdy7`; all historical identities are immutable. The prepared
+fourth single-attempt admission bound the V7 document-analysis contract, corpus
+fingerprint, and `NOETRA-V7-SELVARA-2026-10-27-CONTROLLED-ONE-SHOT-04` approval.
+The fifth admission used the distinct
+`NOETRA-V7-SELVARA-2026-10-29-CONTROLLED-ONE-SHOT-05` identity. Its deterministic
+logical operation ID is
+`42135b9b107af8c93a6336f4086502c5b90744d296653bac7e8076d342f5253d`.
+Job `cmvtfse9c0000lkud7rga99sp` made its single provider call, then failed terminally
+with `V7_OUTPUT_INCOMPLETE` before persistence. It settled EUR 0.193852 and released
+EUR 0.564705. No retry was performed. The failure exposed a mismatch between the
+strict provider schema, which allowed empty required collections, and the V7
+post-response completeness gate. The corrected schema requires those collections
+to be non-empty and the runtime now distinguishes empty required sections from
+incomplete document-inventory coverage. For the unchanged 40-page corpus, the
+corrected schema estimates 40,376 input tokens and EUR 0.758624 maximum cost, still
+within the existing EUR 0.762000 approval ceiling. Any future paid attempt requires
+a new explicit authorization. The sixth identity
+`NOETRA-V7-SELVARA-2026-10-29-CONTROLLED-ONE-SHOT-06` was executed once as job
+`cmvtheqez0000koudqkfrg9c4`. It failed terminally with `INVALID_PROVIDER_OUTPUT`
+before persistence, settled EUR 0.176573, and released EUR 0.582051. Safe
+diagnostics established that the provider proposed incompatible research
+reference-date item kinds and unverifiable inventory-to-item relations. The
+deterministic compiler now downgrades incompatible dates to `UNKNOWN` and rebuilds
+inventory relations only from retained items with authenticated overlapping
+evidence. No retry was performed; any later paid attempt requires a new explicit
+authorization and immutable identity.
+The prepared seventh identity is
+`NOETRA-V7-SELVARA-2026-10-29-CONTROLLED-ONE-SHOT-07`. It binds the same authenticated
+40-page corpus to the structurally separated provider contract: the provider proposes
+only interpretive items and evidence-span selections, while the server owns document
+inventory, provenance, canonical quotations, proceeding anchors, reference dates, and
+verified relationships. The request estimates 37,077 input tokens and at most EUR
+0.752726 with the unchanged 64,000-token output ceiling. The existing EUR 0.758624
+runtime reservation and EUR 0.762000 approved ceiling remain unchanged. The seventh
+identity was executed once as application job `cmvtkqcav0000pcudris24p6p` and Render
+one-off `job-dbhkhj8ae00c73e0rlg0`. The provider call completed with EUR 0.140966
+internally accounted cost, but the application job failed terminally before report
+persistence with Prisma `P2028` while persisting structured knowledge. The immediate
+failure was the default 5-second interactive transaction timeout on a persistence
+transaction that took about 6.5 seconds. The structural cause was an N+1 pattern:
+evidence authorization and item, evidence, and relation writes incurred one Neon
+round-trip per row. These operations are now performed with bounded JSON recordset
+validation and batch inserts. Fascicolo knowledge persistence also uses a bounded
+30-second transaction timeout as a safety margin; other serializable transactions
+retain their existing default. The 40-page offline integration test enforces no more
+than 25 knowledge-persistence query calls for 60 accepted items. No retry or eighth
+paid attempt was performed.
+
+The prepared eighth identity is
+`NOETRA-V7-SELVARA-2026-10-29-CONTROLLED-ONE-SHOT-08`. It is distinct from the
+terminal seventh job and binds the same tenant, proceeding, authenticated 40-page
+corpus fingerprint, controlled V7 purpose, operation, contract, and economic
+preflight. Admission remains single-attempt (`maxAttempts=1`) and is not authorized
+until a new explicit approval is given. Preparing this identity does not admit a
+job, enable a gate, or call a provider.
+
+The isolated database proof is fail-closed and uses an in-memory fixture provider,
+never a configured AI provider. Run it only against an explicitly approved,
+non-production database with all worker/provider gates disabled:
+
+```bash
+PERSISTENCE_E2E_ALLOWED=true npm run test:persistence:e2e -- \
+  --execute-isolated-e2e --run-id <isolated-run-id>
+```
+
+The harness creates unique synthetic tenant, procedure, document, extraction, and
+40-page records; compiles and authenticates structured knowledge; persists and
+promotes the revision and report atomically; reads it through the application query;
+checks report idempotency and tenant isolation; and proves an invalid-evidence
+transaction leaves no revision while preserving the prior `CURRENT` revision.
+Repeating the same admission reuses the same job. Changing the approved preflight after admission causes
+an idempotency conflict instead of creating a second attempt. The job has
+`maxAttempts=1`; provider timeouts, rate limits, unavailable responses, malformed or
+incomplete output, and knowledge-quality failures are terminal. Manual retry is
+disabled for this purpose. The targeted one-off uses a 15-minute lease so a configured
+600-second provider timeout cannot expire the claim; non-targeted application workers
+retain their five-minute lease.
+
+Admission requires a local preflight with all of these values:
+
+- `AI_V7_PREFLIGHT_APPROVAL_ID`;
+- `AI_V7_APPROVED_MAX_OUTPUT_TOKENS`;
+- `AI_V7_APPROVED_MAX_COST_EUR`;
+- `AI_OPENAI_MAX_INPUT_TOKENS`, `AI_OPENAI_MAX_OUTPUT_TOKENS`;
+- `AI_MAX_INPUT_BYTES`, `AI_OPENAI_MAX_RAW_RESPONSE_BYTES`;
+- `AI_OPENAI_TIMEOUT_MS`;
+- `AI_OPENAI_USD_TO_EUR_RATE`, `AI_OPENAI_USD_TO_EUR_RATE_DATE`,
+  `AI_OPENAI_USD_TO_EUR_RATE_SOURCE`;
+- `ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR`, equal to the computed worst-case EUR
+  amount so the runtime reserves the full approved execution maximum.
+
+The controlled V7 path requires `NOETRA_CANONICAL_IDENTITY_V3_ENABLED=false`. It writes
+a distinct `FASCICOLO_STRUCTURED_KNOWLEDGE_V7` revision contract so the verified V7
+result cannot be confused with the existing same-corpus V1 revision. Canonical identity
+V3 requires a separate future compatibility decision and is rejected before admission.
+The V7 revision remains `BUILDING` while missions are reconciled and its structured
+report is prepared from that exact revision. Promotion to `CURRENT`, supersession of
+the prior current revision, and report persistence are the final transaction. A
+reconciliation, report, or finalization failure is terminal, leaves the prior revision
+current, and never exposes the incomplete report as definitive.
+
+The preflight measures the serialized provider request, includes reasoning tokens in
+the billable output ceiling, applies the versioned model tariff, and checks every
+enabled GLOBAL, TENANT, and PROCEDIMENTO budget window. Missing limits, missing budget
+scopes, insufficient headroom, an unapproved output ceiling, or an unapproved monetary
+maximum prevents admission.
+
+Immediately before provider submission, the worker recognizes the controlled V7
+purpose independently of the current approval configuration. It reloads the durable
+job identity, requires `maxAttempts=1`, verifies tenant, procedimento, corpus,
+operation, V7 contract, exact approval and deterministic logical operation ID, then
+rebuilds the complete economic preflight from the acquired corpus and current runtime
+configuration. The rebuilt fingerprint must equal the `trialPreflightHash` stored at
+admission. Missing or replaced approval, changed limits, pricing, FX, timeout, budget
+state, reservation amount or fingerprint terminates the job before provider dispatch
+and is not retryable.
+
+The OpenAI transport marks an attempt as potentially dispatched immediately before
+calling the HTTP transport. A failure before that point releases the reservation. If
+the request was or may have been dispatched and reliable usage is unavailable, the
+runtime settles the full reserved maximum conservatively instead of releasing it.
+Reliable provider usage is internally accounted at the versioned tariff, but the
+provider-billed amount remains `NOT_VERIFIED` until independently reconciled. A later
+output-completeness or knowledge-quality failure does not undo the settlement and
+cannot schedule another V7 attempt.
+
+For a later authorized release, preserve the dirty source worktree and `.tmp/`. Do not
+use `git add -A`. Select only the reviewed V7 source, test, fixture, and documentation
+paths; inspect the staged list and run `git diff --cached --check` before creating an
+immutable commit. Open the release against `staging-operativo`, require the staging
+workflow, TypeScript, focused tests, and production build to pass, then deploy web and
+the application-worker base service from the same SHA.
+
+Keep `AI_REAL_DATA_ENABLED=false`, `ASYNC_PROVIDER_EXECUTION_ENABLED=false`,
+`DOCUMENT_WORKER_ACTIVATION_MODE=DISABLED`, and
+`AUTOMATIC_RESEARCH_EXECUTION_ENABLED=false` through deployment and readiness.
+Enabling the exact V7 approval and one-off activation requires a separate authorization.
+After the one job reaches `SUCCEEDED` or `TERMINAL_FAILED`, restore those disabled
+values, restart the affected processes, keep the worker suspended, and retain the job,
+cost ledger, diagnostics, knowledge revision, and report artifacts.
+
+For the controlled V7 run, a valid and grounded provider output is encrypted with
+AES-256-GCM and written to a dedicated Neon recovery table before structured knowledge
+persistence begins. The artifact is bound to the immutable job, tenant, procedimento,
+corpus fingerprint, and approval identifier, expires after seven days, and is deleted
+after successful atomic finalization. If the original single-attempt job terminates in
+the `PERSISTENCE` category, an operator may temporarily enable
+`AI_PROVIDER_OUTPUT_RECOVERY_ENABLED=true` and run:
+
+`npm run runtime:recover-v7-provider-output -- --job-id <JOB_ID> --approval-id <APPROVAL_ID> --confirm PERSIST_ONLY_WITHOUT_PROVIDER_CALL`
+
+The recovery command refuses non-terminal, multi-attempt, non-V7, non-persistence, or
+misbound jobs. It decrypts the authenticated artifact, re-runs validation and only the
+knowledge/report persistence path, audits the recovery, preserves the failed job's
+historical status, makes no provider call, and deletes the artifact after success.
+
+## Infrastructure service center
+
+`/admin/runtime` is the ADMIN + MFA control center for the services used by NOETRA.
+It distinguishes informational notices, required interventions, and blocking problems
+for AI, Render, Vercel, Neon, S3-compatible document storage (including Cloudflare R2),
+and configured connectors.
+
+Cost totals and forecasts use settled or reserved NOETRA runtime records. Provider
+credits, renewals, failed payments, subscription limits, and storage/compute usage are
+reported only when an authorized API exposes them; otherwise the interface explicitly
+marks the data as unavailable and provides a guided provider-console action. It must
+never infer or fabricate provider billing data.
+
+The Render worker can be resumed or suspended from the service center only when the
+authorized service ID and API key are configured. Both operations require ADMIN + MFA,
+use Render's explicit service-control API, and are audited. They never authorize a
+purchase, renewal, plan change, or provider call.
+Keep the recovery gate false unless this explicitly authorized path is required.
 
 ## Document Extraction Activation
 
@@ -203,10 +407,98 @@ For OpenAI document-analysis failures, logs expose only:
   responses.
 
 Provider messages, response bodies, API keys, and environment values are not logged.
+Document analysis uses a strict Responses JSON Schema for all structurally representable
+constraints. Cross-collection constraints that JSON Schema cannot express are supplied
+as versioned semantic rules and enforced again by the document-specific Zod contract
+before persistence. Invalid-output logs contain only allowlisted semantic codes and
+structural paths; they never contain provider output or document text. Citation
+existence, uniqueness, page recovery, and material coverage remain deterministic
+quality-gate checks against trusted extracted text.
+
+The V7 provider contract keeps deterministic corpus authority out of the probabilistic
+response. The provider proposes interpretive items, legal issues, research questions,
+and evidence-span selections. It does not return document inventory, canonical
+provenance, proceeding anchors, literal quotations, or reference-date links. The
+server:
+
+- constructs one authenticated inventory entry for every corpus page;
+- derives inventory-to-item relationships from verified evidence-span overlap;
+- adds an explicit `UNCERTAIN` coverage gap when a page has no verified interpretive
+  item instead of declaring the page non-material;
+- reconstructs unique proceeding anchors and exact research dates when the authenticated
+  origins make them unambiguous; and
+- quarantines an isolated unverified claim without discarding an otherwise complete
+  report, while still blocking promotion when a legal origin, required relation, or
+  material evidence dependency is lost.
+
+Regression fixtures for ONE-SHOT-01 through ONE-SHOT-06 are synthetic reconstructions
+of the recorded failure classes and diagnostic paths; original provider payloads were
+not retained and the fixtures must not be represented as verbatim outputs. The offline
+Selvara acceptance runs all 40 pages through request construction, provider-boundary
+parsing, deterministic compilation, PGlite persistence, CURRENT promotion, report
+archival, and report query. It also removes an essential concession-act evidence
+candidate and verifies that the resulting revision/report remain non-current while the
+previous CURRENT remains available.
+
+With the same 64,000-token output ceiling and EUR/USD rate `0.89381`, the reduced V7
+wire contract estimates 37,077 input tokens and a maximum of EUR `0.752726` for the
+offline 40-page Selvara corpus. The existing EUR `0.758624` runtime reservation and
+EUR `0.762000` approved ceiling remain conservative; this contract change does not
+increase or authorize either amount.
+
 Before retrying the canary, verify that its operation is exactly
 `FASCICOLO.AUTOMATIC_ANALYSIS_V1`, its procedimento is the authorized canary, and the
 corrected configuration has been deployed in the base service's latest successful
 build artifact.
+
+### Research bridge to legal report
+
+`RESEARCH_BRIDGE_V1` is executed by an authorized ChatGPT-side executor. The NOETRA
+server exposes, leases, validates, and stores missions and evidence bundles; it does
+not invoke ChatGPT-only connectors by itself.
+
+Submitting a bundle for a canonically linked mission projects its authority candidates
+idempotently into the question-result and source-assessment records. Completion then
+revalidates the accepted bundle and refreshes the structured report. Missions without
+tenant, case, legal-issue, research-question, mission-fingerprint, and current
+knowledge-revision linkage are not treated as report research; partial, deferred, and
+budget-exhausted missions are never presented as completed research.
+
+New report snapshots keep candidate sources separate from usable sources. Applicability
+checks establish whether a source may be used; they do not generate a legal conclusion.
+An issue-specific professional analysis is adopted only from a
+`LEGAL_ANALYSIS_CONTRIBUTION_V1` included in the accepted evidence bundle. The
+ChatGPT-side executor must provide rule-to-fact applications, favorable and contrary
+arguments, an evidence assessment, a reasoned conclusion, strategies, and uncertainties.
+Every substantive passage must cite authority `candidateId` values from that bundle and
+documentary `basisRef` values from the linked issue.
+
+The bridge rejects malformed contributions, duplicate contribution IDs, and source
+references absent from the bundle. During report compilation NOETRA additionally
+requires every cited candidate to be a usable current source for that question and
+every cited basis reference to belong to the issue's documented facts. Exactly one
+valid contribution may support a question. Otherwise the sources and applicability
+checks remain visible, the report uses `MOTIVATION_REQUIRED`, and no standard or
+status-derived conclusion is manufactured. Technical diagnostics and internal status
+codes remain in the administrative workflow and are not rendered as professional
+conclusions.
+
+### Obsolete queued analysis cancellation
+
+Use `npm run job:cancel-obsolete-analysis --` only for a named
+`FASCICOLO.AUTOMATIC_ANALYSIS_V1` job whose corpus fingerprint is no longer current.
+The command is dry-run by default and requires the exact job, tenant, procedimento,
+obsolete fingerprint, current fingerprint, and actor role. It accepts `--apply` only
+when `--confirm-job-id` repeats the exact job ID.
+
+The apply path rechecks the scope, operation, input reference, zero attempt count,
+queue state, and state version in the same serializable transaction. A successful
+transition sets `CANCELLED`, preserves the row, records cancellation timestamps, and
+writes `ASYNC_JOB_OBSOLETE_CORPUS_CANCELLED` to the hash-chained audit log. Repeating
+the same authorized operation returns `ALREADY_CANCELLED`.
+
+Never use this operation for a current corpus, a running job, a job with attempts, or
+to delete queue history.
 
 The existing E2E service remains unchanged: its command is
 `npm run worker:document-extraction`. The event-driven code does not replace that

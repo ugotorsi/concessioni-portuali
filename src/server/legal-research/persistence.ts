@@ -514,6 +514,19 @@ export async function persistAssistedVerification(
     const tenantId = missionRecord.tenantId;
     if (!tenantId) throw new ResearchPersistenceError("AUTHORIZATION_REQUIRED");
     const mission = missionFrom(missionRecord);
+    const applicabilityReviews = snapshot.legalApplicabilityReviews ?? [];
+    const applicabilityReviewIds = new Set(applicabilityReviews.map((review) => review.reviewId));
+    if (applicabilityReviewIds.size !== applicabilityReviews.length
+      || applicabilityReviews.some((review) => (
+        review.knowledgeRevisionId !== missionRecord.knowledgeRevisionId
+        || review.legalIssueSemanticKey !== missionRecord.legalIssueSemanticKey
+        || review.ruleOrchestrator.input.enteId !== tenantId
+        || review.ruleOrchestrator.input.referenceDate !== missionRecord.referenceDate.toISOString()
+        || (review.transitionalDiscipline.status === "VERIFIED_ABSENT"
+          && review.transitionalDiscipline.absenceAttestation.reviewedByActorId !== review.reviewerAttestation.reviewedByActorId)
+      ))) {
+      throw new ResearchPersistenceError("INVALID_ASSISTED_VERIFICATION");
+    }
     const previous = await tx.researchAssistedVerificationRecord.findFirst({
       where: { missionId: missionRecord.id, tenantId },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
@@ -539,6 +552,9 @@ export async function persistAssistedVerification(
     )) || snapshot.researchSuggestions?.some((suggestion) => (
       suggestion.reviewedByActorId !== input.actor.actorId
       && !previousSnapshot?.researchSuggestions?.some((item) => unchanged(suggestion, item))
+    )) || applicabilityReviews.some((review) => (
+      review.reviewerAttestation.reviewedByActorId !== input.actor.actorId
+      && !previousSnapshot?.legalApplicabilityReviews?.some((item) => unchanged(review, item))
     )) || (snapshot.adverseReview
       && snapshot.adverseReview.reviewedByActorId !== input.actor.actorId
       && !unchanged(snapshot.adverseReview, previousSnapshot?.adverseReview))) {

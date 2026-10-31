@@ -1,11 +1,19 @@
 import Link from "next/link";
 import { AlertTriangle, CheckCircle2, FileText, HelpCircle, Search } from "lucide-react";
+import {
+  FascicoloResearchSources,
+  type FascicoloResearchSource,
+} from "@/components/procedimenti/FascicoloResearch";
+import { TechnicalSourcesResearchPanel } from "@/components/procedimenti/TechnicalSourcesResearchPanel";
 
 export interface FascicoloAnalysisQuestion {
   id: string;
+  semanticKey?: string | null;
   title: string;
   description?: string | null;
   status?: string | null;
+  knowledgeStatus?: string | null;
+  operationalStatuses?: readonly string[];
   area?: string | null;
   relevance?: string | null;
   evidence?: readonly string[];
@@ -60,6 +68,7 @@ export interface FascicoloAnalysisModel {
   contradictions: readonly FascicoloAnalysisContradiction[];
   gaps: readonly FascicoloAnalysisGap[];
   relevantItems: readonly FascicoloAnalysisRelevantItem[];
+  legalSources?: readonly FascicoloResearchSource[];
   analysisStatus?: string | null;
   corpus?: FascicoloAnalysisCorpus | null;
 }
@@ -75,11 +84,18 @@ function Meta({ label, value }: { label: string; value: string | null | undefine
   return <span className="text-xs text-slate-600"><span className="font-medium text-slate-700">{label}:</span> {text}</span>;
 }
 
-export function FascicoloAnalysis({ model }: { model: FascicoloAnalysisModel }) {
+export function FascicoloAnalysis({
+  model,
+  technicalResearchProcedureId,
+}: {
+  model: FascicoloAnalysisModel;
+  technicalResearchProcedureId?: string;
+}) {
   const hasStructuredAnalysis = model.questions.length > 0
     || model.contradictions.length > 0
     || model.gaps.length > 0
     || model.relevantItems.length > 0
+    || Boolean(model.legalSources?.length)
     || Boolean(optionalText(model.analysisStatus));
 
   return (
@@ -148,6 +164,16 @@ export function FascicoloAnalysis({ model }: { model: FascicoloAnalysisModel }) 
                       <h4 className="min-w-0 font-semibold text-slate-950 [overflow-wrap:anywhere]">{question.title}</h4>
                       {optionalText(question.status) ? <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">{question.status}</span> : null}
                     </div>
+                    {optionalText(question.knowledgeStatus) || question.operationalStatuses?.length ? (
+                      <dl className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
+                        {optionalText(question.knowledgeStatus) ? (
+                          <div><dt className="inline font-medium text-slate-700">Qualificazione Knowledge:</dt> <dd className="inline">{question.knowledgeStatus}</dd></div>
+                        ) : null}
+                        {question.operationalStatuses && question.operationalStatuses.length > 0 ? (
+                          <div><dt className="inline font-medium text-slate-700">Stato missione:</dt> <dd className="inline">{question.operationalStatuses.join(" · ")}</dd></div>
+                        ) : null}
+                      </dl>
+                    ) : null}
                     {optionalText(question.description) ? <p className="mt-2 text-sm leading-6 text-slate-700">{question.description}</p> : null}
                     <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
                       <Meta label="Tema" value={question.area} />
@@ -180,6 +206,19 @@ export function FascicoloAnalysis({ model }: { model: FascicoloAnalysisModel }) 
                   </li>
                 ))}
               </ul>
+            </section>
+          ) : null}
+
+          {model.legalSources && model.legalSources.length > 0 ? (
+            <section aria-labelledby="analysis-legal-sources-title" className="border-t border-slate-200 pt-5">
+              <div className="flex items-center gap-2">
+                <Search className="h-4 w-4 text-[#0b7285]" aria-hidden="true" />
+                <h3 id="analysis-legal-sources-title" className="text-base font-semibold text-slate-950">Fonti giuridiche conservate</h3>
+              </div>
+              <p className="mt-1 text-sm text-slate-600">Fonti verificate e risultati candidati sono distinti in base allo stato di verifica registrato.</p>
+              <div className="mt-3">
+                <FascicoloResearchSources sources={model.legalSources} />
+              </div>
             </section>
           ) : null}
 
@@ -242,6 +281,9 @@ export function FascicoloAnalysis({ model }: { model: FascicoloAnalysisModel }) 
           ) : null}
         </>
       )}
+      {technicalResearchProcedureId ? (
+        <TechnicalSourcesResearchPanel procedimentoId={technicalResearchProcedureId} variant="analysis" />
+      ) : null}
     </section>
   );
 }
