@@ -261,6 +261,34 @@ async function main() {
     throw new Error("Default demo ente DEMO-ENTE-ADSP not found after seed create.");
   }
 
+  const demoAuthority = await prisma.authority.upsert({
+    where: { code: "ADSP-MTC" },
+    create: {
+      code: "ADSP-MTC",
+      name: "Autorita di Sistema Portuale del Mar Tirreno Centrale",
+      level: "ADSP",
+    },
+    update: {
+      name: "Autorita di Sistema Portuale del Mar Tirreno Centrale",
+      level: "ADSP",
+    },
+  });
+
+  await prisma.port.upsert({
+    where: { code: "SALERNO" },
+    create: {
+      code: "SALERNO",
+      name: "Porto di Salerno",
+      enteId: defaultDemoEnteId,
+      authorityId: demoAuthority.id,
+    },
+    update: {
+      name: "Porto di Salerno",
+      enteId: defaultDemoEnteId,
+      authorityId: demoAuthority.id,
+    },
+  });
+
   await prisma.tenantMembership.createMany({
     data: users.map((item) => ({
       userId: item.id,
