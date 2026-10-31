@@ -23,6 +23,8 @@ export class VercelPreviewDeployError extends Error {
     | "DIAGNOSTIC_PROCEDURE_INVALID"
     | "DUPLICATE_AUTH_DIAGNOSTIC"
     | "AUTH_DIAGNOSTIC_MISSION_INVALID"
+    | "DUPLICATE_RECOVERY_DIAGNOSTIC"
+    | "RECOVERY_DIAGNOSTIC_MISSION_INVALID"
     | "DUPLICATE_WORKOS_RESOURCE_CONFIGURATION"
     | "PRODUCTION_TARGET_FORBIDDEN"
     | "TARGET_OVERRIDE_FORBIDDEN"
@@ -43,6 +45,7 @@ export interface VercelPreviewDeployArgs {
   readonly expectedCommit: string;
   readonly diagnosticProcedureId?: string;
   readonly diagnosticAuthMissionId?: string;
+  readonly diagnosticRecoveryMissionId?: string;
   readonly configureWorkosResource?: boolean;
 }
 
@@ -59,6 +62,7 @@ export function parseVercelPreviewDeployArgs(argv: readonly string[]): VercelPre
   let expectedCommit: string | undefined;
   let diagnosticProcedureId: string | undefined;
   let diagnosticAuthMissionId: string | undefined;
+  let diagnosticRecoveryMissionId: string | undefined;
   let configureWorkosResource = false;
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
@@ -105,6 +109,18 @@ export function parseVercelPreviewDeployArgs(argv: readonly string[]): VercelPre
       index += 1;
       continue;
     }
+    if (argument === "--diagnose-preview-recovery") {
+      if (diagnosticRecoveryMissionId !== undefined) {
+        throw new VercelPreviewDeployError("DUPLICATE_RECOVERY_DIAGNOSTIC");
+      }
+      const value = argv[index + 1];
+      if (!value || !/^research-mission:[a-f0-9]{64}$/.test(value)) {
+        throw new VercelPreviewDeployError("RECOVERY_DIAGNOSTIC_MISSION_INVALID");
+      }
+      diagnosticRecoveryMissionId = value;
+      index += 1;
+      continue;
+    }
     if (isProductionArgument(argument)) {
       throw new VercelPreviewDeployError("PRODUCTION_TARGET_FORBIDDEN");
     }
@@ -142,6 +158,7 @@ export function parseVercelPreviewDeployArgs(argv: readonly string[]): VercelPre
     expectedCommit,
     diagnosticProcedureId,
     diagnosticAuthMissionId,
+    diagnosticRecoveryMissionId,
     configureWorkosResource,
   };
 }
@@ -183,6 +200,9 @@ export function createVercelPreviewDeploySpec(
     ...(input.diagnosticAuthMissionId ? [
       `npm run runtime:diagnose-research-auth -- ${input.diagnosticAuthMissionId}`,
     ] : []),
+    ...(input.diagnosticRecoveryMissionId ? [
+      `npm run runtime:diagnose-preview-recovery -- ${input.diagnosticRecoveryMissionId}`,
+    ] : []),
     "npm run build",
   ];
   return {
@@ -203,7 +223,8 @@ export function createVercelPreviewDeploySpec(
         commandForIgnoringBuildStep: "exit 1",
         ...(input.configureWorkosResource
           || input.diagnosticProcedureId
-          || input.diagnosticAuthMissionId ? {
+          || input.diagnosticAuthMissionId
+          || input.diagnosticRecoveryMissionId ? {
           buildCommand: buildCommands.join(" && "),
         } : {}),
       },

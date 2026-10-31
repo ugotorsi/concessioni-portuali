@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { z } from "zod";
 
 const workosUserSchema = z.object({
@@ -18,13 +19,28 @@ export type PreviewPasswordRecoveryConfig = Readonly<{
 
 export type VerifiedWorkosUser = z.infer<typeof workosUserSchema>;
 
+export type PreviewPasswordRecoveryStage =
+  | "IDENTITY_LOOKUP"
+  | "MAGIC_AUTH_CREATE"
+  | "MAGIC_AUTH_VERIFY";
+
+export type PreviewPasswordRecoveryDiagnostic = Readonly<{
+  stage: PreviewPasswordRecoveryStage;
+  httpStatus?: number;
+  providerCode?: string;
+  providerRequestId?: string;
+  providerMessageDigest?: string;
+}>;
+
 export class PreviewPasswordRecoveryError extends Error {
   constructor(
     readonly code:
       | "RECOVERY_UNAVAILABLE"
       | "WORKOS_IDENTITY_UNAVAILABLE"
       | "WORKOS_IDENTITY_MISMATCH"
+      | "WORKOS_MAGIC_AUTH_UNAVAILABLE"
       | "WORKOS_VERIFICATION_FAILED",
+    readonly diagnostic?: PreviewPasswordRecoveryDiagnostic,
   ) {
     super(code);
     this.name = "PreviewPasswordRecoveryError";
@@ -55,13 +71,60 @@ function authorizationHeaders(config: PreviewPasswordRecoveryConfig): HeadersIni
   };
 }
 
+function safeProviderValue(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.trim();
+  return normalized && /^[A-Za-z0-9_.:/-]{1,128}$/.test(normalized)
+    ? normalized
+    : undefined;
+}
+
+async function workosFailure(
+  response: Response,
+  code: PreviewPasswordRecoveryError["code"],
+  stage: PreviewPasswordRecoveryStage,
+): Promise<PreviewPasswordRecoveryError> {
+  const body = await response.clone().json().catch(() => null) as Record<string, unknown> | null;
+  const providerCode = safeProviderValue(
+    body?.code ?? body?.error_code ?? body?.error,
+  );
+  const providerMessage = typeof body?.message === "string" ? body.message : undefined;
+  const providerRequestId = safeProviderValue(
+    response.headers.get("x-request-id")
+      ?? response.headers.get("workos-request-id")
+      ?? response.headers.get("x-workos-request-id"),
+  );
+  return new PreviewPasswordRecoveryError(code, {
+    stage,
+    httpStatus: response.status,
+    ...(providerCode ? { providerCode } : {}),
+    ...(providerRequestId ? { providerRequestId } : {}),
+    ...(providerMessage
+      ? {
+          providerMessageDigest: createHash("sha256")
+            .update(providerMessage, "utf8")
+            .digest("hex")
+            .slice(0, 16),
+        }
+      : {}),
+  });
+}
+
 async function parseWorkosUser(response: Response): Promise<VerifiedWorkosUser> {
   if (!response.ok) {
-    throw new PreviewPasswordRecoveryError("WORKOS_IDENTITY_UNAVAILABLE");
+    throw await workosFailure(
+      response,
+      "WORKOS_IDENTITY_UNAVAILABLE",
+      "IDENTITY_LOOKUP",
+    );
   }
   const parsed = workosUserSchema.safeParse(await response.json());
   if (!parsed.success) {
-    throw new PreviewPasswordRecoveryError("WORKOS_IDENTITY_UNAVAILABLE");
+    throw new PreviewPasswordRecoveryError("WORKOS_IDENTITY_UNAVAILABLE", {
+      stage: "IDENTITY_LOOKUP",
+      httpStatus: response.status,
+      providerCode: "INVALID_WORKOS_USER_RESPONSE",
+    });
   }
   return parsed.data;
 }
@@ -115,7 +178,11 @@ export async function sendWorkosMagicAuthCode(
     cache: "no-store",
   });
   if (!response.ok) {
-    throw new PreviewPasswordRecoveryError("WORKOS_IDENTITY_UNAVAILABLE");
+    throw await workosFailure(
+      response,
+      "WORKOS_MAGIC_AUTH_UNAVAILABLE",
+      "MAGIC_AUTH_CREATE",
+    );
   }
 }
 
@@ -146,11 +213,19 @@ export async function verifyWorkosMagicAuthCode(
     cache: "no-store",
   });
   if (!response.ok) {
-    throw new PreviewPasswordRecoveryError("WORKOS_VERIFICATION_FAILED");
+    throw await workosFailure(
+      response,
+      "WORKOS_VERIFICATION_FAILED",
+      "MAGIC_AUTH_VERIFY",
+    );
   }
   const parsed = workosAuthenticationSchema.safeParse(await response.json());
   if (!parsed.success) {
-    throw new PreviewPasswordRecoveryError("WORKOS_VERIFICATION_FAILED");
+    throw new PreviewPasswordRecoveryError("WORKOS_VERIFICATION_FAILED", {
+      stage: "MAGIC_AUTH_VERIFY",
+      httpStatus: response.status,
+      providerCode: "INVALID_WORKOS_AUTH_RESPONSE",
+    });
   }
   const user = parsed.data.user;
   if (

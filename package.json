@@ -21,6 +21,7 @@
     "runtime:inventory-selvara-promotion": "tsx scripts/runtime/inventory-selvara-promotion.ts",
     "runtime:diagnose-research-missions": "tsx scripts/runtime/diagnose-research-mission-scope.ts",
     "runtime:diagnose-research-auth": "tsx scripts/runtime/diagnose-research-auth-scope.ts",
+    "runtime:diagnose-preview-recovery": "tsx scripts/runtime/diagnose-preview-password-recovery.ts",
     "runtime:configure-workos-mcp-resource": "tsx scripts/runtime/configure-workos-mcp-resource.ts",
     "runtime:promote-selvara-production-candidate": "tsx scripts/runtime/promote-selvara-to-production-candidate.ts",
     "job:cancel-obsolete-analysis": "tsx scripts/cancel-obsolete-fascicolo-analysis-job.ts",

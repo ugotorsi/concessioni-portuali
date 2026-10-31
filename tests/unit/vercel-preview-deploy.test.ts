@@ -141,12 +141,37 @@ describe("Vercel Preview deployment guard", () => {
         buildCommand: `npm run runtime:diagnose-research-auth -- ${missionId} && npm run build`,
       },
     });
+
     expect(() => parseVercelPreviewDeployArgs([
       "--expected-commit",
       COMMIT,
       "--diagnose-research-auth",
       "research-mission:unsafe",
     ])).toThrow(new VercelPreviewDeployError("AUTH_DIAGNOSTIC_MISSION_INVALID"));
+  });
+
+  it("allows a read-only WorkOS recovery diagnostic for one exact mission", () => {
+    const missionId = `research-mission:${"c".repeat(64)}`;
+    const parsed = parseVercelPreviewDeployArgs([
+      "--expected-commit",
+      COMMIT,
+      "--diagnose-preview-recovery",
+      missionId,
+    ]);
+    const spec = createVercelPreviewDeploySpec(parsed, { NODE_ENV: "test" }, "linux");
+
+    expect(JSON.parse(spec.input)).toMatchObject({
+      projectSettings: {
+        commandForIgnoringBuildStep: "exit 1",
+        buildCommand: `npm run runtime:diagnose-preview-recovery -- ${missionId} && npm run build`,
+      },
+    });
+    expect(() => parseVercelPreviewDeployArgs([
+      "--expected-commit",
+      COMMIT,
+      "--diagnose-preview-recovery",
+      "research-mission:unsafe",
+    ])).toThrow(new VercelPreviewDeployError("RECOVERY_DIAGNOSTIC_MISSION_INVALID"));
   });
 
   it.each([

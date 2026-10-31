@@ -57,8 +57,15 @@ function clientContext(request: Request): Readonly<{
   };
 }
 
-function recoveryLog(code: string): void {
-  console.error(JSON.stringify({ event: "preview_password_recovery", code }));
+function recoveryLog(
+  code: string,
+  diagnostic?: PreviewPasswordRecoveryError["diagnostic"],
+): void {
+  console.error(JSON.stringify({
+    event: "preview_password_recovery",
+    code,
+    ...diagnostic,
+  }));
 }
 
 async function recordFailure(input: Readonly<{
@@ -66,6 +73,7 @@ async function recordFailure(input: Readonly<{
   email: string;
   role?: string;
   reason: string;
+  diagnostic?: PreviewPasswordRecoveryError["diagnostic"];
 }>): Promise<void> {
   try {
     await auditFailure({
@@ -77,7 +85,10 @@ async function recordFailure(input: Readonly<{
         userEmail: input.email,
         userRole: input.role,
       },
-      metadata: { reason: input.reason },
+      metadata: {
+        reason: input.reason,
+        ...input.diagnostic,
+      },
     });
   } catch {
     recoveryLog("AUDIT_FAILURE");
@@ -142,8 +153,14 @@ async function startRecovery(
       email: user.email,
       role: user.ruolo,
       reason,
+      ...(error instanceof PreviewPasswordRecoveryError
+        ? { diagnostic: error.diagnostic }
+        : {}),
     });
-    recoveryLog(reason);
+    recoveryLog(
+      reason,
+      error instanceof PreviewPasswordRecoveryError ? error.diagnostic : undefined,
+    );
   }
 
   return Response.json(genericStartResponse, {
@@ -199,6 +216,9 @@ async function completeRecovery(
       email: user.email,
       role: user.ruolo,
       reason,
+      ...(error instanceof PreviewPasswordRecoveryError
+        ? { diagnostic: error.diagnostic }
+        : {}),
     });
     return Response.json({ error: "RECOVERY_VERIFICATION_FAILED" }, { status: 400 });
   }
@@ -262,8 +282,14 @@ async function completeRecovery(
       email: user.email,
       role: user.ruolo,
       reason,
+      ...(error instanceof PreviewPasswordRecoveryError
+        ? { diagnostic: error.diagnostic }
+        : {}),
     });
-    recoveryLog(reason);
+    recoveryLog(
+      reason,
+      error instanceof PreviewPasswordRecoveryError ? error.diagnostic : undefined,
+    );
     return Response.json({ error: "RECOVERY_UPDATE_FAILED" }, { status: 409 });
   }
 

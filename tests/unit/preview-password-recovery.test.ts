@@ -90,6 +90,44 @@ describe("Preview password recovery WorkOS binding", () => {
     );
   });
 
+  it("distinguishes identity lookup failures from Magic Auth delivery failures", async () => {
+    const identityFetcher = vi.fn().mockResolvedValue(Response.json(
+      { message: "User not found", code: "not_found" },
+      { status: 404, headers: { "x-request-id": "request_identity" } },
+    ));
+    await expect(requireVerifiedWorkosIdentity({
+      localUserId: "local-user",
+      email: "owner@example.com",
+      config,
+      fetcher: identityFetcher,
+    })).rejects.toMatchObject({
+      code: "WORKOS_IDENTITY_UNAVAILABLE",
+      diagnostic: {
+        stage: "IDENTITY_LOOKUP",
+        httpStatus: 404,
+        providerCode: "not_found",
+        providerRequestId: "request_identity",
+      },
+    } satisfies Partial<PreviewPasswordRecoveryError>);
+
+    const magicFetcher = vi.fn().mockResolvedValue(Response.json(
+      { message: "Magic Auth email is disabled", code: "email_disabled" },
+      { status: 403 },
+    ));
+    await expect(sendWorkosMagicAuthCode({
+      email: "owner@example.com",
+      config,
+      fetcher: magicFetcher,
+    })).rejects.toMatchObject({
+      code: "WORKOS_MAGIC_AUTH_UNAVAILABLE",
+      diagnostic: {
+        stage: "MAGIC_AUTH_CREATE",
+        httpStatus: 403,
+        providerCode: "email_disabled",
+      },
+    } satisfies Partial<PreviewPasswordRecoveryError>);
+  });
+
   it("verifies the one-time code and rechecks email plus external ID", async () => {
     const fetcher = vi.fn().mockResolvedValue(Response.json({
       user: {
