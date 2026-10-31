@@ -100,6 +100,16 @@ tramite `errorState`, mentre le fonti valide restituite dagli altri provider dev
 essere conservate. Il client puo omettere `candidateId`: NOETRA lo genera e lo
 restituisce in forma canonica dopo aver validato la fonte.
 
+La stessa risposta espone una guida strutturata `evidenceBundle` per
+`RESEARCH_BRIDGE_V1`. La guida indica i campi obbligatori delle esecuzioni, il ruolo
+canonico di ogni provider, i tipi di operazione ammessi, le alternative di identita
+stabile per una fonte e lo schema esatto delle lacune. Ogni `authorityCandidate`
+deve riferirsi a un `executionRecordId` incluso nel bundle. Una lacuna usa
+`{ gapId, kind, targetId?, sourceFamily? }`; se il `candidateId` canonico non e
+ancora disponibile, `targetId` deve essere omesso. Le proprieta opzionali sconosciute
+si omettono invece di valorizzarle a `null`, mentre le collezioni richieste senza
+elementi si inviano come array vuoti.
+
 Le missioni create per questo percorso hanno `executionChannel=CHATGPT_CONNECTOR`.
 L'assenza del campo nelle missioni legacy equivale allo stesso valore. Soltanto una
 missione creata esplicitamente con `executionChannel=SERVER_AUTONOMOUS` puo essere

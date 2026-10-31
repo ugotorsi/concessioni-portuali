@@ -39,7 +39,7 @@ import {
   RESEARCH_MCP_WRITE_ARGUMENT_SCHEMAS,
 } from "@/server/legal-research/mcp-write-contracts";
 
-export const RESEARCH_MCP_SERVER_VERSION = "3B.14G-3" as const;
+export const RESEARCH_MCP_SERVER_VERSION = "3B.14G-4" as const;
 export const RESEARCH_MCP_ROUTE = "/api/mcp" as const;
 export const RESEARCH_MCP_MAX_PENDING_LIMIT = 50;
 export const RESEARCH_MCP_DEFAULT_PENDING_LIMIT = 20;
@@ -228,9 +228,49 @@ const connectorExecutionGuidanceSchema = z.object({
     omitUnsupportedOptionalArguments: z.literal(true),
   }).strict(),
   evidenceBundle: z.object({
+    contractVersion: z.literal(RESEARCH_BRIDGE_VERSION),
     recordFailedCallsWithErrorState: z.literal(true),
     preserveSuccessfulProviderSources: z.literal(true),
     candidateIdMayBeOmitted: z.literal(true),
+    omitUnknownOptionalPropertiesInsteadOfNull: z.literal(true),
+    executionIdSource: z.literal("research_claim_mission.executionId"),
+    claimTokenSource: z.literal("research_claim_mission.claimToken"),
+    researchToolExecutions: z.object({
+      requiredProperties: z.array(z.string()),
+      roleByToolId: z.object({
+        MOONLIT: z.literal("CITATION_AUTHORITY_INTELLIGENCE"),
+        SIMPLICITER: z.literal("LEGAL_RESEARCH_STRATEGIST"),
+        LEGAL_DATA_HUNTER: z.literal("BROAD_DISCOVERY"),
+      }).strict(),
+      operationTypes: z.array(z.enum([
+        "SEMANTIC_SEARCH",
+        "KEYWORD_SEARCH",
+        "EXACT_RETRIEVAL",
+        "FULL_TEXT_RETRIEVAL",
+        "CITATION_SEARCH",
+        "CROSS_JURISDICTION_SEARCH",
+        "ADVERSE_AUTHORITY_SEARCH",
+      ])),
+      failedCallResultCount: z.literal(0),
+      failedCallResultIdentifiersUsed: z.tuple([]),
+      executionRecordIdsMustBeUnique: z.literal(true),
+    }).strict(),
+    authorityCandidates: z.object({
+      requiredProperties: z.array(z.string()),
+      candidateIdPolicy: z.literal("OMIT_FOR_SERVER_CANONICALIZATION"),
+      executionRecordIdMustReferenceResearchToolExecutions: z.literal(true),
+      identityAnyOf: z.array(z.string()),
+      omitCandidateWhenNoStableIdentity: z.literal(true),
+      unverifiedCandidateState: z.literal("OFFICIAL_VERIFICATION_REQUIRED"),
+    }).strict(),
+    evidenceGaps: z.object({
+      requiredProperties: z.tuple([z.literal("gapId"), z.literal("kind")]),
+      optionalProperties: z.tuple([z.literal("targetId"), z.literal("sourceFamily")]),
+      allowedKinds: z.array(z.enum(RESEARCH_GAP_KINDS)),
+      gapIdsMustBeUnique: z.literal(true),
+      omitTargetIdWhenCanonicalCandidateIdIsUnknown: z.literal(true),
+    }).strict(),
+    requiredEmptyCollections: z.array(z.string()),
   }).strict(),
 }).strict();
 
@@ -659,9 +699,82 @@ export function createResearchMcpServer(
           omitUnsupportedOptionalArguments: true,
         },
         evidenceBundle: {
+          contractVersion: RESEARCH_BRIDGE_VERSION,
           recordFailedCallsWithErrorState: true,
           preserveSuccessfulProviderSources: true,
           candidateIdMayBeOmitted: true,
+          omitUnknownOptionalPropertiesInsteadOfNull: true,
+          executionIdSource: "research_claim_mission.executionId",
+          claimTokenSource: "research_claim_mission.claimToken",
+          researchToolExecutions: {
+            requiredProperties: [
+              "executionRecordId",
+              "toolId",
+              "role",
+              "operationType",
+              "researchQuery",
+              "sourceFamiliesRequested",
+              "resultIdentifiersUsed",
+              "resultCount",
+              "callsConsumed",
+            ],
+            roleByToolId: {
+              MOONLIT: "CITATION_AUTHORITY_INTELLIGENCE",
+              SIMPLICITER: "LEGAL_RESEARCH_STRATEGIST",
+              LEGAL_DATA_HUNTER: "BROAD_DISCOVERY",
+            },
+            operationTypes: [
+              "SEMANTIC_SEARCH",
+              "KEYWORD_SEARCH",
+              "EXACT_RETRIEVAL",
+              "FULL_TEXT_RETRIEVAL",
+              "CITATION_SEARCH",
+              "CROSS_JURISDICTION_SEARCH",
+              "ADVERSE_AUTHORITY_SEARCH",
+            ],
+            failedCallResultCount: 0,
+            failedCallResultIdentifiersUsed: [],
+            executionRecordIdsMustBeUnique: true,
+          },
+          authorityCandidates: {
+            requiredProperties: [
+              "kind",
+              "executionRecordId",
+              "toolId",
+              "supportDirection",
+              "sourceFamily",
+              "retrievalMethod",
+              "fullTextAvailable",
+              "verificationState",
+            ],
+            candidateIdPolicy: "OMIT_FOR_SERVER_CANONICALIZATION",
+            executionRecordIdMustReferenceResearchToolExecutions: true,
+            identityAnyOf: [
+              "ecli",
+              "celex",
+              "officialIdentifier",
+              "providerDocumentId",
+              "courtOrBody+documentType+number+year",
+            ],
+            omitCandidateWhenNoStableIdentity: true,
+            unverifiedCandidateState: "OFFICIAL_VERIFICATION_REQUIRED",
+          },
+          evidenceGaps: {
+            requiredProperties: ["gapId", "kind"],
+            optionalProperties: ["targetId", "sourceFamily"],
+            allowedKinds: RESEARCH_GAP_KINDS,
+            gapIdsMustBeUnique: true,
+            omitTargetIdWhenCanonicalCandidateIdIsUnknown: true,
+          },
+          requiredEmptyCollections: [
+            "citationObservations",
+            "legalResearchSuggestions",
+            "evidenceGaps",
+            "conflicts",
+            "unresolvedQuestions",
+            "suggestedFollowUpMissions",
+            "humanDecisionEscalations",
+          ],
         },
       },
       fascicoloContext: context,

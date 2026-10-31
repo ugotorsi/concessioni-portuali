@@ -45,9 +45,24 @@ const operationTypeSchema = z.enum([
   "CROSS_JURISDICTION_SEARCH",
   "ADVERSE_AUTHORITY_SEARCH",
 ]);
+const researchGapKindSchema = z.enum([
+  "NO_ADVERSE_AUTHORITY_CHECK",
+  "NO_CASSATION_CHECK",
+  "NO_EU_CHECK",
+  "FULL_TEXT_NOT_VERIFIED",
+  "OFFICIAL_IDENTITY_NOT_VERIFIED",
+  "TEMPORAL_VALIDITY_NOT_RESOLVED",
+  "OPEN_COUNTERARGUMENT",
+  "INSUFFICIENT_SOURCE_FAMILY_DIVERSITY",
+  "MISSING_FACT_EVIDENCE",
+  "MISSING_DOCUMENT",
+  "UNRESOLVED_AUTHORITY_TREATMENT",
+]);
 const researchToolExecutionInputSchema = z.object({
-  executionRecordId: z.string().min(1).max(256),
-  toolId: z.string().min(1).max(128),
+  executionRecordId: z.string().min(1).max(256)
+    .describe("Unique identifier for this provider call within the bundle."),
+  toolId: z.string().min(1).max(128)
+    .describe("Canonical provider tool family: MOONLIT, SIMPLICITER, or LEGAL_DATA_HUNTER."),
   providerId: z.string().min(1).max(128).optional(),
   role: z.enum([
     "LEGAL_RESEARCH_STRATEGIST",
@@ -58,18 +73,24 @@ const researchToolExecutionInputSchema = z.object({
   operationType: operationTypeSchema,
   researchQuery: z.string().min(1).max(16_384),
   sourceFamiliesRequested: z.array(sourceFamilySchema).max(16),
-  resultIdentifiersUsed: z.array(z.string().min(1).max(2_048)).max(100),
-  resultCount: z.number().int().min(0),
-  callsConsumed: z.number().int().min(0),
+  resultIdentifiersUsed: z.array(z.string().min(1).max(2_048)).max(100)
+    .describe("Provider result identifiers retained as authority candidates; use [] when none were retained."),
+  resultCount: z.number().int().min(0)
+    .describe("Number of results returned by this provider call; use 0 for a failed call."),
+  callsConsumed: z.number().int().min(0)
+    .describe("Number of provider calls represented by this execution record."),
   errorState: z.object({
     code: z.string().min(1).max(256),
     retryable: z.boolean(),
-  }).strict().optional(),
-}).strict();
+  }).strict().optional()
+    .describe("Required when the provider call failed; successful calls omit this property."),
+}).strict().describe("Immutable provenance for one connector call.");
 const authorityCandidateInputSchema = z.object({
-  candidateId: z.string().min(1).max(256).optional(),
+  candidateId: z.string().min(1).max(256).optional()
+    .describe("Omit for connector submissions; NOETRA generates the canonical candidateId."),
   kind: z.literal("AUTHORITY_CANDIDATE"),
-  executionRecordId: z.string().min(1).max(256),
+  executionRecordId: z.string().min(1).max(256)
+    .describe("Must reference an executionRecordId present in researchToolExecutions."),
   toolId: z.string().min(1).max(128),
   providerId: z.string().min(1).max(128).optional(),
   courtOrBody: z.string().min(1).max(1_024).optional(),
@@ -79,10 +100,12 @@ const authorityCandidateInputSchema = z.object({
   documentDate: z.string().optional(),
   ecli: z.string().min(1).max(512).optional(),
   celex: z.string().min(1).max(512).optional(),
-  officialIdentifier: z.string().min(1).max(2_048).optional(),
+  officialIdentifier: z.string().min(1).max(2_048).optional()
+    .describe("One stable identity field is required across ecli, celex, officialIdentifier, providerDocumentId, or the court/document/number/year composite."),
   title: z.string().min(1).max(8_192).optional(),
   sourceUrl: z.string().min(1).max(8_192).optional(),
-  providerDocumentId: z.string().min(1).max(2_048).optional(),
+  providerDocumentId: z.string().min(1).max(2_048).optional()
+    .describe("Provider-native stable identifier; may satisfy the candidate identity requirement."),
   providerReceivedText: z.string().max(1_048_576).optional(),
   providerDates: z.object({
     actDate: z.string().optional(),
@@ -106,8 +129,17 @@ const authorityCandidateInputSchema = z.object({
     "OFFICIAL_VERIFICATION_FAILED",
     "OFFICIALLY_VERIFIED",
   ]),
-  verifiedEvidence: z.unknown().optional(),
-}).strict();
+  verifiedEvidence: z.unknown().optional()
+    .describe("Supply only with OFFICIALLY_VERIFIED and the complete assisted-verification evidence shape."),
+}).strict().describe("A source actually returned by a recorded provider execution; do not invent unavailable fields.");
+const researchGapInputSchema = z.object({
+  gapId: z.string().min(1).max(256)
+    .describe("Unique stable identifier for this unresolved evidence gap within the bundle."),
+  kind: researchGapKindSchema,
+  targetId: z.string().min(1).max(256).optional()
+    .describe("Optional related identifier. Omit when the canonical candidateId is not yet known."),
+  sourceFamily: sourceFamilySchema.optional(),
+}).strict().describe("A remaining research or verification gap. Use [] when no gap is being declared.");
 
 export const researchEvidenceBundleInputSchema = z.object({
   kind: z.literal("RESEARCH_EVIDENCE_BUNDLE"),
@@ -122,7 +154,7 @@ export const researchEvidenceBundleInputSchema = z.object({
   legalAnalysisContributions: z.array(legalAnalysisContributionSchema).max(32).optional(),
   citationObservations: z.array(z.unknown()),
   legalResearchSuggestions: z.array(z.unknown()),
-  evidenceGaps: z.array(z.unknown()),
+  evidenceGaps: z.array(researchGapInputSchema).max(100),
   conflicts: z.array(z.string()),
   unresolvedQuestions: z.array(z.string()),
   suggestedFollowUpMissions: z.array(z.unknown()),

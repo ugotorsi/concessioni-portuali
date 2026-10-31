@@ -64,6 +64,10 @@ import {
   type ResearchPersistenceClient,
   type ResearchPersistenceContext,
 } from "@/server/legal-research/persistence";
+import {
+  canonicalizeResearchEvidenceBundleInput,
+  researchEvidenceBundleInputSchema,
+} from "@/server/legal-research/mcp-write-contracts";
 
 const actor = { actorId: "user-1", tenantId: "ente-1" } as const;
 const start = new Date("2026-09-17T10:00:00.000Z");
@@ -843,6 +847,100 @@ describe("Block 3B.13B research mission persistence", () => {
       }],
     });
     expect(deferred.operational.status).toBe("DEFERRED");
+  });
+
+  it("persists a connector bundle built from the published RESEARCH_BRIDGE_V1 shapes", async () => {
+    const harness = createHarness();
+    const { mission, claimed } = await createAndClaim(harness);
+    const parsed = researchEvidenceBundleInputSchema.parse({
+      ...evidenceBundle(mission, "execution-1"),
+      researchToolExecutions: [{
+        executionRecordId: "simpliciter-query-1",
+        toolId: "SIMPLICITER",
+        providerId: "SIMPLICITER",
+        role: "LEGAL_RESEARCH_STRATEGIST",
+        operationType: "SEMANTIC_SEARCH",
+        researchQuery: mission.researchQuestion,
+        sourceFamiliesRequested: ["GIUSTIZIA_AMMINISTRATIVA"],
+        resultIdentifiersUsed: ["TAR-LIGURIA-TEST-1"],
+        resultCount: 1,
+        callsConsumed: 1,
+      }, {
+        executionRecordId: "legal-data-hunter-query-1",
+        toolId: "LEGAL_DATA_HUNTER",
+        providerId: "LEGAL_DATA_HUNTER",
+        role: "BROAD_DISCOVERY",
+        operationType: "KEYWORD_SEARCH",
+        researchQuery: mission.researchQuestion,
+        sourceFamiliesRequested: ["ITALIAN_LEGISLATION"],
+        resultIdentifiersUsed: ["COD-NAV-ART-37"],
+        resultCount: 1,
+        callsConsumed: 1,
+      }],
+      authorityCandidates: [{
+        kind: "AUTHORITY_CANDIDATE",
+        executionRecordId: "simpliciter-query-1",
+        toolId: "SIMPLICITER",
+        providerId: "SIMPLICITER",
+        officialIdentifier: "TAR-LIGURIA-TEST-1",
+        title: "Synthetic administrative judgment",
+        sourceUrl: "https://official.example.test/TAR-LIGURIA-TEST-1",
+        providerReceivedText: "Synthetic connector result retained verbatim for validation.",
+        supportDirection: "QUALIFIES",
+        sourceFamily: "GIUSTIZIA_AMMINISTRATIVA",
+        retrievalMethod: "SEMANTIC_SEARCH",
+        fullTextAvailable: false,
+        verificationState: "OFFICIAL_VERIFICATION_REQUIRED",
+      }, {
+        kind: "AUTHORITY_CANDIDATE",
+        executionRecordId: "legal-data-hunter-query-1",
+        toolId: "LEGAL_DATA_HUNTER",
+        providerId: "LEGAL_DATA_HUNTER",
+        officialIdentifier: "COD-NAV-ART-37",
+        title: "Synthetic navigation-code source",
+        sourceUrl: "https://official.example.test/COD-NAV-ART-37",
+        providerReceivedText: "Synthetic connector result retained verbatim for validation.",
+        supportDirection: "SUPPORT",
+        sourceFamily: "ITALIAN_LEGISLATION",
+        retrievalMethod: "KEYWORD_SEARCH",
+        fullTextAvailable: false,
+        verificationState: "OFFICIAL_VERIFICATION_REQUIRED",
+      }],
+      evidenceGaps: [{
+        gapId: "moonlit-hosted-connector-validation",
+        kind: "NO_ADVERSE_AUTHORITY_CHECK",
+        sourceFamily: "GIUSTIZIA_AMMINISTRATIVA",
+      }],
+      unresolvedQuestions: ["Moonlit adverse-authority coverage remains unavailable."],
+      completionState: "PARTIAL",
+    });
+    const bundle = canonicalizeResearchEvidenceBundleInput(parsed);
+    expect(bundle).not.toBeNull();
+
+    const submitted = await submitResearchEvidenceBundle({
+      bundle: bundle!,
+      claimantId: "chat-session-1",
+      claimToken: claimed.claim.claimToken,
+      actor,
+    }, harness.context);
+
+    expect(submitted.outcome).toBe("CREATED");
+    expect(harness.bundles).toHaveLength(1);
+    expect(submitted.bundle.payload).toMatchObject({
+      completionState: "PARTIAL",
+      researchToolExecutions: [
+        { toolId: "SIMPLICITER", role: "LEGAL_RESEARCH_STRATEGIST" },
+        { toolId: "LEGAL_DATA_HUNTER", role: "BROAD_DISCOVERY" },
+      ],
+      authorityCandidates: [
+        { candidateId: expect.stringMatching(/^authority-candidate:/), officialIdentifier: "TAR-LIGURIA-TEST-1" },
+        { candidateId: expect.stringMatching(/^authority-candidate:/), officialIdentifier: "COD-NAV-ART-37" },
+      ],
+      evidenceGaps: [{
+        gapId: "moonlit-hosted-connector-validation",
+        kind: "NO_ADVERSE_AUTHORITY_CHECK",
+      }],
+    });
   });
 
   it("reuses an identical bundle idempotently", async () => {

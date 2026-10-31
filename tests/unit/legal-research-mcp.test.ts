@@ -306,6 +306,33 @@ describe("Block 3B.13C legal research MCP", () => {
           maximums: expect.any(Object),
         },
       });
+    const submitSchema = tools.tools.find((tool) => tool.name === "research_submit_evidence_bundle")?.inputSchema;
+    expect(submitSchema).toMatchObject({
+      properties: {
+        bundle: {
+          properties: {
+            researchToolExecutions: {
+              items: { properties: { executionRecordId: expect.any(Object), errorState: expect.any(Object) } },
+            },
+            authorityCandidates: {
+              items: { properties: { executionRecordId: expect.any(Object), candidateId: expect.any(Object) } },
+            },
+            evidenceGaps: {
+              items: {
+                properties: {
+                  gapId: expect.any(Object),
+                  kind: expect.any(Object),
+                  targetId: expect.any(Object),
+                  sourceFamily: expect.any(Object),
+                },
+                required: expect.arrayContaining(["gapId", "kind"]),
+                additionalProperties: false,
+              },
+            },
+          },
+        },
+      },
+    });
     expect(JSON.stringify(tools.tools)).not.toMatch(/research:(read|write)/);
   });
 
@@ -516,11 +543,85 @@ describe("Block 3B.13C legal research MCP", () => {
         omitUnsupportedOptionalArguments: true,
       },
       evidenceBundle: {
+        contractVersion: RESEARCH_BRIDGE_VERSION,
         recordFailedCallsWithErrorState: true,
         preserveSuccessfulProviderSources: true,
         candidateIdMayBeOmitted: true,
+        omitUnknownOptionalPropertiesInsteadOfNull: true,
+        executionIdSource: "research_claim_mission.executionId",
+        claimTokenSource: "research_claim_mission.claimToken",
+        researchToolExecutions: {
+          requiredProperties: [
+            "executionRecordId", "toolId", "role", "operationType", "researchQuery",
+            "sourceFamiliesRequested", "resultIdentifiersUsed", "resultCount", "callsConsumed",
+          ],
+          roleByToolId: {
+            MOONLIT: "CITATION_AUTHORITY_INTELLIGENCE",
+            SIMPLICITER: "LEGAL_RESEARCH_STRATEGIST",
+            LEGAL_DATA_HUNTER: "BROAD_DISCOVERY",
+          },
+          operationTypes: [
+            "SEMANTIC_SEARCH", "KEYWORD_SEARCH", "EXACT_RETRIEVAL", "FULL_TEXT_RETRIEVAL",
+            "CITATION_SEARCH", "CROSS_JURISDICTION_SEARCH", "ADVERSE_AUTHORITY_SEARCH",
+          ],
+          failedCallResultCount: 0,
+          failedCallResultIdentifiersUsed: [],
+          executionRecordIdsMustBeUnique: true,
+        },
+        authorityCandidates: {
+          requiredProperties: [
+            "kind", "executionRecordId", "toolId", "supportDirection", "sourceFamily",
+            "retrievalMethod", "fullTextAvailable", "verificationState",
+          ],
+          candidateIdPolicy: "OMIT_FOR_SERVER_CANONICALIZATION",
+          executionRecordIdMustReferenceResearchToolExecutions: true,
+          identityAnyOf: [
+            "ecli", "celex", "officialIdentifier", "providerDocumentId",
+            "courtOrBody+documentType+number+year",
+          ],
+          omitCandidateWhenNoStableIdentity: true,
+          unverifiedCandidateState: "OFFICIAL_VERIFICATION_REQUIRED",
+        },
+        evidenceGaps: {
+          requiredProperties: ["gapId", "kind"],
+          optionalProperties: ["targetId", "sourceFamily"],
+          allowedKinds: [
+            "NO_ADVERSE_AUTHORITY_CHECK", "NO_CASSATION_CHECK", "NO_EU_CHECK",
+            "FULL_TEXT_NOT_VERIFIED", "OFFICIAL_IDENTITY_NOT_VERIFIED",
+            "TEMPORAL_VALIDITY_NOT_RESOLVED", "OPEN_COUNTERARGUMENT",
+            "INSUFFICIENT_SOURCE_FAMILY_DIVERSITY", "MISSING_FACT_EVIDENCE",
+            "MISSING_DOCUMENT", "UNRESOLVED_AUTHORITY_TREATMENT",
+          ],
+          gapIdsMustBeUnique: true,
+          omitTargetIdWhenCanonicalCandidateIdIsUnknown: true,
+        },
+        requiredEmptyCollections: [
+          "citationObservations", "legalResearchSuggestions", "evidenceGaps", "conflicts",
+          "unresolvedQuestions", "suggestedFollowUpMissions", "humanDecisionEscalations",
+        ],
       },
     });
+  });
+
+  it("rejects an unstructured evidence gap before persistence", async () => {
+    const mockService = service();
+    const { client } = await protocolHarness(mockService);
+    const result = await client.callTool({
+      name: "research_submit_evidence_bundle",
+      arguments: {
+        bundle: {
+          ...evidenceBundle(),
+          evidenceGaps: [{
+            kind: "FULL_TEXT_NOT_VERIFIED",
+            description: "Missing the required gapId.",
+          }],
+        },
+        claimToken,
+      },
+    });
+
+    expect(result.isError).toBe(true);
+    expect(vi.mocked(mockService.submitEvidenceBundle)).not.toHaveBeenCalled();
   });
 
   it("canonicalizes connector sources and preserves failed Moonlit provenance", async () => {

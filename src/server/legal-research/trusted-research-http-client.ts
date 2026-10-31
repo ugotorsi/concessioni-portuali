@@ -170,7 +170,7 @@ const missionResultSchema = z.object({
       recordFailedCallsWithErrorState: z.literal(true),
       preserveSuccessfulProviderSources: z.literal(true),
       candidateIdMayBeOmitted: z.literal(true),
-    }).strict(),
+    }).passthrough(),
   }).strict().optional(),
   fascicoloContext: z.unknown(),
   assistedVerification: trustedAssistedEvidenceSchema.nullable().optional(),
