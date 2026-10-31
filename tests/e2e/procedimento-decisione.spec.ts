@@ -27,35 +27,48 @@ async function seedScenario(input: {
   const documentoId = `e2e-doc-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
   try {
-    const concessioneResult = await pool.query<{ id: string }>(
-      `SELECT "id" FROM "Concessione" WHERE "stato" NOT IN ('DECADUTA', 'REVOCATA', 'ARCHIVIATA') ORDER BY "createdAt" ASC LIMIT 1`,
+    const concessioneResult = await pool.query<{ id: string; enteId: string }>(
+      `SELECT "id", "enteId" FROM "Concessione" WHERE "enteId" IS NOT NULL AND "stato" NOT IN ('DECADUTA', 'REVOCATA', 'ARCHIVIATA') ORDER BY "createdAt" ASC LIMIT 1`,
     );
 
-    const concessioneId = concessioneResult.rows[0]?.id;
-    if (!concessioneId) {
+    const concessione = concessioneResult.rows[0];
+    if (!concessione) {
       throw new Error("No concessione found in seed data.");
     }
+    const concessioneId = concessione.id;
 
     await pool.query(
       `
         INSERT INTO "Procedimento" (
-          "id", "concessioneId", "tipologia", "stato", "checklistContraddittorioCompleta", "propostaEsitoIstruttorio", "createdAt", "updatedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+          "id", "enteId", "concessioneId", "tipologia", "stato", "checklistContraddittorioCompleta", "propostaEsitoIstruttorio",
+          "responsabileProcedimentoNome", "unitaOrganizzativaResponsabile", "responsabileAssegnatoAt", "createdAt", "updatedAt"
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW(), NOW())
       `,
-      [procedimentoId, concessioneId, input.tipologiaProcedimento, "IN_CORSO", true, input.propostaEsito],
+      [
+        procedimentoId,
+        concessione.enteId,
+        concessioneId,
+        input.tipologiaProcedimento,
+        "IN_CORSO",
+        true,
+        input.propostaEsito,
+        "Responsabile E2E",
+        "Ufficio procedimenti E2E",
+      ],
     );
 
     await pool.query(
       `
         INSERT INTO "Documento" (
-          "id", "nome", "tipologia", "statoDocumento", "concessioneId", "procedimentoId", "url", "createdAt", "updatedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
+          "id", "nome", "tipologia", "statoDocumento", "enteId", "concessioneId", "procedimentoId", "url", "createdAt", "updatedAt"
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
       `,
       [
         documentoId,
         `Atto conclusivo ${procedimentoId}`,
         "DETERMINA",
         "ATTIVO",
+        concessione.enteId,
         concessioneId,
         procedimentoId,
         `/documenti/${documentoId}/download`,
@@ -88,16 +101,17 @@ async function executeDecisionFlow(input: {
     }
   });
 
-  await input.page.goto(`/procedimenti/${input.scenario.procedimentoId}`);
-  await expect(input.page.getByRole("heading", { name: "Decisione conclusiva" })).toBeVisible();
+  await input.page.goto(`/procedimenti/${input.scenario.procedimentoId}?section=decisione`);
+  await expect(input.page.getByRole("heading", { name: "Provvedimento finale registrato" })).toBeVisible();
   await expect(input.page.getByText(/proposta istruttoria/i).first()).toBeVisible();
-  await expect(input.page.getByText(/non produce effetti automatici/i).first()).toBeVisible();
+  await expect(input.page.getByText(/non costituisce adozione/i).first()).toBeVisible();
 
   await expect(input.page.getByText(/Documenti demo/i)).toHaveCount(0);
 
   await input.page.locator('select[name="decisionType"]').selectOption(input.decisionType);
   await input.page.locator('select[name="documentoId"]').selectOption(input.scenario.documentoId);
   await input.page.locator('input[name="numeroAtto"]').fill(`ATTO-${Date.now()}`);
+  await input.page.locator('input[name="protocolloAtto"]').fill(`PROT-${Date.now()}`);
   await input.page.locator('input[name="dataAtto"]').fill("2026-07-10");
   await input.page.locator('input[name="dataEfficacia"]').fill("2026-07-11");
   await input.page.locator('input[name="organoCompetente"]').fill("Comitato di Gestione");
@@ -105,11 +119,12 @@ async function executeDecisionFlow(input: {
 
   await Promise.all([
     input.page.waitForResponse((response) => response.request().method() === "POST"),
-    input.page.getByRole("button", { name: "Conferma decisione conclusiva" }).click(),
+    input.page.getByRole("button", { name: "Conferma registrazione provvedimento" }).click(),
   ]);
 
   await expect(input.page).toHaveURL(new RegExp(`/procedimenti/${input.scenario.procedimentoId}$`));
-  await expect(input.page.getByText("Decisione registrata (read-only)")).toBeVisible();
+  await input.page.goto(`/procedimenti/${input.scenario.procedimentoId}?section=decisione`);
+  await expect(input.page.getByText("Provvedimento registrato (sola lettura)")).toBeVisible();
   await expect(input.page.getByText("Comitato di Gestione")).toBeVisible();
   await expect(input.page.getByText(/stato concessione/i).first()).toBeVisible();
 
@@ -118,7 +133,7 @@ async function executeDecisionFlow(input: {
   await expect(input.page.getByText(input.expectedConcessioneStateLabel).first()).toBeVisible();
 
   await input.page.goto("/audit");
-  await expect(input.page.getByText("PROCEDIMENTO_DECISION_FINALIZE").first()).toBeVisible();
+  await expect(input.page.getByText("DECISIONE_REGISTRATA").first()).toBeVisible();
 
   const severeErrors = errors.filter((item) => !/favicon|ResizeObserver loop limit exceeded/i.test(item));
   expect(severeErrors).toEqual([]);

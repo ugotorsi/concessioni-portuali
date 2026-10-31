@@ -6,6 +6,7 @@ test("normativa orchestration workspace is reachable and shows deterministic dis
   await loginAndExpectLanding(page, "giuridico@demo.local", "giuridico123", /\/dashboard$/);
 
   await page.goto("/normativa");
+  await page.locator("summary").filter({ hasText: /^Altro$/ }).click();
   await expect(page.getByRole("link", { name: "Orchestrazione regole" })).toBeVisible();
 
   await page.getByRole("link", { name: "Orchestrazione regole" }).click();

@@ -325,8 +325,8 @@ export function RuleOrchestratorPanel() {
               <div>
                 <h3 className="text-sm font-semibold text-slate-900">Fonti mancanti</h3>
                 <ul className="mt-2 grid gap-2 text-sm text-slate-700">
-                  {result.missingSources.map((item) => (
-                    <li key={item.code} className="rounded-md border border-slate-200 bg-white p-3">
+                  {result.missingSources.map((item, index) => (
+                    <li key={`${item.code}-${index}`} className="rounded-md border border-slate-200 bg-white p-3">
                       <p className="font-semibold text-slate-900">{item.code}</p>
                       <p className="mt-1">{item.message}</p>
                     </li>
@@ -351,8 +351,8 @@ export function RuleOrchestratorPanel() {
               <div>
                 <h3 className="text-sm font-semibold text-slate-900">Conflitti potenziali</h3>
                 <ul className="mt-2 grid gap-2 text-sm text-slate-700">
-                  {result.potentialConflicts.map((conflict) => (
-                    <li key={conflict.code} className="rounded-md border border-slate-200 bg-white p-3">
+                  {result.potentialConflicts.map((conflict, index) => (
+                    <li key={`${conflict.code}-${index}`} className="rounded-md border border-slate-200 bg-white p-3">
                       <p className="font-semibold text-slate-900">{conflict.code}</p>
                       <p className="mt-1">{conflict.message}</p>
                     </li>
@@ -364,8 +364,8 @@ export function RuleOrchestratorPanel() {
               <div>
                 <h3 className="text-sm font-semibold text-slate-900" data-testid="reasoning-trace-title">Reasoning trace</h3>
                 <ul className="mt-2 grid gap-1 text-sm text-slate-700" data-testid="reasoning-trace">
-                  {result.reasoningTrace.map((line) => (
-                    <li key={line}>{line}</li>
+                  {result.reasoningTrace.map((line, index) => (
+                    <li key={`${line}-${index}`}>{line}</li>
                   ))}
                 </ul>
               </div>

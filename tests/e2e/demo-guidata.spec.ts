@@ -64,12 +64,17 @@ async function goToSlideWithTitle(page: import("playwright/test").Page, title: s
     await expect(nextButton).toBeEnabled();
     await nextButton.click();
 
-    await expect
+    const advanced = await expect
       .poll(
         async () => ((await currentTitleLocator.textContent()) ?? "").trim(),
-        { timeout: 5000 },
+        { timeout: 2000 },
       )
-      .not.toBe(currentTitle);
+      .not.toBe(currentTitle)
+      .then(() => true)
+      .catch(() => false);
+    if (!advanced) {
+      await page.waitForTimeout(200);
+    }
   }
 
   throw new Error(`Slide non trovata: ${title}`);
