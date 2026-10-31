@@ -1,9 +1,16 @@
 # Selvara V7 - Protocollo di collaudo AI reale controllato
 
-Stato: **DISABILITATO - NON AUTORIZZATO ALL'ESECUZIONE**
+Stato: **BLOCCATO - ONE-SHOT 08 ESAURITO E NON RECUPERABILE**
 
-Questo protocollo prepara un solo collaudo reale sul fascicolo Selvara. Non abilita
+Questo protocollo descrive i limiti del collaudo reale sul fascicolo Selvara. Non abilita
 provider, non ammette job, non esegue missioni e non autorizza modifiche a Production.
+
+Il one-shot 08 non puo essere eseguito: il job
+`cmvtu2wgi0000260h2ovc1igi` e `TERMINAL_FAILED`, ha consumato l'unico tentativo
+ammesso e non dispone di un `V7ProviderOutputRecoveryArtifact`. Non e quindi
+consentito ne un retry ne il recupero persistence-only. Un eventuale one-shot
+successivo richiede correzione e verifica della riconciliazione delle missioni,
+nuova approvazione immutabile e autorizzazione esplicita dell'utente.
 
 ## Ambito immutabile
 
@@ -13,7 +20,7 @@ provider, non ammette job, non esegue missioni e non autorizza modifiche a Produ
 - Missione: `research-mission:c0cf02cb6dfdd5ff5eab8c0bfac2817ad7a63149b6df8bc51129fe50a06d59e6`.
 - Corpus: fingerprint
   `c9f04d508174cba8e7939704da11921963c60656660df988ee4cb5fdd25cdd5f`.
-- Approvazione predisposta, ma non concessa:
+- Approvazione esaurita e non riutilizzabile:
   `NOETRA-V7-SELVARA-2026-10-29-CONTROLLED-ONE-SHOT-08`.
 - Operazione AI: `FASCICOLO.AUTOMATIC_ANALYSIS_V1`, un solo job con
   `maxAttempts=1`.
@@ -37,7 +44,7 @@ Sono inoltre obbligatori:
 1. Preview e worker sullo stesso commit approvato.
 2. Database e storage non-production identificati.
 3. Identita, tenant, procedimento, missione e corpus verificati in sola lettura.
-4. Nessun job precedente claimable per la stessa approvazione.
+4. Nessun job precedente ammesso o claimable per la stessa approvazione.
 5. Preflight V7 positivo eseguito con
    `npm run runtime:verify-v7-one-shot-08-preflight`.
 6. Budget GLOBAL, TENANT e PROCEDIMENTO capienti per l'intero massimo riservato.
@@ -54,6 +61,9 @@ Sono inoltre obbligatori:
 - Missioni di ricerca eseguite: massimo **1**, esclusivamente quella indicata sopra.
 - Richieste a provider di ricerca: massimo **6** complessive.
 - Acquisizioni read-only di fonti ufficiali: massimo **12**.
+- La policy del worker deve fissare
+  `AUTOMATIC_OFFICIAL_SOURCE_MAX_ACQUISITIONS=12`; il valore e incluso nel
+  fingerprint della policy e limita il numero di acquisizioni eseguite.
 - Budget complessivo: massimo **EUR 2,00**, inclusi analisi e ricerca.
 - Il massimo calcolato dal preflight e tutte le riserve runtime devono essere minori
   o uguali al tetto complessivo. In caso contrario non si esegue il collaudo.

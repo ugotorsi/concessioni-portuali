@@ -109,6 +109,39 @@ describe("automatic research queue job", () => {
     }).requirementCode).toBe("AUTOMATIC_RESEARCH_BUDGET_NOT_ALLOWED");
   });
 
+  it("requires and fingerprints a bounded official-source acquisition policy", () => {
+    expect(evaluateAutomaticResearchPolicy({
+      tenantId: "tenant-1",
+      mission,
+      env: { ...env, AUTOMATIC_OFFICIAL_SOURCE_VERIFICATION_ENABLED: "true" },
+    }).requirementCode).toBe("AUTOMATIC_RESEARCH_POLICY_INVALID");
+
+    const bounded = evaluateAutomaticResearchPolicy({
+      tenantId: "tenant-1",
+      mission,
+      env: {
+        ...env,
+        AUTOMATIC_OFFICIAL_SOURCE_VERIFICATION_ENABLED: "true",
+        AUTOMATIC_OFFICIAL_SOURCE_MAX_ACQUISITIONS: "12",
+      },
+    });
+    const narrower = evaluateAutomaticResearchPolicy({
+      tenantId: "tenant-1",
+      mission,
+      env: {
+        ...env,
+        AUTOMATIC_OFFICIAL_SOURCE_VERIFICATION_ENABLED: "true",
+        AUTOMATIC_OFFICIAL_SOURCE_MAX_ACQUISITIONS: "11",
+      },
+    });
+
+    expect(bounded).toMatchObject({
+      authorized: true,
+      maxOfficialSourceAcquisitions: 12,
+    });
+    expect(narrower.policyDecisionRef).not.toBe(bounded.policyDecisionRef);
+  });
+
   it("completes through the handler with one accounted execution", async () => {
     const execute = vi.fn(async () => ({
       status: "COMPLETED" as const,

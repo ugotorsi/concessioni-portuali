@@ -100,7 +100,9 @@ Aggiunte a `.env.example` per il percorso automatico:
   `AUTOMATIC_RESEARCH_WORKER_ACTOR_ID`, `AUTOMATIC_RESEARCH_LEASE_MS`,
   `AUTOMATIC_RESEARCH_PROVIDER_TIMEOUT_MS`,
   `AUTOMATIC_OFFICIAL_SOURCE_VERIFICATION_ENABLED` (abilita il pass bounded di
-  verifica identity/full-text/temporal sulle fonti ufficiali dopo la discovery);
+  verifica identity/full-text/temporal sulle fonti ufficiali dopo la discovery),
+  `AUTOMATIC_OFFICIAL_SOURCE_MAX_ACQUISITIONS` (limite intero obbligatorio quando
+  la verifica ufficiale e abilitata e incluso nel fingerprint della policy);
 - provider: `LEGAL_DATA_HUNTER_API_KEY`, `MOONLIT_OAUTH_STORAGE_PATH`,
   `SIMPLICITER_OAUTH_STORAGE_PATH`.
 

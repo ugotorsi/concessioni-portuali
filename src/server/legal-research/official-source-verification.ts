@@ -482,7 +482,13 @@ export async function verifyOfficialResearchSources(input: {
   tenantId: string;
   caseId: string;
   actorId: string;
+  maxAcquisitions: number;
 }): Promise<OfficialSourceVerificationResult> {
+  if (!Number.isSafeInteger(input.maxAcquisitions)
+    || input.maxAcquisitions < 0
+    || input.maxAcquisitions > 100) {
+    throw new Error("OFFICIAL_SOURCE_ACQUISITION_LIMIT_INVALID");
+  }
   const missionRecord = await prisma.researchMissionRecord.findUnique({
     where: { id: input.missionId },
     select: {
@@ -532,7 +538,7 @@ export async function verifyOfficialResearchSources(input: {
   });
   const uniqueCandidates = [...new Map(normattivaCandidates.map((entry) => (
     [entry.item.officialIdentifier, entry] as const
-  ))).values()];
+  ))).values()].slice(0, input.maxAcquisitions);
   const provider = createNormattivaOfficialProvider();
   let verified = 0;
   let usable = 0;

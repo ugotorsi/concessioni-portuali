@@ -213,11 +213,15 @@ const defaultDependencies: AutomaticResearchExecutionDependencies = {
       return;
     }
     if (process.env.AUTOMATIC_OFFICIAL_SOURCE_VERIFICATION_ENABLED === "true") {
+      if (input.authority.decision.maxOfficialSourceAcquisitions === null) {
+        throw new Error("AUTOMATIC_OFFICIAL_SOURCE_ACQUISITION_LIMIT_MISSING");
+      }
       await verifyOfficialResearchSources({
         missionId: input.authority.mission.missionId,
         tenantId: input.authority.tenantId,
         caseId: input.authority.mission.caseReference.caseId,
         actorId: input.authority.actorId,
+        maxAcquisitions: input.authority.decision.maxOfficialSourceAcquisitions,
       });
       await produceAndPersistAutomaticLegalApplicabilityReviews({
         missionId: input.authority.mission.missionId,
