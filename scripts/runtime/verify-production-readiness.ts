@@ -1,5 +1,6 @@
 import { prisma } from "../../src/lib/prisma";
 import { VERCEL_PREVIEW_DEPLOYMENT } from "../deploy/vercel-preview";
+import { evaluateProductionReadiness } from "./production-readiness-policy";
 
 async function main(): Promise<void> {
   if (
@@ -50,7 +51,7 @@ async function main(): Promise<void> {
       ? prisma.structuredFascicoloReportSnapshot.count({ where: { status: "CURRENT" } })
       : Promise.resolve(0),
   ]);
-  const readiness = {
+  const readinessData = {
     adminTotal: admins.length,
     adminReady: admins.filter((admin) => (
       admin.attivo
@@ -76,9 +77,11 @@ async function main(): Promise<void> {
       return { action: entry.azione, reason };
     }),
   };
+  const gate = evaluateProductionReadiness(readinessData);
+  const readiness = { ...readinessData, ...gate };
 
   console.info(`NOETRA_PRODUCTION_READINESS=${JSON.stringify(readiness)}`);
-  if (readiness.adminReady < 1 || readiness.currentStructuredReports < 1) {
+  if (gate.blockingIssues.length > 0) {
     throw new Error("PRODUCTION_READINESS_BLOCKED");
   }
 }
