@@ -20,6 +20,10 @@ const MCP_DEDICATED_ALLOWED_PATHS = new Set([
   "/api/auth/callback/credentials",
   "/api/auth/error",
 ]);
+const MCP_DEDICATED_ALLOWED_PREFIXES = [
+  "/_next/static/",
+  "/_next/image",
+];
 const TRUSTED_RESEARCH_MISSION_PATH = "/api/legal-research/trusted/mission";
 const TRUSTED_RESEARCH_MISSION_ACTION_PATH = "/api/legal-research/trusted/mission/action";
 const PROTECTED_PREFIXES = [
@@ -130,10 +134,16 @@ function isDedicatedMcpHost(request: NextRequest): boolean {
   return request.nextUrl.hostname.toLowerCase() === MCP_DEDICATED_PREVIEW_HOST;
 }
 
+function isDedicatedMcpAllowedPath(pathname: string): boolean {
+  return MCP_DEDICATED_ALLOWED_PATHS.has(pathname)
+    || pathname === "/favicon.ico"
+    || MCP_DEDICATED_ALLOWED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
-  if (isDedicatedMcpHost(request) && !MCP_DEDICATED_ALLOWED_PATHS.has(pathname)) {
+  if (isDedicatedMcpHost(request) && !isDedicatedMcpAllowedPath(pathname)) {
     return withSecurityHeaders(NextResponse.json(
       { error: "NOT_FOUND" },
       {

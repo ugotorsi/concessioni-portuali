@@ -45,8 +45,6 @@ describe("middleware sensitive route boundaries", () => {
     "/api/admin/runtime-health",
     "/api/auth/password-recovery",
     "/api/auth/mfa/enrollment",
-    "/_next/static/chunks/app.js",
-    "/favicon.ico",
   ])("denies non-MCP paths on the dedicated MCP host: %s", async (path) => {
     const response = await middleware(makeRequest(
       path,
@@ -69,6 +67,9 @@ describe("middleware sensitive route boundaries", () => {
     "/api/auth/session",
     "/api/auth/callback/credentials",
     "/api/auth/error",
+    "/_next/static/chunks/app.js",
+    "/_next/image?url=%2Ffavicon.ico&w=64&q=75",
+    "/favicon.ico",
   ])("allows the MCP and Standalone Connect boundaries on the dedicated MCP host: %s", async (path) => {
     const response = await middleware(makeRequest(
       path,
