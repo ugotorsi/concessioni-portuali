@@ -92,6 +92,14 @@ La superficie admin di creazione assegna la missione a un attore attivo e deriva
 
 Il percorso operativo e: Concessioni Portuali crea e assegna la missione -> ChatGPT personale la prende tramite MCP -> ChatGPT usa i propri connettori autorizzati -> ChatGPT restituisce e completa il bundle tramite MCP. Non sono richiesti client provider programmatici nel backend.
 
+`research_get_mission` restituisce anche `connectorExecutionGuidance`. Per Moonlit,
+`query` e sempre la stringa indicata da NOETRA: non deve essere trasformata in un
+oggetto o in un array, e gli argomenti opzionali non supportati dallo schema live del
+connettore vanno omessi. Nel bundle le chiamate provider fallite restano tracciate
+tramite `errorState`, mentre le fonti valide restituite dagli altri provider devono
+essere conservate. Il client puo omettere `candidateId`: NOETRA lo genera e lo
+restituisce in forma canonica dopo aver validato la fonte.
+
 Le missioni create per questo percorso hanno `executionChannel=CHATGPT_CONNECTOR`.
 L'assenza del campo nelle missioni legacy equivale allo stesso valore. Soltanto una
 missione creata esplicitamente con `executionChannel=SERVER_AUTONOMOUS` puo essere

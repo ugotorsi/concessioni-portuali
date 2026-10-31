@@ -85,10 +85,14 @@ Sono inoltre obbligatori:
 4. Nella sessione ChatGPT autenticata, acquisire esclusivamente la missione assegnata
    mediante il connettore NOETRA Selvara Preview.
 5. Usare esclusivamente i connettori personali ChatGPT autorizzati e rispettare il
-   budget immutabile della missione.
+   budget immutabile della missione. Per Moonlit usare la stringa
+   `connectorExecutionGuidance.query` come parametro `query`, senza convertirla in
+   oggetto o array e senza aggiungere argomenti opzionali estranei allo schema live.
 6. Trasmettere testi verificabili con `research_submit_documentary_evidence`, quindi
    il bundle con `research_submit_evidence_bundle` e infine completare tramite
-   `research_complete_mission`.
+   `research_complete_mission`. Una chiamata provider fallita va registrata con
+   `errorState`; non deve eliminare le fonti valide gia ottenute dagli altri provider.
+   `candidateId` puo essere omesso per una nuova fonte e viene generato da NOETRA.
 7. Verificare per ogni conclusione rilevante almeno una fonte ufficiale, la data di
    efficacia, eventuali fonti contrarie e la distinzione tra fatto, regola e inferenza.
 8. Verificare che evidenze, relazioni, revisione e rapporto appartengano al tenant e

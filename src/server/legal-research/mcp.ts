@@ -8,7 +8,6 @@ import { refreshStructuredReportAfterResearch } from "@/server/fascicolo-report/
 import {
   CONFIRMED_RESEARCH_TOOL_ROLES,
   RESEARCH_BRIDGE_VERSION,
-  type ResearchEvidenceBundle,
   type ResearchMission,
 } from "@/server/legal-research/bridge";
 import {
@@ -35,9 +34,12 @@ import {
   type ResearchMcpPermission,
   type ResearchMcpPrincipal,
 } from "@/server/legal-research/mcp-auth";
-import { RESEARCH_MCP_WRITE_ARGUMENT_SCHEMAS } from "@/server/legal-research/mcp-write-contracts";
+import {
+  canonicalizeResearchEvidenceBundleInput,
+  RESEARCH_MCP_WRITE_ARGUMENT_SCHEMAS,
+} from "@/server/legal-research/mcp-write-contracts";
 
-export const RESEARCH_MCP_SERVER_VERSION = "3B.14G-2" as const;
+export const RESEARCH_MCP_SERVER_VERSION = "3B.14G-3" as const;
 export const RESEARCH_MCP_ROUTE = "/api/mcp" as const;
 export const RESEARCH_MCP_MAX_PENDING_LIMIT = 50;
 export const RESEARCH_MCP_DEFAULT_PENDING_LIMIT = 20;
@@ -214,6 +216,23 @@ const operationalSchema = z.object({
   completedAt: jsonDateTimeSchema.nullable(),
   deferredAt: jsonDateTimeSchema.nullable(),
 }).strict();
+const connectorExecutionGuidanceSchema = z.object({
+  query: z.string(),
+  queryEncoding: z.literal("JSON_STRING"),
+  moonlit: z.object({
+    semanticTool: z.literal("search_legal_documents"),
+    keywordTool: z.literal("search_legal_documents_by_keyword"),
+    queryArgument: z.literal("query"),
+    passQueryAsString: z.literal(true),
+    useLiveToolSchema: z.literal(true),
+    omitUnsupportedOptionalArguments: z.literal(true),
+  }).strict(),
+  evidenceBundle: z.object({
+    recordFailedCallsWithErrorState: z.literal(true),
+    preserveSuccessfulProviderSources: z.literal(true),
+    candidateIdMayBeOmitted: z.literal(true),
+  }).strict(),
+}).strict();
 
 export const RESEARCH_MCP_OUTPUT_SCHEMAS = {
   research_capabilities: z.object({
@@ -261,6 +280,7 @@ export const RESEARCH_MCP_OUTPUT_SCHEMAS = {
   research_get_mission: z.object({
     mission: researchMissionOutputSchema,
     operational: operationalSchema,
+    connectorExecutionGuidance: connectorExecutionGuidanceSchema,
     fascicoloContext: fascicoloContextSchema,
     assistedVerification: trustedAssistedEvidenceSchema.nullable().optional(),
   }).strict(),
@@ -279,6 +299,7 @@ export const RESEARCH_MCP_OUTPUT_SCHEMAS = {
     fascicoloScopeId: z.string(),
     executionId: z.string(),
     completionState: z.enum(COMPLETION_STATES),
+    authorityCandidateIds: z.array(z.string()),
   }).strict(),
   research_submit_documentary_evidence: z.object({
     outcome: z.enum(["CREATED", "DUPLICATE_OR_IDEMPOTENT_SUCCESS"]),
@@ -603,7 +624,8 @@ export function createResearchMcpServer(
 
   server.registerTool("research_get_mission", {
     title: "Get research mission",
-    description: "Return an immutable mission snapshot and its bounded operational state.",
+    description:
+      "Return an immutable mission snapshot, bounded operational state, and connector-safe query guidance. For Moonlit, pass connectorExecutionGuidance.query unchanged as the string-valued query argument.",
     inputSchema: { missionId: z.string().min(1).max(96) },
     outputSchema: RESEARCH_MCP_OUTPUT_SCHEMAS.research_get_mission,
     annotations: annotations(true, true),
@@ -625,6 +647,23 @@ export function createResearchMcpServer(
     if (verification && verification.snapshot.missionId !== missionId) throw new ResearchPersistenceError("AUTHORIZATION_REQUIRED");
     return {
       ...operationalMission(stored),
+      connectorExecutionGuidance: {
+        query: stored.mission.researchQuestion,
+        queryEncoding: "JSON_STRING",
+        moonlit: {
+          semanticTool: "search_legal_documents",
+          keywordTool: "search_legal_documents_by_keyword",
+          queryArgument: "query",
+          passQueryAsString: true,
+          useLiveToolSchema: true,
+          omitUnsupportedOptionalArguments: true,
+        },
+        evidenceBundle: {
+          recordFailedCallsWithErrorState: true,
+          preserveSuccessfulProviderSources: true,
+          candidateIdMayBeOmitted: true,
+        },
+      },
       fascicoloContext: context,
       assistedVerification: verification ? {
         recordId: verification.recordId,
@@ -680,7 +719,8 @@ export function createResearchMcpServer(
 
   server.registerTool("research_submit_evidence_bundle", {
     title: "Submit research evidence bundle",
-    description: "Validate and append an evidence bundle for the authenticated executor's active claim.",
+    description:
+      "Validate and append an evidence bundle for the active claim. Preserve successful provider sources when another provider fails; candidateId may be omitted and is generated canonically by NOETRA.",
     inputSchema: RESEARCH_MCP_WRITE_ARGUMENT_SCHEMAS.research_submit_evidence_bundle.shape,
     outputSchema: RESEARCH_MCP_OUTPUT_SCHEMAS.research_submit_evidence_bundle,
     annotations: annotations(false, true),
@@ -693,8 +733,10 @@ export function createResearchMcpServer(
       const stored = await service.getMission(bundle.missionId, actor(principal));
       if (!stored) throw new ResearchPersistenceError("MISSION_NOT_FOUND");
       const scope = requireMissionScope(stored.mission);
+      const canonicalBundle = canonicalizeResearchEvidenceBundleInput(bundle);
+      if (!canonicalBundle) throw new ResearchPersistenceError("INVALID_BUNDLE");
       const submitted = await service.submitEvidenceBundle({
-        bundle: bundle as ResearchEvidenceBundle,
+        bundle: canonicalBundle,
         claimantId: principal.claimantId,
         claimToken,
         actor: actor(principal),
@@ -707,6 +749,7 @@ export function createResearchMcpServer(
         fascicoloScopeId: scope.scopeId,
         executionId: submitted.bundle.executionId,
         completionState: submitted.bundle.completionState,
+        authorityCandidateIds: canonicalBundle.authorityCandidates.map((candidate) => candidate.candidateId),
       };
     },
   ));

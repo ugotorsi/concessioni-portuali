@@ -504,6 +504,90 @@ describe("Block 3B.13C legal research MCP", () => {
     expect(fetched.mission.referenceDate).toBe(mission.referenceDate);
     expect(fetched.mission.executionChannel).toBe("CHATGPT_CONNECTOR");
     expect(fetched.mission.researchQuestion).toContain("hidden_admin_tool");
+    expect(fetched.connectorExecutionGuidance).toEqual({
+      query: mission.researchQuestion,
+      queryEncoding: "JSON_STRING",
+      moonlit: {
+        semanticTool: "search_legal_documents",
+        keywordTool: "search_legal_documents_by_keyword",
+        queryArgument: "query",
+        passQueryAsString: true,
+        useLiveToolSchema: true,
+        omitUnsupportedOptionalArguments: true,
+      },
+      evidenceBundle: {
+        recordFailedCallsWithErrorState: true,
+        preserveSuccessfulProviderSources: true,
+        candidateIdMayBeOmitted: true,
+      },
+    });
+  });
+
+  it("canonicalizes connector sources and preserves failed Moonlit provenance", async () => {
+    const mockService = service();
+    const { client } = await protocolHarness(mockService);
+    const bundle = {
+      ...evidenceBundle(),
+      researchToolExecutions: [{
+        executionRecordId: "moonlit-query-1",
+        toolId: "MOONLIT",
+        providerId: "MOONLIT",
+        role: "CITATION_AUTHORITY_INTELLIGENCE",
+        operationType: "SEMANTIC_SEARCH",
+        researchQuery: mission.researchQuestion,
+        sourceFamiliesRequested: ["GIUSTIZIA_AMMINISTRATIVA"],
+        resultIdentifiersUsed: [],
+        resultCount: 0,
+        callsConsumed: 1,
+        errorState: { code: "INVALID_ARGUMENT", retryable: false },
+      }, {
+        executionRecordId: "simpliciter-query-1",
+        toolId: "SIMPLICITER",
+        providerId: "SIMPLICITER",
+        role: "LEGAL_RESEARCH_STRATEGIST",
+        operationType: "SEMANTIC_SEARCH",
+        researchQuery: mission.researchQuestion,
+        sourceFamiliesRequested: ["GIUSTIZIA_AMMINISTRATIVA"],
+        resultIdentifiersUsed: ["TAR-TEST-2026-1"],
+        resultCount: 1,
+        callsConsumed: 1,
+      }],
+      authorityCandidates: [{
+        kind: "AUTHORITY_CANDIDATE",
+        executionRecordId: "simpliciter-query-1",
+        toolId: "SIMPLICITER",
+        providerId: "SIMPLICITER",
+        officialIdentifier: "TAR-TEST-2026-1",
+        title: "Synthetic administrative judgment",
+        sourceUrl: "https://official.example.test/TAR-TEST-2026-1",
+        providerDocumentId: "simpliciter:TAR-TEST-2026-1",
+        providerReceivedText: "Synthetic provider text retained for verification.",
+        supportDirection: "QUALIFIES",
+        sourceFamily: "GIUSTIZIA_AMMINISTRATIVA",
+        retrievalMethod: "SEMANTIC_SEARCH",
+        fullTextAvailable: true,
+        verificationState: "OFFICIAL_VERIFICATION_REQUIRED",
+      }],
+    };
+
+    const result = structured(await client.callTool({
+      name: "research_submit_evidence_bundle",
+      arguments: { bundle, claimToken },
+    }));
+
+    expect(result.authorityCandidateIds).toHaveLength(1);
+    expect(result.authorityCandidateIds[0]).toMatch(/^authority-candidate:/);
+    const submitted = vi.mocked(mockService.submitEvidenceBundle).mock.calls[0][0].bundle;
+    expect(submitted.researchToolExecutions[0]).toMatchObject({
+      toolId: "MOONLIT",
+      errorState: { code: "INVALID_ARGUMENT", retryable: false },
+    });
+    expect(submitted.authorityCandidates[0]).toMatchObject({
+      candidateId: result.authorityCandidateIds[0],
+      providerId: "SIMPLICITER",
+      officialIdentifier: "TAR-TEST-2026-1",
+      providerReceivedText: "Synthetic provider text retained for verification.",
+    });
   });
 
   it("strictly projects mission egress and ignores client-supplied scope selectors", async () => {

@@ -771,6 +771,80 @@ describe("Block 3B.13B research mission persistence", () => {
     expect(result.bundle.completionState).toBe("PARTIAL");
   });
 
+  it("preserves successful provider sources when Moonlit validation fails and defers the mission", async () => {
+    const harness = createHarness();
+    const { mission, claimed } = await createAndClaim(harness);
+    const source = createAuthorityCandidate({
+      kind: "AUTHORITY_CANDIDATE",
+      executionRecordId: "simpliciter-query-1",
+      toolId: "SIMPLICITER",
+      providerId: "SIMPLICITER",
+      officialIdentifier: "TAR-TEST-2026-1",
+      title: "Synthetic administrative judgment",
+      sourceUrl: "https://official.example.test/TAR-TEST-2026-1",
+      providerDocumentId: "simpliciter:TAR-TEST-2026-1",
+      providerReceivedText: "Synthetic provider text retained for verification.",
+      supportDirection: "QUALIFIES",
+      sourceFamily: "GIUSTIZIA_AMMINISTRATIVA",
+      retrievalMethod: "SEMANTIC_SEARCH",
+      fullTextAvailable: true,
+      verificationState: "OFFICIAL_VERIFICATION_REQUIRED",
+    });
+    const bundle: ResearchEvidenceBundle = {
+      ...evidenceBundle(mission, "execution-1"),
+      researchToolExecutions: [{
+        ...toolExecution("MOONLIT"),
+        executionRecordId: "moonlit-query-1",
+        researchQuery: mission.researchQuestion,
+        errorState: { code: "INVALID_ARGUMENT", retryable: false },
+      }, {
+        ...toolExecution("SIMPLICITER"),
+        executionRecordId: "simpliciter-query-1",
+        researchQuery: mission.researchQuestion,
+        resultIdentifiersUsed: ["TAR-TEST-2026-1"],
+        resultCount: 1,
+      }],
+      authorityCandidates: [source],
+      evidenceGaps: [{
+        gapId: "moonlit-query-invalid",
+        kind: "OFFICIAL_IDENTITY_NOT_VERIFIED",
+        targetId: source.candidateId,
+      }],
+      unresolvedQuestions: ["Repeat the Moonlit query with a schema-valid string argument."],
+    };
+
+    const submitted = await submitResearchEvidenceBundle({
+      bundle,
+      claimantId: "chat-session-1",
+      claimToken: claimed.claim.claimToken,
+      actor,
+    }, harness.context);
+    const deferred = await releaseOrDeferResearchMission({
+      missionId: mission.missionId,
+      executionId: "execution-1",
+      claimantId: "chat-session-1",
+      claimToken: claimed.claim.claimToken,
+      actor,
+      disposition: "DEFER",
+      reasonCode: "MOONLIT_INVALID_ARGUMENT",
+    }, harness.context);
+
+    expect(submitted.bundle.payload).toMatchObject({
+      completionState: "PARTIAL",
+      researchToolExecutions: [
+        { toolId: "MOONLIT", errorState: { code: "INVALID_ARGUMENT", retryable: false } },
+        { toolId: "SIMPLICITER", resultIdentifiersUsed: ["TAR-TEST-2026-1"] },
+      ],
+      authorityCandidates: [{
+        candidateId: source.candidateId,
+        providerId: "SIMPLICITER",
+        officialIdentifier: "TAR-TEST-2026-1",
+        providerReceivedText: "Synthetic provider text retained for verification.",
+      }],
+    });
+    expect(deferred.operational.status).toBe("DEFERRED");
+  });
+
   it("reuses an identical bundle idempotently", async () => {
     const harness = createHarness();
     const { mission, claimed } = await createAndClaim(harness);
