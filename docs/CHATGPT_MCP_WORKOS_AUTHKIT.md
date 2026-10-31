@@ -56,6 +56,34 @@ Il comando accetta soltanto tale URI esatto, rifiuta wildcard e ambienti AuthKit
 Staging, conserva tutti gli indicatori esistenti e verifica la postcondizione mediante
 una nuova lettura API.
 
+## Recupero password Preview
+
+Il recupero password locale e disponibile soltanto su Vercel Preview e resta disabilitato
+per default:
+
+```dotenv
+PREVIEW_PASSWORD_RECOVERY_ENABLED="true"
+WORKOS_CLIENT_ID="<client-id-non-production>"
+```
+
+`WORKOS_API_KEY` deve appartenere allo stesso ambiente non-production del `WORKOS_CLIENT_ID`.
+Le email automatiche Magic Auth devono essere abilitate in WorkOS. Production non deve
+ricevere queste variabili con il recupero attivo.
+
+La procedura:
+
+1. trova l'utente locale esistente tramite email, senza creare account;
+2. richiede a WorkOS l'utente con `external_id` uguale all'immutabile `User.id`;
+3. richiede email verificata e corrispondenza esatta dell'indirizzo;
+4. invia un codice Magic Auth monouso tramite WorkOS;
+5. verifica nuovamente email ed `external_id` quando il codice viene presentato;
+6. aggiorna soltanto hash password, timestamp password e stato lockout;
+7. conserva `User.id`, membership, tenant, ruolo, MFA, recovery codes e assegnazioni;
+8. invalida le sessioni JWT emesse prima del cambio password.
+
+Gli account con MFA non configurata non sono recuperabili da questa superficie. Dopo il
+reset, il normale login continua a richiedere il TOTP gia associato all'utente.
+
 ## Binding server-side attore-missione
 
 OAuth identifica l'attore e il tenant; l'accesso a una missione richiede inoltre un'assegnazione persistita e immutabile della `ResearchMission` al `User.id` locale esposto nella claim firmata `urn:concessioni-portuali:actor_id`.

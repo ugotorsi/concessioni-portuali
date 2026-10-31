@@ -14,6 +14,7 @@ declare module "next-auth" {
     role: string;
     mfaEnrollmentRequired?: boolean;
     mfaVerified?: boolean;
+    authVersion?: string;
   }
 }
 
@@ -23,6 +24,7 @@ declare module "next-auth/jwt" {
     role?: string;
     mfaEnrollmentRequired?: boolean;
     mfaVerified?: boolean;
+    authVersion?: string;
     invalidated?: boolean;
   }
 }

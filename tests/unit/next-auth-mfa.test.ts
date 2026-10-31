@@ -46,6 +46,7 @@ function userRecord(overrides: Record<string, unknown> = {}) {
     mfaEnabled: false,
     mfaSecret: null,
     mustChangePassword: false,
+    passwordChangedAt: new Date("2026-10-01T00:00:00.000Z"),
     ...overrides,
   };
 }
@@ -136,6 +137,7 @@ describe("NextAuth MFA enforcement", () => {
       ruolo: "ADMIN",
       lockedUntil: null,
       mfaEnabled: true,
+      passwordChangedAt: new Date("2026-10-01T00:00:00.000Z"),
     });
     const { authOptions } = await loadAuth();
     const sessionCallback = authOptions.callbacks?.session;
@@ -145,7 +147,12 @@ describe("NextAuth MFA enforcement", () => {
         user: { name: "Admin", email: "admin@example.test", image: null },
         expires: "2099-01-01T00:00:00.000Z",
       },
-      token: { id: "user-admin", role: "ADMIN", mfaVerified: true },
+      token: {
+        id: "user-admin",
+        role: "ADMIN",
+        mfaVerified: true,
+        authVersion: "2026-10-01T00:00:00.000Z",
+      },
     } as never);
 
     expect(session.user && "id" in session.user ? session.user.id : undefined).toBe("");
@@ -158,6 +165,7 @@ describe("NextAuth MFA enforcement", () => {
       ruolo: "ADMIN",
       lockedUntil: null,
       mfaEnabled: false,
+      passwordChangedAt: new Date("2026-10-01T00:00:00.000Z"),
     });
     const { authOptions } = await loadAuth();
     const sessionCallback = authOptions.callbacks?.session;
@@ -172,6 +180,7 @@ describe("NextAuth MFA enforcement", () => {
         role: "ADMIN",
         mfaEnrollmentRequired: false,
         mfaVerified: true,
+        authVersion: "2026-10-01T00:00:00.000Z",
       },
     } as never);
 
@@ -189,6 +198,7 @@ describe("NextAuth MFA enforcement", () => {
       ruolo: "ADMIN",
       lockedUntil: null,
       mfaEnabled: true,
+      passwordChangedAt: new Date("2026-10-01T00:00:00.000Z"),
     });
     const { authOptions } = await loadAuth();
     const sessionCallback = authOptions.callbacks?.session;
@@ -203,6 +213,7 @@ describe("NextAuth MFA enforcement", () => {
         role: "ADMIN",
         mfaEnrollmentRequired: true,
         mfaVerified: false,
+        authVersion: "2026-10-01T00:00:00.000Z",
       },
     } as never);
 
@@ -210,6 +221,37 @@ describe("NextAuth MFA enforcement", () => {
       id: "",
       role: "",
       mfaEnrollmentRequired: false,
+      mfaVerified: false,
+    });
+  });
+
+  it("invalidates existing sessions after a password recovery", async () => {
+    findUniqueMock.mockResolvedValue({
+      attivo: true,
+      ruolo: "ADMIN",
+      lockedUntil: null,
+      mfaEnabled: true,
+      passwordChangedAt: new Date("2026-10-31T08:00:00.000Z"),
+    });
+    const { authOptions } = await loadAuth();
+    const sessionCallback = authOptions.callbacks?.session;
+
+    const session = await sessionCallback!({
+      session: {
+        user: { name: "Admin", email: "admin@example.test", image: null },
+        expires: "2099-01-01T00:00:00.000Z",
+      },
+      token: {
+        id: "user-admin",
+        role: "ADMIN",
+        mfaVerified: true,
+        authVersion: "2026-10-01T00:00:00.000Z",
+      },
+    } as never);
+
+    expect(session.user).toMatchObject({
+      id: "",
+      role: "",
       mfaVerified: false,
     });
   });

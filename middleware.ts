@@ -74,6 +74,10 @@ function getRateLimitPolicy(pathname: string): { limit: number; scope: string } 
     return { limit: 10, scope: "mfa-enrollment" };
   }
 
+  if (pathname === "/api/auth/password-recovery") {
+    return { limit: 10, scope: "password-recovery" };
+  }
+
   if (pathname.startsWith("/export/")) {
     return { limit: 25, scope: "export" };
   }

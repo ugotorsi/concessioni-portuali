@@ -114,6 +114,7 @@ export const authOptions: NextAuthOptions = {
             mfaEnabled: true,
             mfaSecret: true,
             mustChangePassword: true,
+            passwordChangedAt: true,
           },
         });
 
@@ -254,6 +255,7 @@ export const authOptions: NextAuthOptions = {
           role: user.ruolo,
           mfaEnrollmentRequired,
           mfaVerified,
+          authVersion: user.passwordChangedAt?.toISOString() ?? "",
         };
       },
     }),
@@ -265,6 +267,7 @@ export const authOptions: NextAuthOptions = {
         token.role = user.role;
         token.mfaEnrollmentRequired = user.mfaEnrollmentRequired === true;
         token.mfaVerified = user.mfaVerified === true;
+        token.authVersion = user.authVersion ?? "";
       }
 
       return token;
@@ -282,7 +285,13 @@ export const authOptions: NextAuthOptions = {
 
       const currentUser = await prisma.user.findUnique({
         where: { id: token.id },
-        select: { attivo: true, ruolo: true, lockedUntil: true, mfaEnabled: true },
+        select: {
+          attivo: true,
+          ruolo: true,
+          lockedUntil: true,
+          mfaEnabled: true,
+          passwordChangedAt: true,
+        },
       });
       const currentMfaRequired = !!currentUser && isMfaRequiredRole(currentUser.ruolo);
       const currentMfaEnrollmentRequired = currentMfaRequired && !currentUser.mfaEnabled;
@@ -296,6 +305,7 @@ export const authOptions: NextAuthOptions = {
         || !currentUser.attivo
         || (currentUser.lockedUntil && currentUser.lockedUntil > new Date())
         || currentUser.ruolo !== token.role
+        || (currentUser.passwordChangedAt?.toISOString() ?? "") !== token.authVersion
         || operationalMfaMissing
       ) {
         token.invalidated = true;

@@ -6,9 +6,14 @@ import { signIn } from "next-auth/react";
 interface LoginCredentialsFormProps {
   initialErrorMessage: string | null;
   callbackUrl?: string;
+  passwordRecoveryEnabled?: boolean;
 }
 
-export function LoginCredentialsForm({ initialErrorMessage, callbackUrl }: LoginCredentialsFormProps) {
+export function LoginCredentialsForm({
+  initialErrorMessage,
+  callbackUrl,
+  passwordRecoveryEnabled = false,
+}: LoginCredentialsFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(initialErrorMessage);
   const [mfaRequired, setMfaRequired] = useState(false);
@@ -143,6 +148,14 @@ export function LoginCredentialsForm({ initialErrorMessage, callbackUrl }: Login
       >
         {isSubmitting ? "Accesso in corso..." : "Accedi"}
       </button>
+      {passwordRecoveryEnabled ? (
+        <a
+          href="/password-recovery"
+          className="text-sm font-medium text-slate-700 underline underline-offset-4"
+        >
+          Password dimenticata?
+        </a>
+      ) : null}
     </form>
   );
 }
