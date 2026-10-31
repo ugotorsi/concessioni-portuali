@@ -710,6 +710,7 @@ describe("automatic fascicolo analysis job", () => {
   });
 
   it("keeps the previous revision current when V7 mission reconciliation fails", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const prior = currentReconciliation(lotto3Knowledge).revision;
     const prepareStructuredReport = vi.fn();
     const finalizeControlledV7 = vi.fn();
@@ -730,7 +731,9 @@ describe("automatic fascicolo analysis job", () => {
       })),
       persistKnowledge: vi.fn(async () => buildingReconciliation(lotto3Knowledge)),
       reconcileKnowledgeMissions: vi.fn(async () => {
-        throw new Error("MISSION_RECONCILIATION_FAILED");
+        throw Object.assign(new Error("MISSION_RECONCILIATION_FAILED"), {
+          code: "40P01",
+        });
       }),
       prepareStructuredReport,
       finalizeControlledV7,
@@ -747,6 +750,11 @@ describe("automatic fascicolo analysis job", () => {
     expect(prepareStructuredReport).not.toHaveBeenCalled();
     expect(finalizeControlledV7).not.toHaveBeenCalled();
     expect(prior.status).toBe("CURRENT");
+    expect(consoleError).toHaveBeenCalledWith(expect.objectContaining({
+      event: "fascicolo_research_mission_reconciliation_failed",
+      databaseCode: "40P01",
+    }));
+    consoleError.mockRestore();
   });
 
   it("keeps the previous revision current when the V7 report cannot be prepared", async () => {

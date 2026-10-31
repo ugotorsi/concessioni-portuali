@@ -17,6 +17,8 @@
     "runtime:recover-v7-provider-output": "tsx scripts/runtime/recover-v7-provider-output.ts",
     "runtime:verify-v7-provider-output-recovery": "tsx scripts/runtime/verify-v7-provider-output-recovery.ts",
     "runtime:verify-v7-one-shot-08-preflight": "tsx scripts/runtime/verify-v7-one-shot-08-preflight.ts",
+    "runtime:verify-v7-one-shot-08-recovered-state": "tsx scripts/runtime/verify-v7-one-shot-08-recovered-state.ts",
+    "runtime:verify-automatic-research-connectors": "tsx scripts/runtime/verify-automatic-research-connectors.ts",
     "runtime:verify-production-readiness": "tsx scripts/runtime/verify-production-readiness.ts",
     "runtime:inventory-selvara-promotion": "tsx scripts/runtime/inventory-selvara-promotion.ts",
     "runtime:diagnose-research-missions": "tsx scripts/runtime/diagnose-research-mission-scope.ts",

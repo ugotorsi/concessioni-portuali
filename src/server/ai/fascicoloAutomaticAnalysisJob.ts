@@ -1090,7 +1090,17 @@ async function reconcileStructuredKnowledgeMissions(input: {
       plans,
       allowBuildingRevision: input.allowBuildingRevision,
     });
-  } catch {
+  } catch (error) {
+    const databaseCode = error && typeof error === "object" && "code" in error
+      && typeof error.code === "string" && /^[A-Z0-9_]{1,32}$/.test(error.code)
+      ? error.code
+      : "UNCLASSIFIED";
+    console.error({
+      event: "fascicolo_research_mission_reconciliation_failed",
+      procedimentoId: input.authority.procedimentoId,
+      knowledgeRevisionId: input.revision.id,
+      databaseCode,
+    });
     throw new AsyncJobExecutionError(
       "PERSISTENCE",
       "RESEARCH_MISSION_RECONCILIATION_FAILED",

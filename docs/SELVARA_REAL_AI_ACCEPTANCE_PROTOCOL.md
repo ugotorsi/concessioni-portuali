@@ -1,16 +1,17 @@
 # Selvara V7 - Protocollo di collaudo AI reale controllato
 
-Stato: **BLOCCATO - ONE-SHOT 08 ESAURITO E NON RECUPERABILE**
+Stato: **ONE-SHOT 08 RECUPERATO - RICERCA REALE NON AUTORIZZATA**
 
 Questo protocollo descrive i limiti del collaudo reale sul fascicolo Selvara. Non abilita
 provider, non ammette job, non esegue missioni e non autorizza modifiche a Production.
 
-Il one-shot 08 non puo essere eseguito: il job
-`cmvtu2wgi0000260h2ovc1igi` e `TERMINAL_FAILED`, ha consumato l'unico tentativo
-ammesso e non dispone di un `V7ProviderOutputRecoveryArtifact`. Non e quindi
-consentito ne un retry ne il recupero persistence-only. Un eventuale one-shot
-successivo richiede correzione e verifica della riconciliazione delle missioni,
-nuova approvazione immutabile e autorizzazione esplicita dell'utente.
+Il job storico `cmvtu2wgi0000260h2ovc1igi` resta `TERMINAL_FAILED` e non deve
+essere riavviato. Il suo output cifrato e stato tuttavia recuperato con successo
+attraverso il percorso persistence-only il 29 ottobre 2026: revisione, missione
+e report sono stati persistiti senza una seconda chiamata provider. L'artefatto
+di recovery e stato eliminato dopo il successo, come previsto dal protocollo.
+Lo stato deve essere verificato in sola lettura con
+`npm run runtime:verify-v7-one-shot-08-recovered-state`.
 
 ## Ambito immutabile
 
@@ -20,7 +21,7 @@ nuova approvazione immutabile e autorizzazione esplicita dell'utente.
 - Missione: `research-mission:c0cf02cb6dfdd5ff5eab8c0bfac2817ad7a63149b6df8bc51129fe50a06d59e6`.
 - Corpus: fingerprint
   `c9f04d508174cba8e7939704da11921963c60656660df988ee4cb5fdd25cdd5f`.
-- Approvazione esaurita e non riutilizzabile:
+- Approvazione consumata e non riutilizzabile:
   `NOETRA-V7-SELVARA-2026-10-29-CONTROLLED-ONE-SHOT-08`.
 - Operazione AI: `FASCICOLO.AUTOMATIC_ANALYSIS_V1`, un solo job con
   `maxAttempts=1`.

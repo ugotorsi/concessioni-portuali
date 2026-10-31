@@ -106,6 +106,12 @@ Aggiunte a `.env.example` per il percorso automatico:
 - provider: `LEGAL_DATA_HUNTER_API_KEY`, `MOONLIT_OAUTH_STORAGE_PATH`,
   `SIMPLICITER_OAUTH_STORAGE_PATH`.
 
+Prima di abilitare la ricerca automatica, eseguire sul worker persistente
+`npm run runtime:verify-automatic-research-connectors`. Il controllo non effettua
+chiamate di rete e non stampa credenziali; richiede percorsi assoluti e token
+OAuth gia presenti per Moonlit e Simpliciter, oltre alla presenza della
+credenziale Legal Data Hunter.
+
 OCR e parsing PDF usano le dipendenze incluse nella release (`tesseract.js`,
 dati italiani e `pdfjs-dist`): non leggono credenziali o variabili OCR.
 `DIRECT_URL` e utile agli strumenti operativi gia preparati, ma Prisma in questo
