@@ -118,6 +118,10 @@ Aggiunte a `.env.example` per il percorso automatico:
 - guardia database: `EXPECTED_DATABASE_HOST_PREFIX` (facoltativa) fa rifiutare
   l'avvio di Prisma se l'host di `DATABASE_URL` non inizia con il prefisso atteso
   (es. l'endpoint Neon del branch Preview), evitando l'uso di un database errato;
+- estrazione PDF: `PDF_DIRECT_TEXT_SUBPROCESS=true` sui worker che girano con
+  `tsx` esegue pdf.js in un processo Node separato (circa 90 MB invece di circa
+  450 MB), evitando che le istanze da 512 MB vengano terminate senza log durante
+  l'estrazione dei documenti caricati;
 - provider: `LEGAL_DATA_HUNTER_API_KEY`, `MOONLIT_OAUTH_STORAGE_PATH`,
   `SIMPLICITER_OAUTH_STORAGE_PATH`.
 
