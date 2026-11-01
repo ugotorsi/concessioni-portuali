@@ -523,7 +523,9 @@ export async function produceAndPersistAutomaticLegalApplicabilityReviews(input:
     includeHistorical: true,
     includePending: true,
   };
-  const orchestrationResult = await resolveApplicableLegalRules(orchestrationInput);
+  const orchestrationResult = await resolveApplicableLegalRules(orchestrationInput, {
+    systemTenantId: input.tenantId,
+  });
   const producedAt = (input.now ?? new Date()).toISOString();
   const reviews = mission.questionResults.flatMap((row) => {
     const source = row.sourceAssessments[0];

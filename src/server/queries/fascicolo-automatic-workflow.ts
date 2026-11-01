@@ -954,7 +954,9 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
     ...mission,
     legalApplicabilityReviews: await Promise.all(mission.legalApplicabilityReviews.map(async (envelope) => {
       try {
-        const resolution = await resolveApplicableLegalRules(envelope.review.ruleOrchestrator.input);
+        const resolution = await resolveApplicableLegalRules(envelope.review.ruleOrchestrator.input, {
+          systemTenantId: tenantId,
+        });
         const verification = verifyRuleResolutionFingerprint({
             review: envelope.review,
             resolution,
