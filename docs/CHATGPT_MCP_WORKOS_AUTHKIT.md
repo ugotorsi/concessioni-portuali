@@ -31,12 +31,15 @@ Configurare nell'ambiente applicativo:
 WORKOS_AUTHKIT_ISSUER="https://<authkit-domain>"
 WORKOS_API_KEY="<secret>"
 MCP_RESOURCE_URI="https://<app-host>/api/mcp"
+MCP_FASCICOLO_GRANT_SECRET="<secret-interno-almeno-32-byte>"
 ```
 
 Requisiti:
 
 - `WORKOS_AUTHKIT_ISSUER` e `MCP_RESOURCE_URI` devono essere URL HTTPS senza query, frammenti o credenziali.
 - `MCP_RESOURCE_URI` deve coincidere esattamente con il resource indicator configurato in WorkOS e richiesto da ChatGPT.
+- `MCP_FASCICOLO_GRANT_SECRET` firma i grant fascicolo-bound e deve essere disponibile
+  nello stesso ambiente del runtime MCP; non deve essere copiato nei client.
 - L'alias dedicato NOETRA Preview
   `concessioni-portuali-demo-v7-mcp-preview.vercel.app` consente esclusivamente
   `/api/mcp` e `/.well-known/oauth-protected-resource`; qualsiasi altro percorso,
@@ -140,10 +143,16 @@ Il worker applicativo puo creare missioni di controllo periodico senza eseguire 
 
 ```dotenv
 PERIODIC_LEGAL_RESEARCH_ENABLED="true"
-PERIODIC_LEGAL_RESEARCH_INTERVAL_DAYS="30"
+PERIODIC_LEGAL_RESEARCH_INTERVAL_DAYS="7"
 ```
 
-L'opzione e disabilitata per default. L'intervallo ammesso e 1-365 giorni. Il worker riconcilia al massimo una volta l'ora e crea nuove missioni soltanto quando l'ultima missione corrente del fascicolo e antecedente alla soglia. Ogni missione conserva `tenantId`, `procedimentoId`, revisione e attore assegnato; un fascicolo di rinnovo usa un `procedimentoId` autonomo e non eredita missioni o conclusioni dal fascicolo precedente.
+L'opzione e una capacita ambientale, ma l'esecuzione resta bloccata finche il controllo
+persistente `AUTOMATION_MODE_CHANGE` non e `ON`; in assenza di eventi il default e
+sempre `OFF`, anche dopo riavvii e deployment. L'intervallo ammesso e 1-365 giorni.
+Il worker riconcilia al massimo una volta l'ora e crea nuove missioni soltanto quando
+l'ultima missione corrente del fascicolo e antecedente alla soglia. Ogni missione
+conserva `tenantId`, `procedimentoId`, revisione e attore assegnato; un fascicolo di
+rinnovo usa un `procedimentoId` autonomo e non eredita missioni o conclusioni dal fascicolo precedente.
 
 ## Configurazione WorkOS
 

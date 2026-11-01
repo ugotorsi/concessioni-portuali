@@ -2,6 +2,10 @@ import { HeadBucketCommand, S3Client } from "@aws-sdk/client-s3";
 
 import { getS3StorageConfig } from "@/server/documents/storage/config";
 import { verifyAutomaticResearchConnectorReadiness } from "@/server/legal-research/automatic-research-readiness";
+import {
+  getResearchMcpAuthConfig,
+  researchMcpProtectedResourceMetadataUrl,
+} from "@/server/legal-research/mcp-auth";
 import { isTechnicalSourcesChannelEnabled } from "@/server/technical-sources/technical-sources-m2m";
 
 export const RUNTIME_DIAGNOSTIC_SERVICE_IDS = [
@@ -261,12 +265,17 @@ async function diagnoseR2(
 
 async function diagnoseConnectors(
   environment: Readonly<Record<string, string | undefined>>,
+  fetchImpl: typeof fetch,
   verifyResearchConnectors: typeof verifyAutomaticResearchConnectorReadiness,
 ): Promise<RuntimeServiceDiagnostic> {
   const automaticResearchEnabled =
     environment.AUTOMATIC_RESEARCH_EXECUTION_ENABLED?.trim().toLowerCase() === "true";
   const mcpEnabled =
     environment.MCP_PRODUCTION_ENABLED?.trim().toLowerCase() === "true";
+  const serverAutonomousResearchEnabled =
+    environment.SERVER_AUTONOMOUS_RESEARCH_ENABLED?.trim().toLowerCase() === "true";
+  const autonomousResearchRequested =
+    automaticResearchEnabled && serverAutonomousResearchEnabled;
   const technicalSourcesRequested =
     environment.TECHNICAL_SOURCES_MCP_ENABLED?.trim().toLowerCase() === "true";
   const technicalSourcesEnabled = isTechnicalSourcesChannelEnabled(environment);
@@ -279,23 +288,75 @@ async function diagnoseConnectors(
     );
   }
 
-  const research = automaticResearchEnabled
+  const research = autonomousResearchRequested
     ? await verifyResearchConnectors(environment)
     : null;
-  const workosReady = !mcpEnabled || configured(environment, ["WORKOS_API_KEY"]);
+  let workosReady = !mcpEnabled;
+  let workosCode = mcpEnabled ? "MCP_CONFIGURATION_INCOMPLETE" : "MCP_DISABLED";
+  if (mcpEnabled) {
+    const authConfig = getResearchMcpAuthConfig(environment as NodeJS.ProcessEnv);
+    const grantSecret = environment.MCP_FASCICOLO_GRANT_SECRET?.trim() ?? "";
+    if (authConfig && grantSecret.length >= 32 && configured(environment, ["WORKOS_API_KEY"])) {
+      try {
+        const [jwksResponse, metadataResponse, resourceResponse] = await Promise.all([
+          fetchWithTimeout(fetchImpl, authConfig.jwksUri, {}),
+          fetchWithTimeout(
+            fetchImpl,
+            researchMcpProtectedResourceMetadataUrl(authConfig.resource),
+            {},
+          ),
+          fetchWithTimeout(fetchImpl, authConfig.resource, {}),
+        ]);
+        const jwks = jwksResponse.ok
+          ? await jwksResponse.json() as { keys?: unknown }
+          : null;
+        const metadata = metadataResponse.ok
+          ? await metadataResponse.json() as {
+              resource?: unknown;
+              authorization_servers?: unknown;
+            }
+          : null;
+        const authenticate = resourceResponse.headers.get("www-authenticate") ?? "";
+        workosReady = jwksResponse.ok
+          && Array.isArray(jwks?.keys)
+          && jwks.keys.length > 0
+          && metadataResponse.ok
+          && metadata?.resource === authConfig.resource
+          && Array.isArray(metadata.authorization_servers)
+          && metadata.authorization_servers.includes(authConfig.issuer)
+          && resourceResponse.status === 401
+          && authenticate.includes(
+            researchMcpProtectedResourceMetadataUrl(authConfig.resource),
+          );
+        workosCode = workosReady ? "MCP_AUTH_HANDSHAKE_READY" : "MCP_AUTH_HANDSHAKE_REJECTED";
+      } catch {
+        workosCode = "MCP_AUTH_HANDSHAKE_UNREACHABLE";
+      }
+    }
+  }
   const ready = (research?.ready ?? true)
     && workosReady
     && (!technicalSourcesRequested || technicalSourcesEnabled);
   return result(
     "connectors",
     ready ? "READY" : "ATTENTION",
-    ready ? "CONNECTORS_READY" : "CONNECTORS_INCOMPLETE",
+    ready ? "CONNECTORS_READY" : workosCode,
     ready
-      ? "I connettori richiesti dai gate attivi risultano configurati."
-      : "Uno o più connettori richiesti dai gate attivi non sono configurati.",
+      ? "I connettori richiesti hanno superato verifiche funzionali non distruttive."
+      : "Uno o più connettori richiesti non hanno superato la verifica funzionale.",
     [
-      { label: "Ricerca automatica", value: research ? (research.ready ? "Pronta" : "Incompleta") : "Disabilitata" },
-      { label: "MCP WorkOS", value: mcpEnabled ? (workosReady ? "Configurato" : "Incompleto") : "Disabilitato" },
+      {
+        label: "Ricerca server autonoma",
+        value: research ? (research.ready ? "Pronta" : "Incompleta") : "Opzionale/disabilitata",
+      },
+      {
+        label: "MCP WorkOS",
+        value: mcpEnabled ? (workosReady ? "Handshake verificato" : "Incompleto") : "Disabilitato",
+      },
+      {
+        label: "Canale Selvara",
+        value: mcpEnabled && workosReady ? "Pronto per token autorizzato" : "Non pronto",
+      },
       { label: "Fonti tecniche", value: technicalSourcesEnabled ? "Configurate" : "Disabilitate" },
     ],
   );
@@ -323,6 +384,7 @@ export async function getRuntimeServiceDiagnostics(
     diagnoseR2(environment, dependencies.probeR2 ?? defaultR2Probe),
     diagnoseConnectors(
       environment,
+      fetchImpl,
       dependencies.verifyResearchConnectors ?? verifyAutomaticResearchConnectorReadiness,
     ),
   ]);

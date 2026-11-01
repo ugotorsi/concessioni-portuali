@@ -12,17 +12,23 @@ import { readDefaultProcedimentoBudgetAuthorization } from "@/server/runtime/pro
 import { buildServiceCenterSnapshot } from "@/server/runtime/serviceCenter";
 import { getRuntimeServiceDiagnostics } from "@/server/runtime/serviceDiagnostics";
 import { getGlobalAiControlState } from "@/server/ai/globalAiControl";
+import { getAutomationControlState } from "@/server/automation/automationControl";
 
 import {
   assignDefaultProcedimentoBudgetPolicy,
   recoverCurrentKnowledgeMissions,
   retryRuntimeJob,
+  runManualFascicoloAnalysis,
+  runManualTenantBatchAnalysis,
   setRenderWorkerState,
   upsertRuntimeBudgetPolicy,
+  updateAutomationControl,
   updateGlobalAiControl,
   verifyRuntimeService,
 } from "./actions";
 import { GlobalAiControlForm } from "./GlobalAiControlForm";
+import { AutomationControlForm } from "./AutomationControlForm";
+import { ManualAnalysisControls } from "./ManualAnalysisControls";
 
 export const dynamic = "force-dynamic";
 
@@ -63,7 +69,8 @@ export default async function RuntimeOperationsPage() {
   const defaultProcedimentoBudget = readDefaultProcedimentoBudgetAuthorization();
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  const [aiControl, health, databaseIdentity, serviceDiagnostics, workers, failedJobs, policies, costs, cost30Days, cost7Days, reservedCosts] = await Promise.all([
+  const [automationControl, aiControl, health, databaseIdentity, serviceDiagnostics, workers, failedJobs, policies, costs, cost30Days, cost7Days, reservedCosts, activeProcedimenti] = await Promise.all([
+    getAutomationControlState(),
     getGlobalAiControlState(),
     getRuntimeHealthSnapshot(),
     getDatabaseIdentityDiagnostic(),
@@ -88,7 +95,26 @@ export default async function RuntimeOperationsPage() {
       where: { status: "RESERVED" },
       _sum: { reservedAmount: true },
     }),
+    prisma.procedimento.findMany({
+      where: { stato: { in: ["DA_AVVIARE", "IN_CORSO"] } },
+      orderBy: [
+        { ente: { nome: "asc" } },
+        { updatedAt: "desc" },
+        { id: "asc" },
+      ],
+      take: 500,
+      select: {
+        id: true,
+        tipologia: true,
+        stato: true,
+        ente: { select: { id: true, nome: true } },
+      },
+    }),
   ]);
+  const tenantOptions = Array.from(new Map(activeProcedimenti.map((procedimento) => [
+    procedimento.ente.id,
+    { id: procedimento.ente.id, label: procedimento.ente.nome },
+  ])).values());
   const serviceCenter = buildServiceCenterSnapshot({
     health,
     databaseIdentity,
@@ -98,6 +124,7 @@ export default async function RuntimeOperationsPage() {
       reservedEur: reservedCosts._sum.reservedAmount?.toNumber() ?? 0,
     },
     activeBudgetPolicyScopes: policies.map((policy) => policy.scope),
+    automationEnabled: automationControl.effectiveEnabled,
   });
   const renderApplicationWorkerConfigured = Boolean(
     process.env.RENDER_APPLICATION_WORKER_SERVICE_ID?.trim(),
@@ -158,6 +185,44 @@ export default async function RuntimeOperationsPage() {
           </Card>
         </section>
       ) : null}
+
+      <section aria-labelledby="automation-control-title" className="mb-4">
+        <Card>
+          <CardHeader>
+            <CardTitle id="automation-control-title">MODALITÀ DI FUNZIONAMENTO</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <div className="flex flex-wrap items-center gap-3">
+              <Badge variant={automationControl.effectiveEnabled ? "warning" : "success"}>
+                AUTOMAZIONE {automationControl.mode}
+              </Badge>
+              <p className="text-sm text-slate-700">
+                {automationControl.effectiveEnabled
+                  ? "Modalità commerciale: trigger periodici e post-documento sono autorizzati entro i budget."
+                  : "Modalità dimostrativa: nessuna analisi AI parte spontaneamente; i comandi manuali restano disponibili."}
+              </p>
+            </div>
+            <dl className="grid gap-3 text-sm sm:grid-cols-2">
+              <div>
+                <dt className="text-slate-500">Ultima modifica</dt>
+                <dd className="font-medium text-slate-900">
+                  {automationControl.updatedAt ? formatDateIT(automationControl.updatedAt) : "Mai (default persistente OFF)"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Amministratore</dt>
+                <dd className="font-medium text-slate-900">
+                  {automationControl.updatedBy?.userEmail ?? "Nessuno"}
+                </dd>
+              </div>
+            </dl>
+            <AutomationControlForm
+              enabled={automationControl.effectiveEnabled}
+              action={updateAutomationControl}
+            />
+          </CardContent>
+        </Card>
+      </section>
 
       <section aria-labelledby="global-ai-control-title">
         <Card>
@@ -237,6 +302,29 @@ export default async function RuntimeOperationsPage() {
             <GlobalAiControlForm
               enabled={aiControl.requestedEnabled}
               action={updateGlobalAiControl}
+            />
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="mt-6" aria-labelledby="manual-analysis-title">
+        <Card>
+          <CardHeader>
+            <CardTitle id="manual-analysis-title">Elaborazioni manuali</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-slate-600">
+              Disponibili anche con AUTOMAZIONE OFF. Ogni richiesta richiede conferma, MFA,
+              autorizzazione tenant, corpus pronto e budget compatibili.
+            </p>
+            <ManualAnalysisControls
+              procedimenti={activeProcedimenti.map((procedimento) => ({
+                id: procedimento.id,
+                label: `${procedimento.ente.nome} · ${procedimento.tipologia} · ${procedimento.id}`,
+              }))}
+              tenants={tenantOptions}
+              singleAction={runManualFascicoloAnalysis}
+              batchAction={runManualTenantBatchAnalysis}
             />
           </CardContent>
         </Card>

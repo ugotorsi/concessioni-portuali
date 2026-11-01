@@ -36,6 +36,7 @@ interface ServiceCenterInput {
   databaseIdentity: DatabaseIdentityDiagnostic;
   costs: ServiceCenterCostInput;
   activeBudgetPolicyScopes?: readonly string[];
+  automationEnabled?: boolean;
   now?: Date;
 }
 
@@ -59,6 +60,8 @@ export function buildServiceCenterSnapshot(input: ServiceCenterInput): ServiceCe
   const aiExecutionRequested = [
     "AI_REAL_DATA_ENABLED",
     "ASYNC_PROVIDER_EXECUTION_ENABLED",
+  ].some((name) => environment[name]?.trim().toLowerCase() === "true");
+  const automaticCapabilityConfigured = [
     "AUTOMATIC_RESEARCH_EXECUTION_ENABLED",
     "AUTOMATIC_OFFICIAL_SOURCE_VERIFICATION_ENABLED",
   ].some((name) => environment[name]?.trim().toLowerCase() === "true");
@@ -78,28 +81,34 @@ export function buildServiceCenterSnapshot(input: ServiceCenterInput): ServiceCe
     ]);
   const automaticResearchEnabled =
     environment.AUTOMATIC_RESEARCH_EXECUTION_ENABLED?.trim().toLowerCase() === "true";
+  const serverAutonomousResearchEnabled =
+    environment.SERVER_AUTONOMOUS_RESEARCH_ENABLED?.trim().toLowerCase() === "true";
   const mcpProductionEnabled =
     environment.MCP_PRODUCTION_ENABLED?.trim().toLowerCase() === "true";
   const connectorStates = [
     {
       name: "WorkOS MCP",
-      configured: configured(environment, ["WORKOS_API_KEY"]),
+      configured: configured(environment, [
+        "WORKOS_API_KEY",
+        "MCP_FASCICOLO_GRANT_SECRET",
+        "MCP_RESOURCE_URI",
+      ]),
       required: mcpProductionEnabled,
     },
     {
       name: "Legal Data Hunter",
       configured: configured(environment, ["LEGAL_DATA_HUNTER_API_KEY"]),
-      required: automaticResearchEnabled,
+      required: automaticResearchEnabled && serverAutonomousResearchEnabled,
     },
     {
       name: "Moonlit OAuth",
       configured: configured(environment, ["MOONLIT_OAUTH_STORAGE_PATH"]),
-      required: automaticResearchEnabled,
+      required: automaticResearchEnabled && serverAutonomousResearchEnabled,
     },
     {
       name: "Simpliciter OAuth",
       configured: configured(environment, ["SIMPLICITER_OAUTH_STORAGE_PATH"]),
-      required: automaticResearchEnabled,
+      required: automaticResearchEnabled && serverAutonomousResearchEnabled,
     },
     {
       name: "Rate limit condiviso",
@@ -137,7 +146,9 @@ export function buildServiceCenterSnapshot(input: ServiceCenterInput): ServiceCe
         { label: "Costo effettivo 30 giorni", value: eur(input.costs.actualLast30DaysEur) },
         { label: "Riservato", value: eur(input.costs.reservedEur) },
         { label: "Proiezione a 30 giorni", value: eur(projectedMonthlyEur) },
-        { label: "Gate provider", value: aiExecutionRequested ? "Richiesto" : "Disabilitato" },
+        { label: "Provider manuale", value: aiExecutionRequested ? "Disponibile" : "Disabilitato" },
+        { label: "Capacità automatica", value: automaticCapabilityConfigured ? "Configurata" : "Disabilitata" },
+        { label: "Automazione persistente", value: input.automationEnabled ? "ON" : "OFF" },
         { label: "Budget globale", value: globalBudgetConfigured ? "Configurato" : "Assente" },
       ],
       alerts: [

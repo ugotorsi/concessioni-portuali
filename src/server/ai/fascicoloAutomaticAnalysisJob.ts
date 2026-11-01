@@ -42,6 +42,7 @@ import {
   withRuntimeCostGate,
 } from "@/server/runtime/cost";
 import { runtimeCostEstimate } from "@/server/runtime/costConfig";
+import { isAutomationEnabled } from "@/server/automation/automationControl";
 import {
   FascicoloV7PreflightError,
   revalidateFascicoloV7EconomicPreflight,
@@ -1812,6 +1813,9 @@ export function buildFascicoloDocumentCorpusUpdateAdmission(input: {
 export async function ensureFascicoloDocumentCorpusUpdateJob(
   input: FascicoloDocumentCorpusUpdateSource,
 ) {
+  if (!(await isAutomationEnabled())) {
+    return { outcome: "AUTOMATION_OFF" as const, job: null };
+  }
   const sourceJob = await prisma.asyncJob.findUnique({
     where: { id: input.sourceJobId },
     select: {
@@ -1886,6 +1890,9 @@ export async function ensureFascicoloDocumentCorpusUpdateJob(
 }
 
 export async function ensureFascicoloAutomaticAnalysisJob(input: FascicoloAutomaticAnalysisSource) {
+  if (!(await isAutomationEnabled())) {
+    return { outcome: "AUTOMATION_OFF" as const, job: null };
+  }
   const [sourceJob, intake] = await Promise.all([
     prisma.asyncJob.findUnique({
       where: { id: input.sourceJobId },

@@ -8,8 +8,9 @@ import {
   type KnowledgeResearchMissionPlan,
 } from "@/server/fascicolo-knowledge";
 import { createResearchMission } from "@/server/legal-research/bridge";
+import { isAutomationEnabled } from "@/server/automation/automationControl";
 
-export const PERIODIC_LEGAL_RESEARCH_DEFAULT_INTERVAL_DAYS = 30;
+export const PERIODIC_LEGAL_RESEARCH_DEFAULT_INTERVAL_DAYS = 7;
 export const PERIODIC_LEGAL_RESEARCH_RECONCILE_INTERVAL_MS = 60 * 60 * 1_000;
 
 export interface PeriodicLegalResearchTarget {
@@ -21,6 +22,7 @@ export interface PeriodicLegalResearchTarget {
 }
 
 export interface PeriodicLegalResearchDependencies {
+  isAutomationEnabled(): Promise<boolean>;
   listDueTargets(input: {
     dueBefore: Date;
     limit: number;
@@ -89,6 +91,7 @@ function configuredIntervalDays(environment: NodeJS.ProcessEnv): number {
 }
 
 const defaultDependencies: PeriodicLegalResearchDependencies = {
+  isAutomationEnabled,
   async listDueTargets({ dueBefore, limit }) {
     const revisions = await prisma.fascicoloKnowledgeRevision.findMany({
       where: {
@@ -173,13 +176,16 @@ export async function reconcilePeriodicLegalResearchMissions(input: {
   if (environment.PERIODIC_LEGAL_RESEARCH_ENABLED !== "true") {
     return { targetCount: 0, missionCount: 0 };
   }
+  const dependencies = { ...defaultDependencies, ...overrides };
+  if (!(await dependencies.isAutomationEnabled())) {
+    return { targetCount: 0, missionCount: 0 };
+  }
   const now = input.now ?? new Date();
   const intervalDays = configuredIntervalDays(environment);
   const limit = input.limit ?? 100;
   if (!Number.isInteger(limit) || limit < 1 || limit > 1_000) {
     throw new Error("INVALID_PERIODIC_LEGAL_RESEARCH_LIMIT");
   }
-  const dependencies = { ...defaultDependencies, ...overrides };
   const dueBefore = new Date(now.getTime() - intervalDays * 24 * 60 * 60 * 1_000);
   const targets = await dependencies.listDueTargets({ dueBefore, limit });
   let missionCount = 0;

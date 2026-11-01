@@ -2,43 +2,49 @@ import type { AsyncJobAdmissionInput } from "@/server/async-jobs/domain";
 import { admitAsyncJob } from "@/server/async-jobs/persistence";
 import { requestDocumentWorkerActivation } from "@/server/async-jobs/documentWorkerActivation";
 import {
-  buildFascicoloDocumentAnalysisInputFromCorpus,
   buildFascicoloDocumentCorpusUpdateAdmission,
-  FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
   FASCICOLO_V7_CONTROLLED_ANALYSIS_PURPOSE,
 } from "@/server/ai/fascicoloAutomaticAnalysisJob";
-import { FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION } from "@/server/ai/fascicoloDocumentAnalysis";
 import {
   buildFascicoloV7ControlledLogicalOperationId,
-  createFascicoloV7EconomicPreflight,
-  FascicoloV7PreflightError,
   inspectFascicoloV7BudgetCompatibility,
-  type FascicoloV7EconomicPreflight,
 } from "@/server/ai/fascicoloV7Preflight";
+import { FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION } from "@/server/ai/fascicoloDocumentAnalysis";
 import { getGlobalAiControlState } from "@/server/ai/globalAiControl";
 import { createRealDataActivationPolicy } from "@/server/ai/realDataActivation";
-import {
-  assertSelvaraPilotAuthorization,
-  isSelvaraPilotApprovalId,
-  SELVARA_PILOT_AUTHORIZATION,
-  SelvaraPilotAuthorizationError,
-} from "@/server/ai/selvaraPilotAuthorization";
+import { SELVARA_PILOT_AUTHORIZATION } from "@/server/ai/selvaraPilotAuthorization";
 import {
   getFascicoloDocumentCorpusForTenant,
 } from "@/server/queries/fascicolo-document-corpus";
 
 export const FASCICOLO_EXISTING_CORPUS_ANALYSIS_PURPOSE =
-  FASCICOLO_V7_CONTROLLED_ANALYSIS_PURPOSE;
+  "FASCICOLO_MANUAL_ANALYSIS" as const;
+
+function manualLogicalOperationId(input: {
+  tenantId: string;
+  procedimentoId: string;
+  corpusFingerprint: string;
+}): string {
+  return [
+    FASCICOLO_EXISTING_CORPUS_ANALYSIS_PURPOSE,
+    input.tenantId,
+    input.procedimentoId,
+    input.corpusFingerprint,
+  ].join(":");
+}
 
 export function buildFascicoloExistingCorpusAnalysisAdmission(input: {
   tenantId: string;
   procedimentoId: string;
   corpusFingerprint: string;
-  preflightFingerprint: string;
+  preflightFingerprint?: string;
   initiatingUserId: string;
   actorEmail: string;
 }): AsyncJobAdmissionInput {
-  const logicalOperationId = buildFascicoloV7ControlledLogicalOperationId(input);
+  const controlledV7 = Boolean(input.preflightFingerprint);
+  const logicalOperationId = controlledV7
+    ? buildFascicoloV7ControlledLogicalOperationId(input)
+    : manualLogicalOperationId(input);
   return {
     ...buildFascicoloDocumentCorpusUpdateAdmission({
       tenantId: input.tenantId,
@@ -53,20 +59,26 @@ export function buildFascicoloExistingCorpusAnalysisAdmission(input: {
       actorRole: "ADMIN",
     }),
     logicalOperationId,
-    purpose: FASCICOLO_EXISTING_CORPUS_ANALYSIS_PURPOSE,
-    maxAttempts: 1,
-    inputReference: {
-      referenceType: "FASCICOLO_DOCUMENT_CORPUS",
-      referenceId: input.corpusFingerprint,
-      referenceVersion: "V1",
-      metadata: {
-        procedimentoId: input.procedimentoId,
-        corpusHash: input.corpusFingerprint,
-        trialContractVersion: FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION,
-        trialApprovalRef: SELVARA_PILOT_AUTHORIZATION.approvalId,
-        trialPreflightHash: input.preflightFingerprint,
-      },
-    },
+    purpose: controlledV7
+      ? FASCICOLO_V7_CONTROLLED_ANALYSIS_PURPOSE
+      : FASCICOLO_EXISTING_CORPUS_ANALYSIS_PURPOSE,
+    maxAttempts: controlledV7 ? 1 : 3,
+    ...(controlledV7
+      ? {
+          inputReference: {
+            referenceType: "FASCICOLO_DOCUMENT_CORPUS" as const,
+            referenceId: input.corpusFingerprint,
+            referenceVersion: "V1" as const,
+            metadata: {
+              procedimentoId: input.procedimentoId,
+              corpusHash: input.corpusFingerprint,
+              trialContractVersion: FASCICOLO_DOCUMENT_ANALYSIS_CONTRACT_VERSION,
+              trialApprovalRef: SELVARA_PILOT_AUTHORIZATION.approvalId,
+              trialPreflightHash: input.preflightFingerprint!,
+            },
+          },
+        }
+      : {}),
   };
 }
 
@@ -75,8 +87,7 @@ export class ExistingCorpusAnalysisRequestError extends Error {
     | "ANALYSIS_ACTIVATION_DISABLED"
     | "CORPUS_NOT_READY"
     | "ECONOMIC_PREFLIGHT_FAILED"
-    | "AI_GLOBALLY_DISABLED"
-    | "SELVARA_PILOT_AUTHORIZATION_MISMATCH") {
+    | "AI_GLOBALLY_DISABLED") {
     super(code);
     this.name = "ExistingCorpusAnalysisRequestError";
   }
@@ -85,9 +96,8 @@ export class ExistingCorpusAnalysisRequestError extends Error {
 export function isExistingCorpusAnalysisRequestEnabled(
   environment: Readonly<Record<string, string | undefined>> = process.env,
 ): boolean {
-  const preflightValuesPresent = [
-    "AI_V7_APPROVED_MAX_OUTPUT_TOKENS",
-    "AI_V7_APPROVED_MAX_COST_EUR",
+  const runtimeValuesPresent = [
+    "AI_OPENAI_API_KEY",
     "AI_OPENAI_MAX_INPUT_TOKENS",
     "AI_OPENAI_MAX_OUTPUT_TOKENS",
     "AI_MAX_INPUT_BYTES",
@@ -98,17 +108,9 @@ export function isExistingCorpusAnalysisRequestEnabled(
     "AI_OPENAI_USD_TO_EUR_RATE_SOURCE",
     "ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR",
   ].every((name) => Boolean(environment[name]?.trim()));
-  return environment.DOCUMENT_WORKER_ACTIVATION_MODE === "RENDER_ONE_OFF"
-    && /^srv-[a-z0-9]+$/.test(
-      environment.RENDER_APPLICATION_WORKER_SERVICE_ID?.trim() ?? "",
-    )
-    && Boolean(environment.RENDER_WORKER_API_KEY?.trim())
+  return environment.ASYNC_PROVIDER_EXECUTION_ENABLED?.trim().toLowerCase() === "true"
     && environment.AI_GLOBAL_EMERGENCY_DISABLED?.trim().toLowerCase() !== "true"
-    && environment.NOETRA_CANONICAL_IDENTITY_V3_ENABLED?.trim().toLowerCase() !== "true"
-    && isSelvaraPilotApprovalId(environment)
-    && environment.AI_V7_PREFLIGHT_APPROVAL_ID?.trim()
-      === SELVARA_PILOT_AUTHORIZATION.approvalId
-    && preflightValuesPresent
+    && runtimeValuesPresent
     && createRealDataActivationPolicy({
       AI_REAL_DATA_ENABLED: environment.AI_REAL_DATA_ENABLED,
       AI_REAL_DATA_APPROVAL_ID: environment.AI_REAL_DATA_APPROVAL_ID,
@@ -120,11 +122,6 @@ interface ExistingCorpusAnalysisDependencies {
   loadCorpus: typeof getFascicoloDocumentCorpusForTenant;
   loadGlobalAiControl: typeof getGlobalAiControlState;
   inspectBudgetCompatibility: typeof inspectFascicoloV7BudgetCompatibility;
-  createPreflight(input: {
-    analysisInput: ReturnType<typeof buildFascicoloDocumentAnalysisInputFromCorpus>;
-    environment: Readonly<Record<string, string | undefined>>;
-    budgetCompatibility: Awaited<ReturnType<typeof inspectFascicoloV7BudgetCompatibility>>;
-  }): FascicoloV7EconomicPreflight;
   admitJob: typeof admitAsyncJob;
   activateWorker: typeof requestDocumentWorkerActivation;
 }
@@ -133,7 +130,6 @@ const defaultDependencies: ExistingCorpusAnalysisDependencies = {
   loadCorpus: getFascicoloDocumentCorpusForTenant,
   loadGlobalAiControl: getGlobalAiControlState,
   inspectBudgetCompatibility: inspectFascicoloV7BudgetCompatibility,
-  createPreflight: createFascicoloV7EconomicPreflight,
   admitJob: admitAsyncJob,
   activateWorker: requestDocumentWorkerActivation,
 };
@@ -152,20 +148,6 @@ export async function requestExistingCorpusAnalysis(input: {
   if (!isExistingCorpusAnalysisRequestEnabled(environment)) {
     throw new ExistingCorpusAnalysisRequestError("ANALYSIS_ACTIVATION_DISABLED");
   }
-  try {
-    assertSelvaraPilotAuthorization(environment, {
-      tenantId: input.tenantId,
-      procedimentoId: input.procedimentoId,
-      corpusFingerprint: SELVARA_PILOT_AUTHORIZATION.corpusFingerprint,
-      purpose: FASCICOLO_EXISTING_CORPUS_ANALYSIS_PURPOSE,
-      operation: FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
-    });
-  } catch (error) {
-    if (error instanceof SelvaraPilotAuthorizationError) {
-      throw new ExistingCorpusAnalysisRequestError("SELVARA_PILOT_AUTHORIZATION_MISMATCH");
-    }
-    throw error;
-  }
   const aiControl = await dependencies.loadGlobalAiControl(environment);
   if (!aiControl.effectiveEnabled) {
     throw new ExistingCorpusAnalysisRequestError("AI_GLOBALLY_DISABLED");
@@ -183,40 +165,22 @@ export async function requestExistingCorpusAnalysis(input: {
   ) {
     throw new ExistingCorpusAnalysisRequestError("CORPUS_NOT_READY");
   }
-  try {
-    assertSelvaraPilotAuthorization(environment, {
-      tenantId: input.tenantId,
-      procedimentoId: input.procedimentoId,
-      corpusFingerprint: corpus.corpusFingerprint,
-      purpose: FASCICOLO_EXISTING_CORPUS_ANALYSIS_PURPOSE,
-      operation: FASCICOLO_AUTOMATIC_ANALYSIS_OPERATION,
-    });
-  } catch (error) {
-    if (error instanceof SelvaraPilotAuthorizationError) {
-      throw new ExistingCorpusAnalysisRequestError("SELVARA_PILOT_AUTHORIZATION_MISMATCH");
-    }
-    throw error;
-  }
-  const approvedMaximumCostEur = Number(environment.AI_V7_APPROVED_MAX_COST_EUR);
-  if (!Number.isFinite(approvedMaximumCostEur) || approvedMaximumCostEur <= 0) {
+  const estimatedCostEur = Number(environment.ASYNC_COST_OPENAI_ANALYSIS_ESTIMATE_EUR);
+  if (!Number.isFinite(estimatedCostEur) || estimatedCostEur <= 0) {
     throw new ExistingCorpusAnalysisRequestError("ECONOMIC_PREFLIGHT_FAILED");
   }
-  let preflight: FascicoloV7EconomicPreflight;
+  let budgetCompatibility: Awaited<ReturnType<typeof inspectFascicoloV7BudgetCompatibility>>;
   try {
-    const budgetCompatibility = await dependencies.inspectBudgetCompatibility({
+    budgetCompatibility = await dependencies.inspectBudgetCompatibility({
       tenantId: input.tenantId,
       procedimentoId: input.procedimentoId,
-      requiredAmountEur: approvedMaximumCostEur,
+      requiredAmountEur: estimatedCostEur,
     });
-    preflight = dependencies.createPreflight({
-      analysisInput: buildFascicoloDocumentAnalysisInputFromCorpus(corpus),
-      environment,
-      budgetCompatibility,
-    });
-  } catch (error) {
-    if (error instanceof FascicoloV7PreflightError) {
+    if (!budgetCompatibility.compatible) {
       throw new ExistingCorpusAnalysisRequestError("ECONOMIC_PREFLIGHT_FAILED");
     }
+  } catch (error) {
+    if (error instanceof ExistingCorpusAnalysisRequestError) throw error;
     throw error;
   }
   const admission = await dependencies.admitJob(
@@ -224,7 +188,6 @@ export async function requestExistingCorpusAnalysis(input: {
       tenantId: input.tenantId,
       procedimentoId: input.procedimentoId,
       corpusFingerprint: corpus.corpusFingerprint,
-      preflightFingerprint: preflight.preflightFingerprint,
       initiatingUserId: input.actor.id,
       actorEmail: input.actor.email,
     }),
@@ -235,5 +198,5 @@ export async function requestExistingCorpusAnalysis(input: {
     tenantId: input.tenantId,
     procedimentoId: input.procedimentoId,
   });
-  return { admission, activation, preflight };
+  return { admission, activation, budgetCompatibility };
 }

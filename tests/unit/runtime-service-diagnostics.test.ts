@@ -55,6 +55,7 @@ describe("runtime service diagnostics", () => {
       S3_ACCESS_KEY_ID: "access",
       S3_SECRET_ACCESS_KEY: "secret",
       AUTOMATIC_RESEARCH_EXECUTION_ENABLED: "true",
+      SERVER_AUTONOMOUS_RESEARCH_ENABLED: "true",
       LEGAL_DATA_HUNTER_API_KEY: "secret",
       MOONLIT_OAUTH_STORAGE_PATH: "C:\\tokens\\moonlit.json",
       SIMPLICITER_OAUTH_STORAGE_PATH: "C:\\tokens\\simpliciter.json",
@@ -73,6 +74,51 @@ describe("runtime service diagnostics", () => {
     ]));
     expect(probeR2).toHaveBeenCalledOnce();
     expect(JSON.stringify(diagnostics)).not.toContain("secret");
+  });
+
+  it("verifies the WorkOS JWKS, protected-resource metadata, and MCP auth challenge", async () => {
+    const issuer = "https://auth.example.test";
+    const resource = "https://mcp.example.test/api/mcp";
+    const metadataUrl = "https://mcp.example.test/.well-known/oauth-protected-resource";
+    const fetchImpl = vi.fn(async (url: string | URL) => {
+      const value = String(url);
+      if (value === `${issuer}/oauth2/jwks`) {
+        return Response.json({ keys: [{ kid: "key-1" }] });
+      }
+      if (value === metadataUrl) {
+        return Response.json({
+          resource,
+          authorization_servers: [issuer],
+        });
+      }
+      if (value === resource) {
+        return new Response("{}", {
+          status: 401,
+          headers: {
+            "WWW-Authenticate": `Bearer resource_metadata="${metadataUrl}"`,
+          },
+        });
+      }
+      throw new Error(`Unexpected URL ${value}`);
+    }) as unknown as typeof fetch;
+
+    const diagnostics = await getRuntimeServiceDiagnostics({
+      MCP_PRODUCTION_ENABLED: "true",
+      WORKOS_API_KEY: "protected",
+      WORKOS_AUTHKIT_ISSUER: issuer,
+      MCP_RESOURCE_URI: resource,
+      MCP_FASCICOLO_GRANT_SECRET: "x".repeat(32),
+    }, {
+      fetch: fetchImpl,
+      probeR2: vi.fn(),
+    });
+
+    expect(diagnostics.services).toContainEqual(expect.objectContaining({
+      id: "connectors",
+      status: "READY",
+      code: "CONNECTORS_READY",
+    }));
+    expect(fetchImpl).toHaveBeenCalledTimes(3);
   });
 
   it("rejects idle templates presented as operational workers", async () => {

@@ -27,6 +27,7 @@ import {
   AI_PROVIDER_BACKED_ASYNC_OPERATIONS,
   getGlobalAiControlState,
 } from "../ai/globalAiControl";
+import { getAutomationControlState } from "../automation/automationControl";
 
 const APPLICATION_ASYNC_JOB_LEASE_MS = 5 * 60 * 1_000;
 const TARGETED_FASCICOLO_ANALYSIS_LEASE_MS = 15 * 60 * 1_000;
@@ -72,14 +73,22 @@ export async function drainOneApplicationAsyncJob(input: {
   procedimentoAllowlist?: readonly string[];
   providerExecutionEnabled?: boolean;
 }) {
-  const aiControl = await getGlobalAiControlState();
+  const [aiControl, automationControl] = await Promise.all([
+    getGlobalAiControlState(),
+    getAutomationControlState(),
+  ]);
   const providerExecutionEnabled =
     input.providerExecutionEnabled === true && aiControl.effectiveEnabled;
-  if (providerExecutionEnabled && !input.procedimentoAllowlist?.length) {
+  if (
+    providerExecutionEnabled
+    && automationControl.effectiveEnabled
+    && !input.procedimentoAllowlist?.length
+  ) {
     await reconcilePeriodicLegalResearch();
   }
   if (
     providerExecutionEnabled
+    && automationControl.effectiveEnabled
     && (!input.operationAllowlist?.length
       || input.operationAllowlist.includes(AUTOMATIC_RESEARCH_OPERATION))
   ) {

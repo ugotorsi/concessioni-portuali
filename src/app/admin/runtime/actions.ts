@@ -8,6 +8,11 @@ import { getCurrentTenantContext, requireTenantAccess } from "@/lib/tenant-auth"
 import { auditFailure, auditSuccess, createAuditLogInTransaction } from "@/server/audit/auditLog";
 import { setGlobalAiControlState } from "@/server/ai/globalAiControl";
 import {
+  setAutomationControlState,
+  type AutomationMode,
+} from "@/server/automation/automationControl";
+import { requestExistingCorpusAnalysis } from "@/server/ai/fascicoloExistingCorpusAnalysis";
+import {
   documentWorkerKindForOperation,
   requestDocumentWorkerActivation,
 } from "@/server/async-jobs/documentWorkerActivation";
@@ -26,6 +31,215 @@ import {
 const RENDER_SERVICE_ID_PATTERN = /^srv-[a-z0-9]+$/;
 const RUNTIME_BUDGET_AMOUNT_PATTERN = /^(?:0|[1-9]\d*)(?:\.\d{1,6})?$/;
 const MAX_RUNTIME_BUDGET_WINDOW_SECONDS = 31 * 24 * 60 * 60;
+const ACTIVE_PROCEDIMENTO_STATES = ["DA_AVVIARE", "IN_CORSO"] as const;
+const MAX_MANUAL_BATCH_SIZE = 100;
+
+async function assertCommercialAutomationReady(): Promise<void> {
+  const requiredEnvironment = [
+    "AI_OPENAI_API_KEY",
+    "ASYNC_PROVIDER_EXECUTION_ENABLED",
+    "MCP_PRODUCTION_ENABLED",
+    "MCP_FASCICOLO_GRANT_SECRET",
+    "WORKOS_API_KEY",
+    "RENDER_APPLICATION_WORKER_SERVICE_ID",
+    "RENDER_WORKER_API_KEY",
+  ] as const;
+  const missing: string[] = requiredEnvironment.filter((name) => {
+    const value = process.env[name]?.trim();
+    if (!value) return true;
+    if (name.endsWith("_ENABLED")) return value.toLowerCase() !== "true";
+    return false;
+  });
+  if (process.env.PERIODIC_LEGAL_RESEARCH_ENABLED?.trim().toLowerCase() !== "true") {
+    missing.push("PERIODIC_LEGAL_RESEARCH_ENABLED");
+  }
+  if (process.env.PERIODIC_LEGAL_RESEARCH_INTERVAL_DAYS?.trim() !== "7") {
+    missing.push("PERIODIC_LEGAL_RESEARCH_INTERVAL_DAYS");
+  }
+  if (missing.length) {
+    throw new Error(`AUTOMATION_CONFIGURATION_INCOMPLETE:${missing.join(",")}`);
+  }
+  const globalBudget = await prisma.runtimeBudgetPolicy.findFirst({
+    where: {
+      scope: "GLOBAL",
+      enabled: true,
+      currency: "EUR",
+      effectiveFrom: { lte: new Date() },
+    },
+    select: { id: true },
+  });
+  if (!globalBudget) throw new Error("AUTOMATION_GLOBAL_BUDGET_REQUIRED");
+}
+
+export async function updateAutomationControl(formData: FormData): Promise<void> {
+  const currentUser = await requireAdminWithMfa();
+  const mode = formData.get("mode");
+  const confirmation = formData.get("confirmation");
+  const reason = formData.get("reason");
+  if (mode !== "OFF" && mode !== "ON") {
+    throw new Error("INVALID_AUTOMATION_MODE");
+  }
+  const expectedConfirmation = mode === "ON"
+    ? "ENABLE_COMMERCIAL_AUTOMATION"
+    : "DISABLE_AUTOMATION";
+  if (confirmation !== expectedConfirmation) {
+    throw new Error("AUTOMATION_CONFIRMATION_REQUIRED");
+  }
+  if (reason !== null && typeof reason !== "string") {
+    throw new Error("INVALID_AUTOMATION_REASON");
+  }
+  const normalizedReason = reason?.trim() || null;
+  if ((mode === "ON" && !normalizedReason) || (normalizedReason?.length ?? 0) > 500) {
+    throw new Error("INVALID_AUTOMATION_REASON");
+  }
+  if (mode === "ON") {
+    await assertCommercialAutomationReady();
+  }
+
+  await setAutomationControlState({
+    mode: mode as AutomationMode,
+    actor: {
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+      userRole: "ADMIN",
+    },
+    reason: normalizedReason,
+  });
+  revalidatePath("/admin/runtime");
+}
+
+export async function runManualFascicoloAnalysis(formData: FormData): Promise<void> {
+  const currentUser = await requireAdminWithMfa();
+  const procedimentoId = formData.get("procedimentoId");
+  if (typeof procedimentoId !== "string" || !procedimentoId.trim()) {
+    throw new Error("INVALID_PROCEDIMENTO_ID");
+  }
+  if (formData.get("confirmation") !== "RUN_MANUAL_FASCICOLO_ANALYSIS") {
+    throw new Error("MANUAL_ANALYSIS_CONFIRMATION_REQUIRED");
+  }
+  const procedimento = await prisma.procedimento.findUnique({
+    where: { id: procedimentoId.trim() },
+    select: { id: true, enteId: true },
+  });
+  if (!procedimento) throw new Error("PROCEDIMENTO_NOT_FOUND");
+  const tenantContext = await getCurrentTenantContext();
+  if (!tenantContext) throw new Error("TENANT_CONTEXT_REQUIRED");
+  requireTenantAccess(tenantContext, procedimento.enteId, {
+    mode: "write",
+    allowWhenEnteMissing: false,
+  });
+
+  const result = await requestExistingCorpusAnalysis({
+    tenantId: procedimento.enteId,
+    procedimentoId: procedimento.id,
+    actor: {
+      id: currentUser.id,
+      email: currentUser.email,
+      role: "ADMIN",
+    },
+  });
+  await auditSuccess({
+    azione: "FASCICOLO_MANUAL_ANALYSIS_REQUEST",
+    entita: "Procedimento",
+    entitaId: procedimento.id,
+    enteId: procedimento.enteId,
+    actor: {
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+      userRole: currentUser.role,
+    },
+    metadata: {
+      jobId: result.admission.job.id,
+      admissionOutcome: result.admission.outcome,
+      workerActivationOutcome: result.activation.outcome,
+      automationRequired: false,
+    },
+  });
+  revalidatePath("/admin/runtime");
+  revalidatePath(`/procedimenti/${procedimento.id}`);
+}
+
+export async function runManualTenantBatchAnalysis(formData: FormData): Promise<void> {
+  const currentUser = await requireAdminWithMfa();
+  const tenantId = formData.get("tenantId");
+  if (typeof tenantId !== "string" || !tenantId.trim()) {
+    throw new Error("INVALID_TENANT_ID");
+  }
+  if (formData.get("confirmation") !== "RUN_ALL_ACTIVE_FASCICOLI") {
+    throw new Error("MANUAL_BATCH_CONFIRMATION_REQUIRED");
+  }
+  const tenantContext = await getCurrentTenantContext();
+  if (!tenantContext) throw new Error("TENANT_CONTEXT_REQUIRED");
+  requireTenantAccess(tenantContext, tenantId.trim(), {
+    mode: "write",
+    allowWhenEnteMissing: false,
+  });
+  const procedimenti = await prisma.procedimento.findMany({
+    where: {
+      enteId: tenantId.trim(),
+      stato: { in: [...ACTIVE_PROCEDIMENTO_STATES] },
+    },
+    orderBy: [{ updatedAt: "asc" }, { id: "asc" }],
+    take: MAX_MANUAL_BATCH_SIZE + 1,
+    select: { id: true, enteId: true },
+  });
+  if (procedimenti.length > MAX_MANUAL_BATCH_SIZE) {
+    throw new Error("MANUAL_BATCH_SIZE_LIMIT_EXCEEDED");
+  }
+  if (!procedimenti.length) throw new Error("NO_ACTIVE_PROCEDIMENTI");
+
+  const admittedJobIds: string[] = [];
+  try {
+    for (const procedimento of procedimenti) {
+      const result = await requestExistingCorpusAnalysis({
+        tenantId: procedimento.enteId,
+        procedimentoId: procedimento.id,
+        actor: {
+          id: currentUser.id,
+          email: currentUser.email,
+          role: "ADMIN",
+        },
+      });
+      admittedJobIds.push(result.admission.job.id);
+    }
+  } catch (error) {
+    await auditFailure({
+      azione: "FASCICOLO_MANUAL_BATCH_ANALYSIS_FAILURE",
+      entita: "Ente",
+      entitaId: tenantId.trim(),
+      enteId: tenantId.trim(),
+      actor: {
+        userId: currentUser.id,
+        userEmail: currentUser.email,
+        userRole: currentUser.role,
+      },
+      metadata: {
+        requestedCount: procedimenti.length,
+        admittedCount: admittedJobIds.length,
+        admittedJobIds,
+        reason: error instanceof Error ? error.message : "UNKNOWN_ERROR",
+      },
+    });
+    throw error;
+  }
+  await auditSuccess({
+    azione: "FASCICOLO_MANUAL_BATCH_ANALYSIS_REQUEST",
+    entita: "Ente",
+    entitaId: tenantId.trim(),
+    enteId: tenantId.trim(),
+    actor: {
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+      userRole: currentUser.role,
+    },
+    metadata: {
+      requestedCount: procedimenti.length,
+      admittedJobIds,
+      automationRequired: false,
+    },
+  });
+  revalidatePath("/admin/runtime");
+}
 
 export async function upsertRuntimeBudgetPolicy(formData: FormData): Promise<void> {
   const currentUser = await requireAdminWithMfa();

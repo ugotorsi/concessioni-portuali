@@ -457,6 +457,15 @@ build artifact.
 server exposes, leases, validates, and stores missions and evidence bundles; it does
 not invoke ChatGPT-only connectors by itself.
 
+The administrative runtime console keeps provider availability separate from
+automation. `AUTOMATION_MODE_CHANGE` is persisted in the hash-chained audit log and
+defaults to `OFF` when no successful event exists. In `OFF`, document extraction and
+OCR may still run, and an MFA-authenticated administrator may explicitly request one
+fascicolo or a confirmed tenant batch, but post-extraction provider jobs, periodic
+mission reconciliation, and automatic backend-research reconciliation do not start.
+Switching back to `OFF` cancels queued automatic provider jobs while preserving jobs
+whose purpose is explicitly manual.
+
 ChatGPT-side missions use `executionChannel=CHATGPT_CONNECTOR` and are excluded from
 automatic admission, residual-wave scheduling, and worker reconciliation. Missing
 channels on legacy missions are interpreted as `CHATGPT_CONNECTOR`. The optional
