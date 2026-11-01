@@ -117,6 +117,24 @@ describe("Lotto 3 legal issue and research question domain", () => {
     expect(result.candidates.some((candidate) => candidate.kind === "FACT")).toBe(false);
   });
 
+  it("resolves cyclic optional relations instead of losing every item in the cycle", () => {
+    const value = knowledge();
+    const event = value.items[1] as { payload: { relatedItemLocalIds: string[] } };
+    const gap = value.items[3] as { payload: { relatedItemLocalIds: string[] } };
+    event.payload.relatedItemLocalIds = ["gap-1"];
+    gap.payload.relatedItemLocalIds = ["event-1"];
+
+    const result = project(value);
+    const again = project(value);
+
+    expect(result.quality.rejections).toEqual([]);
+    expect(result.quality.blockingReasons).toEqual([]);
+    expect(result.candidates.filter((candidate) => candidate.kind === "LEGAL_ISSUE")).toHaveLength(3);
+    expect(result.candidates.some((candidate) => candidate.kind === "RESEARCH_QUESTION")).toBe(true);
+    expect(result.candidates.map((candidate) => candidate.semanticKey))
+      .toEqual(again.candidates.map((candidate) => candidate.semanticKey));
+  });
+
   it("projects issues from FACT, MEASURE, GAP and CONTRADICTION with traceable evidence", () => {
     const result = project();
     const issues = result.candidates.filter((candidate) => candidate.kind === "LEGAL_ISSUE");

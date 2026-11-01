@@ -421,7 +421,15 @@ export function projectStructuredKnowledge(input: {
   const itemsByLocalId = new Map(knowledge.items.map((item) => [item.localId, item]));
   const pending = [...knowledge.items];
   let progressed = true;
-  while (pending.length > 0 && progressed) {
+  // Optional relations may form cycles (e.g. GAP <-> PARTY_POSITION) or point to rejected items.
+  // When resolution stalls, release exactly one item whose required dependencies are resolved,
+  // omitting its still-unresolved optional relations, then resume strict ordering.
+  let releaseOneOptionalCycle = false;
+  while (pending.length > 0) {
+    if (!progressed) {
+      if (releaseOneOptionalCycle) break;
+      releaseOneOptionalCycle = true;
+    }
     progressed = false;
     for (let index = pending.length - 1; index >= 0; index -= 1) {
       const item = pending[index];
@@ -440,20 +448,31 @@ export function projectStructuredKnowledge(input: {
       const resolutionCandidateLocalIds = item.kind === "FACT" || item.kind === "EVENT"
         ? item.payload.proceedingIdentityResolution?.candidateAnchorLocalIds ?? []
         : [];
-      const allDependencyLocalIds = [...new Set([
+      const requiredDependencyLocalIds = [...new Set([
         ...dependencyLocalIds,
-        ...existingOptionalDependencyLocalIds,
         ...(anchorLocalId ? [anchorLocalId] : []),
         ...resolutionCandidateLocalIds,
       ])];
-      const dependencyKeys = allDependencyLocalIds.map((localId) => semanticKeysByLocalId.get(localId));
-      if (dependencyKeys.some((key) => !key)) continue;
+      if (requiredDependencyLocalIds.some((localId) => !semanticKeysByLocalId.has(localId))) continue;
+      const optionalPending = existingOptionalDependencyLocalIds.some((localId) => (
+        !semanticKeysByLocalId.has(localId)
+      ));
+      if (optionalPending) {
+        if (!releaseOneOptionalCycle) continue;
+        releaseOneOptionalCycle = false;
+      }
+      const allDependencyLocalIds = [...new Set([
+        ...requiredDependencyLocalIds,
+        ...existingOptionalDependencyLocalIds,
+      ])];
+      const dependencyKeys = allDependencyLocalIds.flatMap((localId) => {
+        const key = semanticKeysByLocalId.get(localId);
+        return key ? [key] : [];
+      });
       const relatedDependencyKeys = optionalDependencyLocalIds.flatMap((localId) => {
         const key = semanticKeysByLocalId.get(localId);
         if (key) return [key];
-        if (!itemsByLocalId.has(localId)) {
-          warnings.push(`UNRESOLVED_OPTIONAL_RELATION:${item.localId}:${localId}`);
-        }
+        warnings.push(`UNRESOLVED_OPTIONAL_RELATION:${item.localId}:${localId}`);
         return [];
       });
       const evidence = item.basisRefs.map((basisRef) => input.evidenceByBasisRef.get(basisRef));
