@@ -27,7 +27,7 @@ import {
   evaluateIdentityVerification,
   temporalStateFromAssessment,
 } from "./source-chain";
-import { persistSourceChainAssessment } from "./source-chain-persistence";
+import { persistSourceChainAssessment, retireUsableSourceAssessments } from "./source-chain-persistence";
 
 const MAX_OFFICIAL_DOCUMENT_BYTES = 2 * 1024 * 1024;
 const NORMATTIVA_AKN_ENDPOINT = "https://www.normattiva.it/do/atto/caricaAKN";
@@ -89,7 +89,18 @@ function xmlText(value: string): string {
 
 function citationAnchor(xml: string, researchQuestion: string, actTitle: string | null) {
   const articles = [...xml.matchAll(/<article\b[^>]*\beId="([^"]+)"[^>]*>([\s\S]*?)<\/article>/g)]
-    .map((match) => ({ anchor: match[1], text: xmlText(match[2]) }));
+    .map((match) => {
+      // Normattiva editorial notes cite unrelated acts and must not drive pertinence.
+      const body = match[2].replace(/<authorialNote\b[\s\S]*?<\/authorialNote>/g, " ");
+      const heading = /<heading\b[^>]*>([\s\S]*?)<\/heading>/.exec(body)?.[1];
+      const paragraphs = [...body.matchAll(/<(paragraph|point)\b[^>]*>([\s\S]*?)<\/\1>/g)]
+        .map((paragraph) => xmlText(paragraph[2]));
+      return {
+        anchor: match[1],
+        text: xmlText(body),
+        segments: [heading ? xmlText(heading) : "", ...paragraphs].filter(Boolean),
+      };
+    });
   const docTitle = /<docTitle\b[^>]*>([\s\S]*?)<\/docTitle>/.exec(xml)?.[1];
   return selectRelevantArticle({
     articles,
@@ -531,6 +542,9 @@ export async function verifyOfficialResearchSources(input: {
   });
   const checkedAt = new Date();
   const markRows = async (rows: readonly CandidateRow[], relevance: OfficialSourceRelevance) => {
+    if (relevance.status !== "PERTINENTE_VERIFICATA") {
+      await retireUsableSourceAssessments(rows.map((row) => row.id));
+    }
     for (const row of rows) {
       await prisma.researchQuestionResultRecord.update({
         where: { id: row.id },

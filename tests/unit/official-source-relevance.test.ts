@@ -73,6 +73,40 @@ describe("selectRelevantArticle", () => {
       articles: [{ anchor: "art_36", text: "L'amministrazione può concedere l'occupazione di beni demaniali marittimi; la concessione è soggetta a canone e garanzia." }],
     })).toBeNull();
   });
+
+  const DOCUMENTARY_QUESTION = "Quali elementi documentali sono necessari per dimostrare la tempestiva presentazione e l’acquisizione al fascicolo di una garanzia assicurativa prescritta dall’ente concedente?";
+
+  it("rejects terms scattered across the paragraphs of a long article (D.Lgs. 229/2017 art. 33 false positive)", () => {
+    expect(selectRelevantArticle({
+      researchQuestion: DOCUMENTARY_QUESTION,
+      actTitle: "Revisione ed integrazione del codice della nautica da diporto",
+      articles: [{
+        anchor: "art_33",
+        text: "Figure professionali per le unità da diporto. Mediatore del diporto. Ormeggio nei porti turistici in concessione. Iscrizione con garanzia assicurativa. Documentazione necessaria.",
+        segments: [
+          "Figure professionali per le unità da diporto",
+          "È mediatore del diporto colui che mette in relazione le parti per contratti di ormeggio nei porti in concessione.",
+          "Il mediatore stipula una garanzia assicurativa per la responsabilità civile.",
+          "La documentazione necessaria all'iscrizione è acquisita dalla camera di commercio.",
+        ],
+      }],
+    })).toBeNull();
+  });
+
+  it("rejects matches coming only from generic procedural words (DPR 509/1997 art. 1 false positive)", () => {
+    expect(selectRelevantArticle({
+      researchQuestion: DOCUMENTARY_QUESTION,
+      actTitle: "Regolamento recante disciplina del procedimento di concessione di beni del demanio marittimo per la nautica da diporto",
+      articles: [{
+        anchor: "art_1",
+        text: "Ambito di applicazione.",
+        segments: [
+          "Ambito di applicazione",
+          "La connessione si ha quando diversi procedimenti siano tutti necessari per la realizzazione delle strutture e degli elementi documentali in concessione.",
+        ],
+      }],
+    })).toBeNull();
+  });
 });
 
 describe("officialSourceRelevance round trip", () => {

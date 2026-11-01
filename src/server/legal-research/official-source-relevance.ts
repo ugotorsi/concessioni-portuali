@@ -30,7 +30,7 @@ export type OfficialSourceRelevance = Readonly<{
 }>;
 
 export const OFFICIAL_SOURCE_RELEVANCE_LABELS: Readonly<Record<OfficialSourceRelevanceReason, string>> = {
-  OFFICIAL_TEXT_ACQUIRED_RELEVANT_ARTICLE: "Testo ufficiale acquisito da Normattiva; articolo pertinente individuato.",
+  OFFICIAL_TEXT_ACQUIRED_RELEVANT_ARTICLE: "Testo ufficiale acquisito da Normattiva; articolo con corrispondenza testuale al quesito. Pertinenza giuridica e orientamento da confermare dal professionista.",
   OFFICIAL_TEXT_ACQUIRED_NO_RELEVANT_ARTICLE: "Testo ufficiale acquisito da Normattiva, ma nessun articolo pertinente al quesito: fonte esclusa.",
   OFFICIAL_SOURCE_TEMPORAL_OR_IDENTITY_REVIEW_REQUIRED: "Testo ufficiale acquisito, ma vigenza alla data di riferimento o identità non confermate.",
   SOURCE_NOT_ON_SUPPORTED_OFFICIAL_SITE: "Fonte non pubblicata su un sito ufficiale coperto dalla verifica automatica.",
@@ -141,9 +141,15 @@ const NON_DISCRIMINATING_STEMS = new Set([
   "concess", "discipl", "regola", "indicat", "effetti", "previst", "prevista", "relativ", "normati",
   "eventua", "applica", "second", "quale", "quali", "rispett", "riferim", "ambito", "materia",
   "caso", "modalit", "present", "proprio", "partico", "general", "termini",
+  "element", "documen", "necessa", "dimostr", "verific", "attribu", "specifi", "devono", "derivan",
+  "eventua", "richies", "risulta", "rispett", "conform", "essere", "requisi", "fascico",
+  // Domain words are already required separately and must not count as subject matches.
+  "demania", "maritti", "portual", "navigaz", "concede",
 ]);
 
 const PORT_DOMAIN_MARKERS = /(demani|marittim|portual|\bport[oi]\b|navigazion|autorita di sistema portuale)/;
+// The paragraph carrying the matched terms must itself concern a concession or the maritime domain.
+const SEGMENT_SUBJECT_MARKERS = /(concession|concessionari|demani|marittim|portual)/;
 
 export type RelevantArticle = Readonly<{
   section: string;
@@ -152,13 +158,24 @@ export type RelevantArticle = Readonly<{
   matchedTerms: readonly string[];
 }>;
 
+function articleSegments(article: Readonly<{ text: string; segments?: readonly string[] }>): string[] {
+  const segments = article.segments?.length ? article.segments : [article.text];
+  // Paragraphs may embed whole quoted articles (amending acts), so co-occurrence is checked per sentence.
+  return segments
+    .flatMap((segment) => segment.split(/(?<=[.;:])\s+/))
+    .map(normalized)
+    .filter(Boolean);
+}
+
 /**
- * Selects the article most pertinent to the research question. An article is pertinent only if it
- * concerns concessions, belongs to the port/maritime domain (by its own text or the act title) and
- * matches at least two discriminating terms of the question.
+ * Selects the article that textually corresponds to the research question. An article qualifies only
+ * if it concerns concessions, belongs to the port/maritime domain (by its own text or the act title)
+ * and at least two discriminating terms of the question co-occur in the same paragraph. Terms spread
+ * across a long article (or its editorial notes) never establish correspondence on their own.
+ * A textual correspondence is not a legal pertinence judgement: it must be confirmed professionally.
  */
 export function selectRelevantArticle(input: {
-  articles: readonly Readonly<{ anchor: string; text: string }>[];
+  articles: readonly Readonly<{ anchor: string; text: string; segments?: readonly string[] }>[];
   researchQuestion: string;
   actTitle: string | null;
 }): RelevantArticle | null {
@@ -171,7 +188,10 @@ export function selectRelevantArticle(input: {
   const ranked = input.articles
     .map((article) => {
       const text = normalized(article.text);
-      const matchedTerms = terms.filter((term) => text.includes(term));
+      const matchedTerms = articleSegments(article)
+        .filter((segment) => SEGMENT_SUBJECT_MARKERS.test(segment))
+        .map((segment) => terms.filter((term) => segment.includes(term)))
+        .sort((left, right) => right.length - left.length)[0] ?? [];
       const inDomain = actInDomain || PORT_DOMAIN_MARKERS.test(text);
       return { anchor: article.anchor, original: article.text, text, matchedTerms, inDomain };
     })

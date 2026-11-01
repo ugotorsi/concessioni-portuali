@@ -1,17 +1,54 @@
 import { createHash } from "node:crypto";
 import { Pool, type PoolClient } from "pg";
 
-const PROCEDURE_ID = "procedimento-intake-9e04f4d4cdbf092845b57c66";
-const APPROVAL = "NOETRA-V7-PRODUCTION-SELVARA-PROMOTION-2026-10-29";
+interface PromotionScope {
+  procedureId: string;
+  approval: string;
+  // Research data is keyed by caseId/missionId (not foreign keys to Procedimento) and must be followed explicitly.
+  includeResearchAndChildren: boolean;
+  requiredEnteCodePrefix?: string;
+  // Knowledge evidence of document-extraction provenance requires its extraction attempt and pages.
+  includeDocumentExtraction?: boolean;
+}
+
+const PROMOTION_SCOPES: Record<string, PromotionScope> = {
+  SELVARA: {
+    procedureId: "procedimento-intake-9e04f4d4cdbf092845b57c66",
+    approval: "NOETRA-V7-PRODUCTION-SELVARA-PROMOTION-2026-10-29",
+    includeResearchAndChildren: false,
+  },
+  DEMO_CP058_2019: {
+    procedureId: "cmvxr3st5003920udtvom8ebv",
+    approval: "NOETRA-V7-PRODUCTION-DEMO-CP058-2019-PRESERVATION",
+    includeResearchAndChildren: true,
+    requiredEnteCodePrefix: "DEMO-",
+    includeDocumentExtraction: true,
+  },
+};
+const SCOPE_NAME = process.env.NOETRA_PROMOTION_SCOPE ?? "SELVARA";
+const SCOPE: PromotionScope | undefined = PROMOTION_SCOPES[SCOPE_NAME];
+const PROCEDURE_ID = SCOPE?.procedureId ?? "";
+const APPROVAL = SCOPE?.approval ?? "";
+const RESEARCH_CHILD_TABLES = new Set([
+  "DocumentExtractionPage",
+  "DocumentFileVersion",
+  "FascicoloKnowledgeIdentity",
+  "ResearchAdverseRequirement",
+  "ResearchAssistedVerificationRecord",
+  "ResearchEvidenceBundleRecord",
+  "ResearchExecutionAttempt",
+  "ResearchQuestionResultRecord",
+  "ResearchSourceAssessmentRecord",
+  "TechnicalSourceResearchRecord",
+]);
 const EXCLUDED_OPERATIONAL_TABLES = new Set([
   "AsyncJob",
-  "DocumentExtractionAttempt",
-  "DocumentExtractionPage",
+  ...(SCOPE?.includeDocumentExtraction ? [] : ["DocumentExtractionAttempt", "DocumentExtractionPage"]),
   "DocumentOcrRun",
   "RuntimeBudgetPolicy",
   "RuntimeCostReservation",
 ]);
-const EXCLUDED_REFERENCE_COLUMNS = new Map([
+const EXCLUDED_REFERENCE_COLUMNS = new Map(SCOPE?.includeDocumentExtraction ? [] : [
   ["FascicoloKnowledgeEvidence", new Set(["documentExtractionAttemptId"])],
 ]);
 
@@ -134,7 +171,9 @@ async function selectPromotionGraph(client: PoolClient): Promise<{
     const primaryKey = metadata.primaryKeys.get(table);
     if (!primaryKey) throw new Error(`PROMOTION_PRIMARY_KEY_UNSUPPORTED:${table}`);
     for (const row of candidates) {
-      rows.set(rowKey(table, primaryKey, row), { table, row, primaryKey });
+      const key = rowKey(table, primaryKey, row);
+      // Keep the first selected copy so user references already cleared are not restored by a later lookup.
+      if (!rows.has(key)) rows.set(key, { table, row, primaryKey });
     }
   };
 
@@ -154,7 +193,61 @@ async function selectPromotionGraph(client: PoolClient): Promise<{
     addRows(entry.table_name, result.rows);
   }
 
+  if (SCOPE?.includeResearchAndChildren) {
+    const caseTablesResult = await client.query<{ table_name: string }>(`
+      SELECT table_name
+      FROM information_schema.columns
+      WHERE table_schema = 'public' AND column_name = 'caseId'
+      ORDER BY table_name
+    `);
+    for (const entry of caseTablesResult.rows) {
+      if (EXCLUDED_OPERATIONAL_TABLES.has(entry.table_name)) continue;
+      const result = await client.query<Record<string, unknown>>(
+        `SELECT * FROM ${quoteIdentifier(entry.table_name)} WHERE "caseId" = $1`,
+        [PROCEDURE_ID],
+      );
+      addRows(entry.table_name, result.rows);
+    }
+    const missionIds = [...rows.values()]
+      .filter((selected) => selected.table === "ResearchMissionRecord")
+      .map((selected) => selected.row.id);
+    const missionTablesResult = await client.query<{ table_name: string }>(`
+      SELECT table_name
+      FROM information_schema.columns
+      WHERE table_schema = 'public' AND column_name = 'missionId'
+      ORDER BY table_name
+    `);
+    for (const entry of missionTablesResult.rows) {
+      if (!RESEARCH_CHILD_TABLES.has(entry.table_name) || missionIds.length === 0) continue;
+      const result = await client.query<Record<string, unknown>>(
+        `SELECT * FROM ${quoteIdentifier(entry.table_name)} WHERE "missionId" = ANY($1)`,
+        [missionIds],
+      );
+      addRows(entry.table_name, result.rows);
+    }
+    let grew = true;
+    while (grew) {
+      grew = false;
+      for (const foreignKey of metadata.foreignKeys) {
+        if (!RESEARCH_CHILD_TABLES.has(foreignKey.childTable) || foreignKey.childColumns.length !== 1) continue;
+        const parentValues = [...rows.values()]
+          .filter((selected) => selected.table === foreignKey.parentTable)
+          .map((selected) => selected.row[foreignKey.parentColumns[0]])
+          .filter((value) => value != null);
+        if (parentValues.length === 0) continue;
+        const result = await client.query<Record<string, unknown>>(
+          `SELECT * FROM ${quoteIdentifier(foreignKey.childTable)}
+           WHERE ${quoteIdentifier(foreignKey.childColumns[0])} = ANY($1)`,
+          [parentValues],
+        );
+        const previousSize = rows.size;
+        addRows(foreignKey.childTable, result.rows);
+        if (rows.size > previousSize) grew = true;
+      }
+    }
+  }
   let changed = true;
+  const lookedUpParents = new Set<string>();
   while (changed) {
     changed = false;
     for (const selected of [...rows.values()]) {
@@ -172,6 +265,9 @@ async function selectPromotionGraph(client: PoolClient): Promise<{
         }
         const values = foreignKey.childColumns.map((column) => selected.row[column]);
         if (values.some((value) => value == null)) continue;
+        const lookupKey = JSON.stringify([foreignKey.parentTable, foreignKey.parentColumns, values]);
+        if (lookedUpParents.has(lookupKey)) continue;
+        lookedUpParents.add(lookupKey);
         const predicates = foreignKey.parentColumns
           .map((column, index) => `${quoteIdentifier(column)} = $${index + 1}`)
           .join(" AND ");
@@ -203,6 +299,9 @@ async function insertPromotionGraph(
     values: Map<string, unknown>;
   }>();
   let pass = 0;
+  // Strict passes keep every reference; only when they stall is one relaxed pass allowed to defer nullable
+  // references (restored afterwards) to break reference cycles. Deferring eagerly breaks composite keys and checks.
+  let relaxed = false;
   while (pending.length > 0) {
     pass += 1;
     blockedReasons.clear();
@@ -227,7 +326,8 @@ async function insertPromotionGraph(
       }
       for (const foreignKey of metadata.foreignKeys.filter(
         (key) => (
-          key.childTable === selected.table
+          relaxed
+          && key.childTable === selected.table
           && key.parentTable !== "User"
           && !EXCLUDED_OPERATIONAL_TABLES.has(key.parentTable)
         ),
@@ -293,7 +393,13 @@ async function insertPromotionGraph(
         blockedReasons.set(selected.table, reasons);
       }
     }
-    if (progress === 0 || pass > selectedRows.size + 1) {
+    if (progress === 0 && !relaxed) {
+      relaxed = true;
+      continue;
+    }
+    relaxed = false;
+    await applyRestorations(client, restorations, false);
+    if (progress === 0 || pass > 2 * selectedRows.size + 2) {
       const blockedTables = [...new Set(pending.map((row) => row.table))].sort();
       throw new Error(`PROMOTION_FOREIGN_KEY_BLOCKED:${JSON.stringify(
         blockedTables.map((table) => ({
@@ -303,23 +409,101 @@ async function insertPromotionGraph(
       )}`);
     }
   }
-  for (const restoration of restorations.values()) {
-    const entries = [...restoration.values.entries()];
-    if (entries.length === 0) continue;
-    const assignments = entries.map(
-      ([column], index) => `${quoteIdentifier(column)} = $${index + 1}`,
-    );
-    await client.query(
-      `UPDATE ${quoteIdentifier(restoration.table)}
-       SET ${assignments.join(", ")}
-       WHERE ${quoteIdentifier(restoration.primaryKey)} = $${entries.length + 1}`,
-      [...entries.map(([, value]) => value), restoration.primaryValue],
-    );
-  }
+  await applyRestorations(client, restorations, true);
   return inserted;
 }
 
+// Restores deferred references as soon as their parents exist, so later rows can satisfy composite keys.
+async function applyRestorations(
+  client: PoolClient,
+  restorations: Map<string, { table: string; primaryKey: string; primaryValue: unknown; values: Map<string, unknown> }>,
+  required: boolean,
+): Promise<void> {
+  for (const [key, restoration] of [...restorations.entries()]) {
+    const entries = [...restoration.values.entries()];
+    if (entries.length === 0) {
+      restorations.delete(key);
+      continue;
+    }
+    const assignments = entries.map(
+      ([column], index) => `${quoteIdentifier(column)} = $${index + 1}`,
+    );
+    const statement = `UPDATE ${quoteIdentifier(restoration.table)}
+       SET ${assignments.join(", ")}
+       WHERE ${quoteIdentifier(restoration.primaryKey)} = $${entries.length + 1}`;
+    const parameters = [...entries.map(([, value]) => value), restoration.primaryValue];
+    if (required) {
+      await client.query(statement, parameters);
+      restorations.delete(key);
+      continue;
+    }
+    await client.query("SAVEPOINT promotion_restore");
+    try {
+      const result = await client.query(statement, parameters);
+      await client.query("RELEASE SAVEPOINT promotion_restore");
+      if ((result.rowCount ?? 0) > 0) restorations.delete(key);
+    } catch {
+      await client.query("ROLLBACK TO SAVEPOINT promotion_restore");
+    }
+  }
+}
+
+async function assertDemoScope(client: PoolClient): Promise<void> {
+  if (!SCOPE?.requiredEnteCodePrefix) return;
+  const result = await client.query<{ codice: string | null }>(
+    `SELECT e."codice" FROM "Procedimento" p JOIN "Ente" e ON e."id" = p."enteId" WHERE p."id" = $1`,
+    [PROCEDURE_ID],
+  );
+  if (!result.rows[0]?.codice?.startsWith(SCOPE.requiredEnteCodePrefix)) {
+    throw new Error("DEMO_PROMOTION_ENTE_NOT_MARKED_DEMO");
+  }
+}
+
+const DEMO_EMAIL_DOMAINS = /\.(demo|local|example|invalid|test)$/i;
+
+function promotionInventory(rows: Map<string, SelectedRow>) {
+  const tables = new Map<string, number>();
+  const nonDemoEmailDomains = new Set<string>();
+  const storageObjects: { bucket: unknown; key: unknown }[] = [];
+  for (const selected of rows.values()) {
+    tables.set(selected.table, (tables.get(selected.table) ?? 0) + 1);
+    for (const match of JSON.stringify(selected.row).matchAll(/[\w.+-]+@([\w-]+(?:\.[\w-]+)+)/g)) {
+      if (!DEMO_EMAIL_DOMAINS.test(match[1])) nonDemoEmailDomains.add(match[1].toLowerCase());
+    }
+    if (selected.row.storageKey) {
+      storageObjects.push({ bucket: selected.row.storageBucket, key: selected.row.storageKey });
+    }
+  }
+  return {
+    tables: [...tables.entries()].sort(([left], [right]) => left.localeCompare(right)),
+    nonDemoEmailDomains: [...nonDemoEmailDomains].sort(),
+    storageObjects,
+  };
+}
+
 async function main(): Promise<void> {
+  if (!SCOPE) throw new Error("PROMOTION_SCOPE_UNKNOWN");
+  if (process.env.NOETRA_PROMOTION_DRY_RUN === "true") {
+    if (!process.env.DATABASE_URL) throw new Error("PROMOTION_DRY_RUN_SOURCE_MISSING");
+    const dryRunPool = new Pool({ connectionString: process.env.DATABASE_URL });
+    const client = await dryRunPool.connect();
+    try {
+      await client.query("BEGIN READ ONLY");
+      await assertDemoScope(client);
+      const { rows } = await selectPromotionGraph(client);
+      console.info(`NOETRA_PROMOTION_DRY_RUN=${JSON.stringify({
+        scope: SCOPE_NAME,
+        procedureId: PROCEDURE_ID,
+        selectedRows: rows.size,
+        ...promotionInventory(rows),
+      })}`);
+    } finally {
+      await client.query("ROLLBACK").catch(() => undefined);
+      client.release();
+      await dryRunPool.end();
+    }
+    return;
+  }
   const targetUrl = process.env.NOETRA_PRODUCTION_CANDIDATE_DATABASE_URL;
   if (
     process.env.VERCEL_ENV !== "preview"
@@ -340,7 +524,11 @@ async function main(): Promise<void> {
   try {
     await source.query("BEGIN READ ONLY");
     await target.query("BEGIN");
+    await assertDemoScope(source);
     const { rows, metadata } = await selectPromotionGraph(source);
+    if (SCOPE.requiredEnteCodePrefix && promotionInventory(rows).nonDemoEmailDomains.length > 0) {
+      throw new Error("DEMO_PROMOTION_NON_DEMO_PERSONAL_DATA");
+    }
     const inserted = await insertPromotionGraph(target, rows, metadata);
     const verification = await target.query<{
       currentRevisions: number;

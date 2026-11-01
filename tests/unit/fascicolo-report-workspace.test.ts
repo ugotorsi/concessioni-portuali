@@ -127,7 +127,8 @@ describe("Fascicolo report workspace", () => {
       },
     } as unknown as FascicoloReportSnapshot;
     const html = render([withRelevance]);
-    expect(html).toContain("Fonti ufficiali verificate e pertinenti");
+    expect(html).toContain("Fonti ufficiali acquisite con corrispondenza testuale");
+    expect(html).toContain("pertinenza da confermare");
     expect(html).toContain("Legge 28 gennaio 1994, n. 84");
     expect(html).toContain("non verificabili o da verificare");
     expect(html).toContain("Legge regionale 5/2020");

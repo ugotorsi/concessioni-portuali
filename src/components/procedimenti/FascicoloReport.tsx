@@ -147,11 +147,12 @@ function UnverifiedCandidateSources({ question }: { question: StructuredReportQu
   return (
     <>
       {pertinent.length > 0 ? (
-        <section className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 p-3" aria-label="Fonti ufficiali verificate e pertinenti" data-testid="report-pertinent-verified-sources">
-          <h5 className="text-sm font-semibold text-emerald-950">Fonti ufficiali verificate e pertinenti — orientamento da confermare</h5>
+        <section className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 p-3" aria-label="Fonti ufficiali acquisite con corrispondenza testuale" data-testid="report-pertinent-verified-sources">
+          <h5 className="text-sm font-semibold text-emerald-950">Fonti ufficiali acquisite con corrispondenza testuale — pertinenza da confermare</h5>
           <p className="mt-1 text-xs text-emerald-900">
-            Testo ufficiale acquisito e articolo pertinente individuato. Prima di fondare conclusioni giuridiche
-            il professionista deve confermarne l&apos;orientamento (a favore o contrario) nella verifica assistita.
+            Testo ufficiale acquisito e articolo con corrispondenza testuale al quesito. L&apos;acquisizione dal sito
+            ufficiale non equivale a una verifica giuridica: il professionista deve confermarne pertinenza e
+            orientamento (a favore o contrario) nella verifica assistita prima di fondare conclusioni.
           </p>
           <ul className="mt-2 space-y-3">
             {pertinent.map((candidate) => (

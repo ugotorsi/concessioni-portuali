@@ -126,3 +126,24 @@ Mitigazione per questa fase:
 - mantenere sempre un fallback (PDF/screenshot/video/local demo).
 
 Evoluzione consigliata (fase successiva): object storage dedicato (S3, Supabase Storage o Vercel Blob) con persistenza stabile.
+
+## 12. Conservazione del fascicolo DEMO CP-058/2019 (V7)
+
+Il fascicolo dimostrativo CP-058/2019 (procedimento `cmvxr3st5003920udtvom8ebv`, ente `DEMO-ENTE-ADSP`) si trasferisce dal database Preview isolato al database di pubblicazione con lo script esistente `scripts/runtime/promote-selvara-to-production-candidate.ts`, ambito `DEMO_CP058_2019`. L'ambito copia documenti, estrazioni, revisioni di conoscenza, missioni/risultati/valutazioni di ricerca e tutte le versioni dei rapporti (storico `SUPERSEDED` incluso). Non copia utenti, job asincroni, budget o prenotazioni di costo.
+
+Protezioni:
+- l'ente del procedimento deve avere `codice` con prefisso `DEMO-`;
+- il trasferimento si interrompe se trova indirizzi email con domini diversi da `.demo`, `.local`, `.example`, `.invalid`, `.test`;
+- l'esecuzione reale richiede `VERCEL_ENV=preview`, `NOETRA_PRODUCTION_PROMOTION_APPROVAL=NOETRA-V7-PRODUCTION-DEMO-CP058-2019-PRESERVATION` e database sorgente e destinazione distinti;
+- inserimenti idempotenti (`ON CONFLICT DO NOTHING`) in un'unica transazione, con verifica di una revisione e di un rapporto `CURRENT`.
+
+Verifica preliminare, solo lettura sul Preview:
+
+```powershell
+$env:NOETRA_PROMOTION_SCOPE="DEMO_CP058_2019"; $env:NOETRA_PROMOTION_DRY_RUN="true"
+npx tsx scripts/runtime/promote-selvara-to-production-candidate.ts
+```
+
+Il trasferimento verso Production richiede un'autorizzazione esplicita del titolare. Dopo l'importazione restano due passaggi operativi da autorizzare: copiare i 3 file PDF dimostrativi da R2 staging al bucket di Production (le chiavi sono elencate nel dry-run) e associare all'ente DEMO gli utenti che presenteranno la demo.
+
+Per riallineare le classificazioni delle fonti ufficiali dopo una correzione del classificatore, senza ripetere la ricerca, usare `scripts/runtime/reverify-official-sources.ts`. Lo script richiede `EXPECTED_DATABASE_HOST_PREFIX` e `--procedimento` confermato, usa solo Normattiva e archivia una nuova versione del rapporto.
