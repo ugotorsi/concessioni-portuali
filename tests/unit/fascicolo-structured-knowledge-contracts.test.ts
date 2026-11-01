@@ -780,6 +780,74 @@ describe("Lotto 2 structured knowledge contracts", () => {
     ]));
   });
 
+  it("removes deadline or role links from legal-issue origins instead of blocking the analysis", () => {
+    const base = validKnowledge();
+    const event = base.items.find((candidate) => candidate.kind === "EVENT");
+    const deadline = base.items.find((candidate) => candidate.kind === "DEADLINE_CANDIDATE");
+    const role = base.items.find((candidate) => candidate.kind === "PARTY_ROLE");
+    if (!event || !deadline || !role) throw new Error("Expected event, deadline and role fixtures.");
+    const issue = (localId: string, origins: string[]) => ({
+      localId,
+      title: "Garanzia assicurativa",
+      normalizedIssue: "La polizza prescritta e stata depositata?",
+      areaOfLaw: "diritto amministrativo",
+      priority: "HIGH",
+      rationale: "Questione collegata a elementi documentati.",
+      originatingItemLocalIds: origins,
+      confidence: 80,
+      referenceDateBasis: null,
+      targetProceedingHint: null,
+    });
+    const proposal = fascicoloDocumentKnowledgeProposalSchema.parse({
+      ...structuredClone(base),
+      items: base.items.map((candidate) => (
+        candidate.kind === "FACT" || candidate.kind === "EVENT"
+          ? { ...structuredClone(candidate), payload: { ...structuredClone(candidate.payload), proceedingIdentityHint: null } }
+          : structuredClone(candidate)
+      )),
+      legalIssues: [
+        issue("issue-mixed", [event.localId, deadline.localId]),
+        issue("issue-deadline-only", [deadline.localId, role.localId]),
+      ],
+      researchQuestions: [{
+        localId: "question-mixed",
+        legalIssueLocalId: "issue-mixed",
+        canonicalQuestion: "Quale obbligo assicurativo si applica?",
+        priority: "HIGH",
+        referenceDate: "2026-09-29",
+        referenceDateBasis: {
+          type: "EVENT_DATE",
+          itemLocalId: deadline.localId,
+          rationale: "Il modello ha usato la scadenza come base.",
+          userConfirmedDateSource: null,
+        },
+        requestedCapabilities: ["SEMANTIC_DISCOVERY"],
+        mode: "PRIMARY",
+      }],
+      documentInventory: [],
+    });
+
+    const compiled = compileFascicoloDocumentKnowledgeProposal({
+      proposal,
+      sourceTextByBasisRef: new Map([[
+        "DOCUMENT_1.PAGE_1",
+        base.sourceQuotes.map((quote) => quote.quote).join("\n"),
+      ]]),
+    });
+
+    expect(compiled.knowledge.legalIssues.map((entry) => entry.localId)).toEqual(["issue-mixed"]);
+    expect(compiled.knowledge.legalIssues[0].originatingItemLocalIds).toEqual([event.localId]);
+    expect(compiled.knowledge.researchQuestions[0].referenceDateBasis).toMatchObject({
+      type: "UNKNOWN",
+      itemLocalId: null,
+    });
+    expect(compiled.promotable).toBe(false);
+    expect(compiled.diagnostics).toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: "LEGAL_ISSUE_INCOMPATIBLE_ORIGIN_REMOVED", action: "REBUILT" }),
+      expect.objectContaining({ code: "LEGAL_ISSUE_ORIGINS_NOT_VERIFIED", path: "legalIssues.1" }),
+    ]));
+  });
+
   it("represents exact, partial, interval, uncertain, and unknown dates without inventing precision", () => {
     const values = [
       { precision: "EXACT", from: "2026-09-29", to: null, originalText: null, confidence: 100 },

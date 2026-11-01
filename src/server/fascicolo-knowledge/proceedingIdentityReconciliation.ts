@@ -21,6 +21,16 @@ export interface KnowledgeCompilationDiagnostic {
   readonly action: KnowledgeCompilationDiagnosticAction;
 }
 
+const LEGAL_ISSUE_ORIGIN_KINDS: ReadonlySet<string> = new Set([
+  "PARTY_POSITION",
+  "FACT",
+  "EVENT",
+  "LEGAL_ACT",
+  "MEASURE",
+  "CONTRADICTION",
+  "GAP",
+]);
+
 export class DocumentKnowledgeCompilationError extends Error {
   constructor(
     readonly diagnostics: readonly KnowledgeCompilationDiagnostic[],
@@ -628,9 +638,15 @@ export function compileFascicoloDocumentKnowledgeProposal(input: {
   });
   const items = coverage.items;
   diagnostics.push(...coverage.diagnostics);
+  const compiledItemKinds = new Map(items.map((item) => [item.localId, item.kind]));
   const legalIssues = proposal.legalIssues.flatMap((issue, issueIndex) => {
-    const originatingItemLocalIds = issue.originatingItemLocalIds.filter((localId) => (
+    const verifiedLocalIds = issue.originatingItemLocalIds.filter((localId) => (
       evidence.retainedItemLocalIds.has(localId)
+    ));
+    // Deadlines and party roles cannot originate an issue; drop such links deterministically
+    // instead of rejecting the whole analysis, as long as a compatible origin remains.
+    const originatingItemLocalIds = verifiedLocalIds.filter((localId) => (
+      LEGAL_ISSUE_ORIGIN_KINDS.has(compiledItemKinds.get(localId) ?? "")
     ));
     if (originatingItemLocalIds.length === 0) {
       diagnostics.push({
@@ -640,11 +656,18 @@ export function compileFascicoloDocumentKnowledgeProposal(input: {
       });
       return [];
     }
-    if (originatingItemLocalIds.length !== issue.originatingItemLocalIds.length) {
+    if (verifiedLocalIds.length !== issue.originatingItemLocalIds.length) {
       diagnostics.push({
         code: "LEGAL_ISSUE_ORIGINS_PARTIALLY_VERIFIED",
         path: `legalIssues.${issueIndex}.originatingItemLocalIds`,
         action: "MARKED_UNRESOLVED",
+      });
+    }
+    if (originatingItemLocalIds.length !== verifiedLocalIds.length) {
+      diagnostics.push({
+        code: "LEGAL_ISSUE_INCOMPATIBLE_ORIGIN_REMOVED",
+        path: `legalIssues.${issueIndex}.originatingItemLocalIds`,
+        action: "REBUILT",
       });
     }
     const resolved = resolveIssueIdentity({
@@ -742,7 +765,11 @@ export function compileFascicoloDocumentKnowledgeProposal(input: {
       dateMatches = basisItem.payload.date.precision === "EXACT"
         && basisItem.payload.date.from === question.referenceDate;
     }
-    if (basisKindValid && dateMatches) return [question];
+    const basisIsIssueOrigin = basisItemLocalId === null || legalIssues.some((candidate) => (
+      candidate.localId === question.legalIssueLocalId
+      && candidate.originatingItemLocalIds.includes(basisItemLocalId)
+    ));
+    if (basisKindValid && dateMatches && basisIsIssueOrigin) return [question];
     diagnostics.push({
       code: "RESEARCH_QUESTION_REFERENCE_DATE_MARKED_UNKNOWN",
       path: `researchQuestions.${index}.referenceDateBasis`,
