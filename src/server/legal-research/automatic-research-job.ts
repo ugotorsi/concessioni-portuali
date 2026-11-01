@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/prisma";
 import { admitAsyncJob } from "@/server/async-jobs/persistence";
+import { normalizeAsyncJobAdmission, type AsyncJobAdmissionInput } from "@/server/async-jobs/domain";
 import type { AsyncJobHandler } from "@/server/async-jobs/registry";
 import { AsyncJobExecutionError } from "@/server/async-jobs/worker";
 import { withRuntimeCostGate } from "@/server/runtime/cost";
@@ -62,7 +63,10 @@ export async function ensureAutomaticResearchExecution(input: Readonly<{
   correlationId: string;
   now?: Date;
   env?: AutomaticResearchPolicyEnv;
-}>): Promise<AutomaticResearchAdmissionResult> {
+}>, dependencies: Readonly<{
+  findJobByIdempotencyKey?(idempotencyKey: string): Promise<{ id: string; status: string } | null>;
+  admitJob?(admission: AsyncJobAdmissionInput): Promise<{ job: { id: string } }>;
+}> = {}): Promise<AutomaticResearchAdmissionResult> {
   const decision = evaluateAutomaticResearchPolicy({
     tenantId: input.tenantId,
     mission: input.mission,
@@ -71,22 +75,47 @@ export async function ensureAutomaticResearchExecution(input: Readonly<{
   if (!decision.authorized || !decision.policyDecisionRef) {
     return { outcome: "NOT_AUTHORIZED", requirementCode: decision.requirementCode, jobId: null };
   }
-  const admitted = await admitAsyncJob(buildResearchMissionAsyncJobAdmission({
-    mission: input.mission,
-    actor: {
-      actorId: input.actorId,
-      actorEmail: null,
-      actorRole: "AUTOMATIC_FASCICOLO_RESEARCH",
-      initiatingUserId: null,
-      admissionType: "AUTHORIZED_SYSTEM",
-      tenantId: input.tenantId,
-    },
-    correlationId: input.correlationId,
-    policyDecisionRef: decision.policyDecisionRef,
-    availableAt: input.now ?? new Date(),
-    maxAttempts: 1,
-  }));
-  return { outcome: "ADMITTED", requirementCode: null, jobId: admitted.job.id };
+  const findJob = dependencies.findJobByIdempotencyKey ?? defaultFindJobByIdempotencyKey;
+  const admit = dependencies.admitJob ?? admitAsyncJob;
+  for (let generation = 0; generation < MAX_RESEARCH_EXECUTION_GENERATIONS; generation += 1) {
+    const admission = buildResearchMissionAsyncJobAdmission({
+      mission: input.mission,
+      actor: {
+        actorId: input.actorId,
+        actorEmail: null,
+        actorRole: "AUTOMATIC_FASCICOLO_RESEARCH",
+        initiatingUserId: null,
+        admissionType: "AUTHORIZED_SYSTEM",
+        tenantId: input.tenantId,
+      },
+      correlationId: input.correlationId,
+      policyDecisionRef: decision.policyDecisionRef,
+      availableAt: input.now ?? new Date(),
+      maxAttempts: 1,
+      executionGeneration: generation,
+    });
+    const existing = await findJob(normalizeAsyncJobAdmission(admission).idempotencyKey);
+    if (!existing) {
+      const admitted = await admit(admission);
+      return { outcome: "ADMITTED", requirementCode: null, jobId: admitted.job.id };
+    }
+    // A live job already covers this mission: never enqueue a concurrent duplicate.
+    if (!TERMINAL_RESEARCH_JOB_STATUSES.has(existing.status)) {
+      return { outcome: "ADMITTED", requirementCode: null, jobId: existing.id };
+    }
+    // The previous run ended while the mission is PENDING again: admit the next bounded generation.
+  }
+  return { outcome: "NOT_AUTHORIZED", requirementCode: "RESEARCH_EXECUTION_RETRY_LIMIT_REACHED", jobId: null };
+}
+
+const TERMINAL_RESEARCH_JOB_STATUSES = new Set(["SUCCEEDED", "TERMINAL_FAILED", "CANCELLED"]);
+export const MAX_RESEARCH_EXECUTION_GENERATIONS = 5;
+
+async function defaultFindJobByIdempotencyKey(idempotencyKey: string) {
+  return prisma.asyncJob.findUnique({
+    where: { idempotencyKey },
+    select: { id: true, status: true },
+  });
 }
 
 export type CurrentKnowledgeResearchAdmission = Readonly<{

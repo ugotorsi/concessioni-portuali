@@ -1370,10 +1370,15 @@ export function buildResearchMissionAsyncJobAdmission(input: Readonly<{
   policyDecisionRef: string | null;
   availableAt: Date;
   maxAttempts: number;
+  /** Re-execution after a terminal job uses the next generation; generation 0 keeps the original key. */
+  executionGeneration?: number;
 }>): AsyncJobAdmissionInput {
+  const generation = input.executionGeneration ?? 0;
   return {
     operation: RESEARCH_MISSION_EXECUTION_OPERATION,
-    logicalOperationId: input.mission.missionId,
+    logicalOperationId: generation === 0
+      ? input.mission.missionId
+      : `${input.mission.missionId}:execution:${generation}`,
     purpose: RESEARCH_MISSION_EXECUTION_PURPOSE,
     correlationId: input.correlationId,
     procedimentoId: input.mission.caseReference.caseId,

@@ -109,6 +109,56 @@ describe("automatic research queue job", () => {
     });
   });
 
+  it("reuses a live job and admits a bounded new generation only after the previous job is terminal", async () => {
+    const jobs = new Map<string, { id: string; status: string }>();
+    const admitted: string[] = [];
+    const dependencies = {
+      findJobByIdempotencyKey: vi.fn(async (key: string) => jobs.get(key) ?? null),
+      admitJob: vi.fn(async (admission: { logicalOperationId: string; inputReference: unknown }) => {
+        expect((admission.inputReference as { referenceId: string }).referenceId).toBe(mission.missionId);
+        admitted.push(admission.logicalOperationId);
+        return { job: { id: `job-${admitted.length}` } };
+      }),
+    };
+    const base = { mission, tenantId: "tenant-1", actorId: "actor-1", correlationId: "c", env };
+    const keyOf = async (generation: number) => {
+      const { normalizeAsyncJobAdmission } = await import("@/server/async-jobs/domain");
+      const { buildResearchMissionAsyncJobAdmission } = await import("@/server/legal-research/persistence");
+      return normalizeAsyncJobAdmission(buildResearchMissionAsyncJobAdmission({
+        mission,
+        actor: {
+          actorId: "actor-1", actorEmail: null, actorRole: "AUTOMATIC_FASCICOLO_RESEARCH",
+          initiatingUserId: null, admissionType: "AUTHORIZED_SYSTEM", tenantId: "tenant-1",
+        },
+        correlationId: "c",
+        policyDecisionRef: decision.policyDecisionRef,
+        availableAt: new Date(),
+        maxAttempts: 1,
+        executionGeneration: generation,
+      })).idempotencyKey;
+    };
+
+    await expect(ensureAutomaticResearchExecution(base, dependencies)).resolves.toMatchObject({ jobId: "job-1" });
+    expect(admitted).toEqual([mission.missionId]);
+
+    jobs.set(await keyOf(0), { id: "job-1", status: "RUNNING" });
+    await expect(ensureAutomaticResearchExecution(base, dependencies)).resolves.toMatchObject({ jobId: "job-1" });
+    expect(admitted).toHaveLength(1);
+
+    jobs.set(await keyOf(0), { id: "job-1", status: "TERMINAL_FAILED" });
+    await expect(ensureAutomaticResearchExecution(base, dependencies)).resolves.toMatchObject({ jobId: "job-2" });
+    expect(admitted[1]).toBe(`${mission.missionId}:execution:1`);
+
+    for (let generation = 1; generation < 5; generation += 1) {
+      jobs.set(await keyOf(generation), { id: `old-${generation}`, status: "TERMINAL_FAILED" });
+    }
+    await expect(ensureAutomaticResearchExecution(base, dependencies)).resolves.toEqual({
+      outcome: "NOT_AUTHORIZED",
+      requirementCode: "RESEARCH_EXECUTION_RETRY_LIMIT_REACHED",
+      jobId: null,
+    });
+  });
+
   it("rejects tenant, capability, and budget outside the explicit policy", () => {
     expect(evaluateAutomaticResearchPolicy({ tenantId: "tenant-2", mission, env }).requirementCode)
       .toBe("AUTOMATIC_RESEARCH_TENANT_NOT_ALLOWED");

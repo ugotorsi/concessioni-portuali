@@ -240,7 +240,7 @@ export async function getLegalWorkbenchSnapshot(procedimentoId: string): Promise
       jobs: researchJobs.map((job) => ({
         id: job.id,
         status: String(job.status),
-        missionId: job.logicalOperationId,
+        missionId: job.logicalOperationId.replace(/:execution:\d+$/, ""),
         createdAt: job.createdAt,
         completedAt: job.completedAt,
         failureCode: job.failureCode,
