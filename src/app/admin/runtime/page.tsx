@@ -99,18 +99,9 @@ export default async function RuntimeOperationsPage() {
     },
     activeBudgetPolicyScopes: policies.map((policy) => policy.scope),
   });
-  const renderWorkers = [
-    {
-      kind: "APPLICATION",
-      label: "Worker applicativo",
-      configured: Boolean(process.env.RENDER_APPLICATION_WORKER_SERVICE_ID?.trim()),
-    },
-    {
-      kind: "OCR",
-      label: "Worker OCR",
-      configured: Boolean(process.env.RENDER_DOCUMENT_OCR_WORKER_SERVICE_ID?.trim()),
-    },
-  ] as const;
+  const renderApplicationWorkerConfigured = Boolean(
+    process.env.RENDER_APPLICATION_WORKER_SERVICE_ID?.trim(),
+  );
 
   return (
     <AppShell title="Stato dei servizi" subtitle="Controllo delle elaborazioni automatiche e degli eventuali interventi richiesti">
@@ -127,7 +118,7 @@ export default async function RuntimeOperationsPage() {
         <section aria-labelledby="database-identity-title" className="mb-4">
           <Card>
             <CardHeader>
-              <CardTitle id="database-identity-title">Identità database Preview V3</CardTitle>
+              <CardTitle id="database-identity-title">Identità database attiva</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex flex-wrap items-center gap-3">
@@ -345,13 +336,13 @@ export default async function RuntimeOperationsPage() {
                   <p className="mt-3 text-xs text-slate-500">Fonte: {service.dataSource}</p>
                   {service.id === "render" && service.controllable ? (
                     <div className="mt-4 space-y-4">
-                      {renderWorkers.map((worker) => worker.configured ? (
-                        <fieldset key={worker.kind} className="rounded border border-slate-200 p-3">
-                          <legend className="px-1 text-sm font-medium text-slate-700">{worker.label}</legend>
+                      {renderApplicationWorkerConfigured ? (
+                        <fieldset className="rounded border border-slate-200 p-3">
+                          <legend className="px-1 text-sm font-medium text-slate-700">Worker applicativo persistente</legend>
                           <form action={setRenderWorkerState} className="space-y-2">
-                            <input type="hidden" name="workerKind" value={worker.kind} />
+                            <input type="hidden" name="workerKind" value="APPLICATION" />
                             <input type="hidden" name="desiredState" value="RUNNING" />
-                            <input type="hidden" name="confirmation" value={`RESUME_RENDER_${worker.kind}_WORKER`} />
+                            <input type="hidden" name="confirmation" value="RESUME_RENDER_APPLICATION_WORKER" />
                             <label className="flex items-start gap-2 text-xs text-slate-600">
                               <input
                                 type="checkbox"
@@ -362,16 +353,21 @@ export default async function RuntimeOperationsPage() {
                               Autorizzo l&apos;avvio del servizio esistente e i relativi costi già previsti dal suo piano.
                               Non autorizzo acquisti o cambi di piano.
                             </label>
-                            <Button type="submit" size="sm">Attiva {worker.label.toLowerCase()}</Button>
+                            <Button type="submit" size="sm">Attiva worker applicativo</Button>
                           </form>
                           <form action={setRenderWorkerState} className="mt-2">
-                            <input type="hidden" name="workerKind" value={worker.kind} />
+                            <input type="hidden" name="workerKind" value="APPLICATION" />
                             <input type="hidden" name="desiredState" value="SUSPENDED" />
-                            <input type="hidden" name="confirmation" value={`SUSPEND_RENDER_${worker.kind}_WORKER`} />
-                            <Button type="submit" size="sm" variant="outline">Sospendi {worker.label.toLowerCase()}</Button>
+                            <input type="hidden" name="confirmation" value="SUSPEND_RENDER_APPLICATION_WORKER" />
+                            <Button type="submit" size="sm" variant="outline">Sospendi worker applicativo</Button>
                           </form>
                         </fieldset>
-                      ) : null)}
+                      ) : null}
+                      <p className="text-xs text-slate-600">
+                        Il servizio OCR è un template per job one-off: deve restare sospeso e viene avviato soltanto
+                        per la singola elaborazione autorizzata. La console ne verifica configurazione e stato senza
+                        offrire un avvio persistente.
+                      </p>
                     </div>
                   ) : null}
                 </article>

@@ -200,13 +200,13 @@ export async function setRenderWorkerState(formData: FormData): Promise<void> {
   if (desiredState !== "SUSPENDED" && desiredState !== "RUNNING") {
     throw new Error("INVALID_RENDER_WORKER_STATE");
   }
-  if (workerKind !== "APPLICATION" && workerKind !== "OCR") {
+  if (workerKind !== "APPLICATION") {
     throw new Error("INVALID_RENDER_WORKER_KIND");
   }
   const confirmation = formData.get("confirmation");
   const expectedConfirmation = desiredState === "SUSPENDED"
-    ? `SUSPEND_RENDER_${workerKind}_WORKER`
-    : `RESUME_RENDER_${workerKind}_WORKER`;
+    ? "SUSPEND_RENDER_APPLICATION_WORKER"
+    : "RESUME_RENDER_APPLICATION_WORKER";
   if (confirmation !== expectedConfirmation) {
     throw new Error("RENDER_WORKER_CONFIRMATION_REQUIRED");
   }
@@ -216,10 +216,7 @@ export async function setRenderWorkerState(formData: FormData): Promise<void> {
   ) {
     throw new Error("RENDER_WORKER_COST_ACKNOWLEDGEMENT_REQUIRED");
   }
-  const serviceVariable = workerKind === "APPLICATION"
-    ? "RENDER_APPLICATION_WORKER_SERVICE_ID"
-    : "RENDER_DOCUMENT_OCR_WORKER_SERVICE_ID";
-  const serviceId = process.env[serviceVariable]?.trim() ?? "";
+  const serviceId = process.env.RENDER_APPLICATION_WORKER_SERVICE_ID?.trim() ?? "";
   const apiKey = process.env.RENDER_WORKER_API_KEY?.trim() ?? "";
   if (!RENDER_SERVICE_ID_PATTERN.test(serviceId) || !apiKey) {
     throw new Error("RENDER_CONTROL_NOT_CONFIGURED");

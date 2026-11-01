@@ -23,11 +23,17 @@ describe("runtime service diagnostics", () => {
       if (String(url).includes("api.openai.com")) {
         return new Response("{}", { status: 200 });
       }
+      const isOcr = String(url).includes("srv-ocr");
       return Response.json({
-        id: "srv-worker",
-        name: "worker",
+        id: isOcr ? "srv-ocr" : "srv-app",
+        name: isOcr ? "worker-ocr" : "worker-application",
         type: "background_worker",
-        suspended: "not_suspended",
+        suspended: isOcr ? "suspended" : "not_suspended",
+        serviceDetails: {
+          envSpecificDetails: {
+            startCommand: isOcr ? "sleep infinity" : "npm run worker:async",
+          },
+        },
       });
     }) as unknown as typeof fetch;
     const probeR2 = vi.fn().mockResolvedValue(undefined);
@@ -67,6 +73,38 @@ describe("runtime service diagnostics", () => {
     ]));
     expect(probeR2).toHaveBeenCalledOnce();
     expect(JSON.stringify(diagnostics)).not.toContain("secret");
+  });
+
+  it("rejects idle templates presented as operational workers", async () => {
+    const diagnostics = await getRuntimeServiceDiagnostics({
+      RENDER_WORKER_API_KEY: "secret",
+      RENDER_APPLICATION_WORKER_SERVICE_ID: "srv-app",
+      RENDER_DOCUMENT_OCR_WORKER_SERVICE_ID: "srv-ocr",
+    }, {
+      fetch: vi.fn().mockImplementation(async () => Response.json({
+          id: "srv-template",
+          name: "worker-template",
+          type: "background_worker",
+          suspended: "suspended",
+          serviceDetails: {
+            envSpecificDetails: { startCommand: "sleep infinity" },
+          },
+        })) as unknown as typeof fetch,
+      probeR2: vi.fn(),
+    });
+
+    expect(diagnostics.services).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        id: "render-application",
+        status: "ATTENTION",
+        code: "RENDER_START_COMMAND_MISMATCH",
+      }),
+      expect.objectContaining({
+        id: "render-ocr",
+        status: "READY",
+        code: "RENDER_OCR_TEMPLATE_READY",
+      }),
+    ]));
   });
 
   it("reports rejected credentials and unreachable storage explicitly", async () => {

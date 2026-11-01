@@ -142,23 +142,57 @@ async function diagnoseRender(
         name?: unknown;
         type?: unknown;
         suspended?: unknown;
+        serviceDetails?: {
+          envSpecificDetails?: {
+            startCommand?: unknown;
+          };
+        };
+      };
+      serviceDetails?: {
+        envSpecificDetails?: {
+          startCommand?: unknown;
+        };
       };
     };
     const service = body.service ?? body;
     const suspended = typeof service.suspended === "string"
       ? service.suspended
       : service.suspended === true ? "suspended" : "not_suspended";
+    const startCommand = typeof service.serviceDetails?.envSpecificDetails?.startCommand === "string"
+      ? service.serviceDetails.envSpecificDetails.startCommand.trim()
+      : "";
+    const isSuspended = suspended !== "not_suspended";
+    const expectedStartCommand = id === "render-application"
+      ? "npm run worker:async"
+      : "sleep infinity";
+    const commandMatches = startCommand === expectedStartCommand;
+    const ready = id === "render-application"
+      ? !isSuspended && commandMatches
+      : isSuspended && commandMatches;
+    const code = !commandMatches
+      ? "RENDER_START_COMMAND_MISMATCH"
+      : id === "render-application"
+        ? ready ? "RENDER_APPLICATION_WORKER_READY" : "RENDER_APPLICATION_WORKER_SUSPENDED"
+        : ready ? "RENDER_OCR_TEMPLATE_READY" : "RENDER_OCR_TEMPLATE_RUNNING";
+    const summary = !commandMatches
+      ? `Il comando Render non corrisponde al ruolo previsto (${expectedStartCommand}).`
+      : id === "render-application"
+        ? ready
+          ? "Worker applicativo persistente raggiungibile e operativo."
+          : "Worker applicativo configurato correttamente ma sospeso."
+        : ready
+          ? "Template OCR one-off raggiungibile e correttamente sospeso."
+          : "Il template OCR one-off è attivo senza necessità e può generare costi.";
     return result(
       id,
-      suspended === "not_suspended" ? "READY" : "ATTENTION",
-      suspended === "not_suspended" ? "RENDER_SERVICE_READY" : "RENDER_SERVICE_SUSPENDED",
-      suspended === "not_suspended"
-        ? "Servizio Render raggiungibile e non sospeso."
-        : "Servizio Render raggiungibile ma sospeso.",
+      ready ? "READY" : "ATTENTION",
+      code,
+      summary,
       [
         { label: "Nome", value: typeof service.name === "string" ? service.name : "Non esposto" },
         { label: "Tipo", value: typeof service.type === "string" ? service.type : "Non esposto" },
         { label: "Sospensione", value: suspended },
+        { label: "Comando", value: startCommand || "Non esposto" },
       ],
     );
   } catch (error) {
