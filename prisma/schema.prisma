@@ -2563,6 +2563,18 @@ model V7ProviderOutputRecoveryArtifact {
   @@index([expiresAt])
 }
 
+model ResearchProviderOAuthCredential {
+  provider             String    @id @db.VarChar(32)
+  encryptedPayload     String    @db.Text
+  stateVersion         Int       @default(0)
+  hasRefreshToken      Boolean   @default(false)
+  accessTokenExpiresAt DateTime?
+  lastRefreshedAt      DateTime?
+  lastRefreshErrorCode String?   @db.VarChar(128)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
+
 model RuntimeWorkerHeartbeat {
   id                       String              @id @default(cuid())
   workerId                 String              @unique @db.VarChar(256)

@@ -16,10 +16,17 @@ export interface KnowledgeReferenceDateConfirmation {
   sourceVersion: string;
 }
 
+export interface AutonomousResearchAuthorization {
+  authorized: boolean;
+  workerActorId: string | null;
+}
+
 export interface ResearchExecutionPolicy {
   maxQuestionsPerWave: number;
   allowBuildingRevision?: boolean;
   referenceDateConfirmations?: readonly KnowledgeReferenceDateConfirmation[];
+  /** Routes policy-authorized missions to the server worker instead of the ChatGPT connector. */
+  autonomousResearch?: (mission: ResearchMission) => AutonomousResearchAuthorization;
 }
 
 export interface KnowledgeResearchMissionPlan {
@@ -40,6 +47,7 @@ export interface KnowledgeResearchMissionPlan {
   execution: "ADMITTED" | "BLOCKED_FOR_REVIEW" | "DEFERRED_BY_POLICY" | "REJECTED";
   blockReason: string | null;
   mission: ResearchMission | null;
+  autonomousActorId?: string | null;
 }
 
 type SnapshotItem = KnowledgeRevisionSnapshot["items"][number];
@@ -224,16 +232,19 @@ export function buildKnowledgeResearchMissionPlans(
       execution = "BLOCKED_FOR_REVIEW";
       blockReason = "ADVERSE_NOT_AUTOMATED";
     }
-    const mission = execution === "ADMITTED" && issue && declaredDate ? createResearchMission({
+    const missionFor = (
+      assumptionsFingerprint: string,
+      executionChannel: "CHATGPT_CONNECTOR" | "SERVER_AUTONOMOUS",
+    ) => createResearchMission({
       kind: "RESEARCH_MISSION",
       version: RESEARCH_BRIDGE_VERSION,
       caseReference: { caseId: revision.procedimentoId, fascicoloReference: revision.procedimentoId },
-      legalIssueIds: [issue.semanticKey],
+      legalIssueIds: [issue!.semanticKey],
       legalPropositionIds: [],
       referenceDate: `${declaredDate}T00:00:00.000Z`,
       mode: "DISCOVER_AUTHORITIES",
       researchQuestion: canonicalQuestion,
-      assumptionsFingerprint: missionFingerprint,
+      assumptionsFingerprint,
       knownAuthorities: [],
       excludedAuthorities: [],
       preferredSourceFamilies: ["ITALIAN_LEGISLATION", "GIUSTIZIA_AMMINISTRATIVA"],
@@ -244,7 +255,26 @@ export function buildKnowledgeResearchMissionPlans(
       budget: { maxTotalResearchCalls: 6, maxMoonlitCalls: 2, maxSimpliciterCalls: 2, maxLegalDataHunterCalls: 2 },
       status: "PENDING",
       executionPlan: { requiredCapabilities: capabilities },
-    }) : null;
+      ...(executionChannel === "SERVER_AUTONOMOUS" ? { executionChannel } : {}),
+    });
+    let mission: ResearchMission | null = null;
+    let finalFingerprint = missionFingerprint;
+    let autonomousActorId: string | null = null;
+    if (execution === "ADMITTED" && issue && declaredDate) {
+      const authorization = policy.autonomousResearch?.(missionFor(missionFingerprint, "SERVER_AUTONOMOUS"));
+      if (authorization?.authorized && authorization.workerActorId) {
+        // The channel is part of the identity so a connector mission is superseded, never silently reassigned.
+        finalFingerprint = fingerprint({
+          fingerprintVersion: "KNOWLEDGE_RESEARCH_MISSION_CHANNEL_V1",
+          baseFingerprint: missionFingerprint,
+          executionChannel: "SERVER_AUTONOMOUS",
+        });
+        mission = missionFor(finalFingerprint, "SERVER_AUTONOMOUS");
+        autonomousActorId = authorization.workerActorId;
+      } else {
+        mission = missionFor(missionFingerprint, "CHATGPT_CONNECTOR");
+      }
+    }
     return {
       questionItemId: question.id,
       questionSemanticKey: question.semanticKey,
@@ -263,10 +293,11 @@ export function buildKnowledgeResearchMissionPlans(
           confirmedDate: confirmedDate!,
         } : null,
       },
-      missionFingerprint,
+      missionFingerprint: finalFingerprint,
       execution,
       blockReason,
       mission,
+      autonomousActorId,
     } satisfies KnowledgeResearchMissionPlan;
   }).sort((left, right) => priorityRank[left.priority] - priorityRank[right.priority]
     || left.questionSemanticKey.localeCompare(right.questionSemanticKey));

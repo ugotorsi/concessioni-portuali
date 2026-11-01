@@ -79,6 +79,7 @@ export async function reconcileKnowledgeResearchMissions(input: {
     const currentMissionIds: string[] = [];
     for (const plan of executablePlans) {
       const mission = plan.mission!;
+      const planAssignee = plan.autonomousActorId ?? input.assignedActorId;
       const existing = await tx.query<{
         id: string;
         status: ResearchMissionStatus;
@@ -124,13 +125,13 @@ export async function reconcileKnowledgeResearchMissions(input: {
           RETURNING "status", "assignedActorId"
         `, [missionId, input.tenantId, input.procedimentoId, input.knowledgeRevisionId,
           plan.legalIssueSemanticKey, plan.questionSemanticKey, JSON.stringify(plan.referenceDateBasis),
-          input.assignedActorId, plan.execution]);
+          planAssignee, plan.execution]);
         operationalStatus = updated.rows[0].status;
         assignedActorId = updated.rows[0].assignedActorId;
       } else {
         missionId = mission.missionId;
         outcome = "CREATED";
-        assignedActorId = input.assignedActorId;
+        assignedActorId = planAssignee;
         operationalStatus = assignedActorId === null || plan.execution === "DEFERRED_BY_POLICY"
           ? "DEFERRED"
           : "PENDING";
@@ -143,7 +144,7 @@ export async function reconcileKnowledgeResearchMissions(input: {
           ) VALUES ($1, $2, $3, $4, $5, $6, $7::timestamptz, $8, $9::jsonb, $10, $11, $12, $12, $13, $14, $15::jsonb, 'CURRENT', $16::"ResearchMissionStatus",
             CASE WHEN $16 = 'DEFERRED' THEN CURRENT_TIMESTAMP ELSE NULL END,
             CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-        `, [missionId, input.tenantId, input.assignedActorId, mission.version, input.procedimentoId,
+        `, [missionId, input.tenantId, planAssignee, mission.version, input.procedimentoId,
           mission.caseReference.fascicoloReference ?? null, mission.referenceDate, mission.mode,
           JSON.stringify(mission), payloadFingerprint(mission as unknown as JsonValue), plan.missionFingerprint,
           input.knowledgeRevisionId, plan.legalIssueSemanticKey, plan.questionSemanticKey,

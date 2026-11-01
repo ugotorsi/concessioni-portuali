@@ -99,6 +99,7 @@ export const ModelName = {
   LegalSourceCandidateResolution: 'LegalSourceCandidateResolution',
   AsyncJob: 'AsyncJob',
   V7ProviderOutputRecoveryArtifact: 'V7ProviderOutputRecoveryArtifact',
+  ResearchProviderOAuthCredential: 'ResearchProviderOAuthCredential',
   RuntimeWorkerHeartbeat: 'RuntimeWorkerHeartbeat',
   FascicoloAnalysisEvaluationPermit: 'FascicoloAnalysisEvaluationPermit',
   FascicoloAnalysisEvaluationArtifact: 'FascicoloAnalysisEvaluationArtifact',
@@ -1262,6 +1263,21 @@ export const V7ProviderOutputRecoveryArtifactScalarFieldEnum = {
 } as const
 
 export type V7ProviderOutputRecoveryArtifactScalarFieldEnum = (typeof V7ProviderOutputRecoveryArtifactScalarFieldEnum)[keyof typeof V7ProviderOutputRecoveryArtifactScalarFieldEnum]
+
+
+export const ResearchProviderOAuthCredentialScalarFieldEnum = {
+  provider: 'provider',
+  encryptedPayload: 'encryptedPayload',
+  stateVersion: 'stateVersion',
+  hasRefreshToken: 'hasRefreshToken',
+  accessTokenExpiresAt: 'accessTokenExpiresAt',
+  lastRefreshedAt: 'lastRefreshedAt',
+  lastRefreshErrorCode: 'lastRefreshErrorCode',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ResearchProviderOAuthCredentialScalarFieldEnum = (typeof ResearchProviderOAuthCredentialScalarFieldEnum)[keyof typeof ResearchProviderOAuthCredentialScalarFieldEnum]
 
 
 export const RuntimeWorkerHeartbeatScalarFieldEnum = {

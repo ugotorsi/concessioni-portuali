@@ -13,12 +13,14 @@ export const DOCUMENT_WORKER_OPERATIONS = Object.freeze({
   documentOcrCoordinator: "DOCUMENT_OCR_COORDINATOR_V2",
   documentOcrPageBatch: "DOCUMENT_OCR_PAGE_BATCH_V2",
   documentAnalysis: "FASCICOLO.AUTOMATIC_ANALYSIS_V1",
+  legalResearch: "LEGAL_RESEARCH.EXECUTE_V1",
 });
 
 export type DocumentWorkerKind =
   | "DOCUMENT_EXTRACTION"
   | "DOCUMENT_OCR"
-  | "DOCUMENT_ANALYSIS";
+  | "DOCUMENT_ANALYSIS"
+  | "LEGAL_RESEARCH";
 
 export function documentWorkerKindForOperation(operation: string): DocumentWorkerKind | null {
   if (operation === DOCUMENT_WORKER_OPERATIONS.documentExtraction) return "DOCUMENT_EXTRACTION";
@@ -27,6 +29,7 @@ export function documentWorkerKindForOperation(operation: string): DocumentWorke
     || operation === DOCUMENT_WORKER_OPERATIONS.documentOcrPageBatch
   ) return "DOCUMENT_OCR";
   if (operation === DOCUMENT_WORKER_OPERATIONS.documentAnalysis) return "DOCUMENT_ANALYSIS";
+  if (operation === DOCUMENT_WORKER_OPERATIONS.legalResearch) return "LEGAL_RESEARCH";
   return null;
 }
 
@@ -42,9 +45,11 @@ export type DocumentWorkerActivationRequest =
       readonly applicationJobId: string;
       readonly tenantId: string;
       readonly procedimentoId: string;
+      /** Drains the research missions scheduled by the analysis in the same one-off job. */
+      readonly withLegalResearch?: boolean;
     }
   | {
-      readonly kind: "DOCUMENT_EXTRACTION" | "DOCUMENT_OCR";
+      readonly kind: "DOCUMENT_EXTRACTION" | "DOCUMENT_OCR" | "LEGAL_RESEARCH";
       readonly procedimentoId: string;
     };
 
@@ -127,6 +132,19 @@ function activationSpec(request: DocumentWorkerActivationRequest) {
       ].join(" "),
     };
   }
+  const legalResearchCommand = [
+    ...common,
+    "ASYNC_WORKER_BOOTSTRAP_TIME_WATCHES=false",
+    `ASYNC_WORKER_OPERATION_ALLOWLIST=${DOCUMENT_WORKER_OPERATIONS.legalResearch}`,
+    "ASYNC_PROVIDER_EXECUTION_ENABLED=true",
+    "npm run worker:async",
+  ].join(" ");
+  if (request.kind === "LEGAL_RESEARCH") {
+    return {
+      serviceVariable: "RENDER_APPLICATION_WORKER_SERVICE_ID",
+      startCommand: legalResearchCommand,
+    };
+  }
   if (request.kind !== "DOCUMENT_ANALYSIS") {
     throw new DocumentWorkerActivationError("INVALID_CONFIGURATION");
   }
@@ -143,7 +161,7 @@ function activationSpec(request: DocumentWorkerActivationRequest) {
       `ASYNC_WORKER_OPERATION_ALLOWLIST=${DOCUMENT_WORKER_OPERATIONS.documentAnalysis}`,
       "ASYNC_PROVIDER_EXECUTION_ENABLED=true",
       "npm run worker:async",
-    ].join(" "),
+    ].join(" ") + (request.withLegalResearch ? ` && ${legalResearchCommand}` : ""),
   };
 }
 

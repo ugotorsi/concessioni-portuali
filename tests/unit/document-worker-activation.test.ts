@@ -100,7 +100,8 @@ describe("document worker activation", () => {
     expect(documentWorkerKindForOperation("DOCUMENT_OCR_COORDINATOR_V2")).toBe("DOCUMENT_OCR");
     expect(documentWorkerKindForOperation("DOCUMENT_OCR_PAGE_BATCH_V2")).toBe("DOCUMENT_OCR");
     expect(documentWorkerKindForOperation("FASCICOLO.AUTOMATIC_ANALYSIS_V1")).toBe("DOCUMENT_ANALYSIS");
-    expect(documentWorkerKindForOperation("LEGAL_RESEARCH.EXECUTE_V1")).toBeNull();
+    expect(documentWorkerKindForOperation("LEGAL_RESEARCH.EXECUTE_V1")).toBe("LEGAL_RESEARCH");
+    expect(documentWorkerKindForOperation("OTHER.OPERATION_V1")).toBeNull();
   });
 
   it("requests scoped document analysis after an audited terminal retry", async () => {
@@ -127,7 +128,7 @@ describe("document worker activation", () => {
     expect(runtimeActionMocks.revalidatePath).toHaveBeenCalledWith("/admin/runtime");
   });
 
-  it("does not activate legal research after an audited terminal retry", async () => {
+  it("activates the scoped legal research worker after an audited terminal retry", async () => {
     admissionMocks.retryTerminalAsyncJob.mockResolvedValueOnce({
       outcome: "REQUEUED",
       operation: "LEGAL_RESEARCH.EXECUTE_V1",
@@ -138,7 +139,10 @@ describe("document worker activation", () => {
 
     await retryRuntimeJob(formData);
 
-    expect(admissionMocks.requestActivation).not.toHaveBeenCalled();
+    expect(admissionMocks.requestActivation).toHaveBeenCalledWith({
+      kind: "LEGAL_RESEARCH",
+      procedimentoId: "procedure-1",
+    });
     expect(runtimeActionMocks.revalidatePath).toHaveBeenCalledWith("/admin/runtime");
   });
 
@@ -219,6 +223,61 @@ describe("document worker activation", () => {
     }
   });
 
+  it.each([
+    ["LEGAL_RESEARCH", false],
+    ["DOCUMENT_ANALYSIS", true],
+  ] as const)("scopes the %s legal research worker command", async (kind, chained) => {
+    const fetch = vi.fn(async (
+      _input: string | URL | Request,
+      _init?: RequestInit,
+    ) => new Response(
+        JSON.stringify({ id: "job-render123" }),
+        { status: 201, headers: { "Content-Type": "application/json" } },
+      ));
+    const request: DocumentWorkerActivationRequest = kind === "DOCUMENT_ANALYSIS"
+      ? {
+          kind,
+          applicationJobId: "analysis-job-1",
+          tenantId: "tenant-1",
+          procedimentoId: "procedure-1",
+          withLegalResearch: true,
+        }
+      : { kind, procedimentoId: "procedure-1" };
+
+    await expect(activateDocumentWorker(request, {
+      environment,
+      fetch,
+      beginAnalysisActivation: vi.fn(async () => ({
+        outcome: "RESERVED" as const,
+        snapshot: {
+          state: "REQUESTING" as const,
+          activationAttemptId: "a".repeat(32),
+          renderJobId: null,
+          failureCode: null,
+        },
+      })),
+      completeAnalysisActivation: vi.fn(async () => ({
+        state: "CONFIRMED" as const,
+        activationAttemptId: "a".repeat(32),
+        renderJobId: "job-render123",
+        failureCode: null,
+      })),
+    })).resolves.toEqual({ outcome: "REQUESTED", renderJobId: "job-render123" });
+
+    const body = JSON.parse(String(fetch.mock.calls[0][1]?.body)) as { startCommand: string };
+    const segments = body.startCommand.split(" && ");
+    expect(segments).toHaveLength(chained ? 2 : 1);
+    const research = segments.at(-1)!;
+    expect(research).toContain("ASYNC_WORKER_OPERATION_ALLOWLIST=LEGAL_RESEARCH.EXECUTE_V1");
+    expect(research).toContain("ASYNC_WORKER_PROCEDIMENTO_ALLOWLIST=procedure-1");
+    expect(research).toContain("ASYNC_WORKER_EXIT_ON_IDLE=true");
+    expect(research).toContain("ASYNC_WORKER_BOOTSTRAP_TIME_WATCHES=false");
+    expect(research).toContain("ASYNC_PROVIDER_EXECUTION_ENABLED=true");
+    if (chained) {
+      expect(segments[0]).toContain("ASYNC_WORKER_OPERATION_ALLOWLIST=FASCICOLO.AUTOMATIC_ANALYSIS_V1");
+      expect(segments[0]).not.toContain("LEGAL_RESEARCH.EXECUTE_V1");
+    }
+  });
   it("defers a rejected request without exposing credentials", async () => {
     const { requestDocumentWorkerActivation } = await vi.importActual<
       typeof import("@/server/async-jobs/documentWorkerActivation")

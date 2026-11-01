@@ -258,6 +258,11 @@ export type AsyncJob = Prisma.AsyncJobModel
  */
 export type V7ProviderOutputRecoveryArtifact = Prisma.V7ProviderOutputRecoveryArtifactModel
 /**
+ * Model ResearchProviderOAuthCredential
+ * 
+ */
+export type ResearchProviderOAuthCredential = Prisma.ResearchProviderOAuthCredentialModel
+/**
  * Model RuntimeWorkerHeartbeat
  * 
  */

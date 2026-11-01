@@ -46,7 +46,22 @@ interface Props {
   assignedActorId: string;
   confirmReferenceDateAction: (formData: FormData) => Promise<void>;
   recoverMissionsAction: (formData: FormData) => Promise<void>;
+  startLegalAnalysisAction: (formData: FormData) => Promise<void>;
 }
+
+const CHANNEL_LABELS: Record<string, string> = {
+  SERVER_AUTONOMOUS: "Automatica dal server (worker NOETRA)",
+  CHATGPT_CONNECTOR: "ChatGPT con connettore Selvara",
+};
+
+const REQUIREMENT_LABELS: Record<string, string> = {
+  AUTOMATIC_RESEARCH_POLICY_DISABLED: "ricerca autonoma non abilitata in questo ambiente",
+  AUTOMATIC_RESEARCH_TENANT_NOT_ALLOWED: "ente non autorizzato alla ricerca autonoma",
+  AUTOMATIC_RESEARCH_PROCEDIMENTO_NOT_ALLOWED: "fascicolo non autorizzato alla ricerca autonoma",
+  AUTOMATIC_RESEARCH_POLICY_INVALID: "configurazione della ricerca autonoma incompleta",
+};
+
+const PROVIDER_LABELS: Record<string, string> = { MOONLIT: "Moonlit", SIMPLICITER: "Simpliciter" };
 
 export function LegalWorkbenchSection({
   procedimenti,
@@ -55,6 +70,7 @@ export function LegalWorkbenchSection({
   assignedActorId,
   confirmReferenceDateAction,
   recoverMissionsAction,
+  startLegalAnalysisAction,
 }: Props) {
   const confirmedByQuestion = new Map(
     (snapshot?.referenceDateConfirmations ?? []).map((confirmation) => [confirmation.questionSemanticKey, confirmation]),
@@ -67,9 +83,9 @@ export function LegalWorkbenchSection({
         </CardHeader>
         <CardContent className="space-y-6">
           <p className="text-sm text-slate-600">
-            Pannello di controllo manuale: scegli il fascicolo, avvia l&apos;analisi dalla sezione
-            «Elaborazioni manuali», conferma la data di riferimento giuridico quando richiesto e segui lo stato
-            di analisi, rapporti e ricerche. Con AUTOMAZIONE OFF nulla parte da solo.
+            Pannello di controllo manuale: scegli il fascicolo e premi «Avvia analisi giuridica». NOETRA esegue
+            l&apos;analisi AI dei documenti, le ricerche normative e giurisprudenziali sulle fonti autorizzate e
+            aggiorna il rapporto versionato. Con AUTOMAZIONE OFF nulla parte da solo.
           </p>
 
           <form method="get" className="flex flex-wrap items-end gap-3">
@@ -96,6 +112,35 @@ export function LegalWorkbenchSection({
 
           {snapshot ? (
             <>
+              <form action={startLegalAnalysisAction} className="space-y-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
+                <input type="hidden" name="procedimentoId" value={snapshot.procedimentoId} />
+                <p className="text-sm font-semibold text-slate-900">Avvia analisi giuridica completa</p>
+                <p className="text-xs text-slate-700">
+                  Analisi AI (solo se i documenti sono cambiati), poi ricerche giuridiche sul worker autorizzato e
+                  nuova versione del rapporto. Elaborazioni già eseguite non vengono ripetute; si applicano i limiti di spesa.
+                </p>
+                <p className="text-xs text-slate-700">
+                  Ricerca autonoma:{" "}
+                  {snapshot.research.autonomousChannel.authorized
+                    ? <strong className="text-green-700">abilitata per questo fascicolo</strong>
+                    : <strong className="text-amber-700">non disponibile ({REQUIREMENT_LABELS[snapshot.research.autonomousChannel.requirementCode ?? ""] ?? snapshot.research.autonomousChannel.requirementCode})</strong>}
+                  {" · "}Fonti con accesso OAuth:{" "}
+                  {snapshot.research.providerCredentials.map((credential) => (
+                    <span key={credential.provider} className="mr-2">
+                      {PROVIDER_LABELS[credential.provider] ?? credential.provider}{" "}
+                      {credential.stored && credential.hasRefreshToken && !credential.lastRefreshErrorCode
+                        ? "collegato"
+                        : credential.stored ? `da ricollegare (${credential.lastRefreshErrorCode ?? "token non rinnovabile"})` : "non collegato"}
+                    </span>
+                  ))}
+                  {" · "}LegalDataHunter: chiave API sul worker
+                </p>
+                <label className="flex items-center gap-2 text-sm text-slate-800">
+                  <input type="checkbox" name="confirmation" value="START_LEGAL_ANALYSIS" required />
+                  Confermo l&apos;avvio manuale delle elaborazioni AI e delle ricerche per questo fascicolo
+                </label>
+                <Button type="submit">Avvia analisi giuridica</Button>
+              </form>
               <div className="flex flex-wrap gap-3 text-sm">
                 <Link className="font-medium text-blue-700 underline" href={`/procedimenti/${snapshot.procedimentoId}?section=reports`}>
                   Apri i rapporti del fascicolo
@@ -221,17 +266,34 @@ export function LegalWorkbenchSection({
 
               <div className="space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <h3 className="font-semibold text-slate-900">5. Ricerche giuridiche (Selvara)</h3>
+                  <h3 className="font-semibold text-slate-900">5. Ricerche giuridiche</h3>
                   <form action={recoverMissionsAction}>
                     <input type="hidden" name="procedimentoId" value={snapshot.procedimentoId} />
                     <input type="hidden" name="assignedActorId" value={assignedActorId} />
-                    <Button type="submit">Prepara ricerche dalla revisione corrente</Button>
+                    <Button type="submit" variant="outline">Ripianifica ricerche dalla revisione corrente</Button>
                   </form>
                 </div>
                 <p className="text-xs text-slate-600">
-                  Le ricerche vengono eseguite da ChatGPT con il connettore NOETRA (Selvara), usando le fonti giuridiche
-                  autorizzate. Copia le istruzioni della missione in ChatGPT: al termine fonti e lacune compaiono qui.
+                  Le missioni sul canale automatico sono eseguite dal worker NOETRA con le fonti giuridiche autorizzate
+                  (Moonlit, LegalDataHunter, Simpliciter se collegato). Il connettore Selvara resta disponibile per le
+                  ricerche avviate da ChatGPT.
                 </p>
+                {snapshot.research.jobs.length ? (
+                  <Table>
+                    <TableHeader><TableRow><TableHead>Esecuzione</TableHead><TableHead>Stato</TableHead><TableHead>Missione</TableHead><TableHead>Conclusa</TableHead><TableHead>Errore</TableHead></TableRow></TableHeader>
+                    <TableBody>
+                      {snapshot.research.jobs.map((job) => (
+                        <TableRow key={job.id}>
+                          <TableCell>{formatDateIT(job.createdAt)}</TableCell>
+                          <TableCell><StatusBadge status={job.status} /></TableCell>
+                          <TableCell className="font-mono text-xs">{job.missionId ?? "—"}</TableCell>
+                          <TableCell>{job.completedAt ? formatDateIT(job.completedAt) : "—"}</TableCell>
+                          <TableCell className="font-mono text-xs">{job.failureCode ?? "—"}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : null}
                 {snapshot.missions.length === 0 ? (
                   <p className="text-sm text-slate-600">Nessuna missione di ricerca per questo fascicolo.</p>
                 ) : snapshot.missions.map((mission) => (
@@ -245,7 +307,7 @@ export function LegalWorkbenchSection({
                     <p className="text-xs text-slate-600">
                       Data di riferimento {mission.referenceDate}
                       {mission.referenceDateBasis ? ` (${mission.referenceDateBasis === "USER_CONFIRMED" ? "confermata dall'amministratore" : mission.referenceDateBasis})` : ""}
-                      {" · "}Canale {mission.executionChannel}
+                      {" · "}Canale {CHANNEL_LABELS[mission.executionChannel] ?? mission.executionChannel}
                       {" · "}Assegnata a {mission.assignedActorEmail ?? "nessuno"}
                       {" · "}Tentativi {mission.attempts.length}
                     </p>
@@ -270,7 +332,8 @@ export function LegalWorkbenchSection({
                         </ul>
                       </div>
                     ))}
-                    {mission.status === "PENDING" && mission.lifecycleStatus === "CURRENT" ? (
+                    {mission.status === "PENDING" && mission.lifecycleStatus === "CURRENT"
+                      && mission.executionChannel === "CHATGPT_CONNECTOR" ? (
                       <details className="text-xs">
                         <summary className="cursor-pointer font-medium text-slate-700">Istruzioni per ChatGPT (Selvara)</summary>
                         <textarea

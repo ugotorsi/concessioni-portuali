@@ -6,8 +6,24 @@ import {
   loadReferenceDateConfirmations,
   type ReferenceDateReviewQuestion,
 } from "@/server/fascicolo-knowledge/referenceDateConfirmation";
+import { evaluateAutomaticResearchPolicy } from "@/server/legal-research/automatic-research-policy";
+import {
+  readProviderOAuthCredentialStatuses,
+  type ProviderOAuthCredentialStatus,
+} from "@/server/legal-research/provider-oauth-credential-store";
+import { RESEARCH_MISSION_EXECUTION_OPERATION } from "@/server/legal-research/persistence";
 
 const ANALYSIS_OPERATION = "FASCICOLO.AUTOMATIC_ANALYSIS_V1";
+
+function autonomousChannelStatus(tenantId: string, procedimentoId: string) {
+  const decision = evaluateAutomaticResearchPolicy({ tenantId });
+  if (!decision.authorized) return { authorized: false, requirementCode: decision.requirementCode };
+  const procedimenti = process.env.AUTOMATIC_RESEARCH_PROCEDIMENTO_ALLOWLIST
+    ?.split(",").map((value) => value.trim()) ?? [];
+  return procedimenti.includes(procedimentoId)
+    ? { authorized: true, requirementCode: null }
+    : { authorized: false, requirementCode: "AUTOMATIC_RESEARCH_PROCEDIMENTO_NOT_ALLOWED" };
+}
 
 export interface LegalWorkbenchSource {
   title: string;
@@ -43,6 +59,11 @@ export interface LegalWorkbenchSnapshot {
   referenceDateReviews: readonly ReferenceDateReviewQuestion[];
   referenceDateConfirmations: { questionSemanticKey: string; confirmedDate: string; sourceId: string }[];
   missions: LegalWorkbenchMission[];
+  research: {
+    autonomousChannel: { authorized: boolean; requirementCode: string | null };
+    providerCredentials: readonly ProviderOAuthCredentialStatus[];
+    jobs: { id: string; status: string; missionId: string | null; createdAt: Date; completedAt: Date | null; failureCode: string | null }[];
+  };
 }
 
 function object(value: unknown): Record<string, JsonValue> {
@@ -84,7 +105,7 @@ export async function getLegalWorkbenchSnapshot(procedimentoId: string): Promise
   const tenantId = procedimento.enteId;
   const scope = { tenantId, procedimentoId };
 
-  const [currentRevision, revisions, reports, analysisJobs, confirmations, missionRecords] = await Promise.all([
+  const [currentRevision, revisions, reports, analysisJobs, confirmations, missionRecords, providerCredentials, researchJobs] = await Promise.all([
     getCurrentKnowledgeRevision(scope),
     prisma.fascicoloKnowledgeRevision.findMany({
       where: scope,
@@ -137,6 +158,13 @@ export async function getLegalWorkbenchSnapshot(procedimentoId: string): Promise
         },
       },
     }),
+    readProviderOAuthCredentialStatuses().catch(() => []),
+    prisma.asyncJob.findMany({
+      where: { ...scope, operation: RESEARCH_MISSION_EXECUTION_OPERATION },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      select: { id: true, status: true, logicalOperationId: true, createdAt: true, completedAt: true, failureCode: true },
+    }),
   ]);
 
   return {
@@ -186,6 +214,18 @@ export async function getLegalWorkbenchSnapshot(procedimentoId: string): Promise
         }))),
       };
     }),
+    research: {
+      autonomousChannel: autonomousChannelStatus(tenantId, procedimentoId),
+      providerCredentials,
+      jobs: researchJobs.map((job) => ({
+        id: job.id,
+        status: String(job.status),
+        missionId: job.logicalOperationId,
+        createdAt: job.createdAt,
+        completedAt: job.completedAt,
+        failureCode: job.failureCode,
+      })),
+    },
   };
 }
 

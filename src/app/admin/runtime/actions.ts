@@ -23,6 +23,7 @@ import {
 } from "@/server/runtime/procedimentoBudgetPolicy";
 import { recoverCurrentKnowledgeResearchMissions } from "@/server/fascicolo-knowledge/researchMissionRecovery";
 import { confirmKnowledgeReferenceDate } from "@/server/fascicolo-knowledge/referenceDateConfirmation";
+import { runManualLegalAnalysisPipeline } from "@/server/legal-research/manual-legal-analysis-pipeline";
 import {
   getRuntimeServiceDiagnostics,
   RUNTIME_DIAGNOSTIC_SERVICE_IDS,
@@ -604,6 +605,52 @@ export async function assignDefaultProcedimentoBudgetPolicy(
   revalidatePath(`/procedimenti/${procedimento.id}`);
 }
 
+export async function startLegalAnalysisPipeline(formData: FormData): Promise<void> {
+  const currentUser = await requireAdminWithMfa();
+  const procedimentoId = formData.get("procedimentoId");
+  if (typeof procedimentoId !== "string" || !procedimentoId.trim()) {
+    throw new Error("INVALID_PROCEDIMENTO_ID");
+  }
+  if (formData.get("confirmation") !== "START_LEGAL_ANALYSIS") {
+    throw new Error("LEGAL_ANALYSIS_CONFIRMATION_REQUIRED");
+  }
+  const procedimento = await prisma.procedimento.findUnique({
+    where: { id: procedimentoId.trim() },
+    select: { id: true, enteId: true },
+  });
+  if (!procedimento?.enteId) throw new Error("PROCEDIMENTO_NOT_FOUND");
+  const tenantContext = await getCurrentTenantContext();
+  if (!tenantContext) throw new Error("TENANT_CONTEXT_REQUIRED");
+  requireTenantAccess(tenantContext, procedimento.enteId, {
+    mode: "write",
+    allowWhenEnteMissing: false,
+  });
+
+  const result = await runManualLegalAnalysisPipeline({
+    tenantId: procedimento.enteId,
+    procedimentoId: procedimento.id,
+    actor: { id: currentUser.id, email: currentUser.email, role: "ADMIN" },
+  });
+  await auditSuccess({
+    azione: "FASCICOLO_LEGAL_ANALYSIS_PIPELINE_REQUEST",
+    entita: "Procedimento",
+    entitaId: procedimento.id,
+    enteId: procedimento.enteId,
+    actor: {
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+      userRole: currentUser.role,
+    },
+    metadata: {
+      ...result,
+      researchNotAuthorized: [...result.researchNotAuthorized],
+      automationRequired: false,
+    },
+  });
+  revalidatePath("/admin/runtime");
+  revalidatePath(`/procedimenti/${procedimento.id}`);
+}
+
 export async function recoverCurrentKnowledgeMissions(
   formData: FormData,
 ): Promise<void> {
@@ -703,7 +750,7 @@ export async function confirmResearchReferenceDate(
       userRole: currentUser.role,
     },
   });
-  // Turns the now-admitted question into a ChatGPT/Selvara mission without calling any provider.
+  // Turns the now-admitted question into a research mission (server-autonomous when policy allows) without calling any provider.
   const recovery = await recoverCurrentKnowledgeResearchMissions({
     tenantId: procedimento.enteId,
     procedimentoId: procedimento.id,

@@ -1,3 +1,4 @@
+import { autonomousResearchPlanner } from "./automatic-research-policy";
 import { createHash } from "node:crypto";
 
 import { prisma } from "@/lib/prisma";
@@ -160,6 +161,7 @@ const defaultDependencies: PeriodicLegalResearchDependencies = {
         assignedActorId: assignedActor.id,
         plans: buildKnowledgeResearchMissionPlans(current, {
           maxQuestionsPerWave: DEFAULT_RESEARCH_EXECUTION_WAVE_LIMIT,
+          autonomousResearch: autonomousResearchPlanner(revision.tenantId),
           referenceDateConfirmations: await loadReferenceDateConfirmations({
             tenantId: revision.tenantId,
             procedimentoId: revision.procedimentoId,

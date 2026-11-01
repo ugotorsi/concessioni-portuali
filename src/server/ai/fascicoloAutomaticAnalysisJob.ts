@@ -18,6 +18,7 @@ import {
   researchMissionExecutionChannel,
   type ResearchMission,
 } from "@/server/legal-research/bridge";
+import { autonomousResearchPlanner } from "@/server/legal-research/automatic-research-policy";
 import { createResearchMissionRecord } from "@/server/legal-research/persistence";
 import {
   ensureAutomaticResearchExecution,
@@ -81,7 +82,7 @@ import {
 } from "@/server/fascicolo-knowledge";
 import { resolveResearchMissionAssignee } from "@/server/fascicolo-knowledge/researchMissionRecovery";
 import { loadReferenceDateConfirmations } from "@/server/fascicolo-knowledge/referenceDateConfirmation";
-import type { KnowledgeReferenceDateConfirmation } from "@/server/fascicolo-knowledge/researchMissionPlanning";
+import type { KnowledgeReferenceDateConfirmation, KnowledgeResearchMissionPlan } from "@/server/fascicolo-knowledge/researchMissionPlanning";
 import {
   getFascicoloDocumentCorpusForAsyncJob,
   type FascicoloDocumentCorpus,
@@ -1074,6 +1075,7 @@ async function reconcileStructuredKnowledgeMissions(input: {
         ?? DEFAULT_RESEARCH_EXECUTION_WAVE_LIMIT,
       allowBuildingRevision: input.allowBuildingRevision,
       referenceDateConfirmations,
+      autonomousResearch: autonomousResearchPlanner(input.revision.tenantId),
     });
   } catch {
     throw new AsyncJobExecutionError(
@@ -1316,6 +1318,7 @@ export function createFascicoloAutomaticAnalysisHandler(
       }
       let structuredMissions: readonly ResearchMission[] | null = null;
       let structuredMissionsToSchedule: readonly ResearchMission[] | null = null;
+      let structuredPlansToSchedule: readonly KnowledgeResearchMissionPlan[] | null = null;
       let knowledgeRevisionId: string | null = null;
       let structuredMissionAssignmentRequired = false;
       let finalizedStructuredReport: {
@@ -1445,10 +1448,10 @@ export function createFascicoloAutomaticAnalysisHandler(
         const schedulableQuestionKeys = new Set(recovered.lifecycle
           .filter((result) => result.operationalStatus === "PENDING")
           .map((result) => result.questionSemanticKey));
-        structuredMissionsToSchedule = recovered.plans
+        structuredPlansToSchedule = recovered.plans
           .filter((plan) => plan.execution === "ADMITTED" && plan.mission !== null
-            && schedulableQuestionKeys.has(plan.questionSemanticKey))
-          .map((plan) => plan.mission!);
+            && schedulableQuestionKeys.has(plan.questionSemanticKey));
+        structuredMissionsToSchedule = structuredPlansToSchedule.map((plan) => plan.mission!);
         if (controlledV7) {
           if (!dependencies.prepareStructuredReport
             || !dependencies.finalizeControlledV7) {
@@ -1579,11 +1582,14 @@ export function createFascicoloAutomaticAnalysisHandler(
         supersedesReportIds,
       });
       const scheduling = [];
+      const autonomousActorByMissionId = new Map((structuredPlansToSchedule ?? [])
+        .filter((plan) => plan.autonomousActorId)
+        .map((plan) => [plan.mission!.missionId, plan.autonomousActorId!]));
       for (const mission of structuredMissionsToSchedule ?? missions) {
         if (researchMissionExecutionChannel(mission) !== "SERVER_AUTONOMOUS") continue;
         scheduling.push(await dependencies.scheduleMission({
           mission,
-          actorId: authority.actorId,
+          actorId: autonomousActorByMissionId.get(mission.missionId) ?? authority.actorId,
           tenantId: authority.tenantId,
           correlationId: context.correlationId,
         }));

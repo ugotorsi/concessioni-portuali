@@ -23,6 +23,7 @@ import {
   runManualFascicoloAnalysis,
   runManualTenantBatchAnalysis,
   setRenderWorkerState,
+  startLegalAnalysisPipeline,
   upsertRuntimeBudgetPolicy,
   updateAutomationControl,
   updateGlobalAiControl,
@@ -354,6 +355,7 @@ export default async function RuntimeOperationsPage({
         assignedActorId={adminUser.id}
         confirmReferenceDateAction={confirmResearchReferenceDate}
         recoverMissionsAction={recoverCurrentKnowledgeMissions}
+        startLegalAnalysisAction={startLegalAnalysisPipeline}
       />
 
       <section aria-label="Riepilogo servizi" className="border-y border-slate-200 bg-white px-4 py-3">

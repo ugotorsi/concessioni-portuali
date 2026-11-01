@@ -259,4 +259,34 @@ describe("Lotto 3 research mission planning", () => {
     expect(plans).toHaveLength(4);
     expect(plans.filter((plan) => plan.execution === "ADMITTED")).toHaveLength(2);
   });
+
+  it("routes authorized missions to a distinct SERVER_AUTONOMOUS channel and fingerprint", () => {
+    const base = buildKnowledgeResearchMissionPlans(snapshot(knowledge()))[0];
+    const seen: string[] = [];
+    const autonomous = buildKnowledgeResearchMissionPlans(snapshot(knowledge()), {
+      maxQuestionsPerWave: 5,
+      autonomousResearch: (mission) => {
+        seen.push(mission.executionChannel ?? "CHATGPT_CONNECTOR");
+        return { authorized: true, workerActorId: "worker-actor" };
+      },
+    })[0];
+    expect(seen).toEqual(["SERVER_AUTONOMOUS"]);
+    expect(base.mission?.executionChannel ?? "CHATGPT_CONNECTOR").toBe("CHATGPT_CONNECTOR");
+    expect(base.autonomousActorId ?? null).toBeNull();
+    expect(autonomous.mission?.executionChannel).toBe("SERVER_AUTONOMOUS");
+    expect(autonomous.autonomousActorId).toBe("worker-actor");
+    expect(autonomous.missionFingerprint).not.toBe(base.missionFingerprint);
+    expect(autonomous.mission?.missionId).not.toBe(base.mission?.missionId);
+  });
+
+  it("keeps the ChatGPT connector channel when autonomous research is not authorized", () => {
+    const base = buildKnowledgeResearchMissionPlans(snapshot(knowledge()))[0];
+    const denied = buildKnowledgeResearchMissionPlans(snapshot(knowledge()), {
+      maxQuestionsPerWave: 5,
+      autonomousResearch: () => ({ authorized: false, workerActorId: null }),
+    })[0];
+    expect(denied.mission?.executionChannel ?? "CHATGPT_CONNECTOR").toBe("CHATGPT_CONNECTOR");
+    expect(denied.missionFingerprint).toBe(base.missionFingerprint);
+    expect(denied.autonomousActorId ?? null).toBeNull();
+  });
 });

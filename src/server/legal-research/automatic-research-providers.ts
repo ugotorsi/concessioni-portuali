@@ -14,6 +14,11 @@ import {
 import { MOONLIT_MCP_URL, MoonlitOAuthProvider } from "./moonlit-oauth";
 import { SIMPLICITER_MCP_URL, SimpliciterOAuthProvider } from "./simpliciter-oauth";
 import { TrustedMissionExecutorError } from "./trusted-mission-executor";
+import {
+  readProviderCredentialKey,
+  resolveProviderAccessToken,
+  type ResearchOAuthProvider,
+} from "./provider-oauth-credential-store";
 
 type TokenReader = Readonly<{ tokens(): Promise<{ access_token: string } | null | undefined> }>;
 
@@ -54,6 +59,20 @@ function bearerOnlyToolCaller(options: Readonly<{
   };
 }
 
+/** DB-backed tokens let ephemeral workers refresh OAuth access without a persistent disk. */
+function storedTokenReader(
+  provider: ResearchOAuthProvider,
+  serverUrl: string,
+  key: Buffer,
+): TokenReader {
+  return {
+    async tokens() {
+      const result = await resolveProviderAccessToken({ provider, serverUrl, key });
+      return result.status === "READY" ? { access_token: result.accessToken } : null;
+    },
+  };
+}
+
 async function bearer(reader: TokenReader): Promise<string | null> {
   const accessToken = (await reader.tokens())?.access_token.trim();
   return accessToken || null;
@@ -64,6 +83,7 @@ export async function createAutomaticResearchProviderAdapters(options: Readonly<
   moonlitTokenReader?: TokenReader;
   simpliciterTokenReader?: TokenReader;
   fetch?: typeof fetch;
+  environment?: Readonly<Record<string, string | undefined>>;
 }>): Promise<readonly ResearchProviderAdapter[]> {
   if (!Number.isInteger(options.requestTimeoutMs)
     || options.requestTimeoutMs < 1_000 || options.requestTimeoutMs > 300_000) {
@@ -72,10 +92,15 @@ export async function createAutomaticResearchProviderAdapters(options: Readonly<
   const rejectLogin = () => {
     throw new TrustedMissionExecutorError("PROVIDER_OAUTH_LOGIN_FORBIDDEN");
   };
+  const credentialKey = readProviderCredentialKey(options.environment ?? process.env);
   const moonlitReader = options.moonlitTokenReader
-    ?? new MoonlitOAuthProvider("http://127.0.0.1/unused", rejectLogin);
+    ?? (credentialKey
+      ? storedTokenReader("MOONLIT", MOONLIT_MCP_URL, credentialKey)
+      : new MoonlitOAuthProvider("http://127.0.0.1/unused", rejectLogin));
   const simpliciterReader = options.simpliciterTokenReader
-    ?? new SimpliciterOAuthProvider("http://127.0.0.1/unused", rejectLogin);
+    ?? (credentialKey
+      ? storedTokenReader("SIMPLICITER", SIMPLICITER_MCP_URL, credentialKey)
+      : new SimpliciterOAuthProvider("http://127.0.0.1/unused", rejectLogin));
   const adapters: ResearchProviderAdapter[] = [];
   const moonlitToken = await bearer(moonlitReader);
   if (moonlitToken) {

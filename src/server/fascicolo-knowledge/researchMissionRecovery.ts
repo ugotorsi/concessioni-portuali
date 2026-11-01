@@ -1,3 +1,4 @@
+import { autonomousResearchPlanner } from "@/server/legal-research/automatic-research-policy";
 import { prisma } from "@/lib/prisma";
 
 import {
@@ -91,6 +92,7 @@ export async function recoverCurrentKnowledgeResearchMissions(input: {
       maxQuestionsPerWave:
         input.maxQuestionsPerWave ?? DEFAULT_RESEARCH_EXECUTION_WAVE_LIMIT,
       referenceDateConfirmations,
+      autonomousResearch: autonomousResearchPlanner(input.tenantId),
     });
   } catch {
     throw new ResearchMissionRecoveryError("RESEARCH_MISSION_PLANNING_FAILED");

@@ -27,6 +27,7 @@ import { completeAdverseResearchRequirement, ensureAdverseResearchMission } from
 import { verifyOfficialResearchSources } from "./official-source-verification";
 import { produceAndPersistAutomaticLegalApplicabilityReviews } from "./legal-applicability-producer";
 import { assertGlobalAiExecutionAllowed } from "@/server/ai/globalAiControl";
+import { refreshStructuredReportAfterResearch } from "@/server/fascicolo-report/auto-refresh";
 
 const referenceSchema = z.object({
   referenceType: z.literal("LEGAL_RESEARCH_MISSION"),
@@ -88,6 +89,48 @@ export async function ensureAutomaticResearchExecution(input: Readonly<{
   return { outcome: "ADMITTED", requirementCode: null, jobId: admitted.job.id };
 }
 
+export type CurrentKnowledgeResearchAdmission = Readonly<{
+  missionId: string;
+  outcome: AutomaticResearchAdmissionResult["outcome"];
+  requirementCode: string | null;
+  jobId: string | null;
+}>;
+
+/** Schedules worker execution for current V7 knowledge missions on the SERVER_AUTONOMOUS channel. */
+export async function admitCurrentKnowledgeAutonomousResearch(input: Readonly<{
+  tenantId?: string;
+  procedimentoId?: string;
+  limit?: number;
+  correlationId?: string;
+}> = {}): Promise<readonly CurrentKnowledgeResearchAdmission[]> {
+  const records = await prisma.researchMissionRecord.findMany({
+    where: {
+      ...(input.tenantId ? { tenantId: input.tenantId } : {}),
+      ...(input.procedimentoId ? { caseId: input.procedimentoId } : {}),
+      lifecycleStatus: "CURRENT",
+      status: "PENDING",
+      researchQuestionSemanticKey: { not: null },
+      assignedActorId: { not: null },
+    },
+    orderBy: { createdAt: "asc" },
+    take: input.limit ?? 25,
+    select: { id: true, tenantId: true, assignedActorId: true, payload: true },
+  });
+  const admissions: CurrentKnowledgeResearchAdmission[] = [];
+  for (const record of records) {
+    const mission = record.payload as unknown as ResearchMission;
+    if (!record.tenantId || researchMissionExecutionChannel(mission) !== "SERVER_AUTONOMOUS") continue;
+    const result = await ensureAutomaticResearchExecution({
+      mission,
+      tenantId: record.tenantId,
+      actorId: record.assignedActorId!,
+      correlationId: input.correlationId ?? `automatic-research:${mission.missionId}`,
+    });
+    admissions.push({ missionId: record.id, ...result });
+  }
+  return admissions;
+}
+
 export async function reconcilePendingAutomaticResearchExecutions(limit = 25): Promise<number> {
   const links = await prisma.automaticFascicoloReportMission.findMany({
     where: {
@@ -114,7 +157,8 @@ export async function reconcilePendingAutomaticResearchExecutions(limit = 25): P
     });
     if (result.outcome === "ADMITTED") admitted += 1;
   }
-  return admitted;
+  const knowledgeAdmissions = await admitCurrentKnowledgeAutonomousResearch({ limit });
+  return admitted + knowledgeAdmissions.filter((entry) => entry.outcome === "ADMITTED").length;
 }
 
 type ExecutionAuthority = Readonly<{
@@ -156,18 +200,30 @@ const defaultDependencies: AutomaticResearchExecutionDependencies = {
       },
     });
     if (!job || job.operation !== RESEARCH_MISSION_EXECUTION_OPERATION || !job.tenantId) return null;
-    const activeLink = await prisma.automaticFascicoloReportMission.findFirst({
-      where: {
-        missionId: input.missionId,
-        purpose: "PRELIMINARY_DISCOVERY",
-        report: {
-          tenantId: job.tenantId,
-          status: { not: "SUPERSEDED" },
+    const [activeLink, currentKnowledgeMission] = await Promise.all([
+      prisma.automaticFascicoloReportMission.findFirst({
+        where: {
+          missionId: input.missionId,
+          purpose: "PRELIMINARY_DISCOVERY",
+          report: {
+            tenantId: job.tenantId,
+            status: { not: "SUPERSEDED" },
+          },
         },
-      },
-      select: { missionId: true },
-    });
-    if (!activeLink) return null;
+        select: { missionId: true },
+      }),
+      // V7 missions are anchored to the current knowledge revision instead of a V6 report link.
+      prisma.researchMissionRecord.findFirst({
+        where: {
+          id: input.missionId,
+          tenantId: job.tenantId,
+          lifecycleStatus: "CURRENT",
+          researchQuestionSemanticKey: { not: null },
+        },
+        select: { id: true },
+      }),
+    ]);
+    if (!activeLink && !currentKnowledgeMission) return null;
     const stored = await getResearchMission(input.missionId, { actorId: job.actorId, tenantId: job.tenantId });
     if (!stored) return null;
     const decision = evaluateAutomaticResearchPolicy({ tenantId: job.tenantId, mission: stored.mission });
@@ -238,6 +294,11 @@ const defaultDependencies: AutomaticResearchExecutionDependencies = {
       tenantId: input.authority.tenantId,
       caseId: input.authority.mission.caseReference.caseId,
       primaryMissionId: input.authority.mission.missionId,
+    });
+    // Archive a new report draft so research results appear in the versioned report history.
+    await refreshStructuredReportAfterResearch({
+      tenantId: input.authority.tenantId,
+      procedimentoId: input.authority.mission.caseReference.caseId,
     });
   },
 };

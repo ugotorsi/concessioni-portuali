@@ -143,6 +143,7 @@ export async function requestExistingCorpusAnalysis(input: {
     role: "ADMIN";
   };
   environment?: Readonly<Record<string, string | undefined>>;
+  withLegalResearch?: boolean;
 }, dependencies: ExistingCorpusAnalysisDependencies = defaultDependencies) {
   const environment = input.environment ?? process.env;
   if (!isExistingCorpusAnalysisRequestEnabled(environment)) {
@@ -197,6 +198,7 @@ export async function requestExistingCorpusAnalysis(input: {
     applicationJobId: admission.job.id,
     tenantId: input.tenantId,
     procedimentoId: input.procedimentoId,
+    ...(input.withLegalResearch ? { withLegalResearch: true } : {}),
   });
   return { admission, activation, budgetCompatibility };
 }

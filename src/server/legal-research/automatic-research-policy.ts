@@ -150,3 +150,14 @@ export function evaluateAutomaticResearchPolicy(input: Readonly<{
     allowedCapabilities,
   };
 }
+
+/** Planner hook: authorizes the SERVER_AUTONOMOUS channel only when the full execution policy admits the mission. */
+export function autonomousResearchPlanner(
+  tenantId: string,
+  env?: AutomaticResearchPolicyEnv | NodeJS.ProcessEnv,
+): (mission: ResearchMission) => Readonly<{ authorized: boolean; workerActorId: string | null }> {
+  return (mission) => {
+    const decision = evaluateAutomaticResearchPolicy({ tenantId, mission, env });
+    return { authorized: decision.authorized, workerActorId: decision.workerActorId };
+  };
+}
