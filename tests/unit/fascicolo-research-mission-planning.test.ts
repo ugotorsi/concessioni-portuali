@@ -163,6 +163,42 @@ describe("Lotto 3 research mission planning", () => {
     expect(JSON.stringify(plan)).not.toContain("1970-01-01");
   });
 
+  it("admits an unknown reference date only after a traceable human confirmation", () => {
+    const revision = snapshot(knowledge({ basisType: "UNKNOWN", referenceDate: null }));
+    const blocked = buildKnowledgeResearchMissionPlans(revision)[0];
+    const confirmation = {
+      questionSemanticKey: blocked.questionSemanticKey,
+      confirmedDate: "2026-10-15",
+      sourceId: "activity-log-1",
+      sourceVersion: "REFERENCE_DATE_CONFIRMATION_V1",
+    };
+    const plan = buildKnowledgeResearchMissionPlans(revision, { maxQuestionsPerWave: 3, referenceDateConfirmations: [confirmation] })[0];
+    expect(plan).toMatchObject({ execution: "ADMITTED", referenceDate: "2026-10-15", blockReason: null });
+    expect(JSON.stringify(plan)).toContain("activity-log-1");
+    expect(plan.missionFingerprint).not.toBe(
+      buildKnowledgeResearchMissionPlans(revision, {
+        maxQuestionsPerWave: 3,
+        referenceDateConfirmations: [{ ...confirmation, sourceId: "activity-log-2" }],
+      })[0].missionFingerprint,
+    );
+  });
+
+  it("ignores confirmations for questions with an evidence-backed reference date", () => {
+    const revision = snapshot(knowledge());
+    const original = buildKnowledgeResearchMissionPlans(revision)[0];
+    const plan = buildKnowledgeResearchMissionPlans(revision, {
+      maxQuestionsPerWave: 3,
+      referenceDateConfirmations: [{
+        questionSemanticKey: original.questionSemanticKey,
+        confirmedDate: "2020-01-01",
+        sourceId: "activity-log-1",
+        sourceVersion: "REFERENCE_DATE_CONFIRMATION_V1",
+      }],
+    })[0];
+    expect(plan).toMatchObject({ execution: "ADMITTED", referenceDate: "2026-09-01" });
+    expect(plan.missionFingerprint).toBe(original.missionFingerprint);
+  });
+
   it("keeps the mission fingerprint stable for invariant assumptions", () => {
     const first = buildKnowledgeResearchMissionPlans(snapshot(knowledge()))[0];
     const second = buildKnowledgeResearchMissionPlans(snapshot(knowledge()))[0];

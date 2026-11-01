@@ -6,6 +6,7 @@ const prismaMock = vi.hoisted(() => ({
 const getCurrentKnowledgeRevisionMock = vi.hoisted(() => vi.fn());
 const buildPlansMock = vi.hoisted(() => vi.fn());
 const reconcileMock = vi.hoisted(() => vi.fn());
+const loadConfirmationsMock = vi.hoisted(() => vi.fn(async () => []));
 
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }));
 vi.mock("@/server/fascicolo-knowledge/repository", () => ({
@@ -17,6 +18,9 @@ vi.mock("@/server/fascicolo-knowledge/researchMissionPlanning", () => ({
 }));
 vi.mock("@/server/fascicolo-knowledge/researchMissionLifecycle", () => ({
   reconcileKnowledgeResearchMissions: reconcileMock,
+}));
+vi.mock("@/server/fascicolo-knowledge/referenceDateConfirmation", () => ({
+  loadReferenceDateConfirmations: loadConfirmationsMock,
 }));
 
 import {

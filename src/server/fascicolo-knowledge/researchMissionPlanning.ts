@@ -9,9 +9,17 @@ import type { KnowledgeRevisionSnapshot } from "./repository";
 
 export const DEFAULT_RESEARCH_EXECUTION_WAVE_LIMIT = 5;
 
+export interface KnowledgeReferenceDateConfirmation {
+  questionSemanticKey: string;
+  confirmedDate: string;
+  sourceId: string;
+  sourceVersion: string;
+}
+
 export interface ResearchExecutionPolicy {
   maxQuestionsPerWave: number;
   allowBuildingRevision?: boolean;
+  referenceDateConfirmations?: readonly KnowledgeReferenceDateConfirmation[];
 }
 
 export interface KnowledgeResearchMissionPlan {
@@ -90,6 +98,8 @@ export function buildKnowledgeResearchMissionPlans(
   const issueByQuestion = new Map(revision.relations
     .filter((relation) => relation.relationType === "QUESTION_FOR_ISSUE")
     .map((relation) => [relation.sourceItemId, relation.targetItemId]));
+  const confirmationByQuestion = new Map((policy.referenceDateConfirmations ?? [])
+    .map((confirmation) => [confirmation.questionSemanticKey, confirmation]));
   const originsByIssue = new Map<string, string[]>();
   for (const relation of revision.relations.filter((candidate) => candidate.relationType === "ISSUE_DERIVED_FROM")) {
     const values = originsByIssue.get(relation.sourceItemId) ?? [];
@@ -97,20 +107,71 @@ export function buildKnowledgeResearchMissionPlans(
     originsByIssue.set(relation.sourceItemId, values);
   }
   const candidates = revision.items.filter((item) => item.kind === "RESEARCH_QUESTION").map((question) => {
-    const payload = object(question.structuredPayload);
+    const questionPayload = object(question.structuredPayload);
     const issue = itemById.get(issueByQuestion.get(question.id) ?? "");
     const originIds = issue ? [...(originsByIssue.get(issue.id) ?? [])].sort() : [];
     const origins = originIds.map((id) => itemById.get(id)).filter((item): item is SnapshotItem => Boolean(item));
-    const basis = object(payload.referenceDateBasis);
-    const basisType = string(basis.type) ?? "UNKNOWN";
-    const basisSemanticKey = string(basis.itemSemanticKey);
-    const basisItem = basisSemanticKey ? itemBySemanticKey.get(basisSemanticKey) : undefined;
-    const userConfirmedDateSource = object(basis.userConfirmedDateSource);
-    const confirmedDate = string(userConfirmedDateSource.confirmedDate);
-    const confirmationSourceId = string(userConfirmedDateSource.sourceId);
-    const confirmationSourceVersion = string(userConfirmedDateSource.sourceVersion);
-    const declaredDate = string(payload.referenceDate);
-    const derivedDate = basisType === "USER_CONFIRMED" ? confirmedDate : dateFromBasis(basisItem);
+    const evaluateReferenceDate = (payload: Record<string, JsonValue>) => {
+      const basis = object(payload.referenceDateBasis);
+      const basisType = string(basis.type) ?? "UNKNOWN";
+      const basisSemanticKey = string(basis.itemSemanticKey);
+      const basisItem = basisSemanticKey ? itemBySemanticKey.get(basisSemanticKey) : undefined;
+      const userConfirmedDateSource = object(basis.userConfirmedDateSource);
+      const confirmedDate = string(userConfirmedDateSource.confirmedDate);
+      const confirmationSourceId = string(userConfirmedDateSource.sourceId);
+      const confirmationSourceVersion = string(userConfirmedDateSource.sourceVersion);
+      const declaredDate = string(payload.referenceDate);
+      const derivedDate = basisType === "USER_CONFIRMED" ? confirmedDate : dateFromBasis(basisItem);
+      const basisLinkedToIssue = basisItem !== undefined && originIds.includes(basisItem.id);
+      const basisPayload = basisItem ? object(basisItem.structuredPayload) : {};
+      const basisKindValid = (basisType === "EVENT_DATE" && basisItem?.kind === "EVENT" && basisLinkedToIssue)
+        || (basisType === "MEASURE_DATE" && basisItem?.kind === "MEASURE" && basisLinkedToIssue)
+        || (basisType === "CHALLENGED_ACT_DATE"
+          && (basisItem?.kind === "LEGAL_ACT" || basisItem?.kind === "MEASURE")
+          && basisPayload.proceduralRole === "CHALLENGED_ACT" && basisLinkedToIssue)
+        || (basisType === "USER_CONFIRMED" && basisItem === undefined
+          && confirmationSourceId !== null && confirmationSourceVersion !== null && confirmedDate !== null);
+      const dateValid = basisType !== "UNKNOWN" && basisKindValid && declaredDate !== null && declaredDate === derivedDate;
+      return {
+        basis,
+        basisType,
+        basisSemanticKey,
+        basisItem,
+        confirmedDate,
+        confirmationSourceId,
+        confirmationSourceVersion,
+        declaredDate,
+        dateValid,
+      };
+    };
+    const documentaryDate = evaluateReferenceDate(questionPayload);
+    const confirmation = confirmationByQuestion.get(question.semanticKey);
+    // A human confirmation only fills a missing or unverifiable date; evidence-backed dates always win.
+    const payload: Record<string, JsonValue> = !documentaryDate.dateValid && confirmation ? {
+      ...questionPayload,
+      referenceDate: confirmation.confirmedDate,
+      referenceDateBasis: {
+        type: "USER_CONFIRMED",
+        itemSemanticKey: null,
+        rationale: "Data di riferimento confermata da un amministratore con traccia di audit.",
+        userConfirmedDateSource: {
+          sourceId: confirmation.sourceId,
+          sourceVersion: confirmation.sourceVersion,
+          confirmedDate: confirmation.confirmedDate,
+        },
+      },
+    } : questionPayload;
+    const {
+      basis,
+      basisType,
+      basisSemanticKey,
+      basisItem,
+      confirmedDate,
+      confirmationSourceId,
+      confirmationSourceVersion,
+      declaredDate,
+      dateValid,
+    } = payload === questionPayload ? documentaryDate : evaluateReferenceDate(payload);
     const mode = string(payload.mode) === "ADVERSE" ? "ADVERSE" : "PRIMARY";
     const capabilities = [...new Set([
       ...strings(payload.requestedCapabilities),
@@ -123,16 +184,6 @@ export function buildKnowledgeResearchMissionPlans(
       && origins.length === originIds.length
       && origins.length > 0
       && origins.every(identityAllowsMission);
-    const basisLinkedToIssue = basisItem !== undefined && originIds.includes(basisItem.id);
-    const basisPayload = basisItem ? object(basisItem.structuredPayload) : {};
-    const basisKindValid = (basisType === "EVENT_DATE" && basisItem?.kind === "EVENT" && basisLinkedToIssue)
-      || (basisType === "MEASURE_DATE" && basisItem?.kind === "MEASURE" && basisLinkedToIssue)
-      || (basisType === "CHALLENGED_ACT_DATE"
-        && (basisItem?.kind === "LEGAL_ACT" || basisItem?.kind === "MEASURE")
-        && basisPayload.proceduralRole === "CHALLENGED_ACT" && basisLinkedToIssue)
-      || (basisType === "USER_CONFIRMED" && basisItem === undefined
-        && confirmationSourceId !== null && confirmationSourceVersion !== null && confirmedDate !== null);
-    const dateValid = basisType !== "UNKNOWN" && basisKindValid && declaredDate !== null && declaredDate === derivedDate;
     const missionFingerprint = fingerprint({
       fingerprintVersion: "KNOWLEDGE_RESEARCH_MISSION_V2",
       canonicalQuestion,

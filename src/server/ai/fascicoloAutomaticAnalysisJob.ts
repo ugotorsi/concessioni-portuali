@@ -80,6 +80,8 @@ import {
   type KnowledgeRevisionSnapshot,
 } from "@/server/fascicolo-knowledge";
 import { resolveResearchMissionAssignee } from "@/server/fascicolo-knowledge/researchMissionRecovery";
+import { loadReferenceDateConfirmations } from "@/server/fascicolo-knowledge/referenceDateConfirmation";
+import type { KnowledgeReferenceDateConfirmation } from "@/server/fascicolo-knowledge/researchMissionPlanning";
 import {
   getFascicoloDocumentCorpusForAsyncJob,
   type FascicoloDocumentCorpus,
@@ -329,6 +331,10 @@ export interface FascicoloAutomaticAnalysisDependencies {
     plans: ReturnType<typeof buildKnowledgeResearchMissionPlans>;
     allowBuildingRevision?: boolean;
   }): Promise<readonly KnowledgeMissionLifecycleResult[]>;
+  loadReferenceDateConfirmations?(input: {
+    tenantId: string;
+    procedimentoId: string;
+  }): Promise<readonly KnowledgeReferenceDateConfirmation[]>;
   resolveMissionAssignee?(input: {
     tenantId: string;
     candidateActorId: string;
@@ -1024,6 +1030,7 @@ const defaultHandlerDependencies: FascicoloAutomaticAnalysisDependencies = {
     return persistCurrentStructuredReport(input);
   },
   reconcileKnowledgeMissions: (input) => reconcileKnowledgeResearchMissions(input),
+  loadReferenceDateConfirmations: (input) => loadReferenceDateConfirmations(input),
   resolveMissionAssignee: (input) => resolveResearchMissionAssignee(input),
   persistMission: ({ mission, actorId, tenantId }) => createResearchMissionRecord({
     mission,
@@ -1053,6 +1060,12 @@ async function reconcileStructuredKnowledgeMissions(input: {
     );
   }
 
+  const referenceDateConfirmations = input.dependencies.loadReferenceDateConfirmations
+    ? await input.dependencies.loadReferenceDateConfirmations({
+      tenantId: input.revision.tenantId,
+      procedimentoId: input.revision.procedimentoId,
+    })
+    : [];
   let plans: ReturnType<typeof buildKnowledgeResearchMissionPlans>;
   try {
     plans = buildKnowledgeResearchMissionPlans(input.revision, {
@@ -1060,6 +1073,7 @@ async function reconcileStructuredKnowledgeMissions(input: {
         input.dependencies.researchExecutionWaveLimit
         ?? DEFAULT_RESEARCH_EXECUTION_WAVE_LIMIT,
       allowBuildingRevision: input.allowBuildingRevision,
+      referenceDateConfirmations,
     });
   } catch {
     throw new AsyncJobExecutionError(

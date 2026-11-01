@@ -13,9 +13,11 @@ import { buildServiceCenterSnapshot } from "@/server/runtime/serviceCenter";
 import { getRuntimeServiceDiagnostics } from "@/server/runtime/serviceDiagnostics";
 import { getGlobalAiControlState } from "@/server/ai/globalAiControl";
 import { getAutomationControlState } from "@/server/automation/automationControl";
+import { getLegalWorkbenchSnapshot } from "@/server/runtime/legalWorkbench";
 
 import {
   assignDefaultProcedimentoBudgetPolicy,
+  confirmResearchReferenceDate,
   recoverCurrentKnowledgeMissions,
   retryRuntimeJob,
   runManualFascicoloAnalysis,
@@ -29,6 +31,7 @@ import {
 import { GlobalAiControlForm } from "./GlobalAiControlForm";
 import { AutomationControlForm } from "./AutomationControlForm";
 import { ManualAnalysisControls } from "./ManualAnalysisControls";
+import { LegalWorkbenchSection } from "./LegalWorkbenchSection";
 
 export const dynamic = "force-dynamic";
 
@@ -63,9 +66,20 @@ function diagnosticVariant(status: string): "success" | "warning" | "danger" {
   return "danger";
 }
 
-export default async function RuntimeOperationsPage() {
+export default async function RuntimeOperationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ procedimentoId?: string | string[] }>;
+}) {
   await requireRole(["ADMIN"]);
-  await requireAdminWithMfa();
+  const adminUser = await requireAdminWithMfa();
+  const requestedProcedimentoId = (await searchParams).procedimentoId;
+  const selectedProcedimentoId = typeof requestedProcedimentoId === "string" && requestedProcedimentoId.trim()
+    ? requestedProcedimentoId.trim()
+    : null;
+  const legalWorkbench = selectedProcedimentoId
+    ? await getLegalWorkbenchSnapshot(selectedProcedimentoId)
+    : null;
   const defaultProcedimentoBudget = readDefaultProcedimentoBudgetAuthorization();
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
@@ -329,6 +343,18 @@ export default async function RuntimeOperationsPage() {
           </CardContent>
         </Card>
       </section>
+
+      <LegalWorkbenchSection
+        procedimenti={activeProcedimenti.map((procedimento) => ({
+          id: procedimento.id,
+          label: `${procedimento.ente.nome} · ${procedimento.tipologia} · ${procedimento.id}`,
+        }))}
+        selectedProcedimentoId={selectedProcedimentoId}
+        snapshot={legalWorkbench}
+        assignedActorId={adminUser.id}
+        confirmReferenceDateAction={confirmResearchReferenceDate}
+        recoverMissionsAction={recoverCurrentKnowledgeMissions}
+      />
 
       <section aria-label="Riepilogo servizi" className="border-y border-slate-200 bg-white px-4 py-3">
         <dl className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

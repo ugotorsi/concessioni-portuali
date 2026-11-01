@@ -3,10 +3,12 @@ import { createHash } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import {
   buildKnowledgeResearchMissionPlans,
+  DEFAULT_RESEARCH_EXECUTION_WAVE_LIMIT,
   getCurrentKnowledgeRevision,
   reconcileKnowledgeResearchMissions,
   type KnowledgeResearchMissionPlan,
 } from "@/server/fascicolo-knowledge";
+import { loadReferenceDateConfirmations } from "@/server/fascicolo-knowledge/referenceDateConfirmation";
 import { createResearchMission } from "@/server/legal-research/bridge";
 import { isAutomationEnabled } from "@/server/automation/automationControl";
 
@@ -156,7 +158,13 @@ const defaultDependencies: PeriodicLegalResearchDependencies = {
         procedimentoId: revision.procedimentoId,
         knowledgeRevisionId: revision.id,
         assignedActorId: assignedActor.id,
-        plans: buildKnowledgeResearchMissionPlans(current),
+        plans: buildKnowledgeResearchMissionPlans(current, {
+          maxQuestionsPerWave: DEFAULT_RESEARCH_EXECUTION_WAVE_LIMIT,
+          referenceDateConfirmations: await loadReferenceDateConfirmations({
+            tenantId: revision.tenantId,
+            procedimentoId: revision.procedimentoId,
+          }),
+        }),
       });
     }
     return targets;

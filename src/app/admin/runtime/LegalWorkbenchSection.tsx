@@ -1,0 +1,292 @@
+import Link from "next/link";
+
+import { Badge, type BadgeVariant } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
+import { formatDateIT } from "@/lib/utils";
+import {
+  buildSelvaraMissionInstructions,
+  type LegalWorkbenchSnapshot,
+} from "@/server/runtime/legalWorkbench";
+
+const STATUS_LABELS: Record<string, string> = {
+  PENDING: "In attesa di esecuzione",
+  CLAIMED: "In esecuzione",
+  COMPLETED: "Completata",
+  DEFERRED: "Rinviata",
+  FAILED: "Non riuscita",
+  CURRENT: "Corrente",
+  SUPERSEDED: "Storico (sostituita)",
+  STALE: "Da aggiornare",
+  BUILDING: "In costruzione",
+  QUEUED: "In coda",
+  RUNNING: "In elaborazione",
+  SUCCEEDED: "Completata",
+  TERMINAL_FAILED: "Non riuscita",
+  CANCELLED: "Annullata",
+};
+
+function statusVariant(status: string): BadgeVariant {
+  if (["COMPLETED", "SUCCEEDED", "CURRENT"].includes(status)) return "success";
+  if (["FAILED", "TERMINAL_FAILED"].includes(status)) return "danger";
+  if (["SUPERSEDED", "CANCELLED"].includes(status)) return "muted";
+  if (["CLAIMED", "RUNNING", "QUEUED", "BUILDING"].includes(status)) return "info";
+  return "warning";
+}
+
+function StatusBadge({ status }: { status: string }) {
+  return <Badge variant={statusVariant(status)}>{STATUS_LABELS[status] ?? status}</Badge>;
+}
+
+interface Props {
+  procedimenti: readonly { id: string; label: string }[];
+  selectedProcedimentoId: string | null;
+  snapshot: LegalWorkbenchSnapshot | null;
+  assignedActorId: string;
+  confirmReferenceDateAction: (formData: FormData) => Promise<void>;
+  recoverMissionsAction: (formData: FormData) => Promise<void>;
+}
+
+export function LegalWorkbenchSection({
+  procedimenti,
+  selectedProcedimentoId,
+  snapshot,
+  assignedActorId,
+  confirmReferenceDateAction,
+  recoverMissionsAction,
+}: Props) {
+  const confirmedByQuestion = new Map(
+    (snapshot?.referenceDateConfirmations ?? []).map((confirmation) => [confirmation.questionSemanticKey, confirmation]),
+  );
+  return (
+    <section className="mt-6" aria-labelledby="legal-workbench-title">
+      <Card>
+        <CardHeader>
+          <CardTitle id="legal-workbench-title">Analisi giuridica e ricerche</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <p className="text-sm text-slate-600">
+            Pannello di controllo manuale: scegli il fascicolo, avvia l&apos;analisi dalla sezione
+            «Elaborazioni manuali», conferma la data di riferimento giuridico quando richiesto e segui lo stato
+            di analisi, rapporti e ricerche. Con AUTOMAZIONE OFF nulla parte da solo.
+          </p>
+
+          <form method="get" className="flex flex-wrap items-end gap-3">
+            <label className="grid gap-1 text-sm font-medium text-slate-700">
+              Fascicolo
+              <select
+                name="procedimentoId"
+                defaultValue={selectedProcedimentoId ?? ""}
+                className="h-10 min-w-80 rounded-md border border-slate-300 px-3 text-sm"
+                required
+              >
+                <option value="" disabled>Seleziona un fascicolo</option>
+                {procedimenti.map((procedimento) => (
+                  <option key={procedimento.id} value={procedimento.id}>{procedimento.label}</option>
+                ))}
+              </select>
+            </label>
+            <Button type="submit">Mostra stato</Button>
+          </form>
+
+          {selectedProcedimentoId && !snapshot ? (
+            <p className="text-sm font-medium text-red-700">Fascicolo non trovato o non associato a un ente.</p>
+          ) : null}
+
+          {snapshot ? (
+            <>
+              <div className="flex flex-wrap gap-3 text-sm">
+                <Link className="font-medium text-blue-700 underline" href={`/procedimenti/${snapshot.procedimentoId}?section=reports`}>
+                  Apri i rapporti del fascicolo
+                </Link>
+                <Link className="font-medium text-blue-700 underline" href={`/procedimenti/${snapshot.procedimentoId}?section=research`}>
+                  Apri le ricerche del fascicolo
+                </Link>
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="font-semibold text-slate-900">1. Analisi AI</h3>
+                {snapshot.analysisJobs.length === 0 ? (
+                  <p className="text-sm text-slate-600">Nessuna analisi richiesta per questo fascicolo.</p>
+                ) : (
+                  <Table>
+                    <TableHeader><TableRow><TableHead>Richiesta</TableHead><TableHead>Stato</TableHead><TableHead>Motivo</TableHead><TableHead>Conclusa</TableHead><TableHead>Errore</TableHead></TableRow></TableHeader>
+                    <TableBody>
+                      {snapshot.analysisJobs.map((job) => (
+                        <TableRow key={job.id}>
+                          <TableCell>{formatDateIT(job.createdAt)}</TableCell>
+                          <TableCell><StatusBadge status={job.status} /></TableCell>
+                          <TableCell className="font-mono text-xs">{job.purpose}</TableCell>
+                          <TableCell>{job.completedAt ? formatDateIT(job.completedAt) : "—"}</TableCell>
+                          <TableCell className="font-mono text-xs">{job.failureCode ?? "—"}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </div>
+
+              <div className="grid gap-4 xl:grid-cols-2">
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-slate-900">2. Revisioni della conoscenza</h3>
+                  <Table>
+                    <TableHeader><TableRow><TableHead>Revisione</TableHead><TableHead>Stato</TableHead><TableHead>Creata</TableHead></TableRow></TableHeader>
+                    <TableBody>
+                      {snapshot.revisions.map((revision) => (
+                        <TableRow key={revision.id}>
+                          <TableCell className="font-mono text-xs">{revision.id}</TableCell>
+                          <TableCell><StatusBadge status={revision.status} /></TableCell>
+                          <TableCell>{formatDateIT(revision.createdAt)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-slate-900">3. Rapporti versionati</h3>
+                  <Table>
+                    <TableHeader><TableRow><TableHead>Rapporto</TableHead><TableHead>Stato</TableHead><TableHead>Generato</TableHead></TableRow></TableHeader>
+                    <TableBody>
+                      {snapshot.reports.map((report) => (
+                        <TableRow key={report.id}>
+                          <TableCell className="font-mono text-xs">
+                            {report.id}
+                            {report.supersededBySnapshotId ? (
+                              <span className="block text-slate-500">sostituito da {report.supersededBySnapshotId}</span>
+                            ) : null}
+                          </TableCell>
+                          <TableCell><StatusBadge status={report.status} /></TableCell>
+                          <TableCell>{formatDateIT(report.generatedAt)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <h3 className="font-semibold text-slate-900">4. Data di riferimento giuridico</h3>
+                {snapshot.referenceDateReviews.length === 0 ? (
+                  <p className="text-sm text-slate-600">
+                    Nessuna domanda di ricerca in attesa di conferma della data.
+                    {snapshot.referenceDateConfirmations.length
+                      ? ` Conferme registrate: ${snapshot.referenceDateConfirmations.length}.`
+                      : ""}
+                  </p>
+                ) : snapshot.referenceDateReviews.map((review) => {
+                  const previous = confirmedByQuestion.get(review.questionSemanticKey);
+                  return (
+                    <form key={review.questionSemanticKey} action={confirmReferenceDateAction} className="space-y-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                      <input type="hidden" name="procedimentoId" value={snapshot.procedimentoId} />
+                      <input type="hidden" name="questionSemanticKey" value={review.questionSemanticKey} />
+                      <p className="text-sm font-medium text-slate-900">{review.question}</p>
+                      <p className="text-xs text-slate-700">
+                        I documenti non stabiliscono con certezza la data rispetto alla quale individuare la disciplina
+                        applicabile. Indica tu la data corretta: la conferma viene registrata a tuo nome e resta tracciata
+                        nella missione di ricerca.
+                      </p>
+                      {review.documentaryHints.length ? (
+                        <ul className="list-disc pl-5 text-xs text-slate-700">
+                          {review.documentaryHints.map((hint) => (
+                            <li key={hint.semanticKey}>
+                              Data presente nei documenti ({hint.kind}): <strong>{hint.date}</strong>
+                              {hint.originalText ? ` — «${hint.originalText}»` : ""}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                      {previous ? (
+                        <p className="text-xs text-slate-600">Ultima conferma registrata: {previous.confirmedDate}</p>
+                      ) : null}
+                      <div className="flex flex-wrap items-end gap-3">
+                        <label className="grid gap-1 text-sm font-medium text-slate-700">
+                          Data di riferimento
+                          <input type="date" name="confirmedDate" required className="h-10 rounded-md border border-slate-300 px-3 text-sm" />
+                        </label>
+                        <label className="grid min-w-80 flex-1 gap-1 text-sm font-medium text-slate-700">
+                          Motivazione
+                          <input name="rationale" required minLength={5} maxLength={500} className="h-10 rounded-md border border-slate-300 px-3 text-sm" placeholder="Es. data dell'atto impugnato indicata nel documento" />
+                        </label>
+                      </div>
+                      <label className="flex items-center gap-2 text-sm text-slate-800">
+                        <input type="checkbox" name="confirmation" value="CONFIRM_LEGAL_REFERENCE_DATE" required />
+                        Confermo che la data indicata è quella di riferimento giuridico per questa domanda
+                      </label>
+                      <Button type="submit">Conferma data e prepara la ricerca</Button>
+                    </form>
+                  );
+                })}
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h3 className="font-semibold text-slate-900">5. Ricerche giuridiche (Selvara)</h3>
+                  <form action={recoverMissionsAction}>
+                    <input type="hidden" name="procedimentoId" value={snapshot.procedimentoId} />
+                    <input type="hidden" name="assignedActorId" value={assignedActorId} />
+                    <Button type="submit">Prepara ricerche dalla revisione corrente</Button>
+                  </form>
+                </div>
+                <p className="text-xs text-slate-600">
+                  Le ricerche vengono eseguite da ChatGPT con il connettore NOETRA (Selvara), usando le fonti giuridiche
+                  autorizzate. Copia le istruzioni della missione in ChatGPT: al termine fonti e lacune compaiono qui.
+                </p>
+                {snapshot.missions.length === 0 ? (
+                  <p className="text-sm text-slate-600">Nessuna missione di ricerca per questo fascicolo.</p>
+                ) : snapshot.missions.map((mission) => (
+                  <article key={mission.id} className="space-y-2 rounded-lg border border-slate-200 p-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <StatusBadge status={mission.status} />
+                      <Badge variant={mission.lifecycleStatus === "CURRENT" ? "info" : "muted"}>{mission.lifecycleStatus}</Badge>
+                      <span className="font-mono text-xs text-slate-500">{mission.id}</span>
+                    </div>
+                    <p className="text-sm text-slate-900">{mission.question}</p>
+                    <p className="text-xs text-slate-600">
+                      Data di riferimento {mission.referenceDate}
+                      {mission.referenceDateBasis ? ` (${mission.referenceDateBasis === "USER_CONFIRMED" ? "confermata dall'amministratore" : mission.referenceDateBasis})` : ""}
+                      {" · "}Canale {mission.executionChannel}
+                      {" · "}Assegnata a {mission.assignedActorEmail ?? "nessuno"}
+                      {" · "}Tentativi {mission.attempts.length}
+                    </p>
+                    {mission.bundles.map((bundle) => (
+                      <div key={bundle.id} className="rounded border border-slate-200 bg-slate-50 p-3 text-xs">
+                        <p className="font-medium text-slate-800">
+                          Risultato {bundle.completionState} · {bundle.sources.length} fonti · {bundle.evidenceGapCount} lacune · {bundle.totalCalls} chiamate · {formatDateIT(bundle.createdAt)}
+                        </p>
+                        <ul className="mt-2 space-y-1">
+                          {bundle.sources.map((source, index) => (
+                            <li key={`${bundle.id}-${index}`}>
+                              <strong>{source.title}</strong>
+                              {source.identifier ? ` · ${source.identifier}` : ""}
+                              {source.courtOrBody ? ` · ${source.courtOrBody}` : ""}
+                              {source.documentDate ? ` · ${source.documentDate}` : ""}
+                              {source.providerId ? ` · via ${source.providerId}` : ""}
+                              {source.sourceUrl ? (
+                                <> · <a className="text-blue-700 underline" href={source.sourceUrl} target="_blank" rel="noreferrer">fonte</a></>
+                              ) : null}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                    {mission.status === "PENDING" && mission.lifecycleStatus === "CURRENT" ? (
+                      <details className="text-xs">
+                        <summary className="cursor-pointer font-medium text-slate-700">Istruzioni per ChatGPT (Selvara)</summary>
+                        <textarea
+                          readOnly
+                          className="mt-2 h-40 w-full rounded border border-slate-300 p-2 font-mono text-xs"
+                          defaultValue={buildSelvaraMissionInstructions(mission.id)}
+                        />
+                      </details>
+                    ) : null}
+                  </article>
+                ))}
+              </div>
+            </>
+          ) : null}
+        </CardContent>
+      </Card>
+    </section>
+  );
+}

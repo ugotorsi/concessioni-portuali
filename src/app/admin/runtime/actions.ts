@@ -22,6 +22,7 @@ import {
   readDefaultProcedimentoBudgetAuthorization,
 } from "@/server/runtime/procedimentoBudgetPolicy";
 import { recoverCurrentKnowledgeResearchMissions } from "@/server/fascicolo-knowledge/researchMissionRecovery";
+import { confirmKnowledgeReferenceDate } from "@/server/fascicolo-knowledge/referenceDateConfirmation";
 import {
   getRuntimeServiceDiagnostics,
   RUNTIME_DIAGNOSTIC_SERVICE_IDS,
@@ -651,6 +652,81 @@ export async function recoverCurrentKnowledgeMissions(
       missionCount: result.missionCount,
       assignmentRequired: result.assignmentRequired,
       assignedActorId: result.assignedActorId,
+      providerCalled: false,
+    },
+  });
+  revalidatePath("/admin/runtime");
+  revalidatePath(`/procedimenti/${procedimento.id}`);
+}
+export async function confirmResearchReferenceDate(
+  formData: FormData,
+): Promise<void> {
+  await requireAdminWithMfa();
+  const currentUser = await getCurrentUser();
+  if (!currentUser) throw new Error("AUTHENTICATION_REQUIRED");
+  if (formData.get("confirmation") !== "CONFIRM_LEGAL_REFERENCE_DATE") {
+    throw new Error("REFERENCE_DATE_CONFIRMATION_REQUIRED");
+  }
+  const procedimentoId = formData.get("procedimentoId");
+  const questionSemanticKey = formData.get("questionSemanticKey");
+  const confirmedDate = formData.get("confirmedDate");
+  const rationale = formData.get("rationale");
+  if (typeof procedimentoId !== "string" || !procedimentoId.trim()) {
+    throw new Error("INVALID_PROCEDIMENTO_ID");
+  }
+  if (typeof questionSemanticKey !== "string"
+    || typeof confirmedDate !== "string"
+    || typeof rationale !== "string") {
+    throw new Error("INVALID_REFERENCE_DATE_CONFIRMATION");
+  }
+  const procedimento = await prisma.procedimento.findUnique({
+    where: { id: procedimentoId.trim() },
+    select: { id: true, enteId: true },
+  });
+  if (!procedimento?.enteId) throw new Error("PROCEDIMENTO_NOT_FOUND");
+  const tenantContext = await getCurrentTenantContext();
+  if (!tenantContext) throw new Error("TENANT_CONTEXT_REQUIRED");
+  requireTenantAccess(tenantContext, procedimento.enteId, {
+    mode: "write",
+    allowWhenEnteMissing: false,
+  });
+
+  const confirmation = await confirmKnowledgeReferenceDate({
+    tenantId: procedimento.enteId,
+    procedimentoId: procedimento.id,
+    questionSemanticKey,
+    confirmedDate,
+    rationale,
+    actor: {
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+      userRole: currentUser.role,
+    },
+  });
+  // Turns the now-admitted question into a ChatGPT/Selvara mission without calling any provider.
+  const recovery = await recoverCurrentKnowledgeResearchMissions({
+    tenantId: procedimento.enteId,
+    procedimentoId: procedimento.id,
+    candidateActorId: currentUser.id,
+    requireValidCandidate: true,
+  });
+  await auditSuccess({
+    azione: "FASCICOLO_KNOWLEDGE_MISSION_RECOVER",
+    entita: "FascicoloKnowledgeRevision",
+    entitaId: recovery.revisionId,
+    enteId: procedimento.enteId,
+    actor: {
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+      userRole: currentUser.role,
+    },
+    metadata: {
+      procedimentoId: procedimento.id,
+      trigger: "REFERENCE_DATE_CONFIRMATION",
+      referenceDateConfirmationId: confirmation.sourceId,
+      missionCount: recovery.missionCount,
+      assignmentRequired: recovery.assignmentRequired,
+      assignedActorId: recovery.assignedActorId,
       providerCalled: false,
     },
   });

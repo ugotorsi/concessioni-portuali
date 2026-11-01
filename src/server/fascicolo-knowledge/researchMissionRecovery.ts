@@ -12,6 +12,7 @@ import {
   reconcileKnowledgeResearchMissions,
   type KnowledgeMissionLifecycleResult,
 } from "./researchMissionLifecycle";
+import { loadReferenceDateConfirmations } from "./referenceDateConfirmation";
 
 export class ResearchMissionRecoveryError extends Error {
   constructor(readonly code:
@@ -80,11 +81,16 @@ export async function recoverCurrentKnowledgeResearchMissions(input: {
     throw new ResearchMissionRecoveryError("ASSIGNED_ACTOR_INVALID");
   }
 
+  const referenceDateConfirmations = await loadReferenceDateConfirmations({
+    tenantId: input.tenantId,
+    procedimentoId: input.procedimentoId,
+  });
   let plans;
   try {
     plans = buildKnowledgeResearchMissionPlans(revision, {
       maxQuestionsPerWave:
         input.maxQuestionsPerWave ?? DEFAULT_RESEARCH_EXECUTION_WAVE_LIMIT,
+      referenceDateConfirmations,
     });
   } catch {
     throw new ResearchMissionRecoveryError("RESEARCH_MISSION_PLANNING_FAILED");
