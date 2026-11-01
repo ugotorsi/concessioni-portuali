@@ -10,6 +10,7 @@ import { getRuntimeHealthSnapshot } from "@/server/runtime/health";
 import { getDatabaseIdentityDiagnostic } from "@/server/runtime/databaseIdentity";
 import { readDefaultProcedimentoBudgetAuthorization } from "@/server/runtime/procedimentoBudgetPolicy";
 import { buildServiceCenterSnapshot } from "@/server/runtime/serviceCenter";
+import { getRuntimeServiceDiagnostics } from "@/server/runtime/serviceDiagnostics";
 import { getGlobalAiControlState } from "@/server/ai/globalAiControl";
 
 import {
@@ -17,7 +18,9 @@ import {
   recoverCurrentKnowledgeMissions,
   retryRuntimeJob,
   setRenderWorkerState,
+  upsertRuntimeBudgetPolicy,
   updateGlobalAiControl,
+  verifyRuntimeService,
 } from "./actions";
 import { GlobalAiControlForm } from "./GlobalAiControlForm";
 
@@ -48,16 +51,23 @@ function databaseIdentityVariant(outcome: string): "success" | "warning" | "dang
   return "warning";
 }
 
+function diagnosticVariant(status: string): "success" | "warning" | "danger" {
+  if (status === "READY") return "success";
+  if (status === "DISABLED" || status === "NOT_CONFIGURED") return "warning";
+  return "danger";
+}
+
 export default async function RuntimeOperationsPage() {
   await requireRole(["ADMIN"]);
   await requireAdminWithMfa();
   const defaultProcedimentoBudget = readDefaultProcedimentoBudgetAuthorization();
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  const [aiControl, health, databaseIdentity, workers, failedJobs, policies, costs, cost30Days, cost7Days, reservedCosts] = await Promise.all([
+  const [aiControl, health, databaseIdentity, serviceDiagnostics, workers, failedJobs, policies, costs, cost30Days, cost7Days, reservedCosts] = await Promise.all([
     getGlobalAiControlState(),
     getRuntimeHealthSnapshot(),
     getDatabaseIdentityDiagnostic(),
+    getRuntimeServiceDiagnostics(),
     prisma.runtimeWorkerHeartbeat.findMany({ orderBy: { lastSeenAt: "desc" }, take: 20 }),
     prisma.asyncJob.findMany({
       where: { status: "TERMINAL_FAILED" },
@@ -87,7 +97,20 @@ export default async function RuntimeOperationsPage() {
       actualLast7DaysEur: cost7Days._sum.actualAmount?.toNumber() ?? 0,
       reservedEur: reservedCosts._sum.reservedAmount?.toNumber() ?? 0,
     },
+    activeBudgetPolicyScopes: policies.map((policy) => policy.scope),
   });
+  const renderWorkers = [
+    {
+      kind: "APPLICATION",
+      label: "Worker applicativo",
+      configured: Boolean(process.env.RENDER_APPLICATION_WORKER_SERVICE_ID?.trim()),
+    },
+    {
+      kind: "OCR",
+      label: "Worker OCR",
+      configured: Boolean(process.env.RENDER_DOCUMENT_OCR_WORKER_SERVICE_ID?.trim()),
+    },
+  ] as const;
 
   return (
     <AppShell title="Stato dei servizi" subtitle="Controllo delle elaborazioni automatiche e degli eventuali interventi richiesti">
@@ -110,7 +133,9 @@ export default async function RuntimeOperationsPage() {
               <div className="flex flex-wrap items-center gap-3">
                 <Badge variant={databaseIdentityVariant(databaseIdentity.outcome)}>
                   {databaseIdentity.outcome === "NON_VERIFICABILE"
-                    ? "NON VERIFICABILE"
+                    ? databaseIdentity.databaseConnected
+                      ? "CONNESSIONE VERIFICATA"
+                      : "NON VERIFICABILE"
                     : databaseIdentity.outcome}
                 </Badge>
                 <span className="text-sm text-slate-700">
@@ -235,6 +260,49 @@ export default async function RuntimeOperationsPage() {
         </dl>
       </section>
 
+      <section className="mt-6" aria-labelledby="live-diagnostics-title">
+        <Card>
+          <CardHeader>
+            <CardTitle id="live-diagnostics-title">Diagnostica live non distruttiva</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-slate-600">
+              Le verifiche usano i backend configurati senza generare contenuti AI, modificare oggetti R2,
+              avviare worker o acquistare servizi.
+            </p>
+            <div className="grid gap-4 xl:grid-cols-2">
+              {serviceDiagnostics.services.map((service) => (
+                <article key={service.id} className="rounded-lg border border-slate-200 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h3 className="font-semibold text-slate-900">{service.id}</h3>
+                    <Badge variant={diagnosticVariant(service.status)}>{service.status}</Badge>
+                  </div>
+                  <p className="mt-2 text-sm text-slate-700">{service.summary}</p>
+                  <p className="mt-1 font-mono text-xs text-slate-500">{service.code}</p>
+                  {service.metrics.length ? (
+                    <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+                      {service.metrics.map((metric) => (
+                        <div key={metric.label}>
+                          <dt className="text-slate-500">{metric.label}</dt>
+                          <dd className="font-medium text-slate-900">{metric.value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  ) : null}
+                  <form action={verifyRuntimeService} className="mt-3">
+                    <input type="hidden" name="serviceId" value={service.id} />
+                    <Button type="submit" size="sm" variant="outline">Verifica ora</Button>
+                  </form>
+                </article>
+              ))}
+            </div>
+            <p className="text-xs text-slate-500">
+              Ultimo aggiornamento: {formatDateIT(serviceDiagnostics.checkedAt)}. Ogni verifica manuale viene registrata nell&apos;audit.
+            </p>
+          </CardContent>
+        </Card>
+      </section>
+
       <section className="mt-6" aria-labelledby="service-center-title">
         <Card>
           <CardHeader>
@@ -276,17 +344,34 @@ export default async function RuntimeOperationsPage() {
                   {service.guidedAction ? <p className="mt-3 text-sm font-medium text-slate-700">Azione guidata: {service.guidedAction}</p> : null}
                   <p className="mt-3 text-xs text-slate-500">Fonte: {service.dataSource}</p>
                   {service.id === "render" && service.controllable ? (
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <form action={setRenderWorkerState}>
-                        <input type="hidden" name="desiredState" value="RUNNING" />
-                        <input type="hidden" name="confirmation" value="RESUME_RENDER_WORKER" />
-                        <Button type="submit" size="sm">Attiva worker</Button>
-                      </form>
-                      <form action={setRenderWorkerState}>
-                        <input type="hidden" name="desiredState" value="SUSPENDED" />
-                        <input type="hidden" name="confirmation" value="SUSPEND_RENDER_WORKER" />
-                        <Button type="submit" size="sm" variant="outline">Sospendi worker</Button>
-                      </form>
+                    <div className="mt-4 space-y-4">
+                      {renderWorkers.map((worker) => worker.configured ? (
+                        <fieldset key={worker.kind} className="rounded border border-slate-200 p-3">
+                          <legend className="px-1 text-sm font-medium text-slate-700">{worker.label}</legend>
+                          <form action={setRenderWorkerState} className="space-y-2">
+                            <input type="hidden" name="workerKind" value={worker.kind} />
+                            <input type="hidden" name="desiredState" value="RUNNING" />
+                            <input type="hidden" name="confirmation" value={`RESUME_RENDER_${worker.kind}_WORKER`} />
+                            <label className="flex items-start gap-2 text-xs text-slate-600">
+                              <input
+                                type="checkbox"
+                                name="costAcknowledgement"
+                                value="EXISTING_SERVICE_COSTS_AUTHORIZED"
+                                required
+                              />
+                              Autorizzo l&apos;avvio del servizio esistente e i relativi costi già previsti dal suo piano.
+                              Non autorizzo acquisti o cambi di piano.
+                            </label>
+                            <Button type="submit" size="sm">Attiva {worker.label.toLowerCase()}</Button>
+                          </form>
+                          <form action={setRenderWorkerState} className="mt-2">
+                            <input type="hidden" name="workerKind" value={worker.kind} />
+                            <input type="hidden" name="desiredState" value="SUSPENDED" />
+                            <input type="hidden" name="confirmation" value={`SUSPEND_RENDER_${worker.kind}_WORKER`} />
+                            <Button type="submit" size="sm" variant="outline">Sospendi {worker.label.toLowerCase()}</Button>
+                          </form>
+                        </fieldset>
+                      ) : null)}
                     </div>
                   ) : null}
                 </article>
@@ -312,6 +397,58 @@ export default async function RuntimeOperationsPage() {
           <CardContent><Table><TableHeader><TableRow><TableHead>Ambito</TableHead><TableHead>Finestra</TableHead><TableHead>Cap</TableHead></TableRow></TableHeader><TableBody>
             {policies.map((policy) => <TableRow key={policy.id}><TableCell>{policy.scope}</TableCell><TableCell>{policy.windowSeconds}s</TableCell><TableCell>{policy.hardCapAmount.toString()} {policy.currency}</TableCell></TableRow>)}
           </TableBody></Table></CardContent>
+        </Card>
+      </section>
+
+      <section className="mt-6">
+        <Card>
+          <CardHeader><CardTitle>Gestione limiti di spesa</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-slate-600">
+              Crea o aggiorna un limite interno. Questa operazione non acquista crediti e non modifica piani provider.
+              Le elaborazioni restano bloccate se manca anche uno degli ambiti richiesti.
+            </p>
+            <form action={upsertRuntimeBudgetPolicy} className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              <label className="grid gap-1 text-sm font-medium text-slate-700">
+                Ambito
+                <select name="scope" className="h-10 rounded-md border border-slate-300 px-3" required defaultValue="GLOBAL">
+                  <option value="GLOBAL">Globale</option>
+                  <option value="TENANT">Ente</option>
+                  <option value="PROCEDIMENTO">Fascicolo</option>
+                </select>
+              </label>
+              <label className="grid gap-1 text-sm font-medium text-slate-700">
+                ID ente, se richiesto
+                <input name="tenantId" className="h-10 rounded-md border border-slate-300 px-3" />
+              </label>
+              <label className="grid gap-1 text-sm font-medium text-slate-700">
+                ID fascicolo, se richiesto
+                <input name="procedimentoId" className="h-10 rounded-md border border-slate-300 px-3" />
+              </label>
+              <label className="grid gap-1 text-sm font-medium text-slate-700">
+                Cap EUR
+                <input name="hardCapAmount" inputMode="decimal" className="h-10 rounded-md border border-slate-300 px-3" required />
+              </label>
+              <label className="grid gap-1 text-sm font-medium text-slate-700">
+                Finestra in secondi
+                <input name="windowSeconds" inputMode="numeric" className="h-10 rounded-md border border-slate-300 px-3" required />
+              </label>
+              <label className="grid gap-1 text-sm font-medium text-slate-700">
+                Stato
+                <select name="desiredState" className="h-10 rounded-md border border-slate-300 px-3" required defaultValue="ENABLED">
+                  <option value="ENABLED">Attivo</option>
+                  <option value="DISABLED">Disattivo</option>
+                </select>
+              </label>
+              <label className="flex items-start gap-2 text-sm text-slate-600 md:col-span-2 xl:col-span-3">
+                <input type="checkbox" name="confirmation" value="AUTHORIZE_RUNTIME_BUDGET_POLICY" required />
+                Confermo esplicitamente importo, finestra e ambito. Il cap limita la spesa ma non costituisce acquisto o credito provider.
+              </label>
+              <div className="md:col-span-2 xl:col-span-3">
+                <Button type="submit">Registra policy auditata</Button>
+              </div>
+            </form>
+          </CardContent>
         </Card>
       </section>
 

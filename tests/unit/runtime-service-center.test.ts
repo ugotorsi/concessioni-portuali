@@ -23,6 +23,7 @@ const databaseIdentity = {
   neonProjectId: "project-preview",
   neonBranchId: "branch-preview",
   databaseName: "neondb",
+  expectedIdentityConfigured: true,
 };
 
 describe("runtime service center", () => {
@@ -47,6 +48,7 @@ describe("runtime service center", () => {
         actualLast7DaysEur: 0.7,
         reservedEur: 0.2,
       },
+      activeBudgetPolicyScopes: ["GLOBAL"],
       now: new Date("2026-10-29T00:00:00Z"),
     });
 
@@ -71,6 +73,40 @@ describe("runtime service center", () => {
       status: "NOT_CONFIGURED",
       severity: "BLOCKING",
       controllable: false,
+    });
+  });
+
+  it("does not classify optional connectors or a reachable unpinned database as blockers", () => {
+    const snapshot = buildServiceCenterSnapshot({
+      environment: {
+        VERCEL: "1",
+        VERCEL_ENV: "production",
+        VERCEL_PROJECT_ID: "project",
+        RENDER_APPLICATION_WORKER_SERVICE_ID: "srv-worker",
+        RENDER_WORKER_API_KEY: "configured",
+        DOCUMENT_STORAGE_BACKEND: "s3",
+        S3_ENDPOINT: "https://storage.test",
+        S3_REGION: "auto",
+        S3_BUCKET: "documents",
+        S3_ACCESS_KEY_ID: "configured",
+        S3_SECRET_ACCESS_KEY: "configured",
+      },
+      health,
+      databaseIdentity: {
+        ...databaseIdentity,
+        outcome: "NON_VERIFICABILE",
+        expectedIdentityConfigured: false,
+      },
+      costs: { actualLast30DaysEur: 0, actualLast7DaysEur: 0, reservedEur: 0 },
+    });
+
+    expect(snapshot.services.find((service) => service.id === "neon")).toMatchObject({
+      status: "OPERATIVE",
+      severity: "INFORMATION",
+    });
+    expect(snapshot.services.find((service) => service.id === "connectors")).toMatchObject({
+      status: "STANDBY",
+      severity: "INFORMATION",
     });
   });
 });

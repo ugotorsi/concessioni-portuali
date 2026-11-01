@@ -1,14 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import {
-  CANONICAL_IDENTITY_V3_PREVIEW_BRANCH,
-  CANONICAL_IDENTITY_V3_PREVIEW_DATABASE_ENDPOINT_ID,
-  CANONICAL_IDENTITY_V3_PREVIEW_PROJECT_ID,
-} from "@/server/fascicolo-knowledge/canonicalIntegrationGate";
 import type { RuntimeSqlExecutor } from "@/server/runtime/health";
-
-const EXPECTED_NEON_PROJECT_ID = "aged-smoke-22484639";
-const EXPECTED_NEON_BRANCH_ID = "br-aged-truth-atfpqdbo";
-const EXPECTED_DATABASE_NAME = "neondb";
 
 const defaultExecutor: RuntimeSqlExecutor = {
   async query<T>(sql: string, params: readonly unknown[] = []) {
@@ -33,13 +24,7 @@ export interface DatabaseIdentityDiagnostic {
   neonProjectId: string | null;
   neonBranchId: string | null;
   databaseName: string | null;
-}
-
-function isAuthorizedPreview(environment: Readonly<Record<string, string | undefined>>): boolean {
-  return environment.NODE_ENV === "production"
-    && environment.VERCEL_ENV === "preview"
-    && environment.VERCEL_PROJECT_ID === CANONICAL_IDENTITY_V3_PREVIEW_PROJECT_ID
-    && environment.VERCEL_GIT_COMMIT_REF === CANONICAL_IDENTITY_V3_PREVIEW_BRANCH;
+  expectedIdentityConfigured: boolean;
 }
 
 function endpointIdFromDatabaseUrl(databaseUrl: string | undefined): string | null {
@@ -58,18 +43,6 @@ export async function getDatabaseIdentityDiagnostic(
   environment: Readonly<Record<string, string | undefined>> = process.env,
   executor: RuntimeSqlExecutor = defaultExecutor,
 ): Promise<DatabaseIdentityDiagnostic> {
-  if (!isAuthorizedPreview(environment)) {
-    return {
-      available: false,
-      outcome: "NON_VERIFICABILE",
-      databaseConnected: false,
-      endpointId: null,
-      neonProjectId: null,
-      neonBranchId: null,
-      databaseName: null,
-    };
-  }
-
   try {
     const result = await executor.query<DatabaseIdentityRow>(`
       SELECT
@@ -82,22 +55,34 @@ export async function getDatabaseIdentityDiagnostic(
     if (!row) throw new Error("DATABASE_IDENTITY_QUERY_EMPTY");
 
     const endpointId = row.neonEndpointId ?? endpointIdFromDatabaseUrl(environment.DATABASE_URL);
-    const observed = [
-      endpointId,
-      row.neonProjectId,
-      row.neonBranchId,
-      row.databaseName,
+    const comparisons = [
+      {
+        observed: endpointId,
+        expected: environment.RUNTIME_EXPECTED_NEON_ENDPOINT_ID?.trim() || null,
+      },
+      {
+        observed: row.neonProjectId,
+        expected: environment.RUNTIME_EXPECTED_NEON_PROJECT_ID?.trim()
+          || environment.POSTGRES_NEON_PROJECT_ID?.trim()
+          || null,
+      },
+      {
+        observed: row.neonBranchId,
+        expected: environment.RUNTIME_EXPECTED_NEON_BRANCH_ID?.trim() || null,
+      },
+      {
+        observed: row.databaseName,
+        expected: environment.RUNTIME_EXPECTED_DATABASE_NAME?.trim() || null,
+      },
     ];
-    const expected = [
-      CANONICAL_IDENTITY_V3_PREVIEW_DATABASE_ENDPOINT_ID,
-      EXPECTED_NEON_PROJECT_ID,
-      EXPECTED_NEON_BRANCH_ID,
-      EXPECTED_DATABASE_NAME,
-    ];
-    const hasMismatch = observed.some((value, index) => value !== null && value !== expected[index]);
+    const configuredComparisons = comparisons.filter(({ expected }) => expected !== null);
+    const hasMismatch = configuredComparisons.some(
+      ({ observed, expected }) => observed !== null && observed !== expected,
+    );
     const outcome = hasMismatch
       ? "MISMATCH" as const
-      : observed.every((value, index) => value === expected[index])
+      : configuredComparisons.length > 0
+        && configuredComparisons.every(({ observed, expected }) => observed === expected)
         ? "MATCH" as const
         : "NON_VERIFICABILE" as const;
 
@@ -109,6 +94,7 @@ export async function getDatabaseIdentityDiagnostic(
       neonProjectId: row.neonProjectId,
       neonBranchId: row.neonBranchId,
       databaseName: row.databaseName,
+      expectedIdentityConfigured: configuredComparisons.length > 0,
     };
   } catch {
     return {
@@ -119,6 +105,7 @@ export async function getDatabaseIdentityDiagnostic(
       neonProjectId: null,
       neonBranchId: null,
       databaseName: null,
+      expectedIdentityConfigured: false,
     };
   }
 }

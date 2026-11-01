@@ -35,6 +35,7 @@ interface ServiceCenterInput {
   health: RuntimeHealthSnapshot;
   databaseIdentity: DatabaseIdentityDiagnostic;
   costs: ServiceCenterCostInput;
+  activeBudgetPolicyScopes?: readonly string[];
   now?: Date;
 }
 
@@ -55,6 +56,13 @@ export function buildServiceCenterSnapshot(input: ServiceCenterInput): ServiceCe
   const environment = input.environment ?? process.env;
   const projectedMonthlyEur = input.costs.actualLast7DaysEur / 7 * 30;
   const aiConfigured = configured(environment, ["AI_OPENAI_API_KEY"]);
+  const aiExecutionRequested = [
+    "AI_REAL_DATA_ENABLED",
+    "ASYNC_PROVIDER_EXECUTION_ENABLED",
+    "AUTOMATIC_RESEARCH_EXECUTION_ENABLED",
+    "AUTOMATIC_OFFICIAL_SOURCE_VERIFICATION_ENABLED",
+  ].some((name) => environment[name]?.trim().toLowerCase() === "true");
+  const globalBudgetConfigured = input.activeBudgetPolicyScopes?.includes("GLOBAL") ?? false;
   const renderConfigured = configured(environment, [
     "RENDER_APPLICATION_WORKER_SERVICE_ID",
     "RENDER_WORKER_API_KEY",
@@ -68,38 +76,82 @@ export function buildServiceCenterSnapshot(input: ServiceCenterInput): ServiceCe
       "S3_ACCESS_KEY_ID",
       "S3_SECRET_ACCESS_KEY",
     ]);
+  const automaticResearchEnabled =
+    environment.AUTOMATIC_RESEARCH_EXECUTION_ENABLED?.trim().toLowerCase() === "true";
+  const mcpProductionEnabled =
+    environment.MCP_PRODUCTION_ENABLED?.trim().toLowerCase() === "true";
   const connectorStates = [
-    { name: "WorkOS", configured: configured(environment, ["WORKOS_API_KEY"]) },
-    { name: "Legal Data Hunter", configured: configured(environment, ["LEGAL_DATA_HUNTER_API_KEY"]) },
+    {
+      name: "WorkOS MCP",
+      configured: configured(environment, ["WORKOS_API_KEY"]),
+      required: mcpProductionEnabled,
+    },
+    {
+      name: "Legal Data Hunter",
+      configured: configured(environment, ["LEGAL_DATA_HUNTER_API_KEY"]),
+      required: automaticResearchEnabled,
+    },
+    {
+      name: "Moonlit OAuth",
+      configured: configured(environment, ["MOONLIT_OAUTH_STORAGE_PATH"]),
+      required: automaticResearchEnabled,
+    },
+    {
+      name: "Simpliciter OAuth",
+      configured: configured(environment, ["SIMPLICITER_OAUTH_STORAGE_PATH"]),
+      required: automaticResearchEnabled,
+    },
     {
       name: "Rate limit condiviso",
       configured: environment.RATE_LIMIT_BACKEND !== "redis"
         || configured(environment, ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"])
         || configured(environment, ["KV_REST_API_URL", "KV_REST_API_TOKEN"]),
+      required: true,
     },
   ];
-  const missingConnectors = connectorStates.filter((connector) => !connector.configured).map((connector) => connector.name);
+  const missingRequiredConnectors = connectorStates
+    .filter((connector) => connector.required && !connector.configured)
+    .map((connector) => connector.name);
+  const unavailableOptionalConnectors = connectorStates
+    .filter((connector) => !connector.required && !connector.configured)
+    .map((connector) => connector.name);
 
   const services: ServiceCenterItem[] = [
     {
       id: "ai",
       name: "AI e budget",
-      status: aiConfigured ? "STANDBY" : "NOT_CONFIGURED",
-      severity: aiConfigured ? "INFORMATION" : "BLOCKING",
-      summary: aiConfigured
-        ? "Provider configurato; l'operatività resta subordinata ai gate e ai budget."
-        : "Credenziale provider AI mancante.",
+      status: aiExecutionRequested
+        ? aiConfigured && globalBudgetConfigured ? "STANDBY" : "NOT_CONFIGURED"
+        : "STANDBY",
+      severity: aiExecutionRequested && (!aiConfigured || !globalBudgetConfigured)
+        ? "BLOCKING"
+        : "INFORMATION",
+      summary: !aiExecutionRequested
+        ? "Esecuzione provider intenzionalmente disabilitata dai gate ambientali."
+        : !aiConfigured
+          ? "Credenziale provider AI mancante."
+          : !globalBudgetConfigured
+            ? "Provider configurato, ma manca il limite di spesa globale obbligatorio."
+            : "Provider e limite globale configurati; restano applicabili i budget tenant e fascicolo.",
       metrics: [
         { label: "Costo effettivo 30 giorni", value: eur(input.costs.actualLast30DaysEur) },
         { label: "Riservato", value: eur(input.costs.reservedEur) },
         { label: "Proiezione a 30 giorni", value: eur(projectedMonthlyEur) },
+        { label: "Gate provider", value: aiExecutionRequested ? "Richiesto" : "Disabilitato" },
+        { label: "Budget globale", value: globalBudgetConfigured ? "Configurato" : "Assente" },
       ],
-      alerts: aiConfigured
-        ? ["Crediti, rinnovi e pagamenti del provider non sono esposti da un'integrazione billing autorizzata."]
-        : ["Configurare AI_OPENAI_API_KEY prima di autorizzare elaborazioni reali."],
-      guidedAction: aiConfigured
-        ? "Verificare crediti e fatturazione nel portale provider prima di riattivare i gate."
-        : "Aggiungere la credenziale nel secret store dell'ambiente corretto.",
+      alerts: [
+        ...(!aiConfigured && aiExecutionRequested
+          ? ["Configurare AI_OPENAI_API_KEY prima di autorizzare elaborazioni reali."]
+          : []),
+        ...(!globalBudgetConfigured && aiExecutionRequested
+          ? ["Creare un limite di spesa globale prima di abilitare chiamate provider."]
+          : []),
+        "Crediti, rinnovi e pagamenti del provider non sono esposti da un'integrazione billing autorizzata.",
+      ],
+      guidedAction: aiExecutionRequested
+        ? "Completare credenziale e budget mancanti, quindi verificare il provider senza generare contenuti."
+        : "Per attivare il provider servono autorizzazione di spesa, budget, credenziale e una nuova configurazione deployment.",
       controllable: true,
       dataSource: "Contabilità runtime NOETRA e configurazione ambiente",
     },
@@ -146,17 +198,28 @@ export function buildServiceCenterSnapshot(input: ServiceCenterInput): ServiceCe
     {
       id: "neon",
       name: "Neon PostgreSQL",
-      status: input.databaseIdentity.outcome === "MATCH" ? "OPERATIVE" : "ATTENTION",
-      severity: input.databaseIdentity.outcome === "MATCH" ? "INFORMATION" : "BLOCKING",
-      summary: input.databaseIdentity.outcome === "MATCH"
-        ? "Database Preview verificato e coerente con l'identità attesa."
-        : "Identità o raggiungibilità database non verificata.",
+      status: input.databaseIdentity.databaseConnected
+        ? input.databaseIdentity.outcome === "MISMATCH" ? "ATTENTION" : "OPERATIVE"
+        : "ATTENTION",
+      severity: !input.databaseIdentity.databaseConnected
+        || input.databaseIdentity.outcome === "MISMATCH"
+        ? "BLOCKING"
+        : "INFORMATION",
+      summary: !input.databaseIdentity.databaseConnected
+        ? "Connessione PostgreSQL non riuscita."
+        : input.databaseIdentity.outcome === "MISMATCH"
+          ? "Database raggiungibile, ma diverso dall'identità attesa configurata."
+          : input.databaseIdentity.outcome === "MATCH"
+            ? "Database raggiungibile e coerente con l'identità attesa."
+            : "Database raggiungibile; identità Neon rilevata senza un confronto atteso completo.",
       metrics: [
         { label: "Progetto", value: input.databaseIdentity.neonProjectId ?? "Non rilevato" },
         { label: "Branch", value: input.databaseIdentity.neonBranchId ?? "Non rilevato" },
       ],
       alerts: ["Consumi compute/storage, rinnovi e pagamenti Neon non sono esposti dalla connessione PostgreSQL."],
-      guidedAction: "Configurare un'integrazione Neon API in sola lettura per quote e consumi, se autorizzata.",
+      guidedAction: input.databaseIdentity.databaseConnected
+        ? "Configurare aspettative esplicite o una Neon API in sola lettura solo se serve verificare identità, quote e consumi."
+        : "Verificare DATABASE_URL e raggiungibilità PostgreSQL.",
       controllable: false,
       dataSource: "Identità della connessione PostgreSQL attiva",
     },
@@ -182,17 +245,24 @@ export function buildServiceCenterSnapshot(input: ServiceCenterInput): ServiceCe
     {
       id: "connectors",
       name: "Connettori e servizi collegati",
-      status: missingConnectors.length ? "ATTENTION" : "OPERATIVE",
-      severity: missingConnectors.length ? "ACTION_REQUIRED" : "INFORMATION",
-      summary: missingConnectors.length
-        ? `Integrazioni non configurate: ${missingConnectors.join(", ")}.`
-        : "Connettori applicativi configurati.",
+      status: missingRequiredConnectors.length
+        ? "ATTENTION"
+        : unavailableOptionalConnectors.length ? "STANDBY" : "OPERATIVE",
+      severity: missingRequiredConnectors.length ? "BLOCKING" : "INFORMATION",
+      summary: missingRequiredConnectors.length
+        ? `Integrazioni richieste dai gate ma non configurate: ${missingRequiredConnectors.join(", ")}.`
+        : unavailableOptionalConnectors.length
+          ? `Connettori opzionali non attivi: ${unavailableOptionalConnectors.join(", ")}.`
+          : "Connettori applicativi configurati.",
       metrics: [
-        { label: "Configurati", value: String(connectorStates.length - missingConnectors.length) },
-        { label: "Da integrare", value: String(missingConnectors.length) },
+        { label: "Configurati", value: String(connectorStates.filter((connector) => connector.configured).length) },
+        { label: "Richiesti mancanti", value: String(missingRequiredConnectors.length) },
+        { label: "Opzionali inattivi", value: String(unavailableOptionalConnectors.length) },
       ],
-      alerts: missingConnectors.map((name) => `${name}: API o credenziale non disponibile.`),
-      guidedAction: missingConnectors.length ? "Aggiungere soltanto le integrazioni necessarie e autorizzate per l'ambiente." : null,
+      alerts: missingRequiredConnectors.map((name) => `${name}: configurazione richiesta dal gate attivo ma non disponibile.`),
+      guidedAction: missingRequiredConnectors.length
+        ? "Configurare soltanto le integrazioni richieste dai gate già autorizzati."
+        : null,
       controllable: false,
       dataSource: "Configurazione connettori NOETRA",
     },
