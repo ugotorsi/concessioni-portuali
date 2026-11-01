@@ -22,6 +22,7 @@ import {
   createSimpliciterCrossJurisdictionResearchAdapter,
   createSimpliciterExactRetrievalAdapter,
   createSimpliciterResearchAdapter,
+  providerResearchQuery,
   type ProviderToolRequest,
 } from "@/server/legal-research/provider-research-adapters";
 
@@ -574,7 +575,7 @@ describe("trusted mission executor", () => {
     const callTool = vi.fn(async () => ({
       structuredContent: {
         catalog_version: "observed-version",
-        query: mission.researchQuestion,
+        query: providerResearchQuery(mission),
         source_keys: ["it.case_law.cassazione"],
         payload: {
           giurisprudenza: [{ type: "case", citazione: "Cass. 1234/2024", sintesi: "not evidence" }],
@@ -678,7 +679,7 @@ describe("trusted mission executor", () => {
     }));
     const client = trustedClient(mission);
     const discoveryCall = vi.fn(async () => ({ structuredContent: {
-      catalog_version: "test", query: mission.researchQuestion, source_keys: ["it.legislation.normativa-italiana"],
+      catalog_version: "test", query: providerResearchQuery(mission), source_keys: ["it.legislation.normativa-italiana"],
       payload: { normativa: [{ alias: "Art. 2043 codice civile" }] },
     } }));
     const callTool = vi.fn(async () => ({
@@ -722,7 +723,7 @@ describe("trusted mission executor", () => {
     }));
     const client = trustedClient(mission);
     const discoveryCall = vi.fn(async () => ({ structuredContent: {
-      catalog_version: "607c23ddcbf6229e", query: mission.researchQuestion,
+      catalog_version: "607c23ddcbf6229e", query: providerResearchQuery(mission),
       source_keys: ["it.legislation.normativa-italiana"],
       payload: { normativa: [{ alias: "art. 18 legge n. 84 del 28 gennaio 1994" }] },
     } }));
@@ -824,7 +825,7 @@ describe("trusted mission executor", () => {
     const callTool = vi.fn(async () => ({
       structuredContent: {
         catalog_version: "observed-version",
-        query: mission.researchQuestion,
+        query: providerResearchQuery(mission),
         source_keys: ["it.case_law.cassazione", "it.legislation.normativa-italiana"],
         payload: { giurisprudenza: [{ citazione: "PUBLIC-1" }] },
       },
@@ -1039,7 +1040,7 @@ describe("trusted mission executor", () => {
       executionPlan: { requiredCapabilities: ["SEMANTIC_DISCOVERY", "EXACT_RETRIEVAL"], preferredToolIds: ["SIMPLICITER", "MOONLIT"] },
     }));
     const client = trustedClient(mission);
-    const semantic = vi.fn(async () => ({ structuredContent: { catalog_version: "synthetic", query: mission.researchQuestion,
+    const semantic = vi.fn(async () => ({ structuredContent: { catalog_version: "synthetic", query: providerResearchQuery(mission),
       source_keys: ["it.legislation.normativa-italiana"], payload: { normativa: [{ alias: "Art. 2043 codice civile" }] },
     } }));
     const exact = vi.fn(async () => {

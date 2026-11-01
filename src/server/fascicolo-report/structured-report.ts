@@ -17,6 +17,10 @@ import {
 import { documentedProceedingIdentity } from "@/server/legal-reasoning/applicability/proceeding-identity";
 import type { EvaluatedSourceResult } from "@/server/legal-rules/types";
 import type { LegalApplicabilityReview } from "@/server/legal-research/assisted-verification";
+import {
+  OFFICIAL_SOURCE_RELEVANCE_LABELS,
+  type OfficialSourceRelevance,
+} from "@/server/legal-research/official-source-relevance";
 import type { SourceChainSnapshot } from "@/server/legal-research/source-chain";
 import {
   contributionBasisRefs,
@@ -53,6 +57,8 @@ export interface StructuredReportResearchResultInput {
   classificationReviewStatus: "AI_PROPOSED" | "HUMAN_CONFIRMED" | "REJECTED";
   classificationRationale: string | null;
   relevantPassage?: string | null;
+  /** Outcome of the official-source relevance check; absent for results never checked. */
+  officialRelevance?: OfficialSourceRelevance | null;
   sourceAssessment: {
     assessmentId: string;
     chainFingerprint: string;
@@ -131,6 +137,9 @@ export interface StructuredReportQuestion {
     direction: Direction;
     rationale?: string | null;
     reasons: readonly string[];
+    /** Absent in archived snapshots created before the official relevance check. */
+    relevance?: NonUsableRelevance;
+    relevanceNote?: string | null;
   }[];
   gaps: readonly string[];
   limitations: readonly string[];
@@ -782,11 +791,31 @@ function authority(result: StructuredReportResearchResultInput): StructuredRepor
 
 function nonUsableReasons(result: StructuredReportResearchResultInput): readonly string[] {
   const reasons = result.sourceAssessment?.blockingReasons ?? ["MISSING_CURRENT_SOURCE_ASSESSMENT"];
+  const relevance = result.officialRelevance;
   return [...new Set([
     ...reasons,
     ...(result.classificationReviewStatus === "REJECTED" ? ["CLASSIFICATION_REJECTED"] : []),
     ...(result.sourceAssessment?.citationAnchors.length ? [] : ["CITATION_ANCHOR_REQUIRED"]),
+    ...(relevance?.status === "NON_PERTINENTE" ? ["NOT_PERTINENT_TO_QUESTION"] : []),
+    ...(relevance?.status === "NON_VERIFICABILE" ? [`OFFICIAL_SOURCE_NOT_VERIFIABLE:${relevance.reason}`] : []),
+    ...(relevance?.status === "PERTINENTE_VERIFICATA" && !["SUPPORTS", "OPPOSES"].includes(result.supportDirection)
+      ? ["PROFESSIONAL_DIRECTION_REVIEW_REQUIRED"] : []),
   ])].sort();
+}
+
+export type NonUsableRelevance =
+  | "PERTINENTE_VERIFICATA_DA_CLASSIFICARE"
+  | "NON_PERTINENTE"
+  | "NON_VERIFICABILE"
+  | "NON_ANCORA_VERIFICATA";
+
+function nonUsableRelevance(result: StructuredReportResearchResultInput): NonUsableRelevance {
+  switch (result.officialRelevance?.status) {
+    case "PERTINENTE_VERIFICATA": return "PERTINENTE_VERIFICATA_DA_CLASSIFICARE";
+    case "NON_PERTINENTE": return "NON_PERTINENTE";
+    case "NON_VERIFICABILE": return "NON_VERIFICABILE";
+    default: return "NON_ANCORA_VERIFICATA";
+  }
 }
 
 function projectQuestion(
@@ -807,6 +836,11 @@ function projectQuestion(
       direction: result.supportDirection,
       rationale: result.relevantPassage ?? result.classificationRationale,
       reasons: nonUsableReasons(result),
+      relevance: nonUsableRelevance(result),
+      relevanceNote: result.officialRelevance
+        ? OFFICIAL_SOURCE_RELEVANCE_LABELS[result.officialRelevance.reason]
+          + (result.officialRelevance.citation ? ` (${result.officialRelevance.citation})` : "")
+        : null,
     }));
   const gaps = [...new Set([
     ...(mission?.sourceGaps ?? []),
@@ -1491,6 +1525,7 @@ export function buildStructuredFascicoloReport(input: {
       direction: result.supportDirection,
       reviewStatus: result.classificationReviewStatus,
       rationale: result.classificationRationale,
+      ...(result.officialRelevance ? { officialRelevance: result.officialRelevance.status } : {}),
     })),
   }));
   const sourceAssessmentState = currentMissions.flatMap((mission) => mission.results.map((result) => ({

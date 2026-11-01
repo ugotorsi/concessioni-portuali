@@ -311,6 +311,26 @@ export function LegalWorkbenchSection({
                       {" · "}Assegnata a {mission.assignedActorEmail ?? "nessuno"}
                       {" · "}Tentativi {mission.attempts.length}
                     </p>
+                    {mission.documentaryGaps.length > 0 ? (
+                      <div className="rounded border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950" data-testid="mission-documentary-gaps">
+                        <p className="font-semibold">
+                          Lacuna documentale — non è un malfunzionamento tecnico
+                        </p>
+                        <p className="mt-1">
+                          {mission.status === "DEFERRED"
+                            ? "La ricerca è stata eseguita ma la missione resta rinviata finché il fascicolo non contiene i documenti indicati. Caricarli e riavviare l'analisi giuridica."
+                            : "Il fascicolo segnala fatti non ancora documentati: la ricerca li riporterà come lacune."}
+                        </p>
+                        <ul className="mt-1 list-disc pl-5">
+                          {mission.documentaryGaps.map((gap) => (
+                            <li key={gap.gapId}>
+                              {gap.description ?? `Lacuna ${gap.gapId.slice(0, 12)}…`}
+                              {gap.resolvedInCurrentRevision ? " (non più presente nella revisione corrente: riavviare l'analisi)" : ""}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
                     {mission.bundles.map((bundle) => (
                       <div key={bundle.id} className="rounded border border-slate-200 bg-slate-50 p-3 text-xs">
                         <p className="font-medium text-slate-800">

@@ -106,6 +106,35 @@ describe("Fascicolo report workspace", () => {
     expect(html).toContain('rel="noreferrer"');
   });
 
+  it("separates verified pertinent, unverifiable and excluded non-pertinent official sources", () => {
+    const current = snapshot("CURRENT");
+    const question = current.payload.legalIssues[0].questions[0];
+    const withRelevance = {
+      ...current,
+      payload: {
+        ...current.payload,
+        legalIssues: [{
+          ...current.payload.legalIssues[0],
+          questions: [{
+            ...question,
+            nonUsableResults: [
+              { resultId: "pert", title: "Legge 28 gennaio 1994, n. 84", sourceUrl: "https://www.normattiva.it/x", direction: "UNASSESSED", rationale: null, reasons: ["PROFESSIONAL_DIRECTION_REVIEW_REQUIRED"], relevance: "PERTINENTE_VERIFICATA_DA_CLASSIFICARE", relevanceNote: "Testo ufficiale acquisito da Normattiva; articolo pertinente individuato." },
+              { resultId: "nv", title: "Legge regionale 5/2020", sourceUrl: null, direction: "UNASSESSED", rationale: null, reasons: ["OFFICIAL_SOURCE_NOT_VERIFIABLE:REGIONAL_OR_SPECIAL_SERIES_ACT_NOT_COVERED"], relevance: "NON_VERIFICABILE" },
+              { resultId: "np", title: "D.Lgs. 112/2015 (ferroviario)", sourceUrl: null, direction: "UNASSESSED", rationale: null, reasons: ["NOT_PERTINENT_TO_QUESTION"], relevance: "NON_PERTINENTE" },
+            ],
+          }],
+        }],
+      },
+    } as unknown as FascicoloReportSnapshot;
+    const html = render([withRelevance]);
+    expect(html).toContain("Fonti ufficiali verificate e pertinenti");
+    expect(html).toContain("Legge 28 gennaio 1994, n. 84");
+    expect(html).toContain("non verificabili o da verificare");
+    expect(html).toContain("Legge regionale 5/2020");
+    expect(html).toContain("Fonti escluse perché non pertinenti al quesito (1)");
+    expect(html).toContain("D.Lgs. 112/2015 (ferroviario)");
+  });
+
   it("renders verified sources as the basis of issue-specific legal reasoning", () => {
     const current = snapshot("CURRENT");
     const html = render([{

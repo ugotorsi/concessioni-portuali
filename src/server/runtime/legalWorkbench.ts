@@ -47,6 +47,8 @@ export interface LegalWorkbenchMission {
   completedAt: Date | null;
   attempts: { id: string; executorKind: string; completionState: string | null; totalCalls: number; errorCode: string | null; startedAt: Date }[];
   bundles: { id: string; completionState: string; totalCalls: number; createdAt: Date; sources: LegalWorkbenchSource[]; evidenceGapCount: number }[];
+  /** Missing facts in the fascicolo documents: a documentary gap, not a technical failure. */
+  documentaryGaps: { gapId: string; description: string | null; resolvedInCurrentRevision: boolean }[];
 }
 
 export interface LegalWorkbenchSnapshot {
@@ -186,7 +188,25 @@ export async function getLegalWorkbenchSnapshot(procedimentoId: string): Promise
     })),
     missions: missionRecords.map((mission) => {
       const payload = object(mission.payload);
+      const gapItems = new Map(
+        (currentRevision?.items ?? [])
+          .filter((item) => item.kind === "GAP")
+          .map((item) => [item.semanticKey, item.normalizedText] as const),
+      );
+      const knownGaps = Array.isArray(payload.knownEvidenceGaps) ? payload.knownEvidenceGaps : [];
+      const documentaryGaps = knownGaps
+        .map((gap) => object(gap))
+        .filter((gap) => text(gap.kind) === "MISSING_FACT_EVIDENCE" && text(gap.gapId))
+        .map((gap) => {
+          const gapId = text(gap.gapId)!;
+          return {
+            gapId,
+            description: gapItems.get(gapId) ?? null,
+            resolvedInCurrentRevision: currentRevision ? !gapItems.has(gapId) : false,
+          };
+        });
       return {
+        documentaryGaps,
         id: mission.id,
         status: String(mission.status),
         lifecycleStatus: String(mission.lifecycleStatus),

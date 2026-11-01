@@ -137,33 +137,81 @@ function AuthorityGroup({ title, authorities }: { title: string; authorities: re
 }
 
 function UnverifiedCandidateSources({ question }: { question: StructuredReportQuestion }) {
-  const candidates = question.nonUsableResults.filter((candidate) => !candidate.reasons.includes("CLASSIFICATION_REJECTED"));
-  if (candidates.length === 0) return null;
+  const visible = question.nonUsableResults.filter((candidate) => !candidate.reasons.includes("CLASSIFICATION_REJECTED"));
+  const pertinent = visible.filter((candidate) => candidate.relevance === "PERTINENTE_VERIFICATA_DA_CLASSIFICARE");
+  const notPertinent = visible.filter((candidate) => candidate.relevance === "NON_PERTINENTE");
+  const candidates = visible.filter((candidate) => (
+    candidate.relevance !== "PERTINENTE_VERIFICATA_DA_CLASSIFICARE" && candidate.relevance !== "NON_PERTINENTE"
+  ));
+  if (visible.length === 0) return null;
   return (
-    <section className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3" aria-label="Fonti candidate da verificare">
-      <h5 className="text-sm font-semibold text-amber-950">Fonti individuate — da verificare</h5>
-      <p className="mt-1 text-xs text-amber-900">
-        Risultati preliminari dei connettori: non sono ancora fonti utilizzabili per conclusioni professionali.
-        Devono essere controllati identità, testo, citazioni e applicabilità temporale.
-      </p>
-      <ul className="mt-2 space-y-3">
-        {candidates.map((candidate) => (
-          <li key={candidate.resultId} className="border-t border-amber-200 pt-2 text-sm text-slate-800">
-            <p className="font-medium [overflow-wrap:anywhere]">{candidate.title}</p>
-            {candidate.rationale ? (
-              <p className="mt-1 leading-6 [overflow-wrap:anywhere]">
-                Rilevanza preliminare segnalata, da riscontrare: {candidate.rationale}
-              </p>
-            ) : null}
-            {candidate.sourceUrl ? (
-              <a href={candidate.sourceUrl} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-[#075985] underline underline-offset-4">
-                Apri il documento <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-              </a>
-            ) : null}
-          </li>
-        ))}
-      </ul>
-    </section>
+    <>
+      {pertinent.length > 0 ? (
+        <section className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 p-3" aria-label="Fonti ufficiali verificate e pertinenti" data-testid="report-pertinent-verified-sources">
+          <h5 className="text-sm font-semibold text-emerald-950">Fonti ufficiali verificate e pertinenti — orientamento da confermare</h5>
+          <p className="mt-1 text-xs text-emerald-900">
+            Testo ufficiale acquisito e articolo pertinente individuato. Prima di fondare conclusioni giuridiche
+            il professionista deve confermarne l&apos;orientamento (a favore o contrario) nella verifica assistita.
+          </p>
+          <ul className="mt-2 space-y-3">
+            {pertinent.map((candidate) => (
+              <li key={candidate.resultId} className="border-t border-emerald-200 pt-2 text-sm text-slate-800">
+                <p className="font-medium [overflow-wrap:anywhere]">{candidate.title}</p>
+                {candidate.relevanceNote ? <p className="mt-1 text-xs text-emerald-900">{candidate.relevanceNote}</p> : null}
+                {candidate.rationale ? <p className="mt-1 leading-6 [overflow-wrap:anywhere]">{candidate.rationale}</p> : null}
+                {candidate.sourceUrl ? (
+                  <a href={candidate.sourceUrl} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-[#075985] underline underline-offset-4">
+                    Apri la fonte <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                  </a>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+      {candidates.length > 0 ? (
+        <section className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3" aria-label="Fonti candidate da verificare">
+          <h5 className="text-sm font-semibold text-amber-950">Fonti individuate — non verificabili o da verificare</h5>
+          <p className="mt-1 text-xs text-amber-900">
+            Risultati preliminari dei connettori: non sono ancora fonti utilizzabili per conclusioni professionali.
+            Devono essere controllati identità, testo, citazioni e applicabilità temporale.
+          </p>
+          <ul className="mt-2 space-y-3">
+            {candidates.map((candidate) => (
+              <li key={candidate.resultId} className="border-t border-amber-200 pt-2 text-sm text-slate-800">
+                <p className="font-medium [overflow-wrap:anywhere]">{candidate.title}</p>
+                {candidate.relevanceNote ? <p className="mt-1 text-xs text-amber-900">{candidate.relevanceNote}</p> : null}
+                {candidate.rationale ? (
+                  <p className="mt-1 leading-6 [overflow-wrap:anywhere]">
+                    Rilevanza preliminare segnalata, da riscontrare: {candidate.rationale}
+                  </p>
+                ) : null}
+                {candidate.sourceUrl ? (
+                  <a href={candidate.sourceUrl} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-[#075985] underline underline-offset-4">
+                    Apri il documento <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                  </a>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+      {notPertinent.length > 0 ? (
+        <details className="mt-3 rounded-md border border-slate-200 bg-slate-50 p-3 text-sm" data-testid="report-not-pertinent-sources">
+          <summary className="cursor-pointer font-semibold text-slate-700">
+            Fonti escluse perché non pertinenti al quesito ({notPertinent.length})
+          </summary>
+          <ul className="mt-2 space-y-2 text-slate-700">
+            {notPertinent.map((candidate) => (
+              <li key={candidate.resultId} className="[overflow-wrap:anywhere]">
+                {candidate.title}
+                {candidate.relevanceNote ? <span className="block text-xs text-slate-500">{candidate.relevanceNote}</span> : null}
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
+    </>
   );
 }
 

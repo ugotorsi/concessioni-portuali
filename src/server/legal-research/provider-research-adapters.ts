@@ -384,6 +384,33 @@ function prepare(
   return { name: toolName, arguments: input };
 }
 
+const PORT_DOMAIN_CONTEXT = /(demani|marittim|portual|\bport[oi]\b|navigazion)/;
+const PORT_DOMAIN_SUFFIX = "Contesto: concessione demaniale marittima in ambito portuale (codice della navigazione; legge 28 gennaio 1994, n. 84).";
+const KEYWORD_STOPWORDS = new Set([
+  "quale", "quali", "disciplina", "regola", "regolano", "indicata", "indicato", "effetti", "previsti",
+  "prevista", "previste", "previsto", "relativa", "relativo", "normativa", "eventuale", "eventuali",
+  "concessione", "demaniale", "marittima", "applicabile", "rispetto", "caso", "della", "delle", "degli", "nella", "nelle",
+]);
+
+function foldText(value: string): string {
+  return value.normalize("NFKD").replace(/\p{M}/gu, "").toLocaleLowerCase("it-IT");
+}
+
+/** Scopes provider searches to the platform domain when the question does not name it. */
+export function providerResearchQuery(mission: Pick<ResearchMission, "researchQuestion">): string {
+  const question = mission.researchQuestion.trim();
+  return PORT_DOMAIN_CONTEXT.test(foldText(question)) ? question : `${question} ${PORT_DOMAIN_SUFFIX}`;
+}
+
+/** Compact keyword query: domain anchor plus the discriminating terms of the question. */
+export function providerKeywordQuery(mission: Pick<ResearchMission, "researchQuestion">): string {
+  const terms = [...new Set(foldText(mission.researchQuestion)
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter((term) => term.length >= 6 && !KEYWORD_STOPWORDS.has(term)))]
+    .slice(0, 6);
+  return ["concessione demaniale marittima", ...terms].join(" ");
+}
+
 export function createMoonlitResearchAdapter(callTool: ProviderToolCaller): ResearchProviderAdapter {
   return {
     provider: "MOONLIT",
@@ -392,7 +419,7 @@ export function createMoonlitResearchAdapter(callTool: ProviderToolCaller): Rese
     role: "CITATION_AUTHORITY_INTELLIGENCE",
     operationType: "SEMANTIC_SEARCH",
     prepare: (mission) => prepare("MOONLIT", "SEMANTIC_DISCOVERY", "search_legal_documents", {
-      query: mission.researchQuestion,
+      query: providerResearchQuery(mission),
       num_results: 10,
       output_format: "json",
     }),
@@ -409,7 +436,7 @@ export function createMoonlitKeywordResearchAdapter(callTool: ProviderToolCaller
     role: "BROAD_DISCOVERY",
     operationType: "KEYWORD_SEARCH",
     prepare: (mission) => prepare("MOONLIT", "KEYWORD_DISCOVERY", "search_legal_documents_by_keyword", {
-      query: mission.researchQuestion,
+      query: providerKeywordQuery(mission),
       num_results: 10,
       output_format: "json",
     }),
@@ -451,7 +478,7 @@ export function createSimpliciterResearchAdapter(callTool: ProviderToolCaller): 
         .map((family) => simpliciterSourceKeys[family as keyof typeof simpliciterSourceKeys])
         .find((value) => value !== undefined);
       return prepare("SIMPLICITER", "SEMANTIC_DISCOVERY", "legal_research", {
-        query: mission.researchQuestion,
+        query: providerResearchQuery(mission),
         top_n: 10,
         ...(sourceKey ? { source_keys: [sourceKey] } : {}),
       });
@@ -552,7 +579,7 @@ export function createSimpliciterCrossJurisdictionResearchAdapter(
         throw new ProviderResearchAdapterError("PROVIDER_CROSS_JURISDICTION_SOURCES_REQUIRED");
       }
       return prepare("SIMPLICITER", "CROSS_JURISDICTION_DISCOVERY", "legal_research", {
-        query: mission.researchQuestion,
+        query: providerResearchQuery(mission),
         top_n: 10,
         source_keys: sourceKeys,
       });

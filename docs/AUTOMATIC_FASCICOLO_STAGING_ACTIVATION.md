@@ -108,7 +108,16 @@ Aggiunte a `.env.example` per il percorso automatico:
   `AUTOMATIC_OFFICIAL_SOURCE_VERIFICATION_ENABLED` (abilita il pass bounded di
   verifica identity/full-text/temporal sulle fonti ufficiali dopo la discovery),
   `AUTOMATIC_OFFICIAL_SOURCE_MAX_ACQUISITIONS` (limite intero obbligatorio quando
-  la verifica ufficiale e abilitata e incluso nel fingerprint della policy);
+  la verifica ufficiale e abilitata e incluso nel fingerprint della policy).
+  Ogni risultato riceve in `candidateSnapshot.officialRelevance` una
+  classificazione `PERTINENTE_VERIFICATA`, `NON_PERTINENTE` o `NON_VERIFICABILE`
+  (testo Normattiva acquisito alla data di riferimento; URL Gazzetta Ufficiale
+  ELI Serie Generale convertiti in Normattiva; atti regionali e serie speciali
+  non verificabili). Le fonti pertinenti restano non utilizzabili finche il
+  professionista non ne conferma l'orientamento nella verifica assistita;
+- guardia database: `EXPECTED_DATABASE_HOST_PREFIX` (facoltativa) fa rifiutare
+  l'avvio di Prisma se l'host di `DATABASE_URL` non inizia con il prefisso atteso
+  (es. l'endpoint Neon del branch Preview), evitando l'uso di un database errato;
 - provider: `LEGAL_DATA_HUNTER_API_KEY`, `MOONLIT_OAUTH_STORAGE_PATH`,
   `SIMPLICITER_OAUTH_STORAGE_PATH`.
 

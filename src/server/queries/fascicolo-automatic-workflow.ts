@@ -36,6 +36,10 @@ import {
   type ResearchResultSupportDirection,
 } from "@/server/legal-research/question-results";
 import { deriveSourceCoverage } from "@/server/legal-research/source-chain";
+import {
+  readOfficialSourceRelevance,
+  type OfficialSourceRelevance,
+} from "@/server/legal-research/official-source-relevance";
 import type { SourceChainSnapshot } from "@/server/legal-research/source-chain";
 import {
   assistedVerificationSnapshotSchema,
@@ -321,6 +325,7 @@ export interface FascicoloResearchResultReadModel {
   sourceUrl: string | null;
   provider: string | null;
   relevantPassage: string | null;
+  officialRelevance?: OfficialSourceRelevance | null;
   supportDirection: ResearchResultSupportDirection;
   classificationSource: ResearchResultClassificationSource;
   classificationConfidence: number | null;
@@ -881,7 +886,9 @@ export async function getFascicoloAutomaticWorkflowReadModelForTenant(input: {
           documentDate: result.candidateSnapshot.documentDate ?? null,
           sourceUrl: safeHttpUrl(result.candidateSnapshot.sourceUrl),
           provider: result.candidateSnapshot.providerId ?? result.candidateSnapshot.toolId ?? null,
-          relevantPassage: text(result.candidateSnapshot.relevantPassage),
+          relevantPassage: text((result.candidateSnapshot as unknown as JsonRecord).officialRelevantPassage)
+            ?? text(result.candidateSnapshot.relevantPassage),
+          officialRelevance: readOfficialSourceRelevance(result.candidateSnapshot),
           supportDirection: result.supportDirection,
           classificationSource: result.classificationSource,
           classificationConfidence: result.classificationConfidence,
