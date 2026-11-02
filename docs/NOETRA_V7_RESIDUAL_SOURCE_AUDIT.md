@@ -36,7 +36,36 @@ applicabile:
 - `NON_VERIFICABILE`: identità o contenuto specifico non sono recuperabili in
   misura sufficiente da una fonte ufficiale gratuita.
 
-## Esiti sui 24 candidati
+## Rivalutazione conclusiva delle sette fonti già classificate pertinenti
+
+La verifica individuale ha corretto la precedente classificazione
+`PERTINENTE_VERIFICATA`, che era eccessiva: i metadati OpenGA provano
+l'identità dei cinque provvedimenti, ma non il testo ufficiale integrale né la
+ratio decidendi; gli articoli 4 e 5 del regolamento (UE) 2017/352 sono
+pertinenti in astratto, ma il fascicolo non contiene l'atto che qualifica la
+polizza come requisito imposto a un prestatore di servizi portuali.
+
+| Fonte | Identificativo ufficiale | Fonte primaria | Disposizione o principio verificabile | Applicabilità e limite | Esito corretto |
+|---|---|---|---|---|---|
+| TAR Sicilia-Catania, sez. III, n. 2351/2021 | `IT-GA:TAR-SICILIA-CATANIA:2021:2351` | OpenGA, pubblicazione 19/07/2021, ricorso 1505/2020 | Nessun principio attribuibile dai soli metadati | Revoca/archiviazione di altra concessione; manca testo e comparabilità con la polizza CP-058/2019 | `NON_VERIFICABILE` |
+| TAR Abruzzo-Pescara, sez. I, n. 17/2019 | `IT-GA:TAR-ABRUZZO-PESCARA:2019:17` | OpenGA, pubblicazione 31/01/2019, ricorso 278/2017 | Nessun principio attribuibile dai soli metadati | Decadenza di altra concessione; manca il testo ufficiale e il nesso con requisiti assicurativi | `NON_VERIFICABILE` |
+| TAR Lazio-Roma, sez. V-ter, n. 9229/2026 | `IT-GA:TAR-LAZIO-ROMA:2026:9229` | OpenGA, pubblicazione 18/05/2026, ricorso 4746/2026 | Nessun principio attribuibile dai soli metadati | Polizze sostitutive e subentro sono tematicamente vicini, ma mancano testo, ratio e clausola comparabile | `NON_VERIFICABILE` |
+| TAR Sicilia-Catania, sez. III, n. 1859/2025 | `IT-GA:TAR-SICILIA-CATANIA:2025:1859` | OpenGA, pubblicazione 10/06/2025, ricorso 1742/2024 | Nessun principio attribuibile dai soli metadati | Diniego per area cantieristica; nessuna regola assicurativa dimostrata e testo non acquisito | `NON_VERIFICABILE` |
+| TAR Campania-Salerno, sez. III, n. 11/2026 | `IT-GA:TAR-CAMPANIA-SALERNO:2026:11` | OpenGA, pubblicazione 05/01/2026, ricorso 1568/2024 | Nessun principio attribuibile dai soli metadati | Affidamento stazione marittima passeggeri; manca la comparabilità con il procedimento di chiarimenti | `NON_VERIFICABILE` |
+| Regolamento (UE) 2017/352, art. 4 | `CELEX:32017R0352:ART_4` | EUR-Lex, CELEX 32017R0352 | Possibili requisiti minimi, inclusi quelli assicurativi, trasparenti, obiettivi, non discriminatori e proporzionati | Rileva solo se la polizza è requisito del prestatore di servizi portuali; l'atto qualificante manca | `PERTINENTE_IN_ASTRATTO_NON_APPLICABILE_ALLO_STATO` |
+| Regolamento (UE) 2017/352, art. 5 | `CELEX:32017R0352:ART_5` | EUR-Lex, CELEX 32017R0352 | Procedura trasparente, obiettiva, non discriminatoria, proporzionata e motivata | Rileva solo dopo la qualificazione del requisito ex art. 4; mancano atto e atti procedimentali | `PERTINENTE_IN_ASTRATTO_NON_APPLICABILE_ALLO_STATO` |
+
+La rivalutazione è persistita tramite un bundle di audit separato, con zero
+chiamate provider. Per ogni fonte il modello ufficiale conserva:
+
+- risultato associato alla missione canonica e alla relativa domanda;
+- `LegalSource` e `LegalSourceIdentityAssertion` ufficiale;
+- valutazione temporale rispetto al 12 ottobre 2026;
+- `ResearchSourceAssessmentRecord` corrente e non usabile, con motivi
+  bloccanti espliciti;
+- classificazione e limite nel risultato di ricerca.
+
+## Esiti originari sui 24 candidati
 
 | # | Provider | Candidato | Esito | Evidenza ufficiale e temporalità |
 |---|----------|-----------|-------|----------------------------------|
@@ -65,7 +94,7 @@ applicabile:
 | 23 | Moonlit | Disegno di legge S. 1883 | NON_VERIFICABILE | Senato conferma identità e iter del disegno di conversione del d.l. 76/2020, ma il candidato non individua una disposizione pertinente al fascicolo. |
 | 24 | Moonlit | Consiglio di Stato n. 5958/2025 | NON_PERTINENTE | OpenGA: autorizzazione per posa di fibra ottica su strada provinciale; materia diversa. |
 
-Totali:
+Totali originari, sostituiti dalla rivalutazione delle sette fonti:
 
 - `PERTINENTE_VERIFICATA`: 7;
 - `NON_PERTINENTE`: 15;
@@ -86,11 +115,11 @@ Totali:
 
 ## Limiti residui
 
-1. I cinque provvedimenti TAR sono verificati per identità, data e oggetto
-   ufficiale. L'audit non attribuisce loro massime o principi non estratti dal
-   testo ufficiale integrale.
-2. Gli articoli 4 e 5 del regolamento (UE) 2017/352 sono pertinenti in astratto,
-   ma la loro applicabilità dipende dalla qualificazione concreta dell'attività
+1. I cinque provvedimenti TAR sono verificati solo per identità, data, esito e
+   oggetto ufficiale; senza testo integrale non sono fonti usabili dal report.
+2. Gli articoli 4 e 5 del regolamento (UE) 2017/352 restano pertinenti in
+   astratto, ma non applicabili allo stato del fascicolo: occorre l'atto che
+   qualifica la polizza come requisito del prestatore di servizi portuali.ell'attività
    passeggeri come servizio portuale e dalle esclusioni del regolamento.
 3. I due candidati `NON_VERIFICABILE` non devono essere usati a sostegno di una
    conclusione giuridica.

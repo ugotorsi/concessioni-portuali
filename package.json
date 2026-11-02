@@ -45,6 +45,7 @@
     "legal:import:adsp-mtc": "tsx src/server/legal-rules/cli/import-adsp-mtc.ts",
     "legal:audit:adsp-mtc": "tsx scripts/runtime/audit-adsp-mtc-pack.ts",
     "legal:research:acceptance-mission": "tsx scripts/legal-research/create-live-acceptance-mission.ts",
+    "legal:research:persist-definitive-source-audit": "tsx scripts/legal-research/persist-definitive-source-audit.ts",
     "db:normalize:legal-status": "tsx scripts/db/normalize-legal-source-status.ts",
     "db:normalize:legal-status:dry-run": "tsx scripts/db/normalize-legal-source-status.ts --dry-run",
     "db:push": "prisma db push",
