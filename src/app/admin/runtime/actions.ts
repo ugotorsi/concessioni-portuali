@@ -620,6 +620,33 @@ export async function configureLegalDataHunterCredential(formData: FormData): Pr
   }
   const key = readProviderCredentialKey();
   if (!key) throw new Error("RESEARCH_PROVIDER_CREDENTIAL_KEY_MISSING");
+  const renderServiceId = process.env.RENDER_APPLICATION_WORKER_SERVICE_ID?.trim() ?? "";
+  const renderApiKey = process.env.RENDER_WORKER_API_KEY?.trim() ?? "";
+  if (!RENDER_SERVICE_ID_PATTERN.test(renderServiceId) || !renderApiKey) {
+    throw new Error("RENDER_CONTROL_NOT_CONFIGURED");
+  }
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10_000);
+  const headers = new Headers({ "Content-Type": "application/json" });
+  headers.set("Authorization", ["Bearer", renderApiKey].join(" "));
+  let response: Response;
+  try {
+    response = await fetch(
+      `https://api.render.com/v1/services/${renderServiceId}/env-vars/RESEARCH_PROVIDER_CREDENTIAL_KEY`,
+      {
+        method: "PUT",
+        headers,
+        body: JSON.stringify({ value: key.toString("base64url") }),
+        signal: controller.signal,
+        cache: "no-store",
+      },
+    );
+  } catch {
+    throw new Error("RENDER_CREDENTIAL_CONFIGURATION_FAILED");
+  } finally {
+    clearTimeout(timeout);
+  }
+  if (!response.ok) throw new Error(`RENDER_CREDENTIAL_CONFIGURATION_FAILED:${response.status}`);
   await storeLegalDataHunterApiKey({ apiKey, key });
   await auditSuccess({
     azione: "RESEARCH_PROVIDER_CREDENTIAL_CONFIGURE",
@@ -634,6 +661,8 @@ export async function configureLegalDataHunterCredential(formData: FormData): Pr
       provider: "LEGAL_DATA_HUNTER",
       encryptedAtRest: true,
       credentialValueLogged: false,
+      workerCredentialKeySynchronized: true,
+      renderServiceId,
     },
   });
   revalidatePath("/admin/runtime");
