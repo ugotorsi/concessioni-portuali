@@ -467,7 +467,7 @@ function promotionInventory(rows: Map<string, SelectedRow>) {
   const storageObjects: { bucket: unknown; key: unknown }[] = [];
   for (const selected of rows.values()) {
     tables.set(selected.table, (tables.get(selected.table) ?? 0) + 1);
-    for (const match of JSON.stringify(selected.row).matchAll(/[\w.+-]+@([\w-]+(?:\.[\w-]+)+)/g)) {
+    for (const match of JSON.stringify(selected.row).matchAll(/(?:^|[^\w.+@-])[\w.+-]+@([\w-]+(?:\.[\w-]+)+)/g)) {
       if (!DEMO_EMAIL_DOMAINS.test(match[1])) nonDemoEmailDomains.add(match[1].toLowerCase());
     }
     if (selected.row.storageKey) {
