@@ -62,4 +62,20 @@ describe("automatic research connector readiness", () => {
       simpliciter: "READY",
     });
   });
+
+  it("accepts an encrypted database-backed LDH credential without an environment key value", async () => {
+    await expect(verifyAutomaticResearchConnectorReadiness(
+      { RESEARCH_PROVIDER_CREDENTIAL_KEY: "configured-master-key" },
+      statuses(
+        { stored: true, hasRefreshToken: true },
+        { stored: true, hasRefreshToken: true },
+      ),
+      async () => true,
+    )).resolves.toEqual({
+      ready: true,
+      legalDataHunter: "READY",
+      moonlit: "READY",
+      simpliciter: "READY",
+    });
+  });
 });

@@ -1,4 +1,5 @@
 import {
+  isLegalDataHunterApiKeyConfigured,
   readProviderOAuthCredentialStatuses,
   type ProviderOAuthCredentialStatus,
 } from "./provider-oauth-credential-store";
@@ -30,8 +31,11 @@ export async function verifyAutomaticResearchConnectorReadiness(
   env: Readonly<Record<string, string | undefined>> = process.env,
   readOAuthStatuses: typeof readProviderOAuthCredentialStatuses =
     readProviderOAuthCredentialStatuses,
+  readLegalDataHunterConfigured: typeof isLegalDataHunterApiKeyConfigured =
+    isLegalDataHunterApiKeyConfigured,
 ): Promise<AutomaticResearchConnectorReadiness> {
   const legalDataHunter = env.LEGAL_DATA_HUNTER_API_KEY?.trim()
+    || (env.RESEARCH_PROVIDER_CREDENTIAL_KEY?.trim() && await readLegalDataHunterConfigured())
     ? "READY"
     : "CREDENTIAL_MISSING";
   const statuses = await readOAuthStatuses();

@@ -8,6 +8,7 @@ import {
 } from "@/server/fascicolo-knowledge/referenceDateConfirmation";
 import { evaluateManualResearchPolicy } from "@/server/legal-research/manual-research-policy";
 import {
+  isLegalDataHunterApiKeyConfigured,
   readProviderOAuthCredentialStatuses,
   type ProviderOAuthCredentialStatus,
 } from "@/server/legal-research/provider-oauth-credential-store";
@@ -64,6 +65,7 @@ export interface LegalWorkbenchSnapshot {
   research: {
     autonomousChannel: { authorized: boolean; requirementCode: string | null };
     providerCredentials: readonly ProviderOAuthCredentialStatus[];
+    legalDataHunterConfigured: boolean;
     jobs: { id: string; status: string; missionId: string | null; createdAt: Date; completedAt: Date | null; failureCode: string | null }[];
   };
 }
@@ -107,7 +109,7 @@ export async function getLegalWorkbenchSnapshot(procedimentoId: string): Promise
   const tenantId = procedimento.enteId;
   const scope = { tenantId, procedimentoId };
 
-  const [currentRevision, revisions, reports, analysisJobs, confirmations, missionRecords, providerCredentials, researchJobs] = await Promise.all([
+  const [currentRevision, revisions, reports, analysisJobs, confirmations, missionRecords, providerCredentials, legalDataHunterConfigured, researchJobs] = await Promise.all([
     getCurrentKnowledgeRevision(scope),
     prisma.fascicoloKnowledgeRevision.findMany({
       where: scope,
@@ -161,6 +163,7 @@ export async function getLegalWorkbenchSnapshot(procedimentoId: string): Promise
       },
     }),
     readProviderOAuthCredentialStatuses().catch(() => []),
+    isLegalDataHunterApiKeyConfigured().catch(() => false),
     prisma.asyncJob.findMany({
       where: { ...scope, operation: RESEARCH_MISSION_EXECUTION_OPERATION },
       orderBy: { createdAt: "desc" },
@@ -237,6 +240,7 @@ export async function getLegalWorkbenchSnapshot(procedimentoId: string): Promise
     research: {
       autonomousChannel: autonomousChannelStatus(tenantId, procedimentoId),
       providerCredentials,
+      legalDataHunterConfigured,
       jobs: researchJobs.map((job) => ({
         id: job.id,
         status: String(job.status),

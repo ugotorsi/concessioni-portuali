@@ -27,6 +27,10 @@ import {
   type ManualResearchPolicyEnv,
 } from "./manual-research-policy";
 import { createAutomaticResearchProviderAdapters } from "./automatic-research-providers";
+import {
+  readProviderCredentialKey,
+  resolveLegalDataHunterApiKey,
+} from "./provider-oauth-credential-store";
 import { createLocalTrustedResearchClient } from "./local-trusted-research-client";
 import { createTrustedMissionExecutor, type TrustedMissionExecutorResult } from "./trusted-mission-executor";
 import { completeAdverseResearchRequirement, ensureAdverseResearchMission } from "./source-chain-persistence";
@@ -347,12 +351,15 @@ const defaultDependencies: AutomaticResearchExecutionDependencies = {
   createProviderAdapters: createAutomaticResearchProviderAdapters,
   async execute(input) {
     const decision = input.authority.decision;
+    const credentialKey = readProviderCredentialKey();
+    const legalDataHunterApiKey = process.env.LEGAL_DATA_HUNTER_API_KEY?.trim()
+      || (credentialKey ? await resolveLegalDataHunterApiKey(credentialKey) : null);
     const executor = createTrustedMissionExecutor({
       client: createLocalTrustedResearchClient({
         actor: { actorId: decision.workerActorId!, tenantId: input.authority.tenantId },
         claimantId: decision.workerActorId!,
       }),
-      legalDataHunterApiKey: process.env.LEGAL_DATA_HUNTER_API_KEY ?? null,
+      legalDataHunterApiKey,
       legalDataHunterTimeoutMs: decision.providerTimeoutMs!,
       providerAdapters: input.providerAdapters,
       leaseDurationMs: decision.leaseDurationMs!,

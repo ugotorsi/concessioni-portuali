@@ -25,6 +25,10 @@ import { recoverCurrentKnowledgeResearchMissions } from "@/server/fascicolo-know
 import { confirmKnowledgeReferenceDate } from "@/server/fascicolo-knowledge/referenceDateConfirmation";
 import { runManualLegalAnalysisPipeline } from "@/server/legal-research/manual-legal-analysis-pipeline";
 import {
+  readProviderCredentialKey,
+  storeLegalDataHunterApiKey,
+} from "@/server/legal-research/provider-oauth-credential-store";
+import {
   getRuntimeServiceDiagnostics,
   RUNTIME_DIAGNOSTIC_SERVICE_IDS,
   type RuntimeDiagnosticServiceId,
@@ -603,6 +607,36 @@ export async function assignDefaultProcedimentoBudgetPolicy(
   });
   revalidatePath("/admin/runtime");
   revalidatePath(`/procedimenti/${procedimento.id}`);
+}
+
+export async function configureLegalDataHunterCredential(formData: FormData): Promise<void> {
+  const currentUser = await requireAdminWithMfa();
+  if (formData.get("confirmation") !== "STORE_LEGAL_DATA_HUNTER_CREDENTIAL") {
+    throw new Error("LEGAL_DATA_HUNTER_CONFIRMATION_REQUIRED");
+  }
+  const apiKey = formData.get("apiKey");
+  if (typeof apiKey !== "string" || apiKey.trim().length < 8 || apiKey.trim().length > 4_096) {
+    throw new Error("LEGAL_DATA_HUNTER_CREDENTIAL_INVALID");
+  }
+  const key = readProviderCredentialKey();
+  if (!key) throw new Error("RESEARCH_PROVIDER_CREDENTIAL_KEY_MISSING");
+  await storeLegalDataHunterApiKey({ apiKey, key });
+  await auditSuccess({
+    azione: "RESEARCH_PROVIDER_CREDENTIAL_CONFIGURE",
+    entita: "ResearchProviderCredential",
+    entitaId: "LEGAL_DATA_HUNTER",
+    actor: {
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+      userRole: currentUser.role,
+    },
+    metadata: {
+      provider: "LEGAL_DATA_HUNTER",
+      encryptedAtRest: true,
+      credentialValueLogged: false,
+    },
+  });
+  revalidatePath("/admin/runtime");
 }
 
 export async function startLegalAnalysisPipeline(formData: FormData): Promise<void> {

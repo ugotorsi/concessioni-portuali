@@ -265,9 +265,14 @@ Admission requires ADMIN + MFA, tenant write access, an explicit form confirmati
 the three active runtime budget scopes, a procedure allowlist match, and a
 `SERVER_AUTONOMOUS` mission within the configured capability and call limits. The job
 stores a `manual-research-policy-v1` decision fingerprint and the worker recomputes
-that exact policy before provider dispatch. Provider OAuth grants, the encrypted
-credential key, and the Legal Data Hunter API key must already be configured; missing
-credentials fail closed and never fall back to interactive login.
+that exact policy before provider dispatch. Provider OAuth grants and the same
+`RESEARCH_PROVIDER_CREDENTIAL_KEY` must be configured for the web process and worker.
+An ADMIN authenticated with MFA can store the Legal Data Hunter API key from
+`/admin/runtime`; the application encrypts it in the provider credential store and
+never writes its value to audit metadata. The worker prefers its own
+`LEGAL_DATA_HUNTER_API_KEY` when explicitly configured, otherwise it decrypts the
+database-backed credential. Missing credentials fail closed and never fall back to
+interactive login.
 It distinguishes informational notices, required interventions, and blocking problems
 for AI, Render, Vercel, Neon, S3-compatible document storage (including Cloudflare R2),
 and configured connectors.

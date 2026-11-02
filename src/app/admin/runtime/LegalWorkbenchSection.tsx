@@ -47,6 +47,7 @@ interface Props {
   confirmReferenceDateAction: (formData: FormData) => Promise<void>;
   recoverMissionsAction: (formData: FormData) => Promise<void>;
   startLegalAnalysisAction: (formData: FormData) => Promise<void>;
+  configureLegalDataHunterAction: (formData: FormData) => Promise<void>;
 }
 
 const CHANNEL_LABELS: Record<string, string> = {
@@ -77,6 +78,7 @@ export function LegalWorkbenchSection({
   confirmReferenceDateAction,
   recoverMissionsAction,
   startLegalAnalysisAction,
+  configureLegalDataHunterAction,
 }: Props) {
   const confirmedByQuestion = new Map(
     (snapshot?.referenceDateConfirmations ?? []).map((confirmation) => [confirmation.questionSemanticKey, confirmation]),
@@ -118,6 +120,26 @@ export function LegalWorkbenchSection({
 
           {snapshot ? (
             <>
+              {!snapshot.research.legalDataHunterConfigured ? (
+                <form
+                  action={configureLegalDataHunterAction}
+                  className="space-y-2 rounded border border-amber-200 bg-amber-50 p-3"
+                >
+                  <p className="text-xs text-slate-700">
+                    La chiave Legal Data Hunter viene cifrata nel database e non viene registrata nell&apos;audit.
+                  </p>
+                  <input
+                    type="password"
+                    name="apiKey"
+                    autoComplete="off"
+                    className="h-10 w-full rounded-md border border-slate-300 px-3 text-sm"
+                    aria-label="Chiave API Legal Data Hunter"
+                    required
+                  />
+                  <input type="hidden" name="confirmation" value="STORE_LEGAL_DATA_HUNTER_CREDENTIAL" />
+                  <Button type="submit">Salva chiave Legal Data Hunter</Button>
+                </form>
+              ) : null}
               <form action={startLegalAnalysisAction} className="space-y-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
                 <input type="hidden" name="procedimentoId" value={snapshot.procedimentoId} />
                 <p className="text-sm font-semibold text-slate-900">Avvia analisi giuridica completa</p>
@@ -139,7 +161,8 @@ export function LegalWorkbenchSection({
                         : credential.stored ? `da ricollegare (${credential.lastRefreshErrorCode ?? "token non rinnovabile"})` : "non collegato"}
                     </span>
                   ))}
-                  {" · "}LegalDataHunter: chiave API sul worker
+                  {" · "}LegalDataHunter:{" "}
+                  {snapshot.research.legalDataHunterConfigured ? "collegato" : "non collegato"}
                 </p>
                 <label className="flex items-center gap-2 text-sm text-slate-800">
                   <input type="checkbox" name="confirmation" value="START_LEGAL_ANALYSIS" required />

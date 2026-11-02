@@ -6,6 +6,8 @@ vi.mock("@/lib/prisma", () => ({ prisma: {} }));
 
 import {
   decryptProviderOAuthState,
+  decryptLegalDataHunterApiKey,
+  encryptLegalDataHunterApiKey,
   encryptProviderOAuthState,
   ProviderOAuthCredentialError,
   readProviderCredentialKey,
@@ -73,6 +75,14 @@ describe("encrypted research provider OAuth credential store", () => {
     expect(readProviderCredentialKey({})).toBeNull();
     expect(readProviderCredentialKey({ RESEARCH_PROVIDER_CREDENTIAL_KEY: key.toString("base64url") })?.equals(key)).toBe(true);
     expect(() => readProviderCredentialKey({ RESEARCH_PROVIDER_CREDENTIAL_KEY: "c2hvcnQ" }))
+      .toThrow(ProviderOAuthCredentialError);
+  });
+
+  it("encrypts the Legal Data Hunter API key with provider-bound authenticated encryption", () => {
+    const envelope = encryptLegalDataHunterApiKey("ldh-secret-key", key);
+    expect(envelope).not.toContain("ldh-secret-key");
+    expect(decryptLegalDataHunterApiKey(envelope, key)).toBe("ldh-secret-key");
+    expect(() => decryptLegalDataHunterApiKey(envelope, randomBytes(32)))
       .toThrow(ProviderOAuthCredentialError);
   });
 

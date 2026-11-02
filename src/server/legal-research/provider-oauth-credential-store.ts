@@ -14,6 +14,8 @@ export const RESEARCH_OAUTH_PROVIDERS = ["MOONLIT", "SIMPLICITER"] as const;
 export type ResearchOAuthProvider = (typeof RESEARCH_OAUTH_PROVIDERS)[number];
 
 const ENVELOPE_VERSION = "RESEARCH_PROVIDER_OAUTH_V1";
+const API_KEY_ENVELOPE_VERSION = "RESEARCH_PROVIDER_API_KEY_V1";
+const LEGAL_DATA_HUNTER_PROVIDER = "LEGAL_DATA_HUNTER";
 const DEFAULT_REFRESH_MARGIN_MS = 5 * 60 * 1_000;
 
 export type StoredProviderOAuthState = Readonly<{
@@ -111,6 +113,83 @@ export function decryptProviderOAuthState(
   } catch {
     throw new ProviderOAuthCredentialError("CREDENTIAL_PAYLOAD_INVALID");
   }
+}
+
+function apiKeyAad(): Buffer {
+  return Buffer.from(`${API_KEY_ENVELOPE_VERSION}\n${LEGAL_DATA_HUNTER_PROVIDER}`, "utf8");
+}
+
+export function encryptLegalDataHunterApiKey(apiKey: string, key: Buffer): string {
+    const iv = randomBytes(12);
+    const cipher = createCipheriv("aes-256-gcm", key, iv);
+    cipher.setAAD(apiKeyAad());
+    const ciphertext = Buffer.concat([cipher.update(apiKey, "utf8"), cipher.final()]);
+    return JSON.stringify({
+      version: API_KEY_ENVELOPE_VERSION,
+      iv: iv.toString("base64url"),
+      authTag: cipher.getAuthTag().toString("base64url"),
+      ciphertext: ciphertext.toString("base64url"),
+    } satisfies Envelope);
+}
+
+export function decryptLegalDataHunterApiKey(encryptedPayload: string, key: Buffer): string {
+    try {
+      const envelope = JSON.parse(encryptedPayload) as Envelope;
+      if (envelope.version !== API_KEY_ENVELOPE_VERSION) throw new Error("VERSION");
+      const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(envelope.iv, "base64url"));
+      decipher.setAAD(apiKeyAad());
+      decipher.setAuthTag(Buffer.from(envelope.authTag, "base64url"));
+      const plaintext = Buffer.concat([
+        decipher.update(Buffer.from(envelope.ciphertext, "base64url")),
+        decipher.final(),
+      ]).toString("utf8").trim();
+      if (plaintext.length < 8 || plaintext.length > 4_096) throw new Error("LENGTH");
+      return plaintext;
+    } catch {
+      throw new ProviderOAuthCredentialError("CREDENTIAL_PAYLOAD_INVALID");
+    }
+}
+
+export async function storeLegalDataHunterApiKey(input: Readonly<{
+    apiKey: string;
+    key: Buffer;
+  }>): Promise<void> {
+    const apiKey = input.apiKey.trim();
+    if (apiKey.length < 8 || apiKey.length > 4_096) {
+      throw new ProviderOAuthCredentialError("CREDENTIAL_PAYLOAD_INVALID");
+    }
+    await prisma.researchProviderOAuthCredential.upsert({
+      where: { provider: LEGAL_DATA_HUNTER_PROVIDER },
+      create: {
+        provider: LEGAL_DATA_HUNTER_PROVIDER,
+        encryptedPayload: encryptLegalDataHunterApiKey(apiKey, input.key),
+        hasRefreshToken: false,
+      },
+      update: {
+        encryptedPayload: encryptLegalDataHunterApiKey(apiKey, input.key),
+        hasRefreshToken: false,
+        accessTokenExpiresAt: null,
+        lastRefreshedAt: null,
+        lastRefreshErrorCode: null,
+        stateVersion: { increment: 1 },
+      },
+    });
+}
+
+export async function resolveLegalDataHunterApiKey(
+    key: Buffer,
+  ): Promise<string | null> {
+    const row = await prisma.researchProviderOAuthCredential.findUnique({
+      where: { provider: LEGAL_DATA_HUNTER_PROVIDER },
+      select: { encryptedPayload: true },
+    });
+    return row ? decryptLegalDataHunterApiKey(row.encryptedPayload, key) : null;
+}
+
+export async function isLegalDataHunterApiKeyConfigured(): Promise<boolean> {
+    return (await prisma.researchProviderOAuthCredential.count({
+      where: { provider: LEGAL_DATA_HUNTER_PROVIDER },
+    })) === 1;
 }
 
 function accessTokenExpiry(state: StoredProviderOAuthState): Date | null {
