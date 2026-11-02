@@ -36,7 +36,7 @@ Nota: impostare `NEXTAUTH_URL` al dominio cloud pubblico della demo, mai `localh
 1. Usare esclusivamente `npm run deploy:vercel:preview -- --expected-commit <SHA_COMPLETO>`.
 2. Il comando fissa il progetto `concessioni-portuali-demo`, l'organizzazione
    `ugotorsis-projects`, il target `preview` e il branch
-   `feat/noetra-legal-applicability-e4447`; rifiuta argomenti aggiuntivi,
+   `release/v7-integrated-services`; rifiuta argomenti aggiuntivi,
    override di progetto, organizzazione o ambiente e qualsiasi opzione Production.
 3. Il comando verifica che `HEAD` coincida con lo SHA completo autorizzato prima
    di invocare Vercel e che lo stesso SHA sia la testa remota del branch fissato.

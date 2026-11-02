@@ -63,6 +63,7 @@ export type TrustedMissionExecutorResult = Readonly<{
 export type TrustedMissionExecutorOptions = Readonly<{
   client: TrustedResearchHttpClient;
   legalDataHunterApiKey?: string | null;
+  legalDataHunterTimeoutMs?: number;
   legalDataHunterTransport?: LegalDataHunterTransport;
   legalDataHunterFactory?: LegalDataHunterFactory;
   providerAdapters?: readonly ResearchProviderAdapter[];
@@ -347,6 +348,12 @@ function providerRequestKey(adapter: ResearchProviderAdapter, request: ProviderT
 export function createTrustedMissionExecutor(options: TrustedMissionExecutorOptions): Readonly<{
   execute(missionId: string): Promise<TrustedMissionExecutorResult>;
 }> {
+  if (options.legalDataHunterTimeoutMs !== undefined
+    && (!Number.isInteger(options.legalDataHunterTimeoutMs)
+      || options.legalDataHunterTimeoutMs < 1_000
+      || options.legalDataHunterTimeoutMs > 300_000)) {
+    throw new TrustedMissionExecutorError("PROVIDER_REQUEST_TIMEOUT_INVALID");
+  }
   const leaseDurationMs = options.leaseDurationMs ?? DEFAULT_LEASE_DURATION_MS;
   const minimumLeaseRemainingMs = options.minimumLeaseRemainingMs ?? DEFAULT_MINIMUM_LEASE_REMAINING_MS;
   if (!Number.isInteger(leaseDurationMs) || leaseDurationMs < 1_000 || leaseDurationMs > 86_400_000) {
@@ -603,7 +610,13 @@ export function createTrustedMissionExecutor(options: TrustedMissionExecutorOpti
         return baseProviderTransport(input, init);
       };
       const provider: OfficialLegalReferenceProvider | undefined = runLegalDataHunter
-        ? providerFactory({ apiKey: apiKey!, transport: budgetTransport })
+        ? providerFactory({
+            apiKey: apiKey!,
+            transport: budgetTransport,
+            ...(options.legalDataHunterTimeoutMs !== undefined
+              ? { timeoutMs: options.legalDataHunterTimeoutMs }
+              : {}),
+          })
         : undefined;
       const startedAt = now().toISOString();
       const executions: ResearchToolExecution[] = [...assistedEvidence.researchToolExecutions];

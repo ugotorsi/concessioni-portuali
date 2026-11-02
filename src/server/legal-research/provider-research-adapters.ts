@@ -218,15 +218,45 @@ function normalizeMoonlitExact(
   };
 }
 
-function simpliciterIdentity(item: Record<string, unknown>): string | undefined {
-  return text(item.citazione)
-    ?? text(item.alias)
-    ?? text(item.Documento)
-    ?? text(item.identifier)
-    ?? text(item.document_identifier)
-    ?? text(item.ecli)
-    ?? text(item.celex)
-    ?? text(item.id);
+type SimpliciterIdentity = Readonly<{
+  officialIdentifier: string;
+  courtOrBody?: string;
+  number?: string;
+  year?: number;
+}>;
+
+function boundedSimpliciterIdentifier(value: unknown): string | undefined {
+  const candidate = text(value);
+  if (!candidate || candidate.length > 256 || candidate.includes("\n")) return undefined;
+  return candidate;
+}
+
+function simpliciterCaseIdentity(item: Record<string, unknown>): SimpliciterIdentity | undefined {
+  const title = text(item.titolo);
+  const match = title?.match(
+    /^(Tribunale Amministrativo Regionale .+?) (sentenza(?: breve)?) n\.?\s*(\d+)\s+del\s+(\d{4})$/i,
+  );
+  if (!match) return undefined;
+  return {
+    officialIdentifier: `${match[1]}, ${match[2].toLowerCase()} n. ${match[3]}/${match[4]}`,
+    courtOrBody: match[1],
+    number: match[3],
+    year: Number(match[4]),
+  };
+}
+
+function simpliciterIdentity(item: Record<string, unknown>): SimpliciterIdentity | undefined {
+  const caseIdentity = simpliciterCaseIdentity(item);
+  if (caseIdentity) return caseIdentity;
+  const officialIdentifier = boundedSimpliciterIdentifier(item.citazione)
+    ?? boundedSimpliciterIdentifier(item.alias)
+    ?? boundedSimpliciterIdentifier(item.Documento)
+    ?? boundedSimpliciterIdentifier(item.identifier)
+    ?? boundedSimpliciterIdentifier(item.document_identifier)
+    ?? boundedSimpliciterIdentifier(item.ecli)
+    ?? boundedSimpliciterIdentifier(item.celex)
+    ?? boundedSimpliciterIdentifier(item.id);
+  return officialIdentifier ? { officialIdentifier } : undefined;
 }
 
 type SimpliciterLegislationReference = Readonly<{ article: string; law: string }>;
@@ -317,11 +347,12 @@ function normalizeSimpliciter(
     for (const [index, value] of values.entries()) {
       resultCount += 1;
       const item = record(value);
-      const officialIdentifier = item ? simpliciterIdentity(item) : undefined;
-      if (!item || !officialIdentifier) {
+      const identity = item ? simpliciterIdentity(item) : undefined;
+      if (!item || !identity) {
         gaps.push(gap(context.mission, context.executionRecordId, `simpliciter:${category}:${index}`));
         continue;
       }
+      const { officialIdentifier } = identity;
       const providerId = sourceConfirmed ? sourceKeys[0] : "SIMPLICITER";
       const legislationReference = toolName === "fetch_legal_source"
         ? simpliciterLegislationReference(officialIdentifier, text(item.titolo))
@@ -338,6 +369,9 @@ function normalizeSimpliciter(
         providerId,
         documentType: text(item.type) ?? category,
         officialIdentifier,
+        ...(identity.courtOrBody ? { courtOrBody: identity.courtOrBody } : {}),
+        ...(identity.number ? { number: identity.number } : {}),
+        ...(identity.year ? { year: identity.year } : {}),
         ...(text(item.titolo) ? { title: text(item.titolo) } : {}),
         ...(text(item.url) ? { sourceUrl: text(item.url) } : {}),
         ...(text(item.contenuto) ? { providerReceivedText: text(item.contenuto) } : {}),

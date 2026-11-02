@@ -8,6 +8,7 @@ import {
 import type { TrustedResearchHttpClient } from "@/server/legal-research/trusted-research-http-client";
 import { createTrustedResearchHttpClient } from "@/server/legal-research/trusted-research-http-client";
 import { createLiveAcceptanceMission } from "@/server/legal-research/live-acceptance-mission";
+import { createLegalDataHunterProvider } from "@/server/intake/official-source-lookup/legalDataHunter";
 import { createTrustedMissionExecutor } from "@/server/legal-research/trusted-mission-executor";
 import { verifyWithSyntheticDocuments as verifyResearchEvidence } from "./assisted-document-fixtures";
 import {
@@ -1285,10 +1286,13 @@ describe("trusted mission executor", () => {
       discovery(),
       json({ match_type: "exact", documents: [hit()] }),
     ]);
+    const legalDataHunterFactory = vi.fn(createLegalDataHunterProvider);
 
     const result = await createTrustedMissionExecutor({
       client,
       legalDataHunterApiKey: "test-key",
+      legalDataHunterTimeoutMs: 120_000,
+      legalDataHunterFactory,
       legalDataHunterTransport: transport,
       now: () => now,
       executionId: () => "execution-a",
@@ -1297,6 +1301,10 @@ describe("trusted mission executor", () => {
     expect(result).toMatchObject({ status: "COMPLETED", callsConsumed: 2, blockerCodes: [] });
     const bundle = vi.mocked(client.submitEvidenceBundle).mock.calls[0][0].bundle;
     expect(bundle.completionState).toBe("COMPLETE");
+    expect(legalDataHunterFactory).toHaveBeenCalledWith(expect.objectContaining({
+      apiKey: "test-key",
+      timeoutMs: 120_000,
+    }));
     expect(client.completeMission).toHaveBeenCalledOnce();
     expect(client.deferMission).not.toHaveBeenCalled();
   });

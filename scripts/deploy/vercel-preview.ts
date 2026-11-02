@@ -10,7 +10,7 @@ export const VERCEL_PREVIEW_DEPLOYMENT = Object.freeze({
   organizationId: "team_jT8QBufySulc3clxzIl6RqnL",
   scope: "ugotorsis-projects",
   target: "preview",
-  gitBranch: "feat/noetra-legal-applicability-e4447",
+  gitBranch: "release/v7-integrated-services",
   githubRepositoryId: 1288038811,
 } as const);
 

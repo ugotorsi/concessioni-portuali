@@ -149,6 +149,7 @@ async function main(): Promise<void> {
       claimantId: workerActorId,
     }),
     legalDataHunterApiKey: process.env.LEGAL_DATA_HUNTER_API_KEY ?? null,
+    legalDataHunterTimeoutMs: Number(process.env.AUTOMATIC_RESEARCH_PROVIDER_TIMEOUT_MS ?? "120000"),
     providerAdapters,
     executionId: () => `provider-acceptance:${provider}:${executionMarker}`,
   });

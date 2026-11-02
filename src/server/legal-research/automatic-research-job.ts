@@ -273,6 +273,7 @@ const defaultDependencies: AutomaticResearchExecutionDependencies = {
         claimantId: decision.workerActorId!,
       }),
       legalDataHunterApiKey: process.env.LEGAL_DATA_HUNTER_API_KEY ?? null,
+      legalDataHunterTimeoutMs: decision.providerTimeoutMs!,
       providerAdapters: input.providerAdapters,
       leaseDurationMs: decision.leaseDurationMs!,
       executionId: () => `automatic-research-execution:${input.jobId}:${input.attempt}`,
