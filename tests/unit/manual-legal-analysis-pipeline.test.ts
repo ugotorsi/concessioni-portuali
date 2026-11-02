@@ -85,4 +85,40 @@ describe("manual legal analysis pipeline", () => {
     })).resolves.toMatchObject({ outcome: "NO_RESEARCH_TO_RUN", workerActivationOutcome: "NOT_REQUIRED" });
     expect(activateWorker).not.toHaveBeenCalled();
   });
+
+  it("runs research from a current revision when the historical corpus cannot be re-analysed", async () => {
+    const error = Object.assign(new Error("CORPUS_NOT_READY"), { code: "CORPUS_NOT_READY" });
+    const recoverMissions = vi.fn(async () => ({}) as never);
+    const activateWorker = vi.fn(async () => ({ outcome: "REQUESTED", renderJobId: "job-1" })) as never;
+    await expect(runManualLegalAnalysisPipeline(input, {
+      requestAnalysis: vi.fn(async () => {
+        throw error;
+      }) as never,
+      loadCurrentRevision: vi.fn(async () => ({ status: "CURRENT" })) as never,
+      recoverMissions,
+      admitResearch: vi.fn(async () => [{ outcome: "ADMITTED" }]) as never,
+      countQueuedResearchJobs: vi.fn(async () => 1),
+      activateWorker,
+    })).resolves.toMatchObject({
+      outcome: "RESEARCH_STARTED",
+      analysisJobId: null,
+      researchAdmissions: 1,
+      queuedResearchJobs: 1,
+    });
+    expect(recoverMissions).toHaveBeenCalledWith(expect.objectContaining({
+      candidateActorId: "admin-1",
+      requireValidCandidate: true,
+    }));
+    expect(activateWorker).toHaveBeenCalledWith({ kind: "LEGAL_RESEARCH", procedimentoId: "procedure-1" });
+  });
+
+  it("does not bypass corpus readiness without a current knowledge revision", async () => {
+    const error = Object.assign(new Error("CORPUS_NOT_READY"), { code: "CORPUS_NOT_READY" });
+    await expect(runManualLegalAnalysisPipeline(input, {
+      requestAnalysis: vi.fn(async () => {
+        throw error;
+      }) as never,
+      loadCurrentRevision: vi.fn(async () => null) as never,
+    })).rejects.toBe(error);
+  });
 });
